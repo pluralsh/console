@@ -49,3 +49,13 @@ query CronJobJobs($namespace: String!, $name: String!, $active: String) {
     ...JobList
   }
 }
+
+mutation CronJobTrigger($name: String!, $namespace: String!) {
+  handleTriggerCronJob(name: $name, namespace: $namespace)
+  @rest(
+    type: "Void"
+    path: "/cronjob/{args.namespace}/{args.name}/trigger"
+    method: "PUT"
+    bodyKey: "name" # Marked as body key to avoid empty body errors.
+  )
+}

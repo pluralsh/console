@@ -1,7 +1,9 @@
-import { ReactElement, useMemo } from 'react'
+import React, { ReactElement, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import {
+  Button,
   ChipList,
+  PlayIcon,
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -14,6 +16,7 @@ import {
   CronJobJobsQueryVariables,
   CronJobQueryVariables,
   Cronjob_CronJobDetail as CronJobT,
+  CronJobTriggerMutationVariables,
   Common_EventList as EventListT,
   Common_Event as EventT,
   Job_JobList as JobListT,
@@ -21,6 +24,7 @@ import {
   useCronJobEventsQuery,
   useCronJobJobsQuery,
   useCronJobQuery,
+  useCronJobTriggerMutation,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { MetadataSidecar } from '../common/utils'
@@ -49,14 +53,18 @@ const directory: Array<TabEntry> = [
 export default function CronJob(): ReactElement {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useCronJobQuery({
+  const { data, loading, refetch } = useCronJobQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as CronJobQueryVariables,
+    variables: { name, namespace } as CronJobQueryVariables,
+  })
+
+  const [mutation, { loading: mutationLoading }] = useCronJobTriggerMutation({
+    client: KubernetesClient(clusterId ?? ''),
+    variables: { name, namespace } as CronJobTriggerMutationVariables,
+    onCompleted: () => refetch(),
+    onError: (err) => console.error(err),
   })
 
   useSetBreadcrumbs(
@@ -87,6 +95,16 @@ export default function CronJob(): ReactElement {
   return (
     <ResourceDetails
       tabs={directory}
+      additionalHeaderContent={
+        <Button
+          floating
+          startIcon={<PlayIcon />}
+          onClick={() => mutation()}
+          loading={mutationLoading}
+        >
+          Trigger
+        </Button>
+      }
       sidecar={
         <MetadataSidecar resource={cronJob}>
           <SidecarItem heading="Images">
