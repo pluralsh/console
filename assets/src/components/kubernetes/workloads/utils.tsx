@@ -125,7 +125,13 @@ export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
       }}
     >
       {images.map((image) => (
-        <TruncateStart>{image}</TruncateStart>
+        <Tooltip
+          key={image}
+          label={image}
+          placement="left-start"
+        >
+          <TruncateStart>{image}</TruncateStart>
+        </Tooltip>
       ))}
     </div>
   )
