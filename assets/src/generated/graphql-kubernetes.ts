@@ -5166,6 +5166,14 @@ export type CronJobJobsQueryVariables = Exact<{
 
 export type CronJobJobsQuery = { __typename?: 'Query', handleGetCronJobJobs?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> } | null };
 
+export type CronJobTriggerMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type CronJobTriggerMutation = { __typename?: 'Mutation', handleTriggerCronJob?: any | null };
+
 export type CronJobListFragment = { __typename?: 'cronjob_CronJobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
 
 export type CronJobFragment = { __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
@@ -9639,6 +9647,38 @@ export type CronJobJobsQueryHookResult = ReturnType<typeof useCronJobJobsQuery>;
 export type CronJobJobsLazyQueryHookResult = ReturnType<typeof useCronJobJobsLazyQuery>;
 export type CronJobJobsSuspenseQueryHookResult = ReturnType<typeof useCronJobJobsSuspenseQuery>;
 export type CronJobJobsQueryResult = Apollo.QueryResult<CronJobJobsQuery, CronJobJobsQueryVariables>;
+export const CronJobTriggerDocument = gql`
+    mutation CronJobTrigger($name: String!, $namespace: String!) {
+  handleTriggerCronJob(name: $name, namespace: $namespace) @rest(type: "Void", path: "/cronjob/{args.namespace}/{args.name}/trigger", method: "PUT")
+}
+    `;
+export type CronJobTriggerMutationFn = Apollo.MutationFunction<CronJobTriggerMutation, CronJobTriggerMutationVariables>;
+
+/**
+ * __useCronJobTriggerMutation__
+ *
+ * To run a mutation, you first call `useCronJobTriggerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCronJobTriggerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cronJobTriggerMutation, { data, loading, error }] = useCronJobTriggerMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useCronJobTriggerMutation(baseOptions?: Apollo.MutationHookOptions<CronJobTriggerMutation, CronJobTriggerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CronJobTriggerMutation, CronJobTriggerMutationVariables>(CronJobTriggerDocument, options);
+      }
+export type CronJobTriggerMutationHookResult = ReturnType<typeof useCronJobTriggerMutation>;
+export type CronJobTriggerMutationResult = Apollo.MutationResult<CronJobTriggerMutation>;
+export type CronJobTriggerMutationOptions = Apollo.BaseMutationOptions<CronJobTriggerMutation, CronJobTriggerMutationVariables>;
 export const DaemonSetsDocument = gql`
     query DaemonSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetDaemonSetList(
