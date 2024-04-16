@@ -44,7 +44,6 @@ export default function Roles() {
     [colName, colNamespace, colLabels, colCreationTimestamp]
   )
 
-  // TODO: Fix query for all namespaces.
   return (
     <ResourceList<RoleListT, RoleT, RolesQuery, RolesQueryVariables>
       namespaced
