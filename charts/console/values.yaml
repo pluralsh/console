@@ -167,6 +167,10 @@ dashboard:
   cert-manager:
     enabled: false
     installCrds: false
+  metrics-server:
+    enabled: false
+  nginx:
+    enabled: false
   app:
     mode: 'api'
   kong:

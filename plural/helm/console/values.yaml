@@ -210,6 +210,8 @@ dashboard:
     installCrds: false
   nginx:
     enabled: false
+  metrics-server:
+    enabled: false
   app:
     mode: 'api'
   kong:
