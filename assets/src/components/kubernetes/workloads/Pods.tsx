@@ -89,8 +89,6 @@ const colContainers = columnHelper.accessor(
   (row) => row?.containerStatuses?.length,
   {
     id: 'containers',
-    enableSorting: true,
-    sortingFn: numishSort,
     cell: ({ row: { original } }) => (
       <ContainerStatuses
         statuses={
