@@ -30,31 +30,73 @@ query DaemonSet($namespace: String!, $name: String!) {
   }
 }
 
-query DaemonSetEvents($namespace: String!, $name: String!) {
-  handleGetDaemonSetEvents(namespace: $namespace, daemonSet: $name)
+query DaemonSetEvents(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetDaemonSetEvents(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "common_EventList"
-      path: "daemonset/{args.namespace}/{args.daemonSet}/event"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...EventList
   }
 }
 
-query DaemonSetPods($namespace: String!, $name: String!) {
-  handleGetDaemonSetPods(namespace: $namespace, daemonSet: $name)
+query DaemonSetPods(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetDaemonSetPods(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "pod_PodList"
-      path: "daemonset/{args.namespace}/{args.daemonSet}/pod"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...PodList
   }
 }
 
-query DaemonSetServices($namespace: String!, $name: String!) {
-  handleGetDaemonSetServices(namespace: $namespace, daemonSet: $name)
+query DaemonSetServices(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetDaemonSetServices(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "service_ServiceList"
-      path: "daemonset/{args.namespace}/{args.daemonSet}/service"
+      path: "daemonset/{args.namespace}/{args.daemonSet}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...ServiceList
   }

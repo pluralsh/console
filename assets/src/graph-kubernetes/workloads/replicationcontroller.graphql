@@ -33,40 +33,73 @@ query ReplicationController($namespace: String!, $name: String!) {
   }
 }
 
-query ReplicationControllerEvents($namespace: String!, $name: String!) {
+query ReplicationControllerEvents(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
   handleGetReplicationControllerEvents(
     namespace: $namespace
     replicationController: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
   )
     @rest(
       type: "common_EventList"
-      path: "replicationcontroller/{args.namespace}/{args.replicationController}/event"
+      path: "replicationcontroller/{args.namespace}/{args.replicationController}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...EventList
   }
 }
 
-query ReplicationControllerPods($namespace: String!, $name: String!) {
+query ReplicationControllerPods(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
   handleGetReplicationControllerPods(
     namespace: $namespace
     replicationController: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
   )
     @rest(
       type: "pod_PodList"
-      path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod"
+      path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...PodList
   }
 }
 
-query ReplicationControllerServices($namespace: String!, $name: String!) {
+query ReplicationControllerServices(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
   handleGetReplicationControllerServices(
     namespace: $namespace
     replicationController: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
   )
     @rest(
       type: "service_ServiceList"
-      path: "replicationcontroller/{args.namespace}/{args.replicationController}/service"
+      path: "replicationcontroller/{args.namespace}/{args.replicationController}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...ServiceList
   }
