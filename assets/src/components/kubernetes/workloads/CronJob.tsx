@@ -220,6 +220,7 @@ export function CronJobJobs(): ReactElement {
           }}
           queryName="handleGetCronJobJobs"
           itemsKey="jobs"
+          maxHeight="500px"
         />
       </section>
     </>
