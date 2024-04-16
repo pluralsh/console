@@ -1,13 +1,15 @@
-import React, { ReactElement, useMemo } from 'react'
+import React, { ReactElement, useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import {
   Button,
   ChipList,
   PlayIcon,
   SidecarItem,
+  Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import moment from 'moment/moment'
+import { ApolloError } from 'apollo-boost'
 
 import {
   CronJobEventsQuery,
@@ -53,6 +55,9 @@ const directory: Array<TabEntry> = [
 export default function CronJob(): ReactElement {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
+  const [triggerBanner, setTriggerBanner] = useState(false)
+  const [error, setError] = useState<ApolloError>()
+
   const { data, loading, refetch } = useCronJobQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
@@ -63,8 +68,15 @@ export default function CronJob(): ReactElement {
   const [mutation, { loading: mutationLoading }] = useCronJobTriggerMutation({
     client: KubernetesClient(clusterId ?? ''),
     variables: { name, namespace } as CronJobTriggerMutationVariables,
-    onCompleted: () => refetch({ name, namespace }),
-    onError: (err) => console.error(err),
+    onCompleted: () => {
+      refetch({ name, namespace })
+      setTriggerBanner(true)
+      setTimeout(() => setTriggerBanner(false), 3000)
+    },
+    onError: (error) => {
+      setError(error)
+      setTimeout(() => setError(undefined), 3000)
+    },
   })
 
   useSetBreadcrumbs(
@@ -93,47 +105,68 @@ export default function CronJob(): ReactElement {
   }
 
   return (
-    <ResourceDetails
-      tabs={directory}
-      additionalHeaderContent={
-        <Button
-          floating
-          startIcon={<PlayIcon />}
-          onClick={() => mutation()}
-          loading={mutationLoading}
+    <>
+      <ResourceDetails
+        tabs={directory}
+        additionalHeaderContent={
+          <Button
+            floating
+            startIcon={<PlayIcon />}
+            onClick={() => mutation()}
+            loading={mutationLoading}
+          >
+            Trigger
+          </Button>
+        }
+        sidecar={
+          <MetadataSidecar resource={cronJob}>
+            <SidecarItem heading="Images">
+              <ChipList
+                size="small"
+                limit={3}
+                values={cronJob?.containerImages ?? []}
+                emptyState={<div>-</div>}
+              />
+            </SidecarItem>
+            <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>
+            <SidecarItem heading="Last schedule">
+              {moment(cronJob?.lastSchedule).format('lll')}
+            </SidecarItem>
+            <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
+            <SidecarItem heading="Suspended">
+              {cronJob?.suspend ? 'True' : 'False'}
+            </SidecarItem>
+            <SidecarItem heading="Concurrency policy">
+              {cronJob?.concurrencyPolicy}
+            </SidecarItem>
+            <SidecarItem heading="Starting deadline seconds">
+              {cronJob?.startingDeadlineSeconds ?? 0}
+            </SidecarItem>
+          </MetadataSidecar>
+        }
+      >
+        <Outlet context={cronJob} />
+      </ResourceDetails>
+      {triggerBanner && (
+        <Toast
+          severity="success"
+          margin="large"
+          marginRight="xxxxlarge"
         >
-          Trigger
-        </Button>
-      }
-      sidecar={
-        <MetadataSidecar resource={cronJob}>
-          <SidecarItem heading="Images">
-            <ChipList
-              size="small"
-              limit={3}
-              values={cronJob?.containerImages ?? []}
-              emptyState={<div>-</div>}
-            />
-          </SidecarItem>
-          <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>
-          <SidecarItem heading="Last schedule">
-            {moment(cronJob?.lastSchedule).format('lll')}
-          </SidecarItem>
-          <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
-          <SidecarItem heading="Suspended">
-            {cronJob?.suspend ? 'True' : 'False'}
-          </SidecarItem>
-          <SidecarItem heading="Concurrency policy">
-            {cronJob?.concurrencyPolicy}
-          </SidecarItem>
-          <SidecarItem heading="Starting deadline seconds">
-            {cronJob?.startingDeadlineSeconds ?? 0}
-          </SidecarItem>
-        </MetadataSidecar>
-      }
-    >
-      <Outlet context={cronJob} />
-    </ResourceDetails>
+          Cron job triggered successfully
+        </Toast>
+      )}
+      {error && (
+        <Toast
+          heading="Error triggering cron job"
+          severity="danger"
+          margin="large"
+          marginRight="xxxxlarge"
+        >
+          {error.message}
+        </Toast>
+      )}
+    </>
   )
 }
 
