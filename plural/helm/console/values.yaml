@@ -208,6 +208,8 @@ dashboard:
   cert-manager:
     enabled: false
     installCrds: false
+  nginx:
+    enabled: false
   app:
     mode: 'api'
   kong:
