@@ -153,6 +153,7 @@ export function CronJobJobs(): ReactElement {
         >
           namespaced
           columns={columns}
+          initialSort={[{ id: 'creationTimestamp', desc: true }]}
           query={useCronJobJobsQuery}
           queryOptions={{
             variables: {
@@ -175,6 +176,7 @@ export function CronJobJobs(): ReactElement {
         >
           namespaced
           columns={columns}
+          initialSort={[{ id: 'creationTimestamp', desc: true }]}
           query={useCronJobJobsQuery}
           queryOptions={{
             variables: {
