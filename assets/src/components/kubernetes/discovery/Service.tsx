@@ -51,7 +51,7 @@ import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
 import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Services'
-import { Endpoints } from './utils'
+import { Endpoints, serviceTypeDisplayName } from './utils'
 import { useIngressesColumns } from './Ingresses'
 
 const directory: Array<TabEntry> = [
@@ -103,7 +103,10 @@ export default function Service(): ReactElement {
       tabs={directory}
       sidecar={
         <MetadataSidecar resource={service}>
-          <SidecarItem heading="Type">{service?.type}</SidecarItem>
+          <SidecarItem heading="Type">
+            {serviceTypeDisplayName[service?.type.toLowerCase() ?? ''] ??
+              service?.type}
+          </SidecarItem>
           <SidecarItem heading="Cluster IP">{service?.clusterIP}</SidecarItem>
           <SidecarItem heading="Session affinity">
             {service?.sessionAffinity}
