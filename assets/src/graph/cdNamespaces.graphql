@@ -1,38 +1,28 @@
-fragment Namespaces on Namespace {
-  events {
-    action
-    count
-    eventTime
-    lastTimestamp
-    message
-    reason
-    type
+fragment ManagedNamespace on ManagedNamespace {
+  description
+  deletedAt
+  annotations
+  id
+  insertedAt
+  labels
+  name
+  pullSecrets
+  target {
+    distro
+    tags
   }
-  metadata {
-    annotations {
-      name
-      value
-    }
-    creationTimestamp
-    labels {
-      name
-      value
-    }
-    name
-    namespace
-    uid
-  }
-  raw
-  spec {
-    finalizers
-  }
-  status {
-    phase
-  }
+  updatedAt
 }
 
-query Namespaces($clusterId: ID) {
-  namespaces(clusterId: $clusterId) {
-    ...Namespaces
+query ManagedNamespaces($first: Int, $after: String) {
+  managedNamespaces(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ManagedNamespace
+      }
+    }
   }
 }
