@@ -76,6 +76,7 @@ interface ResourceListProps<
   namespaced?: boolean
   customResource?: boolean
   disableOnRowClick?: boolean
+  maxHeight?: string
 }
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
@@ -122,6 +123,7 @@ export function ResourceList<
   queryName,
   itemsKey,
   disableOnRowClick,
+  maxHeight,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
   const cluster = useCluster()
@@ -211,7 +213,7 @@ export function ResourceList<
                 }
           }
           css={{
-            maxHeight: 'unset',
+            maxHeight: maxHeight ?? 'unset',
             height: '100%',
           }}
         />
