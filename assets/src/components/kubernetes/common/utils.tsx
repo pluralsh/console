@@ -169,9 +169,10 @@ export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
 }
 
 export function useSortedTableOptions(
+  initialSort?: SortingState,
   options?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
 ) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>(initialSort ?? [])
 
   return useMemo(
     () => ({

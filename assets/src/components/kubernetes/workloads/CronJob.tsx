@@ -63,7 +63,7 @@ export default function CronJob(): ReactElement {
   const [mutation, { loading: mutationLoading }] = useCronJobTriggerMutation({
     client: KubernetesClient(clusterId ?? ''),
     variables: { name, namespace } as CronJobTriggerMutationVariables,
-    onCompleted: () => refetch(),
+    onCompleted: () => refetch({ name, namespace }),
     onError: (err) => console.error(err),
   })
 
@@ -153,6 +153,7 @@ export function CronJobJobs(): ReactElement {
         >
           namespaced
           columns={columns}
+          initialSort={[{ id: 'creationTimestamp', desc: true }]}
           query={useCronJobJobsQuery}
           queryOptions={{
             variables: {
@@ -175,6 +176,7 @@ export function CronJobJobs(): ReactElement {
         >
           namespaced
           columns={columns}
+          initialSort={[{ id: 'creationTimestamp', desc: true }]}
           query={useCronJobJobsQuery}
           queryOptions={{
             variables: {

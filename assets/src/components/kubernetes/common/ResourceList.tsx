@@ -7,7 +7,7 @@ import type {
 import { Table } from '@pluralsh/design-system'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
-import { Row } from '@tanstack/react-table'
+import { Row, SortingState } from '@tanstack/react-table'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
@@ -67,6 +67,7 @@ interface ResourceListProps<
   TVariables extends ResourceVariables,
 > {
   columns: Array<object>
+  initialSort?: SortingState
   query: (
     baseOptions: QueryHookOptions<TQuery, TVariables>
   ) => QueryResult<TQuery, TVariables>
@@ -116,6 +117,7 @@ export function ResourceList<
   TVariables extends ResourceVariables,
 >({
   columns,
+  initialSort,
   query,
   queryOptions,
   namespaced = false,
@@ -128,7 +130,7 @@ export function ResourceList<
   const navigate = useNavigate()
   const cluster = useCluster()
   const { setNamespaced, namespace, filter } = useDataSelect()
-  const { sortBy, reactTableOptions } = useSortedTableOptions({
+  const { sortBy, reactTableOptions } = useSortedTableOptions(initialSort, {
     meta: { cluster },
   })
 

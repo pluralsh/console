@@ -11,7 +11,7 @@ import {
   PersistentVolumesQueryVariables,
   usePersistentVolumesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 
 import { ClusterTinyFragment } from '../../../generated/graphql'

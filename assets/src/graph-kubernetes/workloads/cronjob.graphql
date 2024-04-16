@@ -40,11 +40,27 @@ query CronJobEvents($namespace: String!, $name: String!) {
   }
 }
 
-query CronJobJobs($namespace: String!, $name: String!, $active: String) {
-  handleGetCronJobJobs(namespace: $namespace, name: $name, active: $active)
+query CronJobJobs(
+  $namespace: String!
+  $name: String!
+  $active: String
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetCronJobJobs(
+    namespace: $namespace
+    name: $name
+    active: $active
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "job_JobList"
-      path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}"
+      path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}&filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...JobList
   }
@@ -52,10 +68,10 @@ query CronJobJobs($namespace: String!, $name: String!, $active: String) {
 
 mutation CronJobTrigger($name: String!, $namespace: String!) {
   handleTriggerCronJob(name: $name, namespace: $namespace)
-  @rest(
-    type: "Void"
-    path: "/cronjob/{args.namespace}/{args.name}/trigger"
-    method: "PUT"
-    bodyKey: "name" # Marked as body key to avoid empty body errors.
-  )
+    @rest(
+      type: "Void"
+      path: "/cronjob/{args.namespace}/{args.name}/trigger"
+      method: "PUT"
+      bodyKey: "name" # Marked as body key to avoid empty body errors.
+    )
 }

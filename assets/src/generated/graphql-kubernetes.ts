@@ -5161,6 +5161,10 @@ export type CronJobJobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
   active?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -9634,8 +9638,16 @@ export type CronJobEventsLazyQueryHookResult = ReturnType<typeof useCronJobEvent
 export type CronJobEventsSuspenseQueryHookResult = ReturnType<typeof useCronJobEventsSuspenseQuery>;
 export type CronJobEventsQueryResult = Apollo.QueryResult<CronJobEventsQuery, CronJobEventsQueryVariables>;
 export const CronJobJobsDocument = gql`
-    query CronJobJobs($namespace: String!, $name: String!, $active: String) {
-  handleGetCronJobJobs(namespace: $namespace, name: $name, active: $active) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}") {
+    query CronJobJobs($namespace: String!, $name: String!, $active: String, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetCronJobJobs(
+    namespace: $namespace
+    name: $name
+    active: $active
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}&filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...JobList
   }
 }
@@ -9656,6 +9668,10 @@ export const CronJobJobsDocument = gql`
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
  *      active: // value for 'active'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
