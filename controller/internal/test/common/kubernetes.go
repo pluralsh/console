@@ -64,6 +64,24 @@ func MaybePatch[O client.Object](c client.Client, object O, patch Patcher[O]) er
 	return c.Status().Patch(ctx, object, client.MergeFrom(original))
 }
 
+func MaybePatchObject[O client.Object](c client.Client, object O, patch Patcher[O]) error {
+	ctx := context.Background()
+	original := object.DeepCopyObject().(O)
+
+	err := c.Get(ctx, client.ObjectKey{Name: object.GetName(), Namespace: object.GetNamespace()}, object)
+	if err != nil {
+		return err
+	}
+
+	if patch == nil {
+		return nil
+	}
+
+	patch(object)
+
+	return c.Patch(ctx, object, client.MergeFrom(original))
+}
+
 func SanitizeStatusConditions(status v1alpha1.Status) v1alpha1.Status {
 	for i := range status.Conditions {
 		status.Conditions[i].LastTransitionTime = metav1.Time{}
