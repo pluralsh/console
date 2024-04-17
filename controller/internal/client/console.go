@@ -68,7 +68,7 @@ type ConsoleClient interface {
 	DeleteScmConnection(ctx context.Context, id string) error
 	GetScmConnection(ctx context.Context, id string) (*console.ScmConnectionFragment, error)
 	GetScmConnectionByName(ctx context.Context, name string) (*console.ScmConnectionFragment, error)
-	IsScmConnectionExists(ctx context.Context, name string) bool
+	IsScmConnectionExists(ctx context.Context, name string) (bool, error)
 	GetClusterBackup(clusterId, namespace, name *string) (*console.ClusterBackupFragment, error)
 	GetClusterRestore(ctx context.Context, id string) (*console.ClusterRestoreFragment, error)
 	UpdateClusterRestore(ctx context.Context, id string, attrs console.RestoreAttributes) (*console.ClusterRestoreFragment, error)

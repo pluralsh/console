@@ -125,7 +125,12 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 }
 
 func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Context, scm *v1alpha1.ScmConnection) (reconcile.Result, error) {
-	if !r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName()) {
+	exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if !exists {
 		scm.Status.ID = nil
 		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find ScmConnection in Console API")
 		return ctrl.Result{}, nil
@@ -178,9 +183,14 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !scm.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Remove ScmConnection from Console API if it exists
-		if r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName()) && !scm.Status.IsReadonly() {
+		exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
+		if err != nil {
+			return &ctrl.Result{}, err
+		}
+
+		if exists && !scm.Status.IsReadonly() {
 			logger.Info("Deleting ScmConnection")
-			if err := r.ConsoleClient.DeleteScmConnection(ctx, scm.Status.GetID()); err != nil {
+			if err = r.ConsoleClient.DeleteScmConnection(ctx, scm.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -202,7 +212,10 @@ func (r *ScmConnectionReconciler) addOrRemoveFinalizer(ctx context.Context, scm 
 
 func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmConnection, changed bool) (*console.ScmConnectionFragment, error) {
 	logger := log.FromContext(ctx)
-	exists := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
+	exists, err := r.ConsoleClient.IsScmConnectionExists(ctx, scm.ConsoleName())
+	if err != nil {
+		return nil, err
+	}
 
 	token, err := r.getTokenFromSecret(ctx, scm)
 	if err != nil {
