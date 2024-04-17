@@ -10,6 +10,7 @@ import {
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
+import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
@@ -80,15 +81,20 @@ export default function Discovery() {
   useSetPageHeaderContent(headerContent)
 
   return (
-    <PluralErrorBoundary>
-      <TabPanel
-        css={{ height: '100%' }}
-        stateRef={tabStateRef}
-      >
-        <Suspense fallback={<LoadingIndicator />}>
-          <Outlet />
-        </Suspense>
-      </TabPanel>
-    </PluralErrorBoundary>
+    <ScrollablePage
+      fullWidth
+      scrollable={false}
+    >
+      <PluralErrorBoundary>
+        <TabPanel
+          css={{ height: '100%' }}
+          stateRef={tabStateRef}
+        >
+          <Suspense fallback={<LoadingIndicator />}>
+            <Outlet />
+          </Suspense>
+        </TabPanel>
+      </PluralErrorBoundary>
+    </ScrollablePage>
   )
 }
