@@ -42,6 +42,12 @@ fragment PipelineGate on PipelineGate {
   approver {
     ...User
   }
+  edge {
+    node {
+      id
+      name
+    }
+  }
   spec {
     job {
       ...JobGateSpec
