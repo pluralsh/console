@@ -3,6 +3,7 @@ fragment Container on pod_Container {
   args
   commands
   image
+  state
   securityContext @type(name: "v1_SecurityContext") {
     ...SecurityContext
   }

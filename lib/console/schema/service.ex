@@ -15,7 +15,8 @@ defmodule Console.Schema.Service do
     DiffNormalizer,
     Metadata,
     StageService,
-    ServiceContextBinding
+    ServiceContextBinding,
+    NamespaceInstance
   }
 
   defenum Promotion, ignore: 0, proceed: 1, rollback: 2
@@ -64,12 +65,21 @@ defmodule Console.Schema.Service do
           _ -> []
         end
       end)
+      |> ensure_chart()
     end
 
     def set_changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, ~w(name value)a)
       |> validate_required(~w(name value)a)
+      |> ensure_chart()
+    end
+
+    defp ensure_chart(cs) do
+      case get_field(cs, :repository) do
+        %{} -> validate_required(cs, ~w(chart version)a)
+        _ -> cs
+      end
     end
   end
 
@@ -110,9 +120,10 @@ defmodule Console.Schema.Service do
     belongs_to :repository, GitRepository
     belongs_to :owner,      GlobalService
 
-    has_one :reference_cluster, Cluster
-    has_one :provider,          ClusterProvider
-    has_one :global_service,    GlobalService
+    has_one :reference_cluster,  Cluster
+    has_one :provider,           ClusterProvider
+    has_one :global_service,     GlobalService
+    has_one :namespace_instance, NamespaceInstance
 
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
@@ -181,6 +192,13 @@ defmodule Console.Schema.Service do
 
   def for_owner(query \\ __MODULE__, owner_id) do
     from(s in query, where: s.owner_id == ^owner_id)
+  end
+
+  def for_namespace(query \\ __MODULE__, ns_id) do
+    from(s in query,
+      join: ni in assoc(s, :namespace_instance),
+      where: ni.id == ^ns_id
+    )
   end
 
   def for_status(query \\ __MODULE__, status) do

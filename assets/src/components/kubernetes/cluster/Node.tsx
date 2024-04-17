@@ -313,7 +313,6 @@ export function NodePods(): ReactElement {
       }}
       queryName="handleGetNodePods"
       itemsKey="pods"
-      disableOnRowClick
     />
   )
 }

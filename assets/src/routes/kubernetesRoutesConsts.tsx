@@ -91,9 +91,9 @@ export function getResourceDetailsAbsPath(
 ): string {
   return namespace
     ? `/${KUBERNETES_ROOT_PATH}/${clusterId}/${pluralize(
-        kind
+        kind ?? ''
       )}/${namespace}/${name}`
-    : `/${KUBERNETES_ROOT_PATH}/${clusterId}/${pluralize(kind)}/${name}`
+    : `/${KUBERNETES_ROOT_PATH}/${clusterId}/${pluralize(kind ?? '')}/${name}`
 }
 
 export function getCustomResourceDetailsAbsPath(

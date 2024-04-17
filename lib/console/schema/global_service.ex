@@ -11,7 +11,7 @@ defmodule Console.Schema.GlobalService do
       field :value, :string
     end
 
-    belongs_to :template, ServiceTemplate
+    belongs_to :template, ServiceTemplate, on_replace: :update
     belongs_to :service,  Service
     belongs_to :provider, ClusterProvider
 

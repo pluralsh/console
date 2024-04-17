@@ -77,7 +77,7 @@ function SkeletonUnstyled({ ...props }): ReactElement {
 interface ResourceInfoCardProps {
   title?: ReactNode
   loading?: boolean
-  children: ReactElement | Array<ReactElement>
+  children: ReactElement | Array<ReactElement> | undefined | null
 }
 
 export default function ResourceInfoCard({

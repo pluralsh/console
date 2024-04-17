@@ -333,8 +333,8 @@ defmodule Console.Deployments.Pipelines do
     |> add_operation(:edges, fn %{promo: %{stage: stage}} -> {:ok, edges(stage)} end)
     |> add_operation(:resolve, fn %{promo: promotion, edges: edges} ->
       Enum.filter(edges, &open?/1)
-      |> Enum.filter(& !promoted?(&1, promotion.revised_at))
-      |> Enum.filter(& !pr_promoted?(&1, promotion))
+      |> Enum.filter(& !promoted?(&1, promotion.revised_at)) # don't drive promotion for edge if it's promoted_at is later than the revised_at of promotion
+      |> Enum.filter(& !pr_promoted?(&1, promotion)) # don't drive promotion if contexts are equal
       |> Enum.reduce(start_transaction(), &promote_edge(&2, promotion, &1))
       |> execute()
     end)
@@ -342,7 +342,7 @@ defmodule Console.Deployments.Pipelines do
       resolved = Map.new(res, fn {edge, _} -> edge end)
       case Enum.all?(edges, & promoted?(&1, promo.revised_at) || resolved[&1.id]) do
         true ->
-          PipelinePromotion.changeset(promo, %{promoted_at: Timex.now()})
+          PipelinePromotion.changeset(promo, %{applied_context_id: promo.context_id, promoted_at: Timex.now()})
           |> Repo.update()
         _ -> {:ok, promo}
       end
@@ -408,9 +408,15 @@ defmodule Console.Deployments.Pipelines do
   defp add_revised(attrs, true), do: Map.merge(attrs, %{revised_at: Timex.now(), revised: true})
   defp add_revised(attrs, _), do: attrs
 
-  defp diff?(%PipelineStage{context_id: ctx1}, _, %PipelinePromotion{context_id: ctx2}) when is_binary(ctx1),
-    do: ctx1 != ctx2
   defp diff?(_, [], _), do: false
+
+  defp diff?(%PipelineStage{context_id: id}, _, %PipelinePromotion{applied_context_id: id})
+    when is_binary(id), do: false
+
+  defp diff?(%PipelineStage{context_id: ctx}, _, %PipelinePromotion{promoted_at: at} = next) when is_binary(ctx) do
+    is_nil(at) || Enum.all?(next.services, &Timex.after?(&1.updated_at, at))
+  end
+
   defp diff?(_, svcs, %PipelinePromotion{services: [_ | _]} = promo) do
     by_id = extant(promo)
     Enum.any?(svcs, fn {%{sha: sha} = svc, %{id: r}} ->
@@ -421,6 +427,7 @@ defmodule Console.Deployments.Pipelines do
       end
     end)
   end
+
   defp diff?(_, _, _), do: true
 
   defp send_updates(gates) do
@@ -433,6 +440,9 @@ defmodule Console.Deployments.Pipelines do
   defp notify({:ok, %PipelineStage{} = stage}, :update),
     do: handle_notify(PubSub.PipelineStageUpdated, stage)
   defp notify(pass, _), do: pass
+
+  defp notify({:ok, %PipelineContext{} = ctx}, :create, user),
+    do: handle_notify(PubSub.PipelineContextCreated, ctx, actor: user)
 
   defp notify({:ok, %Pipeline{} = pipe}, :delete, user),
     do: handle_notify(PubSub.PipelineDeleted, pipe, actor: user)

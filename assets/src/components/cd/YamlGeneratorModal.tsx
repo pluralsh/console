@@ -209,7 +209,9 @@ export function YamlGeneratorModal({
             {getYaml(
               name,
               tags,
-              distributionValue === 'all' ? '' : distributionValue,
+              distributionValue === 'all'
+                ? ''
+                : ClusterDistro[distributionValue],
               kind
             )}
           </Code>
@@ -321,7 +323,7 @@ function ModalIllustration({ modalStep }: { modalStep: 'configure' | 'copy' }) {
 function getYaml(
   name: string,
   tags: Record<string, string>,
-  distribution: string,
+  distro: string,
   kind: string
 ) {
   const defaultObj: any = {
@@ -336,12 +338,15 @@ function getYaml(
         name: 'my-service',
         namespace: 'infra',
       },
-      distribution,
     },
   }
 
   if (!isEmpty(tags)) {
     defaultObj.spec.tags = tags
+  }
+
+  if (distro) {
+    defaultObj.spec.distro = distro
   }
 
   return stringify(defaultObj)

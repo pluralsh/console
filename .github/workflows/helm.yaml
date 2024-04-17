@@ -16,3 +16,4 @@ jobs:
           fetch-depth: 0
       - uses: azure/setup-helm@v3
       - run: helm template charts/console --set dashboard.app.security.csrfKey=dummycsrfkey
+      - run: helm template plural/helm/console --set dashboard.app.security.csrfKey=dummycsrfkey

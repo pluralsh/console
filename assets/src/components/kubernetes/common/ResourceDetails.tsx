@@ -1,16 +1,15 @@
-import { ReactElement, useRef } from 'react'
+import { ReactElement, ReactNode, useMemo, useRef, useState } from 'react'
 import { SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { useMatch, useResolvedPath } from 'react-router-dom'
 
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
-
 import { LinkTabWrap } from '../../utils/Tabs'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
-
 import { ResponsiveLayoutHeader } from '../../utils/layout/ResponsiveLayoutHeader'
+import { PageHeaderContext } from '../../cd/ContinuousDeployment'
 
 export interface TabEntry {
   label: string
@@ -34,6 +33,8 @@ export default function ResourceDetails({
   const tab = pathMatch?.params?.tab || ''
   const tabStateRef = useRef<any>(null)
   const currentTab = tabs.find(({ path }) => path === (tab ?? ''))
+  const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
   return (
     <ResponsiveLayoutPage>
@@ -56,15 +57,7 @@ export default function ResourceDetails({
             overflow: 'hidden',
           }}
         >
-          <div
-            css={{
-              height: '100%',
-              width: '100%',
-              maxWidth: theme.breakpoints.desktopLarge,
-              marginRight: 'auto',
-              marginLeft: 'auto',
-            }}
-          >
+          <div css={{ maxWidth: theme.breakpoints.desktopLarge }}>
             <TabList
               scrollable
               gap="xxsmall"
@@ -93,21 +86,24 @@ export default function ResourceDetails({
               ))}
             </TabList>
           </div>
+          {headerContent}
         </ResponsiveLayoutHeader>
         <ResponsivePageFullWidth
           noPadding
           maxContentWidth={theme.breakpoints.desktopLarge}
         >
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              height: '100%',
-              gap: theme.spacing.large,
-            }}
-          >
-            {children}
-          </div>
+          <PageHeaderContext.Provider value={pageHeaderContext}>
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                gap: theme.spacing.large,
+              }}
+            >
+              {children}
+            </div>
+          </PageHeaderContext.Provider>
         </ResponsivePageFullWidth>
       </ResponsiveLayoutPage>
       <ResponsiveLayoutSpacer />
@@ -119,14 +115,7 @@ export default function ResourceDetails({
           paddingBottom: theme.spacing.large,
         }}
       >
-        <div
-          css={{
-            height: '100%',
-            overflowY: 'auto',
-          }}
-        >
-          {sidecar}
-        </div>
+        <div css={{ height: '100%', overflowY: 'auto' }}>{sidecar}</div>
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )

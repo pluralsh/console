@@ -59,6 +59,9 @@ export default function Conditions({
         height: '100%',
         ...(maxHeight ? { maxHeight } : {}),
       }}
+      emptyStateProps={{
+        message: 'No conditions found.',
+      }}
     />
   )
 }

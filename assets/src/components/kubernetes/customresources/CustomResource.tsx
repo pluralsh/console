@@ -4,7 +4,12 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { MetadataSidecar } from '../common/utils'
 import {
+  CustomResourceEventsQuery,
+  CustomResourceEventsQueryVariables,
   CustomResourceQueryVariables,
+  Common_EventList as EventListT,
+  Common_Event as EventT,
+  useCustomResourceEventsQuery,
   useCustomResourceQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
@@ -14,13 +19,21 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { useCluster } from '../Cluster'
 
+import { useEventsColumns } from '../cluster/Events'
+import { ResourceList } from '../common/ResourceList'
+
+import { NAMESPACE_PARAM } from '../Navigation'
+
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 
-const directory: Array<TabEntry> = [{ path: '', label: 'Raw' }] as const
+const directory: Array<TabEntry> = [
+  { path: '', label: 'Raw' },
+  { path: 'events', label: 'Events' },
+] as const
 
 export default function CustomResource(): ReactElement {
   const cluster = useCluster()
-  const { clusterId, name = '', namespace = '', crd = '' } = useParams()
+  const { clusterId, name = '', namespace, crd = '' } = useParams()
   const { data, loading } = useCustomResourceQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
@@ -42,7 +55,18 @@ export default function CustomResource(): ReactElement {
             crd
           ),
         },
-        { label: namespace ?? '' },
+        ...(namespace
+          ? [
+              {
+                label: namespace,
+                url: `${getResourceDetailsAbsPath(
+                  clusterId,
+                  'customresourcedefinition',
+                  crd
+                )}?${NAMESPACE_PARAM}=${namespace}`,
+              },
+            ]
+          : []),
         { label: name ?? '' },
       ],
       [cluster, clusterId, crd, name, namespace]
@@ -58,5 +82,29 @@ export default function CustomResource(): ReactElement {
     >
       <Outlet />
     </ResourceDetails>
+  )
+}
+
+export function CustomResourceEvents(): ReactElement {
+  const { name } = useParams()
+  const columns = useEventsColumns()
+
+  return (
+    <ResourceList<
+      EventListT,
+      EventT,
+      CustomResourceEventsQuery,
+      CustomResourceEventsQueryVariables
+    >
+      namespaced
+      columns={columns}
+      query={useCustomResourceEventsQuery}
+      queryOptions={{
+        variables: { name } as CustomResourceEventsQueryVariables,
+      }}
+      queryName="handleGetCustomResourceObjectEvents"
+      itemsKey="events"
+      disableOnRowClick
+    />
   )
 }

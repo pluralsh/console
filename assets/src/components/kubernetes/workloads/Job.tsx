@@ -36,7 +36,6 @@ import { useEventsColumns } from '../cluster/Events'
 import Conditions from '../common/Conditions'
 import { ReadinessT } from '../../../utils/status'
 import { StatusChip } from '../../cluster/TableElements'
-
 import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './Jobs'

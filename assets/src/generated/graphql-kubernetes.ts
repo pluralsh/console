@@ -28,6 +28,14 @@ export type Scalars = {
   Void: { input: any; output: any; }
 };
 
+export enum ContainerState {
+  Failed = 'Failed',
+  Running = 'Running',
+  Terminated = 'Terminated',
+  Unknown = 'Unknown',
+  Waiting = 'Waiting'
+}
+
 export enum HttpMethod {
   Connect = 'CONNECT',
   Delete = 'DELETE',
@@ -1591,6 +1599,11 @@ export type QueryHandleLogsArgs = {
   sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type StateWrapper = {
+  __typename?: 'StateWrapper';
+  state: ContainerState;
+};
+
 export type Api_DataPoint = {
   __typename?: 'api_DataPoint';
   x: Scalars['BigInt']['output'];
@@ -2362,6 +2375,7 @@ export type Pod_Container = {
   resources?: Maybe<V1_ResourceRequirements>;
   securityContext: V1_SecurityContext;
   startupProbe: V1_Probe;
+  state: ContainerState;
   status: V1_ContainerStatus;
   volumeMounts: Array<Maybe<Pod_VolumeMount>>;
 };
@@ -2370,7 +2384,7 @@ export type Pod_ContainerStatus = {
   __typename?: 'pod_ContainerStatus';
   name: Scalars['String']['output'];
   ready: Scalars['Boolean']['output'];
-  state: Scalars['String']['output'];
+  state: ContainerState;
 };
 
 export type Pod_EnvVar = {
@@ -3322,9 +3336,9 @@ export type V1_EndpointPort = {
    * * Un-prefixed protocol names - reserved for IANA standard service names (as per RFC-6335 and https://www.iana.org/assignments/service-names).
    *
    * * Kubernetes-defined prefixed names:
-   * * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
-   * * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
-   * * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
+   *   * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
+   *   * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
+   *   * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
    *
    * * Other protocols should use implementation-defined prefixed names such as mycompany.com/my-custom-protocol.
    */
@@ -3511,15 +3525,15 @@ export type V1_HttpIngressPath = {
   path?: Maybe<Scalars['String']['output']>;
   /**
    * pathType determines the interpretation of the path matching. PathType can be one of the following values: * Exact: Matches the URL path exactly. * Prefix: Matches based on a URL path prefix split by '/'. Matching is
-   * done on a path element by element basis. A path element refers is the
-   * list of labels in the path split by the '/' separator. A request is a
-   * match for path p if every p is an element-wise prefix of p of the
-   * request path. Note that if the last element of the path is a substring
-   * of the last element in request path, it is not a match (e.g. /foo/bar
-   * matches /foo/bar/baz, but does not match /foo/barbaz).
+   *   done on a path element by element basis. A path element refers is the
+   *   list of labels in the path split by the '/' separator. A request is a
+   *   match for path p if every p is an element-wise prefix of p of the
+   *   request path. Note that if the last element of the path is a substring
+   *   of the last element in request path, it is not a match (e.g. /foo/bar
+   *   matches /foo/bar/baz, but does not match /foo/barbaz).
    * * ImplementationSpecific: Interpretation of the Path matching is up to
-   * the IngressClass. Implementations can treat this as a separate PathType
-   * or treat it identically to Prefix or Exact path types.
+   *   the IngressClass. Implementations can treat this as a separate PathType
+   *   or treat it identically to Prefix or Exact path types.
    * Implementations are required to support all path types.
    */
   pathType: Scalars['String']['output'];
@@ -3632,9 +3646,9 @@ export type V1_IngressPortStatus = {
   __typename?: 'v1_IngressPortStatus';
   /**
    * error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use
-   * CamelCase names
+   *   CamelCase names
    * - cloud provider specific error values must have names that comply with the
-   * format foo.example.com/CamelCase.
+   *   format foo.example.com/CamelCase.
    */
   error?: Maybe<Scalars['String']['output']>;
   /** port is the port number of the ingress port. */
@@ -3648,10 +3662,10 @@ export type V1_IngressRule = {
   __typename?: 'v1_IngressRule';
   /**
    * host is the fully qualified domain name of a network host, as defined by RFC 3986. Note the following deviations from the "host" part of the URI as defined in RFC 3986: 1. IPs are not allowed. Currently an IngressRuleValue can only apply to
-   * the IP in the Spec of the parent Ingress.
+   *    the IP in the Spec of the parent Ingress.
    * 2. The `:` delimiter is not respected because ports are not allowed.
-   * Currently the port of an Ingress is implicitly :80 for http and
-   * :443 for https.
+   * 	  Currently the port of an Ingress is implicitly :80 for http and
+   * 	  :443 for https.
    * Both these may change in the future. Incoming requests are matched against the host before the IngressRuleValue. If the host is unspecified, the Ingress routes all traffic based on the specified IngressRuleValue.
    *
    * host can be "precise" which is a domain name without the terminating dot of a network host (e.g. "foo.bar.com") or "wildcard", which is a domain name prefixed with a single wildcard label (e.g. "*.foo.com"). The wildcard character '*' must appear by itself as the first DNS label and matches only a single label. You cannot have a wildcard label by itself (e.g. Host == "*"). Requests will be matched against the Host field in the following way: 1. If host is precise, the request matches this rule if the http host header is equal to Host. 2. If host is a wildcard, then the request matches this rule if the http host header is to equal to the suffix (removing the first label) of the wildcard rule.
@@ -4772,7 +4786,7 @@ export type NodePodsQueryVariables = Exact<{
 }>;
 
 
-export type NodePodsQuery = { __typename?: 'Query', handleGetNodePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type NodePodsQuery = { __typename?: 'Query', handleGetNodePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type NodeEventsQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4793,7 +4807,7 @@ export type ObjectMetaFragment = { __typename?: 'types_ObjectMeta', uid?: string
 
 export type ConditionFragment = { __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string };
 
-export type ProbeFragment = { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null };
+export type ProbeFragment = { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null };
 
 export type EndpointFragment = { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> };
 
@@ -4927,6 +4941,15 @@ export type CustomResourceQueryVariables = Exact<{
 
 export type CustomResourceQuery = { __typename?: 'Query', handleGetCustomResourceObjectDetail?: { __typename?: 'types_CustomResourceObjectDetail', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null };
 
+export type CustomResourceEventsQueryVariables = Exact<{
+  crd: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type CustomResourceEventsQuery = { __typename?: 'Query', handleGetCustomResourceObjectEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5025,7 +5048,7 @@ export type ServicePodsQueryVariables = Exact<{
 }>;
 
 
-export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type ServiceIngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5182,7 +5205,7 @@ export type DaemonSetPodsQueryVariables = Exact<{
 }>;
 
 
-export type DaemonSetPodsQuery = { __typename?: 'Query', handleGetDaemonSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type DaemonSetPodsQuery = { __typename?: 'Query', handleGetDaemonSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type DaemonSetServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5284,7 +5307,7 @@ export type JobPodsQueryVariables = Exact<{
 }>;
 
 
-export type JobPodsQuery = { __typename?: 'Query', handleGetJobPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type JobPodsQuery = { __typename?: 'Query', handleGetJobPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type JobListFragment = { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> };
 
@@ -5303,7 +5326,7 @@ export type PodsQueryVariables = Exact<{
 }>;
 
 
-export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type PodQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5311,7 +5334,7 @@ export type PodQueryVariables = Exact<{
 }>;
 
 
-export type PodQuery = { __typename?: 'Query', handleGetPodDetail?: { __typename?: 'pod_PodDetail', nodeName: string, restartCount: number, serviceAccountName: string, podIP: string, podPhase: string, qosClass: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, containers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null } | null>, initContainers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null } | null>, imagePullSecrets?: Array<{ __typename?: 'v1_LocalObjectReference', name?: string | null } | null> | null, persistentVolumeClaimList: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, controller?: { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null, securityContext: { __typename?: 'v1_PodSecurityContext', fsGroup?: any | null, fsGroupChangePolicy?: string | null, runAsUser?: any | null, runAsGroup?: any | null, runAsNonRoot?: boolean | null, supplementalGroups?: Array<any | null> | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', type?: string | null, level?: string | null, role?: string | null, user?: string | null } | null, sysctls?: Array<{ __typename?: 'v1_Sysctl', name: string, value: string } | null> | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', gmsaCredentialSpec?: string | null, gmsaCredentialSpecName?: string | null, hostProcess?: boolean | null, runAsUserName?: string | null } | null } } | null };
+export type PodQuery = { __typename?: 'Query', handleGetPodDetail?: { __typename?: 'pod_PodDetail', nodeName: string, restartCount: number, serviceAccountName: string, podIP: string, podPhase: string, qosClass: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, containers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null } | null>, initContainers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null } | null>, imagePullSecrets?: Array<{ __typename?: 'v1_LocalObjectReference', name?: string | null } | null> | null, persistentVolumeClaimList: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, controller?: { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null, securityContext: { __typename?: 'v1_PodSecurityContext', fsGroup?: any | null, fsGroupChangePolicy?: string | null, runAsUser?: any | null, runAsGroup?: any | null, runAsNonRoot?: boolean | null, supplementalGroups?: Array<any | null> | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', type?: string | null, level?: string | null, role?: string | null, user?: string | null } | null, sysctls?: Array<{ __typename?: 'v1_Sysctl', name: string, value: string } | null> | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', gmsaCredentialSpec?: string | null, gmsaCredentialSpecName?: string | null, hostProcess?: boolean | null, runAsUserName?: string | null } | null } } | null };
 
 export type PodEventsQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5325,7 +5348,7 @@ export type PodEventsQueryVariables = Exact<{
 
 export type PodEventsQuery = { __typename?: 'Query', handleGetPodEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
-export type ContainerFragment = { __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null };
+export type ContainerFragment = { __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null };
 
 export type StateFragment = { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null };
 
@@ -5333,7 +5356,7 @@ export type PodSecurityContextFragment = { __typename?: 'v1_PodSecurityContext',
 
 export type SecurityContextFragment = { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null };
 
-export type PodListFragment = { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> };
+export type PodListFragment = { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> };
 
 export type ReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5368,7 +5391,7 @@ export type ReplicaSetPodsQueryVariables = Exact<{
 }>;
 
 
-export type ReplicaSetPodsQuery = { __typename?: 'Query', handleGetReplicaSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ReplicaSetPodsQuery = { __typename?: 'Query', handleGetReplicaSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type ReplicaSetServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5417,7 +5440,7 @@ export type ReplicationControllerPodsQueryVariables = Exact<{
 }>;
 
 
-export type ReplicationControllerPodsQuery = { __typename?: 'Query', handleGetReplicationControllerPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ReplicationControllerPodsQuery = { __typename?: 'Query', handleGetReplicationControllerPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type ReplicationControllerServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5466,7 +5489,7 @@ export type StatefulSetPodsQueryVariables = Exact<{
 }>;
 
 
-export type StatefulSetPodsQuery = { __typename?: 'Query', handleGetStatefulSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: string } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type StatefulSetPodsQuery = { __typename?: 'Query', handleGetStatefulSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type StatefulSetListFragment = { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
 
@@ -5976,15 +5999,33 @@ export const SecurityContextFragmentDoc = gql`
     `;
 export const ProbeFragmentDoc = gql`
     fragment Probe on v1_Probe {
-  exec {
-    command
-  }
   failureThreshold
   initialDelaySeconds
   periodSeconds
   successThreshold
   terminationGracePeriodSeconds
   timeoutSeconds
+  tcpSocket {
+    host
+    port
+  }
+  grpc {
+    service
+    port
+  }
+  httpGet {
+    host
+    port
+    scheme
+    path
+    httpHeaders {
+      name
+      value
+    }
+  }
+  exec {
+    command
+  }
 }
     `;
 export const StateFragmentDoc = gql`
@@ -6013,6 +6054,7 @@ export const ContainerFragmentDoc = gql`
   args
   commands
   image
+  state
   securityContext @type(name: "v1_SecurityContext") {
     ...SecurityContext
   }
@@ -7968,7 +8010,7 @@ export const CustomResourcesDocument = gql`
     sortBy: $sortBy
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "crd/{args.namespace}/{args.crd}/object") {
+  ) @rest(path: "crd/{args.namespace}/{args.crd}/object?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     listMeta {
       totalItems
     }
@@ -8074,6 +8116,52 @@ export type CustomResourceQueryHookResult = ReturnType<typeof useCustomResourceQ
 export type CustomResourceLazyQueryHookResult = ReturnType<typeof useCustomResourceLazyQuery>;
 export type CustomResourceSuspenseQueryHookResult = ReturnType<typeof useCustomResourceSuspenseQuery>;
 export type CustomResourceQueryResult = Apollo.QueryResult<CustomResourceQuery, CustomResourceQueryVariables>;
+export const CustomResourceEventsDocument = gql`
+    query CustomResourceEvents($crd: String!, $namespace: String!, $name: String!) {
+  handleGetCustomResourceObjectEvents(
+    namespace: $namespace
+    object: $name
+    crd: $crd
+  ) @rest(type: "common_EventList", path: "crd/{args.namespace}/{args.crd}/{args.object}/event") {
+    ...EventList
+  }
+}
+    ${EventListFragmentDoc}`;
+
+/**
+ * __useCustomResourceEventsQuery__
+ *
+ * To run a query within a React component, call `useCustomResourceEventsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomResourceEventsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomResourceEventsQuery({
+ *   variables: {
+ *      crd: // value for 'crd'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCustomResourceEventsQuery(baseOptions: Apollo.QueryHookOptions<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>(CustomResourceEventsDocument, options);
+      }
+export function useCustomResourceEventsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>(CustomResourceEventsDocument, options);
+        }
+export function useCustomResourceEventsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>(CustomResourceEventsDocument, options);
+        }
+export type CustomResourceEventsQueryHookResult = ReturnType<typeof useCustomResourceEventsQuery>;
+export type CustomResourceEventsLazyQueryHookResult = ReturnType<typeof useCustomResourceEventsLazyQuery>;
+export type CustomResourceEventsSuspenseQueryHookResult = ReturnType<typeof useCustomResourceEventsSuspenseQuery>;
+export type CustomResourceEventsQueryResult = Apollo.QueryResult<CustomResourceEventsQuery, CustomResourceEventsQueryVariables>;
 export const IngressesDocument = gql`
     query Ingresses($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetIngressList(

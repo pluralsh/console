@@ -20,6 +20,7 @@ GOLANGCI_LINT ?= $(shell which golangci-lint)
 MOCKERY ?= $(shell which mockery)
 ENVSUBST ?= $(shell which envsubst)
 HELM ?= $(shell which helm)
+CRDDOCS ?= $(shell which crd-ref-docs)
 
 # Tool versions
 KUBEBUILDER_VERSION := 3.11.1
@@ -60,6 +61,10 @@ show-dependency-updates: ## show possible dependency updates
 update-dependencies: ## update dependencies
 	go get -u ./...
 	go mod tidy
+
+.PHONY: crd-docs
+crd-docs: ##generate docs from the CRDs
+	$(CRDDOCS) --source-path=./api --renderer=markdown --output-path=./docs/api.md --config=config.yaml
 
 ##@ Build
 
@@ -231,8 +236,13 @@ mockery: --tool
 envsubst: TOOL = envsubst
 envsubst: --tool
 
+.PHONY: crd-ref-docs
+crd-ref-docs: TOOL = crd-ref-docs
+crd-ref-docs: --tool
+
 .PHONY: kubebuilder
 kubebuilder: ## install kubebuilder
 	@curl -L -O --output-dir bin/ "https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${KUBEBUILDER_VERSION}/kubebuilder_${OS}_${ARCH}"
 	@chmod +x bin/kubebuilder_${OS}_${ARCH}
 	@mv bin/kubebuilder_${OS}_${ARCH} ${GOPATH}/bin/kubebuilder
+

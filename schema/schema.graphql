@@ -1302,6 +1302,8 @@ type ManagedNamespace {
   "A template for creating the core service for this namespace"
   service: ServiceTemplate
 
+  services(after: String, first: Int, before: String, last: Int, q: String): ServiceDeploymentConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime

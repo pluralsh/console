@@ -9,10 +9,13 @@ import {
 import { mapExistingNodes } from '../../utils/graphql'
 
 import { getWorkloadsAbsPath } from '../../routes/kubernetesRoutesConsts'
+import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
+import { KubernetesClient } from '../../helpers/kubernetes.client'
 
 type ClusterContextT = {
   clusters: ClusterTinyFragment[]
   cluster?: ClusterTinyFragment
+  namespaces: string[]
 }
 
 const ClusterContext = createContext<ClusterContextT | undefined>(undefined)
@@ -39,6 +42,12 @@ export const useCluster = () => {
   return cluster
 }
 
+export const useNamespaces = () => {
+  const { namespaces } = useClusterContext()
+
+  return namespaces
+}
+
 export default function Cluster() {
   const { clusterId } = useParams()
   const { search } = useLocation()
@@ -59,9 +68,22 @@ export default function Cluster() {
     [clusterId, clusters]
   )
 
+  const { data: namespacesData } = useNamespacesQuery({
+    client: KubernetesClient(clusterId!),
+    skip: !clusterId,
+  })
+
+  const namespaces = useMemo(
+    () =>
+      (namespacesData?.handleGetNamespaces?.namespaces ?? [])
+        .map((namespace) => namespace?.objectMeta?.name)
+        .filter((namespace): namespace is string => !isEmpty(namespace)),
+    [namespacesData?.handleGetNamespaces?.namespaces]
+  )
+
   const context = useMemo(
-    () => ({ clusters, cluster }) as ClusterContextT,
-    [clusters, cluster]
+    () => ({ clusters, cluster, namespaces }) as ClusterContextT,
+    [clusters, cluster, namespaces]
   )
 
   useEffect(() => {

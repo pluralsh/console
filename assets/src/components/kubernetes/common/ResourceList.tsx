@@ -132,11 +132,11 @@ export function ResourceList<
     skip: !cluster,
     pollInterval: 30_000,
     variables: {
+      filterBy: `name,${filter}`,
+      sortBy,
       ...(namespaced ? { namespace } : {}),
       ...(queryOptions?.variables ?? {}),
       ...DEFAULT_DATA_SELECT,
-      filterBy: `name,${filter}`,
-      sortBy,
     } as TVariables,
   })
 

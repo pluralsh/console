@@ -1,9 +1,11 @@
 import { ReactElement } from 'react'
 import { Chip, ChipList, CloseIcon, Code } from '@pluralsh/design-system'
+import yaml from 'js-yaml'
 
 import {
   Pod_Container as ContainerT,
   Maybe,
+  V1_Probe as ProbeT,
 } from '../../../generated/graphql-kubernetes'
 import { ContainerStatus } from '../../cluster/ContainerStatuses'
 import { toReadiness } from '../workloads/utils'
@@ -57,7 +59,7 @@ function Container({ container }: ContainerProps): ReactElement {
           <ContainerStatus
             status={{
               name: '',
-              readiness: toReadiness(container.status),
+              readiness: toReadiness(container?.state),
             }}
           />
           <span>{container.name}</span>
@@ -76,7 +78,17 @@ function Container({ container }: ContainerProps): ReactElement {
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Commands">
           {container.commands ? (
-            <Code>{container.commands.join('\n')}</Code>
+            // @ts-ignore
+            <Code
+              css={{
+                pre: {
+                  whiteSpace: 'break-spaces',
+                  wordBreak: 'break-word',
+                },
+              }}
+            >
+              {container.commands.join('\n')}
+            </Code>
           ) : (
             '-'
           )}
@@ -87,10 +99,9 @@ function Container({ container }: ContainerProps): ReactElement {
         <ResourceInfoCardEntry heading="Restarts">
           {container.status?.restartCount}
         </ResourceInfoCardEntry>
-        {/* <Entry heading="Volume mounts">{container.volumeMounts}</Entry> */}
       </ResourceInfoCardSection>
 
-      <ResourceInfoCardSection heading="Security context">
+      <ResourceInfoCardSection heading="Security">
         <ResourceInfoCardEntry heading="Privileged">
           {container.securityContext?.privileged}
         </ResourceInfoCardEntry>
@@ -109,54 +120,183 @@ function Container({ container }: ContainerProps): ReactElement {
         <ResourceInfoCardEntry heading="Read-only root filesystem">
           {container.securityContext?.readOnlyRootFilesystem}
         </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Proc mount">
+          {container.securityContext?.procMount}
+        </ResourceInfoCardEntry>
+      </ResourceInfoCardSection>
 
-        {/* {container.securityContext?.capabilities} */}
-        {/* {container.securityContext?.seLinuxOptions} */}
-        {/* {container.securityContext?.windowsOptions} */}
-        {/* {container.securityContext?.procMount} */}
-        {/* {container.securityContext?.seccompProfile} */}
+      <ResourceInfoCardSection heading="Seccomp profile">
+        <ResourceInfoCardEntry heading="Type">
+          {container.securityContext?.seccompProfile?.type}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Profile">
+          {container.securityContext?.seccompProfile?.localhostProfile}
+        </ResourceInfoCardEntry>
+      </ResourceInfoCardSection>
+
+      <ResourceInfoCardSection heading="Windows Options">
+        <ResourceInfoCardEntry heading="Run as user">
+          {container.securityContext?.windowsOptions?.runAsUserName}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Host process">
+          {container.securityContext?.windowsOptions?.hostProcess}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="GMSA credentials spec name">
+          {container.securityContext?.windowsOptions?.gmsaCredentialSpecName}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="GMSA credential spec">
+          {container.securityContext?.windowsOptions?.gmsaCredentialSpec}
+        </ResourceInfoCardEntry>
+      </ResourceInfoCardSection>
+
+      <ResourceInfoCardSection heading="SELinux options">
+        <ResourceInfoCardEntry heading="Role">
+          {container.securityContext?.seLinuxOptions?.role && (
+            <Chip size="small">
+              {container.securityContext?.seLinuxOptions?.role}
+            </Chip>
+          )}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Level">
+          {container.securityContext?.seLinuxOptions?.level && (
+            <Chip size="small">
+              {container.securityContext?.seLinuxOptions?.level}
+            </Chip>
+          )}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="User">
+          {container.securityContext?.seLinuxOptions?.user && (
+            <Chip size="small">
+              {container.securityContext?.seLinuxOptions?.user}
+            </Chip>
+          )}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Type">
+          {container.securityContext?.seLinuxOptions?.type && (
+            <Chip size="small">
+              {container.securityContext?.seLinuxOptions?.type}
+            </Chip>
+          )}
+        </ResourceInfoCardEntry>
+      </ResourceInfoCardSection>
+
+      <ResourceInfoCardSection heading="Capabilities">
+        <ResourceInfoCardEntry heading="Add">
+          {container.securityContext?.capabilities?.add && (
+            <ChipList
+              values={container.securityContext?.capabilities?.add ?? []}
+              limit={3}
+              emptyState={<>-</>}
+            />
+          )}
+        </ResourceInfoCardEntry>
+        <ResourceInfoCardEntry heading="Drop">
+          {container.securityContext?.capabilities?.drop && (
+            <ChipList
+              values={container.securityContext?.capabilities?.drop ?? []}
+              limit={3}
+              emptyState={<>-</>}
+            />
+          )}
+        </ResourceInfoCardEntry>
       </ResourceInfoCardSection>
 
       <ResourceInfoCardSection heading="Resources">
         <ResourceInfoCardEntry heading="Claims">
-          <ChipList
-            size="small"
-            values={Object.entries(
-              container?.resources?.claims?.map((c) => c?.name) ?? []
-            )}
-            limit={3}
-            emptyState={<CloseIcon />}
-          />
+          {container?.resources?.claims && (
+            <ChipList
+              size="small"
+              values={Object.entries(
+                container?.resources?.claims?.map((c) => c?.name)
+              )}
+              limit={3}
+              emptyState={<CloseIcon />}
+            />
+          )}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Requests">
-          <ChipList
-            size="small"
-            values={Object.entries(container?.resources?.requests ?? [])}
-            transformValue={(label) => label.join(': ')}
-            limit={3}
-            emptyState={<CloseIcon />}
-          />
+          {container?.resources?.requests && (
+            <ChipList
+              size="small"
+              values={Object.entries(container?.resources?.requests ?? [])}
+              transformValue={(label) => label.join(': ')}
+              limit={3}
+              emptyState={<CloseIcon />}
+            />
+          )}
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Limits">
-          <ChipList
-            size="small"
-            values={Object.entries(container?.resources?.limits ?? [])}
-            transformValue={(label) => label.join(': ')}
-            limit={3}
-            emptyState={<CloseIcon />}
-          />
+          {container?.resources?.limits && (
+            <ChipList
+              size="small"
+              values={Object.entries(container?.resources?.limits ?? [])}
+              transformValue={(label) => label.join(': ')}
+              limit={3}
+              emptyState={<CloseIcon />}
+            />
+          )}
         </ResourceInfoCardEntry>
-        {/* {container.securityContext?.capabilities} */}
-        {/* {container.securityContext?.seLinuxOptions} */}
-        {/* {container.securityContext?.windowsOptions} */}
-        {/* {container.securityContext?.procMount} */}
-        {/* {container.securityContext?.seccompProfile} */}
       </ResourceInfoCardSection>
 
-      {/* <SidecarItem heading="Liveness">{container.livenessProbe}</SidecarItem> */}
-      {/* <SidecarItem heading="Readines">{container.readinessProbe}</SidecarItem> */}
-      {/* <SidecarItem heading="Startup">{container.startupProbe}</SidecarItem> */}
-      {/* <SidecarItem heading="Resources">{container.resources}</SidecarItem> */}
+      <Probe
+        heading="Liveness probe"
+        probe={container?.livenessProbe}
+      />
+      <Probe
+        heading="Readiness probe"
+        probe={container?.readinessProbe}
+      />
+      <Probe
+        heading="Startup probe"
+        probe={container?.startupProbe}
+      />
     </ResourceInfoCard>
+  )
+}
+
+function Probe({
+  heading,
+  probe,
+}: {
+  heading: string
+  probe: ProbeT
+}): ReactElement {
+  return (
+    <ResourceInfoCardSection heading={heading}>
+      <ResourceInfoCardEntry heading="Failure threshold">
+        {probe?.failureThreshold}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="Success threshold">
+        {probe?.successThreshold}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="Termination grace period seconds">
+        {probe?.terminationGracePeriodSeconds}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="Timeout seconds">
+        {probe?.timeoutSeconds}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="Period seconds">
+        {probe?.periodSeconds}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="Initial delay seconds">
+        {probe?.initialDelaySeconds}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="Exec">
+        {probe?.exec?.command}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="Grpc">
+        {probe?.grpc?.service &&
+          probe?.grpc?.port &&
+          `${probe?.grpc?.service}:${probe?.grpc?.port}`}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="HTTP Get">
+        {probe?.httpGet && <Code>{yaml.dump(probe?.httpGet)}</Code>}
+      </ResourceInfoCardEntry>
+      <ResourceInfoCardEntry heading="TCP socket">
+        {probe?.tcpSocket?.host &&
+          probe?.tcpSocket?.port &&
+          `${probe?.tcpSocket?.host}:${probe?.tcpSocket?.port}`}
+      </ResourceInfoCardEntry>
+    </ResourceInfoCardSection>
   )
 }

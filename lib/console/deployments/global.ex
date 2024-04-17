@@ -289,13 +289,16 @@ defmodule Console.Deployments.Global do
     |> Cluster.target(global)
     |> Repo.all()
     |> Enum.each(fn %{id: cluster_id} = cluster ->
-      case Services.get_service_by_name(cluster_id, svc.name) do
+      case Services.get_service_by_name(cluster_id, svc_name(global)) do
         %Service{owner_id: ^gid} = dest -> sync_service(global, dest, bot)
         %Service{} -> :ok # ignore if the service was created out of band
         nil -> add_to_cluster(global, cluster, bot)
       end
     end)
   end
+
+  defp svc_name(%GlobalService{service: %Service{name: name}}), do: name
+  defp svc_name(%GlobalService{template: %ServiceTemplate{name: name}}), do: name
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 
@@ -363,7 +366,7 @@ defmodule Console.Deployments.Global do
     with {:ok, source_secrets} <- configuration(spec),
          {:ok, dest_secrets} <- Services.configuration(dest),
       do: (spec.repository_id != dest.repository_id || spec.templated != dest.templated ||
-            specs_different?(spec, dest) || contexts_different?(spec, dest) ||
+            specs_different?(spec, dest) || !contexts_equal?(spec, dest) ||
             missing_source?(source_secrets, dest_secrets))
   end
 
@@ -412,8 +415,8 @@ defmodule Console.Deployments.Global do
     Enum.any?(source, fn {k, v} -> dest[k] != v end)
   end
 
-  defp contexts_different?(%ServiceTemplate{contexts: ctxs}, svc) do
-    MapSet.new(svc.context_bindings, & &1.context_id)
+  defp contexts_equal?(%ServiceTemplate{contexts: ctxs}, svc) do
+    MapSet.new(svc.context_bindings || [], & &1.context_id)
     |> MapSet.equal?(MapSet.new(ctxs || []))
   end
 

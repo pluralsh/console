@@ -194,7 +194,6 @@ export function ReplicaSetPods(): ReactElement {
       }}
       queryName="handleGetReplicaSetPods"
       itemsKey="pods"
-      disableOnRowClick
     />
   )
 }
@@ -218,7 +217,6 @@ export function ReplicaSetServices(): ReactElement {
       }}
       queryName="handleGetReplicaSetServices"
       itemsKey="services"
-      disableOnRowClick
     />
   )
 }

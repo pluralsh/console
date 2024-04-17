@@ -39,11 +39,8 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
 import { useServicesColumns } from '../discovery/Services'
-
 import { LabelSelector } from '../common/LabelSelector'
-
 import { PodInfo } from '../common/PodInfo'
-
 import { useCluster } from '../Cluster'
 
 import { getBreadcrumbs } from './DaemonSets'
