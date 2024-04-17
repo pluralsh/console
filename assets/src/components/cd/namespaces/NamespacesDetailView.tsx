@@ -1,17 +1,15 @@
 import { ComponentProps, useMemo } from 'react'
 import { Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { AuthMethod } from 'generated/graphql'
+import { AuthMethod, useGetManagedNamespaceNameQuery } from 'generated/graphql'
 import {
   CD_REL_PATH,
-  GLOBAL_SERVICES_REL_PATH,
-  GLOBAL_SERVICE_PARAM_ID,
+  NAMESPACES_PARAM_ID,
+  NAMESPACES_REL_PATH,
 } from 'routes/cdRoutesConsts'
 import { createMapperWithFallback } from 'utils/mapping'
 
 import { useParams } from 'react-router-dom'
-
-import { gql, useQuery } from '@apollo/client'
 
 import { Title1H1 } from 'components/utils/typography/Text'
 
@@ -19,7 +17,7 @@ import { useTheme } from 'styled-components'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
-import { GlobalServiceDetailTable } from './NamespacesDetailTable'
+import { NamespacesDetailTable } from './NamespacesDetailTable'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {
@@ -37,48 +35,40 @@ export function AuthMethodChip({
   return <Chip severity="neutral">{authMethodToLabel(authMethod)}</Chip>
 }
 
-export const GLOBAL_SERVICES_QUERY_PAGE_SIZE = 100
+export const NAMESPACES_QUERY_PAGE_SIZE = 100
 
-export const GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
+export const NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
   overscan: 10,
 }
 
-const getServiceNameQuery = gql`
-  query GetServiceName($serviceId: ID!) {
-    globalService(id: $serviceId) {
-      name
-    }
-  }
-`
-
 export default function NamespacesDetailView() {
   const params = useParams()
   const theme = useTheme()
 
-  const serviceId = params[GLOBAL_SERVICE_PARAM_ID]
+  const namespaceId = params[NAMESPACES_PARAM_ID]
 
-  const { data } = useQuery(getServiceNameQuery, {
-    variables: { serviceId },
+  const { data } = useGetManagedNamespaceNameQuery({
+    variables: { namespaceId: namespaceId || '' },
   })
 
-  const serviceName = data?.globalService?.name
+  const namespaceName = data?.managedNamespace?.name || ''
 
   useSetBreadcrumbs(
     useMemo(
       () => [
         ...CD_BASE_CRUMBS,
         {
-          label: 'global-services',
-          url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}`,
+          label: 'namespaces',
+          url: `/${CD_REL_PATH}/${NAMESPACES_REL_PATH}`,
         },
         {
-          label: serviceName,
-          url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${serviceName}`,
+          label: namespaceName,
+          url: `/${CD_REL_PATH}/${NAMESPACES_REL_PATH}/${namespaceName}`,
         },
       ],
-      [serviceName]
+      [namespaceName]
     )
   )
 
@@ -92,8 +82,8 @@ export default function NamespacesDetailView() {
         height: '100%',
       }}
     >
-      <Title1H1>{serviceName}</Title1H1>
-      <GlobalServiceDetailTable serviceId={serviceId} />
+      <Title1H1>{namespaceName}</Title1H1>
+      <NamespacesDetailTable namespaceId={namespaceId} />
     </div>
   )
 }

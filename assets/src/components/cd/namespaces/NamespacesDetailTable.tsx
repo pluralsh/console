@@ -1,86 +1,43 @@
-import { useCallback, useRef } from 'react'
-import {
-  AppIcon,
-  Card,
-  EmptyState,
-  GlobeIcon,
-  TabPanel,
-  Table,
-} from '@pluralsh/design-system'
-import { useNavigate } from 'react-router'
+import { useRef } from 'react'
+import { Card, TabPanel, Table } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import type { Row } from '@tanstack/react-table'
-import {
-  type ServiceDeploymentsRowFragment,
-  useGetServiceDataQuery,
-} from 'generated/graphql'
-import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
-import { Edge, extendConnection } from 'utils/graphql'
+import { useGetManagedNamespaceQuery } from 'generated/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
 import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
 
-import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
-
 import {
-  SERVICES_QUERY_PAGE_SIZE,
-  SERVICES_REACT_VIRTUAL_OPTIONS,
-  columns,
-} from '../services/Services'
+  ColName,
+  ColRef,
+  ColRepo,
+  ColTemplated,
+} from './NamespaceDetailColumns'
 
-export function GlobalServiceDetailTable({
-  serviceId,
+export function NamespacesDetailTable({
+  namespaceId,
 }: {
-  serviceId?: string
+  namespaceId?: string
 }) {
   const theme = useTheme()
-  const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
 
-  const queryResult = useGetServiceDataQuery({
+  const queryResult = useGetManagedNamespaceQuery({
     variables: {
-      first: SERVICES_QUERY_PAGE_SIZE,
-      serviceId: serviceId || '',
+      namespaceId: namespaceId || '',
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
     notifyOnNetworkStatusChange: true,
   })
-  const {
-    error,
-    fetchMore,
-    loading,
-    data: currentData,
-    previousData,
-  } = queryResult
+  const { error, loading, data: currentData, previousData } = queryResult
   const data = currentData || previousData
 
-  const globalService = data?.globalService
-  const services = globalService?.services?.edges
-  const pageInfo = globalService?.services?.pageInfo
+  const managedNamespace = data?.managedNamespace
+  const service = managedNamespace?.service
 
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) => {
-        if (!prev.globalService) return prev
-
-        return {
-          ...prev,
-          globalService: extendConnection(
-            prev.globalService,
-            fetchMoreResult.globalService?.services,
-            'services'
-          ),
-        }
-      },
-    })
-  }, [fetchMore, pageInfo?.endCursor])
+  const columns = [ColName, ColRef, ColRepo, ColTemplated]
 
   if (error) {
     return <GqlError error={error} />
@@ -106,7 +63,7 @@ export function GlobalServiceDetailTable({
         }}
       >
         <div css={{ flexGrow: 1 }}>
-          <Body2BoldP>Distribution</Body2BoldP>
+          <Body2BoldP>Description</Body2BoldP>
           <Body2P
             css={{
               display: 'flex',
@@ -114,28 +71,14 @@ export function GlobalServiceDetailTable({
               gap: theme.spacing.small,
             }}
           >
-            <AppIcon
-              spacing="padding"
-              size="xxsmall"
-              icon={globalService?.distro ? undefined : <GlobeIcon size={16} />}
-              url={
-                globalService?.distro
-                  ? getDistroProviderIconUrl({
-                      distro: globalService?.distro,
-                      provider: globalService?.provider?.cloud,
-                      mode: theme.mode,
-                    })
-                  : undefined
-              }
-            />
-            {globalService?.distro || 'All distribution'}
+            {managedNamespace?.description || '--'}
           </Body2P>
         </div>
         <div css={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          <Body2BoldP>Tags</Body2BoldP>
+          <Body2BoldP>Labels</Body2BoldP>
           <Body2P>
-            {globalService?.tags
-              ?.map((tag) => `${tag?.name}: ${tag?.value}`)
+            {Object.keys(managedNamespace?.labels || {})
+              ?.map((label) => `${label}: ${managedNamespace?.labels?.[label]}`)
               .join(', ')}
           </Body2P>
         </div>
@@ -144,41 +87,19 @@ export function GlobalServiceDetailTable({
         stateRef={tabStateRef}
         css={{ height: '100%', overflow: 'hidden' }}
       >
-        {!data ? (
-          <LoadingIndicator />
-        ) : services?.length ? (
-          <FullHeightTableWrap>
-            <Table
-              virtualizeRows
-              data={services || []}
-              columns={columns}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
-              onRowClick={(
-                _e,
-                { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-              ) =>
-                navigate(
-                  getServiceDetailsPath({
-                    clusterId: original.node?.cluster?.id,
-                    serviceId: original.node?.id,
-                  })
-                )
-              }
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={loading}
-              reactTableOptions={{ meta: { refetch: () => null } }}
-              reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
-            />
-          </FullHeightTableWrap>
-        ) : (
-          <div css={{ height: '100%' }}>
-            <EmptyState message="Looks like you don't have any service deployments yet." />
-          </div>
-        )}
+        <FullHeightTableWrap>
+          <Table
+            virtualizeRows
+            data={[service] || []}
+            columns={columns}
+            css={{
+              maxHeight: 'unset',
+              height: '100%',
+            }}
+            isFetchingNextPage={loading}
+            reactTableOptions={{ meta: { refetch: () => null } }}
+          />
+        </FullHeightTableWrap>
       </TabPanel>
     </div>
   )
