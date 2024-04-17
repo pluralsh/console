@@ -170,7 +170,7 @@ export function GlobalServiceDetailTable({
               hasNextPage={pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
               isFetchingNextPage={loading}
-              reactTableOptions={{ meta: { refetch: () => null } }}
+              reactTableOptions={{ meta: { refetch: () => undefined } }}
               reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
             />
           </FullHeightTableWrap>

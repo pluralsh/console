@@ -10,9 +10,11 @@ declare module '@tanstack/table-core' {
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
-    refetch?: (
-      variables?: Partial<OperationVariables | unknown> | undefined
-    ) => Promise<unknown>
+    refetch?: Nullable<
+      (
+        variables?: Partial<OperationVariables | unknown> | undefined
+      ) => Promise<unknown> | void
+    >
     [k: string]: any
   }
 }

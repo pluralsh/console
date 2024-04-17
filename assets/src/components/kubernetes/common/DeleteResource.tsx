@@ -16,7 +16,7 @@ import { Resource } from './types'
 interface DeleteResourceProps {
   resource: Resource
   refetch?: Nullable<
-    (variables?: Partial<QueryHookOptions>) => Promise<unknown>
+    (variables?: Partial<QueryHookOptions>) => Promise<unknown> | void
   >
 }
 
