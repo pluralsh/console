@@ -19,8 +19,7 @@ import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import { Kind, Resource } from './types'
 import Annotations from './Annotations'
 import ResourceLink from './ResourceLink'
-
-import DeleteResource from './DeleteResource'
+import DeleteResourceButton from './DeleteResource'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -92,7 +91,7 @@ export function useDefaultColumns<
         id: 'action',
         header: '',
         cell: ({ getValue, table }) => (
-          <DeleteResource
+          <DeleteResourceButton
             resource={getValue()}
             refetch={table?.options?.meta?.refetch}
           />

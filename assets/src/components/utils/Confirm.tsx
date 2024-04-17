@@ -20,6 +20,7 @@ type ConfirmProps = {
   label?: ReactNode
   loading?: boolean
   destructive?: boolean
+  extraContent?: ReactNode
 }
 
 export function Confirm({
@@ -34,6 +35,7 @@ export function Confirm({
   label,
   loading = false,
   destructive = false,
+  extraContent,
 }: ConfirmProps) {
   const theme = useTheme()
 
@@ -89,6 +91,7 @@ export function Confirm({
         <div css={{ ...theme.partials.text.body1, color: theme.colors.text }}>
           {text}
         </div>
+        {extraContent && extraContent}
       </Modal>
     </ModalMountTransition>
   )
