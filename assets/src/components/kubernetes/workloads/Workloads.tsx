@@ -17,7 +17,6 @@ import { LinkTabWrap } from '../../utils/Tabs'
 import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { useCluster } from '../Cluster'
 import { Maybe } from '../../../generated/graphql-kubernetes'
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -88,20 +87,15 @@ export default function Workloads() {
   useSetPageHeaderContent(headerContent)
 
   return (
-    <ScrollablePage
-      fullWidth
-      scrollable={false}
-    >
-      <PluralErrorBoundary>
-        <TabPanel
-          css={{ height: '100%' }}
-          stateRef={tabStateRef}
-        >
-          <Suspense fallback={<LoadingIndicator />}>
-            <Outlet />
-          </Suspense>
-        </TabPanel>
-      </PluralErrorBoundary>
-    </ScrollablePage>
+    <PluralErrorBoundary>
+      <TabPanel
+        css={{ height: '100%' }}
+        stateRef={tabStateRef}
+      >
+        <Suspense fallback={<LoadingIndicator />}>
+          <Outlet />
+        </Suspense>
+      </TabPanel>
+    </PluralErrorBoundary>
   )
 }
