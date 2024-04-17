@@ -317,8 +317,15 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       event = %PubSub.ManagedNamespaceCreated{item: mns}
       :ok = Recurse.handle_event(event)
 
-      for c <- clusters,
-        do: assert Services.get_service_by_name(c.id, "#{mns.name}-core")
+      services = for c <- clusters do
+        svc = Services.get_service_by_name(c.id, "#{mns.name}-core")
+        assert svc
+        svc
+      end
+
+      instances = Console.Schema.Service.for_namespace(mns.id)
+                  |> Console.Repo.all()
+      assert ids_equal(services, instances)
 
       for c <- [ignore, ignore2],
         do: refute Services.get_service_by_name(c.id, "#{mns.name}-core")

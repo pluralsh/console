@@ -197,7 +197,7 @@ defmodule Console.Schema.Service do
   def for_namespace(query \\ __MODULE__, ns_id) do
     from(s in query,
       join: ni in assoc(s, :namespace_instance),
-      where: ni.id == ^ns_id
+      where: ni.namespace_id == ^ns_id
     )
   end
 
