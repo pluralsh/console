@@ -1968,7 +1968,7 @@ type PipelineGate {
   job: Job
 
   "the edge this gate lives on"
-  edge: PipelineEdge
+  edge: PipelineStageEdge
 
   "the cluster this gate can run on"
   cluster: Cluster
