@@ -2239,9 +2239,20 @@ export type ManagedNamespace = {
   pullSecrets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** A template for creating the core service for this namespace */
   service?: Maybe<ServiceTemplate>;
+  services?: Maybe<ServiceDeploymentConnection>;
   /** The targeting criteria to select clusters this namespace is bound to */
   target?: Maybe<ClusterTarget>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+/** A representation of a managed namespace, which is k8s namespace configuration + a service spec to define a namespace runtime */
+export type ManagedNamespaceServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Attributes for configuring a managed namespace */
@@ -2843,6 +2854,8 @@ export type PipelineGate = {
   approver?: Maybe<User>;
   /** the cluster this gate can run on */
   cluster?: Maybe<Cluster>;
+  /** the edge this gate lives on */
+  edge?: Maybe<PipelineEdge>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation) */
@@ -2937,6 +2950,7 @@ export type PipelineStageEdge = {
   gates?: Maybe<Array<Maybe<PipelineGate>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  pipeline?: Maybe<Pipeline>;
   /** when the edge was last promoted, if greater than the promotion objects revised at, was successfully promoted */
   promotedAt?: Maybe<Scalars['DateTime']['output']>;
   to: PipelineStage;
@@ -7459,6 +7473,34 @@ export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
+export type ManagedNamespaceFragment = { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null };
+
+export type ServiceTemplateFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
+
+export type ManagedNamespacesQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ManagedNamespacesQuery = { __typename?: 'RootQueryType', managedNamespaces?: { __typename?: 'ManagedNamespaceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ManagedNamespaceEdge', node?: { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null } | null } | null> | null } | null };
+
+export type GetManagedNamespaceNameQueryVariables = Exact<{
+  namespaceId: Scalars['ID']['input'];
+}>;
+
+
+export type GetManagedNamespaceNameQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', name: string } | null };
+
+export type GetManagedNamespaceQueryVariables = Exact<{
+  namespaceId: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetManagedNamespaceQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null } | null };
+
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null };
 
 export type ContainerSpecFragment = { __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null };
@@ -8978,6 +9020,66 @@ export const DeploymentSettingsFragmentDoc = gql`
     ${HttpConnectionFragmentDoc}
 ${GitRepositoryFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const ManagedNamespaceFragmentDoc = gql`
+    fragment ManagedNamespace on ManagedNamespace {
+  description
+  deletedAt
+  annotations
+  id
+  insertedAt
+  labels
+  name
+  pullSecrets
+  target {
+    distro
+    tags
+  }
+  updatedAt
+}
+    `;
+export const ServiceTemplateFragmentDoc = gql`
+    fragment ServiceTemplate on ServiceTemplate {
+  configuration {
+    name
+    value
+  }
+  contexts
+  git {
+    folder
+    ref
+  }
+  helm {
+    chart
+    repository {
+      name
+      namespace
+    }
+    set {
+      name
+      value
+    }
+    valuesFiles
+    version
+  }
+  kustomize {
+    path
+  }
+  name
+  namespace
+  repository {
+    ...GitRepository
+  }
+  repositoryId
+  syncConfig {
+    createNamespace
+    namespaceMetadata {
+      annotations
+      labels
+    }
+  }
+  templated
+}
+    ${GitRepositoryFragmentDoc}`;
 export const PersonaConfigurationFragmentDoc = gql`
     fragment PersonaConfiguration on PersonaConfiguration {
   all
@@ -12771,6 +12873,149 @@ export type DeploymentSettingsQueryHookResult = ReturnType<typeof useDeploymentS
 export type DeploymentSettingsLazyQueryHookResult = ReturnType<typeof useDeploymentSettingsLazyQuery>;
 export type DeploymentSettingsSuspenseQueryHookResult = ReturnType<typeof useDeploymentSettingsSuspenseQuery>;
 export type DeploymentSettingsQueryResult = Apollo.QueryResult<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>;
+export const ManagedNamespacesDocument = gql`
+    query ManagedNamespaces($first: Int, $after: String) {
+  managedNamespaces(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ManagedNamespace
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ManagedNamespaceFragmentDoc}`;
+
+/**
+ * __useManagedNamespacesQuery__
+ *
+ * To run a query within a React component, call `useManagedNamespacesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useManagedNamespacesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useManagedNamespacesQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useManagedNamespacesQuery(baseOptions?: Apollo.QueryHookOptions<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>(ManagedNamespacesDocument, options);
+      }
+export function useManagedNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>(ManagedNamespacesDocument, options);
+        }
+export function useManagedNamespacesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>(ManagedNamespacesDocument, options);
+        }
+export type ManagedNamespacesQueryHookResult = ReturnType<typeof useManagedNamespacesQuery>;
+export type ManagedNamespacesLazyQueryHookResult = ReturnType<typeof useManagedNamespacesLazyQuery>;
+export type ManagedNamespacesSuspenseQueryHookResult = ReturnType<typeof useManagedNamespacesSuspenseQuery>;
+export type ManagedNamespacesQueryResult = Apollo.QueryResult<ManagedNamespacesQuery, ManagedNamespacesQueryVariables>;
+export const GetManagedNamespaceNameDocument = gql`
+    query GetManagedNamespaceName($namespaceId: ID!) {
+  managedNamespace(id: $namespaceId) {
+    name
+  }
+}
+    `;
+
+/**
+ * __useGetManagedNamespaceNameQuery__
+ *
+ * To run a query within a React component, call `useGetManagedNamespaceNameQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetManagedNamespaceNameQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetManagedNamespaceNameQuery({
+ *   variables: {
+ *      namespaceId: // value for 'namespaceId'
+ *   },
+ * });
+ */
+export function useGetManagedNamespaceNameQuery(baseOptions: Apollo.QueryHookOptions<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>(GetManagedNamespaceNameDocument, options);
+      }
+export function useGetManagedNamespaceNameLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>(GetManagedNamespaceNameDocument, options);
+        }
+export function useGetManagedNamespaceNameSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>(GetManagedNamespaceNameDocument, options);
+        }
+export type GetManagedNamespaceNameQueryHookResult = ReturnType<typeof useGetManagedNamespaceNameQuery>;
+export type GetManagedNamespaceNameLazyQueryHookResult = ReturnType<typeof useGetManagedNamespaceNameLazyQuery>;
+export type GetManagedNamespaceNameSuspenseQueryHookResult = ReturnType<typeof useGetManagedNamespaceNameSuspenseQuery>;
+export type GetManagedNamespaceNameQueryResult = Apollo.QueryResult<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>;
+export const GetManagedNamespaceDocument = gql`
+    query GetManagedNamespace($namespaceId: ID!, $first: Int, $after: String) {
+  managedNamespace(id: $namespaceId) {
+    ...ManagedNamespace
+    services(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ServiceDeploymentsRow
+        }
+      }
+    }
+  }
+}
+    ${ManagedNamespaceFragmentDoc}
+${PageInfoFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}`;
+
+/**
+ * __useGetManagedNamespaceQuery__
+ *
+ * To run a query within a React component, call `useGetManagedNamespaceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetManagedNamespaceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetManagedNamespaceQuery({
+ *   variables: {
+ *      namespaceId: // value for 'namespaceId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useGetManagedNamespaceQuery(baseOptions: Apollo.QueryHookOptions<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>(GetManagedNamespaceDocument, options);
+      }
+export function useGetManagedNamespaceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>(GetManagedNamespaceDocument, options);
+        }
+export function useGetManagedNamespaceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>(GetManagedNamespaceDocument, options);
+        }
+export type GetManagedNamespaceQueryHookResult = ReturnType<typeof useGetManagedNamespaceQuery>;
+export type GetManagedNamespaceLazyQueryHookResult = ReturnType<typeof useGetManagedNamespaceLazyQuery>;
+export type GetManagedNamespaceSuspenseQueryHookResult = ReturnType<typeof useGetManagedNamespaceSuspenseQuery>;
+export type GetManagedNamespaceQueryResult = Apollo.QueryResult<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>;
 export const PipelinesDocument = gql`
     query Pipelines($q: String, $first: Int = 50, $after: String) {
   pipelines(q: $q, first: $first, after: $after) {
@@ -16251,6 +16496,9 @@ export const namedOperations = {
     GetGlobalServices: 'GetGlobalServices',
     GetServiceData: 'GetServiceData',
     DeploymentSettings: 'DeploymentSettings',
+    ManagedNamespaces: 'ManagedNamespaces',
+    GetManagedNamespaceName: 'GetManagedNamespaceName',
+    GetManagedNamespace: 'GetManagedNamespace',
     Pipelines: 'Pipelines',
     JobGate: 'JobGate',
     JobGateLogs: 'JobGateLogs',
@@ -16407,6 +16655,8 @@ export const namedOperations = {
     GlobalService: 'GlobalService',
     HttpConnection: 'HttpConnection',
     DeploymentSettings: 'DeploymentSettings',
+    ManagedNamespace: 'ManagedNamespace',
+    ServiceTemplate: 'ServiceTemplate',
     PipelineServiceDeployment: 'PipelineServiceDeployment',
     ContainerSpec: 'ContainerSpec',
     JobGateSpec: 'JobGateSpec',

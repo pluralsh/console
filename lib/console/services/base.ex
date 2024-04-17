@@ -92,4 +92,12 @@ defmodule Console.Services.Base do
     |> Map.put(:inserted_at, DateTime.utc_now())
     |> Map.put(:updated_at, DateTime.utc_now())
   end
+
+  def add_binding(bindings, key, value) do
+    case Enum.find(bindings, &Map.get(&1, key) == value) do
+      nil -> [%{key => value} | bindings]
+      _ -> bindings
+    end
+    |> Console.mapify()
+  end
 end
