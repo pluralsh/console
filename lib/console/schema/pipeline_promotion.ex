@@ -7,6 +7,7 @@ defmodule Console.Schema.PipelinePromotion do
     field :revised_at,  :utc_datetime_usec
     field :revised,     :boolean, virtual: true
 
+    belongs_to :applied_context, PipelineContext
     belongs_to :context, PipelineContext
     belongs_to :stage, PipelineStage
 
@@ -29,8 +30,9 @@ defmodule Console.Schema.PipelinePromotion do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(promoted_at revised_at revised context_id)a)
+    |> cast(attrs, ~w(promoted_at revised_at revised context_id applied_context_id)a)
     |> cast_assoc(:services)
     |> foreign_key_constraint(:context_id)
+    |> foreign_key_constraint(:applied_context_id)
   end
 end
