@@ -1,5 +1,5 @@
 import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef } from 'react'
 import { Outlet, useLocation, useMatch } from 'react-router-dom'
 
 import {
@@ -15,12 +15,8 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
-import {
-  PageScrollableContext,
-  useSetPageHeaderContent,
-} from '../../cd/ContinuousDeployment'
+import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { useCluster } from '../Cluster'
 import { Maybe } from '../../../generated/graphql-kubernetes'
 import { ClusterTinyFragment } from '../../../generated/graphql'
@@ -49,8 +45,6 @@ export const getWorkloadsBreadcrumbs = (
 
 export default function Workloads() {
   const cluster = useCluster()
-  const [scrollable, setScrollable] = useState(false)
-  const pageScrollableContext = useMemo(() => ({ setScrollable }), [])
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getWorkloadsAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
@@ -93,22 +87,15 @@ export default function Workloads() {
   useSetPageHeaderContent(headerContent)
 
   return (
-    <ScrollablePage
-      fullWidth
-      scrollable={scrollable}
-    >
-      <PluralErrorBoundary>
-        <TabPanel
-          css={{ height: '100%' }}
-          stateRef={tabStateRef}
-        >
-          <PageScrollableContext.Provider value={pageScrollableContext}>
-            <Suspense fallback={<LoadingIndicator />}>
-              <Outlet />
-            </Suspense>
-          </PageScrollableContext.Provider>
-        </TabPanel>
-      </PluralErrorBoundary>
-    </ScrollablePage>
+    <PluralErrorBoundary>
+      <TabPanel
+        css={{ height: '100%' }}
+        stateRef={tabStateRef}
+      >
+        <Suspense fallback={<LoadingIndicator />}>
+          <Outlet />
+        </Suspense>
+      </TabPanel>
+    </PluralErrorBoundary>
   )
 }

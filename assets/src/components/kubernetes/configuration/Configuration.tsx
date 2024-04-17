@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useMatch } from 'react-router-dom'
 import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { Suspense, useMemo, useRef } from 'react'
 
 import {
   CONFIG_MAPS_REL_PATH,
@@ -8,13 +8,9 @@ import {
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
-import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
-import {
-  PageScrollableContext,
-  useSetPageHeaderContent,
-} from '../../cd/ContinuousDeployment'
+import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { useCluster } from '../Cluster'
@@ -39,15 +35,6 @@ const directory = [
 
 export default function Configuration() {
   const cluster = useCluster()
-  const [scrollable, setScrollable] = useState(false)
-
-  const pageScrollableContext = useMemo(
-    () => ({
-      setScrollable,
-    }),
-    []
-  )
-
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getConfigurationAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
@@ -90,22 +77,15 @@ export default function Configuration() {
   useSetPageHeaderContent(headerContent)
 
   return (
-    <ScrollablePage
-      fullWidth
-      scrollable={scrollable}
-    >
-      <PluralErrorBoundary>
-        <TabPanel
-          css={{ height: '100%' }}
-          stateRef={tabStateRef}
-        >
-          <PageScrollableContext.Provider value={pageScrollableContext}>
-            <Suspense fallback={<LoadingIndicator />}>
-              <Outlet />
-            </Suspense>
-          </PageScrollableContext.Provider>
-        </TabPanel>
-      </PluralErrorBoundary>
-    </ScrollablePage>
+    <PluralErrorBoundary>
+      <TabPanel
+        css={{ height: '100%' }}
+        stateRef={tabStateRef}
+      >
+        <Suspense fallback={<LoadingIndicator />}>
+          <Outlet />
+        </Suspense>
+      </TabPanel>
+    </PluralErrorBoundary>
   )
 }
