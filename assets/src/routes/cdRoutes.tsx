@@ -4,7 +4,6 @@ import ContinuousDeployment, {
 import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
-import Providers from 'components/cd/providers/Providers'
 import { Navigate, Outlet, Route } from 'react-router-dom'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -98,7 +97,6 @@ import {
   NODE_REL_PATH,
   PIPELINES_REL_PATH,
   POD_REL_PATH,
-  PROVIDERS_REL_PATH,
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
   SERVICE_COMPONENTS_PATH,
@@ -193,10 +191,6 @@ const mainRoutes = (
     <Route
       path={REPOS_REL_PATH}
       element={<Repositories />}
-    />
-    <Route
-      path={PROVIDERS_REL_PATH}
-      element={<Providers />}
     />
     <Route
       path={NAMESPACES_REL_PATH}

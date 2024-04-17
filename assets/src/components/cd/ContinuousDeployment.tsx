@@ -21,7 +21,6 @@ import {
   GLOBAL_SERVICES_REL_PATH,
   NAMESPACES_REL_PATH,
   PIPELINES_REL_PATH,
-  PROVIDERS_REL_PATH,
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
@@ -149,11 +148,6 @@ function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
         path: PIPELINES_REL_PATH,
         label: 'Pipelines',
         enabled: personaConfiguration?.all || config?.pipelines,
-      },
-      {
-        path: PROVIDERS_REL_PATH,
-        label: 'Providers',
-        enabled: personaConfiguration?.all || config?.providers,
       },
       {
         path: NAMESPACES_REL_PATH,
