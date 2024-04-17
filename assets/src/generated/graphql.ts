@@ -7470,7 +7470,7 @@ export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
-export type ManagedNamespaceFragment = { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, service?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null };
+export type ManagedNamespaceFragment = { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null };
 
 export type ServiceTemplateFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
 
@@ -7480,7 +7480,7 @@ export type ManagedNamespacesQueryVariables = Exact<{
 }>;
 
 
-export type ManagedNamespacesQuery = { __typename?: 'RootQueryType', managedNamespaces?: { __typename?: 'ManagedNamespaceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ManagedNamespaceEdge', node?: { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, service?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null } | null } | null> | null } | null };
+export type ManagedNamespacesQuery = { __typename?: 'RootQueryType', managedNamespaces?: { __typename?: 'ManagedNamespaceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ManagedNamespaceEdge', node?: { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null } | null } | null> | null } | null };
 
 export type GetManagedNamespaceNameQueryVariables = Exact<{
   namespaceId: Scalars['ID']['input'];
@@ -7491,10 +7491,12 @@ export type GetManagedNamespaceNameQuery = { __typename?: 'RootQueryType', manag
 
 export type GetManagedNamespaceQueryVariables = Exact<{
   namespaceId: Scalars['ID']['input'];
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetManagedNamespaceQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, service?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null } | null };
+export type GetManagedNamespaceQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null } | null };
 
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null };
 
@@ -9015,6 +9017,23 @@ export const DeploymentSettingsFragmentDoc = gql`
     ${HttpConnectionFragmentDoc}
 ${GitRepositoryFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const ManagedNamespaceFragmentDoc = gql`
+    fragment ManagedNamespace on ManagedNamespace {
+  description
+  deletedAt
+  annotations
+  id
+  insertedAt
+  labels
+  name
+  pullSecrets
+  target {
+    distro
+    tags
+  }
+  updatedAt
+}
+    `;
 export const ServiceTemplateFragmentDoc = gql`
     fragment ServiceTemplate on ServiceTemplate {
   configuration {
@@ -9058,26 +9077,6 @@ export const ServiceTemplateFragmentDoc = gql`
   templated
 }
     ${GitRepositoryFragmentDoc}`;
-export const ManagedNamespaceFragmentDoc = gql`
-    fragment ManagedNamespace on ManagedNamespace {
-  description
-  deletedAt
-  annotations
-  id
-  insertedAt
-  labels
-  name
-  pullSecrets
-  service {
-    ...ServiceTemplate
-  }
-  target {
-    distro
-    tags
-  }
-  updatedAt
-}
-    ${ServiceTemplateFragmentDoc}`;
 export const PersonaConfigurationFragmentDoc = gql`
     fragment PersonaConfiguration on PersonaConfiguration {
   all
@@ -12961,12 +12960,24 @@ export type GetManagedNamespaceNameLazyQueryHookResult = ReturnType<typeof useGe
 export type GetManagedNamespaceNameSuspenseQueryHookResult = ReturnType<typeof useGetManagedNamespaceNameSuspenseQuery>;
 export type GetManagedNamespaceNameQueryResult = Apollo.QueryResult<GetManagedNamespaceNameQuery, GetManagedNamespaceNameQueryVariables>;
 export const GetManagedNamespaceDocument = gql`
-    query GetManagedNamespace($namespaceId: ID!) {
+    query GetManagedNamespace($namespaceId: ID!, $first: Int, $after: String) {
   managedNamespace(id: $namespaceId) {
     ...ManagedNamespace
+    services(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ServiceDeploymentsRow
+        }
+      }
+    }
   }
 }
-    ${ManagedNamespaceFragmentDoc}`;
+    ${ManagedNamespaceFragmentDoc}
+${PageInfoFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}`;
 
 /**
  * __useGetManagedNamespaceQuery__
@@ -12981,6 +12992,8 @@ export const GetManagedNamespaceDocument = gql`
  * const { data, loading, error } = useGetManagedNamespaceQuery({
  *   variables: {
  *      namespaceId: // value for 'namespaceId'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */
