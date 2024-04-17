@@ -59,6 +59,10 @@ const getPipelineJobBreadcrumbs = ({
   tab: string
 }): Breadcrumb[] => [
   ...PIPELINES_CRUMBS,
+  {
+    label: gate?.edge?.node?.name || 'pipeline',
+    url: `${PIPELINES_ABS_PATH}/${gate?.edge?.node?.id}`,
+  },
   { label: 'jobs' },
   ...(!gate
     ? []
@@ -108,6 +112,8 @@ export default function PipelineJob() {
     variables: { id: jobId },
     pollInterval: POLL_INTERVAL,
   })
+
+  console.log('data', data)
 
   useSetBreadcrumbs(
     useMemo(
