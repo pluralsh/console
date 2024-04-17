@@ -229,20 +229,26 @@ defmodule Console.Deployments.Global do
     end
   end
 
-  defp create_namespace_instance(%ManagedNamespace{service: %{}} = ns, %Cluster{} = cluster, %User{} = user) do
+  defp create_namespace_instance(%ManagedNamespace{service: %{}} = ns, %Cluster{id: cid} = cluster, %User{} = user) do
+    %{name: name} = attrs = namespace_service_attrs(ns)
     start_transaction()
     |> add_operation(:service, fn _ ->
-      namespace_service_attrs(ns)
-      |> Services.create_service(cluster.id, user)
+      case Services.get_service_by_name(cid, name) do
+        %Service{} = svc -> {:ok, svc}
+        _ -> Services.create_service(attrs, cid, user)
+      end
     end)
     |> add_operation(:instance, fn %{service: svc} ->
-      %NamespaceInstance{}
+      case Repo.get_by(NamespaceInstance, cluster_id: cid, service_id: svc.id) do
+        %NamespaceInstance{} = ni -> ni
+        _ -> %NamespaceInstance{}
+      end
       |> NamespaceInstance.changeset(%{
         service_id: svc.id,
         cluster_id: cluster.id,
         namespace_id: ns.id
       })
-      |> Repo.insert()
+      |> Repo.insert_or_update()
     end)
     |> execute(extract: :service)
   end
