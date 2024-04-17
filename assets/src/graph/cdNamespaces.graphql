@@ -7,11 +7,56 @@ fragment ManagedNamespace on ManagedNamespace {
   labels
   name
   pullSecrets
+  service {
+    ...ServiceTemplate
+  }
   target {
     distro
     tags
   }
   updatedAt
+}
+
+fragment ServiceTemplate on ServiceTemplate {
+  configuration {
+    name
+    value
+  }
+  contexts
+  git {
+    folder
+    ref
+  }
+  helm {
+    chart
+    repository {
+      name
+      namespace
+    }
+    set {
+      name
+      value
+    }
+    valuesFiles
+    version
+  }
+  kustomize {
+    path
+  }
+  name
+  namespace
+  repository {
+    ...GitRepository
+  }
+  repositoryId
+  syncConfig {
+    createNamespace
+    namespaceMetadata {
+      annotations
+      labels
+    }
+  }
+  templated
 }
 
 query ManagedNamespaces($first: Int, $after: String) {
@@ -24,5 +69,17 @@ query ManagedNamespaces($first: Int, $after: String) {
         ...ManagedNamespace
       }
     }
+  }
+}
+
+query GetManagedNamespaceName($namespaceId: ID!) {
+  managedNamespace(id: $namespaceId) {
+    name
+  }
+}
+
+query GetManagedNamespace($namespaceId: ID!) {
+  managedNamespace(id: $namespaceId) {
+    ...ManagedNamespace
   }
 }
