@@ -1,19 +1,16 @@
 query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: $namespace)
-  @rest(
-    method: "GET",
-    path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
-  ) {
+    @rest(
+      method: "GET"
+      path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
+    ) {
     Object
   }
 }
 
 query Resource($kind: String!, $name: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: "")
-  @rest(
-    method: "GET",
-    path: "_raw/{args.kind}/name/{args.name}"
-  ) {
+    @rest(method: "GET", path: "_raw/{args.kind}/name/{args.name}") {
     Object
   }
 }
@@ -30,20 +27,20 @@ mutation NamespacedResourceUpdate(
     namespace: $namespace
     input: $input
   )
-  @rest(
-    type: "Void"
-    path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
-    method: "PUT"
-  )
+    @rest(
+      type: "Void"
+      path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
+      method: "PUT"
+    )
 }
 
 mutation ResourceUpdate($kind: String!, $name: String!, $input: JSON!) {
   handlePutResource(kind: $kind, name: $name, namespace: "", input: $input)
-  @rest(
-    type: "Void"
-    path: "_raw/{args.kind}/name/{args.name}"
-    method: "PUT"
-  )
+    @rest(
+      type: "Void"
+      path: "_raw/{args.kind}/name/{args.name}"
+      method: "PUT"
+    )
 }
 
 mutation ResourceScale(
@@ -58,12 +55,12 @@ mutation ResourceScale(
     name: $name
     scaleBy: $scaleBy
   )
-  @rest(
-    type: "Void"
-    path: "scale/{args.kind}/{args.namespace}/{args.name}?scaleBy={args.scaleBy}"
-    method: "PUT"
-    bodyKey: "scaleBy"
-  ) {
+    @rest(
+      type: "Void"
+      path: "scale/{args.kind}/{args.namespace}/{args.name}?scaleBy={args.scaleBy}"
+      method: "PUT"
+      bodyKey: "scaleBy"
+    ) {
     actualReplicas
     desiredReplicas
   }
@@ -71,18 +68,22 @@ mutation ResourceScale(
 
 mutation ResourceDelete($kind: String!, $name: String!) {
   handleDeleteResource(kind: $kind, name: $name, namespace: "")
-  @rest(
-    type: "Void"
-    path: "_raw/{args.kind}/name/{args.name}"
-    method: "DELETE"
-  )
+    @rest(
+      type: "Void"
+      path: "_raw/{args.kind}/name/{args.name}"
+      method: "DELETE"
+    )
 }
 
-mutation NamespacedResourceDelete($kind: String!, $namespace: String!, $name: String!) {
+mutation NamespacedResourceDelete(
+  $kind: String!
+  $namespace: String!
+  $name: String!
+) {
   handleDeleteResource(kind: $kind, namespace: $namespace, name: $name)
-  @rest(
-    type: "Void"
-    path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
-    method: "DELETE"
-  )
+    @rest(
+      type: "Void"
+      path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
+      method: "DELETE"
+    )
 }

@@ -1,5 +1,4 @@
 import '@tanstack/react-table'
-import { QueryHookOptions } from '@apollo/client/react/types/types'
 import { OperationVariables } from '@apollo/client/core'
 
 declare module '@tanstack/table-core' {

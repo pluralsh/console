@@ -29,7 +29,6 @@ import { ErrorToast } from './errors'
 
 import {
   DEFAULT_DATA_SELECT,
-  ITEMS_PER_PAGE,
   extendConnection,
   usePageInfo,
   useSortedTableOptions,
