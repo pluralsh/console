@@ -66,11 +66,16 @@ mutation ResourceScale(
   }
 }
 
-mutation ResourceDelete($kind: String!, $name: String!) {
-  handleDeleteResource(kind: $kind, name: $name, namespace: "")
+mutation ResourceDelete($kind: String!, $name: String!, $deleteNow: String) {
+  handleDeleteResource(
+    kind: $kind
+    name: $name
+    namespace: ""
+    deleteNow: $deleteNow
+  )
     @rest(
       type: "Void"
-      path: "_raw/{args.kind}/name/{args.name}"
+      path: "_raw/{args.kind}/name/{args.name}?deleteNow={args.deleteNow}"
       method: "DELETE"
     )
 }
@@ -79,11 +84,17 @@ mutation NamespacedResourceDelete(
   $kind: String!
   $namespace: String!
   $name: String!
+  $deleteNow: String
 ) {
-  handleDeleteResource(kind: $kind, namespace: $namespace, name: $name)
+  handleDeleteResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    deleteNow: $deleteNow
+  )
     @rest(
       type: "Void"
-      path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}"
+      path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}?deleteNow={args.deleteNow}"
       method: "DELETE"
     )
 }

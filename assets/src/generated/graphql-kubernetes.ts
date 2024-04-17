@@ -114,6 +114,7 @@ export type MutationHandleCreateNamespaceArgs = {
 
 export type MutationHandleDeleteResourceArgs = {
   aggregations?: InputMaybe<Scalars['String']['input']>;
+  deleteNow?: InputMaybe<Scalars['String']['input']>;
   filterBy?: InputMaybe<Scalars['String']['input']>;
   itemsPerPage?: InputMaybe<Scalars['String']['input']>;
   kind: Scalars['String']['input'];
@@ -4883,6 +4884,7 @@ export type ResourceScaleMutation = { __typename?: 'Mutation', handleScaleResour
 export type ResourceDeleteMutationVariables = Exact<{
   kind: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  deleteNow?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -4892,6 +4894,7 @@ export type NamespacedResourceDeleteMutationVariables = Exact<{
   kind: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  deleteNow?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -7849,8 +7852,13 @@ export type ResourceScaleMutationHookResult = ReturnType<typeof useResourceScale
 export type ResourceScaleMutationResult = Apollo.MutationResult<ResourceScaleMutation>;
 export type ResourceScaleMutationOptions = Apollo.BaseMutationOptions<ResourceScaleMutation, ResourceScaleMutationVariables>;
 export const ResourceDeleteDocument = gql`
-    mutation ResourceDelete($kind: String!, $name: String!) {
-  handleDeleteResource(kind: $kind, name: $name, namespace: "") @rest(type: "Void", path: "_raw/{args.kind}/name/{args.name}", method: "DELETE")
+    mutation ResourceDelete($kind: String!, $name: String!, $deleteNow: String) {
+  handleDeleteResource(
+    kind: $kind
+    name: $name
+    namespace: ""
+    deleteNow: $deleteNow
+  ) @rest(type: "Void", path: "_raw/{args.kind}/name/{args.name}?deleteNow={args.deleteNow}", method: "DELETE")
 }
     `;
 export type ResourceDeleteMutationFn = Apollo.MutationFunction<ResourceDeleteMutation, ResourceDeleteMutationVariables>;
@@ -7870,6 +7878,7 @@ export type ResourceDeleteMutationFn = Apollo.MutationFunction<ResourceDeleteMut
  *   variables: {
  *      kind: // value for 'kind'
  *      name: // value for 'name'
+ *      deleteNow: // value for 'deleteNow'
  *   },
  * });
  */
@@ -7881,8 +7890,13 @@ export type ResourceDeleteMutationHookResult = ReturnType<typeof useResourceDele
 export type ResourceDeleteMutationResult = Apollo.MutationResult<ResourceDeleteMutation>;
 export type ResourceDeleteMutationOptions = Apollo.BaseMutationOptions<ResourceDeleteMutation, ResourceDeleteMutationVariables>;
 export const NamespacedResourceDeleteDocument = gql`
-    mutation NamespacedResourceDelete($kind: String!, $namespace: String!, $name: String!) {
-  handleDeleteResource(kind: $kind, namespace: $namespace, name: $name) @rest(type: "Void", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", method: "DELETE")
+    mutation NamespacedResourceDelete($kind: String!, $namespace: String!, $name: String!, $deleteNow: String) {
+  handleDeleteResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    deleteNow: $deleteNow
+  ) @rest(type: "Void", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}?deleteNow={args.deleteNow}", method: "DELETE")
 }
     `;
 export type NamespacedResourceDeleteMutationFn = Apollo.MutationFunction<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>;
@@ -7903,6 +7917,7 @@ export type NamespacedResourceDeleteMutationFn = Apollo.MutationFunction<Namespa
  *      kind: // value for 'kind'
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      deleteNow: // value for 'deleteNow'
  *   },
  * });
  */
