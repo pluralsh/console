@@ -13,7 +13,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { Body2BoldP, Body2P } from 'components/utils/typography/Text'
+import { Body2BoldP, Body2P, Title1H1 } from 'components/utils/typography/Text'
 
 import {
   SERVICES_QUERY_PAGE_SIZE,
@@ -89,6 +89,7 @@ export function NamespacesDetailTable({
         height: '100%',
       }}
     >
+      <Title1H1>{managedNamespace?.name}</Title1H1>
       <Card
         padding="large"
         css={{

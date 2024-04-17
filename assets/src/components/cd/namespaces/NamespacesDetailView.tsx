@@ -11,9 +11,7 @@ import { createMapperWithFallback } from 'utils/mapping'
 
 import { useParams } from 'react-router-dom'
 
-import { Title1H1 } from 'components/utils/typography/Text'
-
-import { useTheme } from 'styled-components'
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
@@ -45,7 +43,6 @@ export const NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 export default function NamespacesDetailView() {
   const params = useParams()
-  const theme = useTheme()
 
   const namespaceId = params[NAMESPACES_PARAM_ID]
 
@@ -73,17 +70,8 @@ export default function NamespacesDetailView() {
   )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        padding: theme.spacing.large,
-        height: '100%',
-      }}
-    >
-      <Title1H1>{namespaceName}</Title1H1>
+    <ResponsivePageFullWidth scrollable={false}>
       <NamespacesDetailTable namespaceId={namespaceId} />
-    </div>
+    </ResponsivePageFullWidth>
   )
 }
