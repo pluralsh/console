@@ -2854,6 +2854,8 @@ export type PipelineGate = {
   approver?: Maybe<User>;
   /** the cluster this gate can run on */
   cluster?: Maybe<Cluster>;
+  /** the edge this gate lives on */
+  edge?: Maybe<PipelineEdge>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation) */
@@ -2948,6 +2950,7 @@ export type PipelineStageEdge = {
   gates?: Maybe<Array<Maybe<PipelineGate>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  pipeline?: Maybe<Pipeline>;
   /** when the edge was last promoted, if greater than the promotion objects revised at, was successfully promoted */
   promotedAt?: Maybe<Scalars['DateTime']['output']>;
   to: PipelineStage;
