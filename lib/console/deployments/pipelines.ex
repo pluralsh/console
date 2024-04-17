@@ -280,7 +280,7 @@ defmodule Console.Deployments.Pipelines do
   def build_promotion(%PipelineStage{id: id} = stage) do
     start_transaction()
     |> add_operation(:stage, fn _ ->
-      case Repo.preload(stage, [:from_edges, promotion: [:services], services: [service: :revision]]) do
+      case Repo.preload(stage, [:from_edges, :context, promotion: [services: :revision], services: [service: :revision]]) do
         %{from_edges: [_ | _]} = stage -> {:ok, stage}
         _ -> {:error, "this stage has no successors"}
       end
@@ -339,10 +339,18 @@ defmodule Console.Deployments.Pipelines do
       |> execute()
     end)
     |> add_operation(:finish, fn %{promo: promo, resolve: res, edges: edges} ->
-      resolved = Map.new(res, fn {edge, _} -> edge end)
+      resolved = Enum.filter(res, fn
+                   {{:promote, _}, _} -> true
+                   _ -> false
+                 end)
+                 |> Map.new(fn {{:promote, edge_id}, _} -> {edge_id, true} end)
+
       case Enum.all?(edges, & promoted?(&1, promo.revised_at) || resolved[&1.id]) do
         true ->
-          PipelinePromotion.changeset(promo, %{applied_context_id: promo.context_id, promoted_at: Timex.now()})
+          PipelinePromotion.changeset(promo, %{
+            applied_context_id: promo.context_id,
+            promoted_at: Timex.now()
+          })
           |> Repo.update()
         _ -> {:ok, promo}
       end
@@ -413,8 +421,8 @@ defmodule Console.Deployments.Pipelines do
   defp diff?(%PipelineStage{context_id: id}, _, %PipelinePromotion{applied_context_id: id})
     when is_binary(id), do: false
 
-  defp diff?(%PipelineStage{context_id: ctx}, _, %PipelinePromotion{promoted_at: at} = next) when is_binary(ctx) do
-    is_nil(at) || Enum.all?(next.services, &Timex.after?(&1.updated_at, at))
+  defp diff?(%PipelineStage{context: %PipelineContext{inserted_at: at}}, _, %PipelinePromotion{} = next) do
+    Enum.all?(next.services, &Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at))
   end
 
   defp diff?(_, svcs, %PipelinePromotion{services: [_ | _]} = promo) do
