@@ -2239,9 +2239,20 @@ export type ManagedNamespace = {
   pullSecrets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** A template for creating the core service for this namespace */
   service?: Maybe<ServiceTemplate>;
+  services?: Maybe<ServiceDeploymentConnection>;
   /** The targeting criteria to select clusters this namespace is bound to */
   target?: Maybe<ClusterTarget>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+/** A representation of a managed namespace, which is k8s namespace configuration + a service spec to define a namespace runtime */
+export type ManagedNamespaceServicesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Attributes for configuring a managed namespace */
