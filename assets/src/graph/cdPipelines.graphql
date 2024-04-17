@@ -43,7 +43,7 @@ fragment PipelineGate on PipelineGate {
     ...User
   }
   edge {
-    node {
+    pipeline {
       id
       name
     }
