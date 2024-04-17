@@ -20,6 +20,8 @@ import { Kind, Resource } from './types'
 import Annotations from './Annotations'
 import ResourceLink from './ResourceLink'
 
+import DeleteResource from './DeleteResource'
+
 export const ITEMS_PER_PAGE = 25
 
 export const DEFAULT_DATA_SELECT = {
@@ -86,6 +88,16 @@ export function useDefaultColumns<
           cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
         }
       ),
+      colAction: columnHelper.accessor((r) => r, {
+        id: 'action',
+        header: '',
+        cell: ({ getValue, table }) => (
+          <DeleteResource
+            resource={getValue()}
+            refetch={table?.options?.meta?.refetch}
+          />
+        ),
+      }),
     }),
     [columnHelper]
   )

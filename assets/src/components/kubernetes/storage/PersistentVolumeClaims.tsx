@@ -51,7 +51,7 @@ export const colCapacity = columnHelper.accessor((pvc) => pvc.capacity, {
 })
 
 export const usePersistentVolumeClaimListColumns = () => {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
 
   return useMemo(
@@ -105,8 +105,9 @@ export const usePersistentVolumeClaimListColumns = () => {
       colCapacity,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colCreationTimestamp, colLabels, colName, colNamespace]
+    [colCreationTimestamp, colLabels, colName, colNamespace, colAction]
   )
 }
 

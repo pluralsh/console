@@ -73,7 +73,7 @@ export default function Deployments() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colName, colNamespace, colLabels, colCreationTimestamp, colAction } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
@@ -84,8 +84,9 @@ export default function Deployments() {
       colStatus,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

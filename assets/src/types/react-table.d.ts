@@ -1,4 +1,6 @@
 import '@tanstack/react-table'
+import { QueryHookOptions } from '@apollo/client/react/types/types'
+import { OperationVariables } from '@apollo/client/core'
 
 declare module '@tanstack/table-core' {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -9,7 +11,9 @@ declare module '@tanstack/table-core' {
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {
-    refetch?: Nullable<() => void>
+    refetch?: (
+      variables?: Partial<OperationVariables | unknown> | undefined
+    ) => Promise<unknown>
     [k: string]: any
   }
 }

@@ -102,7 +102,7 @@ const colContainers = columnHelper.accessor(
 )
 
 export function usePodsColumns(): Array<object> {
-  const { colName, colNamespace, colCreationTimestamp } =
+  const { colName, colNamespace, colCreationTimestamp, colAction } =
     useDefaultColumns(columnHelper)
 
   return useMemo(
@@ -115,8 +115,9 @@ export function usePodsColumns(): Array<object> {
       // TODO: Add CPU and memory.
       colContainers,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colCreationTimestamp]
+    [colName, colNamespace, colCreationTimestamp, colAction]
   )
 }
 

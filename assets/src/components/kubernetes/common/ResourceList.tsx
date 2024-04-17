@@ -6,7 +6,7 @@ import type {
 import { Table } from '@pluralsh/design-system'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
-import { Row, SortingState } from '@tanstack/react-table'
+import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
@@ -35,24 +35,7 @@ import {
   useSortedTableOptions,
 } from './utils'
 
-interface ResourceListProps<
-  TResourceList,
-  TQuery,
-  TVariables extends ResourceVariables,
-> {
-  columns: Array<object>
-  initialSort?: SortingState
-  query: (
-    baseOptions: QueryHookOptions<TQuery, TVariables>
-  ) => QueryResult<TQuery, TVariables>
-  queryOptions?: QueryHookOptions<TQuery, TVariables>
-  queryName: QueryName<TQuery>
-  itemsKey: ResourceListItemsKey<TResourceList>
-  namespaced?: boolean
-  customResource?: boolean
-  disableOnRowClick?: boolean
-  maxHeight?: string
-}
+const SKELETON_ITEMS = 10
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
   '@keyframes moving-gradient': {
@@ -84,6 +67,26 @@ function SkeletonUnstyled({ ...props }): ReactElement {
   )
 }
 
+interface ResourceListProps<
+  TResourceList,
+  TQuery,
+  TVariables extends ResourceVariables,
+> {
+  columns: Array<object>
+  initialSort?: SortingState
+  query: (
+    baseOptions: QueryHookOptions<TQuery, TVariables>
+  ) => QueryResult<TQuery, TVariables>
+  queryOptions?: QueryHookOptions<TQuery, TVariables>
+  queryName: QueryName<TQuery>
+  itemsKey: ResourceListItemsKey<TResourceList>
+  namespaced?: boolean
+  customResource?: boolean
+  disableOnRowClick?: boolean
+  maxHeight?: string
+  tableOptions?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
+}
+
 export function ResourceList<
   TResourceList extends ResourceListT,
   TResource extends ResourceT,
@@ -100,15 +103,16 @@ export function ResourceList<
   itemsKey,
   disableOnRowClick,
   maxHeight,
+  tableOptions,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
   const cluster = useCluster()
   const { setNamespaced, namespace, filter } = useDataSelect()
   const { sortBy, reactTableOptions } = useSortedTableOptions(initialSort, {
-    meta: { cluster },
+    meta: { cluster, ...tableOptions },
   })
 
-  const { data, loading, fetchMore } = query({
+  const { data, loading, fetchMore, refetch } = query({
     client: KubernetesClient(cluster?.id ?? ''),
     skip: !cluster,
     pollInterval: 30_000,
@@ -125,7 +129,7 @@ export function ResourceList<
   const items = useMemo(
     () =>
       loading
-        ? Array(ITEMS_PER_PAGE - 1).fill({})
+        ? Array(SKELETON_ITEMS).fill({})
         : (resourceList?.[itemsKey] as Array<TResource>) ?? [],
     [itemsKey, loading, resourceList]
   )
@@ -165,7 +169,10 @@ export function ResourceList<
           hasNextPage={hasNextPage}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
-          reactTableOptions={reactTableOptions}
+          reactTableOptions={{
+            ...reactTableOptions,
+            ...{ meta: { ...reactTableOptions.meta, refetch } },
+          }}
           virtualizeRows
           onRowClick={
             disableOnRowClick || loading

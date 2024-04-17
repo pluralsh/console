@@ -56,7 +56,7 @@ const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
 })
 
 export function useIngressesColumns(): Array<object> {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
 
   return useMemo(
@@ -67,8 +67,9 @@ export function useIngressesColumns(): Array<object> {
       colHosts,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 }
 

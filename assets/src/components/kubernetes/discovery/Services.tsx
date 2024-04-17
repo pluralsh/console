@@ -67,7 +67,7 @@ const colExternalEndpoints = columnHelper.accessor(
 )
 
 export function useServicesColumns(): Array<object> {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
 
   return useMemo(
@@ -80,8 +80,9 @@ export function useServicesColumns(): Array<object> {
       colExternalEndpoints,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 }
 

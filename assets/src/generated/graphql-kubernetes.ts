@@ -4880,6 +4880,23 @@ export type ResourceScaleMutationVariables = Exact<{
 
 export type ResourceScaleMutation = { __typename?: 'Mutation', handleScaleResource?: { __typename?: 'scaling_ReplicaCounts', actualReplicas: number, desiredReplicas: number } | null };
 
+export type ResourceDeleteMutationVariables = Exact<{
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type ResourceDeleteMutation = { __typename?: 'Mutation', handleDeleteResource?: any | null };
+
+export type NamespacedResourceDeleteMutationVariables = Exact<{
+  kind: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+}>;
+
+
+export type NamespacedResourceDeleteMutation = { __typename?: 'Mutation', handleDeleteResource?: any | null };
+
 export type ConfigMapsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -7636,7 +7653,7 @@ export type NodeEventsSuspenseQueryHookResult = ReturnType<typeof useNodeEventsS
 export type NodeEventsQueryResult = Apollo.QueryResult<NodeEventsQuery, NodeEventsQueryVariables>;
 export const NamespacedResourceDocument = gql`
     query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
-  handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
+  handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(method: "GET", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
     Object
   }
 }
@@ -7678,7 +7695,7 @@ export type NamespacedResourceSuspenseQueryHookResult = ReturnType<typeof useNam
 export type NamespacedResourceQueryResult = Apollo.QueryResult<NamespacedResourceQuery, NamespacedResourceQueryVariables>;
 export const ResourceDocument = gql`
     query Resource($kind: String!, $name: String!) {
-  handleGetResource(kind: $kind, name: $name, namespace: "") @rest(path: "_raw/{args.kind}/name/{args.name}") {
+  handleGetResource(kind: $kind, name: $name, namespace: "") @rest(method: "GET", path: "_raw/{args.kind}/name/{args.name}") {
     Object
   }
 }
@@ -7831,6 +7848,71 @@ export function useResourceScaleMutation(baseOptions?: Apollo.MutationHookOption
 export type ResourceScaleMutationHookResult = ReturnType<typeof useResourceScaleMutation>;
 export type ResourceScaleMutationResult = Apollo.MutationResult<ResourceScaleMutation>;
 export type ResourceScaleMutationOptions = Apollo.BaseMutationOptions<ResourceScaleMutation, ResourceScaleMutationVariables>;
+export const ResourceDeleteDocument = gql`
+    mutation ResourceDelete($kind: String!, $name: String!) {
+  handleDeleteResource(kind: $kind, name: $name, namespace: "") @rest(type: "Void", path: "_raw/{args.kind}/name/{args.name}", method: "DELETE")
+}
+    `;
+export type ResourceDeleteMutationFn = Apollo.MutationFunction<ResourceDeleteMutation, ResourceDeleteMutationVariables>;
+
+/**
+ * __useResourceDeleteMutation__
+ *
+ * To run a mutation, you first call `useResourceDeleteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResourceDeleteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resourceDeleteMutation, { data, loading, error }] = useResourceDeleteMutation({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useResourceDeleteMutation(baseOptions?: Apollo.MutationHookOptions<ResourceDeleteMutation, ResourceDeleteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResourceDeleteMutation, ResourceDeleteMutationVariables>(ResourceDeleteDocument, options);
+      }
+export type ResourceDeleteMutationHookResult = ReturnType<typeof useResourceDeleteMutation>;
+export type ResourceDeleteMutationResult = Apollo.MutationResult<ResourceDeleteMutation>;
+export type ResourceDeleteMutationOptions = Apollo.BaseMutationOptions<ResourceDeleteMutation, ResourceDeleteMutationVariables>;
+export const NamespacedResourceDeleteDocument = gql`
+    mutation NamespacedResourceDelete($kind: String!, $namespace: String!, $name: String!) {
+  handleDeleteResource(kind: $kind, namespace: $namespace, name: $name) @rest(type: "Void", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}", method: "DELETE")
+}
+    `;
+export type NamespacedResourceDeleteMutationFn = Apollo.MutationFunction<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>;
+
+/**
+ * __useNamespacedResourceDeleteMutation__
+ *
+ * To run a mutation, you first call `useNamespacedResourceDeleteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useNamespacedResourceDeleteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [namespacedResourceDeleteMutation, { data, loading, error }] = useNamespacedResourceDeleteMutation({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useNamespacedResourceDeleteMutation(baseOptions?: Apollo.MutationHookOptions<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>(NamespacedResourceDeleteDocument, options);
+      }
+export type NamespacedResourceDeleteMutationHookResult = ReturnType<typeof useNamespacedResourceDeleteMutation>;
+export type NamespacedResourceDeleteMutationResult = Apollo.MutationResult<NamespacedResourceDeleteMutation>;
+export type NamespacedResourceDeleteMutationOptions = Apollo.BaseMutationOptions<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>;
 export const ConfigMapsDocument = gql`
     query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetConfigMapList(

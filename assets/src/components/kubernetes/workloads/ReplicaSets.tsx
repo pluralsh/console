@@ -68,7 +68,7 @@ const colStatus = columnHelper.accessor((rs) => rs.podInfo, {
 })
 
 export function useReplicaSetsColumns(): Array<object> {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
 
   return useMemo(
@@ -80,8 +80,9 @@ export function useReplicaSetsColumns(): Array<object> {
       colStatus,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 }
 

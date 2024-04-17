@@ -121,7 +121,7 @@ export default function PersistentVolumes() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
@@ -135,8 +135,9 @@ export default function PersistentVolumes() {
       colAccessModes,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colLabels, colCreationTimestamp]
+    [colName, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

@@ -115,7 +115,7 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   const dataSelect = useDataSelect()
   const { name } = useParams()
   const [params, setParams] = useSearchParams()
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
@@ -123,8 +123,16 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       ...(namespaced ? [colNamespace] : []),
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [namespaced, colName, colNamespace, colLabels, colCreationTimestamp]
+    [
+      namespaced,
+      colName,
+      colNamespace,
+      colLabels,
+      colCreationTimestamp,
+      colAction,
+    ]
   )
 
   useEffect(

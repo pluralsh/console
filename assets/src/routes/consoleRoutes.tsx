@@ -232,7 +232,7 @@ export const consoleComponentRoutes = [
 
   /* KUBERNETES */
   kubernetesRoute,
-]
+].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))
 
 export const consoleRoutes: RouteObject[] = [
   // ----- Old-style component-based routes -----

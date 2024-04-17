@@ -92,7 +92,8 @@ export default function CustomResourceDefinitions() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colLabels, colCreationTimestamp } = useDefaultColumns(columnHelper)
+  const { colAction, colLabels, colCreationTimestamp } =
+    useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
       colName,
@@ -103,8 +104,9 @@ export default function CustomResourceDefinitions() {
       colCategories,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colLabels, colCreationTimestamp]
+    [colAction, colLabels, colCreationTimestamp]
   )
 
   return (

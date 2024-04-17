@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import { ReactElement, useMemo } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { ResourceList } from '../common/ResourceList'
@@ -9,29 +9,24 @@ import {
   HorizontalPodAutoscalersQueryVariables,
   useHorizontalPodAutoscalersQuery,
 } from '../../../generated/graphql-kubernetes'
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { toKind } from '../common/types'
 import ResourceLink from '../common/ResourceLink'
+import { useDefaultColumns } from '../common/utils'
 
 const columnHelper = createColumnHelper<HorizontalPodAutoscalerT>()
 
-const COLUMNS = [
-  columnHelper.accessor((hpa) => hpa?.objectMeta?.name, {
-    id: 'name',
-    header: 'Name',
-    cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor((hpa) => hpa?.minReplicas, {
+const COLUMNS = {
+  colMinReplicas: columnHelper.accessor((hpa) => hpa?.minReplicas, {
     id: 'minReplicas',
     header: 'Min replicas',
     cell: ({ getValue }) => getValue(),
   }),
-  columnHelper.accessor((hpa) => hpa?.maxReplicas, {
+  colMaxReplicas: columnHelper.accessor((hpa) => hpa?.maxReplicas, {
     id: 'maxReplicas',
     header: 'Max replicas',
     cell: ({ getValue }) => getValue(),
   }),
-  columnHelper.accessor((hpa) => hpa, {
+  colReference: columnHelper.accessor((hpa) => hpa, {
     id: 'reference',
     header: 'Reference',
     cell: ({ getValue }) => {
@@ -50,19 +45,36 @@ const COLUMNS = [
       )
     },
   }),
-  columnHelper.accessor((hpa) => hpa?.objectMeta?.creationTimestamp, {
-    id: 'creationTimestamp',
-    header: 'Creation',
-    enableSorting: true,
-    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
-  }),
-]
+}
 
 export function useHorizontalPodAutoscalersColumns(): Array<object> {
-  return COLUMNS
+  const { colAction, colName, colCreationTimestamp } =
+    useDefaultColumns(columnHelper)
+  const { colMinReplicas, colMaxReplicas, colReference } = COLUMNS
+
+  return useMemo(
+    () => [
+      colName,
+      colMinReplicas,
+      colMaxReplicas,
+      colReference,
+      colCreationTimestamp,
+      colAction,
+    ],
+    [
+      colName,
+      colMinReplicas,
+      colMaxReplicas,
+      colReference,
+      colCreationTimestamp,
+      colAction,
+    ]
+  )
 }
 
 export default function HorizontalPodAutoscalers(): ReactElement {
+  const columns = useHorizontalPodAutoscalersColumns()
+
   return (
     <ResourceList<
       HorizontalPodAutoscalerListT,
@@ -71,7 +83,7 @@ export default function HorizontalPodAutoscalers(): ReactElement {
       HorizontalPodAutoscalersQueryVariables
     >
       namespaced
-      columns={COLUMNS}
+      columns={columns}
       query={useHorizontalPodAutoscalersQuery}
       queryName="handleGetHorizontalPodAutoscalerList"
       itemsKey="horizontalpodautoscalers"

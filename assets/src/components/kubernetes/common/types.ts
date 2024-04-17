@@ -97,7 +97,7 @@ function toKind(kind: Nullable<string>): Kind {
     return Kind.None
   }
 
-  const result = Object.values(Kind).find((k) => k === kind)
+  const result = Object.values(Kind).find((k) => k === kind?.toLowerCase())
 
   if (result) {
     return result

@@ -64,7 +64,7 @@ export default function StorageClasses() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
@@ -73,8 +73,9 @@ export default function StorageClasses() {
       colParameters,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colLabels, colCreationTimestamp]
+    [colName, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

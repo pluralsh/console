@@ -61,7 +61,10 @@ export function ContainerStatuses({
   return (
     <Flex gap="xxxsmall">
       {statuses.map(({ name, readiness }) => (
-        <ContainerStatus status={{ name, readiness }} />
+        <ContainerStatus
+          key={name}
+          status={{ name, readiness }}
+        />
       ))}
     </Flex>
   )

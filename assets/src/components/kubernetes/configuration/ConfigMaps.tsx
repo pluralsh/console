@@ -38,11 +38,11 @@ export default function ConfigMaps() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [colName, colNamespace, colLabels, colCreationTimestamp, colAction],
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

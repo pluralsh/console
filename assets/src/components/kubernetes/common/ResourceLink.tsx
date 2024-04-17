@@ -56,7 +56,7 @@ export default function ResourceLink({
       )}
       {...props}
     >
-      <InlineLink>{message}</InlineLink>
+      <InlineLink as="span">{message}</InlineLink>
     </Link>
   )
 }
