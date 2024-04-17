@@ -4,7 +4,6 @@ import ContinuousDeployment, {
 import Clusters from 'components/cd/clusters/Clusters'
 import Repositories from 'components/cd/repos/Repositories'
 import Services from 'components/cd/services/Services'
-import Providers from 'components/cd/providers/Providers'
 import { Navigate, Outlet, Route } from 'react-router-dom'
 
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
@@ -44,6 +43,10 @@ import ClusterLogs from 'components/cd/cluster/ClusterLogs'
 import GlobalServices from 'components/cd/globalServices/GlobalService'
 
 import GlobalServiceDetailView from 'components/cd/globalServices/GlobalServiceDetailView'
+
+import Namespaces from 'components/cd/namespaces/Namespaces'
+
+import NamespacesDetailView from 'components/cd/namespaces/NamespacesDetailView'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -89,10 +92,11 @@ import {
   GLOBAL_SERVICES_REL_PATH,
   GLOBAL_SERVICE_PARAM_ID,
   GLOBAL_SETTINGS_REL_PATH,
+  NAMESPACES_PARAM_ID,
+  NAMESPACES_REL_PATH,
   NODE_REL_PATH,
   PIPELINES_REL_PATH,
   POD_REL_PATH,
-  PROVIDERS_REL_PATH,
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
   SERVICE_COMPONENTS_PATH,
@@ -189,8 +193,8 @@ const mainRoutes = (
       element={<Repositories />}
     />
     <Route
-      path={PROVIDERS_REL_PATH}
-      element={<Providers />}
+      path={NAMESPACES_REL_PATH}
+      element={<Namespaces />}
     />
     <Route
       path={ADDONS_REL_PATH}
@@ -207,6 +211,13 @@ const globalServiceRoutes = (
   <Route
     path={`${GLOBAL_SERVICES_REL_PATH}/:${GLOBAL_SERVICE_PARAM_ID}?`}
     element={<GlobalServiceDetailView />}
+  />
+)
+
+const namespacesRoutes = (
+  <Route
+    path={`${NAMESPACES_REL_PATH}/:${NAMESPACES_PARAM_ID}?`}
+    element={<NamespacesDetailView />}
   />
 )
 
@@ -483,5 +494,6 @@ export const cdRoutes = [
     {componentRoutes}
     {pipelineRoutes}
     {globalServiceRoutes}
+    {namespacesRoutes}
   </Route>,
 ]

@@ -13,9 +13,7 @@ import { useParams } from 'react-router-dom'
 
 import { gql, useQuery } from '@apollo/client'
 
-import { Title1H1 } from 'components/utils/typography/Text'
-
-import { useTheme } from 'styled-components'
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
@@ -68,7 +66,6 @@ const getServiceNameQuery = gql`
 
 export default function GlobalServiceDetailView() {
   const params = useParams()
-  const theme = useTheme()
 
   const serviceId = params[GLOBAL_SERVICE_PARAM_ID]
 
@@ -96,17 +93,8 @@ export default function GlobalServiceDetailView() {
   )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        padding: theme.spacing.large,
-        height: '100%',
-      }}
-    >
-      <Title1H1>{serviceName}</Title1H1>
+    <ResponsivePageFullWidth scrollable={false}>
       <GlobalServiceDetailTable serviceId={serviceId} />
-    </div>
+    </ResponsivePageFullWidth>
   )
 }
