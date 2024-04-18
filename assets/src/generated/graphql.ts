@@ -2744,6 +2744,7 @@ export type PinnedCustomResource = {
   group: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
   namespaced?: Maybe<Scalars['Boolean']['output']>;
   version: Scalars['String']['output'];
 };
@@ -2753,6 +2754,7 @@ export type PinnedCustomResourceAttributes = {
   displayName: Scalars['String']['input'];
   group: Scalars['String']['input'];
   kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
   namespaced?: InputMaybe<Scalars['Boolean']['input']>;
   version: Scalars['String']['input'];
 };

@@ -1078,10 +1078,12 @@ defmodule Console.Deployments.ClustersTest do
         kind: "ConstraintTemplate",
         group: "gatekeeper.sh",
         version: "v1beta1",
+        name: "crd",
         namespaced: false,
         display_name: "Constraint Templates"
       }, admin_user())
 
+      assert pinned.name == "crd"
       assert pinned.kind == "ConstraintTemplate"
       assert pinned.group == "gatekeeper.sh"
       assert pinned.version == "v1beta1"
@@ -1096,6 +1098,7 @@ defmodule Console.Deployments.ClustersTest do
         kind: "ConstraintTemplate",
         group: "gatekeeper.sh",
         version: "v1beta1",
+        name: "crd",
         namespaced: false,
         display_name: "Constraint Templates",
         cluster_id: cluster.id

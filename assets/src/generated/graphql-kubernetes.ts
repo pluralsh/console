@@ -114,6 +114,7 @@ export type MutationHandleCreateNamespaceArgs = {
 
 export type MutationHandleDeleteResourceArgs = {
   aggregations?: InputMaybe<Scalars['String']['input']>;
+  deleteNow?: InputMaybe<Scalars['String']['input']>;
   filterBy?: InputMaybe<Scalars['String']['input']>;
   itemsPerPage?: InputMaybe<Scalars['String']['input']>;
   kind: Scalars['String']['input'];
@@ -252,6 +253,7 @@ export type MutationHandleScaleResourceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   page?: InputMaybe<Scalars['String']['input']>;
+  scaleBy?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 

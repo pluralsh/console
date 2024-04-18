@@ -2838,6 +2838,7 @@ input AgentMigrationAttributes {
 }
 
 input PinnedCustomResourceAttributes {
+  name: String!
   displayName: String!
   group: String!
   version: String!
@@ -3312,6 +3313,7 @@ type ClusterStatusInfo {
 "A reference to a custom resource you want to be displayed in the k8s dashboard"
 type PinnedCustomResource {
   id: ID!
+  name: String!
   displayName: String!
   group: String!
   version: String!
