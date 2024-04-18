@@ -7941,28 +7941,28 @@ export type DeleteGroupMutationVariables = Exact<{
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
-export type KubernetesClusterFragment = { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
+export type KubernetesClusterFragment = { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
 
-export type PinnedCustomResourceFragment = { __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+export type PinnedCustomResourceFragment = { __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
 export type KubernetesClustersQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type KubernetesClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
+export type KubernetesClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
 
 export type PinCustomResourceMutationVariables = Exact<{
   attributes: PinnedCustomResourceAttributes;
 }>;
 
 
-export type PinCustomResourceMutation = { __typename?: 'RootMutationType', createPinnedCustomResource?: { __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+export type PinCustomResourceMutation = { __typename?: 'RootMutationType', createPinnedCustomResource?: { __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
 export type UnpinCustomResourceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type UnpinCustomResourceMutation = { __typename?: 'RootMutationType', deletePinnedCustomResource?: { __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+export type UnpinCustomResourceMutation = { __typename?: 'RootMutationType', deletePinnedCustomResource?: { __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
 export type CanaryStatusFragment = { __typename?: 'CanaryStatus', failedChecks?: number | null, canaryWeight?: number | null, iterations?: number | null, phase?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
 
@@ -9738,6 +9738,7 @@ ${GroupFragmentDoc}`;
 export const PinnedCustomResourceFragmentDoc = gql`
     fragment PinnedCustomResource on PinnedCustomResource {
   id
+  name
   kind
   version
   group

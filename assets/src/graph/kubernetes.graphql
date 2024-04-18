@@ -7,6 +7,7 @@ fragment KubernetesCluster on Cluster {
 
 fragment PinnedCustomResource on PinnedCustomResource {
   id
+  name
   kind
   version
   group

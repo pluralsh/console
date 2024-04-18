@@ -106,11 +106,13 @@ const _colPin = columnHelper.accessor((crd) => crd, {
     const crd = getValue()
 
     return (
-      crd &&
-      crd.group &&
-      crd.version &&
-      crd.names?.kind && (
+      crd?.objectMeta?.name &&
+      crd?.group &&
+      crd?.version &&
+      crd?.names?.kind &&
+      crd?.scope && (
         <PinCustomResourceDefinition
+          name={crd.objectMeta.name}
           group={crd.group}
           version={crd.version}
           kind={crd.names.kind}
@@ -122,11 +124,13 @@ const _colPin = columnHelper.accessor((crd) => crd, {
 })
 
 function PinCustomResourceDefinition({
+  name,
   group,
   version,
   kind,
   namespaced,
 }: {
+  name: string
   group: string
   version: string
   kind: string
@@ -137,6 +141,7 @@ function PinCustomResourceDefinition({
   const [mutation] = usePinCustomResourceMutation({
     variables: {
       attributes: {
+        name,
         group,
         version,
         kind,
