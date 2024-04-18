@@ -3,8 +3,9 @@ import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isEmpty } from 'lodash'
 
 import {
-  ClusterTinyFragment,
+  KubernetesClusterFragment,
   useClustersTinyQuery,
+  useKubernetesClustersQuery,
 } from '../../generated/graphql'
 import { mapExistingNodes } from '../../utils/graphql'
 import { getWorkloadsAbsPath } from '../../routes/kubernetesRoutesConsts'
@@ -12,8 +13,8 @@ import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 
 type ClusterContextT = {
-  clusters: ClusterTinyFragment[]
-  cluster?: ClusterTinyFragment
+  clusters: KubernetesClusterFragment[]
+  cluster?: KubernetesClusterFragment
   namespaces: string[]
 }
 
@@ -52,7 +53,7 @@ export default function Cluster() {
   const { search } = useLocation()
   const navigate = useNavigate()
 
-  const { data } = useClustersTinyQuery({
+  const { data } = useKubernetesClustersQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
   })

@@ -1,0 +1,40 @@
+fragment KubernetesCluster on Cluster {
+  ...ClusterTiny
+  pinnedCustomResources {
+    ...PinnedCustomResource
+  }
+}
+
+fragment PinnedCustomResource on PinnedCustomResource {
+  id
+  kind
+  version
+  group
+  cluster {
+    ...ClusterTiny
+  }
+  displayName
+  namespaced
+}
+
+query KubernetesClusters {
+  clusters(first: 200) {
+    edges {
+      node {
+        ...KubernetesCluster
+      }
+    }
+  }
+}
+
+mutation PinCustomResource($attributes: PinnedCustomResourceAttributes!) {
+  createPinnedCustomResource(attributes: $attributes) {
+    ...PinnedCustomResource
+  }
+}
+
+mutation UnpinCustomResource($id: ID!) {
+  deletePinnedCustomResource(id: $id) {
+    ...PinnedCustomResource
+  }
+}

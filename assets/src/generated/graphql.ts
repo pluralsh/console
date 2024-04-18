@@ -7939,6 +7939,29 @@ export type DeleteGroupMutationVariables = Exact<{
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type KubernetesClusterFragment = { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
+
+export type PinnedCustomResourceFragment = { __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+
+export type KubernetesClustersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type KubernetesClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
+
+export type PinCustomResourceMutationVariables = Exact<{
+  attributes: PinnedCustomResourceAttributes;
+}>;
+
+
+export type PinCustomResourceMutation = { __typename?: 'RootMutationType', createPinnedCustomResource?: { __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
+export type UnpinCustomResourceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type UnpinCustomResourceMutation = { __typename?: 'RootMutationType', deletePinnedCustomResource?: { __typename?: 'PinnedCustomResource', id: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
 export type CanaryStatusFragment = { __typename?: 'CanaryStatus', failedChecks?: number | null, canaryWeight?: number | null, iterations?: number | null, phase?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
 
 export type CanarySpecFragment = { __typename?: 'CanarySpec', provider?: string | null, analysis?: { __typename?: 'CanaryAnalysis', interval?: string | null, maxWeight?: number | null, stepWeight?: number | null, stepWeights?: Array<number | null> | null, threshold?: number | null } | null };
@@ -9710,6 +9733,28 @@ export const GroupMemberFragmentDoc = gql`
 }
     ${UserFragmentDoc}
 ${GroupFragmentDoc}`;
+export const PinnedCustomResourceFragmentDoc = gql`
+    fragment PinnedCustomResource on PinnedCustomResource {
+  id
+  kind
+  version
+  group
+  cluster {
+    ...ClusterTiny
+  }
+  displayName
+  namespaced
+}
+    ${ClusterTinyFragmentDoc}`;
+export const KubernetesClusterFragmentDoc = gql`
+    fragment KubernetesCluster on Cluster {
+  ...ClusterTiny
+  pinnedCustomResources {
+    ...PinnedCustomResource
+  }
+}
+    ${ClusterTinyFragmentDoc}
+${PinnedCustomResourceFragmentDoc}`;
 export const StatusConditionFragmentDoc = gql`
     fragment StatusCondition on StatusCondition {
   message
@@ -14952,6 +14997,115 @@ export function useDeleteGroupMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMutation>;
 export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
 export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;
+export const KubernetesClustersDocument = gql`
+    query KubernetesClusters {
+  clusters(first: 200) {
+    edges {
+      node {
+        ...KubernetesCluster
+      }
+    }
+  }
+}
+    ${KubernetesClusterFragmentDoc}`;
+
+/**
+ * __useKubernetesClustersQuery__
+ *
+ * To run a query within a React component, call `useKubernetesClustersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useKubernetesClustersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useKubernetesClustersQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useKubernetesClustersQuery(baseOptions?: Apollo.QueryHookOptions<KubernetesClustersQuery, KubernetesClustersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<KubernetesClustersQuery, KubernetesClustersQueryVariables>(KubernetesClustersDocument, options);
+      }
+export function useKubernetesClustersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<KubernetesClustersQuery, KubernetesClustersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<KubernetesClustersQuery, KubernetesClustersQueryVariables>(KubernetesClustersDocument, options);
+        }
+export function useKubernetesClustersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<KubernetesClustersQuery, KubernetesClustersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<KubernetesClustersQuery, KubernetesClustersQueryVariables>(KubernetesClustersDocument, options);
+        }
+export type KubernetesClustersQueryHookResult = ReturnType<typeof useKubernetesClustersQuery>;
+export type KubernetesClustersLazyQueryHookResult = ReturnType<typeof useKubernetesClustersLazyQuery>;
+export type KubernetesClustersSuspenseQueryHookResult = ReturnType<typeof useKubernetesClustersSuspenseQuery>;
+export type KubernetesClustersQueryResult = Apollo.QueryResult<KubernetesClustersQuery, KubernetesClustersQueryVariables>;
+export const PinCustomResourceDocument = gql`
+    mutation PinCustomResource($attributes: PinnedCustomResourceAttributes!) {
+  createPinnedCustomResource(attributes: $attributes) {
+    ...PinnedCustomResource
+  }
+}
+    ${PinnedCustomResourceFragmentDoc}`;
+export type PinCustomResourceMutationFn = Apollo.MutationFunction<PinCustomResourceMutation, PinCustomResourceMutationVariables>;
+
+/**
+ * __usePinCustomResourceMutation__
+ *
+ * To run a mutation, you first call `usePinCustomResourceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `usePinCustomResourceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [pinCustomResourceMutation, { data, loading, error }] = usePinCustomResourceMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function usePinCustomResourceMutation(baseOptions?: Apollo.MutationHookOptions<PinCustomResourceMutation, PinCustomResourceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<PinCustomResourceMutation, PinCustomResourceMutationVariables>(PinCustomResourceDocument, options);
+      }
+export type PinCustomResourceMutationHookResult = ReturnType<typeof usePinCustomResourceMutation>;
+export type PinCustomResourceMutationResult = Apollo.MutationResult<PinCustomResourceMutation>;
+export type PinCustomResourceMutationOptions = Apollo.BaseMutationOptions<PinCustomResourceMutation, PinCustomResourceMutationVariables>;
+export const UnpinCustomResourceDocument = gql`
+    mutation UnpinCustomResource($id: ID!) {
+  deletePinnedCustomResource(id: $id) {
+    ...PinnedCustomResource
+  }
+}
+    ${PinnedCustomResourceFragmentDoc}`;
+export type UnpinCustomResourceMutationFn = Apollo.MutationFunction<UnpinCustomResourceMutation, UnpinCustomResourceMutationVariables>;
+
+/**
+ * __useUnpinCustomResourceMutation__
+ *
+ * To run a mutation, you first call `useUnpinCustomResourceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUnpinCustomResourceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [unpinCustomResourceMutation, { data, loading, error }] = useUnpinCustomResourceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useUnpinCustomResourceMutation(baseOptions?: Apollo.MutationHookOptions<UnpinCustomResourceMutation, UnpinCustomResourceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UnpinCustomResourceMutation, UnpinCustomResourceMutationVariables>(UnpinCustomResourceDocument, options);
+      }
+export type UnpinCustomResourceMutationHookResult = ReturnType<typeof useUnpinCustomResourceMutation>;
+export type UnpinCustomResourceMutationResult = Apollo.MutationResult<UnpinCustomResourceMutation>;
+export type UnpinCustomResourceMutationOptions = Apollo.BaseMutationOptions<UnpinCustomResourceMutation, UnpinCustomResourceMutationVariables>;
 export const CanaryDocument = gql`
     query Canary($name: String!, $namespace: String!, $serviceId: ID) {
   canary(name: $name, namespace: $namespace, serviceId: $serviceId) {
@@ -16529,6 +16683,7 @@ export const namedOperations = {
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
+    KubernetesClusters: 'KubernetesClusters',
     Canary: 'Canary',
     Certificate: 'Certificate',
     CronJob: 'CronJob',
@@ -16607,6 +16762,8 @@ export const namedOperations = {
     CreateGroup: 'CreateGroup',
     UpdateGroup: 'UpdateGroup',
     DeleteGroup: 'DeleteGroup',
+    PinCustomResource: 'PinCustomResource',
+    UnpinCustomResource: 'UnpinCustomResource',
     UpsertNotificationRouter: 'UpsertNotificationRouter',
     DeleteNotificationRouter: 'DeleteNotificationRouter',
     UpsertNotificationSink: 'UpsertNotificationSink',
@@ -16694,6 +16851,8 @@ export const namedOperations = {
     DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
+    KubernetesCluster: 'KubernetesCluster',
+    PinnedCustomResource: 'PinnedCustomResource',
     CanaryStatus: 'CanaryStatus',
     CanarySpec: 'CanarySpec',
     Canary: 'Canary',
