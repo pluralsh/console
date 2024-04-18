@@ -1,6 +1,9 @@
 defmodule Console do
   @type error :: {:error, term}
 
+  def coalesce(nil, val), do: val
+  def coalesce(val, _), do: val
+
   def rate_limit(), do: {"global", :timer.seconds(1), Console.conf(:qps)}
 
   def provider(), do: Console.conf(:provider)

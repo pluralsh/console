@@ -57,7 +57,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
 
   def list_revisions(%{id: id}, args, _) do
     Revision.for_service(id)
-    |> Revision.ordered()
+    |> Revision.ordered(:ui)
     |> paginate(args)
   end
 

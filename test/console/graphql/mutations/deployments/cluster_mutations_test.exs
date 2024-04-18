@@ -292,6 +292,7 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
         mutation Create($attrs: PinnedCustomResourceAttributes!) {
           createPinnedCustomResource(attributes: $attrs) {
             id
+            name
             displayName
             group
             version
@@ -299,6 +300,7 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
           }
         }
       """, %{"attrs" => %{
+        "name" => "crd",
         "kind" => "ConstraintTemplate",
         "group" => "gatekeeper.sh",
         "version" => "v1beta1",
@@ -306,6 +308,7 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
         "displayName" => "Constraint Templates",
       }}, %{current_user: admin_user()})
 
+      assert pinned["name"] == "crd"
       assert pinned["kind"] == "ConstraintTemplate"
       assert pinned["group"] == "gatekeeper.sh"
       assert pinned["version"] == "v1beta1"

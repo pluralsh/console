@@ -1,11 +1,11 @@
 {
-    "text": "✔ Pull Request Closed",
+    "text": "✔ Pull request <%= @pr.status %>",
 	"blocks": [
          {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "✔ *Pull Request Closed <%= @pr.status %>:*\n<%= @pr.title %>"
+                "text": "✔ *Pull request <%= @pr.status %>:*\n<%= @pr.title %>"
             }
         },
 		{

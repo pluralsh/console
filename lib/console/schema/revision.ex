@@ -26,7 +26,13 @@ defmodule Console.Schema.Revision do
     from(r in query, where: r.service_id == ^service_id)
   end
 
-  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at]) do
+  def ordered(query \\ __MODULE__, order \\ [desc: :inserted_at])
+
+  def ordered(query, :ui) do
+    from(r in query, order_by: [desc: coalesce(r.updated_at, r.inserted_at)])
+  end
+
+  def ordered(query, order) do
     from(r in query, order_by: ^order)
   end
 

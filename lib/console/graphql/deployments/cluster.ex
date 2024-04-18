@@ -166,6 +166,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :pinned_custom_resource_attributes do
+    field :name,         non_null(:string)
     field :display_name, non_null(:string)
     field :group,        non_null(:string)
     field :version,      non_null(:string)
@@ -520,6 +521,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   @desc "A reference to a custom resource you want to be displayed in the k8s dashboard"
   object :pinned_custom_resource do
     field :id,           non_null(:id)
+    field :name,         non_null(:string)
     field :display_name, non_null(:string)
     field :group,        non_null(:string)
     field :version,      non_null(:string)

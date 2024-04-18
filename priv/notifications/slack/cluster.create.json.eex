@@ -22,22 +22,21 @@
 								"bold": true
 							}
 						},
-						{
-							"type": "text",
-							"text": "\n\n"
-						},
-						{
-							"type": "text",
-							"text": "URL",
-							"style": {
-								"bold": true
-							}
-						},
-						{
-							"type": "text",
-							"text": ": <%= Console.url("/cd/clusters/#{@cluster.id}/services") %>"
-						}
 					]
+				}
+			]
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View Cluster",
+						"emoji": true
+					},
+					"url": "<%= Console.url("/cd/clusters/#{@cluster.id}/services") %>"
 				}
 			]
 		}
