@@ -221,11 +221,53 @@ function PinCustomResourceDefinition({
   )
 }
 
+// TODO: Allow deleting pins.
+function PinnedCustomResourceDefinitions({
+  cluster,
+  pinnedResources,
+}: {
+  cluster?: KubernetesClusterFragment
+  pinnedResources: Maybe<PinnedCustomResourceFragment>[]
+}) {
+  const tabStateRef = useRef<any>(null)
+
+  return (
+    <TabList
+      scrollable
+      gap="xxsmall"
+      stateRef={tabStateRef}
+      stateProps={{ orientation: 'horizontal', selectedKey: '' }}
+      paddingBottom="xxsmall"
+    >
+      {pinnedResources
+        .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
+        .map(({ name, displayName }) => (
+          <LinkTabWrap
+            subTab
+            key={name}
+            textValue={name}
+            to={getResourceDetailsAbsPath(
+              cluster?.id,
+              Kind.CustomResourceDefinition,
+              name
+            )}
+          >
+            <SubTab
+              key={name}
+              textValue={name}
+            >
+              {displayName}
+            </SubTab>
+          </LinkTabWrap>
+        ))}
+    </TabList>
+  )
+}
+
 export default function CustomResourceDefinitions() {
   const theme = useTheme()
   const cluster = useCluster()
   const pinnedResources = usePinnedResources()
-  const tabStateRef = useRef<any>(null)
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -248,41 +290,14 @@ export default function CustomResourceDefinitions() {
     [colAction, colLabels, colCreationTimestamp]
   )
 
-  // TODO: Allow deleting pins.
   const headerContent = useMemo(
     () => (
-      <TabList
-        scrollable
-        gap="xxsmall"
-        stateRef={tabStateRef}
-        stateProps={{ orientation: 'horizontal', selectedKey: '' }}
-        marginRight="medium"
-        paddingBottom="xxsmall"
-      >
-        {pinnedResources
-          .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
-          .map(({ name, displayName }) => (
-            <LinkTabWrap
-              subTab
-              key={name}
-              textValue={name}
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                Kind.CustomResourceDefinition,
-                name
-              )}
-            >
-              <SubTab
-                key={name}
-                textValue={name}
-              >
-                {displayName}
-              </SubTab>
-            </LinkTabWrap>
-          ))}
-      </TabList>
+      <PinnedCustomResourceDefinitions
+        cluster={cluster}
+        pinnedResources={pinnedResources}
+      />
     ),
-    [cluster?.id, pinnedResources]
+    [cluster, pinnedResources]
   )
 
   useSetPageHeaderContent(headerContent)
