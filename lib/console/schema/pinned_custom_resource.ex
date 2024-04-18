@@ -6,6 +6,7 @@ defmodule Console.Schema.PinnedCustomResource do
     field :kind,         :string
     field :group,        :string
     field :version,      :string
+    field :name,         :string
     field :display_name, :string
     field :namespaced,   :boolean
 
@@ -22,12 +23,13 @@ defmodule Console.Schema.PinnedCustomResource do
     from(pc in query, order_by: ^order)
   end
 
-  @valid ~w(kind group version display_name namespaced)a
+  @valid ~w(kind group version name display_name namespaced)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, [:cluster_id | @valid])
     |> foreign_key_constraint(:cluster_id)
+    |> unique_constraint([:name, :cluster_id])
     |> validate_required(@valid)
   end
 end
