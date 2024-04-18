@@ -284,6 +284,7 @@ function PinnedCustomResourceDefinitions({
               >
                 {displayName}
                 <Tooltip label="Unpin custom resource">
+                  {/* TODO: Add loading icon. */}
                   <DeleteIcon
                     size={12}
                     onClick={(e) => {
