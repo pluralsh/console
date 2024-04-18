@@ -15,6 +15,7 @@ import { KubernetesClient } from '../../helpers/kubernetes.client'
 
 type ClusterContextT = {
   clusters: KubernetesClusterFragment[]
+  refetch?: Nullable<() => void>
   cluster?: KubernetesClusterFragment
   namespaces: string[]
 }
@@ -35,6 +36,12 @@ export const useClusters = () => {
   const { clusters } = useClusterContext()
 
   return clusters
+}
+
+export const useRefetch = () => {
+  const { refetch } = useClusterContext()
+
+  return refetch
 }
 
 export const useCluster = () => {
@@ -72,7 +79,7 @@ export default function Cluster() {
   const { search } = useLocation()
   const navigate = useNavigate()
 
-  const { data } = useKubernetesClustersQuery({
+  const { data, refetch } = useKubernetesClustersQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
   })
@@ -101,8 +108,8 @@ export default function Cluster() {
   )
 
   const context = useMemo(
-    () => ({ clusters, cluster, namespaces }) as ClusterContextT,
-    [clusters, cluster, namespaces]
+    () => ({ clusters, refetch, cluster, namespaces }) as ClusterContextT,
+    [clusters, refetch, cluster, namespaces]
   )
 
   useEffect(() => {

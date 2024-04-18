@@ -1,13 +1,18 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import React, { useMemo } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
 import {
   ChipList,
   IconFrame,
   PushPinIcon,
+  SubTab,
+  TabList,
+  Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
+
+import { ApolloError } from 'apollo-boost'
 
 import {
   Types_CustomResourceDefinition as CustomResourceDefinitionT,
@@ -21,10 +26,24 @@ import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import {
   KubernetesClusterFragment,
+  PinnedCustomResourceFragment,
   usePinCustomResourceMutation,
 } from '../../../generated/graphql'
-import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import { useCluster, useIsPinnedResource } from '../Cluster'
+import {
+  getCustomResourcesAbsPath,
+  getResourceDetailsAbsPath,
+} from '../../../routes/kubernetesRoutesConsts'
+import {
+  useCluster,
+  useIsPinnedResource,
+  usePinnedResources,
+  useRefetch,
+} from '../Cluster'
+
+import { LinkTabWrap } from '../../utils/Tabs'
+import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
+
+import { Kind } from '../common/types'
 
 import { CRDEstablishedChip } from './utils'
 
@@ -99,7 +118,7 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
   ),
 })
 
-const _colPin = columnHelper.accessor((crd) => crd, {
+const colPin = columnHelper.accessor((crd) => crd, {
   id: 'pin',
   header: '',
   cell: ({ getValue }) => {
@@ -137,7 +156,10 @@ function PinCustomResourceDefinition({
   namespaced: boolean
 }) {
   const { clusterId } = useParams()
+  const refetchClusters = useRefetch()
   const isPinned = useIsPinnedResource(kind, version, group)
+  const [success, setSuccess] = useState(false)
+  const [error, setError] = useState<ApolloError>()
   const [mutation] = usePinCustomResourceMutation({
     variables: {
       attributes: {
@@ -150,31 +172,60 @@ function PinCustomResourceDefinition({
         displayName: kind, // TODO: Add modal with input so users can pick it on their own.
       },
     },
-    onError: (error) => console.error(error), // TODO: Handle errors.
-    // TODO: Refetch on complete.
+    onError: (error) => {
+      setError(error)
+      setTimeout(() => setError(undefined), 3000)
+    },
+    onCompleted: () => {
+      refetchClusters?.()
+      setSuccess(true)
+      setTimeout(() => setSuccess(false), 3000)
+    },
   })
 
   return (
-    !isPinned && (
-      <IconFrame
-        icon={<PushPinIcon />}
-        textValue="Pin custom resource"
-        tooltip
-        size="medium"
-        clickable
-        onClick={(e) => {
-          e.stopPropagation()
-          mutation()
-        }}
-      />
-    )
+    <>
+      {!isPinned && (
+        <IconFrame
+          icon={<PushPinIcon />}
+          textValue="Pin custom resource"
+          tooltip
+          size="medium"
+          clickable
+          onClick={(e) => {
+            e.stopPropagation()
+            mutation()
+          }}
+        />
+      )}
+      {success && (
+        <Toast
+          severity="success"
+          margin="large"
+          marginRight="xxxxlarge"
+        >
+          Resource pinned successfully
+        </Toast>
+      )}
+      {error && (
+        <Toast
+          heading="Error pinning resource"
+          severity="danger"
+          margin="large"
+          marginRight="xxxxlarge"
+        >
+          {error.message}
+        </Toast>
+      )}
+    </>
   )
 }
 
 export default function CustomResourceDefinitions() {
   const theme = useTheme()
   const cluster = useCluster()
-  // const pinnedResources = usePinnedResources()
+  const pinnedResources = usePinnedResources()
+  const tabStateRef = useRef<any>(null)
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -191,11 +242,50 @@ export default function CustomResourceDefinitions() {
       colCategories,
       colLabels,
       colCreationTimestamp,
-      // colPin,
+      colPin,
       colAction,
     ],
     [colAction, colLabels, colCreationTimestamp]
   )
+
+  // TODO: Allow deleting pins.
+  const headerContent = useMemo(
+    () => (
+      <TabList
+        scrollable
+        gap="xxsmall"
+        stateRef={tabStateRef}
+        stateProps={{ orientation: 'horizontal', selectedKey: '' }}
+        marginRight="medium"
+        paddingBottom="xxsmall"
+      >
+        {pinnedResources
+          .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
+          .map(({ name, displayName }) => (
+            <LinkTabWrap
+              subTab
+              key={name}
+              textValue={name}
+              to={getResourceDetailsAbsPath(
+                cluster?.id,
+                Kind.CustomResourceDefinition,
+                name
+              )}
+            >
+              <SubTab
+                key={name}
+                textValue={name}
+              >
+                {displayName}
+              </SubTab>
+            </LinkTabWrap>
+          ))}
+      </TabList>
+    ),
+    [cluster?.id, pinnedResources]
+  )
+
+  useSetPageHeaderContent(headerContent)
 
   return (
     <div
