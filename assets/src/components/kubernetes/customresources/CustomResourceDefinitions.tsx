@@ -1,13 +1,15 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import React, { useMemo, useRef, useState } from 'react'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import {
   ChipList,
+  CloseIcon,
   IconFrame,
   PushPinIcon,
   SubTab,
   TabList,
   Toast,
+  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
@@ -221,7 +223,19 @@ function PinCustomResourceDefinition({
   )
 }
 
-// TODO: Allow deleting pins.
+const DeleteIcon = styled(CloseIcon)(({ theme }) => ({
+  marginLeft: theme.spacing.xxsmall,
+  padding: theme.spacing.xxsmall,
+  opacity: 0,
+  '&:hover': {
+    color: theme.colors['icon-danger'],
+  },
+}))
+
+const LinkContainer = styled(LinkTabWrap)(() => ({
+  [`:hover ${DeleteIcon}`]: { opacity: 1 },
+}))
+
 function PinnedCustomResourceDefinitions({
   cluster,
   pinnedResources,
@@ -242,7 +256,7 @@ function PinnedCustomResourceDefinitions({
       {pinnedResources
         .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
         .map(({ name, displayName }) => (
-          <LinkTabWrap
+          <LinkContainer
             subTab
             key={name}
             textValue={name}
@@ -255,10 +269,14 @@ function PinnedCustomResourceDefinitions({
             <SubTab
               key={name}
               textValue={name}
+              css={{ display: 'flex' }}
             >
               {displayName}
+              <Tooltip label="Unpin custom resource">
+                <DeleteIcon size={12} />
+              </Tooltip>
             </SubTab>
-          </LinkTabWrap>
+          </LinkContainer>
         ))}
     </TabList>
   )
