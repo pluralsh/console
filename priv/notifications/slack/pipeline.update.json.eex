@@ -9,27 +9,16 @@
 			}
 		},
 		{
-			"type": "rich_text",
+			"type": "actions",
 			"elements": [
 				{
-					"type": "rich_text_section",
-					"elements": [
-						{
-							"type": "text",
-							"text": "URL",
-							"style": {
-								"bold": true
-							}
-						},
-						{
-							"type": "text",
-							"text": ": "
-						},
-						{
-							"type": "link",
-							"url": "<%= Console.url("/cd/pipelines/#{@pipe.id}") %>"
-						},
-					]
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View Pipeline",
+						"emoji": true
+					},
+					"url": "<%= Console.url("/cd/pipelines/#{@pipe.id}") %>"
 				}
 			]
 		}

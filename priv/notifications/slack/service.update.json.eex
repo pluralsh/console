@@ -16,25 +16,6 @@
 					"elements": [
 						{
 							"type": "text",
-							"text": "URL",
-							"style": {
-								"bold": true
-							}
-						},
-						{
-							"type": "text",
-							"text": ": "
-						},
-						{
-							"type": "link",
-							"url": "<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"
-						},
-						{
-							"type": "text",
-							"text": "\n\n"
-						},
-						{
-							"type": "text",
 							"text": "Revision",
 							"style": {
 								"bold": true
@@ -64,6 +45,20 @@
 							"text": " <%= @source.ref %>"
 						}
 					]
+				}
+			]
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View Service",
+						"emoji": true
+					},
+					"url": "<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"
 				}
 			]
 		}

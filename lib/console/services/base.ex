@@ -4,6 +4,7 @@ defmodule Console.Services.Base do
   defmacro __using__(_) do
     quote do
       import Console.Services.Base
+      import Console, only: [coalesce: 2]
       alias Console.Repo
     end
   end
