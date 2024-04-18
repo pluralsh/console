@@ -7,10 +7,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/controller"
-	common "github.com/pluralsh/console/controller/internal/test/common"
-	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
@@ -20,6 +16,11 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/controller"
+	common "github.com/pluralsh/console/controller/internal/test/common"
+	"github.com/pluralsh/console/controller/internal/test/mocks"
 )
 
 func sanitizeClusterStatus(status v1alpha1.ClusterStatus) v1alpha1.ClusterStatus {
@@ -148,7 +149,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		It("should successfully reconcile AWS cluster", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, awsClusterName))
-			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(false)
+			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(false, nil)
 			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(&gqlclient.ClusterFragment{ID: awsClusterConsoleID}, nil)
 
 			controllerReconciler := &controller.ClusterReconciler{
@@ -191,7 +192,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(true)
+			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(true, nil)
 			fakeConsoleClient.On("UpdateCluster", mock.AnythingOfType("string"), mock.Anything).Return(
 				&gqlclient.ClusterFragment{ID: awsClusterConsoleID, CurrentVersion: lo.ToPtr("1.25.6")}, nil)
 
@@ -237,7 +238,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(true)
+			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(true, nil)
 			fakeConsoleClient.On("UpdateCluster", mock.AnythingOfType("string"), mock.Anything).Return(
 				&gqlclient.ClusterFragment{ID: awsClusterConsoleID, CurrentVersion: lo.ToPtr("1.25.6")}, nil)
 
@@ -277,7 +278,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 		It("should successfully reconcile BYOK cluster", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, byokClusterName))
-			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(false)
+			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(false, nil)
 			fakeConsoleClient.On("CreateCluster", mock.Anything).Return(&gqlclient.ClusterFragment{ID: byokClusterConsoleID}, nil)
 
 			controllerReconciler := &controller.ClusterReconciler{
@@ -320,7 +321,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(true)
+			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(true, nil)
 			fakeConsoleClient.On("UpdateCluster", mock.AnythingOfType("string"), mock.Anything).Return(
 				&gqlclient.ClusterFragment{ID: byokClusterConsoleID, CurrentVersion: lo.ToPtr("1.25.6")}, nil)
 

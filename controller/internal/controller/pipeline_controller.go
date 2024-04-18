@@ -120,8 +120,13 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !pipeline.ObjectMeta.DeletionTimestamp.IsZero() {
+		exists, err := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
+		if err != nil {
+			return &requeue
+		}
+
 		// Remove Pipeline from Console API if it exists.
-		if r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID()) {
+		if exists {
 			if _, err := r.ConsoleClient.DeletePipeline(*pipeline.Status.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -145,8 +150,11 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 }
 
 func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeline, attrs console.PipelineAttributes, sha string) (*console.PipelineFragment, error) {
-	exists := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 	logger := log.FromContext(ctx)
+	exists, err := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
+	if err != nil {
+		return nil, err
+	}
 
 	if exists && pipeline.Status.IsSHAEqual(sha) {
 		logger.V(9).Info(fmt.Sprintf("No changes detected for %s pipeline", pipeline.Name))

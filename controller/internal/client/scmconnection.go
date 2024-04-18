@@ -59,7 +59,7 @@ func (c *client) GetScmConnectionByName(ctx context.Context, name string) (*gqlc
 }
 
 func (c *client) IsScmConnectionExists(ctx context.Context, name string) (bool, error) {
-	_, err := c.GetScmConnectionByName(ctx, name)
+	scm, err := c.GetScmConnectionByName(ctx, name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
@@ -68,5 +68,5 @@ func (c *client) IsScmConnectionExists(ctx context.Context, name string) (bool, 
 		return false, err
 	}
 
-	return true, nil
+	return scm != nil, nil
 }

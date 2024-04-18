@@ -4,9 +4,10 @@ import (
 	"context"
 
 	console "github.com/pluralsh/console-client-go"
-	internalerror "github.com/pluralsh/console/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	internalerror "github.com/pluralsh/console/controller/internal/errors"
 )
 
 func (c *client) GetClusterRestore(ctx context.Context, id string) (*console.ClusterRestoreFragment, error) {
@@ -42,14 +43,15 @@ func (c *client) CreateClusterRestore(ctx context.Context, backupId string) (*co
 	return restore.CreateClusterRestore, nil
 }
 
-func (c *client) IsClusterRestoreExisting(ctx context.Context, id string) bool {
+func (c *client) IsClusterRestoreExisting(ctx context.Context, id string) (bool, error) {
 	restore, err := c.GetClusterRestore(ctx, id)
-	if restore != nil {
-		return true
-	}
 	if errors.IsNotFound(err) {
-		return false
+		return false, nil
 	}
 
-	return err == nil
+	if err != nil {
+		return false, err
+	}
+
+	return restore != nil, nil
 }

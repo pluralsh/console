@@ -225,7 +225,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 
 		It("should successfully reconcile pipeline", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false)
+			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false, nil)
 			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragment{ID: pipelineConsoleID}, nil)
 
 			controllerReconciler := &controller.PipelineReconciler{
@@ -261,7 +261,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false)
+			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false, nil)
 			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragment{ID: pipelineConsoleID}, nil)
 
 			controllerReconciler := &controller.PipelineReconciler{

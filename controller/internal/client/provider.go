@@ -4,9 +4,10 @@ import (
 	"context"
 
 	gqlclient "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	"github.com/pluralsh/console/controller/api/v1alpha1"
 )
 
 func (c *client) CreateProvider(ctx context.Context, attributes gqlclient.ClusterProviderAttributes) (*gqlclient.ClusterProviderFragment, error) {
@@ -62,14 +63,17 @@ func (c *client) DeleteProvider(ctx context.Context, id string) error {
 	return err
 }
 
-func (c *client) IsProviderExists(ctx context.Context, id string) bool {
-	_, err := c.GetProvider(ctx, id)
+func (c *client) IsProviderExists(ctx context.Context, id string) (bool, error) {
+	provider, err := c.GetProvider(ctx, id)
 	if errors.IsNotFound(err) {
-		return false
+		return false, nil
 	}
 
-	// We are assuming that if there is an error, and it is not ErrorNotFound then provider does not exist.
-	return err == nil
+	if err != nil {
+		return false, err
+	}
+
+	return provider != nil, nil
 }
 
 func (c *client) IsProviderDeleting(ctx context.Context, id string) bool {
