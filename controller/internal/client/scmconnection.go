@@ -58,12 +58,15 @@ func (c *client) GetScmConnectionByName(ctx context.Context, name string) (*gqlc
 	return response.ScmConnection, err
 }
 
-func (c *client) IsScmConnectionExists(ctx context.Context, name string) bool {
-	_, err := c.GetScmConnectionByName(ctx, name)
+func (c *client) IsScmConnectionExists(ctx context.Context, name string) (bool, error) {
+	scm, err := c.GetScmConnectionByName(ctx, name)
 	if errors.IsNotFound(err) {
-		return false
+		return false, nil
 	}
 
-	// We are assuming that if there is an error, and it is not ErrorNotFound then resource does not exist.
-	return err == nil
+	if err != nil {
+		return false, err
+	}
+
+	return scm != nil, nil
 }

@@ -2,9 +2,10 @@ package client
 
 import (
 	console "github.com/pluralsh/console-client-go"
-	internalerror "github.com/pluralsh/console/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	internalerror "github.com/pluralsh/console/controller/internal/errors"
 )
 
 func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error) {
@@ -94,16 +95,17 @@ func (c *client) DeleteCluster(id string) (*console.ClusterFragment, error) {
 	return response.DeleteCluster, nil
 }
 
-func (c *client) IsClusterExisting(id *string) bool {
+func (c *client) IsClusterExisting(id *string) (bool, error) {
 	cluster, err := c.GetCluster(id)
-	if cluster != nil {
-		return true
-	}
 	if errors.IsNotFound(err) {
-		return false
+		return false, nil
 	}
 
-	return err == nil
+	if err != nil {
+		return false, err
+	}
+
+	return cluster != nil, nil
 }
 
 func (c *client) IsClusterDeleting(id *string) bool {

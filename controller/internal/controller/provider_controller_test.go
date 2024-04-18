@@ -98,7 +98,7 @@ var _ = Describe("Provider Controller", Ordered, func() {
 		It("should successfully reconcile provider", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetProviderByCloud", mock.Anything, v1alpha1.GCP).Return(nil, errors.NewNotFound(schema.GroupResource{}, providerName))
-			fakeConsoleClient.On("IsProviderExists", mock.Anything, mock.AnythingOfType("string")).Return(false)
+			fakeConsoleClient.On("IsProviderExists", mock.Anything, mock.AnythingOfType("string")).Return(false, nil)
 			fakeConsoleClient.On("CreateProvider", mock.Anything, mock.Anything).Return(&gqlclient.ClusterProviderFragment{
 				ID:        providerConsoleID,
 				Name:      providerName,

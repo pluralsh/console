@@ -21,15 +21,16 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/utils"
 )
 
 // ClusterRestoreReconciler reconciles a ClusterRestore object
@@ -98,8 +99,11 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 }
 
 func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.ClusterRestore) (*console.ClusterRestoreFragment, error) {
-	exists := r.ConsoleClient.IsClusterRestoreExisting(ctx, restore.Status.GetID())
 	logger := log.FromContext(ctx)
+	exists, err := r.ConsoleClient.IsClusterRestoreExisting(ctx, restore.Status.GetID())
+	if err != nil {
+		return nil, err
+	}
 
 	if exists {
 		logger.V(9).Info(fmt.Sprintf("No changes detected for %s cluster", restore.Name))

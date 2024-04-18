@@ -4,9 +4,10 @@ import (
 	"context"
 
 	console "github.com/pluralsh/console-client-go"
-	internalerror "github.com/pluralsh/console/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	internalerror "github.com/pluralsh/console/controller/internal/errors"
 )
 
 func (c *client) SavePipeline(name string, attrs console.PipelineAttributes) (*console.PipelineFragment, error) {
@@ -49,16 +50,17 @@ func (c *client) DeletePipeline(id string) (*console.PipelineFragment, error) {
 	return response.DeletePipeline, nil
 }
 
-func (c *client) IsPipelineExisting(id string) bool {
+func (c *client) IsPipelineExisting(id string) (bool, error) {
 	pipeline, err := c.GetPipeline(id)
-	if pipeline != nil {
-		return true
-	}
 	if errors.IsNotFound(err) {
-		return false
+		return false, nil
 	}
 
-	return err == nil
+	if err != nil {
+		return false, err
+	}
+
+	return pipeline != nil, nil
 }
 
 func (c *client) GetPipelineContext(ctx context.Context, id string) (*console.PipelineContextFragment, error) {

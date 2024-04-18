@@ -186,10 +186,15 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 			return &requeue, nil
 		}
 
+		exists, err := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
+		if err != nil {
+			return &ctrl.Result{}, err
+		}
+
 		// Remove Provider from Console API if it exists
-		if r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID()) && !provider.Status.IsReadonly() {
+		if exists && !provider.Status.IsReadonly() {
 			logger.Info("Deleting provider")
-			if err := r.ConsoleClient.DeleteProvider(ctx, provider.Status.GetID()); err != nil {
+			if err = r.ConsoleClient.DeleteProvider(ctx, provider.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -211,7 +216,10 @@ func (r *ProviderReconciler) addOrRemoveFinalizer(ctx context.Context, provider 
 
 func (r *ProviderReconciler) sync(ctx context.Context, provider *v1alpha1.Provider, changed bool) (*console.ClusterProviderFragment, error) {
 	logger := log.FromContext(ctx)
-	exists := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
+	exists, err := r.ConsoleClient.IsProviderExists(ctx, provider.Status.GetID())
+	if err != nil {
+		return nil, err
+	}
 
 	// Update only if Provider has changed
 	if changed && exists {

@@ -196,8 +196,13 @@ func (r *ClusterReconciler) addOrRemoveFinalizer(cluster *v1alpha1.Cluster) *ctr
 			return &requeue
 		}
 
+		exists, err := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
+		if err != nil {
+			return &requeue
+		}
+
 		// Remove Cluster from Console API if it exists and is not read-only.
-		if r.ConsoleClient.IsClusterExisting(cluster.Status.ID) && !cluster.Status.IsReadonly() {
+		if exists && !cluster.Status.IsReadonly() {
 			if _, err := r.ConsoleClient.DeleteCluster(*cluster.Status.ID); err != nil {
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
@@ -262,8 +267,11 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 }
 
 func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha string) (*console.ClusterFragment, error) {
-	exists := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 	logger := log.FromContext(ctx)
+	exists, err := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
+	if err != nil {
+		return nil, err
+	}
 
 	if !cluster.Status.IsSHAEqual(sha) && exists {
 		logger.Info(fmt.Sprintf("Detected changes, updating %s cluster", cluster.Name))

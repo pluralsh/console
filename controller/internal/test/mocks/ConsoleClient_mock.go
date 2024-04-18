@@ -2726,7 +2726,7 @@ func (_c *ConsoleClientMock_IsClusterDeleting_Call) RunAndReturn(run func(*strin
 }
 
 // IsClusterExisting provides a mock function with given fields: id
-func (_m *ConsoleClientMock) IsClusterExisting(id *string) bool {
+func (_m *ConsoleClientMock) IsClusterExisting(id *string) (bool, error) {
 	ret := _m.Called(id)
 
 	if len(ret) == 0 {
@@ -2734,13 +2734,23 @@ func (_m *ConsoleClientMock) IsClusterExisting(id *string) bool {
 	}
 
 	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*string) (bool, error)); ok {
+		return rf(id)
+	}
 	if rf, ok := ret.Get(0).(func(*string) bool); ok {
 		r0 = rf(id)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(*string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ConsoleClientMock_IsClusterExisting_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsClusterExisting'
@@ -2761,18 +2771,18 @@ func (_c *ConsoleClientMock_IsClusterExisting_Call) Run(run func(id *string)) *C
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsClusterExisting_Call) Return(_a0 bool) *ConsoleClientMock_IsClusterExisting_Call {
-	_c.Call.Return(_a0)
+func (_c *ConsoleClientMock_IsClusterExisting_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsClusterExisting_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsClusterExisting_Call) RunAndReturn(run func(*string) bool) *ConsoleClientMock_IsClusterExisting_Call {
+func (_c *ConsoleClientMock_IsClusterExisting_Call) RunAndReturn(run func(*string) (bool, error)) *ConsoleClientMock_IsClusterExisting_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // IsClusterRestoreExisting provides a mock function with given fields: ctx, id
-func (_m *ConsoleClientMock) IsClusterRestoreExisting(ctx context.Context, id string) bool {
+func (_m *ConsoleClientMock) IsClusterRestoreExisting(ctx context.Context, id string) (bool, error) {
 	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
@@ -2780,13 +2790,23 @@ func (_m *ConsoleClientMock) IsClusterRestoreExisting(ctx context.Context, id st
 	}
 
 	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
 		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ConsoleClientMock_IsClusterRestoreExisting_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsClusterRestoreExisting'
@@ -2808,18 +2828,18 @@ func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) Run(run func(ctx cont
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) Return(_a0 bool) *ConsoleClientMock_IsClusterRestoreExisting_Call {
-	_c.Call.Return(_a0)
+func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsClusterRestoreExisting_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsClusterRestoreExisting_Call {
+func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsClusterRestoreExisting_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // IsPipelineExisting provides a mock function with given fields: id
-func (_m *ConsoleClientMock) IsPipelineExisting(id string) bool {
+func (_m *ConsoleClientMock) IsPipelineExisting(id string) (bool, error) {
 	ret := _m.Called(id)
 
 	if len(ret) == 0 {
@@ -2827,13 +2847,23 @@ func (_m *ConsoleClientMock) IsPipelineExisting(id string) bool {
 	}
 
 	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (bool, error)); ok {
+		return rf(id)
+	}
 	if rf, ok := ret.Get(0).(func(string) bool); ok {
 		r0 = rf(id)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ConsoleClientMock_IsPipelineExisting_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPipelineExisting'
@@ -2854,18 +2884,18 @@ func (_c *ConsoleClientMock_IsPipelineExisting_Call) Run(run func(id string)) *C
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsPipelineExisting_Call) Return(_a0 bool) *ConsoleClientMock_IsPipelineExisting_Call {
-	_c.Call.Return(_a0)
+func (_c *ConsoleClientMock_IsPipelineExisting_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsPipelineExisting_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsPipelineExisting_Call) RunAndReturn(run func(string) bool) *ConsoleClientMock_IsPipelineExisting_Call {
+func (_c *ConsoleClientMock_IsPipelineExisting_Call) RunAndReturn(run func(string) (bool, error)) *ConsoleClientMock_IsPipelineExisting_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // IsPrAutomationExists provides a mock function with given fields: ctx, id
-func (_m *ConsoleClientMock) IsPrAutomationExists(ctx context.Context, id string) bool {
+func (_m *ConsoleClientMock) IsPrAutomationExists(ctx context.Context, id string) (bool, error) {
 	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
@@ -2873,13 +2903,23 @@ func (_m *ConsoleClientMock) IsPrAutomationExists(ctx context.Context, id string
 	}
 
 	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
 		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ConsoleClientMock_IsPrAutomationExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPrAutomationExists'
@@ -2901,18 +2941,18 @@ func (_c *ConsoleClientMock_IsPrAutomationExists_Call) Run(run func(ctx context.
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsPrAutomationExists_Call) Return(_a0 bool) *ConsoleClientMock_IsPrAutomationExists_Call {
-	_c.Call.Return(_a0)
+func (_c *ConsoleClientMock_IsPrAutomationExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsPrAutomationExists_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsPrAutomationExists_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsPrAutomationExists_Call {
+func (_c *ConsoleClientMock_IsPrAutomationExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsPrAutomationExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // IsPrAutomationExistsByName provides a mock function with given fields: ctx, name
-func (_m *ConsoleClientMock) IsPrAutomationExistsByName(ctx context.Context, name string) bool {
+func (_m *ConsoleClientMock) IsPrAutomationExistsByName(ctx context.Context, name string) (bool, error) {
 	ret := _m.Called(ctx, name)
 
 	if len(ret) == 0 {
@@ -2920,13 +2960,23 @@ func (_m *ConsoleClientMock) IsPrAutomationExistsByName(ctx context.Context, nam
 	}
 
 	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, name)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
 		r0 = rf(ctx, name)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ConsoleClientMock_IsPrAutomationExistsByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsPrAutomationExistsByName'
@@ -2948,12 +2998,12 @@ func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) Run(run func(ctx co
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) Return(_a0 bool) *ConsoleClientMock_IsPrAutomationExistsByName_Call {
-	_c.Call.Return(_a0)
+func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsPrAutomationExistsByName_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsPrAutomationExistsByName_Call {
+func (_c *ConsoleClientMock_IsPrAutomationExistsByName_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsPrAutomationExistsByName_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3006,7 +3056,7 @@ func (_c *ConsoleClientMock_IsProviderDeleting_Call) RunAndReturn(run func(conte
 }
 
 // IsProviderExists provides a mock function with given fields: ctx, id
-func (_m *ConsoleClientMock) IsProviderExists(ctx context.Context, id string) bool {
+func (_m *ConsoleClientMock) IsProviderExists(ctx context.Context, id string) (bool, error) {
 	ret := _m.Called(ctx, id)
 
 	if len(ret) == 0 {
@@ -3014,13 +3064,23 @@ func (_m *ConsoleClientMock) IsProviderExists(ctx context.Context, id string) bo
 	}
 
 	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
 		r0 = rf(ctx, id)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ConsoleClientMock_IsProviderExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsProviderExists'
@@ -3042,18 +3102,18 @@ func (_c *ConsoleClientMock_IsProviderExists_Call) Run(run func(ctx context.Cont
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsProviderExists_Call) Return(_a0 bool) *ConsoleClientMock_IsProviderExists_Call {
-	_c.Call.Return(_a0)
+func (_c *ConsoleClientMock_IsProviderExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsProviderExists_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsProviderExists_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsProviderExists_Call {
+func (_c *ConsoleClientMock_IsProviderExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsProviderExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // IsScmConnectionExists provides a mock function with given fields: ctx, name
-func (_m *ConsoleClientMock) IsScmConnectionExists(ctx context.Context, name string) bool {
+func (_m *ConsoleClientMock) IsScmConnectionExists(ctx context.Context, name string) (bool, error) {
 	ret := _m.Called(ctx, name)
 
 	if len(ret) == 0 {
@@ -3061,13 +3121,23 @@ func (_m *ConsoleClientMock) IsScmConnectionExists(ctx context.Context, name str
 	}
 
 	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, name)
+	}
 	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
 		r0 = rf(ctx, name)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ConsoleClientMock_IsScmConnectionExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsScmConnectionExists'
@@ -3089,12 +3159,12 @@ func (_c *ConsoleClientMock_IsScmConnectionExists_Call) Run(run func(ctx context
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsScmConnectionExists_Call) Return(_a0 bool) *ConsoleClientMock_IsScmConnectionExists_Call {
-	_c.Call.Return(_a0)
+func (_c *ConsoleClientMock_IsScmConnectionExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsScmConnectionExists_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *ConsoleClientMock_IsScmConnectionExists_Call) RunAndReturn(run func(context.Context, string) bool) *ConsoleClientMock_IsScmConnectionExists_Call {
+func (_c *ConsoleClientMock_IsScmConnectionExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsScmConnectionExists_Call {
 	_c.Call.Return(run)
 	return _c
 }

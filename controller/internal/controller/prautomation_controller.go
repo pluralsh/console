@@ -111,10 +111,15 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !prAutomation.ObjectMeta.DeletionTimestamp.IsZero() {
+		exists, err := in.ConsoleClient.IsPrAutomationExists(ctx, prAutomation.Status.GetID())
+		if err != nil {
+			return &ctrl.Result{}, err
+		}
+
 		// Remove PrAutomation from Console API if it exists
-		if in.ConsoleClient.IsPrAutomationExists(ctx, prAutomation.Status.GetID()) {
+		if exists {
 			logger.Info("Deleting PR automation")
-			if err := in.ConsoleClient.DeletePrAutomation(ctx, prAutomation.Status.GetID()); err != nil {
+			if err = in.ConsoleClient.DeletePrAutomation(ctx, prAutomation.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -136,7 +141,11 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 
 func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alpha1.PrAutomation, changed bool) (*console.PrAutomationFragment, error) {
 	logger := log.FromContext(ctx)
-	exists := in.ConsoleClient.IsPrAutomationExistsByName(ctx, prAutomation.ConsoleName())
+	exists, err := in.ConsoleClient.IsPrAutomationExistsByName(ctx, prAutomation.ConsoleName())
+	if err != nil {
+		return nil, err
+	}
+
 	if exists && !prAutomation.Status.HasID() {
 		return nil, nil
 	}

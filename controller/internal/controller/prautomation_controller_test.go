@@ -87,7 +87,7 @@ var _ = Describe("PR Automation Controller", func() {
 
 				It("should successfully reconcile", func() {
 					fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false)
+					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false, nil)
 					fakeConsoleClient.On("CreatePrAutomation", mock.Anything, mock.Anything).Return(&gqlclient.PrAutomationFragment{
 						ID:   prAutomationConsoleID,
 						Name: prAutomationName,
@@ -147,7 +147,7 @@ var _ = Describe("PR Automation Controller", func() {
 
 				It("should error with scm connection not found", func() {
 					fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false)
+					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false, nil)
 					fakeConsoleClient.On("CreatePrAutomation", mock.Anything, mock.Anything).Return(&gqlclient.PrAutomationFragment{
 						ID:   prAutomationConsoleID,
 						Name: prAutomationName,
@@ -223,7 +223,7 @@ var _ = Describe("PR Automation Controller", func() {
 
 				It("should successfully reconcile", func() {
 					fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false)
+					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false, nil)
 					fakeConsoleClient.On("CreatePrAutomation", mock.Anything, mock.Anything).Return(&gqlclient.PrAutomationFragment{
 						ID:   prAutomationConsoleID,
 						Name: prAutomationName,
@@ -302,7 +302,7 @@ var _ = Describe("PR Automation Controller", func() {
 
 				It("should error with cluster not found", func() {
 					fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false)
+					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false, nil)
 					fakeConsoleClient.On("CreatePrAutomation", mock.Anything, mock.Anything).Return(&gqlclient.PrAutomationFragment{
 						ID:   prAutomationConsoleID,
 						Name: prAutomationName,
