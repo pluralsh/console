@@ -1,6 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
@@ -11,21 +10,19 @@ import {
   RolesQueryVariables,
   useRolesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   ROLES_REL_PATH,
   getAccessAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'access',
-    url: getAccessAbsPath(cluster?.id),
-  },
+import { getAccessBreadcrumbs } from './Access'
+
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getAccessBreadcrumbs(cluster),
   {
     label: 'roles',
     url: `${getAccessAbsPath(cluster?.id)}/${ROLES_REL_PATH}`,
@@ -39,14 +36,13 @@ export default function Roles() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [colName, colNamespace, colLabels, colCreationTimestamp, colAction],
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 
-  // TODO: Fix query for all namespaces.
   return (
     <ResourceList<RoleListT, RoleT, RolesQuery, RolesQueryVariables>
       namespaced

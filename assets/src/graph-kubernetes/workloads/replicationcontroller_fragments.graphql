@@ -1,4 +1,5 @@
 fragment ReplicationControllerList on replicationcontroller_ReplicationControllerList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

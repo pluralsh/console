@@ -1,4 +1,5 @@
 fragment DeploymentList on deployment_DeploymentList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

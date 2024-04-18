@@ -18,12 +18,14 @@ export interface TabEntry {
 
 interface ResourceDetailsProps {
   tabs: Array<TabEntry>
+  additionalHeaderContent?: Array<ReactElement> | ReactElement
   sidecar: ReactElement
   children?: Array<ReactElement> | ReactElement
 }
 
 export default function ResourceDetails({
   tabs,
+  additionalHeaderContent,
   sidecar,
   children,
 }: ResourceDetailsProps): ReactElement {
@@ -53,11 +55,17 @@ export default function ResourceDetails({
       >
         <ResponsiveLayoutHeader
           css={{
-            paddingRight: theme.spacing.xlarge,
+            paddingRight: theme.spacing.large,
             overflow: 'hidden',
           }}
         >
-          <div css={{ maxWidth: theme.breakpoints.desktopLarge }}>
+          <div
+            css={{
+              display: 'flex',
+              flexGrow: 1,
+              maxWidth: theme.breakpoints.desktopLarge,
+            }}
+          >
             <TabList
               scrollable
               gap="xxsmall"
@@ -67,6 +75,7 @@ export default function ResourceDetails({
                 selectedKey: currentTab?.path,
               }}
               marginRight="medium"
+              paddingTop="xsmall"
               paddingBottom="xxsmall"
             >
               {tabs.map(({ label, path }) => (
@@ -87,6 +96,7 @@ export default function ResourceDetails({
             </TabList>
           </div>
           {headerContent}
+          {additionalHeaderContent}
         </ResponsiveLayoutHeader>
         <ResponsivePageFullWidth
           noPadding

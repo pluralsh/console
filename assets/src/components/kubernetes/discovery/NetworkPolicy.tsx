@@ -26,6 +26,8 @@ import { SubTitle } from '../../utils/SubTitle'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './Services'
 
 const directory: Array<TabEntry> = [
@@ -62,7 +64,7 @@ export default function NetworkPolicy(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'networkpolicy',
+            Kind.NetworkPolicy,
             name,
             namespace
           ),

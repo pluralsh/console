@@ -1,7 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { Link } from 'react-router-dom'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 import {
   Common_EventList as EventListT,
@@ -13,24 +12,20 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../common/ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
-import { ClusterTinyFragment } from '../../../generated/graphql'
-import { InlineLink } from '../../utils/typography/InlineLink'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   EVENTS_REL_PATH,
   getClusterAbsPath,
-  getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
-import { getBaseBreadcrumbs } from '../common/utils'
+import { Kind } from '../common/types'
+import ResourceLink from '../common/ResourceLink'
 
 import { EventTypeChip } from './utils'
+import { getClusterBreadcrumbs } from './Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'cluster',
-    url: getClusterAbsPath(cluster?.id),
-  },
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getClusterBreadcrumbs(cluster),
   {
     label: 'events',
     url: `${getClusterAbsPath(cluster?.id)}/${EVENTS_REL_PATH}`,
@@ -50,22 +45,17 @@ const colObjectNamespace = columnHelper.accessor(
   {
     id: 'objectNamespace',
     header: 'Namespace',
-    cell: ({ getValue, table }) => {
+    cell: ({ getValue }) => {
       const namespace = getValue()
 
-      if (!namespace) return null
-
-      const { cluster } = table.options.meta as {
-        cluster?: ClusterTinyFragment
-      }
-
       return (
-        <Link
-          to={getResourceDetailsAbsPath(cluster?.id, 'namespace', namespace)}
+        <ResourceLink
+          objectRef={{
+            kind: Kind.Namespace,
+            name: namespace,
+          }}
           onClick={(e) => e.stopPropagation()}
-        >
-          <InlineLink>{getValue()}</InlineLink>
-        </Link>
+        />
       )
     },
   }

@@ -1,4 +1,5 @@
 fragment JobList on job_JobList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

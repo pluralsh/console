@@ -33,8 +33,9 @@ import { ResourceList } from '../common/ResourceList'
 import { useCluster } from '../Cluster'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import { DataSelectInputs, useDataSelect } from '../common/DataSelect'
-
 import { NAMESPACE_PARAM } from '../Navigation'
+
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
@@ -67,7 +68,7 @@ export default function CustomResourceDefinition(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'customresourcedefinition',
+            Kind.CustomResourceDefinition,
             name
           ),
         },
@@ -113,8 +114,8 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
   const namespaced = crd.scope.toLowerCase() === 'namespaced'
   const dataSelect = useDataSelect()
   const { name } = useParams()
-  const [params] = useSearchParams()
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const [params, setParams] = useSearchParams()
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
@@ -122,22 +123,33 @@ export function CustomRersourceDefinitionObjects(): ReactElement {
       ...(namespaced ? [colNamespace] : []),
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [namespaced, colName, colNamespace, colLabels, colCreationTimestamp]
+    [
+      namespaced,
+      colName,
+      colNamespace,
+      colLabels,
+      colCreationTimestamp,
+      colAction,
+    ]
   )
 
   useEffect(
-    () => dataSelect.setNamespaced(namespaced),
+    () => {
+      dataSelect.setNamespaced(namespaced)
+      dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? '')
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataSelect.setNamespaced, namespaced]
+    []
   )
 
-  // TODO: Update param when namespace changes.
-  useEffect(
-    () => dataSelect.setNamespace(params.get(NAMESPACE_PARAM) ?? ''),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dataSelect.setNamespace, params]
-  )
+  useEffect(() => {
+    if (isEmpty(dataSelect.namespace)) params.delete(NAMESPACE_PARAM)
+    else params.set(NAMESPACE_PARAM, dataSelect.namespace)
+
+    setParams(params)
+  }, [dataSelect.namespace, params, setParams])
 
   const headerContent = useMemo(
     () => <DataSelectInputs dataSelect={dataSelect} />,

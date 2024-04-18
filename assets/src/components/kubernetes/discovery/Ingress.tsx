@@ -1,7 +1,5 @@
 import React, { ReactElement, useMemo } from 'react'
-
-import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
-
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import {
   Card,
   ChipList,
@@ -9,9 +7,7 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { useTheme } from 'styled-components'
-
 import { createColumnHelper } from '@tanstack/react-table'
 
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
@@ -28,28 +24,20 @@ import {
   useIngressQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import {
   INGRESSES_REL_PATH,
   getDiscoveryAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { NAMESPACE_PARAM } from '../Navigation'
-
 import LoadingIndicator from '../../utils/LoadingIndicator'
-
 import { useEventsColumns } from '../cluster/Events'
-
 import { ResourceList } from '../common/ResourceList'
-
 import { SubTitle } from '../../utils/SubTitle'
-
 import { ResourceInfoCardEntry } from '../common/ResourceInfoCard'
-
-import { InlineLink } from '../../utils/typography/InlineLink'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
+import ResourceLink from '../common/ResourceLink'
 
 import { getBreadcrumbs } from './Ingresses'
 import { Endpoints } from './utils'
@@ -87,7 +75,12 @@ export default function Ingress(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'ingress', name, namespace),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.Ingress,
+            name,
+            namespace
+          ),
         },
       ],
       [cluster, clusterId, name, namespace]
@@ -152,20 +145,18 @@ const columns = [
     header: 'Service',
     cell: ({ getValue }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { clusterId, namespace } = useParams()
+      const { namespace } = useParams()
 
       return (
-        <Link
-          to={getResourceDetailsAbsPath(
-            clusterId,
-            'service',
-            getValue() ?? '',
-            namespace
-          )}
+        <ResourceLink
+          short
+          objectRef={{
+            kind: Kind.Service,
+            name: getValue(),
+            namespace,
+          }}
           onClick={(e) => e.stopPropagation()}
-        >
-          <InlineLink>{getValue()}</InlineLink>
-        </Link>
+        />
       )
     },
   }),
@@ -179,20 +170,18 @@ const columns = [
     header: 'TLS secret',
     cell: ({ getValue }) => {
       // eslint-disable-next-line react-hooks/rules-of-hooks
-      const { clusterId, namespace } = useParams()
+      const { namespace } = useParams()
 
       return (
-        <Link
-          to={getResourceDetailsAbsPath(
-            clusterId,
-            'secret',
-            getValue() ?? '',
-            namespace
-          )}
+        <ResourceLink
+          short
+          objectRef={{
+            kind: Kind.Secret,
+            name: getValue(),
+            namespace,
+          }}
           onClick={(e) => e.stopPropagation()}
-        >
-          <InlineLink>{getValue()}</InlineLink>
-        </Link>
+        />
       )
     },
   }),

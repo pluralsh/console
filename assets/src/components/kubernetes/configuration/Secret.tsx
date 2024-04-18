@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useMemo, useState } from 'react'
+import React, { ReactElement, useEffect, useMemo, useState } from 'react'
 import {
   Button,
   EyeClosedIcon,
@@ -28,8 +28,11 @@ import {
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-
 import { useCluster } from '../Cluster'
+import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
+import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
+
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Secrets'
 
@@ -65,7 +68,12 @@ export default function Secret(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'secret', name, namespace),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.Secret,
+            name,
+            namespace
+          ),
         },
       ],
       [cluster, clusterId, name, namespace]
@@ -154,9 +162,24 @@ const columns = [
 ]
 
 export function SecretData(): ReactElement {
-  const theme = useTheme()
   const secret = useOutletContext() as SecretT
   const [revealAll, setRevealAll] = useState(false)
+
+  const headerContent = useMemo(
+    () => (
+      <Button
+        floating
+        startIcon={revealAll ? <EyeClosedIcon /> : <EyeIcon />}
+        onClick={() => setRevealAll(!revealAll)}
+      >
+        {revealAll ? 'Hide all' : 'Reveal all'}
+      </Button>
+    ),
+    [revealAll, setRevealAll]
+  )
+
+  useSetPageHeaderContent(headerContent)
+
   const data: SecretDataEntry[] = useMemo(
     () =>
       Object.entries(secret?.data ?? {}).map(([key, value]) => ({
@@ -167,23 +190,7 @@ export function SecretData(): ReactElement {
   )
 
   return (
-    <section>
-      <div
-        css={{
-          ...theme.partials.text.subtitle1,
-          justifyContent: 'end',
-          display: 'flex',
-          marginBottom: theme.spacing.small,
-        }}
-      >
-        <Button
-          floating
-          startIcon={revealAll ? <EyeClosedIcon /> : <EyeIcon />}
-          onClick={() => setRevealAll(!revealAll)}
-        >
-          {revealAll ? 'Hide all' : 'Reveal all'}
-        </Button>
-      </div>
+    <FullHeightTableWrap>
       <Table
         data={data}
         columns={columns}
@@ -193,6 +200,6 @@ export function SecretData(): ReactElement {
           height: '100%',
         }}
       />
-    </section>
+    </FullHeightTableWrap>
   )
 }

@@ -11,9 +11,9 @@ import {
   useStatefulSetsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../common/ResourceList'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { UsageText } from '../../cluster/TableElements'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   STATEFUL_SETS_REL_PATH,
   getWorkloadsAbsPath,
@@ -21,13 +21,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+import { getWorkloadsBreadcrumbs } from './Workloads'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'workloads',
-    url: getWorkloadsAbsPath(cluster?.id),
-  },
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'stateful sets',
     url: `${getWorkloadsAbsPath(cluster?.id)}/${STATEFUL_SETS_REL_PATH}`,
@@ -75,7 +72,7 @@ export default function StatefulSets() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
@@ -86,8 +83,9 @@ export default function StatefulSets() {
       colStatus,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

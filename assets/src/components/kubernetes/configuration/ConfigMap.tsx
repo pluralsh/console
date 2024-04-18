@@ -23,6 +23,8 @@ import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './ConfigMaps'
 
 const directory: Array<TabEntry> = [
@@ -59,7 +61,7 @@ export default function ConfigMap(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'configmap',
+            Kind.ConfigMap,
             name,
             namespace
           ),

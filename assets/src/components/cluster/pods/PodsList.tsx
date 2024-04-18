@@ -234,9 +234,7 @@ export const ColImages = columnHelper.accessor((row) => row?.images || [], {
         label={image}
         placement="left-start"
       >
-        <TruncateStart>
-          <span>{image}</span>
-        </TruncateStart>
+        <TruncateStart>{image}</TruncateStart>
       </Tooltip>
     ))
   },

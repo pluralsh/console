@@ -1,4 +1,5 @@
 fragment ReplicaSetList on replicaset_ReplicaSetList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

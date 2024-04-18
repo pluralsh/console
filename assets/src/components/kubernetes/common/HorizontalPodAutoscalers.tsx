@@ -7,11 +7,13 @@ import {
   HorizontalPodAutoscalersForResourceQueryVariables,
   useHorizontalPodAutoscalersForResourceQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ResourceList } from '../common/ResourceList'
 import { useHorizontalPodAutoscalersColumns } from '../cluster/HorizontalPodAutoscalers'
 
+import { ResourceList } from './ResourceList'
+import { Kind } from './types'
+
 interface HorizontalPodAutoscalersProps {
-  kind: string
+  kind: Kind
   namespace: string
   name: string
 }

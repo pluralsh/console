@@ -1,5 +1,4 @@
 import { ReactElement, useCallback, useEffect, useMemo } from 'react'
-import type { OperationVariables } from '@apollo/client/core'
 import type {
   QueryHookOptions,
   QueryResult,
@@ -7,14 +6,9 @@ import type {
 import { Table } from '@pluralsh/design-system'
 import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
-import { Row } from '@tanstack/react-table'
+import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import {
-  Types_ListMeta as ListMetaT,
-  Types_ObjectMeta as ObjectMetaT,
-  Types_TypeMeta as TypeMetaT,
-} from '../../../generated/graphql-kubernetes'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   getCustomResourceDetailsAbsPath,
@@ -23,57 +17,24 @@ import {
 import { useCluster } from '../Cluster'
 
 import { useDataSelect } from './DataSelect'
+import {
+  QueryName,
+  ResourceListItemsKey,
+  ResourceList as ResourceListT,
+  Resource as ResourceT,
+  ResourceVariables,
+  toKind,
+} from './types'
+import { ErrorToast } from './errors'
 
 import {
   DEFAULT_DATA_SELECT,
-  ITEMS_PER_PAGE,
   extendConnection,
   usePageInfo,
   useSortedTableOptions,
 } from './utils'
 
-interface DataSelectVariables extends OperationVariables {
-  filterBy?: Nullable<string>
-  sortBy?: Nullable<string>
-  itemsPerPage?: Nullable<string>
-  page?: Nullable<string>
-}
-
-interface ResourceVariables extends DataSelectVariables {
-  namespace?: Nullable<string>
-}
-
-interface ResourceListT {
-  listMeta: ListMetaT
-}
-
-export interface ResourceT {
-  objectMeta: ObjectMetaT
-  typeMeta: TypeMetaT
-}
-
-type QueryName<TQuery> = Exclude<Extract<keyof TQuery, string>, '__typename'>
-type ResourceListItemsKey<TResourceList> = Exclude<
-  Extract<keyof TResourceList, string>,
-  '__typename' | 'listMeta' | 'errors' | 'status' | 'cumulativeMetrics'
->
-
-interface ResourceListProps<
-  TResourceList,
-  TQuery,
-  TVariables extends ResourceVariables,
-> {
-  columns: Array<object>
-  query: (
-    baseOptions: QueryHookOptions<TQuery, TVariables>
-  ) => QueryResult<TQuery, TVariables>
-  queryOptions?: QueryHookOptions<TQuery, TVariables>
-  queryName: QueryName<TQuery>
-  itemsKey: ResourceListItemsKey<TResourceList>
-  namespaced?: boolean
-  customResource?: boolean
-  disableOnRowClick?: boolean
-}
+const SKELETON_ITEMS = 10
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
   '@keyframes moving-gradient': {
@@ -105,6 +66,26 @@ function SkeletonUnstyled({ ...props }): ReactElement {
   )
 }
 
+interface ResourceListProps<
+  TResourceList,
+  TQuery,
+  TVariables extends ResourceVariables,
+> {
+  columns: Array<object>
+  initialSort?: SortingState
+  query: (
+    baseOptions: QueryHookOptions<TQuery, TVariables>
+  ) => QueryResult<TQuery, TVariables>
+  queryOptions?: QueryHookOptions<TQuery, TVariables>
+  queryName: QueryName<TQuery>
+  itemsKey: ResourceListItemsKey<TResourceList>
+  namespaced?: boolean
+  customResource?: boolean
+  disableOnRowClick?: boolean
+  maxHeight?: string
+  tableOptions?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
+}
+
 export function ResourceList<
   TResourceList extends ResourceListT,
   TResource extends ResourceT,
@@ -112,6 +93,7 @@ export function ResourceList<
   TVariables extends ResourceVariables,
 >({
   columns,
+  initialSort,
   query,
   queryOptions,
   namespaced = false,
@@ -119,15 +101,17 @@ export function ResourceList<
   queryName,
   itemsKey,
   disableOnRowClick,
+  maxHeight,
+  tableOptions,
 }: ResourceListProps<TResourceList, TQuery, TVariables>): ReactElement {
   const navigate = useNavigate()
   const cluster = useCluster()
   const { setNamespaced, namespace, filter } = useDataSelect()
-  const { sortBy, reactTableOptions } = useSortedTableOptions({
-    meta: { cluster },
+  const { sortBy, reactTableOptions } = useSortedTableOptions(initialSort, {
+    meta: { cluster, ...tableOptions },
   })
 
-  const { data, loading, fetchMore } = query({
+  const { data, loading, fetchMore, refetch } = query({
     client: KubernetesClient(cluster?.id ?? ''),
     skip: !cluster,
     pollInterval: 30_000,
@@ -144,7 +128,7 @@ export function ResourceList<
   const items = useMemo(
     () =>
       loading
-        ? Array(ITEMS_PER_PAGE - 1).fill({})
+        ? Array(SKELETON_ITEMS).fill({})
         : (resourceList?.[itemsKey] as Array<TResource>) ?? [],
     [itemsKey, loading, resourceList]
   )
@@ -175,41 +159,47 @@ export function ResourceList<
   }, [setNamespaced, namespaced])
 
   return (
-    <FullHeightTableWrap>
-      <Table
-        data={items}
-        columns={columnsData}
-        hasNextPage={hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
-        reactTableOptions={reactTableOptions}
-        virtualizeRows
-        onRowClick={
-          disableOnRowClick || loading
-            ? undefined
-            : (_, row: Row<ResourceT>) => {
-                navigate(
-                  customResource
-                    ? getCustomResourceDetailsAbsPath(
-                        cluster?.id,
-                        row.original.typeMeta.kind!,
-                        row.original.objectMeta.name!,
-                        row.original.objectMeta.namespace
-                      )
-                    : getResourceDetailsAbsPath(
-                        cluster?.id,
-                        row.original.typeMeta.kind!,
-                        row.original.objectMeta.name!,
-                        row.original.objectMeta.namespace
-                      )
-                )
-              }
-        }
-        css={{
-          maxHeight: 'unset',
-          height: '100%',
-        }}
-      />
-    </FullHeightTableWrap>
+    <>
+      <ErrorToast errors={resourceList?.errors} />
+      <FullHeightTableWrap>
+        <Table
+          data={items}
+          columns={columnsData}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          reactTableOptions={{
+            ...reactTableOptions,
+            ...{ meta: { ...reactTableOptions.meta, refetch } },
+          }}
+          virtualizeRows
+          onRowClick={
+            disableOnRowClick || loading
+              ? undefined
+              : (_, row: Row<ResourceT>) => {
+                  navigate(
+                    customResource
+                      ? getCustomResourceDetailsAbsPath(
+                          cluster?.id,
+                          row.original.typeMeta.kind!,
+                          row.original.objectMeta.name!,
+                          row.original.objectMeta.namespace
+                        )
+                      : getResourceDetailsAbsPath(
+                          cluster?.id,
+                          toKind(row.original.typeMeta.kind!),
+                          row.original.objectMeta.name!,
+                          row.original.objectMeta.namespace
+                        )
+                  )
+                }
+          }
+          css={{
+            maxHeight: maxHeight ?? 'unset',
+            height: '100%',
+          }}
+        />
+      </FullHeightTableWrap>
+    </>
   )
 }

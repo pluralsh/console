@@ -9,7 +9,6 @@ import {
   useRoleQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import {
   ROLES_REL_PATH,
   getAccessAbsPath,
@@ -18,12 +17,10 @@ import {
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-
 import PolicyRules from '../common/PolicyRules'
-
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Roles'
 
@@ -56,7 +53,7 @@ export default function Role(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'role', name, namespace),
+          url: getResourceDetailsAbsPath(clusterId, Kind.Role, name, namespace),
         },
       ],
       [cluster, clusterId, name, namespace]

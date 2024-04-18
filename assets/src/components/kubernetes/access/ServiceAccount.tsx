@@ -19,6 +19,8 @@ import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './ServiceAccounts'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
@@ -52,7 +54,7 @@ export default function ServiceAccount(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'serviceaccount',
+            Kind.ServiceAccount,
             name,
             namespace
           ),

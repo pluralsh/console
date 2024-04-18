@@ -45,6 +45,8 @@ import { LabelSelector } from '../common/LabelSelector'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './ReplicationControllers'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
@@ -83,7 +85,7 @@ export default function ReplicationController(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'replicationcontroller',
+            Kind.ReplicationController,
             name,
             namespace
           ),

@@ -10,10 +10,10 @@ import {
   ReplicationControllersQueryVariables,
   useReplicationControllersQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { UsageText } from '../../cluster/TableElements'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   REPLICATION_CONTROLLERS_REL_PATH,
   getWorkloadsAbsPath,
@@ -21,13 +21,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+import { getWorkloadsBreadcrumbs } from './Workloads'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'workloads',
-    url: getWorkloadsAbsPath(cluster?.id),
-  },
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'replication controllers',
     url: `${getWorkloadsAbsPath(
@@ -77,7 +74,7 @@ export default function ReplicationControllers() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
@@ -88,8 +85,9 @@ export default function ReplicationControllers() {
       colStatus,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

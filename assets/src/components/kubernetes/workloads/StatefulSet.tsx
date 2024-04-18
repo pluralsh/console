@@ -37,6 +37,8 @@ import { PodInfo } from '../common/PodInfo'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './StatefulSets'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
@@ -74,7 +76,7 @@ export default function StatefulSet(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'statefulset',
+            Kind.StatefulSet,
             name,
             namespace
           ),

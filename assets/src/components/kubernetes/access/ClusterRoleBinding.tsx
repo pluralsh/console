@@ -16,6 +16,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import Subjects from '../common/Subjects'
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './ClusterRoleBindings'
 
@@ -44,7 +45,11 @@ export default function ClusterRoleBinding(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'clusterrolebinding', name),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.ClusterRoleBinding,
+            name
+          ),
         },
       ],
       [cluster, clusterId, name]
@@ -63,7 +68,7 @@ export default function ClusterRoleBinding(): ReactElement {
               as={Link}
               to={getResourceDetailsAbsPath(
                 clusterId,
-                'clusterrole',
+                Kind.ClusterRole,
                 crb?.roleRef.name ?? ''
               )}
               inline

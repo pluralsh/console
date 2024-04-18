@@ -99,11 +99,25 @@ query Ingress($name: String!, $namespace: String!) {
   }
 }
 
-query IngressEvents($namespace: String!, $name: String!) {
-  handleGetIngressEvent(namespace: $namespace, ingress: $name)
+query IngressEvents(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetIngressEvent(
+    namespace: $namespace
+    ingress: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "common_EventList"
-      path: "ingress/{args.namespace}/{args.ingress}/event"
+      path: "ingress/{args.namespace}/{args.ingress}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...EventList
   }

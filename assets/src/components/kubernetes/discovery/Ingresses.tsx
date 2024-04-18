@@ -12,11 +12,11 @@ import {
   Maybe,
   useIngressesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { TableText } from '../../cluster/TableElements'
 
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   INGRESSES_REL_PATH,
   getDiscoveryAbsPath,
@@ -25,13 +25,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { TableEndpoints } from './utils'
+import { getDiscoveryBreadcrumbs } from './Discovery'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'discovery',
-    url: getDiscoveryAbsPath(cluster?.id),
-  },
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getDiscoveryBreadcrumbs(cluster),
   {
     label: 'ingresses',
     url: `${getDiscoveryAbsPath(cluster?.id)}/${INGRESSES_REL_PATH}`,
@@ -59,7 +56,7 @@ const colHosts = columnHelper.accessor((ingress) => ingress?.hosts, {
 })
 
 export function useIngressesColumns(): Array<object> {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
 
   return useMemo(
@@ -70,8 +67,9 @@ export function useIngressesColumns(): Array<object> {
       colHosts,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 }
 

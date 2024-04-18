@@ -23,6 +23,8 @@ import Subjects from '../common/Subjects'
 
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './RoleBindings'
 
 const directory: Array<TabEntry> = [
@@ -59,7 +61,7 @@ export default function RoleBinding(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'rolebinding',
+            Kind.RoleBinding,
             name,
             namespace
           ),
@@ -81,7 +83,7 @@ export default function RoleBinding(): ReactElement {
               as={Link}
               to={getResourceDetailsAbsPath(
                 clusterId,
-                'role',
+                Kind.Role,
                 rb?.roleRef.name ?? '',
                 namespace
               )}

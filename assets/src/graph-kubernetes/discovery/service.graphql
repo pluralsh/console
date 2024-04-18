@@ -62,31 +62,73 @@ query Service($name: String!, $namespace: String!) {
   }
 }
 
-query ServiceEvents($namespace: String!, $name: String!) {
-  handleGetServiceEvent(namespace: $namespace, service: $name)
+query ServiceEvents(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetServiceEvent(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "common_EventList"
-      path: "service/{args.namespace}/{args.service}/event"
+      path: "service/{args.namespace}/{args.service}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...EventList
   }
 }
 
-query ServicePods($namespace: String!, $name: String!) {
-  handleGetServicePods(namespace: $namespace, service: $name)
+query ServicePods(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetServicePods(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "pod_PodList"
-      path: "service/{args.namespace}/{args.service}/pod"
+      path: "service/{args.namespace}/{args.service}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...PodList
   }
 }
 
-query ServiceIngresses($namespace: String!, $name: String!) {
-  handleGetServiceIngressList(namespace: $namespace, service: $name)
+query ServiceIngresses(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetServiceIngressList(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "ingress_IngressList"
-      path: "service/{args.namespace}/{args.service}/ingress"
+      path: "service/{args.namespace}/{args.service}/ingress?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...IngressList
   }

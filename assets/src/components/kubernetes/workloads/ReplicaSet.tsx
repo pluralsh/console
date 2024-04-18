@@ -43,8 +43,8 @@ import {
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './ReplicaSets'
 import { usePodsColumns } from './Pods'
@@ -85,7 +85,7 @@ export default function ReplicaSet(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'replicaset',
+            Kind.ReplicaSet,
             name,
             namespace
           ),
@@ -140,7 +140,7 @@ export function ReplicaSetInfo(): ReactElement {
     <section>
       <SubTitle>Horizontal Pod Autoscalers</SubTitle>
       <HorizontalPodAutoscalersForResource
-        kind="replicaset"
+        kind={Kind.ReplicaSet}
         namespace={namespace!}
         name={name!}
       />

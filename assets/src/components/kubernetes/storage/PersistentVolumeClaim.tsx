@@ -1,7 +1,5 @@
 import React, { ReactElement, useMemo } from 'react'
-
-import { Link, Outlet, useParams } from 'react-router-dom'
-
+import { Outlet, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
@@ -15,7 +13,6 @@ import {
   usePersistentVolumeClaimQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import {
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   getResourceDetailsAbsPath,
@@ -23,10 +20,9 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-
-import { InlineLink } from '../../utils/typography/InlineLink'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
+import ResourceLink from '../common/ResourceLink'
 
 import { getBreadcrumbs } from './PersistentVolumeClaims'
 import { PVCStatusChip } from './utils'
@@ -62,7 +58,7 @@ export default function PersistentVolumeClaim(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'persistentvolumeclaim',
+            Kind.PersistentVolumeClaim,
             name,
             namespace
           ),
@@ -89,26 +85,20 @@ export default function PersistentVolumeClaim(): ReactElement {
             />
           </SidecarItem>
           <SidecarItem heading="Volume">
-            <Link
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                'persistentvolume',
-                pvc?.volume ?? ''
-              )}
-            >
-              <InlineLink>{pvc?.volume}</InlineLink>
-            </Link>
+            <ResourceLink
+              objectRef={{
+                kind: Kind.PersistentVolume,
+                name: pvc?.volume,
+              }}
+            />
           </SidecarItem>
           <SidecarItem heading="Storage class">
-            <Link
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                'storageclass',
-                pvc?.storageClass ?? ''
-              )}
-            >
-              <InlineLink>{pvc?.storageClass}</InlineLink>
-            </Link>
+            <ResourceLink
+              objectRef={{
+                kind: Kind.StorageClass,
+                name: pvc?.storageClass,
+              }}
+            />
           </SidecarItem>
           <SidecarItem heading="Status">
             <PVCStatusChip status={pvc?.status} />

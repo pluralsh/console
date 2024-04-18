@@ -4610,7 +4610,7 @@ export type ClusterRolesQueryVariables = Exact<{
 }>;
 
 
-export type ClusterRolesQuery = { __typename?: 'Query', handleGetClusterRoleList?: { __typename?: 'clusterrole_ClusterRoleList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrole_ClusterRole', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ClusterRolesQuery = { __typename?: 'Query', handleGetClusterRoleList?: { __typename?: 'clusterrole_ClusterRoleList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrole_ClusterRole', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ClusterRoleQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4628,7 +4628,7 @@ export type ClusterRoleBindingsQueryVariables = Exact<{
 }>;
 
 
-export type ClusterRoleBindingsQuery = { __typename?: 'Query', handleGetClusterRoleBindingList?: { __typename?: 'clusterrolebinding_ClusterRoleBindingList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrolebinding_ClusterRoleBinding', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ClusterRoleBindingsQuery = { __typename?: 'Query', handleGetClusterRoleBindingList?: { __typename?: 'clusterrolebinding_ClusterRoleBindingList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'clusterrolebinding_ClusterRoleBinding', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ClusterRoleBindingQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4646,7 +4646,7 @@ export type RolesQueryVariables = Exact<{
 }>;
 
 
-export type RolesQuery = { __typename?: 'Query', handleGetRoleList?: { __typename?: 'role_RoleList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'role_Role', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type RolesQuery = { __typename?: 'Query', handleGetRoleList?: { __typename?: 'role_RoleList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'role_Role', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type RoleQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4665,7 +4665,7 @@ export type RoleBindingsQueryVariables = Exact<{
 }>;
 
 
-export type RoleBindingsQuery = { __typename?: 'Query', handleGetRoleBindingList?: { __typename?: 'rolebinding_RoleBindingList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'rolebinding_RoleBinding', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type RoleBindingsQuery = { __typename?: 'Query', handleGetRoleBindingList?: { __typename?: 'rolebinding_RoleBindingList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'rolebinding_RoleBinding', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type RoleBindingQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4684,7 +4684,7 @@ export type ServiceAccountsQueryVariables = Exact<{
 }>;
 
 
-export type ServiceAccountsQuery = { __typename?: 'Query', handleGetServiceAccountList?: { __typename?: 'serviceaccount_ServiceAccountList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'serviceaccount_ServiceAccount', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ServiceAccountsQuery = { __typename?: 'Query', handleGetServiceAccountList?: { __typename?: 'serviceaccount_ServiceAccountList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'serviceaccount_ServiceAccount', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ServiceAccountQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4703,9 +4703,9 @@ export type EventsQueryVariables = Exact<{
 }>;
 
 
-export type EventsQuery = { __typename?: 'Query', handleGetEventList?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type EventsQuery = { __typename?: 'Query', handleGetEventList?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
-export type EventListFragment = { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
+export type EventListFragment = { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
 
 export type EventFragment = { __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
 
@@ -4720,7 +4720,7 @@ export type HorizontalPodAutoscalersQueryVariables = Exact<{
 }>;
 
 
-export type HorizontalPodAutoscalersQuery = { __typename?: 'Query', handleGetHorizontalPodAutoscalerList?: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } | null };
+export type HorizontalPodAutoscalersQuery = { __typename?: 'Query', handleGetHorizontalPodAutoscalerList?: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } | null };
 
 export type HorizontalPodAutoscalersForResourceQueryVariables = Exact<{
   kind: Scalars['String']['input'];
@@ -4733,7 +4733,7 @@ export type HorizontalPodAutoscalersForResourceQueryVariables = Exact<{
 }>;
 
 
-export type HorizontalPodAutoscalersForResourceQuery = { __typename?: 'Query', handleGetHorizontalPodAutoscalerListForResource?: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } | null };
+export type HorizontalPodAutoscalersForResourceQuery = { __typename?: 'Query', handleGetHorizontalPodAutoscalerListForResource?: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } | null };
 
 export type NamespacesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4744,7 +4744,7 @@ export type NamespacesQueryVariables = Exact<{
 }>;
 
 
-export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', phase: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type NamespacesQuery = { __typename?: 'Query', handleGetNamespaces?: { __typename?: 'namespace_NamespaceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, namespaces: Array<{ __typename?: 'namespace_Namespace', phase: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NamespaceQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4762,7 +4762,7 @@ export type NamespaceEventsQueryVariables = Exact<{
 }>;
 
 
-export type NamespaceEventsQuery = { __typename?: 'Query', handleGetNamespaceEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type NamespaceEventsQuery = { __typename?: 'Query', handleGetNamespaceEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NodesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4773,7 +4773,7 @@ export type NodesQueryVariables = Exact<{
 }>;
 
 
-export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', ready: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any } } | null> } | null };
+export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', ready: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any } } | null> } | null };
 
 export type NodeQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4785,10 +4785,14 @@ export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typena
 export type NodePodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type NodePodsQuery = { __typename?: 'Query', handleGetNodePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type NodePodsQuery = { __typename?: 'Query', handleGetNodePods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type NodeEventsQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4799,7 +4803,7 @@ export type NodeEventsQueryVariables = Exact<{
 }>;
 
 
-export type NodeEventsQuery = { __typename?: 'Query', handleGetNodeEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type NodeEventsQuery = { __typename?: 'Query', handleGetNodeEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
 
@@ -4827,7 +4831,7 @@ export type ResourceOwnerFragment = { __typename?: 'controller_ResourceOwner', c
 
 export type SelectorFragment = { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null };
 
-export type HorizontalPodAutoscalerListFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> };
+export type HorizontalPodAutoscalerListFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> };
 
 export type HorizontalPodAutoscalerFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } };
 
@@ -4867,6 +4871,35 @@ export type ResourceUpdateMutationVariables = Exact<{
 
 export type ResourceUpdateMutation = { __typename?: 'Mutation', handlePutResource?: any | null };
 
+export type ResourceScaleMutationVariables = Exact<{
+  kind: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  scaleBy: Scalars['String']['input'];
+}>;
+
+
+export type ResourceScaleMutation = { __typename?: 'Mutation', handleScaleResource?: { __typename?: 'scaling_ReplicaCounts', actualReplicas: number, desiredReplicas: number } | null };
+
+export type ResourceDeleteMutationVariables = Exact<{
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  deleteNow?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ResourceDeleteMutation = { __typename?: 'Mutation', handleDeleteResource?: any | null };
+
+export type NamespacedResourceDeleteMutationVariables = Exact<{
+  kind: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  deleteNow?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type NamespacedResourceDeleteMutation = { __typename?: 'Mutation', handleDeleteResource?: any | null };
+
 export type ConfigMapsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4876,7 +4909,7 @@ export type ConfigMapsQueryVariables = Exact<{
 }>;
 
 
-export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ConfigMapsQuery = { __typename?: 'Query', handleGetConfigMapList?: { __typename?: 'configmap_ConfigMapList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'configmap_ConfigMap', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ConfigMapQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4895,7 +4928,7 @@ export type SecretsQueryVariables = Exact<{
 }>;
 
 
-export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', type: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type SecretsQuery = { __typename?: 'Query', handleGetSecretList?: { __typename?: 'secret_SecretList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, secrets: Array<{ __typename?: 'secret_Secret', type: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type SecretQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4913,7 +4946,7 @@ export type CustomResourceDefinitionsQueryVariables = Exact<{
 }>;
 
 
-export type CustomResourceDefinitionsQuery = { __typename?: 'Query', handleGetCustomResourceDefinitionList?: { __typename?: 'types_CustomResourceDefinitionList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'types_CustomResourceDefinition', established: string, group: string, scope: string, version?: string | null, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, names: { __typename?: 'types_CustomResourceDefinitionNames', categories?: Array<string | null> | null, kind: string, listKind?: string | null, plural: string, shortNames?: Array<string | null> | null, singular?: string | null } } | null> } | null };
+export type CustomResourceDefinitionsQuery = { __typename?: 'Query', handleGetCustomResourceDefinitionList?: { __typename?: 'types_CustomResourceDefinitionList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'types_CustomResourceDefinition', established: string, group: string, scope: string, version?: string | null, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, names: { __typename?: 'types_CustomResourceDefinitionNames', categories?: Array<string | null> | null, kind: string, listKind?: string | null, plural: string, shortNames?: Array<string | null> | null, singular?: string | null } } | null> } | null };
 
 export type CustomResourceDefinitionQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4932,7 +4965,7 @@ export type CustomResourcesQueryVariables = Exact<{
 }>;
 
 
-export type CustomResourcesQuery = { __typename?: 'Query', handleGetCustomResourceObjectList?: { __typename?: 'types_CustomResourceObjectList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'types_CustomResourceObject', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type CustomResourcesQuery = { __typename?: 'Query', handleGetCustomResourceObjectList?: { __typename?: 'types_CustomResourceObjectList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'types_CustomResourceObject', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type CustomResourceQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4947,10 +4980,14 @@ export type CustomResourceEventsQueryVariables = Exact<{
   crd: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type CustomResourceEventsQuery = { __typename?: 'Query', handleGetCustomResourceObjectEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type CustomResourceEventsQuery = { __typename?: 'Query', handleGetCustomResourceObjectEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type IngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4961,7 +4998,7 @@ export type IngressesQueryVariables = Exact<{
 }>;
 
 
-export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
+export type IngressesQuery = { __typename?: 'Query', handleGetIngressList?: { __typename?: 'ingress_IngressList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
 export type IngressQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4974,12 +5011,16 @@ export type IngressQuery = { __typename?: 'Query', handleGetIngressDetail?: { __
 export type IngressEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type IngressEventsQuery = { __typename?: 'Query', handleGetIngressEvent?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type IngressEventsQuery = { __typename?: 'Query', handleGetIngressEvent?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
-export type IngressListFragment = { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
+export type IngressListFragment = { __typename?: 'ingress_IngressList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
 
 export type IngressClassesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -4989,7 +5030,7 @@ export type IngressClassesQueryVariables = Exact<{
 }>;
 
 
-export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', controller: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type IngressClassesQuery = { __typename?: 'Query', handleGetIngressClassList?: { __typename?: 'ingressclass_IngressClassList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingressclass_IngressClass', controller: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type IngressClassQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5007,7 +5048,7 @@ export type NetworkPoliciesQueryVariables = Exact<{
 }>;
 
 
-export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type NetworkPoliciesQuery = { __typename?: 'Query', handleGetNetworkPolicyList?: { __typename?: 'networkpolicy_NetworkPolicyList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'networkpolicy_NetworkPolicy', typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type NetworkPolicyQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5026,7 +5067,7 @@ export type ServicesQueryVariables = Exact<{
 }>;
 
 
-export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
+export type ServicesQuery = { __typename?: 'Query', handleGetServiceList?: { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
 export type ServiceQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5039,28 +5080,40 @@ export type ServiceQuery = { __typename?: 'Query', handleGetServiceDetail?: { __
 export type ServiceEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ServiceEventsQuery = { __typename?: 'Query', handleGetServiceEvent?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ServiceEventsQuery = { __typename?: 'Query', handleGetServiceEvent?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ServicePodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type ServiceIngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ServiceIngressesQuery = { __typename?: 'Query', handleGetServiceIngressList?: { __typename?: 'ingress_IngressList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
+export type ServiceIngressesQuery = { __typename?: 'Query', handleGetServiceIngressList?: { __typename?: 'ingress_IngressList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'ingress_Ingress', hosts: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, endpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
-export type ServiceListFragment = { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
+export type ServiceListFragment = { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> };
 
 export type PersistentVolumesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5070,7 +5123,7 @@ export type PersistentVolumesQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumesQuery = { __typename?: 'Query', handleGetPersistentVolumeList?: { __typename?: 'persistentvolume_PersistentVolumeList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type PersistentVolumesQuery = { __typename?: 'Query', handleGetPersistentVolumeList?: { __typename?: 'persistentvolume_PersistentVolumeList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolume_PersistentVolume', status: string, claim: string, storageClass: string, reason: string, reclaimPolicy: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type PersistentVolumeQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5088,7 +5141,7 @@ export type PersistentVolumeClaimsQueryVariables = Exact<{
 }>;
 
 
-export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type PersistentVolumeClaimsQuery = { __typename?: 'Query', handleGetPersistentVolumeClaimList?: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type PersistentVolumeClaimQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5102,7 +5155,7 @@ export type PersistentVolumeClaimFragment = { __typename?: 'persistentvolumeclai
 
 export type PersistentVolumeClaimDetailFragment = { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimDetail', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
 
-export type PersistentVolumeClaimListFragment = { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
+export type PersistentVolumeClaimListFragment = { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
 
 export type StorageClassesQueryVariables = Exact<{
   filterBy?: InputMaybe<Scalars['String']['input']>;
@@ -5112,7 +5165,7 @@ export type StorageClassesQueryVariables = Exact<{
 }>;
 
 
-export type StorageClassesQuery = { __typename?: 'Query', handleGetStorageClassList?: { __typename?: 'storageclass_StorageClassList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'storageclass_StorageClass', parameters: any, provisioner: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type StorageClassesQuery = { __typename?: 'Query', handleGetStorageClassList?: { __typename?: 'storageclass_StorageClassList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'storageclass_StorageClass', parameters: any, provisioner: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type StorageClassQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5141,7 +5194,7 @@ export type CronJobsQueryVariables = Exact<{
 }>;
 
 
-export type CronJobsQuery = { __typename?: 'Query', handleGetCronJobList?: { __typename?: 'cronjob_CronJobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type CronJobsQuery = { __typename?: 'Query', handleGetCronJobList?: { __typename?: 'cronjob_CronJobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type CronJobQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5154,21 +5207,37 @@ export type CronJobQuery = { __typename?: 'Query', handleGetCronJobDetail?: { __
 export type CronJobEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type CronJobEventsQuery = { __typename?: 'Query', handleGetCronJobEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type CronJobEventsQuery = { __typename?: 'Query', handleGetCronJobEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type CronJobJobsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
   active?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type CronJobJobsQuery = { __typename?: 'Query', handleGetCronJobJobs?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> } | null };
+export type CronJobJobsQuery = { __typename?: 'Query', handleGetCronJobJobs?: { __typename?: 'job_JobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> } | null };
 
-export type CronJobListFragment = { __typename?: 'cronjob_CronJobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
+export type CronJobTriggerMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type CronJobTriggerMutation = { __typename?: 'Mutation', handleTriggerCronJob?: any | null };
+
+export type CronJobListFragment = { __typename?: 'cronjob_CronJobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> };
 
 export type CronJobFragment = { __typename?: 'cronjob_CronJob', containerImages: Array<string | null>, schedule: string, suspend: boolean, active: number, lastSchedule: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } };
 
@@ -5183,7 +5252,7 @@ export type DaemonSetsQueryVariables = Exact<{
 }>;
 
 
-export type DaemonSetsQuery = { __typename?: 'Query', handleGetDaemonSetList?: { __typename?: 'daemonset_DaemonSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+export type DaemonSetsQuery = { __typename?: 'Query', handleGetDaemonSetList?: { __typename?: 'daemonset_DaemonSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
 export type DaemonSetQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5196,28 +5265,40 @@ export type DaemonSetQuery = { __typename?: 'Query', handleGetDaemonSetDetail?: 
 export type DaemonSetEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type DaemonSetEventsQuery = { __typename?: 'Query', handleGetDaemonSetEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type DaemonSetEventsQuery = { __typename?: 'Query', handleGetDaemonSetEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type DaemonSetPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type DaemonSetPodsQuery = { __typename?: 'Query', handleGetDaemonSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type DaemonSetPodsQuery = { __typename?: 'Query', handleGetDaemonSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type DaemonSetServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type DaemonSetServicesQuery = { __typename?: 'Query', handleGetDaemonSetServices?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
+export type DaemonSetServicesQuery = { __typename?: 'Query', handleGetDaemonSetServices?: { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
-export type DaemonSetListFragment = { __typename?: 'daemonset_DaemonSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+export type DaemonSetListFragment = { __typename?: 'daemonset_DaemonSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, daemonSets: Array<{ __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
 
 export type DaemonSetFragment = { __typename?: 'daemonset_DaemonSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
@@ -5232,7 +5313,7 @@ export type DeploymentsQueryVariables = Exact<{
 }>;
 
 
-export type DeploymentsQuery = { __typename?: 'Query', handleGetDeployments?: { __typename?: 'deployment_DeploymentList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+export type DeploymentsQuery = { __typename?: 'Query', handleGetDeployments?: { __typename?: 'deployment_DeploymentList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
 export type DeploymentQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5245,14 +5326,22 @@ export type DeploymentQuery = { __typename?: 'Query', handleGetDeploymentDetail?
 export type DeploymentEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type DeploymentEventsQuery = { __typename?: 'Query', handleGetDeploymentEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type DeploymentEventsQuery = { __typename?: 'Query', handleGetDeploymentEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type DeploymentNewReplicaSetQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -5261,12 +5350,16 @@ export type DeploymentNewReplicaSetQuery = { __typename?: 'Query', handleGetDepl
 export type DeploymentOldReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type DeploymentOldReplicaSetsQuery = { __typename?: 'Query', handleGetDeploymentOldReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+export type DeploymentOldReplicaSetsQuery = { __typename?: 'Query', handleGetDeploymentOldReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
-export type DeploymentListFragment = { __typename?: 'deployment_DeploymentList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+export type DeploymentListFragment = { __typename?: 'deployment_DeploymentList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, deployments: Array<{ __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
 
 export type DeploymentFragment = { __typename?: 'deployment_Deployment', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
@@ -5285,7 +5378,7 @@ export type JobsQueryVariables = Exact<{
 }>;
 
 
-export type JobsQuery = { __typename?: 'Query', handleGetJobList?: { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> } | null };
+export type JobsQuery = { __typename?: 'Query', handleGetJobList?: { __typename?: 'job_JobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> } | null };
 
 export type JobQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5298,20 +5391,28 @@ export type JobQuery = { __typename?: 'Query', handleGetJobDetail?: { __typename
 export type JobEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type JobEventsQuery = { __typename?: 'Query', handleGetJobEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type JobEventsQuery = { __typename?: 'Query', handleGetJobEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type JobPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type JobPodsQuery = { __typename?: 'Query', handleGetJobPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type JobPodsQuery = { __typename?: 'Query', handleGetJobPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
-export type JobListFragment = { __typename?: 'job_JobList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> };
+export type JobListFragment = { __typename?: 'job_JobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> };
 
 export type JobFragment = { __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } };
 
@@ -5328,7 +5429,7 @@ export type PodsQueryVariables = Exact<{
 }>;
 
 
-export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type PodQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5336,7 +5437,7 @@ export type PodQueryVariables = Exact<{
 }>;
 
 
-export type PodQuery = { __typename?: 'Query', handleGetPodDetail?: { __typename?: 'pod_PodDetail', nodeName: string, restartCount: number, serviceAccountName: string, podIP: string, podPhase: string, qosClass: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, containers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null } | null>, initContainers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null } | null>, imagePullSecrets?: Array<{ __typename?: 'v1_LocalObjectReference', name?: string | null } | null> | null, persistentVolumeClaimList: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, controller?: { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null, securityContext: { __typename?: 'v1_PodSecurityContext', fsGroup?: any | null, fsGroupChangePolicy?: string | null, runAsUser?: any | null, runAsGroup?: any | null, runAsNonRoot?: boolean | null, supplementalGroups?: Array<any | null> | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', type?: string | null, level?: string | null, role?: string | null, user?: string | null } | null, sysctls?: Array<{ __typename?: 'v1_Sysctl', name: string, value: string } | null> | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', gmsaCredentialSpec?: string | null, gmsaCredentialSpecName?: string | null, hostProcess?: boolean | null, runAsUserName?: string | null } | null } } | null };
+export type PodQuery = { __typename?: 'Query', handleGetPodDetail?: { __typename?: 'pod_PodDetail', nodeName: string, restartCount: number, serviceAccountName: string, podIP: string, podPhase: string, qosClass: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, containers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null } | null>, initContainers: Array<{ __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null } | null>, imagePullSecrets?: Array<{ __typename?: 'v1_LocalObjectReference', name?: string | null } | null> | null, persistentVolumeClaimList: { __typename?: 'persistentvolumeclaim_PersistentVolumeClaimList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, items: Array<{ __typename?: 'persistentvolumeclaim_PersistentVolumeClaim', status: string, volume: string, storageClass: string, accessModes: Array<string | null>, capacity: any, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, controller?: { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null, securityContext: { __typename?: 'v1_PodSecurityContext', fsGroup?: any | null, fsGroupChangePolicy?: string | null, runAsUser?: any | null, runAsGroup?: any | null, runAsNonRoot?: boolean | null, supplementalGroups?: Array<any | null> | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', type?: string | null, level?: string | null, role?: string | null, user?: string | null } | null, sysctls?: Array<{ __typename?: 'v1_Sysctl', name: string, value: string } | null> | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', gmsaCredentialSpec?: string | null, gmsaCredentialSpecName?: string | null, hostProcess?: boolean | null, runAsUserName?: string | null } | null } } | null };
 
 export type PodEventsQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5348,7 +5449,7 @@ export type PodEventsQueryVariables = Exact<{
 }>;
 
 
-export type PodEventsQuery = { __typename?: 'Query', handleGetPodEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type PodEventsQuery = { __typename?: 'Query', handleGetPodEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ContainerFragment = { __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null };
 
@@ -5358,7 +5459,7 @@ export type PodSecurityContextFragment = { __typename?: 'v1_PodSecurityContext',
 
 export type SecurityContextFragment = { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null };
 
-export type PodListFragment = { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> };
+export type PodListFragment = { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> };
 
 export type ReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5369,7 +5470,7 @@ export type ReplicaSetsQueryVariables = Exact<{
 }>;
 
 
-export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+export type ReplicaSetsQuery = { __typename?: 'Query', handleGetReplicaSets?: { __typename?: 'replicaset_ReplicaSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
 export type ReplicaSetQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5377,37 +5478,49 @@ export type ReplicaSetQueryVariables = Exact<{
 }>;
 
 
-export type ReplicaSetQuery = { __typename?: 'Query', handleGetReplicaSetDetail?: { __typename?: 'replicaset_ReplicaSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, selector: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null }, horizontalPodAutoscalerList: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } } | null };
+export type ReplicaSetQuery = { __typename?: 'Query', handleGetReplicaSetDetail?: { __typename?: 'replicaset_ReplicaSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, selector: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null }, horizontalPodAutoscalerList: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } } | null };
 
 export type ReplicaSetEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ReplicaSetEventsQuery = { __typename?: 'Query', handleGetReplicaSetEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ReplicaSetEventsQuery = { __typename?: 'Query', handleGetReplicaSetEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ReplicaSetPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ReplicaSetPodsQuery = { __typename?: 'Query', handleGetReplicaSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ReplicaSetPodsQuery = { __typename?: 'Query', handleGetReplicaSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type ReplicaSetServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ReplicaSetServicesQuery = { __typename?: 'Query', handleGetReplicaSetServices?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
+export type ReplicaSetServicesQuery = { __typename?: 'Query', handleGetReplicaSetServices?: { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
-export type ReplicaSetListFragment = { __typename?: 'replicaset_ReplicaSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+export type ReplicaSetListFragment = { __typename?: 'replicaset_ReplicaSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicaSets: Array<{ __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
 
 export type ReplicaSetFragment = { __typename?: 'replicaset_ReplicaSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
-export type ReplicaSetDetailFragment = { __typename?: 'replicaset_ReplicaSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, selector: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null }, horizontalPodAutoscalerList: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } };
+export type ReplicaSetDetailFragment = { __typename?: 'replicaset_ReplicaSetDetail', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, selector: { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null }, horizontalPodAutoscalerList: { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> } };
 
 export type ReplicationControllersQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5418,7 +5531,7 @@ export type ReplicationControllersQueryVariables = Exact<{
 }>;
 
 
-export type ReplicationControllersQuery = { __typename?: 'Query', handleGetReplicationControllerList?: { __typename?: 'replicationcontroller_ReplicationControllerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+export type ReplicationControllersQuery = { __typename?: 'Query', handleGetReplicationControllerList?: { __typename?: 'replicationcontroller_ReplicationControllerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
 export type ReplicationControllerQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5431,28 +5544,40 @@ export type ReplicationControllerQuery = { __typename?: 'Query', handleGetReplic
 export type ReplicationControllerEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ReplicationControllerEventsQuery = { __typename?: 'Query', handleGetReplicationControllerEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type ReplicationControllerEventsQuery = { __typename?: 'Query', handleGetReplicationControllerEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type ReplicationControllerPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ReplicationControllerPodsQuery = { __typename?: 'Query', handleGetReplicationControllerPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ReplicationControllerPodsQuery = { __typename?: 'Query', handleGetReplicationControllerPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
 export type ReplicationControllerServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ReplicationControllerServicesQuery = { __typename?: 'Query', handleGetReplicationControllerServices?: { __typename?: 'service_ServiceList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
+export type ReplicationControllerServicesQuery = { __typename?: 'Query', handleGetReplicationControllerServices?: { __typename?: 'service_ServiceList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, services: Array<{ __typename?: 'service_Service', type: string, clusterIP: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, internalEndpoint: { __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> }, externalEndpoints: Array<{ __typename?: 'common_Endpoint', host: string, ports: Array<{ __typename?: 'common_ServicePort', port: number, nodePort: number, protocol: string } | null> } | null> } | null> } | null };
 
-export type ReplicationControllerListFragment = { __typename?: 'replicationcontroller_ReplicationControllerList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+export type ReplicationControllerListFragment = { __typename?: 'replicationcontroller_ReplicationControllerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, replicationControllers: Array<{ __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
 
 export type ReplicationControllerFragment = { __typename?: 'replicationcontroller_ReplicationController', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
@@ -5467,7 +5592,7 @@ export type StatefulSetsQueryVariables = Exact<{
 }>;
 
 
-export type StatefulSetsQuery = { __typename?: 'Query', handleGetStatefulSetList?: { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
+export type StatefulSetsQuery = { __typename?: 'Query', handleGetStatefulSetList?: { __typename?: 'statefulset_StatefulSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> } | null };
 
 export type StatefulSetQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5480,20 +5605,28 @@ export type StatefulSetQuery = { __typename?: 'Query', handleGetStatefulSetDetai
 export type StatefulSetEventsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type StatefulSetEventsQuery = { __typename?: 'Query', handleGetStatefulSetEvents?: { __typename?: 'common_EventList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+export type StatefulSetEventsQuery = { __typename?: 'Query', handleGetStatefulSetEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
 export type StatefulSetPodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type StatefulSetPodsQuery = { __typename?: 'Query', handleGetStatefulSetPods?: { __typename?: 'pod_PodList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type StatefulSetPodsQuery = { __typename?: 'Query', handleGetStatefulSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
 
-export type StatefulSetListFragment = { __typename?: 'statefulset_StatefulSetList', listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
+export type StatefulSetListFragment = { __typename?: 'statefulset_StatefulSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
 
 export type StatefulSetFragment = { __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
@@ -5544,6 +5677,7 @@ export const EventFragmentDoc = gql`
 ${ObjectMetaFragmentDoc}`;
 export const EventListFragmentDoc = gql`
     fragment EventList on common_EventList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -5625,6 +5759,7 @@ export const EndpointFragmentDoc = gql`
     `;
 export const IngressListFragmentDoc = gql`
     fragment IngressList on ingress_IngressList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -5647,6 +5782,7 @@ ${ObjectMetaFragmentDoc}
 ${EndpointFragmentDoc}`;
 export const ServiceListFragmentDoc = gql`
     fragment ServiceList on service_ServiceList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -5705,6 +5841,7 @@ export const PersistentVolumeClaimFragmentDoc = gql`
 ${ObjectMetaFragmentDoc}`;
 export const PersistentVolumeClaimListFragmentDoc = gql`
     fragment PersistentVolumeClaimList on persistentvolumeclaim_PersistentVolumeClaimList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -5732,6 +5869,7 @@ export const CronJobFragmentDoc = gql`
 ${ObjectMetaFragmentDoc}`;
 export const CronJobListFragmentDoc = gql`
     fragment CronJobList on cronjob_CronJobList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -5778,6 +5916,7 @@ ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
 export const DaemonSetListFragmentDoc = gql`
     fragment DaemonSetList on daemonset_DaemonSetList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -5837,6 +5976,7 @@ ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
 export const DeploymentListFragmentDoc = gql`
     fragment DeploymentList on deployment_DeploymentList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -5936,6 +6076,7 @@ ${PodInfoFragmentDoc}
 ${JobStatusFragmentDoc}`;
 export const JobListFragmentDoc = gql`
     fragment JobList on job_JobList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -6129,6 +6270,7 @@ export const PodSecurityContextFragmentDoc = gql`
     `;
 export const PodListFragmentDoc = gql`
     fragment PodList on pod_PodList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -6175,6 +6317,7 @@ ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
 export const ReplicaSetListFragmentDoc = gql`
     fragment ReplicaSetList on replicaset_ReplicaSetList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -6205,6 +6348,7 @@ export const HorizontalPodAutoscalerFragmentDoc = gql`
 ${ObjectMetaFragmentDoc}`;
 export const HorizontalPodAutoscalerListFragmentDoc = gql`
     fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAutoscalerList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -6258,6 +6402,7 @@ ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
 export const ReplicationControllerListFragmentDoc = gql`
     fragment ReplicationControllerList on replicationcontroller_ReplicationControllerList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -6304,6 +6449,7 @@ ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
 export const StatefulSetListFragmentDoc = gql`
     fragment StatefulSetList on statefulset_StatefulSetList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }
@@ -6338,6 +6484,7 @@ export const ClusterRolesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "clusterrole?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -6450,6 +6597,7 @@ export const ClusterRoleBindingsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "clusterrolebinding?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -6568,6 +6716,7 @@ export const RolesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(type: "role_RoleList", path: "role/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -6682,6 +6831,7 @@ export const RoleBindingsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "rolebinding/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -6801,6 +6951,7 @@ export const ServiceAccountsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(type: "serviceaccount_ServiceAccountList", path: "serviceaccount/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -7065,6 +7216,7 @@ export const NamespacesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "namespace?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -7246,6 +7398,7 @@ export const NodesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -7401,8 +7554,14 @@ export type NodeLazyQueryHookResult = ReturnType<typeof useNodeLazyQuery>;
 export type NodeSuspenseQueryHookResult = ReturnType<typeof useNodeSuspenseQuery>;
 export type NodeQueryResult = Apollo.QueryResult<NodeQuery, NodeQueryVariables>;
 export const NodePodsDocument = gql`
-    query NodePods($namespace: String!, $name: String!) {
-  handleGetNodePods(name: $name) @rest(type: "pod_PodList", path: "node/{args.name}/pod") {
+    query NodePods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetNodePods(
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "node/{args.name}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -7422,6 +7581,10 @@ export const NodePodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -7493,7 +7656,7 @@ export type NodeEventsSuspenseQueryHookResult = ReturnType<typeof useNodeEventsS
 export type NodeEventsQueryResult = Apollo.QueryResult<NodeEventsQuery, NodeEventsQueryVariables>;
 export const NamespacedResourceDocument = gql`
     query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
-  handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
+  handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(method: "GET", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
     Object
   }
 }
@@ -7535,7 +7698,7 @@ export type NamespacedResourceSuspenseQueryHookResult = ReturnType<typeof useNam
 export type NamespacedResourceQueryResult = Apollo.QueryResult<NamespacedResourceQuery, NamespacedResourceQueryVariables>;
 export const ResourceDocument = gql`
     query Resource($kind: String!, $name: String!) {
-  handleGetResource(kind: $kind, name: $name, namespace: "") @rest(path: "_raw/{args.kind}/name/{args.name}") {
+  handleGetResource(kind: $kind, name: $name, namespace: "") @rest(method: "GET", path: "_raw/{args.kind}/name/{args.name}") {
     Object
   }
 }
@@ -7646,6 +7809,125 @@ export function useResourceUpdateMutation(baseOptions?: Apollo.MutationHookOptio
 export type ResourceUpdateMutationHookResult = ReturnType<typeof useResourceUpdateMutation>;
 export type ResourceUpdateMutationResult = Apollo.MutationResult<ResourceUpdateMutation>;
 export type ResourceUpdateMutationOptions = Apollo.BaseMutationOptions<ResourceUpdateMutation, ResourceUpdateMutationVariables>;
+export const ResourceScaleDocument = gql`
+    mutation ResourceScale($kind: String!, $namespace: String!, $name: String!, $scaleBy: String!) {
+  handleScaleResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    scaleBy: $scaleBy
+  ) @rest(type: "Void", path: "scale/{args.kind}/{args.namespace}/{args.name}?scaleBy={args.scaleBy}", method: "PUT", bodyKey: "scaleBy") {
+    actualReplicas
+    desiredReplicas
+  }
+}
+    `;
+export type ResourceScaleMutationFn = Apollo.MutationFunction<ResourceScaleMutation, ResourceScaleMutationVariables>;
+
+/**
+ * __useResourceScaleMutation__
+ *
+ * To run a mutation, you first call `useResourceScaleMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResourceScaleMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resourceScaleMutation, { data, loading, error }] = useResourceScaleMutation({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *      scaleBy: // value for 'scaleBy'
+ *   },
+ * });
+ */
+export function useResourceScaleMutation(baseOptions?: Apollo.MutationHookOptions<ResourceScaleMutation, ResourceScaleMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResourceScaleMutation, ResourceScaleMutationVariables>(ResourceScaleDocument, options);
+      }
+export type ResourceScaleMutationHookResult = ReturnType<typeof useResourceScaleMutation>;
+export type ResourceScaleMutationResult = Apollo.MutationResult<ResourceScaleMutation>;
+export type ResourceScaleMutationOptions = Apollo.BaseMutationOptions<ResourceScaleMutation, ResourceScaleMutationVariables>;
+export const ResourceDeleteDocument = gql`
+    mutation ResourceDelete($kind: String!, $name: String!, $deleteNow: String) {
+  handleDeleteResource(
+    kind: $kind
+    name: $name
+    namespace: ""
+    deleteNow: $deleteNow
+  ) @rest(type: "Void", path: "_raw/{args.kind}/name/{args.name}?deleteNow={args.deleteNow}", method: "DELETE")
+}
+    `;
+export type ResourceDeleteMutationFn = Apollo.MutationFunction<ResourceDeleteMutation, ResourceDeleteMutationVariables>;
+
+/**
+ * __useResourceDeleteMutation__
+ *
+ * To run a mutation, you first call `useResourceDeleteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useResourceDeleteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [resourceDeleteMutation, { data, loading, error }] = useResourceDeleteMutation({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      name: // value for 'name'
+ *      deleteNow: // value for 'deleteNow'
+ *   },
+ * });
+ */
+export function useResourceDeleteMutation(baseOptions?: Apollo.MutationHookOptions<ResourceDeleteMutation, ResourceDeleteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ResourceDeleteMutation, ResourceDeleteMutationVariables>(ResourceDeleteDocument, options);
+      }
+export type ResourceDeleteMutationHookResult = ReturnType<typeof useResourceDeleteMutation>;
+export type ResourceDeleteMutationResult = Apollo.MutationResult<ResourceDeleteMutation>;
+export type ResourceDeleteMutationOptions = Apollo.BaseMutationOptions<ResourceDeleteMutation, ResourceDeleteMutationVariables>;
+export const NamespacedResourceDeleteDocument = gql`
+    mutation NamespacedResourceDelete($kind: String!, $namespace: String!, $name: String!, $deleteNow: String) {
+  handleDeleteResource(
+    kind: $kind
+    namespace: $namespace
+    name: $name
+    deleteNow: $deleteNow
+  ) @rest(type: "Void", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}?deleteNow={args.deleteNow}", method: "DELETE")
+}
+    `;
+export type NamespacedResourceDeleteMutationFn = Apollo.MutationFunction<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>;
+
+/**
+ * __useNamespacedResourceDeleteMutation__
+ *
+ * To run a mutation, you first call `useNamespacedResourceDeleteMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useNamespacedResourceDeleteMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [namespacedResourceDeleteMutation, { data, loading, error }] = useNamespacedResourceDeleteMutation({
+ *   variables: {
+ *      kind: // value for 'kind'
+ *      namespace: // value for 'namespace'
+ *      name: // value for 'name'
+ *      deleteNow: // value for 'deleteNow'
+ *   },
+ * });
+ */
+export function useNamespacedResourceDeleteMutation(baseOptions?: Apollo.MutationHookOptions<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>(NamespacedResourceDeleteDocument, options);
+      }
+export type NamespacedResourceDeleteMutationHookResult = ReturnType<typeof useNamespacedResourceDeleteMutation>;
+export type NamespacedResourceDeleteMutationResult = Apollo.MutationResult<NamespacedResourceDeleteMutation>;
+export type NamespacedResourceDeleteMutationOptions = Apollo.BaseMutationOptions<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>;
 export const ConfigMapsDocument = gql`
     query ConfigMaps($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetConfigMapList(
@@ -7655,6 +7937,7 @@ export const ConfigMapsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "configmap/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -7765,6 +8048,7 @@ export const SecretsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "secret/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -7876,6 +8160,7 @@ export const CustomResourceDefinitionsDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "crd?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta {
       totalItems
     }
@@ -8013,6 +8298,7 @@ export const CustomResourcesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "crd/{args.namespace}/{args.crd}/object?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta {
       totalItems
     }
@@ -8119,12 +8405,16 @@ export type CustomResourceLazyQueryHookResult = ReturnType<typeof useCustomResou
 export type CustomResourceSuspenseQueryHookResult = ReturnType<typeof useCustomResourceSuspenseQuery>;
 export type CustomResourceQueryResult = Apollo.QueryResult<CustomResourceQuery, CustomResourceQueryVariables>;
 export const CustomResourceEventsDocument = gql`
-    query CustomResourceEvents($crd: String!, $namespace: String!, $name: String!) {
+    query CustomResourceEvents($crd: String!, $namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetCustomResourceObjectEvents(
     namespace: $namespace
     object: $name
     crd: $crd
-  ) @rest(type: "common_EventList", path: "crd/{args.namespace}/{args.crd}/{args.object}/event") {
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "crd/{args.namespace}/{args.crd}/{args.object}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -8145,6 +8435,10 @@ export const CustomResourceEventsDocument = gql`
  *      crd: // value for 'crd'
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8330,8 +8624,15 @@ export type IngressLazyQueryHookResult = ReturnType<typeof useIngressLazyQuery>;
 export type IngressSuspenseQueryHookResult = ReturnType<typeof useIngressSuspenseQuery>;
 export type IngressQueryResult = Apollo.QueryResult<IngressQuery, IngressQueryVariables>;
 export const IngressEventsDocument = gql`
-    query IngressEvents($namespace: String!, $name: String!) {
-  handleGetIngressEvent(namespace: $namespace, ingress: $name) @rest(type: "common_EventList", path: "ingress/{args.namespace}/{args.ingress}/event") {
+    query IngressEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetIngressEvent(
+    namespace: $namespace
+    ingress: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "ingress/{args.namespace}/{args.ingress}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -8351,6 +8652,10 @@ export const IngressEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8378,6 +8683,7 @@ export const IngressClassesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "ingressclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -8487,6 +8793,7 @@ export const NetworkPoliciesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "networkpolicy/{args.namespace}?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -8756,8 +9063,15 @@ export type ServiceLazyQueryHookResult = ReturnType<typeof useServiceLazyQuery>;
 export type ServiceSuspenseQueryHookResult = ReturnType<typeof useServiceSuspenseQuery>;
 export type ServiceQueryResult = Apollo.QueryResult<ServiceQuery, ServiceQueryVariables>;
 export const ServiceEventsDocument = gql`
-    query ServiceEvents($namespace: String!, $name: String!) {
-  handleGetServiceEvent(namespace: $namespace, service: $name) @rest(type: "common_EventList", path: "service/{args.namespace}/{args.service}/event") {
+    query ServiceEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServiceEvent(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "service/{args.namespace}/{args.service}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -8777,6 +9091,10 @@ export const ServiceEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8797,8 +9115,15 @@ export type ServiceEventsLazyQueryHookResult = ReturnType<typeof useServiceEvent
 export type ServiceEventsSuspenseQueryHookResult = ReturnType<typeof useServiceEventsSuspenseQuery>;
 export type ServiceEventsQueryResult = Apollo.QueryResult<ServiceEventsQuery, ServiceEventsQueryVariables>;
 export const ServicePodsDocument = gql`
-    query ServicePods($namespace: String!, $name: String!) {
-  handleGetServicePods(namespace: $namespace, service: $name) @rest(type: "pod_PodList", path: "service/{args.namespace}/{args.service}/pod") {
+    query ServicePods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServicePods(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "service/{args.namespace}/{args.service}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -8818,6 +9143,10 @@ export const ServicePodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8838,8 +9167,15 @@ export type ServicePodsLazyQueryHookResult = ReturnType<typeof useServicePodsLaz
 export type ServicePodsSuspenseQueryHookResult = ReturnType<typeof useServicePodsSuspenseQuery>;
 export type ServicePodsQueryResult = Apollo.QueryResult<ServicePodsQuery, ServicePodsQueryVariables>;
 export const ServiceIngressesDocument = gql`
-    query ServiceIngresses($namespace: String!, $name: String!) {
-  handleGetServiceIngressList(namespace: $namespace, service: $name) @rest(type: "ingress_IngressList", path: "service/{args.namespace}/{args.service}/ingress") {
+    query ServiceIngresses($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetServiceIngressList(
+    namespace: $namespace
+    service: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "ingress_IngressList", path: "service/{args.namespace}/{args.service}/ingress?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...IngressList
   }
 }
@@ -8859,6 +9195,10 @@ export const ServiceIngressesDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -8886,6 +9226,7 @@ export const PersistentVolumesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "persistentvolume?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -9297,6 +9638,7 @@ export const StorageClassesDocument = gql`
     itemsPerPage: $itemsPerPage
     page: $page
   ) @rest(path: "storageclass?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -9559,8 +9901,15 @@ export type CronJobLazyQueryHookResult = ReturnType<typeof useCronJobLazyQuery>;
 export type CronJobSuspenseQueryHookResult = ReturnType<typeof useCronJobSuspenseQuery>;
 export type CronJobQueryResult = Apollo.QueryResult<CronJobQuery, CronJobQueryVariables>;
 export const CronJobEventsDocument = gql`
-    query CronJobEvents($namespace: String!, $name: String!) {
-  handleGetCronJobEvents(namespace: $namespace, name: $name) @rest(type: "common_EventList", path: "cronjob/{args.namespace}/{args.name}/event") {
+    query CronJobEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetCronJobEvents(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "cronjob/{args.namespace}/{args.name}/event") {
     ...EventList
   }
 }
@@ -9580,6 +9929,10 @@ export const CronJobEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9600,8 +9953,16 @@ export type CronJobEventsLazyQueryHookResult = ReturnType<typeof useCronJobEvent
 export type CronJobEventsSuspenseQueryHookResult = ReturnType<typeof useCronJobEventsSuspenseQuery>;
 export type CronJobEventsQueryResult = Apollo.QueryResult<CronJobEventsQuery, CronJobEventsQueryVariables>;
 export const CronJobJobsDocument = gql`
-    query CronJobJobs($namespace: String!, $name: String!, $active: String) {
-  handleGetCronJobJobs(namespace: $namespace, name: $name, active: $active) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}") {
+    query CronJobJobs($namespace: String!, $name: String!, $active: String, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetCronJobJobs(
+    namespace: $namespace
+    name: $name
+    active: $active
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "job_JobList", path: "cronjob/{args.namespace}/{args.name}/job?active={args.active}&filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...JobList
   }
 }
@@ -9622,6 +9983,10 @@ export const CronJobJobsDocument = gql`
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
  *      active: // value for 'active'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9641,6 +10006,38 @@ export type CronJobJobsQueryHookResult = ReturnType<typeof useCronJobJobsQuery>;
 export type CronJobJobsLazyQueryHookResult = ReturnType<typeof useCronJobJobsLazyQuery>;
 export type CronJobJobsSuspenseQueryHookResult = ReturnType<typeof useCronJobJobsSuspenseQuery>;
 export type CronJobJobsQueryResult = Apollo.QueryResult<CronJobJobsQuery, CronJobJobsQueryVariables>;
+export const CronJobTriggerDocument = gql`
+    mutation CronJobTrigger($name: String!, $namespace: String!) {
+  handleTriggerCronJob(name: $name, namespace: $namespace) @rest(type: "Void", path: "/cronjob/{args.namespace}/{args.name}/trigger", method: "PUT", bodyKey: "name")
+}
+    `;
+export type CronJobTriggerMutationFn = Apollo.MutationFunction<CronJobTriggerMutation, CronJobTriggerMutationVariables>;
+
+/**
+ * __useCronJobTriggerMutation__
+ *
+ * To run a mutation, you first call `useCronJobTriggerMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCronJobTriggerMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [cronJobTriggerMutation, { data, loading, error }] = useCronJobTriggerMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useCronJobTriggerMutation(baseOptions?: Apollo.MutationHookOptions<CronJobTriggerMutation, CronJobTriggerMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CronJobTriggerMutation, CronJobTriggerMutationVariables>(CronJobTriggerDocument, options);
+      }
+export type CronJobTriggerMutationHookResult = ReturnType<typeof useCronJobTriggerMutation>;
+export type CronJobTriggerMutationResult = Apollo.MutationResult<CronJobTriggerMutation>;
+export type CronJobTriggerMutationOptions = Apollo.BaseMutationOptions<CronJobTriggerMutation, CronJobTriggerMutationVariables>;
 export const DaemonSetsDocument = gql`
     query DaemonSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetDaemonSetList(
@@ -9733,8 +10130,15 @@ export type DaemonSetLazyQueryHookResult = ReturnType<typeof useDaemonSetLazyQue
 export type DaemonSetSuspenseQueryHookResult = ReturnType<typeof useDaemonSetSuspenseQuery>;
 export type DaemonSetQueryResult = Apollo.QueryResult<DaemonSetQuery, DaemonSetQueryVariables>;
 export const DaemonSetEventsDocument = gql`
-    query DaemonSetEvents($namespace: String!, $name: String!) {
-  handleGetDaemonSetEvents(namespace: $namespace, daemonSet: $name) @rest(type: "common_EventList", path: "daemonset/{args.namespace}/{args.daemonSet}/event") {
+    query DaemonSetEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDaemonSetEvents(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "daemonset/{args.namespace}/{args.daemonSet}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -9754,6 +10158,10 @@ export const DaemonSetEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9774,8 +10182,15 @@ export type DaemonSetEventsLazyQueryHookResult = ReturnType<typeof useDaemonSetE
 export type DaemonSetEventsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetEventsSuspenseQuery>;
 export type DaemonSetEventsQueryResult = Apollo.QueryResult<DaemonSetEventsQuery, DaemonSetEventsQueryVariables>;
 export const DaemonSetPodsDocument = gql`
-    query DaemonSetPods($namespace: String!, $name: String!) {
-  handleGetDaemonSetPods(namespace: $namespace, daemonSet: $name) @rest(type: "pod_PodList", path: "daemonset/{args.namespace}/{args.daemonSet}/pod") {
+    query DaemonSetPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDaemonSetPods(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "daemonset/{args.namespace}/{args.daemonSet}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -9795,6 +10210,10 @@ export const DaemonSetPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9815,8 +10234,15 @@ export type DaemonSetPodsLazyQueryHookResult = ReturnType<typeof useDaemonSetPod
 export type DaemonSetPodsSuspenseQueryHookResult = ReturnType<typeof useDaemonSetPodsSuspenseQuery>;
 export type DaemonSetPodsQueryResult = Apollo.QueryResult<DaemonSetPodsQuery, DaemonSetPodsQueryVariables>;
 export const DaemonSetServicesDocument = gql`
-    query DaemonSetServices($namespace: String!, $name: String!) {
-  handleGetDaemonSetServices(namespace: $namespace, daemonSet: $name) @rest(type: "service_ServiceList", path: "daemonset/{args.namespace}/{args.daemonSet}/service") {
+    query DaemonSetServices($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDaemonSetServices(
+    namespace: $namespace
+    daemonSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "service_ServiceList", path: "daemonset/{args.namespace}/{args.daemonSet}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ServiceList
   }
 }
@@ -9836,6 +10262,10 @@ export const DaemonSetServicesDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9947,8 +10377,15 @@ export type DeploymentLazyQueryHookResult = ReturnType<typeof useDeploymentLazyQ
 export type DeploymentSuspenseQueryHookResult = ReturnType<typeof useDeploymentSuspenseQuery>;
 export type DeploymentQueryResult = Apollo.QueryResult<DeploymentQuery, DeploymentQueryVariables>;
 export const DeploymentEventsDocument = gql`
-    query DeploymentEvents($namespace: String!, $name: String!) {
-  handleGetDeploymentEvents(namespace: $namespace, deployment: $name) @rest(type: "common_EventList", path: "deployment/{args.namespace}/{args.deployment}/event") {
+    query DeploymentEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDeploymentEvents(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "deployment/{args.namespace}/{args.deployment}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -9968,6 +10405,10 @@ export const DeploymentEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -9988,8 +10429,15 @@ export type DeploymentEventsLazyQueryHookResult = ReturnType<typeof useDeploymen
 export type DeploymentEventsSuspenseQueryHookResult = ReturnType<typeof useDeploymentEventsSuspenseQuery>;
 export type DeploymentEventsQueryResult = Apollo.QueryResult<DeploymentEventsQuery, DeploymentEventsQueryVariables>;
 export const DeploymentNewReplicaSetDocument = gql`
-    query DeploymentNewReplicaSet($namespace: String!, $name: String!) {
-  handleGetDeploymentNewReplicaSet(namespace: $namespace, deployment: $name) @rest(type: "replicaset_ReplicaSet", path: "deployment/{args.namespace}/{args.deployment}/newreplicaset") {
+    query DeploymentNewReplicaSet($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDeploymentNewReplicaSet(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "replicaset_ReplicaSet", path: "deployment/{args.namespace}/{args.deployment}/newreplicaset?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ReplicaSet
   }
 }
@@ -10009,6 +10457,10 @@ export const DeploymentNewReplicaSetDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10029,8 +10481,15 @@ export type DeploymentNewReplicaSetLazyQueryHookResult = ReturnType<typeof useDe
 export type DeploymentNewReplicaSetSuspenseQueryHookResult = ReturnType<typeof useDeploymentNewReplicaSetSuspenseQuery>;
 export type DeploymentNewReplicaSetQueryResult = Apollo.QueryResult<DeploymentNewReplicaSetQuery, DeploymentNewReplicaSetQueryVariables>;
 export const DeploymentOldReplicaSetsDocument = gql`
-    query DeploymentOldReplicaSets($namespace: String!, $name: String!) {
-  handleGetDeploymentOldReplicaSets(namespace: $namespace, deployment: $name) @rest(type: "replicaset_ReplicaSetList", path: "deployment/{args.namespace}/{args.deployment}/oldreplicaset") {
+    query DeploymentOldReplicaSets($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetDeploymentOldReplicaSets(
+    namespace: $namespace
+    deployment: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "replicaset_ReplicaSetList", path: "deployment/{args.namespace}/{args.deployment}/oldreplicaset?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ReplicaSetList
   }
 }
@@ -10050,6 +10509,10 @@ export const DeploymentOldReplicaSetsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10161,8 +10624,15 @@ export type JobLazyQueryHookResult = ReturnType<typeof useJobLazyQuery>;
 export type JobSuspenseQueryHookResult = ReturnType<typeof useJobSuspenseQuery>;
 export type JobQueryResult = Apollo.QueryResult<JobQuery, JobQueryVariables>;
 export const JobEventsDocument = gql`
-    query JobEvents($namespace: String!, $name: String!) {
-  handleGetJobEvents(namespace: $namespace, name: $name) @rest(type: "common_EventList", path: "job/{args.namespace}/{args.name}/event") {
+    query JobEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetJobEvents(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "job/{args.namespace}/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -10182,6 +10652,10 @@ export const JobEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10202,8 +10676,15 @@ export type JobEventsLazyQueryHookResult = ReturnType<typeof useJobEventsLazyQue
 export type JobEventsSuspenseQueryHookResult = ReturnType<typeof useJobEventsSuspenseQuery>;
 export type JobEventsQueryResult = Apollo.QueryResult<JobEventsQuery, JobEventsQueryVariables>;
 export const JobPodsDocument = gql`
-    query JobPods($namespace: String!, $name: String!) {
-  handleGetJobPods(namespace: $namespace, name: $name) @rest(type: "pod_PodList", path: "job/{args.namespace}/{args.name}/pod") {
+    query JobPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetJobPods(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "job/{args.namespace}/{args.name}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -10223,6 +10704,10 @@ export const JobPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10515,8 +11000,15 @@ export type ReplicaSetLazyQueryHookResult = ReturnType<typeof useReplicaSetLazyQ
 export type ReplicaSetSuspenseQueryHookResult = ReturnType<typeof useReplicaSetSuspenseQuery>;
 export type ReplicaSetQueryResult = Apollo.QueryResult<ReplicaSetQuery, ReplicaSetQueryVariables>;
 export const ReplicaSetEventsDocument = gql`
-    query ReplicaSetEvents($namespace: String!, $name: String!) {
-  handleGetReplicaSetEvents(namespace: $namespace, replicaSet: $name) @rest(type: "common_EventList", path: "replicaset/{args.namespace}/{args.replicaSet}/event") {
+    query ReplicaSetEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicaSetEvents(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "replicaset/{args.namespace}/{args.replicaSet}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -10536,6 +11028,10 @@ export const ReplicaSetEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10556,8 +11052,15 @@ export type ReplicaSetEventsLazyQueryHookResult = ReturnType<typeof useReplicaSe
 export type ReplicaSetEventsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetEventsSuspenseQuery>;
 export type ReplicaSetEventsQueryResult = Apollo.QueryResult<ReplicaSetEventsQuery, ReplicaSetEventsQueryVariables>;
 export const ReplicaSetPodsDocument = gql`
-    query ReplicaSetPods($namespace: String!, $name: String!) {
-  handleGetReplicaSetPods(namespace: $namespace, replicaSet: $name) @rest(type: "pod_PodList", path: "replicaset/{args.namespace}/{args.replicaSet}/pod") {
+    query ReplicaSetPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicaSetPods(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "replicaset/{args.namespace}/{args.replicaSet}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -10577,6 +11080,10 @@ export const ReplicaSetPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10597,8 +11104,15 @@ export type ReplicaSetPodsLazyQueryHookResult = ReturnType<typeof useReplicaSetP
 export type ReplicaSetPodsSuspenseQueryHookResult = ReturnType<typeof useReplicaSetPodsSuspenseQuery>;
 export type ReplicaSetPodsQueryResult = Apollo.QueryResult<ReplicaSetPodsQuery, ReplicaSetPodsQueryVariables>;
 export const ReplicaSetServicesDocument = gql`
-    query ReplicaSetServices($namespace: String!, $name: String!) {
-  handleGetReplicaSetServices(namespace: $namespace, replicaSet: $name) @rest(type: "service_ServiceList", path: "replicaset/{args.namespace}/{args.replicaSet}/service") {
+    query ReplicaSetServices($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetReplicaSetServices(
+    namespace: $namespace
+    replicaSet: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "service_ServiceList", path: "replicaset/{args.namespace}/{args.replicaSet}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ServiceList
   }
 }
@@ -10618,6 +11132,10 @@ export const ReplicaSetServicesDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10732,11 +11250,15 @@ export type ReplicationControllerLazyQueryHookResult = ReturnType<typeof useRepl
 export type ReplicationControllerSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerSuspenseQuery>;
 export type ReplicationControllerQueryResult = Apollo.QueryResult<ReplicationControllerQuery, ReplicationControllerQueryVariables>;
 export const ReplicationControllerEventsDocument = gql`
-    query ReplicationControllerEvents($namespace: String!, $name: String!) {
+    query ReplicationControllerEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetReplicationControllerEvents(
     namespace: $namespace
     replicationController: $name
-  ) @rest(type: "common_EventList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/event") {
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -10756,6 +11278,10 @@ export const ReplicationControllerEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10776,11 +11302,15 @@ export type ReplicationControllerEventsLazyQueryHookResult = ReturnType<typeof u
 export type ReplicationControllerEventsSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerEventsSuspenseQuery>;
 export type ReplicationControllerEventsQueryResult = Apollo.QueryResult<ReplicationControllerEventsQuery, ReplicationControllerEventsQueryVariables>;
 export const ReplicationControllerPodsDocument = gql`
-    query ReplicationControllerPods($namespace: String!, $name: String!) {
+    query ReplicationControllerPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetReplicationControllerPods(
     namespace: $namespace
     replicationController: $name
-  ) @rest(type: "pod_PodList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod") {
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -10800,6 +11330,10 @@ export const ReplicationControllerPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10820,11 +11354,15 @@ export type ReplicationControllerPodsLazyQueryHookResult = ReturnType<typeof use
 export type ReplicationControllerPodsSuspenseQueryHookResult = ReturnType<typeof useReplicationControllerPodsSuspenseQuery>;
 export type ReplicationControllerPodsQueryResult = Apollo.QueryResult<ReplicationControllerPodsQuery, ReplicationControllerPodsQueryVariables>;
 export const ReplicationControllerServicesDocument = gql`
-    query ReplicationControllerServices($namespace: String!, $name: String!) {
+    query ReplicationControllerServices($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetReplicationControllerServices(
     namespace: $namespace
     replicationController: $name
-  ) @rest(type: "service_ServiceList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/service") {
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "service_ServiceList", path: "replicationcontroller/{args.namespace}/{args.replicationController}/service?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...ServiceList
   }
 }
@@ -10844,6 +11382,10 @@ export const ReplicationControllerServicesDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10955,8 +11497,15 @@ export type StatefulSetLazyQueryHookResult = ReturnType<typeof useStatefulSetLaz
 export type StatefulSetSuspenseQueryHookResult = ReturnType<typeof useStatefulSetSuspenseQuery>;
 export type StatefulSetQueryResult = Apollo.QueryResult<StatefulSetQuery, StatefulSetQueryVariables>;
 export const StatefulSetEventsDocument = gql`
-    query StatefulSetEvents($namespace: String!, $name: String!) {
-  handleGetStatefulSetEvents(namespace: $namespace, statefulset: $name) @rest(type: "common_EventList", path: "statefulset/{args.namespace}/{args.statefulset}/event") {
+    query StatefulSetEvents($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetStatefulSetEvents(
+    namespace: $namespace
+    statefulset: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "common_EventList", path: "statefulset/{args.namespace}/{args.statefulset}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...EventList
   }
 }
@@ -10976,6 +11525,10 @@ export const StatefulSetEventsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */
@@ -10996,8 +11549,15 @@ export type StatefulSetEventsLazyQueryHookResult = ReturnType<typeof useStateful
 export type StatefulSetEventsSuspenseQueryHookResult = ReturnType<typeof useStatefulSetEventsSuspenseQuery>;
 export type StatefulSetEventsQueryResult = Apollo.QueryResult<StatefulSetEventsQuery, StatefulSetEventsQueryVariables>;
 export const StatefulSetPodsDocument = gql`
-    query StatefulSetPods($namespace: String!, $name: String!) {
-  handleGetStatefulSetPods(namespace: $namespace, statefulset: $name) @rest(type: "pod_PodList", path: "statefulset/{args.namespace}/{args.statefulset}/pod") {
+    query StatefulSetPods($namespace: String!, $name: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
+  handleGetStatefulSetPods(
+    namespace: $namespace
+    statefulset: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(type: "pod_PodList", path: "statefulset/{args.namespace}/{args.statefulset}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...PodList
   }
 }
@@ -11017,6 +11577,10 @@ export const StatefulSetPodsDocument = gql`
  *   variables: {
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
+ *      filterBy: // value for 'filterBy'
+ *      sortBy: // value for 'sortBy'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
  *   },
  * });
  */

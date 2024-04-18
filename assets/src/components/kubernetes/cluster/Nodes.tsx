@@ -1,7 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { filesize } from 'filesize'
-
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
@@ -12,28 +11,21 @@ import {
   NodesQueryVariables,
   useNodesQuery,
 } from '../../../generated/graphql-kubernetes'
-import {
-  ResourceReadyChip,
-  getBaseBreadcrumbs,
-  useDefaultColumns,
-} from '../common/utils'
+import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { Usage } from '../../cluster/TableElements'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   NODES_REL_PATH,
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { useCluster } from '../Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'cluster',
-    url: getClusterAbsPath(cluster?.id),
-  },
+import { getClusterBreadcrumbs } from './Cluster'
+
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getClusterBreadcrumbs(cluster),
   {
     label: 'nodes',
     url: `${getClusterAbsPath(cluster?.id)}/${NODES_REL_PATH}`,

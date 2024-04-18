@@ -1,7 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
 
 import {
   Maybe,
@@ -11,26 +10,22 @@ import {
   PersistentVolumeClaimsQueryVariables,
   usePersistentVolumeClaimsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
-import { InlineLink } from '../../utils/typography/InlineLink'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
-  getResourceDetailsAbsPath,
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { useCluster } from '../Cluster'
+import { Kind } from '../common/types'
+import ResourceLink from '../common/ResourceLink'
 
 import { PVCStatusChip } from './utils'
+import { getStorageBreadcrumbs } from './Storage'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'storage',
-    url: getStorageAbsPath(cluster?.id),
-  },
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getStorageBreadcrumbs(cluster),
   {
     label: 'persistent volume claims',
     url: `${getStorageAbsPath(
@@ -56,7 +51,7 @@ export const colCapacity = columnHelper.accessor((pvc) => pvc.capacity, {
 })
 
 export const usePersistentVolumeClaimListColumns = () => {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
 
   return useMemo(
@@ -71,46 +66,28 @@ export const usePersistentVolumeClaimListColumns = () => {
       columnHelper.accessor((pvc) => pvc.volume, {
         id: 'volume',
         header: 'Volume',
-        cell: ({ getValue, table }) => {
-          const { cluster } = table.options.meta as {
-            cluster?: ClusterTinyFragment
-          }
-
-          return (
-            <Link
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                'persistentvolume',
-                getValue()
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <InlineLink>{getValue()}</InlineLink>
-            </Link>
-          )
-        },
+        cell: ({ getValue }) => (
+          <ResourceLink
+            objectRef={{
+              kind: Kind.PersistentVolume,
+              name: getValue(),
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ),
       }),
       columnHelper.accessor((pvc) => pvc.storageClass, {
         id: 'storageClass',
         header: 'Storage class',
-        cell: ({ getValue, table }) => {
-          const { cluster } = table.options.meta as {
-            cluster?: ClusterTinyFragment
-          }
-
-          return (
-            <Link
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                'storageclass',
-                getValue()
-              )}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <InlineLink>{getValue()}</InlineLink>
-            </Link>
-          )
-        },
+        cell: ({ getValue }) => (
+          <ResourceLink
+            objectRef={{
+              kind: Kind.StorageClass,
+              name: getValue(),
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        ),
       }),
       columnHelper.accessor((pvc) => pvc.accessModes, {
         id: 'accessModes',
@@ -128,8 +105,9 @@ export const usePersistentVolumeClaimListColumns = () => {
       colCapacity,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colCreationTimestamp, colLabels, colName, colNamespace]
+    [colCreationTimestamp, colLabels, colName, colNamespace, colAction]
   )
 }
 

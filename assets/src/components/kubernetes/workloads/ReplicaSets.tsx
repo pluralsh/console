@@ -11,9 +11,9 @@ import {
   useReplicaSetsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../common/ResourceList'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { UsageText } from '../../cluster/TableElements'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   REPLICA_SETS_REL_PATH,
   getWorkloadsAbsPath,
@@ -21,13 +21,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { WorkloadImages, WorkloadStatusChip } from './utils'
+import { getWorkloadsBreadcrumbs } from './Workloads'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'workloads',
-    url: getWorkloadsAbsPath(cluster?.id),
-  },
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'replica sets',
     url: `${getWorkloadsAbsPath(cluster?.id)}/${REPLICA_SETS_REL_PATH}`,
@@ -71,7 +68,7 @@ const colStatus = columnHelper.accessor((rs) => rs.podInfo, {
 })
 
 export function useReplicaSetsColumns(): Array<object> {
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
 
   return useMemo(
@@ -83,8 +80,9 @@ export function useReplicaSetsColumns(): Array<object> {
       colStatus,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 }
 

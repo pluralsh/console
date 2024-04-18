@@ -1,4 +1,5 @@
 fragment ServiceList on service_ServiceList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

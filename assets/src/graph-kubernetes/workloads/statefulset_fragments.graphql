@@ -1,4 +1,5 @@
 fragment StatefulSetList on statefulset_StatefulSetList {
+  errors
   listMeta @type(name: "types_ListMeta") {
     ...ListMeta
   }

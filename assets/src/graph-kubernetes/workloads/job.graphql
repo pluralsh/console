@@ -27,19 +27,50 @@ query Job($namespace: String!, $name: String!) {
   }
 }
 
-query JobEvents($namespace: String!, $name: String!) {
-  handleGetJobEvents(namespace: $namespace, name: $name)
+query JobEvents(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetJobEvents(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
     @rest(
       type: "common_EventList"
-      path: "job/{args.namespace}/{args.name}/event"
+      path: "job/{args.namespace}/{args.name}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...EventList
   }
 }
 
-query JobPods($namespace: String!, $name: String!) {
-  handleGetJobPods(namespace: $namespace, name: $name)
-    @rest(type: "pod_PodList", path: "job/{args.namespace}/{args.name}/pod") {
+query JobPods(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetJobPods(
+    namespace: $namespace
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "pod_PodList"
+      path: "job/{args.namespace}/{args.name}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     ...PodList
   }
 }

@@ -3,18 +3,20 @@ import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isEmpty } from 'lodash'
 
 import {
-  ClusterTinyFragment,
-  useClustersTinyQuery,
+  KubernetesClusterFragment,
+  Maybe,
+  PinnedCustomResourceFragment,
+  useKubernetesClustersQuery,
 } from '../../generated/graphql'
 import { mapExistingNodes } from '../../utils/graphql'
-
 import { getWorkloadsAbsPath } from '../../routes/kubernetesRoutesConsts'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 
 type ClusterContextT = {
-  clusters: ClusterTinyFragment[]
-  cluster?: ClusterTinyFragment
+  clusters: KubernetesClusterFragment[]
+  refetch?: Nullable<() => void>
+  cluster?: KubernetesClusterFragment
   namespaces: string[]
 }
 
@@ -36,10 +38,34 @@ export const useClusters = () => {
   return clusters
 }
 
+export const useRefetch = () => {
+  const { refetch } = useClusterContext()
+
+  return refetch
+}
+
 export const useCluster = () => {
   const { cluster } = useClusterContext()
 
   return cluster
+}
+
+export const usePinnedResources = (): Maybe<PinnedCustomResourceFragment>[] => {
+  const cluster = useCluster()
+
+  return cluster?.pinnedCustomResources ?? []
+}
+
+export const useIsPinnedResource = (
+  kind: string,
+  version: string,
+  group: string
+) => {
+  const pinnedResources = usePinnedResources()
+
+  return !!pinnedResources.find(
+    (pr) => pr?.group === group && pr?.version === version && pr?.kind === kind
+  )
 }
 
 export const useNamespaces = () => {
@@ -53,7 +79,7 @@ export default function Cluster() {
   const { search } = useLocation()
   const navigate = useNavigate()
 
-  const { data } = useClustersTinyQuery({
+  const { data, refetch } = useKubernetesClustersQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
   })
@@ -82,8 +108,8 @@ export default function Cluster() {
   )
 
   const context = useMemo(
-    () => ({ clusters, cluster, namespaces }) as ClusterContextT,
-    [clusters, cluster, namespaces]
+    () => ({ clusters, refetch, cluster, namespaces }) as ClusterContextT,
+    [clusters, refetch, cluster, namespaces]
   )
 
   useEffect(() => {

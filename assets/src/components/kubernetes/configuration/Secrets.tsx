@@ -3,7 +3,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import {
   Maybe,
@@ -13,19 +13,17 @@ import {
   SecretsQueryVariables,
   useSecretsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   SECRETS_REL_PATH,
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'configuration',
-    url: getConfigurationAbsPath(cluster?.id),
-  },
+import { getConfigurationBreadcrumbs } from './Configuration'
+
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getConfigurationBreadcrumbs(cluster),
   {
     label: 'secrets',
     url: `${getConfigurationAbsPath(cluster?.id)}/${SECRETS_REL_PATH}`,
@@ -45,11 +43,18 @@ export default function Secrets() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colType, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [
+      colName,
+      colNamespace,
+      colType,
+      colLabels,
+      colCreationTimestamp,
+      colAction,
+    ],
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

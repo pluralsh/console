@@ -1,5 +1,5 @@
-import { ReactElement, useMemo } from 'react'
-import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
+import React, { ReactElement, useMemo } from 'react'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { SidecarItem, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
@@ -27,13 +27,14 @@ import {
   getResourceDetailsAbsPath,
   getWorkloadsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { InlineLink } from '../../utils/typography/InlineLink'
 import ResourceOwner from '../common/ResourceOwner'
 import { NAMESPACE_PARAM } from '../Navigation'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { useCluster } from '../Cluster'
 import ImagePullSecrets from '../common/ImagePullSecrets'
+import { Kind } from '../common/types'
+import ResourceLink from '../common/ResourceLink'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
@@ -70,7 +71,7 @@ export function Pod(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'pod', name, namespace),
+          url: getResourceDetailsAbsPath(clusterId, Kind.Pod, name, namespace),
         },
       ],
       [cluster, clusterId, name, namespace]
@@ -103,23 +104,23 @@ export function Pod(): ReactElement {
           </SidecarItem>
           <SidecarItem heading="Phase">{pod?.podPhase}</SidecarItem>
           <SidecarItem heading="Node">
-            <Link
-              to={getResourceDetailsAbsPath(clusterId, 'node', pod?.nodeName)}
-            >
-              <InlineLink>{pod?.nodeName}</InlineLink>
-            </Link>
+            <ResourceLink
+              short
+              objectRef={{
+                kind: Kind.Node,
+                name: pod?.nodeName,
+              }}
+            />
           </SidecarItem>
           <SidecarItem heading="Service account">
-            <Link
-              to={getResourceDetailsAbsPath(
-                clusterId,
-                'serviceaccount',
-                pod?.serviceAccountName,
-                pod?.objectMeta?.namespace
-              )}
-            >
-              <InlineLink>{pod?.serviceAccountName}</InlineLink>
-            </Link>
+            <ResourceLink
+              short
+              objectRef={{
+                kind: Kind.ServiceAccount,
+                name: pod?.serviceAccountName,
+                namespace: pod?.objectMeta?.namespace,
+              }}
+            />
           </SidecarItem>
           <SidecarItem heading="IP">{pod?.podIP}</SidecarItem>
           <SidecarItem heading="Restart Count">
@@ -146,10 +147,7 @@ export function PodInfo(): ReactElement {
       {pod?.controller?.objectMeta?.name && (
         <section>
           <SubTitle>Owner</SubTitle>
-          <ResourceOwner
-            clusterId={cluster?.id}
-            owner={pod?.controller}
-          />
+          <ResourceOwner owner={pod?.controller} />
         </section>
       )}
       <section>

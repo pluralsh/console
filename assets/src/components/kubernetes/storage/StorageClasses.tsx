@@ -12,21 +12,19 @@ import {
   StorageClassesQueryVariables,
   useStorageClassesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   STORAGE_CLASSES_REL_PATH,
   getStorageAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'storage',
-    url: getStorageAbsPath(cluster?.id),
-  },
+import { getStorageBreadcrumbs } from './Storage'
+
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getStorageBreadcrumbs(cluster),
   {
     label: 'storage classes',
     url: `${getStorageAbsPath(cluster?.id)}/${STORAGE_CLASSES_REL_PATH}`,
@@ -66,7 +64,7 @@ export default function StorageClasses() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
     () => [
@@ -75,8 +73,9 @@ export default function StorageClasses() {
       colParameters,
       colLabels,
       colCreationTimestamp,
+      colAction,
     ],
-    [colName, colLabels, colCreationTimestamp]
+    [colName, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

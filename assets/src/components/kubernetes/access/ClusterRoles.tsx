@@ -11,21 +11,19 @@ import {
   Maybe,
   useClusterRolesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   CLUSTER_ROLES_REL_PATH,
   getAccessAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'access',
-    url: getAccessAbsPath(cluster?.id),
-  },
+import { getAccessBreadcrumbs } from './Access'
+
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getAccessBreadcrumbs(cluster),
   {
     label: 'cluster roles',
     url: `${getAccessAbsPath(cluster?.id)}/${CLUSTER_ROLES_REL_PATH}`,
@@ -39,11 +37,11 @@ export default function ClusterRoles() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colLabels, colCreationTimestamp],
-    [colName, colLabels, colCreationTimestamp]
+    () => [colName, colLabels, colCreationTimestamp, colAction],
+    [colName, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

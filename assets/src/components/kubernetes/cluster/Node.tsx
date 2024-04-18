@@ -45,6 +45,8 @@ import { useCluster } from '../Cluster'
 
 import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './Nodes'
 import { useEventsColumns } from './Events'
 
@@ -77,7 +79,7 @@ export default function Node(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'namespace', name),
+          url: getResourceDetailsAbsPath(clusterId, Kind.Namespace, name),
         },
       ],
       [cluster, clusterId, name]

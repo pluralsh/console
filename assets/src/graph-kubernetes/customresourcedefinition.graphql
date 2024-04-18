@@ -13,6 +13,7 @@ query CustomResourceDefinitions(
     @rest(
       path: "crd?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
+    errors
     listMeta {
       totalItems
     }
@@ -87,6 +88,7 @@ query CustomResources(
     @rest(
       path: "crd/{args.namespace}/{args.crd}/object?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
+    errors
     listMeta {
       totalItems
     }
@@ -116,15 +118,27 @@ query CustomResource($namespace: String!, $name: String!, $crd: String!) {
   }
 }
 
-query CustomResourceEvents($crd: String!, $namespace: String!, $name: String!) {
+query CustomResourceEvents(
+  $crd: String!
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
   handleGetCustomResourceObjectEvents(
     namespace: $namespace
     object: $name
     crd: $crd
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
   )
     @rest(
       type: "common_EventList"
-      path: "crd/{args.namespace}/{args.crd}/{args.object}/event"
+      path: "crd/{args.namespace}/{args.crd}/{args.object}/event?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...EventList
   }

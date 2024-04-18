@@ -9,6 +9,7 @@ import {
   Common_PodInfo as PodInfoT,
 } from '../../../generated/graphql-kubernetes'
 import { Readiness, ReadinessT } from '../../../utils/status'
+import { TruncateStart } from '../../utils/table/TruncateStart'
 
 const podStatusSeverity = {
   Running: 'success',
@@ -94,10 +95,10 @@ export function WorkloadStatusChip({ podInfo }: { podInfo: PodInfoT }) {
 
   return (
     <WrapWithIf
-      condition={podInfo.warnings?.length > 0}
+      condition={podInfo?.warnings?.length > 0}
       wrapper={
         <Tooltip
-          label={podInfo.warnings?.map((ev) => ev?.message)?.join(', ')}
+          label={podInfo?.warnings?.map((ev) => ev?.message)?.join(', ')}
           placement="bottom"
         />
       }
@@ -124,15 +125,13 @@ export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
       }}
     >
       {images.map((image) => (
-        <span
-          css={{
-            overflow: 'hidden',
-            whiteSpace: 'nowrap',
-            textOverflow: 'ellipsis',
-          }}
+        <Tooltip
+          key={image}
+          label={image}
+          placement="left-start"
         >
-          {image}
-        </span>
+          <TruncateStart>{image}</TruncateStart>
+        </Tooltip>
       ))}
     </div>
   )

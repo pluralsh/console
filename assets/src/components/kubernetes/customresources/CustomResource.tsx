@@ -13,16 +13,15 @@ import {
   useCustomResourceQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { useCluster } from '../Cluster'
-
 import { useEventsColumns } from '../cluster/Events'
 import { ResourceList } from '../common/ResourceList'
-
 import { NAMESPACE_PARAM } from '../Navigation'
+
+import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 
@@ -51,7 +50,7 @@ export default function CustomResource(): ReactElement {
           label: crd ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'customresourcedefinition',
+            Kind.CustomResourceDefinition,
             crd
           ),
         },
@@ -61,7 +60,7 @@ export default function CustomResource(): ReactElement {
                 label: namespace,
                 url: `${getResourceDetailsAbsPath(
                   clusterId,
-                  'customresourcedefinition',
+                  Kind.CustomResourceDefinition,
                   crd
                 )}?${NAMESPACE_PARAM}=${namespace}`,
               },
@@ -86,7 +85,7 @@ export default function CustomResource(): ReactElement {
 }
 
 export function CustomResourceEvents(): ReactElement {
-  const { name } = useParams()
+  const { name, namespace, crd } = useParams()
   const columns = useEventsColumns()
 
   return (
@@ -100,7 +99,11 @@ export function CustomResourceEvents(): ReactElement {
       columns={columns}
       query={useCustomResourceEventsQuery}
       queryOptions={{
-        variables: { name } as CustomResourceEventsQueryVariables,
+        variables: {
+          name,
+          namespace,
+          crd,
+        } as CustomResourceEventsQueryVariables,
       }}
       queryName="handleGetCustomResourceObjectEvents"
       itemsKey="events"

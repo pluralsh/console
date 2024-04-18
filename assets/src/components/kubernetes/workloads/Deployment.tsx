@@ -1,5 +1,5 @@
-import { ReactElement, useMemo } from 'react'
-import { Link, Outlet, useParams } from 'react-router-dom'
+import React, { ReactElement, useMemo } from 'react'
+import { Outlet, useParams } from 'react-router-dom'
 import {
   ChipList,
   SidecarItem,
@@ -46,9 +46,10 @@ import ResourceInfoCard, {
   ResourceInfoCardSection,
 } from '../common/ResourceInfoCard'
 import Annotations from '../common/Annotations'
-import { InlineLink } from '../../utils/typography/InlineLink'
 import HorizontalPodAutoscalersForResource from '../common/HorizontalPodAutoscalers'
 import { useCluster } from '../Cluster'
+import ResourceLink from '../common/ResourceLink'
+import { Kind, Resource, fromResource } from '../common/types'
 
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
@@ -88,7 +89,7 @@ export default function Deployment(): ReactElement {
           label: name ?? '',
           url: getResourceDetailsAbsPath(
             clusterId,
-            'deployment',
+            Kind.Deployment,
             name,
             namespace
           ),
@@ -191,19 +192,18 @@ function NewReplicaSet(): ReactElement {
     <ResourceInfoCard loading={loading}>
       <ResourceInfoCardSection>
         <ResourceInfoCardEntry heading="Name">
-          <Link
-            to={getResourceDetailsAbsPath(
-              clusterId,
-              replicaSet?.typeMeta?.kind ?? '',
-              replicaSet?.objectMeta?.name,
-              replicaSet?.objectMeta?.namespace
-            )}
-          >
-            <InlineLink>{replicaSet?.objectMeta?.name}</InlineLink>
-          </Link>
+          <ResourceLink
+            objectRef={fromResource(replicaSet as Resource)}
+            short
+          />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Namespace">
-          {replicaSet?.objectMeta?.namespace ?? ''}
+          <ResourceLink
+            objectRef={{
+              kind: Kind.Namespace,
+              name: replicaSet?.objectMeta?.namespace,
+            }}
+          />
         </ResourceInfoCardEntry>
         <ResourceInfoCardEntry heading="Creation date">
           {moment(replicaSet?.objectMeta?.creationTimestamp).format('lll')}{' '}
@@ -233,7 +233,7 @@ export function DeploymentHorizontalPodAutoscalers(): ReactElement {
 
   return (
     <HorizontalPodAutoscalersForResource
-      kind="deployment"
+      kind={Kind.Deployment}
       namespace={namespace!}
       name={name!}
     />

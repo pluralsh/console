@@ -1,23 +1,26 @@
 import { ReactNode } from 'react'
 import { ApolloError } from '@apollo/client'
 import { Button, Modal } from '@pluralsh/design-system'
-
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
 import { useTheme } from 'styled-components'
+import { GraphQLError } from 'graphql'
+import { GraphQLErrors } from '@apollo/client/errors'
 
 import { GqlError } from './Alert'
+import { ModalMountTransition } from './ModalMountTransition'
 
 type ConfirmProps = {
   open: boolean
   close: Nullable<(...args: any[]) => unknown>
   title?: ReactNode
   error?: ApolloError | undefined
+  errorHeader?: string
+  errorMessage?: string
   text?: ReactNode
   submit: (...args: any[]) => unknown
   label?: ReactNode
   loading?: boolean
   destructive?: boolean
+  extraContent?: ReactNode
 }
 
 export function Confirm({
@@ -25,11 +28,14 @@ export function Confirm({
   close,
   title = 'Are you sure?',
   error,
+  errorHeader = 'Something went wrong',
+  errorMessage,
   text,
   submit,
   label,
   loading = false,
   destructive = false,
+  extraContent,
 }: ConfirmProps) {
   const theme = useTheme()
 
@@ -62,16 +68,30 @@ export function Confirm({
           </>
         }
       >
-        {error ? (
-          <GqlError
-            error={error}
-            header="Something went wrong"
-          />
-        ) : (
-          <div css={{ ...theme.partials.text.body1, color: theme.colors.text }}>
-            {text}
+        {error && (
+          <div
+            css={{
+              marginBottom: theme.spacing.large,
+            }}
+          >
+            <GqlError
+              error={
+                errorMessage
+                  ? ({
+                      graphQLErrors: [
+                        { message: errorMessage } as GraphQLError,
+                      ] as GraphQLErrors,
+                    } as ApolloError)
+                  : error
+              }
+              header={errorHeader}
+            />
           </div>
         )}
+        <div css={{ ...theme.partials.text.body1, color: theme.colors.text }}>
+          {text}
+        </div>
+        {extraContent && extraContent}
       </Modal>
     </ModalMountTransition>
   )

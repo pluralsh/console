@@ -1,11 +1,15 @@
-import { ReactElement, useMemo } from 'react'
+import React, { ReactElement, useMemo, useState } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import {
+  Button,
   ChipList,
+  PlayIcon,
   SidecarItem,
+  Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import moment from 'moment/moment'
+import { ApolloError } from 'apollo-boost'
 
 import {
   CronJobEventsQuery,
@@ -14,6 +18,7 @@ import {
   CronJobJobsQueryVariables,
   CronJobQueryVariables,
   Cronjob_CronJobDetail as CronJobT,
+  CronJobTriggerMutationVariables,
   Common_EventList as EventListT,
   Common_Event as EventT,
   Job_JobList as JobListT,
@@ -21,6 +26,7 @@ import {
   useCronJobEventsQuery,
   useCronJobJobsQuery,
   useCronJobQuery,
+  useCronJobTriggerMutation,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import { MetadataSidecar } from '../common/utils'
@@ -37,6 +43,8 @@ import { useEventsColumns } from '../cluster/Events'
 import { SubTitle } from '../../utils/SubTitle'
 import { useCluster } from '../Cluster'
 
+import { Kind } from '../common/types'
+
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
 
@@ -49,14 +57,28 @@ const directory: Array<TabEntry> = [
 export default function CronJob(): ReactElement {
   const cluster = useCluster()
   const { clusterId, name, namespace } = useParams()
-  const { data, loading } = useCronJobQuery({
+  const [triggerBanner, setTriggerBanner] = useState(false)
+  const [error, setError] = useState<ApolloError>()
+
+  const { data, loading, refetch } = useCronJobQuery({
     client: KubernetesClient(clusterId ?? ''),
     skip: !clusterId,
     pollInterval: 30_000,
-    variables: {
-      name,
-      namespace,
-    } as CronJobQueryVariables,
+    variables: { name, namespace } as CronJobQueryVariables,
+  })
+
+  const [mutation, { loading: mutationLoading }] = useCronJobTriggerMutation({
+    client: KubernetesClient(clusterId ?? ''),
+    variables: { name, namespace } as CronJobTriggerMutationVariables,
+    onCompleted: () => {
+      refetch({ name, namespace })
+      setTriggerBanner(true)
+      setTimeout(() => setTriggerBanner(false), 3000)
+    },
+    onError: (error) => {
+      setError(error)
+      setTimeout(() => setError(undefined), 3000)
+    },
   })
 
   useSetBreadcrumbs(
@@ -71,7 +93,12 @@ export default function CronJob(): ReactElement {
         },
         {
           label: name ?? '',
-          url: getResourceDetailsAbsPath(clusterId, 'cronjob', name, namespace),
+          url: getResourceDetailsAbsPath(
+            clusterId,
+            Kind.CronJob,
+            name,
+            namespace
+          ),
         },
       ],
       [cluster, clusterId, name, namespace]
@@ -85,37 +112,68 @@ export default function CronJob(): ReactElement {
   }
 
   return (
-    <ResourceDetails
-      tabs={directory}
-      sidecar={
-        <MetadataSidecar resource={cronJob}>
-          <SidecarItem heading="Images">
-            <ChipList
-              size="small"
-              limit={3}
-              values={cronJob?.containerImages ?? []}
-              emptyState={<div>-</div>}
-            />
-          </SidecarItem>
-          <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>
-          <SidecarItem heading="Last schedule">
-            {moment(cronJob?.lastSchedule).format('lll')}
-          </SidecarItem>
-          <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
-          <SidecarItem heading="Suspended">
-            {cronJob?.suspend ? 'True' : 'False'}
-          </SidecarItem>
-          <SidecarItem heading="Concurrency policy">
-            {cronJob?.concurrencyPolicy}
-          </SidecarItem>
-          <SidecarItem heading="Starting deadline seconds">
-            {cronJob?.startingDeadlineSeconds ?? 0}
-          </SidecarItem>
-        </MetadataSidecar>
-      }
-    >
-      <Outlet context={cronJob} />
-    </ResourceDetails>
+    <>
+      <ResourceDetails
+        tabs={directory}
+        additionalHeaderContent={
+          <Button
+            floating
+            startIcon={<PlayIcon />}
+            onClick={() => mutation()}
+            loading={mutationLoading}
+          >
+            Trigger
+          </Button>
+        }
+        sidecar={
+          <MetadataSidecar resource={cronJob}>
+            <SidecarItem heading="Images">
+              <ChipList
+                size="small"
+                limit={3}
+                values={cronJob?.containerImages ?? []}
+                emptyState={<div>-</div>}
+              />
+            </SidecarItem>
+            <SidecarItem heading="Schedule">{cronJob?.schedule}</SidecarItem>
+            <SidecarItem heading="Last schedule">
+              {moment(cronJob?.lastSchedule).format('lll')}
+            </SidecarItem>
+            <SidecarItem heading="Active jobs">{cronJob?.active}</SidecarItem>
+            <SidecarItem heading="Suspended">
+              {cronJob?.suspend ? 'True' : 'False'}
+            </SidecarItem>
+            <SidecarItem heading="Concurrency policy">
+              {cronJob?.concurrencyPolicy}
+            </SidecarItem>
+            <SidecarItem heading="Starting deadline seconds">
+              {cronJob?.startingDeadlineSeconds ?? 0}
+            </SidecarItem>
+          </MetadataSidecar>
+        }
+      >
+        <Outlet context={cronJob} />
+      </ResourceDetails>
+      {triggerBanner && (
+        <Toast
+          severity="success"
+          margin="large"
+          marginRight="xxxxlarge"
+        >
+          Cron job triggered successfully
+        </Toast>
+      )}
+      {error && (
+        <Toast
+          heading="Error triggering cron job"
+          severity="danger"
+          margin="large"
+          marginRight="xxxxlarge"
+        >
+          {error.message}
+        </Toast>
+      )}
+    </>
   )
 }
 
@@ -135,6 +193,7 @@ export function CronJobJobs(): ReactElement {
         >
           namespaced
           columns={columns}
+          initialSort={[{ id: 'creationTimestamp', desc: true }]}
           query={useCronJobJobsQuery}
           queryOptions={{
             variables: {
@@ -157,6 +216,7 @@ export function CronJobJobs(): ReactElement {
         >
           namespaced
           columns={columns}
+          initialSort={[{ id: 'creationTimestamp', desc: true }]}
           query={useCronJobJobsQuery}
           queryOptions={{
             variables: {
@@ -167,6 +227,7 @@ export function CronJobJobs(): ReactElement {
           }}
           queryName="handleGetCronJobJobs"
           itemsKey="jobs"
+          maxHeight="500px"
         />
       </section>
     </>

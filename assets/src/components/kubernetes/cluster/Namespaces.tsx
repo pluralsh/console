@@ -11,10 +11,10 @@ import {
   NamespacesQueryVariables,
   useNamespacesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   NAMESPACES_REL_PATH,
   getClusterAbsPath,
@@ -23,13 +23,10 @@ import {
 import { useCluster } from '../Cluster'
 
 import { NamespacePhaseChip } from './utils'
+import { getClusterBreadcrumbs } from './Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'cluster',
-    url: getClusterAbsPath(cluster?.id),
-  },
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getClusterBreadcrumbs(cluster),
   {
     label: 'namespaces',
     url: `${getClusterAbsPath(cluster?.id)}/${NAMESPACES_REL_PATH}`,
@@ -49,11 +46,11 @@ export default function Namespaces() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colPhase, colLabels, colCreationTimestamp],
-    [colName, colLabels, colCreationTimestamp]
+    () => [colName, colPhase, colLabels, colCreationTimestamp, colAction],
+    [colName, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

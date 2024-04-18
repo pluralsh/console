@@ -11,22 +11,20 @@ import {
   Networkpolicy_NetworkPolicy as NetworkPolicyT,
   useNetworkPoliciesQuery,
 } from '../../../generated/graphql-kubernetes'
-import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
+import { useDefaultColumns } from '../common/utils'
 
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   NETWORK_POLICIES_REL_PATH,
   getDiscoveryAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
-  ...getBaseBreadcrumbs(cluster),
-  {
-    label: 'discovery',
-    url: getDiscoveryAbsPath(cluster?.id),
-  },
+import { getDiscoveryBreadcrumbs } from './Discovery'
+
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
+  ...getDiscoveryBreadcrumbs(cluster),
   {
     label: 'network policies',
     url: `${getDiscoveryAbsPath(cluster?.id)}/${NETWORK_POLICIES_REL_PATH}`,
@@ -40,11 +38,11 @@ export default function NetworkPolicies() {
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
-  const { colName, colNamespace, colLabels, colCreationTimestamp } =
+  const { colAction, colName, colNamespace, colLabels, colCreationTimestamp } =
     useDefaultColumns(columnHelper)
   const columns = useMemo(
-    () => [colName, colNamespace, colLabels, colCreationTimestamp],
-    [colName, colNamespace, colLabels, colCreationTimestamp]
+    () => [colName, colNamespace, colLabels, colCreationTimestamp, colAction],
+    [colName, colNamespace, colLabels, colCreationTimestamp, colAction]
   )
 
   return (

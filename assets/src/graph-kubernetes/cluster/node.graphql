@@ -14,6 +14,7 @@ query Nodes(
     @rest(
       path: "node?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
+    errors
     listMeta @type(name: "types_ListMeta") {
       ...ListMeta
     }
@@ -93,9 +94,25 @@ query Node($name: String!) {
   }
 }
 
-query NodePods($namespace: String!, $name: String!) {
-  handleGetNodePods(name: $name)
-    @rest(type: "pod_PodList", path: "node/{args.name}/pod") {
+query NodePods(
+  $namespace: String!
+  $name: String!
+  $filterBy: String
+  $sortBy: String
+  $itemsPerPage: String
+  $page: String
+) {
+  handleGetNodePods(
+    name: $name
+    filterBy: $filterBy
+    sortBy: $sortBy
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      type: "pod_PodList"
+      path: "node/{args.name}/pod?filterBy={args.filterBy}&sortBy={args.sortBy}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
     ...PodList
   }
 }

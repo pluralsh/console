@@ -2,11 +2,8 @@ import uniqWith from 'lodash/uniqWith'
 import React, { ReactNode, useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { Chip, ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
-import { Link, useParams } from 'react-router-dom'
 import moment from 'moment/moment'
-
 import yaml from 'js-yaml'
-
 import { capitalize } from 'lodash'
 
 import {
@@ -16,16 +13,13 @@ import {
   Types_TypeMeta as TypeMetaT,
 } from '../../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
-import { ClusterTinyFragment } from '../../../generated/graphql'
-import {
-  getKubernetesAbsPath,
-  getResourceDetailsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
-import { InlineLink } from '../../utils/typography/InlineLink'
-
-import { ResourceT } from './ResourceList'
+import { Kind, Resource } from './types'
 import Annotations from './Annotations'
+import ResourceLink from './ResourceLink'
+import DeleteResourceButton from './DeleteResource'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -53,26 +47,17 @@ export function useDefaultColumns<
         id: 'namespace',
         header: 'Namespace',
         enableSorting: true,
-        cell: ({ getValue, table, row }) => {
+        cell: ({ getValue }) => {
           const namespace = getValue()
 
-          if (!namespace) return null
-
-          const { cluster } = table.options.meta as {
-            cluster?: ClusterTinyFragment
-          }
-
           return (
-            <Link
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                'namespace',
-                row.original.objectMeta.namespace!
-              )}
+            <ResourceLink
+              objectRef={{
+                kind: Kind.Namespace,
+                name: namespace,
+              }}
               onClick={(e) => e.stopPropagation()}
-            >
-              <InlineLink>{getValue()}</InlineLink>
-            </Link>
+            />
           )
         },
       }),
@@ -102,6 +87,16 @@ export function useDefaultColumns<
           cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
         }
       ),
+      colAction: columnHelper.accessor((r) => r, {
+        id: 'action',
+        header: '',
+        cell: ({ getValue, table }) => (
+          <DeleteResourceButton
+            resource={getValue()}
+            refetch={table?.options?.meta?.refetch}
+          />
+        ),
+      }),
     }),
     [columnHelper]
   )
@@ -133,32 +128,6 @@ export function ResourceReadyChip({
   )
 }
 
-export function ResourceLink({
-  name,
-  namespace,
-  kind,
-  emptyState = '-',
-}: {
-  name?: Maybe<string>
-  namespace?: Maybe<string>
-  kind: string
-  emptyState?: string
-}) {
-  const { clusterId } = useParams()
-
-  if (!name) return emptyState
-
-  return (
-    <Link to={getResourceDetailsAbsPath(clusterId, kind, name, namespace)}>
-      <InlineLink>
-        {namespace}
-        {namespace && '/'}
-        {name}
-      </InlineLink>
-    </Link>
-  )
-}
-
 export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
   const totalItems = listMeta?.totalItems ?? 0
   const pages = Math.ceil(totalItems / ITEMS_PER_PAGE)
@@ -169,9 +138,10 @@ export function usePageInfo(items: any[], listMeta: ListMetaT | undefined) {
 }
 
 export function useSortedTableOptions(
+  initialSort?: SortingState,
   options?: Omit<TableOptions<any>, 'data' | 'columns' | 'getCoreRowModel'>
 ) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>(initialSort ?? [])
 
   return useMemo(
     () => ({
@@ -211,7 +181,9 @@ export function extendConnection(
   }
 }
 
-export const getBaseBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBaseBreadcrumbs = (
+  cluster?: Maybe<KubernetesClusterFragment>
+) => [
   {
     label: 'kubernetes',
     url: getKubernetesAbsPath(cluster?.id),
@@ -256,7 +228,7 @@ export function MetadataSidecar({
   resource,
   children,
 }: {
-  resource?: Maybe<ResourceT>
+  resource?: Maybe<Resource>
   children?: ReactNode
 }) {
   const objectMeta = resource?.objectMeta
@@ -269,7 +241,12 @@ export function MetadataSidecar({
           <SidecarItem heading="Name">{objectMeta.name}</SidecarItem>
           {objectMeta.namespace && (
             <SidecarItem heading="Namespace">
-              {objectMeta.namespace}
+              <ResourceLink
+                objectRef={{
+                  kind: Kind.Namespace,
+                  name: objectMeta?.namespace,
+                }}
+              />
             </SidecarItem>
           )}
           <SidecarItem heading="UID">{objectMeta.uid}</SidecarItem>
