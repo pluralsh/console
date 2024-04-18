@@ -72,6 +72,7 @@ export { default as Sidebar } from './components/Sidebar'
 export { default as SidebarSection } from './components/SidebarSection'
 export { default as SidebarItem } from './components/SidebarItem'
 export { default as Modal } from './components/Modal'
+export { default as Flyover } from './components/Flyover'
 export { HonorableModal } from './components/HonorableModal'
 export type {
   ChecklistProps,
