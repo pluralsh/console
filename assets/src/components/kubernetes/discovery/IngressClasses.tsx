@@ -13,7 +13,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   INGRESS_CLASSES_REL_PATH,
   getDiscoveryAbsPath,
@@ -22,7 +22,7 @@ import { useCluster } from '../Cluster'
 
 import { getDiscoveryBreadcrumbs } from './Discovery'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getDiscoveryBreadcrumbs(cluster),
   {
     label: 'ingress classes',

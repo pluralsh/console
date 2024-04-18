@@ -4,7 +4,8 @@ import { isEmpty } from 'lodash'
 
 import {
   KubernetesClusterFragment,
-  useClustersTinyQuery,
+  Maybe,
+  PinnedCustomResourceFragment,
   useKubernetesClustersQuery,
 } from '../../generated/graphql'
 import { mapExistingNodes } from '../../utils/graphql'
@@ -40,6 +41,24 @@ export const useCluster = () => {
   const { cluster } = useClusterContext()
 
   return cluster
+}
+
+export const usePinnedResources = (): Maybe<PinnedCustomResourceFragment>[] => {
+  const cluster = useCluster()
+
+  return cluster?.pinnedCustomResources ?? []
+}
+
+export const useIsPinnedResource = (
+  kind: string,
+  version: string,
+  group: string
+) => {
+  const pinnedResources = usePinnedResources()
+
+  return !!pinnedResources.find(
+    (pr) => pr?.group === group && pr?.version === version && pr?.kind === kind
+  )
 }
 
 export const useNamespaces = () => {

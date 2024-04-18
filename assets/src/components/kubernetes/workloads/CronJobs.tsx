@@ -15,7 +15,7 @@ import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   CRON_JOBS_REL_PATH,
   getWorkloadsAbsPath,
@@ -26,7 +26,7 @@ import { useCluster } from '../Cluster'
 import { CronJobSuspendChip, WorkloadImages } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'cron jobs',

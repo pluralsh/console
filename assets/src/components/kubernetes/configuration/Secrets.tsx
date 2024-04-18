@@ -13,7 +13,7 @@ import {
   SecretsQueryVariables,
   useSecretsQuery,
 } from '../../../generated/graphql-kubernetes'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   SECRETS_REL_PATH,
   getConfigurationAbsPath,
@@ -22,7 +22,7 @@ import { useCluster } from '../Cluster'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getConfigurationBreadcrumbs(cluster),
   {
     label: 'secrets',

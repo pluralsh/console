@@ -13,7 +13,7 @@ import {
   Types_TypeMeta as TypeMetaT,
 } from '../../../generated/graphql-kubernetes'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
 
 import { Kind, Resource } from './types'
@@ -181,7 +181,9 @@ export function extendConnection(
   }
 }
 
-export const getBaseBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBaseBreadcrumbs = (
+  cluster?: Maybe<KubernetesClusterFragment>
+) => [
   {
     label: 'kubernetes',
     url: getKubernetesAbsPath(cluster?.id),

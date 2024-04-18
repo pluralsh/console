@@ -12,7 +12,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   SERVICE_ACCOUNTS_REL_PATH,
   getAccessAbsPath,
@@ -21,7 +21,7 @@ import { useCluster } from '../Cluster'
 
 import { getAccessBreadcrumbs } from './Access'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getAccessBreadcrumbs(cluster),
   {
     label: 'service accounts',

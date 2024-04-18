@@ -18,12 +18,12 @@ import {
   CONFIG_MAPS_REL_PATH,
   getConfigurationAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { useCluster } from '../Cluster'
 
 import { getConfigurationBreadcrumbs } from './Configuration'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getConfigurationBreadcrumbs(cluster),
   {
     label: 'config maps',

@@ -12,7 +12,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { ResourceList } from '../common/ResourceList'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   EVENTS_REL_PATH,
   getClusterAbsPath,
@@ -24,7 +24,7 @@ import ResourceLink from '../common/ResourceLink'
 import { EventTypeChip } from './utils'
 import { getClusterBreadcrumbs } from './Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
   {
     label: 'events',

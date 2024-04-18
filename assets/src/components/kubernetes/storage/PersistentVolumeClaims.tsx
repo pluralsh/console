@@ -12,7 +12,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   getStorageAbsPath,
@@ -24,7 +24,7 @@ import ResourceLink from '../common/ResourceLink'
 import { PVCStatusChip } from './utils'
 import { getStorageBreadcrumbs } from './Storage'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getStorageBreadcrumbs(cluster),
   {
     label: 'persistent volume claims',

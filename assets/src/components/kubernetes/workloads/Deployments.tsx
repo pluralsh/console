@@ -13,7 +13,7 @@ import {
 import { ResourceList } from '../common/ResourceList'
 import { useDefaultColumns } from '../common/utils'
 import { UsageText } from '../../cluster/TableElements'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   DEPLOYMENTS_REL_PATH,
   getWorkloadsAbsPath,
@@ -24,7 +24,7 @@ import { useCluster } from '../Cluster'
 import { WorkloadImages, WorkloadStatusChip } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'deployments',

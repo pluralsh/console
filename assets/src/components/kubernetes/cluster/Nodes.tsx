@@ -15,7 +15,7 @@ import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { Usage } from '../../cluster/TableElements'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   NODES_REL_PATH,
   getClusterAbsPath,
@@ -24,7 +24,7 @@ import { useCluster } from '../Cluster'
 
 import { getClusterBreadcrumbs } from './Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
   {
     label: 'nodes',

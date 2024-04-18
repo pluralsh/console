@@ -16,11 +16,11 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { useCluster } from '../Cluster'
 import { Maybe } from '../../../generated/graphql-kubernetes'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 
 export const getConfigurationBreadcrumbs = (
-  cluster?: Maybe<ClusterTinyFragment>
+  cluster?: Maybe<KubernetesClusterFragment>
 ) => [
   ...getBaseBreadcrumbs(cluster),
   {

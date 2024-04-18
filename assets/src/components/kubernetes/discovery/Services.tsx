@@ -14,7 +14,7 @@ import {
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   SERVICES_REL_PATH,
   getDiscoveryAbsPath,
@@ -25,7 +25,7 @@ import { useCluster } from '../Cluster'
 import { TableEndpoints, serviceTypeDisplayName } from './utils'
 import { getDiscoveryBreadcrumbs } from './Discovery'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getDiscoveryBreadcrumbs(cluster),
   {
     label: 'services',

@@ -14,7 +14,7 @@ import {
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   NAMESPACES_REL_PATH,
   getClusterAbsPath,
@@ -25,7 +25,7 @@ import { useCluster } from '../Cluster'
 import { NamespacePhaseChip } from './utils'
 import { getClusterBreadcrumbs } from './Cluster'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),
   {
     label: 'namespaces',

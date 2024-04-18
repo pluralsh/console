@@ -1,27 +1,34 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import React, { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  ChipList,
+  IconFrame,
+  PushPinIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+import { useParams } from 'react-router-dom'
 
 import {
+  Types_CustomResourceDefinition as CustomResourceDefinitionT,
   CustomResourceDefinitionsQuery,
   CustomResourceDefinitionsQueryVariables,
   Types_CustomResourceDefinitionList as CustomResourceListT,
-  Types_CustomResourceDefinition as CustomResourceT,
   Maybe,
   useCustomResourceDefinitionsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import {
+  KubernetesClusterFragment,
+  usePinCustomResourceMutation,
+} from '../../../generated/graphql'
 import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
-
-import { useCluster } from '../Cluster'
+import { useCluster, useIsPinnedResource } from '../Cluster'
 
 import { CRDEstablishedChip } from './utils'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getBaseBreadcrumbs(cluster),
   {
     label: 'custom resources',
@@ -29,7 +36,7 @@ export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
   },
 ]
 
-const columnHelper = createColumnHelper<CustomResourceT>()
+const columnHelper = createColumnHelper<CustomResourceDefinitionT>()
 
 const colName = columnHelper.accessor((r) => r?.objectMeta.name, {
   id: 'name',
@@ -61,6 +68,12 @@ const colVersion = columnHelper.accessor((crd) => crd?.version, {
   cell: ({ getValue }) => getValue(),
 })
 
+const colKind = columnHelper.accessor((crd) => crd?.names?.kind, {
+  id: 'kind',
+  header: 'Kind',
+  cell: ({ getValue }) => getValue(),
+})
+
 const colScope = columnHelper.accessor((crd) => crd?.scope, {
   id: 'scope',
   header: 'Scope',
@@ -86,9 +99,77 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
   ),
 })
 
+const _colPin = columnHelper.accessor((crd) => crd, {
+  id: 'pin',
+  header: '',
+  cell: ({ getValue }) => {
+    const crd = getValue()
+
+    return (
+      crd &&
+      crd.group &&
+      crd.version &&
+      crd.names?.kind && (
+        <PinCustomResourceDefinition
+          group={crd.group}
+          version={crd.version}
+          kind={crd.names.kind}
+          namespaced={crd.scope?.toLowerCase() === 'namespaced'}
+        />
+      )
+    )
+  },
+})
+
+function PinCustomResourceDefinition({
+  group,
+  version,
+  kind,
+  namespaced,
+}: {
+  group: string
+  version: string
+  kind: string
+  namespaced: boolean
+}) {
+  const { clusterId } = useParams()
+  const isPinned = useIsPinnedResource(kind, version, group)
+  const [mutation] = usePinCustomResourceMutation({
+    variables: {
+      attributes: {
+        group,
+        version,
+        kind,
+        namespaced,
+        clusterId,
+        displayName: kind, // TODO: Add modal with input so users can pick it on their own.
+      },
+    },
+    onError: (error) => console.error(error), // TODO: Handle errors.
+    // TODO: Refetch on complete.
+  })
+
+  return (
+    !isPinned && (
+      <IconFrame
+        icon={<PushPinIcon />}
+        textValue="Pin custom resource"
+        tooltip
+        size="medium"
+        clickable
+        onClick={(e) => {
+          e.stopPropagation()
+          mutation()
+        }}
+      />
+    )
+  )
+}
+
 export default function CustomResourceDefinitions() {
   const theme = useTheme()
   const cluster = useCluster()
+  // const pinnedResources = usePinnedResources()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
 
@@ -99,11 +180,13 @@ export default function CustomResourceDefinitions() {
       colName,
       colGroup,
       colVersion,
+      colKind,
       colScope,
       colEstablished,
       colCategories,
       colLabels,
       colCreationTimestamp,
+      // colPin,
       colAction,
     ],
     [colAction, colLabels, colCreationTimestamp]
@@ -128,7 +211,7 @@ export default function CustomResourceDefinitions() {
       >
         <ResourceList<
           CustomResourceListT,
-          CustomResourceT,
+          CustomResourceDefinitionT,
           CustomResourceDefinitionsQuery,
           CustomResourceDefinitionsQueryVariables
         >

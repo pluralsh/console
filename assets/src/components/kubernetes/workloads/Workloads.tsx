@@ -20,7 +20,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { useCluster } from '../Cluster'
 import { Maybe } from '../../../generated/graphql-kubernetes'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 
 const directory = [
@@ -35,7 +35,7 @@ const directory = [
 ] as const
 
 export const getWorkloadsBreadcrumbs = (
-  cluster?: Maybe<ClusterTinyFragment>
+  cluster?: Maybe<KubernetesClusterFragment>
 ) => [
   ...getBaseBreadcrumbs(cluster),
   {

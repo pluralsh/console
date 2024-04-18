@@ -12,7 +12,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   PODS_REL_PATH,
   getWorkloadsAbsPath,
@@ -28,7 +28,7 @@ import ResourceLink from '../common/ResourceLink'
 import { WorkloadImages, toReadiness } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
   {
     label: 'pods',

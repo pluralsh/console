@@ -16,10 +16,12 @@ import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { useCluster } from '../Cluster'
 import { Maybe } from '../../../generated/graphql-kubernetes'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 
-export const getClusterBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getClusterBreadcrumbs = (
+  cluster?: Maybe<KubernetesClusterFragment>
+) => [
   ...getBaseBreadcrumbs(cluster),
   {
     label: 'cluster',

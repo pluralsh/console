@@ -14,7 +14,7 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { ClusterTinyFragment } from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   STORAGE_CLASSES_REL_PATH,
   getStorageAbsPath,
@@ -23,7 +23,7 @@ import { useCluster } from '../Cluster'
 
 import { getStorageBreadcrumbs } from './Storage'
 
-export const getBreadcrumbs = (cluster?: Maybe<ClusterTinyFragment>) => [
+export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getStorageBreadcrumbs(cluster),
   {
     label: 'storage classes',
