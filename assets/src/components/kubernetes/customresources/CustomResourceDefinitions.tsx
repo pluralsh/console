@@ -30,6 +30,7 @@ import {
   KubernetesClusterFragment,
   PinnedCustomResourceFragment,
   usePinCustomResourceMutation,
+  useUnpinCustomResourceMutation,
 } from '../../../generated/graphql'
 import {
   getCustomResourcesAbsPath,
@@ -243,7 +244,16 @@ function PinnedCustomResourceDefinitions({
   cluster?: KubernetesClusterFragment
   pinnedResources: Maybe<PinnedCustomResourceFragment>[]
 }) {
+  const refetchClusters = useRefetch()
   const tabStateRef = useRef<any>(null)
+  const [error, setError] = useState<ApolloError>()
+  const [mutation] = useUnpinCustomResourceMutation({
+    onCompleted: () => refetchClusters?.(),
+    onError: (error) => {
+      setError(error)
+      setTimeout(() => setError(undefined), 3000)
+    },
+  })
 
   return (
     <TabList
@@ -253,31 +263,49 @@ function PinnedCustomResourceDefinitions({
       stateProps={{ orientation: 'horizontal', selectedKey: '' }}
       paddingBottom="xxsmall"
     >
-      {pinnedResources
-        .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
-        .map(({ name, displayName }) => (
-          <LinkContainer
-            subTab
-            key={name}
-            textValue={name}
-            to={getResourceDetailsAbsPath(
-              cluster?.id,
-              Kind.CustomResourceDefinition,
-              name
-            )}
-          >
-            <SubTab
+      <>
+        {pinnedResources
+          .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
+          .map(({ id, name, displayName }) => (
+            <LinkContainer
+              subTab
               key={name}
               textValue={name}
-              css={{ display: 'flex' }}
+              to={getResourceDetailsAbsPath(
+                cluster?.id,
+                Kind.CustomResourceDefinition,
+                name
+              )}
             >
-              {displayName}
-              <Tooltip label="Unpin custom resource">
-                <DeleteIcon size={12} />
-              </Tooltip>
-            </SubTab>
-          </LinkContainer>
-        ))}
+              <SubTab
+                key={name}
+                textValue={name}
+                css={{ display: 'flex' }}
+              >
+                {displayName}
+                <Tooltip label="Unpin custom resource">
+                  <DeleteIcon
+                    size={12}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      mutation({ variables: { id } })
+                    }}
+                  />
+                </Tooltip>
+              </SubTab>
+            </LinkContainer>
+          ))}
+        {error && (
+          <Toast
+            heading="Error unpinning resource"
+            severity="danger"
+            margin="large"
+            marginRight="xxxxlarge"
+          >
+            {error.message}
+          </Toast>
+        )}
+      </>
     </TabList>
   )
 }
