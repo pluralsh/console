@@ -25,7 +25,7 @@ spec:
     prometheus:
       format: memory
       legend: $pod
-      query: sum(container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"plural-console-[0-9]+"}) by (pod)
+      query: sum(container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"plural-console-[0-9]+",image!="",container!=""}) by (pod)
   - name: statefulset
     type: kubernetes
     kubernetes:
@@ -98,7 +98,7 @@ spec:
     prometheus:
       format: memory
       legend: $pod
-      query: sum(container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"console.+"}) by (pod)
+      query: sum(container_memory_working_set_bytes{namespace="{{ .Release.Namespace }}",pod=~"console.+",image!="",container!=""}) by (pod)
   - name: deployment
     type: kubernetes
     kubernetes:

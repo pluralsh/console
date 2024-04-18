@@ -33,6 +33,8 @@ defmodule Console.PubSub.PipelineUpserted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PipelineDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PipelineStageUpdated, do: use Piazza.PubSub.Event
 
+defmodule Console.PubSub.PipelineContextCreated, do: use Piazza.PubSub.Event
+
 defmodule Console.PubSub.PipelineGateApproved, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PipelineGateUpdated, do: use Piazza.PubSub.Event
 

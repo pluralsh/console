@@ -1302,6 +1302,8 @@ type ManagedNamespace {
   "A template for creating the core service for this namespace"
   service: ServiceTemplate
 
+  services(after: String, first: Int, before: String, last: Int, q: String): ServiceDeploymentConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -1936,6 +1938,8 @@ type PipelineStageEdge {
 
   gates: [PipelineGate]
 
+  pipeline: Pipeline
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -1962,6 +1966,9 @@ type PipelineGate {
 
   "the kubernetes job running this gate (should only be fetched lazily as this is a heavy operation)"
   job: Job
+
+  "the edge this gate lives on"
+  edge: PipelineStageEdge
 
   "the cluster this gate can run on"
   cluster: Cluster

@@ -77,6 +77,12 @@ defmodule Console.GraphQl.Deployments.Global do
       description: "A template for creating the core service for this namespace",
       resolve: dataloader(Deployments)
 
+    connection field :services, node_type: :service_deployment do
+      arg :q, :string
+
+      resolve &Deployments.services_for_namespace/3
+    end
+
     timestamps()
   end
 

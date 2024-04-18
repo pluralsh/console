@@ -126,9 +126,9 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.AgentMigrationCreated do
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
-  alias Console.Deployments.Pipelines
+  alias Console.Deployments.Pipelines.Discovery
 
-  def process(%{item: stage}), do: Pipelines.apply_pipeline_context(stage)
+  def process(%{item: stage}), do: Discovery.context(stage)
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackCreated, Console.PubSub.StackUpdated] do

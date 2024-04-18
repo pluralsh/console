@@ -1,0 +1,92 @@
+fragment ManagedNamespace on ManagedNamespace {
+  description
+  deletedAt
+  annotations
+  id
+  insertedAt
+  labels
+  name
+  pullSecrets
+  target {
+    distro
+    tags
+  }
+  updatedAt
+}
+
+fragment ServiceTemplate on ServiceTemplate {
+  configuration {
+    name
+    value
+  }
+  contexts
+  git {
+    folder
+    ref
+  }
+  helm {
+    chart
+    repository {
+      name
+      namespace
+    }
+    set {
+      name
+      value
+    }
+    valuesFiles
+    version
+  }
+  kustomize {
+    path
+  }
+  name
+  namespace
+  repository {
+    ...GitRepository
+  }
+  repositoryId
+  syncConfig {
+    createNamespace
+    namespaceMetadata {
+      annotations
+      labels
+    }
+  }
+  templated
+}
+
+query ManagedNamespaces($first: Int, $after: String) {
+  managedNamespaces(first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ManagedNamespace
+      }
+    }
+  }
+}
+
+query GetManagedNamespaceName($namespaceId: ID!) {
+  managedNamespace(id: $namespaceId) {
+    name
+  }
+}
+
+query GetManagedNamespace($namespaceId: ID!, $first: Int, $after: String) {
+  managedNamespace(id: $namespaceId) {
+    ...ManagedNamespace
+    services(first: $first, after: $after) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ServiceDeploymentsRow
+        }
+      }
+    }
+  }
+}

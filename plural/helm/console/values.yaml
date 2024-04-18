@@ -30,6 +30,19 @@ serviceAccount:
 
 extraSecretEnv: []
 
+secrets:
+  cluster_name: test
+  jwt: test
+  git_url: test
+  repo_root: test
+  branch_name: main
+  erlang: test
+  git_user: test
+  git_email: test
+  admin_name: test
+  admin_email: test
+  admin_password: test
+
 livenessProbe:
   httpGet:
     path: /health
@@ -192,6 +205,13 @@ test-base:
 
 dashboard:
   enabled: true
+  cert-manager:
+    enabled: false
+    installCrds: false
+  nginx:
+    enabled: false
+  metrics-server:
+    enabled: false
   app:
     mode: 'api'
   kong:

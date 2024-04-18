@@ -59,6 +59,10 @@ const getPipelineJobBreadcrumbs = ({
   tab: string
 }): Breadcrumb[] => [
   ...PIPELINES_CRUMBS,
+  {
+    label: gate?.edge?.pipeline?.name || 'pipeline',
+    url: `${PIPELINES_ABS_PATH}/${gate?.edge?.pipeline?.id}`,
+  },
   { label: 'jobs' },
   ...(!gate
     ? []

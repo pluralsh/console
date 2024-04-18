@@ -46,6 +46,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     |> paginate(args)
   end
 
+  def services_for_namespace(%{id: id}, args, %{context: %{current_user: user}}) do
+    Service.for_user(user)
+    |> Service.for_namespace(id)
+    |> service_filters(args)
+    |> maybe_search(Service, args)
+    |> Service.ordered()
+    |> paginate(args)
+  end
+
   def list_revisions(%{id: id}, args, _) do
     Revision.for_service(id)
     |> Revision.ordered()

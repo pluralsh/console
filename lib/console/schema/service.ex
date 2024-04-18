@@ -15,7 +15,8 @@ defmodule Console.Schema.Service do
     DiffNormalizer,
     Metadata,
     StageService,
-    ServiceContextBinding
+    ServiceContextBinding,
+    NamespaceInstance
   }
 
   defenum Promotion, ignore: 0, proceed: 1, rollback: 2
@@ -119,9 +120,10 @@ defmodule Console.Schema.Service do
     belongs_to :repository, GitRepository
     belongs_to :owner,      GlobalService
 
-    has_one :reference_cluster, Cluster
-    has_one :provider,          ClusterProvider
-    has_one :global_service,    GlobalService
+    has_one :reference_cluster,  Cluster
+    has_one :provider,           ClusterProvider
+    has_one :global_service,     GlobalService
+    has_one :namespace_instance, NamespaceInstance
 
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
@@ -190,6 +192,13 @@ defmodule Console.Schema.Service do
 
   def for_owner(query \\ __MODULE__, owner_id) do
     from(s in query, where: s.owner_id == ^owner_id)
+  end
+
+  def for_namespace(query \\ __MODULE__, ns_id) do
+    from(s in query,
+      join: ni in assoc(s, :namespace_instance),
+      where: ni.namespace_id == ^ns_id
+    )
   end
 
   def for_status(query \\ __MODULE__, status) do

@@ -3338,9 +3338,9 @@ export type V1_EndpointPort = {
    * * Un-prefixed protocol names - reserved for IANA standard service names (as per RFC-6335 and https://www.iana.org/assignments/service-names).
    *
    * * Kubernetes-defined prefixed names:
-   * * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
-   * * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
-   * * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
+   *   * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
+   *   * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
+   *   * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
    *
    * * Other protocols should use implementation-defined prefixed names such as mycompany.com/my-custom-protocol.
    */
@@ -3527,15 +3527,15 @@ export type V1_HttpIngressPath = {
   path?: Maybe<Scalars['String']['output']>;
   /**
    * pathType determines the interpretation of the path matching. PathType can be one of the following values: * Exact: Matches the URL path exactly. * Prefix: Matches based on a URL path prefix split by '/'. Matching is
-   * done on a path element by element basis. A path element refers is the
-   * list of labels in the path split by the '/' separator. A request is a
-   * match for path p if every p is an element-wise prefix of p of the
-   * request path. Note that if the last element of the path is a substring
-   * of the last element in request path, it is not a match (e.g. /foo/bar
-   * matches /foo/bar/baz, but does not match /foo/barbaz).
+   *   done on a path element by element basis. A path element refers is the
+   *   list of labels in the path split by the '/' separator. A request is a
+   *   match for path p if every p is an element-wise prefix of p of the
+   *   request path. Note that if the last element of the path is a substring
+   *   of the last element in request path, it is not a match (e.g. /foo/bar
+   *   matches /foo/bar/baz, but does not match /foo/barbaz).
    * * ImplementationSpecific: Interpretation of the Path matching is up to
-   * the IngressClass. Implementations can treat this as a separate PathType
-   * or treat it identically to Prefix or Exact path types.
+   *   the IngressClass. Implementations can treat this as a separate PathType
+   *   or treat it identically to Prefix or Exact path types.
    * Implementations are required to support all path types.
    */
   pathType: Scalars['String']['output'];
@@ -3648,9 +3648,9 @@ export type V1_IngressPortStatus = {
   __typename?: 'v1_IngressPortStatus';
   /**
    * error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use
-   * CamelCase names
+   *   CamelCase names
    * - cloud provider specific error values must have names that comply with the
-   * format foo.example.com/CamelCase.
+   *   format foo.example.com/CamelCase.
    */
   error?: Maybe<Scalars['String']['output']>;
   /** port is the port number of the ingress port. */
@@ -3664,10 +3664,10 @@ export type V1_IngressRule = {
   __typename?: 'v1_IngressRule';
   /**
    * host is the fully qualified domain name of a network host, as defined by RFC 3986. Note the following deviations from the "host" part of the URI as defined in RFC 3986: 1. IPs are not allowed. Currently an IngressRuleValue can only apply to
-   * the IP in the Spec of the parent Ingress.
+   *    the IP in the Spec of the parent Ingress.
    * 2. The `:` delimiter is not respected because ports are not allowed.
-   * Currently the port of an Ingress is implicitly :80 for http and
-   * :443 for https.
+   * 	  Currently the port of an Ingress is implicitly :80 for http and
+   * 	  :443 for https.
    * Both these may change in the future. Incoming requests are matched against the host before the IngressRuleValue. If the host is unspecified, the Ingress routes all traffic based on the specified IngressRuleValue.
    *
    * host can be "precise" which is a domain name without the terminating dot of a network host (e.g. "foo.bar.com") or "wildcard", which is a domain name prefixed with a single wildcard label (e.g. "*.foo.com"). The wildcard character '*' must appear by itself as the first DNS label and matches only a single label. You cannot have a wildcard label by itself (e.g. Host == "*"). Requests will be matched against the Host field in the following way: 1. If host is precise, the request matches this rule if the http host header is equal to Host. 2. If host is a wildcard, then the request matches this rule if the http host header is to equal to the suffix (removing the first label) of the wildcard rule.

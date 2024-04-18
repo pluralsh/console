@@ -174,9 +174,9 @@ function Metric({
   const { data } = useUsageQuery({
     variables: {
       cpu: `sum(rate(container_cpu_usage_seconds_total{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
-      mem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"})`,
+      mem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}",image!="",container!=""})`,
       podCpu: `sum(rate(container_cpu_usage_seconds_total{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}[5m])) by (pod)`,
-      podMem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}) by (pod)`,
+      podMem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}",image!="",container!=""}) by (pod)`,
       clusterId: cluster?.id,
       step,
       offset,

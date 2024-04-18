@@ -166,6 +166,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :to,          non_null(:pipeline_stage), resolve: dataloader(Deployments)
     field :gates,       list_of(:pipeline_gate), resolve: dataloader(Deployments)
 
+    field :pipeline,    :pipeline, resolve: dataloader(Deployments)
+
     timestamps()
   end
 
@@ -184,6 +186,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
       middleware ErrorHandler
     end
 
+    field :edge,     :pipeline_stage_edge, description: "the edge this gate lives on", resolve: dataloader(Deployments)
     field :cluster,  :cluster, description: "the cluster this gate can run on", resolve: dataloader(Deployments)
     field :approver, :user, description: "the last user to approve this gate", resolve: dataloader(User)
 
