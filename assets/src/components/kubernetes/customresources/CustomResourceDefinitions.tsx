@@ -1,20 +1,7 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import React, { useMemo, useRef, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
-import {
-  ChipList,
-  CloseIcon,
-  IconFrame,
-  PushPinIcon,
-  SubTab,
-  TabList,
-  Toast,
-  Tooltip,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { useParams } from 'react-router-dom'
-
-import { ApolloError } from 'apollo-boost'
+import React, { useMemo } from 'react'
+import { useTheme } from 'styled-components'
+import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
   Types_CustomResourceDefinition as CustomResourceDefinitionT,
@@ -26,29 +13,14 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { getBaseBreadcrumbs, useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import {
-  KubernetesClusterFragment,
-  PinnedCustomResourceFragment,
-  usePinCustomResourceMutation,
-  useUnpinCustomResourceMutation,
-} from '../../../generated/graphql'
-import {
-  getCustomResourcesAbsPath,
-  getResourceDetailsAbsPath,
-} from '../../../routes/kubernetesRoutesConsts'
-import {
-  useCluster,
-  useIsPinnedResource,
-  usePinnedResources,
-  useRefetch,
-} from '../Cluster'
-
-import { LinkTabWrap } from '../../utils/Tabs'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
+import { getCustomResourcesAbsPath } from '../../../routes/kubernetesRoutesConsts'
+import { useCluster, usePinnedResources } from '../Cluster'
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 
-import { Kind } from '../common/types'
-
 import { CRDEstablishedChip } from './utils'
+import PinCustomResourceDefinition from './PinCustomResourceDefinition'
+import PinnedCustomResourceDefinitions from './PinnedCustomResourceDefinitions'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getBaseBreadcrumbs(cluster),
@@ -124,192 +96,8 @@ const colCategories = columnHelper.accessor((crd) => crd?.names.categories, {
 const colPin = columnHelper.accessor((crd) => crd, {
   id: 'pin',
   header: '',
-  cell: ({ getValue }) => {
-    const crd = getValue()
-
-    return (
-      crd?.objectMeta?.name &&
-      crd?.group &&
-      crd?.version &&
-      crd?.names?.kind &&
-      crd?.scope && (
-        <PinCustomResourceDefinition
-          name={crd.objectMeta.name}
-          group={crd.group}
-          version={crd.version}
-          kind={crd.names.kind}
-          namespaced={crd.scope?.toLowerCase() === 'namespaced'}
-        />
-      )
-    )
-  },
+  cell: ({ getValue }) => <PinCustomResourceDefinition crd={getValue()} />,
 })
-
-function PinCustomResourceDefinition({
-  name,
-  group,
-  version,
-  kind,
-  namespaced,
-}: {
-  name: string
-  group: string
-  version: string
-  kind: string
-  namespaced: boolean
-}) {
-  const { clusterId } = useParams()
-  const refetchClusters = useRefetch()
-  const isPinned = useIsPinnedResource(kind, version, group)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState<ApolloError>()
-  const [mutation] = usePinCustomResourceMutation({
-    variables: {
-      attributes: {
-        name,
-        group,
-        version,
-        kind,
-        namespaced,
-        clusterId,
-        displayName: kind, // TODO: Add modal with input so users can pick it on their own.
-      },
-    },
-    onError: (error) => {
-      setError(error)
-      setTimeout(() => setError(undefined), 3000)
-    },
-    onCompleted: () => {
-      refetchClusters?.()
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
-    },
-  })
-
-  return (
-    <>
-      {!isPinned && (
-        <IconFrame
-          icon={<PushPinIcon />}
-          textValue="Pin custom resource"
-          tooltip
-          size="medium"
-          clickable
-          onClick={(e) => {
-            e.stopPropagation()
-            mutation()
-          }}
-        />
-      )}
-      {success && (
-        <Toast
-          severity="success"
-          margin="large"
-          marginRight="xxxxlarge"
-        >
-          Resource pinned successfully
-        </Toast>
-      )}
-      {error && (
-        <Toast
-          heading="Error pinning resource"
-          severity="danger"
-          margin="large"
-          marginRight="xxxxlarge"
-        >
-          {error.message}
-        </Toast>
-      )}
-    </>
-  )
-}
-
-const DeleteIcon = styled(CloseIcon)(({ theme }) => ({
-  marginLeft: theme.spacing.xxsmall,
-  padding: theme.spacing.xxsmall,
-  opacity: 0,
-  '&:hover': {
-    color: theme.colors['icon-danger'],
-  },
-}))
-
-const LinkContainer = styled(LinkTabWrap)(() => ({
-  [`:hover ${DeleteIcon}`]: { opacity: 1 },
-}))
-
-function PinnedCustomResourceDefinitions({
-  cluster,
-  pinnedResources,
-}: {
-  cluster?: KubernetesClusterFragment
-  pinnedResources: Maybe<PinnedCustomResourceFragment>[]
-}) {
-  const refetchClusters = useRefetch()
-  const tabStateRef = useRef<any>(null)
-  const [error, setError] = useState<ApolloError>()
-  const [mutation] = useUnpinCustomResourceMutation({
-    onCompleted: () => refetchClusters?.(),
-    onError: (error) => {
-      setError(error)
-      setTimeout(() => setError(undefined), 3000)
-    },
-  })
-
-  return (
-    <TabList
-      scrollable
-      gap="xxsmall"
-      stateRef={tabStateRef}
-      stateProps={{ orientation: 'horizontal', selectedKey: '' }}
-      paddingBottom="xxsmall"
-    >
-      <>
-        {pinnedResources
-          .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
-          .map(({ id, name, displayName }) => (
-            <LinkContainer
-              subTab
-              key={name}
-              textValue={name}
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                Kind.CustomResourceDefinition,
-                name
-              )}
-            >
-              <SubTab
-                key={name}
-                textValue={name}
-                css={{ display: 'flex' }}
-              >
-                {displayName}
-                <Tooltip label="Unpin custom resource">
-                  {/* TODO: Add loading icon. */}
-                  <DeleteIcon
-                    size={12}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      mutation({ variables: { id } })
-                    }}
-                  />
-                </Tooltip>
-              </SubTab>
-            </LinkContainer>
-          ))}
-        {error && (
-          <Toast
-            heading="Error unpinning resource"
-            severity="danger"
-            margin="large"
-            marginRight="xxxxlarge"
-          >
-            {error.message}
-          </Toast>
-        )}
-      </>
-    </TabList>
-  )
-}
 
 export default function CustomResourceDefinitions() {
   const theme = useTheme()

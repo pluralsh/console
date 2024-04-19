@@ -23,10 +23,9 @@ import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
 import { ClusterSelect } from '../cd/addOns/ClusterSelect'
-import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 
-import { useCluster, useClusters } from './Cluster'
+import { useClusters } from './Cluster'
 import {
   DataSelect,
   DataSelectInputs,
@@ -52,7 +51,6 @@ export default function Navigation() {
   const { pathname, search } = useLocation()
   const { clusterId = '' } = useParams()
   const clusters = useClusters()
-  const cluster = useCluster()
   const [params, setParams] = useSearchParams()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
@@ -75,8 +73,6 @@ export default function Navigation() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSelect, pathname])
-
-  if (!cluster) return <LoadingIndicator />
 
   return (
     <ResponsiveLayoutPage>

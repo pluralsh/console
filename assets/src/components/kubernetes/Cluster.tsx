@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { isEmpty } from 'lodash'
 
+import { useTheme } from 'styled-components'
+
 import {
   KubernetesClusterFragment,
   Maybe,
@@ -12,6 +14,8 @@ import { mapExistingNodes } from '../../utils/graphql'
 import { getWorkloadsAbsPath } from '../../routes/kubernetesRoutesConsts'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
+import LoadingIndicator from '../utils/LoadingIndicator'
+import { GqlError } from '../utils/Alert'
 
 type ClusterContextT = {
   clusters: KubernetesClusterFragment[]
@@ -57,11 +61,13 @@ export const usePinnedResources = (): Maybe<PinnedCustomResourceFragment>[] => {
 }
 
 export const useIsPinnedResource = (
-  kind: string,
-  version: string,
-  group: string
+  kind: string | null | undefined,
+  version: string | null | undefined,
+  group: string | null | undefined
 ) => {
   const pinnedResources = usePinnedResources()
+
+  if (!kind || !version || !group) return false
 
   return !!pinnedResources.find(
     (pr) => pr?.group === group && pr?.version === version && pr?.kind === kind
@@ -75,11 +81,12 @@ export const useNamespaces = () => {
 }
 
 export default function Cluster() {
+  const theme = useTheme()
   const { clusterId } = useParams()
   const { search } = useLocation()
   const navigate = useNavigate()
 
-  const { data, refetch } = useKubernetesClustersQuery({
+  const { data, error, refetch } = useKubernetesClustersQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
   })
@@ -121,6 +128,18 @@ export default function Cluster() {
       }
     }
   }, [clusters, navigate, search, clusterId])
+
+  if (error)
+    return (
+      <div css={{ padding: theme.spacing.large }}>
+        <GqlError
+          header="Cannot load clusters"
+          error={error}
+        />
+      </div>
+    )
+
+  if (!cluster) return <LoadingIndicator />
 
   return (
     <ClusterContext.Provider value={context}>
