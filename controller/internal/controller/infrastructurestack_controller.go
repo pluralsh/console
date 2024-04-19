@@ -19,18 +19,25 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/utils"
+	"k8s.io/apimachinery/pkg/api/errors"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	deploymentsv1alpha1 "github.com/pluralsh/console/controller/api/v1alpha1"
 )
+
+const InfrastructureStackFinalizer = "deployments.plural.sh/stack-protection"
 
 // InfrastructureStackReconciler reconciles a InfrastructureStack object
 type InfrastructureStackReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme        *runtime.Scheme
+	ConsoleClient consoleclient.ConsoleClient
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
@@ -39,17 +46,32 @@ type InfrastructureStackReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the InfrastructureStack object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+	logger := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	stack := &v1alpha1.InfrastructureStack{}
+	if err := r.Get(ctx, req.NamespacedName, stack); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	scope, err := NewInfrastructureStackScope(ctx, r.Client, stack)
+	if err != nil {
+		logger.Error(err, "failed to create stack")
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	// Always patch object when exiting this function, so we can persist any object changes.
+	defer func() {
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
+		}
+	}()
+	if !stack.GetDeletionTimestamp().IsZero() {
+		return ctrl.Result{}, r.handleDelete(ctx, stack)
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -57,6 +79,29 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 // SetupWithManager sets up the controller with the Manager.
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&deploymentsv1alpha1.InfrastructureStack{}).
+		For(&v1alpha1.InfrastructureStack{}).
 		Complete(r)
+}
+
+func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack *v1alpha1.InfrastructureStack) error {
+	logger := log.FromContext(ctx)
+	if controllerutil.ContainsFinalizer(stack, InfrastructureStackFinalizer) {
+		logger.Info("try to delete stack")
+		if stack.Status.GetID() != "" {
+			existingNotificationSink, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
+			if err != nil && !errors.IsNotFound(err) {
+				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				return err
+			}
+			if existingNotificationSink != nil {
+				if err := r.ConsoleClient.DeleteStack(ctx, *stack.Status.ID); err != nil {
+					utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+					return err
+				}
+			}
+		}
+		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
+		logger.Info("stack deleted successfully")
+	}
+	return nil
 }
