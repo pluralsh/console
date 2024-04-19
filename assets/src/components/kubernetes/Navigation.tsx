@@ -52,7 +52,6 @@ export default function Navigation() {
   const { pathname, search } = useLocation()
   const { clusterId = '' } = useParams()
   const clusters = useClusters()
-  const cluster = useCluster()
   const [params, setParams] = useSearchParams()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pathPrefix = getKubernetesAbsPath(clusterId)
@@ -75,8 +74,6 @@ export default function Navigation() {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSelect, pathname])
-
-  if (!cluster) return <LoadingIndicator />
 
   return (
     <ResponsiveLayoutPage>
