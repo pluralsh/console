@@ -61,11 +61,13 @@ export const usePinnedResources = (): Maybe<PinnedCustomResourceFragment>[] => {
 }
 
 export const useIsPinnedResource = (
-  kind: string,
-  version: string,
-  group: string
+  kind: string | null | undefined,
+  version: string | null | undefined,
+  group: string | null | undefined
 ) => {
   const pinnedResources = usePinnedResources()
+
+  if (!kind || !version || !group) return false
 
   return !!pinnedResources.find(
     (pr) => pr?.group === group && pr?.version === version && pr?.kind === kind
