@@ -1,15 +1,10 @@
-import styled from 'styled-components'
-import {
-  CloseIcon,
-  SubTab,
-  TabList,
-  Toast,
-  Tooltip,
-} from '@pluralsh/design-system'
-import React, { useRef, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
+import { Button, CloseIcon, Toast, Tooltip } from '@pluralsh/design-system'
+import React, { useState } from 'react'
 import { ApolloError } from 'apollo-boost'
 
-import { LinkTabWrap } from '../../utils/Tabs'
+import { useNavigate } from 'react-router-dom'
+
 import {
   KubernetesClusterFragment,
   PinnedCustomResourceFragment,
@@ -29,7 +24,8 @@ const DeleteIcon = styled(CloseIcon)(({ theme }) => ({
   },
 }))
 
-const LinkContainer = styled(LinkTabWrap)(() => ({
+const LinkButton = styled(Button)(() => ({
+  display: 'flex',
   [`:hover ${DeleteIcon}`]: { opacity: 1 },
 }))
 
@@ -40,8 +36,9 @@ export default function PinnedCustomResourceDefinitions({
   cluster?: KubernetesClusterFragment
   pinnedResources: Maybe<PinnedCustomResourceFragment>[]
 }) {
+  const theme = useTheme()
+  const navigate = useNavigate()
   const refetchClusters = useRefetch()
-  const tabStateRef = useRef<any>(null)
   const [error, setError] = useState<ApolloError>()
   const [mutation] = useUnpinCustomResourceMutation({
     onCompleted: () => refetchClusters?.(),
@@ -52,56 +49,52 @@ export default function PinnedCustomResourceDefinitions({
   })
 
   return (
-    <TabList
-      scrollable
-      gap="xxsmall"
-      stateRef={tabStateRef}
-      stateProps={{ orientation: 'horizontal', selectedKey: '' }}
-      paddingBottom="xxsmall"
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.xxsmall,
+        paddingBottom: theme.spacing.xxsmall,
+        overflowX: 'auto',
+        whiteSpace: 'nowrap',
+      }}
     >
-      <>
-        {pinnedResources
-          .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
-          .map(({ id, name, displayName }) => (
-            <LinkContainer
-              subTab
-              key={name}
-              textValue={name}
-              to={getResourceDetailsAbsPath(
-                cluster?.id,
-                Kind.CustomResourceDefinition,
-                name
-              )}
-            >
-              <SubTab
-                key={name}
-                textValue={name}
-                css={{ display: 'flex' }}
-              >
-                {displayName}
-                <Tooltip label="Unpin custom resource">
-                  <DeleteIcon
-                    size={12}
-                    onClick={(e) => {
-                      e.preventDefault()
-                      mutation({ variables: { id } })
-                    }}
-                  />
-                </Tooltip>
-              </SubTab>
-            </LinkContainer>
-          ))}
-        {error && (
-          <Toast
-            heading="Error unpinning resource"
-            severity="danger"
-            margin="large"
-            marginRight="xxxxlarge"
+      {pinnedResources
+        .filter((pr): pr is PinnedCustomResourceFragment => !!pr)
+        .map(({ id, name, displayName }) => (
+          <LinkButton
+            tertiary
+            onClick={() =>
+              navigate(
+                getResourceDetailsAbsPath(
+                  cluster?.id,
+                  Kind.CustomResourceDefinition,
+                  name
+                )
+              )
+            }
           >
-            {error.message}
-          </Toast>
-        )}
-      </>
-    </TabList>
+            {displayName}
+            <Tooltip label="Unpin custom resource">
+              <DeleteIcon
+                size={12}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  mutation({ variables: { id } })
+                }}
+              />
+            </Tooltip>
+          </LinkButton>
+        ))}
+      {error && (
+        <Toast
+          heading="Error unpinning resource"
+          severity="danger"
+          margin="large"
+          marginRight="xxxxlarge"
+        >
+          {error.message}
+        </Toast>
+      )}
+    </div>
   )
 }
