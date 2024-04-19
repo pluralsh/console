@@ -23,10 +23,9 @@ import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
 import { ClusterSelect } from '../cd/addOns/ClusterSelect'
-import LoadingIndicator from '../utils/LoadingIndicator'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 
-import { useCluster, useClusters } from './Cluster'
+import { useClusters } from './Cluster'
 import {
   DataSelect,
   DataSelectInputs,
