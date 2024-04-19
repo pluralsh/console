@@ -2,6 +2,7 @@ import {
   Card,
   Chip,
   ChipList,
+  Code,
   IconFrame,
   SidecarItem,
   Tooltip,
@@ -46,6 +47,8 @@ function MetadataCard({
   )
   const status = cluster?.status
   const renderTag = (tag) => `${tag.name}${tag.value ? `: ${tag.value}` : ''}`
+
+  console.log('cluster', cluster)
 
   return (
     <Card
@@ -149,6 +152,11 @@ function MetadataCard({
           />
         </section>
       )}
+      {cluster.metadata && (
+        <Code language="json">
+          {formatJson(JSON.stringify(cluster.metadata))}
+        </Code>
+      )}
     </Card>
   )
 }
@@ -218,4 +226,17 @@ export default function ClusterMetadata() {
       <NodePoolsSection cluster={cluster} />
     </div>
   )
+}
+
+function formatJson(jsonString) {
+  try {
+    const jsonObject = JSON.parse(jsonString) // Parse the JSON string into an object
+    const formattedJson = JSON.stringify(jsonObject, null, 2) // Convert the object back into a formatted string
+
+    return formattedJson
+  } catch (e) {
+    console.error('Invalid JSON:', e)
+
+    return '' // Return empty string or error message if JSON is invalid
+  }
 }
