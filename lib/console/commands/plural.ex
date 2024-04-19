@@ -1,7 +1,7 @@
 defmodule Console.Commands.Plural do
   require Logger
   import Console
-  import Console.Commands.Command, only: [cmd_raw: 3, cmd: 4]
+  import Console.Commands.Command, only: [cmd_raw: 3, cmd_tee: 4, cmd: 4]
 
   def unlock() do
     with {:ok, _} <- plural("crypto", ["init"]),
@@ -47,11 +47,11 @@ defmodule Console.Commands.Plural do
 
   def repair(), do: plural("repair", [])
 
-  def template(conf, dir, nil), do: cmd("plural", ["pr", "template", "--file", conf], dir, [])
-  def template(conf, dir, ext) when is_binary(ext), do: cmd("plural", ["pr", "tempate", "--file", conf, "--templates", ext], dir, [])
+  def template(conf, dir, nil), do: cmd_tee("plural", ["pr", "template", "--file", conf], dir, [])
+  def template(conf, dir, ext) when is_binary(ext), do: cmd_tee("plural", ["pr", "tempate", "--file", conf, "--templates", ext], dir, [])
 
   def plural_home(command, args, env \\ []),
-    do: cmd("plural", [command | args], System.user_home(), env)
+    do: cmd_tee("plural", [command | args], System.user_home(), env)
 
   def plural(command, args, env \\ []), do: cmd("plural", [command | args], workspace(), env)
 end

@@ -61,6 +61,11 @@ defmodule Console.Deployments.Init do
     end
   end
 
+  def auth_token() do
+    with {:ok, %{data: %{"access-token" => token}}} <- Utils.get_secret(namespace(), @secret_name),
+      do: Base.decode64(token)
+  end
+
   defp create_auth_secret() do
     console = Users.get_bot!("console")
     start_transaction()

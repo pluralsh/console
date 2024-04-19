@@ -19,6 +19,12 @@ defmodule Console.Commands.Command do
     complete(output, exit_code)
   end
 
+  def cmd_tee(exec, args, dir \\ conf(:workspace_root), env \\ []) do
+    tee = Tee.new()
+    set_build(tee)
+    cmd(exec, args, dir, env)
+  end
+
   defp make_command(exec, args) do
     case Process.get(@build_key) do
       %Build{} = build ->

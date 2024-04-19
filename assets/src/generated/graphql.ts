@@ -1427,6 +1427,8 @@ export type DeploymentSettings = {
   agentHelmValues?: Maybe<Scalars['String']['output']>;
   /** the repo to fetch CAPI manifests from, for both providers and clusters */
   artifactRepository?: Maybe<GitRepository>;
+  /** your compliant k8s version */
+  compliantK8sVsn: Scalars['String']['output'];
   /** policy for creation of new clusters */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the repo to fetch the deploy operators manifests from */
@@ -1437,6 +1439,8 @@ export type DeploymentSettings = {
   gitBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the latest known k8s version */
+  latestK8sVsn: Scalars['String']['output'];
   /** the way we can connect to your loki instance */
   lokiConnection?: Maybe<HttpConnection>;
   name: Scalars['String']['output'];
@@ -4755,6 +4759,8 @@ export type RootQueryType = {
   unstructuredResource?: Maybe<KubernetesUnstructured>;
   upgradePlan?: Maybe<UpgradePlan>;
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
+  /** gets summary information for upgradeability in your fleet */
+  upgradeStatistics?: Maybe<UpgradeStatistics>;
   user?: Maybe<User>;
   users?: Maybe<UserConnection>;
   violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
@@ -5548,6 +5554,12 @@ export type RootQueryTypeUpgradePlanArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeUpgradeStatisticsArgs = {
+  q?: InputMaybe<Scalars['String']['input']>;
+  tag?: InputMaybe<TagInput>;
 };
 
 
@@ -6709,6 +6721,19 @@ export enum UpgradePolicyType {
   Deploy = 'DEPLOY',
   Ignore = 'IGNORE'
 }
+
+/** Summary statistics of the upgradeability of your fleet */
+export type UpgradeStatistics = {
+  __typename?: 'UpgradeStatistics';
+  /** the number of clusters compliant w/ your versioning policy */
+  compliant?: Maybe<Scalars['Int']['output']>;
+  /** total number of clusters */
+  count?: Maybe<Scalars['Int']['output']>;
+  /** the number of clusters currently at the latest version */
+  latest?: Maybe<Scalars['Int']['output']>;
+  /** the number of clusters currently upgradeable */
+  upgradeable?: Maybe<Scalars['Int']['output']>;
+};
 
 export type UrlSinkAttributes = {
   url: Scalars['String']['input'];

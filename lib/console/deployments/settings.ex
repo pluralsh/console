@@ -9,6 +9,7 @@ defmodule Console.Deployments.Settings do
   alias Console.Schema.{DeploymentSettings, User}
 
   @agent_vsn File.read!("AGENT_VERSION")
+  @kube_vsn File.read!("KUBE_VERSION")
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.minutes(45)
 
@@ -22,6 +23,21 @@ defmodule Console.Deployments.Settings do
   @spec fetch() :: DeploymentSettings.t | nil
   @decorate cacheable(cache: @cache_adapter, key: :deployment_settings, opts: [ttl: @ttl])
   def fetch(), do: fetch_consistent()
+
+  @doc """
+  The latest known k8s version
+  """
+  @spec kube_vsn() :: binary
+  def kube_vsn(), do: @kube_vsn
+
+  @doc """
+  The configured compliant kubernetes version, defaults to latest - 1
+  """
+  @spec compliant_vsn() :: binary
+  def compliant_vsn() do
+    %{major: maj, minor: min} = Version.parse!("#{kube_vsn()}.0")
+    "#{maj}.#{min - 1}"
+  end
 
   @doc """
   The git ref to use for new agents on clusters

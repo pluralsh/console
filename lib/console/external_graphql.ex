@@ -94,6 +94,12 @@ defmodule Console.ExternalGraphQl do
   def middleware(middleware, _field, _object), do: middleware
 
   query do
+    field :deployment_settings, :deployment_settings do
+      middleware Authenticated, :cluster
+
+      resolve &Deployments.settings/2
+    end
+
     import_fields :public_service_queries
     import_fields :public_cluster_queries
     import_fields :public_pipeline_queries

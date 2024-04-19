@@ -1,5 +1,6 @@
  defmodule Console.GraphQl.Deployments do
   use Console.GraphQl.Schema.Base
+  alias Console.Deployments.Settings
   alias Console.GraphQl.Resolvers.{User, Deployments}
 
   input_object :policy_binding_attributes do
@@ -49,6 +50,12 @@
     field :loki_connection,       :http_connection, description: "the way we can connect to your loki instance"
     field :prometheus_connection, :http_connection, description: "the way we can connect to your prometheus instance"
     field :agent_helm_values,     :string, description: "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
+
+    field :latest_k8s_vsn, non_null(:string), description: "the latest known k8s version",
+      resolve: fn _, _, _ -> {:ok, Settings.kube_vsn()} end
+
+    field :compliant_k8s_vsn, non_null(:string), description: "your compliant k8s version",
+      resolve: fn _, _, _ -> {:ok, Settings.compliant_vsn()} end
 
     field :artifact_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch CAPI manifests from, for both providers and clusters"
     field :deployer_repository, :git_repository, resolve: dataloader(Deployments), description: "the repo to fetch the deploy operators manifests from"
@@ -109,7 +116,7 @@
     import_fields :stack_queries
 
     field :deployment_settings, :deployment_settings do
-      middleware Authenticated
+      middleware Authenticated, :cluster
 
       resolve &Deployments.settings/2
     end

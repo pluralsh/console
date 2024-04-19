@@ -3,10 +3,10 @@ defmodule Console.Deployments.Clusters do
   use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Commands.{Tee, Command}
+  alias Console.Commands.Tee
   alias Console.Deployments.{Services, Git, Providers.Configuration}
   alias Console.Deployments.Providers.Versions
-  alias Console.Deployments.Compatibilities.{Table, AddOn}
+  alias Console.Deployments.Compatibilities.{Table, AddOn, Version}
   alias Console.Deployments.Ecto.Validations
   alias Console.Services.Users
   alias Kazan.Apis.Core.V1, as: Core
@@ -193,9 +193,7 @@ defmodule Console.Deployments.Clusters do
   """
   @spec install(Cluster.t) :: cluster_resp
   def install(%Cluster{id: id, deploy_token: token, self: true} = cluster) do
-    tee = Tee.new()
-    Command.set_build(tee)
-    url = Services.api_url("gql")
+    url = Console.graphql_endpoint()
     with {:ok, _} <- Console.Commands.Plural.install_cd(url, token) do
       get_cluster(id)
       |> Repo.preload([:service_errors])
@@ -212,8 +210,6 @@ defmodule Console.Deployments.Clusters do
   end
 
   def install(%Cluster{id: id, deploy_token: token} = cluster) do
-    tee = Tee.new()
-    Command.set_build(tee)
     url = Services.api_url("gql")
     cluster = Repo.preload(cluster, [:provider, :credential])
     with {:ok, %Kube.Cluster{status: %Kube.Cluster.Status{control_plane_ready: true}}} <- cluster_crd(cluster),
@@ -354,6 +350,26 @@ defmodule Console.Deployments.Clusters do
       %{cluster: cluster} -> cluster
     end)
     |> notify(:update, user)
+  end
+
+  @doc """
+  Determines current status of this clusters upgrade plan given what information we currently have
+  """
+  @spec update_upgrade_plan(Cluster.t) :: cluster_resp
+  def update_upgrade_plan(%Cluster{} = cluster) do
+    %{api_deprecations: deps} = cluster = Repo.preload(cluster, [:api_deprecations])
+    addons = runtime_services(cluster)
+    Cluster.changeset(cluster, %{
+      upgrade_plan: %{
+        deprecations: length(deps) == 0,
+        compatibilities: !Enum.any?(addons, fn
+          %{addon_version: %Version{} = vsn} -> Version.blocking?(vsn, cluster.current_version)
+          _ -> false
+        end),
+        incompatibilities: true
+      }
+    })
+    |> Repo.update()
   end
 
   defp add_revision(xact) do

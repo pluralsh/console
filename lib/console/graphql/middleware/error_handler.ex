@@ -1,5 +1,6 @@
 defmodule Console.Middleware.ErrorHandler do
   import Console.GraphQl.Helpers
+  alias Console.Commands.Tee
   require Logger
   @behaviour Absinthe.Middleware
 
@@ -10,6 +11,7 @@ defmodule Console.Middleware.ErrorHandler do
   def call(res, _), do: res
 
   defp format(%Ecto.Changeset{} = cs), do: resolve_changeset(cs)
+  defp format(%Tee{} = tee), do: Tee.output(tee)
   defp format(%{"message" => msg}), do: msg
   defp format({:http_error, _, %{"message" => msg}}), do: msg
   defp format({:http_error, _, err}) when is_binary(err), do: err

@@ -1,7 +1,7 @@
 defmodule Console.Schema.Cluster do
   use Piazza.Ecto.Schema
   import Console.Deployments.Ecto.Validations
-  alias Console.Deployments.Policies.Rbac
+  alias Console.Deployments.{Policies.Rbac, Settings}
   alias Console.Schema.{
     Service,
     ClusterNodePool,
@@ -101,7 +101,7 @@ defmodule Console.Schema.Cluster do
     field :token_readable,  :boolean, default: false, virtual: true
 
     embeds_one :upgrade_plan, UpgradePlan, on_replace: :update do
-      boolean_fields [:deprecations, :compatibilities, :incompatibilties]
+      boolean_fields [:deprecations, :compatibilities, :incompatibilities]
     end
 
     embeds_one :resource,       NamespacedName
@@ -227,6 +227,18 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  def upgrade_statistics(query \\ __MODULE__) do
+    from(c in query,
+      select: %{
+        count: count(c.id),
+        upgradeable: sum(fragment("CASE WHEN ? = 'true'::jsonb and ? = 'true'::jsonb and ? = 'true'::jsonb THEN 1 ELSE 0 END",
+          c.upgrade_plan["compatibilities"], c.upgrade_plan["incompatibilities"], c.upgrade_plan["deprecations"])),
+        latest: sum(fragment("CASE WHEN ? >= ? THEN 1 ELSE 0 END", c.current_version, ^Settings.kube_vsn())),
+        compliant: sum(fragment("CASE WHEN ? >= ? THEN 1 ELSE 0 END", c.current_version, ^Settings.compliant_vsn())),
+      }
+    )
+  end
+
   def health(query \\ __MODULE__, health)
   def health(query, true) do
     expired = health_threshold()
@@ -277,6 +289,10 @@ defmodule Console.Schema.Cluster do
 
   def uninstalled(query \\ __MODULE__) do
     from(c in query, where: not c.installed and is_nil(c.pinged_at) and (not is_nil(c.provider_id) or c.self) and is_nil(c.deleted_at))
+  end
+
+  def installed(query \\ __MODULE__) do
+    from(c in query, where: not is_nil(c.pinged_at) and not is_nil(c.current_version))
   end
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)

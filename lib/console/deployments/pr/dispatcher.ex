@@ -3,7 +3,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   import Console.Deployments.Pr.Utils
   alias Console.Repo
   alias Console.Deployments.{Pr.Config, Git.Discovery, Tar}
-  alias Console.Commands.Plural
+  alias Console.Commands.{Plural}
   alias Console.Deployments.Pr.Impl.{Github, Gitlab}
   alias Console.Schema.{PrAutomation, ScmConnection, ScmWebhook, GitRepository}
 

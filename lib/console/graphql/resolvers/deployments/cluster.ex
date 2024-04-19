@@ -107,6 +107,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> ok()
   end
 
+  def upgrade_statistics(args, %{context: %{current_user: user}}) do
+    Cluster.for_user(user)
+    |> cluster_filters(args)
+    |> maybe_search(Cluster, args)
+    |> Cluster.upgrade_statistics()
+    |> Console.Repo.one()
+    |> ok()
+  end
+
   def create_cluster(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_cluster(attrs, user)
 

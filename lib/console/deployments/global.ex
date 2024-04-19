@@ -288,7 +288,7 @@ defmodule Console.Deployments.Global do
   """
   @spec sync_clusters(GlobalService.t) :: :ok
   def sync_clusters(%GlobalService{id: gid} = global) do
-    %{service: svc} = global = Repo.preload(global, [:service, :template])
+    %{service: svc} = global = Repo.preload(global, [service: [:context_bindings]])
     global = load_configuration(global)
     bot = bot()
     Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
@@ -314,8 +314,10 @@ defmodule Console.Deployments.Global do
   @spec sync_service(GlobalService.t | Service.t, Service.t, User.t) :: Services.service_resp | :ok
   def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl}, %Service{} = dest, %User{} = user) do
     Logger.info "Attempting to resync service #{dest.id}"
+    dest = Repo.preload(dest, [:context_bindings])
     case diff?(tpl, dest) do
-      true -> ServiceTemplate.attributes(tpl) |> Services.update_service(dest.id, user)
+      true -> ServiceTemplate.attributes(tpl)
+              |> Services.update_service(dest.id, user)
       false -> Logger.info "did not update service due to no differences"
     end
   end

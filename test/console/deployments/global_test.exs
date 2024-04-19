@@ -143,7 +143,7 @@ defmodule Console.Deployments.GlobalTest do
         template: %{repository_id: git.id, git: %{ref: "main", folder: "/"}, name: "svc", namespace: "prod"})
       service = insert(:service, name: "svc", namespace: "prod", git: %{ref: "master", folder: "/k8s"})
 
-      {:ok, synced} = Global.sync_service(global, service, admin_user())
+      {:ok, synced} = Global.sync_service(global, refetch(service), admin_user())
 
       assert synced.id == service.id
       assert synced.repository_id == git.id
