@@ -2,6 +2,33 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v2
+    appVersion: 0.9.8
+    created: "2024-04-20T23:45:56.057743244Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.0.6
+    - name: controller
+      repository: file://../controller
+      version: 0.0.35
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.3.2
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.11.1
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: ff4ec88cbacf423177f54f043763eb95015037ad4896b1cfe8a3721c318ffbe2
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.9/console-0.3.9.tgz
+    version: 0.3.9
+  - apiVersion: v2
     appVersion: 0.9.7
     created: "2024-04-18T21:55:16.48640951Z"
     dependencies:
@@ -1057,6 +1084,16 @@ entries:
     version: 0.1.1
   controller:
   - apiVersion: v2
+    appVersion: 0.9.8
+    created: "2024-04-20T23:45:56.259257391Z"
+    description: deploys the deployment operator for plural cd
+    digest: 97146153035b14e0a666e36d3203200c00e6bafc959af2255792c8a72c006f15
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.35/controller-0.0.35.tgz
+    version: 0.0.35
+  - apiVersion: v2
     appVersion: 0.9.7
     created: "2024-04-18T21:55:16.603242898Z"
     description: deploys the deployment operator for plural cd
@@ -1440,4 +1477,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-04-18T21:55:16.603578243Z"
+generated: "2024-04-20T23:45:56.259740132Z"
