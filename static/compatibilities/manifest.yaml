@@ -12,3 +12,4 @@ names:
 - jaeger
 - flux
 - opentelemetry
+- kyverno
