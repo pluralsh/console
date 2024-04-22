@@ -20,17 +20,17 @@ import (
 	"context"
 	"encoding/json"
 
-	corev1 "k8s.io/api/core/v1"
-
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -216,7 +216,22 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 			Image:   stack.Spec.Configuration.Image,
 		},
 		Approval: stack.Spec.Approval,
-		Files:    nil,
+		Files:    make([]*console.StackFileAttributes, 0),
+	}
+
+	if stack.Spec.Files != nil {
+		configMap := &corev1.ConfigMap{}
+		name := types.NamespacedName{Name: stack.Spec.Files.Name, Namespace: stack.GetNamespace()}
+		if err := r.Get(ctx, name, configMap); err != nil {
+			return nil, err
+		}
+		for k, v := range configMap.Data {
+			attr.Files = append(attr.Files, &console.StackFileAttributes{
+				Path:    k,
+				Content: v,
+			})
+		}
+
 	}
 
 	attr.Environemnt = algorithms.Map(stack.Spec.Environment,
