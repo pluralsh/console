@@ -181,6 +181,7 @@ fragment Cluster on Cluster {
   id
   name
   handle
+  metadata
   nodePools {
     ...NodePool
   }

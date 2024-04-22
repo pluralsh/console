@@ -2,6 +2,7 @@ import {
   Card,
   Chip,
   ChipList,
+  Code,
   IconFrame,
   SidecarItem,
   Tooltip,
@@ -149,6 +150,9 @@ function MetadataCard({
           />
         </section>
       )}
+      {cluster.metadata && (
+        <Code language="json">{formatJson(cluster.metadata)}</Code>
+      )}
     </Card>
   )
 }
@@ -218,4 +222,16 @@ export default function ClusterMetadata() {
       <NodePoolsSection cluster={cluster} />
     </div>
   )
+}
+
+function formatJson(jsonObject) {
+  try {
+    const formattedJson = JSON.stringify(jsonObject, null, 2) // Convert the object back into a formatted string
+
+    return formattedJson
+  } catch (e) {
+    console.error('Invalid JSON:', e)
+
+    return '' // Return empty string or error message if JSON is invalid
+  }
 }
