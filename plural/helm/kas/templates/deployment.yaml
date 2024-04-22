@@ -83,6 +83,17 @@ spec:
           - name: etc-kas
             mountPath: /etc/kas
             readOnly: true
+        - name: nginx
+          image: {{ .Values.agent.proxy.image.repository }}:{{ .Values.agent.proxy.image.tag }}
+          imagePullPolicy: {{ .Values.agent.proxy.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          ports:
+          - containerPort: {{ .Values.agent.proxy.port }}
+          volumeMounts:
+          - name: nginx-conf
+            mountPath: /etc/nginx
+            readOnly: true
       terminationGracePeriodSeconds: 300
       volumes:
       {{ if .Values.global.additionalVolumes }}
@@ -106,6 +117,15 @@ spec:
                 items:
                   - key: redis-password
                     path: redis_server_secret
+      - name: nginx-conf
+        projected:
+          defaultMode: 0440
+          sources:
+          - configMap:
+              name: {{ template "kas.configMapName" . }}
+              items:
+              - key: nginx.conf
+                path: nginx.conf
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

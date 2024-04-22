@@ -19,6 +19,10 @@ spec:
       targetPort: {{ .Values.service.kubernetesApiPort }}
       protocol: TCP
       name: tcp-{{ include "kas.name" . }}-k8s-api
+    - port: {{ .Values.agent.proxy.port }}
+      targetPort: {{ .Values.agent.proxy.port }}
+      protocol: TCP
+      name: tcp-{{ include "kas.name" . }}-nginx
   {{- if .Values.metrics.enabled }}
     - port: {{ .Values.service.observabilityPort }}
       targetPort: {{ .Values.service.observabilityPort }}
