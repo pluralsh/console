@@ -86,6 +86,16 @@ secrets:
   privateapi: ""
   redis: ""
 
+agent:
+  path: /ext/kas
+  backend: localhost:8150
+  proxy:
+    image:
+      repository: docker.io/nginx
+      tag: stable-alpine3.17-slim
+      pullPolicy: IfNotPresent
+    port: 8180
+
 ingress:
   enabled: true
   ingressClass: nginx

@@ -28,6 +28,13 @@ spec:
                 name: {{ include "kas.serviceName" . }}
                 port:
                   number: {{ .Values.service.externalPort }}
+          - path: {{ .Values.agent.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "kas.serviceName" . }}
+                port:
+                  number: {{ .Values.agent.proxy.port }}
   {{ if .Values.ingress.tls.enabled }}
   tls:
     - hosts:
