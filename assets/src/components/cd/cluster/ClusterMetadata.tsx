@@ -48,8 +48,6 @@ function MetadataCard({
   const status = cluster?.status
   const renderTag = (tag) => `${tag.name}${tag.value ? `: ${tag.value}` : ''}`
 
-  console.log('cluster', cluster)
-
   return (
     <Card
       css={{
@@ -153,9 +151,7 @@ function MetadataCard({
         </section>
       )}
       {cluster.metadata && (
-        <Code language="json">
-          {formatJson(JSON.stringify(cluster.metadata))}
-        </Code>
+        <Code language="json">{formatJson(cluster.metadata)}</Code>
       )}
     </Card>
   )
@@ -228,9 +224,8 @@ export default function ClusterMetadata() {
   )
 }
 
-function formatJson(jsonString) {
+function formatJson(jsonObject) {
   try {
-    const jsonObject = JSON.parse(jsonString) // Parse the JSON string into an object
     const formattedJson = JSON.stringify(jsonObject, null, 2) // Convert the object back into a formatted string
 
     return formattedJson
