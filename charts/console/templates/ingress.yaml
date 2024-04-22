@@ -24,9 +24,10 @@ spec:
       - path: /ext/kas
         pathType: Prefix
         backend:
-          service: console-kas-service
-          port:
-            number: 8180
+          service:
+            name: console-kas-service
+            port:
+              number: 8180
       {{ end }}
       {{ if .Values.dashboard.enabled }}
       - path: /api
@@ -117,9 +118,10 @@ spec:
       - path: /ext/kas
         pathType: Prefix
         backend:
-          service: console-kas-service
-          port:
-            number: 8180
+          service: 
+            name: console-kas-service
+            port:
+              number: 8180
       {{ end }}
       - path: /ext
         pathType: Prefix
