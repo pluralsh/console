@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
 	internalerror "github.com/pluralsh/console/controller/internal/errors"
@@ -30,4 +31,28 @@ func (c *client) DeleteStack(ctx context.Context, id string) error {
 		return err
 	}
 	return nil
+}
+
+func (c *client) CreateStack(ctx context.Context, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error) {
+	result, err := c.consoleClient.CreateStack(ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, fmt.Errorf("new created stack %s is nil", attributes.Name)
+	}
+	return result.CreateStack, nil
+
+}
+
+func (c *client) UpdateStack(ctx context.Context, id string, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error) {
+	result, err := c.consoleClient.UpdateStack(ctx, id, attributes)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, fmt.Errorf("updated stack %s is nil", attributes.Name)
+	}
+	return result.UpdateStack, nil
+
 }

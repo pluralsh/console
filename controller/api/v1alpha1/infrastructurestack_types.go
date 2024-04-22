@@ -31,6 +31,7 @@ type InfrastructureStackSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Type specifies the tool to use to apply it
+	// +kubebuilder:validation:Enum=TERRAFORM;ANSIBLE
 	Type console.StackType `json:"type"`
 
 	// RepositoryRef to source IaC from
@@ -41,7 +42,7 @@ type InfrastructureStackSpec struct {
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
 
 	// Git reference w/in the repository where the IaC lives
-	Git GitRef `json:"git,omitempty"`
+	Git GitRef `json:"git"`
 
 	// JobSpec optional k8s job configuration for the job that will apply this stack
 	// +kubebuilder:validation:Optional

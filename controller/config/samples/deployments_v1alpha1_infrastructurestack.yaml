@@ -1,4 +1,20 @@
 apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: existing
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: tf-hello
+  namespace: default
+spec:
+  url: https://github.com/zreigz/tf-hello.git
+---
+apiVersion: deployments.plural.sh/v1alpha1
 kind: InfrastructureStack
 metadata:
   labels:
@@ -8,5 +24,19 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
   name: infrastructurestack-sample
+  namespace: default
 spec:
-  # TODO(user): Add fields here
+  name: "test1"
+  type: TERRAFORM
+  configuration:
+    version: "v0.0.3"
+  repositoryRef:
+    name: tf-hello
+    namespace: default
+  clusterRef:
+    name: existing
+    namespace: default
+  git:
+    ref: main
+    folder: terraform
+

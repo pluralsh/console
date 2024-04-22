@@ -99,6 +99,8 @@ type ConsoleClient interface {
 	UpdateNamespace(ctx context.Context, id string, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
 	GetStack(ctx context.Context, id string) (*console.InfrastructureStackFragment, error)
 	DeleteStack(ctx context.Context, id string) error
+	CreateStack(ctx context.Context, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)
+	UpdateStack(ctx context.Context, id string, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)
 }
 
 func New(url, token string) ConsoleClient {

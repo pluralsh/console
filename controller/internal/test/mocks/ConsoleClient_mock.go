@@ -736,6 +736,65 @@ func (_c *ConsoleClientMock_CreateService_Call) RunAndReturn(run func(*string, g
 	return _c
 }
 
+// CreateStack provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateStack(ctx context.Context, attributes gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateStack")
+	}
+
+	var r0 *gqlclient.InfrastructureStackFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.StackAttributes) *gqlclient.InfrastructureStackFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.InfrastructureStackFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.StackAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateStack_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateStack'
+type ConsoleClientMock_CreateStack_Call struct {
+	*mock.Call
+}
+
+// CreateStack is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes gqlclient.StackAttributes
+func (_e *ConsoleClientMock_Expecter) CreateStack(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateStack_Call {
+	return &ConsoleClientMock_CreateStack_Call{Call: _e.mock.On("CreateStack", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateStack_Call) Run(run func(ctx context.Context, attributes gqlclient.StackAttributes)) *ConsoleClientMock_CreateStack_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(gqlclient.StackAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateStack_Call) Return(_a0 *gqlclient.InfrastructureStackFragment, _a1 error) *ConsoleClientMock_CreateStack_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateStack_Call) RunAndReturn(run func(context.Context, gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error)) *ConsoleClientMock_CreateStack_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteCluster provides a mock function with given fields: id
 func (_m *ConsoleClientMock) DeleteCluster(id string) (*gqlclient.ClusterFragment, error) {
 	ret := _m.Called(id)
@@ -4073,6 +4132,66 @@ func (_c *ConsoleClientMock_UpdateService_Call) Return(_a0 error) *ConsoleClient
 }
 
 func (_c *ConsoleClientMock_UpdateService_Call) RunAndReturn(run func(string, gqlclient.ServiceUpdateAttributes) error) *ConsoleClientMock_UpdateService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateStack provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateStack(ctx context.Context, id string, attributes gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateStack")
+	}
+
+	var r0 *gqlclient.InfrastructureStackFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.StackAttributes) *gqlclient.InfrastructureStackFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.InfrastructureStackFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.StackAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateStack_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateStack'
+type ConsoleClientMock_UpdateStack_Call struct {
+	*mock.Call
+}
+
+// UpdateStack is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes gqlclient.StackAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateStack(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateStack_Call {
+	return &ConsoleClientMock_UpdateStack_Call{Call: _e.mock.On("UpdateStack", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateStack_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.StackAttributes)) *ConsoleClientMock_UpdateStack_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.StackAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateStack_Call) Return(_a0 *gqlclient.InfrastructureStackFragment, _a1 error) *ConsoleClientMock_UpdateStack_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateStack_Call) RunAndReturn(run func(context.Context, string, gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error)) *ConsoleClientMock_UpdateStack_Call {
 	_c.Call.Return(run)
 	return _c
 }

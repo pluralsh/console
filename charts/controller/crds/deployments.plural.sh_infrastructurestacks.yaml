@@ -8119,10 +8119,14 @@ spec:
                 x-kubernetes-map-type: atomic
               type:
                 description: Type specifies the tool to use to apply it
+                enum:
+                - TERRAFORM
+                - ANSIBLE
                 type: string
             required:
             - clusterRef
             - configuration
+            - git
             - repositoryRef
             - type
             type: object

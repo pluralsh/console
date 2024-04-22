@@ -18,10 +18,16 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 
+	corev1 "k8s.io/api/core/v1"
+
+	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/utils"
+	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -73,6 +79,79 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		return ctrl.Result{}, r.handleDelete(ctx, stack)
 	}
 
+	cluster := &v1alpha1.Cluster{}
+	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.ClusterRef.Name, Namespace: stack.Spec.ClusterRef.Namespace}, cluster); err != nil {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	if cluster.Status.ID == nil {
+		logger.Info("Cluster is not ready")
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
+		return requeue, nil
+	}
+
+	repository := &v1alpha1.GitRepository{}
+	if err := r.Get(ctx, client.ObjectKey{Name: stack.Spec.RepositoryRef.Name, Namespace: stack.Spec.RepositoryRef.Namespace}, repository); err != nil {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if repository.Status.ID == nil {
+		logger.Info("Repository is not ready")
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
+		return requeue, nil
+	}
+	if repository.Status.Health == v1alpha1.GitHealthFailed {
+		logger.Info("Repository is not healthy")
+		return requeue, nil
+	}
+
+	sha, err := utils.HashObject(stack.Spec)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	// Check if resource already exists in the API and only sync the ID
+	exists, err := r.isAlreadyExists(ctx, stack)
+	if err != nil {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if !exists {
+		logger.Info("create stack", "name", stack.StackName())
+		attr, err := r.getStackAttributes(ctx, stack, *cluster.Status.ID, *repository.Status.ID)
+		if err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+
+		st, err := r.ConsoleClient.CreateStack(ctx, *attr)
+		if err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		stack.Status.ID = st.ID
+		stack.Status.SHA = lo.ToPtr(sha)
+		controllerutil.AddFinalizer(stack, InfrastructureStackFinalizer)
+	}
+	if exists && !stack.Status.IsSHAEqual(sha) {
+		logger.Info("update stack", "name", stack.StackName())
+		attr, err := r.getStackAttributes(ctx, stack, *cluster.Status.ID, *repository.Status.ID)
+		if err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		_, err = r.ConsoleClient.UpdateStack(ctx, stack.Status.GetID(), *attr)
+		if err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+
+		stack.Status.SHA = lo.ToPtr(sha)
+	}
+
+	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+
 	return ctrl.Result{}, nil
 }
 
@@ -81,6 +160,22 @@ func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.InfrastructureStack{}).
 		Complete(r)
+}
+
+func (r *InfrastructureStackReconciler) isAlreadyExists(ctx context.Context, stack *v1alpha1.InfrastructureStack) (bool, error) {
+	if !stack.Status.HasID() {
+		return false, nil
+	}
+
+	_, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack *v1alpha1.InfrastructureStack) error {
@@ -104,4 +199,108 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 		logger.Info("stack deleted successfully")
 	}
 	return nil
+}
+
+func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, stack *v1alpha1.InfrastructureStack, clusterID, repositoryID string) (*console.StackAttributes, error) {
+	attr := &console.StackAttributes{
+		Name:         stack.StackName(),
+		Type:         stack.Spec.Type,
+		RepositoryID: repositoryID,
+		ClusterID:    clusterID,
+		Git: console.GitRefAttributes{
+			Ref:    stack.Spec.Git.Ref,
+			Folder: stack.Spec.Git.Folder,
+		},
+		Configuration: console.StackConfigurationAttributes{
+			Version: stack.Spec.Configuration.Version,
+			Image:   stack.Spec.Configuration.Image,
+		},
+		Approval: stack.Spec.Approval,
+		Files:    nil,
+	}
+
+	attr.Environemnt = algorithms.Map(stack.Spec.Environment,
+		func(b v1alpha1.StackEnvironment) *console.StackEnvironmentAttributes {
+			return &console.StackEnvironmentAttributes{
+				Name:   b.Name,
+				Value:  b.Value,
+				Secret: b.Secret,
+			}
+		})
+
+	if stack.Spec.JobSpec != nil {
+		raw, err := json.Marshal(stack.Spec.JobSpec)
+		if err != nil {
+			return nil, err
+		}
+		containers := []*console.ContainerAttributes{}
+		for _, c := range stack.Spec.JobSpec.Template.Spec.Containers {
+			ca := &console.ContainerAttributes{
+				Image: c.Image,
+			}
+			ca.Args = algorithms.Map(c.Args,
+				func(b string) *string { return &b })
+			ca.Env = algorithms.Map(c.Env,
+				func(b corev1.EnvVar) *console.EnvAttributes {
+					return &console.EnvAttributes{
+						Name:  b.Name,
+						Value: b.Value,
+					}
+				})
+			ca.EnvFrom = algorithms.Map(c.EnvFrom,
+				func(b corev1.EnvFromSource) *console.EnvFromAttributes {
+					secret := ""
+					configMap := ""
+					if b.SecretRef != nil {
+						secret = b.SecretRef.Name
+					}
+					if b.ConfigMapRef != nil {
+						configMap = b.ConfigMapRef.Name
+					}
+					return &console.EnvFromAttributes{
+						Secret:    secret,
+						ConfigMap: configMap,
+					}
+				})
+			containers = append(containers, ca)
+		}
+
+		var annotations *string
+		var labels *string
+		if stack.Spec.JobSpec.Template.Annotations != nil {
+			result, err := json.Marshal(stack.Spec.JobSpec.Template.Annotations)
+			if err != nil {
+				return nil, err
+			}
+			rawAnnotations := string(result)
+			annotations = &rawAnnotations
+		}
+		if stack.Spec.JobSpec.Template.Labels != nil {
+			result, err := json.Marshal(stack.Spec.JobSpec.Template.Labels)
+			if err != nil {
+				return nil, err
+			}
+			rawLabels := string(result)
+			labels = &rawLabels
+		}
+		attr.JobSpec = &console.GateJobAttributes{
+			Namespace:      stack.Spec.JobSpec.Template.Namespace,
+			Raw:            lo.ToPtr(string(raw)),
+			Containers:     containers,
+			ServiceAccount: lo.ToPtr(stack.Spec.JobSpec.Template.Spec.ServiceAccountName),
+			Labels:         labels,
+			Annotations:    annotations,
+		}
+	}
+
+	if stack.Spec.Bindings != nil {
+		attr.ReadBindings = make([]*console.PolicyBindingAttributes, 0)
+		attr.WriteBindings = make([]*console.PolicyBindingAttributes, 0)
+		attr.ReadBindings = algorithms.Map(stack.Spec.Bindings.Read,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attr.WriteBindings = algorithms.Map(stack.Spec.Bindings.Write,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+	}
+
+	return attr, nil
 }
