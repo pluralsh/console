@@ -85,6 +85,7 @@ ingress:
     enabled: true
 
   rewrite:
+    enabled: true
     annotations:
       konghq.com/rewrite: /$2
       nginx.ingress.kubernetes.io/use-regex: "true"
