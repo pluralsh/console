@@ -400,6 +400,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :conditions,          list_of(:cluster_condition)
   end
 
+  @desc "Summary statistics of the upgradeability of your fleet"
+  object :upgrade_statistics do
+    field :count,       :integer, description: "total number of clusters"
+    field :upgradeable, :integer, description: "the number of clusters currently upgradeable"
+    field :latest,      :integer, description: "the number of clusters currently at the latest version"
+    field :compliant,   :integer, description: "the number of clusters compliant w/ your versioning policy"
+  end
+
   @desc "a single condition struct for various phases of the cluster provisionining process"
   object :cluster_condition do
     field :last_transition_time, :string
@@ -593,6 +601,15 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :tag,    :tag_input
 
       resolve &Deployments.cluster_statuses/2
+    end
+
+    @desc "gets summary information for upgradeability in your fleet"
+    field :upgrade_statistics, :upgrade_statistics do
+      middleware Authenticated
+      arg :q,      :string
+      arg :tag,    :tag_input
+
+      resolve &Deployments.upgrade_statistics/2
     end
 
     @desc "lists tags applied to any clusters in the fleet"

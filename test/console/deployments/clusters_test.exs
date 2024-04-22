@@ -1039,7 +1039,7 @@ defmodule Console.Deployments.ClustersTest do
       expect(Kube.Utils, :get_secret, fn ^ns, ^kubeconf_secret ->
         {:ok, %CoreV1.Secret{data: %{"value" => Base.encode64("kubeconfig")}}}
       end)
-      expect(Console.Commands.Command, :cmd, fn "plural", ["deployments", "install", "--url", _, "--token", ^t, "--force"], _, [{"KUBECONFIG", f}, {"PLURAL_INSTALL_AGENT_CONFIRM", "true"}] ->
+      expect(Console.Commands.Command, :cmd_tee, fn "plural", ["deployments", "install", "--url", _, "--token", ^t, "--force"], _, [{"KUBECONFIG", f}, {"PLURAL_INSTALL_AGENT_CONFIRM", "true"}] ->
         case File.read(f) do
           {:ok, "kubeconfig"} -> {:ok, "yay"}
           err -> {:error, err}
@@ -1130,6 +1130,19 @@ defmodule Console.Deployments.ClustersTest do
 
       assert deleted.id == pcr.id
       refute refetch(pcr)
+    end
+  end
+
+  describe "#update_upgrade_plan/1" do
+    test "it can update the upgrade plans for a cluster" do
+      cluster = insert(:cluster)
+
+      {:ok, updated} = Clusters.update_upgrade_plan(cluster)
+
+      assert updated.id == cluster.id
+      assert updated.upgrade_plan.deprecations
+      assert updated.upgrade_plan.compatibilities
+      assert updated.upgrade_plan.incompatibilities
     end
   end
 end

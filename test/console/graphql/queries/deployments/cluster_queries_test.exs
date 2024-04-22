@@ -523,6 +523,31 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
     end
   end
 
+  describe "upgradeStatistics" do
+    test "it can aggregate statuses for all visible clusters" do
+      admin = admin_user()
+      insert_list(2, :cluster, current_version: "1.28", pinged_at: Timex.now(), upgrade_plan: %{compatibilities: true, incompatibilities: true, deprecations: true})
+      insert_list(3, :cluster, current_version: "1.29", pinged_at: Timex.now() |> Timex.shift(days: -1))
+      insert_list(2, :cluster, current_version: "1.27")
+
+      {:ok, %{data: %{"upgradeStatistics" => res}}} = run_query("""
+        query {
+          upgradeStatistics {
+            upgradeable
+            compliant
+            latest
+            count
+          }
+        }
+      """, %{}, %{current_user: admin})
+
+      assert res["count"] == 7
+      assert res["upgradeable"] == 2
+      assert res["compliant"] == 5
+      assert res["latest"] == 3
+    end
+  end
+
   describe "tags" do
     test "it can list cluster tag names and values" do
       user = insert(:user)

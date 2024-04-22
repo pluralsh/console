@@ -202,6 +202,9 @@ type RootQueryType {
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
   clusterStatuses(q: String, tag: TagInput): [ClusterStatusInfo]
 
+  "gets summary information for upgradeability in your fleet"
+  upgradeStatistics(q: String, tag: TagInput): UpgradeStatistics
+
   "lists tags applied to any clusters in the fleet"
   tags(tag: String): [String]
 
@@ -768,6 +771,12 @@ type DeploymentSettings {
 
   "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
   agentHelmValues: String
+
+  "the latest known k8s version"
+  latestK8sVsn: String!
+
+  "your compliant k8s version"
+  compliantK8sVsn: String!
 
   "the repo to fetch CAPI manifests from, for both providers and clusters"
   artifactRepository: GitRepository
@@ -3169,6 +3178,21 @@ type ClusterStatus {
   failureMessage: String
   failureReason: String
   conditions: [ClusterCondition]
+}
+
+"Summary statistics of the upgradeability of your fleet"
+type UpgradeStatistics {
+  "total number of clusters"
+  count: Int
+
+  "the number of clusters currently upgradeable"
+  upgradeable: Int
+
+  "the number of clusters currently at the latest version"
+  latest: Int
+
+  "the number of clusters compliant w\/ your versioning policy"
+  compliant: Int
 }
 
 "a single condition struct for various phases of the cluster provisionining process"

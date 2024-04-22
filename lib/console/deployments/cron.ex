@@ -101,6 +101,17 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
+  def update_upgrade_plans() do
+    Cluster.installed()
+    |> Cluster.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(fn cluster ->
+      Logger.info "compiling upgrade plan for #{cluster.handle}"
+      Clusters.update_upgrade_plan(cluster)
+    end)
+    |> Stream.run()
+  end
+
   def backfill_deprecations() do
     Logger.info "backfilling missing deprecations for all services"
 
