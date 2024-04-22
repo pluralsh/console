@@ -67,6 +67,7 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   onDeleteChip?: (key: string) => void
   inputContent?: ComponentProps<typeof Input2>['inputContent']
   onDeleteInputContent?: ComponentProps<typeof Input2>['onDeleteInputContent']
+  containerProps?: HTMLAttributes<HTMLDivElement>
 } & Pick<InputProps, 'suffix' | 'prefix' | 'titleContent' | 'showClearButton'> &
   Omit<
     ComboBoxStateOptions<object>,
@@ -251,6 +252,7 @@ function ComboBox({
   chips,
   inputContent,
   onDeleteChip: onDeleteChipProp,
+  containerProps,
   ...props
 }: ComboBoxProps) {
   const nextFocusedKeyRef = useRef<Key>(null)
@@ -514,7 +516,7 @@ function ComboBox({
   )
 
   return (
-    <ComboBoxInner>
+    <ComboBoxInner {...containerProps}>
       <ComboBoxInput
         inputRef={inputInnerRef}
         inputProps={{

@@ -3,6 +3,8 @@ import { type ComponentProps, type Key, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import Fuse from 'fuse.js'
 
+import { isEqual, uniqWith } from 'lodash-es'
+
 import {
   AppIcon,
   BrowseAppsIcon,
@@ -16,6 +18,7 @@ import {
 } from '..'
 
 import { ClusterTagsTemplate } from './ClusterTagsTemplate'
+import TagMultiSelectTemplate from './TagMultiselectTemplate'
 
 export default {
   title: 'Combo Box',
@@ -485,4 +488,35 @@ export const ClusterTags = ClusterTagsTemplate.bind({})
 ClusterTags.args = {
   loading: false,
   withTitleContent: false,
+}
+
+const TAGS = [
+  { name: 'local', value: 'true' },
+  { name: 'local', value: 'false' },
+  { name: 'stage', value: 'dev' },
+  { name: 'stage', value: 'prod' },
+  { name: 'stage', value: 'canary' },
+  { name: 'route', value: 'some-very-very-long-tag-value' },
+  { name: 'route', value: 'short-name' },
+  { name: 'local2', value: 'true' },
+  { name: 'local2', value: 'false' },
+  { name: 'stage2', value: 'dev' },
+  { name: 'stage2', value: 'prod' },
+  { name: 'stage2', value: 'canary' },
+  { name: 'route2', value: 'some-very-very-long-tag-value' },
+  { name: 'route2', value: 'short-name' },
+]
+const tags = uniqWith(TAGS, isEqual)
+
+export const TagMultiSelect = TagMultiSelectTemplate.bind({})
+TagMultiSelect.args = {
+  loading: false,
+  options: tags.map((tag) => `${tag.name}:${tag.value}`),
+  width: 100,
+  onSelectedTagsChange: (keys: Set<Key>) => {
+    console.log('Selected keys:', keys)
+  },
+  onFilterChange: (filter: string) => {
+    console.log('Filter:', filter)
+  },
 }
