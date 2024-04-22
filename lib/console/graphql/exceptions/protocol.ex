@@ -13,5 +13,9 @@ defimpl Console.GraphQl.Exception, for: Ecto.NoResultsError do
 end
 
 defimpl Console.GraphQl.Exception, for: Ecto.CastError do
-  def error(_), do: {400, "invalid input"}
+  def error(_), do: {400, "could not find resource"}
+end
+
+defimpl Console.GraphQl.Exception, for: Ecto.Query.CastError do
+  def error(_), do: {404, "could not find resource"}
 end
