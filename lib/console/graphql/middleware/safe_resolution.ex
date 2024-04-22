@@ -29,9 +29,11 @@ defmodule Console.Middleware.SafeResolution do
     Resolution.call(resolution, resolver)
   rescue
     exception ->
-      {_, msg} = Console.GraphQl.Exception.error(exception)
-      error = Exception.format(:error, exception, __STACKTRACE__)
-      Logger.error(error)
+      {code, msg} = Console.GraphQl.Exception.error(exception)
+      if code >= 500 do
+        error = Exception.format(:error, exception, __STACKTRACE__)
+        Logger.error(error)
+      end
       Resolution.put_result(resolution, {:error, msg})
   end
 end
