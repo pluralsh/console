@@ -1819,7 +1819,10 @@ export type HelmChartVersion = {
 
 export type HelmConfigAttributes = {
   chart?: InputMaybe<Scalars['String']['input']>;
+  git?: InputMaybe<GitRefAttributes>;
   repository?: InputMaybe<NamespacedName>;
+  /** pointer to a Plural GitRepository */
+  repositoryId?: InputMaybe<Scalars['ID']['input']>;
   set?: InputMaybe<HelmValueAttributes>;
   values?: InputMaybe<Scalars['String']['input']>;
   valuesFiles?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -1856,8 +1859,12 @@ export type HelmSpec = {
   __typename?: 'HelmSpec';
   /** the name of the chart this service is using */
   chart?: Maybe<Scalars['String']['output']>;
+  /** spec of where to find the chart in git */
+  git?: Maybe<GitRef>;
   /** pointer to the flux helm repository resource used for this chart */
   repository?: Maybe<ObjectReference>;
+  /** a git repository in Plural to use as a source */
+  repositoryId?: Maybe<Scalars['ID']['output']>;
   /** a list of helm name/value pairs to precisely set individual values */
   set?: Maybe<Array<Maybe<HelmValue>>>;
   /** a helm values file to use with this service, requires auth and so is heavy to query */

@@ -39,26 +39,30 @@ defmodule Console.Schema.Service do
 
   defmodule Helm do
     use Piazza.Ecto.Schema
+    alias Console.Schema.{NamespacedName, Service.Git}
 
     embedded_schema do
-      field :values,       Piazza.Ecto.EncryptedString
-      field :chart,        :string
-      field :version,      :string
-      field :values_files, {:array, :string}
+      field :values,        Piazza.Ecto.EncryptedString
+      field :chart,         :string
+      field :version,       :string
+      field :values_files,  {:array, :string}
+      field :repository_id, :binary_id
 
       embeds_many :set, HelmValue, on_replace: :delete do
         field :name, :string
         field :value, Piazza.Ecto.EncryptedString
       end
 
-      embeds_one :repository, Console.Schema.NamespacedName, on_replace: :update
+      embeds_one :git,        Git, on_replace: :update
+      embeds_one :repository, NamespacedName, on_replace: :update
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(values chart version values_files)a)
+      |> cast(attrs, ~w(values chart version repository_id values_files)a)
       |> cast_embed(:repository)
-      |> cast_embed(:set)
+      |> cast_embed(:set, with: &set_changeset/2)
+      |> cast_embed(:git)
       |> validate_change(:values_files, fn :values_files, files ->
         case Enum.member?(files, "values.yaml") do
           true -> [values_files: "explicitly wiring in values.yaml can corrupt helm charts, try a different filename"]
@@ -101,6 +105,8 @@ defmodule Console.Schema.Service do
     field :protect,          :boolean
     field :dry_run,          :boolean
     field :interval,         :string
+
+    field :norevise, :boolean, virtual: true, default: false
 
     embeds_one :git,  Git,  on_replace: :update
     embeds_one :helm, Helm, on_replace: :update

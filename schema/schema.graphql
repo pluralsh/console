@@ -2203,11 +2203,21 @@ input SyncConfigAttributes {
 
 input HelmConfigAttributes {
   values: String
+
   valuesFiles: [String]
+
   chart: String
+
   version: String
+
   set: HelmValueAttributes
+
   repository: NamespacedName
+
+  git: GitRefAttributes
+
+  "pointer to a Plural GitRepository"
+  repositoryId: ID
 }
 
 input MetadataAttributes {
@@ -2464,6 +2474,12 @@ type HelmSpec {
 
   "a helm values file to use with this service, requires auth and so is heavy to query"
   values: String
+
+  "spec of where to find the chart in git"
+  git: GitRef
+
+  "a git repository in Plural to use as a source"
+  repositoryId: ID
 
   "pointer to the flux helm repository resource used for this chart"
   repository: ObjectReference
