@@ -21,25 +21,33 @@ export type MultiSelectTag = {
 const matchOptions = [
   { label: 'All', value: 'AND' },
   { label: 'Any', value: 'OR' },
-]
+] as const
 
-export function TagMultiSelect({
-  options,
-  loading,
-  onSelectedTagsChange,
-  onFilterChange,
-}: {
+type TagMultiSelectProps = {
   options: string[]
   loading: boolean
+  selectedMatchType?: 'AND' | 'OR'
   onSelectedTagsChange?: (keys: Set<Key>) => void
   onFilterChange?: (value: string) => void
-}) {
+  onChangeMatchType?: (value: 'AND' | 'OR') => void
+}
+
+function TagMultiSelect({
+  options,
+  loading,
+  selectedMatchType,
+  onSelectedTagsChange,
+  onFilterChange,
+  onChangeMatchType,
+}: TagMultiSelectProps) {
   const theme = useTheme()
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
   const selectedTagArr = useMemo(() => [...selectedTagKeys], [selectedTagKeys])
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
-  const [searchLogic, setSearchLogic] = useState<string>(matchOptions[0].value)
+  const [searchLogic, setSearchLogic] = useState<string>(
+    selectedMatchType || matchOptions[0].value
+  )
 
   const onSelectionChange: ComponentProps<
     typeof ComboBox
@@ -72,8 +80,9 @@ export function TagMultiSelect({
       <Select
         label="Pick search logic"
         selectedKey={searchLogic}
-        onSelectionChange={(key: string) => {
-          setSearchLogic(key)
+        onSelectionChange={(value: 'AND' | 'OR') => {
+          setSearchLogic(value)
+          onChangeMatchType?.(value)
         }}
         defaultOpen={false}
         triggerButton={
@@ -128,6 +137,7 @@ export function TagMultiSelect({
         allowsEmptyCollection
         loading={loading}
         containerProps={{ style: { flexGrow: 1 } }}
+        showArrow={false}
       >
         {options
           .map((tagStr) => {
@@ -156,3 +166,6 @@ export function TagMultiSelect({
     </Flex>
   )
 }
+
+export type { TagMultiSelectProps }
+export { TagMultiSelect }

@@ -8,12 +8,14 @@ export default function TagMultiSelectTemplate({
   width,
   onSelectedTagsChange,
   onFilterChange,
+  onChangeMatchType,
 }: {
   loading: boolean
   options: string[]
   width: number
   onSelectedTagsChange?: (keys: Set<Key>) => void
   onFilterChange?: (value: string) => void
+  onChangeMatchType?: (value: 'AND' | 'OR') => void
 }) {
   return (
     <div style={{ width: `${width}%` }}>
@@ -22,6 +24,7 @@ export default function TagMultiSelectTemplate({
         options={options}
         onSelectedTagsChange={onSelectedTagsChange}
         onFilterChange={onFilterChange}
+        onChangeMatchType={onChangeMatchType}
       />
     </div>
   )

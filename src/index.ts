@@ -103,6 +103,7 @@ export type {
 export { default as LoadingSpinner } from './components/LoadingSpinner'
 export { default as LoopingLogo } from './components/LoopingLogo'
 export { ComboBox } from './components/ComboBox'
+export type { TagMultiSelectProps } from './components/TagMultiSelect'
 export { TagMultiSelect } from './components/TagMultiSelect'
 export { Toast, GraphQLToast } from './components/Toast'
 export { default as WrapWithIf } from './components/WrapWithIf'
