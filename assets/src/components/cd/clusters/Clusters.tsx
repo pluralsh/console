@@ -56,6 +56,8 @@ import {
   ClustersFilters,
 } from '../services/ClustersFilters'
 
+import { ClusterTagsFilter } from '../services/ClusterTagsFilter'
+
 import CreateCluster from './create/CreateCluster'
 import { DemoTable } from './ClustersDemoTable'
 import { ClustersGettingStarted } from './ClustersGettingStarted'
@@ -248,7 +250,11 @@ export default function Clusters() {
             selectedTagKeys={selectedTagKeys}
             setSelectedTagKeys={setSelectedTagKeys}
             tagOp={tagOp}
-            setTagOp={setTagOp}
+            setTagOp={
+              setTagOp as ComponentProps<
+                typeof ClusterTagsFilter
+              >['setSearchOp']
+            }
           />
           <TabPanel
             stateRef={tabStateRef}
