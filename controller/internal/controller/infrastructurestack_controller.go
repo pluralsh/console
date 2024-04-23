@@ -76,7 +76,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 	}()
 	if !stack.GetDeletionTimestamp().IsZero() {
-		return ctrl.Result{}, r.handleDelete(ctx, stack)
+		return r.handleDelete(ctx, stack)
 	}
 
 	cluster := &v1alpha1.Cluster{}
@@ -178,7 +178,7 @@ func (r *InfrastructureStackReconciler) isAlreadyExists(ctx context.Context, sta
 	return true, nil
 }
 
-func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack *v1alpha1.InfrastructureStack) error {
+func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack *v1alpha1.InfrastructureStack) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(stack, InfrastructureStackFinalizer) {
 		logger.Info("try to delete stack")
@@ -186,19 +186,24 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 			existingNotificationSink, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
 			if err != nil && !errors.IsNotFound(err) {
 				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return err
+				return ctrl.Result{}, err
+			}
+			if existingNotificationSink != nil && existingNotificationSink.DeletedAt != nil {
+				logger.Info("waiting for the stack")
+				return requeue, nil
 			}
 			if existingNotificationSink != nil {
 				if err := r.ConsoleClient.DeleteStack(ctx, *stack.Status.ID); err != nil {
 					utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-					return err
+					return ctrl.Result{}, err
 				}
+				return requeue, nil
 			}
 		}
 		controllerutil.RemoveFinalizer(stack, InfrastructureStackFinalizer)
 		logger.Info("stack deleted successfully")
 	}
-	return nil
+	return ctrl.Result{}, nil
 }
 
 func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, stack *v1alpha1.InfrastructureStack, clusterID, repositoryID string) (*console.StackAttributes, error) {
@@ -253,30 +258,37 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 			ca := &console.ContainerAttributes{
 				Image: c.Image,
 			}
-			ca.Args = algorithms.Map(c.Args,
-				func(b string) *string { return &b })
-			ca.Env = algorithms.Map(c.Env,
-				func(b corev1.EnvVar) *console.EnvAttributes {
-					return &console.EnvAttributes{
-						Name:  b.Name,
-						Value: b.Value,
-					}
-				})
-			ca.EnvFrom = algorithms.Map(c.EnvFrom,
-				func(b corev1.EnvFromSource) *console.EnvFromAttributes {
-					secret := ""
-					configMap := ""
-					if b.SecretRef != nil {
-						secret = b.SecretRef.Name
-					}
-					if b.ConfigMapRef != nil {
-						configMap = b.ConfigMapRef.Name
-					}
-					return &console.EnvFromAttributes{
-						Secret:    secret,
-						ConfigMap: configMap,
-					}
-				})
+			if c.Args != nil {
+				ca.Args = algorithms.Map(c.Args,
+					func(b string) *string { return &b })
+			}
+			if c.Env != nil {
+				ca.Env = algorithms.Map(c.Env,
+					func(b corev1.EnvVar) *console.EnvAttributes {
+						return &console.EnvAttributes{
+							Name:  b.Name,
+							Value: b.Value,
+						}
+					})
+			}
+			if c.EnvFrom != nil {
+				ca.EnvFrom = algorithms.Map(c.EnvFrom,
+					func(b corev1.EnvFromSource) *console.EnvFromAttributes {
+						secret := ""
+						configMap := ""
+						if b.SecretRef != nil {
+							secret = b.SecretRef.Name
+						}
+						if b.ConfigMapRef != nil {
+							configMap = b.ConfigMapRef.Name
+						}
+						return &console.EnvFromAttributes{
+							Secret:    secret,
+							ConfigMap: configMap,
+						}
+					})
+			}
+
 			containers = append(containers, ca)
 		}
 
@@ -298,8 +310,13 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 			rawLabels := string(result)
 			labels = &rawLabels
 		}
+		namespace := stack.Namespace
+		if stack.Spec.JobSpec.Template.Namespace != "" {
+			namespace = stack.Spec.JobSpec.Template.Namespace
+		}
+
 		attr.JobSpec = &console.GateJobAttributes{
-			Namespace:      stack.Spec.JobSpec.Template.Namespace,
+			Namespace:      namespace,
 			Raw:            lo.ToPtr(string(raw)),
 			Containers:     containers,
 			ServiceAccount: lo.ToPtr(stack.Spec.JobSpec.Template.Spec.ServiceAccountName),
