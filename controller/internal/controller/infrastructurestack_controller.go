@@ -193,9 +193,16 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 				return requeue, nil
 			}
 			if existingNotificationSink != nil {
-				if err := r.ConsoleClient.DeleteStack(ctx, *stack.Status.ID); err != nil {
-					utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-					return ctrl.Result{}, err
+				if stack.Spec.Detach {
+					if err := r.ConsoleClient.DetachStack(ctx, *stack.Status.ID); err != nil {
+						utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+						return ctrl.Result{}, err
+					}
+				} else {
+					if err := r.ConsoleClient.DeleteStack(ctx, *stack.Status.ID); err != nil {
+						utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+						return ctrl.Result{}, err
+					}
 				}
 				return requeue, nil
 			}
@@ -239,7 +246,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 
 	}
 
-	attr.Environemnt = algorithms.Map(stack.Spec.Environment,
+	attr.Environment = algorithms.Map(stack.Spec.Environment,
 		func(b v1alpha1.StackEnvironment) *console.StackEnvironmentAttributes {
 			return &console.StackEnvironmentAttributes{
 				Name:   b.Name,

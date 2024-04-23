@@ -65,6 +65,9 @@ type InfrastructureStackSpec struct {
 	// Files reference to ConfigMap with a key as a path and value as a content
 	// +kubebuilder:validation:Optional
 	Files *corev1.LocalObjectReference `json:"files,omitempty"`
+
+	// Detach determined if user want to delete or detach stack
+	Detach bool `json:"detach"`
 }
 
 //+kubebuilder:object:root=true

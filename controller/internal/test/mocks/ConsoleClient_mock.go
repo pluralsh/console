@@ -1378,6 +1378,53 @@ func (_c *ConsoleClientMock_DeleteStack_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// DetachStack provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DetachStack(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DetachStack")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DetachStack_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DetachStack'
+type ConsoleClientMock_DetachStack_Call struct {
+	*mock.Call
+}
+
+// DetachStack is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DetachStack(ctx interface{}, id interface{}) *ConsoleClientMock_DetachStack_Call {
+	return &ConsoleClientMock_DetachStack_Call{Call: _e.mock.On("DetachStack", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DetachStack_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DetachStack_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DetachStack_Call) Return(_a0 error) *ConsoleClientMock_DetachStack_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DetachStack_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DetachStack_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetCluster provides a mock function with given fields: id
 func (_m *ConsoleClientMock) GetCluster(id *string) (*gqlclient.ClusterFragment, error) {
 	ret := _m.Called(id)

@@ -26,7 +26,8 @@ metadata:
   name: infrastructurestack-sample
   namespace: default
 spec:
-  name: "test1"
+  name: "test2"
+  detach: true
   type: TERRAFORM
   configuration:
     version: "v0.0.3"

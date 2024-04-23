@@ -158,6 +158,9 @@ spec:
                 required:
                 - version
                 type: object
+              detach:
+                description: Detach determined if user want to delete or detach stack
+                type: boolean
               environment:
                 items:
                   properties:
@@ -8160,6 +8163,7 @@ spec:
             required:
             - clusterRef
             - configuration
+            - detach
             - git
             - repositoryRef
             - type

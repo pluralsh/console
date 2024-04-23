@@ -33,6 +33,14 @@ func (c *client) DeleteStack(ctx context.Context, id string) error {
 	return nil
 }
 
+func (c *client) DetachStack(ctx context.Context, id string) error {
+	_, err := c.consoleClient.DetachStack(ctx, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *client) CreateStack(ctx context.Context, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error) {
 	result, err := c.consoleClient.CreateStack(ctx, attributes)
 	if err != nil {

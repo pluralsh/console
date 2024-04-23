@@ -113,7 +113,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("VI4DCAVCKOPYM5TIXIXKGNJTSW4S2HOCPG3UARJOPWMYYWLXMMSQ===="),
+					SHA: lo.ToPtr("32YZZXF6HMFYYT4XLB647U2ROKV75U54EMPOUSDBI55ZWYK2Y2QQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
@@ -153,14 +153,14 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
-		It("should successfully reconcile and update metadata od previously created stack", func() {
+		It("should successfully reconcile and update previously created stack", func() {
 			test := struct {
 				returnCreateStack *gqlclient.InfrastructureStackFragment
 				expectedStatus    v1alpha1.Status
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("JETFV35M2SZ5PXLI6WEFQCH5EWIVVT3BYR2VJP5DIUQTY4QGTWWQ===="),
+					SHA: lo.ToPtr("UUEALKZ6CZRN5Q2TUBQGUIMBT2R73OXSRCMUDHRNFSNM4N3WG4LQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
