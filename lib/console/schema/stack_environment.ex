@@ -8,6 +8,8 @@ defmodule Console.Schema.StackEnvironment do
 
     belongs_to :stack, Stack
     belongs_to :run, StackRun
+
+    timestamps()
   end
 
   @valid ~w(name value stack_id run_id)a

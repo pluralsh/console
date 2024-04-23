@@ -15,6 +15,8 @@ defmodule Console.Schema.StackState do
 
     belongs_to :stack, Stack
     belongs_to :run,   StackRun
+
+    timestamps()
   end
 
   @valid ~w(plan stack_id run_id)a

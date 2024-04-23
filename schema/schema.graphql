@@ -949,7 +949,7 @@ input StackAttributes {
 
   files: [StackFileAttributes]
 
-  environemnt: [StackEnvironmentAttributes]
+  environment: [StackEnvironmentAttributes]
 }
 
 input StackConfigurationAttributes {
@@ -1087,9 +1087,6 @@ type StackRun {
 
   "The status of this run"
   status: StackStatus!
-
-  "the name of the stack"
-  name: String!
 
   "A type for the stack, specifies the tool to use to apply it"
   type: StackType!
