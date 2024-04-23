@@ -118,6 +118,8 @@ const ColRole = columnHelper.accessor(({ node }) => node?.cluster?.name, {
     const { role, cluster } = row.original.node || {}
     const label = roleToLabel[role || ''] || roleToLabel['']
 
+    if (!role) return null
+
     return (
       <ColRoleSC>
         <DynamicRoleIcon role={role} />
