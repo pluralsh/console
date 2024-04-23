@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react'
 
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { Chip, ComboBox, ListBoxItem, Select, SelectButton } from '..'
 
@@ -86,16 +86,11 @@ function TagMultiSelect({
         }}
         defaultOpen={false}
         triggerButton={
-          <SelectButton
-            css={{
-              borderTopRightRadius: 0,
-              borderBottomRightRadius: 0,
-              borderRight: `none`,
-              width: '150px',
-            }}
-          >
-            Match {matchOptions.find((el) => el.value === searchLogic).label}
-          </SelectButton>
+          <MultiSelectMatchButtonContainer>
+            <SelectButton>
+              Match {matchOptions.find((el) => el.value === searchLogic).label}
+            </SelectButton>
+          </MultiSelectMatchButtonContainer>
         }
       >
         {matchOptions.map(({ value, label }) => (
@@ -169,3 +164,12 @@ function TagMultiSelect({
 
 export type { TagMultiSelectProps }
 export { TagMultiSelect }
+
+const MultiSelectMatchButtonContainer = styled.div`
+  > div {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+    width: 150px;
+  }
+`
