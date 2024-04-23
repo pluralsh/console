@@ -16,7 +16,7 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
             repository { id }
             git { ref folder }
             configuration { version }
-            environment { name value }
+            environment { name value secret }
             files { path content }
           }
         }
@@ -27,7 +27,7 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
         "clusterId" => cluster.id,
         "git" => %{"ref" => "main", "folder" => "terraform"},
         "configuration" => %{"version" => "1.7.0"},
-        "environment" => [%{"name" => "TEST_ENV_VAR", "value" => "dummy"}],
+        "environment" => [%{"secret" => true, "name" => "TEST_ENV_VAR", "value" => "dummy"}],
         "files" => [%{"path" => "test", "content" => "test"}]
       }}, %{current_user: admin_user()})
 
@@ -43,6 +43,7 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       [env] = found["environment"]
       assert env["name"] == "TEST_ENV_VAR"
       assert env["value"] == "dummy"
+      assert env["secret"]
 
       [file] = found["files"]
       assert file["path"] == "test"
