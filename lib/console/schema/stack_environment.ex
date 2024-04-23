@@ -3,8 +3,9 @@ defmodule Console.Schema.StackEnvironment do
   alias Console.Schema.{Stack, StackRun}
 
   schema "stack_environment" do
-    field :name,  :string
-    field :value, Piazza.Ecto.EncryptedString
+    field :name,   :string
+    field :value,  Piazza.Ecto.EncryptedString
+    field :secret, :boolean
 
     belongs_to :stack, Stack
     belongs_to :run, StackRun
@@ -12,7 +13,7 @@ defmodule Console.Schema.StackEnvironment do
     timestamps()
   end
 
-  @valid ~w(name value stack_id run_id)a
+  @valid ~w(name value secret stack_id run_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
