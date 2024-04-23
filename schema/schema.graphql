@@ -351,6 +351,10 @@ type RootQueryType {
 
   infrastructureStacks(after: String, first: Int, before: String, last: Int): InfrastructureStackConnection
 
+  observabilityProvider(id: ID!): ObservabilityProvider
+
+  observabilityProviders(after: String, first: Int, before: String, last: Int): ObservabilityProviderConnection
+
   deploymentSettings: DeploymentSettings
 }
 
@@ -701,6 +705,10 @@ type RootMutationType {
 
   approveStackRun(id: ID!): StackRun
 
+  upsertObservabilityProvider(attributes: ObservabilityProviderAttributes!): ObservabilityProvider
+
+  deleteObservabilityProvider(id: ID!): ObservabilityProvider
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
 
@@ -848,6 +856,39 @@ input HttpConnectionAttributes {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+enum ObservabilityProviderType {
+  DATADOG
+  NEWRELIC
+}
+
+input ObservabilityProviderAttributes {
+  type: ObservabilityProviderType!
+  name: String!
+  credentials: ObservabilityProviderCredentialsAttributes!
+}
+
+input ObservabilityProviderCredentialsAttributes {
+  datadog: DatadogCredentialsAttributes
+}
+
+input DatadogCredentialsAttributes {
+  apiKey: String!
+  appKey: String!
+}
+
+type ObservabilityProvider {
+  id: ID!
+  type: ObservabilityProviderType!
+  name: String!
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type ObservabilityProviderConnection {
+  pageInfo: PageInfo!
+  edges: [ObservabilityProviderEdge]
 }
 
 enum StackStatus {
@@ -5831,5 +5872,10 @@ type StackRunEdge {
 
 type InfrastructureStackEdge {
   node: InfrastructureStack
+  cursor: String
+}
+
+type ObservabilityProviderEdge {
+  node: ObservabilityProvider
   cursor: String
 }

@@ -1,17 +1,30 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Schema.DeploymentSettings
-  alias Console.Deployments.Settings
-  alias Console.Services.Observability
+  alias Console.Schema.{DeploymentSettings, ObservabilityProvider}
+  alias Console.Deployments.{Settings, Observability}
+  alias Console.Services.Observability, as: ObsSvc
 
   @default_offset 30 * 60
   @nano 1_000_000_000
+
+  def get_observability_provider(%{id: id}, _), do: {:ok, Observability.get_provider!(id)}
+
+  def list_observability_providers(args, _) do
+    ObservabilityProvider.ordered()
+    |> paginate(args)
+  end
+
+  def upsert_observability_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.upsert_provider(attrs, user)
+
+  def delete_observability_provider(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.delete_provider(id, user)
 
   def cluster_logs(cluster, %{query: query} = args, _) do
     with_client(:loki, fn ->
       {start, end_ts} = timestamps(args)
       add_label(query, %{name: "cluster", value: cluster.handle})
-      |> Observability.get_logs(end_ts, start, args[:limit])
+      |> ObsSvc.get_logs(end_ts, start, args[:limit])
     end)
   end
 
@@ -22,7 +35,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
       {start, end_ts} = timestamps(args)
       add_label(query, %{name: "namespace", value: service.namespace})
       |> add_label(%{name: "cluster", value: service.cluster.handle})
-      |> Observability.get_logs(end_ts, start, args[:limit])
+      |> ObsSvc.get_logs(end_ts, start, args[:limit])
     end)
   end
 
@@ -40,7 +53,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp with_client(client, closure) do
     with %DeploymentSettings{} = settings <- Settings.fetch(),
          %DeploymentSettings.Connection{} = conn <- find(settings, client),
-         _ <- Observability.put_connection(client, conn) do
+         _ <- ObsSvc.put_connection(client, conn) do
       closure.()
     else
       _ -> {:error, "Observability settings for #{client} not configured"}

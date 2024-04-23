@@ -555,6 +555,14 @@ defmodule Console.Factory do
     }
   end
 
+  def observability_provider_factory do
+    %Schema.ObservabilityProvider{
+      type: :datadog,
+      name: sequence(:obsv_provider, & "obs-#{&1}"),
+      credentials: %{datadog: %{api_key: "api", app_key: "app"}}
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

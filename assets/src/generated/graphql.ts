@@ -1382,6 +1382,11 @@ export type DatabaseVolume = {
   size?: Maybe<Scalars['String']['output']>;
 };
 
+export type DatadogCredentialsAttributes = {
+  apiKey: Scalars['String']['input'];
+  appKey: Scalars['String']['input'];
+};
+
 export enum Delta {
   Create = 'CREATE',
   Delete = 'DELETE',
@@ -2605,6 +2610,42 @@ export type ObjectStoreEdge = {
   node?: Maybe<ObjectStore>;
 };
 
+export type ObservabilityProvider = {
+  __typename?: 'ObservabilityProvider';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  type: ObservabilityProviderType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ObservabilityProviderAttributes = {
+  credentials: ObservabilityProviderCredentialsAttributes;
+  name: Scalars['String']['input'];
+  type: ObservabilityProviderType;
+};
+
+export type ObservabilityProviderConnection = {
+  __typename?: 'ObservabilityProviderConnection';
+  edges?: Maybe<Array<Maybe<ObservabilityProviderEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ObservabilityProviderCredentialsAttributes = {
+  datadog?: InputMaybe<DatadogCredentialsAttributes>;
+};
+
+export type ObservabilityProviderEdge = {
+  __typename?: 'ObservabilityProviderEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ObservabilityProvider>;
+};
+
+export enum ObservabilityProviderType {
+  Datadog = 'DATADOG',
+  Newrelic = 'NEWRELIC'
+}
+
 export enum Operation {
   Eq = 'EQ',
   Gt = 'GT',
@@ -3801,6 +3842,7 @@ export type RootMutationType = {
   deleteNotificationRouter?: Maybe<NotificationRouter>;
   deleteNotificationSink?: Maybe<NotificationSink>;
   deleteObjectStore?: Maybe<ObjectStore>;
+  deleteObservabilityProvider?: Maybe<ObservabilityProvider>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
   deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
@@ -3887,6 +3929,7 @@ export type RootMutationType = {
   updateUser?: Maybe<User>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
+  upsertObservabilityProvider?: Maybe<ObservabilityProvider>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -4182,6 +4225,11 @@ export type RootMutationTypeDeleteNotificationSinkArgs = {
 
 
 export type RootMutationTypeDeleteObjectStoreArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteObservabilityProviderArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -4601,6 +4649,11 @@ export type RootMutationTypeUpsertNotificationSinkArgs = {
 };
 
 
+export type RootMutationTypeUpsertObservabilityProviderArgs = {
+  attributes: ObservabilityProviderAttributes;
+};
+
+
 export type RootMutationTypeUpsertPolicyConstraintsArgs = {
   constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
 };
@@ -4697,6 +4750,8 @@ export type RootQueryType = {
   notificationSinks?: Maybe<NotificationSinkConnection>;
   notifications?: Maybe<NotificationConnection>;
   objectStores?: Maybe<ObjectStoreConnection>;
+  observabilityProvider?: Maybe<ObservabilityProvider>;
+  observabilityProviders?: Maybe<ObservabilityProviderConnection>;
   pagedClusterGates?: Maybe<PipelineGateConnection>;
   pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
   persona?: Maybe<Persona>;
@@ -5194,6 +5249,19 @@ export type RootQueryTypeNotificationsArgs = {
 
 
 export type RootQueryTypeObjectStoresArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeObservabilityProviderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeObservabilityProvidersArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
