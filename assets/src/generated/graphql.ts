@@ -6377,7 +6377,7 @@ export type StackAttributes = {
   clusterId: Scalars['ID']['input'];
   /** version/image config for the tool you're using */
   configuration: StackConfigurationAttributes;
-  environemnt?: InputMaybe<Array<InputMaybe<StackEnvironmentAttributes>>>;
+  environment?: InputMaybe<Array<InputMaybe<StackEnvironmentAttributes>>>;
   files?: InputMaybe<Array<InputMaybe<StackFileAttributes>>>;
   /** reference w/in the repository where the IaC lives */
   git: GitRefAttributes;
@@ -6469,8 +6469,6 @@ export type StackRun = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: Maybe<JobGateSpec>;
-  /** the name of the stack */
-  name: Scalars['String']['output'];
   /** the most recent output for this stack */
   output?: Maybe<Array<Maybe<StackOutput>>>;
   /** the git repository you're sourcing IaC from */

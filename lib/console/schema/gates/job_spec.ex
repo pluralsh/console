@@ -10,7 +10,7 @@ defmodule Console.Schema.Gates.JobSpec do
 
     embeds_many :containers, Container, on_replace: :delete do
       field       :image, :string
-      field       :args,  {:array, :string}
+      field       :args,  {:array, :string}, default: []
 
       embeds_many :env, Env, on_replace: :delete do
         field :name,  :string

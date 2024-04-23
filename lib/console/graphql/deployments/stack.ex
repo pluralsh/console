@@ -21,7 +21,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :write_bindings, list_of(:policy_binding_attributes)
 
     field :files,       list_of(:stack_file_attributes)
-    field :environemnt, list_of(:stack_environment_attributes)
+    field :environment, list_of(:stack_environment_attributes)
   end
 
   input_object :stack_configuration_attributes do
@@ -111,7 +111,6 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_run do
     field :id,             non_null(:id)
     field :status,         non_null(:stack_status), description: "The status of this run"
-    field :name,           non_null(:string), description: "the name of the stack"
     field :type,           non_null(:stack_type), description: "A type for the stack, specifies the tool to use to apply it"
     field :git,            non_null(:git_ref), description: "reference w/in the repository where the IaC lives"
     field :job_spec,       :job_gate_spec, description: "optional k8s job configuration for the job that will apply this stack"

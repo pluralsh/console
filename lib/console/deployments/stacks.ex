@@ -14,6 +14,8 @@ defmodule Console.Deployments.Stacks do
     GitRepository
   }
 
+  @preloads [:environment, :files]
+
   @type error :: Console.error
   @type stack_resp :: {:ok, Stack.t} | error
   @type run_resp :: {:ok, StackRun.t} | error
@@ -28,6 +30,8 @@ defmodule Console.Deployments.Stacks do
 
   @spec get_step!(binary) :: RunStep.t
   def get_step!(id), do: Repo.get!(RunStep, id)
+
+  def preloaded(%Stack{} = stack), do: Repo.preload(stack, @preloads)
 
   @spec authorized(binary, Cluster.t) :: run_resp
   def authorized(run_id, cluster) do
@@ -53,6 +57,7 @@ defmodule Console.Deployments.Stacks do
   @spec update_stack(map, binary, User.t) :: stack_resp
   def update_stack(attrs, id, %User{} = user) do
     get_stack!(id)
+    |> preloaded()
     |> Stack.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(:update)
