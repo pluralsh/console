@@ -15,6 +15,10 @@ homeDir: /root
 podLabels: {}
 podAnnotations: {}
 
+migrator: {}
+
+console: {}
+
 secrets:
   cluster_name: test
   jwt: REPLACEME
@@ -85,7 +89,7 @@ ingress:
     enabled: true
 
   rewrite:
-    enabled: true
+    enabled: false
     annotations:
       konghq.com/rewrite: /$2
       nginx.ingress.kubernetes.io/use-regex: "true"

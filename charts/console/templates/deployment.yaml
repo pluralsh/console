@@ -32,6 +32,10 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+      {{ if .Values.console.securityContext }}
+      securityContext:
+      {{ toYaml .Values.console.securityContext | nindent 8 }}
+      {{ end }}
       terminationGracePeriodSeconds: {{ .Values.shutdownDelay }}
       {{ if .Values.cliContainer.enabled }}
       initContainers:
@@ -45,6 +49,10 @@ spec:
       {{- end }}
       containers:
       - name: console
+        {{ if .Values.console.containerSecurityContext }}
+        securityContext:
+        {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
+        {{ end }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         envFrom:
@@ -87,19 +95,19 @@ spec:
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with .Values.affinity }}
+      {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
+      {{- end }}
+      {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-    {{- end }}
+      {{- end }}
       volumes:
       {{ if .Values.cliContainer.enabled }}
       - name: cli-override
         emptyDir: {}
-      {{- end }}
+      {{ end }}
       {{- if or .Values.secrets.identity .Values.secrets.key }}
       - name: console-conf
         secret:

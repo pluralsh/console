@@ -13,8 +13,16 @@ spec:
       imagePullSecrets:
       {{- toYaml . | nindent 6 }}
       {{- end }}
+      {{ if .Values.migrator.securityContext }}
+      securityContext:
+      {{- toYaml .Values.migrator.securityContext | nindent 8 }}
+      {{ end }}
       containers:
       - name: migrator
+        {{ if .Values.migrator.containerSecurityContext }}
+        securityContext:
+        {{- toYaml .Values.migrator.containerSecurityContext | nindent 10 }}
+        {{ end }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         command: ["/opt/app/bin/console",  "migrate"]
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -25,5 +33,19 @@ spec:
             name: console-migration-env
         env:
         {{ include "console.env" . | nindent 8 }}
+        volumeMounts:
+        - mountPath: /opt/app/var
+          name: scratch
       restartPolicy: Never
+      {{ with .Values.migrator.nodeSelector}}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{ with .Values.migrator.tolerations}}
+      tolerations:
+      {{- toYaml . | nindent 6 }}
+      {{- end }}
+      volumes:
+      - name: scratch
+        emptyDir: {}
   backoffLimit: 5
