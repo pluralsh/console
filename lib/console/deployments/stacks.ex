@@ -203,8 +203,10 @@ defmodule Console.Deployments.Stacks do
       %StackRun{stack_id: stack.id, status: :queued}
       |> StackRun.changeset(
         Repo.preload(stack, [:environment, :files])
-        |> Map.take(~w(approval configuration type environment files job_spec repository_id cluster_id)a)
+        |> Map.take(~w(approval dry_run configuration type environment files job_spec repository_id cluster_id)a)
         |> Console.clean()
+        |> Map.update(:environment, [], fn env -> Enum.map(env, &Map.delete(&1, :stack_id)) end)
+        |> Map.update(:files, [], fn files -> Enum.map(files, &Map.delete(&1, :stack_id)) end)
         |> Map.put(:git, %{ref: sha, folder: stack.git.folder})
         |> Map.put(:steps, commands(stack, !!attrs[:dry_run]))
         |> Map.merge(attrs)

@@ -143,7 +143,7 @@ defmodule Console.Deployments.StacksTest do
 
   describe "#poll/1" do
     test "it can create a new run when the sha changes" do
-      stack = insert(:stack)
+      stack = insert(:stack, environment: [%{name: "ENV", value: "1"}], files: [%{path: "test.txt", content: "test"}])
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
 
       {:ok, run} = Stacks.poll(stack)
@@ -167,6 +167,9 @@ defmodule Console.Deployments.StacksTest do
       assert third.cmd == "terraform"
       assert third.args == ["apply", "-auto-approve"]
       assert third.index == 2
+
+      stack = refetch(stack)
+      %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
     end
