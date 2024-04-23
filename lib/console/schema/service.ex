@@ -16,7 +16,8 @@ defmodule Console.Schema.Service do
     Metadata,
     StageService,
     ServiceContextBinding,
-    NamespaceInstance
+    NamespaceInstance,
+    ServiceDependency
   }
 
   defenum Promotion, ignore: 0, proceed: 1, rollback: 2
@@ -128,6 +129,7 @@ defmodule Console.Schema.Service do
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
     has_many :context_bindings, ServiceContextBinding, on_replace: :delete
+    has_many :dependencies, ServiceDependency, on_replace: :delete
     has_many :api_deprecations, through: [:components, :api_deprecations]
     has_many :contexts, through: [:context_bindings, :context]
     has_many :stage_services, StageService
@@ -240,6 +242,7 @@ defmodule Console.Schema.Service do
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:context_bindings)
+    |> cast_assoc(:dependencies)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)

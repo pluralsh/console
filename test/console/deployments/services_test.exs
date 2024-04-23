@@ -687,6 +687,13 @@ defmodule Console.Deployments.ServicesTest do
   describe "#update_components/2" do
     test "it will update the k8s components w/in the service" do
       service = insert(:service)
+      dependencies = for _ <- 1..3 do
+        insert(:service_dependency, service: build(:service, cluster: service.cluster), name: service.name)
+      end
+      ignore = [
+        insert(:service_dependency, name: service.name),
+        insert(:service_dependency, service: build(:service, cluster: service.cluster))
+      ]
 
       {:ok, service} = Services.update_components(%{
         errors: [],
@@ -726,6 +733,14 @@ defmodule Console.Deployments.ServicesTest do
       svc = refetch(service)
       assert svc.status == :healthy
       assert svc.component_status == "2 / 2"
+
+      for dep <- dependencies do
+        assert refetch(dep).status == :healthy
+      end
+
+      for dep <- ignore do
+        refute refetch(dep).status == :healthy
+      end
 
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
 

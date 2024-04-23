@@ -22,6 +22,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :helm,             :helm_config_attributes
     field :kustomize,        :kustomize_attributes
     field :configuration,    list_of(:config_attributes)
+    field :dependencies,     list_of(:service_dependency_attributes)
     field :read_bindings,    list_of(:policy_binding_attributes)
     field :write_bindings,   list_of(:policy_binding_attributes)
     field :context_bindings, list_of(:context_binding_attributes)
@@ -62,6 +63,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :helm,             :helm_config_attributes
     field :configuration,    list_of(:config_attributes)
     field :kustomize,        :kustomize_attributes
+    field :dependencies,     list_of(:service_dependency_attributes)
     field :read_bindings,    list_of(:policy_binding_attributes)
     field :write_bindings,   list_of(:policy_binding_attributes)
     field :context_bindings, list_of(:context_binding_attributes)
@@ -114,6 +116,11 @@ defmodule Console.GraphQl.Deployments.Service do
   @desc "a binding from a service to a service context"
   input_object :context_binding_attributes do
     field :context_id, non_null(:string)
+  end
+
+  @desc "A named depedency of a service, will prevent applying any manifests until the dependency has become ready"
+  input_object :service_dependency_attributes do
+    field :name, non_null(:string)
   end
 
   input_object :kustomize_attributes do
@@ -177,6 +184,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :global_service, :global_service, resolve: dataloader(Deployments), description: "the global service this service is the source for"
     field :owner,          :global_service, resolve: dataloader(Deployments), description: "whether this service is controlled by a global service"
     field :contexts,       list_of(:service_context), resolve: dataloader(Deployments), description: "bound contexts for this service"
+    field :dependencies,   list_of(:service_dependency), resolve: dataloader(Deployments), description: "the dependencies of this service, actualization will not happen until all are HEALTHY"
 
     @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
     connection field :revisions, node_type: :revision do
@@ -311,6 +319,15 @@ defmodule Console.GraphQl.Deployments.Service do
     field :name,          non_null(:string)
     field :configuration, :map
     field :secrets,       list_of(:service_configuration)
+
+    timestamps()
+  end
+
+  @desc "A dependency of a service, the service will not actualize until all dependencies are ready"
+  object :service_dependency do
+    field :id,     non_null(:id)
+    field :status, :service_deployment_status
+    field :name,   non_null(:string)
 
     timestamps()
   end

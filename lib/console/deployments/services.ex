@@ -3,8 +3,16 @@ defmodule Console.Deployments.Services do
   use Nebulex.Caching
   import Console.Deployments.Policies
   alias Console.PubSub
-  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository, ServiceContext}
-  alias Console.Deployments.{Secrets.Store, Settings, Git, Clusters, Deprecations.Checker, AddOns, Tar}
+  alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository, ServiceContext, ServiceDependency}
+  alias Console.Deployments.{
+    Secrets.Store,
+    Settings,
+    Git,
+    Clusters,
+    Deprecations.Checker,
+    AddOns,
+    Tar,
+  }
   alias Console.Deployments.Helm
   require Logger
 
@@ -203,6 +211,19 @@ defmodule Console.Deployments.Services do
   end
   def authorized(_, _), do: {:error, "could not find service in cluster"}
 
+  @doc """
+  Determines if all dependencies for a service have been satisfied
+  """
+  @spec dependencies_ready(Service.t) :: service_resp
+  def dependencies_ready(%Service{} = svc) do
+    with %{dependencies: [_ | _] = deps} <- Repo.preload(svc, [:dependencies]),
+         dep when not is_nil(dep) <- Enum.find(deps, & &1.status != :healthy) do
+      {:error, "dependency #{dep.name} is not ready"}
+    else
+      _ -> {:ok, svc}
+    end
+  end
+
   def add_errors(%Service{id: svc_id}, errors) do
     get_service(svc_id)
     |> Repo.preload([:errors])
@@ -383,7 +404,7 @@ defmodule Console.Deployments.Services do
   def update_service(attrs, %Service{} = svc) do
     start_transaction()
     |> add_operation(:base, fn _ ->
-      Repo.preload(svc, [:context_bindings, :read_bindings, :write_bindings])
+      Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings])
       |> Service.changeset(Map.put(attrs, :status, :stale))
       |> Service.update_changeset()
       |> Console.Repo.update()
@@ -508,6 +529,14 @@ defmodule Console.Deployments.Services do
         {_, _, true, _} -> update_status(service, :healthy, component_status)
         _ -> update_status(service, :stale, component_status)
       end
+    end)
+    |> add_operation(:dependencies, fn
+      %{service: %{status: s}, updated: %{status: :healthy} = svc} when s != :healthy ->
+        ServiceDependency.for_cluster(svc.cluster_id)
+        |> ServiceDependency.for_name(svc.name)
+        |> Repo.update_all(set: [status: :healthy])
+        |> ok()
+      _ -> {:ok, nil}
     end)
     |> execute(extract: :updated)
     |> notify(:components)
