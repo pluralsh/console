@@ -15,6 +15,10 @@ homeDir: /root
 podLabels: {}
 podAnnotations: {}
 
+migrator: {}
+
+console: {}
+
 secrets:
   cluster_name: test
   jwt: REPLACEME

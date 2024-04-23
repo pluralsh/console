@@ -4,11 +4,18 @@ global:
 
 disableAdditionalVolumes: false
 
+securityContext:
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
 consoleUrl: ~
 fullnameOverride: console-operator
+
 tokenSecretRef:
   name: console-auth-token
   key: access-token
+
 controllerManager:
   podLabels: {}
   podAnnotations: {}
