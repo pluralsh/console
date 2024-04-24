@@ -88,21 +88,27 @@ defmodule Console.Deployments.Services do
   before sending it upstream to the given client.
   """
   @spec tarstream(Service.t) :: {:ok, File.t} | Console.error
-  def tarstream(%Service{repository_id: id, helm: %Service.Helm{chart: c, values_files: [_ | _] = files} = helm} = svc) when is_binary(id) and is_binary(c) do
+  def tarstream(%Service{repository_id: id, helm: %Service.Helm{repository_id: rid, chart: c, values_files: [_ | _] = files} = helm} = svc)
+      when is_binary(id) and (is_binary(c) or is_binary(rid)) do
     with {:ok, f} <- Git.Discovery.fetch(svc),
          {:ok, contents} <- Tar.tar_stream(f),
          contents = Map.new(contents),
-         {:ok, f, _} <- Helm.Charts.artifact(svc),
-         splice <- Map.take(contents, files)
-                   |> maybe_values(helm),
-      do: Tar.splice(f, splice)
+         {:ok, chart} <- tarfile(%{svc | norevise: true}),
+         splice <- Map.take(contents, files) |> maybe_values(helm),
+      do: Tar.splice(chart, splice)
   end
+
   def tarstream(%Service{helm: %Service.Helm{values: values}} = svc) when is_binary(values) do
     with {:ok, tar} <- tarfile(svc),
       do: Tar.splice(tar, %{"values.yaml.static" => values})
   end
+
   def tarstream(%Service{} = svc), do: tarfile(svc)
 
+  defp tarfile(%Service{helm: %Service.Helm{repository_id: id, git: %{} = git}}) when is_binary(id) do
+    Git.get_repository!(id)
+    |> Git.Discovery.fetch(git)
+  end
   defp tarfile(%Service{helm: %Service.Helm{chart: c, version: v}} = svc) when is_binary(c) and is_binary(v) do
     with {:ok, f, sha} <- Helm.Charts.artifact(svc),
          {:ok, _} <- update_sha_without_revision(svc, sha),
@@ -380,6 +386,7 @@ defmodule Console.Deployments.Services do
     |> notify(:update, :ignore)
   end
 
+  defp update_sha_without_revision(%Service{norevise: true} = svc, _), do: {:ok, svc}
   defp update_sha_without_revision(%Service{revision: %Revision{sha: sha}} = svc, sha), do: {:ok, svc}
   defp update_sha_without_revision(%Service{id: id}, sha) do
     start_transaction()
