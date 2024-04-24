@@ -2227,6 +2227,8 @@ input ServiceDeploymentAttributes {
 
   configuration: [ConfigAttributes]
 
+  dependencies: [ServiceDependencyAttributes]
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -2282,6 +2284,8 @@ input ServiceUpdateAttributes {
   configuration: [ConfigAttributes]
 
   kustomize: KustomizeAttributes
+
+  dependencies: [ServiceDependencyAttributes]
 
   readBindings: [PolicyBindingAttributes]
 
@@ -2339,6 +2343,11 @@ input ServiceContextAttributes {
 "a binding from a service to a service context"
 input ContextBindingAttributes {
   contextId: String!
+}
+
+"A named depedency of a service, will prevent applying any manifests until the dependency has become ready"
+input ServiceDependencyAttributes {
+  name: String!
 }
 
 input KustomizeAttributes {
@@ -2445,6 +2454,9 @@ type ServiceDeployment {
 
   "bound contexts for this service"
   contexts: [ServiceContext]
+
+  "the dependencies of this service, actualization will not happen until all are HEALTHY"
+  dependencies: [ServiceDependency]
 
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
@@ -2642,6 +2654,15 @@ type ServiceContext {
   name: String!
   configuration: Map
   secrets: [ServiceConfiguration]
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"A dependency of a service, the service will not actualize until all dependencies are ready"
+type ServiceDependency {
+  id: ID!
+  status: ServiceDeploymentStatus
+  name: String!
   insertedAt: DateTime
   updatedAt: DateTime
 }

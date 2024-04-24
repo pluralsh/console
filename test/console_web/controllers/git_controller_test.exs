@@ -26,6 +26,21 @@ defmodule ConsoleWeb.GitControllerTest do
       assert error.message == "could not resolve ref doesnt-exist"
     end
 
+    test "if fetching and dependencies are not satisfied, it will 402 and persist an error", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+      dep = insert(:service_dependency, service: svc)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/v1/git/tarballs", %{id: svc.id})
+      |> response(402)
+
+      %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
+      assert error.source == "git"
+      assert error.message =~ "dependency #{dep.name} is not ready"
+    end
+
     test "non-permitted tokens are 403'ed", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})

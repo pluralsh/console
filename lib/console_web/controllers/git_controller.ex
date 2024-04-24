@@ -41,6 +41,7 @@ defmodule ConsoleWeb.GitController do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),
          svc <- Console.Repo.preload(svc, [:revision]),
+         {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
          {{:ok, f}, _} <- {Services.tarstream(svc), svc} do
       chunk_send_tar(conn, f)
     else

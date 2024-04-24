@@ -6072,6 +6072,21 @@ export type ServiceContextAttributes = {
   secrets?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
 };
 
+/** A dependency of a service, the service will not actualize until all dependencies are ready */
+export type ServiceDependency = {
+  __typename?: 'ServiceDependency';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  status?: Maybe<ServiceDeploymentStatus>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A named depedency of a service, will prevent applying any manifests until the dependency has become ready */
+export type ServiceDependencyAttributes = {
+  name: Scalars['String']['input'];
+};
+
 /** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
@@ -6087,6 +6102,8 @@ export type ServiceDeployment = {
   contexts?: Maybe<Array<Maybe<ServiceContext>>>;
   /** the time this service was scheduled for deletion */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the dependencies of this service, actualization will not happen until all are HEALTHY */
+  dependencies?: Maybe<Array<Maybe<ServiceDependency>>>;
   /** fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries */
   docs?: Maybe<Array<Maybe<GitFile>>>;
   /** whether this service should not actively reconcile state and instead simply report pending changes */
@@ -6169,6 +6186,7 @@ export type ServiceDeploymentRevisionsArgs = {
 export type ServiceDeploymentAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
+  dependencies?: InputMaybe<Array<InputMaybe<ServiceDependencyAttributes>>>;
   docsPath?: InputMaybe<Scalars['String']['input']>;
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
   git?: InputMaybe<GitRefAttributes>;
@@ -6304,6 +6322,7 @@ export type ServiceTemplateAttributes = {
 export type ServiceUpdateAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   contextBindings?: InputMaybe<Array<InputMaybe<ContextBindingAttributes>>>;
+  dependencies?: InputMaybe<Array<InputMaybe<ServiceDependencyAttributes>>>;
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
   git?: InputMaybe<GitRefAttributes>;
   helm?: InputMaybe<HelmConfigAttributes>;
