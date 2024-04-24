@@ -14,7 +14,7 @@ defmodule Console.Deployments.Stacks do
     GitRepository
   }
 
-  @preloads [:environment, :files]
+  @preloads [:environment, :files, :observable_metrics]
 
   @type error :: Console.error
   @type stack_resp :: {:ok, Stack.t} | error

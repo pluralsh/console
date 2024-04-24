@@ -143,6 +143,10 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackDeleted do
   def process(%{item: stack}), do: Stacks.create_run(stack, stack.sha)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
+  def process(%{item: run}), do: Console.Deployments.Stacks.Discovery.runner(run)
+end
+
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
   alias Console.Schema.{Stack, StackRun}
   alias Console.Deployments.Stacks

@@ -22,6 +22,8 @@ defmodule Console.Schema.StackRun do
     field :dry_run,     :boolean, default: false
     field :approved_at, :utc_datetime_usec
 
+    field :cancellation_reason, :string
+
     embeds_one :git,           Service.Git, on_replace: :update
     embeds_one :job_spec,      JobSpec, on_replace: :update
     embeds_one :configuration, Stack.Configuration, on_replace: :update
@@ -121,7 +123,7 @@ defmodule Console.Schema.StackRun do
 
   def complete_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(status)a)
+    |> cast(attrs, ~w(status cancellation_reason)a)
     |> cast_assoc(:state)
     |> cast_assoc(:output)
     |> validate_required(~w(status)a)
