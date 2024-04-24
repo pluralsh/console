@@ -7,7 +7,7 @@ defmodule Console.Schema.StackFile do
     field :content, Piazza.Ecto.EncryptedString
 
     belongs_to :stack, Stack
-    belongs_to :run, StackRun
+    belongs_to :run,   StackRun
 
     timestamps()
   end

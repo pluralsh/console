@@ -200,4 +200,34 @@ defmodule Console.Deployments.CronTest do
       :ok = Cron.cache_warm()
     end
   end
+
+  describe "#poll_stacks/0" do
+    test "it can generate new stack runs" do
+      stack = insert(:stack, environment: [%{name: "ENV", value: "1"}], files: [%{path: "test.txt", content: "test"}])
+      expect(Console.Deployments.Git.Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+
+      Cron.poll_stacks()
+
+      [run] = Console.Schema.StackRun.for_stack(stack.id)
+              |> Console.Repo.all()
+
+      assert run.status == :queued
+      assert run.stack_id == stack.id
+    end
+  end
+
+  describe "#dequeue_stacks/0" do
+    test "it can mark stack runs as pending" do
+      stack = insert(:stack)
+      insert(:stack_run, stack: stack, status: :successful)
+      :timer.sleep(1)
+      run = insert(:stack_run, stack: stack, status: :queued)
+
+      Cron.dequeue_stacks()
+
+      dequeued = refetch(run)
+      assert dequeued.id == run.id
+      assert dequeued.status == :pending
+    end
+  end
 end

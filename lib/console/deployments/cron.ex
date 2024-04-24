@@ -224,6 +224,7 @@ defmodule Console.Deployments.Cron do
       Logger.info "polling stack repository #{stack.id}"
       Stacks.poll(stack)
     end)
+    |> Stream.run()
   end
 
   def dequeue_stacks() do
@@ -233,5 +234,6 @@ defmodule Console.Deployments.Cron do
       Logger.info "dequeuing eligible stack runs #{stack.id}"
       Stacks.dequeue(stack)
     end)
+    |> Stream.run()
   end
 end
