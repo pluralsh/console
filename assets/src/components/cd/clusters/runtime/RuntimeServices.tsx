@@ -1,4 +1,4 @@
-import { Tab, TabList, TabPanel, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { ClustersRowFragment, useRuntimeServicesQuery } from 'generated/graphql'
 import { Key, useMemo, useRef, useState } from 'react'
 import { useTheme } from 'styled-components'
@@ -33,51 +33,25 @@ export default function RuntimeServices({
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-  const { blocking, all } = useMemo(() => {
-    const all = data?.cluster?.runtimeServices?.filter(isNonNullable) || []
+  const addOns = useMemo(
+    () => data?.cluster?.runtimeServices?.filter(isNonNullable) || [],
+    [data?.cluster?.runtimeServices]
+  )
 
-    return {
-      all,
-      blocking: all.filter((addOn) => !!addOn.addonVersion?.blocking),
-    }
-  }, [data?.cluster?.runtimeServices])
-
-  if ((data?.cluster?.runtimeServices || []).length <= 0) return null
+  if ((data?.cluster?.runtimeServices || []).length <= 0)
+    return <p style={{ marginLeft: '1rem' }}>No Add-Ons Detected</p>
 
   return (
     <>
-      <div
+      <Table
+        data={addOns}
+        columns={runtimeColumns}
+        reactTableOptions={{ meta: { clusterId: cluster?.id } }}
         css={{
-          ...theme.partials.text.body1,
-          color: theme.colors['text-light'],
+          maxHeight: 258,
+          height: '100%',
         }}
-      >
-        We detected these Kubernetes add-ons in your cluster. You should
-        validate they are compatible before upgrading.
-      </div>
-      <TabList
-        stateRef={tabStateRef}
-        stateProps={{
-          orientation: 'horizontal',
-          // @ts-ignore
-          selectedKey: tabKey,
-          onSelectionChange: setTabKey,
-        }}
-      >
-        <Tab key="blocking">Blocking Add-ons ({blocking.length})</Tab>
-        <Tab key="all">All Add-ons ({all.length})</Tab>
-      </TabList>
-      <TabPanel stateRef={tabStateRef}>
-        <Table
-          data={tabKey === 'blocking' ? blocking : all}
-          columns={runtimeColumns}
-          reactTableOptions={{ meta: { clusterId: cluster?.id } }}
-          css={{
-            maxHeight: 258,
-            height: '100%',
-          }}
-        />
-      </TabPanel>
+      />
     </>
   )
 }

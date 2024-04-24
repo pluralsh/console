@@ -170,6 +170,11 @@ fragment ClustersRow on Cluster {
     value
   }
   distro
+  upgradePlan {
+    compatibilities
+    deprecations
+    incompatibilities
+  }
 }
 
 fragment Cluster on Cluster {

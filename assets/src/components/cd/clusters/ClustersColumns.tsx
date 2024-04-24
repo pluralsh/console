@@ -7,19 +7,13 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { isEmpty } from 'lodash'
 import { Link } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { Cluster, ClustersRowFragment } from 'generated/graphql'
 
-import {
-  canUpgrade,
-  isUpgrading,
-  nextSupportedVersion,
-  toNiceVersion,
-} from 'utils/semver'
+import { isUpgrading, toNiceVersion } from 'utils/semver'
 import { Edge } from 'utils/graphql'
 import {
   cpuFormat,
@@ -267,20 +261,7 @@ const ColStatus = columnHelper.accessor(({ node }) => node, {
   header: 'Status',
   cell: ({ table, getValue, row: { original } }) => {
     const cluster = getValue()
-    const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
-    const upgrade = nextSupportedVersion(
-      cluster?.version,
-      cluster?.provider?.supportedVersions
-    )
     const { refetch } = table.options.meta as { refetch?: () => void }
-
-    if (
-      !upgrade &&
-      !hasDeprecations &&
-      !(!cluster?.provider && canUpgrade(cluster?.currentVersion ?? '0.0.0'))
-    ) {
-      return null
-    }
 
     return (
       <ColStatusSC
