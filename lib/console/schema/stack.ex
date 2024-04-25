@@ -12,7 +12,8 @@ defmodule Console.Schema.Stack do
     StackEnvironment,
     StackOutput,
     StackFile,
-    User
+    User,
+    ObservableMetric
   }
 
   defenum Type, terraform: 0, ansible: 1
@@ -60,6 +61,8 @@ defmodule Console.Schema.Stack do
     has_many :output,      StackOutput, on_replace: :delete
     has_many :runs,        StackRun
 
+    has_many :observable_metrics, ObservableMetric, on_replace: :delete
+
     has_many :read_bindings, PolicyBinding,
       on_replace: :delete,
       foreign_key: :policy_id,
@@ -101,6 +104,7 @@ defmodule Console.Schema.Stack do
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:environment)
     |> cast_assoc(:files)
+    |> cast_assoc(:observable_metrics)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:cluster_id)
     |> unique_constraint(:name)

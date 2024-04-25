@@ -20,10 +20,23 @@ defmodule Console.GraphQl.Deployments.Observability do
     field :app_key, non_null(:string)
   end
 
+  input_object :observable_metric_attributes do
+    field :identifier,  non_null(:string)
+    field :provider_id, non_null(:id)
+  end
+
   object :observability_provider do
     field :id,          non_null(:id)
     field :type,        non_null(:observability_provider_type)
     field :name,        non_null(:string)
+
+    timestamps()
+  end
+
+  object :observable_metric do
+    field :id,         non_null(:id)
+    field :identifier, non_null(:string)
+    field :provider,   :observability_provider, resolve: dataloader(Deployments)
 
     timestamps()
   end

@@ -6,7 +6,7 @@ defmodule Console.Deployments.Git.Agent do
   We can then initiate a file stream out of this agent, which supports cross-node streams in case a repo tarball
   fetch is served on a separate node as this agent.
   """
-  use GenServer
+  use GenServer, restart: :transient
   import Console.Deployments.Git.Cmd
   alias Console.Prom.Metrics
   alias Console.Deployments.{Git.Cache, Git, Services}
