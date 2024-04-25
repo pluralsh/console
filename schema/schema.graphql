@@ -2276,6 +2276,8 @@ input HelmConfigAttributes {
 
   version: String
 
+  release: String
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -2550,6 +2552,8 @@ type HelmSpec {
 
   "a helm values file to use with this service, requires auth and so is heavy to query"
   values: String
+
+  release: String
 
   "spec of where to find the chart in git"
   git: GitRef
