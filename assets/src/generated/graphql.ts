@@ -3162,6 +3162,7 @@ export type PolicyBindingAttributes = {
 /** A OPA Gatekeeper Constraint reference */
 export type PolicyConstraint = {
   __typename?: 'PolicyConstraint';
+  cluster?: Maybe<Cluster>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
