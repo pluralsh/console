@@ -6306,6 +6306,7 @@ export type ServiceTemplate = {
   configuration?: Maybe<Array<Maybe<ServiceConfiguration>>>;
   /** a list of context ids to add to this service */
   contexts?: Maybe<Array<Maybe<Scalars['ID']['output']>>>;
+  dependencies?: Maybe<Array<Maybe<ServiceDependency>>>;
   /** settings to configure git for a service */
   git?: Maybe<GitRef>;
   /** settings to configure helm for a service */
@@ -6330,6 +6331,8 @@ export type ServiceTemplateAttributes = {
   configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>>>;
   /** a list of context ids to add to this service */
   contexts?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  /** dependencies for the service to be spawned */
+  dependencies?: InputMaybe<Array<InputMaybe<ServiceDependencyAttributes>>>;
   /** settings to configure git for a service */
   git?: InputMaybe<GitRefAttributes>;
   /** settings to configure helm for a service */
