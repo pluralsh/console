@@ -1462,6 +1462,8 @@ type PolicyConstraint {
   "pointer to the kubernetes resource itself"
   ref: ConstraintRef
 
+  cluster: Cluster
+
   violations: [Violation]
 
   insertedAt: DateTime

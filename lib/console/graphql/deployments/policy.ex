@@ -45,6 +45,7 @@ defmodule Console.GraphQl.Deployments.Policy do
 
     field :ref, :constraint_ref, description: "pointer to the kubernetes resource itself"
 
+    field :cluster, :cluster, resolve: dataloader(Deployments)
     field :violations, list_of(:violation), resolve: dataloader(Deployments)
 
     timestamps()
