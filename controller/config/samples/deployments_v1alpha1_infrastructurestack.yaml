@@ -14,6 +14,15 @@ metadata:
 spec:
   url: https://github.com/zreigz/tf-hello.git
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infrastructurestack
+  namespace: default
+data:
+  your-file.json: |
+    {key1: value1, key2: value2, keyN: valueN}
+---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: InfrastructureStack
 metadata:
@@ -26,7 +35,7 @@ metadata:
   name: infrastructurestack-sample
   namespace: default
 spec:
-  name: "test2"
+  name: "test"
   detach: true
   type: TERRAFORM
   configuration:
@@ -40,6 +49,11 @@ spec:
   git:
     ref: main
     folder: terraform
+  files:
+    name: infrastructurestack
+  environment:
+    - name: test
+      value: test
   jobSpec:
     template:
       metadata:
