@@ -16,8 +16,11 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import {
+  ApiDeprecation,
   ClustersRowFragment,
+  RuntimeServicesQuery,
   useCreatePullRequestMutation,
+  useRuntimeServicesQuery,
   useUpdateClusterMutation,
 } from 'generated/graphql'
 import {
@@ -32,13 +35,17 @@ import { Confirm } from 'components/utils/Confirm'
 import { ApolloError } from '@apollo/client'
 import { coerce } from 'semver'
 
+import { createColumnHelper } from '@tanstack/react-table'
+
+import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
+
 import { GqlError } from '../../utils/Alert'
 import { TabularNumbers } from '../../cluster/TableElements'
 
-import { createColumnHelper } from '@tanstack/react-table'
-import RuntimeServices from './runtime/RuntimeServices'
+import RuntimeServices, {
+  getClusterKubeVersion,
+} from './runtime/RuntimeServices'
 import { deprecationsColumns } from './deprecationsColumns'
-import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
   cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
@@ -81,11 +88,13 @@ function ClusterUpgradePr({ prs, setError }) {
 function ClustersUpgradeNow({
   cluster,
   targetVersion,
+  apiDeprecations,
   refetch,
   setError,
 }: {
   cluster?: ClustersRowFragment | null
   targetVersion: Nullable<string>
+  apiDeprecations: ApiDeprecation[]
   refetch: Nullable<() => void>
   setError: Nullable<(error: Nullable<ApolloError>) => void>
 }) {
@@ -107,7 +116,7 @@ function ClustersUpgradeNow({
     onError: (e: ApolloError) => setError?.(e),
   })
   const [confirm, setConfirm] = useState(false)
-  const hasDeprecations = !isEmpty(cluster?.apiDeprecations)
+  const hasDeprecations = !isEmpty(apiDeprecations)
   const onClick = useCallback(
     () => (!hasDeprecations ? updateCluster() : setConfirm(true)),
     [hasDeprecations, updateCluster]
@@ -190,9 +199,10 @@ const upgradeColumns = [
       const [targetVersion, setTargetVersion] =
         useState<Nullable<string>>(upgradeVersion)
 
-      const { refetch, setError } = table.options.meta as {
+      const { refetch, setError, runtimeServiceData } = table.options.meta as {
         refetch?: () => void
         setError?: (error: Nullable<ApolloError>) => void
+        runtimeServiceData?: RuntimeServicesQuery
       }
 
       useEffect(() => {
@@ -245,6 +255,10 @@ const upgradeColumns = [
           <ClustersUpgradeNow
             cluster={cluster}
             targetVersion={targetVersion}
+            apiDeprecations={
+              (runtimeServiceData?.cluster
+                ?.apiDeprecations as ApiDeprecation[]) || []
+            }
             refetch={refetch}
             setError={setError}
           />
@@ -267,6 +281,18 @@ export function ClusterUpgradeFlyover({
 }) {
   const [error, setError] = useState<Nullable<ApolloError>>(undefined)
   const theme = useTheme()
+
+  const POLL_INTERVAL = 10 * 1000
+  const kubeVersion = getClusterKubeVersion(cluster)
+  const { data: runtimeServiceData } = useRuntimeServicesQuery({
+    variables: {
+      kubeVersion,
+      hasKubeVersion: true,
+      id: cluster?.id ?? '',
+    },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
 
   return (
     <Flyover
@@ -303,7 +329,9 @@ export function ClusterUpgradeFlyover({
             maxHeight: 'unset',
             height: '100%',
           }}
-          reactTableOptions={{ meta: { refetch, setError } }}
+          reactTableOptions={{
+            meta: { refetch, setError, runtimeServiceData },
+          }}
         />
         <Accordion
           label={
@@ -315,7 +343,7 @@ export function ClusterUpgradeFlyover({
           }
         >
           <Table
-            data={cluster?.apiDeprecations || []}
+            data={runtimeServiceData?.cluster?.apiDeprecations || []}
             columns={deprecationsColumns}
             css={{
               maxHeight: 181,
@@ -332,7 +360,7 @@ export function ClusterUpgradeFlyover({
             />
           }
         >
-          <RuntimeServices cluster={cluster} />
+          <RuntimeServices data={runtimeServiceData} />
         </Accordion>
         <Accordion
           label={
@@ -343,7 +371,7 @@ export function ClusterUpgradeFlyover({
               subtitle="Use suggested version for each add-on to resolve mutual incompabilities"
             />
           }
-        ></Accordion>
+        />
         {error && (
           <GqlError
             header="Problem upgrading cluster"

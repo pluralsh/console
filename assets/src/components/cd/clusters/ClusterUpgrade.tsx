@@ -23,6 +23,7 @@ export default function ClusterUpgrade({
   }, [])
   const numUpgradePlans = 3
   let numUpgrades = numUpgradePlans
+
   if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
   if (!cluster?.upgradePlan?.deprecations) --numUpgrades
   if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
