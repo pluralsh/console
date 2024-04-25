@@ -9,6 +9,7 @@ import {
   Sidebar as DSSidebar,
   DatabaseIcon,
   DiscordIcon,
+  DocumentIcon,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
@@ -41,6 +42,8 @@ import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
+
+import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
 
 import { useLogin } from '../contexts'
 
@@ -125,6 +128,12 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
+    },
+    {
+      text: 'Policies',
+      icon: <DocumentIcon />,
+      path: POLICIES_ABS_PATH,
+      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
       text: 'Database management',
