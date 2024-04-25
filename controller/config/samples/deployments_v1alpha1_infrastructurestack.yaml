@@ -1,0 +1,68 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: existing
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: tf-hello
+  namespace: default
+spec:
+  url: https://github.com/zreigz/tf-hello.git
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: infrastructurestack
+  namespace: default
+data:
+  your-file.json: |
+    {key1: value1, key2: value2, keyN: valueN}
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  labels:
+    app.kubernetes.io/name: infrastructurestack
+    app.kubernetes.io/instance: infrastructurestack-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: infrastructurestack-sample
+  namespace: default
+spec:
+  name: "test"
+  detach: true
+  type: TERRAFORM
+  configuration:
+    version: "v0.0.3"
+  repositoryRef:
+    name: tf-hello
+    namespace: default
+  clusterRef:
+    name: existing
+    namespace: default
+  git:
+    ref: main
+    folder: terraform
+  files:
+    name: infrastructurestack
+  environment:
+    - name: test
+      value: test
+  jobSpec:
+    template:
+      metadata:
+        namespace: default
+      spec:
+        containers:
+          - name: pi
+            image: perl:5.34.0
+            command: [ "perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)" ]
+        restartPolicy: Never
+    backoffLimit: 4
+

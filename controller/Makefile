@@ -111,7 +111,7 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 
 .PHONY: manifests
 manifests: controller-gen ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) rbac:roleName=manager-role crd:generateEmbeddedObjectMeta=true webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 	@$(MAKE) -s chart-crds
 
 .PHONY: generate
