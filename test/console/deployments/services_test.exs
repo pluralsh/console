@@ -152,6 +152,7 @@ defmodule Console.Deployments.ServicesTest do
           ref: "master",
           folder: "k8s"
         },
+        dependencies: [%{name: "deploy-operator"}],
         configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
       }, service.id, user)
 
@@ -166,6 +167,9 @@ defmodule Console.Deployments.ServicesTest do
       assert updated.git.folder == "k8s"
       assert updated.revision_id
       assert updated.status == :stale
+
+      [dependency] = updated.dependencies
+      assert dependency.name == "deploy-operator"
 
       %{revision: revision} = Console.Repo.preload(updated, [:revision])
       assert revision.git.ref == updated.git.ref
