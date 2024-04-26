@@ -227,6 +227,81 @@ var _ = Describe("Service Controller", Ordered, func() {
 			Expect(sanitizeServiceConditions(service.Status)).To(Equal(sanitizeServiceConditions(test.expectedStatus)))
 		})
 		It("should successfully reconcile the resource", func() {
+			By("Update resource with the dependencies")
+			test := struct {
+				returnGetService *gqlclient.ServiceDeploymentExtended
+				expectedStatus   v1alpha1.ServiceStatus
+			}{
+				expectedStatus: v1alpha1.ServiceStatus{
+					Status: v1alpha1.Status{
+						ID:  lo.ToPtr(id),
+						SHA: lo.ToPtr("HNVNOPAXHYMV5XQMPCT3ILWU4LQKJFEFF5EF5SDVNZRDLSP7E6DQ===="),
+						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.ReadyConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.ReadyConditionReason.String(),
+								Message: "The service components are not ready yet",
+							},
+							{
+								Type:   v1alpha1.SynchronizedConditionType.String(),
+								Status: metav1.ConditionTrue,
+								Reason: v1alpha1.SynchronizedConditionReason.String(),
+							},
+						},
+					},
+				},
+				returnGetService: &gqlclient.ServiceDeploymentExtended{
+					ID: "123",
+				},
+			}
+			dep1 := "dep-1"
+			dep2 := "dep-2"
+			createService(ctx, namespace, dep1, clusterName, repoName)
+			createService(ctx, namespace, dep2, clusterName, repoName)
+			Expect(common.MaybePatch(k8sClient, &v1alpha1.ServiceDeployment{
+				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
+			}, func(p *v1alpha1.ServiceDeployment) {
+				p.Status.ID = lo.ToPtr(id)
+				p.Status.SHA = lo.ToPtr(sha)
+			})).To(Succeed())
+			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.ServiceDeployment{
+				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
+			}, func(p *v1alpha1.ServiceDeployment) {
+				p.Spec.Dependencies = []corev1.ObjectReference{
+					{
+						Name:      dep1,
+						Namespace: namespace,
+					},
+					{
+						Name:      dep2,
+						Namespace: namespace,
+					},
+				}
+			})).To(Succeed())
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
+			fakeConsoleClient.On("UpdateService", mock.Anything, mock.Anything).Return(nil)
+			serviceReconciler := &controller.ServiceReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			service := &v1alpha1.ServiceDeployment{}
+			err = k8sClient.Get(ctx, typeNamespacedName, service)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sanitizeServiceConditions(service.Status)).To(Equal(sanitizeServiceConditions(test.expectedStatus)))
+		})
+		It("should successfully reconcile the resource", func() {
 			By("Delete resource")
 			resource := &v1alpha1.ServiceDeployment{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
@@ -403,3 +478,27 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 		})
 	})
 })
+
+func createService(ctx context.Context, namespace, name, clusterName, repoName string) {
+	serviceDep1 := &v1alpha1.ServiceDeployment{}
+	if err := k8sClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, serviceDep1); err == nil {
+		Expect(k8sClient.Delete(ctx, serviceDep1)).To(Succeed())
+	}
+	resource := &v1alpha1.ServiceDeployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1alpha1.ServiceSpec{
+			Version:       lo.ToPtr("1.24"),
+			ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
+			RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
+			SyncConfig: &v1alpha1.SyncConfigAttributes{
+				CreateNamespace: lo.ToPtr(true),
+				Labels:          map[string]string{"a": "a"},
+				Annotations:     map[string]string{"b": "b"},
+			},
+		},
+	}
+	Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+}

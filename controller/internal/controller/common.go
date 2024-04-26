@@ -73,6 +73,18 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 		Templated:    lo.ToPtr(true),
 		RepositoryID: repositoryID,
 	}
+	if len(srv.Dependencies) > 0 {
+		serviceTemplate.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
+	}
+	for _, dep := range srv.Dependencies {
+		serviceDep := &v1alpha1.ServiceDeployment{}
+		if err := c.Get(ctx, runtimeclient.ObjectKey{Name: dep.Name, Namespace: dep.Namespace}, serviceDep); err != nil {
+			return nil, err
+		}
+
+		serviceTemplate.Dependencies = append(serviceTemplate.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
+	}
+
 	if srv.Templated != nil {
 		serviceTemplate.Templated = srv.Templated
 	}

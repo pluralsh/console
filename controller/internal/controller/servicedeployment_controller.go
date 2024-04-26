@@ -76,17 +76,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return r.handleDelete(ctx, cluster, service)
 	}
 
-	for _, dep := range service.Spec.Dependencies {
-		serviceDep := &v1alpha1.ServiceDeployment{}
-		if err := r.Get(ctx, client.ObjectKey{Name: dep.Name, Namespace: dep.Namespace}, serviceDep); err != nil {
-			return ctrl.Result{}, err
-		}
-
-		if !isServiceReady(serviceDep.Status.Components) {
-			return requeue, nil
-		}
-	}
-
 	repository := &v1alpha1.GitRepository{}
 	if service.Spec.RepositoryRef != nil {
 		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.RepositoryRef.Name, Namespace: service.Spec.RepositoryRef.Namespace}, repository); err != nil {
@@ -163,6 +152,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		ContextBindings: attr.ContextBindings,
 		Templated:       attr.Templated,
 		SyncConfig:      attr.SyncConfig,
+		Dependencies:    attr.Dependencies,
 	}
 
 	sha, err := utils.HashObject(updater)
@@ -243,6 +233,18 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		RepositoryID:    repositoryId,
 		ContextBindings: make([]*console.ContextBindingAttributes, 0),
 		Templated:       lo.ToPtr(true),
+	}
+
+	if len(service.Spec.Dependencies) > 0 {
+		attr.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
+	}
+	for _, dep := range service.Spec.Dependencies {
+		serviceDep := &v1alpha1.ServiceDeployment{}
+		if err := r.Get(ctx, client.ObjectKey{Name: dep.Name, Namespace: dep.Namespace}, serviceDep); err != nil {
+			return nil, err
+		}
+
+		attr.Dependencies = append(attr.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
 	}
 
 	if service.Spec.Templated != nil {
