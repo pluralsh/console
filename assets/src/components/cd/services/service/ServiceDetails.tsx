@@ -35,7 +35,7 @@ import {
   SERVICE_PARAM_ID,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
-import ComponentProgress from 'components/apps/app/components/ComponentProgress'
+
 import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
@@ -43,6 +43,8 @@ import { POLL_INTERVAL } from 'components/cluster/constants'
 import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
 
 import { LoginContext } from 'components/contexts'
+
+import FractionalChip from 'components/utils/FractionalChip'
 
 import ServiceSelector from '../ServiceSelector'
 
@@ -109,10 +111,20 @@ export const getDirectory = ({
   }
   const { name, componentStatus, dryRun } = serviceDeployment
 
+  const healthyDependencies =
+    serviceDeployment.dependencies?.filter((dep) => dep?.status === 'HEALTHY')
+      .length || 0
+  const totalDependencies = serviceDeployment.dependencies?.length || 0
+
   return [
     {
       path: 'components',
-      label: <ComponentProgress componentsReady={componentStatus} />,
+      label: (
+        <FractionalChip
+          label="Components"
+          fraction={componentStatus}
+        />
+      ),
       enabled: true,
     },
     {
@@ -131,6 +143,16 @@ export const getDirectory = ({
       label: name ? `${capitalize(name)} docs` : 'Docs',
       enabled: !isEmpty(docs),
       ...(docs ? { subpaths: docs } : {}),
+    },
+    {
+      path: 'dependencies',
+      label: (
+        <FractionalChip
+          label="Dependencies"
+          fraction={`${healthyDependencies}/${totalDependencies}`}
+        />
+      ),
+      enabled: !isEmpty(serviceDeployment.dependencies),
     },
   ]
 }

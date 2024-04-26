@@ -31,6 +31,8 @@ import isEmpty from 'lodash/isEmpty'
 import { config } from 'markdoc/mdSchema'
 import { toNiceVersion } from 'utils/semver'
 
+import FractionalChip from 'components/utils/FractionalChip'
+
 import { LoginContext } from '../../contexts'
 import AppStatus from '../AppStatus'
 
@@ -42,7 +44,6 @@ import {
 import AppSelector from './AppSelector'
 import RunbookStatus from './runbooks/runbook/RunbookStatus'
 import LogsLegend from './logs/LogsLegend'
-import ComponentProgress from './components/ComponentProgress'
 
 export function getDocsData(
   docs:
@@ -112,7 +113,10 @@ export const getDirectory = ({
     {
       path: 'components',
       label: (
-        <ComponentProgress componentsReady={app?.status?.componentsReady} />
+        <FractionalChip
+          label="Components"
+          fraction={app?.status?.componentsReady}
+        />
       ),
       enabled: true,
     },

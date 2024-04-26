@@ -92,6 +92,10 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   components {
     ...ServiceDeploymentComponent
   }
+  dependencies {
+    name
+    status
+  }
 }
 
 fragment ServiceDeploymentComponent on ServiceComponent {
