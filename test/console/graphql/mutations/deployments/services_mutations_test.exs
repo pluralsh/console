@@ -129,12 +129,14 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
             git { ref folder }
             repository { id }
             configuration { name value }
+            dependencies { name }
             editable
           }
         }
       """, %{
         "attributes" => %{
           "git" => %{"ref" => "main", "folder" => "k8s"},
+          "dependencies" => [%{"name" => "deploy-operator"}, %{"name" => "rbac"}],
           "configuration" => [%{"name" => "new-name", "value" => "new-value"}],
         },
         "id" => service.id,
@@ -148,6 +150,9 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
       [conf] = updated["configuration"]
       assert conf["name"] == "new-name"
       assert conf["value"] == "new-value"
+
+      assert Enum.map(updated["dependencies"], & &1["name"])
+             |> Enum.sort() == ["deploy-operator", "rbac"]
     end
 
     test "updates the service by handle" do

@@ -52,7 +52,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     StackEnvironment,
     StackFile,
     StackOutput,
-    StackState
+    StackState,
+    ServiceDependency
   }
 
   def query(Pipeline, _), do: Pipeline
@@ -103,6 +104,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(StackFile, _), do: StackFile
   def query(StackOutput, _), do: StackOutput
   def query(StackState, _), do: StackState
+  def query(ServiceDependency, _), do: ServiceDependency
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

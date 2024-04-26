@@ -136,7 +136,9 @@ defmodule Console.Schema.Service do
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
     has_many :context_bindings, ServiceContextBinding, on_replace: :delete
-    has_many :dependencies, ServiceDependency, on_replace: :delete
+    has_many :dependencies, ServiceDependency,
+      foreign_key: :service_id,
+      on_replace: :delete
     has_many :api_deprecations, through: [:components, :api_deprecations]
     has_many :contexts, through: [:context_bindings, :context]
     has_many :stage_services, StageService
