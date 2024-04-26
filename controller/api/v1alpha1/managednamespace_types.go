@@ -85,6 +85,9 @@ type ServiceTemplate struct {
 	// SyncConfig attributes to configure sync settings for this service
 	// +kubebuilder:validation:Optional
 	SyncConfig *SyncConfigAttributes `json:"syncConfig,omitempty"`
+	// Dependencies contain dependent services
+	// +kubebuilder:validation:Optional
+	Dependencies []corev1.ObjectReference `json:"dependencies,omitempty"`
 }
 
 //+kubebuilder:object:root=true
