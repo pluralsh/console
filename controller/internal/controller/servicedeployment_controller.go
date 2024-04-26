@@ -292,6 +292,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	}
 	if service.Spec.Helm != nil {
 		attr.Helm = &console.HelmConfigAttributes{
+			Release:     service.Spec.Helm.Release,
 			ValuesFiles: service.Spec.Helm.ValuesFiles,
 			Version:     service.Spec.Helm.Version,
 		}

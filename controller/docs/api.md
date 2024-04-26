@@ -14,6 +14,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ClusterRestoreTrigger](#clusterrestoretrigger)
 - [GitRepository](#gitrepository)
 - [GlobalService](#globalservice)
+- [InfrastructureStack](#infrastructurestack)
 - [ManagedNamespace](#managednamespace)
 - [NotificationRouter](#notificationrouter)
 - [NotificationSink](#notificationsink)
@@ -58,6 +59,7 @@ Bindings ...
 
 _Appears in:_
 - [ClusterSpec](#clusterspec)
+- [InfrastructureStackSpec](#infrastructurestackspec)
 - [ServiceSpec](#servicespec)
 
 | Field | Description | Default | Validation |
@@ -494,6 +496,7 @@ GitRef ...
 
 
 _Appears in:_
+- [InfrastructureStackSpec](#infrastructurestackspec)
 - [PrAutomationCreateConfiguration](#prautomationcreateconfiguration)
 - [ServiceSpec](#servicespec)
 - [ServiceTemplate](#servicetemplate)
@@ -579,6 +582,51 @@ _Appears in:_
 | `template` _[ServiceTemplate](#servicetemplate)_ |  |  | Optional: {} <br /> |
 
 
+
+
+#### InfrastructureStack
+
+
+
+InfrastructureStack is the Schema for the infrastructurestacks API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `InfrastructureStack` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[InfrastructureStackSpec](#infrastructurestackspec)_ |  |  |  |
+
+
+#### InfrastructureStackSpec
+
+
+
+InfrastructureStackSpec defines the desired state of InfrastructureStack
+
+
+
+_Appears in:_
+- [InfrastructureStack](#infrastructurestack)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this Stack. If not provided InfrastructureStack's own name from InfrastructureStack.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `type` _[StackType](#stacktype)_ | Type specifies the tool to use to apply it |  | Enum: [TERRAFORM ANSIBLE] <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef to source IaC from |  |  |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
+| `git` _[GitRef](#gitref)_ | Git reference w/in the repository where the IaC lives |  |  |
+| `jobSpec` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | JobSpec optional k8s job configuration for the job that will apply this stack |  | Optional: {} <br /> |
+| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  |  |
+| `approval` _boolean_ | Approval whether to require approval |  | Optional: {} <br /> |
+| `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
+| `environment` _[StackEnvironment](#stackenvironment) array_ |  |  | Optional: {} <br /> |
+| `files` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | Files reference to ConfigMap with a key as a path and value as a content |  | Optional: {} <br /> |
+| `detach` _boolean_ | Detach determined if user want to delete or detach stack |  |  |
 
 
 #### ManagedNamespace
@@ -1245,11 +1293,12 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `valuesFrom` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Fetches the helm values from a secret in this cluster, will consider any key with yaml data a values file and merge them iteratively |  | Optional: {} <br /> |
 | `valuesConfigMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
-| `values` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ |  |  | Optional: {} <br /> |
-| `valuesFiles` _string array_ |  |  | Optional: {} <br /> |
-| `chart` _string_ |  |  | Optional: {} <br /> |
-| `version` _string_ |  |  | Optional: {} <br /> |
-| `repository` _[NamespacedName](#namespacedname)_ |  |  | Optional: {} <br /> |
+| `release` _string_ | name of the helm release to use when applying |  | Optional: {} <br /> |
+| `values` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | arbitrary yaml values to overlay |  | Optional: {} <br /> |
+| `valuesFiles` _string array_ | individual values files to overlay |  | Optional: {} <br /> |
+| `chart` _string_ | chart to use |  | Optional: {} <br /> |
+| `version` _string_ | chart version to use |  | Optional: {} <br /> |
+| `repository` _[NamespacedName](#namespacedname)_ | pointer to the FluxCD helm repository to use |  | Optional: {} <br /> |
 
 
 #### ServiceKustomize
@@ -1325,6 +1374,7 @@ _Appears in:_
 | `helm` _[ServiceHelm](#servicehelm)_ | Helm settings to configure helm for a service |  | Optional: {} <br /> |
 | `kustomize` _[ServiceKustomize](#servicekustomize)_ | Kustomize settings for service kustomization |  | Optional: {} <br /> |
 | `syncConfig` _[SyncConfigAttributes](#syncconfigattributes)_ | SyncConfig attributes to configure sync settings for this service |  | Optional: {} <br /> |
+| `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
 
 
 #### SinkConfiguration
@@ -1358,6 +1408,43 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ |  |  |  |
+
+
+#### StackConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [InfrastructureStackSpec](#infrastructurestackspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `image` _string_ | Image optional custom image you might want to use |  | Optional: {} <br /> |
+| `version` _string_ | Version the semver of the tool you wish to use |  |  |
+
+
+#### StackEnvironment
+
+
+
+
+
+
+
+_Appears in:_
+- [InfrastructureStackSpec](#infrastructurestackspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  |  |
+| `value` _string_ |  |  |  |
+| `secret` _boolean_ |  |  | Optional: {} <br /> |
+
+
 
 
 #### Status

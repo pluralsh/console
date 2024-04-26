@@ -339,6 +339,7 @@ export function ClusterUpgradeFlyover({
               checked={cluster?.upgradePlan?.deprecations || false}
               icon={ClusterIcon}
               title="Check API Deprecations"
+              subtitle="Ensure that all k8s yaml you're deploying is conformant with the next k8s version"
             />
           }
         >
@@ -357,6 +358,7 @@ export function ClusterUpgradeFlyover({
               checked={cluster?.upgradePlan?.compatibilities || false}
               icon={MarketPlusIcon}
               title="Check Add-On Compatibilities"
+              subtitle="Ensure all known third-party add-ons are supported on the next k8s version"
             />
           }
         >
