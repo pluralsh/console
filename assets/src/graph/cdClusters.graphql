@@ -118,9 +118,6 @@ fragment AddonVersionBlocking on AddonVersion {
 }
 
 fragment ClustersRow on Cluster {
-  apiDeprecations {
-    ...ApiDeprecation
-  }
   currentVersion
   id
   self
@@ -170,6 +167,11 @@ fragment ClustersRow on Cluster {
     value
   }
   distro
+  upgradePlan {
+    compatibilities
+    deprecations
+    incompatibilities
+  }
 }
 
 fragment Cluster on Cluster {
@@ -375,6 +377,9 @@ query RuntimeServices(
     version
     runtimeServices {
       ...RuntimeService
+    }
+    apiDeprecations {
+      ...ApiDeprecation
     }
   }
 }

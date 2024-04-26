@@ -28,6 +28,7 @@ const (
 	NotificationSinkReconciler      Reconciler = "notificationsink"
 	NotificationRouterReconciler    Reconciler = "notificationrouter"
 	ManagedNamespaceReconciler      Reconciler = "managednamespace"
+	StackReconciler                 Reconciler = "stack"
 )
 
 // ToReconciler maps reconciler string to a Reconciler type.
@@ -60,6 +61,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case NotificationRouterReconciler:
 		fallthrough
 	case ManagedNamespaceReconciler:
+		fallthrough
+	case StackReconciler:
 		fallthrough
 	case ProviderReconciler:
 		return Reconciler(reconciler), nil
@@ -161,6 +164,12 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
 		}, nil
+	case StackReconciler:
+		return &controller.InfrastructureStackReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}, nil
 	default:
 		return nil, fmt.Errorf("reconciler %q is not supported", sc)
 	}
@@ -173,7 +182,7 @@ type ReconcilerList []Reconciler
 // Reconcilers defines a list of reconcilers that will be started by default
 // if '--reconcilers=...' flag is not provided.
 func Reconcilers() ReconcilerList {
-	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler, ServiceDeploymentReconciler, GlobalServiceReconciler, PipelineReconciler, ScmConnectionReconciler, PrAutomationReconciler, PipelineContextReconciler, PrAutomationTriggerReconciler, ClusterRestoreTriggerReconciler, NotificationSinkReconciler, NotificationRouterReconciler, ManagedNamespaceReconciler}
+	return []Reconciler{GitRepositoryReconciler, ProviderReconciler, ClusterReconciler, ServiceDeploymentReconciler, GlobalServiceReconciler, PipelineReconciler, ScmConnectionReconciler, PrAutomationReconciler, PipelineContextReconciler, PrAutomationTriggerReconciler, ClusterRestoreTriggerReconciler, NotificationSinkReconciler, NotificationRouterReconciler, ManagedNamespaceReconciler, StackReconciler}
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.

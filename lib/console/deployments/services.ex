@@ -296,6 +296,7 @@ defmodule Console.Deployments.Services do
     start_transaction()
     |> add_operation(:source, fn _ ->
       get_service!(service_id)
+      |> Repo.preload([:dependencies, :context_bindings])
       |> allow(user, :write)
     end)
     |> add_operation(:config, fn %{source: source} ->
@@ -307,6 +308,7 @@ defmodule Console.Deployments.Services do
       |> Console.dedupe(:git, Console.mapify(source.git))
       |> Console.dedupe(:helm, Console.mapify(source.helm))
       |> Console.dedupe(:kustomize, Console.mapify(source.kustomize))
+      |> Console.dedupe(:dependencies, Enum.map(source.dependencies, & %{name: &1.name}))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)
@@ -411,8 +413,10 @@ defmodule Console.Deployments.Services do
   def update_service(attrs, %Service{} = svc) do
     start_transaction()
     |> add_operation(:base, fn _ ->
-      Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings])
-      |> Service.changeset(Map.put(attrs, :status, :stale))
+      svc = Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings])
+      attrs = Map.put(attrs, :status, :stale)
+      svc
+      |> Service.changeset(stabilize_deps(attrs, svc))
       |> Service.update_changeset()
       |> Console.Repo.update()
     end)
@@ -507,6 +511,26 @@ defmodule Console.Deployments.Services do
   def rollback?(%Service{promotion: :rollback}), do: true
   def rollback?(_), do: false
 
+  def stale_dependencies?(%Service{cluster_id: id, name: name}) do
+    ServiceDependency.for_cluster(id)
+    |> ServiceDependency.for_name(name)
+    |> ServiceDependency.pending()
+    |> Repo.exists?()
+  end
+
+  def flush_dependencies(%Service{status: :healthy, cluster_id: id, name: name} = svc) do
+    if stale_dependencies?(svc) do
+      ServiceDependency.for_cluster(id)
+      |> ServiceDependency.for_name(name)
+      |> ServiceDependency.pending()
+      |> Repo.update_all(set: [status: :healthy])
+      |> ok()
+    else
+      {:ok, []}
+    end
+  end
+  def flush_dependencies(_), do: {:ok, :pending}
+
   @doc """
   Updates the list of service components, separate operation to avoid creating a no-op revision
   """
@@ -537,14 +561,7 @@ defmodule Console.Deployments.Services do
         _ -> update_status(service, :stale, component_status)
       end
     end)
-    |> add_operation(:dependencies, fn
-      %{service: %{status: s}, updated: %{status: :healthy} = svc} when s != :healthy ->
-        ServiceDependency.for_cluster(svc.cluster_id)
-        |> ServiceDependency.for_name(svc.name)
-        |> Repo.update_all(set: [status: :healthy])
-        |> ok()
-      _ -> {:ok, nil}
-    end)
+    |> add_operation(:dependencies, fn %{updated: svc} -> flush_dependencies(svc) end)
     |> execute(extract: :updated)
     |> notify(:components)
   end
@@ -556,6 +573,13 @@ defmodule Console.Deployments.Services do
     with {:ok, svc} <- authorized(service_id, cluster),
       do: update_components(attrs, svc)
   end
+
+  def stabilize_deps(%{dependencies: deps} = attrs, %Service{dependencies: old_deps}) when is_list(old_deps) do
+    by_name = Map.new(old_deps, & {&1.name, &1.status})
+    deps = Enum.map(deps, &Map.put(&1, :status, by_name[&1.name]))
+    Map.put(attrs, :dependencies, deps)
+  end
+  def stabilize_deps(attrs, _), do: attrs
 
   def stabilize(%{components: new_components} = attrs, %{components: components}) do
     components = Map.new(components, fn %{id: id} = comp -> {component_key(comp), id} end)

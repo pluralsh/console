@@ -46,6 +46,7 @@ defmodule Console.Schema.Service do
       field :values,        Piazza.Ecto.EncryptedString
       field :chart,         :string
       field :version,       :string
+      field :release,       :string
       field :values_files,  {:array, :string}
       field :repository_id, :binary_id
 
@@ -60,7 +61,7 @@ defmodule Console.Schema.Service do
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(values chart version repository_id values_files)a)
+      |> cast(attrs, ~w(values release chart version repository_id values_files)a)
       |> cast_embed(:repository)
       |> cast_embed(:set, with: &set_changeset/2)
       |> cast_embed(:git)

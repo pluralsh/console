@@ -97,6 +97,11 @@ type ConsoleClient interface {
 	DeleteNamespace(ctx context.Context, id string) error
 	CreateNamespace(ctx context.Context, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
 	UpdateNamespace(ctx context.Context, id string, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
+	GetStack(ctx context.Context, id string) (*console.InfrastructureStackFragment, error)
+	DeleteStack(ctx context.Context, id string) error
+	CreateStack(ctx context.Context, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)
+	UpdateStack(ctx context.Context, id string, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)
+	DetachStack(ctx context.Context, id string) error
 }
 
 func New(url, token string) ConsoleClient {

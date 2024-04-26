@@ -30,6 +30,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :repository_id, :id, description: "the id of a repository to source manifests for this service"
     field :contexts,      list_of(:id), description: "a list of context ids to add to this service"
     field :configuration, list_of(:config_attributes), description: "a list of secure configuration that will be added to any services created by this template"
+    field :dependencies,  list_of(:service_dependency_attributes), description: "dependencies for the service to be spawned"
 
     field :git,         :git_ref_attributes, description: "settings to configure git for a service"
     field :helm,        :helm_config_attributes, description: "settings to configure helm for a service"
@@ -94,7 +95,8 @@ defmodule Console.GraphQl.Deployments.Global do
     field :repository_id, :id, description: "the id of a repository to source manifests for this service"
     field :contexts,      list_of(:id), description: "a list of context ids to add to this service"
 
-    field :repository, :git_repository, resolve: dataloader(Deployments)
+    field :repository,   :git_repository, resolve: dataloader(Deployments)
+    field :dependencies, list_of(:service_dependency), resolve: dataloader(Deployments)
 
     field :configuration, list_of(:service_configuration),
       resolve: &Deployments.template_configuration/3,

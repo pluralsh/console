@@ -56,7 +56,8 @@ defmodule Console.Deployments.GlobalTest do
         namespace: "my-service",
         repository_id: git.id,
         git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
+        configuration: [%{name: "name", value: "value"}],
+        dependencies: [%{name: "cert-manager"}]
       }, insert(:cluster), admin)
 
       {:ok, dest} = create_service(%{
@@ -64,7 +65,7 @@ defmodule Console.Deployments.GlobalTest do
         namespace: "my-service",
         repository_id: git.id,
         git: %{ref: "master", folder: "k8s"},
-        configuration: [%{name: "name2", value: "value"}]
+        configuration: [%{name: "name2", value: "value"}],
       }, insert(:cluster), admin)
 
       {:ok, synced} = Global.sync_service(source, dest, admin)
@@ -74,6 +75,9 @@ defmodule Console.Deployments.GlobalTest do
       assert synced.git.ref == "main"
       assert synced.git.folder == "k8s"
       assert synced.repository_id == git.id
+
+      [dep] = synced.dependencies
+      assert dep.name == "cert-manager"
 
       {:ok, secrets} = Services.configuration(synced)
       assert secrets["name"] == "value"
@@ -123,7 +127,8 @@ defmodule Console.Deployments.GlobalTest do
         namespace: "my-service",
         repository_id: git.id,
         git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
+        configuration: [%{name: "name", value: "value"}],
+        dependencies: [%{name: "cert-manager"}]
       }, insert(:cluster), admin)
 
       {:ok, dest} = create_service(%{
@@ -131,7 +136,8 @@ defmodule Console.Deployments.GlobalTest do
         namespace: "my-service",
         repository_id: git.id,
         git: %{ref: "main", folder: "k8s"},
-        configuration: [%{name: "name", value: "value"}]
+        configuration: [%{name: "name", value: "value"}],
+        dependencies: [%{name: "cert-manager"}]
       }, insert(:cluster), admin)
 
       :ok = Global.sync_service(source, dest, admin)

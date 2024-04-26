@@ -22,7 +22,7 @@ defmodule Console.Schema.GlobalService do
     from(g in query, order_by: ^order)
   end
 
-  def preloaded(query \\ __MODULE__, preloads \\ [:template, :service]) do
+  def preloaded(query \\ __MODULE__, preloads \\ [template: :dependencies, service: :dependencies]) do
     from(g in query, preload: ^preloads)
   end
 
