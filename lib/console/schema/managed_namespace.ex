@@ -65,7 +65,7 @@ defmodule Console.Schema.ManagedNamespace do
     from(mn in query, order_by: ^order)
   end
 
-  def preloaded(query \\ __MODULE__, preloads \\ [:service]) do
+  def preloaded(query \\ __MODULE__, preloads \\ [service: :dependencies]) do
     from(mn in query, preload: ^preloads)
   end
 

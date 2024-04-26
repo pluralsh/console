@@ -1293,6 +1293,9 @@ input ServiceTemplateAttributes {
   "a list of secure configuration that will be added to any services created by this template"
   configuration: [ConfigAttributes]
 
+  "dependencies for the service to be spawned"
+  dependencies: [ServiceDependencyAttributes]
+
   "settings to configure git for a service"
   git: GitRefAttributes
 
@@ -1397,6 +1400,8 @@ type ServiceTemplate {
   contexts: [ID]
 
   repository: GitRepository
+
+  dependencies: [ServiceDependency]
 
   "possibly secret configuration for all spawned services, don't query this in list endpoints"
   configuration: [ServiceConfiguration]

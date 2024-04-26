@@ -1,14 +1,19 @@
 defmodule Console.Schema.ServiceDependency do
   use Piazza.Ecto.Schema
-  alias Console.Schema.Service
+  alias Console.Schema.{Service, ServiceTemplate}
 
   schema "service_dependencies" do
     field :name,   :string
     field :status, Service.Status
 
     belongs_to :service, Service
+    belongs_to :template, ServiceTemplate
 
     timestamps()
+  end
+
+  def pending(query \\ __MODULE__) do
+    from(d in query, where: not is_nil(d.service_id) and is_nil(d.status) or d.status != ^:healthy)
   end
 
   def for_cluster(query \\ __MODULE__, cluster_id) do

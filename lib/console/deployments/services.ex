@@ -296,6 +296,7 @@ defmodule Console.Deployments.Services do
     start_transaction()
     |> add_operation(:source, fn _ ->
       get_service!(service_id)
+      |> Repo.preload([:dependencies, :context_bindings])
       |> allow(user, :write)
     end)
     |> add_operation(:config, fn %{source: source} ->
@@ -307,6 +308,7 @@ defmodule Console.Deployments.Services do
       |> Console.dedupe(:git, Console.mapify(source.git))
       |> Console.dedupe(:helm, Console.mapify(source.helm))
       |> Console.dedupe(:kustomize, Console.mapify(source.kustomize))
+      |> Console.dedupe(:dependencies, Enum.map(source.dependencies, & %{name: &1.name}))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)
@@ -541,6 +543,7 @@ defmodule Console.Deployments.Services do
       %{service: %{status: s}, updated: %{status: :healthy} = svc} when s != :healthy ->
         ServiceDependency.for_cluster(svc.cluster_id)
         |> ServiceDependency.for_name(svc.name)
+        |> ServiceDependency.pending()
         |> Repo.update_all(set: [status: :healthy])
         |> ok()
       _ -> {:ok, nil}
