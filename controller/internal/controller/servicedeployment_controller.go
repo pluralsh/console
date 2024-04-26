@@ -239,11 +239,6 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		attr.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
 	}
 	for _, dep := range service.Spec.Dependencies {
-		serviceDep := &v1alpha1.ServiceDeployment{}
-		if err := r.Get(ctx, client.ObjectKey{Name: dep.Name, Namespace: dep.Namespace}, serviceDep); err != nil {
-			return nil, err
-		}
-
 		attr.Dependencies = append(attr.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
 	}
 

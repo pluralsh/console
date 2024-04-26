@@ -77,11 +77,6 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 		serviceTemplate.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
 	}
 	for _, dep := range srv.Dependencies {
-		serviceDep := &v1alpha1.ServiceDeployment{}
-		if err := c.Get(ctx, runtimeclient.ObjectKey{Name: dep.Name, Namespace: dep.Namespace}, serviceDep); err != nil {
-			return nil, err
-		}
-
 		serviceTemplate.Dependencies = append(serviceTemplate.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
 	}
 
