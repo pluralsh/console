@@ -48,6 +48,8 @@ import Namespaces from 'components/cd/namespaces/Namespaces'
 
 import NamespacesDetailView from 'components/cd/namespaces/NamespacesDetailView'
 
+import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -450,6 +452,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceHelm />}
       path="helm"
+    />
+    <Route
+      element={<ServiceDependencies />}
+      path="dependencies"
     />
     <Route
       element={<ServiceLogs />}

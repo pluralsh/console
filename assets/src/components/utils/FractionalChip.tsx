@@ -1,18 +1,14 @@
 import { Flex } from 'honorable'
 import { Chip } from '@pluralsh/design-system'
 
-interface ComponentProgressProps {
-  label?: boolean
+interface FractionalChipProps {
+  label?: string
   suffix?: string
-  componentsReady?: string | null | undefined
+  fraction?: string | null | undefined
 }
 
-function ComponentProgress({
-  label,
-  suffix,
-  componentsReady,
-}: ComponentProgressProps) {
-  const split = componentsReady?.split('/') || [0, 0]
+function FractionalChip({ label, suffix, fraction }: FractionalChipProps) {
+  const split = fraction?.split('/') || [0, 0]
   const numReady = Number(split[0]) ?? 0
   const numTotal = Number(split[1]) ?? 0
   const ready = numTotal > 0 && numReady >= numTotal
@@ -20,7 +16,7 @@ function ComponentProgress({
 
   return (
     <Flex gap="small">
-      {label && 'Components'}
+      {label}
       <Chip
         size="small"
         severity={severity}
@@ -31,6 +27,6 @@ function ComponentProgress({
   )
 }
 
-ComponentProgress.defaultProps = { label: true, suffix: '' }
+FractionalChip.defaultProps = { label: true, suffix: '' }
 
-export default ComponentProgress
+export default FractionalChip
