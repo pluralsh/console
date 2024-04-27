@@ -12,7 +12,8 @@ defmodule Console.Deployments.Cron do
     AgentMigration,
     ManagedNamespace,
     Stack,
-    StackRun
+    StackRun,
+    PullRequest
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -219,8 +220,7 @@ defmodule Console.Deployments.Cron do
   end
 
   def poll_stacks() do
-    Stack.stream()
-    |> Repo.stream(method: :keyset)
+    stack_stream()
     |> Stream.each(fn stack ->
       Logger.info "polling stack repository #{stack.id}"
       Stacks.poll(stack)
@@ -229,13 +229,22 @@ defmodule Console.Deployments.Cron do
   end
 
   def dequeue_stacks() do
-    Stack.stream()
-    |> Repo.stream(method: :keyset)
+    stack_stream()
     |> Stream.each(fn stack ->
       Logger.info "dequeuing eligible stack runs #{stack.id}"
       Stacks.dequeue(stack)
     end)
     |> Stream.run()
+  end
+
+  defp stack_stream() do
+    Stack.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.concat(
+      PullRequest.stack()
+      |> PullRequest.stream()
+      |> Repo.stream(method: :keyset)
+    )
   end
 
   def place_run_workers() do

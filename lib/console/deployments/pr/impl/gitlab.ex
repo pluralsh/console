@@ -25,7 +25,8 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
         allow_collaboration: true,
       })
       |> case do
-        {:ok, %{"web_url" => url} = mr} -> {:ok, %{title: title, url: url, owner: owner(mr)}}
+        {:ok, %{"web_url" => url} = mr} ->
+          {:ok, %{title: title, ref: branch, url: url, owner: owner(mr)}}
         err -> err
       end
     end
@@ -45,8 +46,20 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     end
   end
 
-  def pr(%{"object_attributes" => %{"url" => url} = mr}), do: {:ok, url, %{status: state(mr)}}
+  def pr(%{"object_attributes" => %{"url" => url} = mr}) do
+    attrs = Map.merge(%{
+      status: state(mr),
+      ref: mr["source_branch"],
+      title: mr["title"],
+      body: mr["description"]
+    }, pr_associations(mr_content(mr)))
+    |> Console.drop_nils()
+
+    {:ok, url, attrs}
+  end
   def pr(_), do: :ignore
+
+  defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
   defp post(conn, url, body) do
     HTTPoison.post("#{conn.host}#{url}", Jason.encode!(body), Connection.headers(conn))

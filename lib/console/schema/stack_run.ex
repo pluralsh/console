@@ -12,7 +12,8 @@ defmodule Console.Schema.StackRun do
     RunStep,
     StackFile,
     User,
-    ServiceError
+    ServiceError,
+    PullRequest
   }
 
   schema "stack_runs" do
@@ -50,10 +51,11 @@ defmodule Console.Schema.StackRun do
 
     has_many :errors, ServiceError, on_replace: :delete
 
-    belongs_to :repository, GitRepository
-    belongs_to :cluster,    Cluster
-    belongs_to :stack,      Stack
-    belongs_to :approver,   User
+    belongs_to :repository,   GitRepository
+    belongs_to :cluster,      Cluster
+    belongs_to :stack,        Stack
+    belongs_to :approver,     User
+    belongs_to :pull_request, PullRequest
 
     timestamps()
   end
@@ -72,6 +74,10 @@ defmodule Console.Schema.StackRun do
 
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(r in query, where: r.cluster_id == ^cluster_id)
+  end
+
+  def for_pr(query \\ __MODULE__, pr_id) do
+    from(r in query, where: r.pull_request_id == ^pr_id)
   end
 
   def pending(query \\ __MODULE__) do
@@ -94,7 +100,7 @@ defmodule Console.Schema.StackRun do
     from(r in query, order_by: ^order)
   end
 
-  @valid ~w(type status approval dry_run repository_id cluster_id stack_id)a
+  @valid ~w(type status approval dry_run repository_id pull_request_id cluster_id stack_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

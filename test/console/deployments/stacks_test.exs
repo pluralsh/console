@@ -174,6 +174,39 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
     end
 
+    test "it can create a new run from a pr the sha changes" do
+      stack = insert(:stack, environment: [%{name: "ENV", value: "1"}], files: [%{path: "test.txt", content: "test"}])
+      pr = insert(:pull_request, stack: stack)
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+
+      {:ok, run} = Stacks.poll(pr)
+
+      assert run.stack_id == stack.id
+      assert run.pull_request_id == pr.id
+      assert run.status == :queued
+      assert run.dry_run
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+      assert run.git.folder == stack.git.folder
+      [first, second] = run.steps
+
+      assert first.cmd == "terraform"
+      assert first.args == ["init", "-upgrade"]
+      assert first.index == 0
+
+      assert second.cmd == "terraform"
+      assert second.args == ["plan"]
+      assert second.index == 1
+
+      stack = refetch(stack)
+      %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
+
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+
+      assert refetch(pr).ref == "new-sha"
+    end
+
     test "it will ignore if the shas are the same" do
       stack = insert(:stack, sha: "old-sha")
       expect(Discovery, :sha, fn _, _ -> {:ok, "old-sha"} end)
@@ -197,11 +230,36 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunUpdated{item: ^dequeued}}
     end
 
+    test "tries to dequeue the next dry pr run of the stack for a pr" do
+      stack = insert(:stack)
+      pr = insert(:pull_request, stack: stack)
+      insert(:stack_run, stack: stack, status: :successful, pull_request: pr, dry_run: true)
+      :timer.sleep(1)
+      run = insert(:stack_run, stack: stack, status: :queued, pull_request: pr, dry_run: true)
+
+      {:ok, dequeued} = Stacks.dequeue(pr)
+
+      assert dequeued.id == run.id
+      assert dequeued.status == :pending
+
+      assert_receive {:event, %PubSub.StackRunUpdated{item: ^dequeued}}
+    end
+
     test "it will fail if the stack is currently running" do
       stack = insert(:stack)
       insert(:stack_run, stack: stack, status: :pending)
       :timer.sleep(1)
       insert(:stack_run, stack: stack, status: :queued)
+
+      {:error, _} = Stacks.dequeue(stack)
+    end
+
+    test "it will fail if the stack is currently running a pr run" do
+      stack = insert(:stack)
+      pr = insert(:pull_request, stack: stack)
+      insert(:stack_run, stack: stack, status: :pending, pull_request: pr, dry_run: true)
+      :timer.sleep(1)
+      insert(:stack_run, stack: stack, status: :queued, pull_request: pr, dry_run: true)
 
       {:error, _} = Stacks.dequeue(stack)
     end

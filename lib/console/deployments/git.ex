@@ -292,13 +292,28 @@ defmodule Console.Deployments.Git do
   @doc """
   Updates attributes for a pr in response to a scm webhook invocation
   """
-  @spec update_pull_request(map, binary) :: pull_request_resp
-  def update_pull_request(attrs, url) do
-    case Repo.get_by(PullRequest, url: url) do
-      %PullRequest{} = pr -> PullRequest.changeset(pr, attrs) |> Repo.update()
+  @spec upsert_pull_request(map, binary) :: pull_request_resp
+  def upsert_pull_request(attrs, url) do
+    case {attrs, Repo.get_by(PullRequest, url: url)} do
+      {attrs, %PullRequest{} = pr} ->
+        PullRequest.changeset(pr, attrs)
+        |> Repo.update()
+        |> notify(:update)
+      {%{stack_id: stack_id} = attrs, nil} when is_binary(stack_id) ->
+        create_pr(attrs, url)
+      {%{cluster_id: cluster_id} = attrs, nil} when is_binary(cluster_id) ->
+        create_pr(attrs, url)
+      {%{service_id: service_id} = attrs, nil} when is_binary(service_id) ->
+        create_pr(attrs, url)
       _ -> {:error, :not_found}
     end
-    |> notify(:update)
+  end
+
+  defp create_pr(attrs, url) do
+    %PullRequest{url: url}
+    |> PullRequest.changeset(attrs)
+    |> Repo.insert()
+    |> notify(:create)
   end
 
   @doc """
