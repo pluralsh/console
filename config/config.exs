@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :console,
   ecto_repos: [Console.Repo],

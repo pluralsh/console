@@ -12,15 +12,21 @@ defmodule Console.Schema.ObservabilityProvider do
         field :api_key, EncryptedString
         field :app_key, EncryptedString
       end
+
+      embeds_one :newrelic, NewRelic, on_replace: :update do
+        field :api_key, EncryptedString
+      end
     end
 
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, [])
       |> cast_embed(:datadog, with: &datadog_changeset/2)
+      |> cast_embed(:newrelic, with: &newrelic_changeset/2)
     end
 
     defp datadog_changeset(model, attrs), do: cast(model, attrs, ~w(api_key app_key)a)
+    defp newrelic_changeset(model, attrs), do: cast(model, attrs, ~w(api_key)a)
   end
 
   schema "observability_providers" do

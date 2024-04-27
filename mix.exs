@@ -73,6 +73,7 @@ defmodule Console.MixProject do
       {:libcluster, "~> 3.2"},
       {:horde, "~> 0.8"},
       {:tentacat, "~> 2.0"},
+      {:absinthe_client, "~> 0.1.0"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix, "~> 1.5"},
       {:phoenix_view, "~> 2.0"},
@@ -134,7 +135,8 @@ defmodule Console.MixProject do
 
       # if using the Mint adapter:
       {:castore, "~> 0.1.7"},
-      {:mint, "~> 1.1.0"},
+      {:req, "~> 0.4.14", override: true},
+      {:mint, "~> 1.4.0", override: true},
       {:phoenix_client, "~> 0.11", git: "https://github.com/michaeljguarino/phoenix_client.git", branch: "mguarino/channel-listen"},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},
