@@ -238,11 +238,13 @@ spec:
                     description: Helm settings to configure helm for a service
                     properties:
                       chart:
+                        description: chart to use
+                        type: string
+                      release:
+                        description: name of the helm release to use when applying
                         type: string
                       repository:
-                        description: |-
-                          NamespacedName is the same as types.NamespacedName
-                          with the addition of kubebuilder/json annotations for better schema support.
+                        description: pointer to the FluxCD helm repository to use
                         properties:
                           name:
                             description: Name is a resource name.
@@ -255,6 +257,7 @@ spec:
                         - namespace
                         type: object
                       values:
+                        description: arbitrary yaml values to overlay
                         type: object
                         x-kubernetes-preserve-unknown-fields: true
                       valuesConfigMapRef:
@@ -278,6 +281,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       valuesFiles:
+                        description: individual values files to overlay
                         items:
                           type: string
                         type: array
@@ -297,6 +301,7 @@ spec:
                         type: object
                         x-kubernetes-map-type: atomic
                       version:
+                        description: chart version to use
                         type: string
                     type: object
                   kustomize:
