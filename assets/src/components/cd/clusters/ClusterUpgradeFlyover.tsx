@@ -3,6 +3,7 @@ import {
   AppIcon,
   Button,
   ClusterIcon,
+  ConfettiIcon,
   Flyover,
   ListBoxItem,
   MarketPlusIcon,
@@ -268,6 +269,111 @@ const upgradeColumns = [
   }),
 ]
 
+const POLL_INTERVAL = 10 * 1000
+
+function FlyoverContent({ open, cluster, refetch }) {
+  const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
+  const theme = useTheme()
+
+  const kubeVersion = getClusterKubeVersion(cluster)
+  const { data, error } = useRuntimeServicesQuery({
+    variables: {
+      kubeVersion,
+      hasKubeVersion: true,
+      id: cluster?.id ?? '',
+    },
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+    skip: !open,
+  })
+
+  const runtimeServices = data?.cluster?.runtimeServices
+  const apiDeprecations = data?.cluster?.apiDeprecations
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+      }}
+    >
+      {(upgradeError || error) && (
+        <GqlError
+          header={
+            upgradeError
+              ? 'Could not upgrade cluster'
+              : 'Failed to fetch upgrade plan'
+          }
+          error={upgradeError || error}
+        />
+      )}
+      <Table
+        data={[cluster]}
+        columns={upgradeColumns}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+        reactTableOptions={{
+          meta: { refetch, setError, data },
+        }}
+      />
+      <Accordion
+        label={
+          <ClusterUpgradeAccordionTrigger
+            checked={cluster?.upgradePlan?.deprecations || false}
+            icon={ClusterIcon}
+            title="Check API Deprecations"
+            subtitle="Ensure that all k8s yaml you're deploying is conformant with the next k8s version"
+          />
+        }
+      >
+        {!isEmpty(apiDeprecations) ? (
+          <Table
+            data={apiDeprecations || []}
+            columns={deprecationsColumns}
+            css={{
+              maxHeight: 181,
+              height: '100%',
+            }}
+          />
+        ) : (
+          <EmptyState description="No services with api deprecations discovered!" />
+        )}
+      </Accordion>
+      <Accordion
+        label={
+          <ClusterUpgradeAccordionTrigger
+            checked={cluster?.upgradePlan?.compatibilities || false}
+            icon={MarketPlusIcon}
+            title="Check Add-On Compatibilities"
+            subtitle="Ensure all known third-party add-ons are supported on the next k8s version"
+          />
+        }
+      >
+        {!isEmpty(runtimeServices) ? (
+          <RuntimeServices data={data} />
+        ) : (
+          <EmptyState description="No known add-ons found" />
+        )}
+      </Accordion>
+      <Accordion
+        label={
+          <ClusterUpgradeAccordionTrigger
+            checked={cluster?.upgradePlan?.incompatibilities || false}
+            icon={MarketPlusIcon}
+            title="Check Add-On Mutual Incompatibilities"
+            subtitle="Use suggested version for each add-on to resolve mutual incompabilities"
+          />
+        }
+      >
+        <EmptyState description="No mutually incompatible add-ons detected!" />
+      </Accordion>
+    </div>
+  )
+}
+
 export function ClusterUpgradeFlyover({
   open,
   onClose,
@@ -279,21 +385,6 @@ export function ClusterUpgradeFlyover({
   cluster: ClustersRowFragment | null | undefined
   refetch: Nullable<() => void>
 }) {
-  const [error, setError] = useState<Nullable<ApolloError>>(undefined)
-  const theme = useTheme()
-
-  const POLL_INTERVAL = 10 * 1000
-  const kubeVersion = getClusterKubeVersion(cluster)
-  const { data: runtimeServiceData } = useRuntimeServicesQuery({
-    variables: {
-      kubeVersion,
-      hasKubeVersion: true,
-      id: cluster?.id ?? '',
-    },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-  })
-
   return (
     <Flyover
       header={`Upgrade Plan for ${cluster?.name}`}
@@ -315,73 +406,35 @@ export function ClusterUpgradeFlyover({
         </Button>
       }
     >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.large,
-        }}
-      >
-        <Table
-          data={[cluster]}
-          columns={upgradeColumns}
-          css={{
-            maxHeight: 'unset',
-            height: '100%',
-          }}
-          reactTableOptions={{
-            meta: { refetch, setError, runtimeServiceData },
-          }}
-        />
-        <Accordion
-          label={
-            <ClusterUpgradeAccordionTrigger
-              checked={cluster?.upgradePlan?.deprecations || false}
-              icon={ClusterIcon}
-              title="Check API Deprecations"
-              subtitle="Ensure that all k8s yaml you're deploying is conformant with the next k8s version"
-            />
-          }
-        >
-          <Table
-            data={runtimeServiceData?.cluster?.apiDeprecations || []}
-            columns={deprecationsColumns}
-            css={{
-              maxHeight: 181,
-              height: '100%',
-            }}
-          />
-        </Accordion>
-        <Accordion
-          label={
-            <ClusterUpgradeAccordionTrigger
-              checked={cluster?.upgradePlan?.compatibilities || false}
-              icon={MarketPlusIcon}
-              title="Check Add-On Compatibilities"
-              subtitle="Ensure all known third-party add-ons are supported on the next k8s version"
-            />
-          }
-        >
-          <RuntimeServices data={runtimeServiceData} />
-        </Accordion>
-        <Accordion
-          label={
-            <ClusterUpgradeAccordionTrigger
-              checked={cluster?.upgradePlan?.incompatibilities || false}
-              icon={MarketPlusIcon}
-              title="Check Add-On Mutual Incompatibilities"
-              subtitle="Use suggested version for each add-on to resolve mutual incompabilities"
-            />
-          }
-        />
-        {error && (
-          <GqlError
-            header="Problem upgrading cluster"
-            error={error}
-          />
-        )}
-      </div>
+      <FlyoverContent
+        open={open}
+        cluster={cluster}
+        refetch={refetch}
+      />
     </Flyover>
+  )
+}
+
+function EmptyState({ description }) {
+  const theme = useTheme()
+
+  return (
+    <div
+      style={{
+        margin: theme.spacing.medium,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: theme.spacing.small,
+      }}
+    >
+      <ConfettiIcon
+        size={32}
+        color={theme.colors['icon-success']}
+      />
+      <span>{description}</span>
+    </div>
   )
 }
 
