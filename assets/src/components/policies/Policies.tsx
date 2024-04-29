@@ -137,7 +137,7 @@ function Policies() {
       <div className="filter" />
       <div className="search">
         <Input
-          placeholder="Search"
+          placeholder="Search policies"
           startIcon={<SearchIcon />}
           value={searchString}
           onChange={(e) => {
