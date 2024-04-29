@@ -24,6 +24,10 @@ defmodule Console.Schema.PullRequest do
     timestamps()
   end
 
+  def open(query \\ __MODULE__) do
+    from(pr in query, where: pr.status == ^:open)
+  end
+
   def search(query \\ __MODULE__, q) do
     from(pr in query, where: ilike(pr.title, ^"%#{q}%"))
   end

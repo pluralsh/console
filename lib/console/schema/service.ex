@@ -170,6 +170,13 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.name == "deploy-operator")
   end
 
+  def errored(query \\ __MODULE__) do
+    from(s in query,
+      join: e in assoc(s, :errors),
+      distinct: true
+    )
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(s in query,

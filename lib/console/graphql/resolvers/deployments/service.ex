@@ -189,6 +189,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
       {:cluster_id, id}, q -> Service.for_cluster(q, id)
       {:cluster, handle}, q -> Service.for_cluster_handle(q, handle)
       {:status, status}, q -> Service.for_status(q, status)
+      {:errored, true}, q -> Service.errored(q)
       _, q -> q
     end)
   end
