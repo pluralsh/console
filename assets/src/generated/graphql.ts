@@ -1430,6 +1430,8 @@ export type DeploymentSettings = {
   __typename?: 'DeploymentSettings';
   /** custom helm values to apply to all agents (useful for things like adding customary annotations/labels) */
   agentHelmValues?: Maybe<Scalars['String']['output']>;
+  /** The console's expected agent version */
+  agentVsn: Scalars['String']['output'];
   /** the repo to fetch CAPI manifests from, for both providers and clusters */
   artifactRepository?: Maybe<GitRepository>;
   /** your compliant k8s version */
