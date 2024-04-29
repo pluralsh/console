@@ -5,19 +5,19 @@ import Service, {
   ServiceInfo,
   ServiceIngresses,
   ServicePods,
-} from 'components/kubernetes/discovery/Service'
+} from 'components/kubernetes/network/Service'
 import PersistentVolume, {
   PersistentVolumeInfo,
 } from 'components/kubernetes/storage/PersistentVolume'
 import Secret, { SecretData } from 'components/kubernetes/configuration/Secret'
 import RoleBinding, {
   RoleBindingSubjects,
-} from 'components/kubernetes/access/RoleBinding'
-import Role, { RolePolicyRules } from 'components/kubernetes/access/Role'
-import ClusterRole from 'components/kubernetes/access/ClusterRole'
+} from 'components/kubernetes/rbac/RoleBinding'
+import Role, { RolePolicyRules } from 'components/kubernetes/rbac/Role'
+import ClusterRole from 'components/kubernetes/rbac/ClusterRole'
 import ClusterRoleBinding, {
   ClusterRoleBindingSubjects,
-} from 'components/kubernetes/access/ClusterRoleBinding'
+} from 'components/kubernetes/rbac/ClusterRoleBinding'
 import CustomResourceDefinition, {
   CustomRersourceDefinitionObjects,
   CustomResourceDefinitionConditions,
@@ -31,10 +31,10 @@ import {
 } from '../components/kubernetes/workloads/Pod'
 import Navigation from '../components/kubernetes/Navigation'
 import Workloads from '../components/kubernetes/workloads/Workloads'
-import Discovery from '../components/kubernetes/discovery/Discovery'
-import Services from '../components/kubernetes/discovery/Services'
-import Ingresses from '../components/kubernetes/discovery/Ingresses'
-import IngressClasses from '../components/kubernetes/discovery/IngressClasses'
+import Network from '../components/kubernetes/network/Network'
+import Services from '../components/kubernetes/network/Services'
+import Ingresses from '../components/kubernetes/network/Ingresses'
+import IngressClasses from '../components/kubernetes/network/IngressClasses'
 import Storage from '../components/kubernetes/storage/Storage'
 import Configuration from '../components/kubernetes/configuration/Configuration'
 import Deployments from '../components/kubernetes/workloads/Deployments'
@@ -62,12 +62,12 @@ import Node, {
 import Events from '../components/kubernetes/cluster/Events'
 import Namespaces from '../components/kubernetes/cluster/Namespaces'
 import CustomResourceDefinitions from '../components/kubernetes/customresources/CustomResourceDefinitions'
-import NetworkPolicies from '../components/kubernetes/discovery/NetworkPolicies'
-import ClusterRoleBindings from '../components/kubernetes/access/ClusterRoleBindings'
-import ClusterRoles from '../components/kubernetes/access/ClusterRoles'
-import RoleBindings from '../components/kubernetes/access/RoleBindings'
-import Roles from '../components/kubernetes/access/Roles'
-import Access from '../components/kubernetes/access/Access'
+import NetworkPolicies from '../components/kubernetes/network/NetworkPolicies'
+import ClusterRoleBindings from '../components/kubernetes/rbac/ClusterRoleBindings'
+import ClusterRoles from '../components/kubernetes/rbac/ClusterRoles'
+import RoleBindings from '../components/kubernetes/rbac/RoleBindings'
+import Roles from '../components/kubernetes/rbac/Roles'
+import Rbac from '../components/kubernetes/rbac/Rbac'
 import Deployment, {
   DeploymentEvents,
   DeploymentHorizontalPodAutoscalers,
@@ -101,15 +101,15 @@ import ReplicationController, {
 import Ingress, {
   IngressEvents,
   IngressInfo,
-} from '../components/kubernetes/discovery/Ingress'
+} from '../components/kubernetes/network/Ingress'
 import CronJob, {
   CronJobEvents,
   CronJobJobs,
 } from '../components/kubernetes/workloads/CronJob'
-import IngressClass from '../components/kubernetes/discovery/IngressClass'
+import IngressClass from '../components/kubernetes/network/IngressClass'
 import NetworkPolicy, {
   NetworkPolicyInfo,
-} from '../components/kubernetes/discovery/NetworkPolicy'
+} from '../components/kubernetes/network/NetworkPolicy'
 import PersistentVolumeClaim from '../components/kubernetes/storage/PersistentVolumeClaim'
 import StorageClass, {
   StorageClassPersistentVolumes,
@@ -124,9 +124,9 @@ import Namespace, {
 
 import Raw from '../components/kubernetes/common/Raw'
 
-import ServiceAccounts from '../components/kubernetes/access/ServiceAccounts'
+import ServiceAccounts from '../components/kubernetes/rbac/ServiceAccounts'
 
-import ServiceAccount from '../components/kubernetes/access/ServiceAccount'
+import ServiceAccount from '../components/kubernetes/rbac/ServiceAccount'
 
 import HorizontalPodAutoscalers from '../components/kubernetes/cluster/HorizontalPodAutoscalers'
 
@@ -137,7 +137,6 @@ import CustomResource, {
 import Root from '../components/kubernetes/Cluster'
 
 import {
-  ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
   CLUSTER_ROLES_REL_PATH,
   CLUSTER_ROLE_BINDINGS_REL_PATH,
@@ -147,7 +146,6 @@ import {
   CUSTOM_RESOURCES_REL_PATH,
   DAEMON_SETS_REL_PATH,
   DEPLOYMENTS_REL_PATH,
-  DISCOVERY_REL_PATH,
   EVENTS_REL_PATH,
   HPAS_REL_PATH,
   INGRESSES_REL_PATH,
@@ -157,10 +155,12 @@ import {
   NAMESPACED_RESOURCE_DETAILS_REL_PATH,
   NAMESPACES_REL_PATH,
   NETWORK_POLICIES_REL_PATH,
+  NETWORK_REL_PATH,
   NODES_REL_PATH,
   PERSISTENT_VOLUMES_REL_PATH,
   PERSISTENT_VOLUME_CLAIMS_REL_PATH,
   PODS_REL_PATH,
+  RBAC_REL_PATH,
   REPLICATION_CONTROLLERS_REL_PATH,
   REPLICA_SETS_REL_PATH,
   RESOURCE_DETAILS_REL_PATH,
@@ -240,8 +240,8 @@ export const kubernetesRoute = (
         />
       </Route>
       <Route
-        path={DISCOVERY_REL_PATH}
-        element={<Discovery />}
+        path={NETWORK_REL_PATH}
+        element={<Network />}
       >
         <Route
           index
@@ -348,8 +348,8 @@ export const kubernetesRoute = (
         />
       </Route>
       <Route
-        path={ACCESS_REL_PATH}
-        element={<Access />}
+        path={RBAC_REL_PATH}
+        element={<Rbac />}
       >
         <Route
           index

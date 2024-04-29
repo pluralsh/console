@@ -5,35 +5,34 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
   Maybe,
-  NetworkPoliciesQuery,
-  NetworkPoliciesQueryVariables,
-  Networkpolicy_NetworkPolicyList as NetworkPolicyListT,
-  Networkpolicy_NetworkPolicy as NetworkPolicyT,
-  useNetworkPoliciesQuery,
+  Rolebinding_RoleBindingList as RoleBindingListT,
+  Rolebinding_RoleBinding as RoleBindingT,
+  RoleBindingsQuery,
+  RoleBindingsQueryVariables,
+  useRoleBindingsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
-
 import { ResourceList } from '../common/ResourceList'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  NETWORK_POLICIES_REL_PATH,
-  getDiscoveryAbsPath,
+  ROLE_BINDINGS_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-import { getDiscoveryBreadcrumbs } from './Discovery'
+import { getRbacBreadcrumbs } from './Rbac'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getDiscoveryBreadcrumbs(cluster),
+  ...getRbacBreadcrumbs(cluster),
   {
-    label: 'network policies',
-    url: `${getDiscoveryAbsPath(cluster?.id)}/${NETWORK_POLICIES_REL_PATH}`,
+    label: 'role bindings',
+    url: `${getRbacAbsPath(cluster?.id)}/${ROLE_BINDINGS_REL_PATH}`,
   },
 ]
 
-const columnHelper = createColumnHelper<NetworkPolicyT>()
+const columnHelper = createColumnHelper<RoleBindingT>()
 
-export default function NetworkPolicies() {
+export default function RoleBindings() {
   const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
@@ -47,15 +46,15 @@ export default function NetworkPolicies() {
 
   return (
     <ResourceList<
-      NetworkPolicyListT,
-      NetworkPolicyT,
-      NetworkPoliciesQuery,
-      NetworkPoliciesQueryVariables
+      RoleBindingListT,
+      RoleBindingT,
+      RoleBindingsQuery,
+      RoleBindingsQueryVariables
     >
       namespaced
       columns={columns}
-      query={useNetworkPoliciesQuery}
-      queryName="handleGetNetworkPolicyList"
+      query={useRoleBindingsQuery}
+      queryName="handleGetRoleBindingList"
       itemsKey="items"
     />
   )

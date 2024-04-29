@@ -3,13 +3,13 @@ import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { Suspense, useMemo, useRef } from 'react'
 
 import {
-  CLUSTER_ROLES_REL_PATH,
-  CLUSTER_ROLE_BINDINGS_REL_PATH,
-  ROLES_REL_PATH,
-  ROLE_BINDINGS_REL_PATH,
-  SERVICE_ACCOUNTS_REL_PATH,
-  getAccessAbsPath,
+  INGRESSES_REL_PATH,
+  INGRESS_CLASSES_REL_PATH,
+  NETWORK_POLICIES_REL_PATH,
+  SERVICES_REL_PATH,
+  getNetworkAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
+
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
@@ -20,28 +20,27 @@ import { Maybe } from '../../../generated/graphql-kubernetes'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 
-export const getAccessBreadcrumbs = (
+export const getNetworkBreadcrumbs = (
   cluster?: Maybe<KubernetesClusterFragment>
 ) => [
   ...getBaseBreadcrumbs(cluster),
   {
-    label: 'access',
-    url: getAccessAbsPath(cluster?.id),
+    label: 'network',
+    url: getNetworkAbsPath(cluster?.id),
   },
 ]
 
 const directory = [
-  { path: ROLES_REL_PATH, label: 'Roles' },
-  { path: ROLE_BINDINGS_REL_PATH, label: 'Role bindings' },
-  { path: CLUSTER_ROLES_REL_PATH, label: 'Cluster roles' },
-  { path: CLUSTER_ROLE_BINDINGS_REL_PATH, label: 'Cluster role bindings' },
-  { path: SERVICE_ACCOUNTS_REL_PATH, label: 'Service Accounts' },
+  { path: SERVICES_REL_PATH, label: 'Services' },
+  { path: INGRESSES_REL_PATH, label: 'Ingresses' },
+  { path: INGRESS_CLASSES_REL_PATH, label: 'Ingress classes' },
+  { path: NETWORK_POLICIES_REL_PATH, label: 'Network policies' },
 ] as const
 
-export default function Access() {
+export default function Network() {
   const cluster = useCluster()
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${getAccessAbsPath(cluster?.id)}/:tab/*`)
+  const pathMatch = useMatch(`${getNetworkAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
   const { search } = useLocation()
@@ -64,7 +63,7 @@ export default function Access() {
             subTab
             key={path}
             textValue={label}
-            to={`${getAccessAbsPath(cluster?.id)}/${path}${search}`}
+            to={`${getNetworkAbsPath(cluster?.id)}/${path}${search}`}
           >
             <SubTab
               key={path}

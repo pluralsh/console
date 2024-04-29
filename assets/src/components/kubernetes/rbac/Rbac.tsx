@@ -3,13 +3,13 @@ import { SubTab, TabList, TabPanel } from '@pluralsh/design-system'
 import { Suspense, useMemo, useRef } from 'react'
 
 import {
-  INGRESSES_REL_PATH,
-  INGRESS_CLASSES_REL_PATH,
-  NETWORK_POLICIES_REL_PATH,
-  SERVICES_REL_PATH,
-  getDiscoveryAbsPath,
+  CLUSTER_ROLES_REL_PATH,
+  CLUSTER_ROLE_BINDINGS_REL_PATH,
+  ROLES_REL_PATH,
+  ROLE_BINDINGS_REL_PATH,
+  SERVICE_ACCOUNTS_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
-
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { PluralErrorBoundary } from '../../cd/PluralErrorBoundary'
@@ -20,27 +20,28 @@ import { Maybe } from '../../../generated/graphql-kubernetes'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 
-export const getDiscoveryBreadcrumbs = (
+export const getRbacBreadcrumbs = (
   cluster?: Maybe<KubernetesClusterFragment>
 ) => [
   ...getBaseBreadcrumbs(cluster),
   {
-    label: 'discovery',
-    url: getDiscoveryAbsPath(cluster?.id),
+    label: 'rbac',
+    url: getRbacAbsPath(cluster?.id),
   },
 ]
 
 const directory = [
-  { path: SERVICES_REL_PATH, label: 'Services' },
-  { path: INGRESSES_REL_PATH, label: 'Ingresses' },
-  { path: INGRESS_CLASSES_REL_PATH, label: 'Ingress classes' },
-  { path: NETWORK_POLICIES_REL_PATH, label: 'Network policies' },
+  { path: ROLES_REL_PATH, label: 'Roles' },
+  { path: ROLE_BINDINGS_REL_PATH, label: 'Role bindings' },
+  { path: CLUSTER_ROLES_REL_PATH, label: 'Cluster roles' },
+  { path: CLUSTER_ROLE_BINDINGS_REL_PATH, label: 'Cluster role bindings' },
+  { path: SERVICE_ACCOUNTS_REL_PATH, label: 'Service Accounts' },
 ] as const
 
-export default function Discovery() {
+export default function Rbac() {
   const cluster = useCluster()
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${getDiscoveryAbsPath(cluster?.id)}/:tab/*`)
+  const pathMatch = useMatch(`${getRbacAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
   const { search } = useLocation()
@@ -63,7 +64,7 @@ export default function Discovery() {
             subTab
             key={path}
             textValue={label}
-            to={`${getDiscoveryAbsPath(cluster?.id)}/${path}${search}`}
+            to={`${getRbacAbsPath(cluster?.id)}/${path}${search}`}
           >
             <SubTab
               key={path}

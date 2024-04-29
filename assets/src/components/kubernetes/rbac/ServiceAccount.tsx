@@ -10,7 +10,7 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   SERVICE_ACCOUNTS_REL_PATH,
-  getAccessAbsPath,
+  getRbacAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -46,7 +46,7 @@ export default function ServiceAccount(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: namespace ?? '',
-          url: `${getAccessAbsPath(
+          url: `${getRbacAbsPath(
             cluster?.id
           )}/${SERVICE_ACCOUNTS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
         },
