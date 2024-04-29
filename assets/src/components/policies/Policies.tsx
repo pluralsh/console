@@ -6,6 +6,7 @@ import {
   SubTab,
   TabList,
   TabPanel,
+  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
@@ -22,6 +23,8 @@ import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
 import styled, { useTheme } from 'styled-components'
 import { extendConnection } from 'utils/graphql'
 import { createMapperWithFallback } from 'utils/mapping'
+
+import { PoliciesTable } from './PoliciesTable'
 
 const breadcrumbs: Breadcrumb[] = [
   { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
@@ -40,6 +43,12 @@ export const statusTabs = {
 const POLICIES_QUERY_PAGE_SIZE = 100
 
 export const POLL_INTERVAL = 10_000
+
+export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
+  typeof Table
+>['reactVirtualOptions'] = {
+  overscan: 10,
+}
 
 function Policies() {
   const theme = useTheme()
@@ -139,7 +148,14 @@ function Policies() {
       </div>
       <div
         className="tabs"
-        css={{ justifySelf: 'end' }}
+        css={{
+          justifySelf: 'end',
+          '.statusTab': {
+            display: 'flex',
+            gap: theme.spacing.small,
+            alignItems: 'center',
+          },
+        }}
       >
         <TabList
           stateRef={tabStateRef}
@@ -181,16 +197,13 @@ function Policies() {
           css={{ height: '100%', overflow: 'hidden' }}
         >
           <FullHeightTableWrap>
-            {/* <ClustersTable
-                data={tableData || []}
-                refetch={refetch}
-                virtualizeRows
-                hasNextPage={pageInfo?.hasNextPage}
-                fetchNextPage={fetchNextPage}
-                isFetchingNextPage={loading}
-                reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
-                onVirtualSliceChange={setVirtualSlice}
-              /> */}
+            <PoliciesTable
+              data={data || []}
+              refetch={refetch}
+              fetchNextPage={fetchNextPage}
+              loading={loading}
+              setVirtualSlice={setVirtualSlice}
+            />
           </FullHeightTableWrap>
         </TabPanel>
       </div>
