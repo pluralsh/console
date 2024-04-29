@@ -4,34 +4,34 @@ import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
   Maybe,
-  Role_RoleList as RoleListT,
-  Role_Role as RoleT,
-  RolesQuery,
-  RolesQueryVariables,
-  useRolesQuery,
+  Serviceaccount_ServiceAccountList as ServiceAccountListT,
+  Serviceaccount_ServiceAccount as ServiceAccountT,
+  ServiceAccountsQuery,
+  ServiceAccountsQueryVariables,
+  useServiceAccountsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  ROLES_REL_PATH,
-  getAccessAbsPath,
+  SERVICE_ACCOUNTS_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-import { getAccessBreadcrumbs } from './Access'
+import { getRbacBreadcrumbs } from './Rbac'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getAccessBreadcrumbs(cluster),
+  ...getRbacBreadcrumbs(cluster),
   {
-    label: 'roles',
-    url: `${getAccessAbsPath(cluster?.id)}/${ROLES_REL_PATH}`,
+    label: 'service accounts',
+    url: `${getRbacAbsPath(cluster?.id)}/${SERVICE_ACCOUNTS_REL_PATH}`,
   },
 ]
 
-const columnHelper = createColumnHelper<RoleT>()
+const columnHelper = createColumnHelper<ServiceAccountT>()
 
-export default function Roles() {
+export default function ServiceAccounts() {
   const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
@@ -44,11 +44,16 @@ export default function Roles() {
   )
 
   return (
-    <ResourceList<RoleListT, RoleT, RolesQuery, RolesQueryVariables>
+    <ResourceList<
+      ServiceAccountListT,
+      ServiceAccountT,
+      ServiceAccountsQuery,
+      ServiceAccountsQueryVariables
+    >
       namespaced
       columns={columns}
-      query={useRolesQuery}
-      queryName="handleGetRoleList"
+      query={useServiceAccountsQuery}
+      queryName="handleGetServiceAccountList"
       itemsKey="items"
     />
   )

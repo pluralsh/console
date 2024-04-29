@@ -8,7 +8,7 @@ import {
   ROLES_REL_PATH,
   ROLE_BINDINGS_REL_PATH,
   SERVICE_ACCOUNTS_REL_PATH,
-  getAccessAbsPath,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 import { LinkTabWrap } from '../../utils/Tabs'
@@ -20,13 +20,13 @@ import { Maybe } from '../../../generated/graphql-kubernetes'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 
-export const getAccessBreadcrumbs = (
+export const getRbacBreadcrumbs = (
   cluster?: Maybe<KubernetesClusterFragment>
 ) => [
   ...getBaseBreadcrumbs(cluster),
   {
-    label: 'access',
-    url: getAccessAbsPath(cluster?.id),
+    label: 'rbac',
+    url: getRbacAbsPath(cluster?.id),
   },
 ]
 
@@ -38,10 +38,10 @@ const directory = [
   { path: SERVICE_ACCOUNTS_REL_PATH, label: 'Service Accounts' },
 ] as const
 
-export default function Access() {
+export default function Rbac() {
   const cluster = useCluster()
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${getAccessAbsPath(cluster?.id)}/:tab/*`)
+  const pathMatch = useMatch(`${getRbacAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
   const { search } = useLocation()
@@ -64,7 +64,7 @@ export default function Access() {
             subTab
             key={path}
             textValue={label}
-            to={`${getAccessAbsPath(cluster?.id)}/${path}${search}`}
+            to={`${getRbacAbsPath(cluster?.id)}/${path}${search}`}
           >
             <SubTab
               key={path}

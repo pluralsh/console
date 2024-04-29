@@ -33,7 +33,7 @@ export const CONFIGURATION_REL_PATH = 'configuration'
 export const CONFIG_MAPS_REL_PATH = 'configmaps'
 export const SECRETS_REL_PATH = 'secrets'
 
-export const ACCESS_REL_PATH = 'access'
+export const RBAC_REL_PATH = 'rbac'
 export const ROLES_REL_PATH = 'roles'
 export const ROLE_BINDINGS_REL_PATH = 'rolebindings'
 export const CLUSTER_ROLES_REL_PATH = 'clusterroles'
@@ -75,8 +75,8 @@ export function getClusterAbsPath(clusterId: string | null | undefined) {
   return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CLUSTER_REL_PATH}`
 }
 
-export function getAccessAbsPath(clusterId: string | null | undefined) {
-  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${ACCESS_REL_PATH}`
+export function getRbacAbsPath(clusterId: string | null | undefined) {
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${RBAC_REL_PATH}`
 }
 
 export function getCustomResourcesAbsPath(

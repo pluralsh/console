@@ -10,11 +10,11 @@ import { ReactNode, useLayoutEffect, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
 
 import {
-  ACCESS_REL_PATH,
   CLUSTER_REL_PATH,
   CONFIGURATION_REL_PATH,
   CUSTOM_RESOURCES_REL_PATH,
   NETWORK_REL_PATH,
+  RBAC_REL_PATH,
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
@@ -40,7 +40,7 @@ const directory: Directory = [
   { path: NETWORK_REL_PATH, label: 'Network' },
   { path: STORAGE_REL_PATH, label: 'Storage' },
   { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
-  { path: ACCESS_REL_PATH, label: 'Access' },
+  { path: RBAC_REL_PATH, label: 'RBAC' },
   { path: CLUSTER_REL_PATH, label: 'Cluster' },
   { path: CUSTOM_RESOURCES_REL_PATH, label: 'Custom resources' },
 ] as const

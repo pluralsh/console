@@ -4,35 +4,35 @@ import { useMemo } from 'react'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
-  Clusterrolebinding_ClusterRoleBindingList as ClusterRoleBindingListT,
-  Clusterrolebinding_ClusterRoleBinding as ClusterRoleBindingT,
-  ClusterRoleBindingsQuery,
-  ClusterRoleBindingsQueryVariables,
+  Clusterrole_ClusterRoleList as ClusterRoleListT,
+  Clusterrole_ClusterRole as ClusterRoleT,
+  ClusterRolesQuery,
+  ClusterRolesQueryVariables,
   Maybe,
-  useClusterRoleBindingsQuery,
+  useClusterRolesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  CLUSTER_ROLE_BINDINGS_REL_PATH,
-  getAccessAbsPath,
+  CLUSTER_ROLES_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-import { getAccessBreadcrumbs } from './Access'
+import { getRbacBreadcrumbs } from './Rbac'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getAccessBreadcrumbs(cluster),
+  ...getRbacBreadcrumbs(cluster),
   {
-    label: 'cluster role bindings',
-    url: `${getAccessAbsPath(cluster?.id)}/${CLUSTER_ROLE_BINDINGS_REL_PATH}`,
+    label: 'cluster roles',
+    url: `${getRbacAbsPath(cluster?.id)}/${CLUSTER_ROLES_REL_PATH}`,
   },
 ]
 
-const columnHelper = createColumnHelper<ClusterRoleBindingT>()
+const columnHelper = createColumnHelper<ClusterRoleT>()
 
-export default function ClusterRoleBindings() {
+export default function ClusterRoles() {
   const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
@@ -46,14 +46,14 @@ export default function ClusterRoleBindings() {
 
   return (
     <ResourceList<
-      ClusterRoleBindingListT,
-      ClusterRoleBindingT,
-      ClusterRoleBindingsQuery,
-      ClusterRoleBindingsQueryVariables
+      ClusterRoleListT,
+      ClusterRoleT,
+      ClusterRolesQuery,
+      ClusterRolesQueryVariables
     >
       columns={columns}
-      query={useClusterRoleBindingsQuery}
-      queryName="handleGetClusterRoleBindingList"
+      query={useClusterRolesQuery}
+      queryName="handleGetClusterRoleList"
       itemsKey="items"
     />
   )

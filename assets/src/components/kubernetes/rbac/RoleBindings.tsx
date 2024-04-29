@@ -1,37 +1,38 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
+
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
   Maybe,
-  Serviceaccount_ServiceAccountList as ServiceAccountListT,
-  Serviceaccount_ServiceAccount as ServiceAccountT,
-  ServiceAccountsQuery,
-  ServiceAccountsQueryVariables,
-  useServiceAccountsQuery,
+  Rolebinding_RoleBindingList as RoleBindingListT,
+  Rolebinding_RoleBinding as RoleBindingT,
+  RoleBindingsQuery,
+  RoleBindingsQueryVariables,
+  useRoleBindingsQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  SERVICE_ACCOUNTS_REL_PATH,
-  getAccessAbsPath,
+  ROLE_BINDINGS_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-import { getAccessBreadcrumbs } from './Access'
+import { getRbacBreadcrumbs } from './Rbac'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getAccessBreadcrumbs(cluster),
+  ...getRbacBreadcrumbs(cluster),
   {
-    label: 'service accounts',
-    url: `${getAccessAbsPath(cluster?.id)}/${SERVICE_ACCOUNTS_REL_PATH}`,
+    label: 'role bindings',
+    url: `${getRbacAbsPath(cluster?.id)}/${ROLE_BINDINGS_REL_PATH}`,
   },
 ]
 
-const columnHelper = createColumnHelper<ServiceAccountT>()
+const columnHelper = createColumnHelper<RoleBindingT>()
 
-export default function ServiceAccounts() {
+export default function RoleBindings() {
   const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
@@ -45,15 +46,15 @@ export default function ServiceAccounts() {
 
   return (
     <ResourceList<
-      ServiceAccountListT,
-      ServiceAccountT,
-      ServiceAccountsQuery,
-      ServiceAccountsQueryVariables
+      RoleBindingListT,
+      RoleBindingT,
+      RoleBindingsQuery,
+      RoleBindingsQueryVariables
     >
       namespaced
       columns={columns}
-      query={useServiceAccountsQuery}
-      queryName="handleGetServiceAccountList"
+      query={useRoleBindingsQuery}
+      queryName="handleGetRoleBindingList"
       itemsKey="items"
     />
   )
