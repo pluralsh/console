@@ -19,19 +19,19 @@ import { TableText } from '../../cluster/TableElements'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   INGRESSES_REL_PATH,
-  getDiscoveryAbsPath,
+  getNetworkAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { useCluster } from '../Cluster'
 
 import { TableEndpoints } from './utils'
-import { getDiscoveryBreadcrumbs } from './Discovery'
+import { getNetworkBreadcrumbs } from './Network'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getDiscoveryBreadcrumbs(cluster),
+  ...getNetworkBreadcrumbs(cluster),
   {
     label: 'ingresses',
-    url: `${getDiscoveryAbsPath(cluster?.id)}/${INGRESSES_REL_PATH}`,
+    url: `${getNetworkAbsPath(cluster?.id)}/${INGRESSES_REL_PATH}`,
   },
 ]
 

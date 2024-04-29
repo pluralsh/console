@@ -26,7 +26,7 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   INGRESSES_REL_PATH,
-  getDiscoveryAbsPath,
+  getNetworkAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -69,7 +69,7 @@ export default function Ingress(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: namespace ?? '',
-          url: `${getDiscoveryAbsPath(
+          url: `${getNetworkAbsPath(
             cluster?.id
           )}/${INGRESSES_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
         },

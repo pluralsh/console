@@ -18,7 +18,7 @@ import { MetadataSidecar, useCodeTabs } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 import {
   NETWORK_POLICIES_REL_PATH,
-  getDiscoveryAbsPath,
+  getNetworkAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
@@ -56,7 +56,7 @@ export default function NetworkPolicy(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: namespace ?? '',
-          url: `${getDiscoveryAbsPath(
+          url: `${getNetworkAbsPath(
             cluster?.id
           )}/${NETWORK_POLICIES_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
         },

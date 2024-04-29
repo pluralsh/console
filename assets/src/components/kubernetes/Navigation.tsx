@@ -14,7 +14,7 @@ import {
   CLUSTER_REL_PATH,
   CONFIGURATION_REL_PATH,
   CUSTOM_RESOURCES_REL_PATH,
-  DISCOVERY_REL_PATH,
+  NETWORK_REL_PATH,
   STORAGE_REL_PATH,
   WORKLOADS_REL_PATH,
   getKubernetesAbsPath,
@@ -37,7 +37,7 @@ export const FILTER_PARAM = 'filter'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
-  { path: DISCOVERY_REL_PATH, label: 'Discovery' },
+  { path: NETWORK_REL_PATH, label: 'Network' },
   { path: STORAGE_REL_PATH, label: 'Storage' },
   { path: CONFIGURATION_REL_PATH, label: 'Configuration' },
   { path: ACCESS_REL_PATH, label: 'Access' },

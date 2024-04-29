@@ -37,7 +37,7 @@ import { MetadataSidecar, ResourceReadyChip } from '../common/utils'
 import { NAMESPACE_PARAM } from '../Navigation'
 import {
   SERVICES_REL_PATH,
-  getDiscoveryAbsPath,
+  getNetworkAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
@@ -85,7 +85,7 @@ export default function Service(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: namespace ?? '',
-          url: `${getDiscoveryAbsPath(
+          url: `${getNetworkAbsPath(
             cluster?.id
           )}/${SERVICES_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
         },

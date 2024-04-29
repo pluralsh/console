@@ -7,7 +7,7 @@ import {
   INGRESS_CLASSES_REL_PATH,
   NETWORK_POLICIES_REL_PATH,
   SERVICES_REL_PATH,
-  getDiscoveryAbsPath,
+  getNetworkAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
@@ -20,13 +20,13 @@ import { Maybe } from '../../../generated/graphql-kubernetes'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getBaseBreadcrumbs } from '../common/utils'
 
-export const getDiscoveryBreadcrumbs = (
+export const getNetworkBreadcrumbs = (
   cluster?: Maybe<KubernetesClusterFragment>
 ) => [
   ...getBaseBreadcrumbs(cluster),
   {
-    label: 'discovery',
-    url: getDiscoveryAbsPath(cluster?.id),
+    label: 'network',
+    url: getNetworkAbsPath(cluster?.id),
   },
 ]
 
@@ -37,10 +37,10 @@ const directory = [
   { path: NETWORK_POLICIES_REL_PATH, label: 'Network policies' },
 ] as const
 
-export default function Discovery() {
+export default function Network() {
   const cluster = useCluster()
   const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${getDiscoveryAbsPath(cluster?.id)}/:tab/*`)
+  const pathMatch = useMatch(`${getNetworkAbsPath(cluster?.id)}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
   const { search } = useLocation()
@@ -63,7 +63,7 @@ export default function Discovery() {
             subTab
             key={path}
             textValue={label}
-            to={`${getDiscoveryAbsPath(cluster?.id)}/${path}${search}`}
+            to={`${getNetworkAbsPath(cluster?.id)}/${path}${search}`}
           >
             <SubTab
               key={path}

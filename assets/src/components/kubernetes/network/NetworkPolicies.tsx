@@ -17,17 +17,17 @@ import { ResourceList } from '../common/ResourceList'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   NETWORK_POLICIES_REL_PATH,
-  getDiscoveryAbsPath,
+  getNetworkAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-import { getDiscoveryBreadcrumbs } from './Discovery'
+import { getNetworkBreadcrumbs } from './Network'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getDiscoveryBreadcrumbs(cluster),
+  ...getNetworkBreadcrumbs(cluster),
   {
     label: 'network policies',
-    url: `${getDiscoveryAbsPath(cluster?.id)}/${NETWORK_POLICIES_REL_PATH}`,
+    url: `${getNetworkAbsPath(cluster?.id)}/${NETWORK_POLICIES_REL_PATH}`,
   },
 ]
 
