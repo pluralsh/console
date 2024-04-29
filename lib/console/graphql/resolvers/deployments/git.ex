@@ -118,6 +118,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     Enum.reduce(args, query, fn
       {:cluster_id, cid}, q -> PullRequest.for_cluster(q, cid)
       {:service_id, sid}, q -> PullRequest.for_service(q, sid)
+      {:open, true}, q -> PullRequest.open(q)
+      {:q, search}, q -> PullRequest.search(q, search)
       _, q -> q
     end)
   end
