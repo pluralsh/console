@@ -51,6 +51,11 @@ defmodule Console do
   def remove_ids(l) when is_list(l), do: Enum.map(l, &remove_ids/1)
   def remove_ids(v), do: v
 
+  def drop_nils(%{} = map) do
+    Enum.filter(map, fn {_, v} -> not is_nil(v) end)
+    |> Map.new()
+  end
+
   def clean(val) do
     mapify(val)
     |> remove_ids()

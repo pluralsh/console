@@ -1947,6 +1947,7 @@ export type InfrastructureStack = {
   observableMetrics?: Maybe<Array<Maybe<ObservableMetric>>>;
   /** the most recent output for this stack */
   output?: Maybe<Array<Maybe<StackOutput>>>;
+  pullRequests?: Maybe<PullRequestConnection>;
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repository you're sourcing IaC from */
   repository?: Maybe<GitRepository>;
@@ -1960,11 +1961,20 @@ export type InfrastructureStack = {
 };
 
 
+export type InfrastructureStackPullRequestsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type InfrastructureStackRunsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  pullRequestId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type InfrastructureStackConnection = {

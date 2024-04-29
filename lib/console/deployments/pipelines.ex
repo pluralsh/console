@@ -131,7 +131,7 @@ defmodule Console.Deployments.Pipelines do
     |> Enum.reduce(start_transaction(), fn svc, xact ->
       service = svc.service
       add_operation(xact, {:pull, svc.id}, fn _ ->
-        branch = "plrl/pipeline-#{stage.pipeline.name}-#{service.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
+        branch = "plrl-svc/#{service.name}/pipeline-#{stage.pipeline.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
         context = build_pr_context(ctx.context, svc, stage)
         Git.create_pull_request(%{service_id: service.id}, context, svc.criteria.pr_automation_id, branch, bot)
       end)

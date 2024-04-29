@@ -1066,7 +1066,9 @@ type InfrastructureStack {
   "why this run was cancelled"
   cancellationReason: String
 
-  runs(after: String, first: Int, before: String, last: Int): StackRunConnection
+  runs(after: String, first: Int, before: String, last: Int, pullRequestId: ID): StackRunConnection
+
+  pullRequests(after: String, first: Int, before: String, last: Int): PullRequestConnection
 
   "files bound to a run of this stack"
   files: [StackFile]

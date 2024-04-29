@@ -89,7 +89,12 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :cancellation_reason, :string, description: "why this run was cancelled"
 
     connection field :runs, node_type: :stack_run do
+      arg :pull_request_id, :id
       resolve &Deployments.list_stack_runs/3
+    end
+
+    connection field :pull_requests, node_type: :pull_request do
+      resolve &Deployments.list_prs_for_stack/3
     end
 
     field :files, list_of(:stack_file), resolve: dataloader(Deployments), description: "files bound to a run of this stack"

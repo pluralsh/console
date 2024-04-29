@@ -131,6 +131,14 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
   def process(%{item: stage}), do: Discovery.context(stage)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.PullRequestCreated do
+  alias Console.{Schema.PullRequest, Deployments.Stacks}
+
+  def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id),
+    do: Stacks.poll(pr)
+  def process(_), do: :ok
+end
+
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackCreated, Console.PubSub.StackUpdated] do
   alias Console.Deployments.Stacks
 

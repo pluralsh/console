@@ -15,7 +15,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
       })
       |> case do
         {_, %{"html_url" => url} = body, _} ->
-          {:ok, %{title: title, url: url, owner: owner(body)}}
+          {:ok, %{title: title, url: url, ref: branch, owner: owner(body)}}
         {_, body, _} -> {:error, "failed to create pull request: #{Jason.encode!(body)}"}
       end
     end
@@ -40,8 +40,20 @@ defmodule Console.Deployments.Pr.Impl.Github do
     end
   end
 
-  def pr(%{"pull_request" => %{"html_url" => url} = pr}), do: {:ok, url, %{status: state(pr)}}
+  def pr(%{"pull_request" => %{"html_url" => url} = pr}) do
+    attrs = Map.merge(%{
+      status: state(pr),
+      ref: pr["head"]["ref"],
+      title: pr["title"],
+      body: pr["body"]
+    }, pr_associations(pr_content(pr)))
+    |> Console.drop_nils()
+
+    {:ok, url, attrs}
+  end
   def pr(_), do: :ignore
+
+  defp pr_content(pr), do: "#{pr["head"]["ref"]}\n#{pr["title"]}\n#{pr["body"] || ""}"
 
   defp identifier(%PrAutomation{identifier: id}) when is_binary(id) do
     case String.split(id, "/") do
