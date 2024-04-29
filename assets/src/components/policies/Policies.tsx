@@ -25,6 +25,7 @@ import { extendConnection } from 'utils/graphql'
 import { createMapperWithFallback } from 'utils/mapping'
 
 import { PoliciesTable } from './PoliciesTable'
+import PoliciesViolationsGauge from './PoliciesViolationsGauge'
 
 const breadcrumbs: Breadcrumb[] = [
   { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
@@ -84,8 +85,8 @@ function Policies() {
     previousData,
   } = queryResult
   const data = currentData || previousData
-  const policies = data?.policyConstraints
-  const pageInfo = policies?.pageInfo
+  const policies = data?.policyConstraints?.edges
+  const pageInfo = data?.policyConstraints?.pageInfo
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
     pageSize: POLICIES_QUERY_PAGE_SIZE,
@@ -112,15 +113,13 @@ function Policies() {
     Record<keyof typeof statusTabs, number | undefined>
   >(
     () => ({
-      ALL: policies?.edges?.length,
-      PASSING: policies?.edges?.filter(
-        (edge) => edge?.node?.violationCount === 0
-      ).length,
-      VIOLATIONS: policies?.edges?.filter(
-        (edge) => edge?.node?.violationCount !== 0
-      ).length,
+      ALL: policies?.length,
+      PASSING: policies?.filter((edge) => edge?.node?.violationCount === 0)
+        .length,
+      VIOLATIONS: policies?.filter((edge) => edge?.node?.violationCount !== 0)
+        .length,
     }),
-    [policies?.edges]
+    [policies]
   )
 
   if (error) {
@@ -189,7 +188,14 @@ function Policies() {
           ))}
         </TabList>
       </div>
-      <div className="violations" />
+      <div className="violations">
+        <PoliciesViolationsGauge
+          clustersWithViolations={
+            policies?.filter((pol) => pol?.node?.violationCount).length || 0
+          }
+          totalClusters={policies?.length || 0}
+        />
+      </div>
       <div className="enforcement" />
       <div className="table">
         <TabPanel
@@ -218,7 +224,7 @@ const PoliciesContainer = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
   display: 'grid',
   gridTemplateColumns: '1fr 1fr 188px',
-  gridTemplateRows: '1fr 1fr 1fr 1fr',
+  gridTemplateRows: 'auto auto auto 1fr',
   gap: '16px 16px',
   gridAutoFlow: 'row',
   gridTemplateAreas: `
