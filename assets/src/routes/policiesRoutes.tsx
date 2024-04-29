@@ -1,4 +1,4 @@
-import { Navigate, Route } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 
 import Policies from 'components/policies/Policies'
 
@@ -15,28 +15,16 @@ import {
 
 export const policiesRoutes = [
   <Route
-    path={POLICIES_REL_PATH}
+    path={`${POLICIES_REL_PATH}`}
     element={<Policies />}
   />,
-  <Route
-    path={`${POLICIES_REL_PATH}/:${POLICY_PARAM_ID}`}
-    element={<Policies />}
-  >
+  <Route path={`${POLICIES_REL_PATH}/:${POLICY_PARAM_ID}`}>
     <Route
-      index
-      element={
-        <Navigate
-          replace
-          to={POLICIES_DETAILS_PATH}
-        />
-      }
-    />
-    <Route
-      path={POLICIES_DETAILS_PATH}
+      path={`${POLICIES_DETAILS_PATH}`}
       element={<PolicyDetails />}
     />
     <Route
-      path={POLICIES_AFFECTED_RESOURCES_PATH}
+      path={`${POLICIES_AFFECTED_RESOURCES_PATH}`}
       element={<PolicyAffectedResources />}
     />
   </Route>,
