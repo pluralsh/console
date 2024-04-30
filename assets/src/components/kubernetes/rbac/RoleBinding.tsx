@@ -13,7 +13,7 @@ import { MetadataSidecar } from '../common/utils'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import {
   ROLE_BINDINGS_REL_PATH,
-  getAccessAbsPath,
+  getRbacAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -53,7 +53,7 @@ export default function RoleBinding(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: namespace ?? '',
-          url: `${getAccessAbsPath(
+          url: `${getRbacAbsPath(
             cluster?.id
           )}/${ROLE_BINDINGS_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
         },

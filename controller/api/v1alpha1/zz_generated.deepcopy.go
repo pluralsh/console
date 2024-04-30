@@ -2541,6 +2541,11 @@ func (in *ServiceHelm) DeepCopyInto(out *ServiceHelm) {
 		*out = new(v1.ConfigMapKeySelector)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Release != nil {
+		in, out := &in.Release, &out.Release
+		*out = new(string)
+		**out = **in
+	}
 	if in.Values != nil {
 		in, out := &in.Values, &out.Values
 		*out = new(runtime.RawExtension)

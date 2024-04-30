@@ -36,7 +36,7 @@ import { PodInfo } from '../common/PodInfo'
 import { LabelSelector } from '../common/LabelSelector'
 import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
-import { useServicesColumns } from '../discovery/Services'
+import { useServicesColumns } from '../network/Services'
 import {
   REPLICA_SETS_REL_PATH,
   getResourceDetailsAbsPath,

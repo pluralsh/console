@@ -45,6 +45,9 @@ defmodule Console.Deployments.Settings do
   @spec agent_ref() :: binary
   def agent_ref(), do: "refs/tags/agent-#{@agent_vsn}"
 
+  @spec agent_vsn() :: binary
+  def agent_vsn(), do: @agent_vsn
+
   @doc "same as fetch/0 but always reads from db"
   def fetch_consistent() do
     Console.Repo.get_by(DeploymentSettings, name: "global")

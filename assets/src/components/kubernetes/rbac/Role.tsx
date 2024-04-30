@@ -11,7 +11,7 @@ import {
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   ROLES_REL_PATH,
-  getAccessAbsPath,
+  getRbacAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { NAMESPACE_PARAM } from '../Navigation'
@@ -47,7 +47,7 @@ export default function Role(): ReactElement {
         ...getBreadcrumbs(cluster),
         {
           label: namespace ?? '',
-          url: `${getAccessAbsPath(
+          url: `${getRbacAbsPath(
             cluster?.id
           )}/${ROLES_REL_PATH}?${NAMESPACE_PARAM}=${namespace}`,
         },

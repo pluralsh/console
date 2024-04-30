@@ -1,37 +1,39 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
+
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
   Maybe,
-  Serviceaccount_ServiceAccountList as ServiceAccountListT,
-  Serviceaccount_ServiceAccount as ServiceAccountT,
-  ServiceAccountsQuery,
-  ServiceAccountsQueryVariables,
-  useServiceAccountsQuery,
+  NetworkPoliciesQuery,
+  NetworkPoliciesQueryVariables,
+  Networkpolicy_NetworkPolicyList as NetworkPolicyListT,
+  Networkpolicy_NetworkPolicy as NetworkPolicyT,
+  useNetworkPoliciesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
+
 import { ResourceList } from '../common/ResourceList'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  SERVICE_ACCOUNTS_REL_PATH,
-  getAccessAbsPath,
+  NETWORK_POLICIES_REL_PATH,
+  getNetworkAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-import { getAccessBreadcrumbs } from './Access'
+import { getNetworkBreadcrumbs } from './Network'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getAccessBreadcrumbs(cluster),
+  ...getNetworkBreadcrumbs(cluster),
   {
-    label: 'service accounts',
-    url: `${getAccessAbsPath(cluster?.id)}/${SERVICE_ACCOUNTS_REL_PATH}`,
+    label: 'network policies',
+    url: `${getNetworkAbsPath(cluster?.id)}/${NETWORK_POLICIES_REL_PATH}`,
   },
 ]
 
-const columnHelper = createColumnHelper<ServiceAccountT>()
+const columnHelper = createColumnHelper<NetworkPolicyT>()
 
-export default function ServiceAccounts() {
+export default function NetworkPolicies() {
   const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
@@ -45,15 +47,15 @@ export default function ServiceAccounts() {
 
   return (
     <ResourceList<
-      ServiceAccountListT,
-      ServiceAccountT,
-      ServiceAccountsQuery,
-      ServiceAccountsQueryVariables
+      NetworkPolicyListT,
+      NetworkPolicyT,
+      NetworkPoliciesQuery,
+      NetworkPoliciesQueryVariables
     >
       namespaced
       columns={columns}
-      query={useServiceAccountsQuery}
-      queryName="handleGetServiceAccountList"
+      query={useNetworkPoliciesQuery}
+      queryName="handleGetNetworkPolicyList"
       itemsKey="items"
     />
   )

@@ -52,6 +52,9 @@
     field :prometheus_connection, :http_connection, description: "the way we can connect to your prometheus instance"
     field :agent_helm_values,     :string, description: "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
 
+    field :agent_vsn, non_null(:string), description: "The console's expected agent version",
+      resolve: fn _, _, _ -> {:ok, Settings.agent_vsn()} end
+
     field :latest_k8s_vsn, non_null(:string), description: "the latest known k8s version",
       resolve: fn _, _, _ -> {:ok, Settings.kube_vsn()} end
 

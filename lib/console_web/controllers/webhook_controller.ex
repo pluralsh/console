@@ -14,7 +14,7 @@ defmodule ConsoleWeb.WebhookController do
     with %ScmWebhook{} = hook <- Git.get_scm_webhook_by_ext_id(id),
          :ok <- verify(conn, hook),
          {:ok, url, params} <- Dispatcher.pr(hook, conn.body_params),
-         {:ok, _} <- Git.update_pull_request(params, url) do
+         {:ok, _} <- Git.upsert_pull_request(params, url) do
       json(conn, %{ignored: false, message: "updated pull request"})
     else
       :reject -> send_resp(conn, 403, "Forbidden")

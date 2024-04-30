@@ -185,7 +185,9 @@ type RootQueryType {
 
   prAutomation(id: ID, name: String): PrAutomation
 
-  pullRequests(after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, q: String): PullRequestConnection
+  pullRequests(
+    after: String, first: Int, before: String, last: Int, clusterId: ID, serviceId: ID, open: Boolean, q: String
+  ): PullRequestConnection
 
   scmWebhooks(after: String, first: Int, before: String, last: Int): ScmWebhookConnection
 
@@ -254,6 +256,8 @@ type RootQueryType {
     q: String
 
     status: ServiceDeploymentStatus
+
+    errored: Boolean
 
     "the handle of the cluster for this service"
     cluster: String
@@ -780,6 +784,9 @@ type DeploymentSettings {
   "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
   agentHelmValues: String
 
+  "The console's expected agent version"
+  agentVsn: String!
+
   "the latest known k8s version"
   latestK8sVsn: String!
 
@@ -1066,7 +1073,9 @@ type InfrastructureStack {
   "why this run was cancelled"
   cancellationReason: String
 
-  runs(after: String, first: Int, before: String, last: Int): StackRunConnection
+  runs(after: String, first: Int, before: String, last: Int, pullRequestId: ID): StackRunConnection
+
+  pullRequests(after: String, first: Int, before: String, last: Int): PullRequestConnection
 
   "files bound to a run of this stack"
   files: [StackFile]

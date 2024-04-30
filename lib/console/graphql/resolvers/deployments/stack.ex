@@ -3,7 +3,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   alias Console.Deployments.{Stacks, Services}
   alias Console.Schema.{
     Stack,
-    StackRun
+    StackRun,
+    PullRequest
   }
 
   def list_stacks(args, %{context: %{current_user: user}}) do
@@ -14,7 +15,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def list_stack_runs(stack, args, _) do
     StackRun.for_stack(stack.id)
+    |> filters(args)
     |> StackRun.ordered()
+    |> paginate(args)
+  end
+
+  defp filters(query, %{pull_request_id: id}) when is_binary(id), do: StackRun.for_pr(query, id)
+  defp filters(query, _), do: query
+
+  def list_prs_for_stack(stack, args, _) do
+    PullRequest.for_stack(stack.id)
+    |> PullRequest.ordered()
     |> paginate(args)
   end
 

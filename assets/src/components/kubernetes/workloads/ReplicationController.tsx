@@ -40,7 +40,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { PodInfo } from '../common/PodInfo'
 import { ResourceList } from '../common/ResourceList'
 import { useEventsColumns } from '../cluster/Events'
-import { useServicesColumns } from '../discovery/Services'
+import { useServicesColumns } from '../network/Services'
 import { LabelSelector } from '../common/LabelSelector'
 
 import { useCluster } from '../Cluster'

@@ -25,6 +25,28 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       assert from_connection(found["runs"])
              |> ids_equal(runs)
     end
+
+    test "it can fetch pull requests for a stack" do
+      stack = insert(:stack)
+      prs = insert_list(3, :pull_request, stack: stack)
+      insert_list(2, :pull_request)
+
+      {:ok, %{data: %{"infrastructureStack" => found}}} = run_query("""
+        query Stack($id: ID!) {
+          infrastructureStack(id: $id) {
+            id
+            name
+            pullRequests(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: admin_user()})
+
+      assert found["id"] == stack.id
+      assert from_connection(found["pullRequests"])
+             |> ids_equal(prs)
+    end
   end
 
   describe "infrastructureStacks" do

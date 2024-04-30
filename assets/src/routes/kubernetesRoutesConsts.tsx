@@ -18,7 +18,7 @@ export const JOBS_REL_PATH = 'jobs'
 export const CRON_JOBS_REL_PATH = 'cronjobs'
 export const REPLICATION_CONTROLLERS_REL_PATH = 'replicationcontrollers'
 
-export const DISCOVERY_REL_PATH = 'discovery'
+export const NETWORK_REL_PATH = 'network'
 export const SERVICES_REL_PATH = 'services'
 export const INGRESSES_REL_PATH = 'ingresses'
 export const INGRESS_CLASSES_REL_PATH = 'ingressclasses'
@@ -33,7 +33,7 @@ export const CONFIGURATION_REL_PATH = 'configuration'
 export const CONFIG_MAPS_REL_PATH = 'configmaps'
 export const SECRETS_REL_PATH = 'secrets'
 
-export const ACCESS_REL_PATH = 'access'
+export const RBAC_REL_PATH = 'rbac'
 export const ROLES_REL_PATH = 'roles'
 export const ROLE_BINDINGS_REL_PATH = 'rolebindings'
 export const CLUSTER_ROLES_REL_PATH = 'clusterroles'
@@ -59,8 +59,8 @@ export function getWorkloadsAbsPath(clusterId: string | null | undefined) {
   return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${WORKLOADS_REL_PATH}`
 }
 
-export function getDiscoveryAbsPath(clusterId: string | null | undefined) {
-  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${DISCOVERY_REL_PATH}`
+export function getNetworkAbsPath(clusterId: string | null | undefined) {
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${NETWORK_REL_PATH}`
 }
 
 export function getStorageAbsPath(clusterId: string | null | undefined) {
@@ -75,8 +75,8 @@ export function getClusterAbsPath(clusterId: string | null | undefined) {
   return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CLUSTER_REL_PATH}`
 }
 
-export function getAccessAbsPath(clusterId: string | null | undefined) {
-  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${ACCESS_REL_PATH}`
+export function getRbacAbsPath(clusterId: string | null | undefined) {
+  return `/${KUBERNETES_ROOT_PATH}/${clusterId}/${RBAC_REL_PATH}`
 }
 
 export function getCustomResourcesAbsPath(

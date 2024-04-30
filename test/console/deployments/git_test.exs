@@ -290,7 +290,7 @@ defmodule Console.Deployments.GitTest do
       pra = insert(:pr_automation,
         identifier: "pluralsh/console",
         cluster: build(:cluster),
-        connection: conn,
+        connection: conn
       )
 
       {:error, _} = Git.create_pull_request(%{}, pra.id, "pr-test", user)

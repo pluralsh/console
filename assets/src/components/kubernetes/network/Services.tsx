@@ -17,19 +17,19 @@ import { ResourceList } from '../common/ResourceList'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   SERVICES_REL_PATH,
-  getDiscoveryAbsPath,
+  getNetworkAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 
 import { useCluster } from '../Cluster'
 
 import { TableEndpoints, serviceTypeDisplayName } from './utils'
-import { getDiscoveryBreadcrumbs } from './Discovery'
+import { getNetworkBreadcrumbs } from './Network'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getDiscoveryBreadcrumbs(cluster),
+  ...getNetworkBreadcrumbs(cluster),
   {
     label: 'services',
-    url: `${getDiscoveryAbsPath(cluster?.id)}/${SERVICES_REL_PATH}`,
+    url: `${getNetworkAbsPath(cluster?.id)}/${SERVICES_REL_PATH}`,
   },
 ]
 

@@ -11,7 +11,8 @@ defmodule Console.Deployments.Stacks do
     StackRun,
     RunStep,
     RunLog,
-    GitRepository
+    GitRepository,
+    PullRequest
   }
 
   @preloads [:environment, :files, :observable_metrics]
@@ -24,6 +25,9 @@ defmodule Console.Deployments.Stacks do
 
   @spec get_stack!(binary) :: Stack.t
   def get_stack!(id), do: Repo.get!(Stack, id)
+
+  @spec get_stack_by_name(binary) :: Stack.t | nil
+  def get_stack_by_name(name), do: Repo.get_by(Stack, name: name)
 
   @spec get_run!(binary) :: StackRun.t
   def get_run!(id), do: Repo.get!(StackRun, id)
@@ -177,21 +181,43 @@ defmodule Console.Deployments.Stacks do
     |> when_ok(:insert)
   end
 
+  @poll_preloads ~w(repository environment files)a
+
   @doc """
   Polls a stack's git repo and creates a run if there's a new commit
   """
-  @spec poll(Stack.t) :: run_resp
+  @spec poll(Stack.t | PullRequest.t) :: run_resp
   def poll(%Stack{delete_run_id: id}) when is_binary(id),
     do: {:error, "stack is deleting"}
 
   def poll(%Stack{sha: sha} = stack) do
-    %{repository: repo} = stack = Repo.preload(stack, [:repository, :environment])
+    %{repository: repo} = stack = Repo.preload(stack, @poll_preloads)
     case Discovery.sha(repo, stack.git.ref) do
       {:ok, ^sha} -> {:error, "no new commit in repo"}
       {:ok, new_sha} -> create_run(stack, new_sha)
       err -> err
     end
   end
+
+  def poll(%PullRequest{sha: sha, ref: ref, stack_id: id} = pr) when is_binary(id) do
+    %{stack: %{repository: repo} = stack} = pr = Repo.preload(pr, [stack: @poll_preloads])
+    case Discovery.sha(repo, ref) do
+      {:ok, ^sha} -> {:error, "no new commit in repo for branch #{ref}"}
+      {:ok, new_sha} ->
+        start_transaction()
+        |> add_operation(:run, fn _ ->
+          create_run(stack, new_sha, %{pull_request_id: pr.id, dry_run: true})
+        end)
+        |> add_operation(:pr, fn _ ->
+          Ecto.Changeset.change(pr, %{ref: new_sha})
+          |> Repo.update()
+        end)
+        |> execute(extract: :run)
+      err -> err
+    end
+  end
+
+  def poll(_), do: {:error, "invalid parent"}
 
   @doc """
   Creates a new run for the stack with the given sha and optional additional attrs
@@ -247,27 +273,36 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
-  Determines if the stack has a run in progress
+  Determines if the stack or stack pr has a run in progress
   """
-  @spec running?(Stack.t) :: boolean
-  def running?(%Stack{id: id}) do
-    StackRun.for_stack(id)
+  @spec running?(Stack.t | PullRequest.t) :: boolean
+  def running?(parent) do
+    filter(parent)
     |> StackRun.running()
-    |> StackRun.wet()
     |> Repo.exists?()
+  end
+
+  defp filter(%Stack{id: id}) do
+    StackRun.for_stack(id)
+    |> StackRun.wet()
+  end
+
+  defp filter(%PullRequest{id: id, stack_id: sid}) do
+    StackRun.for_stack(sid)
+    |> StackRun.for_pr(id)
+    |> StackRun.dry()
   end
 
   @doc """
   Checks to see if a stack run can be dequeued (all runs before it have terminated), and marks
   it as pending.
   """
-  @spec dequeue(Stack.t) :: run_resp
-  def dequeue(%Stack{} = stack) do
-    unless running?(stack) do
-      StackRun.for_stack(stack.id)
+  @spec dequeue(Stack.t | PullRequest.t) :: run_resp
+  def dequeue(parent) do
+    unless running?(parent) do
+      filter(parent)
       |> StackRun.for_status(:queued)
       |> StackRun.ordered(asc: :id)
-      |> StackRun.wet()
       |> StackRun.limit(1)
       |> Repo.one()
       |> case do

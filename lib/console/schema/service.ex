@@ -136,7 +136,9 @@ defmodule Console.Schema.Service do
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
     has_many :context_bindings, ServiceContextBinding, on_replace: :delete
-    has_many :dependencies, ServiceDependency, on_replace: :delete
+    has_many :dependencies, ServiceDependency,
+      foreign_key: :service_id,
+      on_replace: :delete
     has_many :api_deprecations, through: [:components, :api_deprecations]
     has_many :contexts, through: [:context_bindings, :context]
     has_many :stage_services, StageService
@@ -166,6 +168,13 @@ defmodule Console.Schema.Service do
 
   def agent(query \\ __MODULE__) do
     from(s in query, where: s.name == "deploy-operator")
+  end
+
+  def errored(query \\ __MODULE__) do
+    from(s in query,
+      join: e in assoc(s, :errors),
+      distinct: true
+    )
   end
 
   def for_user(query \\ __MODULE__, %User{} = user) do

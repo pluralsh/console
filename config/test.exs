@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :console, Console.Repo,
   username: "postgres",
@@ -72,3 +72,6 @@ users:
   user:
     token: TEST
 """
+
+config :console, Console.Deployments.Metrics.Provider.NewRelic,
+  plug: {Req.Test, Console.Deployments.Metrics.Provider.NewRelic}

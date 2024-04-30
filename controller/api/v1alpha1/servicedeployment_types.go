@@ -29,14 +29,22 @@ type ServiceHelm struct {
 	ValuesFrom *corev1.SecretReference `json:"valuesFrom,omitempty"`
 	// +kubebuilder:validation:Optional
 	ValuesConfigMapRef *corev1.ConfigMapKeySelector `json:"valuesConfigMapRef,omitempty"`
+	// name of the helm release to use when applying
+	// +kubebuilder:validation:Optional
+	Release *string `json:"release,omitempty"`
+	// arbitrary yaml values to overlay
 	// +kubebuilder:validation:Optional
 	Values *runtime.RawExtension `json:"values,omitempty"`
+	// individual values files to overlay
 	// +kubebuilder:validation:Optional
 	ValuesFiles []*string `json:"valuesFiles,omitempty"`
+	// chart to use
 	// +kubebuilder:validation:Optional
 	Chart *string `json:"chart,omitempty"`
+	// chart version to use
 	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty"`
+	// pointer to the FluxCD helm repository to use
 	// +kubebuilder:validation:Optional
 	Repository *NamespacedName `json:"repository,omitempty"`
 }

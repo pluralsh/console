@@ -1,38 +1,37 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useMemo } from 'react'
-
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import {
   Maybe,
-  Rolebinding_RoleBindingList as RoleBindingListT,
-  Rolebinding_RoleBinding as RoleBindingT,
-  RoleBindingsQuery,
-  RoleBindingsQueryVariables,
-  useRoleBindingsQuery,
+  Role_RoleList as RoleListT,
+  Role_Role as RoleT,
+  RolesQuery,
+  RolesQueryVariables,
+  useRolesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
-  ROLE_BINDINGS_REL_PATH,
-  getAccessAbsPath,
+  ROLES_REL_PATH,
+  getRbacAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 
-import { getAccessBreadcrumbs } from './Access'
+import { getRbacBreadcrumbs } from './Rbac'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
-  ...getAccessBreadcrumbs(cluster),
+  ...getRbacBreadcrumbs(cluster),
   {
-    label: 'role bindings',
-    url: `${getAccessAbsPath(cluster?.id)}/${ROLE_BINDINGS_REL_PATH}`,
+    label: 'roles',
+    url: `${getRbacAbsPath(cluster?.id)}/${ROLES_REL_PATH}`,
   },
 ]
 
-const columnHelper = createColumnHelper<RoleBindingT>()
+const columnHelper = createColumnHelper<RoleT>()
 
-export default function RoleBindings() {
+export default function Roles() {
   const cluster = useCluster()
 
   useSetBreadcrumbs(useMemo(() => getBreadcrumbs(cluster), [cluster]))
@@ -45,16 +44,11 @@ export default function RoleBindings() {
   )
 
   return (
-    <ResourceList<
-      RoleBindingListT,
-      RoleBindingT,
-      RoleBindingsQuery,
-      RoleBindingsQueryVariables
-    >
+    <ResourceList<RoleListT, RoleT, RolesQuery, RolesQueryVariables>
       namespaced
       columns={columns}
-      query={useRoleBindingsQuery}
-      queryName="handleGetRoleBindingList"
+      query={useRolesQuery}
+      queryName="handleGetRoleList"
       itemsKey="items"
     />
   )
