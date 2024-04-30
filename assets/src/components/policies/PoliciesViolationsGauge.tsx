@@ -27,8 +27,8 @@ function PoliciesViolationsGauge({
       <Subtitle2H1>Clusters with Violations</Subtitle2H1>
       <Flex alignItems="center">
         <svg
-          width="150"
-          height="150"
+          width="100"
+          height="100"
           viewBox="0 0 200 200"
         >
           {values.map((value, index) => {
@@ -116,5 +116,7 @@ const Container = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.medium,
+  border: `1px solid ${theme.colors.border}`,
+  borderRadius: theme.borderRadiuses.large,
+  fontSize: 12,
 }))
