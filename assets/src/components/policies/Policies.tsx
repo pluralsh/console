@@ -16,7 +16,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { Title1H1 } from 'components/utils/typography/Text'
-import { usePolicyConstraintsQuery } from 'generated/graphql'
+import { Cluster, usePolicyConstraintsQuery } from 'generated/graphql'
 import { isNil } from 'lodash'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
@@ -26,6 +26,7 @@ import { createMapperWithFallback } from 'utils/mapping'
 
 import { PoliciesTable } from './PoliciesTable'
 import PoliciesViolationsGauge from './PoliciesViolationsGauge'
+import PoliciesFilter from './PoliciesFilter'
 
 const breadcrumbs: Breadcrumb[] = [
   { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
@@ -54,6 +55,9 @@ export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 function Policies() {
   const theme = useTheme()
   const [searchString, setSearchString] = useState('')
+  const [selectedCluster, setSelectedCluster] = useState<string>('')
+  const [selectedKind, setSelectedKind] = useState<string>('')
+  const [selectedNamespace, setSelectedNamespace] = useState<string>('')
   const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
   const [statusFilter, setStatusFilter] =
@@ -122,6 +126,32 @@ function Policies() {
     [policies]
   )
 
+  const filters = useMemo(
+    () =>
+      policies?.reduce(
+        (
+          acc: { clusters: Cluster[]; kinds: string[]; namespaces: string[] },
+          policy
+        ) => {
+          const cluster = policy?.node?.cluster
+
+          if (cluster) {
+            acc.clusters.push(cluster as Cluster)
+            if (policy?.node?.violations?.length) {
+              policy?.node?.violations?.forEach((violation) => {
+                acc.kinds.push(violation?.kind || '')
+                acc.namespaces.push(violation?.namespace || '')
+              })
+            }
+          }
+
+          return acc
+        },
+        { clusters: [], kinds: [], namespaces: [] }
+      ),
+    [policies]
+  )
+
   if (error) {
     return <GqlError error={error} />
   }
@@ -134,7 +164,19 @@ function Policies() {
       <div className="title">
         <Title1H1>Policies</Title1H1>
       </div>
-      <div className="filter" />
+      <div className="filter">
+        <PoliciesFilter
+          clusters={filters?.clusters}
+          kinds={filters?.kinds}
+          namespaces={filters?.namespaces}
+          selectedNamespace={selectedNamespace}
+          setSelectedNamespace={setSelectedNamespace}
+          selectedKind={selectedKind}
+          setSelectedKind={setSelectedKind}
+          selectedCluster={selectedCluster}
+          setSelectedCluster={setSelectedCluster}
+        />
+      </div>
       <div className="search">
         <Input
           placeholder="Search policies"
@@ -223,7 +265,7 @@ const PoliciesContainer = styled.div(({ theme }) => ({
   padding: theme.spacing.large,
   backgroundColor: theme.colors['fill-zero'],
   display: 'grid',
-  gridTemplateColumns: '1fr 1fr 188px',
+  gridTemplateColumns: '1fr 1fr 230px',
   gridTemplateRows: 'auto auto auto 1fr',
   gap: '16px 16px',
   gridAutoFlow: 'row',
