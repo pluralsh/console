@@ -6,7 +6,8 @@ defmodule Console.GraphQl.CustomTypes do
     serialize &mapish/1
     parse fn
       %Blueprint.Input.String{value: value}, _ ->
-        Jason.decode(value)
+        with {:error, _} <- Jason.decode(value),
+          do: {:error, "invalid json encoding"}
       %Blueprint.Input.Null{}, _ -> {:ok, nil}
       _, _ -> :error
     end
@@ -16,7 +17,8 @@ defmodule Console.GraphQl.CustomTypes do
     serialize &mapish/1
     parse fn
       %Blueprint.Input.String{value: value}, _ ->
-        Jason.decode(value)
+        with {:error, _} <- Jason.decode(value),
+          do: {:error, "invalid json encoding"}
       %Blueprint.Input.Null{}, _ -> {:ok, nil}
       _, _ -> :error
     end
