@@ -67,15 +67,17 @@ export default PoliciesFilter
 const PoliciesFiltersContainer = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  div: {
+  '> div': {
     borderRadius: 0,
+    borderBottom: 'none',
   },
-  'div:first-child': {
+  '>div:first-child': {
     borderTopLeftRadius: theme.borderRadiuses.large,
     borderTopRightRadius: theme.borderRadiuses.large,
   },
-  'div:last-child': {
+  '>div:last-child': {
     borderBottomLeftRadius: theme.borderRadiuses.large,
     borderBottomRightRadius: theme.borderRadiuses.large,
+    borderBottom: `1px solid ${theme.colors.border}`,
   },
 }))
