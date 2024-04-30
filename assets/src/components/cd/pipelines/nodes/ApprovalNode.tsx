@@ -103,12 +103,12 @@ export function ApprovalNode(props: EdgeNode) {
       <NodeCardList>
         {gates?.map((gate) =>
           gate?.approver ? (
-            <li>
+            <li key={gate.id}>
               <ApproverCard gate={gate} />
             </li>
           ) : (
             gate && (
-              <li>
+              <li key={gate.id}>
                 <ApproveButton id={gate.id} />
               </li>
             )

@@ -274,6 +274,7 @@ const globalSettingsRoutes = (
 
 const clusterDetailsRoutes = [
   <Route
+    key="cluster-main"
     path={CLUSTER_REL_PATH}
     element={<Cluster />}
   >
@@ -312,6 +313,7 @@ const clusterDetailsRoutes = [
     />
   </Route>,
   <Route
+    key="cluster-addon"
     path={`${CLUSTER_REL_PATH}/${CLUSTER_ADDONS_REL_PATH}/:${CLUSTER_ADDONS_PARAM_ID}`}
     element={<ClusterAddOnDetails />}
   >

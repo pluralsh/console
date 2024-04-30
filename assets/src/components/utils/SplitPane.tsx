@@ -1,5 +1,6 @@
 import {
   ComponentProps,
+  Ref,
   forwardRef,
   useCallback,
   useEffect,
@@ -101,19 +102,20 @@ const Pane1SC = styled(PaneSC)((_) => ({
 const Pane2SC = styled(PaneSC)((_) => ({}))
 
 export const SplitPane = forwardRef(
-  ({
-    id,
-    pane1,
-    pane2,
-    ref: refProp,
-    ...props
-  }: {
-    id: string
-    pane1: React.ReactNode
-    pane2: React.ReactNode
-  } & ComponentProps<typeof SplitPaneSC>) => {
-    const ref = useRef<HTMLDivElement>(null)
-    const pane1Ref = useRef<HTMLDivElement>(null)
+  (
+    {
+      id,
+      pane1,
+      pane2,
+      ...props
+    }: {
+      id: string
+      pane1: React.ReactNode
+      pane2: React.ReactNode
+    } & ComponentProps<typeof SplitPaneSC>,
+    parentRef: Ref<HTMLDivElement>
+  ) => {
+    const localRef = useRef<HTMLDivElement>(null)
     const [boxTop, setBoxTop] = useState(0)
     const [boxHeight, setBoxHeight] = useState(0)
     const [dragging, setDragging] = useState(false)
@@ -124,17 +126,17 @@ export const SplitPane = forwardRef(
     )
 
     useResizeObserver(
-      ref,
+      localRef,
       useCallback((rect) => {
         setBoxHeight(rect.height)
       }, [])
     )
     useEffect(() => {
       const updateTop = () => {
-        setBoxTop((pT) => ref.current?.getBoundingClientRect().top || pT)
+        setBoxTop((pT) => localRef.current?.getBoundingClientRect().top || pT)
       }
 
-      setBoxTop((pT) => ref.current?.getBoundingClientRect().top || pT)
+      setBoxTop((pT) => localRef.current?.getBoundingClientRect().top || pT)
       window.addEventListener('resize', updateTop)
 
       updateTop()
@@ -168,15 +170,10 @@ export const SplitPane = forwardRef(
 
     return (
       <SplitPaneSC
-        ref={mergeRefs([ref, refProp])}
+        ref={mergeRefs([localRef, parentRef])}
         {...props}
       >
-        <Pane1SC
-          ref={pane1Ref}
-          style={{ height: pane1Height }}
-        >
-          {pane1}
-        </Pane1SC>
+        <Pane1SC style={{ height: pane1Height }}>{pane1}</Pane1SC>
         <Resizer
           onMouseDown={(e) => {
             e.preventDefault()
