@@ -9,7 +9,6 @@ import {
   Sidebar as DSSidebar,
   DatabaseIcon,
   DiscordIcon,
-  DocumentIcon,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
@@ -26,6 +25,7 @@ import {
   ServersIcon,
   SidebarItem,
   SidebarSection,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
@@ -131,7 +131,7 @@ function getMenuItems({
     },
     {
       text: 'Policies',
-      icon: <DocumentIcon />,
+      icon: <WarningShieldIcon />,
       path: POLICIES_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
