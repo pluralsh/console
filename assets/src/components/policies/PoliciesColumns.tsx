@@ -1,19 +1,16 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useTheme } from 'styled-components'
 
 import { PolicyConstraint } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 
-import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-
 import { Chip, ErrorIcon } from '@pluralsh/design-system'
-import { getClusterIconUrl } from 'components/utils/Provider'
+import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
 
 const columnHelper = createColumnHelper<Edge<PolicyConstraint>>()
 
 export const ColPolicyName = columnHelper.accessor(({ node }) => node, {
   id: 'name',
-  header: 'Name',
+  header: 'Policy',
   meta: { truncate: true, gridTemplate: '1fr' },
   cell: function Cell({ getValue }) {
     const policy = getValue()
@@ -22,29 +19,15 @@ export const ColPolicyName = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-export const ColCluster = columnHelper.accessor(
-  ({ node }) => node?.cluster?.name,
-  {
-    id: 'clusterName',
-    header: 'Cluster',
-    cell: ({ getValue, row: { original } }) => {
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const theme = useTheme()
-      const clusterName = getValue()
+export const ColCluster = columnHelper.accessor(({ node }) => node?.cluster, {
+  id: 'cluster',
+  header: 'Cluster',
+  cell: function Cell({ getValue }) {
+    const cluster = getValue()
 
-      return (
-        <ColWithIcon
-          icon={getClusterIconUrl({
-            cluster: original?.node?.cluster,
-            mode: theme.mode,
-          })}
-        >
-          {clusterName}
-        </ColWithIcon>
-      )
-    },
-  }
-)
+    return <ColClusterContent cluster={cluster} />
+  },
+})
 
 export const ColViolations = columnHelper.accessor(({ node }) => node, {
   id: 'violations',
