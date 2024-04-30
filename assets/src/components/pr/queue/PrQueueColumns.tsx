@@ -220,7 +220,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-export const columns = [
+export const prColumns = [
   ColTitle,
   ColLink,
   ColStatus,

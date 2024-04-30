@@ -14,8 +14,8 @@ import { useNavigate } from 'react-router-dom'
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
 import {
+  PRS_REACT_VIRTUAL_OPTIONS,
   PR_QUERY_PAGE_SIZE,
-  REACT_VIRTUAL_OPTIONS,
 } from 'components/pr/queue/PrQueue'
 
 import { GqlError } from 'components/utils/Alert'
@@ -116,7 +116,7 @@ export default function PipelineList() {
       <FullHeightTableWrap>
         <Table
           columns={columns}
-          reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+          reactVirtualOptions={PRS_REACT_VIRTUAL_OPTIONS}
           data={data?.pipelines?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

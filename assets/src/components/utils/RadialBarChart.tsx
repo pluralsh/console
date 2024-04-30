@@ -8,13 +8,14 @@ import styled, { useTheme } from 'styled-components'
 import { useChartTheme } from './charts'
 import { ChartTooltip } from './ChartTooltip'
 
-const COLOR_MAP = {
+export const COLOR_MAP = {
   blue: '#99DAFF',
   orange: '#D596F4',
   green: '#99F5D5',
   purple: '#9FA3F9',
   red: '#F599A8',
 
+  'yellow-light': '#FFF9C2',
   'blue-light': '#C2E9FF',
   'orange-light': '#E7C3F9',
   'green-light': '#C7FAE8',

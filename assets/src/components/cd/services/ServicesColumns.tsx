@@ -96,7 +96,7 @@ export const ColCluster = columnHelper.accessor(
 export const ColRepo = columnHelper.accessor(({ node }) => node, {
   id: 'repository',
   header: 'Repository',
-  meta: { truncate: true, gridTemplate: 'minmax(180px,1fr)' },
+  meta: { truncate: true, gridTemplate: 'minmax(180px,0.65fr)' },
   cell: ({ getValue }) => {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const theme = useTheme()

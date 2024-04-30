@@ -2,7 +2,7 @@ import { Modal, Table } from '@pluralsh/design-system'
 import { PullRequestFragment } from 'generated/graphql'
 import { ComponentProps, useMemo } from 'react'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-import { columns as pullRequestsColumns } from 'components/pr/queue/PrQueueColumns'
+import { prColumns } from 'components/pr/queue/PrQueueColumns'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useTheme } from 'styled-components'
 
@@ -44,7 +44,7 @@ export function PipelinePullRequestsTable({
 }) {
   return (
     <Table
-      columns={pullRequestsColumns}
+      columns={prColumns}
       reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
       data={pullRequestEdges || []}
       virtualizeRows

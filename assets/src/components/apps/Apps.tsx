@@ -158,7 +158,7 @@ export default function Apps() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (configuration?.byok) navigate('/cd/clusters')
+    if (configuration?.byok) navigate('/home')
   }, [configuration, navigate])
 
   useSetBreadcrumbs(breadcrumbs)
