@@ -784,6 +784,9 @@ type DeploymentSettings {
   "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
   agentHelmValues: String
 
+  "The console's expected agent version"
+  agentVsn: String!
+
   "the latest known k8s version"
   latestK8sVsn: String!
 

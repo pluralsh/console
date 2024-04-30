@@ -47,10 +47,6 @@ defmodule Console.Schema.PullRequest do
     from(pr in query, where: pr.stack_id == ^stack_id)
   end
 
-  def open(query \\ __MODULE__) do
-    from(pr in query, where: pr.status == ^:open)
-  end
-
   def stack(query \\ __MODULE__) do
     from(pr in query, where: not is_nil(pr.stack_id))
   end
