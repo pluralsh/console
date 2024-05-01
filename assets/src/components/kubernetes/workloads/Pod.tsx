@@ -1,6 +1,6 @@
-import React, { ReactElement, useMemo } from 'react'
+import { Key, ReactElement, useMemo, useState } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
-import { SidecarItem, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { FormField, ListBoxItem, Select, SidecarItem, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
@@ -11,6 +11,7 @@ import {
   PodQueryVariables,
   Pod_PodDetail as PodT,
   usePodEventsQuery,
+  usePodLogsQuery,
   usePodQuery,
 } from '../../../generated/graphql-kubernetes'
 import LoadingIndicator from '../../utils/LoadingIndicator'
@@ -38,11 +39,17 @@ import ResourceLink from '../common/ResourceLink'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
+import { useTheme } from 'styled-components'
+import { ContainerLogsTable } from 'components/cd/cluster/pod/logs/ContainerLogs'
+import { SinceSecondsOptions, SinceSecondsSelectOptions } from 'components/cd/cluster/pod/logs/Logs'
+import { GqlError } from 'components/utils/Alert'
+import { reverse } from 'lodash'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
   { path: 'containers', label: 'Containers' },
   { path: 'events', label: 'Events' },
+  { path: 'logs', label: 'Logs'},
   { path: 'raw', label: 'Raw' },
 ] as const
 
@@ -202,6 +209,92 @@ export function PodContainers(): ReactElement {
         <Containers containers={pod?.containers} />
       </section>
     </>
+  )
+}
+
+export function PodLogs(): ReactElement {
+  const { name, namespace, clusterId } = useParams()
+  const pod = useOutletContext() as PodT
+  const theme = useTheme()
+  const containers: Array<string> = useMemo(
+    () => [
+      ...(pod.initContainers?.map((c) => c!.name!) ?? []),
+      ...(pod.containers?.map((c) => c!.name!) ?? []),
+    ],
+    [pod]
+  )
+  const [selected, setSelected] = useState<Key>(containers.at(0) as Key)
+
+  const { data, loading, refetch, error } = usePodLogsQuery({
+    client: KubernetesClient(clusterId ?? ''),
+    variables: {
+      container: selected as string,
+      name: name ?? '',
+      namespace: namespace ?? '',
+    },
+    fetchPolicy: 'no-cache',
+  })
+  const [sinceSeconds, setSinceSeconds] = useState<Key>(
+    SinceSecondsOptions.HalfHour as Key
+  )
+
+  if (error) return <GqlError error={error} header="Could not load pod logs" />
+
+  if (!data) return <LoadingIndicator />
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.medium,
+        height: '100%',
+      }}
+    >
+      <div
+        css={{
+          display: 'flex',
+          gap: theme.spacing.large,
+          '> *': { width: '100%' },
+        }}
+      >
+        <FormField label="Container">
+          {/* @ts-ignore */}
+          <Select
+            selectedKey={selected}
+            onSelectionChange={(key) => setSelected(key)}
+          >
+            {containers.map((c) => (
+              <ListBoxItem
+                key={c}
+                label={c}
+              />
+            ))}
+          </Select>
+        </FormField>
+
+        <FormField label="Logs since">
+          <Select
+            selectedKey={`${sinceSeconds}`}
+            onSelectionChange={(key) => setSinceSeconds(key)}
+          >
+            {SinceSecondsSelectOptions.map((opts) => (
+              <ListBoxItem
+                key={`${opts.key}`}
+                label={opts.label}
+                selected={opts.key === sinceSeconds}
+              />
+            ))}
+          </Select>
+        </FormField>
+      </div>
+      <ContainerLogsTable
+        logs={reverse(data?.handleLogs?.logs.map((line) => line?.content || '') || [])}
+        loading={loading}
+        refetch={refetch}
+        container={selected as string}
+      />
+    </div>
   )
 }
 

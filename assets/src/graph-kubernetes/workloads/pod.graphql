@@ -83,3 +83,24 @@ query PodEvents(
     ...EventList
   }
 }
+
+query PodLogs(
+  $name: String!
+  $namespace: String!
+  $container: String!
+  $itemsPerPage: String
+  $page: String
+) {
+  handleLogs(
+    pod: $name
+    namespace: $namespace
+    container: $container
+    itemsPerPage: $itemsPerPage
+    page: $page
+  )
+    @rest(
+      path: "log/{args.namespace}/{args.pod}?container={args.container}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+    ) {
+    ...LogDetails
+  }
+}

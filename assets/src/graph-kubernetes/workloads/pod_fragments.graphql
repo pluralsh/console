@@ -146,3 +146,18 @@ fragment PodList on pod_PodList {
     }
   }
 }
+
+fragment LogDetails on logs_LogDetails {
+  info {
+    podName
+    containerName
+    initContainerName
+    fromDate
+    toDate
+  }
+
+  logs {
+    timestamp
+    content
+  }
+}
