@@ -1,10 +1,7 @@
 import {
   Breadcrumb,
-  Chip,
   Input,
   SearchIcon,
-  SubTab,
-  TabList,
   TabPanel,
   Table,
   useSetBreadcrumbs,
@@ -17,12 +14,10 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { Title1H1 } from 'components/utils/typography/Text'
 import { Cluster, usePolicyConstraintsQuery } from 'generated/graphql'
-import { isNil } from 'lodash'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 import { extendConnection } from 'utils/graphql'
-import { createMapperWithFallback } from 'utils/mapping'
 
 import { PoliciesTable } from './PoliciesTable'
 import PoliciesViolationsGauge from './PoliciesViolationsGauge'
@@ -31,16 +26,6 @@ import PoliciesFilter from './PoliciesFilter'
 const breadcrumbs: Breadcrumb[] = [
   { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
 ]
-
-export const statusTabs = {
-  ALL: { label: 'All' },
-  PASSING: {
-    label: 'Passing',
-  },
-  VIOLATIONS: {
-    label: 'Violations',
-  },
-} as const
 
 const POLICIES_QUERY_PAGE_SIZE = 100
 
@@ -53,15 +38,13 @@ export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 }
 
 function Policies() {
-  const theme = useTheme()
   const [searchString, setSearchString] = useState('')
   const [selectedCluster, setSelectedCluster] = useState<string>('')
   const [selectedKind, setSelectedKind] = useState<string>('')
   const [selectedNamespace, setSelectedNamespace] = useState<string>('')
   const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
-  const [statusFilter, setStatusFilter] =
-    useState<keyof typeof statusTabs>('ALL')
+
   const [virtualSlice, setVirtualSlice] = useState<
     | {
         start: VirtualItem | undefined
@@ -112,19 +95,6 @@ function Policies() {
         ),
     })
   }, [fetchMore, pageInfo?.endCursor])
-
-  const statusCounts = useMemo<
-    Record<keyof typeof statusTabs, number | undefined>
-  >(
-    () => ({
-      ALL: policies?.length,
-      PASSING: policies?.filter((edge) => edge?.node?.violationCount === 0)
-        .length,
-      VIOLATIONS: policies?.filter((edge) => edge?.node?.violationCount !== 0)
-        .length,
-    }),
-    [policies]
-  )
 
   const filters = useMemo(
     () =>
@@ -187,49 +157,6 @@ function Policies() {
           }}
         />
       </div>
-      <div
-        className="tabs"
-        css={{
-          justifySelf: 'end',
-          '.statusTab': {
-            display: 'flex',
-            gap: theme.spacing.small,
-            alignItems: 'center',
-          },
-        }}
-      >
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: statusFilter,
-            onSelectionChange: (key) => {
-              setStatusFilter(key as keyof typeof statusTabs)
-            },
-          }}
-        >
-          {Object.keys(statusTabs)?.map((key) => (
-            <SubTab
-              key={key}
-              textValue={statusTabs[key].label}
-              className="statusTab"
-            >
-              {statusTabs[key].label}
-              {!isNil(statusCounts?.[key]) && (
-                <Chip
-                  size="small"
-                  severity={policyStatusToSeverity(
-                    key as keyof typeof statusTabs
-                  )}
-                  loading={isNil(statusCounts?.[key])}
-                >
-                  {statusCounts?.[key]}
-                </Chip>
-              )}
-            </SubTab>
-          ))}
-        </TabList>
-      </div>
       <div className="violations">
         <PoliciesViolationsGauge
           clustersWithViolations={
@@ -238,7 +165,6 @@ function Policies() {
           totalClusters={policies?.length || 0}
         />
       </div>
-      <div className="enforcement" />
       <div className="table">
         <TabPanel
           stateRef={tabStateRef}
@@ -271,8 +197,8 @@ const PoliciesContainer = styled.div(({ theme }) => ({
   gridAutoFlow: 'row',
   gridTemplateAreas: `
     "title title title"
-    "search tabs filter"
-    "violations enforcement filter"
+    "search search filter"
+    "violations violations filter"
     "table table filter"
   `,
   '.title': {
@@ -284,28 +210,10 @@ const PoliciesContainer = styled.div(({ theme }) => ({
   '.search': {
     gridArea: 'search',
   },
-  '.tabs': {
-    gridArea: 'tabs',
-  },
   '.violations': {
     gridArea: 'violations',
-  },
-  '.enforcement': {
-    gridArea: 'enforcement',
   },
   '.table': {
     gridArea: 'table',
   },
 }))
-
-export const policyStatusToSeverity = createMapperWithFallback<
-  keyof typeof statusTabs,
-  ComponentProps<typeof Chip>['severity']
->(
-  {
-    VIOLATIONS: 'critical',
-    PASSING: 'success',
-    ALL: 'neutral',
-  },
-  'neutral'
-)
