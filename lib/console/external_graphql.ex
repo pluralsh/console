@@ -2,7 +2,7 @@ defmodule Console.ExternalGraphQl do
   use Absinthe.Schema
   use Absinthe.Relay.Schema, :modern
   alias Console.Middleware.{SafeResolution, ErrorHandler}
-  alias Console.GraphQl.Resolvers.{Deployments}
+  alias Console.GraphQl.Resolvers.{Deployments, User}
 
   defmodule Plug do
     # used to hack phoenix routing for `forward`
@@ -71,7 +71,7 @@ defmodule Console.ExternalGraphQl do
   import_types Console.GraphQl.Kubernetes.Deployment
   import_types Console.GraphQl.Kubernetes.DaemonSet
 
-  @sources [Deployments]
+  @sources [Deployments, User]
 
   def context(ctx) do
     loader = make_dataloader(@sources, ctx)
