@@ -1,5 +1,4 @@
 import { useMemo } from 'react'
-import { LoopingLogo } from '@pluralsh/design-system'
 import { useQuery } from '@apollo/client'
 import { memoryParser } from 'kubernetes-resource-parser'
 import { sumBy } from 'lodash'
@@ -110,7 +109,7 @@ export function ClusterGauges({
   }, [data, nodes, usage])
 
   if (!prometheusConnection) return null
-  if (!chartData) return <LoopingLogo />
+  if (!chartData) return null
 
   return (
     <>

@@ -30,6 +30,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
       {:kind, k}, q -> PolicyConstraint.for_kind(q, k)
       {:kinds, ks}, q -> PolicyConstraint.for_kinds(q, ks)
       {:namespaces, ns}, q -> PolicyConstraint.for_namespaces(q, ns)
+      {:clusters, ids}, q -> PolicyConstraint.for_clusters(q, ids)
       _, q -> q
     end)
   end
