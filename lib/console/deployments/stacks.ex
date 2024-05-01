@@ -268,7 +268,8 @@ defmodule Console.Deployments.Stacks do
   """
   @spec add_errors(StackRun.t, [map]) :: run_resp
   def add_errors(%StackRun{} = run, errors) do
-    StackRun.update_changeset(run, %{errors: errors})
+    Repo.preload(run, [:errors])
+    |> StackRun.update_changeset(%{errors: errors})
     |> Repo.update()
   end
 
