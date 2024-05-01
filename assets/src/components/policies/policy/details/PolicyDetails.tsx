@@ -1,7 +1,10 @@
 import { Chip, ErrorIcon, Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Body1P, Title1H1, Title2H1 } from 'components/utils/typography/Text'
 import { PolicyConstraintQuery } from 'generated/graphql'
+import { A } from 'honorable'
 import moment from 'moment'
+import { Link } from 'react-router-dom'
+import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -59,7 +62,15 @@ function PolicyDetails({
         )} */}
         {ref && <SidecarItem heading="Kind"> {ref.kind}</SidecarItem>}
         {cluster && (
-          <SidecarItem heading="Cluster name">{cluster?.name}</SidecarItem>
+          <SidecarItem heading="Cluster name">
+            <A
+              as={Link}
+              to={getClusterDetailsPath({ clusterId: cluster.id })}
+              inline
+            >
+              {cluster.name}
+            </A>
+          </SidecarItem>
         )}
       </Sidecar>
     </PolicyDetailsContainer>
