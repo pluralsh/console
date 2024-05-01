@@ -314,7 +314,7 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
     if (!cluster) {
       return null
     }
-    const protect = cluster.protect || cluster.self || !!cluster.deletedAt
+    const protect = cluster.protect || cluster.self
 
     return (
       <div
@@ -344,7 +344,7 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
               textValue="Detach cluster"
             />
           )}
-          {!protect && (
+          {!protect && !cluster.deletedAt && (
             <ListBoxItem
               key={MenuItemKey.Delete}
               leftContent={
