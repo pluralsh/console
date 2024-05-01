@@ -23,7 +23,7 @@ function Policy() {
   const { policyId } = params
 
   const route = params['*']
-  const { data } = usePolicyConstraintQuery({
+  const { data, loading } = usePolicyConstraintQuery({
     variables: {
       id: policyId || '',
     },
@@ -86,7 +86,11 @@ function Policy() {
       {isDetailsPath ? (
         <PolicyDetails policy={policy} />
       ) : (
-        <PolicyAffectedResources />
+        <PolicyAffectedResources
+          policyName={policy?.name}
+          violations={policy?.violations}
+          loading={loading}
+        />
       )}
     </PolicyContainer>
   )
