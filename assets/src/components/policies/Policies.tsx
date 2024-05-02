@@ -58,6 +58,8 @@ function Policies() {
     variables: {
       q: debouncedSearchString,
       first: POLICIES_QUERY_PAGE_SIZE,
+      kind: selectedKind || undefined,
+      namespace: selectedNamespace || undefined,
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
