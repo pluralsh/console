@@ -1,22 +1,41 @@
 import { Accordion, Radio, RadioGroup } from '@pluralsh/design-system'
+import {
+  ConstraintViolationField,
+  useViolationStatisticsQuery,
+} from 'generated/graphql'
 import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 
 function PoliciesFilter({
-  kinds,
   selectedKind,
   setSelectedKind,
-  namespaces,
   selectedNamespace,
   setSelectedNamespace,
 }: {
-  kinds?: string[]
   selectedKind: string
   setSelectedKind: Dispatch<SetStateAction<string>>
-  namespaces?: string[]
   selectedNamespace: string
   setSelectedNamespace: Dispatch<SetStateAction<string>>
 }) {
+  const { data: kindsData } = useViolationStatisticsQuery({
+    variables: {
+      field: ConstraintViolationField.Kind,
+    },
+  })
+  const { data: namspacesData } = useViolationStatisticsQuery({
+    variables: {
+      field: ConstraintViolationField.Namespace,
+    },
+  })
+
+  const kinds = kindsData?.violationStatistics
+    ?.map((statistic) => statistic?.value || '')
+    .filter(Boolean)
+
+  const namespaces = namspacesData?.violationStatistics
+    ?.map((statistic) => statistic?.value || '')
+    .filter(Boolean)
+
   return (
     <PoliciesFiltersContainer>
       <Accordion label="Kind">

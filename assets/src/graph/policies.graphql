@@ -69,3 +69,11 @@ query PolicyConstraint($id: ID!) {
     # }
   }
 }
+
+query ViolationStatistics($field: ConstraintViolationField!) {
+  violationStatistics(field: $field) {
+    count
+    value
+    violations
+  }
+}
