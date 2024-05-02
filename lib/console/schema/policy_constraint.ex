@@ -43,6 +43,10 @@ defmodule Console.Schema.PolicyConstraint do
     from(p in query, where: p.cluster_id == ^cluster_id)
   end
 
+  def for_clusters(query \\ __MODULE__, cluster_ids) do
+    from(p in query, where: p.cluster_id in ^cluster_ids)
+  end
+
   def for_namespace(query \\ __MODULE__, ns) do
     from(p in query,
       join: v in assoc(p, :violations),

@@ -5410,6 +5410,7 @@ export type RootQueryTypePolicyConstraintArgs = {
 export type RootQueryTypePolicyConstraintsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   first?: InputMaybe<Scalars['Int']['input']>;
   kind?: InputMaybe<Scalars['String']['input']>;
   kinds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;

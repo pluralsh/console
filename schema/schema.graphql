@@ -330,7 +330,7 @@ type RootQueryType {
   notificationRouters(after: String, first: Int, before: String, last: Int, q: String): NotificationRouterConnection
 
   policyConstraints(
-    after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], q: String
+    after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], clusters: [ID], q: String
   ): PolicyConstraintConnection
 
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
