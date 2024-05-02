@@ -13,3 +13,5 @@ names:
 - flux
 - opentelemetry
 - kyverno
+- vitess
+- strimzi
