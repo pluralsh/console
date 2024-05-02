@@ -150,12 +150,14 @@ function Policies() {
         />
       </div>
       <div className="violations">
-        <PoliciesViolationsGauge
-          clustersWithViolations={
-            policies?.filter((pol) => pol?.node?.violationCount).length || 0
-          }
-          totalClusters={policies?.length || 0}
-        />
+        {policies && policies?.length > 0 && (
+          <PoliciesViolationsGauge
+            clustersWithViolations={
+              policies?.filter((pol) => pol?.node?.violationCount).length || 0
+            }
+            totalClusters={policies?.length || 0}
+          />
+        )}
       </div>
       <div className="table">
         <TabPanel
