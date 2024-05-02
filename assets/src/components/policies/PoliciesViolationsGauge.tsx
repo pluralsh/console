@@ -2,7 +2,7 @@ import { Subtitle2H1 } from 'components/utils/typography/Text'
 import { Flex } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
-const violationLabels = ['WITHOUT VIOLATIONS', 'WITH VIOLATIONS']
+const violationLabels = ['WITH VIOLATIONS', 'WITHOUT']
 
 function PoliciesViolationsGauge({
   clustersWithViolations,
@@ -13,13 +13,13 @@ function PoliciesViolationsGauge({
 }) {
   let startAngle = 180
   const values = [
-    totalClusters - clustersWithViolations,
     clustersWithViolations,
+    totalClusters - clustersWithViolations,
   ]
   const theme = useTheme()
   const fillColors = [
-    theme.colors['icon-success'],
     theme.colors['text-danger-light'],
+    theme.colors['icon-success'],
   ]
 
   return (
