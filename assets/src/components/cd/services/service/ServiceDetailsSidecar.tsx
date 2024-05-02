@@ -68,7 +68,10 @@ export function ServiceDetailsSidecar({
           gap: theme.spacing.small,
         }}
       >
-        <ServiceKick id={id} />
+        <ServiceKick
+          pulledAt={repository?.pulledAt}
+          id={id}
+        />
         {status === ServiceDeploymentStatus.Paused &&
           serviceDeployment.promotion === ServicePromotion.Ignore && (
             <ServicePromote id={id} />
