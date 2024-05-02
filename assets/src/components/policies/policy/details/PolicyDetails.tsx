@@ -44,7 +44,7 @@ function PolicyDetails({
       <Sidecar width={200}>
         <SidecarItem heading="Policy name"> {name}</SidecarItem>
         <SidecarItem heading="Last Updated">
-          {moment(updatedAt || insertedAt).format('lll')}
+          {moment(updatedAt || insertedAt).format('M/D/YYYY')}
         </SidecarItem>
         <SidecarItem heading="Violations">
           <Chip
