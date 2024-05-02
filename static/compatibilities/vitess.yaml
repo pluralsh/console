@@ -1,0 +1,56 @@
+icon: https://avatars.githubusercontent.com/u/33043890?s=48&v=4
+git_url: https://github.com/vitessio/vitess
+release_url: https://github.com/vitessio/vitess/releases/tag/v{vsn}
+versions:
+- version: 19.0
+  kube: ['1.28', '1.27', '1.26', '1.25'] 
+  requirements: []
+  incompatibilities: []
+- version: 18.0
+  kube: ['1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+- version: 17.0
+  kube: ['1.25', '1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+- version: 16.0
+  kube: ['1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+- version: 15.0
+  kube: ['1.24', '1.23', '1.22']
+  requirements: []
+  incompatibilities: []
+- version: 14.0
+  kube: ['1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+- version: 13.0
+  kube: ['1.22', '1.21', '1.20'] 
+  requirements: []
+  incompatibilities: []
+- version: 12.0
+  kube: ['1.22', '1.21', '1.20', '1.19', '1.18', '1.17']
+  requirements: []
+  incompatibilities: []
+- version: 10.0
+  kube: ['1.17', '1.16', '1.15']
+  requirements: []
+  incompatibilities: []
+- version: 9.0
+  kube: ['1.17', '1.16', '1.15']
+  requirements: []
+  incompatibilities: []
+- version: 8.0
+  kube: ['1.17', '1.16', '1.15']
+  requirements: []
+  incompatibilities: []
+- version: 7.0
+  kube: ['1.17', '1.16', '1.15']
+  requirements: []
+  incompatibilities: []
+- version: 6.0
+  kube: ['1.15', '1.14', '1.13']
+  requirements: []
+  incompatibilities: []
