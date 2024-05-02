@@ -14,7 +14,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { Title1H1 } from 'components/utils/typography/Text'
 import { usePolicyConstraintsQuery } from 'generated/graphql'
-import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
+import { ComponentProps, useCallback, useRef, useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
 import styled from 'styled-components'
 import { extendConnection } from 'utils/graphql'
@@ -97,28 +97,6 @@ function Policies() {
     })
   }, [fetchMore, pageInfo?.endCursor])
 
-  const filters = useMemo(
-    () =>
-      policies?.reduce(
-        (acc: { kinds: string[]; namespaces: string[] }, policy) => {
-          const cluster = policy?.node?.cluster
-
-          if (cluster) {
-            if (policy?.node?.violations?.length) {
-              policy?.node?.violations?.forEach((violation) => {
-                acc.kinds.push(violation?.kind || '')
-                acc.namespaces.push(violation?.namespace || '')
-              })
-            }
-          }
-
-          return acc
-        },
-        { kinds: [], namespaces: [] }
-      ),
-    [policies]
-  )
-
   if (error) {
     return <GqlError error={error} />
   }
@@ -133,8 +111,6 @@ function Policies() {
       </div>
       <div className="filter">
         <PoliciesFilter
-          kinds={filters?.kinds}
-          namespaces={filters?.namespaces}
           selectedNamespace={selectedNamespace}
           setSelectedNamespace={setSelectedNamespace}
           selectedKind={selectedKind}
