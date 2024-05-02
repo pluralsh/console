@@ -1,12 +1,8 @@
 import { Accordion, Radio, RadioGroup } from '@pluralsh/design-system'
-import { Cluster } from 'generated/graphql'
 import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 
 function PoliciesFilter({
-  clusters,
-  selectedCluster,
-  setSelectedCluster,
   kinds,
   selectedKind,
   setSelectedKind,
@@ -14,9 +10,6 @@ function PoliciesFilter({
   selectedNamespace,
   setSelectedNamespace,
 }: {
-  clusters?: Cluster[]
-  selectedCluster: string
-  setSelectedCluster: Dispatch<SetStateAction<string>>
   kinds?: string[]
   selectedKind: string
   setSelectedKind: Dispatch<SetStateAction<string>>
@@ -26,16 +19,6 @@ function PoliciesFilter({
 }) {
   return (
     <PoliciesFiltersContainer>
-      <Accordion label="Cluster">
-        <RadioGroup
-          name="radio-group-cluster"
-          value={selectedCluster}
-          onChange={setSelectedCluster}
-        >
-          <Radio value="">All</Radio>
-          {clusters?.map(({ id, name }) => <Radio value={id}>{name}</Radio>)}
-        </RadioGroup>
-      </Accordion>
       <Accordion label="Kind">
         <RadioGroup
           name="radio-group-kind"

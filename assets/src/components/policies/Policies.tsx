@@ -13,7 +13,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { Title1H1 } from 'components/utils/typography/Text'
-import { Cluster, usePolicyConstraintsQuery } from 'generated/graphql'
+import { usePolicyConstraintsQuery } from 'generated/graphql'
 import { ComponentProps, useCallback, useMemo, useRef, useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
 import styled from 'styled-components'
@@ -39,7 +39,6 @@ export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 function Policies() {
   const [searchString, setSearchString] = useState('')
-  const [selectedCluster, setSelectedCluster] = useState<string>('')
   const [selectedKind, setSelectedKind] = useState<string>('')
   const [selectedNamespace, setSelectedNamespace] = useState<string>('')
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -99,14 +98,10 @@ function Policies() {
   const filters = useMemo(
     () =>
       policies?.reduce(
-        (
-          acc: { clusters: Cluster[]; kinds: string[]; namespaces: string[] },
-          policy
-        ) => {
+        (acc: { kinds: string[]; namespaces: string[] }, policy) => {
           const cluster = policy?.node?.cluster
 
           if (cluster) {
-            acc.clusters.push(cluster as Cluster)
             if (policy?.node?.violations?.length) {
               policy?.node?.violations?.forEach((violation) => {
                 acc.kinds.push(violation?.kind || '')
@@ -117,7 +112,7 @@ function Policies() {
 
           return acc
         },
-        { clusters: [], kinds: [], namespaces: [] }
+        { kinds: [], namespaces: [] }
       ),
     [policies]
   )
@@ -136,15 +131,12 @@ function Policies() {
       </div>
       <div className="filter">
         <PoliciesFilter
-          clusters={filters?.clusters}
           kinds={filters?.kinds}
           namespaces={filters?.namespaces}
           selectedNamespace={selectedNamespace}
           setSelectedNamespace={setSelectedNamespace}
           selectedKind={selectedKind}
           setSelectedKind={setSelectedKind}
-          selectedCluster={selectedCluster}
-          setSelectedCluster={setSelectedCluster}
         />
       </div>
       <div className="search">
