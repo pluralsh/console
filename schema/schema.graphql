@@ -1447,6 +1447,12 @@ type ManagedNamespaceConnection {
   edges: [ManagedNamespaceEdge]
 }
 
+enum ConstraintEnforcement {
+  WARN
+  DENY
+  DRY_RUN
+}
+
 enum ConstraintViolationField {
   NAMESPACE
   KIND
@@ -1466,6 +1472,8 @@ input PolicyConstraintAttributes {
   ref: ConstraintRefAttributes
 
   violations: [ViolationAttributes]
+
+  enforcement: ConstraintEnforcement
 }
 
 input ConstraintRefAttributes {
@@ -1493,6 +1501,8 @@ type PolicyConstraint {
   recommendation: String
 
   violationCount: Int
+
+  enforcement: ConstraintEnforcement
 
   "Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints"
   object: KubernetesUnstructured
@@ -2292,6 +2302,8 @@ input HelmConfigAttributes {
 
   release: String
 
+  url: String
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -2563,6 +2575,9 @@ type ObjectReference {
 type HelmSpec {
   "the name of the chart this service is using"
   chart: String
+
+  "the helm repository url to use"
+  url: String
 
   "a helm values file to use with this service, requires auth and so is heavy to query"
   values: String

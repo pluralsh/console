@@ -39,7 +39,7 @@ defmodule Console.Deployments.Compatibilities.Table do
   end
 
   def handle_info(:poll, %State{table: table, static: true} = state) do
-    table = Enum.reduce(Static.compatibilities(), table, &KeyValueSet.put(&2, &1.name, &1))
+    table = Enum.reduce(Static.compatibilities(), table, &KeyValueSet.put!(&2, &1.name, &1))
     {:noreply, %{state | table: table}}
   end
 

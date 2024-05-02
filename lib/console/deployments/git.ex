@@ -14,13 +14,15 @@ defmodule Console.Deployments.Git do
     ScmWebhook,
     PrAutomation,
     PullRequest,
-    DependencyManagementService
+    DependencyManagementService,
+    HelmRepository
   }
 
   @cache Console.conf(:cache_adapter)
   @ttl :timer.minutes(30)
 
   @type repository_resp :: {:ok, GitRepository.t} | Console.error
+  @type helm_resp :: {:ok, HelmRepository.t} | Console.error
   @type connection_resp :: {:ok, ScmConnection.t} | Console.error
   @type webhook_resp :: {:ok, ScmWebhook.t} | Console.error
   @type automation_resp :: {:ok, PrAutomation.t} | Console.error
@@ -29,6 +31,8 @@ defmodule Console.Deployments.Git do
   def get_repository(id), do: Repo.get(GitRepository, id)
 
   def get_repository!(id), do: Repo.get!(GitRepository, id)
+
+  def get_helm_repository(url), do: Repo.get_by(HelmRepository, url: url)
 
   def get_by_url!(url), do: Repo.get_by!(GitRepository, url: url)
 
@@ -325,6 +329,16 @@ defmodule Console.Deployments.Git do
       {:ok, %{items: items}} -> {:ok, items}
       _ -> {:ok, []}
     end
+  end
+
+  @spec upsert_helm_repository(binary) :: helm_resp
+  def upsert_helm_repository(url) do
+    case Console.Repo.get_by(HelmRepository, url: url) do
+      %HelmRepository{} = repo -> repo
+      nil -> %HelmRepository{url: url}
+    end
+    |> HelmRepository.changeset()
+    |> Console.Repo.insert_or_update()
   end
 
   @doc """

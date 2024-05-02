@@ -1176,6 +1176,12 @@ export type ConsoleConfiguration = {
   vpnEnabled?: Maybe<Scalars['Boolean']['output']>;
 };
 
+export enum ConstraintEnforcement {
+  Deny = 'DENY',
+  DryRun = 'DRY_RUN',
+  Warn = 'WARN'
+}
+
 export type ConstraintRef = {
   __typename?: 'ConstraintRef';
   kind: Scalars['String']['output'];
@@ -1832,6 +1838,7 @@ export type HelmConfigAttributes = {
   /** pointer to a Plural GitRepository */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   set?: InputMaybe<HelmValueAttributes>;
+  url?: InputMaybe<Scalars['String']['input']>;
   values?: InputMaybe<Scalars['String']['input']>;
   valuesFiles?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   version?: InputMaybe<Scalars['String']['input']>;
@@ -1876,6 +1883,8 @@ export type HelmSpec = {
   repositoryId?: Maybe<Scalars['ID']['output']>;
   /** a list of helm name/value pairs to precisely set individual values */
   set?: Maybe<Array<Maybe<HelmValue>>>;
+  /** the helm repository url to use */
+  url?: Maybe<Scalars['String']['output']>;
   /** a helm values file to use with this service, requires auth and so is heavy to query */
   values?: Maybe<Scalars['String']['output']>;
   /** a list of relative paths to values files to use for helm applies */
@@ -3196,6 +3205,7 @@ export type PolicyConstraint = {
   __typename?: 'PolicyConstraint';
   cluster?: Maybe<Cluster>;
   description?: Maybe<Scalars['String']['output']>;
+  enforcement?: Maybe<ConstraintEnforcement>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
@@ -3212,6 +3222,7 @@ export type PolicyConstraint = {
 /** inputs to add constraint data from an OPA gatekeeper constraint CRD */
 export type PolicyConstraintAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
+  enforcement?: InputMaybe<ConstraintEnforcement>;
   name: Scalars['String']['input'];
   recommendation?: InputMaybe<Scalars['String']['input']>;
   /** pointer to the group/name for the CR */
