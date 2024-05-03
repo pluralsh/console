@@ -115,7 +115,10 @@ export default function ObservabilitySettings() {
     useUpdateDeploymentSettingsMutation()
 
   useSetBreadcrumbs(
-    useMemo(() => getGlobalSettingsBreadcrumbs({ page: 'repositories' }), [])
+    useMemo(
+      () => getGlobalSettingsBreadcrumbs({ page: 'observability Settings' }),
+      []
+    )
   )
 
   const allowSubmit = formState.hasUpdates
