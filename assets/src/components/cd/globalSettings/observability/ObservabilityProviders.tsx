@@ -17,8 +17,6 @@ import { GqlError } from 'components/utils/Alert'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
-import { StepH } from '../../ModalAlt'
-
 import { POLL_INTERVAL } from '../../ContinuousDeployment'
 
 import { getGlobalSettingsBreadcrumbs } from '../GlobalSettings'
@@ -104,7 +102,6 @@ function ObservabilityProviders() {
           rowGap: theme.spacing.small,
         }}
       >
-        <StepH>Providers</StepH>
         <FullHeightTableWrap>
           <Table
             columns={columns}
