@@ -317,6 +317,8 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:tags)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
+    |> foreign_key_constraint(:services, name: :global_services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")
+    |> foreign_key_constraint(:services, name: :services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")
     |> unique_constraint(:handle)
     |> unique_constraint([:name, :provider_id, :credential_id])
     |> put_new_change(:deploy_token, fn -> "deploy-#{Console.rand_alphanum(50)}" end)

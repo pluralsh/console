@@ -5,7 +5,7 @@ defprotocol Console.GraphQl.Exception do
 end
 
 defimpl Console.GraphQl.Exception, for: Any do
-  def error(_), do: {500, "unknown error"}
+  def error(_), do: {500, "unknown error (check the logs for more details)"}
 end
 
 defimpl Console.GraphQl.Exception, for: Ecto.NoResultsError do

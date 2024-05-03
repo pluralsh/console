@@ -466,6 +466,7 @@ defmodule Console.Deployments.Clusters do
   @spec detach_cluster(binary, User.t) :: cluster_resp
   def detach_cluster(id, %User{} = user) do
     get_cluster!(id)
+    |> Cluster.changeset()
     |> allow(user, :delete)
     |> when_ok(:delete)
     |> notify(:delete, user)
