@@ -80,6 +80,34 @@ defmodule Console.Deployments.ServicesTest do
       assert_receive {:event, %PubSub.ServiceCreated{item: ^service}}
     end
 
+    test "it can create a kustomize-based service and initial revision" do
+      cluster = insert(:cluster)
+      user = admin_user()
+
+      {:ok, service} = Services.create_service(%{
+        name: "my-service",
+        namespace: "my-service",
+        version: "0.0.1",
+        kustomize: %{path: "path"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster.id, user)
+
+      assert service.name == "my-service"
+      assert service.namespace == "my-service"
+      assert service.version == "0.0.1"
+      assert service.cluster_id == cluster.id
+      assert service.kustomize.path == "path"
+      assert service.status == :stale
+
+      %{revision: revision} = Console.Repo.preload(service, [:revision])
+      assert revision.kustomize.path == service.kustomize.path
+
+      {:ok, secrets} = Services.configuration(service)
+      assert secrets["name"] == "value"
+
+      assert_receive {:event, %PubSub.ServiceCreated{item: ^service}}
+    end
+
     test "you cannot create a service in a deleting cluster" do
       cluster = insert(:cluster, deleted_at: Timex.now())
       user = admin_user()
@@ -1114,6 +1142,23 @@ defmodule Console.Deployments.ServicesAsyncTest do
       assert content["Chart.yaml"]
 
       assert refetch(svc).sha == "sha"
+    end
+
+    test "it can fetch a chart for a helm service by url" do
+      svc = insert(:service,
+        helm: %{
+          url: "https://stefanprodan.github.io/podinfo",
+          chart: "podinfo",
+          version: "6.5.2"
+        }
+      )
+
+      {:ok, f} = Services.tarstream(svc)
+      {:ok, content} = Tar.tar_stream(f)
+      content = Map.new(content)
+      assert content["Chart.yaml"]
+
+      assert refetch(svc).sha == "98eeab2a630dbe6605266b635d0dfa0ce595bfe019b843f628c775ed1c588838"
     end
 
     test "it can splice in a new values.yaml.tpl" do

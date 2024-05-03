@@ -47,6 +47,7 @@ defmodule Console.Schema.Service do
       field :chart,         :string
       field :version,       :string
       field :release,       :string
+      field :url,           :string
       field :values_files,  {:array, :string}
       field :repository_id, :binary_id
 

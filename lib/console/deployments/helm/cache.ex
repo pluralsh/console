@@ -2,7 +2,7 @@ defmodule Console.Deployments.Helm.Cache do
   require Logger
   alias Kube.HelmChart
   alias Kube.HelmChart.Status
-  alias Console.Deployments.Tar
+  alias Console.Deployments.{Helm.Utils, Tar}
 
   defstruct [:dir, :touched]
 
@@ -48,10 +48,15 @@ defmodule Console.Deployments.Helm.Cache do
   end
 
   defp build_tarball(url, cache, path, chart) do
-    with {:ok, f} <- Tar.from_url(url),
-         {:ok, contents} <- Tar.tar_stream(f),
-         :ok <- Tar.tarball(path, remove_prefix(contents, chart)),
+    with {:ok, path} <- download_to(url, path, chart),
       do: open(cache, path)
+  end
+
+  def download_to(url, path, chart) do
+    with {:ok, tmp} <- Tar.from_url(url),
+         :ok <- File.open!(tmp) |> Utils.clean_chart(path, chart),
+         :ok <- File.rm(tmp),
+      do: {:ok, path}
   end
 
   def refresh(%__MODULE__{touched: touched} = cache) do
@@ -81,8 +86,4 @@ defmodule Console.Deployments.Helm.Cache do
     end
   end
   defp reason(_), do: "downloading"
-
-  defp remove_prefix(contents, chart) do
-    Enum.map(contents, fn {path, content} -> {String.trim_leading(path, "#{chart}/"), content} end)
-  end
 end

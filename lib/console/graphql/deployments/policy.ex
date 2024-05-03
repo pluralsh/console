@@ -2,6 +2,8 @@ defmodule Console.GraphQl.Deployments.Policy do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
 
+  ecto_enum :constraint_enforcement, Console.Schema.PolicyConstraint.Enforcement
+
   enum :constraint_violation_field do
     value :namespace
     value :kind
@@ -15,6 +17,7 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :violation_count, :integer
     field :ref,             :constraint_ref_attributes, description: "pointer to the group/name for the CR"
     field :violations,      list_of(:violation_attributes)
+    field :enforcement,     :constraint_enforcement
   end
 
   input_object :constraint_ref_attributes do
@@ -38,6 +41,7 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :description,     :string
     field :recommendation,  :string
     field :violation_count, :integer
+    field :enforcement,     :constraint_enforcement
 
     field :object, :kubernetes_unstructured,
       description: "Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints",

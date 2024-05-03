@@ -52,7 +52,7 @@ defmodule Console.Schema.Revision do
     |> put_change(:id, Piazza.Ecto.UUID.generate_monotonic())
     |> cast_embed(:git)
     |> cast_embed(:helm)
-    |> cast_embed(:kustomize)
+    |> cast_embed(:kustomize, with: &Service.kustomize_changeset/2)
     |> cast_assoc(:configuration)
     |> validate_required(~w(version)a)
   end
