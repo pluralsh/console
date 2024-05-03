@@ -103,7 +103,7 @@ function SubmitRow({ allowSubmit, loading, formState }) {
   )
 }
 
-export default function GlobalSettingsObservability() {
+export default function ObservabilitySettings() {
   const theme = useTheme()
   const { deploymentSettings, refetch } = useGlobalSettingsContext()
   const formState = useUpdateState({

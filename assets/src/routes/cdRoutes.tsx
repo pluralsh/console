@@ -32,7 +32,7 @@ import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
 
-import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
+import ObservabilitySettings from 'components/cd/globalSettings/GlobalSettingsObservability'
 
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
 
@@ -267,7 +267,7 @@ const globalSettingsRoutes = (
     />
     <Route
       path="observability/settings"
-      element={<GlobalSettingsObservability />}
+      element={<ObservabilitySettings />}
     />
   </Route>
 )
