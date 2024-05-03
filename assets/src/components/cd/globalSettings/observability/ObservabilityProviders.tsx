@@ -1,7 +1,12 @@
 import { useTheme } from 'styled-components'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Button,
+  LoopingLogo,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 
 import { useObservabilityProvidersQuery } from 'generated/graphql'
 
@@ -22,6 +27,7 @@ import { POLL_INTERVAL } from '../../ContinuousDeployment'
 import { getGlobalSettingsBreadcrumbs } from '../GlobalSettings'
 
 import { columns } from './ObservabilityProvidersColumns'
+import { EditObservabilityProviderModal } from './EditObservabilityProvider'
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -31,14 +37,13 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
 const OBSERVABILITY_PROVIDER_QUERY_PAGE_SIZE = 100
 
 function ObservabilityProviders() {
-  const theme = useTheme()
-
   useSetBreadcrumbs(
     useMemo(
       () => getGlobalSettingsBreadcrumbs({ page: 'observability providers' }),
       []
     )
   )
+
   const [virtualSlice, _setVirtualSlice] = useState<
     | {
         start: VirtualItem | undefined
@@ -94,33 +99,51 @@ function ObservabilityProviders() {
   }
 
   return (
-    <ScrollablePage heading="Observability Providers">
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          rowGap: theme.spacing.small,
-        }}
-      >
-        <FullHeightTableWrap>
-          <Table
-            columns={columns}
-            reactTableOptions={{ meta: { refetch } }}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-            data={data?.observabilityProviders?.edges || []}
-            virtualizeRows
-            hasNextPage={pageInfo?.hasNextPage}
-            fetchNextPage={fetchNextPage}
-            isFetchingNextPage={loading}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
-      </div>
+    <ScrollablePage
+      heading="Observability Providers"
+      headingContent={<AddProviderButton />}
+    >
+      <FullHeightTableWrap>
+        <Table
+          columns={columns}
+          reactTableOptions={{ meta: { refetch } }}
+          reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+          data={data?.observabilityProviders?.edges || []}
+          virtualizeRows
+          hasNextPage={pageInfo?.hasNextPage}
+          fetchNextPage={fetchNextPage}
+          isFetchingNextPage={loading}
+          css={{
+            maxHeight: 'unset',
+            height: '100%',
+          }}
+        />
+      </FullHeightTableWrap>
     </ScrollablePage>
   )
 }
 
 export default ObservabilityProviders
+
+function AddProviderButton() {
+  const [open, setOpen] = useState(false)
+  const theme = useTheme()
+
+  return (
+    <>
+      <Button
+        primary
+        onClick={() => {
+          setOpen(true)
+        }}
+        css={{ marginRight: theme.spacing.large }}
+      >
+        New Provider
+      </Button>
+      <EditObservabilityProviderModal
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </>
+  )
+}
