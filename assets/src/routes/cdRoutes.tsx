@@ -50,6 +50,8 @@ import NamespacesDetailView from 'components/cd/namespaces/NamespacesDetailView'
 
 import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
 
+import ObservabilityProviders from 'components/cd/globalSettings/observability/ObservabilityProviders'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -268,6 +270,10 @@ const globalSettingsRoutes = (
     <Route
       path="observability/settings"
       element={<ObservabilitySettings />}
+    />
+    <Route
+      path="observability/providers"
+      element={<ObservabilityProviders />}
     />
   </Route>
 )

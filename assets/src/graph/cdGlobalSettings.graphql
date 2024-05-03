@@ -78,3 +78,9 @@ mutation UpsertObservabilityProvider(
     ...ObservabilityProvider
   }
 }
+
+mutation DeleteObservabilityProvider($id: ID!) {
+  deleteObservabilityProvider(id: $id) {
+    ...ObservabilityProvider
+  }
+}

@@ -7728,6 +7728,13 @@ export type UpsertObservabilityProviderMutationVariables = Exact<{
 
 export type UpsertObservabilityProviderMutation = { __typename?: 'RootMutationType', upsertObservabilityProvider?: { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type DeleteObservabilityProviderMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteObservabilityProviderMutation = { __typename?: 'RootMutationType', deleteObservabilityProvider?: { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type ManagedNamespaceFragment = { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null };
 
 export type ServiceTemplateFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
@@ -13284,6 +13291,39 @@ export function useUpsertObservabilityProviderMutation(baseOptions?: Apollo.Muta
 export type UpsertObservabilityProviderMutationHookResult = ReturnType<typeof useUpsertObservabilityProviderMutation>;
 export type UpsertObservabilityProviderMutationResult = Apollo.MutationResult<UpsertObservabilityProviderMutation>;
 export type UpsertObservabilityProviderMutationOptions = Apollo.BaseMutationOptions<UpsertObservabilityProviderMutation, UpsertObservabilityProviderMutationVariables>;
+export const DeleteObservabilityProviderDocument = gql`
+    mutation DeleteObservabilityProvider($id: ID!) {
+  deleteObservabilityProvider(id: $id) {
+    ...ObservabilityProvider
+  }
+}
+    ${ObservabilityProviderFragmentDoc}`;
+export type DeleteObservabilityProviderMutationFn = Apollo.MutationFunction<DeleteObservabilityProviderMutation, DeleteObservabilityProviderMutationVariables>;
+
+/**
+ * __useDeleteObservabilityProviderMutation__
+ *
+ * To run a mutation, you first call `useDeleteObservabilityProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteObservabilityProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteObservabilityProviderMutation, { data, loading, error }] = useDeleteObservabilityProviderMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteObservabilityProviderMutation(baseOptions?: Apollo.MutationHookOptions<DeleteObservabilityProviderMutation, DeleteObservabilityProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteObservabilityProviderMutation, DeleteObservabilityProviderMutationVariables>(DeleteObservabilityProviderDocument, options);
+      }
+export type DeleteObservabilityProviderMutationHookResult = ReturnType<typeof useDeleteObservabilityProviderMutation>;
+export type DeleteObservabilityProviderMutationResult = Apollo.MutationResult<DeleteObservabilityProviderMutation>;
+export type DeleteObservabilityProviderMutationOptions = Apollo.BaseMutationOptions<DeleteObservabilityProviderMutation, DeleteObservabilityProviderMutationVariables>;
 export const ManagedNamespacesDocument = gql`
     query ManagedNamespaces($first: Int, $after: String) {
   managedNamespaces(first: $first, after: $after) {
@@ -17100,6 +17140,7 @@ export const namedOperations = {
     DeleteGlobalService: 'DeleteGlobalService',
     UpdateDeploymentSettings: 'UpdateDeploymentSettings',
     UpsertObservabilityProvider: 'UpsertObservabilityProvider',
+    DeleteObservabilityProvider: 'DeleteObservabilityProvider',
     deletePipeline: 'deletePipeline',
     ApproveGate: 'ApproveGate',
     CreatePipelineContext: 'CreatePipelineContext',
