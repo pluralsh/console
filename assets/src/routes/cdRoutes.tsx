@@ -32,7 +32,7 @@ import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
 
-import ObservabilitySettings from 'components/cd/globalSettings/GlobalSettingsObservability'
+import ObservabilitySettings from 'components/cd/globalSettings/observability/ObservabilitySettings'
 
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
 
