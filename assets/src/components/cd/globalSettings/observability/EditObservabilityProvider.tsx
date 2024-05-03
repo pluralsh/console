@@ -27,7 +27,7 @@ function EditObservabilityProviderModalBase({
 }: {
   open: boolean
   onClose: Nullable<() => void>
-  observabilityProvider: ObservabilityProviderFragment
+  observabilityProvider?: ObservabilityProviderFragment
 }) {
   const theme = useTheme()
   const {
@@ -35,8 +35,8 @@ function EditObservabilityProviderModalBase({
     update: updateFormState,
     hasUpdates,
   } = useUpdateState({
-    name: observabilityProvider.name || '',
-    type: observabilityProvider.type || ObservabilityProviderType.Datadog,
+    name: observabilityProvider?.name || '',
+    type: observabilityProvider?.type || ObservabilityProviderType.Datadog,
     credentials: {
       datadog: { apiKey: '', appKey: '' },
     } as ObservabilityProviderCredentialsAttributes,
@@ -75,7 +75,11 @@ function EditObservabilityProviderModalBase({
       onClose={onClose || undefined}
       asForm
       onSubmit={onSubmit}
-      header={`Update connection - ${observabilityProvider.name}`}
+      header={
+        observabilityProvider?.name
+          ? `Update provider - ${observabilityProvider.name}`
+          : 'New provider'
+      }
       actions={
         <div
           css={{
