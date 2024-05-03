@@ -39,7 +39,7 @@ export const columnHelper =
 
 const ColName = columnHelper.accessor(({ node }) => node?.name, {
   id: 'name',
-  header: 'Connection name',
+  header: 'Name',
   cell: function Cell({ getValue }) {
     return <>{getValue()}</>
   },
@@ -102,7 +102,7 @@ export function ObservabilityProviderTypeCell({ getValue }) {
 }
 export const ColType = columnHelper.accessor(({ node }) => node?.type, {
   id: 'type',
-  header: 'Provider type',
+  header: 'Type',
   cell: ObservabilityProviderTypeCell,
 })
 
@@ -220,4 +220,4 @@ export const ColLastActivity = columnHelper.accessor(
   }
 )
 
-export const columns = [ColType, ColName, ColActions]
+export const columns = [ColType, ColName, ColLastActivity, ColActions]
