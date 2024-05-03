@@ -7711,6 +7711,23 @@ export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
+export type ObservabilityProviderFragment = { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null };
+
+export type ObservabilityProvidersQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ObservabilityProvidersQuery = { __typename?: 'RootQueryType', observabilityProviders?: { __typename?: 'ObservabilityProviderConnection', edges?: Array<{ __typename?: 'ObservabilityProviderEdge', node?: { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null } } | null };
+
+export type UpsertObservabilityProviderMutationVariables = Exact<{
+  attributes: ObservabilityProviderAttributes;
+}>;
+
+
+export type UpsertObservabilityProviderMutation = { __typename?: 'RootMutationType', upsertObservabilityProvider?: { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type ManagedNamespaceFragment = { __typename?: 'ManagedNamespace', description?: string | null, deletedAt?: string | null, annotations?: Record<string, unknown> | null, id: string, insertedAt?: string | null, labels?: Record<string, unknown> | null, name: string, pullSecrets?: Array<string | null> | null, updatedAt?: string | null, target?: { __typename?: 'ClusterTarget', distro?: ClusterDistro | null, tags?: unknown | null } | null };
 
 export type ServiceTemplateFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, configuration?: Array<{ __typename?: 'ServiceConfiguration', name: string, value: string } | null> | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
@@ -9283,6 +9300,15 @@ export const DeploymentSettingsFragmentDoc = gql`
     ${HttpConnectionFragmentDoc}
 ${GitRepositoryFragmentDoc}
 ${PolicyBindingFragmentDoc}`;
+export const ObservabilityProviderFragmentDoc = gql`
+    fragment ObservabilityProvider on ObservabilityProvider {
+  id
+  name
+  type
+  insertedAt
+  updatedAt
+}
+    `;
 export const ManagedNamespaceFragmentDoc = gql`
     fragment ManagedNamespace on ManagedNamespace {
   description
@@ -13176,6 +13202,88 @@ export type DeploymentSettingsQueryHookResult = ReturnType<typeof useDeploymentS
 export type DeploymentSettingsLazyQueryHookResult = ReturnType<typeof useDeploymentSettingsLazyQuery>;
 export type DeploymentSettingsSuspenseQueryHookResult = ReturnType<typeof useDeploymentSettingsSuspenseQuery>;
 export type DeploymentSettingsQueryResult = Apollo.QueryResult<DeploymentSettingsQuery, DeploymentSettingsQueryVariables>;
+export const ObservabilityProvidersDocument = gql`
+    query ObservabilityProviders($first: Int, $after: String) {
+  observabilityProviders(first: $first, after: $after) {
+    edges {
+      node {
+        ...ObservabilityProvider
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+    ${ObservabilityProviderFragmentDoc}
+${PageInfoFragmentDoc}`;
+
+/**
+ * __useObservabilityProvidersQuery__
+ *
+ * To run a query within a React component, call `useObservabilityProvidersQuery` and pass it any options that fit your needs.
+ * When your component renders, `useObservabilityProvidersQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useObservabilityProvidersQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useObservabilityProvidersQuery(baseOptions?: Apollo.QueryHookOptions<ObservabilityProvidersQuery, ObservabilityProvidersQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ObservabilityProvidersQuery, ObservabilityProvidersQueryVariables>(ObservabilityProvidersDocument, options);
+      }
+export function useObservabilityProvidersLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ObservabilityProvidersQuery, ObservabilityProvidersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ObservabilityProvidersQuery, ObservabilityProvidersQueryVariables>(ObservabilityProvidersDocument, options);
+        }
+export function useObservabilityProvidersSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ObservabilityProvidersQuery, ObservabilityProvidersQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ObservabilityProvidersQuery, ObservabilityProvidersQueryVariables>(ObservabilityProvidersDocument, options);
+        }
+export type ObservabilityProvidersQueryHookResult = ReturnType<typeof useObservabilityProvidersQuery>;
+export type ObservabilityProvidersLazyQueryHookResult = ReturnType<typeof useObservabilityProvidersLazyQuery>;
+export type ObservabilityProvidersSuspenseQueryHookResult = ReturnType<typeof useObservabilityProvidersSuspenseQuery>;
+export type ObservabilityProvidersQueryResult = Apollo.QueryResult<ObservabilityProvidersQuery, ObservabilityProvidersQueryVariables>;
+export const UpsertObservabilityProviderDocument = gql`
+    mutation UpsertObservabilityProvider($attributes: ObservabilityProviderAttributes!) {
+  upsertObservabilityProvider(attributes: $attributes) {
+    ...ObservabilityProvider
+  }
+}
+    ${ObservabilityProviderFragmentDoc}`;
+export type UpsertObservabilityProviderMutationFn = Apollo.MutationFunction<UpsertObservabilityProviderMutation, UpsertObservabilityProviderMutationVariables>;
+
+/**
+ * __useUpsertObservabilityProviderMutation__
+ *
+ * To run a mutation, you first call `useUpsertObservabilityProviderMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertObservabilityProviderMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertObservabilityProviderMutation, { data, loading, error }] = useUpsertObservabilityProviderMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpsertObservabilityProviderMutation(baseOptions?: Apollo.MutationHookOptions<UpsertObservabilityProviderMutation, UpsertObservabilityProviderMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertObservabilityProviderMutation, UpsertObservabilityProviderMutationVariables>(UpsertObservabilityProviderDocument, options);
+      }
+export type UpsertObservabilityProviderMutationHookResult = ReturnType<typeof useUpsertObservabilityProviderMutation>;
+export type UpsertObservabilityProviderMutationResult = Apollo.MutationResult<UpsertObservabilityProviderMutation>;
+export type UpsertObservabilityProviderMutationOptions = Apollo.BaseMutationOptions<UpsertObservabilityProviderMutation, UpsertObservabilityProviderMutationVariables>;
 export const ManagedNamespacesDocument = gql`
     query ManagedNamespaces($first: Int, $after: String) {
   managedNamespaces(first: $first, after: $after) {
@@ -16908,6 +17016,7 @@ export const namedOperations = {
     GetGlobalServices: 'GetGlobalServices',
     GetServiceData: 'GetServiceData',
     DeploymentSettings: 'DeploymentSettings',
+    ObservabilityProviders: 'ObservabilityProviders',
     ManagedNamespaces: 'ManagedNamespaces',
     GetManagedNamespaceName: 'GetManagedNamespaceName',
     GetManagedNamespace: 'GetManagedNamespace',
@@ -16990,6 +17099,7 @@ export const namedOperations = {
     CreateGlobalService: 'CreateGlobalService',
     DeleteGlobalService: 'DeleteGlobalService',
     UpdateDeploymentSettings: 'UpdateDeploymentSettings',
+    UpsertObservabilityProvider: 'UpsertObservabilityProvider',
     deletePipeline: 'deletePipeline',
     ApproveGate: 'ApproveGate',
     CreatePipelineContext: 'CreatePipelineContext',
@@ -17070,6 +17180,7 @@ export const namedOperations = {
     GlobalService: 'GlobalService',
     HttpConnection: 'HttpConnection',
     DeploymentSettings: 'DeploymentSettings',
+    ObservabilityProvider: 'ObservabilityProvider',
     ManagedNamespace: 'ManagedNamespace',
     ServiceTemplate: 'ServiceTemplate',
     PipelineServiceDeployment: 'PipelineServiceDeployment',

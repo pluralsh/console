@@ -49,3 +49,32 @@ query DeploymentSettings {
     ...DeploymentSettings
   }
 }
+
+fragment ObservabilityProvider on ObservabilityProvider {
+  id
+  name
+  type
+  insertedAt
+  updatedAt
+}
+
+query ObservabilityProviders($first: Int, $after: String) {
+  observabilityProviders(first: $first, after: $after) {
+    edges {
+      node {
+        ...ObservabilityProvider
+      }
+    }
+    pageInfo {
+      ...PageInfo
+    }
+  }
+}
+
+mutation UpsertObservabilityProvider(
+  $attributes: ObservabilityProviderAttributes!
+) {
+  upsertObservabilityProvider(attributes: $attributes) {
+    ...ObservabilityProvider
+  }
+}
