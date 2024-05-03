@@ -266,7 +266,7 @@ const globalSettingsRoutes = (
       element={<SelfManage />}
     />
     <Route
-      path="observability"
+      path="observability/settings"
       element={<GlobalSettingsObservability />}
     />
   </Route>
