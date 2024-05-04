@@ -179,6 +179,14 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		Name:        ns.NamespaceName(),
 		Description: ns.Spec.Description,
 	}
+
+	if ns.Spec.Cascade != nil {
+		attr.Cascade = &console.CascadeAttributes{
+			Delete: ns.Spec.Cascade.Delete,
+			Detach: ns.Spec.Cascade.Detach,
+		}
+	}
+
 	if ns.Spec.Target != nil {
 		attr.Target = &console.ClusterTargetAttributes{
 			Distro: ns.Spec.Target.Distro,

@@ -232,6 +232,11 @@ spec:
               git:
                 description: GitRef ...
                 properties:
+                  files:
+                    description: Optional files to add to the manifests for this service
+                    items:
+                      type: string
+                    type: array
                   folder:
                     description: Folder ...
                     type: string
