@@ -24,6 +24,19 @@ defmodule Console.Deployments.Git.AgentTest do
       assert Process.alive?(pid)
     end
 
+    test "it can checkout and tarball a subfolder of a repo with additional files" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin", files: ["AGENT_VERSION"]})
+
+      {:ok, pid} = Discovery.start(git)
+
+      files = fetch_and_extract(pid, svc)
+      for f <- ~w(.git-askpass .ssh-askpass ssh-add),
+        do: assert files[f] == File.read!(Path.join("bin", f))
+
+      assert files["AGENT_VERSION"] == File.read!("AGENT_VERSION")
+    end
+
     @tag :skip
     test "it can fetch constraints from the bootstrap repo" do
       git = insert(:git_repository, url: "https://github.com/pluralsh/bootstrap.git")
@@ -86,6 +99,18 @@ defmodule Console.Deployments.Git.AgentTest do
       assert git.health == :pullable
       assert git.pulled_at
     end
+  end
+
+  defp fetch_and_extract(pid, svc) do
+    {:ok, f} = Agent.fetch(pid, svc)
+    {:ok, tmp} = Briefly.create()
+
+    IO.binstream(f, 1024)
+    |> Enum.into(File.stream!(tmp))
+    File.close(f)
+
+    {:ok, res} = :erl_tar.extract(tmp, [:compressed, :memory])
+    Enum.into(res, %{}, fn {name, content} -> {to_string(name), to_string(content)} end)
   end
 
   defp fetch_and_check(pid, svc) do

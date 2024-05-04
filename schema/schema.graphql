@@ -1262,6 +1262,9 @@ input GlobalServiceAttributes {
   reparent: Boolean
 
   template: ServiceTemplateAttributes
+
+  "behavior for all owned resources when this global service is deleted"
+  cascade: CascadeAttributes
 }
 
 "Attributes for configuring a managed namespace"
@@ -1284,6 +1287,9 @@ input ManagedNamespaceAttributes {
   service: ServiceTemplateAttributes
 
   target: ClusterTargetAttributes
+
+  "behavior for all owned resources when this global service is deleted"
+  cascade: CascadeAttributes
 }
 
 "Attributes for configuring a service in something like a managed namespace"
@@ -1330,6 +1336,12 @@ input ClusterTargetAttributes {
   distro: ClusterDistro
 }
 
+"Whether you want to delete or detach owned resources"
+input CascadeAttributes {
+  delete: Boolean
+  detach: Boolean
+}
+
 "a rules based mechanism to redeploy a service across a fleet of clusters"
 type GlobalService {
   "internal id of this global service"
@@ -1346,6 +1358,9 @@ type GlobalService {
 
   "whether you want to reparent existing plural services under this global service"
   reparent: Boolean
+
+  "behavior for all owned resources when this global service is deleted"
+  cascade: Cascade
 
   "the service template used to spawn services"
   template: ServiceTemplate
@@ -1387,6 +1402,9 @@ type ManagedNamespace {
 
   "the timestamp this namespace was deleted at, indicating it's currently draining"
   deletedAt: DateTime
+
+  "behavior for all owned resources when this global service is deleted"
+  cascade: Cascade
 
   "A template for creating the core service for this namespace"
   service: ServiceTemplate
@@ -1441,6 +1459,15 @@ type ClusterTarget {
 
   "kubernetes distribution to target"
   distro: ClusterDistro
+}
+
+"A spec for specifying cascade behavior on an owning resource"
+type Cascade {
+  "whether to perform a drain-delete for all owned resources"
+  delete: Boolean
+
+  "whether to perform a detach-delete for all owned resources"
+  detach: Boolean
 }
 
 type GlobalServiceConnection {
@@ -2373,6 +2400,7 @@ input ServiceCloneAttributes {
 input GitRefAttributes {
   ref: String!
   folder: String!
+  files: [String!]
 }
 
 input ConfigAttributes {
@@ -2571,6 +2599,9 @@ type GitRef {
 
   "the folder manifests live under"
   folder: String!
+
+  "a list of individual files to include as well"
+  files: [String!]
 }
 
 type ObjectReference {

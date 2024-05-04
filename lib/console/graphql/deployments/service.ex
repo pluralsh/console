@@ -82,6 +82,7 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :git_ref_attributes do
     field :ref,    non_null(:string)
     field :folder, non_null(:string)
+    field :files,  list_of(non_null(:string))
   end
 
   input_object :config_attributes do
@@ -216,6 +217,7 @@ defmodule Console.GraphQl.Deployments.Service do
   object :git_ref do
     field :ref,    non_null(:string), description: "a general git ref, either a branch name or commit sha understandable by `git checkout <ref>`"
     field :folder, non_null(:string), description: "the folder manifests live under"
+    field :files,  list_of(non_null(:string)), description: "a list of individual files to include as well"
   end
 
   object :object_reference do

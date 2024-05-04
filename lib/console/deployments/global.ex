@@ -79,16 +79,25 @@ defmodule Console.Deployments.Global do
   @spec delete(binary, User.t) :: global_resp
   def delete(global_id, %User{} = user) do
     start_transaction()
-    |> add_operation(:owned, fn _ ->
-      Service.for_owner(global_id)
-      |> Repo.update_all(set: [owner_id: nil])
-      |> ok()
-    end)
     |> add_operation(:global, fn _ ->
       get!(global_id)
       |> allow(user, :write)
-      |> when_ok(:delete)
     end)
+    |> add_operation(:cascade, fn
+      %{global: %GlobalService{cascade: %GlobalService.Cascade{delete: true}}} ->
+        Service.for_owner(global_id)
+        |> Repo.update_all(set: [deleted_at: Timex.now()])
+        |> ok()
+      %{global: %GlobalService{cascade: %GlobalService.Cascade{detach: true}}} ->
+        Service.for_owner(global_id)
+        |> Repo.delete_all()
+        |> ok()
+      %{global: _} ->
+        Service.for_owner(global_id)
+        |> Repo.update_all(set: [owner_id: nil])
+        |> ok()
+    end)
+    |> add_operation(:delete, fn %{global: global} -> Repo.delete(global) end)
     |> execute(extract: :global)
     |> notify(:delete, user)
   end

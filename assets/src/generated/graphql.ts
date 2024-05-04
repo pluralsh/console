@@ -519,6 +519,21 @@ export type CanaryStatus = {
   phase?: Maybe<Scalars['String']['output']>;
 };
 
+/** A spec for specifying cascade behavior on an owning resource */
+export type Cascade = {
+  __typename?: 'Cascade';
+  /** whether to perform a drain-delete for all owned resources */
+  delete?: Maybe<Scalars['Boolean']['output']>;
+  /** whether to perform a detach-delete for all owned resources */
+  detach?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** Whether you want to delete or detach owned resources */
+export type CascadeAttributes = {
+  delete?: InputMaybe<Scalars['Boolean']['input']>;
+  detach?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type Certificate = {
   __typename?: 'Certificate';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -1645,6 +1660,8 @@ export enum GitHealth {
 /** a representation of where to pull manifests from git */
 export type GitRef = {
   __typename?: 'GitRef';
+  /** a list of individual files to include as well */
+  files?: Maybe<Array<Scalars['String']['output']>>;
   /** the folder manifests live under */
   folder: Scalars['String']['output'];
   /** a general git ref, either a branch name or commit sha understandable by `git checkout <ref>` */
@@ -1652,6 +1669,7 @@ export type GitRef = {
 };
 
 export type GitRefAttributes = {
+  files?: InputMaybe<Array<Scalars['String']['input']>>;
   folder: Scalars['String']['input'];
   ref: Scalars['String']['input'];
 };
@@ -1706,6 +1724,8 @@ export type GitStatus = {
 /** a rules based mechanism to redeploy a service across a fleet of clusters */
 export type GlobalService = {
   __typename?: 'GlobalService';
+  /** behavior for all owned resources when this global service is deleted */
+  cascade?: Maybe<Cascade>;
   /** the kubernetes distribution to target with this global service */
   distro?: Maybe<ClusterDistro>;
   /** internal id of this global service */
@@ -1739,6 +1759,8 @@ export type GlobalServiceServicesArgs = {
 
 /** A reference for a globalized service, which targets clusters based on the configured criteria */
 export type GlobalServiceAttributes = {
+  /** behavior for all owned resources when this global service is deleted */
+  cascade?: InputMaybe<CascadeAttributes>;
   /** kubernetes distribution to target */
   distro?: InputMaybe<ClusterDistro>;
   /** name for this global service */
@@ -2272,6 +2294,8 @@ export type ManagedNamespace = {
   __typename?: 'ManagedNamespace';
   /** annotations for this namespace */
   annotations?: Maybe<Scalars['Map']['output']>;
+  /** behavior for all owned resources when this global service is deleted */
+  cascade?: Maybe<Cascade>;
   /** the timestamp this namespace was deleted at, indicating it's currently draining */
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   /** A short description of the purpose of this namespace */
@@ -2306,6 +2330,8 @@ export type ManagedNamespaceServicesArgs = {
 export type ManagedNamespaceAttributes = {
   /** annotations for this namespace */
   annotations?: InputMaybe<Scalars['Json']['input']>;
+  /** behavior for all owned resources when this global service is deleted */
+  cascade?: InputMaybe<CascadeAttributes>;
   /** A short description of the purpose of this namespace */
   description?: InputMaybe<Scalars['String']['input']>;
   /** labels for this namespace */
