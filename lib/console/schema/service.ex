@@ -29,11 +29,12 @@ defmodule Console.Schema.Service do
     embedded_schema do
       field :ref,    :string
       field :folder, :string
+      field :files,  {:array, :string}
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(ref folder)a)
+      |> cast(attrs, ~w(ref folder files)a)
       |> validate_required(~w(ref folder)a)
     end
   end

@@ -98,6 +98,10 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              reparent:
+                description: Whether you'd want this global service to take ownership
+                  of existing Plural services
+                type: boolean
               serviceRef:
                 description: ServiceRef to replicate across clusters
                 properties:

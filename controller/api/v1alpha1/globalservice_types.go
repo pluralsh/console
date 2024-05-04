@@ -33,6 +33,10 @@ type GlobalServiceSpec struct {
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
 
+	// Whether you'd want this global service to take ownership of existing Plural services
+	// +kubebuilder:validation:Optional
+	Reparent *bool `json:"reparent,omitempty"`
+
 	// Distro of kubernetes this cluster is running
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Enum=GENERIC;EKS;AKS;GKE;RKE;K3S

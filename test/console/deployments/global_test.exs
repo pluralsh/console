@@ -61,6 +61,32 @@ defmodule Console.Deployments.GlobalTest do
 
       assert_receive {:event, %PubSub.GlobalServiceDeleted{item: ^deleted}}
     end
+
+    test "if cascade.delete is true, will drain all owned services" do
+      global = insert(:global_service, cascade: %{delete: true})
+      svc = insert(:service, owner: global)
+
+      {:ok, deleted} = Global.delete(global.id, admin_user())
+
+      assert deleted.id == global.id
+      assert refetch(svc).deleted_at
+      refute refetch(global)
+
+      assert_receive {:event, %PubSub.GlobalServiceDeleted{item: ^deleted}}
+    end
+
+    test "if cascade.detach is true, will detach all owned services" do
+      global = insert(:global_service, cascade: %{detach: true})
+      svc = insert(:service, owner: global)
+
+      {:ok, deleted} = Global.delete(global.id, admin_user())
+
+      assert deleted.id == global.id
+      refute refetch(svc)
+      refute refetch(global)
+
+      assert_receive {:event, %PubSub.GlobalServiceDeleted{item: ^deleted}}
+    end
   end
 
   describe "#sync_service/3" do

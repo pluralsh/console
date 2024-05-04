@@ -131,6 +131,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		Name:       globalService.Name,
 		Distro:     globalService.Spec.Distro,
 		ProviderID: provider.Status.ID,
+		Reparent:   globalService.Spec.Reparent,
 	}
 	if globalService.Spec.Template != nil {
 		namespace := globalService.GetNamespace()
@@ -156,27 +157,18 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	if !globalService.Status.HasID() {
 		controllerutil.AddFinalizer(globalService, GlobalServiceFinalizer)
-		var err error
-		var createGlobalService *console.GlobalServiceFragment
-		if service == nil {
-			createGlobalService, err = r.ConsoleClient.CreateGlobalServiceFromTemplate(attr)
-		} else {
-			createGlobalService, err = r.ConsoleClient.CreateGlobalService(*service.Status.ID, attr)
-		}
-		if err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
-		}
-		globalService.Status.ID = &createGlobalService.ID
-		globalService.Status.SHA = &sha
-		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-		return ctrl.Result{}, nil
+		return ctrl.Result{}, r.handleCreate(sha, globalService, service, attr)
 	}
 
 	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
+	if errors.IsNotFound(err) {
+		globalService.Status.ID = nil
+		return ctrl.Result{}, r.handleCreate(sha, globalService, service, attr)
+	}
+
 	if err != nil {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return requeue, err
 	}
 
 	if !globalService.Status.IsSHAEqual(sha) {
@@ -197,6 +189,24 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	globalService.Status.SHA = &sha
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	return ctrl.Result{}, nil
+}
+
+func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.GlobalService, svc *v1alpha1.ServiceDeployment, attrs console.GlobalServiceAttributes) error {
+	var err error
+	var createGlobalService *console.GlobalServiceFragment
+	if svc == nil {
+		createGlobalService, err = r.ConsoleClient.CreateGlobalServiceFromTemplate(attrs)
+	} else {
+		createGlobalService, err = r.ConsoleClient.CreateGlobalService(*svc.Status.ID, attrs)
+	}
+	if err != nil {
+		utils.MarkCondition(global.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return err
+	}
+	global.Status.ID = &createGlobalService.ID
+	global.Status.SHA = &sha
+	utils.MarkCondition(global.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	return nil
 }
 
 func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.GlobalService) error {

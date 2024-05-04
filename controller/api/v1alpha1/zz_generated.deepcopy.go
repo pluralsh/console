@@ -1027,6 +1027,11 @@ func (in *GlobalServiceSpec) DeepCopyInto(out *GlobalServiceSpec) {
 			(*out)[key] = val
 		}
 	}
+	if in.Reparent != nil {
+		in, out := &in.Reparent, &out.Reparent
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Distro != nil {
 		in, out := &in.Distro, &out.Distro
 		*out = new(console_client_go.ClusterDistro)
