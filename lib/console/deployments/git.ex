@@ -104,6 +104,7 @@ defmodule Console.Deployments.Git do
   def delete_repository(id, %User{} = user) do
     try do
       get_repository!(id)
+      |> GitRepository.changeset()
       |> allow(user, :git)
       |> when_ok(:delete)
       |> notify(:delete, user)

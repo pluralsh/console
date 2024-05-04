@@ -131,6 +131,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		Name:       globalService.Name,
 		Distro:     globalService.Spec.Distro,
 		ProviderID: provider.Status.ID,
+		Reparent:   globalService.Spec.Reparent,
 	}
 	if globalService.Spec.Template != nil {
 		namespace := globalService.GetNamespace()
