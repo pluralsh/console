@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
     field :distro,      :cluster_distro, description: "kubernetes distribution to target"
     field :provider_id, :id, description: "cluster api provider to target"
+    field :reparent,    :boolean, description: "whether you want the global service to take ownership of existing plural services"
     field :template,    :service_template_attributes
   end
 
@@ -46,10 +47,11 @@ defmodule Console.GraphQl.Deployments.Global do
 
   @desc "a rules based mechanism to redeploy a service across a fleet of clusters"
   object :global_service do
-    field :id,     non_null(:id), description: "internal id of this global service"
-    field :name,   non_null(:string), description: "a human readable name for this global service"
-    field :tags,   list_of(:tag), description: "a set of tags to select clusters for this global service"
-    field :distro, :cluster_distro, description: "the kubernetes distribution to target with this global service"
+    field :id,       non_null(:id), description: "internal id of this global service"
+    field :name,     non_null(:string), description: "a human readable name for this global service"
+    field :tags,     list_of(:tag), description: "a set of tags to select clusters for this global service"
+    field :distro,   :cluster_distro, description: "the kubernetes distribution to target with this global service"
+    field :reparent, :boolean, description: "whether you want to reparent existing plural services under this global service"
 
     field :template, :service_template,   resolve: dataloader(Deployments), description: "the service template used to spawn services"
     field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"

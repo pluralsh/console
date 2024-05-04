@@ -1258,6 +1258,9 @@ input GlobalServiceAttributes {
   "cluster api provider to target"
   providerId: ID
 
+  "whether you want the global service to take ownership of existing plural services"
+  reparent: Boolean
+
   template: ServiceTemplateAttributes
 }
 
@@ -1340,6 +1343,9 @@ type GlobalService {
 
   "the kubernetes distribution to target with this global service"
   distro: ClusterDistro
+
+  "whether you want to reparent existing plural services under this global service"
+  reparent: Boolean
 
   "the service template used to spawn services"
   template: ServiceTemplate
