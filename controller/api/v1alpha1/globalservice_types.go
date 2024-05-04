@@ -27,6 +27,17 @@ func init() {
 	SchemeBuilder.Register(&GlobalService{}, &GlobalServiceList{})
 }
 
+// Cascade is a specification for deletion behavior of owned resources
+type Cascade struct {
+	// Whether you want to delete owned resources in Plural but leave kubernetes objects in-place
+	// +kubebuilder:validation:Optional
+	Detach *bool `json:"detach.omitempty"`
+
+	// Whether you want to delete owned resources in Plural and in the targeted k8s cluster
+	// +kubebuilder:validation:Optional
+	Delete *bool `json:"delete,omitempty"`
+}
+
 // GlobalServiceSpec defines the desired state of GlobalService
 type GlobalServiceSpec struct {
 	// Tags a set of tags to select clusters for this global service
@@ -36,6 +47,10 @@ type GlobalServiceSpec struct {
 	// Whether you'd want this global service to take ownership of existing Plural services
 	// +kubebuilder:validation:Optional
 	Reparent *bool `json:"reparent,omitempty"`
+
+	// Cascade deletion options for this global service
+	// +kubebuilder:validation:Optional
+	Cascade *Cascade `json:"cascade,omitempty"`
 
 	// Distro of kubernetes this cluster is running
 	// +kubebuilder:validation:Optional

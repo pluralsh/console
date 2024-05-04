@@ -44,6 +44,18 @@ spec:
                   type: string
                 description: Annotations for this namespace
                 type: object
+              cascade:
+                description: Cascade specifies how owned resources are deleted
+                properties:
+                  delete:
+                    description: Whether you want to delete owned resources in Plural
+                      and in the targeted k8s cluster
+                    type: boolean
+                  detach.omitempty:
+                    description: Whether you want to delete owned resources in Plural
+                      but leave kubernetes objects in-place
+                    type: boolean
+                type: object
               description:
                 description: Description a short description of the purpose of this
                   namespace
@@ -140,6 +152,12 @@ spec:
                   git:
                     description: Git settings to configure git for a service
                     properties:
+                      files:
+                        description: Optional files to add to the manifests for this
+                          service
+                        items:
+                          type: string
+                        type: array
                       folder:
                         description: Folder ...
                         type: string

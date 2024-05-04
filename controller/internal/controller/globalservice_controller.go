@@ -146,6 +146,13 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		attr.Template = st
 	}
 
+	if globalService.Spec.Cascade != nil {
+		attr.Cascade = &console.CascadeAttributes{
+			Delete: globalService.Spec.Cascade.Delete,
+			Detach: globalService.Spec.Cascade.Detach,
+		}
+	}
+
 	if globalService.Spec.Tags != nil {
 		attr.Tags = genGlobalServiceTags(globalService.Spec.Tags)
 	}

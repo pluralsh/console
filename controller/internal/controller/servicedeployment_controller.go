@@ -272,6 +272,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		attr.Git = &console.GitRefAttributes{
 			Ref:    service.Spec.Git.Ref,
 			Folder: service.Spec.Git.Folder,
+			Files:  service.Spec.Git.Files,
 		}
 	}
 	if service.Spec.ConfigurationRef != nil {
