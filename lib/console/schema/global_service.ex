@@ -3,8 +3,9 @@ defmodule Console.Schema.GlobalService do
   alias Console.Schema.{Service, Cluster, ClusterProvider, ServiceTemplate}
 
   schema "global_services" do
-    field :name, :string
-    field :distro, Cluster.Distro
+    field :reparent, :boolean
+    field :name,     :string
+    field :distro,   Cluster.Distro
 
     embeds_many :tags, Tag, on_replace: :delete do
       field :name,  :string
@@ -28,7 +29,7 @@ defmodule Console.Schema.GlobalService do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name service_id distro provider_id)a
+  @valid ~w(name reparent service_id distro provider_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

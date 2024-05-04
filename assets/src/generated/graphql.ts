@@ -1715,6 +1715,8 @@ export type GlobalService = {
   name: Scalars['String']['output'];
   /** whether to only apply to clusters with this provider */
   provider?: Maybe<ClusterProvider>;
+  /** whether you want to reparent existing plural services under this global service */
+  reparent?: Maybe<Scalars['Boolean']['output']>;
   /** the service to replicate across clusters */
   service?: Maybe<ServiceDeployment>;
   services?: Maybe<ServiceDeploymentConnection>;
@@ -1743,6 +1745,8 @@ export type GlobalServiceAttributes = {
   name: Scalars['String']['input'];
   /** cluster api provider to target */
   providerId?: InputMaybe<Scalars['ID']['input']>;
+  /** whether you want the global service to take ownership of existing plural services */
+  reparent?: InputMaybe<Scalars['Boolean']['input']>;
   /** the cluster tags to target */
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   template?: InputMaybe<ServiceTemplateAttributes>;
