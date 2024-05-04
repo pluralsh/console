@@ -548,6 +548,18 @@ defmodule Console.Deployments.ClustersTest do
       assert_receive {:event, %PubSub.ClusterDeleted{item: ^deleted}}
     end
 
+    test "it cannot detach with a global service within the cluster" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      service = insert(:service, cluster: cluster)
+      global = insert(:global_service, service: service)
+      insert(:service, owner: global)
+
+      {:ok, deleted} = Clusters.detach_cluster(cluster.id, user)
+
+      assert deleted.id == cluster.id
+    end
+
     test "non-writers cannot detach" do
       user = insert(:user)
       cluster = insert(:cluster)

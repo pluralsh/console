@@ -17,6 +17,23 @@ defmodule Console.Deployments.GlobalTest do
 
       assert_receive {:event, %PubSub.GlobalServiceCreated{item: ^global}}
     end
+
+    test "it can create a template global service" do
+      git = insert(:git_repository)
+      {:ok, global} = Global.create(%{
+        name: "templated",
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "main", folder: "k8s"},
+        }
+      }, admin_user())
+
+      assert global.name == "templated"
+
+      {:ok, deleted} = Global.delete(global.id, admin_user())
+
+      assert deleted.id == global.id
+    end
   end
 
   describe "#update/2" do
