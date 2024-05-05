@@ -65,6 +65,8 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
+  def changes(%__MODULE__{git: g}, sha1, sha2, folder), do: file_changes(g, sha1, sha2, folder)
+
   defp new_line(cache, repo, sha, path, filter) do
     with {:ok, _} <- git(repo, "checkout", [sha]),
          {:ok, msg} <- msg(repo),

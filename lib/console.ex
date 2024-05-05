@@ -218,5 +218,7 @@ defmodule Console do
     end
   end
 
+  def lines(str), do: String.split(str, ~r/\R/)
+
   def storage, do: Console.Storage.Git
 end

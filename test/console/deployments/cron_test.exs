@@ -203,8 +203,12 @@ defmodule Console.Deployments.CronTest do
 
   describe "#poll_stacks/0" do
     test "it can generate new stack runs" do
-      stack = insert(:stack, environment: [%{name: "ENV", value: "1"}], files: [%{path: "test.txt", content: "test"}])
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}], files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"}
+      )
       expect(Console.Deployments.Git.Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Console.Deployments.Git.Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"]} end)
 
       Cron.poll_stacks()
 

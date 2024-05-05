@@ -191,11 +191,13 @@ defmodule Console.Deployments.Stacks do
   def poll(%Stack{delete_run_id: id}) when is_binary(id),
     do: {:error, "stack is deleting"}
 
-  def poll(%Stack{sha: sha} = stack) do
+  def poll(%Stack{sha: sha, git: git} = stack) do
     %{repository: repo} = stack = Repo.preload(stack, @poll_preloads)
-    case Discovery.sha(repo, stack.git.ref) do
+    case Discovery.sha(repo, git.ref) do
       {:ok, ^sha} -> {:error, "no new commit in repo"}
-      {:ok, new_sha} -> create_run(stack, new_sha)
+      {:ok, new_sha} ->
+        with {:ok, new_sha} <- new_changes(repo, git, sha, new_sha),
+          do: create_run(stack, new_sha)
       err -> err
     end
   end
@@ -205,20 +207,30 @@ defmodule Console.Deployments.Stacks do
     case Discovery.sha(repo, ref) do
       {:ok, ^sha} -> {:error, "no new commit in repo for branch #{ref}"}
       {:ok, new_sha} ->
-        start_transaction()
-        |> add_operation(:run, fn _ ->
-          create_run(stack, new_sha, %{pull_request_id: pr.id, dry_run: true})
-        end)
-        |> add_operation(:pr, fn _ ->
-          Ecto.Changeset.change(pr, %{ref: new_sha})
-          |> Repo.update()
-        end)
-        |> execute(extract: :run)
+        with {:ok, new_sha} <- new_changes(repo, stack.git, sha, new_sha) do
+          start_transaction()
+          |> add_operation(:run, fn _ ->
+            create_run(stack, new_sha, %{pull_request_id: pr.id, dry_run: true})
+          end)
+          |> add_operation(:pr, fn _ ->
+            Ecto.Changeset.change(pr, %{ref: new_sha})
+            |> Repo.update()
+          end)
+          |> execute(extract: :run)
+        end
       err -> err
     end
   end
 
   def poll(_), do: {:error, "invalid parent"}
+
+  defp new_changes(repo, %{folder: folder}, sha1, sha2) do
+    case Discovery.changes(repo, sha1, sha2, folder) do
+      {:ok, [_ | _]} -> {:ok, sha2}
+      {:ok, :pass} -> {:ok, sha2}
+      _ -> {:error, "no changes within #{folder}"}
+    end
+  end
 
   @doc """
   Creates a new run for the stack with the given sha and optional additional attrs
@@ -241,13 +253,16 @@ defmodule Console.Deployments.Stacks do
       |> Repo.insert()
     end)
     |> add_operation(:stack, fn %{run: run} ->
-      Ecto.Changeset.change(stack, %{sha: sha})
+      Ecto.Changeset.change(stack, sha_attrs(run, sha))
       |> Stack.delete_changeset(delete_run(stack, run))
       |> Repo.update()
     end)
     |> execute(extract: :run)
     |> notify(:create)
   end
+
+  defp sha_attrs(%StackRun{dry_run: true}, _sha), do: %{}
+  defp sha_attrs(%StackRun{}, sha), do: %{sha: sha}
 
   defp delete_run(%Stack{deleted_at: d}, %{id: id}) when not is_nil(d),
     do: %{delete_run_id: id}

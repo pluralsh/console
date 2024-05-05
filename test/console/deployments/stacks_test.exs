@@ -143,8 +143,13 @@ defmodule Console.Deployments.StacksTest do
 
   describe "#poll/1" do
     test "it can create a new run when the sha changes" do
-      stack = insert(:stack, environment: [%{name: "ENV", value: "1"}], files: [%{path: "test.txt", content: "test"}])
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"}
+      )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"]} end)
 
       {:ok, run} = Stacks.poll(stack)
 
@@ -174,10 +179,16 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
     end
 
-    test "it can create a new run from a pr the sha changes" do
-      stack = insert(:stack, environment: [%{name: "ENV", value: "1"}], files: [%{path: "test.txt", content: "test"}])
+    test "it can create a new run from a pr if the sha changes" do
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"},
+        sha: "old-sha"
+      )
       pr = insert(:pull_request, stack: stack)
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"]} end)
 
       {:ok, run} = Stacks.poll(pr)
 
@@ -200,6 +211,7 @@ defmodule Console.Deployments.StacksTest do
       assert second.index == 1
 
       stack = refetch(stack)
+      assert stack.sha == "old-sha"
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
@@ -428,6 +440,29 @@ defmodule Console.Deployments.StacksTest do
       step = insert(:run_step)
 
       {:error, _} = Stacks.add_run_logs(%{content: "some logs"}, step.id, insert(:cluster))
+    end
+  end
+end
+
+defmodule Console.Deployments.StacksSyncTest do
+  use Console.DataCase, async: false
+  alias Console.Deployments.Stacks
+
+  describe "#poll/1" do
+    test "it will create runs when it detects changes" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      stack = insert(:stack,
+        repository: git,
+        git: %{ref: "master", folder: "charts"},
+        sha: "e136726eb7f3ef1d3578b8b250b1fc1957331a84"
+      )
+
+      {:ok, run} = Stacks.poll(stack)
+
+      assert run.status == :queued
+      refute run.dry_run
+      assert run.stack_id == stack.id
+      refute run.git.ref == stack.git.ref
     end
   end
 end
