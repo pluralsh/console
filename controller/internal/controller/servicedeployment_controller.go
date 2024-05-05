@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"sort"
 
 	console "github.com/pluralsh/console-client-go"
@@ -303,6 +304,21 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 				Namespace: service.Spec.Helm.Repository.Namespace,
 			}
 		}
+
+		if service.Spec.RepositoryRef != nil {
+			ref := service.Spec.RepositoryRef
+			var repo v1alpha1.GitRepository
+			if err := r.Get(ctx, client.ObjectKey{Name: ref.Name, Namespace: ref.Namespace}, &repo); err != nil {
+				return nil, err
+			}
+
+			if repo.Status.ID == nil {
+				return nil, fmt.Errorf("GitRepository %s/%s is not yet ready", ref.Namespace, ref.Name)
+			}
+
+			attr.Helm.RepositoryID = repo.Status.ID
+		}
+
 		if service.Spec.Helm.ValuesConfigMapRef != nil {
 			val, err := utils.GetConfigMapData(ctx, r.Client, service.GetNamespace(), service.Spec.Helm.ValuesConfigMapRef)
 			if err != nil {

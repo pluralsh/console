@@ -32,6 +32,9 @@ type ServiceHelm struct {
 	// name of the helm release to use when applying
 	// +kubebuilder:validation:Optional
 	Release *string `json:"release,omitempty"`
+	// reference to a GitRepository to source the helm chart from (useful if you're using a multi-source configuration for values files)
+	// +kubebuilder:validation:Optional
+	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
 	// arbitrary yaml values to overlay
 	// +kubebuilder:validation:Optional
 	Values *runtime.RawExtension `json:"values,omitempty"`

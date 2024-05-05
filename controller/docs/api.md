@@ -1316,6 +1316,7 @@ _Appears in:_
 | `valuesFrom` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Fetches the helm values from a secret in this cluster, will consider any key with yaml data a values file and merge them iteratively |  | Optional: {} <br /> |
 | `valuesConfigMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 | `release` _string_ | name of the helm release to use when applying |  | Optional: {} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | reference to a GitRepository to source the helm chart from (useful if you're using a multi-source configuration for values files) |  | Optional: {} <br /> |
 | `values` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | arbitrary yaml values to overlay |  | Optional: {} <br /> |
 | `valuesFiles` _string array_ | individual values files to overlay |  | Optional: {} <br /> |
 | `chart` _string_ | chart to use |  | Optional: {} <br /> |

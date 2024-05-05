@@ -2591,6 +2591,11 @@ func (in *ServiceHelm) DeepCopyInto(out *ServiceHelm) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.RepositoryRef != nil {
+		in, out := &in.RepositoryRef, &out.RepositoryRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	if in.Values != nil {
 		in, out := &in.Values, &out.Values
 		*out = new(runtime.RawExtension)
