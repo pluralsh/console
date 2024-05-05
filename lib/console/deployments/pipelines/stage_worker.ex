@@ -5,11 +5,16 @@ defmodule Console.Deployments.Pipelines.StageWorker do
   alias Console.Deployments.Pipelines
   alias Console.Schema.PipelineStage
 
+  @poll :timer.minutes(2)
+
   def start_link([shard]) do
     GenServer.start_link(__MODULE__, :ok, name: name(shard))
   end
 
-  def init(_), do: {:ok, %{}}
+  def init(_) do
+    :timer.send_interval(@poll, :cleanup)
+    {:ok, %{}}
+  end
 
   def dispatch(shard, %PipelineStage{} = stage),
     do: GenServer.cast(name(shard), stage)
@@ -34,4 +39,11 @@ defmodule Console.Deployments.Pipelines.StageWorker do
     end
     {:noreply, state}
   end
+
+  def handle_info(:cleanup, state) do
+    Briefly.cleanup()
+    {:noreply, state}
+  end
+
+  def handle_info(_, state), do: {:noreply, state}
 end

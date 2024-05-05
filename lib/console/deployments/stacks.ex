@@ -179,6 +179,7 @@ defmodule Console.Deployments.Stacks do
     |> RunLog.changeset(attrs)
     |> allow(cluster, :write)
     |> when_ok(:insert)
+    |> notify(:create)
   end
 
   @poll_preloads ~w(repository environment files)a
@@ -330,6 +331,8 @@ defmodule Console.Deployments.Stacks do
 
   defp notify({:ok, %StackRun{} = stack}, :create),
     do: handle_notify(PubSub.StackRunCreated, stack)
+  defp notify({:ok, %RunLog{} = log}, :create),
+    do: handle_notify(PubSub.RunLogsCreated, log)
   defp notify({:ok, %StackRun{} = stack}, :update),
     do: handle_notify(PubSub.StackRunUpdated, stack)
   defp notify({:ok, %StackRun{} = stack}, :delete),

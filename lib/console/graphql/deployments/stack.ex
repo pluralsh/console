@@ -205,6 +205,8 @@ defmodule Console.GraphQl.Deployments.Stack do
   connection node_type: :infrastructure_stack
   connection node_type: :stack_run
 
+  delta :run_logs
+
   object :public_stack_queries do
     connection field :cluster_stack_runs, node_type: :stack_run do
       middleware ClusterAuthenticated
@@ -304,6 +306,17 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.approve_stack_run/2
+    end
+  end
+
+  object :stack_subscriptions do
+    field :run_logs_delta, :run_logs_delta do
+      arg :step_id, non_null(:id)
+
+      config fn %{step_id: step_id}, ctx ->
+        with {:ok, step} <- Deployments.resolve_run_step(step_id, ctx),
+          do: {:ok, topic: "steps:#{step.id}"}
+      end
     end
   end
 end

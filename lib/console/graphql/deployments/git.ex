@@ -125,6 +125,17 @@ defmodule Console.GraphQl.Deployments.Git do
     field :cluster,    :namespaced_name
   end
 
+  @desc "attributes for a pull request pointer record"
+  input_object :pull_request_update_attributes do
+    field :title,      non_null(:string)
+    field :labels,     list_of(:string)
+    field :status,     non_null(:pr_status)
+    field :service_id, :id
+    field :cluster_id, :id
+    field :service,    :namespaced_name
+    field :cluster,    :namespaced_name
+  end
+
   @desc "The attributes to configure a new webhook for a SCM provider"
   input_object :scm_webhook_attributes do
     field :hmac,  non_null(:string), description: "the secret token for authenticating this webhook via hmac signature"
@@ -545,6 +556,21 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :attributes, :pull_request_attributes
 
       safe_resolve &Deployments.create_pr/2
+    end
+
+    field :update_pull_request, :pull_request do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, :pull_request_update_attributes
+
+      safe_resolve &Deployments.update_pr/2
+    end
+
+    field :delete_pull_request, :pull_request do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_pr/2
     end
   end
 end

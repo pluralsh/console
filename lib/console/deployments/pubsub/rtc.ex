@@ -1,5 +1,9 @@
 ## I need to find a way to provide authorization for this that's not a major perf drag
 
+defimpl Console.PubSub.Rtc, for: [Console.PubSub.RunLogsCreated] do
+  def deliver(%{item: item}), do: {item, :create}
+end
+
 # defimpl Console.PubSub.Rtc, for: [
 #   Console.PubSub.ServiceUpdated,
 #   Console.PubSub.ClusterUpdated,

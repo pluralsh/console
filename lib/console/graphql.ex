@@ -84,6 +84,7 @@ defmodule Console.GraphQl do
     import_fields :kubernetes_subscriptions
     import_fields :build_subscriptions
     import_fields :user_subscriptions
+    import_fields :stack_subscriptions
   end
 
   def safe_resolver(fun) do

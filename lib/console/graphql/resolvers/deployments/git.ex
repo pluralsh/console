@@ -102,6 +102,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def create_pr(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_pull_request(attrs, user)
 
+  def update_pr(%{attributes: attrs, id: id}, %{context: %{current_user: user}}),
+    do: Git.update_pr(attrs, id, user)
+
+  def delete_pr(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.delete_pr(id, user)
+
   def create_webhook_for_connection(%{owner: owner, connection_id: conn_id}, %{context: %{current_user: user}}),
     do: Git.create_webhook_for_connection(owner, conn_id, user)
 

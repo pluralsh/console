@@ -46,6 +46,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     |> allow(actor(ctx), :read)
   end
 
+  def resolve_run_step(step_id, %{context: %{current_user: user}}) do
+    Stacks.get_step!(step_id)
+    |> allow(user, :read)
+  end
+
   def create_stack(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Stacks.create_stack(attrs, user)
 

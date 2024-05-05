@@ -322,6 +322,28 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Deletes this reference to a pull request from the db
+  """
+  @spec delete_pr(binary, User.t) :: pull_request_resp
+  def delete_pr(id, %User{} = user) do
+    Repo.get(PullRequest, id)
+    |> PullRequest.changeset()
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
+
+  @doc """
+  Updates this pr reference in the db
+  """
+  @spec update_pr(map, binary, User.t) :: pull_request_resp
+  def update_pr(attrs, id, %User{} = user) do
+    Repo.get(PullRequest, id)
+    |> PullRequest.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
   Fetches all helm repos registered in this cluster so far
   """
   @spec list_helm_repositories() :: {:ok, [Kube.HelmRepository.t]} | Console.error

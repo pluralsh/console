@@ -45,7 +45,6 @@ defmodule Console.PubSub.ObjectStoreCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ObjectStoreUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ObjectStoreDeleted, do: use Piazza.PubSub.Event
 
-
 defmodule Console.PubSub.PullRequestCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PullRequestUpdated, do: use Piazza.PubSub.Event
 
@@ -62,3 +61,5 @@ defmodule Console.PubSub.StackRunCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackRunUpdated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackRunDeleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackRunCompleted, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.RunLogsCreated, do: use Piazza.PubSub.Event
