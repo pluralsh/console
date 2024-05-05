@@ -1,15 +1,15 @@
 apiVersion: v2
 name: console
 description: A chart for plural console
-appVersion: 0.9.12
-version: 0.10.16
+appVersion: 0.9.13
+version: 0.10.17
 dependencies:
   - name: test-base
     version: 0.1.10
     repository: https://pluralsh.github.io/module-library
     condition: test-base.enabled
   - name: controller
-    version: 0.0.40
+    version: 0.0.41
     repository: file://../../../charts/controller
   - name: kubernetes-dashboard
     version: 7.3.2
