@@ -82,7 +82,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `detach.omitempty` _boolean_ | Whether you want to delete owned resources in Plural but leave kubernetes objects in-place |  | Optional: {} <br /> |
+| `detach` _boolean_ | Whether you want to delete owned resources in Plural but leave kubernetes objects in-place |  | Optional: {} <br /> |
 | `delete` _boolean_ | Whether you want to delete owned resources in Plural and in the targeted k8s cluster |  | Optional: {} <br /> |
 
 

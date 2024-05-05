@@ -51,7 +51,7 @@ spec:
                     description: Whether you want to delete owned resources in Plural
                       and in the targeted k8s cluster
                     type: boolean
-                  detach.omitempty:
+                  detach:
                     description: Whether you want to delete owned resources in Plural
                       but leave kubernetes objects in-place
                     type: boolean

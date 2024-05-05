@@ -31,7 +31,7 @@ func init() {
 type Cascade struct {
 	// Whether you want to delete owned resources in Plural but leave kubernetes objects in-place
 	// +kubebuilder:validation:Optional
-	Detach *bool `json:"detach.omitempty"`
+	Detach *bool `json:"detach,omitempty"`
 
 	// Whether you want to delete owned resources in Plural and in the targeted k8s cluster
 	// +kubebuilder:validation:Optional
