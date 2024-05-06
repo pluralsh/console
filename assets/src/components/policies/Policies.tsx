@@ -56,10 +56,10 @@ function Policies() {
 
   const queryResult = usePolicyConstraintsQuery({
     variables: {
-      q: debouncedSearchString,
+      ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
       first: POLICIES_QUERY_PAGE_SIZE,
-      kind: selectedKind || undefined,
-      namespace: selectedNamespace || undefined,
+      ...(selectedKind ? { kind: selectedKind } : {}),
+      ...(selectedNamespace ? { namespace: selectedNamespace } : {}),
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
