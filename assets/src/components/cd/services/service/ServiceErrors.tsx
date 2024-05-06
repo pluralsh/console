@@ -1,4 +1,9 @@
-import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Code,
+  EmptyState,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { ComponentProps, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
@@ -24,6 +29,7 @@ export const ColSource = columnHelper.accessor((row) => row?.source, {
   id: 'source',
   header: 'Source',
   enableSorting: true,
+  meta: { gridTemplate: '1fr' },
   cell: ({ getValue }) => getValue(),
 })
 
@@ -31,8 +37,15 @@ export const ColMessage = columnHelper.accessor((row) => row?.message, {
   id: 'message',
   header: 'Message',
   enableSorting: true,
-  meta: { truncate: true },
-  cell: ({ getValue }) => getValue(),
+  meta: { gridTemplate: '6fr' },
+  cell: ({ getValue }) => (
+    <Code
+      maxHeight="300px"
+      width="100%"
+    >
+      {getValue()}
+    </Code>
+  ),
 })
 
 const columns = [ColSource, ColMessage]
