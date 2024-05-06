@@ -45,7 +45,10 @@ function PolicyDetails({
           </>
         ) : null}
       </div>
-      <Sidecar width={200}>
+      <Sidecar
+        width={200}
+        minWidth={200}
+      >
         <SidecarItem heading="Policy name"> {name}</SidecarItem>
         <SidecarItem heading="Last Updated">
           {moment(updatedAt || insertedAt).format('M/D/YYYY')}
