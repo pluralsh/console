@@ -143,6 +143,7 @@ function AddProviderButton() {
       <EditObservabilityProviderModal
         open={open}
         onClose={() => setOpen(false)}
+        operationType="create"
       />
     </>
   )

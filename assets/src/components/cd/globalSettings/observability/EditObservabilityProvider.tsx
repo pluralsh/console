@@ -24,10 +24,12 @@ function EditObservabilityProviderModalBase({
   open,
   onClose,
   observabilityProvider,
+  operationType,
 }: {
   open: boolean
   onClose: Nullable<() => void>
   observabilityProvider?: ObservabilityProviderFragment
+  operationType: 'create' | 'update'
 }) {
   const theme = useTheme()
   const {
@@ -49,8 +51,14 @@ function EditObservabilityProviderModalBase({
       },
     }
   )
-  const { name, type } = formState
-  const allowSubmit = name && type && hasUpdates
+  const { name, type, credentials } = formState
+  const allowSubmit =
+    name &&
+    type &&
+    hasUpdates &&
+    credentials.datadog?.apiKey &&
+    credentials.datadog?.appKey
+
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
@@ -76,7 +84,7 @@ function EditObservabilityProviderModalBase({
       asForm
       onSubmit={onSubmit}
       header={
-        observabilityProvider?.name
+        operationType === 'update' && observabilityProvider
           ? `Update provider - ${observabilityProvider.name}`
           : 'New provider'
       }
@@ -94,7 +102,7 @@ function EditObservabilityProviderModalBase({
             disabled={!allowSubmit}
             type="submit"
           >
-            Update
+            {operationType === 'create' ? 'Create' : 'Update'}
           </Button>
           <Button
             secondary
@@ -106,7 +114,6 @@ function EditObservabilityProviderModalBase({
       }
     >
       <ObservabilityProviderForm
-        type="update"
         formState={formState}
         updateFormState={updateFormState}
         error={error}
@@ -116,12 +123,10 @@ function EditObservabilityProviderModalBase({
 }
 
 export function ObservabilityProviderForm({
-  type,
   formState,
   updateFormState,
   error,
 }: {
-  type: 'update' | 'create'
   formState: Partial<ObservabilityProviderAttributes>
   updateFormState: (update: Partial<ObservabilityProviderAttributes>) => void
   error: ApolloError | undefined
@@ -149,27 +154,44 @@ export function ObservabilityProviderForm({
           onChange={(e) => updateFormState({ name: e.target.value })}
         />
       </FormField>
-      {type === 'create' && (
-        <FormField
-          label="Api Key"
-          required
-        >
-          <InputRevealer
-            defaultRevealed={false}
-            value={formState.credentials?.datadog?.apiKey || ''}
-            onChange={(e) =>
-              updateFormState({
-                credentials: {
-                  datadog: {
-                    apiKey: e.target.value,
-                    appKey: formState.credentials?.datadog?.appKey || '',
-                  },
+      <FormField
+        label="Api Key"
+        required
+      >
+        <InputRevealer
+          defaultRevealed={false}
+          value={formState.credentials?.datadog?.apiKey || ''}
+          onChange={(e) =>
+            updateFormState({
+              credentials: {
+                datadog: {
+                  apiKey: e.target.value,
+                  appKey: formState.credentials?.datadog?.appKey || '',
                 },
-              })
-            }
-          />
-        </FormField>
-      )}
+              },
+            })
+          }
+        />
+      </FormField>
+      <FormField
+        label="App Key"
+        required
+      >
+        <InputRevealer
+          defaultRevealed={false}
+          value={formState.credentials?.datadog?.appKey || ''}
+          onChange={(e) =>
+            updateFormState({
+              credentials: {
+                datadog: {
+                  apiKey: formState.credentials?.datadog?.apiKey || '',
+                  appKey: e.target.value,
+                },
+              },
+            })
+          }
+        />
+      </FormField>
 
       {error && <GqlError error={error} />}
     </div>
