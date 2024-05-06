@@ -7068,7 +7068,7 @@ export type ViolationStatistic = {
   /** the total number of policy constraints */
   count?: Maybe<Scalars['Int']['output']>;
   /** the value of this field being aggregated */
-  value: Scalars['String']['output'];
+  value?: Maybe<Scalars['String']['output']>;
   /** the total number of violations found */
   violations?: Maybe<Scalars['Int']['output']>;
 };

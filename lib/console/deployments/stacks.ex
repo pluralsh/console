@@ -131,12 +131,11 @@ defmodule Console.Deployments.Stacks do
   defp sync_stack_status(%StackRun{dry_run: false, status: :successful} = run) do
     %{state: state, output: output, stack: stack} = Repo.preload(run, [:state, :output, :stack])
     Repo.preload(stack, [:state, :output])
-    |> Stack.complete_changeset(%{
+    |> Stack.complete_changeset(add_stack_state(%{
       status: :successful,
       last_successful: run.git.ref,
-      state: Console.clean(state),
       output: Enum.map(output, &Map.take(&1, ~w(name value secret)a))
-    })
+    }, state))
     |> Repo.update()
   end
   defp sync_stack_status(%StackRun{dry_run: false} = run) do
@@ -145,6 +144,12 @@ defmodule Console.Deployments.Stacks do
     |> Repo.update()
   end
   defp sync_stack_status(_), do: {:ok, %{}}
+
+  defp add_stack_state(attrs, %{} = state) do
+    state = Console.clean(state) |> Map.delete(:run_id)
+    Map.put(attrs, :state, state)
+  end
+  defp add_stack_state(attrs, _), do: attrs
 
   @doc """
   Approves a stack run, only possible if user has write perms

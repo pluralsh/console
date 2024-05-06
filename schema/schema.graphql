@@ -1570,7 +1570,7 @@ type ConstraintRef {
 "A summary of statistics for violations w\/in a specific column"
 type ViolationStatistic {
   "the value of this field being aggregated"
-  value: String!
+  value: String
 
   "the total number of violations found"
   violations: Int

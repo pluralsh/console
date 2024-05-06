@@ -363,6 +363,7 @@ defmodule Console.Deployments.StacksTest do
 
       {:ok, completed} = Stacks.complete_stack_run(%{
         status: :successful,
+        state: %{plan: "some plan"},
         output: [%{name: "some-output", value: "val"}]
       }, run.id, user)
 
@@ -379,6 +380,13 @@ defmodule Console.Deployments.StacksTest do
       assert output.value == "val"
 
       assert_receive {:event, %PubSub.StackRunCompleted{item: ^completed}}
+
+      # can still complete when completed
+      {:ok, _} = Stacks.complete_stack_run(%{
+        status: :successful,
+        state: %{plan: "some plan"},
+        output: [%{name: "some-output", value: "val"}]
+      }, run.id, user)
     end
 
     test "clusters can complete runs" do
