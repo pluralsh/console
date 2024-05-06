@@ -40,7 +40,7 @@ export const ColErrorMessage = columnHelper.accessor(
   (violation) => violation.message,
   {
     id: 'errorMessage',
-    header: 'ErrorMessage',
+    header: 'Error Message',
     meta: { truncate: true, gridTemplate: 'minmax(180px,auto)' },
     cell: function Cell({ getValue }) {
       return <div>{getValue()}</div>
