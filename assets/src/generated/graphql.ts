@@ -1984,6 +1984,8 @@ export type InfrastructureStack = {
   observableMetrics?: Maybe<Array<Maybe<ObservableMetric>>>;
   /** the most recent output for this stack */
   output?: Maybe<Array<Maybe<StackOutput>>>;
+  /** whether the stack is actively tracking changes in git */
+  paused?: Maybe<Scalars['Boolean']['output']>;
   pullRequests?: Maybe<PullRequestConnection>;
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repository you're sourcing IaC from */
@@ -6612,6 +6614,8 @@ export type StackRun = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: Maybe<JobGateSpec>;
+  /** the commit message */
+  message?: Maybe<Scalars['String']['output']>;
   /** the most recent output for this stack */
   output?: Maybe<Array<Maybe<StackOutput>>>;
   /** the git repository you're sourcing IaC from */

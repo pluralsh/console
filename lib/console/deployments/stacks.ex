@@ -201,8 +201,8 @@ defmodule Console.Deployments.Stacks do
     case Discovery.sha(repo, git.ref) do
       {:ok, ^sha} -> {:error, "no new commit in repo"}
       {:ok, new_sha} ->
-        with {:ok, new_sha} <- new_changes(repo, git, sha, new_sha),
-          do: create_run(stack, new_sha)
+        with {:ok, new_sha, msg} <- new_changes(repo, git, sha, new_sha),
+          do: create_run(stack, new_sha, %{message: msg})
       err -> err
     end
   end
@@ -212,10 +212,10 @@ defmodule Console.Deployments.Stacks do
     case Discovery.sha(repo, ref) do
       {:ok, ^sha} -> {:error, "no new commit in repo for branch #{ref}"}
       {:ok, new_sha} ->
-        with {:ok, new_sha} <- new_changes(repo, stack.git, sha, new_sha) do
+        with {:ok, new_sha, msg} <- new_changes(repo, stack.git, sha, new_sha) do
           start_transaction()
           |> add_operation(:run, fn _ ->
-            create_run(stack, new_sha, %{pull_request_id: pr.id, dry_run: true})
+            create_run(stack, new_sha, %{pull_request_id: pr.id, message: msg, dry_run: true})
           end)
           |> add_operation(:pr, fn _ ->
             Ecto.Changeset.change(pr, %{ref: new_sha})
@@ -231,8 +231,7 @@ defmodule Console.Deployments.Stacks do
 
   defp new_changes(repo, %{folder: folder}, sha1, sha2) do
     case Discovery.changes(repo, sha1, sha2, folder) do
-      {:ok, [_ | _]} -> {:ok, sha2}
-      {:ok, :pass} -> {:ok, sha2}
+      {:ok, _, msg} -> {:ok, sha2, msg}
       _ -> {:error, "no changes within #{folder}"}
     end
   end
