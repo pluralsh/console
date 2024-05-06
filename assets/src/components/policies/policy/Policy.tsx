@@ -55,7 +55,7 @@ function Policy() {
 
   return (
     <PolicyContainer>
-      <div css={{ width: '250px' }}>
+      <div css={{ width: '250px', minWidth: '250px' }}>
         <TreeNav>
           <TreeNavEntry
             key={POLICIES_DETAILS_PATH}
