@@ -36,10 +36,14 @@ function PolicyDetails({
         <Body1P css={{ color: theme.colors['text-long-form'] }}>
           {policy.description}
         </Body1P>
-        <Title2H1>Recommended action</Title2H1>
-        <Body1P css={{ color: theme.colors['text-long-form'] }}>
-          {policy.recommendation}
-        </Body1P>
+        {policy.recommendation ? (
+          <>
+            <Title2H1>Recommended action</Title2H1>
+            <Body1P css={{ color: theme.colors['text-long-form'] }}>
+              {policy.recommendation}
+            </Body1P>
+          </>
+        ) : null}
       </div>
       <Sidecar width={200}>
         <SidecarItem heading="Policy name"> {name}</SidecarItem>
