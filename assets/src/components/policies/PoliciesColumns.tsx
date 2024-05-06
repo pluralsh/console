@@ -11,7 +11,7 @@ const columnHelper = createColumnHelper<Edge<PolicyConstraint>>()
 export const ColPolicyName = columnHelper.accessor(({ node }) => node, {
   id: 'name',
   header: 'Policy',
-  meta: { truncate: true, gridTemplate: '1fr' },
+  meta: { truncate: true, gridTemplate: 'minmax(250px, auto)' },
   cell: function Cell({ getValue }) {
     const policy = getValue()
 
@@ -52,10 +52,10 @@ export const ColViolations = columnHelper.accessor(({ node }) => node, {
 export const ColDescription = columnHelper.accessor(({ node }) => node, {
   id: 'description',
   header: 'Description',
-  meta: { truncate: true, gridTemplate: 'auto' },
+  meta: { truncate: true, gridTemplate: 'minmax(180px, auto)' },
   cell: function Cell({ getValue }) {
     const policy = getValue()
 
-    return policy ? policy.description : ''
+    return <div>{policy ? policy.description : ''}</div>
   },
 })
