@@ -27,8 +27,8 @@ function PoliciesViolationsGauge({
       <Subtitle2H1>Clusters with Violations</Subtitle2H1>
       <Flex alignItems="center">
         <svg
-          width="100"
-          height="100"
+          width="150"
+          height="150"
           viewBox="0 0 200 200"
         >
           {values.map((value, index) => {
@@ -72,7 +72,7 @@ function PoliciesViolationsGauge({
           <circle
             cx="100"
             cy="100"
-            r="65"
+            r="63"
             fill={theme.colors['fill-one']}
           />
         </svg>
