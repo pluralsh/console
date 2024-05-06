@@ -364,7 +364,7 @@ function FlyoverContent({ open, cluster, refetch }) {
             checked={cluster?.upgradePlan?.incompatibilities || false}
             icon={MarketPlusIcon}
             title="Check Add-On Mutual Incompatibilities"
-            subtitle="Use suggested version for each add-on to resolve mutual incompabilities"
+            subtitle="Use suggested version for each add-on to resolve mutual incompatibilities"
           />
         }
       >

@@ -100,7 +100,7 @@ export function ColClusterContent({
   )
 }
 
-const ColCluster = columnHelper.accessor(({ node }) => node?.name, {
+export const ColCluster = columnHelper.accessor(({ node }) => node?.name, {
   id: 'cluster',
   header: 'Cluster',
   cell: function Cell({ row: { original } }) {
@@ -108,7 +108,7 @@ const ColCluster = columnHelper.accessor(({ node }) => node?.name, {
   },
 })
 
-const ColProvider = columnHelper.accessor(
+export const ColProvider = columnHelper.accessor(
   ({ node }) =>
     `${getClusterDistroName(node?.distro, 'short')} – ${getProviderName(
       node?.provider?.cloud
@@ -139,13 +139,13 @@ const ColProvider = columnHelper.accessor(
   }
 )
 
-const ColHealth = columnHelper.accessor(({ node }) => node, {
+export const ColHealth = columnHelper.accessor(({ node }) => node, {
   id: 'health',
   header: 'Health',
   cell: ({ getValue }) => <ClusterHealth cluster={getValue() || undefined} />,
 })
 
-const ColVersion = columnHelper.accessor(({ node }) => node, {
+export const ColVersion = columnHelper.accessor(({ node }) => node, {
   id: 'version',
   header: 'Deployed version',
   cell: function Cell({
@@ -177,7 +177,7 @@ const ColVersion = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-const ColCpu = columnHelper.accessor(({ node }) => node, {
+export const ColCpu = columnHelper.accessor(({ node }) => node, {
   id: 'cpu',
   header: 'CPU',
   cell: ({ getValue }) => {
@@ -214,7 +214,7 @@ const ColCpu = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-const ColMemory = columnHelper.accessor(({ node }) => node, {
+export const ColMemory = columnHelper.accessor(({ node }) => node, {
   id: 'memory',
   header: 'Memory',
   cell: ({ getValue }) => {
@@ -256,7 +256,8 @@ const ColStatusSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.small,
 }))
-const ColStatus = columnHelper.accessor(({ node }) => node, {
+
+export const ColStatus = columnHelper.accessor(({ node }) => node, {
   id: 'status',
   header: 'Status',
   cell: ({ table, getValue, row: { original } }) => {
@@ -302,7 +303,7 @@ const ColConditions = columnHelper.accessor(
 )
 */
 
-const ColActions = columnHelper.accessor(({ node }) => node, {
+export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
   cell: function Cell({ table, getValue }) {
@@ -383,7 +384,7 @@ const ColActions = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-export const columns = [
+export const cdClustersColumns = [
   ColCluster,
   ColProvider,
   ColHealth,

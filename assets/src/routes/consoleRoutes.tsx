@@ -30,6 +30,8 @@ import Apps from 'components/apps/Apps'
 
 import { Personas } from 'components/account/personas/Personas'
 
+import Home from 'components/home/Home'
+
 import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 import { cdRoutes } from './cdRoutes'
@@ -238,12 +240,18 @@ export const consoleRoutes: RouteObject[] = [
   // ----- Old-style component-based routes -----
   {
     path: '*',
-    Component: () => <Routes>{consoleComponentRoutes}</Routes>,
+    element: <Routes>{consoleComponentRoutes}</Routes>,
   },
 
   // ----- New object-based routes -----
   // Index
-  { index: true, Component: Apps },
+  { index: true, element: <Apps /> },
+
+  // HOME
+  {
+    path: 'home',
+    element: <Home />,
+  },
 
   // PR QUEUE
   ...prRoutes,

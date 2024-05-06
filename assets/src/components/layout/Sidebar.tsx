@@ -13,6 +13,7 @@ import {
   GitHubLogoIcon,
   GitPullIcon,
   HistoryIcon,
+  HomeIcon,
   KubernetesIcon,
   LightningIcon,
   ListIcon,
@@ -71,6 +72,11 @@ function getMenuItems({
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
   return [
+    {
+      text: 'Home',
+      icon: <HomeIcon />,
+      path: '/home',
+    },
     {
       text: 'Apps',
       icon: <AppsIcon />,
