@@ -24,6 +24,8 @@ defmodule Console.Schema.StackState do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> unique_constraint(:run_id)
+    |> unique_constraint(:stack_id)
     |> cast_embed(:state, with: &state_changeset/2)
   end
 

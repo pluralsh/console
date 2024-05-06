@@ -43,9 +43,11 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :violation_count, :integer
     field :enforcement,     :constraint_enforcement
 
-    field :object, :kubernetes_unstructured,
-      description: "Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints",
-      resolve: &Deployments.fetch_constraint/3
+    @desc "Fetches the live constraint object from K8s, this is an expensive query and should not be done in list endpoints"
+    field :object, :kubernetes_unstructured do
+      middleware ErrorHandler
+      resolve &Deployments.fetch_constraint/3
+    end
 
     field :ref, :constraint_ref, description: "pointer to the kubernetes resource itself"
 
@@ -62,7 +64,7 @@ defmodule Console.GraphQl.Deployments.Policy do
 
   @desc "A summary of statistics for violations w/in a specific column"
   object :violation_statistic do
-    field :value,      non_null(:string), description: "the value of this field being aggregated"
+    field :value,      :string, description: "the value of this field being aggregated"
     field :violations, :integer, description: "the total number of violations found"
     field :count,      :integer, description: "the total number of policy constraints"
   end

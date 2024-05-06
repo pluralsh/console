@@ -22,6 +22,7 @@ defmodule Console.Schema.StackRun do
     field :approval,    :boolean, default: true
     field :dry_run,     :boolean, default: false
     field :approved_at, :utc_datetime_usec
+    field :message,     :binary
 
     field :cancellation_reason, :string
 
@@ -100,7 +101,7 @@ defmodule Console.Schema.StackRun do
     from(r in query, order_by: ^order)
   end
 
-  @valid ~w(type status approval dry_run repository_id pull_request_id cluster_id stack_id)a
+  @valid ~w(type status message approval dry_run repository_id pull_request_id cluster_id stack_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

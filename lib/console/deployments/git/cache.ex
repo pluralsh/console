@@ -65,7 +65,20 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
-  def changes(%__MODULE__{git: g}, sha1, sha2, folder), do: file_changes(g, sha1, sha2, folder)
+  def changes(%__MODULE__{git: g} = c, sha1, sha2, folder) do
+    case file_changes(g, sha1, sha2, folder) do
+      {:ok, [_ | _] = changes} -> add_msgs(c, changes, sha2)
+      {:ok, :pass} -> add_msgs(c, :pass, sha1)
+      pass -> pass
+    end
+  end
+
+  defp add_msgs(%__MODULE__{git: g}, changes, sha) do
+    case msg(g, sha) do
+      {:ok, msg} -> {:ok, changes, msg}
+      _ -> {:ok, changes, ""}
+    end
+  end
 
   defp new_line(cache, repo, sha, path, filter) do
     with {:ok, _} <- git(repo, "checkout", [sha]),

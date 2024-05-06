@@ -208,7 +208,7 @@ defmodule Console.Deployments.CronTest do
         git: %{ref: "main", folder: "terraform"}
       )
       expect(Console.Deployments.Git.Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Console.Deployments.Git.Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"]} end)
+      expect(Console.Deployments.Git.Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
 
       Cron.poll_stacks()
 

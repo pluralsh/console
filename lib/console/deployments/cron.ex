@@ -239,6 +239,7 @@ defmodule Console.Deployments.Cron do
 
   defp stack_stream() do
     Stack.stream()
+    |> Stack.unpaused()
     |> Repo.stream(method: :keyset)
     |> Stream.concat(
       PullRequest.stack()
