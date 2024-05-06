@@ -10,7 +10,7 @@ export const ColRessourceName = columnHelper.accessor(
     header: 'Resource Name',
     meta: { truncate: true, gridTemplate: 'minmax(180px,auto)' },
     cell: function Cell({ getValue }) {
-      return getValue()
+      return <div>{getValue()}</div>
     },
   }
 )
@@ -22,7 +22,7 @@ export const ColNamespace = columnHelper.accessor(
     header: 'Namespace',
     meta: { truncate: true, gridTemplate: 'auto' },
     cell: function Cell({ getValue }) {
-      return getValue()
+      return <div>{getValue()}</div>
     },
   }
 )
@@ -32,7 +32,7 @@ export const ColKind = columnHelper.accessor((violation) => violation.kind, {
   header: 'Kind',
   meta: { truncate: true, gridTemplate: 'auto' },
   cell: function Cell({ getValue }) {
-    return getValue()
+    return <div>{getValue()}</div>
   },
 })
 
@@ -43,7 +43,7 @@ export const ColErrorMessage = columnHelper.accessor(
     header: 'ErrorMessage',
     meta: { truncate: true, gridTemplate: 'minmax(180px,auto)' },
     cell: function Cell({ getValue }) {
-      return getValue()
+      return <div>{getValue()}</div>
     },
   }
 )
