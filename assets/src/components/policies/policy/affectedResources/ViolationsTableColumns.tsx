@@ -8,7 +8,7 @@ export const ColRessourceName = columnHelper.accessor(
   {
     id: 'name',
     header: 'Resource Name',
-    meta: { truncate: true, gridTemplate: 'auto' },
+    meta: { truncate: true, gridTemplate: 'minmax(180px,auto)' },
     cell: function Cell({ getValue }) {
       return getValue()
     },
@@ -41,7 +41,7 @@ export const ColErrorMessage = columnHelper.accessor(
   {
     id: 'errorMessage',
     header: 'ErrorMessage',
-    meta: { truncate: true, gridTemplate: 'auto' },
+    meta: { truncate: true, gridTemplate: 'minmax(180px,auto)' },
     cell: function Cell({ getValue }) {
       return getValue()
     },
