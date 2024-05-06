@@ -507,6 +507,10 @@ type RootMutationType {
   "just registers a pointer record to a PR after it was created externally be some other automation"
   createPullRequestPointer(attributes: PullRequestAttributes): PullRequest
 
+  updatePullRequest(id: ID!, attributes: PullRequestUpdateAttributes): PullRequest
+
+  deletePullRequest(id: ID!): PullRequest
+
   createCluster(attributes: ClusterAttributes!): Cluster
 
   updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster
@@ -727,6 +731,7 @@ type RootSubscriptionType {
   buildDelta(buildId: ID): BuildDelta
   commandDelta(buildId: ID!): CommandDelta
   notificationDelta: NotificationDelta
+  runLogsDelta(stepId: ID!): RunLogsDelta
 }
 
 input PolicyBindingAttributes {
@@ -1242,6 +1247,11 @@ type InfrastructureStackConnection {
 type StackRunConnection {
   pageInfo: PageInfo!
   edges: [StackRunEdge]
+}
+
+type RunLogsDelta {
+  delta: Delta
+  payload: RunLogs
 }
 
 "A reference for a globalized service, which targets clusters based on the configured criteria"
@@ -3756,6 +3766,17 @@ input PullRequestAttributes {
   title: String!
   creator: String
   labels: [String]
+  serviceId: ID
+  clusterId: ID
+  service: NamespacedName
+  cluster: NamespacedName
+}
+
+"attributes for a pull request pointer record"
+input PullRequestUpdateAttributes {
+  title: String!
+  labels: [String]
+  status: PrStatus!
   serviceId: ID
   clusterId: ID
   service: NamespacedName

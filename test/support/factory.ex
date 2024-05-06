@@ -549,6 +549,13 @@ defmodule Console.Factory do
     }
   end
 
+  def run_log_factory do
+    %Schema.RunLog{
+      logs: "test logs",
+      step: build(:run_step)
+    }
+  end
+
   def service_template_factory do
     %Schema.ServiceTemplate{
       name: sequence(:service_template, & "tpl-#{&1}")

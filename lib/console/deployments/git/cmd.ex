@@ -27,6 +27,13 @@ defmodule Console.Deployments.Git.Cmd do
       do: {:ok, String.trim(sha)}
   end
 
+  def file_changes(repo, sha1, sha2, folder) do
+    case git(repo, "--no-pager", ["diff", "--name-only", "#{sha1}", "#{sha2}", "--", folder]) do
+      {:ok, res} -> {:ok, String.trim(res) |> Console.lines()}
+      _ -> {:ok, :pass}
+    end
+  end
+
   def branches(%GitRepository{} = repo) do
     with {:ok, res} <- git(repo, "branch", ["-r"]) do
       split_and_trim(res)

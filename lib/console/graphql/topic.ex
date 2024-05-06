@@ -27,3 +27,7 @@ end
 defimpl Console.GraphQl.Topic, for: Kazan.Apis.Core.V1.Pod do
   def infer(%{metadata: %{namespace: ns, name: name}}, _), do: [pod_delta: "pods:#{ns}:#{name}", pod_delta: "pods"]
 end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.RunLog do
+  def infer(%{step_id: id}, _), do: [run_logs_delta: "steps:#{id}"]
+end

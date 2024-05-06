@@ -3595,6 +3595,17 @@ export type PullRequestEdge = {
   node?: Maybe<PullRequest>;
 };
 
+/** attributes for a pull request pointer record */
+export type PullRequestUpdateAttributes = {
+  cluster?: InputMaybe<NamespacedName>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  labels?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  service?: InputMaybe<NamespacedName>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  status: PrStatus;
+  title: Scalars['String']['input'];
+};
+
 export type RbacAttributes = {
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -3931,6 +3942,7 @@ export type RootMutationType = {
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
   deleteProviderCredential?: Maybe<ProviderCredential>;
+  deletePullRequest?: Maybe<PullRequest>;
   deleteRole?: Maybe<Role>;
   deleteScmConnection?: Maybe<ScmConnection>;
   deleteServiceContext?: Maybe<ServiceContext>;
@@ -3995,6 +4007,7 @@ export type RootMutationType = {
   updateObjectStore?: Maybe<ObjectStore>;
   updatePersona?: Maybe<Persona>;
   updatePrAutomation?: Maybe<PrAutomation>;
+  updatePullRequest?: Maybe<PullRequest>;
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
   updateRole?: Maybe<Role>;
@@ -4352,6 +4365,11 @@ export type RootMutationTypeDeleteProviderCredentialArgs = {
 };
 
 
+export type RootMutationTypeDeletePullRequestArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteRoleArgs = {
   id: Scalars['ID']['input'];
 };
@@ -4646,6 +4664,12 @@ export type RootMutationTypeUpdatePersonaArgs = {
 
 export type RootMutationTypeUpdatePrAutomationArgs = {
   attributes: PrAutomationAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdatePullRequestArgs = {
+  attributes?: InputMaybe<PullRequestUpdateAttributes>;
   id: Scalars['ID']['input'];
 };
 
@@ -5753,6 +5777,7 @@ export type RootSubscriptionType = {
   commandDelta?: Maybe<CommandDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
+  runLogsDelta?: Maybe<RunLogsDelta>;
 };
 
 
@@ -5763,6 +5788,11 @@ export type RootSubscriptionTypeBuildDeltaArgs = {
 
 export type RootSubscriptionTypeCommandDeltaArgs = {
   buildId: Scalars['ID']['input'];
+};
+
+
+export type RootSubscriptionTypeRunLogsDeltaArgs = {
+  stepId: Scalars['ID']['input'];
 };
 
 export type RouterFilterAttributes = {
@@ -5790,6 +5820,12 @@ export type RunLogs = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   logs: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type RunLogsDelta = {
+  __typename?: 'RunLogsDelta';
+  delta?: Maybe<Delta>;
+  payload?: Maybe<RunLogs>;
 };
 
 export type RunStep = {

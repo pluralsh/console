@@ -168,4 +168,8 @@
       safe_resolve &Deployments.enable/2
     end
   end
+
+  object :deployment_subscriptions do
+    import_fields :stack_subscriptions
+  end
 end

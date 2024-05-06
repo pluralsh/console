@@ -361,8 +361,9 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
   describe "StackCreated" do
     test "it will poll the stack" do
-      stack = insert(:stack)
+      stack = insert(:stack, git: %{folder: "terraform", ref: "main"})
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"]} end)
 
       event = %PubSub.StackCreated{item: stack}
       {:ok, run} = Recurse.handle_event(event)
@@ -377,8 +378,9 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
   describe "StackUpdated" do
     test "it will poll the stack" do
-      stack = insert(:stack)
+      stack = insert(:stack, git: %{folder: "terraform", ref: "main"})
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"]} end)
 
       event = %PubSub.StackUpdated{item: stack}
       {:ok, run} = Recurse.handle_event(event)

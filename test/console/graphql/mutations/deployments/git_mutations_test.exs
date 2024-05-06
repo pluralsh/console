@@ -219,6 +219,41 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
     end
   end
 
+  describe "updatePullRequest" do
+    test "it will update an existing pr" do
+      pr = insert(:pull_request)
+
+      {:ok, %{data: %{"updatePullRequest" => updated}}} = run_query("""
+        mutation Update($id: ID!, $attrs: PullRequestUpdateAttributes!) {
+          updatePullRequest(id: $id, attributes: $attrs) {
+            id
+            status
+            title
+          }
+        }
+      """, %{"id" => pr.id, "attrs" => %{"status" => "MERGED", "title" => "new title"}}, %{current_user: admin_user()})
+
+      assert updated["id"] == pr.id
+      assert updated["status"] == "MERGED"
+      assert updated["title"] == "new title"
+    end
+  end
+
+  describe "deletePullRequest" do
+    test "it will update an existing pr" do
+      pr = insert(:pull_request)
+
+      {:ok, %{data: %{"deletePullRequest" => deleted}}} = run_query("""
+        mutation Update($id: ID!) {
+          deletePullRequest(id: $id) { id }
+        }
+      """, %{"id" => pr.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == pr.id
+      refute refetch(pr)
+    end
+  end
+
   describe "createScmWebhookPointer" do
     test "admins can create webhook pointers" do
       {:ok, %{data: %{"createScmWebhookPointer" => hook}}} = run_query("""
