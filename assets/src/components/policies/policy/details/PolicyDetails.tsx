@@ -18,7 +18,7 @@ function PolicyDetails({
   if (!policy) {
     return null
   }
-  const { name, cluster, violationCount, ref, insertedAt, updatedAt } = policy
+  const { name, cluster, violationCount, insertedAt, updatedAt } = policy
 
   return (
     <PolicyDetailsContainer>
@@ -60,7 +60,7 @@ function PolicyDetails({
             {object.metadata.namespace}
           </SidecarItem>
         )} */}
-        {ref && <SidecarItem heading="Kind"> {ref.kind}</SidecarItem>}
+        {/* {ref && <SidecarItem heading="Kind"> {ref.kind}</SidecarItem>} */}
         {cluster && (
           <SidecarItem heading="Cluster name">
             <A
