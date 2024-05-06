@@ -44,6 +44,18 @@ spec:
           spec:
             description: GlobalServiceSpec defines the desired state of GlobalService
             properties:
+              cascade:
+                description: Cascade deletion options for this global service
+                properties:
+                  delete:
+                    description: Whether you want to delete owned resources in Plural
+                      and in the targeted k8s cluster
+                    type: boolean
+                  detach:
+                    description: Whether you want to delete owned resources in Plural
+                      but leave kubernetes objects in-place
+                    type: boolean
+                type: object
               distro:
                 description: Distro of kubernetes this cluster is running
                 enum:
@@ -98,6 +110,10 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              reparent:
+                description: Whether you'd want this global service to take ownership
+                  of existing Plural services
+                type: boolean
               serviceRef:
                 description: ServiceRef to replicate across clusters
                 properties:
@@ -224,6 +240,12 @@ spec:
                   git:
                     description: Git settings to configure git for a service
                     properties:
+                      files:
+                        description: Optional files to add to the manifests for this
+                          service
+                        items:
+                          type: string
+                        type: array
                       folder:
                         description: Folder ...
                         type: string

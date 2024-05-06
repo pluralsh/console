@@ -3,8 +3,14 @@ defmodule Console.Schema.GlobalService do
   alias Console.Schema.{Service, Cluster, ClusterProvider, ServiceTemplate}
 
   schema "global_services" do
-    field :name, :string
-    field :distro, Cluster.Distro
+    field :reparent, :boolean
+    field :name,     :string
+    field :distro,   Cluster.Distro
+
+    embeds_one :cascade, Cascade, on_replace: :update do
+      field :delete, :boolean
+      field :detach, :boolean
+    end
 
     embeds_many :tags, Tag, on_replace: :delete do
       field :name,  :string
@@ -28,13 +34,14 @@ defmodule Console.Schema.GlobalService do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name service_id distro provider_id)a
+  @valid ~w(name reparent service_id distro provider_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_assoc(:template)
     |> cast_embed(:tags, with: &tag_changeset/2)
+    |> cast_embed(:cascade, with: &cascade_changeset/2)
     |> unique_constraint(:service_id)
     |> unique_constraint(:name)
     |> foreign_key_constraint(:service_id)
@@ -47,5 +54,10 @@ defmodule Console.Schema.GlobalService do
     model
     |> cast(attrs, ~w(name value)a)
     |> validate_required(~w(name value)a)
+  end
+
+  def cascade_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(delete detach)a)
   end
 end

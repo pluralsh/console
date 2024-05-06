@@ -1,13 +1,9 @@
 import { useOutletContext } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
-import { Card } from '@pluralsh/design-system'
-import sumBy from 'lodash/sumBy'
 import { useTheme } from 'styled-components'
-import isEmpty from 'lodash/isEmpty'
 
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-import { Cluster, Node } from 'generated/graphql'
+import { Cluster } from 'generated/graphql'
 
 import {
   ColCpuTotal,
@@ -23,9 +19,6 @@ import {
   columnHelper,
 } from '../../cluster/nodes/NodesList'
 import { TableCaretLink } from '../../cluster/TableElements'
-import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
-import { cpuParser, memoryParser } from '../../../utils/kubernetes'
-import { ResourceUsage } from '../../cluster/nodes/Nodes'
 import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
 
 export const ColActions = (clusterId?: string) =>
@@ -45,7 +38,6 @@ export const ColActions = (clusterId?: string) =>
 
 export default function ClusterNodes() {
   const theme = useTheme()
-  const { prometheusConnection } = useDeploymentSettings()
   const { cluster } = useOutletContext() as { cluster: Cluster }
 
   const columns: ColumnDef<TableData, any>[] = useMemo(
@@ -63,21 +55,21 @@ export default function ClusterNodes() {
     [cluster]
   )
 
-  const usage: ResourceUsage = useMemo(() => {
-    if (!cluster) {
-      return null
-    }
-    const cpu = sumBy(
-      cluster.nodeMetrics,
-      (metrics) => cpuParser(metrics?.usage?.cpu) ?? 0
-    )
-    const mem = sumBy(
-      cluster.nodeMetrics,
-      (metrics) => memoryParser((metrics as any)?.usage?.memory) ?? 0
-    )
+  // const usage: ResourceUsage = useMemo(() => {
+  //   if (!cluster) {
+  //     return null
+  //   }
+  //   const cpu = sumBy(
+  //     cluster.nodeMetrics,
+  //     (metrics) => cpuParser(metrics?.usage?.cpu) ?? 0
+  //   )
+  //   const mem = sumBy(
+  //     cluster.nodeMetrics,
+  //     (metrics) => memoryParser((metrics as any)?.usage?.memory) ?? 0
+  //   )
 
-    return { cpu, mem }
-  }, [cluster])
+  //   return { cpu, mem }
+  // }, [cluster])
 
   return (
     <div
@@ -87,15 +79,13 @@ export default function ClusterNodes() {
         gap: theme.spacing.medium,
       }}
     >
-      {!isEmpty(cluster.nodes) && prometheusConnection && (
-        <Card padding="xlarge">
-          <ClusterMetrics
-            nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
-            usage={usage}
-            cluster={cluster}
-          />
-        </Card>
-      )}
+      {/* {!isEmpty(cluster.nodes) && prometheusConnection && (
+        <ClusterMetrics
+          nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
+          usage={usage}
+          cluster={cluster}
+        />
+      )} */}
       <NodesList
         nodes={cluster?.nodes || []}
         nodeMetrics={cluster?.nodeMetrics || []}

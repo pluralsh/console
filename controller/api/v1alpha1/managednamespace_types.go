@@ -31,6 +31,10 @@ type ManagedNamespaceSpec struct {
 	// Description a short description of the purpose of this namespace
 	// +kubebuilder:validation:Optional
 	Description *string `json:"description,omitempty"`
+
+	// Cascade specifies how owned resources are deleted
+	Cascade *Cascade `json:"cascade,omitempty"`
+
 	// Labels for this namespace
 	// +kubebuilder:validation:Optional
 	Labels map[string]string `json:"labels,omitempty"`

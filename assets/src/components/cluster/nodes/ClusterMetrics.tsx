@@ -3,6 +3,8 @@ import { ClusterFragment, Node } from 'generated/graphql'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
+import { Card } from '@pluralsh/design-system'
+
 import { ClusterMetrics as Metrics } from '../constants'
 
 import { ClusterGauges } from './ClusterGauges'
@@ -29,39 +31,41 @@ export function ClusterMetrics({
   if (!prometheusConnection) return null
 
   return (
-    <Flex
-      flex={false}
-      direction="column"
-      gap="xlarge"
-      align="center"
-    >
+    <Card padding="xlarge">
       <Flex
         flex={false}
-        flexDirection="row"
-        alignItems="stretch"
-        justifyContent="center"
-        width="100%"
-        gap="xsmall"
-        overflow="visible"
-        wrap="wrap"
+        direction="column"
+        gap="xlarge"
+        align="center"
       >
-        <ClusterGauges
-          nodes={nodes}
-          usage={usage}
-          cluster={cluster}
-        />
-        <SaturationGraphs
-          clusterId={cluster?.id}
-          cpu={replaceMetric(
-            cluster ? Metrics.CPUCD : Metrics.CPU,
-            cluster?.handle
-          )}
-          mem={replaceMetric(
-            cluster ? Metrics.MemoryCD : Metrics.Memory,
-            cluster?.handle
-          )}
-        />
+        <Flex
+          flex={false}
+          flexDirection="row"
+          alignItems="stretch"
+          justifyContent="center"
+          width="100%"
+          gap="xsmall"
+          overflow="visible"
+          wrap="wrap"
+        >
+          <ClusterGauges
+            nodes={nodes}
+            usage={usage}
+            cluster={cluster}
+          />
+          <SaturationGraphs
+            clusterId={cluster?.id}
+            cpu={replaceMetric(
+              cluster ? Metrics.CPUCD : Metrics.CPU,
+              cluster?.handle
+            )}
+            mem={replaceMetric(
+              cluster ? Metrics.MemoryCD : Metrics.Memory,
+              cluster?.handle
+            )}
+          />
+        </Flex>
       </Flex>
-    </Flex>
+    </Card>
   )
 }

@@ -131,6 +131,10 @@ type GitRef struct {
 	// Ref ...
 	// +kubebuilder:validation:Required
 	Ref string `json:"ref"`
+
+	// Optional files to add to the manifests for this service
+	// +kubebuilder:validation:Optional
+	Files []string `json:"files,omitempty"`
 }
 
 func (in *GitRef) Attributes() *console.GitRefAttributes {

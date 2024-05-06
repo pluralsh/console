@@ -240,7 +240,7 @@ export function StageNode(
               if (!serviceId) return null
 
               return (
-                <li>
+                <li key={serviceId}>
                   <ServiceCard
                     clickable
                     onClick={() => {

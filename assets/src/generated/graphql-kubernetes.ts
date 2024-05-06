@@ -5451,6 +5451,17 @@ export type PodEventsQueryVariables = Exact<{
 
 export type PodEventsQuery = { __typename?: 'Query', handleGetPodEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
 
+export type PodLogsQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  container: Scalars['String']['input'];
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PodLogsQuery = { __typename?: 'Query', handleLogs?: { __typename?: 'logs_LogDetails', info: { __typename?: 'logs_LogInfo', podName: string, containerName: string, initContainerName: string, fromDate: string, toDate: string }, logs: Array<{ __typename?: 'logs_LogLine', timestamp: string, content: string } | null> } | null };
+
 export type ContainerFragment = { __typename?: 'pod_Container', name: string, args: Array<string | null>, commands: Array<string | null>, image: string, state: ContainerState, securityContext: { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null }, livenessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, readinessProbe: { __typename?: 'v1_Probe', failureThreshold?: number | null, initialDelaySeconds?: number | null, periodSeconds?: number | null, successThreshold?: number | null, terminationGracePeriodSeconds?: any | null, timeoutSeconds?: number | null, tcpSocket?: { __typename?: 'v1_TCPSocketAction', host?: string | null, port: string } | null, grpc?: { __typename?: 'v1_GRPCAction', service: string, port: number } | null, httpGet?: { __typename?: 'v1_HTTPGetAction', host?: string | null, port: string, scheme?: string | null, path?: string | null, httpHeaders?: Array<{ __typename?: 'v1_HTTPHeader', name: string, value: string } | null> | null } | null, exec?: { __typename?: 'v1_ExecAction', command?: Array<string | null> | null } | null }, status: { __typename?: 'v1_ContainerStatus', name: string, started?: boolean | null, ready: boolean, containerID?: string | null, image: string, imageID: string, restartCount: number, resources?: { __typename?: 'v1_ResourceRequirements', claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null, lastState?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null, state?: { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null } | null }, resources?: { __typename?: 'v1_ResourceRequirements', requests: any, limits: any, claims?: Array<{ __typename?: 'v1_ResourceClaim', name: string } | null> | null } | null };
 
 export type StateFragment = { __typename?: 'v1_ContainerState', running?: { __typename?: 'v1_ContainerStateRunning', startedAt?: string | null } | null, terminated?: { __typename?: 'v1_ContainerStateTerminated', startedAt?: string | null, reason?: string | null, message?: string | null, containerID?: string | null, exitCode: number, finishedAt?: string | null, signal?: number | null } | null, waiting?: { __typename?: 'v1_ContainerStateWaiting', message?: string | null, reason?: string | null } | null };
@@ -5460,6 +5471,8 @@ export type PodSecurityContextFragment = { __typename?: 'v1_PodSecurityContext',
 export type SecurityContextFragment = { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null };
 
 export type PodListFragment = { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> };
+
+export type LogDetailsFragment = { __typename?: 'logs_LogDetails', info: { __typename?: 'logs_LogInfo', podName: string, containerName: string, initContainerName: string, fromDate: string, toDate: string }, logs: Array<{ __typename?: 'logs_LogLine', timestamp: string, content: string } | null> };
 
 export type ReplicaSetsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -6298,6 +6311,21 @@ export const PodListFragmentDoc = gql`
     ${ListMetaFragmentDoc}
 ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}`;
+export const LogDetailsFragmentDoc = gql`
+    fragment LogDetails on logs_LogDetails {
+  info {
+    podName
+    containerName
+    initContainerName
+    fromDate
+    toDate
+  }
+  logs {
+    timestamp
+    content
+  }
+}
+    `;
 export const ReplicaSetFragmentDoc = gql`
     fragment ReplicaSet on replicaset_ReplicaSet {
   typeMeta @type(name: "types_TypeMeta") {
@@ -10908,6 +10936,56 @@ export type PodEventsQueryHookResult = ReturnType<typeof usePodEventsQuery>;
 export type PodEventsLazyQueryHookResult = ReturnType<typeof usePodEventsLazyQuery>;
 export type PodEventsSuspenseQueryHookResult = ReturnType<typeof usePodEventsSuspenseQuery>;
 export type PodEventsQueryResult = Apollo.QueryResult<PodEventsQuery, PodEventsQueryVariables>;
+export const PodLogsDocument = gql`
+    query PodLogs($name: String!, $namespace: String!, $container: String!, $itemsPerPage: String, $page: String) {
+  handleLogs(
+    pod: $name
+    namespace: $namespace
+    container: $container
+    itemsPerPage: $itemsPerPage
+    page: $page
+  ) @rest(path: "log/{args.namespace}/{args.pod}?container={args.container}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+    ...LogDetails
+  }
+}
+    ${LogDetailsFragmentDoc}`;
+
+/**
+ * __usePodLogsQuery__
+ *
+ * To run a query within a React component, call `usePodLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePodLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePodLogsQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      container: // value for 'container'
+ *      itemsPerPage: // value for 'itemsPerPage'
+ *      page: // value for 'page'
+ *   },
+ * });
+ */
+export function usePodLogsQuery(baseOptions: Apollo.QueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+      }
+export function usePodLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+        }
+export function usePodLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PodLogsQuery, PodLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PodLogsQuery, PodLogsQueryVariables>(PodLogsDocument, options);
+        }
+export type PodLogsQueryHookResult = ReturnType<typeof usePodLogsQuery>;
+export type PodLogsLazyQueryHookResult = ReturnType<typeof usePodLogsLazyQuery>;
+export type PodLogsSuspenseQueryHookResult = ReturnType<typeof usePodLogsSuspenseQuery>;
+export type PodLogsQueryResult = Apollo.QueryResult<PodLogsQuery, PodLogsQueryVariables>;
 export const ReplicaSetsDocument = gql`
     query ReplicaSets($namespace: String!, $filterBy: String, $sortBy: String, $itemsPerPage: String, $page: String) {
   handleGetReplicaSets(

@@ -1,6 +1,6 @@
 defmodule Console.Schema.ManagedNamespace do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{NamespaceCluster, NamespaceInstance, Cluster, ServiceTemplate}
+  alias Console.Schema.{NamespaceCluster, NamespaceInstance, GlobalService, Cluster, ServiceTemplate}
 
   defmodule Target do
     use Piazza.Ecto.Schema
@@ -31,6 +31,7 @@ defmodule Console.Schema.ManagedNamespace do
     field :deleted_at,   :utc_datetime_usec
 
     embeds_one :target,  Target, on_replace: :update
+    embeds_one :cascade, GlobalService.Cascade, on_replace: :update
 
     belongs_to :service, ServiceTemplate, on_replace: :update
 
@@ -77,6 +78,7 @@ defmodule Console.Schema.ManagedNamespace do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:target)
+    |> cast_embed(:cascade, with: &GlobalService.cascade_changeset/2)
     |> cast_assoc(:service)
     |> cast_assoc(:clusters)
     |> validate_required(~w(name)a)

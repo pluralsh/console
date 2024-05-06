@@ -17,6 +17,23 @@ defmodule Console.Deployments.GlobalTest do
 
       assert_receive {:event, %PubSub.GlobalServiceCreated{item: ^global}}
     end
+
+    test "it can create a template global service" do
+      git = insert(:git_repository)
+      {:ok, global} = Global.create(%{
+        name: "templated",
+        template: %{
+          repository_id: git.id,
+          git: %{ref: "main", folder: "k8s"},
+        }
+      }, admin_user())
+
+      assert global.name == "templated"
+
+      {:ok, deleted} = Global.delete(global.id, admin_user())
+
+      assert deleted.id == global.id
+    end
   end
 
   describe "#update/2" do
@@ -40,6 +57,32 @@ defmodule Console.Deployments.GlobalTest do
 
       assert deleted.id == global.id
       refute refetch(svc).owner_id
+      refute refetch(global)
+
+      assert_receive {:event, %PubSub.GlobalServiceDeleted{item: ^deleted}}
+    end
+
+    test "if cascade.delete is true, will drain all owned services" do
+      global = insert(:global_service, cascade: %{delete: true})
+      svc = insert(:service, owner: global)
+
+      {:ok, deleted} = Global.delete(global.id, admin_user())
+
+      assert deleted.id == global.id
+      assert refetch(svc).deleted_at
+      refute refetch(global)
+
+      assert_receive {:event, %PubSub.GlobalServiceDeleted{item: ^deleted}}
+    end
+
+    test "if cascade.detach is true, will detach all owned services" do
+      global = insert(:global_service, cascade: %{detach: true})
+      svc = insert(:service, owner: global)
+
+      {:ok, deleted} = Global.delete(global.id, admin_user())
+
+      assert deleted.id == global.id
+      refute refetch(svc)
       refute refetch(global)
 
       assert_receive {:event, %PubSub.GlobalServiceDeleted{item: ^deleted}}

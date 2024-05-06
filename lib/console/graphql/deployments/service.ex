@@ -39,6 +39,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :chart,         :string
     field :version,       :string
     field :release,       :string
+    field :url,           :string
     field :set,           :helm_value_attributes
     field :repository,    :namespaced_name
     field :git,           :git_ref_attributes
@@ -81,6 +82,7 @@ defmodule Console.GraphQl.Deployments.Service do
   input_object :git_ref_attributes do
     field :ref,    non_null(:string)
     field :folder, non_null(:string)
+    field :files,  list_of(non_null(:string))
   end
 
   input_object :config_attributes do
@@ -215,6 +217,7 @@ defmodule Console.GraphQl.Deployments.Service do
   object :git_ref do
     field :ref,    non_null(:string), description: "a general git ref, either a branch name or commit sha understandable by `git checkout <ref>`"
     field :folder, non_null(:string), description: "the folder manifests live under"
+    field :files,  list_of(non_null(:string)), description: "a list of individual files to include as well"
   end
 
   object :object_reference do
@@ -224,6 +227,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   object :helm_spec do
     field :chart,         :string, description: "the name of the chart this service is using"
+    field :url,           :string, description: "the helm repository url to use"
     field :values,        :string,
       description: "a helm values file to use with this service, requires auth and so is heavy to query",
       resolve: &Deployments.helm_values/3

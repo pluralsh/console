@@ -68,6 +68,24 @@ _Appears in:_
 | `write` _[Binding](#binding) array_ | Write bindings. |  | Optional: {} <br /> |
 
 
+#### Cascade
+
+
+
+Cascade is a specification for deletion behavior of owned resources
+
+
+
+_Appears in:_
+- [GlobalServiceSpec](#globalservicespec)
+- [ManagedNamespaceSpec](#managednamespacespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `detach` _boolean_ | Whether you want to delete owned resources in Plural but leave kubernetes objects in-place |  | Optional: {} <br /> |
+| `delete` _boolean_ | Whether you want to delete owned resources in Plural and in the targeted k8s cluster |  | Optional: {} <br /> |
+
+
 #### CloudProvider
 
 _Underlying type:_ _string_
@@ -505,6 +523,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `folder` _string_ | Folder ... |  | Required: {} <br /> |
 | `ref` _string_ | Ref ... |  | Required: {} <br /> |
+| `files` _string array_ | Optional files to add to the manifests for this service |  | Optional: {} <br /> |
 
 
 #### GitRepository
@@ -576,6 +595,8 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `tags` _object (keys:string, values:string)_ | Tags a set of tags to select clusters for this global service |  | Optional: {} <br /> |
+| `reparent` _boolean_ | Whether you'd want this global service to take ownership of existing Plural services |  | Optional: {} <br /> |
+| `cascade` _[Cascade](#cascade)_ | Cascade deletion options for this global service |  | Optional: {} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | Distro of kubernetes this cluster is running |  | Enum: [GENERIC EKS AKS GKE RKE K3S] <br />Optional: {} <br /> |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef to replicate across clusters |  | Optional: {} <br /> |
 | `providerRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProviderRef apply to clusters with this provider |  | Optional: {} <br /> |
@@ -662,6 +683,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this namespace once its placed on a cluster. If not provided ManagedNamespace's own name from ManagedNamespace.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `description` _string_ | Description a short description of the purpose of this namespace |  | Optional: {} <br /> |
+| `cascade` _[Cascade](#cascade)_ | Cascade specifies how owned resources are deleted |  |  |
 | `labels` _object (keys:string, values:string)_ | Labels for this namespace |  | Optional: {} <br /> |
 | `annotations` _object (keys:string, values:string)_ | Annotations for this namespace |  | Optional: {} <br /> |
 | `pullSecrets` _string array_ | PullSecrets a list of pull secrets to attach to this namespace |  | Optional: {} <br /> |

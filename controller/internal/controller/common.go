@@ -92,6 +92,7 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 		serviceTemplate.Git = &console.GitRefAttributes{
 			Ref:    srv.Git.Ref,
 			Folder: srv.Git.Folder,
+			Files:  srv.Git.Files,
 		}
 	}
 	if srv.Helm != nil {

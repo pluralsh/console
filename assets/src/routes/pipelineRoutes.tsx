@@ -13,14 +13,17 @@ import { PIPELINES_REL_PATH } from './cdRoutesConsts'
 
 export const pipelineRoutes = [
   <Route
+    key="pipeline-main"
     path={`${PIPELINES_REL_PATH}/:pipelineId`}
     element={<PipelineDetails />}
   />,
   <Route
+    key="pipeline-context"
     path={`${PIPELINES_REL_PATH}/:pipelineId/context/:contextId`}
     element={<PipelineContextDetails />}
   />,
   <Route
+    key="pipeline-jobs"
     path={`${PIPELINES_REL_PATH}/jobs/:jobId`}
     element={<PipelineJob />}
   >

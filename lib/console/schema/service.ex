@@ -29,11 +29,12 @@ defmodule Console.Schema.Service do
     embedded_schema do
       field :ref,    :string
       field :folder, :string
+      field :files,  {:array, :string}
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(ref folder)a)
+      |> cast(attrs, ~w(ref folder files)a)
       |> validate_required(~w(ref folder)a)
     end
   end
@@ -47,6 +48,7 @@ defmodule Console.Schema.Service do
       field :chart,         :string
       field :version,       :string
       field :release,       :string
+      field :url,           :string
       field :values_files,  {:array, :string}
       field :repository_id, :binary_id
 
@@ -262,6 +264,7 @@ defmodule Console.Schema.Service do
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)
+    |> foreign_key_constraint(:global_service, name: :global_services, match: :prefix, message: "Cannot delete due to existing global services bound to this cluster")
     |> unique_constraint([:cluster_id, :name], message: "there is already a service with that name for this cluster")
     |> unique_constraint([:cluster_id, :owner_id])
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)

@@ -83,16 +83,16 @@ defmodule Console.Deployments.Git.Agent do
     {:reply, Cache.commit(cache, ref), state}
   end
 
-  def handle_call({:fetch, %Service.Git{ref: ref, folder: path}}, _, %State{cache: cache} = state) do
-    case Cache.fetch(cache, ref, path) do
+  def handle_call({:fetch, %Service.Git{} = ref}, _, %State{cache: cache} = state) do
+    case Cache.fetch(cache, ref) do
       {:ok, %Cache.Line{file: f}, cache} -> {:reply, File.open(f), %{state | cache: cache}}
       err -> {:reply, err, state}
     end
   end
 
-  def handle_call({:fetch, %Service{git: %{ref: ref, folder: path}} = svc}, _, %State{cache: cache} = state) do
+  def handle_call({:fetch, %Service{git: %Service.Git{} = ref} = svc}, _, %State{cache: cache} = state) do
     svc = Console.Repo.preload(svc, [:revision])
-    with {:ok, %Cache.Line{file: f, sha: sha, message: msg}, cache} <- Cache.fetch(cache, ref, path),
+    with {:ok, %Cache.Line{file: f, sha: sha, message: msg}, cache} <- Cache.fetch(cache, ref),
          {:ok, _} <- Services.update_sha(svc, sha, msg) do
       {:reply, File.open(f), %{state | cache: cache}}
     else

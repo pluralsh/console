@@ -79,16 +79,25 @@ defmodule Console.Deployments.Global do
   @spec delete(binary, User.t) :: global_resp
   def delete(global_id, %User{} = user) do
     start_transaction()
-    |> add_operation(:owned, fn _ ->
-      Service.for_owner(global_id)
-      |> Repo.update_all(set: [owner_id: nil])
-      |> ok()
-    end)
     |> add_operation(:global, fn _ ->
       get!(global_id)
       |> allow(user, :write)
-      |> when_ok(:delete)
     end)
+    |> add_operation(:cascade, fn
+      %{global: %GlobalService{cascade: %GlobalService.Cascade{delete: true}}} ->
+        Service.for_owner(global_id)
+        |> Repo.update_all(set: [deleted_at: Timex.now()])
+        |> ok()
+      %{global: %GlobalService{cascade: %GlobalService.Cascade{detach: true}}} ->
+        Service.for_owner(global_id)
+        |> Repo.delete_all()
+        |> ok()
+      %{global: _} ->
+        Service.for_owner(global_id)
+        |> Repo.update_all(set: [owner_id: nil])
+        |> ok()
+    end)
+    |> add_operation(:delete, fn %{global: global} -> Repo.delete(global) end)
     |> execute(extract: :global)
     |> notify(:delete, user)
   end
@@ -298,10 +307,11 @@ defmodule Console.Deployments.Global do
     |> Cluster.target(global)
     |> Repo.all()
     |> Enum.each(fn %{id: cluster_id} = cluster ->
-      case Services.get_service_by_name(cluster_id, svc_name(global)) do
-        %Service{owner_id: ^gid} = dest -> sync_service(global, dest, bot)
-        %Service{} -> :ok # ignore if the service was created out of band
-        nil -> add_to_cluster(global, cluster, bot)
+      case {global, Services.get_service_by_name(cluster_id, svc_name(global))} do
+        {_, %Service{owner_id: ^gid} = dest} -> sync_service(global, dest, bot)
+        {%GlobalService{reparent: true}, %Service{} = dest} -> sync_service(global, dest, bot)
+        {_, %Service{}} -> :ok # ignore if the service was created out of band
+        {_, nil} -> add_to_cluster(global, cluster, bot)
       end
     end)
   end
@@ -315,22 +325,23 @@ defmodule Console.Deployments.Global do
   it can resync a service owned by a global service
   """
   @spec sync_service(GlobalService.t | Service.t, Service.t, User.t) :: Services.service_resp | :ok
-  def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl}, %Service{} = dest, %User{} = user) do
+  def sync_service(%GlobalService{template: %ServiceTemplate{} = tpl, id: id}, %Service{} = dest, %User{} = user) do
     Logger.info "Attempting to resync service #{dest.id}"
     dest = Repo.preload(dest, [:context_bindings, :dependencies])
     tpl = Repo.preload(tpl, [:dependencies])
     case diff?(tpl, dest) do
       true -> ServiceTemplate.attributes(tpl)
               |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
+              |> Map.put(:owner_id, id)
               |> Services.update_service(dest.id, user)
       false -> Logger.info "did not update service due to no differences"
     end
   end
 
-  def sync_service(%GlobalService{service: %Service{} = source}, %Service{} = dest, %User{} = user),
-    do: sync_service(source, dest, user)
+  def sync_service(%GlobalService{service: %Service{} = source, id: id}, %Service{} = dest, %User{} = user),
+    do: sync_service(source, %{dest | owner_id: id}, user)
 
-  def sync_service(%Service{} = source, %Service{} = dest, %User{} = user) do
+  def sync_service(%Service{} = source, %Service{owner_id: owner_id} = dest, %User{} = user) do
     Logger.info "attempting to resync service #{dest.id}"
     source = Repo.preload(source, [:context_bindings, :dependencies])
     dest = Repo.preload(dest, [:context_bindings, :dependencies])
@@ -340,6 +351,7 @@ defmodule Console.Deployments.Global do
       Services.update_service(%{
         templated: source.templated,
         namespace: source.namespace,
+        owner_id: owner_id,
         configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
         repository_id: source.repository_id,
         git: clean(source.git),

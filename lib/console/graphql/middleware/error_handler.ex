@@ -19,7 +19,7 @@ defmodule Console.Middleware.ErrorHandler do
   defp format(err) when is_atom(err), do: err
   defp format(err) do
     Logger.error "found unknown error: #{inspect(err)}"
-    "unknown error"
+    "unknown error (check logs for more details)"
   end
 
   defp flatten(vals, res \\ [])

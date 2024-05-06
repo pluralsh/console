@@ -2,11 +2,14 @@ defmodule Console.Schema.PolicyConstraint do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Cluster, ConstraintViolation}
 
+  defenum Enforcement, warn: 0, deny: 1, dry_run: 2
+
   schema "policy_constraints" do
     field :name,            :string
     field :description,     :string
     field :recommendation,  :string
     field :violation_count, :integer
+    field :enforcement,     Enforcement
 
     embeds_one :ref, Ref, on_replace: :update do
       field :kind, :string
@@ -41,6 +44,10 @@ defmodule Console.Schema.PolicyConstraint do
 
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(p in query, where: p.cluster_id == ^cluster_id)
+  end
+
+  def for_clusters(query \\ __MODULE__, cluster_ids) do
+    from(p in query, where: p.cluster_id in ^cluster_ids)
   end
 
   def for_namespace(query \\ __MODULE__, ns) do
@@ -87,7 +94,7 @@ defmodule Console.Schema.PolicyConstraint do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name description recommendation violation_count)a
+  @valid ~w(name description recommendation violation_count enforcement)a
 
   def changeset(model, attrs \\ %{}) do
     model

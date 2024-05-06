@@ -96,6 +96,9 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
     name
     status
   }
+  repository {
+    pulledAt
+  }
 }
 
 fragment ServiceDeploymentComponent on ServiceComponent {

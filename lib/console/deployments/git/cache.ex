@@ -8,7 +8,7 @@ defmodule Console.Deployments.Git.Cache do
   This should be relatively disk-efficient, and refresh cycles will sync with polling the git repo
   """
   import Console.Deployments.Git.Cmd
-  alias Console.Schema.GitRepository
+  alias Console.Schema.{GitRepository, Service.Git}
 
   defstruct [:git, :dir, :heads, cache: %{}]
 
@@ -34,10 +34,14 @@ defmodule Console.Deployments.Git.Cache do
     %__MODULE__{git: git, dir: dir}
   end
 
+  def fetch(%__MODULE__{} = cache, %Git{ref: ref, folder: folder, files: [_ | _] = files}),
+    do: fetch(cache, ref, folder, files)
+  def fetch(%__MODULE__{} = cache, %Git{ref: ref, folder: folder}), do: fetch(cache, ref, folder)
+
   def fetch(%__MODULE__{} = cache, ref, path, filter \\ fn _ -> true end) do
     with {:ok, sha} <- commit(cache, ref),
          {:ok, line} <- find_commit(cache, sha, path, filter),
-      do: {:ok, line, put_in(cache.cache[{sha, path}], line)}
+      do: {:ok, line, put_in(cache.cache[cache_key(sha, path, filter)], line)}
   end
 
   def refresh(%__MODULE__{git: git, cache: cache} = c) do
@@ -47,7 +51,8 @@ defmodule Console.Deployments.Git.Cache do
   end
 
   defp find_commit(%__MODULE__{git: g, cache: cache} = c, sha, path, filter) do
-    case Map.get(cache, {sha, path}) do
+    cache_key = cache_key(sha, path, filter)
+    case Map.get(cache, cache_key) do
       %Line{} = l -> {:ok, Line.touch(l)}
       _ -> new_line(c, g, sha, path, filter)
     end
@@ -82,7 +87,21 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
-  defp tarball(%GitRepository{dir: dir}, path, tgz_path, filter) do
+  defp tarball(%GitRepository{dir: dir}, path, tgz_path, [_ | _] = files) do
+    subpath = Path.join(dir, path)
+    additional_files = Enum.map(files, &Path.join(dir, &1))
+                       |> Enum.map(& {to_charlist(Path.basename(&1)), to_charlist(&1)})
+
+    Console.ls_r(subpath)
+    |> Enum.map(&tar_path(&1, subpath))
+    |> Enum.concat(additional_files)
+    |> case do
+      [_ | _] = files -> tar_files(files, tgz_path)
+      [] -> {:error, "folder is empty"}
+    end
+  end
+
+  defp tarball(%GitRepository{dir: dir}, path, tgz_path, filter) when is_function(filter) do
     subpath = Path.join(dir, path)
 
     Console.ls_r(subpath)
@@ -107,6 +126,9 @@ defmodule Console.Deployments.Git.Cache do
     relative_path = Path.relative_to(filename, repo_path) |> to_charlist()
     {relative_path, to_charlist(filename)}
   end
+
+  defp cache_key(sha, path, [_ | _] = filter), do: {sha, path, filter}
+  defp cache_key(sha, path, _), do: {sha, path}
 
   defp sha?(ref), do: String.match?(ref, ~r/^[0-9A-Fa-f]{40}$/)
 

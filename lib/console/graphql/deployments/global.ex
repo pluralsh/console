@@ -8,7 +8,9 @@ defmodule Console.GraphQl.Deployments.Global do
     field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
     field :distro,      :cluster_distro, description: "kubernetes distribution to target"
     field :provider_id, :id, description: "cluster api provider to target"
+    field :reparent,    :boolean, description: "whether you want the global service to take ownership of existing plural services"
     field :template,    :service_template_attributes
+    field :cascade,     :cascade_attributes, description: "behavior for all owned resources when this global service is deleted"
   end
 
   @desc "Attributes for configuring a managed namespace"
@@ -20,6 +22,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :pull_secrets, list_of(:string), description: "a list of pull secrets to attach to this namespace"
     field :service,      :service_template_attributes
     field :target,       :cluster_target_attributes
+    field :cascade,      :cascade_attributes, description: "behavior for all owned resources when this global service is deleted"
   end
 
   @desc "Attributes for configuring a service in something like a managed namespace"
@@ -44,12 +47,20 @@ defmodule Console.GraphQl.Deployments.Global do
     field :distro, :cluster_distro, description: "kubernetes distribution to target"
   end
 
+  @desc "Whether you want to delete or detach owned resources"
+  input_object :cascade_attributes do
+    field :delete, :boolean
+    field :detach, :boolean
+  end
+
   @desc "a rules based mechanism to redeploy a service across a fleet of clusters"
   object :global_service do
-    field :id,     non_null(:id), description: "internal id of this global service"
-    field :name,   non_null(:string), description: "a human readable name for this global service"
-    field :tags,   list_of(:tag), description: "a set of tags to select clusters for this global service"
-    field :distro, :cluster_distro, description: "the kubernetes distribution to target with this global service"
+    field :id,       non_null(:id), description: "internal id of this global service"
+    field :name,     non_null(:string), description: "a human readable name for this global service"
+    field :tags,     list_of(:tag), description: "a set of tags to select clusters for this global service"
+    field :distro,   :cluster_distro, description: "the kubernetes distribution to target with this global service"
+    field :reparent, :boolean, description: "whether you want to reparent existing plural services under this global service"
+    field :cascade,  :cascade, description: "behavior for all owned resources when this global service is deleted"
 
     field :template, :service_template,   resolve: dataloader(Deployments), description: "the service template used to spawn services"
     field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"
@@ -74,6 +85,8 @@ defmodule Console.GraphQl.Deployments.Global do
     field :pull_secrets, list_of(:string), description: "a list of pull secrets to attach to this namespace"
     field :target,       :cluster_target, description: "The targeting criteria to select clusters this namespace is bound to"
     field :deleted_at,   :datetime, description: "the timestamp this namespace was deleted at, indicating it's currently draining"
+    field :cascade,      :cascade, description: "behavior for all owned resources when this global service is deleted"
+
     field :service,      :service_template,
       description: "A template for creating the core service for this namespace",
       resolve: dataloader(Deployments)
@@ -112,6 +125,12 @@ defmodule Console.GraphQl.Deployments.Global do
   object :cluster_target do
     field :tags,   :json, description: "the cluster tags to target"
     field :distro, :cluster_distro, description: "kubernetes distribution to target"
+  end
+
+  @desc "A spec for specifying cascade behavior on an owning resource"
+  object :cascade do
+    field :delete, :boolean, description: "whether to perform a drain-delete for all owned resources"
+    field :detach, :boolean, description: "whether to perform a detach-delete for all owned resources"
   end
 
   connection node_type: :global_service

@@ -34,6 +34,9 @@ defmodule Console.Schema.GitRepository do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> foreign_key_constraint(:id, name: :service_template, match: :prefix, message: "There is a service template attached to an active managed namespace or global service using this repository")
+    |> foreign_key_constraint(:id, name: :services, match: :prefix, message: "there is an active service using this repository")
+    |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "there is an active stack using this repository")
     |> validate_format(:url, ~r/((git|ssh|http(s)?)|(git@[\w\.-]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/, message: "must provide a valid git url")
     |> add_auth_method()
     |> validate_required([:url])

@@ -6,10 +6,9 @@ defmodule Console.Deployments.Tar do
   """
   @spec from_url(binary) :: {:ok, File.t} | err
   def from_url(url) do
-    stream = HTTPStream.get(url)
     with {:ok, tmp} <- Briefly.create(),
-         :ok <- Stream.into(stream, File.stream!(tmp)) |> Stream.run(),
-      do: File.open(tmp)
+         {:ok, _} <- Req.get(url, into: File.stream!(tmp)),
+      do: {:ok, tmp}
   end
 
   @doc """
@@ -51,6 +50,7 @@ defmodule Console.Deployments.Tar do
       with {:ok, tmp} <- Briefly.create(),
             _ <- IO.binstream(tar_file, 1024) |> Enum.into(File.stream!(tmp)),
            {:ok, res} <- :erl_tar.extract(tmp, [:compressed, :memory]),
+           _ <- File.rm(tmp),
         do: {:ok, Enum.map(res, fn {name, content} -> {to_string(name), to_string(content)} end)}
     after
       File.close(tar_file)

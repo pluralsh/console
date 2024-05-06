@@ -28,6 +28,7 @@ import {
   PodContainers,
   PodEvents,
   PodInfo,
+  PodLogs,
 } from '../components/kubernetes/workloads/Pod'
 import Navigation from '../components/kubernetes/Navigation'
 import Workloads from '../components/kubernetes/workloads/Workloads'
@@ -402,6 +403,10 @@ export const kubernetesRoute = (
       <Route
         path="events"
         element={<PodEvents />}
+      />
+      <Route
+        path="logs"
+        element={<PodLogs />}
       />
       <Route
         path="raw"
