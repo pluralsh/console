@@ -1,10 +1,10 @@
 import { ReactElement, useState } from 'react'
 import {
-  GitHubLogoIcon,
-  GitLabLogoIcon,
+  DatadogLogoIcon,
   HelpIcon,
   IconFrame,
   ListBoxItem,
+  NewrelicLogoIcon,
   PencilIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
@@ -56,8 +56,8 @@ export const observabilityproviderTypeToLabel = {
 } as const satisfies Record<ObservabilityProviderType | '', string>
 
 export const observabilityproviderTypeToIcon = {
-  [ObservabilityProviderType.Datadog]: <GitHubLogoIcon fullColor />,
-  [ObservabilityProviderType.Newrelic]: <GitLabLogoIcon fullColor />,
+  [ObservabilityProviderType.Datadog]: <DatadogLogoIcon />,
+  [ObservabilityProviderType.Newrelic]: <NewrelicLogoIcon />,
   '': <HelpIcon />,
 } as const satisfies Record<ObservabilityProviderType | '', ReactElement>
 
