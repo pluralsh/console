@@ -40,6 +40,7 @@ export const columnHelper =
 const ColName = columnHelper.accessor(({ node }) => node?.name, {
   id: 'name',
   header: 'Name',
+  meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
   cell: function Cell({ getValue }) {
     return <>{getValue()}</>
   },
@@ -194,6 +195,7 @@ export const ColActions = columnHelper.display({
           observabilityProvider={observabilityProvider}
           open={menuKey === MenuItemKey.Edit}
           onClose={() => setMenuKey('')}
+          operationType="update"
         />
         <DeleteObservabilityProviderModal
           observabilityProvider={observabilityProvider}
