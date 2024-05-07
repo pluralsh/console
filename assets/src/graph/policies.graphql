@@ -62,11 +62,11 @@ query PolicyConstraints(
 query PolicyConstraint($id: ID!) {
   policyConstraint(id: $id) {
     ...PoliciyConstraint
-    # object{
-    #     metadata{
-    #         namespace
-    #     }
-    # }
+    object {
+      metadata {
+        namespace
+      }
+    }
   }
 }
 
