@@ -2175,8 +2175,11 @@ export type KubernetesDatasource = {
 export type KubernetesUnstructured = {
   __typename?: 'KubernetesUnstructured';
   events?: Maybe<Array<Maybe<Event>>>;
+  group?: Maybe<Scalars['String']['output']>;
+  kind: Scalars['String']['output'];
   metadata: Metadata;
   raw?: Maybe<Scalars['Map']['output']>;
+  version: Scalars['String']['output'];
 };
 
 /** metadata needed for configuring kustomize */
