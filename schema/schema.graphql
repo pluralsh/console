@@ -4582,6 +4582,9 @@ type ResourceSpec {
 }
 
 type KubernetesUnstructured {
+  group: String
+  version: String!
+  kind: String!
   raw: Map
   metadata: Metadata!
   events: [Event]
