@@ -57,7 +57,9 @@ defmodule Console.Schema.Stack do
     belongs_to :delete_run, StackRun
     belongs_to :connection, ScmConnection
 
-    has_one :state, StackState, on_replace: :update
+    has_one :state, StackState,
+      on_replace: :update,
+      foreign_key: :stack_id
 
     has_many :environment, StackEnvironment, on_replace: :delete
     has_many :files,       StackFile, on_replace: :delete

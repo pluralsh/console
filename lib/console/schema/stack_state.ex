@@ -5,7 +5,7 @@ defmodule Console.Schema.StackState do
   schema "stack_states" do
     field :plan, :binary
 
-    embeds_many :state, StateItem do
+    embeds_many :state, StateItem, on_replace: :delete do
       field :identifier,    :string
       field :resource,      :string
       field :name,          :string
