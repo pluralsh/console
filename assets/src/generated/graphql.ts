@@ -6673,7 +6673,7 @@ export type StackStateAttributes = {
 export type StackStateResource = {
   __typename?: 'StackStateResource';
   /** arbitrary configuration used to create the resource */
-  configuration?: Maybe<Scalars['Json']['output']>;
+  configuration?: Maybe<Scalars['Map']['output']>;
   /** a string identifier for this resource, different tools will have different conventions */
   identifier: Scalars['String']['output'];
   /** identifiers this resource is linked to for graphing in the UI */
