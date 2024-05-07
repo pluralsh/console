@@ -171,7 +171,7 @@ defmodule Console.Deployments.StacksTest do
       assert second.index == 1
 
       assert third.cmd == "terraform"
-      assert third.args == ["apply", "-auto-approve"]
+      assert third.args == ["apply"]
       assert third.index == 2
 
       stack = refetch(stack)
