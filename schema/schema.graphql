@@ -1239,7 +1239,7 @@ type StackStateResource {
   name: String!
 
   "arbitrary configuration used to create the resource"
-  configuration: Json
+  configuration: Map
 
   "identifiers this resource is linked to for graphing in the UI"
   links: [String]
