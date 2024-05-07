@@ -2799,6 +2799,8 @@ export type PersonaConfiguration = {
   all?: Maybe<Scalars['Boolean']['output']>;
   /** enable individual parts of the deployments views */
   deployments?: Maybe<PersonaDeployment>;
+  /** settings for the home page for this persona */
+  home?: Maybe<PersonaHome>;
   /** enable individual aspects of the sidebar */
   sidebar?: Maybe<PersonaSidebar>;
 };
@@ -2808,6 +2810,8 @@ export type PersonaConfigurationAttributes = {
   all?: InputMaybe<Scalars['Boolean']['input']>;
   /** enable individual parts of the deployments views */
   deployments?: InputMaybe<PersonaDeploymentAttributes>;
+  /** configuration for the homepage for the given persona */
+  home?: InputMaybe<PersonaHomeAttributes>;
   /** enable individual aspects of the sidebar */
   sidebar?: InputMaybe<PersonaSidebarAttributes>;
 };
@@ -2843,6 +2847,17 @@ export type PersonaEdge = {
   __typename?: 'PersonaEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Persona>;
+};
+
+export type PersonaHome = {
+  __typename?: 'PersonaHome';
+  manager?: Maybe<Scalars['Boolean']['output']>;
+  security?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type PersonaHomeAttributes = {
+  manager?: InputMaybe<Scalars['Boolean']['input']>;
+  security?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type PersonaSidebar = {

@@ -37,6 +37,10 @@ import { PersonaAttributes } from './PersonaAttributesEdit'
 
 const DEFAULT_CONFIGURATION = {
   all: true,
+  home: {
+    manager: false,
+    security: false,
+  },
   deployments: {
     addOns: true,
     clusters: true,
@@ -57,6 +61,7 @@ const DEFAULT_CONFIGURATION = {
 } as const satisfies RequiredDeep<PersonaConfigurationAttributes>
 
 export const configTabs = {
+  home: 'Homepage',
   deployments: 'Continuous deployment',
   sidebar: 'Sidebar',
 } as const satisfies Record<

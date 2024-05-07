@@ -318,6 +318,7 @@ defmodule Console.Deployments.Services do
       |> Console.dedupe(:helm, Console.mapify(source.helm))
       |> Console.dedupe(:kustomize, Console.mapify(source.kustomize))
       |> Console.dedupe(:dependencies, Enum.map(source.dependencies, & %{name: &1.name}))
+      |> Console.dedupe(:sync_config, Console.clean(source.sync_config))
       |> Map.merge(attrs)
       |> Map.put(:configuration, config)
       |> create_service(cluster_id, user)

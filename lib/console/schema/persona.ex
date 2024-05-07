@@ -7,6 +7,10 @@ defmodule Console.Schema.Persona do
 
     embedded_schema do
       field :all, :boolean
+      embeds_one :home, Home, on_replace: :update do
+        boolean_fields [:manager, :security]
+      end
+
       embeds_one :deployments, Deployments, on_replace: :update do
         boolean_fields [:clusters, :repositories, :deployments, :services, :pipelines, :providers, :add_ons]
       end
@@ -21,6 +25,7 @@ defmodule Console.Schema.Persona do
       |> cast(attrs, [:all])
       |> cast_embed(:deployments, with: &deployments_cs/2)
       |> cast_embed(:sidebar, with: &sidebar_cs/2)
+      |> cast_embed(:home, with: &home_cs/2)
     end
 
     defp deployments_cs(model, attrs) do
@@ -33,8 +38,14 @@ defmodule Console.Schema.Persona do
       |> cast(attrs, sidebar_fields())
     end
 
+    defp home_cs(model, attrs) do
+      model
+      |> cast(attrs, home_fields())
+    end
+
     defp deployments_fields(), do: __MODULE__.Deployments.__schema__(:fields) -- [:id]
     defp sidebar_fields(), do: __MODULE__.Sidebar.__schema__(:fields) -- [:id]
+    defp home_fields(), do: __MODULE__.Home.__schema__(:fields) -- [:id]
   end
 
   schema "personas" do

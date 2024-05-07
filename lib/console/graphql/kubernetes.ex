@@ -53,10 +53,10 @@ defmodule Console.GraphQl.Kubernetes do
   end
 
   object :kubernetes_unstructured do
-    field :group,    :string
-    field :version,  non_null(:string)
-    field :kind,     non_null(:string)
-    field :raw, :map, resolve: fn
+    field :group,   :string
+    field :version, non_null(:string)
+    field :kind,    non_null(:string)
+    field :raw,     :map, resolve: fn
       %{raw: %{"metadata" => %{"managedFields" => _}} = raw}, _, _ ->
         {:ok, put_in(raw["metadata"]["managedFields"], [])}
       %{raw: raw}, _, _ -> {:ok, raw}
