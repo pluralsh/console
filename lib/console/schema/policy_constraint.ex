@@ -38,10 +38,6 @@ defmodule Console.Schema.PolicyConstraint do
     )
   end
 
-  def globally_ordered(query \\ __MODULE__) do
-    from([p, clusters: c] in query, order_by: [asc: c.name, asc: p.name])
-  end
-
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(p in query, where: p.cluster_id == ^cluster_id)
   end
@@ -90,7 +86,9 @@ defmodule Console.Schema.PolicyConstraint do
     )
   end
 
-  def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
+  def distinct(query), do: from(p in query, distinct: true)
+
+  def ordered(query \\ __MODULE__, order \\ [asc: :name, asc: :cluster_id]) do
     from(p in query, order_by: ^order)
   end
 
