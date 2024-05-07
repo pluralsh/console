@@ -1063,6 +1063,9 @@ type InfrastructureStack {
   "reference w\/in the repository where the IaC lives"
   git: GitRef!
 
+  "whether the stack is actively tracking changes in git"
+  paused: Boolean
+
   "optional k8s job configuration for the job that will apply this stack"
   jobSpec: JobGateSpec
 
@@ -1140,6 +1143,9 @@ type StackRun {
 
   "whether to require approval"
   approval: Boolean
+
+  "the commit message"
+  message: String
 
   "when this run was approved"
   approvedAt: DateTime
@@ -1570,7 +1576,7 @@ type ConstraintRef {
 "A summary of statistics for violations w\/in a specific column"
 type ViolationStatistic {
   "the value of this field being aggregated"
-  value: String!
+  value: String
 
   "the total number of violations found"
   violations: Int

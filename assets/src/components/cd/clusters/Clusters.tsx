@@ -7,21 +7,12 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import {
-  ComponentProps,
-  Key,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ComponentProps, Key, useMemo, useRef, useState } from 'react'
 import { Row } from '@tanstack/react-table'
-import { VirtualItem } from '@tanstack/react-virtual'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { useDebounce } from '@react-hooks-library/core'
-import { isEmpty } from 'lodash'
 
 import {
   ClustersRowFragment,
@@ -36,15 +27,15 @@ import {
   getClusterDetailsPath,
 } from 'routes/cdRoutesConsts'
 
-import { Edge, extendConnection } from 'utils/graphql'
+import { Edge } from 'utils/graphql'
 import { keyToTag } from 'utils/clusterTags'
 import usePersistedState from 'components/hooks/usePersistedState'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
 
+import { isEmpty } from 'lodash'
+
 import {
-  POLL_INTERVAL,
   useSetPageHeaderContent,
   useSetPageScrollable,
 } from '../ContinuousDeployment'
@@ -58,17 +49,19 @@ import {
 
 import { ClusterTagsFilter } from '../services/ClusterTagsFilter'
 
+import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
+
 import CreateCluster from './create/CreateCluster'
 import { DemoTable } from './ClustersDemoTable'
 import { ClustersGettingStarted } from './ClustersGettingStarted'
-import { columns } from './ClustersColumns'
-
-export const CLUSTERS_QUERY_PAGE_SIZE = 100
+import { cdClustersColumns } from './ClustersColumns'
 
 export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'cd', url: '/cd' },
   { label: 'clusters', url: `${CD_REL_PATH}/${CLUSTERS_REL_PATH}` },
 ]
+
+export const CLUSTERS_QUERY_PAGE_SIZE = 100
 
 type TableWrapperSCProps = {
   $blurred: boolean
@@ -105,18 +98,13 @@ export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
   const cdIsEnabled = useCDEnabled()
-  const [searchString, setSearchString] = useState()
-  const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
   const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
-  const [virtualSlice, setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
+
+  const [searchString, setSearchString] = useState<string>()
+  const debouncedSearchString = useDebounce(searchString, 100)
+
   const searchTags = useMemo(
     () =>
       Array.from(selectedTagKeys.values(), (tagKey) => keyToTag(`${tagKey}`)),
@@ -128,48 +116,29 @@ export default function Clusters() {
     Conjunction.Or
   )
 
-  const queryResult = useClustersQuery({
-    variables: {
+  const {
+    data,
+    loading,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      queryHook: useClustersQuery,
+      pageSize: CLUSTERS_QUERY_PAGE_SIZE,
+      queryKey: 'clusters',
+    },
+    {
       q: debouncedSearchString,
-      first: CLUSTERS_QUERY_PAGE_SIZE,
+      ...(statusFilter !== 'ALL' ? { status: statusFilter } : {}),
       ...(!isEmpty(searchTags)
         ? { tagQuery: { op: tagOp, tags: searchTags } }
         : {}),
-      ...(statusFilter !== 'ALL'
-        ? { healthy: statusFilter === 'HEALTHY' }
-        : {}),
-    },
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
-  const {
-    error,
-    fetchMore,
-    loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
-  const clusters = data?.clusters
-  const pageInfo = clusters?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
-    pageSize: CLUSTERS_QUERY_PAGE_SIZE,
-    key: 'clusters',
-    interval: POLL_INTERVAL,
-  })
-
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
     }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult.clusters, 'clusters'),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
+  )
+
   const statusCounts = useMemo<Record<ClusterStatusTabKey, number | undefined>>(
     () => ({
       ALL: data?.clusterStatuses?.reduce(
@@ -296,15 +265,16 @@ export function ClustersTable({
   data: any[]
 } & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
   const navigate = useNavigate()
-  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(() => ({ meta: { refetch } }), [refetch])
+  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
+    meta: { refetch },
+  }
 
   return (
     <Table
       loose
       reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
       data={data || []}
-      columns={columns}
+      columns={cdClustersColumns}
       reactTableOptions={reactTableOptions}
       css={{
         maxHeight: 'unset',

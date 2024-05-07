@@ -50,7 +50,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   end
 
   def fetch_constraint(%{ref: %{name: name, kind: kind}, cluster_id: cluster_id}, _, _) do
-    path = Kube.Client.Base.path("constraints.gatekeeper.sh", "v1beta1", kind, nil, name)
+    path = Kube.Client.Base.path("constraints.gatekeeper.sh", "v1beta1", String.downcase(kind), nil, name)
     with %Cluster{} = cluster <- Clusters.get_cluster(cluster_id),
          _ <- save_kubeconfig(cluster),
          {:ok, res} <- Kube.Client.raw(path),

@@ -149,12 +149,13 @@ defmodule Console.Deployments.StacksTest do
         git: %{ref: "main", folder: "terraform"}
       )
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"]} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
 
       {:ok, run} = Stacks.poll(stack)
 
       assert run.stack_id == stack.id
       assert run.status == :queued
+      assert run.message == "a commit message"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -188,7 +189,7 @@ defmodule Console.Deployments.StacksTest do
       )
       pr = insert(:pull_request, stack: stack)
       expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"]} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
 
       {:ok, run} = Stacks.poll(pr)
 
@@ -196,6 +197,7 @@ defmodule Console.Deployments.StacksTest do
       assert run.pull_request_id == pr.id
       assert run.status == :queued
       assert run.dry_run
+      assert run.message == "a commit message"
       assert run.cluster_id == stack.cluster_id
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
@@ -363,6 +365,7 @@ defmodule Console.Deployments.StacksTest do
 
       {:ok, completed} = Stacks.complete_stack_run(%{
         status: :successful,
+        state: %{plan: "some plan"},
         output: [%{name: "some-output", value: "val"}]
       }, run.id, user)
 
@@ -379,6 +382,13 @@ defmodule Console.Deployments.StacksTest do
       assert output.value == "val"
 
       assert_receive {:event, %PubSub.StackRunCompleted{item: ^completed}}
+
+      # can still complete when completed
+      {:ok, _} = Stacks.complete_stack_run(%{
+        status: :successful,
+        state: %{plan: "some plan"},
+        output: [%{name: "some-output", value: "val"}]
+      }, run.id, user)
     end
 
     test "clusters can complete runs" do
@@ -461,6 +471,7 @@ defmodule Console.Deployments.StacksSyncTest do
 
       assert run.status == :queued
       refute run.dry_run
+      assert run.message
       assert run.stack_id == stack.id
       refute run.git.ref == stack.git.ref
     end

@@ -30,6 +30,7 @@ query PullRequests(
   $after: String
   $clusterId: ID
   $serviceId: ID
+  $open: Boolean
 ) {
   pullRequests(
     q: $q
@@ -37,6 +38,7 @@ query PullRequests(
     after: $after
     clusterId: $clusterId
     serviceId: $serviceId
+    open: $open
   ) {
     pageInfo {
       ...PageInfo

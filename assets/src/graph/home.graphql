@@ -1,0 +1,8 @@
+query UpgradeStatistics {
+  upgradeStatistics {
+    upgradeable
+    count
+    latest
+    compliant
+  }
+}

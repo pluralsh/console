@@ -39,6 +39,7 @@ defmodule Console.Schema.Stack do
     field :name,            :string
     field :type,            Type
     field :status,          Status
+    field :paused,          :boolean, default: false
     field :approval,        :boolean
     field :sha,             :string
     field :last_successful, :string
@@ -88,13 +89,17 @@ defmodule Console.Schema.Stack do
     end)
   end
 
+  def unpaused(query \\ __MODULE__) do
+    from(s in query, where: not s.paused or is_nil(s.paused))
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(s in query, order_by: ^order)
   end
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name type status approval connection_id repository_id cluster_id)a
+  @valid ~w(name type paused status approval connection_id repository_id cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -1984,6 +1984,8 @@ export type InfrastructureStack = {
   observableMetrics?: Maybe<Array<Maybe<ObservableMetric>>>;
   /** the most recent output for this stack */
   output?: Maybe<Array<Maybe<StackOutput>>>;
+  /** whether the stack is actively tracking changes in git */
+  paused?: Maybe<Scalars['Boolean']['output']>;
   pullRequests?: Maybe<PullRequestConnection>;
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repository you're sourcing IaC from */
@@ -6612,6 +6614,8 @@ export type StackRun = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: Maybe<JobGateSpec>;
+  /** the commit message */
+  message?: Maybe<Scalars['String']['output']>;
   /** the most recent output for this stack */
   output?: Maybe<Array<Maybe<StackOutput>>>;
   /** the git repository you're sourcing IaC from */
@@ -7068,7 +7072,7 @@ export type ViolationStatistic = {
   /** the total number of policy constraints */
   count?: Maybe<Scalars['Int']['output']>;
   /** the value of this field being aggregated */
-  value: Scalars['String']['output'];
+  value?: Maybe<Scalars['String']['output']>;
   /** the total number of violations found */
   violations?: Maybe<Scalars['Int']['output']>;
 };
@@ -7923,6 +7927,7 @@ export type PullRequestsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+  open?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -8200,6 +8205,11 @@ export type DeleteGroupMutationVariables = Exact<{
 
 
 export type DeleteGroupMutation = { __typename?: 'RootMutationType', deleteGroup?: { __typename?: 'Group', id: string, name: string, description?: string | null, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type UpgradeStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UpgradeStatisticsQuery = { __typename?: 'RootQueryType', upgradeStatistics?: { __typename?: 'UpgradeStatistics', upgradeable?: number | null, count?: number | null, latest?: number | null, compliant?: number | null } | null };
 
 export type KubernetesClusterFragment = { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
 
@@ -14057,13 +14067,14 @@ export type CreatePullRequestMutationHookResult = ReturnType<typeof useCreatePul
 export type CreatePullRequestMutationResult = Apollo.MutationResult<CreatePullRequestMutation>;
 export type CreatePullRequestMutationOptions = Apollo.BaseMutationOptions<CreatePullRequestMutation, CreatePullRequestMutationVariables>;
 export const PullRequestsDocument = gql`
-    query PullRequests($q: String, $first: Int = 100, $after: String, $clusterId: ID, $serviceId: ID) {
+    query PullRequests($q: String, $first: Int = 100, $after: String, $clusterId: ID, $serviceId: ID, $open: Boolean) {
   pullRequests(
     q: $q
     first: $first
     after: $after
     clusterId: $clusterId
     serviceId: $serviceId
+    open: $open
   ) {
     pageInfo {
       ...PageInfo
@@ -14095,6 +14106,7 @@ ${PullRequestFragmentDoc}`;
  *      after: // value for 'after'
  *      clusterId: // value for 'clusterId'
  *      serviceId: // value for 'serviceId'
+ *      open: // value for 'open'
  *   },
  * });
  */
@@ -15397,6 +15409,48 @@ export function useDeleteGroupMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteGroupMutationHookResult = ReturnType<typeof useDeleteGroupMutation>;
 export type DeleteGroupMutationResult = Apollo.MutationResult<DeleteGroupMutation>;
 export type DeleteGroupMutationOptions = Apollo.BaseMutationOptions<DeleteGroupMutation, DeleteGroupMutationVariables>;
+export const UpgradeStatisticsDocument = gql`
+    query UpgradeStatistics {
+  upgradeStatistics {
+    upgradeable
+    count
+    latest
+    compliant
+  }
+}
+    `;
+
+/**
+ * __useUpgradeStatisticsQuery__
+ *
+ * To run a query within a React component, call `useUpgradeStatisticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUpgradeStatisticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUpgradeStatisticsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUpgradeStatisticsQuery(baseOptions?: Apollo.QueryHookOptions<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>(UpgradeStatisticsDocument, options);
+      }
+export function useUpgradeStatisticsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>(UpgradeStatisticsDocument, options);
+        }
+export function useUpgradeStatisticsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>(UpgradeStatisticsDocument, options);
+        }
+export type UpgradeStatisticsQueryHookResult = ReturnType<typeof useUpgradeStatisticsQuery>;
+export type UpgradeStatisticsLazyQueryHookResult = ReturnType<typeof useUpgradeStatisticsLazyQuery>;
+export type UpgradeStatisticsSuspenseQueryHookResult = ReturnType<typeof useUpgradeStatisticsSuspenseQuery>;
+export type UpgradeStatisticsQueryResult = Apollo.QueryResult<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>;
 export const KubernetesClustersDocument = gql`
     query KubernetesClusters {
   clusters(first: 200) {
@@ -17084,6 +17138,7 @@ export const namedOperations = {
     Groups: 'Groups',
     SearchGroups: 'SearchGroups',
     GroupMembers: 'GroupMembers',
+    UpgradeStatistics: 'UpgradeStatistics',
     KubernetesClusters: 'KubernetesClusters',
     Canary: 'Canary',
     Certificate: 'Certificate',
