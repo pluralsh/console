@@ -14,11 +14,10 @@ import styled, { useTheme } from 'styled-components'
 import {
   ObservabilityProviderFragment,
   ObservabilityProviderType,
-  ObservabilityProvidersDocument,
   useDeleteObservabilityProviderMutation,
 } from 'generated/graphql'
 
-import { Edge, removeConnection, updateCache } from 'utils/graphql'
+import { Edge } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
 import { StackedText } from 'components/utils/table/StackedText'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -111,27 +110,19 @@ export function DeleteObservabilityProviderModal({
   observabilityProvider,
   open,
   onClose,
+  refetch,
 }: {
   observabilityProvider: ObservabilityProviderFragment
   open: boolean
   onClose: Nullable<() => void>
+  refetch: () => void
 }) {
   const theme = useTheme()
   const [mutation, { loading, error }] = useDeleteObservabilityProviderMutation(
     {
       variables: { id: observabilityProvider.id },
-      update: (cache, { data }) =>
-        updateCache(cache, {
-          variables: {},
-          query: ObservabilityProvidersDocument,
-          update: (prev) =>
-            removeConnection(
-              prev,
-              data?.deleteObservabilityProvider,
-              'observabilityProviders'
-            ),
-        }),
       onCompleted: () => {
+        refetch()
         onClose?.()
       },
     }
@@ -163,7 +154,7 @@ export function DeleteObservabilityProviderModal({
 export const ColActions = columnHelper.display({
   id: 'actions',
   header: '',
-  cell: function Cell({ row }) {
+  cell: function Cell({ row, table }) {
     const theme = useTheme()
     const observabilityProvider = row.original?.node
     const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
@@ -201,6 +192,7 @@ export const ColActions = columnHelper.display({
           observabilityProvider={observabilityProvider}
           open={menuKey === MenuItemKey.Delete}
           onClose={() => setMenuKey('')}
+          refetch={() => table.options.meta?.refetch?.()}
         />
       </>
     )

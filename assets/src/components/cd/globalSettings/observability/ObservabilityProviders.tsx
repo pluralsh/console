@@ -101,7 +101,7 @@ function ObservabilityProviders() {
   return (
     <ScrollablePage
       heading="Observability Providers"
-      headingContent={<AddProviderButton />}
+      headingContent={<AddProviderButton refetch={refetch} />}
     >
       <FullHeightTableWrap>
         <Table
@@ -125,7 +125,7 @@ function ObservabilityProviders() {
 
 export default ObservabilityProviders
 
-function AddProviderButton() {
+function AddProviderButton({ refetch }: { refetch: () => void }) {
   const [open, setOpen] = useState(false)
   const theme = useTheme()
 
@@ -144,6 +144,7 @@ function AddProviderButton() {
         open={open}
         onClose={() => setOpen(false)}
         operationType="create"
+        refetch={refetch}
       />
     </>
   )

@@ -25,11 +25,13 @@ function EditObservabilityProviderModalBase({
   onClose,
   observabilityProvider,
   operationType,
+  refetch,
 }: {
   open: boolean
   onClose: Nullable<() => void>
   observabilityProvider?: ObservabilityProviderFragment
   operationType: 'create' | 'update'
+  refetch?: () => void
 }) {
   const theme = useTheme()
   const {
@@ -47,10 +49,12 @@ function EditObservabilityProviderModalBase({
   const [mutation, { loading, error }] = useUpsertObservabilityProviderMutation(
     {
       onCompleted: () => {
+        refetch?.()
         onClose?.()
       },
     }
   )
+
   const { name, type, credentials } = formState
   const allowSubmit =
     name &&
