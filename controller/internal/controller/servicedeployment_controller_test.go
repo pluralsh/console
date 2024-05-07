@@ -268,14 +268,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.ServiceDeployment{
 				ObjectMeta: metav1.ObjectMeta{Name: serviceName, Namespace: namespace},
 			}, func(p *v1alpha1.ServiceDeployment) {
-				p.Spec.Dependencies = []corev1.ObjectReference{
+				p.Spec.Dependencies = []v1alpha1.ServiceDependency{
 					{
-						Name:      dep1,
-						Namespace: namespace,
+						Name: dep1,
 					},
 					{
-						Name:      dep2,
-						Namespace: namespace,
+						Name: dep2,
 					},
 				}
 			})).To(Succeed())

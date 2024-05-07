@@ -72,7 +72,7 @@ defmodule Console.Schema.PolicyConstraint do
   def for_namespaces(query, ns, _) do
     from(p in query,
       join: v in assoc(p, :violations),
-      where: v.namespace in ^ns or is_nil(v.namespace)
+      where: v.namespace in ^ns
     )
   end
 
