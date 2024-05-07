@@ -941,6 +941,7 @@ enum StepStage {
   PLAN
   VERIFY
   APPLY
+  INIT
 }
 
 input StackAttributes {
