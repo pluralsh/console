@@ -883,11 +883,16 @@ input ObservabilityProviderAttributes {
 
 input ObservabilityProviderCredentialsAttributes {
   datadog: DatadogCredentialsAttributes
+  newrelic: NewRelicCredentialsAttributes
 }
 
 input DatadogCredentialsAttributes {
   apiKey: String!
   appKey: String!
+}
+
+input NewRelicCredentialsAttributes {
+  apiKey: String!
 }
 
 input ObservableMetricAttributes {
