@@ -3,6 +3,8 @@ import { ReactNode } from 'react'
 import { Property } from 'csstype'
 import { useTheme } from 'styled-components'
 
+import { Title2H1 } from '../utils/typography/Text'
+
 export const HOME_CARD_MAX_HEIGHT = '436px'
 
 export function HomeCard({
@@ -17,17 +19,8 @@ export function HomeCard({
   const theme = useTheme()
 
   return (
-    <div>
-      {label && (
-        <div
-          css={{
-            ...theme.partials.text.title2,
-            marginBottom: theme.spacing.medium,
-          }}
-        >
-          {label}
-        </div>
-      )}
+    <div css={{ gap: theme.spacing.medium }}>
+      {label && <Title2H1>{label}</Title2H1>}
       <Card
         css={{
           maxHeight: HOME_CARD_MAX_HEIGHT,
