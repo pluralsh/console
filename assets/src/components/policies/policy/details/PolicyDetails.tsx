@@ -35,11 +35,13 @@ function PolicyDetails({
         </Title1H1>
         <Title2H1>Description</Title2H1>
         <Body1P css={{ color: theme.colors['text-long-form'] }}>
-          {policy.description || 'No description found for this policy, this must be set in an annotation'}
+          {policy.description ||
+            'No description found for this policy, this must be set in an annotation'}
         </Body1P>
         <Title2H1>Recommended action</Title2H1>
         <Body1P css={{ color: theme.colors['text-long-form'] }}>
-          {policy.recommendation || 'No recommendation found for this policy, this must be set in an annotation'}
+          {policy.recommendation ||
+            'No recommendation found for this policy, this must be set in an annotation'}
         </Body1P>
       </div>
       <Sidecar
