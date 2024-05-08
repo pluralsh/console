@@ -49,23 +49,35 @@ function PoliciesFilter({
 
   const clusters = clustersData?.clusters?.edges
 
+  const clusterLabel = 'Cluster'
+  const kindLabel = 'Kind'
+  const namespaceLabel = 'Namespace'
+
+  function handleCheckboxChange(
+    setSelected: Dispatch<SetStateAction<(string | null)[]>>,
+    value: string | null,
+    checked: boolean
+  ) {
+    setSelected((prev) => {
+      if (checked) {
+        return [...prev, value]
+      }
+
+      return prev.filter((el) => el !== value)
+    })
+  }
+
   return (
     <PoliciesFiltersContainer>
-      <Accordion label="Cluster">
+      <Accordion label={clusterLabel}>
         <Flex direction="column">
           <Checkbox
-            name="clusters"
+            name={clusterLabel}
             value={null}
             checked={selectedClusters.includes(null)}
-            onChange={({ target: { checked } }: any) => {
-              setSelectedClusters((prev) => {
-                if (checked) {
-                  return [...prev, null]
-                }
-
-                return prev.filter((id) => id !== null)
-              })
-            }}
+            onChange={({ target: { checked } }: any) =>
+              handleCheckboxChange(setSelectedClusters, null, checked)
+            }
           >
             No cluster
           </Checkbox>
@@ -76,17 +88,11 @@ function PoliciesFilter({
             return (
               <Checkbox
                 key={node.id}
-                name="clusters"
+                name={clusterLabel}
                 value={node.id}
                 checked={selectedClusters.includes(node.id)}
                 onChange={({ target: { checked } }: any) => {
-                  setSelectedClusters((prev) => {
-                    if (checked) {
-                      return [...prev, node.id]
-                    }
-
-                    return prev.filter((id) => id !== node.id)
-                  })
+                  handleCheckboxChange(setSelectedClusters, node.id, checked)
                 }}
               >
                 {node.name}
@@ -95,21 +101,15 @@ function PoliciesFilter({
           })}
         </Flex>
       </Accordion>
-      <Accordion label="Kind">
+      <Accordion label={kindLabel}>
         <Flex direction="column">
           <Checkbox
-            name="kinds"
+            name={kindLabel}
             value={null}
             checked={selectedKinds.includes(null)}
-            onChange={({ target: { checked } }: any) => {
-              setSelectedKinds((prev) => {
-                if (checked) {
-                  return [...prev, null]
-                }
-
-                return prev.filter((el) => el !== null)
-              })
-            }}
+            onChange={({ target: { checked } }: any) =>
+              handleCheckboxChange(setSelectedKinds, null, checked)
+            }
           >
             No kind
           </Checkbox>
@@ -119,54 +119,36 @@ function PoliciesFilter({
               name="kinds"
               value={kind}
               checked={selectedKinds.includes(kind)}
-              onChange={({ target: { checked } }: any) => {
-                setSelectedKinds((prev) => {
-                  if (checked) {
-                    return [...prev, kind]
-                  }
-
-                  return prev.filter((el) => el !== kind)
-                })
-              }}
+              onChange={({ target: { checked } }: any) =>
+                handleCheckboxChange(setSelectedKinds, kind, checked)
+              }
             >
               {kind}
             </Checkbox>
           ))}
         </Flex>
       </Accordion>
-      <Accordion label="Namespace">
+      <Accordion label={namespaceLabel}>
         <Flex direction="column">
           <Checkbox
-            name="namespaces"
+            name={namespaceLabel}
             value={null}
             checked={selectedNamespaces.includes(null)}
-            onChange={({ target: { checked } }: any) => {
-              setSelectedNamespaces((prev) => {
-                if (checked) {
-                  return [...prev, null]
-                }
-
-                return prev.filter((el) => el !== null)
-              })
-            }}
+            onChange={({ target: { checked } }: any) =>
+              handleCheckboxChange(setSelectedNamespaces, null, checked)
+            }
           >
             No namespace
           </Checkbox>
           {namespaces?.map((namespace) => (
             <Checkbox
               key={namespace}
-              name="namespaces"
+              name={namespaceLabel}
               value={namespace}
               checked={selectedNamespaces.includes(namespace)}
-              onChange={({ target: { checked } }: any) => {
-                setSelectedNamespaces((prev) => {
-                  if (checked) {
-                    return [...prev, namespace]
-                  }
-
-                  return prev.filter((el) => el !== namespace)
-                })
-              }}
+              onChange={({ target: { checked } }: any) =>
+                handleCheckboxChange(setSelectedNamespaces, namespace, checked)
+              }
             >
               {namespace}
             </Checkbox>
