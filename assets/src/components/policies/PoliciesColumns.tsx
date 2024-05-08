@@ -32,7 +32,7 @@ export const ColCluster = columnHelper.accessor(({ node }) => node?.cluster, {
 export const ColViolations = columnHelper.accessor(({ node }) => node, {
   id: 'violations',
   header: 'Violations',
-  meta: { truncate: true, gridTemplate: 'auto' },
+  meta: { truncate: false, gridTemplate: 'auto' },
   cell: function Cell({ getValue }) {
     const policy = getValue()
     const count = policy?.violationCount
