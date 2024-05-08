@@ -39,7 +39,7 @@ export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 function Policies() {
   const [searchString, setSearchString] = useState('')
-  const [selectedKind, setSelectedKind] = useState<string>('')
+  const [selectedKinds, setSelectedKinds] = useState<string[]>([])
   const [selectedNamespace, setSelectedNamespace] = useState<string>('')
   const [selectedClusters, setSelectedClusters] = useState<string[]>([])
 
@@ -60,7 +60,7 @@ function Policies() {
     variables: {
       ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
       first: POLICIES_QUERY_PAGE_SIZE,
-      ...(selectedKind ? { kind: selectedKind } : {}),
+      ...(selectedKinds.length ? { kinds: selectedKinds } : {}),
       ...(selectedNamespace ? { namespace: selectedNamespace } : {}),
       ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
     },
@@ -116,8 +116,8 @@ function Policies() {
         <PoliciesFilter
           selectedNamespace={selectedNamespace}
           setSelectedNamespace={setSelectedNamespace}
-          selectedKind={selectedKind}
-          setSelectedKind={setSelectedKind}
+          selectedKinds={selectedKinds}
+          setSelectedKinds={setSelectedKinds}
           selectedClusters={selectedClusters}
           setSelectedClusters={setSelectedClusters}
         />

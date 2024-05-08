@@ -9,15 +9,15 @@ import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 
 function PoliciesFilter({
-  selectedKind,
-  setSelectedKind,
+  selectedKinds,
+  setSelectedKinds,
   selectedNamespace,
   setSelectedNamespace,
   selectedClusters,
   setSelectedClusters,
 }: {
-  selectedKind: string
-  setSelectedKind: Dispatch<SetStateAction<string>>
+  selectedKinds: string[]
+  setSelectedKinds: Dispatch<SetStateAction<string[]>>
   selectedNamespace: string
   setSelectedNamespace: Dispatch<SetStateAction<string>>
   selectedClusters: Array<string>
@@ -60,7 +60,7 @@ function PoliciesFilter({
             return (
               <Checkbox
                 key={node.id}
-                name="options"
+                name="clusters"
                 value={node.id}
                 checked={selectedClusters.includes(node.id)}
                 onChange={({ target: { checked } }: any) => {
@@ -80,14 +80,27 @@ function PoliciesFilter({
         </Flex>
       </Accordion>
       <Accordion label="Kind">
-        <RadioGroup
-          name="radio-group-kind"
-          value={selectedKind}
-          onChange={setSelectedKind}
-        >
-          <Radio value="">All</Radio>
-          {kinds?.map((kind) => <Radio value={kind}>{kind}</Radio>)}
-        </RadioGroup>
+        <Flex direction="column">
+          {kinds?.map((kind) => (
+            <Checkbox
+              key={kind}
+              name="kinds"
+              value={kind}
+              checked={selectedKinds.includes(kind)}
+              onChange={({ target: { checked } }: any) => {
+                setSelectedKinds((prev) => {
+                  if (checked) {
+                    return [...prev, kind]
+                  }
+
+                  return prev.filter((id) => id !== kind)
+                })
+              }}
+            >
+              {kind}
+            </Checkbox>
+          ))}
+        </Flex>
       </Accordion>
       <Accordion label="Namespace">
         <RadioGroup
