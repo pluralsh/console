@@ -2,6 +2,8 @@ import { createColumnHelper } from '@tanstack/react-table'
 import React, { useMemo } from 'react'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
+import { filesize } from 'filesize'
+
 import {
   Maybe,
   Pod_PodList as PodListT,
@@ -24,6 +26,8 @@ import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { Kind } from '../common/types'
 
 import ResourceLink from '../common/ResourceLink'
+
+import { UsageText } from '../../cluster/TableElements'
 
 import { WorkloadImages, toReadiness } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
@@ -101,6 +105,46 @@ const colContainers = columnHelper.accessor(
   }
 )
 
+const colCpu = columnHelper.accessor((row) => row?.allocatedResources, {
+  id: 'cpu',
+  cell: ({ getValue }) => {
+    const allocatedResources = getValue()
+
+    return (
+      <UsageText>
+        {allocatedResources?.cpuRequests
+          ? allocatedResources.cpuRequests / 1000
+          : '-'}
+        {' / '}
+        {allocatedResources?.cpuLimits
+          ? allocatedResources.cpuLimits / 1000
+          : '-'}
+      </UsageText>
+    )
+  },
+  header: 'CPU',
+})
+
+const colMemory = columnHelper.accessor((row) => row?.allocatedResources, {
+  id: 'memory',
+  cell: ({ getValue }) => {
+    const allocatedResources = getValue()
+
+    return (
+      <UsageText>
+        {allocatedResources?.memoryRequests
+          ? filesize(allocatedResources.memoryRequests)
+          : '-'}
+        {' / '}
+        {allocatedResources?.memoryLimits
+          ? filesize(allocatedResources.memoryLimits)
+          : '-'}
+      </UsageText>
+    )
+  },
+  header: 'Memory',
+})
+
 export function usePodsColumns(): Array<object> {
   const { colName, colNamespace, colCreationTimestamp, colAction } =
     useDefaultColumns(columnHelper)
@@ -112,7 +156,8 @@ export function usePodsColumns(): Array<object> {
       colNode,
       colImages,
       colRestarts,
-      // TODO: Add CPU and memory.
+      colCpu,
+      colMemory,
       colContainers,
       colCreationTimestamp,
       colAction,
