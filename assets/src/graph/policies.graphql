@@ -13,17 +13,6 @@ fragment PoliciyConstraint on PolicyConstraint {
   }
   updatedAt
   violationCount
-  violations {
-    group
-    id
-    insertedAt
-    kind
-    message
-    name
-    namespace
-    updatedAt
-    version
-  }
 }
 
 query PolicyConstraints(
@@ -69,6 +58,17 @@ query PolicyConstraint($id: ID!) {
         namespace
       }
       kind
+    }
+    violations {
+      group
+      id
+      insertedAt
+      kind
+      message
+      name
+      namespace
+      updatedAt
+      version
     }
   }
 }
