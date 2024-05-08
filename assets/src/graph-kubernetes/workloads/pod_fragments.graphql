@@ -144,6 +144,12 @@ fragment PodList on pod_PodList {
     warnings {
       message
     }
+    allocatedResources {
+      cpuLimits
+      cpuRequests
+      memoryLimits
+      memoryRequests
+    }
   }
 }
 
