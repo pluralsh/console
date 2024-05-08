@@ -33,10 +33,14 @@ function PolicyDetails({
         >
           {name}
         </Title1H1>
-        <Title2H1>Description</Title2H1>
-        <Body1P css={{ color: theme.colors['text-long-form'] }}>
-          {policy.description}
-        </Body1P>
+        {policy.description ? (
+          <>
+            <Title2H1>Description</Title2H1>
+            <Body1P css={{ color: theme.colors['text-long-form'] }}>
+              {policy.description}
+            </Body1P>
+          </>
+        ) : null}
         {policy.recommendation ? (
           <>
             <Title2H1>Recommended action</Title2H1>
