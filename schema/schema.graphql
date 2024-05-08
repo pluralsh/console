@@ -941,6 +941,7 @@ enum StepStage {
   PLAN
   VERIFY
   APPLY
+  INIT
 }
 
 input StackAttributes {
@@ -1239,7 +1240,7 @@ type StackStateResource {
   name: String!
 
   "arbitrary configuration used to create the resource"
-  configuration: Json
+  configuration: Map
 
   "identifiers this resource is linked to for graphing in the UI"
   links: [String]
@@ -4581,6 +4582,9 @@ type ResourceSpec {
 }
 
 type KubernetesUnstructured {
+  group: String
+  version: String!
+  kind: String!
   raw: Map
   metadata: Metadata!
   events: [Event]
@@ -5377,6 +5381,9 @@ input PersonaConfigurationAttributes {
   "enable full ui for this persona"
   all: Boolean
 
+  "configuration for the homepage for the given persona"
+  home: PersonaHomeAttributes
+
   "enable individual parts of the deployments views"
   deployments: PersonaDeploymentAttributes
 
@@ -5401,6 +5408,11 @@ input PersonaSidebarAttributes {
   settings: Boolean
   backups: Boolean
   stacks: Boolean
+}
+
+input PersonaHomeAttributes {
+  manager: Boolean
+  security: Boolean
 }
 
 type User {
@@ -5554,6 +5566,9 @@ type PersonaConfiguration {
   "enable full ui for this persona"
   all: Boolean
 
+  "settings for the home page for this persona"
+  home: PersonaHome
+
   "enable individual parts of the deployments views"
   deployments: PersonaDeployment
 
@@ -5578,6 +5593,11 @@ type PersonaSidebar {
   settings: Boolean
   backups: Boolean
   stacks: Boolean
+}
+
+type PersonaHome {
+  manager: Boolean
+  security: Boolean
 }
 
 type UserConnection {

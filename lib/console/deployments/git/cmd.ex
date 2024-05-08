@@ -68,7 +68,7 @@ defmodule Console.Deployments.Git.Cmd do
   end
 
   def msg(%GitRepository{} = repo), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B"])
-  def msg(%GitRepository{} = repo, sha), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B", sha])
+  def msg(%GitRepository{} = repo, sha), do: git(repo, "--no-pager", ["log", "-n", "1", "--format=%B", "#{sha}"])
 
   def clone(%GitRepository{dir: dir} = git) when is_binary(dir) do
     with {:ok, _} = res <- git(git, "clone", ["--filter=blob:none", url(git), git.dir]),

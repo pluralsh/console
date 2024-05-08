@@ -354,6 +354,7 @@ defmodule Console.Deployments.Global do
         owner_id: owner_id,
         configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
         repository_id: source.repository_id,
+        sync_config: clean(source.sync_config),
         git: clean(source.git),
         helm: clean(source.helm),
         kustomize: clean(source.kustomize),
@@ -470,7 +471,7 @@ defmodule Console.Deployments.Global do
   end
 
   defp specs_different?(source, dest) do
-    Enum.any?(~w(helm git kustomize)a, fn key ->
+    Enum.any?(~w(helm git kustomize sync_config)a, fn key ->
       s = Map.get(source, key)
       d = Map.get(dest, key)
       clean(s) != clean(d)

@@ -10,10 +10,10 @@ import {
 } from 'components/cd/services/Services'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import pluralize from 'pluralize'
 
-import styled from 'styled-components'
-
-import { HomeCard } from '../HomeCard'
+import { Title2H1 } from '../../utils/typography/Text'
+import { HOME_CARD_MAX_HEIGHT } from '../HomeCard'
 
 import { DeploymentsTable } from './DeploymentsTable'
 
@@ -45,30 +45,25 @@ export function DeploymentsCard() {
   }
 
   const numDeployments = data.serviceDeployments.edges.length
-  const headerText =
-    numDeployments === 1
-      ? `1 Deployment created an error`
-      : `${numDeployments} Deployments creating errors`
 
   return (
-    <HomeCard label={headerText}>
-      <DeploymentsTableWrapperSC>
-        <DeploymentsTable
-          data={data.serviceDeployments.edges}
-          emptyStateProps={{ message: 'All services healthy!' }}
-          refetch={refetch}
-          virtualizeRows
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
-          onVirtualSliceChange={setVirtualSlice}
-        />
-      </DeploymentsTableWrapperSC>
-    </HomeCard>
+    <div>
+      <Title2H1>
+        {numDeployments} {pluralize('deployment', numDeployments)} creating
+        errors
+      </Title2H1>
+      <DeploymentsTable
+        data={data.serviceDeployments.edges}
+        emptyStateProps={{ message: 'All services healthy!' }}
+        refetch={refetch}
+        virtualizeRows
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+        onVirtualSliceChange={setVirtualSlice}
+        css={{ maxHeight: HOME_CARD_MAX_HEIGHT }}
+      />
+    </div>
   )
 }
-
-const DeploymentsTableWrapperSC = styled.div({
-  overflow: 'auto',
-})

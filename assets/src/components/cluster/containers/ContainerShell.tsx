@@ -63,7 +63,7 @@ export function ShellWithContext({
 
   const shellContext = useContext(ShellContext)
   const cluster = clusterId ?? ''
-  const room = `pod:${cluster}${namespace}:${name}:${container}`
+  const room = `pod:${cluster}:${namespace}:${name}:${container}`
 
   return (
     <Flex

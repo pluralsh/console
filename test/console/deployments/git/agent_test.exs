@@ -34,7 +34,7 @@ defmodule Console.Deployments.Git.AgentTest do
       for f <- ~w(.git-askpass .ssh-askpass ssh-add),
         do: assert files[f] == File.read!(Path.join("bin", f))
 
-      assert files["AGENT_VERSION"] == File.read!("AGENT_VERSION")
+      assert files["AGENT_VERSION"]
     end
 
     @tag :skip

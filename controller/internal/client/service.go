@@ -60,3 +60,11 @@ func (c *client) DeleteService(serviceId string) error {
 	}
 	return nil
 }
+
+func (c *client) DetachService(serviceId string) error {
+	_, err := c.consoleClient.DetachServiceDeployment(c.ctx, serviceId)
+	if err != nil {
+		return err
+	}
+	return nil
+}

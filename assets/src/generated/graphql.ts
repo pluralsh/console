@@ -2175,8 +2175,11 @@ export type KubernetesDatasource = {
 export type KubernetesUnstructured = {
   __typename?: 'KubernetesUnstructured';
   events?: Maybe<Array<Maybe<Event>>>;
+  group?: Maybe<Scalars['String']['output']>;
+  kind: Scalars['String']['output'];
   metadata: Metadata;
   raw?: Maybe<Scalars['Map']['output']>;
+  version: Scalars['String']['output'];
 };
 
 /** metadata needed for configuring kustomize */
@@ -2796,6 +2799,8 @@ export type PersonaConfiguration = {
   all?: Maybe<Scalars['Boolean']['output']>;
   /** enable individual parts of the deployments views */
   deployments?: Maybe<PersonaDeployment>;
+  /** settings for the home page for this persona */
+  home?: Maybe<PersonaHome>;
   /** enable individual aspects of the sidebar */
   sidebar?: Maybe<PersonaSidebar>;
 };
@@ -2805,6 +2810,8 @@ export type PersonaConfigurationAttributes = {
   all?: InputMaybe<Scalars['Boolean']['input']>;
   /** enable individual parts of the deployments views */
   deployments?: InputMaybe<PersonaDeploymentAttributes>;
+  /** configuration for the homepage for the given persona */
+  home?: InputMaybe<PersonaHomeAttributes>;
   /** enable individual aspects of the sidebar */
   sidebar?: InputMaybe<PersonaSidebarAttributes>;
 };
@@ -2840,6 +2847,17 @@ export type PersonaEdge = {
   __typename?: 'PersonaEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<Persona>;
+};
+
+export type PersonaHome = {
+  __typename?: 'PersonaHome';
+  manager?: Maybe<Scalars['Boolean']['output']>;
+  security?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type PersonaHomeAttributes = {
+  manager?: InputMaybe<Scalars['Boolean']['input']>;
+  security?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type PersonaSidebar = {
@@ -6673,7 +6691,7 @@ export type StackStateAttributes = {
 export type StackStateResource = {
   __typename?: 'StackStateResource';
   /** arbitrary configuration used to create the resource */
-  configuration?: Maybe<Scalars['Json']['output']>;
+  configuration?: Maybe<Scalars['Map']['output']>;
   /** a string identifier for this resource, different tools will have different conventions */
   identifier: Scalars['String']['output'];
   /** identifiers this resource is linked to for graphing in the UI */
@@ -6785,6 +6803,7 @@ export type StatusCondition = {
 
 export enum StepStage {
   Apply = 'APPLY',
+  Init = 'INIT',
   Plan = 'PLAN',
   Verify = 'VERIFY'
 }

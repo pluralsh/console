@@ -1,6 +1,6 @@
-import { Flex, H1 } from 'honorable'
+import { H1 } from 'honorable'
 
-import styled from 'styled-components'
+import { useTheme } from 'styled-components'
 import {
   CLUSTERS_QUERY_PAGE_SIZE,
   CLUSTERS_REACT_VIRTUAL_OPTIONS,
@@ -20,6 +20,7 @@ import { ClusterOverviewChart } from './ClusterOverviewChart'
 const CHART_VIEW_WIDTH = '450px'
 
 export function ClusterOverviewCard() {
+  const theme = useTheme()
   const {
     data: tableData,
     loading,
@@ -51,16 +52,24 @@ export function ClusterOverviewCard() {
 
   return (
     <HomeCard overflow="none">
-      <Flex
-        style={{
+      <div
+        css={{
+          display: 'flex',
+
           maxHeight: HOME_CARD_MAX_HEIGHT,
         }}
       >
-        <ChartViewWrapperSC>
+        <div css={{ width: CHART_VIEW_WIDTH, padding: theme.spacing.xlarge }}>
           <H1 title2>Cluster Overview</H1>
           <ClusterOverviewChart data={chartData} />
-        </ChartViewWrapperSC>
-        <OverviewTableWrapperSC>
+        </div>
+        <div
+          css={{
+            display: 'flex',
+            width: '100%',
+            padding: theme.spacing.medium,
+          }}
+        >
           <ClusterOverViewTable
             data={tableData.clusters.edges}
             refetch={refetch}
@@ -70,18 +79,11 @@ export function ClusterOverviewCard() {
             isFetchingNextPage={loading}
             reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
+            width="100%"
+            css={{ maxHeight: '100%' }}
           />
-        </OverviewTableWrapperSC>
-      </Flex>
+        </div>
+      </div>
     </HomeCard>
   )
 }
-
-const ChartViewWrapperSC = styled.div(({ theme }) => ({
-  width: CHART_VIEW_WIDTH,
-  padding: theme.spacing.xlarge,
-}))
-const OverviewTableWrapperSC = styled.div({
-  flex: 1,
-  overflow: 'auto',
-})

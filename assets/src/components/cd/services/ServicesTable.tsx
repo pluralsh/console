@@ -57,6 +57,7 @@ export function ServicesTable({
     },
     {
       q: debouncedSearchString,
+      ...(clusterId ? { clusterId } : {}),
       ...(statusFilter !== 'ALL' ? { status: statusFilter } : {}),
     }
   )

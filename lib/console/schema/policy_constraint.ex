@@ -38,10 +38,6 @@ defmodule Console.Schema.PolicyConstraint do
     )
   end
 
-  def globally_ordered(query \\ __MODULE__) do
-    from([p, clusters: c] in query, order_by: [asc: c.name, asc: p.name])
-  end
-
   def for_cluster(query \\ __MODULE__, cluster_id) do
     from(p in query, where: p.cluster_id == ^cluster_id)
   end
@@ -64,7 +60,16 @@ defmodule Console.Schema.PolicyConstraint do
     )
   end
 
-  def for_namespaces(query \\ __MODULE__, ns) do
+  def for_namespaces(query \\ __MODULE__, ns, cluster)
+
+  def for_namespaces(query, ns, true) do
+    from(p in query,
+      join: v in assoc(p, :violations),
+      where: v.namespace in ^ns or is_nil(v.namespace)
+    )
+  end
+
+  def for_namespaces(query, ns, _) do
     from(p in query,
       join: v in assoc(p, :violations),
       where: v.namespace in ^ns
@@ -90,7 +95,9 @@ defmodule Console.Schema.PolicyConstraint do
     )
   end
 
-  def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
+  def distinct(query), do: from(p in query, distinct: true)
+
+  def ordered(query \\ __MODULE__, order \\ [asc: :name, asc: :cluster_id]) do
     from(p in query, order_by: ^order)
   end
 
