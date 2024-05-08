@@ -1,7 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import React, { useMemo } from 'react'
 import {
-  InfoIcon,
   InfoOutlineIcon,
   Tooltip,
   useSetBreadcrumbs,
