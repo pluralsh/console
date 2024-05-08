@@ -262,5 +262,5 @@ defmodule Console.Deployments.Cron do
 
   defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"
   defp log({:error, error}, msg), do: "Failed to #{msg} with error: #{inspect(error)}"
-  defp log(_), do: :ok
+  defp log(_, _), do: :ok
 end

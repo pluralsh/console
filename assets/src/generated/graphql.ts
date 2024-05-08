@@ -2431,6 +2431,10 @@ export type NamespacedName = {
   namespace: Scalars['String']['input'];
 };
 
+export type NewRelicCredentialsAttributes = {
+  apiKey: Scalars['String']['input'];
+};
+
 export type Node = {
   __typename?: 'Node';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -2702,6 +2706,7 @@ export type ObservabilityProviderConnection = {
 
 export type ObservabilityProviderCredentialsAttributes = {
   datadog?: InputMaybe<DatadogCredentialsAttributes>;
+  newrelic?: InputMaybe<NewRelicCredentialsAttributes>;
 };
 
 export type ObservabilityProviderEdge = {

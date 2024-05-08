@@ -12,12 +12,17 @@ defmodule Console.GraphQl.Deployments.Observability do
   end
 
   input_object :observability_provider_credentials_attributes do
-    field :datadog, :datadog_credentials_attributes
+    field :datadog,  :datadog_credentials_attributes
+    field :newrelic, :new_relic_credentials_attributes
   end
 
   input_object :datadog_credentials_attributes do
     field :api_key, non_null(:string)
     field :app_key, non_null(:string)
+  end
+
+  input_object :new_relic_credentials_attributes do
+    field :api_key, non_null(:string)
   end
 
   input_object :observable_metric_attributes do
