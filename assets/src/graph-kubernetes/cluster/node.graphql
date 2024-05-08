@@ -25,18 +25,10 @@ query Nodes(
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
-      ready
-      allocatedResources {
-        cpuRequests
-        cpuRequestsFraction
-        cpuCapacity
-        memoryRequests
-        memoryRequestsFraction
-        memoryCapacity
-        allocatedPods
-        podFraction
-        podCapacity
+      allocatedResources @type(name: "node_NodeAllocatedResources") {
+        ...NodeAllocatedResources
       }
+      ready
     }
   }
 }
@@ -52,16 +44,8 @@ query Node($name: String!) {
     conditions @type(name: "common_Condition") {
       ...Condition
     }
-    allocatedResources {
-      cpuRequests
-      cpuRequestsFraction
-      cpuCapacity
-      memoryRequests
-      memoryRequestsFraction
-      memoryCapacity
-      allocatedPods
-      podFraction
-      podCapacity
+    allocatedResources @type(name: "node_NodeAllocatedResources") {
+      ...NodeAllocatedResources
     }
     nodeInfo {
       architecture

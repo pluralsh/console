@@ -1,8 +1,9 @@
 import { Card } from '@pluralsh/design-system'
-import { Flex, H2 } from 'honorable'
 import { ReactNode } from 'react'
 import { Property } from 'csstype'
 import { useTheme } from 'styled-components'
+
+import { Title2H1 } from '../utils/typography/Text'
 
 export const HOME_CARD_MAX_HEIGHT = '436px'
 
@@ -18,11 +19,8 @@ export function HomeCard({
   const theme = useTheme()
 
   return (
-    <Flex
-      direction="column"
-      gap={theme.spacing.medium}
-    >
-      {label && <H2 title2>{label}</H2>}
+    <div css={{ gap: theme.spacing.medium }}>
+      {label && <Title2H1>{label}</Title2H1>}
       <Card
         css={{
           maxHeight: HOME_CARD_MAX_HEIGHT,
@@ -31,6 +29,6 @@ export function HomeCard({
       >
         {children}
       </Card>
-    </Flex>
+    </div>
   )
 }
