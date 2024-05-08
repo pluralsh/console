@@ -20,6 +20,18 @@ import { ApolloError } from '@apollo/client'
 
 import ObservabilityProviderSelect from './ObservabilityProviderSelect'
 
+const initialDatadogCredentials: ObservabilityProviderCredentialsAttributes = {
+  datadog: {
+    apiKey: '',
+    appKey: '',
+  },
+}
+const initialNewrelicCredentials: ObservabilityProviderCredentialsAttributes = {
+  newrelic: {
+    apiKey: '',
+  },
+}
+
 function EditObservabilityProviderModalBase({
   open,
   onClose,
@@ -41,9 +53,10 @@ function EditObservabilityProviderModalBase({
   } = useUpdateState({
     name: observabilityProvider?.name || '',
     type: observabilityProvider?.type || ObservabilityProviderType.Datadog,
-    credentials: {
-      datadog: { apiKey: '', appKey: '' },
-    } as ObservabilityProviderCredentialsAttributes,
+    credentials:
+      observabilityProvider?.type === ObservabilityProviderType.Datadog
+        ? initialDatadogCredentials
+        : initialNewrelicCredentials,
   })
 
   const [mutation, { loading, error }] = useUpsertObservabilityProviderMutation(
@@ -56,12 +69,15 @@ function EditObservabilityProviderModalBase({
   )
 
   const { name, type, credentials } = formState
-  const allowSubmit =
-    name &&
-    type &&
-    hasUpdates &&
-    credentials.datadog?.apiKey &&
-    credentials.datadog?.appKey
+
+  const hasCredentials =
+    (type === ObservabilityProviderType.Datadog &&
+      credentials.datadog?.apiKey &&
+      credentials.datadog?.appKey) ||
+    (type === ObservabilityProviderType.Newrelic &&
+      credentials.newrelic?.apiKey)
+
+  const allowSubmit = name && type && hasUpdates && hasCredentials
 
   const onSubmit = useCallback(
     (e) => {
@@ -121,6 +137,7 @@ function EditObservabilityProviderModalBase({
         formState={formState}
         updateFormState={updateFormState}
         error={error}
+        operationType={operationType}
       />
     </Modal>
   )
@@ -130,10 +147,12 @@ export function ObservabilityProviderForm({
   formState,
   updateFormState,
   error,
+  operationType,
 }: {
   formState: Partial<ObservabilityProviderAttributes>
   updateFormState: (update: Partial<ObservabilityProviderAttributes>) => void
   error: ApolloError | undefined
+  operationType: 'create' | 'update'
 }) {
   const theme = useTheme()
 
@@ -147,7 +166,15 @@ export function ObservabilityProviderForm({
     >
       <ObservabilityProviderSelect
         selectedKey={formState.type}
-        updateSelectedKey={(type) => updateFormState({ type })}
+        updateSelectedKey={(type) =>
+          updateFormState({
+            type,
+            credentials:
+              type === ObservabilityProviderType.Datadog
+                ? initialDatadogCredentials
+                : initialNewrelicCredentials,
+          })
+        }
       />
       <FormField
         label="Name"
@@ -156,46 +183,71 @@ export function ObservabilityProviderForm({
         <Input2
           value={formState.name}
           onChange={(e) => updateFormState({ name: e.target.value })}
+          disabled={operationType === 'update'}
         />
       </FormField>
-      <FormField
-        label="Api Key"
-        required
-      >
-        <InputRevealer
-          defaultRevealed={false}
-          value={formState.credentials?.datadog?.apiKey || ''}
-          onChange={(e) =>
-            updateFormState({
-              credentials: {
-                datadog: {
-                  apiKey: e.target.value,
-                  appKey: formState.credentials?.datadog?.appKey || '',
+
+      {formState.type === ObservabilityProviderType.Datadog ? (
+        <>
+          <FormField
+            label="Api Key"
+            required
+          >
+            <InputRevealer
+              defaultRevealed={false}
+              value={formState.credentials?.datadog?.apiKey || ''}
+              onChange={(e) =>
+                updateFormState({
+                  credentials: {
+                    datadog: {
+                      apiKey: e.target.value,
+                      appKey: formState.credentials?.datadog?.appKey || '',
+                    },
+                  },
+                })
+              }
+            />
+          </FormField>
+          <FormField
+            label="App Key"
+            required
+          >
+            <InputRevealer
+              defaultRevealed={false}
+              value={formState.credentials?.datadog?.appKey || ''}
+              onChange={(e) =>
+                updateFormState({
+                  credentials: {
+                    datadog: {
+                      apiKey: formState.credentials?.datadog?.apiKey || '',
+                      appKey: e.target.value,
+                    },
+                  },
+                })
+              }
+            />
+          </FormField>
+        </>
+      ) : (
+        <FormField
+          label="Api Key"
+          required
+        >
+          <InputRevealer
+            defaultRevealed={false}
+            value={formState.credentials?.newrelic?.apiKey || ''}
+            onChange={(e) =>
+              updateFormState({
+                credentials: {
+                  newrelic: {
+                    apiKey: e.target.value,
+                  },
                 },
-              },
-            })
-          }
-        />
-      </FormField>
-      <FormField
-        label="App Key"
-        required
-      >
-        <InputRevealer
-          defaultRevealed={false}
-          value={formState.credentials?.datadog?.appKey || ''}
-          onChange={(e) =>
-            updateFormState({
-              credentials: {
-                datadog: {
-                  apiKey: formState.credentials?.datadog?.apiKey || '',
-                  appKey: e.target.value,
-                },
-              },
-            })
-          }
-        />
-      </FormField>
+              })
+            }
+          />
+        </FormField>
+      )}
 
       {error && <GqlError error={error} />}
     </div>
