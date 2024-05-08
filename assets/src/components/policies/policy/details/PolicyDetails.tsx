@@ -67,14 +67,14 @@ function PolicyDetails({
             {violationCount}
           </Chip>
         </SidecarItem>
-        {object?.metadata && (
+        {object?.metadata?.namespace && (
           <SidecarItem heading="Namespace">
             {object.metadata.namespace}
           </SidecarItem>
         )}
-        {/* {object?.kind && (
+        {object?.kind && (
           <SidecarItem heading="Kind">{object.kind}</SidecarItem>
-        )} */}
+        )}
         {cluster && (
           <SidecarItem heading="Cluster name">
             <A

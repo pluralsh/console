@@ -66,6 +66,7 @@ query PolicyConstraint($id: ID!) {
       metadata {
         namespace
       }
+      kind
     }
   }
 }
