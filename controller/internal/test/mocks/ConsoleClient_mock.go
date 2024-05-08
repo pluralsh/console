@@ -1378,6 +1378,52 @@ func (_c *ConsoleClientMock_DeleteStack_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// DetachService provides a mock function with given fields: serviceId
+func (_m *ConsoleClientMock) DetachService(serviceId string) error {
+	ret := _m.Called(serviceId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DetachService")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(serviceId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DetachService_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DetachService'
+type ConsoleClientMock_DetachService_Call struct {
+	*mock.Call
+}
+
+// DetachService is a helper method to define mock.On call
+//   - serviceId string
+func (_e *ConsoleClientMock_Expecter) DetachService(serviceId interface{}) *ConsoleClientMock_DetachService_Call {
+	return &ConsoleClientMock_DetachService_Call{Call: _e.mock.On("DetachService", serviceId)}
+}
+
+func (_c *ConsoleClientMock_DetachService_Call) Run(run func(serviceId string)) *ConsoleClientMock_DetachService_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DetachService_Call) Return(_a0 error) *ConsoleClientMock_DetachService_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DetachService_Call) RunAndReturn(run func(string) error) *ConsoleClientMock_DetachService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DetachStack provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) DetachStack(ctx context.Context, id string) error {
 	ret := _m.Called(ctx, id)

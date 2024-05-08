@@ -109,6 +109,10 @@ type ServiceSpec struct {
 	// Templated should apply liquid templating to raw yaml files, defaults to true
 	// +kubebuilder:validation:Optional
 	Templated *bool `json:"templated,omitempty"`
+
+	// Detach determined if user want to delete or detach service
+	// +kubebuilder:validation:Optional
+	Detach bool `json:"detach,omitempty"`
 }
 
 type ServiceStatus struct {
