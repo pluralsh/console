@@ -71,6 +71,7 @@ defmodule Console.GraphQl.Users do
 
   input_object :persona_configuration_attributes do
     field :all,         :boolean, description: "enable full ui for this persona"
+    field :home,        :persona_home_attributes, description: "configuration for the homepage for the given persona"
     field :deployments, :persona_deployment_attributes, description: "enable individual parts of the deployments views"
     field :sidebar,     :persona_sidebar_attributes, description: "enable individual aspects of the sidebar"
   end
@@ -92,6 +93,11 @@ defmodule Console.GraphQl.Users do
     field :settings,      :boolean
     field :backups,       :boolean
     field :stacks,        :boolean
+  end
+
+  input_object :persona_home_attributes do
+    field :manager,  :boolean
+    field :security, :boolean
   end
 
   object :user do
@@ -252,6 +258,7 @@ defmodule Console.GraphQl.Users do
 
   object :persona_configuration do
     field :all,         :boolean, description: "enable full ui for this persona"
+    field :home,        :persona_home, description: "settings for the home page for this persona"
     field :deployments, :persona_deployment, description: "enable individual parts of the deployments views"
     field :sidebar,     :persona_sidebar, description: "enable individual aspects of the sidebar"
   end
@@ -273,6 +280,11 @@ defmodule Console.GraphQl.Users do
     field :settings,      :boolean
     field :backups,       :boolean
     field :stacks,        :boolean
+  end
+
+  object :persona_home do
+    field :manager,  :boolean
+    field :security, :boolean
   end
 
   connection node_type: :user

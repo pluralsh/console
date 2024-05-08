@@ -1,0 +1,82 @@
+fragment PoliciyConstraint on PolicyConstraint {
+  cluster {
+    ...Cluster
+  }
+  description
+  id
+  insertedAt
+  name
+  recommendation
+  ref {
+    kind
+    name
+  }
+  updatedAt
+  violationCount
+}
+
+query PolicyConstraints(
+  $after: String
+  $before: String
+  $clusters: [ID]
+  $first: Int
+  $kind: String
+  $kinds: [String]
+  $last: Int
+  $namespace: String
+  $namespaces: [String]
+  $q: String
+) {
+  policyConstraints(
+    after: $after
+    before: $before
+    clusters: $clusters
+    first: $first
+    kind: $kind
+    kinds: $kinds
+    last: $last
+    namespace: $namespace
+    namespaces: $namespaces
+    q: $q
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...PoliciyConstraint
+      }
+    }
+  }
+}
+
+query PolicyConstraint($id: ID!) {
+  policyConstraint(id: $id) {
+    ...PoliciyConstraint
+    object {
+      metadata {
+        namespace
+      }
+      kind
+    }
+    violations {
+      group
+      id
+      insertedAt
+      kind
+      message
+      name
+      namespace
+      updatedAt
+      version
+    }
+  }
+}
+
+query ViolationStatistics($field: ConstraintViolationField!) {
+  violationStatistics(field: $field) {
+    count
+    value
+    violations
+  }
+}

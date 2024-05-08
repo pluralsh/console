@@ -106,8 +106,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :output, list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
     field :state,  :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
 
-    field :cluster,         :cluster, resolve: dataloader(Deployments), description: "the cluster this stack runs on"
-    field :repository,      :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
+    field :cluster,    :cluster, resolve: dataloader(Deployments), description: "the cluster this stack runs on"
+    field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
 
     field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
@@ -200,7 +200,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :identifier,    non_null(:string), description: "a string identifier for this resource, different tools will have different conventions"
     field :resource,      non_null(:string), description: "a string name of the resource type"
     field :name,          non_null(:string), description: "the name of the resource within that type"
-    field :configuration, :json, description: "arbitrary configuration used to create the resource"
+    field :configuration, :map, description: "arbitrary configuration used to create the resource"
     field :links,         list_of(:string), description: "identifiers this resource is linked to for graphing in the UI"
   end
 

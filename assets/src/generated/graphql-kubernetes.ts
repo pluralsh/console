@@ -2398,6 +2398,7 @@ export type Pod_EnvVar = {
 
 export type Pod_Pod = {
   __typename?: 'pod_Pod';
+  allocatedResources: Pod_PodAllocatedResources;
   containerImages: Array<Maybe<Scalars['String']['output']>>;
   containerStatuses: Array<Maybe<Pod_ContainerStatus>>;
   metrics: Pod_PodMetrics;
@@ -2407,6 +2408,14 @@ export type Pod_Pod = {
   status: Scalars['String']['output'];
   typeMeta: Types_TypeMeta;
   warnings: Array<Maybe<Common_Event>>;
+};
+
+export type Pod_PodAllocatedResources = {
+  __typename?: 'pod_PodAllocatedResources';
+  cpuLimits: Scalars['BigInt']['output'];
+  cpuRequests: Scalars['BigInt']['output'];
+  memoryLimits: Scalars['BigInt']['output'];
+  memoryRequests: Scalars['BigInt']['output'];
 };
 
 export type Pod_PodDetail = {
@@ -4773,14 +4782,14 @@ export type NodesQueryVariables = Exact<{
 }>;
 
 
-export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', ready: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any } } | null> } | null };
+export type NodesQuery = { __typename?: 'Query', handleGetNodeList?: { __typename?: 'node_NodeList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, nodes: Array<{ __typename?: 'node_Node', ready: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuLimits: any, cpuLimitsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryLimits: any, memoryLimitsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any } } | null> } | null };
 
 export type NodeQueryVariables = Exact<{
   name: Scalars['String']['input'];
 }>;
 
 
-export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, unschedulable: boolean, ready: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string }, addresses?: Array<{ __typename?: 'v1_NodeAddress', type: string, address: string } | null> | null, taints?: Array<{ __typename?: 'v1_Taint', key: string, value?: string | null, effect: string } | null> | null } | null };
+export type NodeQuery = { __typename?: 'Query', handleGetNodeDetail?: { __typename?: 'node_NodeDetail', providerID: string, containerImages: Array<string | null>, podCIDR: string, phase: string, unschedulable: boolean, ready: string, errors: Array<any | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null>, allocatedResources: { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuLimits: any, cpuLimitsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryLimits: any, memoryLimitsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any }, nodeInfo: { __typename?: 'v1_NodeSystemInfo', architecture: string, bootID: string, containerRuntimeVersion: string, kernelVersion: string, kubeletVersion: string, kubeProxyVersion: string, machineID: string, operatingSystem: string, osImage: string, systemUUID: string }, addresses?: Array<{ __typename?: 'v1_NodeAddress', type: string, address: string } | null> | null, taints?: Array<{ __typename?: 'v1_Taint', key: string, value?: string | null, effect: string } | null> | null } | null };
 
 export type NodePodsQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -4792,7 +4801,7 @@ export type NodePodsQueryVariables = Exact<{
 }>;
 
 
-export type NodePodsQuery = { __typename?: 'Query', handleGetNodePods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type NodePodsQuery = { __typename?: 'Query', handleGetNodePods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> } | null };
 
 export type NodeEventsQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -4830,6 +4839,8 @@ export type PodInfoFragment = { __typename?: 'common_PodInfo', current: number, 
 export type ResourceOwnerFragment = { __typename?: 'controller_ResourceOwner', containerImages: Array<string | null>, initContainerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, pods: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } };
 
 export type SelectorFragment = { __typename?: 'v1_LabelSelector', matchLabels?: any | null, matchExpressions?: Array<{ __typename?: 'v1_LabelSelectorRequirement', key: string, operator: string, values?: Array<string | null> | null } | null> | null };
+
+export type NodeAllocatedResourcesFragment = { __typename?: 'node_NodeAllocatedResources', cpuRequests: any, cpuRequestsFraction: number, cpuLimits: any, cpuLimitsFraction: number, cpuCapacity: any, memoryRequests: any, memoryRequestsFraction: number, memoryLimits: any, memoryLimitsFraction: number, memoryCapacity: any, allocatedPods: number, podFraction: number, podCapacity: any };
 
 export type HorizontalPodAutoscalerListFragment = { __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscalerList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, horizontalpodautoscalers: Array<{ __typename?: 'horizontalpodautoscaler_HorizontalPodAutoscaler', currentCPUUtilizationPercentage: number, maxReplicas: number, minReplicas: number, targetCPUUtilizationPercentage: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, scaleTargetRef: { __typename?: 'horizontalpodautoscaler_ScaleTargetRef', name: string, kind: string } } | null> };
 
@@ -5099,7 +5110,7 @@ export type ServicePodsQueryVariables = Exact<{
 }>;
 
 
-export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ServicePodsQuery = { __typename?: 'Query', handleGetServicePods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> } | null };
 
 export type ServiceIngressesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5284,7 +5295,7 @@ export type DaemonSetPodsQueryVariables = Exact<{
 }>;
 
 
-export type DaemonSetPodsQuery = { __typename?: 'Query', handleGetDaemonSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type DaemonSetPodsQuery = { __typename?: 'Query', handleGetDaemonSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> } | null };
 
 export type DaemonSetServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5410,7 +5421,7 @@ export type JobPodsQueryVariables = Exact<{
 }>;
 
 
-export type JobPodsQuery = { __typename?: 'Query', handleGetJobPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type JobPodsQuery = { __typename?: 'Query', handleGetJobPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> } | null };
 
 export type JobListFragment = { __typename?: 'job_JobList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, jobs: Array<{ __typename?: 'job_Job', initContainerImages: Array<string | null>, containerImages: Array<string | null>, parallelism: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> }, jobStatus: { __typename?: 'job_JobStatus', message: string, status: string, conditions: Array<{ __typename?: 'common_Condition', message: string, type: string, status: string, lastProbeTime: string, lastTransitionTime: string, reason: string } | null> } } | null> };
 
@@ -5429,7 +5440,7 @@ export type PodsQueryVariables = Exact<{
 }>;
 
 
-export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type PodsQuery = { __typename?: 'Query', handleGetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> } | null };
 
 export type PodQueryVariables = Exact<{
   name: Scalars['String']['input'];
@@ -5470,7 +5481,7 @@ export type PodSecurityContextFragment = { __typename?: 'v1_PodSecurityContext',
 
 export type SecurityContextFragment = { __typename?: 'v1_SecurityContext', runAsUser?: any | null, runAsNonRoot?: boolean | null, runAsGroup?: any | null, allowPrivilegeEscalation?: boolean | null, privileged?: boolean | null, procMount?: string | null, readOnlyRootFilesystem?: boolean | null, windowsOptions?: { __typename?: 'v1_WindowsSecurityContextOptions', runAsUserName?: string | null, hostProcess?: boolean | null, gmsaCredentialSpecName?: string | null, gmsaCredentialSpec?: string | null } | null, seLinuxOptions?: { __typename?: 'v1_SELinuxOptions', user?: string | null, role?: string | null, level?: string | null, type?: string | null } | null, seccompProfile?: { __typename?: 'v1_SeccompProfile', type: string, localhostProfile?: string | null } | null, capabilities?: { __typename?: 'v1_Capabilities', add?: Array<string | null> | null, drop?: Array<string | null> | null } | null };
 
-export type PodListFragment = { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> };
+export type PodListFragment = { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> };
 
 export type LogDetailsFragment = { __typename?: 'logs_LogDetails', info: { __typename?: 'logs_LogInfo', podName: string, containerName: string, initContainerName: string, fromDate: string, toDate: string }, logs: Array<{ __typename?: 'logs_LogLine', timestamp: string, content: string } | null> };
 
@@ -5515,7 +5526,7 @@ export type ReplicaSetPodsQueryVariables = Exact<{
 }>;
 
 
-export type ReplicaSetPodsQuery = { __typename?: 'Query', handleGetReplicaSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ReplicaSetPodsQuery = { __typename?: 'Query', handleGetReplicaSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> } | null };
 
 export type ReplicaSetServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5576,7 +5587,7 @@ export type ReplicationControllerPodsQueryVariables = Exact<{
 }>;
 
 
-export type ReplicationControllerPodsQuery = { __typename?: 'Query', handleGetReplicationControllerPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type ReplicationControllerPodsQuery = { __typename?: 'Query', handleGetReplicationControllerPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> } | null };
 
 export type ReplicationControllerServicesQueryVariables = Exact<{
   namespace: Scalars['String']['input'];
@@ -5637,7 +5648,7 @@ export type StatefulSetPodsQueryVariables = Exact<{
 }>;
 
 
-export type StatefulSetPodsQuery = { __typename?: 'Query', handleGetStatefulSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null> } | null> } | null };
+export type StatefulSetPodsQuery = { __typename?: 'Query', handleGetStatefulSetPods?: { __typename?: 'pod_PodList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, pods: Array<{ __typename?: 'pod_Pod', status: string, containerImages: Array<string | null>, nodeName: string, restartCount: number, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, containerStatuses: Array<{ __typename?: 'pod_ContainerStatus', name: string, ready: boolean, state: ContainerState } | null>, warnings: Array<{ __typename?: 'common_Event', message: string } | null>, allocatedResources: { __typename?: 'pod_PodAllocatedResources', cpuLimits: any, cpuRequests: any, memoryLimits: any, memoryRequests: any } } | null> } | null };
 
 export type StatefulSetListFragment = { __typename?: 'statefulset_StatefulSetList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, statefulSets: Array<{ __typename?: 'statefulset_StatefulSet', initContainerImages: Array<string | null>, containerImages: Array<string | null>, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null }, podInfo: { __typename?: 'common_PodInfo', current: number, desired?: number | null, failed: number, pending: number, running: number, succeeded: number, warnings: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } } | null> };
 
@@ -5760,6 +5771,23 @@ export const ResourceOwnerFragmentDoc = gql`
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}
 ${PodInfoFragmentDoc}`;
+export const NodeAllocatedResourcesFragmentDoc = gql`
+    fragment NodeAllocatedResources on node_NodeAllocatedResources {
+  cpuRequests
+  cpuRequestsFraction
+  cpuLimits
+  cpuLimitsFraction
+  cpuCapacity
+  memoryRequests
+  memoryRequestsFraction
+  memoryLimits
+  memoryLimitsFraction
+  memoryCapacity
+  allocatedPods
+  podFraction
+  podCapacity
+}
+    `;
 export const EndpointFragmentDoc = gql`
     fragment Endpoint on common_Endpoint {
   host
@@ -6305,6 +6333,12 @@ export const PodListFragmentDoc = gql`
     restartCount
     warnings {
       message
+    }
+    allocatedResources {
+      cpuLimits
+      cpuRequests
+      memoryLimits
+      memoryRequests
     }
   }
 }
@@ -7437,24 +7471,17 @@ export const NodesDocument = gql`
       objectMeta @type(name: "types_ObjectMeta") {
         ...ObjectMeta
       }
-      ready
-      allocatedResources {
-        cpuRequests
-        cpuRequestsFraction
-        cpuCapacity
-        memoryRequests
-        memoryRequestsFraction
-        memoryCapacity
-        allocatedPods
-        podFraction
-        podCapacity
+      allocatedResources @type(name: "node_NodeAllocatedResources") {
+        ...NodeAllocatedResources
       }
+      ready
     }
   }
 }
     ${ListMetaFragmentDoc}
 ${TypeMetaFragmentDoc}
-${ObjectMetaFragmentDoc}`;
+${ObjectMetaFragmentDoc}
+${NodeAllocatedResourcesFragmentDoc}`;
 
 /**
  * __useNodesQuery__
@@ -7504,16 +7531,8 @@ export const NodeDocument = gql`
     conditions @type(name: "common_Condition") {
       ...Condition
     }
-    allocatedResources {
-      cpuRequests
-      cpuRequestsFraction
-      cpuCapacity
-      memoryRequests
-      memoryRequestsFraction
-      memoryCapacity
-      allocatedPods
-      podFraction
-      podCapacity
+    allocatedResources @type(name: "node_NodeAllocatedResources") {
+      ...NodeAllocatedResources
     }
     nodeInfo {
       architecture
@@ -7547,7 +7566,8 @@ export const NodeDocument = gql`
 }
     ${TypeMetaFragmentDoc}
 ${ObjectMetaFragmentDoc}
-${ConditionFragmentDoc}`;
+${ConditionFragmentDoc}
+${NodeAllocatedResourcesFragmentDoc}`;
 
 /**
  * __useNodeQuery__

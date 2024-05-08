@@ -224,6 +224,7 @@ defmodule Console.Deployments.Cron do
     |> Stream.each(fn stack ->
       Logger.info "polling stack repository #{stack.id}"
       Stacks.poll(stack)
+      |> log("poll stack for a new run")
     end)
     |> Stream.run()
   end
@@ -233,6 +234,7 @@ defmodule Console.Deployments.Cron do
     |> Stream.each(fn stack ->
       Logger.info "dequeuing eligible stack runs #{stack.id}"
       Stacks.dequeue(stack)
+      |> log("dequeue a new stack run")
     end)
     |> Stream.run()
   end
@@ -257,4 +259,8 @@ defmodule Console.Deployments.Cron do
     end)
     |> Stream.run()
   end
+
+  defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"
+  defp log({:error, error}, msg), do: "Failed to #{msg} with error: #{inspect(error)}"
+  defp log(_, _), do: :ok
 end

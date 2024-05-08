@@ -36,6 +36,10 @@ import { PersonaConfiguration } from './PersonaConfiguration'
 
 const BASE_CONFIGURATION: PersonaConfigurationAttributes = {
   all: false,
+  home: {
+    manager: false,
+    security: false,
+  },
   deployments: {
     addOns: false,
     clusters: false,

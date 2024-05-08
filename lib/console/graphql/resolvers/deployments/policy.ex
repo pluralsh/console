@@ -10,9 +10,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
 
   def list_policy_constraints(args, %{context: %{current_user: user}}) do
     PolicyConstraint.for_user(user)
-    |> PolicyConstraint.globally_ordered()
+    |> PolicyConstraint.ordered()
     |> maybe_search(PolicyConstraint, args)
     |> apply_filters(args)
+    |> PolicyConstraint.distinct()
     |> paginate(args)
   end
 
@@ -21,6 +22,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> PolicyConstraint.ordered()
     |> maybe_search(PolicyConstraint, args)
     |> apply_filters(args)
+    |> PolicyConstraint.distinct()
     |> paginate(args)
   end
 
@@ -29,7 +31,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
       {:namespace, ns}, q -> PolicyConstraint.for_namespace(q, ns)
       {:kind, k}, q -> PolicyConstraint.for_kind(q, k)
       {:kinds, ks}, q -> PolicyConstraint.for_kinds(q, ks)
-      {:namespaces, ns}, q -> PolicyConstraint.for_namespaces(q, ns)
+      {:namespaces, ns}, q ->
+        PolicyConstraint.for_namespaces(q, Enum.filter(ns, & &1), Enum.any?(ns, &is_nil/1))
       {:clusters, ids}, q -> PolicyConstraint.for_clusters(q, ids)
       _, q -> q
     end)
@@ -54,7 +57,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     with %Cluster{} = cluster <- Clusters.get_cluster(cluster_id),
          _ <- save_kubeconfig(cluster),
          {:ok, res} <- Kube.Client.raw(path),
-      do: {:ok, %{raw: res, metadata: Kube.Utils.raw_meta(res)}}
+         {g, v, k, _, _} <- Kube.Utils.identifier(res),
+      do: {:ok, %{raw: res, kind: k, group: g, version: v, metadata: Kube.Utils.raw_meta(res)}}
   end
   def fetch_constraint(_, _, _), do: {:ok, nil}
 

@@ -3,7 +3,7 @@ defmodule Console.Schema.RunStep do
   alias Console.Schema.{StackRun, RunLog}
 
   defenum Status, pending: 0, running: 1, successful: 2, failed: 3
-  defenum Stage,  plan: 0, verify: 1, apply: 2
+  defenum Stage,  plan: 0, verify: 1, apply: 2, init: 3
 
   schema "run_steps" do
     field :name,   :string

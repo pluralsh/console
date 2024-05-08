@@ -52,6 +52,11 @@ type ServiceHelm struct {
 	Repository *NamespacedName `json:"repository,omitempty"`
 }
 
+type ServiceDependency struct {
+	// The name of a service on the same cluster this service depends on
+	Name string `json:"name"`
+}
+
 type SyncConfigAttributes struct {
 	// +kubebuilder:validation:Optional
 	CreateNamespace *bool `json:"createNamespace,omitempty"`
@@ -97,13 +102,17 @@ type ServiceSpec struct {
 	Bindings *Bindings `json:"bindings,omitempty"`
 	// Dependencies contain dependent services
 	// +kubebuilder:validation:Optional
-	Dependencies []corev1.ObjectReference `json:"dependencies,omitempty"`
+	Dependencies []ServiceDependency `json:"dependencies,omitempty"`
 	// Contexts contain dependent service context names
 	// +kubebuilder:validation:Optional
 	Contexts []string `json:"contexts,omitempty"`
 	// Templated should apply liquid templating to raw yaml files, defaults to true
 	// +kubebuilder:validation:Optional
 	Templated *bool `json:"templated,omitempty"`
+
+	// Detach determined if user want to delete or detach service
+	// +kubebuilder:validation:Optional
+	Detach bool `json:"detach,omitempty"`
 }
 
 type ServiceStatus struct {

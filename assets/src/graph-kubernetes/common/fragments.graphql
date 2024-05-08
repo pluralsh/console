@@ -126,6 +126,22 @@ fragment Selector on v1_LabelSelector {
   }
 }
 
+fragment NodeAllocatedResources on node_NodeAllocatedResources {
+  cpuRequests
+  cpuRequestsFraction
+  cpuLimits
+  cpuLimitsFraction
+  cpuCapacity
+  memoryRequests
+  memoryRequestsFraction
+  memoryLimits
+  memoryLimitsFraction
+  memoryCapacity
+  allocatedPods
+  podFraction
+  podCapacity
+}
+
 fragment HorizontalPodAutoscalerList on horizontalpodautoscaler_HorizontalPodAutoscalerList {
   errors
   listMeta @type(name: "types_ListMeta") {
