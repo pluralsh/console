@@ -29,6 +29,7 @@ fragment PoliciyConstraint on PolicyConstraint {
 query PolicyConstraints(
   $after: String
   $before: String
+  $clusters: [ID]
   $first: Int
   $kind: String
   $kinds: [String]
@@ -40,6 +41,7 @@ query PolicyConstraints(
   policyConstraints(
     after: $after
     before: $before
+    clusters: $clusters
     first: $first
     kind: $kind
     kinds: $kinds

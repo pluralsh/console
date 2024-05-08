@@ -8522,6 +8522,7 @@ export type PoliciyConstraintFragment = { __typename?: 'PolicyConstraint', descr
 export type PolicyConstraintsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
   first?: InputMaybe<Scalars['Int']['input']>;
   kind?: InputMaybe<Scalars['String']['input']>;
   kinds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
@@ -16599,10 +16600,11 @@ export type DeletePersonaMutationHookResult = ReturnType<typeof useDeletePersona
 export type DeletePersonaMutationResult = Apollo.MutationResult<DeletePersonaMutation>;
 export type DeletePersonaMutationOptions = Apollo.BaseMutationOptions<DeletePersonaMutation, DeletePersonaMutationVariables>;
 export const PolicyConstraintsDocument = gql`
-    query PolicyConstraints($after: String, $before: String, $first: Int, $kind: String, $kinds: [String], $last: Int, $namespace: String, $namespaces: [String], $q: String) {
+    query PolicyConstraints($after: String, $before: String, $clusters: [ID], $first: Int, $kind: String, $kinds: [String], $last: Int, $namespace: String, $namespaces: [String], $q: String) {
   policyConstraints(
     after: $after
     before: $before
+    clusters: $clusters
     first: $first
     kind: $kind
     kinds: $kinds
@@ -16638,6 +16640,7 @@ ${PoliciyConstraintFragmentDoc}`;
  *   variables: {
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      clusters: // value for 'clusters'
  *      first: // value for 'first'
  *      kind: // value for 'kind'
  *      kinds: // value for 'kinds'
