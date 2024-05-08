@@ -16,12 +16,12 @@ function PoliciesFilter({
   selectedClusters,
   setSelectedClusters,
 }: {
-  selectedKinds: string[]
-  setSelectedKinds: Dispatch<SetStateAction<string[]>>
-  selectedNamespaces: string[]
-  setSelectedNamespaces: Dispatch<SetStateAction<string[]>>
-  selectedClusters: Array<string>
-  setSelectedClusters: Dispatch<SetStateAction<Array<string>>>
+  selectedKinds: (string | null)[]
+  setSelectedKinds: Dispatch<SetStateAction<(string | null)[]>>
+  selectedNamespaces: (string | null)[]
+  setSelectedNamespaces: Dispatch<SetStateAction<(string | null)[]>>
+  selectedClusters: (string | null)[]
+  setSelectedClusters: Dispatch<SetStateAction<(string | null)[]>>
 }) {
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: {
@@ -53,6 +53,22 @@ function PoliciesFilter({
     <PoliciesFiltersContainer>
       <Accordion label="Cluster">
         <Flex direction="column">
+          <Checkbox
+            name="clusters"
+            value={null}
+            checked={selectedClusters.includes(null)}
+            onChange={({ target: { checked } }: any) => {
+              setSelectedClusters((prev) => {
+                if (checked) {
+                  return [...prev, null]
+                }
+
+                return prev.filter((id) => id !== null)
+              })
+            }}
+          >
+            No cluster
+          </Checkbox>
           {clusters?.map((edge) => {
             if (!edge?.node) return null
             const { node } = edge
@@ -81,6 +97,22 @@ function PoliciesFilter({
       </Accordion>
       <Accordion label="Kind">
         <Flex direction="column">
+          <Checkbox
+            name="kinds"
+            value={null}
+            checked={selectedKinds.includes(null)}
+            onChange={({ target: { checked } }: any) => {
+              setSelectedKinds((prev) => {
+                if (checked) {
+                  return [...prev, null]
+                }
+
+                return prev.filter((el) => el !== null)
+              })
+            }}
+          >
+            No kind
+          </Checkbox>
           {kinds?.map((kind) => (
             <Checkbox
               key={kind}
@@ -104,6 +136,22 @@ function PoliciesFilter({
       </Accordion>
       <Accordion label="Namespace">
         <Flex direction="column">
+          <Checkbox
+            name="namespaces"
+            value={null}
+            checked={selectedNamespaces.includes(null)}
+            onChange={({ target: { checked } }: any) => {
+              setSelectedNamespaces((prev) => {
+                if (checked) {
+                  return [...prev, null]
+                }
+
+                return prev.filter((el) => el !== null)
+              })
+            }}
+          >
+            No namespace
+          </Checkbox>
           {namespaces?.map((namespace) => (
             <Checkbox
               key={namespace}

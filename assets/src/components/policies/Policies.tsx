@@ -39,9 +39,13 @@ export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 function Policies() {
   const [searchString, setSearchString] = useState('')
-  const [selectedKinds, setSelectedKinds] = useState<string[]>([])
-  const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([])
-  const [selectedClusters, setSelectedClusters] = useState<string[]>([])
+  const [selectedKinds, setSelectedKinds] = useState<(string | null)[]>([])
+  const [selectedNamespaces, setSelectedNamespaces] = useState<
+    (string | null)[]
+  >([])
+  const [selectedClusters, setSelectedClusters] = useState<(string | null)[]>(
+    []
+  )
 
   const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
