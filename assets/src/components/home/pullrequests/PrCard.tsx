@@ -5,9 +5,7 @@ import { PR_QUERY_PAGE_SIZE } from 'components/pr/queue/PrQueue'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import styled from 'styled-components'
-
-import { HomeCard } from '../HomeCard'
+import { Title2H1 } from '../../utils/typography/Text'
 
 import { PrTable } from './PrTable'
 
@@ -43,24 +41,19 @@ export function PrCard() {
     numPrs === 1 ? `1 PR needs action` : `${numPrs} PRs need action`
 
   return (
-    <HomeCard label={headerText}>
-      <PrTableWrapperSC>
-        <PrTable
-          data={data.pullRequests.edges}
-          emptyStateProps={{ message: 'All services healthy!' }}
-          refetch={refetch}
-          virtualizeRows
-          hasNextPage={pageInfo?.hasNextPage}
-          fetchNextPage={fetchNextPage}
-          isFetchingNextPage={loading}
-          onVirtualSliceChange={setVirtualSlice}
-        />
-      </PrTableWrapperSC>
-    </HomeCard>
+    <div>
+      <Title2H1>{headerText}</Title2H1>
+      <PrTable
+        data={data.pullRequests.edges}
+        emptyStateProps={{ message: 'All services healthy!' }}
+        refetch={refetch}
+        virtualizeRows
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+        css={{ maxHeight: '350px' }}
+      />
+    </div>
   )
 }
-
-const PrTableWrapperSC = styled.div({
-  overflow: 'auto',
-  maxHeight: '350px',
-})
