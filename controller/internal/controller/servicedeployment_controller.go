@@ -460,7 +460,13 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 			return requeue, nil
 		}
 		if existingService != nil && service.Status.ID != nil {
-			if err := r.ConsoleClient.DeleteService(*service.Status.ID); err != nil {
+			var err error
+			if service.Spec.Detach {
+				err = r.ConsoleClient.DetachService(*service.Status.ID)
+			} else {
+				err = r.ConsoleClient.DeleteService(*service.Status.ID)
+			}
+			if err != nil {
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}

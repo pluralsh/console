@@ -175,6 +175,9 @@ spec:
                   - name
                   type: object
                 type: array
+              detach:
+                description: Detach determined if user want to delete or detach service
+                type: boolean
               docsPath:
                 type: string
               git:

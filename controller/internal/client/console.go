@@ -102,6 +102,7 @@ type ConsoleClient interface {
 	CreateStack(ctx context.Context, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)
 	UpdateStack(ctx context.Context, id string, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)
 	DetachStack(ctx context.Context, id string) error
+	DetachService(serviceId string) error
 }
 
 func New(url, token string) ConsoleClient {
