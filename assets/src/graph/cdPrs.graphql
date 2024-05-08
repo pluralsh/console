@@ -24,6 +24,17 @@ mutation CreatePullRequest($id: ID!, $branch: String!, $context: Json!) {
   }
 }
 
+mutation UpdatePullRequest($id: ID!, $attributes: PullRequestUpdateAttributes) {
+  updatePullRequest(id: $id, attributes: $attributes) {
+    ...PullRequest
+  }
+}
+mutation DeletePullRequest($id: ID!) {
+  deletePullRequest(id: $id) {
+    ...PullRequest
+  }
+}
+
 query PullRequests(
   $q: String
   $first: Int = 100

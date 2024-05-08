@@ -1,10 +1,11 @@
 import { ComponentProps, ReactElement, useMemo, useState } from 'react'
 import {
   Chip,
+  EditIcon,
   IconFrame,
   LinkoutIcon,
   ListBoxItem,
-  PeopleIcon,
+  TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
@@ -27,8 +28,13 @@ import { ProtectBadge } from '../../cd/clusters/ProtectBadge'
 import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
 import { BasicLink } from '../../utils/typography/BasicLink'
 
+import { PrSettingsModal } from './PrSettings'
+import { DeletePrModal } from './DeletePr'
+
 enum MenuItemKey {
-  Option1 = 'option1',
+  None = '',
+  Update = 'update',
+  Delete = 'delete',
 }
 
 interface ColServiceContentProps {
@@ -193,9 +199,10 @@ const ColLink = columnHelper.accessor(({ node }) => node?.url, {
 export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
-  cell: function Cell({ getValue }) {
+  cell: function Cell({ table, getValue }) {
     const pullReq = getValue()
-    const [_, setMenuKey] = useState<MenuItemKey>()
+    const { refetch } = table.options.meta as { refetch?: () => void }
+    const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
 
     if (!pullReq) {
       return null
@@ -208,13 +215,32 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
       >
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
-            key={MenuItemKey.Option1}
-            leftContent={<PeopleIcon />}
-            label="Option 1"
-            textValue="Permissions"
+            key={MenuItemKey.Update}
+            leftContent={<EditIcon />}
+            label="Update"
+            textValue="Update"
+          />
+          <ListBoxItem
+            destructive
+            key={MenuItemKey.Delete}
+            leftContent={<TrashCanIcon color="icon-danger" />}
+            label="Delete"
+            textValue="Delete"
           />
         </MoreMenu>
         {/* Modals */}
+        <PrSettingsModal
+          pr={pullReq}
+          refetch={refetch}
+          open={menuKey === MenuItemKey.Update}
+          onClose={() => setMenuKey(MenuItemKey.None)}
+        />
+        <DeletePrModal
+          pr={pullReq}
+          refetch={refetch}
+          open={menuKey === MenuItemKey.Delete}
+          onClose={() => setMenuKey(MenuItemKey.None)}
+        />
       </div>
     )
   },
@@ -229,4 +255,5 @@ export const prColumns = [
   ColCreator,
   ColLabels,
   ColInsertedAt,
+  ColActions,
 ]
