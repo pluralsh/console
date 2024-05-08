@@ -41,7 +41,7 @@ function Policies() {
   const [searchString, setSearchString] = useState('')
   const [selectedKind, setSelectedKind] = useState<string>('')
   const [selectedNamespace, setSelectedNamespace] = useState<string>('')
-  const [selectedClusters, setSelectedClusters] = useState<string[]>([''])
+  const [selectedClusters, setSelectedClusters] = useState<string[]>([])
 
   const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
@@ -62,7 +62,7 @@ function Policies() {
       first: POLICIES_QUERY_PAGE_SIZE,
       ...(selectedKind ? { kind: selectedKind } : {}),
       ...(selectedNamespace ? { namespace: selectedNamespace } : {}),
-      ...(selectedClusters[0] ? { clusters: selectedClusters } : {}),
+      ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
     },
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table

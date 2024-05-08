@@ -1,9 +1,10 @@
-import { Accordion, Radio, RadioGroup } from '@pluralsh/design-system'
+import { Accordion, Checkbox, Radio, RadioGroup } from '@pluralsh/design-system'
 import {
   ConstraintViolationField,
   useClustersQuery,
   useViolationStatisticsQuery,
 } from 'generated/graphql'
+import { Flex } from 'honorable'
 import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 
@@ -19,8 +20,8 @@ function PoliciesFilter({
   setSelectedKind: Dispatch<SetStateAction<string>>
   selectedNamespace: string
   setSelectedNamespace: Dispatch<SetStateAction<string>>
-  selectedClusters: string[]
-  setSelectedClusters: Dispatch<SetStateAction<string[]>>
+  selectedClusters: Array<string>
+  setSelectedClusters: Dispatch<SetStateAction<Array<string>>>
 }) {
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: {
@@ -51,19 +52,32 @@ function PoliciesFilter({
   return (
     <PoliciesFiltersContainer>
       <Accordion label="Cluster">
-        <RadioGroup
-          name="radio-group-cluster"
-          value={selectedClusters[0]}
-          onChange={(value) => setSelectedClusters([value])}
-        >
-          <Radio value="">All</Radio>
+        <Flex direction="column">
           {clusters?.map((edge) => {
             if (!edge?.node) return null
             const { node } = edge
 
-            return <Radio value={node.id}>{node.name}</Radio>
+            return (
+              <Checkbox
+                key={node.id}
+                name="options"
+                value={node.id}
+                checked={selectedClusters.includes(node.id)}
+                onChange={({ target: { checked } }: any) => {
+                  setSelectedClusters((prev) => {
+                    if (checked) {
+                      return [...prev, node.id]
+                    }
+
+                    return prev.filter((id) => id !== node.id)
+                  })
+                }}
+              >
+                {node.name}
+              </Checkbox>
+            )
           })}
-        </RadioGroup>
+        </Flex>
       </Accordion>
       <Accordion label="Kind">
         <RadioGroup
