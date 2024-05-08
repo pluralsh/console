@@ -1,6 +1,6 @@
-import { Flex, H1 } from 'honorable'
+import { H1 } from 'honorable'
 
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import {
   CLUSTERS_QUERY_PAGE_SIZE,
   CLUSTERS_REACT_VIRTUAL_OPTIONS,
