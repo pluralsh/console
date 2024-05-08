@@ -1,6 +1,11 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import React, { useMemo } from 'react'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  InfoIcon,
+  InfoOutlineIcon,
+  Tooltip,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 
 import { filesize } from 'filesize'
 
@@ -122,7 +127,18 @@ const colCpu = columnHelper.accessor((row) => row?.allocatedResources, {
       </UsageText>
     )
   },
-  header: 'CPU',
+  // @ts-ignore
+  header: (
+    <div>
+      CPU{' '}
+      <Tooltip
+        label='Allocated CPU displayed in "requests / limits" format. Values are added up from all containers that have them specified by the user. '
+        width={370}
+      >
+        <InfoOutlineIcon size={14} />
+      </Tooltip>
+    </div>
+  ),
 })
 
 const colMemory = columnHelper.accessor((row) => row?.allocatedResources, {
@@ -142,7 +158,18 @@ const colMemory = columnHelper.accessor((row) => row?.allocatedResources, {
       </UsageText>
     )
   },
-  header: 'Memory',
+  // @ts-ignore
+  header: (
+    <div>
+      Memory{' '}
+      <Tooltip
+        label='Allocated memory displayed in "requests / limits" format. Values are added up from all containers that have them specified by the user. '
+        width={370}
+      >
+        <InfoOutlineIcon size={14} />
+      </Tooltip>
+    </div>
+  ),
 })
 
 export function usePodsColumns(): Array<object> {
