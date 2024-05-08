@@ -40,7 +40,7 @@ export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 function Policies() {
   const [searchString, setSearchString] = useState('')
   const [selectedKinds, setSelectedKinds] = useState<string[]>([])
-  const [selectedNamespace, setSelectedNamespace] = useState<string>('')
+  const [selectedNamespaces, setSelectedNamespaces] = useState<string[]>([])
   const [selectedClusters, setSelectedClusters] = useState<string[]>([])
 
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -61,7 +61,7 @@ function Policies() {
       ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
       first: POLICIES_QUERY_PAGE_SIZE,
       ...(selectedKinds.length ? { kinds: selectedKinds } : {}),
-      ...(selectedNamespace ? { namespace: selectedNamespace } : {}),
+      ...(selectedNamespaces.length ? { namespaces: selectedNamespaces } : {}),
       ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
     },
     fetchPolicy: 'cache-and-network',
@@ -114,8 +114,8 @@ function Policies() {
       </div>
       <div className="filter">
         <PoliciesFilter
-          selectedNamespace={selectedNamespace}
-          setSelectedNamespace={setSelectedNamespace}
+          selectedNamespaces={selectedNamespaces}
+          setSelectedNamespaces={setSelectedNamespaces}
           selectedKinds={selectedKinds}
           setSelectedKinds={setSelectedKinds}
           selectedClusters={selectedClusters}

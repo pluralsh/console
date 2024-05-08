@@ -1,4 +1,4 @@
-import { Accordion, Checkbox, Radio, RadioGroup } from '@pluralsh/design-system'
+import { Accordion, Checkbox } from '@pluralsh/design-system'
 import {
   ConstraintViolationField,
   useClustersQuery,
@@ -11,15 +11,15 @@ import styled from 'styled-components'
 function PoliciesFilter({
   selectedKinds,
   setSelectedKinds,
-  selectedNamespace,
-  setSelectedNamespace,
+  selectedNamespaces,
+  setSelectedNamespaces,
   selectedClusters,
   setSelectedClusters,
 }: {
   selectedKinds: string[]
   setSelectedKinds: Dispatch<SetStateAction<string[]>>
-  selectedNamespace: string
-  setSelectedNamespace: Dispatch<SetStateAction<string>>
+  selectedNamespaces: string[]
+  setSelectedNamespaces: Dispatch<SetStateAction<string[]>>
   selectedClusters: Array<string>
   setSelectedClusters: Dispatch<SetStateAction<Array<string>>>
 }) {
@@ -93,7 +93,7 @@ function PoliciesFilter({
                     return [...prev, kind]
                   }
 
-                  return prev.filter((id) => id !== kind)
+                  return prev.filter((el) => el !== kind)
                 })
               }}
             >
@@ -103,16 +103,27 @@ function PoliciesFilter({
         </Flex>
       </Accordion>
       <Accordion label="Namespace">
-        <RadioGroup
-          name="radio-group-namespace"
-          value={selectedNamespace}
-          onChange={setSelectedNamespace}
-        >
-          <Radio value="">All</Radio>
+        <Flex direction="column">
           {namespaces?.map((namespace) => (
-            <Radio value={namespace}>{namespace}</Radio>
+            <Checkbox
+              key={namespace}
+              name="namespaces"
+              value={namespace}
+              checked={selectedNamespaces.includes(namespace)}
+              onChange={({ target: { checked } }: any) => {
+                setSelectedNamespaces((prev) => {
+                  if (checked) {
+                    return [...prev, namespace]
+                  }
+
+                  return prev.filter((el) => el !== namespace)
+                })
+              }}
+            >
+              {namespace}
+            </Checkbox>
           ))}
-        </RadioGroup>
+        </Flex>
       </Accordion>
     </PoliciesFiltersContainer>
   )
