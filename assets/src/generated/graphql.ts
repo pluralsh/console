@@ -7916,6 +7916,21 @@ export type CreatePullRequestMutationVariables = Exact<{
 
 export type CreatePullRequestMutation = { __typename?: 'RootMutationType', createPullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
+export type UpdatePullRequestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes?: InputMaybe<PullRequestUpdateAttributes>;
+}>;
+
+
+export type UpdatePullRequestMutation = { __typename?: 'RootMutationType', updatePullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
+export type DeletePullRequestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeletePullRequestMutation = { __typename?: 'RootMutationType', deletePullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
 export type PullRequestsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -13937,6 +13952,73 @@ export function useCreatePullRequestMutation(baseOptions?: Apollo.MutationHookOp
 export type CreatePullRequestMutationHookResult = ReturnType<typeof useCreatePullRequestMutation>;
 export type CreatePullRequestMutationResult = Apollo.MutationResult<CreatePullRequestMutation>;
 export type CreatePullRequestMutationOptions = Apollo.BaseMutationOptions<CreatePullRequestMutation, CreatePullRequestMutationVariables>;
+export const UpdatePullRequestDocument = gql`
+    mutation UpdatePullRequest($id: ID!, $attributes: PullRequestUpdateAttributes) {
+  updatePullRequest(id: $id, attributes: $attributes) {
+    ...PullRequest
+  }
+}
+    ${PullRequestFragmentDoc}`;
+export type UpdatePullRequestMutationFn = Apollo.MutationFunction<UpdatePullRequestMutation, UpdatePullRequestMutationVariables>;
+
+/**
+ * __useUpdatePullRequestMutation__
+ *
+ * To run a mutation, you first call `useUpdatePullRequestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdatePullRequestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updatePullRequestMutation, { data, loading, error }] = useUpdatePullRequestMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdatePullRequestMutation(baseOptions?: Apollo.MutationHookOptions<UpdatePullRequestMutation, UpdatePullRequestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdatePullRequestMutation, UpdatePullRequestMutationVariables>(UpdatePullRequestDocument, options);
+      }
+export type UpdatePullRequestMutationHookResult = ReturnType<typeof useUpdatePullRequestMutation>;
+export type UpdatePullRequestMutationResult = Apollo.MutationResult<UpdatePullRequestMutation>;
+export type UpdatePullRequestMutationOptions = Apollo.BaseMutationOptions<UpdatePullRequestMutation, UpdatePullRequestMutationVariables>;
+export const DeletePullRequestDocument = gql`
+    mutation DeletePullRequest($id: ID!) {
+  deletePullRequest(id: $id) {
+    ...PullRequest
+  }
+}
+    ${PullRequestFragmentDoc}`;
+export type DeletePullRequestMutationFn = Apollo.MutationFunction<DeletePullRequestMutation, DeletePullRequestMutationVariables>;
+
+/**
+ * __useDeletePullRequestMutation__
+ *
+ * To run a mutation, you first call `useDeletePullRequestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePullRequestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePullRequestMutation, { data, loading, error }] = useDeletePullRequestMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeletePullRequestMutation(baseOptions?: Apollo.MutationHookOptions<DeletePullRequestMutation, DeletePullRequestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePullRequestMutation, DeletePullRequestMutationVariables>(DeletePullRequestDocument, options);
+      }
+export type DeletePullRequestMutationHookResult = ReturnType<typeof useDeletePullRequestMutation>;
+export type DeletePullRequestMutationResult = Apollo.MutationResult<DeletePullRequestMutation>;
+export type DeletePullRequestMutationOptions = Apollo.BaseMutationOptions<DeletePullRequestMutation, DeletePullRequestMutationVariables>;
 export const PullRequestsDocument = gql`
     query PullRequests($q: String, $first: Int = 100, $after: String, $clusterId: ID, $serviceId: ID, $open: Boolean) {
   pullRequests(
@@ -17072,6 +17154,8 @@ export const namedOperations = {
     UpdateClusterProvider: 'UpdateClusterProvider',
     DeleteClusterProvider: 'DeleteClusterProvider',
     CreatePullRequest: 'CreatePullRequest',
+    UpdatePullRequest: 'UpdatePullRequest',
+    DeletePullRequest: 'DeletePullRequest',
     CreateServiceDeployment: 'CreateServiceDeployment',
     UpdateServiceDeployment: 'UpdateServiceDeployment',
     MergeService: 'MergeService',
