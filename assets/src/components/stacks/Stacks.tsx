@@ -7,18 +7,46 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { Key, useEffect, useMemo, useState } from 'react'
+import {
+  Key,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react'
 
 import { isEmpty } from 'lodash'
 
+import { Outlet } from 'react-router-dom'
+
 import { STACKS_ABS_PATH } from '../../routes/stacksRoutesConsts'
 
-import { useInfrastructureStacksQuery } from '../../generated/graphql'
+import {
+  InfrastructureStack,
+  useInfrastructureStacksQuery,
+} from '../../generated/graphql'
 import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
 
 import { StackTypeIconFrame } from './StackType'
+
+type StacksContextT = {
+  stacks: InfrastructureStack[]
+}
+
+const StacksContext = createContext<StacksContextT | undefined>(undefined)
+
+export const useStacksContext = () => {
+  const ctx = useContext(StacksContext)
+
+  if (!ctx) {
+    throw Error('useStacksContext() must be used within a StacksContext')
+  }
+
+  return ctx
+}
 
 const STACKS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'stacks', url: STACKS_ABS_PATH },
@@ -41,6 +69,8 @@ export default function Stacks() {
     () => mapExistingNodes(data?.infrastructureStacks),
     [data?.infrastructureStacks]
   )
+
+  const context = useMemo(() => ({ stacks }) as StacksContextT, [stacks, stack])
 
   useEffect(() => {
     if (isEmpty(stack) && !isEmpty(stacks))
@@ -92,6 +122,9 @@ export default function Stacks() {
           />
         ))}
       </ListBox>
+      <StacksContext.Provider value={context}>
+        <Outlet />
+      </StacksContext.Provider>
     </div>
   )
 }
