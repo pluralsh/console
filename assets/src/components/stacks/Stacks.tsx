@@ -6,40 +6,22 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { createContext, useContext, useEffect, useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { isEmpty } from 'lodash'
-import { Outlet, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 
 import {
   STACKS_ABS_PATH,
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
 
-import {
-  InfrastructureStack,
-  useInfrastructureStacksQuery,
-} from '../../generated/graphql'
+import { useInfrastructureStacksQuery } from '../../generated/graphql'
 import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
 
 import { StackTypeIconFrame } from './StackType'
-
-type StacksContextT = {
-  stacks: InfrastructureStack[]
-}
-
-const StacksContext = createContext<StacksContextT | undefined>(undefined)
-
-export const useStacksContext = () => {
-  const ctx = useContext(StacksContext)
-
-  if (!ctx) {
-    throw Error('useStacksContext() must be used within a StacksContext')
-  }
-
-  return ctx
-}
+import Stack from './Stack'
 
 const STACKS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'stacks', url: STACKS_ABS_PATH },
@@ -69,8 +51,6 @@ export default function Stacks() {
     [stackId, stacks]
   )
 
-  const context = useMemo(() => ({ stacks }) as StacksContextT, [stacks, stack])
-
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
   }, [stacks, stackId, navigate])
@@ -93,7 +73,7 @@ export default function Stacks() {
     <div
       css={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: 'row',
         gap: theme.spacing.small,
         padding: theme.spacing.large,
         height: '100%',
@@ -125,9 +105,7 @@ export default function Stacks() {
           />
         ))}
       </ListBox>
-      <StacksContext.Provider value={context}>
-        <Outlet />
-      </StacksContext.Provider>
+      <Stack stack={stack} />
     </div>
   )
 }
