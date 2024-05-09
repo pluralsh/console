@@ -15,6 +15,9 @@ import { STACKS_ABS_PATH } from '../../routes/stacksRoutesConsts'
 import { useInfrastructureStacksQuery } from '../../generated/graphql'
 import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
+import { StackedText } from '../utils/table/StackedText'
+
+import { StackTypeIconFrame } from './StackType'
 
 const STACKS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'stacks', url: STACKS_ABS_PATH },
@@ -61,12 +64,23 @@ export default function Stacks() {
         onSelectionChange={(key) => {
           setSelectedKey(key)
         }}
-        extendStyle={{ width: 300 }}
+        extendStyle={{ width: 360 }}
       >
         {stacks.map((stack) => (
           <ListBoxItem
             key={stack.id ?? stack.name}
-            label={stack.name}
+            label={
+              <div css={{ display: 'flex', gap: theme.spacing.small }}>
+                <StackTypeIconFrame
+                  stackType={stack.type}
+                  type="floating"
+                />
+                <StackedText
+                  first={stack.name}
+                  second={stack.repository?.url}
+                />
+              </div>
+            }
             textValue={stack.name}
           />
         ))}
