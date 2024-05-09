@@ -1,0 +1,31 @@
+fragment InfrastructureStack on InfrastructureStack {
+  id
+  insertedAt
+  updatedAt
+  name
+  type
+  configuration {
+    image
+    version
+  }
+  repository {
+    url
+  }
+  git {
+    ref
+    folder
+  }
+}
+
+query InfrastructureStacks($after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...InfrastructureStack
+      }
+    }
+  }
+}
