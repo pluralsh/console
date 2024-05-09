@@ -6,21 +6,14 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
+import { createContext, useContext, useEffect, useMemo } from 'react'
+import { isEmpty } from 'lodash'
+import { Outlet, useNavigate, useParams } from 'react-router-dom'
 
 import {
-  Key,
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-
-import { isEmpty } from 'lodash'
-
-import { Outlet } from 'react-router-dom'
-
-import { STACKS_ABS_PATH } from '../../routes/stacksRoutesConsts'
+  STACKS_ABS_PATH,
+  getStacksAbsPath,
+} from '../../routes/stacksRoutesConsts'
 
 import {
   InfrastructureStack,
@@ -54,7 +47,8 @@ const STACKS_BASE_CRUMBS: Breadcrumb[] = [
 
 export default function Stacks() {
   const theme = useTheme()
-  const [stack, setStack] = useState<Key>('')
+  const navigate = useNavigate()
+  const { stackId = '' } = useParams()
 
   // TODO: Add pagination and filtering.
   const { data, error } = useInfrastructureStacksQuery({
@@ -70,18 +64,26 @@ export default function Stacks() {
     [data?.infrastructureStacks]
   )
 
+  const stack = useMemo(
+    () => stacks.find(({ id }) => id === stackId),
+    [stackId, stacks]
+  )
+
   const context = useMemo(() => ({ stacks }) as StacksContextT, [stacks, stack])
 
   useEffect(() => {
-    if (isEmpty(stack) && !isEmpty(stacks))
-      setStack(stacks[0].id ?? stacks[0].name)
+    if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
+  }, [stacks, stackId, navigate])
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setStack])
-
-  if (error) {
-    return <GqlError error={error} />
-  }
+  if (error)
+    return (
+      <div css={{ padding: theme.spacing.large }}>
+        <GqlError
+          header="Cannot load stacks"
+          error={error}
+        />
+      </div>
+    )
 
   if (!data) {
     return <LoopingLogo />
@@ -98,14 +100,15 @@ export default function Stacks() {
       }}
     >
       <ListBox
-        selectedKey={stack}
-        onSelectionChange={setStack}
+        selectedKey={stackId}
+        onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
         disallowEmptySelection
         extendStyle={{ width: 360 }}
       >
+        {/* TODO: Filter stacks without IDs. */}
         {stacks.map((stack) => (
           <ListBoxItem
-            key={stack.id ?? stack.name}
+            key={stack.id ?? ''}
             label={
               <div css={{ display: 'flex', gap: theme.spacing.small }}>
                 <StackTypeIconFrame
