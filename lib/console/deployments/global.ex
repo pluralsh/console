@@ -230,7 +230,7 @@ defmodule Console.Deployments.Global do
     user = user || bot()
     with %NamespaceInstance{} = ni <- Repo.get_by(NamespaceInstance, cluster_id: cluster.id, namespace_id: ns.id),
          %{service: %Service{} = service} <- Repo.preload(ni, [service: [:context_bindings, :dependencies]]),
-         {:diff, true} <- {:diff, diff?(ns.service, service)} do
+         {:diff, true} <- {:diff, diff?(%{ns.service | sync_config: %{create_namespace: false}}, service)} do
       namespace_service_attrs(ns, service.dependencies)
       |> Map.delete(:name)
       |> Services.update_service(service.id, user)
