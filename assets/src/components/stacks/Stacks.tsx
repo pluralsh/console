@@ -5,10 +5,11 @@ import {
   LoopingLogo,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { useTheme } from 'styled-components'
 
-import { Key, useMemo, useState } from 'react'
+import { Key, useEffect, useMemo, useState } from 'react'
+
+import { isEmpty } from 'lodash'
 
 import { STACKS_ABS_PATH } from '../../routes/stacksRoutesConsts'
 
@@ -25,7 +26,7 @@ const STACKS_BASE_CRUMBS: Breadcrumb[] = [
 
 export default function Stacks() {
   const theme = useTheme()
-  const [selectedKey, setSelectedKey] = useState<Key>('')
+  const [stack, setStack] = useState<Key>('')
 
   // TODO: Add pagination and filtering.
   const { data, error } = useInfrastructureStacksQuery({
@@ -40,6 +41,13 @@ export default function Stacks() {
     () => mapExistingNodes(data?.infrastructureStacks),
     [data?.infrastructureStacks]
   )
+
+  useEffect(() => {
+    if (isEmpty(stack) && !isEmpty(stacks))
+      setStack(stacks[0].id ?? stacks[0].name)
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setStack])
 
   if (error) {
     return <GqlError error={error} />
@@ -60,10 +68,9 @@ export default function Stacks() {
       }}
     >
       <ListBox
-        selectedKey={selectedKey}
-        onSelectionChange={(key) => {
-          setSelectedKey(key)
-        }}
+        selectedKey={stack}
+        onSelectionChange={setStack}
+        disallowEmptySelection
         extendStyle={{ width: 360 }}
       >
         {stacks.map((stack) => (
@@ -73,7 +80,7 @@ export default function Stacks() {
               <div css={{ display: 'flex', gap: theme.spacing.small }}>
                 <StackTypeIconFrame
                   stackType={stack.type}
-                  type="floating"
+                  type="secondary"
                 />
                 <StackedText
                   first={stack.name}
