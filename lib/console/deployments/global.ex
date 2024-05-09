@@ -230,7 +230,7 @@ defmodule Console.Deployments.Global do
     user = user || bot()
     with %NamespaceInstance{} = ni <- Repo.get_by(NamespaceInstance, cluster_id: cluster.id, namespace_id: ns.id),
          %{service: %Service{} = service} <- Repo.preload(ni, [service: [:context_bindings, :dependencies]]),
-         {:diff, true} <- {:diff, diff?(%{ns.service | sync_config: %{create_namespace: false}}, service)} do
+         {:diff, true} <- {:diff, diff?(%{ns.service | ignore_sync: true}, service)} do
       namespace_service_attrs(ns, service.dependencies)
       |> Map.delete(:name)
       |> Services.update_service(service.id, user)
@@ -471,12 +471,15 @@ defmodule Console.Deployments.Global do
   end
 
   defp specs_different?(source, dest) do
-    Enum.any?(~w(helm git kustomize sync_config)a, fn key ->
+    Enum.any?(spec_fields(source), fn key ->
       s = Map.get(source, key)
       d = Map.get(dest, key)
       clean(s) != clean(d)
     end)
   end
+
+  defp spec_fields(%{ignore_sync: true}), do: ~w(helm git kustomize)a
+  defp spec_fields(_), do: ~w(helm git kustomize sync_config)a
 
   def notify({:ok, %GlobalService{} = svc}, :create, user),
     do: handle_notify(PubSub.GlobalServiceCreated, svc, actor: user)
