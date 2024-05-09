@@ -8571,7 +8571,7 @@ export type ViolationStatisticsQuery = { __typename?: 'RootQueryType', violation
 
 export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, name: string, type: StackType, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string } };
 
-export type StackRunFragment = { __typename?: 'StackRun', id: string, status: StackStatus, approvedAt?: string | null, approver?: { __typename?: 'User', name: string, email: string } | null };
+export type StackRunFragment = { __typename?: 'StackRun', id: string, message?: string | null, status: StackStatus, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
 
 export type StacksQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -8592,7 +8592,7 @@ export type StackRunsQueryVariables = Exact<{
 }>;
 
 
-export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, status: StackStatus, approvedAt?: string | null, approver?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
+export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, message?: string | null, status: StackStatus, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
 
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
@@ -10666,6 +10666,10 @@ export const StackFragmentDoc = gql`
 export const StackRunFragmentDoc = gql`
     fragment StackRun on StackRun {
   id
+  git {
+    ref
+  }
+  message
   status
   approvedAt
   approver {

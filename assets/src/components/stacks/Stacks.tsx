@@ -84,18 +84,18 @@ export default function Stacks() {
         selectedKey={stackId}
         onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
         disallowEmptySelection
-        extendStyle={{ width: 360 }}
+        extendStyle={{
+          borderColor: theme.colors.border,
+          backgroundColor: theme.colors['fill-one'],
+          width: 360,
+        }}
       >
-        {/* TODO: Filter stacks without IDs. */}
         {stacks.map((stack) => (
           <ListBoxItem
             key={stack.id ?? ''}
             label={
               <div css={{ display: 'flex', gap: theme.spacing.small }}>
-                <StackTypeIconFrame
-                  stackType={stack.type}
-                  type="secondary"
-                />
+                <StackTypeIconFrame stackType={stack.type} />
                 <StackedText
                   first={stack.name}
                   second={stack.repository?.url}
@@ -103,6 +103,15 @@ export default function Stacks() {
               </div>
             }
             textValue={stack.name}
+            css={{
+              borderColor: theme.colors.border,
+              '&:hover': {
+                backgroundColor:
+                  theme.mode === 'light'
+                    ? theme.colors['fill-zero-hover']
+                    : theme.colors['fill-one-hover'],
+              },
+            }}
           />
         ))}
       </ListBox>

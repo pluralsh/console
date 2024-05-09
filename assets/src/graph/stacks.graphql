@@ -19,6 +19,10 @@ fragment Stack on InfrastructureStack {
 
 fragment StackRun on StackRun {
   id
+  git {
+    ref
+  }
+  message
   status
   approvedAt
   approver {
