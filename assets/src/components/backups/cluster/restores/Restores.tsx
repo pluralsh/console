@@ -6,12 +6,13 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
-import { VirtualItem } from '@tanstack/react-virtual'
 import { capitalize } from 'lodash'
+
+import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import {
   ClusterBasicFragment,
@@ -22,13 +23,12 @@ import {
 } from '../../../../generated/graphql'
 import { GqlError } from '../../../utils/Alert'
 import { FullHeightTableWrap } from '../../../utils/layout/FullHeightTableWrap'
-import { Edge, extendConnection } from '../../../../utils/graphql'
+import { Edge } from '../../../../utils/graphql'
 import { BACKUPS_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
 import { DynamicClusterIcon } from '../../../cd/clusters/DynamicClusterIcon'
 import { ColClusterContentSC } from '../../../cd/clusters/ClustersColumns'
 import { BasicLink } from '../../../utils/typography/BasicLink'
 import { StackedText } from '../../../utils/table/StackedText'
-import { useSlicePolling } from '../../../utils/tableFetchHelpers'
 
 import {
   CLUSTER_RESTORES_REL_PATH,
@@ -36,7 +36,6 @@ import {
 } from '../../../../routes/backupRoutesConsts'
 import { DateTimeCol } from '../../../utils/table/DateTimeCol'
 
-const POLL_INTERVAL = 10 * 1000
 const QUERY_PAGE_SIZE = 100
 
 const restoreStatusSeverity = {
@@ -144,49 +143,24 @@ export default function Restores() {
   })
   const cluster = clusterData?.cluster
 
-  const [virtualSlice, _setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
-  const queryResult = useClusterRestoresQuery({
-    variables: { clusterId, first: QUERY_PAGE_SIZE },
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
   const {
-    error,
-    fetchMore,
+    data,
     loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
-  const clusterRestores = data?.clusterRestores
-  const pageInfo = clusterRestores?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
-    pageSize: QUERY_PAGE_SIZE,
-    key: 'clusterRestores',
-    interval: POLL_INTERVAL,
-  })
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      queryHook: useClusterRestoresQuery,
+      pageSize: QUERY_PAGE_SIZE,
+      queryKey: 'clusterRestores',
+    },
+    {
+      clusterId,
     }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(
-          prev,
-          fetchMoreResult.clusterRestores,
-          'clusterRestores'
-        ),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -236,6 +210,7 @@ export default function Restores() {
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
             css={{
               maxHeight: 'unset',
               height: '100%',

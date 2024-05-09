@@ -124,9 +124,9 @@ export function WorkloadImages({ images }: { images: Maybe<string>[] }) {
         maxWidth: 300,
       }}
     >
-      {images.map((image) => (
+      {images.map((image, index) => (
         <Tooltip
-          key={image}
+          key={index}
           label={image}
           placement="left-start"
         >

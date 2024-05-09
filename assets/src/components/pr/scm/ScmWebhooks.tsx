@@ -1,20 +1,16 @@
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { ComponentProps } from 'react'
 import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { VirtualItem } from '@tanstack/react-virtual'
 
 import { useScmWebhooksQuery } from 'generated/graphql'
-import { extendConnection } from 'utils/graphql'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { GqlError } from 'components/utils/Alert'
-import {
-  POLL_INTERVAL,
-  useSetPageHeaderContent,
-} from 'components/cd/ContinuousDeployment'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
+
+import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import { columns } from './ScmWebhooksColumns'
 import { CreateScmWebhook } from './CreateScmWebhook'
@@ -26,66 +22,37 @@ export const REACT_VIRTUAL_OPTIONS: ComponentProps<
 }
 
 export const PR_QUERY_PAGE_SIZE = 100
+
+const crumbs = [
+  ...PR_BASE_CRUMBS,
+  {
+    label: 'SCM webhooks',
+    url: PR_SCM_WEBHOOKS_ABS_PATH,
+  },
+]
+
 export const SCM_WEBHOOKS_Q_VARS = {
   first: PR_QUERY_PAGE_SIZE,
 }
 
 export default function ScmWebhooks() {
   const theme = useTheme()
-  const [virtualSlice, _setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...PR_BASE_CRUMBS,
-        {
-          label: 'SCM webhooks',
-          url: PR_SCM_WEBHOOKS_ABS_PATH,
-        },
-      ],
-      []
-    )
-  )
+  useSetBreadcrumbs(crumbs)
 
-  const queryResult = useScmWebhooksQuery({
-    variables: SCM_WEBHOOKS_Q_VARS,
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
   const {
-    error,
-    fetchMore,
+    data,
     loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
-
-  const scmWebhooks = data?.scmWebhooks
-  const pageInfo = scmWebhooks?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
-    pageSize: PR_QUERY_PAGE_SIZE,
-    key: 'scmWebhooks',
-    interval: POLL_INTERVAL,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData({
+    queryHook: useScmWebhooksQuery,
+    pageSize: SCM_WEBHOOKS_Q_VARS.first,
+    queryKey: 'scmWebhooks',
   })
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult.scmWebhooks, 'scmWebhooks'),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
 
   useSetPageHeaderContent(
     <div
@@ -119,11 +86,12 @@ export default function ScmWebhooks() {
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
           reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
-          data={scmWebhooks?.edges || []}
+          data={data?.scmWebhooks?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
           css={{
             maxHeight: 'unset',
             height: '100%',
