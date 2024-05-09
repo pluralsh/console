@@ -57,8 +57,12 @@ const getDirectory = ({
     label: 'Agent Configuration',
   },
   {
-    path: 'observability',
+    path: 'observability/settings',
     label: 'Observability Settings',
+  },
+  {
+    path: 'observability/providers',
+    label: 'Observability Providers',
   },
   {
     path: 'auto-update',
