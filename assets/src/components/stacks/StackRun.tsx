@@ -7,13 +7,18 @@ import {
   InstallIcon,
 } from '@pluralsh/design-system'
 
+import moment from 'moment'
+
 import { StackRunFragment } from '../../generated/graphql'
 
 export default function StackRun({ stackRun }: { stackRun: StackRunFragment }) {
   const {
     id,
-    status,
+    insertedAt,
     message,
+    status,
+    approvedAt,
+    approver,
     git: { ref },
   } = stackRun
   const navigate = useNavigate()
@@ -51,18 +56,7 @@ export default function StackRun({ stackRun }: { stackRun: StackRunFragment }) {
         align="center"
         justify="end"
       >
-        <div>
-          {/* <TimeFromNow */}
-          {/*  date={[insertedAt, completedAt]} */}
-          {/*  prefix={[<>Started:&nbsp;</>, <>Completed:&nbsp;</>]} */}
-          {/*  endContent={humanizeDur( */}
-          {/*    new Date(completedAt).getTime() - new Date(insertedAt).getTime() */}
-          {/*  )} */}
-          {/* > */}
-          {/*  {moment(insertedAt).fromNow()} */}
-          {/* </TimeFromNow> */}
-          time
-        </div>
+        <div>{moment(insertedAt).fromNow()}</div>
         <Chip>{status}</Chip>
         <CaretRightIcon />
       </Flex>

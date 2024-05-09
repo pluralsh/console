@@ -1,7 +1,6 @@
 fragment Stack on InfrastructureStack {
   id
   insertedAt
-  updatedAt
   name
   type
   configuration {
@@ -19,6 +18,7 @@ fragment Stack on InfrastructureStack {
 
 fragment StackRun on StackRun {
   id
+  insertedAt
   git {
     ref
   }
