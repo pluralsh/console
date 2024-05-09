@@ -8569,9 +8569,11 @@ export type ViolationStatisticsQueryVariables = Exact<{
 
 export type ViolationStatisticsQuery = { __typename?: 'RootQueryType', violationStatistics?: Array<{ __typename?: 'ViolationStatistic', count?: number | null, value?: string | null, violations?: number | null } | null> | null };
 
-export type InfrastructureStackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, name: string, type: StackType, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string } };
+export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, name: string, type: StackType, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string } };
 
-export type InfrastructureStacksQueryVariables = Exact<{
+export type StackRunFragment = { __typename?: 'StackRun', id: string, status: StackStatus };
+
+export type StacksQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -8579,7 +8581,18 @@ export type InfrastructureStacksQueryVariables = Exact<{
 }>;
 
 
-export type InfrastructureStacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, name: string, type: StackType, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string } } | null } | null> | null } | null };
+export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, name: string, type: StackType, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string } } | null } | null> | null } | null };
+
+export type StackRunsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, status: StackStatus } | null } | null> | null } | null } | null };
 
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
@@ -10630,8 +10643,8 @@ export const PoliciyConstraintFragmentDoc = gql`
   violationCount
 }
     ${ClusterFragmentDoc}`;
-export const InfrastructureStackFragmentDoc = gql`
-    fragment InfrastructureStack on InfrastructureStack {
+export const StackFragmentDoc = gql`
+    fragment Stack on InfrastructureStack {
   id
   insertedAt
   updatedAt
@@ -10648,6 +10661,12 @@ export const InfrastructureStackFragmentDoc = gql`
     ref
     folder
   }
+}
+    `;
+export const StackRunFragmentDoc = gql`
+    fragment StackRun on StackRun {
+  id
+  status
 }
     `;
 export const AccessTokenFragmentDoc = gql`
@@ -16874,33 +16893,33 @@ export type ViolationStatisticsQueryHookResult = ReturnType<typeof useViolationS
 export type ViolationStatisticsLazyQueryHookResult = ReturnType<typeof useViolationStatisticsLazyQuery>;
 export type ViolationStatisticsSuspenseQueryHookResult = ReturnType<typeof useViolationStatisticsSuspenseQuery>;
 export type ViolationStatisticsQueryResult = Apollo.QueryResult<ViolationStatisticsQuery, ViolationStatisticsQueryVariables>;
-export const InfrastructureStacksDocument = gql`
-    query InfrastructureStacks($after: String, $before: String, $first: Int = 100, $last: Int) {
+export const StacksDocument = gql`
+    query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
     pageInfo {
       ...PageInfo
     }
     edges {
       node {
-        ...InfrastructureStack
+        ...Stack
       }
     }
   }
 }
     ${PageInfoFragmentDoc}
-${InfrastructureStackFragmentDoc}`;
+${StackFragmentDoc}`;
 
 /**
- * __useInfrastructureStacksQuery__
+ * __useStacksQuery__
  *
- * To run a query within a React component, call `useInfrastructureStacksQuery` and pass it any options that fit your needs.
- * When your component renders, `useInfrastructureStacksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useStacksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStacksQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useInfrastructureStacksQuery({
+ * const { data, loading, error } = useStacksQuery({
  *   variables: {
  *      after: // value for 'after'
  *      before: // value for 'before'
@@ -16909,22 +16928,76 @@ ${InfrastructureStackFragmentDoc}`;
  *   },
  * });
  */
-export function useInfrastructureStacksQuery(baseOptions?: Apollo.QueryHookOptions<InfrastructureStacksQuery, InfrastructureStacksQueryVariables>) {
+export function useStacksQuery(baseOptions?: Apollo.QueryHookOptions<StacksQuery, StacksQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<InfrastructureStacksQuery, InfrastructureStacksQueryVariables>(InfrastructureStacksDocument, options);
+        return Apollo.useQuery<StacksQuery, StacksQueryVariables>(StacksDocument, options);
       }
-export function useInfrastructureStacksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InfrastructureStacksQuery, InfrastructureStacksQueryVariables>) {
+export function useStacksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StacksQuery, StacksQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<InfrastructureStacksQuery, InfrastructureStacksQueryVariables>(InfrastructureStacksDocument, options);
+          return Apollo.useLazyQuery<StacksQuery, StacksQueryVariables>(StacksDocument, options);
         }
-export function useInfrastructureStacksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<InfrastructureStacksQuery, InfrastructureStacksQueryVariables>) {
+export function useStacksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StacksQuery, StacksQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<InfrastructureStacksQuery, InfrastructureStacksQueryVariables>(InfrastructureStacksDocument, options);
+          return Apollo.useSuspenseQuery<StacksQuery, StacksQueryVariables>(StacksDocument, options);
         }
-export type InfrastructureStacksQueryHookResult = ReturnType<typeof useInfrastructureStacksQuery>;
-export type InfrastructureStacksLazyQueryHookResult = ReturnType<typeof useInfrastructureStacksLazyQuery>;
-export type InfrastructureStacksSuspenseQueryHookResult = ReturnType<typeof useInfrastructureStacksSuspenseQuery>;
-export type InfrastructureStacksQueryResult = Apollo.QueryResult<InfrastructureStacksQuery, InfrastructureStacksQueryVariables>;
+export type StacksQueryHookResult = ReturnType<typeof useStacksQuery>;
+export type StacksLazyQueryHookResult = ReturnType<typeof useStacksLazyQuery>;
+export type StacksSuspenseQueryHookResult = ReturnType<typeof useStacksSuspenseQuery>;
+export type StacksQueryResult = Apollo.QueryResult<StacksQuery, StacksQueryVariables>;
+export const StackRunsDocument = gql`
+    query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStack(id: $id) {
+    runs(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...StackRun
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${StackRunFragmentDoc}`;
+
+/**
+ * __useStackRunsQuery__
+ *
+ * To run a query within a React component, call `useStackRunsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackRunsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useStackRunsQuery(baseOptions: Apollo.QueryHookOptions<StackRunsQuery, StackRunsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackRunsQuery, StackRunsQueryVariables>(StackRunsDocument, options);
+      }
+export function useStackRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackRunsQuery, StackRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackRunsQuery, StackRunsQueryVariables>(StackRunsDocument, options);
+        }
+export function useStackRunsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackRunsQuery, StackRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackRunsQuery, StackRunsQueryVariables>(StackRunsDocument, options);
+        }
+export type StackRunsQueryHookResult = ReturnType<typeof useStackRunsQuery>;
+export type StackRunsLazyQueryHookResult = ReturnType<typeof useStackRunsLazyQuery>;
+export type StackRunsSuspenseQueryHookResult = ReturnType<typeof useStackRunsSuspenseQuery>;
+export type StackRunsQueryResult = Apollo.QueryResult<StackRunsQuery, StackRunsQueryVariables>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -17418,7 +17491,8 @@ export const namedOperations = {
     PolicyConstraints: 'PolicyConstraints',
     PolicyConstraint: 'PolicyConstraint',
     ViolationStatistics: 'ViolationStatistics',
-    InfrastructureStacks: 'InfrastructureStacks',
+    Stacks: 'Stacks',
+    StackRuns: 'StackRuns',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me',
@@ -17610,7 +17684,8 @@ export const namedOperations = {
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
     PoliciyConstraint: 'PoliciyConstraint',
-    InfrastructureStack: 'InfrastructureStack',
+    Stack: 'Stack',
+    StackRun: 'StackRun',
     AccessToken: 'AccessToken',
     AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',

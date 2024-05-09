@@ -1,4 +1,4 @@
-fragment InfrastructureStack on InfrastructureStack {
+fragment Stack on InfrastructureStack {
   id
   insertedAt
   updatedAt
@@ -17,14 +17,34 @@ fragment InfrastructureStack on InfrastructureStack {
   }
 }
 
-query InfrastructureStacks($after: String, $before: String, $first: Int = 100, $last: Int) {
+fragment StackRun on StackRun {
+  id
+  status
+}
+
+query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
     pageInfo {
       ...PageInfo
     }
     edges {
       node {
-        ...InfrastructureStack
+        ...Stack
+      }
+    }
+  }
+}
+
+query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStack(id: $id) {
+    runs(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...StackRun
+        }
       }
     }
   }

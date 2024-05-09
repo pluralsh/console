@@ -15,10 +15,11 @@ import {
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
 
-import { useInfrastructureStacksQuery } from '../../generated/graphql'
 import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
+
+import { useStacksQuery } from '../../generated/graphql'
 
 import { StackTypeIconFrame } from './StackType'
 import Stack from './Stack'
@@ -33,7 +34,7 @@ export default function Stacks() {
   const { stackId = '' } = useParams()
 
   // TODO: Add pagination and filtering.
-  const { data, error } = useInfrastructureStacksQuery({
+  const { data, error } = useStacksQuery({
     variables: {},
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
