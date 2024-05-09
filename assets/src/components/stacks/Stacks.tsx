@@ -1,22 +1,28 @@
 import {
   Breadcrumb,
+  ListBox,
+  ListBoxItem,
   LoopingLogo,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 
+import { Key, useMemo, useState } from 'react'
+
 import { STACKS_ABS_PATH } from '../../routes/stacksRoutesConsts'
 
 import { useInfrastructureStacksQuery } from '../../generated/graphql'
 import { GqlError } from '../utils/Alert'
+import { mapExistingNodes } from '../../utils/graphql'
 
-const BACKUPS_OBJECT_STORES_BASE_CRUMBS: Breadcrumb[] = [
+const STACKS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'stacks', url: STACKS_ABS_PATH },
 ]
 
-export default function InfrastructureStacks() {
+export default function Stacks() {
   const theme = useTheme()
+  const [selectedKey, setSelectedKey] = useState<Key>('')
 
   // TODO: Add pagination and filtering.
   const { data, error } = useInfrastructureStacksQuery({
@@ -25,7 +31,12 @@ export default function InfrastructureStacks() {
     notifyOnNetworkStatusChange: true,
   })
 
-  useSetBreadcrumbs(BACKUPS_OBJECT_STORES_BASE_CRUMBS)
+  useSetBreadcrumbs(STACKS_BASE_CRUMBS)
+
+  const stacks = useMemo(
+    () => mapExistingNodes(data?.infrastructureStacks),
+    [data?.infrastructureStacks]
+  )
 
   if (error) {
     return <GqlError error={error} />
@@ -41,10 +52,25 @@ export default function InfrastructureStacks() {
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.small,
+        padding: theme.spacing.large,
         height: '100%',
       }}
     >
-      {JSON.stringify(data?.infrastructureStacks?.edges)}
+      <ListBox
+        selectedKey={selectedKey}
+        onSelectionChange={(key) => {
+          setSelectedKey(key)
+        }}
+        extendStyle={{ width: 300 }}
+      >
+        {stacks.map((stack) => (
+          <ListBoxItem
+            key={stack.id ?? stack.name}
+            label={stack.name}
+            textValue={stack.name}
+          />
+        ))}
+      </ListBox>
     </div>
   )
 }
