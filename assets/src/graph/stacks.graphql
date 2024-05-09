@@ -20,6 +20,11 @@ fragment Stack on InfrastructureStack {
 fragment StackRun on StackRun {
   id
   status
+  approvedAt
+  approver {
+    name
+    email
+  }
 }
 
 query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
