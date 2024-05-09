@@ -1,4 +1,4 @@
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { ComponentProps, useMemo, useState } from 'react'
 import {
   Button,
   LoopingLogo,
@@ -6,25 +6,21 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { VirtualItem } from '@tanstack/react-virtual'
 
 import { useNotificationRoutersQuery } from 'generated/graphql'
-import { extendConnection } from 'utils/graphql'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 
 import { GqlError } from 'components/utils/Alert'
 
-import {
-  POLL_INTERVAL,
-  useSetPageHeaderContent,
-} from 'components/cd/ContinuousDeployment'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
 import {
   NOTIFICATIONS_BASE_CRUMBS,
   NOTIFICATIONS_ROUTERS_ABS_PATH,
 } from 'routes/notificationsRoutesConsts'
+
+import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import { columns } from './NotificationRoutersColumns'
 import { CreateNotificationRouterModal } from './CreateNotificationRouterModal'
@@ -36,6 +32,13 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
 }
 
 const QUERY_PAGE_SIZE = 100
+const crumbs = [
+  ...NOTIFICATIONS_BASE_CRUMBS,
+  {
+    label: 'routers',
+    url: NOTIFICATIONS_ROUTERS_ABS_PATH,
+  },
+]
 
 function CreateRouterButton() {
   const [open, setOpen] = useState(false)
@@ -58,66 +61,23 @@ function CreateRouterButton() {
 
 export default function NotificationRouters() {
   const theme = useTheme()
-  const [virtualSlice, _setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...NOTIFICATIONS_BASE_CRUMBS,
-        {
-          label: 'routers',
-          url: NOTIFICATIONS_ROUTERS_ABS_PATH,
-        },
-      ],
-      []
-    )
-  )
+  useSetBreadcrumbs(crumbs)
 
-  const queryResult = useNotificationRoutersQuery({
-    variables: {
-      first: QUERY_PAGE_SIZE,
-    },
-    errorPolicy: 'all',
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
   const {
-    error,
-    fetchMore,
+    data,
     loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
-  const notificationRouters = data?.notificationRouters
-  const pageInfo = notificationRouters?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData({
+    queryHook: useNotificationRoutersQuery,
     pageSize: QUERY_PAGE_SIZE,
-    key: 'notificationRouters',
-    interval: POLL_INTERVAL,
+    errorPolicy: 'all',
+    queryKey: 'notificationRouters',
   })
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(
-          prev,
-          fetchMoreResult.notificationRouters,
-          'notificationRouters'
-        ),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
 
   useSetPageHeaderContent(useMemo(() => <CreateRouterButton />, []))
 
@@ -147,6 +107,7 @@ export default function NotificationRouters() {
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
           css={{
             maxHeight: 'unset',
             height: '100%',

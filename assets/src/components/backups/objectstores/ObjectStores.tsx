@@ -1,4 +1,4 @@
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import {
   Breadcrumb,
   EmptyState,
@@ -11,7 +11,7 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useTheme } from 'styled-components'
 
-import { VirtualItem } from '@tanstack/react-virtual'
+import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import {
@@ -20,16 +20,11 @@ import {
 } from '../../../routes/backupRoutesConsts'
 import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { useObjectStoresQuery } from '../../../generated/graphql'
-import { extendConnection } from '../../../utils/graphql'
 
 import { GqlError } from '../../utils/Alert'
 
-import { useSlicePolling } from '../../utils/tableFetchHelpers'
-
 import CreateObjectStore from './CreateObjectStore'
 import { ColActions, ColName, ColProvider } from './ObjectStoreColumns'
-
-const POLL_INTERVAL = 10 * 1000
 
 const QUERY_PAGE_SIZE = 100
 
@@ -51,48 +46,22 @@ export const columns = [ColProvider, ColName, ColActions]
 
 export default function ObjectStores() {
   const theme = useTheme()
-  const [virtualSlice, _setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
 
-  const queryResult = useObjectStoresQuery({
-    variables: {
-      first: QUERY_PAGE_SIZE,
-    },
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
   const {
-    error,
-    fetchMore,
+    data,
     loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
-  const objectStores = data?.objectStores
-  const pageInfo = objectStores?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData({
+    queryHook: useObjectStoresQuery,
     pageSize: QUERY_PAGE_SIZE,
-    key: 'objectStores',
-    interval: POLL_INTERVAL,
+    queryKey: 'objectStores',
   })
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult.objectStores, 'objectStores'),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
+
+  const objectStores = data?.objectStores
 
   const headerActions = useMemo(
     () => <CreateObjectStore refetch={refetch} />,
@@ -130,6 +99,7 @@ export default function ObjectStores() {
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
             css={{
               maxHeight: 'unset',
               height: '100%',
