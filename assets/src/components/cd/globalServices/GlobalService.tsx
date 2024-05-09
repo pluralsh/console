@@ -15,6 +15,7 @@ import {
 import { YamlGeneratorModal } from '../YamlGeneratorModal'
 
 import {
+  ColActions,
   ColDistribution,
   ColLastActivity,
   ColServiceName,
@@ -51,24 +52,22 @@ export const columns = [
   ColDistribution,
   ColTags,
   ColLastActivity,
+  ColActions,
+]
+const crumbs = [
+  ...CD_BASE_CRUMBS,
+  {
+    label: 'global-services',
+    url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}`,
+  },
 ]
 
 export default function GlobalServices() {
   const theme = useTheme()
+  const [refetch, setRefetch] = useState(() => () => {})
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...CD_BASE_CRUMBS,
-        {
-          label: 'global-services',
-          url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}`,
-        },
-      ],
-      []
-    )
-  )
+  useSetBreadcrumbs(crumbs)
 
   useSetPageHeaderContent(
     useMemo(
@@ -86,14 +85,15 @@ export default function GlobalServices() {
           <YamlGeneratorModal
             open={isModalOpen}
             onClose={() => setIsModalOpen(false)}
+            refetch={refetch}
             header="Create global service"
             kind="GlobalService"
           />
         </div>
       ),
-      [theme.spacing.small, isModalOpen]
+      [theme.spacing.small, isModalOpen, refetch]
     )
   )
 
-  return <GlobalServicesTable />
+  return <GlobalServicesTable setRefetch={setRefetch} />
 }

@@ -186,7 +186,7 @@ const mainRoutes = (
       element={
         <Navigate
           replace
-          to={REPOS_REL_PATH}
+          to={`../${REPOS_REL_PATH}`}
         />
       }
     />
@@ -203,7 +203,7 @@ const mainRoutes = (
       element={<AddOns />}
     />
     <Route
-      path={`${GLOBAL_SERVICES_REL_PATH}`}
+      path={GLOBAL_SERVICES_REL_PATH}
       element={<GlobalServices />}
     />
   </Route>

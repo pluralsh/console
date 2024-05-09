@@ -1,10 +1,9 @@
-import { useCallback, useRef } from 'react'
+import { useCallback } from 'react'
 import {
   AppIcon,
   Card,
   EmptyState,
   GlobeIcon,
-  TabPanel,
   Table,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
@@ -37,7 +36,6 @@ export function GlobalServiceDetailTable({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const tabStateRef = useRef<any>(null)
 
   const queryResult = useGetServiceDataQuery({
     variables: {
@@ -109,8 +107,9 @@ export function GlobalServiceDetailTable({
       >
         <div css={{ flexGrow: 1 }}>
           <Body2BoldP>Distribution</Body2BoldP>
-          <Body2P
+          <div
             css={{
+              ...theme.partials.text.body2,
               display: 'flex',
               alignItems: 'center',
               gap: theme.spacing.small,
@@ -131,7 +130,7 @@ export function GlobalServiceDetailTable({
               }
             />
             {globalService?.distro || 'All distribution'}
-          </Body2P>
+          </div>
         </div>
         <div css={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
           <Body2BoldP>Tags</Body2BoldP>
@@ -142,46 +141,41 @@ export function GlobalServiceDetailTable({
           </Body2P>
         </div>
       </Card>
-      <TabPanel
-        stateRef={tabStateRef}
-        css={{ height: '100%', overflow: 'hidden' }}
-      >
-        {!data ? (
-          <LoadingIndicator />
-        ) : services?.length ? (
-          <FullHeightTableWrap>
-            <Table
-              virtualizeRows
-              data={services || []}
-              columns={columns}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
-              onRowClick={(
-                _e,
-                { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-              ) =>
-                navigate(
-                  getServiceDetailsPath({
-                    clusterId: original.node?.cluster?.id,
-                    serviceId: original.node?.id,
-                  })
-                )
-              }
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={loading}
-              reactTableOptions={{ meta: { refetch: () => undefined } }}
-              reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
-            />
-          </FullHeightTableWrap>
-        ) : (
-          <div css={{ height: '100%' }}>
-            <EmptyState message="Looks like you don't have any service deployments yet." />
-          </div>
-        )}
-      </TabPanel>
+      {!data ? (
+        <LoadingIndicator />
+      ) : services?.length ? (
+        <FullHeightTableWrap>
+          <Table
+            virtualizeRows
+            data={services || []}
+            columns={columns}
+            css={{
+              maxHeight: 'unset',
+              height: '100%',
+            }}
+            onRowClick={(
+              _e,
+              { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+            ) =>
+              navigate(
+                getServiceDetailsPath({
+                  clusterId: original.node?.cluster?.id,
+                  serviceId: original.node?.id,
+                })
+              )
+            }
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            reactTableOptions={{ meta: { refetch: () => undefined } }}
+            reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+          />
+        </FullHeightTableWrap>
+      ) : (
+        <div css={{ height: '100%' }}>
+          <EmptyState message="Looks like you don't have any service deployments yet." />
+        </div>
+      )}
     </div>
   )
 }
