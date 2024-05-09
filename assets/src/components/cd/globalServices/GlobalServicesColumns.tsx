@@ -9,9 +9,18 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
-import { GlobeIcon } from '@pluralsh/design-system'
+import { GlobeIcon, ListBoxItem, TrashCanIcon } from '@pluralsh/design-system'
+import { useState } from 'react'
+import { MoreMenu } from 'components/utils/MoreMenu'
+
+import { DeleteGlobalServiceModal } from './DeleteGlobalService'
 
 const columnHelper = createColumnHelper<Edge<GlobalService>>()
+
+enum MenuItemKey {
+  None = '',
+  Delete = 'delete',
+}
 
 export const ColServiceName = columnHelper.accessor(({ node }) => node, {
   id: 'service',
@@ -83,3 +92,41 @@ export const ColLastActivity = columnHelper.accessor(
     cell: ({ getValue }) => <DateTimeCol date={getValue()?.toISOString()} />,
   }
 )
+
+export const ColActions = columnHelper.accessor(({ node }) => node, {
+  id: 'actions',
+  header: '',
+  cell: function Cell({ table, getValue }) {
+    const globalService = getValue()
+    const { refetch } = table.options.meta as { refetch?: () => void }
+    const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
+
+    if (!globalService) {
+      return null
+    }
+
+    return (
+      <div
+        onClick={(e) => e.stopPropagation()}
+        css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}
+      >
+        <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+          <ListBoxItem
+            destructive
+            key={MenuItemKey.Delete}
+            leftContent={<TrashCanIcon color="icon-danger" />}
+            label="Delete"
+            textValue="Delete"
+          />
+        </MoreMenu>
+        {/* Modals */}
+        <DeleteGlobalServiceModal
+          globalService={globalService}
+          refetch={refetch}
+          open={menuKey === MenuItemKey.Delete}
+          onClose={() => setMenuKey(MenuItemKey.None)}
+        />
+      </div>
+    )
+  },
+})
