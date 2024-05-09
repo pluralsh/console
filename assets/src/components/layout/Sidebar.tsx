@@ -25,6 +25,7 @@ import {
   ServersIcon,
   SidebarItem,
   SidebarSection,
+  StackIcon,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
@@ -93,6 +94,11 @@ function getMenuItems({
       path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
+    },
+    {
+      text: 'Infrastructure stacks',
+      icon: <StackIcon />,
+      path: '/stacks',
     },
     {
       text: 'Kubernetes',
