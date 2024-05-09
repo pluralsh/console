@@ -35,20 +35,17 @@ import { ME_Q } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
 import styled from 'styled-components'
-
 import { PersonaConfigurationFragment } from 'generated/graphql'
-
 import { CD_ABS_PATH } from 'routes/cdRoutesConsts'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
-
 import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
 
 import { useLogin } from '../contexts'
-
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
+import { STACKS_ABS_PATH } from '../../routes/stacksRoutesConsts'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -98,7 +95,7 @@ function getMenuItems({
     {
       text: 'Infrastructure stacks',
       icon: <StackIcon />,
-      path: '/stacks',
+      path: STACKS_ABS_PATH,
     },
     {
       text: 'Kubernetes',

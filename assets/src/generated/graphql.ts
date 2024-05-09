@@ -16875,7 +16875,7 @@ export type ViolationStatisticsLazyQueryHookResult = ReturnType<typeof useViolat
 export type ViolationStatisticsSuspenseQueryHookResult = ReturnType<typeof useViolationStatisticsSuspenseQuery>;
 export type ViolationStatisticsQueryResult = Apollo.QueryResult<ViolationStatisticsQuery, ViolationStatisticsQueryVariables>;
 export const InfrastructureStacksDocument = gql`
-    query InfrastructureStacks($after: String, $before: String, $first: Int, $last: Int) {
+    query InfrastructureStacks($after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
     pageInfo {
       ...PageInfo
