@@ -13,10 +13,7 @@ import { isEmpty } from 'lodash'
 import { useNavigate, useParams } from 'react-router-dom'
 import capitalize from 'lodash/capitalize'
 
-import {
-  STACKS_ABS_PATH,
-  getStacksAbsPath,
-} from '../../routes/stacksRoutesConsts'
+import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
 import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
@@ -45,7 +42,7 @@ export default function Stacks() {
 
   const breadcrumbs = useMemo(
     () => [
-      { label: 'stacks', url: STACKS_ABS_PATH },
+      { label: 'stacks', url: getStacksAbsPath('') },
       { label: stackId, url: getStacksAbsPath(stackId) },
     ],
     [stackId]
