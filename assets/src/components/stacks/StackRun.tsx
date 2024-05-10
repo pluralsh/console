@@ -1,52 +1,72 @@
-import { useNavigate } from 'react-router-dom'
 import { Flex, P } from 'honorable'
 import {
-  AppIcon,
   CaretRightIcon,
   Chip,
-  InstallIcon,
+  CliIcon,
+  IconFrame,
+  PlayIcon,
 } from '@pluralsh/design-system'
-
 import moment from 'moment'
+import { useTheme } from 'styled-components'
 
 import { StackRunFragment } from '../../generated/graphql'
 
-export default function StackRun({ stackRun }: { stackRun: StackRunFragment }) {
+export default function StackRun({
+  stackRun,
+  first,
+}: {
+  stackRun: StackRunFragment
+  first: boolean
+}) {
   const {
-    id,
     insertedAt,
     message,
     status,
+    approval,
     approvedAt,
     approver,
     git: { ref },
   } = stackRun
-  const navigate = useNavigate()
+  const theme = useTheme()
 
   return (
-    <Flex
-      borderBottom="1px solid border"
-      gap="small"
-      padding="medium"
-      cursor="pointer"
-      _hover={{ backgroundColor: 'fill-one-hover' }}
-      onClick={() => navigate(`/builds/${id}`)}
-      width="100%"
+    <div
+      css={{
+        alignItems: 'center',
+        borderBottom: theme.borders.default,
+        cursor: 'pointer',
+        display: 'flex',
+        gap: theme.spacing.small,
+        padding: theme.spacing.medium,
+        '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
+      }}
     >
-      <AppIcon
-        icon={<InstallIcon />}
-        size="xsmall"
-      />
+      <IconFrame icon={<CliIcon />} />
       <Flex direction="column">
         <Flex gap="small">
           <P
             body1
             fontWeight={600}
           >
-            {message}
+            {message ?? (first ? 'Initial run' : 'No message')}
           </P>
         </Flex>
-        ref: {ref}
+        {approval && (
+          <Chip
+            size="small"
+            severity="warning"
+          >
+            {approvedAt ? moment(approvedAt).fromNow() : 'Pending approval'}
+          </Chip>
+        )}
+        <div
+          css={{
+            ...theme.partials.text.caption,
+            color: theme.colors['text-xlight'],
+          }}
+        >
+          {ref}
+        </div>
       </Flex>
       <Flex
         caption
@@ -60,6 +80,6 @@ export default function StackRun({ stackRun }: { stackRun: StackRunFragment }) {
         <Chip>{status}</Chip>
         <CaretRightIcon />
       </Flex>
-    </Flex>
+    </div>
   )
 }

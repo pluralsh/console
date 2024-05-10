@@ -24,6 +24,7 @@ fragment StackRun on StackRun {
   }
   message
   status
+  approval
   approvedAt
   approver {
     name
