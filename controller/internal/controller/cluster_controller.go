@@ -78,8 +78,8 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, fmt.Errorf("could not check if cluster is existing resource, got error: %+v", err)
 	}
-	if exists {
-		logger.V(9).Info("Cluster already exists in the API, running in read-only mode")
+	if exists || cluster.Spec.ProviderRef == nil {
+		logger.V(9).Info("Cluster is in BYOK mode, running in read-only mode")
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExisting(cluster)
 	}
