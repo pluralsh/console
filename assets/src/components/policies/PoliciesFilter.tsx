@@ -1,4 +1,4 @@
-import { Accordion, Checkbox } from '@pluralsh/design-system'
+import { Accordion, Checkbox, Chip } from '@pluralsh/design-system'
 import {
   ConstraintViolationField,
   useClustersQuery,
@@ -28,7 +28,7 @@ function PoliciesFilter({
       field: ConstraintViolationField.Kind,
     },
   })
-  const { data: namspacesData } = useViolationStatisticsQuery({
+  const { data: namespacesData } = useViolationStatisticsQuery({
     variables: {
       field: ConstraintViolationField.Namespace,
     },
@@ -40,12 +40,18 @@ function PoliciesFilter({
   })
 
   const kinds = kindsData?.violationStatistics
-    ?.map((statistic) => statistic?.value || '')
-    .filter(Boolean)
+    ?.map((statistic) => ({
+      id: statistic?.value || '',
+      count: statistic?.count,
+    }))
+    .filter(({ id }) => Boolean(id))
 
-  const namespaces = namspacesData?.violationStatistics
-    ?.map((statistic) => statistic?.value || '')
-    .filter(Boolean)
+  const namespaces = namespacesData?.violationStatistics
+    ?.map((statistic) => ({
+      id: statistic?.value || '',
+      count: statistic?.count,
+    }))
+    .filter(({ id }) => Boolean(id))
 
   const clusters = clustersData?.clusters?.edges
 
@@ -114,17 +120,25 @@ function PoliciesFilter({
             No kind
           </Checkbox>
           {kinds?.map((kind) => (
-            <Checkbox
-              key={kind}
-              name="kinds"
-              value={kind}
-              checked={selectedKinds.includes(kind)}
-              onChange={({ target: { checked } }: any) =>
-                handleCheckboxChange(setSelectedKinds, kind, checked)
-              }
-            >
-              {kind}
-            </Checkbox>
+            <div className="checkboxWrapper">
+              <Checkbox
+                key={kind.id}
+                name="kinds"
+                value={kind.id}
+                checked={selectedKinds.includes(kind.id)}
+                onChange={({ target: { checked } }: any) =>
+                  handleCheckboxChange(setSelectedKinds, kind.id, checked)
+                }
+              >
+                {kind.id}
+              </Checkbox>
+              <Chip
+                condensed
+                width={kind.count ? 'auto' : 'fit-content'}
+              >
+                {kind.count ?? '-'}
+              </Chip>
+            </div>
           ))}
         </Flex>
       </Accordion>
@@ -141,17 +155,29 @@ function PoliciesFilter({
             No namespace
           </Checkbox>
           {namespaces?.map((namespace) => (
-            <Checkbox
-              key={namespace}
-              name={namespaceLabel}
-              value={namespace}
-              checked={selectedNamespaces.includes(namespace)}
-              onChange={({ target: { checked } }: any) =>
-                handleCheckboxChange(setSelectedNamespaces, namespace, checked)
-              }
-            >
-              {namespace}
-            </Checkbox>
+            <div className="checkboxWrapper">
+              <Checkbox
+                key={namespace.id}
+                name={namespaceLabel}
+                value={namespace}
+                checked={selectedNamespaces.includes(namespace.id)}
+                onChange={({ target: { checked } }: any) =>
+                  handleCheckboxChange(
+                    setSelectedNamespaces,
+                    namespace.id,
+                    checked
+                  )
+                }
+              >
+                {namespace.id}
+              </Checkbox>
+              <Chip
+                condensed
+                width={namespace.count ? 'auto' : 'fit-content'}
+              >
+                {namespace.count ?? '-'}
+              </Chip>
+            </div>
           ))}
         </Flex>
       </Accordion>
@@ -162,6 +188,7 @@ function PoliciesFilter({
 export default PoliciesFilter
 
 const PoliciesFiltersContainer = styled.div(({ theme }) => ({
+  width: 'fit-content',
   display: 'flex',
   flexDirection: 'column',
   '> div': {
@@ -176,5 +203,10 @@ const PoliciesFiltersContainer = styled.div(({ theme }) => ({
     borderBottomLeftRadius: theme.borderRadiuses.large,
     borderBottomRightRadius: theme.borderRadiuses.large,
     borderBottom: `1px solid ${theme.colors.border}`,
+  },
+  '.checkboxWrapper': {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 }))
