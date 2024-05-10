@@ -8,6 +8,7 @@ defmodule Console.Schema.ServiceTemplate do
     field :templated,     :boolean, default: true
     field :contexts,      {:array, :string}
     field :configuration, {:array, :map}, virtual: true
+    field :ignore_sync,   :boolean, virtual: true
 
     embeds_one :git,  Service.Git,  on_replace: :update
     embeds_one :helm, Service.Helm, on_replace: :update

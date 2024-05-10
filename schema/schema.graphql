@@ -335,6 +335,10 @@ type RootQueryType {
 
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
 
+  policyStatistics(
+    aggregate: PolicyAggregate!, kind: String, namespace: String, kinds: [String], namespaces: [String], clusters: [ID], q: String
+  ): [PolicyStatistic]
+
   policyConstraint(id: ID!): PolicyConstraint
 
   managedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
@@ -1508,6 +1512,12 @@ enum ConstraintEnforcement {
   DRY_RUN
 }
 
+enum PolicyAggregate {
+  CLUSTER
+  ENFORCEMENT
+  INSTALLED
+}
+
 enum ConstraintViolationField {
   NAMESPACE
   KIND
@@ -1588,6 +1598,15 @@ type ViolationStatistic {
   violations: Int
 
   "the total number of policy constraints"
+  count: Int
+}
+
+"Aggregate statistics for policies across your fleet"
+type PolicyStatistic {
+  "the field you're computing this statistic on"
+  aggregate: String
+
+  "the count for this aggregate"
   count: Int
 }
 

@@ -131,4 +131,51 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert stage["violations"] == 2
     end
   end
+
+  describe "policyStatistics" do
+    test "it can fetch statistics for policies globally" do
+      cluster = insert(:cluster)
+      con1 = insert(:policy_constraint, violation_count: 2, cluster: cluster)
+      insert_list(2, :constraint_violation, constraint: con1, namespace: "test")
+
+      cluster2 = insert(:cluster)
+      insert(:policy_constraint, violation_count: 2, cluster: cluster2)
+
+      {:ok, %{data: %{"policyStatistics" => stats}}} = run_query("""
+        query {
+          policyStatistics(aggregate: CLUSTER) {
+            aggregate
+            count
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      %{"exists" => exist, "none" => none} = Map.new(stats, & {&1["aggregate"], &1})
+
+      assert exist["count"] == 1
+      assert none["count"] == 1
+    end
+    test "it can fetch statistics for policy enforcement globally" do
+      cluster = insert(:cluster)
+      con1 = insert(:policy_constraint, violation_count: 2, cluster: cluster, enforcement: :warn)
+      insert_list(2, :constraint_violation, constraint: con1, namespace: "test")
+
+      cluster2 = insert(:cluster)
+      insert(:policy_constraint, violation_count: 2, cluster: cluster2, enforcement: :dry_run)
+
+      {:ok, %{data: %{"policyStatistics" => stats}}} = run_query("""
+        query {
+          policyStatistics(aggregate: ENFORCEMENT) {
+            aggregate
+            count
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      %{"warn" => warn, "dry_run" => dry_run} = Map.new(stats, & {&1["aggregate"], &1})
+
+      assert warn["count"] == 1
+      assert dry_run["count"] == 1
+    end
+  end
 end

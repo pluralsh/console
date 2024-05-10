@@ -4,6 +4,12 @@ defmodule Console.GraphQl.Deployments.Policy do
 
   ecto_enum :constraint_enforcement, Console.Schema.PolicyConstraint.Enforcement
 
+  enum :policy_aggregate do
+    value :cluster
+    value :enforcement
+    value :installed
+  end
+
   enum :constraint_violation_field do
     value :namespace
     value :kind
@@ -69,6 +75,12 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :count,      :integer, description: "the total number of policy constraints"
   end
 
+  @desc "Aggregate statistics for policies across your fleet"
+  object :policy_statistic do
+    field :aggregate, :string, description: "the field you're computing this statistic on"
+    field :count,     :integer, description: "the count for this aggregate"
+  end
+
   @desc "A violation of a given OPA Gatekeeper constraint"
   object :violation do
     field :id,        non_null(:id)
@@ -102,6 +114,19 @@ defmodule Console.GraphQl.Deployments.Policy do
       arg :field, non_null(:constraint_violation_field)
 
       resolve &Deployments.violation_statistics/2
+    end
+
+    field :policy_statistics, list_of(:policy_statistic) do
+      middleware Authenticated
+      arg :aggregate, non_null(:policy_aggregate)
+      arg :kind,       :string
+      arg :namespace,  :string
+      arg :kinds,      list_of(:string)
+      arg :namespaces, list_of(:string)
+      arg :clusters,   list_of(:id)
+      arg :q,          :string
+
+      resolve &Deployments.policy_statistics/2
     end
 
     field :policy_constraint, :policy_constraint do

@@ -3242,6 +3242,12 @@ export type PodStatus = {
   reason?: Maybe<Scalars['String']['output']>;
 };
 
+export enum PolicyAggregate {
+  Cluster = 'CLUSTER',
+  Enforcement = 'ENFORCEMENT',
+  Installed = 'INSTALLED'
+}
+
 export type PolicyBinding = {
   __typename?: 'PolicyBinding';
   group?: Maybe<Group>;
@@ -3296,6 +3302,15 @@ export type PolicyConstraintEdge = {
   __typename?: 'PolicyConstraintEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<PolicyConstraint>;
+};
+
+/** Aggregate statistics for policies across your fleet */
+export type PolicyStatistic = {
+  __typename?: 'PolicyStatistic';
+  /** the field you're computing this statistic on */
+  aggregate?: Maybe<Scalars['String']['output']>;
+  /** the count for this aggregate */
+  count?: Maybe<Scalars['Int']['output']>;
 };
 
 export type Port = {
@@ -4898,6 +4913,7 @@ export type RootQueryType = {
   pods?: Maybe<PodConnection>;
   policyConstraint?: Maybe<PolicyConstraint>;
   policyConstraints?: Maybe<PolicyConstraintConnection>;
+  policyStatistics?: Maybe<Array<Maybe<PolicyStatistic>>>;
   postgresDatabase?: Maybe<Postgresql>;
   postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   prAutomation?: Maybe<PrAutomation>;
@@ -5505,6 +5521,17 @@ export type RootQueryTypePolicyConstraintsArgs = {
   kind?: InputMaybe<Scalars['String']['input']>;
   kinds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypePolicyStatisticsArgs = {
+  aggregate: PolicyAggregate;
+  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  kinds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   namespace?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   q?: InputMaybe<Scalars['String']['input']>;
