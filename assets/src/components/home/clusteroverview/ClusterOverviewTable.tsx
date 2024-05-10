@@ -14,6 +14,7 @@ import {
 } from 'components/cd/clusters/ClustersColumns'
 import { TableCaretLink } from 'components/cluster/TableElements'
 import { CLUSTERS_REACT_VIRTUAL_OPTIONS } from 'components/cd/clusters/Clusters'
+import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 
 export function ClusterOverViewTable({
   refetch,
@@ -26,6 +27,10 @@ export function ClusterOverViewTable({
   const navigate = useNavigate()
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
     meta: { refetch },
+  }
+
+  if (!data) {
+    return <TableSkeleton centered />
   }
 
   return (
