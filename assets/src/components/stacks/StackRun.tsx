@@ -62,7 +62,7 @@ export default function StackRun({
             }}
           >
             {approvedAt
-              ? `Approved ${moment(approvedAt).fromNow()} by ${approver?.name} `
+              ? `Approved ${moment(approvedAt).fromNow()} by ${approver?.name}`
               : 'Pending approval'}
           </div>
         )}
