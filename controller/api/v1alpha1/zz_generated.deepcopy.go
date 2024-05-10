@@ -1194,8 +1194,13 @@ func (in *InfrastructureStackSpec) DeepCopyInto(out *InfrastructureStackSpec) {
 	}
 	if in.Files != nil {
 		in, out := &in.Files, &out.Files
-		*out = new(v1.LocalObjectReference)
-		**out = **in
+		*out = make([]v1.LocalObjectReference, len(*in))
+		copy(*out, *in)
+	}
+	if in.SecretFiles != nil {
+		in, out := &in.SecretFiles, &out.SecretFiles
+		*out = make([]v1.LocalObjectReference, len(*in))
+		copy(*out, *in)
 	}
 }
 

@@ -231,9 +231,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 		Files:    make([]*console.StackFileAttributes, 0),
 	}
 
-	if stack.Spec.Files != nil {
+	for _, file := range stack.Spec.Files {
 		configMap := &corev1.ConfigMap{}
-		name := types.NamespacedName{Name: stack.Spec.Files.Name, Namespace: stack.GetNamespace()}
+		name := types.NamespacedName{Name: file.Name, Namespace: stack.GetNamespace()}
 		if err := r.Get(ctx, name, configMap); err != nil {
 			return nil, err
 		}
@@ -243,7 +243,19 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 				Content: v,
 			})
 		}
-
+	}
+	for _, file := range stack.Spec.SecretFiles {
+		secret := &corev1.Secret{}
+		name := types.NamespacedName{Name: file.Name, Namespace: stack.GetNamespace()}
+		if err := r.Get(ctx, name, secret); err != nil {
+			return nil, err
+		}
+		for k, v := range secret.Data {
+			attr.Files = append(attr.Files, &console.StackFileAttributes{
+				Path:    k,
+				Content: string(v),
+			})
+		}
 	}
 
 	attr.Environment = algorithms.Map(stack.Spec.Environment,

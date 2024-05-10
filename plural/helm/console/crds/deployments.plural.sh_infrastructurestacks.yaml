@@ -176,17 +176,22 @@ spec:
                   type: object
                 type: array
               files:
-                description: Files reference to ConfigMap with a key as a path and
+                description: Files reference to ConfigMaps with a key as a path and
                   value as a content
-                properties:
-                  name:
-                    description: |-
-                      Name of the referent.
-                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?
-                    type: string
-                type: object
-                x-kubernetes-map-type: atomic
+                items:
+                  description: |-
+                    LocalObjectReference contains enough information to let you locate the
+                    referenced object inside the same namespace.
+                  properties:
+                    name:
+                      description: |-
+                        Name of the referent.
+                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        TODO: Add other useful fields. apiVersion, kind, uid?
+                      type: string
+                  type: object
+                  x-kubernetes-map-type: atomic
+                type: array
               git:
                 description: Git reference w/in the repository where the IaC lives
                 properties:
@@ -8159,6 +8164,23 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              secretFiles:
+                description: SecretFiles reference to Secrets with a key as a path
+                  and value as a content
+                items:
+                  description: |-
+                    LocalObjectReference contains enough information to let you locate the
+                    referenced object inside the same namespace.
+                  properties:
+                    name:
+                      description: |-
+                        Name of the referent.
+                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        TODO: Add other useful fields. apiVersion, kind, uid?
+                      type: string
+                  type: object
+                  x-kubernetes-map-type: atomic
+                type: array
               type:
                 description: Type specifies the tool to use to apply it
                 enum:
