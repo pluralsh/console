@@ -4,10 +4,10 @@ import { Link, useLocation } from 'react-router-dom'
 import { AppIcon, Tab, TabList } from '@pluralsh/design-system'
 
 import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
-import { StackTypeIcon } from '../StackType'
 import { StackedText } from '../../utils/table/StackedText'
 import { StackRun } from '../../../generated/graphql'
 import BuildStatus from '../../builds/BuildStatus'
+import { StackTypeIcon } from '../StackTypeIcon'
 
 const DIRECTORY = [
   { path: '', label: 'Progress' },
@@ -79,7 +79,7 @@ function StackRunSidenavHeader({
       }}
     >
       <AppIcon
-        icon={<StackTypeIcon type={stackRun.type} />}
+        icon={<StackTypeIcon stackType={stackRun.type} />}
         size="small"
       />
       <StackedText

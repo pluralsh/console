@@ -2,7 +2,12 @@ import { CaretRightIcon, CliIcon, IconFrame } from '@pluralsh/design-system'
 import moment from 'moment'
 import { useTheme } from 'styled-components'
 
+import { useNavigate } from 'react-router'
+import { useParams } from 'react-router-dom'
+
 import { StackRunFragment } from '../../generated/graphql'
+
+import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
 
 import { StackRunStatusChip } from './StackRunStatusChip'
 
@@ -13,7 +18,10 @@ export default function StackRun({
   stackRun: StackRunFragment
   first: boolean
 }) {
+  const navigate = useNavigate()
+  const { stackId } = useParams()
   const {
+    id,
     insertedAt,
     message,
     status,
@@ -35,6 +43,7 @@ export default function StackRun({
         padding: theme.spacing.medium,
         '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
       }}
+      onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
     >
       <IconFrame icon={<CliIcon />} />
       <div
