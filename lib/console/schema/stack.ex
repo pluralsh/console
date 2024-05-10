@@ -80,6 +80,10 @@ defmodule Console.Schema.Stack do
     timestamps()
   end
 
+  def search(query \\ __MODULE__, sq) do
+    from(s in query, where: ilike(s.name, ^"#{sq}%"))
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(s in query,

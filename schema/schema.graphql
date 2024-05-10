@@ -357,7 +357,7 @@ type RootQueryType {
 
   infrastructureStack(id: ID!): InfrastructureStack
 
-  infrastructureStacks(after: String, first: Int, before: String, last: Int): InfrastructureStackConnection
+  infrastructureStacks(after: String, first: Int, before: String, last: Int, q: String): InfrastructureStackConnection
 
   observabilityProvider(id: ID!): ObservabilityProvider
 
