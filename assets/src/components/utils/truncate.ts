@@ -5,3 +5,9 @@ export const TRUNCATE = {
   overflow: 'hidden',
   textOverflow: 'ellipsis',
 } satisfies CSSProperties
+
+export const TRUNCATE_LEFT = {
+  ...TRUNCATE,
+  direction: 'rtl',
+  textAlign: 'left',
+} satisfies CSSProperties

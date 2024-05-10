@@ -3,6 +3,8 @@ import {
   ListBox,
   ListBoxItem,
   LoopingLogo,
+  Sidecar,
+  SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -10,18 +12,25 @@ import { useEffect, useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import { useNavigate, useParams } from 'react-router-dom'
 
+import capitalize from 'lodash/capitalize'
+
 import {
   STACKS_ABS_PATH,
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
-
 import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
-
 import { useStacksQuery } from '../../generated/graphql'
+import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../utils/layout/ResponsiveLayoutContentContainer'
 
-import { StackTypeIconFrame } from './StackTypeIcon'
+import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
+
+import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
+
+import { ClusterProviderIcon } from '../utils/Provider'
+
+import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
 import Stack from './Stack'
 
 const STACKS_BASE_CRUMBS: Breadcrumb[] = [
@@ -115,7 +124,48 @@ export default function Stacks() {
           />
         ))}
       </ListBox>
-      <Stack stack={stack} />
+      <ResponsiveLayoutSpacer />
+      <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
+        <Stack stack={stack} />
+      </div>
+      <ResponsiveLayoutSpacer />
+      <ResponsiveLayoutSidecarContainer>
+        <Sidecar heading="Stack">
+          <SidecarItem heading="Name">{stack?.name}</SidecarItem>
+          <SidecarItem heading="ID">{stack?.id}</SidecarItem>
+          <SidecarItem heading="Type">
+            <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+              <StackTypeIcon
+                size={16}
+                stackType={stack?.type}
+              />
+              {capitalize(stack?.type)}
+            </div>
+          </SidecarItem>
+          {stack?.configuration?.image && (
+            <SidecarItem heading="Image">
+              {stack?.configuration?.image}
+            </SidecarItem>
+          )}
+          <SidecarItem heading="Version">
+            {stack?.configuration?.version}
+          </SidecarItem>
+          <SidecarItem heading="Repository">
+            {stack?.repository?.url}
+          </SidecarItem>
+          <SidecarItem heading="Ref">{stack?.git?.ref}</SidecarItem>
+          <SidecarItem heading="Folder">{stack?.git?.folder}</SidecarItem>
+          <SidecarItem heading="Cluster">
+            <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+              <ClusterProviderIcon
+                cluster={stack?.cluster}
+                size={16}
+              />
+              {stack?.cluster?.name}
+            </div>
+          </SidecarItem>
+        </Sidecar>
+      </ResponsiveLayoutSidecarContainer>
     </div>
   )
 }

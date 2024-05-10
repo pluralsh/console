@@ -1,5 +1,7 @@
 import { Flex } from 'honorable'
 
+export const RESPONSIVE_LAYOUT_CONTENT_WIDTH = 896
+
 export function ResponsiveLayoutContentContainer(props: any) {
   return (
     <Flex
@@ -8,9 +10,9 @@ export function ResponsiveLayoutContentContainer(props: any) {
       flexShrink={1}
       height="100%"
       maxHeight="100%"
-      width={896}
-      maxWidth-desktopLarge-up={896}
-      width-desktopLarge-up={896}
+      width={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
+      maxWidth-desktopLarge-up={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
+      width-desktopLarge-up={RESPONSIVE_LAYOUT_CONTENT_WIDTH}
       overflowY="auto"
       overflowX="hidden"
       {...props}

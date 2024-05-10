@@ -7,8 +7,8 @@ import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 export const statusToSeverity = {
   [StackStatus.Queued]: 'neutral',
-  [StackStatus.Pending]: 'neutral',
-  [StackStatus.Running]: 'warning',
+  [StackStatus.Pending]: 'warning',
+  [StackStatus.Running]: 'info',
   [StackStatus.Cancelled]: 'neutral',
   [StackStatus.Failed]: 'danger',
   [StackStatus.Successful]: 'success',
