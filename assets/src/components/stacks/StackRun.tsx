@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Flex, P } from 'honorable'
 import {
   AppIcon,
@@ -10,8 +10,10 @@ import {
 import moment from 'moment'
 
 import { StackRunFragment } from '../../generated/graphql'
+import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
 
 export default function StackRun({ stackRun }: { stackRun: StackRunFragment }) {
+  const { stackId } = useParams()
   const {
     id,
     insertedAt,
@@ -30,7 +32,7 @@ export default function StackRun({ stackRun }: { stackRun: StackRunFragment }) {
       padding="medium"
       cursor="pointer"
       _hover={{ backgroundColor: 'fill-one-hover' }}
-      onClick={() => navigate(`/builds/${id}`)}
+      onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
       width="100%"
     >
       <AppIcon

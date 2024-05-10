@@ -8573,6 +8573,22 @@ export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | 
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
 
+export type StackConfigurationFragment = { __typename?: 'StackConfiguration', version: string, image?: string | null };
+
+export type StackStateResourceFragment = { __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null };
+
+export type StackStateFragment = { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null };
+
+export type StackOutputFragment = { __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null };
+
+export type StackEnvironmentFragment = { __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null };
+
+export type ServiceErrorsFragment = { __typename?: 'ServiceError', source: string, message: string };
+
+export type StackFileFragment = { __typename?: 'StackFile', path: string, content: string };
+
+export type RunStepFragment = { __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null };
+
 export type StacksQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8582,6 +8598,13 @@ export type StacksQueryVariables = Exact<{
 
 
 export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string } } | null } | null> | null } | null };
+
+export type StackTinyQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackTinyQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, paused?: boolean | null, type: StackType, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type StackRunsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8593,6 +8616,13 @@ export type StackRunsQueryVariables = Exact<{
 
 
 export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
+
+export type StackRunQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version: string, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null } | null };
 
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
@@ -10675,6 +10705,75 @@ export const StackRunFragmentDoc = gql`
   approver {
     name
     email
+  }
+}
+    `;
+export const StackConfigurationFragmentDoc = gql`
+    fragment StackConfiguration on StackConfiguration {
+  version
+  image
+}
+    `;
+export const StackStateResourceFragmentDoc = gql`
+    fragment StackStateResource on StackStateResource {
+  name
+  resource
+  identifier
+  links
+  configuration
+}
+    `;
+export const StackStateFragmentDoc = gql`
+    fragment StackState on StackState {
+  id
+  plan
+  state {
+    ...StackStateResource
+  }
+}
+    ${StackStateResourceFragmentDoc}`;
+export const StackOutputFragmentDoc = gql`
+    fragment StackOutput on StackOutput {
+  name
+  value
+  secret
+}
+    `;
+export const StackEnvironmentFragmentDoc = gql`
+    fragment StackEnvironment on StackEnvironment {
+  name
+  value
+  secret
+}
+    `;
+export const ServiceErrorsFragmentDoc = gql`
+    fragment ServiceErrors on ServiceError {
+  source
+  message
+}
+    `;
+export const StackFileFragmentDoc = gql`
+    fragment StackFile on StackFile {
+  path
+  content
+}
+    `;
+export const RunStepFragmentDoc = gql`
+    fragment RunStep on RunStep {
+  id
+  name
+  insertedAt
+  updatedAt
+  status
+  stage
+  args
+  cmd
+  index
+  logs {
+    id
+    updatedAt
+    insertedAt
+    logs
   }
 }
     `;
@@ -16953,6 +17052,51 @@ export type StacksQueryHookResult = ReturnType<typeof useStacksQuery>;
 export type StacksLazyQueryHookResult = ReturnType<typeof useStacksLazyQuery>;
 export type StacksSuspenseQueryHookResult = ReturnType<typeof useStacksSuspenseQuery>;
 export type StacksQueryResult = Apollo.QueryResult<StacksQuery, StacksQueryVariables>;
+export const StackTinyDocument = gql`
+    query StackTiny($id: ID!) {
+  infrastructureStack(id: $id) {
+    id
+    name
+    paused
+    type
+    insertedAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useStackTinyQuery__
+ *
+ * To run a query within a React component, call `useStackTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackTinyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackTinyQuery(baseOptions: Apollo.QueryHookOptions<StackTinyQuery, StackTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackTinyQuery, StackTinyQueryVariables>(StackTinyDocument, options);
+      }
+export function useStackTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackTinyQuery, StackTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackTinyQuery, StackTinyQueryVariables>(StackTinyDocument, options);
+        }
+export function useStackTinySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackTinyQuery, StackTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackTinyQuery, StackTinyQueryVariables>(StackTinyDocument, options);
+        }
+export type StackTinyQueryHookResult = ReturnType<typeof useStackTinyQuery>;
+export type StackTinyLazyQueryHookResult = ReturnType<typeof useStackTinyLazyQuery>;
+export type StackTinySuspenseQueryHookResult = ReturnType<typeof useStackTinySuspenseQuery>;
+export type StackTinyQueryResult = Apollo.QueryResult<StackTinyQuery, StackTinyQueryVariables>;
 export const StackRunsDocument = gql`
     query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStack(id: $id) {
@@ -17007,6 +17151,101 @@ export type StackRunsQueryHookResult = ReturnType<typeof useStackRunsQuery>;
 export type StackRunsLazyQueryHookResult = ReturnType<typeof useStackRunsLazyQuery>;
 export type StackRunsSuspenseQueryHookResult = ReturnType<typeof useStackRunsSuspenseQuery>;
 export type StackRunsQueryResult = Apollo.QueryResult<StackRunsQuery, StackRunsQueryVariables>;
+export const StackRunDocument = gql`
+    query StackRun($id: ID!) {
+  stackRun(id: $id) {
+    id
+    status
+    updatedAt
+    insertedAt
+    type
+    message
+    approval
+    approvedAt
+    approver {
+      ...User
+    }
+    configuration {
+      ...StackConfiguration
+    }
+    state {
+      ...StackState
+    }
+    repository {
+      ...GitRepository
+    }
+    git {
+      files
+      ref
+      folder
+    }
+    output {
+      ...StackOutput
+    }
+    cluster {
+      ...ClusterTiny
+    }
+    environment {
+      ...StackEnvironment
+    }
+    errors {
+      ...ServiceErrors
+    }
+    files {
+      ...StackFile
+    }
+    jobSpec {
+      ...JobGateSpec
+    }
+    steps {
+      ...RunStep
+    }
+  }
+}
+    ${UserFragmentDoc}
+${StackConfigurationFragmentDoc}
+${StackStateFragmentDoc}
+${GitRepositoryFragmentDoc}
+${StackOutputFragmentDoc}
+${ClusterTinyFragmentDoc}
+${StackEnvironmentFragmentDoc}
+${ServiceErrorsFragmentDoc}
+${StackFileFragmentDoc}
+${JobGateSpecFragmentDoc}
+${RunStepFragmentDoc}`;
+
+/**
+ * __useStackRunQuery__
+ *
+ * To run a query within a React component, call `useStackRunQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackRunQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackRunQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackRunQuery(baseOptions: Apollo.QueryHookOptions<StackRunQuery, StackRunQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackRunQuery, StackRunQueryVariables>(StackRunDocument, options);
+      }
+export function useStackRunLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackRunQuery, StackRunQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackRunQuery, StackRunQueryVariables>(StackRunDocument, options);
+        }
+export function useStackRunSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackRunQuery, StackRunQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackRunQuery, StackRunQueryVariables>(StackRunDocument, options);
+        }
+export type StackRunQueryHookResult = ReturnType<typeof useStackRunQuery>;
+export type StackRunLazyQueryHookResult = ReturnType<typeof useStackRunLazyQuery>;
+export type StackRunSuspenseQueryHookResult = ReturnType<typeof useStackRunSuspenseQuery>;
+export type StackRunQueryResult = Apollo.QueryResult<StackRunQuery, StackRunQueryVariables>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -17501,7 +17740,9 @@ export const namedOperations = {
     PolicyConstraint: 'PolicyConstraint',
     ViolationStatistics: 'ViolationStatistics',
     Stacks: 'Stacks',
+    StackTiny: 'StackTiny',
     StackRuns: 'StackRuns',
+    StackRun: 'StackRun',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me',
@@ -17695,6 +17936,14 @@ export const namedOperations = {
     PoliciyConstraint: 'PoliciyConstraint',
     Stack: 'Stack',
     StackRun: 'StackRun',
+    StackConfiguration: 'StackConfiguration',
+    StackStateResource: 'StackStateResource',
+    StackState: 'StackState',
+    StackOutput: 'StackOutput',
+    StackEnvironment: 'StackEnvironment',
+    ServiceErrors: 'ServiceErrors',
+    StackFile: 'StackFile',
+    RunStep: 'RunStep',
     AccessToken: 'AccessToken',
     AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',

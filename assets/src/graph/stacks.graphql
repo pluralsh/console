@@ -31,6 +31,67 @@ fragment StackRun on StackRun {
   }
 }
 
+fragment StackConfiguration on StackConfiguration {
+  version
+  image
+}
+
+fragment StackStateResource on StackStateResource {
+  name
+  resource
+  identifier
+  links
+  configuration
+}
+
+fragment StackState on StackState {
+  id
+  plan
+  state {
+    ...StackStateResource
+  }
+}
+
+fragment StackOutput on StackOutput {
+  name
+  value
+  secret
+}
+
+fragment StackEnvironment on StackEnvironment {
+  name
+  value
+  secret
+}
+
+fragment ServiceErrors on ServiceError {
+  source
+  message
+}
+
+fragment StackFile on StackFile {
+  path
+  content
+}
+
+fragment RunStep on RunStep {
+  id
+  name
+  insertedAt
+  updatedAt
+  status
+  stage
+  args
+  cmd
+  index
+  logs {
+    id
+    updatedAt
+    insertedAt
+    logs
+  }
+}
+
 query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
     pageInfo {
@@ -41,6 +102,17 @@ query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
         ...Stack
       }
     }
+  }
+}
+
+query StackTiny($id: ID!) {
+  infrastructureStack(id: $id) {
+    id
+    name
+    paused
+    type
+    insertedAt
+    updatedAt
   }
 }
 
@@ -58,3 +130,55 @@ query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $l
     }
   }
 }
+
+query StackRun($id: ID!) {
+  stackRun(id: $id) {
+    id
+    status
+    updatedAt
+    insertedAt
+    type
+    message
+    approval
+    approvedAt
+    approver {
+      ...User
+    }
+    configuration {
+      ...StackConfiguration
+    }
+    state {
+      ...StackState
+    }
+    repository {
+      ...GitRepository
+    }
+    git {
+      files
+      ref
+      folder
+    }
+    output {
+      ...StackOutput
+    }
+    cluster {
+      ...ClusterTiny
+    }
+    environment {
+      ...StackEnvironment
+    }
+    errors {
+      ...ServiceErrors
+    }
+    files {
+      ...StackFile
+    }
+    jobSpec {
+      ...JobGateSpec
+    }
+    steps {
+      ...RunStep
+    }
+  }
+}
+
