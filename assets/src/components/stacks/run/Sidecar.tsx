@@ -22,11 +22,7 @@ export default function StackRunSidecar({
       <Sidecar>
         <SidecarItem heading="ID">{stackRun.id}</SidecarItem>
         <SidecarItem heading="Needs approval">
-          {stackRun.approval ? (
-            <CheckIcon size="16px" />
-          ) : (
-            <CloseIcon size="16px" />
-          )}
+          {stackRun.approval ? 'Required' : 'Not required'}
         </SidecarItem>
         {stackRun.approvedAt && (
           <SidecarItem heading="Approved at">{stackRun.approvedAt}</SidecarItem>
@@ -36,7 +32,9 @@ export default function StackRunSidecar({
             <UserInfo user={stackRun.approver} />
           </SidecarItem>
         )}
-        <SidecarItem heading="Commit message">{stackRun.message}</SidecarItem>
+        {stackRun.message && (
+          <SidecarItem heading="Commit message">{stackRun.message}</SidecarItem>
+        )}
       </Sidecar>
     </ResponsiveLayoutSidecarContainer>
   )
