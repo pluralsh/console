@@ -53,7 +53,7 @@ export default function Conditions({
 }: ConditionsProps): ReactElement {
   return (
     <Table
-      data={conditions}
+      data={conditions ?? []}
       columns={columns}
       css={{
         height: '100%',
