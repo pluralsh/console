@@ -21,7 +21,7 @@ import { StackedText } from '../utils/table/StackedText'
 
 import { useStacksQuery } from '../../generated/graphql'
 
-import { StackTypeIconFrame } from './StackType'
+import { StackTypeIconFrame } from './StackTypeIcon'
 import Stack from './Stack'
 
 const STACKS_BASE_CRUMBS: Breadcrumb[] = [
@@ -87,7 +87,7 @@ export default function Stacks() {
         extendStyle={{
           borderColor: theme.colors.border,
           backgroundColor: theme.colors['fill-one'],
-          width: 360,
+          width: 400,
         }}
       >
         {stacks.map((stack) => (

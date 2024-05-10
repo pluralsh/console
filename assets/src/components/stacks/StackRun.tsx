@@ -1,13 +1,13 @@
-import { Flex, P } from 'honorable'
 import {
   CaretRightIcon,
   Chip,
   CliIcon,
   IconFrame,
-  PlayIcon,
 } from '@pluralsh/design-system'
 import moment from 'moment'
 import { useTheme } from 'styled-components'
+
+import capitalize from 'lodash/capitalize'
 
 import { StackRunFragment } from '../../generated/graphql'
 
@@ -36,28 +36,35 @@ export default function StackRun({
         borderBottom: theme.borders.default,
         cursor: 'pointer',
         display: 'flex',
-        gap: theme.spacing.small,
+        gap: theme.spacing.medium,
         padding: theme.spacing.medium,
         '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
       }}
     >
       <IconFrame icon={<CliIcon />} />
-      <Flex direction="column">
-        <Flex gap="small">
-          <P
-            body1
-            fontWeight={600}
-          >
-            {message ?? (first ? 'Initial run' : 'No message')}
-          </P>
-        </Flex>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.xxxsmall,
+        }}
+      >
+        <div css={{ ...theme.partials.text.body2 }}>
+          {message ?? (first ? 'Initial run' : 'No message')}
+        </div>
         {approval && (
-          <Chip
-            size="small"
-            severity="warning"
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: approvedAt
+                ? theme.colors['text-xlight']
+                : theme.colors['text-warning-light'],
+            }}
           >
-            {approvedAt ? moment(approvedAt).fromNow() : 'Pending approval'}
-          </Chip>
+            {approvedAt
+              ? `Approved ${moment(approvedAt).fromNow()} by ${approver?.name} `
+              : 'Pending approval'}
+          </div>
         )}
         <div
           css={{
@@ -67,19 +74,20 @@ export default function StackRun({
         >
           {ref}
         </div>
-      </Flex>
-      <Flex
-        caption
-        color="text-xlight"
-        gap="medium"
-        grow={1}
-        align="center"
-        justify="end"
+      </div>
+      <div
+        css={{
+          ...theme.partials.text.caption,
+          color: theme.colors['text-xlight'],
+          display: 'flex',
+          flexGrow: 1,
+          justifyContent: 'end',
+        }}
       >
-        <div>{moment(insertedAt).fromNow()}</div>
-        <Chip>{status}</Chip>
-        <CaretRightIcon />
-      </Flex>
+        {moment(insertedAt).fromNow()}
+      </div>
+      <Chip>{capitalize(status)}</Chip>
+      <CaretRightIcon />
     </div>
   )
 }
