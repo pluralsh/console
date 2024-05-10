@@ -4,6 +4,7 @@ import {
   LoopingLogo,
   Sidecar,
   SidecarItem,
+  TreeNavEntry,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -82,41 +83,39 @@ export default function Stacks() {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ListBox
-        selectedKey={stackId}
-        onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
-        disallowEmptySelection
-        extendStyle={{
-          borderColor: theme.colors.border,
-          backgroundColor: theme.colors['fill-one'],
-          width: 360,
-        }}
+      <ResponsiveLayoutSidenavContainer
+        width={300}
+        overflowY="auto"
       >
-        {stacks.map((stack) => (
-          <ListBoxItem
+        {stacks?.map((stack) => (
+          <TreeNavEntry
             key={stack.id ?? ''}
             label={
-              <div css={{ display: 'flex', gap: theme.spacing.small }}>
-                <StackTypeIconFrame stackType={stack.type} />
+              <div
+                css={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  gap: theme.spacing.small,
+                }}
+              >
+                <StackTypeIconFrame
+                  size="small"
+                  stackType={stack.type}
+                />
                 <StackedText
                   first={stack.name}
                   second={stack.repository?.url}
                 />
               </div>
             }
-            textValue={stack.name}
-            css={{
-              borderColor: theme.colors.border,
-              '&:hover': {
-                backgroundColor:
-                  theme.mode === 'light'
-                    ? theme.colors['fill-zero-hover']
-                    : theme.colors['fill-one-hover'],
-              },
-            }}
+            active={stack.id === stackId}
+            activeSecondary={false}
+            href={getStacksAbsPath(stack.id)}
+            desktop
           />
         ))}
-      </ListBox>
+        {/* TODO: Load more button */}
+      </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
         <Stack stack={stack} />
