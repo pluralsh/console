@@ -127,6 +127,12 @@ export default function Stacks() {
         <Sidecar heading="Stack">
           <SidecarItem heading="Name">{stack?.name}</SidecarItem>
           <SidecarItem heading="ID">{stack?.id}</SidecarItem>
+          <SidecarItem heading="Status">
+            {stack?.paused ? 'Paused' : 'Active'}
+          </SidecarItem>
+          <SidecarItem heading="Approval">
+            {stack?.approval ? 'Required' : 'Not required'}
+          </SidecarItem>
           <SidecarItem heading="Type">
             <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
               <StackTypeIcon

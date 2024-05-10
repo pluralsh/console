@@ -17,6 +17,8 @@ fragment Stack on InfrastructureStack {
   cluster {
     ...ClusterTiny
   }
+  paused
+  approval
 }
 
 fragment StackRun on StackRun {
