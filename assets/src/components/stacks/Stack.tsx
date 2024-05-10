@@ -1,13 +1,11 @@
 import { Card } from '@pluralsh/design-system'
-
 import React, { useCallback, useMemo, useState } from 'react'
-
 import { useTheme } from 'styled-components'
 
-import { StackFragment, useStackRunsQuery } from '../../generated/graphql'
-import {} from '../../routes/kubernetesRoutesConsts'
-import { mapExistingNodes } from '../../utils/graphql'
+import { isEmpty } from 'lodash'
 
+import { StackFragment, useStackRunsQuery } from '../../generated/graphql'
+import { mapExistingNodes } from '../../utils/graphql'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { ReturnToBeginning } from '../utils/ReturnToBeginning'
 
@@ -50,11 +48,14 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
           <div css={{ height: 77, borderBottom: theme.borders.default }} />
         )}
         hasNextPage={data?.infrastructureStack?.runs?.pageInfo.hasNextPage}
-        mapper={(run) => (
-          <StackRun
-            key={run.id}
-            stackRun={run}
-          />
+        mapper={(run, { next }) => (
+          <div>
+            <StackRun
+              key={run.id}
+              stackRun={run}
+              first={isEmpty(next)}
+            />
+          </div>
         )}
         loadNextPage={null}
         // loadNextPage={() =>

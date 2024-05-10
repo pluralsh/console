@@ -32,18 +32,18 @@ export function useStackTypeIconUrl({ type }: { type: Nullable<StackType> }) {
 }
 
 export function StackTypeIcon({
-  type,
+  stackType,
   size,
   ...props
 }: {
-  type: Nullable<StackType>
+  stackType: Nullable<StackType>
   size?: number
 } & ComponentProps<'img'>) {
-  const src = useStackTypeIconUrl({ type })
+  const src = useStackTypeIconUrl({ type: stackType })
 
   return (
     <img
-      alt={capitalize(type ?? '')}
+      alt={capitalize(stackType ?? '')}
       src={src}
       {...props}
       {...(size ? { width: size } : {})}
@@ -61,7 +61,7 @@ export function StackTypeIconFrame({
     <IconFrame
       textValue={capitalize(stackType ?? '')}
       tooltip={capitalize(stackType ?? '')}
-      icon={<StackTypeIcon type={stackType} />}
+      icon={<StackTypeIcon stackType={stackType} />}
       {...props}
     />
   )

@@ -11,8 +11,8 @@ export const STACK_RUNS_ABS_PATH = getStackRunsAbsPath(
 
 export const STACK_RUNS_STATE_REL_PATH = 'state'
 
-export function getStacksAbsPath(clusterId: string | null | undefined) {
-  return `/${STACKS_ROOT_PATH}/${clusterId}`
+export function getStacksAbsPath(stackId: string | null | undefined) {
+  return `/${STACKS_ROOT_PATH}/${stackId}`
 }
 
 export function getStackRunsAbsPath(

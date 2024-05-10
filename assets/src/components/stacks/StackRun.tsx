@@ -1,67 +1,88 @@
-import { useNavigate, useParams } from 'react-router-dom'
-import { Flex, P } from 'honorable'
-import {
-  AppIcon,
-  CaretRightIcon,
-  Chip,
-  InstallIcon,
-} from '@pluralsh/design-system'
-
+import { CaretRightIcon, CliIcon, IconFrame } from '@pluralsh/design-system'
 import moment from 'moment'
+import { useTheme } from 'styled-components'
 
 import { StackRunFragment } from '../../generated/graphql'
-import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
 
-export default function StackRun({ stackRun }: { stackRun: StackRunFragment }) {
-  const { stackId } = useParams()
+import { StackRunStatusChip } from './StackRunStatusChip'
+
+export default function StackRun({
+  stackRun,
+  first,
+}: {
+  stackRun: StackRunFragment
+  first: boolean
+}) {
   const {
-    id,
     insertedAt,
     message,
     status,
+    approval,
     approvedAt,
     approver,
     git: { ref },
   } = stackRun
-  const navigate = useNavigate()
+  const theme = useTheme()
 
   return (
-    <Flex
-      borderBottom="1px solid border"
-      gap="small"
-      padding="medium"
-      cursor="pointer"
-      _hover={{ backgroundColor: 'fill-one-hover' }}
-      onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
-      width="100%"
+    <div
+      css={{
+        alignItems: 'center',
+        borderBottom: theme.borders.default,
+        cursor: 'pointer',
+        display: 'flex',
+        gap: theme.spacing.medium,
+        padding: theme.spacing.medium,
+        '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
+      }}
     >
-      <AppIcon
-        icon={<InstallIcon />}
-        size="xsmall"
-      />
-      <Flex direction="column">
-        <Flex gap="small">
-          <P
-            body1
-            fontWeight={600}
-          >
-            {message}
-          </P>
-        </Flex>
-        ref: {ref}
-      </Flex>
-      <Flex
-        caption
-        color="text-xlight"
-        gap="medium"
-        grow={1}
-        align="center"
-        justify="end"
+      <IconFrame icon={<CliIcon />} />
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.xxxsmall,
+        }}
       >
-        <div>{moment(insertedAt).fromNow()}</div>
-        <Chip>{status}</Chip>
-        <CaretRightIcon />
-      </Flex>
-    </Flex>
+        <div css={{ ...theme.partials.text.body2 }}>
+          {message ?? (first ? 'Initial run' : 'No message')}
+        </div>
+        {approval && (
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: approvedAt
+                ? theme.colors['text-xlight']
+                : theme.colors['text-warning-light'],
+            }}
+          >
+            {approvedAt
+              ? `Approved ${moment(approvedAt).fromNow()} by ${approver?.name}`
+              : 'Pending approval'}
+          </div>
+        )}
+        <div
+          css={{
+            ...theme.partials.text.caption,
+            color: theme.colors['text-xlight'],
+          }}
+        >
+          {ref}
+        </div>
+      </div>
+      <div
+        css={{
+          ...theme.partials.text.caption,
+          color: theme.colors['text-xlight'],
+          display: 'flex',
+          flexGrow: 1,
+          justifyContent: 'end',
+        }}
+      >
+        {moment(insertedAt).fromNow()}
+      </div>
+      <StackRunStatusChip status={status} />
+      <CaretRightIcon />
+    </div>
   )
 }

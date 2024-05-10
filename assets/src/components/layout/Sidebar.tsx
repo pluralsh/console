@@ -45,7 +45,10 @@ import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
 
 import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
-import { STACKS_ABS_PATH } from '../../routes/stacksRoutesConsts'
+import {
+  STACKS_ABS_PATH,
+  getStacksAbsPath,
+} from '../../routes/stacksRoutesConsts'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -95,7 +98,7 @@ function getMenuItems({
     {
       text: 'Infrastructure stacks',
       icon: <StackIcon />,
-      path: STACKS_ABS_PATH,
+      path: getStacksAbsPath(''),
     },
     {
       text: 'Kubernetes',

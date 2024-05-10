@@ -14,6 +14,11 @@ fragment Stack on InfrastructureStack {
     ref
     folder
   }
+  cluster {
+    ...ClusterTiny
+  }
+  paused
+  approval
 }
 
 fragment StackRun on StackRun {
@@ -24,6 +29,7 @@ fragment StackRun on StackRun {
   }
   message
   status
+  approval
   approvedAt
   approver {
     name
