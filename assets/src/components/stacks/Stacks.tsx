@@ -82,42 +82,41 @@ export default function Stacks() {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer width={360}>
-        <ListBox
-          selectedKey={stackId}
-          onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
-          disallowEmptySelection
-          extendStyle={{
-            borderColor: theme.colors.border,
-            backgroundColor: theme.colors['fill-one'],
-          }}
-        >
-          {stacks.map((stack) => (
-            <ListBoxItem
-              key={stack.id ?? ''}
-              label={
-                <div css={{ display: 'flex', gap: theme.spacing.small }}>
-                  <StackTypeIconFrame stackType={stack.type} />
-                  <StackedText
-                    first={stack.name}
-                    second={stack.repository?.url}
-                  />
-                </div>
-              }
-              textValue={stack.name}
-              css={{
-                borderColor: theme.colors.border,
-                '&:hover': {
-                  backgroundColor:
-                    theme.mode === 'light'
-                      ? theme.colors['fill-zero-hover']
-                      : theme.colors['fill-one-hover'],
-                },
-              }}
-            />
-          ))}
-        </ListBox>
-      </ResponsiveLayoutSidenavContainer>
+      <ListBox
+        selectedKey={stackId}
+        onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
+        disallowEmptySelection
+        extendStyle={{
+          borderColor: theme.colors.border,
+          backgroundColor: theme.colors['fill-one'],
+          width: 360,
+        }}
+      >
+        {stacks.map((stack) => (
+          <ListBoxItem
+            key={stack.id ?? ''}
+            label={
+              <div css={{ display: 'flex', gap: theme.spacing.small }}>
+                <StackTypeIconFrame stackType={stack.type} />
+                <StackedText
+                  first={stack.name}
+                  second={stack.repository?.url}
+                />
+              </div>
+            }
+            textValue={stack.name}
+            css={{
+              borderColor: theme.colors.border,
+              '&:hover': {
+                backgroundColor:
+                  theme.mode === 'light'
+                    ? theme.colors['fill-zero-hover']
+                    : theme.colors['fill-one-hover'],
+              },
+            }}
+          />
+        ))}
+      </ListBox>
       <ResponsiveLayoutSpacer />
       <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
         <Stack stack={stack} />
