@@ -101,6 +101,20 @@ defmodule Console.Deployments.Git.AgentTest do
     end
   end
 
+  describe "#changes" do
+    test "it can fetch the sha for a ref and the changes in a sha" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+
+      {:ok, pid} = Discovery.start(git)
+
+      {:ok, sha} = Agent.sha(pid, "master")
+
+      {:ok, :pass, msg} = Agent.changes(pid, nil, sha, "bin")
+
+      assert is_binary(msg)
+    end
+  end
+
   defp fetch_and_extract(pid, svc) do
     {:ok, f} = Agent.fetch(pid, svc)
     {:ok, tmp} = Briefly.create()
