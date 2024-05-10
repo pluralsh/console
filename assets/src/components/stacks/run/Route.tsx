@@ -1,12 +1,7 @@
 import { ReactNode } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 
-import {
-  InfrastructureStack,
-  StackRun,
-  useStackRunQuery,
-  useStackTinyQuery,
-} from '../../../generated/graphql'
+import { StackRun, useStackRunQuery } from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
@@ -37,9 +32,9 @@ function ZeroState({ id }: ZeroStateProps): ReactNode {
 }
 
 export default function StackRunDetail(): ReactNode {
-  const { runId, stackId } = useParams()
+  const { runId } = useParams()
 
-  const { data: stackRunQuery, loading: loadinStackRun } = useStackRunQuery({
+  const { data: stackRunQuery, loading: loadingStackRun } = useStackRunQuery({
     variables: {
       id: runId!,
     },
@@ -48,7 +43,7 @@ export default function StackRunDetail(): ReactNode {
 
   const stackRun: StackRun = stackRunQuery?.stackRun as StackRun
 
-  if (loadinStackRun) {
+  if (loadingStackRun) {
     return <LoadingIndicator />
   }
 

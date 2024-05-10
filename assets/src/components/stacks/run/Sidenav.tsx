@@ -25,7 +25,9 @@ export default function StackRunSidenav({
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
   const currentTab = useMemo(
-    () => DIRECTORY.find((d) => pathname.endsWith(d.path)),
+    () =>
+      DIRECTORY.find((d) => d.path && pathname.endsWith(d.path)) ??
+      DIRECTORY[0],
     [pathname]
   )
 
