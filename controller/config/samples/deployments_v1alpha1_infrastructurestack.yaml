@@ -50,7 +50,7 @@ spec:
     ref: main
     folder: terraform
   files:
-    name: infrastructurestack
+    - name: infrastructurestack
   environment:
     - name: test
       value: test
