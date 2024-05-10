@@ -45,7 +45,7 @@ export default function Stacks() {
 
   const breadcrumbs = useMemo(
     () => [
-      { label: 'stacks', url: STACKS_ABS_PATH },
+      { label: 'stacks', url: getStacksAbsPath('') },
       { label: stackId, url: getStacksAbsPath(stackId) },
     ],
     [stackId]
