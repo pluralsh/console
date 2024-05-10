@@ -1,15 +1,10 @@
-import {
-  CaretRightIcon,
-  Chip,
-  CliIcon,
-  IconFrame,
-} from '@pluralsh/design-system'
+import { CaretRightIcon, CliIcon, IconFrame } from '@pluralsh/design-system'
 import moment from 'moment'
 import { useTheme } from 'styled-components'
 
-import capitalize from 'lodash/capitalize'
-
 import { StackRunFragment } from '../../generated/graphql'
+
+import { StackRunStatusChip } from './StackRunStatusChip'
 
 export default function StackRun({
   stackRun,
@@ -86,7 +81,7 @@ export default function StackRun({
       >
         {moment(insertedAt).fromNow()}
       </div>
-      <Chip>{capitalize(status)}</Chip>
+      <StackRunStatusChip status={status} />
       <CaretRightIcon />
     </div>
   )
