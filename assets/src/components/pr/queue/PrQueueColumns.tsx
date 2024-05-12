@@ -201,7 +201,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
   header: '',
   cell: function Cell({ table, getValue }) {
     const pullReq = getValue()
-    const { refetch } = table.options.meta as { refetch?: () => void }
+    const refetch = table.options?.meta?.refetch || (() => {})
     const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
 
     if (!pullReq) {
