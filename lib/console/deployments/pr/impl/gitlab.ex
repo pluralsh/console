@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Pr.Impl.Gitlab do
   import Console.Deployments.Pr.Utils
-  alias Console.Schema.{PrAutomation, ScmWebhook, ScmConnection}
+  alias Console.Schema.{PrAutomation, PullRequest, ScmWebhook, ScmConnection}
   @behaviour Console.Deployments.Pr.Dispatcher
 
   defmodule Connection do
@@ -59,6 +59,18 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   end
   def pr(_), do: :ignore
 
+  def review(conn, %PullRequest{url: url}, body) do
+    with {:ok, group, number} <- get_pull_id(url),
+         {:ok, conn} <- connection(conn) do
+      case post(conn, Path.join(["/api/v4/projects", "#{URI.encode(group)}", "merge_requests", number]), %{
+        body: body
+      }) do
+        {:ok, %{"id" => id}} -> {:ok, "#{id}"}
+        err -> err
+      end
+    end
+  end
+
   defp mr_content(mr), do: "#{mr["branch"]}\n#{mr["title"]}\n#{mr["description"]}"
 
   defp post(conn, url, body) do
@@ -81,5 +93,14 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   defp connection(conn) do
     with {:ok, url, token} <- url_and_token(conn, "https://gitlab.com"),
       do: Connection.new(url, token)
+  end
+
+  defp get_pull_id(url) do
+    with {:ok, %URI{path: "/" <> path}} <- URI.parse(url),
+         [group, "/merge_requests/" <> number] <- String.split(path, "-") do
+      {:ok, group, number}
+    else
+      _ -> {:error, "could not parse gitlab url"}
+    end
   end
 end

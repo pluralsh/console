@@ -557,7 +557,7 @@ defmodule Console.Deployments.Services do
     end)
     |> add_operation(:deprecations, fn %{service: svc} -> add_deprecations(svc) end)
     |> add_operation(:updated, fn %{service: %Service{components: components} = service} ->
-      running = Enum.all?(components, & &1.state == :running || is_nil(&1.state))
+      running = Enum.all?(components, & &1.state == :running || is_nil(&1.state)) && !Enum.empty?(components)
       failed = Enum.any?(components, & &1.state == :failed)
       paused = Enum.any?(components, & &1.state == :paused)
       unsynced = Enum.any?(components, & !&1.synced)

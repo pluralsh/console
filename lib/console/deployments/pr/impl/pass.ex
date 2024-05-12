@@ -6,4 +6,6 @@ defmodule Console.Deployments.Pr.Impl.Pass do
   def webhook(_, _), do: :ok
 
   def pr(_), do: :ignore
+
+  def review(_, _, _), do: {:ok, ""}
 end

@@ -229,6 +229,20 @@ defmodule Console.Deployments.StacksTest do
     end
   end
 
+  describe "#post_comment/1" do
+    test "it can post a comment to a pr" do
+      run = insert(:stack_run,
+        state: build(:stack_state),
+        pull_request: build(:pull_request, url: "https://github.com/pluralsh/console/pull/10"),
+        stack: build(:stack, connection: build(:scm_connection))
+      )
+
+      expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
+
+      {:ok, "id"} = Stacks.post_comment(run)
+    end
+  end
+
   describe "#dequeue/1" do
     test "tries to dequeue the next wet run of the stack" do
       stack = insert(:stack)

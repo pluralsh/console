@@ -5,7 +5,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Deployments.{Pr.Config, Git.Discovery, Tar}
   alias Console.Commands.{Plural}
   alias Console.Deployments.Pr.Impl.{Github, Gitlab}
-  alias Console.Schema.{PrAutomation, ScmConnection, ScmWebhook, GitRepository}
+  alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository}
 
   @type pr_resp :: {:ok, binary, binary} | Console.error
 
@@ -23,6 +23,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   Gets updates to perform in response to a pr webhook event
   """
   @callback pr(msg :: map) :: {:ok, binary, map} | :ignore
+
+  @doc """
+  Creates a review on a given pr
+  """
+  @callback review(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
   @doc """
   Fully creates a pr against the working dispatcher implementation
@@ -49,6 +54,11 @@ defmodule Console.Deployments.Pr.Dispatcher do
   def pr(%ScmWebhook{} = hook, body) do
     impl = dispatcher(hook)
     impl.pr(body)
+  end
+
+  def review(%ScmConnection{} = conn, %PullRequest{} = pr, body) do
+    impl = dispatcher(conn)
+    impl.review(conn, pr, body)
   end
 
   defp external_git(%PrAutomation{repository: %GitRepository{} = git, creates: %{git: %{ref: _, folder: _} = ref}}) do

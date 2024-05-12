@@ -4,15 +4,18 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Stacks.Commands
   alias Console.PubSub
   alias Console.Deployments.Git.Discovery
+  alias Console.Deployments.Pr.Dispatcher
   alias Console.Schema.{
     User,
     Cluster,
     Stack,
     StackRun,
+    StackState,
     RunStep,
     RunLog,
     GitRepository,
-    PullRequest
+    PullRequest,
+    ScmConnection
   }
 
   @preloads [:environment, :files, :observable_metrics]
@@ -109,6 +112,37 @@ defmodule Console.Deployments.Stacks do
     |> notify(:update)
   end
 
+  @doc """
+  Posts a review comment for a completed pr stack run if possible
+  """
+  def post_comment(%StackRun{} = run) do
+    case Repo.preload(run, [:pull_request, :state, stack: :connection]) do
+      %StackRun{
+        id: id,
+        stack_id: stack_id,
+        state: %StackState{plan: plan},
+        stack: %Stack{connection: %ScmConnection{} = conn},
+        pull_request: %PullRequest{} = pr
+      } when is_binary(plan) ->
+        url = Console.url("/stacks/#{stack_id}/runs/#{id}")
+        Dispatcher.review(conn, pr, pr_blob("stack_summary", plan: plan, link: url))
+      %StackRun{
+        id: id,
+        stack_id: stack_id,
+        status: :failed,
+        stack: %Stack{connection: %ScmConnection{} = conn},
+        pull_request: %PullRequest{} = pr
+      } ->
+        url = Console.url("/stacks/#{stack_id}/runs/#{id}")
+        Dispatcher.review(conn, pr, pr_blob("failed", link: url))
+      _ -> {:error, "cannot post review for this stack run"}
+    end
+  end
+
+  defp pr_blob(type, assigns) do
+    Path.join([:code.priv_dir(:console), "pr", "#{type}.md.eex"])
+    |> EEx.eval_file(assigns: assigns)
+  end
 
   @doc """
   It terminates a run in a completed state, and if successful, persists output/state information to the stack
