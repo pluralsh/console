@@ -1,4 +1,4 @@
-import { Button, Card } from '@pluralsh/design-system'
+import { Card } from '@pluralsh/design-system'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -47,7 +47,7 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
         loading={loading}
         handleScroll={setScrolled}
         placeholder={() => (
-          <div css={{ height: 77, borderBottom: theme.borders.default }} />
+          <div css={{ height: 71, borderBottom: theme.borders.default }} />
         )}
         hasNextPage={pageInfo?.hasNextPage}
         mapper={(run, { next }) => (
