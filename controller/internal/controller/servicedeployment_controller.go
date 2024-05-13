@@ -14,6 +14,7 @@ import (
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -62,6 +63,9 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		}
 	}()
 
+	if !service.GetDeletionTimestamp().IsZero() {
+		return r.handleDelete(ctx, service)
+	}
 	cluster := &v1alpha1.Cluster{}
 	if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -72,9 +76,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		logger.Info("Cluster is not ready")
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
 		return requeue, nil
-	}
-	if !service.GetDeletionTimestamp().IsZero() {
-		return r.handleDelete(ctx, cluster, service)
 	}
 
 	repository := &v1alpha1.GitRepository{}
@@ -121,12 +122,12 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		return ctrl.Result{}, err
 	}
 	if existingService == nil {
-		controllerutil.AddFinalizer(service, ServiceFinalizer)
 		_, err = r.ConsoleClient.CreateService(cluster.Status.ID, *attr)
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
+		controllerutil.AddFinalizer(service, ServiceFinalizer)
 		existingService, err = r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
 		if err != nil {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -445,10 +446,27 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 	return nil
 }
 
-func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.Cluster, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
+func (r *ServiceReconciler) handleDelete(ctx context.Context, service *v1alpha1.ServiceDeployment) (ctrl.Result, error) {
 	log := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(service, ServiceFinalizer) {
 		log.Info("try to delete service")
+		cluster := &v1alpha1.Cluster{}
+		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
+			if !apierrors.IsNotFound(err) {
+				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				return ctrl.Result{}, err
+			}
+		}
+		if cluster.Status.ID == nil {
+			err := r.deleteService(service)
+			if errors.IsNotFound(err) || err == nil {
+				controllerutil.RemoveFinalizer(service, ServiceFinalizer)
+				return ctrl.Result{}, nil
+			}
+			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+
 		existingService, err := r.ConsoleClient.GetService(*cluster.Status.ID, service.ConsoleName())
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -459,14 +477,8 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 			updateStatus(service, existingService, "")
 			return requeue, nil
 		}
-		if existingService != nil && service.Status.ID != nil {
-			var err error
-			if service.Spec.Detach {
-				err = r.ConsoleClient.DetachService(*service.Status.ID)
-			} else {
-				err = r.ConsoleClient.DeleteService(*service.Status.ID)
-			}
-			if err != nil {
+		if existingService != nil {
+			if err := r.deleteService(service); err != nil {
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
@@ -475,6 +487,16 @@ func (r *ServiceReconciler) handleDelete(ctx context.Context, cluster *v1alpha1.
 		controllerutil.RemoveFinalizer(service, ServiceFinalizer)
 	}
 	return ctrl.Result{}, nil
+}
+
+func (r *ServiceReconciler) deleteService(service *v1alpha1.ServiceDeployment) error {
+	if service.Status.ID != nil {
+		if service.Spec.Detach {
+			return r.ConsoleClient.DetachService(*service.Status.ID)
+		}
+		return r.ConsoleClient.DeleteService(*service.Status.ID)
+	}
+	return nil
 }
 
 // ensureService makes sure that user-friendly input such as userEmail/groupName in
