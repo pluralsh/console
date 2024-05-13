@@ -1,5 +1,4 @@
 import {
-  Breadcrumb,
   EmptyState,
   Input,
   LoopingLogo,
