@@ -1,5 +1,7 @@
 import {
+  Input,
   LoopingLogo,
+  SearchIcon,
   Sidecar,
   SidecarItem,
   TreeNavEntry,
@@ -10,6 +12,10 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
 import { useNavigate, useParams } from 'react-router-dom'
 import capitalize from 'lodash/capitalize'
+
+import { useDebounce } from '@react-hooks-library/core'
+
+import Fuse from 'fuse.js'
 
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
 import { GqlError } from '../utils/Alert'
@@ -28,11 +34,18 @@ import { StandardScroller } from '../utils/SmoothScroller'
 import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
 import Stack from './Stack'
 
+const searchOptions = {
+  keys: ['name'],
+  threshold: 0.25,
+}
+
 export default function Stacks() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { stackId = '' } = useParams()
   const [listRef, setListRef] = useState<any>(null)
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useDebounce(searchString, 100)
 
   const { data, error, loading, fetchMore } = useStacksQuery({
     variables: {},
@@ -63,6 +76,16 @@ export default function Stacks() {
     [stackId, stacks]
   )
 
+  // TODO: Use server-side filtering once it will be available.
+  const filteredStacks = useMemo(() => {
+    if (!debouncedSearchString) {
+      return stacks || []
+    }
+    const fuse = new Fuse(stacks || [], searchOptions)
+
+    return fuse.search(debouncedSearchString).map((result) => result.item)
+  }, [debouncedSearchString, stacks])
+
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
   }, [stacks, stackId, navigate])
@@ -84,10 +107,19 @@ export default function Stacks() {
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <ResponsiveLayoutSidenavContainer width={300}>
+        <Input
+          placeholder="Filter by name"
+          startIcon={<SearchIcon />}
+          value={searchString}
+          onChange={(e) => {
+            setSearchString?.(e.currentTarget.value)
+          }}
+          css={{ marginBottom: theme.spacing.medium }}
+        />
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}
-          items={stacks}
+          items={filteredStacks}
           loading={loading}
           placeholder={() => (
             <div css={{ height: 52, borderBottom: theme.borders.default }} />
