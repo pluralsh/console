@@ -24,12 +24,7 @@ export default function CreateStack({
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
 
-  const close = useCallback(() => {
-    setName('')
-    setOpen(false)
-  }, [])
-
-  const [mutation, { loading, error }] = useCreateStackMutation({
+  const [mutation, { loading, error, reset }] = useCreateStackMutation({
     variables: {
       // TODO: Add these and others to form.
       attributes: {
@@ -49,6 +44,12 @@ export default function CreateStack({
           appendConnection(prev, data?.createStack, 'infrastructureStacks'),
       }),
   })
+
+  const close = useCallback(() => {
+    setName('')
+    reset()
+    setOpen(false)
+  }, [reset])
 
   return (
     <>
