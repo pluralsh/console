@@ -60,7 +60,7 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
           </div>
         )}
         loadNextPage={() =>
-          data?.infrastructureStack?.runs?.pageInfo.hasNextPage &&
+          pageInfo?.hasNextPage &&
           fetchMore({
             variables: { after: pageInfo?.endCursor },
             updateQuery: (prev, { fetchMoreResult }) => {

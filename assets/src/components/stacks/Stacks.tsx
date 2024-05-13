@@ -1,6 +1,4 @@
 import {
-  ListBox,
-  ListBoxItem,
   LoopingLogo,
   Sidecar,
   SidecarItem,
@@ -8,14 +6,14 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { isEmpty } from 'lodash'
 import { useNavigate, useParams } from 'react-router-dom'
 import capitalize from 'lodash/capitalize'
 
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
 import { GqlError } from '../utils/Alert'
-import { mapExistingNodes } from '../../utils/graphql'
+import { extendConnection, mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
 import { useStacksQuery } from '../../generated/graphql'
 import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../utils/layout/ResponsiveLayoutContentContainer'
@@ -25,6 +23,8 @@ import { ClusterProviderIcon } from '../utils/Provider'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 
+import { StandardScroller } from '../utils/SmoothScroller'
+
 import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
 import Stack from './Stack'
 
@@ -32,9 +32,9 @@ export default function Stacks() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { stackId = '' } = useParams()
+  const [listRef, setListRef] = useState<any>(null)
 
-  // TODO: Add pagination and filtering.
-  const { data, error } = useStacksQuery({
+  const { data, error, loading, fetchMore } = useStacksQuery({
     variables: {},
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
@@ -50,8 +50,11 @@ export default function Stacks() {
 
   useSetBreadcrumbs(breadcrumbs)
 
-  const stacks = useMemo(
-    () => mapExistingNodes(data?.infrastructureStacks),
+  const { stacks, pageInfo } = useMemo(
+    () => ({
+      stacks: mapExistingNodes(data?.infrastructureStacks),
+      pageInfo: data?.infrastructureStacks?.pageInfo,
+    }),
     [data?.infrastructureStacks]
   )
 
@@ -80,38 +83,62 @@ export default function Stacks() {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer
-        width={300}
-        overflowY="auto"
-      >
-        {stacks?.map((stack) => (
-          <TreeNavEntry
-            key={stack.id ?? ''}
-            label={
-              <div
-                css={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  gap: theme.spacing.small,
-                }}
-              >
-                <StackTypeIconFrame
-                  size="small"
-                  stackType={stack.type}
-                />
-                <StackedText
-                  first={stack.name}
-                  second={stack.repository?.url}
-                />
-              </div>
-            }
-            active={stack.id === stackId}
-            activeSecondary={false}
-            href={getStacksAbsPath(stack.id)}
-            desktop
-          />
-        ))}
-        {/* TODO: Load more button */}
+      <ResponsiveLayoutSidenavContainer width={300}>
+        <StandardScroller
+          listRef={listRef}
+          setListRef={setListRef}
+          items={stacks}
+          loading={loading}
+          placeholder={() => (
+            <div css={{ height: 71, borderBottom: theme.borders.default }} />
+          )}
+          hasNextPage={pageInfo?.hasNextPage}
+          mapper={(stack) => (
+            <TreeNavEntry
+              key={stack.id ?? ''}
+              label={
+                <div
+                  css={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: theme.spacing.small,
+                  }}
+                >
+                  <StackTypeIconFrame
+                    size="small"
+                    stackType={stack.type}
+                  />
+                  <StackedText
+                    first={stack.name}
+                    second={stack.repository?.url}
+                  />
+                </div>
+              }
+              active={stack.id === stackId}
+              activeSecondary={false}
+              href={getStacksAbsPath(stack.id)}
+              desktop
+            />
+          )}
+          loadNextPage={() =>
+            pageInfo?.hasNextPage &&
+            fetchMore({
+              variables: { after: pageInfo?.endCursor },
+              updateQuery: (
+                prev,
+                { fetchMoreResult: { infrastructureStacks } }
+              ) =>
+                extendConnection(
+                  prev,
+                  infrastructureStacks,
+                  'infrastructureStacks'
+                ),
+            })
+          }
+          refreshKey={undefined}
+          setLoader={undefined}
+          handleScroll={undefined}
+        />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
