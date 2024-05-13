@@ -1,4 +1,4 @@
-import { Card } from '@pluralsh/design-system'
+import { Button, Card } from '@pluralsh/design-system'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -62,7 +62,7 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
         loadNextPage={() =>
           data?.infrastructureStack?.runs?.pageInfo.hasNextPage &&
           fetchMore({
-            variables: { cursor: pageInfo?.endCursor },
+            variables: { after: pageInfo?.endCursor },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!prev.infrastructureStack) return prev
 
