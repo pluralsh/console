@@ -1,4 +1,5 @@
 import {
+  Breadcrumb,
   EmptyState,
   Input,
   LoopingLogo,
@@ -43,6 +44,11 @@ const searchOptions = {
   threshold: 0.25,
 }
 
+export const getBreadcrumbs = (stackId: string) => [
+  { label: 'stacks', url: getStacksAbsPath('') },
+  ...(stackId ? [{ label: stackId, url: getStacksAbsPath(stackId) }] : []),
+]
+
 export default function Stacks() {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -57,15 +63,7 @@ export default function Stacks() {
     pollInterval,
   })
 
-  const breadcrumbs = useMemo(
-    () => [
-      { label: 'stacks', url: getStacksAbsPath('') },
-      ...(stackId ? [{ label: stackId, url: getStacksAbsPath(stackId) }] : []),
-    ],
-    [stackId]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(stackId), [stackId]))
 
   const { stacks, pageInfo } = useMemo(
     () => ({

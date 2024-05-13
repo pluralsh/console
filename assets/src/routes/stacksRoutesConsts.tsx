@@ -19,8 +19,8 @@ export function getStacksAbsPath(stackId: string | null | undefined) {
 }
 
 export function getStackRunsAbsPath(
-  clusterId: Nullable<string>,
+  stackId: Nullable<string>,
   runId: Nullable<string>
 ): string {
-  return `${getStacksAbsPath(clusterId)}/${STACK_RUNS_REL_PATH}/${runId}`
+  return `${getStacksAbsPath(stackId)}/${STACK_RUNS_REL_PATH}/${runId}`
 }

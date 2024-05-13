@@ -1,13 +1,15 @@
-import { ReactNode } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
-
 import { useTheme } from 'styled-components'
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { StackRun, useStackRunQuery } from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
+import { getBreadcrumbs } from '../Stacks'
+import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
 
 import StackRunSidenav from './Sidenav'
 import StackRunSidecar from './Sidecar'
@@ -33,7 +35,7 @@ function ZeroState({ id }: ZeroStateProps): ReactNode {
 }
 
 export default function StackRunDetail(): ReactNode {
-  const { runId } = useParams()
+  const { stackId, runId } = useParams()
   const theme = useTheme()
 
   const { data: stackRunQuery, loading: loadingStackRun } = useStackRunQuery({
@@ -43,6 +45,19 @@ export default function StackRunDetail(): ReactNode {
     skip: !runId,
     pollInterval: 10_000,
   })
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...getBreadcrumbs(stackId ?? ''),
+        { label: 'runs', url: getStackRunsAbsPath(stackId, runId) },
+        ...(runId
+          ? [{ label: runId, url: getStackRunsAbsPath(stackId, runId) }]
+          : []),
+      ],
+      [runId]
+    )
+  )
 
   const stackRun: StackRun = stackRunQuery?.stackRun as StackRun
 

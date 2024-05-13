@@ -1,7 +1,6 @@
 import { Card, EmptyState } from '@pluralsh/design-system'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
-
 import { isEmpty } from 'lodash'
 
 import { StackFragment, useStackRunsQuery } from '../../generated/graphql'
