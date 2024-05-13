@@ -5,7 +5,7 @@ import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
 
 import { StackFragment, useStackRunsQuery } from '../../generated/graphql'
-import { mapExistingNodes } from '../../utils/graphql'
+import { extendConnection, mapExistingNodes } from '../../utils/graphql'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { ReturnToBeginning } from '../utils/ReturnToBeginning'
 
@@ -16,14 +16,16 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
   const [listRef, setListRef] = useState<any>(null)
   const [scrolled, setScrolled] = useState(false)
 
-  // TODO: Add pagination.
-  const { data, loading } = useStackRunsQuery({
+  const { data, loading, fetchMore } = useStackRunsQuery({
     variables: { id: stack?.id ?? '' },
     fetchPolicy: 'cache-and-network',
   })
 
-  const runs = useMemo(
-    () => mapExistingNodes(data?.infrastructureStack?.runs),
+  const { runs, pageInfo } = useMemo(
+    () => ({
+      runs: mapExistingNodes(data?.infrastructureStack?.runs),
+      pageInfo: data?.infrastructureStack?.runs?.pageInfo,
+    }),
     [data?.infrastructureStack?.runs]
   )
 
@@ -47,7 +49,7 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
         placeholder={() => (
           <div css={{ height: 77, borderBottom: theme.borders.default }} />
         )}
-        hasNextPage={data?.infrastructureStack?.runs?.pageInfo.hasNextPage}
+        hasNextPage={pageInfo?.hasNextPage}
         mapper={(run, { next }) => (
           <div>
             <StackRun
@@ -57,15 +59,24 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
             />
           </div>
         )}
-        loadNextPage={null}
-        // loadNextPage={() =>
-        //   data?.infrastructureStack?.runs?.pageInfo.hasNextPage &&
-        //   fetchMore({
-        //     variables: { cursor: data?.infrastructureStack?.runs?.pageInfo.endCursor },
-        //     updateQuery: (prev, { fetchMoreResult: { infrastructureStack } }) =>
-        //       extendConnection(prev, builds, 'builds'),
-        //   })
-        // }
+        loadNextPage={() =>
+          data?.infrastructureStack?.runs?.pageInfo.hasNextPage &&
+          fetchMore({
+            variables: { cursor: pageInfo?.endCursor },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              if (!prev.infrastructureStack) return prev
+
+              return {
+                ...prev,
+                infrastructureStack: extendConnection(
+                  prev.infrastructureStack,
+                  fetchMoreResult.infrastructureStack?.runs,
+                  'runs'
+                ),
+              }
+            },
+          })
+        }
         refreshKey={undefined}
         setLoader={undefined}
       />
