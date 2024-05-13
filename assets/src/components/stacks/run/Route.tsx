@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import React, { ReactNode } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 
 import { useTheme } from 'styled-components'
@@ -74,6 +74,7 @@ export default function StackRunDetail(): ReactNode {
           />
         </div>
       </ResponsiveLayoutContentContainer>
+      <ResponsiveLayoutSpacer />
       <StackRunSidecar stackRun={stackRun} />
     </ResponsiveLayoutPage>
   )
