@@ -3,6 +3,7 @@ import {
   EmptyState,
   Input,
   LoopingLogo,
+  PlusIcon,
   SearchIcon,
   Sidecar,
   SidecarItem,
@@ -116,16 +117,28 @@ export default function Stacks() {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer width={300}>
-        <Input
-          placeholder="Filter by name"
-          startIcon={<SearchIcon />}
-          value={searchString}
-          onChange={(e) => {
-            setSearchString?.(e.currentTarget.value)
+      <ResponsiveLayoutSidenavContainer width={360}>
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.small,
+            marginBottom: theme.spacing.medium,
           }}
-          css={{ marginBottom: theme.spacing.medium }}
-        />
+        >
+          <Input
+            flexGrow={1}
+            placeholder="Search"
+            startIcon={<SearchIcon />}
+            value={searchString}
+            onChange={(e) => {
+              setSearchString?.(e.currentTarget.value)
+            }}
+          />
+          <CreateStack
+            buttonContent={<PlusIcon />}
+            buttonProps={{ secondary: true, height: 40 }}
+          />
+        </div>
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}
