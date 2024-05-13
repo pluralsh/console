@@ -6,12 +6,15 @@ import { AppIcon, Tab, TabList } from '@pluralsh/design-system'
 import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
 import { StackedText } from '../../utils/table/StackedText'
 import { StackRun } from '../../../generated/graphql'
-import BuildStatus from '../../builds/BuildStatus'
 import { StackTypeIcon } from '../StackTypeIcon'
+import { StackRunStatusChip } from '../StackRunStatusChip'
 
 const DIRECTORY = [
   { path: '', label: 'Progress' },
+  { path: 'repository', label: 'Repository' },
   { path: 'state', label: 'State' },
+  { path: 'plan', label: 'Plan' },
+  { path: 'output', label: 'Output' },
 ]
 
 interface StackRunSidenavProps {
@@ -87,7 +90,7 @@ function StackRunSidenavHeader({
       <StackedText
         first={stackRun.id}
         second={
-          <BuildStatus
+          <StackRunStatusChip
             status={stackRun.status}
             size="small"
           />
