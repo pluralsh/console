@@ -36,6 +36,8 @@ import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
 import Stack from './Stack'
 import CreateStack from './CreateStack'
 
+const pollInterval = 10 * 1000
+
 const searchOptions = {
   keys: ['name'],
   threshold: 0.25,
@@ -50,9 +52,9 @@ export default function Stacks() {
   const debouncedSearchString = useDebounce(searchString, 100)
 
   const { data, error, loading, fetchMore } = useStacksQuery({
-    variables: {},
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
+    pollInterval,
   })
 
   const breadcrumbs = useMemo(

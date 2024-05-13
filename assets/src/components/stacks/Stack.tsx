@@ -11,6 +11,8 @@ import { ReturnToBeginning } from '../utils/ReturnToBeginning'
 
 import StackRun from './StackRun'
 
+const pollInterval = 5 * 1000
+
 export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
   const theme = useTheme()
   const [listRef, setListRef] = useState<any>(null)
@@ -19,6 +21,7 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
   const { data, loading, fetchMore } = useStackRunsQuery({
     variables: { id: stack?.id ?? '' },
     fetchPolicy: 'cache-and-network',
+    pollInterval,
   })
 
   const { runs, pageInfo } = useMemo(
