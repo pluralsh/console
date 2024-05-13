@@ -90,7 +90,7 @@ export default function Stacks() {
           items={stacks}
           loading={loading}
           placeholder={() => (
-            <div css={{ height: 71, borderBottom: theme.borders.default }} />
+            <div css={{ height: 52, borderBottom: theme.borders.default }} />
           )}
           hasNextPage={pageInfo?.hasNextPage}
           mapper={(stack) => (
