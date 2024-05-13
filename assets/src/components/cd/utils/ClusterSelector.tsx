@@ -14,15 +14,20 @@ import { useTheme } from 'styled-components'
 import { useThrottle } from 'components/hooks/useThrottle'
 import isEmpty from 'lodash/isEmpty'
 import { extendConnection } from 'utils/graphql'
+import { hide } from 'concurrently/dist/src/defaults'
 
 export default function ClusterSelector({
   onClusterChange,
   clusterId,
   allowDeselect,
+  hideTitleContent = false,
+  placeholder = 'Filter by cluster',
 }: {
   onClusterChange: (cluster: ClusterTinyFragment | null) => void
   clusterId: Nullable<string>
   allowDeselect: boolean
+  hideTitleContent?: boolean
+  placeholder?: string
 }) {
   const theme = useTheme()
   const [inputValue, setInputValue] = useState('')
@@ -69,15 +74,15 @@ export default function ClusterSelector({
   return (
     <ComboBox
       inputProps={{
-        placeholder: selectedCluster
-          ? selectedCluster.name
-          : 'Filter by cluster',
+        placeholder: selectedCluster ? selectedCluster.name : placeholder,
       }}
       titleContent={
-        <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-          <ClusterIcon />
-          Cluster
-        </div>
+        !hideTitleContent ? (
+          <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+            <ClusterIcon />
+            Cluster
+          </div>
+        ) : undefined
       }
       startIcon={
         clusterSelectIsOpen || !selectedCluster ? (
