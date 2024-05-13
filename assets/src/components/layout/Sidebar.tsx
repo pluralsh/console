@@ -23,6 +23,8 @@ import {
   PrOpenIcon,
   ScrollIcon,
   ServersIcon,
+  SidebarExpandButton,
+  SidebarExpandWrapper,
   SidebarItem,
   SidebarSection,
   WarningShieldIcon,
@@ -33,7 +35,7 @@ import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
 import { ME_Q } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
 import { updateCache } from 'utils/graphql'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { PersonaConfigurationFragment } from 'generated/graphql'
 
@@ -60,6 +62,7 @@ type MenuItem = {
   ignoreRegexp?: RegExp
   plural?: boolean
   enabled?: boolean
+  expandedLabel: string
 }
 
 function getMenuItems({
@@ -77,11 +80,13 @@ function getMenuItems({
   return [
     {
       text: 'Home',
+      expandedLabel: 'Home',
       icon: <HomeIcon />,
       path: '/home',
     },
     {
       text: 'Apps',
+      expandedLabel: 'Apps',
       icon: <AppsIcon />,
       path: '/',
       plural: true,
@@ -89,6 +94,7 @@ function getMenuItems({
     },
     {
       text: 'Continuous deployment',
+      expandedLabel: 'CD',
       icon: <GitPullIcon />,
       path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
@@ -96,18 +102,21 @@ function getMenuItems({
     },
     {
       text: 'Kubernetes',
+      expandedLabel: 'Kubernetes',
       icon: <KubernetesIcon />,
       path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
       text: 'Builds',
+      expandedLabel: 'Builds',
       icon: <BuildIcon />,
       plural: true,
       path: '/builds',
     },
     {
       text: 'Nodes',
+      expandedLabel: 'Nodes',
       icon: <ServersIcon />,
       path: '/nodes',
       plural: true,
@@ -115,6 +124,7 @@ function getMenuItems({
     },
     {
       text: 'Pods',
+      expandedLabel: 'Pods',
       icon: <ApiIcon />,
       path: '/pods',
       plural: true,
@@ -122,6 +132,7 @@ function getMenuItems({
     },
     {
       text: 'PR',
+      expandedLabel: 'PRs',
       icon: <PrOpenIcon />,
       path: PR_DEFAULT_ABS_PATH,
       pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
@@ -131,12 +142,14 @@ function getMenuItems({
     },
     {
       text: 'Policies',
+      expandedLabel: 'Policies',
       icon: <WarningShieldIcon />,
       path: POLICIES_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
       text: 'Database management',
+      expandedLabel: 'Databases',
       icon: <DatabaseIcon />,
       plural: true,
       path: `/${DB_MANAGEMENT_PATH}`,
@@ -153,6 +166,7 @@ function getMenuItems({
     //     ]),
     {
       text: 'Backups',
+      expandedLabel: 'Backups',
       icon: <HistoryIcon />,
       path: '/backups',
       enabled:
@@ -161,12 +175,14 @@ function getMenuItems({
     },
     {
       text: 'Notifications',
+      expandedLabel: 'Notifications',
       icon: <LightningIcon />,
       path: '/notifications',
       enabled: isCDEnabled,
     },
     {
       text: 'Deployment Settings',
+      expandedLabel: 'Settings',
       icon: <GearTrainIcon />,
       path: `${CD_ABS_PATH}/settings`,
       pathRegexp: /^\/cd\/settings.*$/,
@@ -176,12 +192,14 @@ function getMenuItems({
     },
     {
       text: 'Audits',
+      expandedLabel: 'Audits',
       icon: <ListIcon />,
       path: '/audits',
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.audits),
     },
     {
       text: 'Account',
+      expandedLabel: 'Account',
       icon: <PeopleIcon />,
       path: '/account',
     },
@@ -204,13 +222,14 @@ function isActiveMenuItem(
   )
 }
 
-const SidebarSC = styled(DSSidebar).attrs(() => ({ variant: 'console' }))(
-  (_) => ({
-    flexGrow: 1,
-    minHeight: 0,
-    height: 'auto',
-  })
-)
+const SidebarSC = styled(DSSidebar).attrs(({ variant }) => ({
+  variant,
+}))((_) => ({
+  flexGrow: 1,
+  minHeight: 0,
+  height: 'auto',
+  overflow: 'visible',
+}))
 
 const NotificationsCountSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -235,7 +254,6 @@ export default function Sidebar() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false)
   const [isNotificationsPanelOpen, setIsNotificationsPanelOpen] =
     useState(false)
-  const sidebarWidth = 64
   const { me, configuration, personaConfiguration } = useLogin()
   const { pathname } = useLocation()
   const isActive = useCallback(
@@ -297,15 +315,23 @@ export default function Sidebar() {
 
   useOutsideClick(notificationsPanelRef, () => toggleNotificationPanel(false))
 
+  const theme = useTheme()
+
   if (!me) return null
   const unreadNotifications = me.unreadNotifications || 0
 
   return (
-    <>
-      <SidebarSC variant="console">
+    <SidebarSC
+      variant="console"
+      css={{
+        zIndex: theme.zIndexes.selectPopover,
+      }}
+    >
+      <SidebarExpandWrapper pathname={pathname}>
         <SidebarSection
           grow={1}
           shrink={1}
+          border="none"
         >
           {menuItems.map((item, i) => (
             <SidebarItem
@@ -316,11 +342,13 @@ export default function Sidebar() {
               active={isActive(item)}
               as={Link}
               to={item.path}
+              expandedLabel={item.expandedLabel}
             >
               {item.icon}
             </SidebarItem>
           ))}
           <Flex grow={1} />
+          <SidebarExpandButton />
           <SidebarItem
             tooltip="Discord"
             className="sidebar-discord"
@@ -329,6 +357,7 @@ export default function Sidebar() {
             target="_blank"
             rel="noopener noreferrer"
             href={DISCORD_LINK}
+            expandedLabel="Discord"
           >
             <DiscordIcon />
           </SidebarItem>
@@ -340,6 +369,7 @@ export default function Sidebar() {
             target="_blank"
             rel="noopener noreferrer"
             href={`${GITHUB_LINK}/plural`}
+            expandedLabel="GitHub"
           >
             <GitHubLogoIcon />
           </SidebarItem>
@@ -357,6 +387,7 @@ export default function Sidebar() {
             }}
             badge={unreadNotifications}
             active={isNotificationsPanelOpen}
+            expandedLabel="Notifications"
           >
             <BellIcon />
             {unreadNotifications > 0 && (
@@ -371,70 +402,76 @@ export default function Sidebar() {
             active={isMenuOpen}
             clickable
             collapsed
-            onClick={() => setIsMenuOpen((x) => !x)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsMenuOpen((x) => !x)
+            }}
+            expandedLabel="Menu"
+            css={{
+              paddingLeft: 0,
+            }}
           >
             <Avatar
               name={me.name}
               src={me.profile}
-              size={32}
+              size={40}
             />
           </SidebarItem>
         </SidebarSection>
-      </SidebarSC>
-      {isMenuOpen && (
-        <Menu
-          ref={menuRef}
-          zIndex={999}
-          position="absolute"
-          bottom={8}
-          minWidth="175px"
-          left={60 + 8}
-          border="1px solid border"
-        >
-          <MenuItem
-            as={Link}
-            to="/profile"
-            className="sidebar-menu-myprofile"
-            color="inherit"
-            onClick={() => setIsMenuOpen(false)}
-            textDecoration="none"
-          >
-            <PersonIcon marginRight="xsmall" />
-            My profile
-          </MenuItem>
-          <MenuItem
-            as="a"
-            href="https://docs.plural.sh"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="sidebar-menu-docs"
-            color="inherit"
-            onClick={() => setIsMenuOpen(false)}
-            textDecoration="none"
-          >
-            <ScrollIcon marginRight="xsmall" />
-            Docs
-            <Flex flexGrow={1} />
-            <ArrowTopRightIcon />
-          </MenuItem>
-          <MenuItem
-            onClick={handleLogout}
-            className="sidebar-menu-logout"
-            color="icon-error"
-          >
-            <LogoutIcon marginRight="xsmall" />
-            Logout
-          </MenuItem>
-        </Menu>
-      )}
-      {/* ---
+        {/* ---
         NOTIFICATIONS PANEL
       --- */}
-      <NotificationsPanelOverlay
-        leftOffset={sidebarWidth}
-        isOpen={isNotificationsPanelOpen}
-        setIsOpen={setIsNotificationsPanelOpen}
-      />
-    </>
+        <NotificationsPanelOverlay
+          isOpen={isNotificationsPanelOpen}
+          setIsOpen={setIsNotificationsPanelOpen}
+        />
+        {isMenuOpen && (
+          <Menu
+            ref={menuRef}
+            zIndex={999}
+            position="absolute"
+            bottom={8}
+            minWidth="175px"
+            left="calc(100% + 10px)"
+            border="1px solid border"
+          >
+            <MenuItem
+              as={Link}
+              to="/profile"
+              className="sidebar-menu-myprofile"
+              color="inherit"
+              onClick={() => setIsMenuOpen(false)}
+              textDecoration="none"
+            >
+              <PersonIcon marginRight="xsmall" />
+              My profile
+            </MenuItem>
+            <MenuItem
+              as="a"
+              href="https://docs.plural.sh"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="sidebar-menu-docs"
+              color="inherit"
+              onClick={() => setIsMenuOpen(false)}
+              textDecoration="none"
+            >
+              <ScrollIcon marginRight="xsmall" />
+              Docs
+              <Flex flexGrow={1} />
+              <ArrowTopRightIcon />
+            </MenuItem>
+            <MenuItem
+              onClick={handleLogout}
+              className="sidebar-menu-logout"
+              color="icon-error"
+            >
+              <LogoutIcon marginRight="xsmall" />
+              Logout
+            </MenuItem>
+          </Menu>
+        )}
+      </SidebarExpandWrapper>
+    </SidebarSC>
   )
 }
