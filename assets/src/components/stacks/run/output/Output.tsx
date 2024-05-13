@@ -31,17 +31,16 @@ function useColumns(): Array<object> {
 
 export default function StackRunOutput(): ReactNode {
   const { stackRun } = useOutletContext<{ stackRun: StackRun }>()
+  const isEmpty = (stackRun.output ?? []).length === 0
+  const columns = useColumns()
 
-  return (
-    <>
-      {(stackRun.output ?? []).length === 0 && (
-        <div>No output available for this run.</div>
-      )}
-      <Table
-        data={stackRun.output ?? []}
-        columns={useColumns()}
-        maxHeight="100%"
-      />
-    </>
+  return isEmpty ? (
+    <div>No output available for this run.</div>
+  ) : (
+    <Table
+      data={stackRun.output ?? []}
+      columns={columns}
+      maxHeight="100%"
+    />
   )
 }
