@@ -1,4 +1,4 @@
-import { Card } from '@pluralsh/design-system'
+import { Card, EmptyState } from '@pluralsh/design-system'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -33,6 +33,11 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
     () => listRef.scrollToItem(0),
     [listRef]
   )
+
+  if (isEmpty(runs))
+    return (
+      <EmptyState message="Looks like this stack doesn't have any runs yet." />
+    )
 
   return (
     <Card
