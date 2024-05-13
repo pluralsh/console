@@ -1,4 +1,4 @@
-import { Card, EmptyState } from '@pluralsh/design-system'
+import { Card, EmptyState, LoopingLogo } from '@pluralsh/design-system'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
@@ -35,6 +35,10 @@ export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
     () => listRef.scrollToItem(0),
     [listRef]
   )
+
+  if (!data) {
+    return <LoopingLogo />
+  }
 
   if (isEmpty(runs))
     return (
