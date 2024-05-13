@@ -8624,6 +8624,13 @@ export type StackRunQueryVariables = Exact<{
 
 export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version: string, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null } | null };
 
+export type CreateStackMutationVariables = Exact<{
+  attributes: StackAttributes;
+}>;
+
+
+export type CreateStackMutation = { __typename?: 'RootMutationType', createStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
@@ -17252,6 +17259,39 @@ export type StackRunQueryHookResult = ReturnType<typeof useStackRunQuery>;
 export type StackRunLazyQueryHookResult = ReturnType<typeof useStackRunLazyQuery>;
 export type StackRunSuspenseQueryHookResult = ReturnType<typeof useStackRunSuspenseQuery>;
 export type StackRunQueryResult = Apollo.QueryResult<StackRunQuery, StackRunQueryVariables>;
+export const CreateStackDocument = gql`
+    mutation CreateStack($attributes: StackAttributes!) {
+  createStack(attributes: $attributes) {
+    ...Stack
+  }
+}
+    ${StackFragmentDoc}`;
+export type CreateStackMutationFn = Apollo.MutationFunction<CreateStackMutation, CreateStackMutationVariables>;
+
+/**
+ * __useCreateStackMutation__
+ *
+ * To run a mutation, you first call `useCreateStackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateStackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createStackMutation, { data, loading, error }] = useCreateStackMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateStackMutation(baseOptions?: Apollo.MutationHookOptions<CreateStackMutation, CreateStackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateStackMutation, CreateStackMutationVariables>(CreateStackDocument, options);
+      }
+export type CreateStackMutationHookResult = ReturnType<typeof useCreateStackMutation>;
+export type CreateStackMutationResult = Apollo.MutationResult<CreateStackMutation>;
+export type CreateStackMutationOptions = Apollo.BaseMutationOptions<CreateStackMutation, CreateStackMutationVariables>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -17820,6 +17860,7 @@ export const namedOperations = {
     CreatePersona: 'CreatePersona',
     UpdatePersona: 'UpdatePersona',
     DeletePersona: 'DeletePersona',
+    CreateStack: 'CreateStack',
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken',
     Logout: 'Logout'

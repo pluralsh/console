@@ -188,3 +188,9 @@ query StackRun($id: ID!) {
   }
 }
 
+mutation CreateStack($attributes: StackAttributes!){
+  createStack(attributes: $attributes) {
+    ...Stack
+  }
+}
+
