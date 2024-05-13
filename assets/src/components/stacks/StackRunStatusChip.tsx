@@ -22,7 +22,7 @@ export function StackRunStatusChip({
   ...props
 }: {
   status?: StackStatus
-  size?: number
+  size?: string
 } & ChipProps) {
   const severity = statusToSeverity[status ?? '']
 
