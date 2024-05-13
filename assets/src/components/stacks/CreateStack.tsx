@@ -1,9 +1,15 @@
-import { Button, Modal, Tooltip, ValidatedInput } from '@pluralsh/design-system'
+import {
+  Button,
+  GearTrainIcon,
+  GitHubIcon,
+  Stepper,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { ButtonProps } from 'honorable'
 import { ReactNode, useCallback, useState } from 'react'
 import isEmpty from 'lodash/isEmpty'
 
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { GqlError } from '../utils/Alert'
 import {
@@ -12,6 +18,39 @@ import {
   useCreateStackMutation,
 } from '../../generated/graphql'
 import { appendConnection, updateCache } from '../../utils/graphql'
+import ModalAlt from '../cd/ModalAlt'
+
+import { CreateStackBasic } from './CreateStackBasic'
+
+enum FormState {
+  Initial = 'initial',
+  Repository = 'repository',
+}
+
+const StepTitle = styled.div(({ theme }) => ({
+  marginRight: theme.spacing.small,
+}))
+
+const stepBase = {
+  circleSize: 32,
+  iconSize: 16,
+  vertical: true,
+}
+
+const stepperSteps = [
+  {
+    key: FormState.Initial,
+    stepTitle: <StepTitle>Stack props</StepTitle>,
+    IconComponent: GearTrainIcon,
+    ...stepBase,
+  },
+  {
+    key: FormState.Repository,
+    stepTitle: <StepTitle>Repository</StepTitle>,
+    IconComponent: GitHubIcon,
+    ...stepBase,
+  },
+]
 
 export default function CreateStack({
   buttonContent = 'Create stack',
@@ -22,16 +61,25 @@ export default function CreateStack({
 }) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
+  const [formState, setFormState] = useState<FormState>(FormState.Initial)
   const [name, setName] = useState('')
+  const [type, setType] = useState<StackType>(StackType.Terraform)
+  const [clusterId, setClusterId] = useState('')
+  const [approval, setApproval] = useState<boolean>(false)
+
+  const currentStepIndex = stepperSteps.findIndex(
+    (step) => step.key === formState
+  )
 
   const [mutation, { loading, error, reset }] = useCreateStackMutation({
     variables: {
-      // TODO: Add these and others to form.
       attributes: {
         name,
-        clusterId: '',
+        type,
+        clusterId,
+        approval,
+        // TODO: Add all props to form.
         repositoryId: '',
-        type: StackType.Terraform,
         git: { ref: '', folder: '' },
         configuration: { version: '' },
       },
@@ -61,8 +109,10 @@ export default function CreateStack({
           {buttonContent}
         </Button>
       </Tooltip>
-      <Modal
+      <ModalAlt
         header="Create infrastracture stack"
+        portal
+        asForm
         open={open}
         onClose={() => close()}
         actions={
@@ -88,15 +138,31 @@ export default function CreateStack({
         <div
           css={{
             display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.medium,
+            paddingBottom:
+              formState === FormState.Repository ? 0 : theme.spacing.medium,
           }}
         >
-          <ValidatedInput
-            value={name}
-            onChange={({ target: { value } }) => setName(value)}
-            label="Name"
+          <Stepper
+            compact
+            steps={stepperSteps}
+            stepIndex={currentStepIndex}
           />
+        </div>
+
+        {formState === FormState.Initial && (
+          <CreateStackBasic
+            name={name}
+            setName={setName}
+            type={type}
+            setType={setType}
+            clusterId={clusterId}
+            setClusterId={setClusterId}
+            approval={approval}
+            setApproval={setApproval}
+          />
+        )}
+
+        <div css={{ marginTop: theme.spacing.medium }}>
           {error && (
             <GqlError
               header="Something went wrong"
@@ -104,7 +170,7 @@ export default function CreateStack({
             />
           )}
         </div>
-      </Modal>
+      </ModalAlt>
     </>
   )
 }
