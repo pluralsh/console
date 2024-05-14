@@ -1,0 +1,25 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: selfsigned-issuer
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ include "network-observability-operator.fullname" . }}-ca
+spec:
+  isCA: true
+  commonName: {{ include "network-observability-operator.fullname" . }}-ca
+  subject:
+    organizations:
+      - Plural
+  secretName: webhook-server-cert
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io

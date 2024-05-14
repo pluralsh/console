@@ -1,0 +1,195 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "network-observability-operator.fullname" . }}
+  labels:
+    {{- include "network-observability-operator.labels" . | nindent 4 }}
+spec:
+  progressDeadlineSeconds: 600
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "network-observability-operator.selectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "network-observability-operator.labels" . | nindent 8 }}
+          {{- with .Values.podLabels }}
+          {{- toYaml . | nindent 8 }}
+          {{- end }}
+    spec:
+      containers:
+        - args:
+            - --health-probe-bind-address=:8081
+            - --metrics-bind-address=127.0.0.1:8080
+            - --leader-elect
+            - --ebpf-agent-image=$(RELATED_IMAGE_EBPF_AGENT)
+            - --flowlogs-pipeline-image=$(RELATED_IMAGE_FLOWLOGS_PIPELINE)
+            - --console-plugin-image=$(RELATED_IMAGE_CONSOLE_PLUGIN)
+            - --downstream-deployment=$(DOWNSTREAM_DEPLOYMENT)
+            - --profiling-bind-address=$(PROFILING_BIND_ADDRESS)
+            - --enable-http2=false
+          command:
+            - /manager
+          env:
+            - name: ENABLE_WEBHOOKS
+              value: "false"
+            - name: RELATED_IMAGE_EBPF_AGENT
+              value: quay.io/netobserv/netobserv-ebpf-agent:v0.3.3
+            - name: RELATED_IMAGE_FLOWLOGS_PIPELINE
+              value: quay.io/netobserv/flowlogs-pipeline:v0.1.11
+            - name: RELATED_IMAGE_CONSOLE_PLUGIN
+              value: quay.io/netobserv/network-observability-console-plugin:v0.1.12
+            - name: DOWNSTREAM_DEPLOYMENT
+              value: "false"
+            - name: PROFILING_BIND_ADDRESS
+            - name: OPERATOR_CONDITION_NAME
+              value: netobserv-operator.v1.0.5
+          image: quay.io/netobserv/network-observability-operator:1.0.5
+          imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: manager
+          ports:
+            - containerPort: 9443
+              name: webhook-server
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readyz
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources:
+            limits:
+              memory: 400Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        - args:
+            - --secure-listen-address=0.0.0.0:8443
+            - --upstream=http://127.0.0.1:8080/
+            - --logtostderr=true
+            - --v=10
+            - --http2-disable
+          env:
+            - name: OPERATOR_CONDITION_NAME
+              value: netobserv-operator.v1.0.5
+          image: gcr.io/kubebuilder/kube-rbac-proxy:v0.15.0
+          imagePullPolicy: IfNotPresent
+          name: kube-rbac-proxy
+          ports:
+            - containerPort: 8443
+              name: https
+              protocol: TCP
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+            requests:
+              cpu: 5m
+              memory: 64Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsNonRoot: true
+      serviceAccount: {{ include "network-observability-operator.serviceAccountName" . }}
+      serviceAccountName: {{ include "network-observability-operator.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: webhook-server-cert
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  name: netobserv-validating-webhook-configuration
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: netobserv-webhook-service
+        namespace: '{{ .Release.Namespace }}'
+        path: /validate-netobserv-io-v1beta2-flowcollector
+    failurePolicy: Fail
+    name: flowcollectorconversionwebhook.netobserv.io
+    rules:
+      - apiGroups:
+          - netobserv.io
+        apiVersions:
+          - v1beta2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - flowcollectors
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: netobserv-webhook-service
+        namespace: '{{ .Release.Namespace }}'
+        path: /validate-flows-netobserv-io-v1alpha1-flowmetric
+    failurePolicy: Fail
+    name: flowmetricvalidationwebhook.netobserv.io
+    rules:
+      - apiGroups:
+          - flows.netobserv.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - flowmetrics
+    sideEffects: None
