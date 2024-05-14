@@ -1,29 +1,20 @@
-import {
-  ComponentProps,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
+import { ComponentProps, useEffect, useMemo } from 'react'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-import { type VirtualItem } from '@tanstack/react-virtual'
 import {
   type ServiceDeploymentsRowFragment,
   useGetGlobalServicesQuery,
 } from 'generated/graphql'
 import { getGlobalServiceDetailsPath } from 'routes/cdRoutesConsts'
-import { Edge, extendConnection } from 'utils/graphql'
+import { Edge } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 
-import { POLL_INTERVAL } from '../ContinuousDeployment'
+import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
 import {
   GLOBAL_SERVICES_QUERY_PAGE_SIZE,
@@ -38,38 +29,19 @@ export function GlobalServicesTable({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const tabStateRef = useRef<any>(null)
-  const [virtualSlice, setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
 
-  const queryResult = useGetGlobalServicesQuery({
-    variables: {
-      first: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
-    },
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
   const {
-    error,
-    fetchMore,
+    data,
     loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
-
-  const pageInfo = data?.globalServices?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData({
+    queryHook: useGetGlobalServicesQuery,
     pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
-    key: 'globalServices',
-    interval: POLL_INTERVAL,
+    queryKey: 'globalServices',
   })
 
   useEffect(() => {
@@ -85,21 +57,6 @@ export function GlobalServicesTable({
       }),
       [refetch]
     )
-
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(
-          prev,
-          fetchMoreResult.globalServices,
-          'globalServices'
-        ),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
 
   if (error) {
     return <GqlError error={error} />
@@ -117,46 +74,41 @@ export function GlobalServicesTable({
         height: '100%',
       }}
     >
-      <TabPanel
-        stateRef={tabStateRef}
-        css={{ height: '100%', overflow: 'hidden' }}
-      >
-        {!data ? (
-          <LoadingIndicator />
-        ) : !isEmpty(data?.globalServices?.edges) ? (
-          <FullHeightTableWrap>
-            <Table
-              virtualizeRows
-              data={data?.globalServices?.edges || []}
-              columns={columns}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
-              onRowClick={(
-                _e,
-                { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-              ) =>
-                navigate(
-                  getGlobalServiceDetailsPath({
-                    serviceId: original.node?.id,
-                  })
-                )
-              }
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={loading}
-              reactTableOptions={reactTableOptions}
-              reactVirtualOptions={GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS}
-              onVirtualSliceChange={setVirtualSlice}
-            />
-          </FullHeightTableWrap>
-        ) : (
-          <div css={{ height: '100%' }}>
-            <EmptyState message="Looks like you don't have any service deployments yet." />
-          </div>
-        )}
-      </TabPanel>
+      {!data ? (
+        <LoadingIndicator />
+      ) : !isEmpty(data?.globalServices?.edges) ? (
+        <FullHeightTableWrap>
+          <Table
+            virtualizeRows
+            data={data?.globalServices?.edges || []}
+            columns={columns}
+            css={{
+              maxHeight: 'unset',
+              height: '100%',
+            }}
+            onRowClick={(
+              _e,
+              { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+            ) =>
+              navigate(
+                getGlobalServiceDetailsPath({
+                  serviceId: original.node?.id,
+                })
+              )
+            }
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            reactTableOptions={reactTableOptions}
+            reactVirtualOptions={GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS}
+            onVirtualSliceChange={setVirtualSlice}
+          />
+        </FullHeightTableWrap>
+      ) : (
+        <div css={{ height: '100%' }}>
+          <EmptyState message="Looks like you don't have any service deployments yet." />
+        </div>
+      )}
     </div>
   )
 }

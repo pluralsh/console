@@ -295,18 +295,18 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
 				Status: v1alpha1.Status{
-					ID:  lo.ToPtr(byokClusterConsoleID),
-					SHA: lo.ToPtr("CPYLCGRGF2JWFBF3OGRHQQUSBDXW6Y4VMUDQDCQQDEA6G6CAZORQ===="),
 					Conditions: []metav1.Condition{
 						{
-							Type:   v1alpha1.ReadonlyConditionType.String(),
-							Status: metav1.ConditionFalse,
-							Reason: v1alpha1.ReadonlyConditionReason.String(),
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
 						},
 						{
-							Type:   v1alpha1.SynchronizedConditionType.String(),
-							Status: metav1.ConditionTrue,
-							Reason: v1alpha1.SynchronizedConditionReason.String(),
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonNotFound.String(),
+							Message: "Could not find Cluster in Console API",
 						},
 					},
 				},
@@ -321,6 +321,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{ID: byokClusterConsoleID, CurrentVersion: lo.ToPtr("1.25.6")}, nil)
 			fakeConsoleClient.On("IsClusterExisting", mock.AnythingOfType("*string")).Return(true, nil)
 			fakeConsoleClient.On("UpdateCluster", mock.AnythingOfType("string"), mock.Anything).Return(
 				&gqlclient.ClusterFragment{ID: byokClusterConsoleID, CurrentVersion: lo.ToPtr("1.25.6")}, nil)
@@ -345,9 +346,10 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 					SHA: lo.ToPtr("CPYLCGRGF2JWFBF3OGRHQQUSBDXW6Y4VMUDQDCQQDEA6G6CAZORQ===="),
 					Conditions: []metav1.Condition{
 						{
-							Type:   v1alpha1.ReadonlyConditionType.String(),
-							Status: metav1.ConditionFalse,
-							Reason: v1alpha1.ReadonlyConditionReason.String(),
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadonlyConditionReason.String(),
+							Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
 						},
 						{
 							Type:   v1alpha1.SynchronizedConditionType.String(),

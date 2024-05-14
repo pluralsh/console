@@ -268,6 +268,7 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     connection field :infrastructure_stacks, node_type: :infrastructure_stack do
       middleware Authenticated
+      arg :q, :string
 
       resolve &Deployments.list_stacks/2
     end

@@ -4,14 +4,15 @@ import { extendConnection } from 'utils/graphql'
 import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
+  ErrorPolicy,
   OperationVariables,
   QueryHookOptions,
   QueryResult,
 } from '@apollo/client'
 
 type GenericQueryHook<TQueryType, TVariables extends OperationVariables> = (
-  baseOptions?: QueryHookOptions<TQueryType, TVariables>
-) => QueryResult<TQueryType> & {
+  baseOptions: QueryHookOptions<TQueryType, TVariables>
+) => QueryResult<TQueryType, TVariables> & {
   fetchMore: (options: any) => Promise<any>
 }
 
@@ -20,6 +21,7 @@ type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   pageSize: number
   queryKey: string
   pollInterval?: number
+  errorPolicy?: ErrorPolicy
 }
 
 export function useFetchPaginatedData<
@@ -42,6 +44,7 @@ export function useFetchPaginatedData<
       ...variables,
       first: options.pageSize,
     },
+    errorPolicy: options.errorPolicy,
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table
     notifyOnNetworkStatusChange: true,

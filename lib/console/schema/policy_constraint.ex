@@ -95,6 +95,45 @@ defmodule Console.Schema.PolicyConstraint do
     )
   end
 
+  def aggregate(query, :cluster) do
+    q = cluster_violations(query)
+    from(p in subquery(q),
+      group_by: p.exists,
+      select: %{aggregate: p.exists, count: count(p.cluster_id, :distinct)}
+    )
+  end
+
+  def aggregate(_query, :installed) do
+    from(p in subquery(installed_clusters()),
+      group_by: p.installed,
+      select: %{aggregate: p.installed, count: count(p.cluster_id, :distinct)}
+    )
+  end
+
+  def aggregate(query, :enforcement) do
+    from(p in query,
+      group_by: p.enforcement,
+      select: %{aggregate: p.enforcement, count: count(p.id, :distinct)}
+    )
+  end
+
+  defp cluster_violations(query) do
+    from(p in query,
+      left_join: v in assoc(p, :violations),
+      group_by: p.cluster_id,
+      select: %{cluster_id: p.cluster_id, exists: fragment("CASE WHEN ? > 0 THEN 'exists' ELSE 'none' END", count(v.id, :distinct))}
+    )
+  end
+
+  defp installed_clusters() do
+    from(c in Cluster,
+      left_join: p in __MODULE__,
+        on: p.cluster_id == c.id,
+      group_by: c.id,
+      select: %{cluster_id: c.id, installed: fragment("CASE WHEN ? > 0 THEN 'installed' ELSE 'uninstalled' END", count(p.id, :distinct))}
+    )
+  end
+
   def distinct(query), do: from(p in query, distinct: true)
 
   def ordered(query \\ __MODULE__, order \\ [asc: :name, asc: :cluster_id]) do

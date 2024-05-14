@@ -9,6 +9,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def list_stacks(args, %{context: %{current_user: user}}) do
     Stack.for_user(user)
+    |> maybe_search(Stack, args)
     |> Stack.ordered()
     |> paginate(args)
   end

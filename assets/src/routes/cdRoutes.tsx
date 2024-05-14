@@ -32,7 +32,7 @@ import SelfManage from 'components/cd/globalSettings/SelfManage'
 
 import Pipelines from 'components/cd/pipelines/Pipelines'
 
-import GlobalSettingsObservability from 'components/cd/globalSettings/GlobalSettingsObservability'
+import ObservabilitySettings from 'components/cd/globalSettings/observability/ObservabilitySettings'
 
 import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
 
@@ -49,6 +49,8 @@ import Namespaces from 'components/cd/namespaces/Namespaces'
 import NamespacesDetailView from 'components/cd/namespaces/NamespacesDetailView'
 
 import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
+
+import ObservabilityProviders from 'components/cd/globalSettings/observability/ObservabilityProviders'
 
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
@@ -186,7 +188,7 @@ const mainRoutes = (
       element={
         <Navigate
           replace
-          to={REPOS_REL_PATH}
+          to={`../${REPOS_REL_PATH}`}
         />
       }
     />
@@ -203,7 +205,7 @@ const mainRoutes = (
       element={<AddOns />}
     />
     <Route
-      path={`${GLOBAL_SERVICES_REL_PATH}`}
+      path={GLOBAL_SERVICES_REL_PATH}
       element={<GlobalServices />}
     />
   </Route>
@@ -266,8 +268,12 @@ const globalSettingsRoutes = (
       element={<SelfManage />}
     />
     <Route
-      path="observability"
-      element={<GlobalSettingsObservability />}
+      path="observability/settings"
+      element={<ObservabilitySettings />}
+    />
+    <Route
+      path="observability/providers"
+      element={<ObservabilityProviders />}
     />
   </Route>
 )

@@ -26,7 +26,7 @@ import {
   SidebarItem,
   SidebarSection,
   StackIcon,
-  WarningShieldIcon,
+  //WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
@@ -41,7 +41,8 @@ import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
-import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
+
+//import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
 
 import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
@@ -135,12 +136,12 @@ function getMenuItems({
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
     },
-    {
-      text: 'Policies',
-      icon: <WarningShieldIcon />,
-      path: POLICIES_ABS_PATH,
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-    },
+    // {
+    //   text: 'Policies',
+    //   icon: <WarningShieldIcon />,
+    //   path: POLICIES_ABS_PATH,
+    //   enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
+    // },
     {
       text: 'Database management',
       icon: <DatabaseIcon />,

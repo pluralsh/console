@@ -1,4 +1,4 @@
-import { ComponentProps, useMemo } from 'react'
+import { ComponentProps } from 'react'
 import { Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { AuthMethod } from 'generated/graphql'
@@ -41,19 +41,13 @@ export const NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 export const columns = [ColName, ColAnnotations, ColLabels, ColLastActivity]
 
+const crumbs = [
+  ...CD_BASE_CRUMBS,
+  { label: 'namespaces', url: `/${CD_REL_PATH}/${NAMESPACES_REL_PATH}` },
+]
+
 export default function Namespaces() {
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...CD_BASE_CRUMBS,
-        {
-          label: 'namespaces',
-          url: `/${CD_REL_PATH}/${NAMESPACES_REL_PATH}`,
-        },
-      ],
-      []
-    )
-  )
+  useSetBreadcrumbs(crumbs)
 
   return <NamespacesTable />
 }

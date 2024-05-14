@@ -13,12 +13,12 @@ import { useUpdateDeploymentSettingsMutation } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { useUpdateState } from 'components/hooks/useUpdateState'
 
-import { StepH } from '../ModalAlt'
+import { StepH } from '../../ModalAlt'
 
 import {
   getGlobalSettingsBreadcrumbs,
   useGlobalSettingsContext,
-} from './GlobalSettings'
+} from '../GlobalSettings'
 
 function HttpForm({ name, connection, setConnection }) {
   const theme = useTheme()
@@ -103,7 +103,7 @@ function SubmitRow({ allowSubmit, loading, formState }) {
   )
 }
 
-export default function GlobalSettingsObservability() {
+export default function ObservabilitySettings() {
   const theme = useTheme()
   const { deploymentSettings, refetch } = useGlobalSettingsContext()
   const formState = useUpdateState({
@@ -115,7 +115,10 @@ export default function GlobalSettingsObservability() {
     useUpdateDeploymentSettingsMutation()
 
   useSetBreadcrumbs(
-    useMemo(() => getGlobalSettingsBreadcrumbs({ page: 'repositories' }), [])
+    useMemo(
+      () => getGlobalSettingsBreadcrumbs({ page: 'observability Settings' }),
+      []
+    )
   )
 
   const allowSubmit = formState.hasUpdates

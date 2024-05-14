@@ -1,5 +1,5 @@
-import { useCallback, useRef } from 'react'
-import { Card, EmptyState, TabPanel, Table } from '@pluralsh/design-system'
+import { useCallback } from 'react'
+import { Card, EmptyState, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
@@ -28,7 +28,6 @@ export function NamespacesDetailTable({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const tabStateRef = useRef<any>(null)
 
   const queryResult = useGetManagedNamespaceQuery({
     variables: {
@@ -118,46 +117,42 @@ export function NamespacesDetailTable({
           </Body2P>
         </div>
       </Card>
-      <TabPanel
-        stateRef={tabStateRef}
-        css={{ height: '100%', overflow: 'hidden' }}
-      >
-        {!data ? (
-          <LoadingIndicator />
-        ) : services?.length ? (
-          <FullHeightTableWrap>
-            <Table
-              virtualizeRows
-              data={services || []}
-              columns={columns}
-              css={{
-                maxHeight: 'unset',
-                height: '100%',
-              }}
-              onRowClick={(
-                _e,
-                { original }: Row<Edge<ServiceDeploymentsRowFragment>>
-              ) =>
-                navigate(
-                  getServiceDetailsPath({
-                    clusterId: original.node?.cluster?.id,
-                    serviceId: original.node?.id,
-                  })
-                )
-              }
-              hasNextPage={pageInfo?.hasNextPage}
-              fetchNextPage={fetchNextPage}
-              isFetchingNextPage={loading}
-              reactTableOptions={{ meta: { refetch: () => undefined } }}
-              reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
-            />
-          </FullHeightTableWrap>
-        ) : (
-          <div css={{ height: '100%' }}>
-            <EmptyState message="Looks like you don't have any service deployments yet." />
-          </div>
-        )}
-      </TabPanel>
+
+      {!data ? (
+        <LoadingIndicator />
+      ) : services?.length ? (
+        <FullHeightTableWrap>
+          <Table
+            virtualizeRows
+            data={services || []}
+            columns={columns}
+            css={{
+              maxHeight: 'unset',
+              height: '100%',
+            }}
+            onRowClick={(
+              _e,
+              { original }: Row<Edge<ServiceDeploymentsRowFragment>>
+            ) =>
+              navigate(
+                getServiceDetailsPath({
+                  clusterId: original.node?.cluster?.id,
+                  serviceId: original.node?.id,
+                })
+              )
+            }
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            reactTableOptions={{ meta: { refetch: () => undefined } }}
+            reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+          />
+        </FullHeightTableWrap>
+      ) : (
+        <div css={{ height: '100%' }}>
+          <EmptyState message="Looks like you don't have any service deployments yet." />
+        </div>
+      )}
     </div>
   )
 }

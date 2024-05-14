@@ -5,10 +5,11 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
-import { VirtualItem } from '@tanstack/react-virtual'
+
+import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import {
   useClusterBackupsQuery,
@@ -16,9 +17,7 @@ import {
 } from '../../../../generated/graphql'
 import { GqlError } from '../../../utils/Alert'
 import { FullHeightTableWrap } from '../../../utils/layout/FullHeightTableWrap'
-import { extendConnection } from '../../../../utils/graphql'
 import { BACKUPS_CLUSTERS_BASE_CRUMBS } from '../../clusters/Clusters'
-import { useSlicePolling } from '../../../utils/tableFetchHelpers'
 
 import {
   CLUSTER_BACKUPS_REL_PATH,
@@ -33,7 +32,6 @@ import {
   ColStatus,
 } from './BackupsColumns'
 
-const POLL_INTERVAL = 10 * 1000
 const QUERY_PAGE_SIZE = 100
 
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
@@ -58,49 +56,24 @@ export default function Backups() {
   })
   const cluster = clusterData?.cluster
 
-  const [virtualSlice, _setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
-  const queryResult = useClusterBackupsQuery({
-    variables: { clusterId, first: QUERY_PAGE_SIZE },
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
   const {
-    error,
-    fetchMore,
+    data,
     loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
-  const clusterBackups = data?.clusterBackups
-  const pageInfo = clusterBackups?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
-    pageSize: QUERY_PAGE_SIZE,
-    key: 'clusterBackups',
-    interval: POLL_INTERVAL,
-  })
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData(
+    {
+      queryHook: useClusterBackupsQuery,
+      pageSize: QUERY_PAGE_SIZE,
+      queryKey: 'clusterBackups',
+    },
+    {
+      clusterId,
     }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(
-          prev,
-          fetchMoreResult.clusterBackups,
-          'clusterBackups'
-        ),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
+  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -150,6 +123,7 @@ export default function Backups() {
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
             css={{
               maxHeight: 'unset',
               height: '100%',

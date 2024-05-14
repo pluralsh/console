@@ -45,11 +45,13 @@ distributionOptions.unshift({
 export function YamlGeneratorModal({
   open,
   onClose,
+  refetch,
   header,
   kind,
 }: {
   open: boolean
   onClose: Nullable<() => void>
+  refetch: Nullable<() => void>
   header: string
   kind: string
 }) {
@@ -77,6 +79,7 @@ export function YamlGeneratorModal({
       portal
       onClose={() => {
         onClose?.()
+        refetch?.()
       }}
       asForm
       actions={

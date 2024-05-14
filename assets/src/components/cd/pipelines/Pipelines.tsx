@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import {
   Input2,
   LoopingLogo,
@@ -8,25 +8,22 @@ import {
 } from '@pluralsh/design-system'
 import { type Row } from '@tanstack/react-table'
 import { useTheme } from 'styled-components'
-import { type VirtualItem } from '@tanstack/react-virtual'
 import { useNavigate } from 'react-router-dom'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
-import {
-  PRS_REACT_VIRTUAL_OPTIONS,
-  PR_QUERY_PAGE_SIZE,
-} from 'components/pr/queue/PrQueue'
+import { PRS_REACT_VIRTUAL_OPTIONS } from 'components/pr/queue/PrQueue'
 
 import { GqlError } from 'components/utils/Alert'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
-import { Edge, extendConnection } from 'utils/graphql'
+import { Edge } from 'utils/graphql'
 
 import { useThrottle } from 'components/hooks/useThrottle'
 
-import { CD_BASE_CRUMBS, POLL_INTERVAL } from '../ContinuousDeployment'
+import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
+
+import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
 import { columns } from './PipelinesColumns'
 
@@ -42,50 +39,20 @@ export default function PipelineList() {
   const navigate = useNavigate()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 100)
-  const [virtualSlice, _setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
+
+  const { data, loading, error, pageInfo, fetchNextPage } =
+    useFetchPaginatedData(
+      {
+        queryHook: usePipelinesQuery,
+        pageSize: QUERY_PAGE_SIZE,
+        queryKey: 'pipelines',
+      },
+      {
+        q: debouncedSearchString,
       }
-    | undefined
-  >()
+    )
 
   useSetBreadcrumbs(PIPELINES_CRUMBS)
-  const queryResult = usePipelinesQuery({
-    variables: {
-      first: QUERY_PAGE_SIZE,
-      q: debouncedSearchString,
-    },
-    fetchPolicy: 'cache-and-network',
-    pollInterval: POLL_INTERVAL,
-    notifyOnNetworkStatusChange: true,
-  })
-  const {
-    data: currentData,
-    previousData,
-    loading,
-    error,
-    fetchMore,
-  } = queryResult
-  const data = currentData || previousData
-  const pipelines = data?.pipelines
-  const pageInfo = pipelines?.pageInfo
-  const { refetch: _ } = useSlicePolling(queryResult, {
-    virtualSlice,
-    pageSize: PR_QUERY_PAGE_SIZE,
-    key: 'pipelines',
-    interval: POLL_INTERVAL,
-  })
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(prev, fetchMoreResult.pipelines, 'pipelines'),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
 
   if (error) {
     return <GqlError error={error} />

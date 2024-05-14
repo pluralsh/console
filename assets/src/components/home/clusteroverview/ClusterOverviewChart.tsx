@@ -6,9 +6,10 @@ import {
 } from 'components/utils/RadialBarChart'
 import { UpgradeStatisticsQuery } from 'generated/graphql'
 import styled from 'styled-components'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useMemo } from 'react'
+
+import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
 import { CustomLegend } from './CustomLegend'
 
@@ -29,7 +30,7 @@ export function ClusterOverviewChart({
   const { chartData, legendData } = useChartData(data || {}, chartColors)
 
   if (!data?.upgradeStatistics) {
-    return <LoadingIndicator />
+    return <ChartSkeleton />
   }
 
   const CenterLabel = createCenteredMetric(
