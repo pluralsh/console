@@ -62,7 +62,7 @@ const FlyoverContentSC = styled.div<{
 
 const FlyoverHeaderWrapSC = styled.div(({ theme }) => ({
   alignItems: 'center',
-  justifyContent: 'start',
+  justifyContent: 'space-between',
   gap: theme.spacing.small,
   height: 56,
   borderBottom: `1px solid ${theme.colors.border}`,
@@ -132,6 +132,7 @@ function FlyoverRef(
       >
         {!!header && (
           <FlyoverHeaderWrapSC ref={ref}>
+            <FlyoverHeaderSC>{header}</FlyoverHeaderSC>
             <IconFrame
               textValue=""
               display="flex"
@@ -140,7 +141,6 @@ function FlyoverRef(
               onClick={onClose}
               icon={<CloseIcon />}
             />
-            <FlyoverHeaderSC>{header}</FlyoverHeaderSC>
           </FlyoverHeaderWrapSC>
         )}
         <FlyoverContentSC $scrollable={scrollable}>{children}</FlyoverContentSC>
