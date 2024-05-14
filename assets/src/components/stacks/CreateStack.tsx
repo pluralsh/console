@@ -16,11 +16,17 @@ import {
   StackType,
   StacksDocument,
   useCreateStackMutation,
+  useGitRepositoriesQuery,
 } from '../../generated/graphql'
-import { appendConnection, updateCache } from '../../utils/graphql'
+import {
+  appendConnection,
+  mapExistingNodes,
+  updateCache,
+} from '../../utils/graphql'
 import ModalAlt from '../cd/ModalAlt'
 
 import { CreateStackBasic } from './CreateStackBasic'
+import { CreateStackRepository } from './CreateStackRepository'
 
 enum FormState {
   Initial = 'initial',
@@ -68,9 +74,17 @@ export default function CreateStack({
   const [version, setVersion] = useState('')
   const [clusterId, setClusterId] = useState('')
   const [approval, setApproval] = useState<boolean>(false)
+  const [repositoryId, setRepositoryId] = useState('')
+  const [ref, setRef] = useState('')
+  const [folder, setFolder] = useState('')
 
   const currentStepIndex = stepperSteps.findIndex(
     (step) => step.key === formState
+  )
+
+  const { data } = useGitRepositoriesQuery()
+  const repos = mapExistingNodes(data?.gitRepositories).filter(
+    (repo) => repo.health === 'PULLABLE'
   )
 
   const [mutation, { loading, error, reset }] = useCreateStackMutation({
@@ -81,9 +95,9 @@ export default function CreateStack({
         clusterId,
         approval,
         configuration: { image, version },
+        repositoryId,
+        git: { ref, folder },
         // TODO: Add all props to form.
-        repositoryId: '',
-        git: { ref: '', folder: '' },
       },
     },
     onCompleted: () => close(),
@@ -150,7 +164,6 @@ export default function CreateStack({
             stepIndex={currentStepIndex}
           />
         </div>
-
         {formState === FormState.Initial && (
           <CreateStackBasic
             name={name}
@@ -165,6 +178,17 @@ export default function CreateStack({
             setClusterId={setClusterId}
             approval={approval}
             setApproval={setApproval}
+          />
+        )}
+        {formState === FormState.Repository && (
+          <CreateStackRepository
+            repos={repos}
+            repositoryId={repositoryId}
+            setRepositoryId={setRepositoryId}
+            gitRef={ref}
+            setGitRef={setRef}
+            gitFolder={folder}
+            setGitFolder={setFolder}
           />
         )}
 
