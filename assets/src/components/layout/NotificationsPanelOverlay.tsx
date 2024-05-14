@@ -28,7 +28,7 @@ const getTransitionProps = (isOpen: boolean) => ({
       },
 })
 
-const Wrapper = styled(AnimatedDiv)(() => ({
+const Wrapper = styled(AnimatedDiv)(({ theme }) => ({
   position: 'absolute',
   display: 'flex',
   alignItems: 'flex-end',
@@ -36,7 +36,7 @@ const Wrapper = styled(AnimatedDiv)(() => ({
   right: '0',
   overflow: 'hidden',
   transform: `translateX(100%)`,
-  height: `calc(100% - ${56}px)`,
+  height: `calc(100% - ${theme.spacing.xxxlarge}px)`,
 }))
 
 const Animated = styled(AnimatedDiv)(({ theme }) => ({
@@ -91,6 +91,7 @@ export function NotificationsPanelOverlay({
             <Checkbox
               checked={all}
               onChange={() => setAll(!all)}
+              onClick={(e) => e.stopPropagation()}
               small
             >
               Show all notifications
