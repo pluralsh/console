@@ -1,4 +1,4 @@
-import { type ComponentProps } from 'react'
+import { type ComponentProps, useDeferredValue, useState } from 'react'
 import {
   Chip,
   Input,
@@ -9,6 +9,8 @@ import {
 import styled from 'styled-components'
 import { Dispatch, MutableRefObject, SetStateAction, useEffect } from 'react'
 import isNil from 'lodash/isNil'
+
+import { useDebounce } from '@react-hooks-library/core'
 
 import { serviceStatusToSeverity } from './ServiceStatusChip'
 import { ClusterTagsFilter } from './ClusterTagsFilter'
@@ -36,10 +38,8 @@ const ClustersFiltersSC = styled.div(({ theme }) => ({
 }))
 
 export function ClustersFilters({
-  statusFilter,
-  setStatusFilter,
-  searchString,
-  setSearchString,
+  setQueryStatusFilter,
+  setQueryString,
   tabStateRef,
   statusCounts,
   selectedTagKeys,
@@ -47,10 +47,8 @@ export function ClustersFilters({
   tagOp,
   setTagOp,
 }: {
-  searchString
-  setSearchString: (string) => void
-  statusFilter: ClusterStatusTabKey
-  setStatusFilter: Dispatch<SetStateAction<ClusterStatusTabKey>>
+  setQueryStatusFilter: Dispatch<SetStateAction<ClusterStatusTabKey>>
+  setQueryString: (string) => void
   tabStateRef: MutableRefObject<any>
   statusCounts: Record<ClusterStatusTabKey, number | undefined>
   selectedTagKeys: ComponentProps<typeof ClusterTagsFilter>['selectedTagKeys']
@@ -60,9 +58,18 @@ export function ClustersFilters({
   tagOp: ComponentProps<typeof ClusterTagsFilter>['searchOp']
   setTagOp: ComponentProps<typeof ClusterTagsFilter>['setSearchOp']
 }) {
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useDebounce(searchString, 400)
+  const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
+  const deferredStatusFilter = useDeferredValue(statusFilter)
+
   useEffect(() => {
-    setStatusFilter(statusFilter)
-  }, [setStatusFilter, statusFilter])
+    setQueryString(debouncedSearchString)
+  }, [searchString, debouncedSearchString, setQueryString])
+
+  useEffect(() => {
+    setQueryStatusFilter(deferredStatusFilter)
+  }, [setQueryStatusFilter, deferredStatusFilter])
 
   return (
     <ClustersFiltersSC>
@@ -80,7 +87,7 @@ export function ClustersFilters({
           startIcon={<SearchIcon />}
           value={searchString}
           onChange={(e) => {
-            setSearchString?.(e.currentTarget.value)
+            setSearchString(e.currentTarget.value)
           }}
         />
       </div>

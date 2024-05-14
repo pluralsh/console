@@ -11,11 +11,15 @@ import {
   MutableRefObject,
   SetStateAction,
   useCallback,
+  useDeferredValue,
   useEffect,
+  useState,
 } from 'react'
 import isNil from 'lodash/isNil'
 
 import { ServiceDeploymentStatus } from 'generated/graphql'
+
+import { useDebounce } from '@react-hooks-library/core'
 
 import ClusterSelector from '../utils/ClusterSelector'
 
@@ -56,27 +60,33 @@ const ServiceFiltersSC = styled.div(({ theme }) => ({
 }))
 
 export function ServicesFilters({
-  statusFilter,
-  setStatusFilter,
-  searchString,
-  setSearchString,
+  setQueryStatusFilter,
+  setQueryString,
   clusterId,
   setClusterId,
   tabStateRef,
   statusCounts,
 }: {
-  searchString
-  setSearchString: (string) => void
-  statusFilter: StatusTabKey
-  setStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
+  setQueryStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
+  setQueryString: (string) => void
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
   tabStateRef: MutableRefObject<any>
   statusCounts: Record<StatusTabKey, number | undefined>
 }) {
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useDebounce(searchString, 400)
+  const [statusFilter, setStatusFilter] = useState<StatusTabKey>('ALL')
+  const deferredStatusFilter = useDeferredValue(statusFilter)
+
   useEffect(() => {
-    setStatusFilter(statusFilter)
-  }, [setStatusFilter, statusFilter])
+    setQueryString(debouncedSearchString)
+  }, [searchString, debouncedSearchString, setQueryString])
+
+  useEffect(() => {
+    setQueryStatusFilter(deferredStatusFilter)
+  }, [setQueryStatusFilter, deferredStatusFilter])
+
   const onClusterChange = useCallback(
     (cluster) => {
       setClusterId?.(cluster?.id || '')
@@ -100,7 +110,7 @@ export function ServicesFilters({
         startIcon={<SearchIcon />}
         value={searchString}
         onChange={(e) => {
-          setSearchString?.(e.currentTarget.value)
+          setSearchString(e.currentTarget.value)
         }}
         css={{ flexGrow: 1 }}
       />
