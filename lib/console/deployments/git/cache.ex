@@ -68,7 +68,7 @@ defmodule Console.Deployments.Git.Cache do
   def changes(%__MODULE__{git: g} = c, sha1, sha2, folder) do
     case file_changes(g, sha1, sha2, folder) do
       {:ok, [_ | _] = changes} -> add_msgs(c, changes, sha2)
-      {:ok, :pass} -> add_msgs(c, :pass, sha1)
+      {:ok, :pass} -> add_msgs(c, :pass, sha2)
       pass -> pass
     end
   end

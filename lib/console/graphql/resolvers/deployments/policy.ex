@@ -38,6 +38,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     end)
   end
 
+  def policy_statistics(%{aggregate: f} = args, %{context: %{current_user: user}}) do
+    PolicyConstraint.for_user(user)
+    |> apply_filters(args)
+    |> PolicyConstraint.aggregate(f)
+    |> Console.Repo.all()
+    |> ok()
+  end
+
   def violation_statistics(%{field: f}, %{context: %{current_user: user}}) do
     PolicyConstraint.for_user(user)
     |> PolicyConstraint.statistics(f)

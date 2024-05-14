@@ -2,25 +2,23 @@ import {
   Breadcrumb,
   Input,
   SearchIcon,
-  TabPanel,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useDebounce } from '@react-hooks-library/core'
-import { VirtualItem } from '@tanstack/react-virtual'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
 import { Title1H1 } from 'components/utils/typography/Text'
 import { usePolicyConstraintsQuery } from 'generated/graphql'
-import { ComponentProps, useCallback, useRef, useState } from 'react'
+import { ComponentProps, useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
 import styled from 'styled-components'
-import { extendConnection } from 'utils/graphql'
+
+import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import { PoliciesTable } from './PoliciesTable'
-import PoliciesViolationsGauge from './PoliciesViolationsGauge'
+import { PoliciesViolationsGauge } from './PoliciesViolationsGauge'
 import PoliciesFilter from './PoliciesFilter'
 
 const breadcrumbs: Breadcrumb[] = [
@@ -38,6 +36,7 @@ export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 }
 
 function Policies() {
+  useSetBreadcrumbs(breadcrumbs)
   const [searchString, setSearchString] = useState('')
   const [selectedKinds, setSelectedKinds] = useState<(string | null)[]>([])
   const [selectedNamespaces, setSelectedNamespaces] = useState<
@@ -48,61 +47,24 @@ function Policies() {
   )
 
   const debouncedSearchString = useDebounce(searchString, 100)
-  const tabStateRef = useRef<any>(null)
 
-  const [virtualSlice, setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
+  const policyQFilters = {
+    ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
+    ...(selectedKinds.length ? { kinds: selectedKinds } : {}),
+    ...(selectedNamespaces.length ? { namespaces: selectedNamespaces } : {}),
+    ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
+  }
 
-  useSetBreadcrumbs(breadcrumbs)
-
-  const queryResult = usePolicyConstraintsQuery({
-    variables: {
-      ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
-      first: POLICIES_QUERY_PAGE_SIZE,
-      ...(selectedKinds.length ? { kinds: selectedKinds } : {}),
-      ...(selectedNamespaces.length ? { namespaces: selectedNamespaces } : {}),
-      ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
-    },
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
-  const {
-    error,
-    fetchMore,
-    loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
+  const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: usePolicyConstraintsQuery,
+        pageSize: POLICIES_QUERY_PAGE_SIZE,
+        queryKey: 'policyConstraints',
+      },
+      policyQFilters
+    )
   const policies = data?.policyConstraints?.edges
-  const pageInfo = data?.policyConstraints?.pageInfo
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
-    pageSize: POLICIES_QUERY_PAGE_SIZE,
-    key: 'policyConstraints',
-    interval: POLL_INTERVAL,
-  })
-
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(
-          prev,
-          fetchMoreResult.policyConstraints,
-          'policyConstraints'
-        ),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
 
   if (error) {
     return <GqlError error={error} />
@@ -138,29 +100,19 @@ function Policies() {
       </div>
       <div className="violations">
         {policies && policies?.length > 0 && (
-          <PoliciesViolationsGauge
-            clustersWithViolations={
-              policies?.filter((pol) => pol?.node?.violationCount).length || 0
-            }
-            totalClusters={policies?.length || 0}
-          />
+          <PoliciesViolationsGauge filters={policyQFilters} />
         )}
       </div>
       <div className="table">
-        <TabPanel
-          stateRef={tabStateRef}
-          css={{ height: '100%', overflow: 'hidden' }}
-        >
-          <FullHeightTableWrap>
-            <PoliciesTable
-              data={data || []}
-              refetch={refetch}
-              fetchNextPage={fetchNextPage}
-              loading={loading}
-              setVirtualSlice={setVirtualSlice}
-            />
-          </FullHeightTableWrap>
-        </TabPanel>
+        <FullHeightTableWrap>
+          <PoliciesTable
+            data={data || []}
+            refetch={refetch}
+            fetchNextPage={fetchNextPage}
+            loading={loading}
+            setVirtualSlice={setVirtualSlice}
+          />
+        </FullHeightTableWrap>
       </div>
     </PoliciesContainer>
   )
@@ -193,6 +145,7 @@ const PoliciesContainer = styled.div(({ theme }) => ({
   },
   '.violations': {
     gridArea: 'violations',
+    overflow: 'auto',
   },
   '.table': {
     gridArea: 'table',

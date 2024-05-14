@@ -7,7 +7,6 @@ import {
 } from 'components/cd/clusters/Clusters'
 import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useClustersQuery, useUpgradeStatisticsQuery } from 'generated/graphql'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
@@ -46,10 +45,6 @@ export function ClusterOverviewCard() {
     return <GqlError error={tableError} />
   }
 
-  if (!tableData?.clusters?.edges) {
-    return <LoadingIndicator />
-  }
-
   return (
     <HomeCard overflow="none">
       <div
@@ -71,7 +66,7 @@ export function ClusterOverviewCard() {
           }}
         >
           <ClusterOverViewTable
-            data={tableData.clusters.edges}
+            data={tableData?.clusters?.edges}
             refetch={refetch}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}

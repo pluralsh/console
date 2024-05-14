@@ -15,6 +15,7 @@ import {
   ColServiceDeployment,
   ColStatus,
 } from 'components/cd/services/ServicesColumns'
+import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 
 export function DeploymentsTable({
   refetch,
@@ -27,6 +28,10 @@ export function DeploymentsTable({
   const navigate = useNavigate()
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
     meta: { refetch },
+  }
+
+  if (!data) {
+    return <TableSkeleton centered />
   }
 
   return (
