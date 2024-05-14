@@ -62,11 +62,6 @@ spec:
       #   - "namespace_flows_total"
       #   - "namespace_drop_packets_total"
       #   - "namespace_rtt_seconds"
-    # Kafka consumer stage configuration
-    kafkaConsumerReplicas: 3
-    kafkaConsumerAutoscaler: null
-    kafkaConsumerQueueCapacity: 1000
-    kafkaConsumerBatchSize: 10485760
     # Custom optionnal resources configuration
     resources:
       requests:
