@@ -6,20 +6,25 @@ import {
   SearchIcon,
   Sidecar,
   SidecarItem,
+  SubTab,
+  TabList,
   TreeNavEntry,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { isEmpty } from 'lodash'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import capitalize from 'lodash/capitalize'
 
 import { useDebounce } from '@react-hooks-library/core'
 
 import Fuse from 'fuse.js'
 
-import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
+import {
+  STACK_ENV_REL_PATH,
+  STACK_RUNS_REL_PATH,
+  getStacksAbsPath,
+} from '../../routes/stacksRoutesConsts'
 import { GqlError } from '../utils/Alert'
 import { extendConnection, mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
@@ -33,8 +38,9 @@ import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayo
 
 import { StandardScroller } from '../utils/SmoothScroller'
 
+import { LinkTabWrap } from '../utils/Tabs'
+
 import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
-import Stack from './Stack'
 import CreateStack from './CreateStack'
 
 const pollInterval = 10 * 1000
@@ -43,6 +49,11 @@ const searchOptions = {
   keys: ['name'],
   threshold: 0.25,
 }
+
+const directory = [
+  { path: STACK_RUNS_REL_PATH, label: 'Runs' },
+  { path: STACK_ENV_REL_PATH, label: 'Environment' },
+] as const
 
 export const getBreadcrumbs = (stackId: string) => [
   { label: 'stacks', url: getStacksAbsPath('') },
@@ -53,6 +64,10 @@ export default function Stacks() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { stackId = '' } = useParams()
+  const tabStateRef = useRef<any>(null)
+  const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
+  const tab = pathMatch?.params?.tab || ''
+  const currentTab = directory.find(({ path }) => path === tab)
   const [listRef, setListRef] = useState<any>(null)
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -62,8 +77,6 @@ export default function Stacks() {
     notifyOnNetworkStatusChange: true,
     pollInterval,
   })
-
-  useSetBreadcrumbs(useMemo(() => getBreadcrumbs(stackId), [stackId]))
 
   const { stacks, pageInfo } = useMemo(
     () => ({
@@ -196,7 +209,34 @@ export default function Stacks() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
-        {stack && <Stack stack={stack} />}
+        <TabList
+          scrollable
+          gap="xxsmall"
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            selectedKey: currentTab?.path,
+          }}
+          marginRight="medium"
+          paddingBottom="small"
+        >
+          {directory.map(({ label, path }) => (
+            <LinkTabWrap
+              subTab
+              key={path}
+              textValue={label}
+              to={`${getStacksAbsPath(stackId)}/${path}`}
+            >
+              <SubTab
+                key={path}
+                textValue={label}
+              >
+                {label}
+              </SubTab>
+            </LinkTabWrap>
+          ))}
+        </TabList>
+        <Outlet context={{ stack }} />
       </div>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer>

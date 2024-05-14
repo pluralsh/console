@@ -1,7 +1,14 @@
-import { Card, EmptyState, LoopingLogo } from '@pluralsh/design-system'
+import {
+  Card,
+  EmptyState,
+  LoopingLogo,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
+
+import { useOutletContext, useParams } from 'react-router-dom'
 
 import { StackFragment, useStackRunsQuery } from '../../generated/graphql'
 import { extendConnection, mapExistingNodes } from '../../utils/graphql'
@@ -9,13 +16,20 @@ import { StandardScroller } from '../utils/SmoothScroller'
 import { ReturnToBeginning } from '../utils/ReturnToBeginning'
 
 import StackRun from './StackRun'
+import { getBreadcrumbs } from './Stacks'
 
 const pollInterval = 5 * 1000
 
-export default function Stack({ stack }: { stack?: Nullable<StackFragment> }) {
+export default function StackRuns() {
   const theme = useTheme()
+  const { stackId = '' } = useParams()
+  const { stack } = useOutletContext() as { stack?: Nullable<StackFragment> }
   const [listRef, setListRef] = useState<any>(null)
   const [scrolled, setScrolled] = useState(false)
+
+  useSetBreadcrumbs(
+    useMemo(() => [...getBreadcrumbs(stackId), { label: 'runs' }], [stackId])
+  )
 
   const { data, loading, fetchMore } = useStackRunsQuery({
     variables: { id: stack?.id ?? '' },
