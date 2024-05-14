@@ -10,6 +10,8 @@ import ClusterSelector from 'components/cd/utils/ClusterSelector'
 
 import { StackType } from '../../generated/graphql'
 
+import { StackTypeIcon } from './StackTypeIcon'
+
 export function CreateStackBasic({
   name,
   setName,
@@ -59,10 +61,10 @@ export function CreateStackBasic({
         required
         label="Type"
       >
-        {/* TODO: Add provider icon. */}
         <Select
           aria-label="type"
           label="Type"
+          leftContent={<StackTypeIcon stackType={type} />}
           selectedKey={type}
           onSelectionChange={(key) => setType(key as StackType)}
         >
@@ -71,6 +73,7 @@ export function CreateStackBasic({
               key={value}
               label={key}
               textValue={value}
+              leftContent={<StackTypeIcon stackType={value} />}
             />
           ))}
         </Select>

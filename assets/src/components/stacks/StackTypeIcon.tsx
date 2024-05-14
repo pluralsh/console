@@ -33,7 +33,7 @@ export function useStackTypeIconUrl({ type }: { type: Nullable<StackType> }) {
 
 export function StackTypeIcon({
   stackType,
-  size,
+  size = 16,
   ...props
 }: {
   stackType: Nullable<StackType>
