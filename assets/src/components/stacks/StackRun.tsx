@@ -51,14 +51,23 @@ export default function StackRun({
           display: 'flex',
           flexDirection: 'column',
           gap: theme.spacing.xxxsmall,
+          overflow: 'hidden',
         }}
       >
-        <div css={{ ...theme.partials.text.body2 }}>
+        <div
+          css={{
+            ...theme.partials.text.body2,
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+          }}
+        >
           {message ?? (first ? 'Initial run' : 'No message')}
         </div>
         {approval && (
           <div
             css={{
+              textOverflow: 'ellipsis',
+              overflow: 'hidden',
               ...theme.partials.text.caption,
               color: approvedAt
                 ? theme.colors['text-xlight']
@@ -74,6 +83,8 @@ export default function StackRun({
           css={{
             ...theme.partials.text.caption,
             color: theme.colors['text-xlight'],
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
           }}
         >
           {ref}
