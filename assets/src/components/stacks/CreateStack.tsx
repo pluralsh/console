@@ -7,7 +7,6 @@ import {
 } from '@pluralsh/design-system'
 import { ButtonProps } from 'honorable'
 import { ReactNode, useCallback, useState } from 'react'
-import isEmpty from 'lodash/isEmpty'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -25,10 +24,13 @@ import {
 } from '../../utils/graphql'
 import ModalAlt from '../cd/ModalAlt'
 
+import { ModalMountTransition } from '../utils/ModalMountTransition'
+
 import { CreateStackBasic } from './CreateStackBasic'
 import { CreateStackRepository } from './CreateStackRepository'
+import CreateStackActions from './CreateStackActions'
 
-enum FormState {
+export enum FormState {
   Initial = 'initial',
   Repository = 'repository',
 }
@@ -43,7 +45,7 @@ const stepBase = {
   vertical: true,
 }
 
-const stepperSteps = [
+export const stepperSteps = [
   {
     key: FormState.Initial,
     stepTitle: <StepTitle>Stack props</StepTitle>,
@@ -77,6 +79,11 @@ export default function CreateStack({
   const [repositoryId, setRepositoryId] = useState('')
   const [ref, setRef] = useState('')
   const [folder, setFolder] = useState('')
+
+  // TODO: Reset form on exit.
+
+  const initialFormValid = !!(name && type && version && clusterId)
+  const repoFormValid = !!(repositoryId && ref && folder)
 
   const currentStepIndex = stepperSteps.findIndex(
     (step) => step.key === formState
@@ -125,82 +132,79 @@ export default function CreateStack({
           {buttonContent}
         </Button>
       </Tooltip>
-      <ModalAlt
-        header="Create infrastracture stack"
-        portal
-        asForm
-        open={open}
-        onClose={() => close()}
-        actions={
-          <>
-            <Button
-              secondary
-              onClick={() => close()}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isEmpty(name)}
-              onClick={() => mutation()}
+      <ModalMountTransition open={open}>
+        <ModalAlt
+          header="Create infrastracture stack"
+          portal
+          asForm
+          open={open}
+          onClose={() => close()}
+          actions={
+            <CreateStackActions
+              formState={formState}
+              setFormState={setFormState}
+              currentStepIndex={currentStepIndex}
+              initialFormValid={initialFormValid}
+              repoFormValid={repoFormValid}
+              close={close}
+              submit={mutation}
               loading={loading}
-              marginLeft="medium"
-            >
-              Create
-            </Button>
-          </>
-        }
-      >
-        <div
-          css={{
-            display: 'flex',
-            paddingBottom:
-              formState === FormState.Repository ? 0 : theme.spacing.medium,
-          }}
+            />
+          }
         >
-          <Stepper
-            compact
-            steps={stepperSteps}
-            stepIndex={currentStepIndex}
-          />
-        </div>
-        {formState === FormState.Initial && (
-          <CreateStackBasic
-            name={name}
-            setName={setName}
-            type={type}
-            setType={setType}
-            image={image}
-            setImage={setImage}
-            version={version}
-            setVersion={setVersion}
-            clusterId={clusterId}
-            setClusterId={setClusterId}
-            approval={approval}
-            setApproval={setApproval}
-          />
-        )}
-        {formState === FormState.Repository && (
-          <CreateStackRepository
-            repos={repos}
-            repositoryId={repositoryId}
-            setRepositoryId={setRepositoryId}
-            gitRef={ref}
-            setGitRef={setRef}
-            gitFolder={folder}
-            setGitFolder={setFolder}
-          />
-        )}
+          <div
+            css={{
+              display: 'flex',
+              paddingBottom:
+                formState === FormState.Repository ? 0 : theme.spacing.medium,
+            }}
+          >
+            <Stepper
+              compact
+              steps={stepperSteps}
+              stepIndex={currentStepIndex}
+            />
+          </div>
 
-        <div css={{ marginTop: theme.spacing.medium }}>
-          {error && (
-            <GqlError
-              header="Something went wrong"
-              error={error}
+          {formState === FormState.Initial && (
+            <CreateStackBasic
+              name={name}
+              setName={setName}
+              type={type}
+              setType={setType}
+              image={image}
+              setImage={setImage}
+              version={version}
+              setVersion={setVersion}
+              clusterId={clusterId}
+              setClusterId={setClusterId}
+              approval={approval}
+              setApproval={setApproval}
             />
           )}
-        </div>
-      </ModalAlt>
+
+          {formState === FormState.Repository && (
+            <CreateStackRepository
+              repos={repos}
+              repositoryId={repositoryId}
+              setRepositoryId={setRepositoryId}
+              gitRef={ref}
+              setGitRef={setRef}
+              gitFolder={folder}
+              setGitFolder={setFolder}
+            />
+          )}
+
+          <div css={{ marginTop: theme.spacing.medium }}>
+            {error && (
+              <GqlError
+                header="Something went wrong"
+                error={error}
+              />
+            )}
+          </div>
+        </ModalAlt>
+      </ModalMountTransition>
     </>
   )
 }
