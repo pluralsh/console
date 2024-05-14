@@ -38,6 +38,16 @@ export default function CreateStackActions({
         <Button
           type="submit"
           disabled={!repoFormValid}
+          onClick={() => setFormState(FormState.Environment)}
+          marginLeft="medium"
+        >
+          Setup environment
+        </Button>
+      )}
+
+      {formState === FormState.Environment && (
+        <Button
+          type="submit"
           onClick={() => submit()}
           loading={loading}
           marginLeft="medium"

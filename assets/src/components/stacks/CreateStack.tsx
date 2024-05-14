@@ -3,6 +3,7 @@ import {
   GearTrainIcon,
   GitHubIcon,
   Stepper,
+  TerminalIcon,
   Tooltip,
 } from '@pluralsh/design-system'
 import { ButtonProps } from 'honorable'
@@ -12,6 +13,7 @@ import styled, { useTheme } from 'styled-components'
 
 import { GqlError } from '../utils/Alert'
 import {
+  StackEnvironmentAttributes,
   StackType,
   StacksDocument,
   useCreateStackMutation,
@@ -29,10 +31,12 @@ import { ModalMountTransition } from '../utils/ModalMountTransition'
 import { CreateStackBasic } from './CreateStackBasic'
 import { CreateStackRepository } from './CreateStackRepository'
 import CreateStackActions from './CreateStackActions'
+import { CreateStackEnvironment } from './CreateStackEnvironment'
 
 export enum FormState {
   Initial = 'initial',
   Repository = 'repository',
+  Environment = 'environment',
 }
 
 const StepTitle = styled.div(({ theme }) => ({
@@ -58,6 +62,12 @@ export const stepperSteps = [
     IconComponent: GitHubIcon,
     ...stepBase,
   },
+  {
+    key: FormState.Environment,
+    stepTitle: <StepTitle>Environment</StepTitle>,
+    IconComponent: TerminalIcon,
+    ...stepBase,
+  },
 ]
 
 export default function CreateStack({
@@ -79,6 +89,9 @@ export default function CreateStack({
   const [repositoryId, setRepositoryId] = useState('')
   const [ref, setRef] = useState('')
   const [folder, setFolder] = useState('')
+  const [environment, setEnvironment] = useState<StackEnvironmentAttributes[]>(
+    []
+  )
 
   // TODO: Reset form on exit.
 
@@ -104,6 +117,7 @@ export default function CreateStack({
         configuration: { image, version },
         repositoryId,
         git: { ref, folder },
+        environment,
         // TODO: Add all props to form.
       },
     },
@@ -192,6 +206,13 @@ export default function CreateStack({
               setGitRef={setRef}
               gitFolder={folder}
               setGitFolder={setFolder}
+            />
+          )}
+
+          {formState === FormState.Environment && (
+            <CreateStackEnvironment
+              environment={environment}
+              setEnvironment={setEnvironment}
             />
           )}
 
