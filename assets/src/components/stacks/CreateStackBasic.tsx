@@ -15,6 +15,10 @@ export function CreateStackBasic({
   setName,
   type,
   setType,
+  image,
+  setImage,
+  version,
+  setVersion,
   clusterId,
   setClusterId,
   approval,
@@ -24,6 +28,10 @@ export function CreateStackBasic({
   setName: (name: string) => void
   type: StackType
   setType: (type: StackType) => void
+  image: string
+  setImage: (image: string) => void
+  version: string
+  setVersion: (version: string) => void
   clusterId: string
   setClusterId: (clusterId: string) => void
   approval: boolean
@@ -66,6 +74,23 @@ export function CreateStackBasic({
             />
           ))}
         </Select>
+      </FormField>
+      <FormField label="Image">
+        <Input
+          inputProps={{ ref: inputRef }}
+          value={image}
+          onChange={(e) => setImage(e.currentTarget.value)}
+        />
+      </FormField>
+      <FormField
+        required
+        label="Version"
+      >
+        <Input
+          inputProps={{ ref: inputRef }}
+          value={version}
+          onChange={(e) => setVersion(e.currentTarget.value)}
+        />
       </FormField>
       <FormField
         required

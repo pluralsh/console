@@ -64,6 +64,8 @@ export default function CreateStack({
   const [formState, setFormState] = useState<FormState>(FormState.Initial)
   const [name, setName] = useState('')
   const [type, setType] = useState<StackType>(StackType.Terraform)
+  const [image, setImage] = useState('')
+  const [version, setVersion] = useState('')
   const [clusterId, setClusterId] = useState('')
   const [approval, setApproval] = useState<boolean>(false)
 
@@ -78,10 +80,10 @@ export default function CreateStack({
         type,
         clusterId,
         approval,
+        configuration: { image, version },
         // TODO: Add all props to form.
         repositoryId: '',
         git: { ref: '', folder: '' },
-        configuration: { version: '' },
       },
     },
     onCompleted: () => close(),
@@ -155,6 +157,10 @@ export default function CreateStack({
             setName={setName}
             type={type}
             setType={setType}
+            image={image}
+            setImage={setImage}
+            version={version}
+            setVersion={setVersion}
             clusterId={clusterId}
             setClusterId={setClusterId}
             approval={approval}
