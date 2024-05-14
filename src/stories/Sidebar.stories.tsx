@@ -15,6 +15,8 @@ import Sidebar from '../components/Sidebar'
 import SidebarItem from '../components/SidebarItem'
 import SidebarSection from '../components/SidebarSection'
 import { Button, IconFrame, PluralLogoMark } from '../index'
+import SidebarExpandButton from '../components/SidebarExpandButton'
+import SidebarExpandWrapper from '../components/SidebarExpandWrapper'
 
 export default {
   title: 'Sidebar',
@@ -59,71 +61,82 @@ function Template({ variant }: any) {
   return (
     <Div
       width="800px"
-      height="600px"
+      height="680px"
       border="1px solid border"
     >
       <Sidebar
         variant={variant}
         layout="vertical"
       >
-        <SidebarSection>
-          <SidebarItem
-            as="a"
-            href="https://app.plural.sh"
-          >
-            <PluralLogoMark
-              width="24"
-              color={theme.colors['marketing-white']}
-            />
-          </SidebarItem>
-        </SidebarSection>
+        <SidebarExpandWrapper>
+          <SidebarSection>
+            <SidebarItem
+              as="a"
+              href="https://app.plural.sh"
+              expandedLabel="Plural"
+            >
+              <PluralLogoMark
+                width="24"
+                color={theme.colors['marketing-white']}
+              />
+            </SidebarItem>
+          </SidebarSection>
+          <SidebarSection grow={1}>
+            {items.map(({ tooltip, icon }) => (
+              <SidebarItem
+                clickable
+                as="a"
+                onClick={(e: MouseEvent) => {
+                  e.preventDefault()
+                  setActiveKey(tooltip)
+                }}
+                key={tooltip}
+                tooltip={tooltip}
+                active={tooltip === activeKey}
+                expandedLabel={tooltip}
+              >
+                {icon}
+              </SidebarItem>
+            ))}
+          </SidebarSection>
 
-        <SidebarSection grow={1}>
-          {items.map(({ tooltip, icon }) => (
+          <SidebarSection>
+            <SidebarExpandButton />
             <SidebarItem
               clickable
-              as="a"
-              onClick={(e: MouseEvent) => {
-                e.preventDefault()
-                setActiveKey(tooltip)
-              }}
-              key={tooltip}
-              tooltip={tooltip}
-              active={tooltip === activeKey}
+              tooltip="Discord"
+              expandedLabel="Discord"
+              href="https://discord.com/invite/qsUfBcC3Ru"
             >
-              {icon}
+              <DiscordIcon />
             </SidebarItem>
-          ))}
-        </SidebarSection>
+            <SidebarItem
+              clickable
+              tooltip="GitHub"
+              expandedLabel="GitHub"
+              href="https://github.com/pluralsh/plural"
+            >
+              <GitHubLogoIcon />
+            </SidebarItem>
+          </SidebarSection>
 
-        <SidebarSection>
-          <SidebarItem
-            clickable
-            tooltip="Discord"
-            href="https://discord.com/invite/qsUfBcC3Ru"
-          >
-            <DiscordIcon />
-          </SidebarItem>
-          <SidebarItem
-            clickable
-            tooltip="GitHub"
-            href="https://github.com/pluralsh/plural"
-          >
-            <GitHubLogoIcon />
-          </SidebarItem>
-        </SidebarSection>
-
-        <SidebarSection>
-          <SidebarItem
-            clickable
-            tooltip="Notifications"
-          >
-            <BellIcon />
-          </SidebarItem>
-          <SidebarItem clickable>
-            <Avatar size={32} />
-          </SidebarItem>
-        </SidebarSection>
+          <SidebarSection>
+            <SidebarItem
+              clickable
+              tooltip="Notifications"
+              expandedLabel="Notifications"
+            >
+              <BellIcon />
+            </SidebarItem>
+            <SidebarItem
+              clickable
+              expandedLabel="Profile"
+              css={{ padding: '0' }}
+            >
+              <Avatar size={40} />
+            </SidebarItem>
+          </SidebarSection>
+        </SidebarExpandWrapper>
       </Sidebar>
     </Div>
   )

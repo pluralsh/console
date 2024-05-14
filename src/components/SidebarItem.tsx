@@ -8,22 +8,27 @@ import { type SidebarVariant, useSidebar } from './Sidebar'
 type SidebarItemProps = ComponentProps<typeof ItemSC> & {
   clickable?: boolean
   tooltip?: string
+  expandedLabel?: string
   active?: boolean
 }
 
-function SidebarItemRef(
-  { children, clickable = false, tooltip = '', ...props }: SidebarItemProps,
-  ref: Ref<any>
-) {
+function SidebarItemRef({
+  children,
+  tooltip = '',
+  expandedLabel = '',
+  className,
+  ...props
+}: SidebarItemProps) {
+  const { isExpanded } = useSidebar()
+
   return (
-    <WithTooltip tooltip={tooltip}>
-      <Item
-        clickable={clickable}
-        ref={ref}
-        {...props}
-      >
-        {children}
-      </Item>
+    <WithTooltip
+      tooltip={tooltip}
+      className={className}
+      {...props}
+    >
+      {children}
+      {isExpanded && expandedLabel ? expandedLabel : null}
     </WithTooltip>
   )
 }
@@ -32,9 +37,19 @@ function WithTooltipRef(
   { children, clickable, tooltip = '', ...props }: SidebarItemProps,
   ref: Ref<any>
 ) {
-  const { layout } = useSidebar()
+  const { layout, isExpanded } = useSidebar()
 
-  if (!tooltip) return <> {children}</>
+  if (!tooltip || isExpanded)
+    return (
+      <Item
+        layout={layout}
+        clickable={clickable}
+        ref={ref}
+        {...props}
+      >
+        {children}
+      </Item>
+    )
 
   return (
     <Tooltip
@@ -63,10 +78,14 @@ const ItemSC = styled.div<{
 }>(({ theme, $clickable, $active, $isHorizontal, $variant }) => ({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
-  width: $isHorizontal ? undefined : 32,
-  height: 32,
+  justifyContent: 'flex-start',
+  gap: theme.spacing.xsmall,
+  textDecoration: 'none',
+  whiteSpace: 'nowrap',
+  width: $isHorizontal ? undefined : '100%',
+  height: $isHorizontal ? undefined : 40,
   flexGrow: 0,
+  padding: $isHorizontal ? undefined : theme.spacing.small,
   borderRadius: '3px',
   overflow: 'hidden',
   color: theme.colors['icon-light'],

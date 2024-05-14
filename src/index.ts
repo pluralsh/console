@@ -68,8 +68,13 @@ export {
 export type { TooltipProps } from './components/Tooltip'
 export { default as Tooltip } from './components/Tooltip'
 export { default as FormTitle } from './components/FormTitle'
-export { default as Sidebar } from './components/Sidebar'
+export { default as Sidebar, SIDEBAR_WIDTH } from './components/Sidebar'
 export { default as SidebarSection } from './components/SidebarSection'
+export { default as SidebarExpandButton } from './components/SidebarExpandButton'
+export {
+  default as SidebarExpandWrapper,
+  SIDEBAR_EXPANDED_WIDTH,
+} from './components/SidebarExpandWrapper'
 export { default as SidebarItem } from './components/SidebarItem'
 export { default as Modal } from './components/Modal'
 export { default as Flyover } from './components/Flyover'

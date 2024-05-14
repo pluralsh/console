@@ -1,10 +1,13 @@
 import {
   type ComponentProps,
+  type Dispatch,
   type Ref,
+  type SetStateAction,
   createContext,
   forwardRef,
   useContext,
   useMemo,
+  useState,
 } from 'react'
 import styled from 'styled-components'
 
@@ -14,10 +17,12 @@ type SidebarVariant = 'app' | 'console'
 type SidebarBaseProps = {
   layout?: SidebarLayout
   variant: SidebarVariant
+  isExpanded?: boolean
+  setIsExpanded?: Dispatch<SetStateAction<boolean>>
 }
 type SidebarProps = SidebarBaseProps & ComponentProps<typeof SidebarSC>
 
-const SIDEBAR_WIDTH = 64
+export const SIDEBAR_WIDTH = 64
 const SIDEBAR_HEIGHT = 56
 
 const SidebarContext = createContext<SidebarBaseProps | null>(null)
@@ -49,22 +54,24 @@ const SidebarSC = styled.div<{
       : $variant === 'console'
       ? theme.colors.grey[950]
       : theme.colors['fill-one'],
-
-  borderRight: $isHorizontal ? 'none' : theme.borders.default,
   borderBottom: $isHorizontal ? theme.borders.default : 'none',
-  overflowY: 'hidden',
+  overflow: 'visible',
 }))
 
 function SidebarRef(
   { layout = 'vertical', variant = 'app', ...props }: SidebarProps,
   ref: Ref<any>
 ) {
+  const [isExpanded, setIsExpanded] = useState<boolean>(false)
+
   const contextVal = useMemo(
     () => ({
       layout,
       variant,
+      isExpanded,
+      setIsExpanded,
     }),
-    [layout, variant]
+    [layout, variant, isExpanded, setIsExpanded]
   )
 
   return (
@@ -72,6 +79,7 @@ function SidebarRef(
       <SidebarSC
         $isHorizontal={layout === 'horizontal'}
         $variant={variant}
+        $isExpanded={isExpanded}
         ref={ref}
         {...props}
       />
