@@ -28,16 +28,16 @@ const getTransitionProps = (isOpen: boolean) => ({
       },
 })
 
-const Wrapper = styled(AnimatedDiv)<{ $leftOffset: number }>(
-  ({ $leftOffset, theme }) => ({
-    position: 'fixed',
-    display: 'flex',
-    alignItems: 'flex-end',
-    inset: `${56}px 0 0 ${$leftOffset}px`,
-    zIndex: theme.zIndexes.selectPopover - 1,
-    overflow: 'hidden',
-  })
-)
+const Wrapper = styled(AnimatedDiv)(({ theme }) => ({
+  position: 'absolute',
+  display: 'flex',
+  alignItems: 'flex-end',
+  top: 0,
+  right: '0',
+  overflow: 'hidden',
+  transform: `translateX(100%)`,
+  height: `calc(100% - ${theme.spacing.xxxlarge}px)`,
+}))
 
 const Animated = styled(AnimatedDiv)(({ theme }) => ({
   display: 'flex',
@@ -51,11 +51,9 @@ const Animated = styled(AnimatedDiv)(({ theme }) => ({
 }))
 
 export function NotificationsPanelOverlay({
-  leftOffset,
   isOpen,
   setIsOpen,
 }: {
-  leftOffset: number
   isOpen: boolean
   setIsOpen: Dispatch<SetStateAction<boolean>>
 }) {
@@ -72,7 +70,7 @@ export function NotificationsPanelOverlay({
   const transitions = useTransition(isOpen ? [true] : [], transitionProps)
 
   return transitions((styles) => (
-    <Wrapper $leftOffset={leftOffset}>
+    <Wrapper>
       <Animated
         style={styles}
         ref={notificationsPanelRef}
@@ -93,6 +91,7 @@ export function NotificationsPanelOverlay({
             <Checkbox
               checked={all}
               onChange={() => setAll(!all)}
+              onClick={(e) => e.stopPropagation()}
               small
             >
               Show all notifications
