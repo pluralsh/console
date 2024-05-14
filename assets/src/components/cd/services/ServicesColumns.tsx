@@ -177,6 +177,7 @@ export const ColLastActivity = columnHelper.accessor(
 export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   id: 'status',
   header: 'Status',
+  meta: { gridTemplate: 'auto' },
   enableColumnFilter: true,
   filterFn: 'equalsString',
   cell: ({
@@ -190,11 +191,11 @@ export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
     return (
       <div
         css={{
-          minWidth: 164,
           display: 'flex',
           flexWrap: 'wrap',
           gap: theme.spacing.xxsmall,
           alignItems: 'center',
+          whiteSpace: 'nowrap',
         }}
       >
         <ServiceStatusChip
