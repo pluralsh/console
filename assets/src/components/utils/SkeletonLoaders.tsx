@@ -85,11 +85,11 @@ export function TableSkeleton({
   )
 }
 
-export function ChartSkeleton({ _centered }: { _centered?: boolean }) {
+export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
   return (
     <svg
-      width="276"
-      height="314"
+      width={`${276 * scale}`}
+      height={`${314 * scale}`}
       viewBox="0 0 276 314"
       xmlns="http://www.w3.org/2000/svg"
     >
