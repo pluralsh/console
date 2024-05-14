@@ -19,6 +19,11 @@ fragment Stack on InfrastructureStack {
   }
   paused
   approval
+  environment {
+    name
+    value
+    secret
+  }
 }
 
 fragment StackRun on StackRun {

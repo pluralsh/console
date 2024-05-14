@@ -8621,7 +8621,7 @@ export type ViolationStatisticsQueryVariables = Exact<{
 
 export type ViolationStatisticsQuery = { __typename?: 'RootQueryType', violationStatistics?: Array<{ __typename?: 'ViolationStatistic', count?: number | null, value?: string | null, violations?: number | null } | null> | null };
 
-export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null };
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
 
@@ -8649,7 +8649,7 @@ export type StacksQueryVariables = Exact<{
 }>;
 
 
-export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null } | null } | null> | null } | null };
 
 export type StackTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8681,7 +8681,7 @@ export type CreateStackMutationVariables = Exact<{
 }>;
 
 
-export type CreateStackMutation = { __typename?: 'RootMutationType', createStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
+export type CreateStackMutation = { __typename?: 'RootMutationType', createStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null } | null };
 
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
@@ -10763,6 +10763,11 @@ export const StackFragmentDoc = gql`
   }
   paused
   approval
+  environment {
+    name
+    value
+    secret
+  }
 }
     ${ClusterTinyFragmentDoc}`;
 export const StackRunFragmentDoc = gql`
