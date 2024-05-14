@@ -89,14 +89,14 @@ export default function CreateStack({
   const [repositoryId, setRepositoryId] = useState('')
   const [ref, setRef] = useState('')
   const [folder, setFolder] = useState('')
-  const [environment, setEnvironment] = useState<StackEnvironmentAttributes[]>(
-    []
-  )
-
-  // TODO: Reset form on exit.
+  const [environment, setEnvironment] = useState<StackEnvironmentAttributes[]>([
+    { name: '', value: '' },
+  ])
+  const [environmentErrors, setEnvironmentErrors] = useState(false)
 
   const initialFormValid = !!(name && type && version && clusterId)
   const repoFormValid = !!(repositoryId && ref && folder)
+  const environmentFormValid = !environmentErrors
 
   const currentStepIndex = stepperSteps.findIndex(
     (step) => step.key === formState
@@ -130,8 +130,8 @@ export default function CreateStack({
       }),
   })
 
+  // TODO: Reset form on exit.
   const close = useCallback(() => {
-    setName('')
     reset()
     setOpen(false)
   }, [reset])
@@ -160,6 +160,7 @@ export default function CreateStack({
               currentStepIndex={currentStepIndex}
               initialFormValid={initialFormValid}
               repoFormValid={repoFormValid}
+              environmentFormValid={environmentFormValid}
               close={close}
               submit={mutation}
               loading={loading}
@@ -213,6 +214,7 @@ export default function CreateStack({
             <CreateStackEnvironment
               environment={environment}
               setEnvironment={setEnvironment}
+              setEnvironmentErrors={setEnvironmentErrors}
             />
           )}
 

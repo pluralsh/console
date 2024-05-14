@@ -8,6 +8,7 @@ export default function CreateStackActions({
   currentStepIndex,
   initialFormValid,
   repoFormValid,
+  environmentFormValid,
   close,
   submit,
   loading,
@@ -17,6 +18,7 @@ export default function CreateStackActions({
   currentStepIndex: number
   initialFormValid: boolean
   repoFormValid: boolean
+  environmentFormValid: boolean
   close: () => void
   submit: () => void
   loading: boolean
@@ -48,6 +50,7 @@ export default function CreateStackActions({
       {formState === FormState.Environment && (
         <Button
           type="submit"
+          disabled={!environmentFormValid}
           onClick={() => submit()}
           loading={loading}
           marginLeft="medium"

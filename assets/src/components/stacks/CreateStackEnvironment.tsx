@@ -1,53 +1,165 @@
-import { FormField, Input, Switch } from '@pluralsh/design-system'
-import { useEffect, useRef, useState } from 'react'
+import { Button, FormField, Input, Switch } from '@pluralsh/design-system'
+import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
+
+import { useTheme } from 'styled-components'
+import { produce } from 'immer'
+import { DeleteIconButton } from 'components/utils/IconButtons'
 
 import { StackEnvironmentAttributes } from '../../generated/graphql'
+import { SecretsTableSC } from '../cd/services/deployModal/DeployServiceSettingsSecrets'
 
 export function CreateStackEnvironment({
   environment,
   setEnvironment,
+  setEnvironmentErrors,
 }: {
   environment: StackEnvironmentAttributes[]
-  setEnvironment: (environment: StackEnvironmentAttributes[]) => void
-}): any {
-  const inputRef = useRef<HTMLInputElement>()
-  const [name, setName] = useState<string>('')
-  const [value, setValue] = useState<string>('')
-  const [secret, setSecret] = useState<boolean>(false)
+  setEnvironment: Dispatch<SetStateAction<StackEnvironmentAttributes[]>>
+  setEnvironmentErrors: Dispatch<SetStateAction<boolean>>
+}) {
+  const theme = useTheme()
 
-  useEffect(() => {
-    inputRef.current?.focus?.()
-  }, [])
+  const { items, errorCount } = useMemo(() => {
+    const names = new Set<string>()
+    let errorCount = 0
+
+    const items = environment.map((env) => {
+      const duplicate = names.has(env.name) && !!env.name
+
+      names.add(env.name)
+
+      const noName = !!env.value && !env.name
+
+      if (duplicate || noName) {
+        errorCount++
+      }
+
+      return {
+        env,
+        errors: {
+          duplicate,
+          noName,
+        },
+      }
+    })
+
+    return { items, errorCount }
+  }, [environment])
+
+  useEffect(
+    () => setEnvironmentErrors(errorCount > 0),
+    [errorCount, setEnvironmentErrors]
+  )
 
   return (
-    <>
-      <FormField
-        required
-        label="Name"
-      >
-        <Input
-          inputProps={{ ref: inputRef }}
-          value={name}
-          onChange={(e) => setName(e.currentTarget.value)}
-        />
-      </FormField>
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
+      }}
+    >
+      {environment.length > 0 && (
+        <SecretsTableSC>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Value</th>
+              <th>Secret</th>
+            </tr>
+          </thead>
 
-      <FormField
-        required
-        label="Value"
-      >
-        <Input
-          value={value}
-          onChange={(e) => setValue(e.currentTarget.value)}
-        />
-      </FormField>
-
-      <Switch
-        checked={secret}
-        onChange={setSecret}
-      >
-        Secret
-      </Switch>
-    </>
+          <tr className="header displayContents" />
+          {items.map(({ env, errors }, i) => (
+            <tr
+              key={i}
+              className="displayContents"
+            >
+              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+              <td>
+                <FormField
+                  error={errors.duplicate || errors.noName}
+                  hint={
+                    errors.noName
+                      ? 'Name cannot be empty'
+                      : errors.duplicate
+                      ? 'Duplicate name'
+                      : undefined
+                  }
+                >
+                  <Input
+                    error={errors.duplicate || errors.noName}
+                    value={env.name}
+                    inputProps={{ 'aria-label': 'Name' }}
+                    onChange={(e) => {
+                      setEnvironment((env) =>
+                        produce(env, (draft) => {
+                          draft[i].name = e.target.value
+                        })
+                      )
+                    }}
+                  />
+                </FormField>
+              </td>
+              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+              <td>
+                <Input
+                  value={env.value}
+                  type={env?.secret ? 'password' : 'text'}
+                  inputProps={{ 'aria-label': 'Value' }}
+                  onChange={(e) =>
+                    setEnvironment((env) =>
+                      produce(env, (draft) => {
+                        draft[i].value = e.target.value
+                      })
+                    )
+                  }
+                />
+              </td>
+              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+              <td>
+                <div css={{ display: 'flex' }}>
+                  <Switch
+                    checked={!!env?.secret}
+                    onChange={(e) =>
+                      setEnvironment((env) =>
+                        produce(env, (draft) => {
+                          draft[i].secret = e
+                        })
+                      )
+                    }
+                  />
+                  <DeleteIconButton
+                    css={{ marginTop: 4 }}
+                    onClick={() => {
+                      setEnvironment((env) =>
+                        produce(env, (draft) => {
+                          draft.splice(i, 1)
+                        })
+                      )
+                    }}
+                  />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </SecretsTableSC>
+      )}
+      <div css={{ display: 'flex' }}>
+        <Button
+          css={{ flexGrow: 0, width: 'auto' }}
+          type="button"
+          secondary
+          small
+          size="tertiary"
+          onClick={(e) => {
+            e.preventDefault()
+            setEnvironment((env) => [...env, { name: '', value: '' }])
+          }}
+        >
+          Add environment variable
+        </Button>
+      </div>
+    </div>
   )
 }
