@@ -3,7 +3,7 @@ kind: FlowCollector
 metadata:
   name: cluster
 spec:
-  namespace: default
+  namespace: '{{ .Release.Namespace }}'
   deploymentModel: Direct
   agent:
     type: eBPF
