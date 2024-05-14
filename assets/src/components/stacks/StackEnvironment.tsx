@@ -20,10 +20,10 @@ export default function StackEnvironment() {
 
   return (
     <Card
-      height="100%"
+      padding="large"
       width="100%"
-      position="relative"
     >
+      {/* TODO */}
       {JSON.stringify(stack?.environment)}
     </Card>
   )

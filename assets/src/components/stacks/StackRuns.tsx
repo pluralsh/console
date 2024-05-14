@@ -61,7 +61,7 @@ export default function StackRuns() {
 
   return (
     <Card
-      height="100%"
+      height="calc(100% - 52px)"
       width="100%"
       position="relative"
     >
