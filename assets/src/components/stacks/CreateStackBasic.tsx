@@ -77,7 +77,6 @@ export function CreateStackBasic({
       </FormField>
       <FormField label="Image">
         <Input
-          inputProps={{ ref: inputRef }}
           value={image}
           onChange={(e) => setImage(e.currentTarget.value)}
         />
@@ -87,7 +86,6 @@ export function CreateStackBasic({
         label="Version"
       >
         <Input
-          inputProps={{ ref: inputRef }}
           value={version}
           onChange={(e) => setVersion(e.currentTarget.value)}
         />
