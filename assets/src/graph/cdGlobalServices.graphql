@@ -2,12 +2,17 @@ fragment GlobalService on GlobalService {
   id
   distro
   name
+  cascade {
+    delete
+    detach
+  }
   provider {
     id
     name
     cloud
     namespace
   }
+  reparent
   service {
     id
     name
