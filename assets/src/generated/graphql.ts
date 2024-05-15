@@ -8621,6 +8621,19 @@ export type ViolationStatisticsQueryVariables = Exact<{
 
 export type ViolationStatisticsQuery = { __typename?: 'RootQueryType', violationStatistics?: Array<{ __typename?: 'ViolationStatistic', count?: number | null, value?: string | null, violations?: number | null } | null> | null };
 
+export type PolicyStatisticsQueryVariables = Exact<{
+  aggregate: PolicyAggregate;
+  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
+  kind?: InputMaybe<Scalars['String']['input']>;
+  kinds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatistics?: Array<{ __typename?: 'PolicyStatistic', count?: number | null, aggregate?: string | null } | null> | null };
+
 export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null };
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
@@ -8682,19 +8695,6 @@ export type CreateStackMutationVariables = Exact<{
 
 
 export type CreateStackMutation = { __typename?: 'RootMutationType', createStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null } | null };
-
-export type PolicyStatisticsQueryVariables = Exact<{
-  aggregate: PolicyAggregate;
-  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
-  kind?: InputMaybe<Scalars['String']['input']>;
-  kinds?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
-  namespace?: InputMaybe<Scalars['String']['input']>;
-  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
-  q?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatistics?: Array<{ __typename?: 'PolicyStatistic', count?: number | null, aggregate?: string | null } | null> | null };
 
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
@@ -17208,6 +17208,61 @@ export type ViolationStatisticsQueryHookResult = ReturnType<typeof useViolationS
 export type ViolationStatisticsLazyQueryHookResult = ReturnType<typeof useViolationStatisticsLazyQuery>;
 export type ViolationStatisticsSuspenseQueryHookResult = ReturnType<typeof useViolationStatisticsSuspenseQuery>;
 export type ViolationStatisticsQueryResult = Apollo.QueryResult<ViolationStatisticsQuery, ViolationStatisticsQueryVariables>;
+export const PolicyStatisticsDocument = gql`
+    query PolicyStatistics($aggregate: PolicyAggregate!, $clusters: [ID], $kind: String, $kinds: [String], $namespace: String, $namespaces: [String], $q: String) {
+  policyStatistics(
+    aggregate: $aggregate
+    clusters: $clusters
+    kind: $kind
+    kinds: $kinds
+    namespace: $namespace
+    namespaces: $namespaces
+    q: $q
+  ) {
+    count
+    aggregate
+  }
+}
+    `;
+
+/**
+ * __usePolicyStatisticsQuery__
+ *
+ * To run a query within a React component, call `usePolicyStatisticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `usePolicyStatisticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = usePolicyStatisticsQuery({
+ *   variables: {
+ *      aggregate: // value for 'aggregate'
+ *      clusters: // value for 'clusters'
+ *      kind: // value for 'kind'
+ *      kinds: // value for 'kinds'
+ *      namespace: // value for 'namespace'
+ *      namespaces: // value for 'namespaces'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function usePolicyStatisticsQuery(baseOptions: Apollo.QueryHookOptions<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>(PolicyStatisticsDocument, options);
+      }
+export function usePolicyStatisticsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>(PolicyStatisticsDocument, options);
+        }
+export function usePolicyStatisticsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>(PolicyStatisticsDocument, options);
+        }
+export type PolicyStatisticsQueryHookResult = ReturnType<typeof usePolicyStatisticsQuery>;
+export type PolicyStatisticsLazyQueryHookResult = ReturnType<typeof usePolicyStatisticsLazyQuery>;
+export type PolicyStatisticsSuspenseQueryHookResult = ReturnType<typeof usePolicyStatisticsSuspenseQuery>;
+export type PolicyStatisticsQueryResult = Apollo.QueryResult<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>;
 export const StacksDocument = gql`
     query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
@@ -17486,61 +17541,6 @@ export function useCreateStackMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateStackMutationHookResult = ReturnType<typeof useCreateStackMutation>;
 export type CreateStackMutationResult = Apollo.MutationResult<CreateStackMutation>;
 export type CreateStackMutationOptions = Apollo.BaseMutationOptions<CreateStackMutation, CreateStackMutationVariables>;
-export const PolicyStatisticsDocument = gql`
-    query PolicyStatistics($aggregate: PolicyAggregate!, $clusters: [ID], $kind: String, $kinds: [String], $namespace: String, $namespaces: [String], $q: String) {
-  policyStatistics(
-    aggregate: $aggregate
-    clusters: $clusters
-    kind: $kind
-    kinds: $kinds
-    namespace: $namespace
-    namespaces: $namespaces
-    q: $q
-  ) {
-    count
-    aggregate
-  }
-}
-    `;
-
-/**
- * __usePolicyStatisticsQuery__
- *
- * To run a query within a React component, call `usePolicyStatisticsQuery` and pass it any options that fit your needs.
- * When your component renders, `usePolicyStatisticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = usePolicyStatisticsQuery({
- *   variables: {
- *      aggregate: // value for 'aggregate'
- *      clusters: // value for 'clusters'
- *      kind: // value for 'kind'
- *      kinds: // value for 'kinds'
- *      namespace: // value for 'namespace'
- *      namespaces: // value for 'namespaces'
- *      q: // value for 'q'
- *   },
- * });
- */
-export function usePolicyStatisticsQuery(baseOptions: Apollo.QueryHookOptions<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>(PolicyStatisticsDocument, options);
-      }
-export function usePolicyStatisticsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>(PolicyStatisticsDocument, options);
-        }
-export function usePolicyStatisticsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>(PolicyStatisticsDocument, options);
-        }
-export type PolicyStatisticsQueryHookResult = ReturnType<typeof usePolicyStatisticsQuery>;
-export type PolicyStatisticsLazyQueryHookResult = ReturnType<typeof usePolicyStatisticsLazyQuery>;
-export type PolicyStatisticsSuspenseQueryHookResult = ReturnType<typeof usePolicyStatisticsSuspenseQuery>;
-export type PolicyStatisticsQueryResult = Apollo.QueryResult<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -18035,11 +18035,11 @@ export const namedOperations = {
     PolicyConstraints: 'PolicyConstraints',
     PolicyConstraint: 'PolicyConstraint',
     ViolationStatistics: 'ViolationStatistics',
+    PolicyStatistics: 'PolicyStatistics',
     Stacks: 'Stacks',
     StackTiny: 'StackTiny',
     StackRuns: 'StackRuns',
     StackRun: 'StackRun',
-    PolicyStatistics: 'PolicyStatistics',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me',
@@ -18234,7 +18234,7 @@ export const namedOperations = {
     NotificationRouter: 'NotificationRouter',
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
-    PoliciyConstraint: 'PoliciyConstraint',
+    PolicyConstraint: 'PolicyConstraint',
     Stack: 'Stack',
     StackRun: 'StackRun',
     StackConfiguration: 'StackConfiguration',
@@ -18245,7 +18245,6 @@ export const namedOperations = {
     ServiceErrors: 'ServiceErrors',
     StackFile: 'StackFile',
     RunStep: 'RunStep',
-    PolicyConstraint: 'PolicyConstraint',
     AccessToken: 'AccessToken',
     AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',
