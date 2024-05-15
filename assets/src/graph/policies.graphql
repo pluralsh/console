@@ -1,4 +1,4 @@
-fragment PoliciyConstraint on PolicyConstraint {
+fragment PolicyConstraint on PolicyConstraint {
   cluster {
     ...Cluster
   }
@@ -44,7 +44,7 @@ query PolicyConstraints(
     }
     edges {
       node {
-        ...PoliciyConstraint
+        ...PolicyConstraint
       }
     }
   }
@@ -52,7 +52,7 @@ query PolicyConstraints(
 
 query PolicyConstraint($id: ID!) {
   policyConstraint(id: $id) {
-    ...PoliciyConstraint
+    ...PolicyConstraint
     object {
       metadata {
         namespace
@@ -78,5 +78,28 @@ query ViolationStatistics($field: ConstraintViolationField!) {
     count
     value
     violations
+  }
+}
+
+query PolicyStatistics(
+  $aggregate: PolicyAggregate!
+  $clusters: [ID]
+  $kind: String
+  $kinds: [String]
+  $namespace: String
+  $namespaces: [String]
+  $q: String
+) {
+  policyStatistics(
+    aggregate: $aggregate
+    clusters: $clusters
+    kind: $kind
+    kinds: $kinds
+    namespace: $namespace
+    namespaces: $namespaces
+    q: $q
+  ) {
+    count
+    aggregate
   }
 }

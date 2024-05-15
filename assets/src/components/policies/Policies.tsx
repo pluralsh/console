@@ -18,7 +18,7 @@ import styled from 'styled-components'
 import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import { PoliciesTable } from './PoliciesTable'
-import PoliciesViolationsGauge from './PoliciesViolationsGauge'
+import { PoliciesViolationsGauge } from './PoliciesViolationsGauge'
 import PoliciesFilter from './PoliciesFilter'
 
 const breadcrumbs: Breadcrumb[] = [
@@ -48,6 +48,13 @@ function Policies() {
 
   const debouncedSearchString = useDebounce(searchString, 100)
 
+  const policyQFilters = {
+    ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
+    ...(selectedKinds.length ? { kinds: selectedKinds } : {}),
+    ...(selectedNamespaces.length ? { namespaces: selectedNamespaces } : {}),
+    ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
+  }
+
   const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
       {
@@ -55,14 +62,7 @@ function Policies() {
         pageSize: POLICIES_QUERY_PAGE_SIZE,
         queryKey: 'policyConstraints',
       },
-      {
-        ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
-        ...(selectedKinds.length ? { kinds: selectedKinds } : {}),
-        ...(selectedNamespaces.length
-          ? { namespaces: selectedNamespaces }
-          : {}),
-        ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
-      }
+      policyQFilters
     )
   const policies = data?.policyConstraints?.edges
 
@@ -100,12 +100,7 @@ function Policies() {
       </div>
       <div className="violations">
         {policies && policies?.length > 0 && (
-          <PoliciesViolationsGauge
-            clustersWithViolations={
-              policies?.filter((pol) => pol?.node?.violationCount).length || 0
-            }
-            totalClusters={policies?.length || 0}
-          />
+          <PoliciesViolationsGauge filters={policyQFilters} />
         )}
       </div>
       <div className="table">
@@ -150,6 +145,7 @@ const PoliciesContainer = styled.div(({ theme }) => ({
   },
   '.violations': {
     gridArea: 'violations',
+    overflow: 'auto',
   },
   '.table': {
     gridArea: 'table',

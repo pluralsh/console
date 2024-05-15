@@ -1,122 +1,126 @@
+import { PieChart, PieChartData } from 'components/utils/PieChart'
 import { Subtitle2H1 } from 'components/utils/typography/Text'
-import { Flex } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
-const violationLabels = ['WITH VIOLATIONS', 'WITHOUT']
+import { Card } from '@pluralsh/design-system'
 
-function PoliciesViolationsGauge({
-  clustersWithViolations,
-  totalClusters,
+import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
+import { GqlError } from 'components/utils/Alert'
+
+import { usePolicyChartsData } from './usePolicyChartsData'
+
+type PolicyQueryFilters = {
+  clusters?: (string | null)[] | undefined
+  namespaces?: (string | null)[] | undefined
+  kinds?: (string | null)[] | undefined
+  q?: string | undefined
+}
+
+const CHART_SIZE = '120px'
+
+export function PoliciesViolationsGauge({
+  filters,
 }: {
-  clustersWithViolations: number
-  totalClusters: number
+  filters: PolicyQueryFilters
 }) {
-  let startAngle = 180
-  const values = [
-    clustersWithViolations,
-    totalClusters - clustersWithViolations,
-  ]
   const theme = useTheme()
-  const fillColors = [
-    theme.colors['text-danger-light'],
-    theme.colors['icon-success'],
-  ]
+  const {
+    clusterPolicyChartData,
+    enforcementChartData,
+    installedChartData,
+    clusterPolicyStatsError,
+    enforcementStatsError,
+    installedStatsError,
+  } = usePolicyChartsData(filters)
+
+  if (clusterPolicyStatsError || enforcementStatsError || installedStatsError) {
+    return (
+      <GqlError
+        error={
+          clusterPolicyStatsError ||
+          enforcementStatsError ||
+          installedStatsError
+        }
+      />
+    )
+  }
 
   return (
-    <Container>
-      <Subtitle2H1>Clusters with Violations</Subtitle2H1>
-      <Flex alignItems="center">
-        <svg
-          width="150"
-          height="150"
-          viewBox="0 0 200 200"
-        >
-          {values.map((value, index) => {
-            if (value === 0) {
-              return null
-            }
-            const proportion = value / totalClusters
-
-            if (proportion === 1) {
-              return (
-                <circle
-                  key={index}
-                  cx="100"
-                  cy="100"
-                  r="80"
-                  fill={fillColors[index]}
-                />
-              )
-            }
-            const endAngle = startAngle + proportion * 360
-            const largeArcFlag = proportion > 0.5 ? 1 : 0
-            const x1 = 100 + 80 * Math.cos((startAngle * Math.PI) / 180)
-            const y1 = 100 + 80 * Math.sin((startAngle * Math.PI) / 180)
-            const x2 = 100 + 80 * Math.cos((endAngle * Math.PI) / 180)
-            const y2 = 100 + 80 * Math.sin((endAngle * Math.PI) / 180)
-
-            const pathData = `M 100 100 L ${x1} ${y1} A 80 80 0 ${largeArcFlag} 1 ${x2} ${y2} Z`
-
-            startAngle = endAngle
-
-            return (
-              <path
-                key={index}
-                d={pathData}
-                fill={fillColors[index]}
-                stroke={theme.colors['fill-one']}
-                strokeWidth={4}
-              />
-            )
-          })}
-          <circle
-            cx="100"
-            cy="100"
-            r="63"
-            fill={theme.colors['fill-one']}
-          />
-        </svg>
-        <Flex
-          direction="column"
-          gap="small"
-          css={{ marginLeft: theme.spacing.medium }}
-        >
-          {values.map((value, index) => (
-            <Flex
-              key={index}
-              gap="small"
-              alignItems="center"
-            >
-              <div
-                css={{
-                  color: fillColors[index],
-                }}
-              >
-                {value}
-              </div>
-              <span
-                css={{
-                  color: theme.colors['text-xlight'],
-                }}
-              >
-                {violationLabels[index]}
-              </span>
-            </Flex>
-          ))}
-        </Flex>
-      </Flex>
-    </Container>
+    <div css={{ display: 'flex', gap: theme.spacing.large }}>
+      <PolicyChartCard
+        title="Clusters with Violations"
+        data={clusterPolicyChartData}
+      />
+      <PolicyChartCard
+        title="Constraints by Enforcement"
+        data={enforcementChartData}
+      />
+      <PolicyChartCard
+        title="Installed Clusters"
+        data={installedChartData}
+      />
+    </div>
   )
 }
 
-export default PoliciesViolationsGauge
+function PolicyChartCard({
+  title,
+  rotate = 45,
+  data,
+}: {
+  title: string
+  rotate?: number
+  data: PieChartData | null
+}) {
+  const theme = useTheme()
 
-const Container = styled.div(({ theme }) => ({
-  background: theme.colors['fill-one'],
-  padding: theme.spacing.large,
+  return (
+    <Card
+      css={{ padding: theme.spacing.large, flex: 1, minWidth: 'fit-content' }}
+    >
+      <Subtitle2H1>{title}</Subtitle2H1>
+      <ChartWrapper>
+        {!data ? (
+          <ChartSkeleton scale={0.5} />
+        ) : (
+          <>
+            <PieChart
+              width={CHART_SIZE}
+              height={CHART_SIZE}
+              padAngle={3}
+              startAngle={rotate}
+              endAngle={360 + rotate}
+              data={data}
+            />
+            <ChartLegend data={data} />
+          </>
+        )}
+      </ChartWrapper>
+    </Card>
+  )
+}
+
+const ChartWrapper = styled.div(({ theme }) => ({
   display: 'flex',
-  flexDirection: 'column',
-  border: `1px solid ${theme.colors.border}`,
-  borderRadius: theme.borderRadiuses.large,
-  fontSize: 12,
+  alignItems: 'center',
+  gap: theme.spacing.medium,
 }))
+
+function ChartLegend({ data }: { data: PieChartData }) {
+  const theme = useTheme()
+
+  return (
+    <div>
+      {data.map((datum) => (
+        <div
+          key={datum.id}
+          css={{
+            ...theme.partials.text.body1,
+          }}
+        >
+          <span css={{ color: datum.color }}>{datum.value}</span> {datum.label}
+        </div>
+      ))}
+    </div>
+  )
+}
