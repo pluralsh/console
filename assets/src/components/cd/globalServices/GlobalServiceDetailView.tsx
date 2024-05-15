@@ -1,7 +1,15 @@
-import { ComponentProps, useMemo } from 'react'
-import { Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { ComponentProps, useCallback, useMemo } from 'react'
+import {
+  AppIcon,
+  Chip,
+  GlobeIcon,
+  Sidecar,
+  SidecarItem,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 
-import { AuthMethod } from 'generated/graphql'
+import { AuthMethod, useGetServiceDataQuery } from 'generated/graphql'
 import {
   CD_REL_PATH,
   GLOBAL_SERVICES_REL_PATH,
@@ -11,11 +19,23 @@ import { createMapperWithFallback } from 'utils/mapping'
 
 import { useParams } from 'react-router-dom'
 
-import { gql, useQuery } from '@apollo/client'
-
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
+import { Flex } from 'honorable'
+
+import { useTheme } from 'styled-components'
+
+import { extendConnection } from 'utils/graphql'
+
+import { getDistroProviderIconUrl } from 'components/utils/ClusterDistro'
+
+import { Body2P } from 'components/utils/typography/Text'
+
+import moment from 'moment'
+
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
+
+import { SERVICES_QUERY_PAGE_SIZE } from '../services/Services'
 
 import {
   ColDistribution,
@@ -56,24 +76,52 @@ export const columns = [
   ColLastActivity,
 ]
 
-const getServiceNameQuery = gql`
-  query GetServiceName($serviceId: ID!) {
-    globalService(id: $serviceId) {
-      name
-    }
-  }
-`
-
 export default function GlobalServiceDetailView() {
   const params = useParams()
-
+  const theme = useTheme()
   const serviceId = params[GLOBAL_SERVICE_PARAM_ID]
 
-  const { data } = useQuery(getServiceNameQuery, {
-    variables: { serviceId },
+  const queryResult = useGetServiceDataQuery({
+    variables: {
+      first: SERVICES_QUERY_PAGE_SIZE,
+      serviceId: serviceId || '',
+    },
+    fetchPolicy: 'cache-and-network',
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
   })
+  const {
+    error,
+    fetchMore,
+    loading,
+    data: currentData,
+    previousData,
+  } = queryResult
+  const data = currentData || previousData
 
-  const serviceName = data?.globalService?.name
+  const globalService = data?.globalService
+  const pageInfo = globalService?.services?.pageInfo
+
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
+    }
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!prev.globalService) return prev
+
+        return {
+          ...prev,
+          globalService: extendConnection(
+            prev.globalService,
+            fetchMoreResult.globalService?.services,
+            'services'
+          ),
+        }
+      },
+    })
+  }, [fetchMore, pageInfo?.endCursor])
 
   useSetBreadcrumbs(
     useMemo(
@@ -84,17 +132,83 @@ export default function GlobalServiceDetailView() {
           url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}`,
         },
         {
-          label: serviceName,
-          url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${serviceName}`,
+          label: globalService?.name || 'Service',
+          url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${
+            globalService?.name || 'Service'
+          }`,
         },
       ],
-      [serviceName]
+      [globalService?.name]
     )
   )
 
   return (
     <ResponsivePageFullWidth scrollable={false}>
-      <GlobalServiceDetailTable serviceId={serviceId} />
+      <Flex gap={theme.spacing.medium}>
+        <GlobalServiceDetailTable
+          data={data}
+          error={error}
+          fetchNextPage={fetchNextPage}
+          loading={loading}
+        />
+        <Sidecar
+          width={200}
+          minWidth={200}
+        >
+          <SidecarItem heading="Last Updated">
+            {moment(
+              globalService?.updatedAt || globalService?.insertedAt
+            ).format('M/D/YYYY')}
+          </SidecarItem>
+          <SidecarItem heading="Distribution">
+            <div
+              css={{
+                ...theme.partials.text.body2,
+                display: 'flex',
+                alignItems: 'center',
+                gap: theme.spacing.small,
+              }}
+            >
+              <AppIcon
+                spacing="padding"
+                size="xxsmall"
+                icon={
+                  globalService?.distro ? undefined : <GlobeIcon size={16} />
+                }
+                url={
+                  globalService?.distro
+                    ? getDistroProviderIconUrl({
+                        distro: globalService?.distro,
+                        provider: globalService?.provider?.cloud,
+                        mode: theme.mode,
+                      })
+                    : undefined
+                }
+              />
+              {globalService?.distro || 'All distribution'}
+            </div>
+          </SidecarItem>
+          {globalService?.tags?.length ? (
+            <SidecarItem heading="Tags">
+              <Body2P>
+                {globalService?.tags
+                  ?.map((tag) => `${tag?.name}: ${tag?.value}`)
+                  .join(', ')}
+              </Body2P>
+            </SidecarItem>
+          ) : null}
+          <SidecarItem heading="ID">{globalService?.id}</SidecarItem>
+          <SidecarItem heading="Cascade (Delete)">
+            {globalService?.cascade?.delete}
+          </SidecarItem>
+          <SidecarItem heading="Cascade (Detach)">
+            {globalService?.cascade?.detach}
+          </SidecarItem>
+          <SidecarItem heading="Reparent">
+            {globalService?.reparent}
+          </SidecarItem>
+        </Sidecar>
+      </Flex>
     </ResponsivePageFullWidth>
   )
 }
