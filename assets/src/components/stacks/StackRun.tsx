@@ -45,7 +45,7 @@ export default function StackRun({
       }}
       onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
     >
-      <IconFrame icon={<CliIcon />} />
+      <IconFrame icon={<CliIcon width={32} />} />
       <div
         css={{
           display: 'flex',
@@ -97,6 +97,7 @@ export default function StackRun({
           display: 'flex',
           flexGrow: 1,
           justifyContent: 'end',
+          whiteSpace: 'nowrap',
         }}
       >
         {moment(insertedAt).fromNow()}
