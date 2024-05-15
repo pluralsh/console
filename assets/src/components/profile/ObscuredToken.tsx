@@ -6,12 +6,14 @@ export function ObscuredToken({
   showLast,
   length,
   reveal,
+  reducedOpacity = true,
 }: {
   token: string | null | undefined
   showFirst?: number
   showLast?: number
   length?: number
   reveal?: boolean
+  reducedOpacity?: boolean
 }) {
   length = length || 0 > 0 ? length || 0 : (token || '').length
 
@@ -35,7 +37,7 @@ export function ObscuredToken({
       ) : (
         <>
           {prefix}
-          <span css={{ opacity: 0.5 }}>
+          <span css={{ ...(reducedOpacity ? { opacity: 0.5 } : {}) }}>
             {'·'.repeat(length - firstCount - lastCount)}
           </span>
           {suffix}
