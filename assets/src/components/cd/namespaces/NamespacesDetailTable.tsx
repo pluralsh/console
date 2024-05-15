@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { Card, EmptyState, Table } from '@pluralsh/design-system'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
@@ -13,7 +13,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { Body2BoldP, Body2P, Title1H1 } from 'components/utils/typography/Text'
+import { Title1H1 } from 'components/utils/typography/Text'
 
 import {
   SERVICES_QUERY_PAGE_SIZE,
@@ -89,34 +89,6 @@ export function NamespacesDetailTable({
       }}
     >
       <Title1H1>{managedNamespace?.name}</Title1H1>
-      <Card
-        padding="large"
-        css={{
-          display: 'flex',
-          gap: theme.spacing.small,
-        }}
-      >
-        <div css={{ flexGrow: 1 }}>
-          <Body2BoldP>Description</Body2BoldP>
-          <Body2P
-            css={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: theme.spacing.small,
-            }}
-          >
-            {managedNamespace?.description || '--'}
-          </Body2P>
-        </div>
-        <div css={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-          <Body2BoldP>Labels</Body2BoldP>
-          <Body2P>
-            {Object.keys(managedNamespace?.labels || {})
-              ?.map((label) => `${label}: ${managedNamespace?.labels?.[label]}`)
-              .join(', ')}
-          </Body2P>
-        </div>
-      </Card>
 
       {!data ? (
         <LoadingIndicator />
