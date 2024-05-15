@@ -190,6 +190,7 @@ export default PoliciesFilter
 const PoliciesFiltersContainer = styled.div(({ theme }) => ({
   width: 'fit-content',
   display: 'flex',
+  overflow: 'auto',
   flexDirection: 'column',
   '> div': {
     borderRadius: 0,

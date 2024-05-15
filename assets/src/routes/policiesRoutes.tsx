@@ -1,6 +1,6 @@
 import { Route } from 'react-router-dom'
 
-import Policies from 'components/policies/Policies'
+import { Policies } from 'components/policies/Policies'
 
 import Policy from 'components/policies/policy/Policy'
 
