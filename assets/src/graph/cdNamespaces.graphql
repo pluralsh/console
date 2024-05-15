@@ -1,6 +1,10 @@
 fragment ManagedNamespace on ManagedNamespace {
   description
   deletedAt
+  cascade {
+    delete
+    detach
+  }
   annotations
   id
   insertedAt
