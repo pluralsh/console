@@ -132,7 +132,9 @@ export default function Clusters() {
     },
     {
       q: debouncedSearchString,
-      ...(statusFilter !== 'ALL' ? { status: statusFilter } : {}),
+      ...(statusFilter !== 'ALL'
+        ? { healthy: statusFilter === 'HEALTHY' }
+        : {}),
       ...(!isEmpty(searchTags)
         ? { tagQuery: { op: tagOp, tags: searchTags } }
         : {}),
@@ -210,10 +212,8 @@ export default function Clusters() {
           }}
         >
           <ClustersFilters
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            searchString={searchString}
-            setSearchString={setSearchString}
+            setQueryStatusFilter={setStatusFilter}
+            setQueryString={setSearchString}
             tabStateRef={tabStateRef}
             statusCounts={statusCounts}
             selectedTagKeys={selectedTagKeys}

@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
-import { useDebounce } from '@react-hooks-library/core'
 import {
   ServiceDeploymentStatus,
   type ServiceDeploymentsRowFragment,
@@ -36,10 +35,10 @@ export function ServicesTable({
   const navigate = useNavigate()
   const [clusterIdInternal, setClusterId] = useState<string>('')
   const clusterId = clusterIdProp ?? clusterIdInternal
-  const [searchString, setSearchString] = useState()
-  const debouncedSearchString = useDebounce(searchString, 100)
   const tabStateRef = useRef<any>(null)
-  const [statusFilter, setStatusFilter] = useState<StatusTabKey>('ALL')
+  const [queryString, setQueryString] = useState()
+  const [queryStatusFilter, setQueryStatusFilter] =
+    useState<StatusTabKey>('ALL')
 
   const {
     data,
@@ -56,9 +55,9 @@ export function ServicesTable({
       queryKey: 'serviceDeployments',
     },
     {
-      q: debouncedSearchString,
+      q: queryString,
       ...(clusterId ? { clusterId } : {}),
-      ...(statusFilter !== 'ALL' ? { status: statusFilter } : {}),
+      ...(queryStatusFilter !== 'ALL' ? { status: queryStatusFilter } : {}),
     }
   )
 
@@ -114,10 +113,8 @@ export function ServicesTable({
       }}
     >
       <ServicesFilters
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        searchString={searchString}
-        setSearchString={setSearchString}
+        setQueryStatusFilter={setQueryStatusFilter}
+        setQueryString={setQueryString}
         clusterId={clusterId}
         setClusterId={clusterIdProp ? undefined : setClusterId}
         tabStateRef={tabStateRef}
