@@ -3,14 +3,13 @@ import {
   EmptyState,
   EyeClosedIcon,
   EyeIcon,
-  FormField,
   IconFrame,
   Input,
   SearchIcon,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 import { useOutletContext, useParams } from 'react-router-dom'
 
@@ -19,26 +18,24 @@ import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useDebounce } from '@react-hooks-library/core'
 
-import { useMergeServiceMutation } from 'generated/graphql'
-
-import { GqlError } from 'components/utils/Alert'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import ModalAlt from 'components/cd/ModalAlt'
-import { useUpdateState } from 'components/hooks/useUpdateState'
 import CopyButton from 'components/utils/CopyButton'
 import { ObscuredToken } from 'components/profile/ObscuredToken'
-import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import {
   StackEnvironment as StackEnvironmentT,
   StackFragment,
-} from '../../generated/graphql'
+} from '../../../generated/graphql'
 
-import { StackOutletContextT, getBreadcrumbs } from './Stacks'
+import { ModalMountTransition } from '../../utils/ModalMountTransition'
+
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+
 import StackEnvironmentDelete from './StackEnvironmentDelete'
+import StackEnvironmentEdit from './StackEnvironmentEdit'
+import StackEnvironmentApplyModal from './StackEnvironmentApplyModal'
 
 const columnHelper = createColumnHelper<StackEnvironmentT>()
 
@@ -123,7 +120,7 @@ function EnvironmentActions({ env }: { env: StackEnvironmentT }) {
             tooltip="Copy value"
             type="tertiary"
           />
-          <ChangeSecret env={env} />
+          <StackEnvironmentEdit env={env} />
           <StackEnvironmentDelete env={env} />
         </>
       )}
@@ -152,14 +149,12 @@ export default function StackEnvironment() {
 
   return (
     <ScrollablePage scrollable={false}>
-      {/* <ModalMountTransition open={createOpen}> */}
-      {/* <SecretEditModal */}
-      {/*  open={createOpen} */}
-      {/*  serviceDeploymentId={serviceId} */}
-      {/*  refetch={refetch} */}
-      {/*  onClose={() => setCreateOpen(false)} */}
-      {/* /> */}
-      {/* </ModalMountTransition> */}
+      <ModalMountTransition open={createOpen}>
+        <StackEnvironmentApplyModal
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+        />
+      </ModalMountTransition>
       <div
         css={{
           display: 'flex',
@@ -212,147 +207,3 @@ export default function StackEnvironment() {
 }
 
 /// //////////////////////////
-
-function SecretEditModal({
-  serviceDeploymentId,
-  open,
-  onClose,
-  refetch,
-  initialValue,
-  mode = 'create',
-}: {
-  serviceDeploymentId: string | null | undefined
-  open: boolean
-  onClose: () => void
-  refetch: () => void
-  mode?: 'edit' | 'create'
-  initialValue?: { name: string; value: string } | null | undefined
-}) {
-  const {
-    state: { name, value },
-    hasUpdates,
-    update,
-  } = useUpdateState(initialValue || { name: '', value: '' })
-  const nameRef = useRef<HTMLInputElement>()
-  const valueRef = useRef<HTMLInputElement>()
-
-  useEffect(() => {
-    if (mode === 'edit') {
-      valueRef.current?.focus?.()
-    } else {
-      nameRef.current?.focus?.()
-    }
-  }, [mode])
-
-  const disabled = !hasUpdates || !name || !value
-
-  const variables = {
-    id: serviceDeploymentId || '',
-    ...(disabled
-      ? {}
-      : {
-          configuration: [
-            {
-              name,
-              value,
-            },
-          ],
-        }),
-  }
-
-  const [mutation, { loading, error }] = useMergeServiceMutation({
-    variables,
-    onCompleted: () => {
-      refetch?.()
-      onClose?.()
-    },
-  })
-
-  return (
-    <ModalAlt
-      header={mode === 'edit' ? 'Edit Secret' : 'Add Secret'}
-      open={open}
-      portal
-      onClose={onClose}
-      asForm
-      formProps={{
-        onSubmit: (e) => {
-          e.preventDefault()
-          if (!disabled) {
-            mutation()
-          }
-        },
-      }}
-      actions={
-        <>
-          <Button
-            primary
-            type="submit"
-            disabled={disabled}
-            loading={loading}
-          >
-            {mode === 'edit' ? 'Change value' : 'Add secret'}
-          </Button>
-          <Button
-            secondary
-            type="button"
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-        </>
-      }
-    >
-      <FormField label="Name">
-        <Input
-          value={name}
-          disabled={mode === 'edit'}
-          onChange={(e) => {
-            if (mode === 'create') {
-              update({ name: e.target.value })
-            }
-          }}
-          inputProps={{ ref: nameRef }}
-        />
-      </FormField>
-      <FormField label="Value">
-        <InputRevealer
-          value={value}
-          onChange={(e) => {
-            update({ value: e.target.value })
-          }}
-          inputProps={{ ref: valueRef }}
-        />
-      </FormField>
-      {error && <GqlError error={error} />}
-    </ModalAlt>
-  )
-}
-
-function ChangeSecret({ env }: { env: StackEnvironment }) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      test
-      {/* <div className="icon"> */}
-      {/*  <IconFrame */}
-      {/*    tooltip="Edit secret" */}
-      {/*    clickable */}
-      {/*    icon={<GearTrainIcon />} */}
-      {/*    onClick={() => setOpen(true)} */}
-      {/*  /> */}
-      {/* </div> */}
-      {/* <ModalMountTransition open={open}> */}
-      {/*  <SecretEditModal */}
-      {/*    open={open} */}
-      {/*    serviceDeploymentId={serviceDeploymentId} */}
-      {/*    refetch={refetch} */}
-      {/*    onClose={() => setOpen(false)} */}
-      {/*    mode="edit" */}
-      {/*    initialValue={secret} */}
-      {/*  /> */}
-      {/* </ModalMountTransition> */}
-    </>
-  )
-}

@@ -8,20 +8,20 @@ import { useState } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
-import { GqlError } from '../utils/Alert'
+import { GqlError } from '../../utils/Alert'
 import {
   StackEnvironmentAttributes,
   StackType,
   StacksDocument,
   useCreateStackMutation,
   useGitRepositoriesQuery,
-} from '../../generated/graphql'
+} from '../../../generated/graphql'
 import {
   appendConnection,
   mapExistingNodes,
   updateCache,
-} from '../../utils/graphql'
-import ModalAlt from '../cd/ModalAlt'
+} from '../../../utils/graphql'
+import ModalAlt from '../../cd/ModalAlt'
 
 import { CreateStackModalFormBasic } from './CreateStackModalFormBasic'
 import { CreateStackModalFormRepository } from './CreateStackModalFormRepository'

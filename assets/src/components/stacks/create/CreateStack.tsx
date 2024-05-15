@@ -2,7 +2,7 @@ import { Button, Tooltip } from '@pluralsh/design-system'
 import { ButtonProps } from 'honorable'
 import { ReactNode, useState } from 'react'
 
-import { ModalMountTransition } from '../utils/ModalMountTransition'
+import { ModalMountTransition } from '../../utils/ModalMountTransition'
 
 import CreateStackModal from './CreateStackModal'
 

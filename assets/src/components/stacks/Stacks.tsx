@@ -41,7 +41,7 @@ import { StandardScroller } from '../utils/SmoothScroller'
 import { LinkTabWrap } from '../utils/Tabs'
 
 import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
-import CreateStack from './CreateStack'
+import CreateStack from './create/CreateStack'
 
 const pollInterval = 10 * 1000
 

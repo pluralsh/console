@@ -11,7 +11,7 @@ import StackRunState from '../components/stacks/run/state/State'
 
 import StackRuns from '../components/stacks/StackRuns'
 
-import StackEnvironment from '../components/stacks/StackEnvironment'
+import StackEnvironment from '../components/stacks/environment/StackEnvironment'
 
 import {
   STACKS_ABS_PATH,

@@ -5,8 +5,8 @@ import { useTheme } from 'styled-components'
 import { produce } from 'immer'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
-import { StackEnvironmentAttributes } from '../../generated/graphql'
-import { SecretsTableSC } from '../cd/services/deployModal/DeployServiceSettingsSecrets'
+import { StackEnvironmentAttributes } from '../../../generated/graphql'
+import { SecretsTableSC } from '../../cd/services/deployModal/DeployServiceSettingsSecrets'
 
 export function CreateStackModalFormEnvironment({
   environment,
