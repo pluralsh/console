@@ -24,11 +24,14 @@ import { useTheme } from 'styled-components'
 
 import { extendConnection } from 'utils/graphql'
 
+import { Flex } from 'honorable'
+
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import { SERVICES_QUERY_PAGE_SIZE } from '../services/Services'
 
 import { NamespacesDetailTable } from './NamespacesDetailTable'
+import NamespaceSidecar from './NamespaceSidecar'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {
@@ -136,15 +139,18 @@ export default function NamespacesDetailView() {
         {!data ? (
           <LoadingIndicator />
         ) : services?.length ? (
-          <NamespacesDetailTable
-            data={data}
-            error={error}
-            fetchNextPage={fetchNextPage}
-            loading={loading}
-          />
+          <Flex gap={theme.spacing.medium}>
+            <NamespacesDetailTable
+              data={data}
+              error={error}
+              fetchNextPage={fetchNextPage}
+              loading={loading}
+            />
+            <NamespaceSidecar namespace={managedNamespace} />
+          </Flex>
         ) : (
           <div css={{ height: '100%' }}>
-            <EmptyState message="Looks like you don't have any service deployments yet." />
+            <EmptyState message="Looks like this namespace does not exist." />
           </div>
         )}
       </div>
