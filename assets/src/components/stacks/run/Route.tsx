@@ -55,7 +55,7 @@ export default function StackRunDetail(): ReactNode {
           ? [{ label: runId, url: getStackRunsAbsPath(stackId, runId) }]
           : []),
       ],
-      [runId]
+      [runId, stackId]
     )
   )
 

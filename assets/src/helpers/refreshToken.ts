@@ -31,7 +31,7 @@ export const onErrorHandler: ErrorHandler = ({
 }) => {
   const refreshToken = fetchRefreshToken()
   const is401 = networkError && (networkError as any).statusCode === 401
-  const isUnauthenticated = graphQLErrors?.some(
+  const isUnauthenticated = graphQLErrors?.some?.(
     (err) =>
       err.message === 'unauthenticated' || err.message === 'invalid_token'
   )
