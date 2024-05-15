@@ -8,7 +8,7 @@ import { DeleteIconButton } from 'components/utils/IconButtons'
 import { StackEnvironmentAttributes } from '../../generated/graphql'
 import { SecretsTableSC } from '../cd/services/deployModal/DeployServiceSettingsSecrets'
 
-export function CreateStackEnvironment({
+export function CreateStackModalFormEnvironment({
   environment,
   setEnvironment,
   setEnvironmentErrors,

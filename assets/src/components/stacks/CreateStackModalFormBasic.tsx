@@ -12,7 +12,7 @@ import { StackType } from '../../generated/graphql'
 
 import { StackTypeIcon } from './StackTypeIcon'
 
-export function CreateStackBasic({
+export function CreateStackModalFormBasic({
   name,
   setName,
   type,

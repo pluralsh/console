@@ -1,8 +1,8 @@
 import { Button } from '@pluralsh/design-system'
 
-import { FormState, stepperSteps } from './CreateStack'
+import { FormState, stepperSteps } from './CreateStackModal'
 
-export default function CreateStackActions({
+export default function CreateStackModalActions({
   formState,
   setFormState,
   currentStepIndex,

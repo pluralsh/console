@@ -7,7 +7,7 @@ import { trimStart } from 'lodash'
 
 import { RepositorySelector } from '../cd/services/deployModal/DeployServiceSettingsGit'
 
-export function CreateStackRepository({
+export function CreateStackModalFormRepository({
   repos,
   repositoryId,
   setRepositoryId: setRepoId,
