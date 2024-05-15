@@ -7,6 +7,8 @@ import {
 import { Div, Flex } from 'honorable'
 import { ReactNode, useEffect, useMemo, useRef } from 'react'
 
+import sortBy from 'lodash/sortBy'
+
 import { RunStep, StepStatus } from '../../../../generated/graphql'
 import CommandLog from '../../../builds/build/progress/CommandLog'
 
@@ -20,6 +22,13 @@ export default function Step({ step, follow }: StepProps): ReactNode {
   const command = useMemo(
     () => `${step.cmd} ${step.args?.join(' ')}`,
     [step.args, step.cmd]
+  )
+  const logs = useMemo(
+    () =>
+      sortBy(step?.logs ?? [], ['insertedAt'])
+        .map((l) => l!.logs)
+        .join(''),
+    [step?.logs]
   )
 
   useEffect(() => {
@@ -49,13 +58,10 @@ export default function Step({ step, follow }: StepProps): ReactNode {
         </Flex>
         <Status status={step.status} />
       </Flex>
-      {step?.logs?.map((l) => (
-        <CommandLog
-          key={l!.id}
-          text={l!.logs}
-          follow
-        />
-      ))}
+      <CommandLog
+        text={logs}
+        follow
+      />
     </Div>
   )
 }
