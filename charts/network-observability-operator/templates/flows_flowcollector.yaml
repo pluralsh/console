@@ -69,22 +69,7 @@ spec:
         cpu: 100m
       limits:
         memory: 800Mi
-  loki:
-    enable: true
-    # Change mode to "LokiStack" to use with the loki operator
-    mode: Monolithic
-    monolithic:
-      url: {{ .Values.lokiUrl }}
-    lokiStack:
-      name: loki
-      # Change loki operator instance namespace
-      # namespace: loki-operator
-    # Console plugin read timeout
-    readTimeout: 30s
-    # Write stage configuration
-    writeTimeout: 10s
-    writeBatchWait: 1s
-    writeBatchSize: 10485760
+  loki: {{- toYaml .Values.loki | nindent 4 }}
   consolePlugin:
     enable: true
     imagePullPolicy: IfNotPresent
