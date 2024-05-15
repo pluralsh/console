@@ -27,8 +27,8 @@ import {
   SidebarExpandWrapper,
   SidebarItem,
   SidebarSection,
-  WarningShieldIcon,
   StackIcon,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
@@ -49,10 +49,7 @@ import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
 
 import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
-import {
-  STACKS_ABS_PATH,
-  getStacksAbsPath,
-} from '../../routes/stacksRoutesConsts'
+import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -105,6 +102,7 @@ function getMenuItems({
     },
     {
       text: 'Infrastructure stacks',
+      expandedLabel: 'Infrastructure stacks',
       icon: <StackIcon />,
       path: getStacksAbsPath(''),
     },
