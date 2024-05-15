@@ -156,7 +156,11 @@ export default function GlobalServiceDetailView() {
           <>
             <Title1H1>{globalService?.name}</Title1H1>
 
-            <Flex gap={theme.spacing.medium}>
+            <Flex
+              gap={theme.spacing.medium}
+              alignItems="flex-start"
+              height="85%"
+            >
               <GlobalServiceDetailTable
                 data={data}
                 error={error}

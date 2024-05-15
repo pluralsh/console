@@ -1,4 +1,4 @@
-import { ComponentProps, useCallback, useMemo } from 'react'
+import { ComponentProps, useCallback, useMemo, useRef } from 'react'
 import {
   Chip,
   EmptyState,
@@ -61,6 +61,7 @@ export default function NamespacesDetailView() {
   const params = useParams()
   const theme = useTheme()
   const namespaceId = params[NAMESPACES_PARAM_ID]
+  const titleRef = useRef<HTMLHeadingElement | null>(null)
 
   const queryResult = useGetManagedNamespaceQuery({
     variables: {
@@ -134,12 +135,16 @@ export default function NamespacesDetailView() {
           height: '100%',
         }}
       >
-        <Title1H1>{managedNamespace?.name}</Title1H1>
+        <Title1H1 ref={titleRef}>{managedNamespace?.name}</Title1H1>
 
         {!data ? (
           <LoadingIndicator />
         ) : services?.length ? (
-          <Flex gap={theme.spacing.medium}>
+          <Flex
+            gap={theme.spacing.medium}
+            alignItems="flex-start"
+            height="85%"
+          >
             <NamespacesDetailTable
               data={data}
               error={error}
