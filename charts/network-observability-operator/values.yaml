@@ -89,10 +89,10 @@ controllerManager:
     resources:
       limits:
         cpu: 500m
-        memory: 1.5Gi
+        memory: 400Mi
       requests:
-        cpu: 50m
-        memory: 200Mi
+        cpu: 100m
+        memory: 100Mi
   replicas: 1
   serviceAccount:
     annotations: {}
