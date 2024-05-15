@@ -8,9 +8,9 @@ import {
 import { useEffect, useRef } from 'react'
 import ClusterSelector from 'components/cd/utils/ClusterSelector'
 
-import { StackType } from '../../generated/graphql'
+import { StackType } from '../../../generated/graphql'
 
-import { StackTypeIcon } from './StackTypeIcon'
+import { StackTypeIcon } from '../StackTypeIcon'
 
 export function CreateStackModalFormBasic({
   name,

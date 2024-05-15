@@ -5,7 +5,7 @@ import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useGitRepositoryQuery } from 'generated/graphql'
 import { trimStart } from 'lodash'
 
-import { RepositorySelector } from '../cd/services/deployModal/DeployServiceSettingsGit'
+import { RepositorySelector } from '../../cd/services/deployModal/DeployServiceSettingsGit'
 
 export function CreateStackModalFormRepository({
   repos,

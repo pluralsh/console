@@ -1,55 +1,52 @@
-import { Button, FormField, Input, Switch } from '@pluralsh/design-system'
+import { Button, FormField, Input } from '@pluralsh/design-system'
 import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
-import { StackEnvironmentAttributes } from '../../generated/graphql'
-import { SecretsTableSC } from '../cd/services/deployModal/DeployServiceSettingsSecrets'
+import { StackFileAttributes } from '../../../generated/graphql'
+import { SecretsTableSC } from '../../cd/services/deployModal/DeployServiceSettingsSecrets'
 
-export function CreateStackModalFormEnvironment({
-  environment,
-  setEnvironment,
-  setEnvironmentErrors,
+export function CreateStackModalFormFiles({
+  files,
+  setFiles,
+  setFilesErrors,
 }: {
-  environment: StackEnvironmentAttributes[]
-  setEnvironment: Dispatch<SetStateAction<StackEnvironmentAttributes[]>>
-  setEnvironmentErrors: Dispatch<SetStateAction<boolean>>
+  files: StackFileAttributes[]
+  setFiles: Dispatch<SetStateAction<StackFileAttributes[]>>
+  setFilesErrors: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
 
   const { items, errorCount } = useMemo(() => {
-    const names = new Set<string>()
+    const paths = new Set<string>()
     let errorCount = 0
 
-    const items = environment.map((env) => {
-      const duplicate = names.has(env.name) && !!env.name
+    const items = files.map((file) => {
+      const duplicate = paths.has(file.path) && !!file.path
 
-      names.add(env.name)
+      paths.add(file.path)
 
-      const noName = !!env.value && !env.name
+      const noPath = !!file.content && !file.path
 
-      if (duplicate || noName) {
+      if (duplicate || noPath) {
         errorCount++
       }
 
       return {
-        env,
+        file,
         errors: {
           duplicate,
-          noName,
+          noPath,
         },
       }
     })
 
     return { items, errorCount }
-  }, [environment])
+  }, [files])
 
-  useEffect(
-    () => setEnvironmentErrors(errorCount > 0),
-    [errorCount, setEnvironmentErrors]
-  )
+  useEffect(() => setFilesErrors(errorCount > 0), [errorCount, setFilesErrors])
 
   return (
     <div
@@ -59,18 +56,19 @@ export function CreateStackModalFormEnvironment({
         gap: theme.spacing.small,
       }}
     >
-      {environment.length > 0 && (
+      {files.length > 0 && (
         <SecretsTableSC>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Value</th>
-              <th>Secret</th>
+              <th>Path</th>
+              <th>Content</th>
+              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+              <th />
             </tr>
           </thead>
 
           <tr className="header displayContents" />
-          {items.map(({ env, errors }, i) => (
+          {items.map(({ file, errors }, i) => (
             <tr
               key={i}
               className="displayContents"
@@ -78,23 +76,23 @@ export function CreateStackModalFormEnvironment({
               {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
               <td>
                 <FormField
-                  error={errors.duplicate || errors.noName}
+                  error={errors.duplicate || errors.noPath}
                   hint={
-                    errors.noName
-                      ? 'Name cannot be empty'
+                    errors.noPath
+                      ? 'Path cannot be empty'
                       : errors.duplicate
-                      ? 'Duplicate name'
+                      ? 'Duplicate path'
                       : undefined
                   }
                 >
                   <Input
-                    error={errors.duplicate || errors.noName}
-                    value={env.name}
-                    inputProps={{ 'aria-label': 'Name' }}
+                    error={errors.duplicate || errors.noPath}
+                    value={file.path}
+                    inputProps={{ 'aria-label': 'Path' }}
                     onChange={(e) => {
-                      setEnvironment((env) =>
-                        produce(env, (draft) => {
-                          draft[i].name = e.target.value
+                      setFiles((f) =>
+                        produce(f, (draft) => {
+                          draft[i].path = e.target.value
                         })
                       )
                     }}
@@ -104,13 +102,12 @@ export function CreateStackModalFormEnvironment({
               {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
               <td>
                 <Input
-                  value={env.value}
-                  type={env?.secret ? 'password' : 'text'}
-                  inputProps={{ 'aria-label': 'Value' }}
+                  value={file.content}
+                  inputProps={{ 'aria-label': 'Content' }}
                   onChange={(e) =>
-                    setEnvironment((env) =>
-                      produce(env, (draft) => {
-                        draft[i].value = e.target.value
+                    setFiles((f) =>
+                      produce(f, (draft) => {
+                        draft[i].content = e.target.value
                       })
                     )
                   }
@@ -119,21 +116,11 @@ export function CreateStackModalFormEnvironment({
               {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
               <td>
                 <div css={{ display: 'flex' }}>
-                  <Switch
-                    checked={!!env?.secret}
-                    onChange={(e) =>
-                      setEnvironment((env) =>
-                        produce(env, (draft) => {
-                          draft[i].secret = e
-                        })
-                      )
-                    }
-                  />
                   <DeleteIconButton
                     css={{ marginTop: 4 }}
                     onClick={() => {
-                      setEnvironment((env) =>
-                        produce(env, (draft) => {
+                      setFiles((f) =>
+                        produce(f, (draft) => {
                           draft.splice(i, 1)
                         })
                       )
@@ -154,10 +141,10 @@ export function CreateStackModalFormEnvironment({
           size="tertiary"
           onClick={(e) => {
             e.preventDefault()
-            setEnvironment((env) => [...env, { name: '', value: '' }])
+            setFiles((files) => [...files, { path: '', content: '' }])
           }}
         >
-          Add environment variable
+          Add file
         </Button>
       </div>
     </div>

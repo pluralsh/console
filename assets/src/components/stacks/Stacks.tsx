@@ -28,7 +28,7 @@ import {
 import { GqlError } from '../utils/Alert'
 import { extendConnection, mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
-import { useStacksQuery } from '../../generated/graphql'
+import { StackFragment, useStacksQuery } from '../../generated/graphql'
 import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
@@ -41,7 +41,7 @@ import { StandardScroller } from '../utils/SmoothScroller'
 import { LinkTabWrap } from '../utils/Tabs'
 
 import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
-import CreateStack from './CreateStack'
+import CreateStack from './create/CreateStack'
 
 const pollInterval = 10 * 1000
 
@@ -54,6 +54,11 @@ const directory = [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
 ] as const
+
+export type StackOutletContextT = {
+  stack: StackFragment
+  refetch?: Nullable<() => void>
+}
 
 export const getBreadcrumbs = (stackId: string) => [
   { label: 'stacks', url: getStacksAbsPath('') },
@@ -72,7 +77,7 @@ export default function Stacks() {
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
 
-  const { data, error, loading, fetchMore } = useStacksQuery({
+  const { data, error, loading, fetchMore, refetch } = useStacksQuery({
     fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
     pollInterval,
@@ -125,6 +130,10 @@ export default function Stacks() {
         <CreateStack />
       </EmptyState>
     )
+  }
+
+  if (!stack) {
+    return <LoopingLogo />
   }
 
   return (
@@ -236,7 +245,7 @@ export default function Stacks() {
             </LinkTabWrap>
           ))}
         </TabList>
-        <Outlet context={{ stack }} />
+        <Outlet context={{ stack, refetch } as StackOutletContextT} />
       </div>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer>
