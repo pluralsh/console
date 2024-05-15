@@ -47,7 +47,7 @@ spec:
             - name: PROFILING_BIND_ADDRESS
             - name: OPERATOR_CONDITION_NAME
               value: netobserv-operator.v1.0.5
-          image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default (printf "v%s" .Chart.AppVersion) }}
+          image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default (printf "%s" .Chart.AppVersion) }}
           imagePullPolicy: {{ .Values.controllerManager.manager.imagePullPolicy }}
           livenessProbe:
             failureThreshold: 3
