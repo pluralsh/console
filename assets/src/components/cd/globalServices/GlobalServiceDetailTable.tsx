@@ -12,8 +12,6 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { Title1H1 } from 'components/utils/typography/Text'
-
 import { ApolloError } from '@apollo/client'
 
 import { SERVICES_REACT_VIRTUAL_OPTIONS, columns } from '../services/Services'
@@ -53,7 +51,6 @@ export function GlobalServiceDetailTable({
         flexGrow: 1,
       }}
     >
-      <Title1H1>{globalService?.name}</Title1H1>
       {!data ? (
         <LoadingIndicator />
       ) : services?.length ? (
