@@ -8,6 +8,7 @@ fragment Stack on InfrastructureStack {
     version
   }
   repository {
+    id
     url
   }
   git {
@@ -195,6 +196,12 @@ query StackRun($id: ID!) {
 
 mutation CreateStack($attributes: StackAttributes!){
   createStack(attributes: $attributes) {
+    ...Stack
+  }
+}
+
+mutation UpdateStack($id: ID!, $attributes: StackAttributes!) {
+  updateStack(id: $id, attributes: $attributes) {
     ...Stack
   }
 }
