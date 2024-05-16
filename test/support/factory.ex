@@ -537,6 +537,12 @@ defmodule Console.Factory do
     }
   end
 
+  def stack_state_factory do
+    %Schema.StackState{
+      plan: "some plan"
+    }
+  end
+
   def run_step_factory do
     %Schema.RunStep{
       name: sequence(:run_step, & "step-#{&1}"),

@@ -1,6 +1,6 @@
 defmodule Console.Deployments.Pr.Impl.Github do
   import Console.Deployments.Pr.Utils
-  alias Console.Schema.{PrAutomation, ScmWebhook, ScmConnection}
+  alias Console.Schema.{PrAutomation, PullRequest, ScmWebhook, ScmConnection}
   @behaviour Console.Deployments.Pr.Dispatcher
 
   def create(pr, branch, ctx) do
@@ -53,6 +53,19 @@ defmodule Console.Deployments.Pr.Impl.Github do
   end
   def pr(_), do: :ignore
 
+  def review(conn, %PullRequest{url: url}, body) do
+    with {:ok, owner, repo, number} <- get_pull_id(url),
+         {:ok, client} <- client(conn) do
+      case Tentacat.Pulls.Reviews.create(client, owner, repo, number, %{
+            "body" => body,
+            "event" => "COMMENT"
+      }) do
+        {_, %{"id" => id}, _} -> {:ok, "#{id}"}
+        {_, body, _} -> {:error, "failed to create review comment: #{Jason.encode!(body)}"}
+      end
+    end
+  end
+
   defp pr_content(pr), do: "#{pr["head"]["ref"]}\n#{pr["title"]}\n#{pr["body"] || ""}"
 
   defp identifier(%PrAutomation{identifier: id}) when is_binary(id) do
@@ -77,4 +90,13 @@ defmodule Console.Deployments.Pr.Impl.Github do
   defp state(%{"state" => "closed", "merged_at" => merged}) when not is_nil(merged), do: :merged
   defp state(%{"state" => "closed"}), do: :closed
   defp state(_), do: :open
+
+  defp get_pull_id(url) do
+    with %URI{path: "/" <> path} <- URI.parse(url),
+         [owner, repo, "pull", number] <- String.split(path, "/") do
+      {:ok, owner, repo, number}
+    else
+      _ -> {:error, "could not parse github url"}
+    end
+  end
 end

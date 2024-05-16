@@ -1,0 +1,8 @@
+Plural has generated a plan for this PR, full details [here](<%= @link %>)
+
+<details>
+<summary>Plan Details</summary>
+
+<pre><code><%= @plan %></code></pre>
+
+</details>

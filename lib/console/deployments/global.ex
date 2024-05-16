@@ -318,6 +318,7 @@ defmodule Console.Deployments.Global do
 
   defp svc_name(%GlobalService{service: %Service{name: name}}), do: name
   defp svc_name(%GlobalService{template: %ServiceTemplate{name: name}}), do: name
+  defp svc_name(%GlobalService{name: name}), do: name
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}
 

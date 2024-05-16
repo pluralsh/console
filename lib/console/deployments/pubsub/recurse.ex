@@ -163,6 +163,9 @@ defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
     case {Stacks.get_stack!(run.stack_id), run} do
       {%Stack{delete_run_id: ^id} = stack, %StackRun{status: :successful}} ->
         Console.Repo.delete(stack)
+      {stack, %StackRun{pull_request_id: id} = run} when is_binary(id) ->
+        Stacks.post_comment(run)
+        Stacks.dequeue(stack)
       {stack, _} -> Stacks.dequeue(stack)
     end
   end

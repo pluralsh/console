@@ -13,6 +13,8 @@ defmodule Console.Schema.PullRequest do
     field :ref,     :string
     field :sha,     :string
 
+    field :review_id, :string
+
     field :notifications_policy_id, :binary_id
 
     belongs_to :cluster, Cluster
@@ -57,7 +59,7 @@ defmodule Console.Schema.PullRequest do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(url ref sha status title cluster_id stack_id service_id creator labels)a
+  @valid ~w(url ref sha status title cluster_id stack_id service_id review_id creator labels)a
 
   def changeset(model, attrs \\ %{}) do
     model
