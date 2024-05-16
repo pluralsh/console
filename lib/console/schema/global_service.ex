@@ -24,6 +24,15 @@ defmodule Console.Schema.GlobalService do
     timestamps()
   end
 
+  def service_ids(query \\ __MODULE__, id) do
+    from(g in query,
+      join: s in Service,
+        on: s.owner_id == g.id,
+      where: g.id == ^id,
+      select: s.id
+    )
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(g in query, order_by: ^order)
   end

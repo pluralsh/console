@@ -209,8 +209,10 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       global  = insert(:global_service, provider: cluster.provider)
       global2 = insert(:global_service, tags: [%{name: "test", value: "tag"}])
       global3 = insert(:global_service)
-      ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}])
-      ignore1 = insert(:global_service, provider: insert(:cluster_provider))
+      ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}], cascade: %{detach: true})
+      ignore1 = insert(:global_service, provider: insert(:cluster_provider), cascade: %{delete: true})
+      svc  = insert(:service, owner: ignore1, cluster: cluster)
+      svc2 = insert(:service, owner: ignore, cluster: cluster)
 
       event = %PubSub.ClusterUpdated{item: cluster}
       :ok = Recurse.handle_event(event)
@@ -219,6 +221,9 @@ defmodule Console.Deployments.PubSub.RecurseTest do
         do: assert Services.get_service_by_name(cluster.id, gs.service.name)
       for gs <- [ignore, ignore1],
         do: refute Services.get_service_by_name(cluster.id, gs.service.name)
+
+      assert refetch(svc).deleted_at
+      refute refetch(svc2)
     end
 
     test "it will apply managed namespaces" do
