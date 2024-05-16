@@ -1,5 +1,7 @@
 import { Button } from '@pluralsh/design-system'
 
+import { useTheme } from 'styled-components'
+
 import { FormState, stepperSteps } from './CreateStackModal'
 
 export default function CreateStackModalActions({
@@ -27,63 +29,16 @@ export default function CreateStackModalActions({
   submit: () => void
   loading: boolean
 }) {
+  const theme = useTheme()
+
   return (
-    <>
-      {formState === FormState.Initial && (
-        <Button
-          type="submit"
-          disabled={!initialFormValid}
-          onClick={() => setFormState(FormState.Repository)}
-          marginLeft="medium"
-        >
-          Select repository
-        </Button>
-      )}
-
-      {formState === FormState.Repository && (
-        <Button
-          type="submit"
-          disabled={!repoFormValid}
-          onClick={() => setFormState(FormState.Environment)}
-          marginLeft="medium"
-        >
-          Setup environment
-        </Button>
-      )}
-
-      {formState === FormState.Environment && (
-        <Button
-          type="submit"
-          disabled={!environmentFormValid}
-          onClick={() => setFormState(FormState.Files)}
-          marginLeft="medium"
-        >
-          Setup files
-        </Button>
-      )}
-
-      {formState === FormState.Files && (
-        <Button
-          type="submit"
-          disabled={!filesFormValid}
-          onClick={() => setFormState(FormState.Files)}
-          marginLeft="medium"
-        >
-          Setup files
-        </Button>
-      )}
-
-      {formState === FormState.Job && (
-        <Button
-          type="submit"
-          disabled={!jobFormValid}
-          onClick={() => submit()}
-          loading={loading}
-          marginLeft="medium"
-        >
-          Create
-        </Button>
-      )}
+    <div css={{ display: 'flex', gap: theme.spacing.medium }}>
+      <Button
+        secondary
+        onClick={() => close()}
+      >
+        Cancel
+      </Button>
 
       {currentStepIndex > 0 && (
         <Button
@@ -98,12 +53,57 @@ export default function CreateStackModalActions({
         </Button>
       )}
 
-      <Button
-        secondary
-        onClick={() => close()}
-      >
-        Cancel
-      </Button>
-    </>
+      {formState === FormState.Initial && (
+        <Button
+          type="submit"
+          disabled={!initialFormValid}
+          onClick={() => setFormState(FormState.Repository)}
+        >
+          Select repository
+        </Button>
+      )}
+
+      {formState === FormState.Repository && (
+        <Button
+          type="submit"
+          disabled={!repoFormValid}
+          onClick={() => setFormState(FormState.Environment)}
+        >
+          Setup environment
+        </Button>
+      )}
+
+      {formState === FormState.Environment && (
+        <Button
+          type="submit"
+          disabled={!environmentFormValid}
+          onClick={() => setFormState(FormState.Files)}
+        >
+          Setup files
+        </Button>
+      )}
+
+      {formState === FormState.Files && (
+        <Button
+          type="submit"
+          secondary
+          disabled={!filesFormValid}
+          onClick={() => setFormState(FormState.Job)}
+        >
+          Setup job
+        </Button>
+      )}
+
+      {(formState === FormState.Job || formState === FormState.Files) && (
+        <Button
+          type="submit"
+          disabled={!jobFormValid || !filesFormValid}
+          onClick={() => submit()}
+          loading={loading}
+        >
+          Create
+        </Button>
+      )}
+    </div>
   )
 }
