@@ -10,27 +10,33 @@ export function usePolicyChartsData(filters: {
   q?: string | undefined
 }) {
   const theme = useTheme()
-  const { data: clusterPolicyStats, error: clusterPolicyStatsError } =
+
+  const { error: clusterPolicyStatsError, ...clusterRes } =
     usePolicyStatisticsQuery({
       variables: {
         aggregate: PolicyAggregate.Cluster,
         ...filters,
       },
     })
-  const { data: enforcementStats, error: enforcementStatsError } =
+  const clusterPolicyStats = clusterRes.data || clusterRes.previousData
+
+  const { error: enforcementStatsError, ...enforcementRes } =
     usePolicyStatisticsQuery({
       variables: {
         aggregate: PolicyAggregate.Enforcement,
         ...filters,
       },
     })
-  const { data: installedStats, error: installedStatsError } =
+  const enforcementStats = enforcementRes.data || enforcementRes.previousData
+
+  const { error: installedStatsError, ...installedRes } =
     usePolicyStatisticsQuery({
       variables: {
         aggregate: PolicyAggregate.Installed,
         ...filters,
       },
     })
+  const installedStats = installedRes.data || installedRes.previousData
 
   const clusterPolicyChartData: PieChartData | null = useMemo(
     () =>

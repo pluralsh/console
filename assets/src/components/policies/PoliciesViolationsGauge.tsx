@@ -46,7 +46,7 @@ export function PoliciesViolationsGauge({
   }
 
   return (
-    <div css={{ display: 'flex', gap: theme.spacing.large }}>
+    <div css={{ display: 'flex', overflow: 'auto', gap: theme.spacing.large }}>
       <PolicyChartCard
         title="Clusters with Violations"
         data={clusterPolicyChartData}
@@ -81,7 +81,7 @@ function PolicyChartCard({
       <Subtitle2H1>{title}</Subtitle2H1>
       <ChartWrapper>
         {!data ? (
-          <ChartSkeleton scale={0.5} />
+          <ChartSkeleton scale={0.4} />
         ) : (
           <>
             <PieChart

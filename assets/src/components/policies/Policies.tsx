@@ -1,15 +1,7 @@
-import {
-  Breadcrumb,
-  Input,
-  SearchIcon,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { useDebounce } from '@react-hooks-library/core'
+import { Breadcrumb, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { Title1H1 } from 'components/utils/typography/Text'
 import { usePolicyConstraintsQuery } from 'generated/graphql'
 import { ComponentProps, useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
@@ -17,9 +9,11 @@ import styled from 'styled-components'
 
 import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
+import { Overline } from 'components/cd/utils/PermissionsModal'
+
+import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
 import { PoliciesViolationsGauge } from './PoliciesViolationsGauge'
-import PoliciesFilter from './PoliciesFilter'
 
 const breadcrumbs: Breadcrumb[] = [
   { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
@@ -35,9 +29,9 @@ export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-function Policies() {
+export function Policies() {
   useSetBreadcrumbs(breadcrumbs)
-  const [searchString, setSearchString] = useState('')
+  // const [searchString, setSearchString] = useState('')
   const [selectedKinds, setSelectedKinds] = useState<(string | null)[]>([])
   const [selectedNamespaces, setSelectedNamespaces] = useState<
     (string | null)[]
@@ -46,10 +40,10 @@ function Policies() {
     []
   )
 
-  const debouncedSearchString = useDebounce(searchString, 100)
+  // const debouncedSearchString = useDebounce(searchString, 100)
 
   const policyQFilters = {
-    ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
+    // ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
     ...(selectedKinds.length ? { kinds: selectedKinds } : {}),
     ...(selectedNamespaces.length ? { namespaces: selectedNamespaces } : {}),
     ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
@@ -75,10 +69,8 @@ function Policies() {
 
   return (
     <PoliciesContainer>
-      <div className="title">
-        <Title1H1>Policies</Title1H1>
-      </div>
       <div className="filter">
+        <Overline>Filters</Overline>
         <PoliciesFilter
           selectedNamespaces={selectedNamespaces}
           setSelectedNamespaces={setSelectedNamespaces}
@@ -88,7 +80,7 @@ function Policies() {
           setSelectedClusters={setSelectedClusters}
         />
       </div>
-      <div className="search">
+      {/* <div className="search">
         <Input
           placeholder="Search policies"
           startIcon={<SearchIcon />}
@@ -97,7 +89,7 @@ function Policies() {
             setSearchString?.(e.currentTarget.value)
           }}
         />
-      </div>
+      </div> */}
       <div className="violations">
         {policies && policies?.length > 0 && (
           <PoliciesViolationsGauge filters={policyQFilters} />
@@ -118,36 +110,37 @@ function Policies() {
   )
 }
 
-export default Policies
-
 const PoliciesContainer = styled.div(({ theme }) => ({
-  padding: theme.spacing.large,
-  backgroundColor: theme.colors['fill-zero'],
   display: 'grid',
-  gridTemplateColumns: '1fr 1fr 230px',
-  gridTemplateRows: 'auto auto auto 1fr',
+  overflow: 'auto',
+  padding: theme.spacing.large,
+  gridTemplateColumns: 'auto max(230px)',
+  gridTemplateRows: 'auto 1fr',
   gap: '16px 16px',
-  gridAutoFlow: 'row',
   gridTemplateAreas: `
-    "title title title"
-    "search search filter"
-    "violations violations filter"
-    "table table filter"
+    // "search filter"
+    "violations filter"
+    "table filter"
   `,
   '.title': {
     gridArea: 'title',
   },
   '.filter': {
     gridArea: 'filter',
+    minWidth: 'fit-content',
+    overflow: 'hidden auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: theme.spacing.small,
   },
   '.search': {
     gridArea: 'search',
   },
   '.violations': {
     gridArea: 'violations',
-    overflow: 'auto',
   },
   '.table': {
     gridArea: 'table',
+    overflow: 'auto',
   },
 }))
