@@ -153,7 +153,7 @@ export default function StackEnvironment() {
   }
 
   return (
-    <ScrollablePage scrollable={false}>
+    <>
       <ModalMountTransition open={createOpen}>
         <StackEnvironmentApplyModal
           open={createOpen}
@@ -207,6 +207,6 @@ export default function StackEnvironment() {
           </FullHeightTableWrap>
         )}
       </div>
-    </ScrollablePage>
+    </>
   )
 }
