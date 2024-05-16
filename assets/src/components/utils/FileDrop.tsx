@@ -60,6 +60,8 @@ const FileDropSC = styled.div<{
   } = $dropState
 
   return {
+    flexGrow: 1,
+
     '.dropRoot': {
       cursor: disabled
         ? 'not-allowed'

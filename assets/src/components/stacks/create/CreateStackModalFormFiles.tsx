@@ -1,20 +1,29 @@
-import { Button, FormField, Input } from '@pluralsh/design-system'
-import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
+import { Button, Card, FormField, Input } from '@pluralsh/design-system'
+import {
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useMemo,
+} from 'react'
 
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
-import { StackFileAttributes } from '../../../generated/graphql'
-import { SecretsTableSC } from '../../cd/services/deployModal/DeployServiceSettingsSecrets'
+import { isEmpty } from 'lodash'
+
+import { FileDrop, FileDropFile } from '../../utils/FileDrop'
+
+import { StackFileAttributesExtended } from './CreateStackModal'
 
 export function CreateStackModalFormFiles({
   files,
   setFiles,
   setFilesErrors,
 }: {
-  files: StackFileAttributes[]
-  setFiles: Dispatch<SetStateAction<StackFileAttributes[]>>
+  files: StackFileAttributesExtended[]
+  setFiles: Dispatch<SetStateAction<StackFileAttributesExtended[]>>
   setFilesErrors: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
@@ -48,94 +57,110 @@ export function CreateStackModalFormFiles({
 
   useEffect(() => setFilesErrors(errorCount > 0), [errorCount, setFilesErrors])
 
+  const readFile = useCallback(
+    async (files, i) => {
+      if (isEmpty(files)) return
+
+      const file = files?.[0]
+      const content = await file?.text()
+
+      setFiles((f) =>
+        produce(f, (draft) => {
+          draft[i].name = file.name
+          draft[i].content = content
+        })
+      )
+    },
+    [setFiles]
+  )
+
   return (
     <div
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.small,
+        gap: theme.spacing.medium,
       }}
     >
       {files.length > 0 && (
-        <SecretsTableSC>
-          <thead>
-            <tr>
-              <th>Path</th>
-              <th>Content</th>
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-              <th />
-            </tr>
-          </thead>
-
-          <tr className="header displayContents" />
+        <>
           {items.map(({ file, errors }, i) => (
-            <tr
+            <Card
+              fillLevel={2}
+              padding="medium"
               key={i}
-              className="displayContents"
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.small,
+              }}
             >
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-              <td>
-                <FormField
-                  error={errors.duplicate || errors.noPath}
-                  hint={
-                    errors.noPath
-                      ? 'Path cannot be empty'
-                      : errors.duplicate
-                      ? 'Duplicate path'
-                      : undefined
-                  }
-                >
-                  <Input
-                    error={errors.duplicate || errors.noPath}
-                    value={file.path}
-                    inputProps={{ 'aria-label': 'Path' }}
-                    onChange={(e) => {
-                      setFiles((f) =>
-                        produce(f, (draft) => {
-                          draft[i].path = e.target.value
-                        })
-                      )
-                    }}
-                  />
-                </FormField>
-              </td>
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-              <td>
+              <FormField
+                error={errors.duplicate || errors.noPath}
+                hint={
+                  errors.noPath
+                    ? 'Path cannot be empty'
+                    : errors.duplicate
+                    ? 'Duplicate path'
+                    : undefined
+                }
+              >
                 <Input
-                  value={file.content}
-                  inputProps={{ 'aria-label': 'Content' }}
-                  onChange={(e) =>
+                  error={errors.duplicate || errors.noPath}
+                  value={file.path}
+                  inputProps={{ 'aria-label': 'Mount path' }}
+                  placeholder="Mount path"
+                  onChange={(e) => {
                     setFiles((f) =>
                       produce(f, (draft) => {
-                        draft[i].content = e.target.value
+                        draft[i].path = e.target.value
                       })
                     )
+                  }}
+                />
+              </FormField>
+              <div
+                css={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  gap: theme.spacing.small,
+                }}
+              >
+                <FileDrop
+                  onDrop={(files) => readFile(files, i)}
+                  files={
+                    !!file.content && [
+                      <FileDropFile
+                        key="file"
+                        label={file.name ?? 'Selected file'}
+                        onClear={() => {
+                          setFiles((f) =>
+                            produce(f, (draft) => {
+                              draft[i].content = ''
+                            })
+                          )
+                        }}
+                      />,
+                    ]
                   }
                 />
-              </td>
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-              <td>
-                <div css={{ display: 'flex' }}>
-                  <DeleteIconButton
-                    css={{ marginTop: 4 }}
-                    onClick={() => {
-                      setFiles((f) =>
-                        produce(f, (draft) => {
-                          draft.splice(i, 1)
-                        })
-                      )
-                    }}
-                  />
-                </div>
-              </td>
-            </tr>
+                <DeleteIconButton
+                  tooltip="Delete"
+                  onClick={() => {
+                    setFiles((f) =>
+                      produce(f, (draft) => {
+                        draft.splice(i, 1)
+                      })
+                    )
+                  }}
+                />
+              </div>
+            </Card>
           ))}
-        </SecretsTableSC>
+        </>
       )}
-      <div css={{ display: 'flex' }}>
+      <div>
         <Button
-          css={{ flexGrow: 0, width: 'auto' }}
-          type="button"
           secondary
           small
           size="tertiary"

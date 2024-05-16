@@ -75,6 +75,10 @@ export const stepperSteps = [
   },
 ]
 
+export type StackFileAttributesExtended = StackFileAttributes & {
+  name?: string
+}
+
 export default function CreateStackModal({
   open,
   onClose,
@@ -83,7 +87,7 @@ export default function CreateStackModal({
   onClose: () => void
 }) {
   const theme = useTheme()
-  const [formState, setFormState] = useState<FormState>(FormState.Initial)
+  const [formState, setFormState] = useState<FormState>(FormState.Files)
   const [name, setName] = useState('')
   const [type, setType] = useState<StackType>(StackType.Terraform)
   const [image, setImage] = useState('')
@@ -96,7 +100,7 @@ export default function CreateStackModal({
   const [environment, setEnvironment] = useState<StackEnvironmentAttributes[]>([
     { name: '', value: '' },
   ])
-  const [files, setFiles] = useState<StackFileAttributes[]>([
+  const [files, setFiles] = useState<StackFileAttributesExtended[]>([
     { path: '', content: '' },
   ])
   const [environmentErrors, setEnvironmentErrors] = useState(false)
