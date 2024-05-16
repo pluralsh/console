@@ -1,4 +1,5 @@
 import {
+  CraneIcon,
   FileIcon,
   GearTrainIcon,
   GitHubIcon,
@@ -8,6 +9,8 @@ import {
 import { useState } from 'react'
 
 import styled, { useTheme } from 'styled-components'
+
+import { isEmpty } from 'lodash'
 
 import { GqlError } from '../../utils/Alert'
 import {
@@ -30,12 +33,14 @@ import { CreateStackModalFormRepository } from './CreateStackModalFormRepository
 import CreateStackModalActions from './CreateStackModalActions'
 import { CreateStackModalFormEnvironment } from './CreateStackModalFormEnvironment'
 import { CreateStackModalFormFiles } from './CreateStackModalFormFiles'
+import { CreateStackModalFormJob } from './CreateStackModalFormJob'
 
 export enum FormState {
   Initial = 'initial',
   Repository = 'repository',
   Environment = 'environment',
   Files = 'files',
+  Job = 'job',
 }
 
 const StepTitle = styled.div(({ theme }) => ({
@@ -51,7 +56,7 @@ const stepBase = {
 export const stepperSteps = [
   {
     key: FormState.Initial,
-    stepTitle: <StepTitle>Stack props</StepTitle>,
+    stepTitle: <StepTitle>General</StepTitle>,
     IconComponent: GearTrainIcon,
     ...stepBase,
   },
@@ -71,6 +76,12 @@ export const stepperSteps = [
     key: FormState.Files,
     stepTitle: <StepTitle>Files</StepTitle>,
     IconComponent: FileIcon,
+    ...stepBase,
+  },
+  {
+    key: FormState.Job,
+    stepTitle: <StepTitle>Job</StepTitle>,
+    IconComponent: CraneIcon,
     ...stepBase,
   },
 ]
@@ -101,6 +112,8 @@ export default function CreateStackModal({
     []
   )
   const [files, setFiles] = useState<StackFileAttributesExtended[]>([])
+  const [jobNamespace, setJobNamespace] = useState('')
+  const [jobSpec, setJobSpec] = useState('')
   const [environmentErrors, setEnvironmentErrors] = useState(false)
   const [filesErrors, setFilesErrors] = useState(false)
 
@@ -108,6 +121,9 @@ export default function CreateStackModal({
   const repoFormValid = !!(repositoryId && ref && folder)
   const environmentFormValid = !environmentErrors
   const filesFormValid = !filesErrors
+  const jobFormValid =
+    (isEmpty(jobNamespace) && isEmpty(jobSpec)) ||
+    (!isEmpty(jobSpec) && !isEmpty(jobNamespace))
 
   const currentStepIndex = stepperSteps.findIndex(
     (step) => step.key === formState
@@ -150,6 +166,8 @@ export default function CreateStackModal({
       header="Create infrastracture stack"
       portal
       asForm
+      width={640}
+      maxWidth={640}
       open={open}
       onClose={onClose}
       actions={
@@ -161,6 +179,7 @@ export default function CreateStackModal({
           repoFormValid={repoFormValid}
           environmentFormValid={environmentFormValid}
           filesFormValid={filesFormValid}
+          jobFormValid={jobFormValid}
           close={onClose}
           submit={mutation}
           loading={loading}
@@ -223,6 +242,15 @@ export default function CreateStackModal({
           files={files}
           setFiles={setFiles}
           setFilesErrors={setFilesErrors}
+        />
+      )}
+
+      {formState === FormState.Job && (
+        <CreateStackModalFormJob
+          jobNamespace={jobNamespace}
+          setJobNamespace={setJobNamespace}
+          jobSpec={jobSpec}
+          setJobSpec={setJobSpec}
         />
       )}
 

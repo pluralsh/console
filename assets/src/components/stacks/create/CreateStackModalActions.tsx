@@ -10,6 +10,7 @@ export default function CreateStackModalActions({
   repoFormValid,
   environmentFormValid,
   filesFormValid,
+  jobFormValid,
   close,
   submit,
   loading,
@@ -21,6 +22,7 @@ export default function CreateStackModalActions({
   repoFormValid: boolean
   environmentFormValid: boolean
   filesFormValid: boolean
+  jobFormValid: boolean
   close: () => void
   submit: () => void
   loading: boolean
@@ -64,6 +66,17 @@ export default function CreateStackModalActions({
         <Button
           type="submit"
           disabled={!filesFormValid}
+          onClick={() => setFormState(FormState.Files)}
+          marginLeft="medium"
+        >
+          Setup files
+        </Button>
+      )}
+
+      {formState === FormState.Job && (
+        <Button
+          type="submit"
+          disabled={!jobFormValid}
           onClick={() => submit()}
           loading={loading}
           marginLeft="medium"
