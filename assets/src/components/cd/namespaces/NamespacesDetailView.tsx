@@ -1,7 +1,12 @@
-import { ComponentProps, useMemo } from 'react'
-import { Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { ComponentProps, useCallback, useMemo, useRef } from 'react'
+import {
+  Chip,
+  EmptyState,
+  Table,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 
-import { AuthMethod, useGetManagedNamespaceNameQuery } from 'generated/graphql'
+import { AuthMethod, useGetManagedNamespaceQuery } from 'generated/graphql'
 import {
   CD_REL_PATH,
   NAMESPACES_PARAM_ID,
@@ -13,9 +18,20 @@ import { useParams } from 'react-router-dom'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
+import { Title1H1 } from 'components/utils/typography/Text'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useTheme } from 'styled-components'
+
+import { extendConnection } from 'utils/graphql'
+
+import { Flex } from 'honorable'
+
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
+import { SERVICES_QUERY_PAGE_SIZE } from '../services/Services'
+
 import { NamespacesDetailTable } from './NamespacesDetailTable'
+import NamespaceSidecar from './NamespaceSidecar'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {
@@ -43,14 +59,52 @@ export const NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 export default function NamespacesDetailView() {
   const params = useParams()
-
+  const theme = useTheme()
   const namespaceId = params[NAMESPACES_PARAM_ID]
+  const titleRef = useRef<HTMLHeadingElement | null>(null)
 
-  const { data } = useGetManagedNamespaceNameQuery({
-    variables: { namespaceId: namespaceId || '' },
+  const queryResult = useGetManagedNamespaceQuery({
+    variables: {
+      first: SERVICES_QUERY_PAGE_SIZE,
+      namespaceId: namespaceId || '',
+    },
+    fetchPolicy: 'cache-and-network',
+    // Important so loading will be updated on fetchMore to send to Table
+    notifyOnNetworkStatusChange: true,
   })
+  const {
+    error,
+    fetchMore,
+    loading,
+    data: currentData,
+    previousData,
+  } = queryResult
+  const data = currentData || previousData
 
-  const namespaceName = data?.managedNamespace?.name || ''
+  const managedNamespace = data?.managedNamespace
+  const services = managedNamespace?.services?.edges
+  const pageInfo = managedNamespace?.services?.pageInfo
+
+  const fetchNextPage = useCallback(() => {
+    if (!pageInfo?.endCursor) {
+      return
+    }
+    fetchMore({
+      variables: { after: pageInfo.endCursor },
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!prev.managedNamespace) return prev
+
+        return {
+          ...prev,
+          managedNamespace: extendConnection(
+            prev.managedNamespace,
+            fetchMoreResult.managedNamespace?.services,
+            'services'
+          ),
+        }
+      },
+    })
+  }, [fetchMore, pageInfo?.endCursor])
 
   useSetBreadcrumbs(
     useMemo(
@@ -61,17 +115,50 @@ export default function NamespacesDetailView() {
           url: `/${CD_REL_PATH}/${NAMESPACES_REL_PATH}`,
         },
         {
-          label: namespaceName,
-          url: `/${CD_REL_PATH}/${NAMESPACES_REL_PATH}/${namespaceName}`,
+          label: managedNamespace?.name || '',
+          url: `/${CD_REL_PATH}/${NAMESPACES_REL_PATH}/${
+            managedNamespace?.name || ''
+          }`,
         },
       ],
-      [namespaceName]
+      [managedNamespace?.name]
     )
   )
 
   return (
     <ResponsivePageFullWidth scrollable={false}>
-      <NamespacesDetailTable namespaceId={namespaceId} />
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.small,
+          height: '100%',
+        }}
+      >
+        <Title1H1 ref={titleRef}>{managedNamespace?.name}</Title1H1>
+
+        {!data ? (
+          <LoadingIndicator />
+        ) : services?.length ? (
+          <Flex
+            gap={theme.spacing.medium}
+            alignItems="flex-start"
+            height="85%"
+          >
+            <NamespacesDetailTable
+              data={data}
+              error={error}
+              fetchNextPage={fetchNextPage}
+              loading={loading}
+            />
+            <NamespaceSidecar namespace={managedNamespace} />
+          </Flex>
+        ) : (
+          <div css={{ height: '100%' }}>
+            <EmptyState message="Looks like this namespace does not exist." />
+          </div>
+        )}
+      </div>
     </ResponsivePageFullWidth>
   )
 }
