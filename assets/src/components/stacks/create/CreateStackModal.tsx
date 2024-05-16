@@ -129,7 +129,10 @@ export default function CreateStackModal({
         repositoryId,
         git: { ref, folder },
         environment,
-        files,
+        files: files.map(({ path, content }) => ({
+          path,
+          content,
+        })),
         // TODO: Add job spec.
       },
     },
