@@ -119,6 +119,7 @@ export function CreateStackModalFormBasic({
           '> div:first-child': {
             ...theme.partials.text.overline,
             color: theme.colors['text-xlight'],
+            cursor: 'pointer',
             padding: 0,
           },
         }}

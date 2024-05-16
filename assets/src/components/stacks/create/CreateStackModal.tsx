@@ -255,15 +255,14 @@ export default function CreateStackModal({
           setJobSpec={setJobSpec}
         />
       )}
-
-      <div css={{ marginTop: theme.spacing.medium }}>
-        {error && (
+      {error && (
+        <div css={{ marginTop: theme.spacing.medium }}>
           <GqlError
             header="Something went wrong"
             error={error}
           />
-        )}
-      </div>
+        </div>
+      )}
     </ModalAlt>
   )
 }
