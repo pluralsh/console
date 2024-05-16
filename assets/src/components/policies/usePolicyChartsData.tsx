@@ -45,7 +45,7 @@ export function usePolicyChartsData(filters: {
         : [
             {
               id: 'violations',
-              label: 'WITH VIOLATIONS',
+              label: 'with violations',
               color: theme.colors.semanticRedLight,
               value:
                 clusterPolicyStats?.policyStatistics?.find(
@@ -54,7 +54,7 @@ export function usePolicyChartsData(filters: {
             },
             {
               id: 'no-violations',
-              label: 'WITHOUT',
+              label: 'without',
               color: theme.colors.semanticGreen,
               value:
                 clusterPolicyStats?.policyStatistics?.find(
@@ -76,7 +76,7 @@ export function usePolicyChartsData(filters: {
         : [
             {
               id: 'dryrun',
-              label: 'DRYRUN',
+              label: 'dryrun',
               color: theme.colors.semanticGreen,
               value:
                 enforcementStats?.policyStatistics?.find(
@@ -85,7 +85,7 @@ export function usePolicyChartsData(filters: {
             },
             {
               id: 'deny',
-              label: 'DENY',
+              label: 'deny',
               color: theme.colors.semanticRedLight,
               value:
                 enforcementStats?.policyStatistics?.find(
@@ -94,7 +94,7 @@ export function usePolicyChartsData(filters: {
             },
             {
               id: 'warn',
-              label: 'WARN',
+              label: 'warn',
               color: theme.colors.semanticYellow,
               value:
                 enforcementStats?.policyStatistics?.find(
@@ -116,25 +116,24 @@ export function usePolicyChartsData(filters: {
         : [
             {
               id: 'uninstalled',
-              label: 'UNINSTALLED',
+              label: 'uninstalled',
               color: theme.colors.semanticRedLight,
               value:
-                clusterPolicyStats?.policyStatistics?.find(
-                  (stat) => stat?.aggregate === 'none'
+                installedStats?.policyStatistics?.find(
+                  (stat) => stat?.aggregate === 'uninstalled'
                 )?.count ?? 0,
             },
             {
               id: 'installed',
-              label: 'INSTALLED',
+              label: 'installed',
               color: theme.colors.semanticGreen,
               value:
-                clusterPolicyStats?.policyStatistics?.find(
-                  (stat) => stat?.aggregate === 'exists'
+                installedStats?.policyStatistics?.find(
+                  (stat) => stat?.aggregate === 'installed'
                 )?.count ?? 0,
             },
           ],
     [
-      clusterPolicyStats?.policyStatistics,
       installedStats?.policyStatistics,
       theme.colors.semanticGreen,
       theme.colors.semanticRedLight,
