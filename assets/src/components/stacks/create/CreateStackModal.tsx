@@ -149,7 +149,9 @@ export default function CreateStackModal({
           path,
           content,
         })),
-        // TODO: Add job spec.
+        jobSpec: jobSpec
+          ? { namespace: jobNamespace, raw: jobSpec }
+          : undefined,
       },
     },
     onCompleted: () => onClose(),
