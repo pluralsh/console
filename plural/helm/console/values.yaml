@@ -111,6 +111,8 @@ ingress:
     nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
     nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
     nginx.ingress.kubernetes.io/session-cookie-path: /socket
+  rewrite:
+    enabled: false
 
 externalIngress:
   ingressClass: nginx
