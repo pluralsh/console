@@ -180,7 +180,7 @@ export default function StackEnvironment() {
         }}
       >
         {isEmpty(stack.environment) ? (
-          <EmptyState message="No environment variables.">
+          <EmptyState message="Looks like this stack doesn't have any environment variables set.">
             {addButton}
           </EmptyState>
         ) : (
