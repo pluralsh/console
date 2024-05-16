@@ -22,7 +22,6 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import CopyButton from 'components/utils/CopyButton'
 import { ObscuredToken } from 'components/profile/ObscuredToken'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import {
   StackEnvironment as StackEnvironmentT,
@@ -148,6 +147,18 @@ export default function StackEnvironment() {
     )
   )
 
+  const addButton = useMemo(
+    () => (
+      <Button
+        secondary
+        onClick={() => setCreateOpen(true)}
+      >
+        Add environment variable
+      </Button>
+    ),
+    [setCreateOpen]
+  )
+
   if (!stack) {
     return <LoadingIndicator />
   }
@@ -168,43 +179,42 @@ export default function StackEnvironment() {
           height: '100%',
         }}
       >
-        <div
-          css={{
-            display: 'flex',
-            columnGap: theme.spacing.medium,
-            flexShrink: 0,
-          }}
-        >
-          <Input
-            placeholder="Search"
-            startIcon={<SearchIcon />}
-            value={filterString}
-            onChange={(e) => setFilterString(e.currentTarget.value)}
-            css={{ flexGrow: 1 }}
-          />
-          <Button
-            primary
-            onClick={() => setCreateOpen(true)}
-          >
-            Add environment variable
-          </Button>
-        </div>
         {isEmpty(stack.environment) ? (
-          <EmptyState message="No environment variables" />
+          <EmptyState message="No environment variables.">
+            {addButton}
+          </EmptyState>
         ) : (
-          <FullHeightTableWrap>
-            <Table
-              data={stack.environment || []}
-              columns={columns}
+          <>
+            <div
               css={{
-                maxHeight: 'unset',
-                height: '100%',
+                display: 'flex',
+                columnGap: theme.spacing.medium,
+                flexShrink: 0,
               }}
-              reactTableOptions={{
-                state: { globalFilter: debouncedFilterString },
-              }}
-            />
-          </FullHeightTableWrap>
+            >
+              <Input
+                placeholder="Search"
+                startIcon={<SearchIcon />}
+                value={filterString}
+                onChange={(e) => setFilterString(e.currentTarget.value)}
+                css={{ flexGrow: 1 }}
+              />
+              {addButton}
+            </div>
+            <FullHeightTableWrap>
+              <Table
+                data={stack.environment || []}
+                columns={columns}
+                css={{
+                  maxHeight: 'unset',
+                  height: '100%',
+                }}
+                reactTableOptions={{
+                  state: { globalFilter: debouncedFilterString },
+                }}
+              />
+            </FullHeightTableWrap>
+          </>
         )}
       </div>
     </>

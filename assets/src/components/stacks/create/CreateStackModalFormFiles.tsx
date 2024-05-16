@@ -183,7 +183,7 @@ export function CreateStackModalFormFiles({
           <div>{addButton}</div>
         </>
       ) : (
-        <EmptyState message="No files">{addButton}</EmptyState>
+        <EmptyState message="No files.">{addButton}</EmptyState>
       )}
     </div>
   )

@@ -171,7 +171,7 @@ export function CreateStackModalFormEnvironment({
           <div>{addButton}</div>
         </>
       ) : (
-        <EmptyState message="No environment variables">{addButton}</EmptyState>
+        <EmptyState message="No environment variables.">{addButton}</EmptyState>
       )}
     </div>
   )
