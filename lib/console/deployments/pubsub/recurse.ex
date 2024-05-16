@@ -44,18 +44,38 @@ end
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.ClusterCreated, Console.PubSub.ClusterUpdated] do
   alias Console.Repo
   alias Console.Deployments.{Global}
-  alias Console.Services.Users
-  alias Console.Schema.{GlobalService, ManagedNamespace}
+  alias Console.Services.{Users}
+  alias Console.Schema.{GlobalService, Service, ManagedNamespace}
 
   def process(%{item: cluster}) do
     cluster = Repo.preload(cluster, [:tags])
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    svcs =  Service.globalized()
+            |> Service.for_cluster(cluster.id)
+            |> Repo.all()
+            |> MapSet.new(& &1.id)
+
     GlobalService.stream()
     |> GlobalService.preloaded()
     |> Repo.stream(method: :keyset)
     |> Stream.filter(&Global.match?(&1, cluster))
-    |> Stream.each(&Global.add_to_cluster(&1, cluster))
-    |> Stream.run()
+    |> Stream.map(fn global ->
+      case Global.add_to_cluster(global, cluster) do
+        {:ok, svc} -> svc
+        _ -> Global.get_service(global, cluster.id)
+      end
+    end)
+    |> Stream.map(fn
+      %Service{} = svc -> svc.id
+      _ -> nil
+    end)
+    |> Stream.filter(& &1)
+    |> Enum.into(MapSet.new())
+    |> (fn expected -> MapSet.difference(svcs, expected) end).()
+    |> MapSet.to_list()
+    |> Service.for_ids()
+    |> Repo.all()
+    |> Global.maybe_drain()
 
     ManagedNamespace.for_cluster(cluster)
     |> ManagedNamespace.preloaded()

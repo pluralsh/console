@@ -214,6 +214,10 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.owner_id == ^owner_id)
   end
 
+  def globalized(query \\ __MODULE__) do
+    from(s in query, where: not is_nil(s.owner_id))
+  end
+
   def for_namespace(query \\ __MODULE__, ns_id) do
     from(s in query,
       join: ni in assoc(s, :namespace_instance),

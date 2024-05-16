@@ -26,6 +26,8 @@ defmodule Console.Deployments.Global do
 
   def get_namespace!(id), do: Repo.get!(ManagedNamespace, id)
 
+  def get_service(%GlobalService{} = svc, cluster_id), do: Services.get_service_by_name(cluster_id, svc_name(svc))
+
   @doc """
   Creates a new global service and defers syncing clusters through the pubsub broadcaster
   """
@@ -303,10 +305,13 @@ defmodule Console.Deployments.Global do
     %{service: svc} = global = Repo.preload(global, [template: :dependencies, service: [:context_bindings, :dependencies]])
     global = load_configuration(global)
     bot = bot()
+
+    service_ids = GlobalService.service_ids(gid) |> Repo.all() |> MapSet.new()
+
     Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
     |> Cluster.target(global)
     |> Repo.all()
-    |> Enum.each(fn %{id: cluster_id} = cluster ->
+    |> Enum.map(fn %{id: cluster_id} = cluster ->
       case {global, Services.get_service_by_name(cluster_id, svc_name(global))} do
         {_, %Service{owner_id: ^gid} = dest} -> sync_service(global, dest, bot)
         {%GlobalService{reparent: true}, %Service{} = dest} -> sync_service(global, dest, bot)
@@ -314,7 +319,47 @@ defmodule Console.Deployments.Global do
         {_, nil} -> add_to_cluster(global, cluster, bot)
       end
     end)
+    |> Enum.map(fn
+      {:ok, %{id: id}} -> id
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+    |> MapSet.new()
+    |> (fn s -> MapSet.difference(service_ids, s) end).()
+    |> MapSet.to_list()
+    |> maybe_drain(global)
   end
+
+  @doc """
+  Determines if a given list of service ids should be drained due to a state event
+  """
+  @spec maybe_drain([Service.t]) :: :ok
+  def maybe_drain(services) do
+    bot = bot()
+    Repo.preload(services, [:owner])
+    |> Enum.each(fn
+      %{owner: %GlobalService{cascade: %{delete: true}}} = svc ->
+        Services.delete_service(svc.id, bot)
+      %{owner: %GlobalService{cascade: %{detach: true}}} = svc ->
+        Services.detach_service(svc.id, bot)
+      _ -> :ok
+    end)
+  end
+
+  @spec maybe_drain([binary], GlobalService.t) :: :ok
+  def maybe_drain(service_ids, %GlobalService{cascade: %{delete: true}}) do
+    Service.for_ids(service_ids)
+    |> Repo.update_all(set: [deleted_at: Timex.now()])
+    :ok
+  end
+
+  def maybe_drain(service_ids, %GlobalService{cascade: %{detach: true}}) do
+    Service.for_ids(service_ids)
+    |> Repo.delete_all()
+    :ok
+  end
+
+  def maybe_drain(_, _), do: :ok
 
   defp svc_name(%GlobalService{service: %Service{name: name}}), do: name
   defp svc_name(%GlobalService{template: %ServiceTemplate{name: name}}), do: name

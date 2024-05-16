@@ -155,6 +155,7 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
       assert exist["count"] == 1
       assert none["count"] == 1
     end
+
     test "it can fetch statistics for policy enforcement globally" do
       cluster = insert(:cluster)
       con1 = insert(:policy_constraint, violation_count: 2, cluster: cluster, enforcement: :warn)
@@ -176,6 +177,31 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
 
       assert warn["count"] == 1
       assert dry_run["count"] == 1
+    end
+
+    test "it can fetch statistics for installations globally" do
+      cluster = insert(:cluster)
+      insert(:policy_constraint, violation_count: 2, cluster: cluster, enforcement: :warn)
+      cluster2 = insert(:cluster)
+      insert(:policy_constraint, cluster: cluster2)
+      insert_list(3, :cluster)
+
+      cluster3 = insert(:cluster)
+      insert(:policy_constraint, violation_count: 2, cluster: cluster3, enforcement: :dry_run)
+
+      {:ok, %{data: %{"policyStatistics" => stats}}} = run_query("""
+        query {
+          policyStatistics(aggregate: INSTALLED) {
+            aggregate
+            count
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      %{"installed" => installed, "uninstalled" => uninstalled} = Map.new(stats, & {&1["aggregate"], &1})
+
+      assert installed["count"] == 3
+      assert uninstalled["count"] == 3
     end
   end
 end

@@ -216,10 +216,16 @@ defmodule Console.Deployments.GlobalTest do
         configuration: [%{name: "name", value: "value"}]
       }, cluster, admin)
 
-      global = insert(:global_service, service: source, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      global = insert(:global_service,
+        service: source,
+        provider: cluster.provider,
+        tags: [%{name: "sync", value: "test"}],
+        cascade: %{delete: true}
+      )
       sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
       ignore1 = insert(:cluster, provider: cluster.provider)
       ignore2 = insert(:cluster, tags: [%{name: "sync", value: "test"}])
+      svc = insert(:service, owner: global, cluster: ignore1)
 
       :ok = Global.sync_clusters(global)
 
@@ -228,6 +234,8 @@ defmodule Console.Deployments.GlobalTest do
 
       synced = Services.get_service_by_name(sync.id, "source")
       refute Global.diff?(source, synced)
+
+      assert refetch(svc).deleted_at
     end
 
     test "it will sync by distro" do
