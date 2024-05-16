@@ -1,4 +1,4 @@
-import { FormField, Input } from '@pluralsh/design-system'
+import { Callout, CodeEditor, FormField, Input } from '@pluralsh/design-system'
 import { useEffect, useRef } from 'react'
 
 export function CreateStackModalFormJob({
@@ -20,9 +20,18 @@ export function CreateStackModalFormJob({
 
   return (
     <>
+      <Callout>
+        Specifying job details is optional. You can skip this step if you want
+        to use defaults.
+      </Callout>
       <FormField
-        required
         label="Namespace"
+        error={!!jobSpec && !jobNamespace}
+        hint={
+          jobSpec && !jobNamespace
+            ? 'Namespace cannot be empty if spec was provided'
+            : undefined
+        }
       >
         <Input
           inputProps={{ ref: inputRef }}
@@ -31,12 +40,19 @@ export function CreateStackModalFormJob({
         />
       </FormField>
       <FormField
-        required
         label="Spec"
+        error={!!jobNamespace && !jobSpec}
+        hint={
+          jobNamespace && !jobSpec
+            ? 'Spec cannot be empty if namespace was provided'
+            : undefined
+        }
       >
-        <Input
+        <CodeEditor
           value={jobSpec}
-          onChange={(e) => setJobSpec(e.currentTarget.value)}
+          onChange={(values) => setJobSpec(values)}
+          language="yaml"
+          height={200}
         />
       </FormField>
     </>
