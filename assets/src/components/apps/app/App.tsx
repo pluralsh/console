@@ -1,4 +1,4 @@
-import { A, Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import {
   Button,
   Sidecar,
@@ -219,7 +219,6 @@ function SideNavEntries({
     </WrapWithIf>
   )
 }
-
 function AppWithoutContext() {
   const theme = useTheme()
   const { me, configuration } = useContext<any>(LoginContext)
@@ -277,16 +276,18 @@ function AppWithoutContext() {
             applications={applications}
             currentApp={currentApp}
           />
-          <Div
-            overflowY="auto"
-            paddingBottom={theme.spacing.medium}
+          <div
+            css={{
+              overflowY: 'auto',
+              paddingBottom: theme.spacing.medium,
+            }}
           >
             <SideNavEntries
               directory={directory}
               pathname={pathname}
               pathPrefix={pathPrefix}
             />
-          </Div>
+          </div>
         </Flex>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
@@ -322,15 +323,14 @@ function AppWithoutContext() {
             {validLinks?.length > 1 && (
               <SidecarItem heading="Other links">
                 {validLinks.slice(1).map(({ url }) => (
-                  <A
-                    inline
+                  <a
+                    css={{ ...theme.partials.text.inlineLink }}
                     href={ensureURLValidity(url)}
-                    as="a"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     {url}
-                  </A>
+                  </a>
                 ))}
               </SidecarItem>
             )}

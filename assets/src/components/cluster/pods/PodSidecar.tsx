@@ -1,12 +1,15 @@
 import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { Pod } from 'generated/graphql'
-import { A } from 'honorable'
 import { Link } from 'react-router-dom'
 import { podStatusToReadiness } from 'utils/status'
+
+import { useTheme } from 'styled-components'
 
 import { StatusChip } from '../TableElements'
 
 export default function PodSidecar({ pod }: { pod?: Pod | null }) {
+  const theme = useTheme()
+
   if (!pod) {
     return null
   }
@@ -19,13 +22,12 @@ export default function PodSidecar({ pod }: { pod?: Pod | null }) {
       <SidecarItem heading="Namespace">{pod?.metadata?.namespace}</SidecarItem>
       <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
       <SidecarItem heading="Parent node">
-        <A
-          as={Link}
+        <Link
+          css={{ ...theme.partials.text.inlineLink }}
           to={`/nodes/${pod.spec.nodeName}`}
-          inline
         >
           {pod.spec.nodeName}
-        </A>
+        </Link>
       </SidecarItem>
       <SidecarItem heading="Service account">
         {pod.spec.serviceAccountName}

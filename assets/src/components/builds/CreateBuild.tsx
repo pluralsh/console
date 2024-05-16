@@ -11,7 +11,7 @@ import { getIcon, hasIcons } from 'components/apps/misc'
 import { BUILDS_Q, CREATE_BUILD } from 'components/graphql/builds'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
-import { A, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { Key, useCallback, useContext, useMemo, useState } from 'react'
 import { ApolloError, useMutation } from '@apollo/client'
 import { appendConnection, updateCache } from 'utils/graphql'
@@ -199,12 +199,12 @@ export default function CreateBuild() {
           onClose={() => setSuccess(undefined)}
         >
           Build created&nbsp;
-          <A
-            inline
+          <a
+            css={{ ...theme.partials.text.inlineLink }}
             href={`/builds/${success}`}
           >
             View build
-          </A>
+          </a>
         </Banner>
       )}
       {error && (

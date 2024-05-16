@@ -1,7 +1,7 @@
 import { ReactElement, useMemo } from 'react'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { A } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { MetadataSidecar } from '../common/utils'
@@ -26,6 +26,7 @@ const directory: Array<TabEntry> = [
 ] as const
 
 export default function ClusterRoleBinding(): ReactElement {
+  const theme = useTheme()
   const cluster = useCluster()
   const { clusterId, name = '' } = useParams()
   const { data, loading } = useClusterRoleBindingQuery({
@@ -64,17 +65,16 @@ export default function ClusterRoleBinding(): ReactElement {
       sidecar={
         <MetadataSidecar resource={crb}>
           <SidecarItem heading="Role">
-            <A
-              as={Link}
+            <Link
               to={getResourceDetailsAbsPath(
                 clusterId,
                 Kind.ClusterRole,
                 crb?.roleRef.name ?? ''
               )}
-              inline
+              css={{ ...theme.partials.text.inlineLink }}
             >
               {crb?.roleRef.name}
-            </A>
+            </Link>
           </SidecarItem>
         </MetadataSidecar>
       }

@@ -7,15 +7,17 @@ import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { DASHBOARDS_Q } from 'components/graphql/dashboards'
 
-import { A, Flex } from 'honorable'
+import { Flex } from 'honorable'
 
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { ListItem } from '../misc'
 
 export default function Dashboards() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const { appName } = useParams()
   const { data } = useQuery(DASHBOARDS_Q, {
@@ -62,16 +64,16 @@ export default function Dashboards() {
               (
                 <div>
                   If you're interested in adding your dashboards to this
-                  application,&nbsp;
-                  <A
-                    inline
+                  application,{' '}
+                  <a
+                    css={{ ...theme.partials.text.inlineLink }}
                     href="https://www.plural.sh/community"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     visit our docs
-                  </A>
-                  &nbsp;for more details.
+                  </a>{' '}
+                  for more details.
                 </div>
               ) as any // Workaround as JSX elements are not allowed here.
             }

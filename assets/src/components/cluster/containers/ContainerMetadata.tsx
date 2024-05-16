@@ -1,7 +1,7 @@
 import { EmptyState } from '@pluralsh/design-system'
-import { A } from 'honorable'
 import { Link } from 'react-router-dom'
 import { containerStatusToReadiness } from 'utils/status'
+import { useTheme } from 'styled-components'
 
 import { ContainerStatusChip } from '../TableElements'
 
@@ -11,6 +11,7 @@ import { useContainer } from './Container'
 
 export default function ContainerMetadata() {
   const containerContext = useContainer()
+  const theme = useTheme()
 
   if (!containerContext) {
     return <EmptyState message="This container has no metadata" />
@@ -21,18 +22,17 @@ export default function ContainerMetadata() {
     <MetadataGrid>
       <MetadataItem heading="Container name">{container?.name}</MetadataItem>
       <MetadataItem heading="Parent pod">
-        <A
-          inline
-          as={Link}
+        <Link
+          css={{ ...theme.partials.text.inlineLink }}
           to={`/pods/${pod?.metadata.namespace}/${pod?.metadata.name}`}
         >
           {pod?.metadata.name}
-        </A>
+        </Link>
       </MetadataItem>
       {container?.ports && container?.ports?.length > 0 && (
         <MetadataItem heading="Ports">
           {container.ports.map((port) => (
-            <div>
+            <div css={{}}>
               {port?.protocol ? `${port.protocol} ` : ''}
               {port?.containerPort}
             </div>

@@ -11,9 +11,11 @@ import {
   Select,
 } from '@pluralsh/design-system'
 
-import { A, Flex } from 'honorable'
-
 import { isEmpty } from 'lodash'
+
+import { useTheme } from 'styled-components'
+
+import { Flex } from 'honorable'
 
 import { CREATE_POLICY, UPGRADE_POLICIES } from '../graphql/builds'
 
@@ -38,6 +40,7 @@ export default function UpgradePolicyCreate() {
   })
   const [error, setError] = useState<ApolloError>()
   const { setModal } = useContext<any>(PolicyContext)
+  const theme = useTheme()
 
   const [mutation, { loading }] = useMutation(CREATE_POLICY, {
     variables: { attributes },
@@ -104,14 +107,14 @@ export default function UpgradePolicyCreate() {
         <FormField
           label="App bindings"
           caption={
-            <A
-              inline
+            <a
               href="https://www.sitepoint.com/learn-regex/"
               target="_blank"
               rel="noopener noreferrer"
+              css={{ ...theme.partials.text.inlineLink }}
             >
               Regex guide
-            </A>
+            </a>
           }
           hint="Target applications using a glob expression, e.g. “*” to select all, or prefix with `~` to use a full regex."
         >

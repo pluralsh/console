@@ -8,9 +8,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { POLL_INTERVAL } from 'components/runbooks/constants'
 import { RUNBOOKS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
-import { A, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useTheme } from 'styled-components'
 
 import { ListItem } from '../misc'
 
@@ -25,6 +26,7 @@ export default function Runbooks() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+  const theme = useTheme()
 
   const breadcrumbs = useMemo(
     () => [
@@ -71,17 +73,18 @@ export default function Runbooks() {
             description={
               (
                 <div>
-                  If you're interested in adding runbooks to this
-                  application,&nbsp;
-                  <A
-                    inline
+                  If you're interested in adding runbooks to this application,{' '}
+                  <a
+                    css={{
+                      ...theme.partials.text.inlineLink,
+                    }}
                     href="https://www.plural.sh/community"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     visit our docs
-                  </A>
-                  &nbsp;for more details.
+                  </a>{' '}
+                  for more details.
                 </div>
               ) as any // Workaround as JSX elements are not allowed here.
             }

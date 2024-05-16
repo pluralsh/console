@@ -1,7 +1,7 @@
 import { DISCORD_LINK } from 'utils/constants'
 
 import { InstallationContext } from 'components/Installations'
-import { A, Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import {
   AppsIcon,
   type Breadcrumb,
@@ -26,6 +26,7 @@ import {
   useState,
 } from 'react'
 import Fuse from 'fuse.js'
+import { useTheme } from 'styled-components'
 
 import { Readiness, readinessToLabel } from 'utils/status'
 
@@ -106,6 +107,8 @@ function ReadyEmptyState() {
 }
 
 function PendingFailedEmptyState({ filter }) {
+  const theme = useTheme()
+
   return (
     <EmptyState
       icon={
@@ -123,15 +126,15 @@ function PendingFailedEmptyState({ filter }) {
               {FILTERS.find((f) => f.key === filter)?.label.toLowerCase()} apps.
             </div>
             <div>
-              You may be ready to become an&nbsp;
-              <A
-                inline
+              You may be ready to become an{' '}
+              <a
                 href="https://www.plural.sh/community"
                 target="_blank"
                 rel="noopener noreferrer"
+                css={{ ...theme.partials.text.inlineLink }}
               >
                 open-sourcerer
-              </A>
+              </a>
               .
             </div>
           </>
@@ -244,10 +247,12 @@ export default function Apps() {
       }
     >
       {!noFilteredApps ? (
-        <Div
-          display="grid"
-          gap="small"
-          gridTemplateColumns="repeat(auto-fit, minmax(450px, 1fr))"
+        <div
+          css={{
+            display: 'grid',
+            gap: 'small',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
+          }}
         >
           {!noFilteredApps &&
             filteredApps.map((app) => (
@@ -256,7 +261,7 @@ export default function Apps() {
                 app={app}
               />
             ))}
-        </Div>
+        </div>
       ) : (
         <Flex
           justifyContent="center"

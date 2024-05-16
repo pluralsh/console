@@ -17,8 +17,6 @@ import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPa
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { A } from 'honorable'
-
 import {
   SERVICE_POD_ABS_PATH,
   SERVICE_POD_PARAM_CLUSTER,
@@ -154,16 +152,15 @@ export default function Pod() {
           </SidecarItem>
           <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
           <SidecarItem heading="Parent node">
-            <A
-              as={Link}
+            <Link
               to={getNodeDetailsPath({
                 clusterId,
                 name: pod?.spec.nodeName,
               })}
-              inline
+              css={{ ...theme.partials.text.inlineLink }}
             >
               {pod?.spec.nodeName}
-            </A>
+            </Link>
           </SidecarItem>
           <SidecarItem heading="Service account">
             {pod?.spec.serviceAccountName}

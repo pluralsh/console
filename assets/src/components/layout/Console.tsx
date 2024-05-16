@@ -4,7 +4,7 @@ import { MarkdocContextProvider } from '@pluralsh/design-system/dist/markdoc/Mar
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
-import { A, Flex, Span } from 'honorable'
+import { Flex } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
 import { CommandPalette } from 'components/CommandPalette'
@@ -78,14 +78,19 @@ function ConsoleContent() {
               marginBottom="medium"
               marginRight="xxxxlarge"
             >
-              <Span marginRight="small">Time for a new update!</Span>
-              <A
+              <span
+                css={{
+                  marginRight: 'small',
+                }}
+              >
+                Time for a new update!
+              </span>
+              <a
                 onClick={() => reloadApplication()}
-                style={{ textDecoration: 'none' }}
-                color="action-link-inline"
+                css={{ textDecoration: 'none', color: 'action-link-inline' }}
               >
                 Update now
-              </A>
+              </a>
             </Toast>
           )}
         </WithApplicationUpdate>

@@ -14,7 +14,6 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { A } from 'honorable'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
@@ -144,13 +143,12 @@ export default function Pod() {
           </SidecarItem>
           <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
           <SidecarItem heading="Parent node">
-            <A
-              as={Link}
+            <Link
               to={getNodeDetailsPath({ clusterId, name: pod?.spec.nodeName })}
-              inline
+              css={{ ...theme.partials.text.inlineLink }}
             >
               {pod?.spec.nodeName}
-            </A>
+            </Link>
           </SidecarItem>
           <SidecarItem heading="Service account">
             {pod?.spec.serviceAccountName}

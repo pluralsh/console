@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { Dispatch, ReactElement, useCallback, useMemo, useState } from 'react'
 import {
   AppIcon,
@@ -12,7 +12,6 @@ import {
   Modal,
 } from '@pluralsh/design-system'
 import { ServerError, useMutation, useQuery } from '@apollo/client'
-import { A } from 'honorable'
 
 import Fuse from 'fuse.js'
 
@@ -73,6 +72,7 @@ function ModalContentUnstyled({
   refetch,
   ...props
 }: CreateClientProps): ReactElement {
+  const theme = useTheme()
   const [name, setName] = useState<string>('')
   const [email, setEmail] = useState<string>()
   const [mode, setMode] = useState<UserSelectionMode>(UserSelectionMode.Select)
@@ -162,8 +162,8 @@ function ModalContentUnstyled({
         error={!isEmailValid}
         hint={email && !isEmailValid ? 'Invalid email address' : undefined}
         caption={
-          <A
-            inline
+          <a
+            css={{ ...theme.partials.text.inlineLink }}
             onClick={() => {
               setMode(
                 mode === UserSelectionMode.Input
@@ -176,7 +176,7 @@ function ModalContentUnstyled({
             }}
           >
             {mode === UserSelectionMode.Input ? 'Go back' : 'Input email'}
-          </A>
+          </a>
         }
       >
         {mode === UserSelectionMode.Select && (

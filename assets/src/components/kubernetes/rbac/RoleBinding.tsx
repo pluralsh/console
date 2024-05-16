@@ -1,7 +1,7 @@
 import { ReactElement, useMemo } from 'react'
 import { Link, Outlet, useOutletContext, useParams } from 'react-router-dom'
 import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { A } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import {
   RoleBindingQueryVariables,
@@ -46,6 +46,7 @@ export default function RoleBinding(): ReactElement {
   })
 
   const rb = data?.handleGetRoleBindingDetail
+  const theme = useTheme()
 
   useSetBreadcrumbs(
     useMemo(
@@ -79,18 +80,17 @@ export default function RoleBinding(): ReactElement {
       sidecar={
         <MetadataSidecar resource={rb}>
           <SidecarItem heading="Role">
-            <A
-              as={Link}
+            <Link
               to={getResourceDetailsAbsPath(
                 clusterId,
                 Kind.Role,
                 rb?.roleRef.name ?? '',
                 namespace
               )}
-              inline
+              css={{ ...theme.partials.text.inlineLink }}
             >
               {rb?.roleRef.name}
-            </A>
+            </Link>
           </SidecarItem>
         </MetadataSidecar>
       }
