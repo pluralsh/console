@@ -6,6 +6,8 @@ import { useIsManager, useLogin } from 'components/contexts'
 
 import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 
+import { Form } from 'honorable'
+
 import { ClusterOverviewCard } from './clusteroverview/ClusterOverviewCard'
 // import { MonthlyClusterCostsCard } from './MonthlyClusterCostsCard'
 import { DeploymentsCard } from './deployments/DeploymentsCard'
@@ -22,6 +24,9 @@ export default function Home() {
 
   return (
     <ResponsivePageFullWidth>
+      <Form>
+        <div>test</div>
+      </Form>
       <ConsolePageTitle
         headingProps={{ title2: false, title1: true }}
         heading={`Welcome${name ? `, ${name.split(' ')[0]}` : ''}!`}

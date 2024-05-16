@@ -1,10 +1,12 @@
 import { ComponentProps, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
-import { Div, Flex, Form, P } from 'honorable'
+import { Flex } from 'honorable'
 import { Button } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
+
+import { useTheme } from 'styled-components'
 
 import { setRefreshToken, setToken } from '../../helpers/auth'
 
@@ -33,13 +35,17 @@ function InvalidInvite() {
 }
 
 function PasswordErrorMsg({ errorCode }: { errorCode: PasswordErrorCode }) {
+  const theme = useTheme()
+
   return (
-    <P
-      caption
-      color="text-error"
+    <p
+      css={{
+        ...theme.partials.text.caption,
+        color: 'text-error',
+      }}
     >
       {PasswordErrorMessage[errorCode]}
-    </P>
+    </p>
   )
 }
 
@@ -91,6 +97,7 @@ export function ConfirmPasswordField({
 }
 
 export default function Invite() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const { inviteId } = useParams()
   const [attributes, setAttributes] = useState({ name: '', password: '' })
@@ -129,27 +136,29 @@ export default function Invite() {
 
   return (
     <LoginPortal>
-      <Div marginBottom="xlarge">
+      <div css={{ marginBottom: 'xlarge' }}>
         <WelcomeHeader
           textAlign="left"
           marginBottom="xxsmall"
         />
-        <P
-          body1
-          color="text-xlight"
+        <p
+          css={{
+            ...theme.partials.text.body1,
+            color: 'text-xlight',
+          }}
         >
           You have been invited to join this Plural account. Create an account
           to join.
-        </P>
-      </Div>
-      <Form onSubmit={onSubmit}>
+        </p>
+      </div>
+      <form onSubmit={onSubmit}>
         {signupError && (
-          <Div marginBottom="large">
+          <div css={{ marginBottom: 'large' }}>
             <GqlError
               header="Signup failed"
               error={signupError}
             />
-          </Div>
+          </div>
         )}
         <Flex
           flexDirection="column"
@@ -189,7 +198,7 @@ export default function Invite() {
         >
           Sign up
         </Button>
-      </Form>
+      </form>
     </LoginPortal>
   )
 }

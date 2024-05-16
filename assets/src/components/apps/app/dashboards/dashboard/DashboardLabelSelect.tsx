@@ -1,5 +1,5 @@
 import { ListBoxItem, Select } from '@pluralsh/design-system'
-import { Div, Span } from 'honorable'
+import { Span } from 'honorable'
 import { Key, useEffect, useState } from 'react'
 
 export default function DashboardLabelSelect({ label, onSelect }) {
@@ -10,7 +10,7 @@ export default function DashboardLabelSelect({ label, onSelect }) {
   useEffect(() => onSelect(label.values[0]), [])
 
   return (
-    <Div width={250}>
+    <div css={{ width: 250 }}>
       {/* @ts-ignore */}
       <Select
         aria-label={label.name}
@@ -37,6 +37,6 @@ export default function DashboardLabelSelect({ label, onSelect }) {
           />
         ))}
       </Select>
-    </Div>
+    </div>
   )
 }

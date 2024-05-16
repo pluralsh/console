@@ -1,12 +1,14 @@
 import { Input } from '@pluralsh/design-system'
-import { Div, Span } from 'honorable'
 import { useContext, useEffect, useState } from 'react'
+
+import { useTheme } from 'styled-components'
 
 import { DisplayContext } from '../RunbookDisplay'
 
 import { convertType, valueFrom } from './misc'
 
 export default function DisplayInput({ attributes, children }) {
+  const theme = useTheme()
   const { context, setContext, ...rest } = useContext(DisplayContext)
   const [value, setValue] = useState(
     children?.length > 0 ? valueFrom(children[0], rest) : ''
@@ -23,14 +25,16 @@ export default function DisplayInput({ attributes, children }) {
   }, [attributes, context, setContext, value])
 
   return (
-    <Div margin="xsmall">
-      <Span
-        caption
-        marginBottom="xxsmall"
-        whiteSpace="nowrap"
+    <div css={{ margin: 'xsmall' }}>
+      <span
+        css={{
+          ...theme.partials.text.caption,
+          marginBottom: 'xxsmall',
+          whiteSpace: 'nowrap',
+        }}
       >
         {attributes.label}
-      </Span>
+      </span>
       <Input
         value={value || ''}
         onChange={({ target: { value } }) => setValue(value)}
@@ -38,6 +42,6 @@ export default function DisplayInput({ attributes, children }) {
         maxWidth={attributes.width || 150}
         {...attributes}
       />
-    </Div>
+    </div>
   )
 }

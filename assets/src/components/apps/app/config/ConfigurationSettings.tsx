@@ -5,7 +5,7 @@ import yaml from 'js-yaml'
 
 import { Button, Card, ListBoxItem, Select } from '@pluralsh/design-system'
 
-import { Div, Flex, P } from 'honorable'
+import { Flex, P } from 'honorable'
 
 import isEqualWith from 'lodash/isEqualWith'
 
@@ -76,7 +76,7 @@ export function ConfigurationSettings({
         gap="medium"
         align="center"
       >
-        <Div width={240}>
+        <div style={{ width: 240 }}>
           <Select
             aria-label="folder"
             label="Folder"
@@ -91,8 +91,8 @@ export function ConfigurationSettings({
               />
             ))}
           </Select>
-        </Div>
-        <Div width={240}>
+        </div>
+        <div style={{ width: 240 }}>
           <Select
             aria-label="subfolder"
             label="Sub-folder"
@@ -107,7 +107,7 @@ export function ConfigurationSettings({
               />
             ))}
           </Select>
-        </Div>
+        </div>
         <Flex grow={1} />
         {changed && (
           <P

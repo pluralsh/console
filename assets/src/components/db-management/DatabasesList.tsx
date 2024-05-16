@@ -1,4 +1,4 @@
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { createColumnHelper } from '@tanstack/react-table'
 import { ComponentProps, memo, useMemo, useState } from 'react'
 import { cpuParser, memoryFormat, memoryParser } from 'utils/kubernetes'
@@ -41,7 +41,7 @@ function RestoreDatabase({
   const theme = useTheme()
 
   return (
-    <Div onClick={(e) => e.stopPropagation()}>
+    <div onClick={(e) => e.stopPropagation()}>
       <Button
         floating
         startIcon={<RestoreIcon color={theme.colors['icon-default']} />}
@@ -58,7 +58,7 @@ function RestoreDatabase({
           refetch={refetch}
         />
       )}
-    </Div>
+    </div>
   )
 }
 

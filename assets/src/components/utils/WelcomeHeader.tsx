@@ -1,4 +1,4 @@
-import { Div, H1 } from 'honorable'
+import { H1 } from 'honorable'
 
 export function WelcomeHeader({
   heading = 'Welcome to Plural Console',
@@ -6,13 +6,13 @@ export function WelcomeHeader({
   ...props
 }: any) {
   return (
-    <Div {...props}>
+    <div css={props}>
       <H1
         title1
         textAlign={textAlign}
       >
         {heading}
       </H1>
-    </Div>
+    </div>
   )
 }

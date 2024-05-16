@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from '@pluralsh/design-system'
-import { Div, Flex } from 'honorable'
 import { useEffect, useRef } from 'react'
+
+import { Flex } from 'honorable'
 
 import { Timer } from '../BuildTimer'
 
@@ -16,7 +17,7 @@ export default function Command({ command, follow }) {
   }, [follow, ref])
 
   return (
-    <Div ref={ref}>
+    <div ref={ref}>
       <Flex
         gap="small"
         paddingHorizontal="medium"
@@ -46,6 +47,6 @@ export default function Command({ command, follow }) {
         text={stdout}
         follow={follow}
       />
-    </Div>
+    </div>
   )
 }

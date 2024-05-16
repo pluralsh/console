@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Div } from 'honorable'
 import { isEmpty } from 'lodash'
 import { useGroupMembersQuery } from 'generated/graphql'
 
@@ -31,17 +30,19 @@ export default function GroupMembers({
       minHeight="230px"
       position="relative"
     >
-      <Div flexGrow="1">
+      <div css={{ flexGrow: '1' }}>
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}
           items={edges}
           loading={loading}
           placeholder={() => (
-            <Div
-              flex={false}
-              height="50px"
-              padding="small"
+            <div
+              css={{
+                flex: 'none',
+                height: '50px',
+                padding: 'small',
+              }}
             />
           )}
           hasNextPage={pageInfo.hasNextPage}
@@ -66,7 +67,7 @@ export default function GroupMembers({
           refreshKey={undefined}
           setLoader={undefined}
         />
-      </Div>
+      </div>
     </List>
   )
 }

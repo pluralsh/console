@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
-import { Div, Flex, Form, P } from 'honorable'
+import { Flex, Form, P } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
 import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
@@ -69,7 +69,7 @@ export function GrantAccess() {
 
   return (
     <LoginPortal>
-      <Div marginBottom="large">
+      <div css={{ marginBottom: 'large' }}>
         <WelcomeHeader
           textAlign="left"
           marginBottom="xxsmall"
@@ -80,7 +80,7 @@ export function GrantAccess() {
         >
           Enter the login token given to you to gain access
         </P>
-      </Div>
+      </div>
       <LabelledInput
         value={jwt}
         width="100%"
@@ -314,12 +314,12 @@ export default function Login() {
           gap="xsmall"
         >
           {loginMError && (
-            <Div marginBottom="large">
+            <div css={{ marginBottom: 'large' }}>
               <GqlError
                 header="Login failed"
                 error={loginError}
               />
-            </Div>
+            </div>
           )}
           <Flex
             flexDirection="column"

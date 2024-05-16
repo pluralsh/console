@@ -16,7 +16,6 @@ import {
   TabPanel,
   useBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Div, Flex } from 'honorable'
 import styled from 'styled-components'
 import {
   ContainerStatus,
@@ -30,6 +29,8 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import { LinkTabWrap } from 'components/utils/Tabs'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { Flex } from 'honorable'
 
 import { POLL_INTERVAL } from '../constants'
 import { statusesToRecord } from '../pods/PodInfo'
@@ -160,7 +161,7 @@ export default function Container() {
             tabStateRef={tabStateRef}
           />
           {(initContainers || containers) && (
-            <Div minWidth={260}>
+            <div css={{ minWidth: 260 }}>
               <Select
                 placement="right"
                 selectedKey={containerName}
@@ -193,7 +194,7 @@ export default function Container() {
                   )),
                 ]}
               </Select>
-            </Div>
+            </div>
           )}
         </Flex>
       }

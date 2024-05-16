@@ -1,6 +1,5 @@
 import { Button, FiltersIcon, ListBoxItem } from '@pluralsh/design-system'
 import { LOG_FILTER_Q } from 'components/graphql/plural'
-import { Div } from 'honorable'
 import { useCallback, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
@@ -54,7 +53,7 @@ export default function LogsFilters({
   if (logFilters.length < 1) return null
 
   return (
-    <Div position="relative">
+    <div css={{ position: 'relative' }}>
       <Button
         secondary
         startIcon={<FiltersIcon />}
@@ -86,6 +85,6 @@ export default function LogsFilters({
           })}
         </LogsInfoPanel>
       )}
-    </Div>
+    </div>
   )
 }

@@ -1,8 +1,9 @@
 import { forwardRef, useContext, useMemo, useState } from 'react'
-import { Button, Div, Flex, useDebounce } from 'honorable'
+import { Flex, useDebounce } from 'honorable'
 import {
   AppsIcon,
   Breadcrumb,
+  Button,
   Card,
   EmptyState,
   Input,
@@ -373,7 +374,7 @@ function NamespaceSelect({
   const [isOpen, setIsOpen] = useState(false)
 
   return isEmpty(namespaces) ? null : (
-    <Div width={340}>
+    <div css={{ width: 340 }}>
       <Select
         isDisabled={isDisabled}
         isOpen={isOpen}
@@ -413,6 +414,6 @@ function NamespaceSelect({
           />
         )) || []}
       </Select>
-    </Div>
+    </div>
   )
 }

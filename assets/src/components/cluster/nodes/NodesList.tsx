@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import {
   EmptyState,
   IconFrame,
@@ -67,7 +67,7 @@ function DeleteNode({ name, refetch }) {
   })
 
   return (
-    <Div onClick={(e) => e.stopPropagation()}>
+    <div onClick={(e) => e.stopPropagation()}>
       <IconFrame
         clickable
         icon={<TrashCanIcon color="icon-danger" />}
@@ -89,7 +89,7 @@ function DeleteNode({ name, refetch }) {
           />
         </div>
       )}
-    </Div>
+    </div>
   )
 }
 

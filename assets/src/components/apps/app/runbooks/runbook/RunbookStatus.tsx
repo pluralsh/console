@@ -1,6 +1,6 @@
 import { Chip, Tooltip, WarningIcon } from '@pluralsh/design-system'
 import { Maybe, Runbook, RunbookAlertStatus } from 'generated/graphql'
-import { Div, Flex, Span } from 'honorable'
+import { Flex, Span } from 'honorable'
 import moment from 'moment'
 import { useTheme } from 'styled-components'
 
@@ -38,9 +38,9 @@ function AlertsTooltipLabel({
                 },
               }}
             >
-              <Div paddingTop={2}>
+              <div css={{ paddingTop: 2 }}>
                 <WarningIcon color={theme.colors['icon-warning']} />
-              </Div>
+              </div>
               <Flex
                 key={i}
                 flexDirection="column"
@@ -51,27 +51,30 @@ function AlertsTooltipLabel({
                   gap="small"
                   alignItems="baseline"
                 >
-                  <Div
-                    body2
-                    bold
-                    flexGrow={1}
+                  <div
+                    css={{
+                      ...theme.partials.text.body2,
+                      fontWeight: 'bold',
+                      flexGrow: 1,
+                    }}
                   >
                     {alert.name}
-                  </Div>
-                  <Div
-                    overline
-                    color="text-xlight"
+                  </div>
+                  <div
+                    css={{
+                      ...theme.partials.text.overline,
+                      color: 'text-xlight',
+                    }}
                   >
                     {dateTime}
-                  </Div>
+                  </div>
                 </Flex>
                 {alert.annotations && (
-                  <Div
-                    body2
-                    color="text-xlight"
+                  <div
+                    css={{ ...theme.partials.text.body2, color: 'text-xlight' }}
                   >
                     {(alert?.annotations as any)?.summary}
-                  </Div>
+                  </div>
                 )}
               </Flex>
             </Flex>
