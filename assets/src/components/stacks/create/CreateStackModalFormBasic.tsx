@@ -1,4 +1,5 @@
 import {
+  Accordion,
   FormField,
   Input,
   ListBoxItem,
@@ -7,6 +8,8 @@ import {
 } from '@pluralsh/design-system'
 import { useEffect, useRef } from 'react'
 import ClusterSelector from 'components/cd/utils/ClusterSelector'
+
+import { useTheme } from 'styled-components'
 
 import { StackType } from '../../../generated/graphql'
 
@@ -39,6 +42,7 @@ export function CreateStackModalFormBasic({
   approval: boolean
   setApproval: (name: boolean) => void
 }): any {
+  const theme = useTheme()
   const inputRef = useRef<HTMLInputElement>()
 
   useEffect(() => {
@@ -78,12 +82,6 @@ export function CreateStackModalFormBasic({
           ))}
         </Select>
       </FormField>
-      <FormField label="Image">
-        <Input
-          value={image}
-          onChange={(e) => setImage(e.currentTarget.value)}
-        />
-      </FormField>
       <FormField
         required
         label="Version"
@@ -114,6 +112,27 @@ export function CreateStackModalFormBasic({
       >
         Require approvals
       </Switch>
+      <Accordion
+        label="Advanced configuration"
+        unstyled
+        css={{
+          '> div:first-child': {
+            ...theme.partials.text.overline,
+            color: theme.colors['text-xlight'],
+            padding: 0,
+          },
+        }}
+      >
+        <FormField
+          label="Image"
+          paddingTop="medium"
+        >
+          <Input
+            value={image}
+            onChange={(e) => setImage(e.currentTarget.value)}
+          />
+        </FormField>
+      </Accordion>
     </>
   )
 }
