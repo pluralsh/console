@@ -45,7 +45,12 @@ const columns = [
     header: 'Name',
     enableGlobalFilter: true,
     meta: { truncate: true },
-    cell: ({ getValue }) => getValue(),
+    cell: ({ getValue }) => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
+
+      return <span css={{ ...theme.partials.text.code }}>{getValue()}</span>
+    },
   }),
   columnHelper.accessor((row) => row, {
     id: 'value',
