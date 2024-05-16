@@ -1,4 +1,10 @@
-import { Button, Card, FormField, Input } from '@pluralsh/design-system'
+import {
+  Button,
+  Card,
+  EmptyState,
+  FormField,
+  Input,
+} from '@pluralsh/design-system'
 import {
   Dispatch,
   SetStateAction,
@@ -57,6 +63,23 @@ export function CreateStackModalFormFiles({
 
   useEffect(() => setFilesErrors(errorCount > 0), [errorCount, setFilesErrors])
 
+  const addButton = useMemo(
+    () => (
+      <Button
+        secondary
+        small
+        size="tertiary"
+        onClick={(e) => {
+          e.preventDefault()
+          setFiles((files) => [...files, { path: '', content: '' }])
+        }}
+      >
+        Add file
+      </Button>
+    ),
+    [setFiles]
+  )
+
   const readFile = useCallback(
     async (files, i) => {
       if (isEmpty(files)) return
@@ -82,7 +105,7 @@ export function CreateStackModalFormFiles({
         gap: theme.spacing.medium,
       }}
     >
-      {files.length > 0 && (
+      {files.length > 0 ? (
         <>
           {items.map(({ file, errors }, i) => (
             <Card
@@ -157,21 +180,11 @@ export function CreateStackModalFormFiles({
               </div>
             </Card>
           ))}
+          <div>{addButton}</div>
         </>
+      ) : (
+        <EmptyState message="No files">{addButton}</EmptyState>
       )}
-      <div>
-        <Button
-          secondary
-          small
-          size="tertiary"
-          onClick={(e) => {
-            e.preventDefault()
-            setFiles((files) => [...files, { path: '', content: '' }])
-          }}
-        >
-          Add file
-        </Button>
-      </div>
     </div>
   )
 }

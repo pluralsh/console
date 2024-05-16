@@ -87,7 +87,7 @@ export default function CreateStackModal({
   onClose: () => void
 }) {
   const theme = useTheme()
-  const [formState, setFormState] = useState<FormState>(FormState.Files)
+  const [formState, setFormState] = useState<FormState>(FormState.Initial)
   const [name, setName] = useState('')
   const [type, setType] = useState<StackType>(StackType.Terraform)
   const [image, setImage] = useState('')
@@ -97,12 +97,10 @@ export default function CreateStackModal({
   const [repositoryId, setRepositoryId] = useState('')
   const [ref, setRef] = useState('')
   const [folder, setFolder] = useState('')
-  const [environment, setEnvironment] = useState<StackEnvironmentAttributes[]>([
-    { name: '', value: '' },
-  ])
-  const [files, setFiles] = useState<StackFileAttributesExtended[]>([
-    { path: '', content: '' },
-  ])
+  const [environment, setEnvironment] = useState<StackEnvironmentAttributes[]>(
+    []
+  )
+  const [files, setFiles] = useState<StackFileAttributesExtended[]>([])
   const [environmentErrors, setEnvironmentErrors] = useState(false)
   const [filesErrors, setFilesErrors] = useState(false)
 
