@@ -1,8 +1,13 @@
-import { GearTrainIcon, IconFrame, PeopleIcon } from '@pluralsh/design-system'
+import {
+  Button,
+  GearTrainIcon,
+  IconFrame,
+  PeopleIcon,
+} from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 import { Confirm } from 'components/utils/Confirm'
 import { LoginContext } from 'components/contexts'
-import { Button, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import {
   Persona as PersonaT,
   PersonasDocument,

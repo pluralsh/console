@@ -31,7 +31,7 @@ import {
   usePrevious,
 } from '@pluralsh/design-system'
 
-import { Div, Flex, Modal, ModalBaseProps, P } from 'honorable'
+import { Flex, Modal, ModalBaseProps } from 'honorable'
 
 import { useTheme } from 'styled-components'
 
@@ -73,19 +73,23 @@ export function ScalingButton({ ...props }: ComponentProps<typeof Button>) {
 }
 
 function RecommendationNub({ text: label, value }) {
+  const theme = useTheme()
+
   return (
     <Flex
       flexDirection="column"
       justifyContent="center"
     >
       <div>{value}</div>
-      <Div
-        caption
-        color="text-xlight"
-        marginTop="minus-xxxsmall"
+      <div
+        css={{
+          ...theme.partials.text.caption,
+          color: 'text-xlight',
+          marginTop: 'minus-xxxsmall',
+        }}
       >
         {label}
-      </Div>
+      </div>
     </Flex>
   )
 }
@@ -94,10 +98,10 @@ function RecommendationComp({ label, cpu, memory }: any) {
   const theme = useTheme()
 
   return (
-    <Div
-      display="contents"
-      alignItems="center"
-      {...{
+    <div
+      css={{
+        display: 'contents',
+        alignItems: 'center',
         '& > *': {
           padding: `${theme.spacing.xxsmall}px ${theme.spacing.medium}px`,
           paddingRight: theme.spacing.small,
@@ -123,10 +127,9 @@ function RecommendationComp({ label, cpu, memory }: any) {
         text="Memory"
         value={mem(memory)}
       />
-    </Div>
+    </div>
   )
 }
-
 function ContainerRecommendations({
   lowerBound,
   upperBound,
@@ -141,11 +144,11 @@ function ContainerRecommendations({
   const { overlays, componentName } = useScalingContext()
 
   return (
-    <Div padding="large">
-      <P marginBottom="large">
+    <div css={{ padding: 'large' }}>
+      <p css={{ marginBottom: 'large' }}>
         Recommendations for how to scale your {componentName} instance on this
         application.
-      </P>
+      </p>
       <Card
         display="grid"
         gridTemplateColumns="1fr 1fr 1fr"
@@ -169,7 +172,7 @@ function ContainerRecommendations({
           </Button>
         </Flex>
       )}
-    </Div>
+    </div>
   )
 }
 
@@ -200,7 +203,7 @@ export function ScalingEdit({ rec }: { rec: ContainerResources }) {
   })
 
   return (
-    <Div padding="large">
+    <div css={{ padding: 'large' }}>
       <Flex
         flexDirection="column"
         pad="medium"
@@ -249,11 +252,12 @@ export function ScalingEdit({ rec }: { rec: ContainerResources }) {
           </Button>
         </Flex>
       </Flex>
-    </Div>
+    </div>
   )
 }
 
 export function SuccessConfirm() {
+  const theme = useTheme()
   const { closeModal } = useScalingContext()
 
   return (
@@ -262,12 +266,14 @@ export function SuccessConfirm() {
       gap="small"
       flexDirection="column"
     >
-      <P
-        body1
-        marginBottom="medium"
+      <p
+        css={{
+          ...theme.partials.text.body1,
+          marginBottom: 'medium',
+        }}
       >
         Scaling recommendations successfully applied.
-      </P>
+      </p>
       <Flex
         direction="row"
         gap="xsmall"

@@ -1,7 +1,6 @@
 import { useCallback, useContext, useMemo, useState } from 'react'
 import { useMutation } from '@apollo/client'
-import { Button } from 'honorable'
-import { Modal } from '@pluralsh/design-system'
+import { Button, Modal } from '@pluralsh/design-system'
 import uniqWith from 'lodash/uniqWith'
 import isEqual from 'lodash/isEqual'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'

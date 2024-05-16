@@ -1,7 +1,8 @@
-import { Button, Modal } from 'honorable'
+import { Modal } from 'honorable'
 import moment from 'moment'
 import { Suspense, useMemo, useState } from 'react'
 import {
+  Button,
   CopyIcon,
   EmptyState,
   IconFrame,
