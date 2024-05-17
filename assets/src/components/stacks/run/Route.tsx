@@ -1,19 +1,9 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+import React, { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import {
-  LogsDeltaDocument,
-  LogsDeltaSubscriptionVariables,
-  RunLogAttributes,
-  RunLogsDelta,
-  RunStep,
-  StackRun,
-  StackRunQuery,
-  StepStatus,
-  useStackRunQuery,
-} from '../../../generated/graphql'
+import { StackRun, useStackRunQuery } from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
@@ -47,13 +37,8 @@ function ZeroState({ id }: ZeroStateProps): ReactNode {
 export default function StackRunDetail(): ReactNode {
   const { stackId, runId } = useParams()
   const theme = useTheme()
-  // const [subscribed, setSubscribed] = useState(false)
 
-  const {
-    data: stackRunQuery,
-    loading: loadingStackRun,
-    // subscribeToMore,
-  } = useStackRunQuery({
+  const { data: stackRunQuery, loading: loadingStackRun } = useStackRunQuery({
     variables: {
       id: runId!,
     },
@@ -76,47 +61,6 @@ export default function StackRunDetail(): ReactNode {
 
   const stackRun: StackRun = stackRunQuery?.stackRun as StackRun
 
-  // useEffect(() => {
-  //   if (subscribed || !stackRun) {
-  //     return
-  //   }
-  //
-  //   console.log('subscribing')
-  //   stackRun?.steps
-  //     ?.filter((s) => s!.status === StepStatus.Running)
-  //     .forEach((s) =>
-  //       subscribeToMore<RunLogsDelta>({
-  //         variables: { id: s!.id },
-  //         document: LogsDeltaDocument,
-  //         updateQuery: (
-  //           prev,
-  //           { subscriptionData: { data } }
-  //         ): StackRunQuery => {
-  //           const updatedStep = applyLogsDelta(s!, data as RunLogsDelta)
-  //           const steps: Array<RunStep> = [
-  //             ...((prev.stackRun?.steps?.filter(
-  //               (s) => s!.id !== updatedStep.id
-  //             ) as Array<RunStep>) ?? []),
-  //             updatedStep,
-  //           ]
-  //
-  //           console.log(data)
-  //           console.log(updatedStep)
-  //           console.log(steps)
-  //
-  //           return data
-  //             ? ({
-  //                 ...prev,
-  //                 ...{ stackRun: { ...prev.stackRun, steps } },
-  //               } as StackRunQuery)
-  //             : prev
-  //         },
-  //       })
-  //     )
-  //
-  //   setSubscribed(true)
-  // }, [stackRun, stackRun?.steps, subscribeToMore, subscribed])
-
   if (loadingStackRun) {
     return <LoadingIndicator />
   }
@@ -136,6 +80,8 @@ export default function StackRunDetail(): ReactNode {
             overflow: 'hidden',
             width: '100%',
             height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           <Outlet
