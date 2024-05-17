@@ -255,6 +255,7 @@ export default function CreateStackModal({
           setJobSpec={setJobSpec}
         />
       )}
+
       {error && (
         <div css={{ marginTop: theme.spacing.medium }}>
           <GqlError

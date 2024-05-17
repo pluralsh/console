@@ -34,6 +34,7 @@ export default function CreateStackModalActions({
   return (
     <div css={{ display: 'flex', gap: theme.spacing.medium }}>
       <Button
+        type="button"
         secondary
         onClick={() => close()}
       >
@@ -55,9 +56,12 @@ export default function CreateStackModalActions({
 
       {formState === FormState.Initial && (
         <Button
-          type="submit"
+          type="button"
           disabled={!initialFormValid}
-          onClick={() => setFormState(FormState.Repository)}
+          onClick={(e) => {
+            e.preventDefault()
+            setFormState(FormState.Repository)
+          }}
         >
           Select repository
         </Button>
@@ -65,9 +69,12 @@ export default function CreateStackModalActions({
 
       {formState === FormState.Repository && (
         <Button
-          type="submit"
+          type="button"
           disabled={!repoFormValid}
-          onClick={() => setFormState(FormState.Environment)}
+          onClick={(e) => {
+            e.preventDefault()
+            setFormState(FormState.Environment)
+          }}
         >
           Setup environment
         </Button>
@@ -75,9 +82,12 @@ export default function CreateStackModalActions({
 
       {formState === FormState.Environment && (
         <Button
-          type="submit"
+          type="button"
           disabled={!environmentFormValid}
-          onClick={() => setFormState(FormState.Files)}
+          onClick={(e) => {
+            e.preventDefault()
+            setFormState(FormState.Files)
+          }}
         >
           Setup files
         </Button>
@@ -85,10 +95,13 @@ export default function CreateStackModalActions({
 
       {formState === FormState.Files && (
         <Button
-          type="submit"
+          type="button"
           secondary
           disabled={!filesFormValid}
-          onClick={() => setFormState(FormState.Job)}
+          onClick={(e) => {
+            e.preventDefault()
+            setFormState(FormState.Job)
+          }}
         >
           Setup job
         </Button>
