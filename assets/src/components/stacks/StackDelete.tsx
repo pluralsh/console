@@ -49,7 +49,7 @@ export default function StackDelete({
     <>
       <Button
         destructive
-        disabled={stack.deletedAt}
+        disabled={!!stack.deletedAt}
         onClick={() => setConfirm(true)}
       >
         Delete
