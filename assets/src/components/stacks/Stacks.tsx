@@ -20,6 +20,8 @@ import { useDebounce } from '@react-hooks-library/core'
 
 import Fuse from 'fuse.js'
 
+import moment from 'moment'
+
 import {
   STACK_ENV_REL_PATH,
   STACK_RUNS_REL_PATH,
@@ -42,6 +44,8 @@ import { LinkTabWrap } from '../utils/Tabs'
 
 import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
 import CreateStack from './create/CreateStack'
+import StackDelete from './StackDelete'
+import StackStatusChip from './StackStatusChip'
 
 const pollInterval = 10 * 1000
 
@@ -248,49 +252,74 @@ export default function Stacks() {
         <Outlet context={{ stack, refetch } as StackOutletContextT} />
       </div>
       <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer>
+      <ResponsiveLayoutSidecarContainer
+        display="flex"
+        flexDirection="column"
+        gap="small"
+      >
         {stack && (
-          <Sidecar heading="Stack">
-            <SidecarItem heading="Name">{stack.name}</SidecarItem>
-            <SidecarItem heading="ID">{stack.id}</SidecarItem>
-            <SidecarItem heading="Status">
-              {stack.paused ? 'Paused' : 'Active'}
-            </SidecarItem>
-            <SidecarItem heading="Approval">
-              {stack.approval ? 'Required' : 'Not required'}
-            </SidecarItem>
-            <SidecarItem heading="Type">
-              <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-                <StackTypeIcon
-                  size={16}
-                  stackType={stack.type}
-                />
-                {capitalize(stack.type)}
-              </div>
-            </SidecarItem>
-            {stack.configuration?.image && (
-              <SidecarItem heading="Image">
-                {stack.configuration?.image}
+          <>
+            <StackDelete
+              stack={stack}
+              refetch={refetch}
+            />
+            <Sidecar heading="Stack">
+              <SidecarItem heading="Name">
+                <div css={{ display: 'flex', gap: theme.spacing.small }}>
+                  {stack.name}
+                </div>
               </SidecarItem>
-            )}
-            <SidecarItem heading="Version">
-              {stack.configuration?.version}
-            </SidecarItem>
-            <SidecarItem heading="Repository">
-              {stack.repository?.url}
-            </SidecarItem>
-            <SidecarItem heading="Ref">{stack?.git?.ref}</SidecarItem>
-            <SidecarItem heading="Folder">{stack?.git?.folder}</SidecarItem>
-            <SidecarItem heading="Cluster">
-              <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-                <ClusterProviderIcon
-                  cluster={stack.cluster}
-                  size={16}
+              <SidecarItem heading="ID">{stack.id}</SidecarItem>
+              <SidecarItem heading="Created">
+                {moment(stack.insertedAt).fromNow()}
+              </SidecarItem>
+              {stack.deletedAt && (
+                <SidecarItem heading="Deleted">
+                  {moment(stack.deletedAt).fromNow()}
+                </SidecarItem>
+              )}
+              <SidecarItem heading="Status">
+                <StackStatusChip
+                  paused={!!stack.paused}
+                  deleting={!!stack.deletedAt}
                 />
-                {stack.cluster?.name}
-              </div>
-            </SidecarItem>
-          </Sidecar>
+              </SidecarItem>
+              <SidecarItem heading="Approval">
+                {stack.approval ? 'Required' : 'Not required'}
+              </SidecarItem>
+              <SidecarItem heading="Type">
+                <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+                  <StackTypeIcon
+                    size={16}
+                    stackType={stack.type}
+                  />
+                  {capitalize(stack.type)}
+                </div>
+              </SidecarItem>
+              {stack.configuration?.image && (
+                <SidecarItem heading="Image">
+                  {stack.configuration?.image}
+                </SidecarItem>
+              )}
+              <SidecarItem heading="Version">
+                {stack.configuration?.version}
+              </SidecarItem>
+              <SidecarItem heading="Repository">
+                {stack.repository?.url}
+              </SidecarItem>
+              <SidecarItem heading="Ref">{stack?.git?.ref}</SidecarItem>
+              <SidecarItem heading="Folder">{stack?.git?.folder}</SidecarItem>
+              <SidecarItem heading="Cluster">
+                <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+                  <ClusterProviderIcon
+                    cluster={stack.cluster}
+                    size={16}
+                  />
+                  {stack.cluster?.name}
+                </div>
+              </SidecarItem>
+            </Sidecar>
+          </>
         )}
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>

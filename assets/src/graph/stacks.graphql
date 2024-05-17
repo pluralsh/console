@@ -1,6 +1,7 @@
 fragment Stack on InfrastructureStack {
   id
   insertedAt
+  deletedAt
   name
   type
   configuration {
@@ -202,6 +203,19 @@ mutation CreateStack($attributes: StackAttributes!){
 
 mutation UpdateStack($id: ID!, $attributes: StackAttributes!) {
   updateStack(id: $id, attributes: $attributes) {
+    ...Stack
+  }
+}
+
+mutation DetachStack($id: ID!) {
+  detachStack(id: $id) {
+    ...Stack
+  }
+}
+
+
+mutation DeleteStack($id: ID!) {
+  deleteStack(id: $id) {
     ...Stack
   }
 }
