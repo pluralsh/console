@@ -373,29 +373,31 @@ export default function Sidebar() {
           >
             <GitHubLogoIcon />
           </SidebarItem>
-          <SidebarItem
-            clickable
-            label="Notifications"
-            tooltip="Notifications"
-            className="sidebar-notifications"
-            css={{
-              position: 'relative',
-            }}
-            onClick={(event) => {
-              event.stopPropagation()
-              toggleNotificationPanel(!isNotificationsPanelOpen)
-            }}
-            badge={unreadNotifications}
-            active={isNotificationsPanelOpen}
-            expandedLabel="Notifications"
-          >
-            <BellIcon />
-            {unreadNotifications > 0 && (
-              <NotificationsCountSC>
-                {unreadNotifications > 99 ? '!' : unreadNotifications}
-              </NotificationsCountSC>
-            )}
-          </SidebarItem>
+          {!configuration?.byok && (
+            <SidebarItem
+              clickable
+              label="Notifications"
+              tooltip="Notifications"
+              className="sidebar-notifications"
+              css={{
+                position: 'relative',
+              }}
+              onClick={(event) => {
+                event.stopPropagation()
+                toggleNotificationPanel(!isNotificationsPanelOpen)
+              }}
+              badge={unreadNotifications}
+              active={isNotificationsPanelOpen}
+              expandedLabel="Notifications"
+            >
+              <BellIcon />
+              {unreadNotifications > 0 && (
+                <NotificationsCountSC>
+                  {unreadNotifications > 99 ? '!' : unreadNotifications}
+                </NotificationsCountSC>
+              )}
+            </SidebarItem>
+          )}
           <SidebarItem
             ref={menuItemRef}
             className="sidebar-menu"
@@ -408,13 +410,13 @@ export default function Sidebar() {
             }}
             expandedLabel="Menu"
             css={{
-              paddingLeft: 0,
+              paddingLeft: theme.spacing.xxsmall,
             }}
           >
             <Avatar
               name={me.name}
               src={me.profile}
-              size={40}
+              size={32}
             />
           </SidebarItem>
         </SidebarSection>
