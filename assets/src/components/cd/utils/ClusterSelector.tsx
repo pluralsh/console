@@ -14,7 +14,6 @@ import { useTheme } from 'styled-components'
 import { useThrottle } from 'components/hooks/useThrottle'
 import isEmpty from 'lodash/isEmpty'
 import { extendConnection } from 'utils/graphql'
-import { hide } from 'concurrently/dist/src/defaults'
 
 export default function ClusterSelector({
   onClusterChange,

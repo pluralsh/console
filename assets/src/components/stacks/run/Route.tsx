@@ -1,19 +1,9 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react'
+import React, { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import {
-  LogsDeltaDocument,
-  LogsDeltaSubscriptionVariables,
-  RunLogAttributes,
-  RunLogsDelta,
-  RunStep,
-  StackRun,
-  StackRunQuery,
-  StepStatus,
-  useStackRunQuery,
-} from '../../../generated/graphql'
+import { StackRun, useStackRunQuery } from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'

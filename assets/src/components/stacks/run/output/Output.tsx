@@ -1,24 +1,7 @@
-import React, {
-  ReactElement,
-  ReactNode,
-  useCallback,
-  useMemo,
-  useState,
-} from 'react'
+import React, { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import {
-  CheckIcon,
-  CloseIcon,
-  Code,
-  EyeClosedIcon,
-  EyeIcon,
-  IconFrame,
-  Modal,
-  Table,
-} from '@pluralsh/design-system'
+import { CheckIcon, CloseIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-
-import yaml from 'js-yaml'
 
 import { StackOutput, StackRun } from '../../../../generated/graphql'
 
