@@ -227,25 +227,25 @@ query StackRun($id: ID!) {
 
 mutation CreateStack($attributes: StackAttributes!) {
   createStack(attributes: $attributes) {
-    ...Stack
+    id
   }
 }
 
 mutation UpdateStack($id: ID!, $attributes: StackAttributes!) {
   updateStack(id: $id, attributes: $attributes) {
-    ...Stack
+    id
   }
 }
 
 mutation DetachStack($id: ID!) {
   detachStack(id: $id) {
-    ...Stack
+    id
   }
 }
 
 mutation DeleteStack($id: ID!) {
   deleteStack(id: $id) {
-    ...Stack
+    id
   }
 }
 
