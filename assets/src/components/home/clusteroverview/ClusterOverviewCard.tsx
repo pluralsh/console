@@ -16,8 +16,6 @@ import { HOME_CARD_MAX_HEIGHT, HomeCard } from '../HomeCard'
 import { ClusterOverViewTable } from './ClusterOverviewTable'
 import { ClusterOverviewChart } from './ClusterOverviewChart'
 
-const CHART_VIEW_WIDTH = '450px'
-
 export function ClusterOverviewCard() {
   const theme = useTheme()
   const {
@@ -46,15 +44,14 @@ export function ClusterOverviewCard() {
   }
 
   return (
-    <HomeCard overflow="none">
+    <HomeCard>
       <div
         css={{
           display: 'flex',
-
           maxHeight: HOME_CARD_MAX_HEIGHT,
         }}
       >
-        <div css={{ width: CHART_VIEW_WIDTH, padding: theme.spacing.xlarge }}>
+        <div css={{ minWidth: 'fit-content', padding: theme.spacing.xlarge }}>
           <H1 title2>Cluster Overview</H1>
           <ClusterOverviewChart data={chartData} />
         </div>

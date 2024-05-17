@@ -3,6 +3,8 @@ import { PolicyAggregate, usePolicyStatisticsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 
+import { POLL_INTERVAL } from './Policies'
+
 export function usePolicyChartsData(filters: {
   clusters?: (string | null)[] | undefined
   namespaces?: (string | null)[] | undefined
@@ -17,6 +19,7 @@ export function usePolicyChartsData(filters: {
         aggregate: PolicyAggregate.Cluster,
         ...filters,
       },
+      pollInterval: POLL_INTERVAL,
     })
   const clusterPolicyStats = clusterRes.data || clusterRes.previousData
 
@@ -26,6 +29,7 @@ export function usePolicyChartsData(filters: {
         aggregate: PolicyAggregate.Enforcement,
         ...filters,
       },
+      pollInterval: POLL_INTERVAL,
     })
   const enforcementStats = enforcementRes.data || enforcementRes.previousData
 
@@ -35,6 +39,7 @@ export function usePolicyChartsData(filters: {
         aggregate: PolicyAggregate.Installed,
         ...filters,
       },
+      pollInterval: POLL_INTERVAL,
     })
   const installedStats = installedRes.data || installedRes.previousData
 
