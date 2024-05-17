@@ -1,6 +1,5 @@
 import { ListBoxItem, Tooltip } from '@pluralsh/design-system'
 import { CellContext } from '@tanstack/react-table'
-import { Div } from 'honorable'
 import { Dispatch, useContext, useMemo, useState } from 'react'
 import { ColumnDefTemplate } from '@tanstack/table-core/src/types'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
@@ -106,9 +105,11 @@ function VPNColumnActions({ disabled, refetch, name }) {
   }
 
   return (
-    <Div
-      right={0}
-      marginRight="small"
+    <div
+      css={{
+        right: 0,
+        marginRight: 'small',
+      }}
     >
       <MoreMenu
         onSelectionChange={(selected) => menuItems[selected]?.onSelect()}
@@ -137,7 +138,7 @@ function VPNColumnActions({ disabled, refetch, name }) {
       </MoreMenu>
 
       {!!selected && dialog}
-    </Div>
+    </div>
   )
 }
 

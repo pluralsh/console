@@ -1,7 +1,6 @@
 import isEmpty from 'lodash/isEmpty'
 import { EmptyState } from '@pluralsh/design-system'
 import { useState } from 'react'
-import { Div } from 'honorable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { usePersonasQuery } from 'generated/graphql'
 
@@ -52,10 +51,11 @@ export function PersonasList() {
           hasNextPage={pageInfo.hasNextPage}
           loading={loading}
           placeholder={() => (
-            <Div
-              flex={false}
-              height="50px"
-              padding="small"
+            <div
+              css={{
+                height: '50px',
+                padding: 'small',
+              }}
             />
           )}
           handleScroll={undefined}
