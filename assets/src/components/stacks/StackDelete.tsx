@@ -43,7 +43,7 @@ export default function StackDelete({
 
     if (detach) detachMutation(baseOptions)
     else deleteMutation(baseOptions)
-  }, [deleteMutation, detach, detachMutation, refetch, stack.id])
+  }, [deleteMutation, detach, detachMutation, navigate, refetch, stack.id])
 
   return (
     <>
