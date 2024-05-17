@@ -27,6 +27,7 @@ import {
   SidebarExpandWrapper,
   SidebarItem,
   SidebarSection,
+  StackIcon,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
@@ -38,7 +39,6 @@ import { updateCache } from 'utils/graphql'
 import styled, { useTheme } from 'styled-components'
 
 import { PersonaConfigurationFragment } from 'generated/graphql'
-
 import { CD_ABS_PATH } from 'routes/cdRoutesConsts'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
@@ -47,9 +47,11 @@ import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
 import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
 
-import { useLogin } from '../contexts'
+import { isEmpty } from 'lodash'
 
+import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
+import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -77,6 +79,8 @@ function getMenuItems({
   isByok: boolean
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
+  const showStacks = !isEmpty(localStorage.getItem(`plural-stacks`))
+
   return [
     {
       text: 'Home',
@@ -100,6 +104,16 @@ function getMenuItems({
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
+    ...(showStacks
+      ? [
+          {
+            text: 'Infrastructure stacks',
+            expandedLabel: 'Infrastructure stacks',
+            icon: <StackIcon />,
+            path: getStacksAbsPath(''),
+          },
+        ]
+      : []),
     {
       text: 'Kubernetes',
       expandedLabel: 'Kubernetes',

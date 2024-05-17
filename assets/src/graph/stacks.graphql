@@ -1,0 +1,262 @@
+fragment Stack on InfrastructureStack {
+  id
+  insertedAt
+  deletedAt
+  name
+  type
+  configuration {
+    image
+    version
+  }
+  repository {
+    id
+    url
+  }
+  git {
+    ref
+    folder
+  }
+  cluster {
+    ...ClusterTiny
+  }
+  paused
+  approval
+  environment {
+    name
+    value
+    secret
+  }
+  jobSpec {
+    namespace
+    raw
+    annotations
+    labels
+    serviceAccount
+    containers {
+      image
+      args
+      env {
+        value
+        name
+      }
+      envFrom {
+        secret
+        configMap
+      }
+    }
+  }
+}
+
+fragment StackRun on StackRun {
+  id
+  insertedAt
+  git {
+    ref
+  }
+  message
+  status
+  approval
+  approvedAt
+  approver {
+    name
+    email
+  }
+}
+
+fragment StackConfiguration on StackConfiguration {
+  version
+  image
+}
+
+fragment StackStateResource on StackStateResource {
+  name
+  resource
+  identifier
+  links
+  configuration
+}
+
+fragment StackState on StackState {
+  id
+  plan
+  state {
+    ...StackStateResource
+  }
+}
+
+fragment StackOutput on StackOutput {
+  name
+  value
+  secret
+}
+
+fragment StackEnvironment on StackEnvironment {
+  name
+  value
+  secret
+}
+
+fragment ServiceErrors on ServiceError {
+  source
+  message
+}
+
+fragment StackFile on StackFile {
+  path
+  content
+}
+
+fragment RunStep on RunStep {
+  id
+  name
+  insertedAt
+  updatedAt
+  status
+  stage
+  args
+  cmd
+  index
+  logs {
+    id
+    updatedAt
+    insertedAt
+    logs
+  }
+}
+
+query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStacks(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Stack
+      }
+    }
+  }
+}
+
+query StackTiny($id: ID!) {
+  infrastructureStack(id: $id) {
+    id
+    name
+    paused
+    type
+    insertedAt
+    updatedAt
+  }
+}
+
+query StackRuns(
+  $id: ID!
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+) {
+  infrastructureStack(id: $id) {
+    runs(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...StackRun
+        }
+      }
+    }
+  }
+}
+
+query StackRun($id: ID!) {
+  stackRun(id: $id) {
+    id
+    status
+    updatedAt
+    insertedAt
+    type
+    message
+    approval
+    approvedAt
+    approver {
+      ...User
+    }
+    configuration {
+      ...StackConfiguration
+    }
+    state {
+      ...StackState
+    }
+    repository {
+      ...GitRepository
+    }
+    git {
+      files
+      ref
+      folder
+    }
+    output {
+      ...StackOutput
+    }
+    cluster {
+      ...ClusterTiny
+    }
+    environment {
+      ...StackEnvironment
+    }
+    errors {
+      ...ServiceErrors
+    }
+    files {
+      ...StackFile
+    }
+    jobSpec {
+      ...JobGateSpec
+    }
+    steps {
+      ...RunStep
+    }
+  }
+}
+
+mutation CreateStack($attributes: StackAttributes!) {
+  createStack(attributes: $attributes) {
+    id
+  }
+}
+
+mutation UpdateStack($id: ID!, $attributes: StackAttributes!) {
+  updateStack(id: $id, attributes: $attributes) {
+    id
+  }
+}
+
+mutation DetachStack($id: ID!) {
+  detachStack(id: $id) {
+    id
+  }
+}
+
+mutation DeleteStack($id: ID!) {
+  deleteStack(id: $id) {
+    id
+  }
+}
+
+subscription LogsDelta($id: ID!) {
+  runLogsDelta(stepId: $id) {
+    delta
+    payload {
+      id
+      logs
+      insertedAt
+      updatedAt
+    }
+  }
+}

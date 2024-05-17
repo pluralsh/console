@@ -8634,6 +8634,97 @@ export type PolicyStatisticsQueryVariables = Exact<{
 
 export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatistics?: Array<{ __typename?: 'PolicyStatistic', count?: number | null, aggregate?: string | null } | null> | null };
 
+export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
+
+export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
+
+export type StackConfigurationFragment = { __typename?: 'StackConfiguration', version: string, image?: string | null };
+
+export type StackStateResourceFragment = { __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null };
+
+export type StackStateFragment = { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null };
+
+export type StackOutputFragment = { __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null };
+
+export type StackEnvironmentFragment = { __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null };
+
+export type ServiceErrorsFragment = { __typename?: 'ServiceError', source: string, message: string };
+
+export type StackFileFragment = { __typename?: 'StackFile', path: string, content: string };
+
+export type RunStepFragment = { __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null };
+
+export type StacksQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null } | null } | null> | null } | null };
+
+export type StackTinyQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackTinyQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, paused?: boolean | null, type: StackType, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type StackRunsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
+
+export type StackRunQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version: string, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null } | null };
+
+export type CreateStackMutationVariables = Exact<{
+  attributes: StackAttributes;
+}>;
+
+
+export type CreateStackMutation = { __typename?: 'RootMutationType', createStack?: { __typename?: 'InfrastructureStack', id?: string | null } | null };
+
+export type UpdateStackMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: StackAttributes;
+}>;
+
+
+export type UpdateStackMutation = { __typename?: 'RootMutationType', updateStack?: { __typename?: 'InfrastructureStack', id?: string | null } | null };
+
+export type DetachStackMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DetachStackMutation = { __typename?: 'RootMutationType', detachStack?: { __typename?: 'InfrastructureStack', id?: string | null } | null };
+
+export type DeleteStackMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteStackMutation = { __typename?: 'RootMutationType', deleteStack?: { __typename?: 'InfrastructureStack', id?: string | null } | null };
+
+export type LogsDeltaSubscriptionVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LogsDeltaSubscription = { __typename?: 'RootSubscriptionType', runLogsDelta?: { __typename?: 'RunLogsDelta', delta?: Delta | null, payload?: { __typename?: 'RunLogs', id: string, logs: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
+
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
@@ -10701,6 +10792,142 @@ export const PolicyConstraintFragmentDoc = gql`
   violationCount
 }
     ${ClusterFragmentDoc}`;
+export const StackFragmentDoc = gql`
+    fragment Stack on InfrastructureStack {
+  id
+  insertedAt
+  deletedAt
+  name
+  type
+  configuration {
+    image
+    version
+  }
+  repository {
+    id
+    url
+  }
+  git {
+    ref
+    folder
+  }
+  cluster {
+    ...ClusterTiny
+  }
+  paused
+  approval
+  environment {
+    name
+    value
+    secret
+  }
+  jobSpec {
+    namespace
+    raw
+    annotations
+    labels
+    serviceAccount
+    containers {
+      image
+      args
+      env {
+        value
+        name
+      }
+      envFrom {
+        secret
+        configMap
+      }
+    }
+  }
+}
+    ${ClusterTinyFragmentDoc}`;
+export const StackRunFragmentDoc = gql`
+    fragment StackRun on StackRun {
+  id
+  insertedAt
+  git {
+    ref
+  }
+  message
+  status
+  approval
+  approvedAt
+  approver {
+    name
+    email
+  }
+}
+    `;
+export const StackConfigurationFragmentDoc = gql`
+    fragment StackConfiguration on StackConfiguration {
+  version
+  image
+}
+    `;
+export const StackStateResourceFragmentDoc = gql`
+    fragment StackStateResource on StackStateResource {
+  name
+  resource
+  identifier
+  links
+  configuration
+}
+    `;
+export const StackStateFragmentDoc = gql`
+    fragment StackState on StackState {
+  id
+  plan
+  state {
+    ...StackStateResource
+  }
+}
+    ${StackStateResourceFragmentDoc}`;
+export const StackOutputFragmentDoc = gql`
+    fragment StackOutput on StackOutput {
+  name
+  value
+  secret
+}
+    `;
+export const StackEnvironmentFragmentDoc = gql`
+    fragment StackEnvironment on StackEnvironment {
+  name
+  value
+  secret
+}
+    `;
+export const ServiceErrorsFragmentDoc = gql`
+    fragment ServiceErrors on ServiceError {
+  source
+  message
+}
+    `;
+export const StackFileFragmentDoc = gql`
+    fragment StackFile on StackFile {
+  path
+  content
+}
+    `;
+export const RunStepFragmentDoc = gql`
+    fragment RunStep on RunStep {
+  id
+  name
+  insertedAt
+  updatedAt
+  status
+  stage
+  args
+  cmd
+  index
+  logs {
+    id
+    updatedAt
+    insertedAt
+    logs
+  }
+}
+    `;
 export const AccessTokenFragmentDoc = gql`
     fragment AccessToken on AccessToken {
   id
@@ -17095,6 +17322,420 @@ export type PolicyStatisticsQueryHookResult = ReturnType<typeof usePolicyStatist
 export type PolicyStatisticsLazyQueryHookResult = ReturnType<typeof usePolicyStatisticsLazyQuery>;
 export type PolicyStatisticsSuspenseQueryHookResult = ReturnType<typeof usePolicyStatisticsSuspenseQuery>;
 export type PolicyStatisticsQueryResult = Apollo.QueryResult<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>;
+export const StacksDocument = gql`
+    query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Stack
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${StackFragmentDoc}`;
+
+/**
+ * __useStacksQuery__
+ *
+ * To run a query within a React component, call `useStacksQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStacksQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStacksQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useStacksQuery(baseOptions?: Apollo.QueryHookOptions<StacksQuery, StacksQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StacksQuery, StacksQueryVariables>(StacksDocument, options);
+      }
+export function useStacksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StacksQuery, StacksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StacksQuery, StacksQueryVariables>(StacksDocument, options);
+        }
+export function useStacksSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StacksQuery, StacksQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StacksQuery, StacksQueryVariables>(StacksDocument, options);
+        }
+export type StacksQueryHookResult = ReturnType<typeof useStacksQuery>;
+export type StacksLazyQueryHookResult = ReturnType<typeof useStacksLazyQuery>;
+export type StacksSuspenseQueryHookResult = ReturnType<typeof useStacksSuspenseQuery>;
+export type StacksQueryResult = Apollo.QueryResult<StacksQuery, StacksQueryVariables>;
+export const StackTinyDocument = gql`
+    query StackTiny($id: ID!) {
+  infrastructureStack(id: $id) {
+    id
+    name
+    paused
+    type
+    insertedAt
+    updatedAt
+  }
+}
+    `;
+
+/**
+ * __useStackTinyQuery__
+ *
+ * To run a query within a React component, call `useStackTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackTinyQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackTinyQuery(baseOptions: Apollo.QueryHookOptions<StackTinyQuery, StackTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackTinyQuery, StackTinyQueryVariables>(StackTinyDocument, options);
+      }
+export function useStackTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackTinyQuery, StackTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackTinyQuery, StackTinyQueryVariables>(StackTinyDocument, options);
+        }
+export function useStackTinySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackTinyQuery, StackTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackTinyQuery, StackTinyQueryVariables>(StackTinyDocument, options);
+        }
+export type StackTinyQueryHookResult = ReturnType<typeof useStackTinyQuery>;
+export type StackTinyLazyQueryHookResult = ReturnType<typeof useStackTinyLazyQuery>;
+export type StackTinySuspenseQueryHookResult = ReturnType<typeof useStackTinySuspenseQuery>;
+export type StackTinyQueryResult = Apollo.QueryResult<StackTinyQuery, StackTinyQueryVariables>;
+export const StackRunsDocument = gql`
+    query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStack(id: $id) {
+    runs(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...StackRun
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${StackRunFragmentDoc}`;
+
+/**
+ * __useStackRunsQuery__
+ *
+ * To run a query within a React component, call `useStackRunsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackRunsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useStackRunsQuery(baseOptions: Apollo.QueryHookOptions<StackRunsQuery, StackRunsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackRunsQuery, StackRunsQueryVariables>(StackRunsDocument, options);
+      }
+export function useStackRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackRunsQuery, StackRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackRunsQuery, StackRunsQueryVariables>(StackRunsDocument, options);
+        }
+export function useStackRunsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackRunsQuery, StackRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackRunsQuery, StackRunsQueryVariables>(StackRunsDocument, options);
+        }
+export type StackRunsQueryHookResult = ReturnType<typeof useStackRunsQuery>;
+export type StackRunsLazyQueryHookResult = ReturnType<typeof useStackRunsLazyQuery>;
+export type StackRunsSuspenseQueryHookResult = ReturnType<typeof useStackRunsSuspenseQuery>;
+export type StackRunsQueryResult = Apollo.QueryResult<StackRunsQuery, StackRunsQueryVariables>;
+export const StackRunDocument = gql`
+    query StackRun($id: ID!) {
+  stackRun(id: $id) {
+    id
+    status
+    updatedAt
+    insertedAt
+    type
+    message
+    approval
+    approvedAt
+    approver {
+      ...User
+    }
+    configuration {
+      ...StackConfiguration
+    }
+    state {
+      ...StackState
+    }
+    repository {
+      ...GitRepository
+    }
+    git {
+      files
+      ref
+      folder
+    }
+    output {
+      ...StackOutput
+    }
+    cluster {
+      ...ClusterTiny
+    }
+    environment {
+      ...StackEnvironment
+    }
+    errors {
+      ...ServiceErrors
+    }
+    files {
+      ...StackFile
+    }
+    jobSpec {
+      ...JobGateSpec
+    }
+    steps {
+      ...RunStep
+    }
+  }
+}
+    ${UserFragmentDoc}
+${StackConfigurationFragmentDoc}
+${StackStateFragmentDoc}
+${GitRepositoryFragmentDoc}
+${StackOutputFragmentDoc}
+${ClusterTinyFragmentDoc}
+${StackEnvironmentFragmentDoc}
+${ServiceErrorsFragmentDoc}
+${StackFileFragmentDoc}
+${JobGateSpecFragmentDoc}
+${RunStepFragmentDoc}`;
+
+/**
+ * __useStackRunQuery__
+ *
+ * To run a query within a React component, call `useStackRunQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackRunQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackRunQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackRunQuery(baseOptions: Apollo.QueryHookOptions<StackRunQuery, StackRunQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackRunQuery, StackRunQueryVariables>(StackRunDocument, options);
+      }
+export function useStackRunLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackRunQuery, StackRunQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackRunQuery, StackRunQueryVariables>(StackRunDocument, options);
+        }
+export function useStackRunSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackRunQuery, StackRunQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackRunQuery, StackRunQueryVariables>(StackRunDocument, options);
+        }
+export type StackRunQueryHookResult = ReturnType<typeof useStackRunQuery>;
+export type StackRunLazyQueryHookResult = ReturnType<typeof useStackRunLazyQuery>;
+export type StackRunSuspenseQueryHookResult = ReturnType<typeof useStackRunSuspenseQuery>;
+export type StackRunQueryResult = Apollo.QueryResult<StackRunQuery, StackRunQueryVariables>;
+export const CreateStackDocument = gql`
+    mutation CreateStack($attributes: StackAttributes!) {
+  createStack(attributes: $attributes) {
+    id
+  }
+}
+    `;
+export type CreateStackMutationFn = Apollo.MutationFunction<CreateStackMutation, CreateStackMutationVariables>;
+
+/**
+ * __useCreateStackMutation__
+ *
+ * To run a mutation, you first call `useCreateStackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateStackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createStackMutation, { data, loading, error }] = useCreateStackMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateStackMutation(baseOptions?: Apollo.MutationHookOptions<CreateStackMutation, CreateStackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateStackMutation, CreateStackMutationVariables>(CreateStackDocument, options);
+      }
+export type CreateStackMutationHookResult = ReturnType<typeof useCreateStackMutation>;
+export type CreateStackMutationResult = Apollo.MutationResult<CreateStackMutation>;
+export type CreateStackMutationOptions = Apollo.BaseMutationOptions<CreateStackMutation, CreateStackMutationVariables>;
+export const UpdateStackDocument = gql`
+    mutation UpdateStack($id: ID!, $attributes: StackAttributes!) {
+  updateStack(id: $id, attributes: $attributes) {
+    id
+  }
+}
+    `;
+export type UpdateStackMutationFn = Apollo.MutationFunction<UpdateStackMutation, UpdateStackMutationVariables>;
+
+/**
+ * __useUpdateStackMutation__
+ *
+ * To run a mutation, you first call `useUpdateStackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateStackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateStackMutation, { data, loading, error }] = useUpdateStackMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateStackMutation(baseOptions?: Apollo.MutationHookOptions<UpdateStackMutation, UpdateStackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateStackMutation, UpdateStackMutationVariables>(UpdateStackDocument, options);
+      }
+export type UpdateStackMutationHookResult = ReturnType<typeof useUpdateStackMutation>;
+export type UpdateStackMutationResult = Apollo.MutationResult<UpdateStackMutation>;
+export type UpdateStackMutationOptions = Apollo.BaseMutationOptions<UpdateStackMutation, UpdateStackMutationVariables>;
+export const DetachStackDocument = gql`
+    mutation DetachStack($id: ID!) {
+  detachStack(id: $id) {
+    id
+  }
+}
+    `;
+export type DetachStackMutationFn = Apollo.MutationFunction<DetachStackMutation, DetachStackMutationVariables>;
+
+/**
+ * __useDetachStackMutation__
+ *
+ * To run a mutation, you first call `useDetachStackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDetachStackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [detachStackMutation, { data, loading, error }] = useDetachStackMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDetachStackMutation(baseOptions?: Apollo.MutationHookOptions<DetachStackMutation, DetachStackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DetachStackMutation, DetachStackMutationVariables>(DetachStackDocument, options);
+      }
+export type DetachStackMutationHookResult = ReturnType<typeof useDetachStackMutation>;
+export type DetachStackMutationResult = Apollo.MutationResult<DetachStackMutation>;
+export type DetachStackMutationOptions = Apollo.BaseMutationOptions<DetachStackMutation, DetachStackMutationVariables>;
+export const DeleteStackDocument = gql`
+    mutation DeleteStack($id: ID!) {
+  deleteStack(id: $id) {
+    id
+  }
+}
+    `;
+export type DeleteStackMutationFn = Apollo.MutationFunction<DeleteStackMutation, DeleteStackMutationVariables>;
+
+/**
+ * __useDeleteStackMutation__
+ *
+ * To run a mutation, you first call `useDeleteStackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteStackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteStackMutation, { data, loading, error }] = useDeleteStackMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteStackMutation(baseOptions?: Apollo.MutationHookOptions<DeleteStackMutation, DeleteStackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteStackMutation, DeleteStackMutationVariables>(DeleteStackDocument, options);
+      }
+export type DeleteStackMutationHookResult = ReturnType<typeof useDeleteStackMutation>;
+export type DeleteStackMutationResult = Apollo.MutationResult<DeleteStackMutation>;
+export type DeleteStackMutationOptions = Apollo.BaseMutationOptions<DeleteStackMutation, DeleteStackMutationVariables>;
+export const LogsDeltaDocument = gql`
+    subscription LogsDelta($id: ID!) {
+  runLogsDelta(stepId: $id) {
+    delta
+    payload {
+      id
+      logs
+      insertedAt
+      updatedAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useLogsDeltaSubscription__
+ *
+ * To run a query within a React component, call `useLogsDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useLogsDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLogsDeltaSubscription({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useLogsDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<LogsDeltaSubscription, LogsDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<LogsDeltaSubscription, LogsDeltaSubscriptionVariables>(LogsDeltaDocument, options);
+      }
+export type LogsDeltaSubscriptionHookResult = ReturnType<typeof useLogsDeltaSubscription>;
+export type LogsDeltaSubscriptionResult = Apollo.SubscriptionResult<LogsDeltaSubscription>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -17590,6 +18231,10 @@ export const namedOperations = {
     PolicyConstraint: 'PolicyConstraint',
     ViolationStatistics: 'ViolationStatistics',
     PolicyStatistics: 'PolicyStatistics',
+    Stacks: 'Stacks',
+    StackTiny: 'StackTiny',
+    StackRuns: 'StackRuns',
+    StackRun: 'StackRun',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me',
@@ -17663,9 +18308,16 @@ export const namedOperations = {
     CreatePersona: 'CreatePersona',
     UpdatePersona: 'UpdatePersona',
     DeletePersona: 'DeletePersona',
+    CreateStack: 'CreateStack',
+    UpdateStack: 'UpdateStack',
+    DetachStack: 'DetachStack',
+    DeleteStack: 'DeleteStack',
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken',
     Logout: 'Logout'
+  },
+  Subscription: {
+    LogsDelta: 'LogsDelta'
   },
   Fragment: {
     CostAnalysis: 'CostAnalysis',
@@ -17784,6 +18436,16 @@ export const namedOperations = {
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
     PolicyConstraint: 'PolicyConstraint',
+    Stack: 'Stack',
+    StackRun: 'StackRun',
+    StackConfiguration: 'StackConfiguration',
+    StackStateResource: 'StackStateResource',
+    StackState: 'StackState',
+    StackOutput: 'StackOutput',
+    StackEnvironment: 'StackEnvironment',
+    ServiceErrors: 'ServiceErrors',
+    StackFile: 'StackFile',
+    RunStep: 'RunStep',
     AccessToken: 'AccessToken',
     AccessTokenAudit: 'AccessTokenAudit',
     User: 'User',

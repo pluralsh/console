@@ -40,6 +40,7 @@ import { notificationsRoutes } from './notificationsRoutes'
 import { backupsRoutes } from './backupRoutes'
 import { kubernetesRoute } from './kubernetesRoute'
 import { policiesRoutes } from './policiesRoutes'
+import { stacksRoutes } from './stacksRoutes'
 
 const buildsRoutes = [
   <Route
@@ -211,6 +212,9 @@ export const consoleComponentRoutes = [
 
   /* CLUSTER */
   ...clusterRoutes,
+
+  /* STACKS */
+  ...stacksRoutes,
 
   /* INCIDENTS */
   // ...incidentsRoutes,
