@@ -155,7 +155,11 @@ export default function CreateStackModal({
         configuration: { image, version },
         repositoryId,
         git: { ref, folder },
-        environment,
+        // Workaround to enforce correct typing.
+        environment: environment.map(
+          ({ name, value, secret }) =>
+            ({ name, value, secret }) as StackEnvironmentAttributes
+        ),
         files: files.map(
           ({ path, content }) =>
             ({
