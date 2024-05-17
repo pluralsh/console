@@ -46,7 +46,7 @@
     "@nivo/pie": "0.83.0",
     "@nivo/radial-bar": "0.83.0",
     "@nivo/tooltip": "0.83.0",
-    "@pluralsh/design-system": "^3.36.1",
+    "@pluralsh/design-system": "^3.37.0",
     "@react-hooks-library/core": "0.6.0",
     "@tanstack/react-virtual": "3.0.1",
     "anser": "2.1.1",

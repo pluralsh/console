@@ -91,6 +91,7 @@ export function CookieSettingsDialog({
   return (
     <Layer
       open={show}
+      modal
       position="bottom-right"
       margin={{
         right: 50,
