@@ -1,39 +1,66 @@
 import {
-  ArrowRightIcon,
+  CaretDownIcon,
+  CaretRightIcon,
   CheckIcon,
   ErrorIcon,
   Spinner,
 } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
-import { ReactNode, useEffect, useMemo, useRef } from 'react'
-
+import {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import sortBy from 'lodash/sortBy'
 
-import { RunStep, StepStatus } from '../../../../generated/graphql'
+import {
+  RunLogs,
+  RunStep,
+  StepStatus,
+  useLogsDeltaSubscription,
+} from '../../../../generated/graphql'
 import CommandLog from '../../../builds/build/progress/CommandLog'
 
 interface StepProps {
   step: RunStep
-  follow?: any
 }
 
-export default function Step({ step, follow }: StepProps): ReactNode {
+export default function Step({ step }: StepProps): ReactNode {
   const ref = useRef<any>()
+
+  const [folded, setFolded] = useState(
+    step.status === StepStatus.Successful || step.status === StepStatus.Pending
+  )
+  const [logs, setLogs] = useState(step?.logs as Array<RunLogs>)
+
   const command = useMemo(
     () => `${step.cmd} ${step.args?.join(' ')}`,
     [step.args, step.cmd]
   )
-  const logs = useMemo(
-    () =>
-      sortBy(step?.logs ?? [], ['insertedAt'])
+
+  const toLogsString = useCallback(
+    (logs: Array<RunLogs>) =>
+      sortBy(logs ?? [], ['insertedAt'])
         .map((l) => l!.logs)
         .join(''),
-    [step?.logs]
+    []
   )
 
+  useLogsDeltaSubscription({
+    skip: step.status !== StepStatus.Running,
+    variables: { id: step.id },
+    onData: ({ data: { data } }) =>
+      setLogs(
+        (logs) => [...logs, data?.runLogsDelta?.payload] as Array<RunLogs>
+      ),
+  })
+
   useEffect(() => {
-    if (ref && ref.current && follow) ref.current.scrollIntoView()
-  }, [follow, ref])
+    setLogs(step?.logs as Array<RunLogs>)
+  }, [step?.logs])
 
   return (
     <Div ref={ref}>
@@ -44,24 +71,39 @@ export default function Step({ step, follow }: StepProps): ReactNode {
         justify="space-between"
         backgroundColor="fill-two"
         _hover={{ backgroundColor: 'fill-two-hover' }}
+        css={{
+          position: 'sticky',
+          top: 0,
+          cursor: logs.length > 0 ? 'pointer' : 'cursor',
+        }}
+        onClick={() => logs.length > 0 && setFolded(!folded)}
       >
         <Flex
           gap="small"
           align="center"
           grow={1}
         >
-          <ArrowRightIcon
-            size={12}
-            paddingRight="small"
-          />
+          {folded ? (
+            <CaretRightIcon
+              size={12}
+              paddingRight="small"
+            />
+          ) : (
+            <CaretDownIcon
+              size={12}
+              paddingRight="small"
+            />
+          )}
           <span>{command}</span>
         </Flex>
         <Status status={step.status} />
       </Flex>
-      <CommandLog
-        text={logs}
-        follow
-      />
+      {!folded && (
+        <CommandLog
+          text={toLogsString(logs)}
+          follow={step.status === StepStatus.Running}
+        />
+      )}
     </Div>
   )
 }

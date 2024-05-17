@@ -206,3 +206,14 @@ mutation UpdateStack($id: ID!, $attributes: StackAttributes!) {
   }
 }
 
+subscription LogsDelta($id: ID!) {
+  runLogsDelta(stepId: $id) {
+    delta
+    payload {
+      id
+      logs
+      insertedAt
+      updatedAt
+    }
+  }
+}
