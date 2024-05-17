@@ -151,6 +151,7 @@ function LayerRef(
   {
     position,
     animation = 'slide',
+    modal = false,
     margin,
     children,
     onClickOutside,
@@ -161,6 +162,7 @@ function LayerRef(
     open: boolean
     position: LayerPositionType
     animation?: AnimationType
+    modal?: boolean
     margin?: MarginType
     onClose?: () => void | null | undefined
     onCloseComplete?: () => void | null | undefined
@@ -295,7 +297,10 @@ function LayerRef(
         <AnimatedDiv
           className="animated"
           ref={finalRef}
-          style={{ ...styles }}
+          style={{
+            ...styles,
+            ...(modal ? { zIndex: theme.zIndexes.modal } : {}),
+          }}
         >
           {children}
         </AnimatedDiv>
