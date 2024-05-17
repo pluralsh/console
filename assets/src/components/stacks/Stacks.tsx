@@ -25,6 +25,7 @@ import moment from 'moment'
 import {
   STACK_CONFIG_REL_PATH,
   STACK_ENV_REL_PATH,
+  STACK_JOB_REL_PATH,
   STACK_REPO_REL_PATH,
   STACK_RUNS_REL_PATH,
   getStacksAbsPath,
@@ -61,6 +62,7 @@ const directory = [
   { path: STACK_CONFIG_REL_PATH, label: 'Configuration' },
   { path: STACK_REPO_REL_PATH, label: 'Repository' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
+  { path: STACK_JOB_REL_PATH, label: 'Job' },
 ] as const
 
 export type StackOutletContextT = {

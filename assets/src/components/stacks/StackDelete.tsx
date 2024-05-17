@@ -66,7 +66,7 @@ export default function StackDelete({
             onChange={(d) => setDetach(d)}
             css={{ marginTop: theme.spacing.medium }}
           >
-            Detach stack instead of deleting it completely
+            Detach stack instead of destroying it completely
           </Switch>
         }
         label={detach ? 'Detach' : 'Delete'}

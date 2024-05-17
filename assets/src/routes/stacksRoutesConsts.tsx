@@ -15,6 +15,8 @@ export const STACK_REPO_REL_PATH = `repo`
 
 export const STACK_ENV_REL_PATH = `env`
 
+export const STACK_JOB_REL_PATH = `job`
+
 export const STACK_RUNS_STATE_REL_PATH = 'state'
 export const STACK_RUNS_PLAN_REL_PATH = 'plan'
 export const STACK_RUNS_OUTPUT_REL_PATH = 'output'

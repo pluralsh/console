@@ -16,10 +16,13 @@ import StackRepository from '../components/stacks/repository/StackRepository'
 
 import StackConfiguration from '../components/stacks/configuration/StackConfiguration'
 
+import StackJob from '../components/stacks/job/StackJob'
+
 import {
   STACKS_ABS_PATH,
   STACK_CONFIG_REL_PATH,
   STACK_ENV_REL_PATH,
+  STACK_JOB_REL_PATH,
   STACK_REPO_REL_PATH,
   STACK_RUNS_ABS_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
@@ -58,6 +61,10 @@ export const stacksRoutes = [
     <Route
       path={STACK_ENV_REL_PATH}
       element={<StackEnvironment />}
+    />
+    <Route
+      path={STACK_JOB_REL_PATH}
+      element={<StackJob />}
     />
   </Route>,
   <Route
