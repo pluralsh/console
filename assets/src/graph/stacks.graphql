@@ -220,3 +220,14 @@ mutation DeleteStack($id: ID!) {
   }
 }
 
+subscription LogsDelta($id: ID!) {
+  runLogsDelta(stepId: $id) {
+    delta
+    payload {
+      id
+      logs
+      insertedAt
+      updatedAt
+    }
+  }
+}

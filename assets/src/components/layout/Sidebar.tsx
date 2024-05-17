@@ -53,8 +53,6 @@ import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
 
-import usePersistedState from '../hooks/usePersistedState'
-
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 

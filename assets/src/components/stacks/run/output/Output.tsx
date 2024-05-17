@@ -1,16 +1,28 @@
-import React, { ReactNode, useMemo, useState } from 'react'
+import React, {
+  ReactElement,
+  ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import { useOutletContext } from 'react-router-dom'
 import {
   CheckIcon,
   CloseIcon,
+  Code,
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
+  Modal,
   Table,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
+import yaml from 'js-yaml'
+
 import { StackOutput, StackRun } from '../../../../generated/graphql'
+
+import OutputValue from './Value'
 
 const columnHelper = createColumnHelper<StackOutput>()
 
@@ -25,35 +37,12 @@ const colValue = columnHelper.accessor((o) => o, {
   header: 'Value',
   cell: function Cell({ getValue }): ReactNode {
     const output = getValue()
-    const [hidden, setHidden] = useState(output.secret)
-    const value = useMemo(
-      () =>
-        hidden
-          ? Array(output.value.length)
-              .fill('•', 0, Math.min(10, output.value.length))
-              .join('')
-          : output.value,
-      [hidden, output.value]
-    )
 
     return (
-      <div
-        css={{
-          display: 'flex',
-          alignItems: 'center',
-        }}
-      >
-        {output.secret && (
-          <IconFrame
-            size="medium"
-            clickable
-            tooltip={hidden ? 'Reveal value' : 'Hide value'}
-            icon={hidden ? <EyeClosedIcon /> : <EyeIcon />}
-            onClick={() => setHidden(() => !hidden)}
-          />
-        )}
-        <span css={{ wordBreak: 'break-word' }}>{value}</span>
-      </div>
+      <OutputValue
+        value={output.value}
+        secret={output.secret ?? false}
+      />
     )
   },
 })

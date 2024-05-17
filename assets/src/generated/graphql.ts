@@ -8718,6 +8718,13 @@ export type DeleteStackMutationVariables = Exact<{
 
 export type DeleteStackMutation = { __typename?: 'RootMutationType', deleteStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null } | null };
 
+export type LogsDeltaSubscriptionVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type LogsDeltaSubscription = { __typename?: 'RootSubscriptionType', runLogsDelta?: { __typename?: 'RunLogsDelta', delta?: Delta | null, payload?: { __typename?: 'RunLogs', id: string, logs: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null };
+
 export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null };
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
@@ -17665,6 +17672,42 @@ export function useDeleteStackMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteStackMutationHookResult = ReturnType<typeof useDeleteStackMutation>;
 export type DeleteStackMutationResult = Apollo.MutationResult<DeleteStackMutation>;
 export type DeleteStackMutationOptions = Apollo.BaseMutationOptions<DeleteStackMutation, DeleteStackMutationVariables>;
+export const LogsDeltaDocument = gql`
+    subscription LogsDelta($id: ID!) {
+  runLogsDelta(stepId: $id) {
+    delta
+    payload {
+      id
+      logs
+      insertedAt
+      updatedAt
+    }
+  }
+}
+    `;
+
+/**
+ * __useLogsDeltaSubscription__
+ *
+ * To run a query within a React component, call `useLogsDeltaSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useLogsDeltaSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useLogsDeltaSubscription({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useLogsDeltaSubscription(baseOptions: Apollo.SubscriptionHookOptions<LogsDeltaSubscription, LogsDeltaSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<LogsDeltaSubscription, LogsDeltaSubscriptionVariables>(LogsDeltaDocument, options);
+      }
+export type LogsDeltaSubscriptionHookResult = ReturnType<typeof useLogsDeltaSubscription>;
+export type LogsDeltaSubscriptionResult = Apollo.SubscriptionResult<LogsDeltaSubscription>;
 export const AccessTokensDocument = gql`
     query AccessTokens {
   accessTokens(first: 500) {
@@ -18244,6 +18287,9 @@ export const namedOperations = {
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken',
     Logout: 'Logout'
+  },
+  Subscription: {
+    LogsDelta: 'LogsDelta'
   },
   Fragment: {
     CostAnalysis: 'CostAnalysis',
