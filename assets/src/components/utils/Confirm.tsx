@@ -91,7 +91,7 @@ export function Confirm({
         <div css={{ ...theme.partials.text.body1, color: theme.colors.text }}>
           {text}
         </div>
-        {extraContent && extraContent}
+        {extraContent}
       </Modal>
     </ModalMountTransition>
   )
