@@ -9,9 +9,11 @@ import CreateStackModal from './CreateStackModal'
 export default function CreateStack({
   buttonContent = 'Create stack',
   buttonProps,
+  refetch,
 }: {
   buttonProps?: ButtonProps
   buttonContent?: string | ReactNode
+  refetch?: Nullable<() => void>
 }) {
   const [open, setOpen] = useState(false)
 
@@ -29,6 +31,7 @@ export default function CreateStack({
         <CreateStackModal
           open={open}
           onClose={() => setOpen(false)}
+          refetch={refetch}
         />
       </ModalMountTransition>
     </>

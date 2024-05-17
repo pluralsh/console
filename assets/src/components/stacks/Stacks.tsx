@@ -89,7 +89,6 @@ export default function Stacks() {
 
   const { data, error, loading, fetchMore, refetch } = useStacksQuery({
     fetchPolicy: 'cache-and-network',
-    notifyOnNetworkStatusChange: true,
     pollInterval,
   })
 
@@ -137,7 +136,7 @@ export default function Stacks() {
   if (isEmpty(stacks)) {
     return (
       <EmptyState message="Looks like you don't have any infrastructure stacks yet.">
-        <CreateStack />
+        <CreateStack refetch={refetch} />
       </EmptyState>
     )
   }
@@ -168,6 +167,7 @@ export default function Stacks() {
           <CreateStack
             buttonContent={<PlusIcon />}
             buttonProps={{ secondary: true, height: 40 }}
+            refetch={refetch}
           />
         </div>
         <StandardScroller

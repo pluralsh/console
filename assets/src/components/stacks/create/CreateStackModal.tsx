@@ -12,21 +12,20 @@ import styled, { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
 
+import { useNavigate } from 'react-router-dom'
+
 import { GqlError } from '../../utils/Alert'
 import {
   StackEnvironmentAttributes,
   StackFileAttributes,
   StackType,
-  StacksDocument,
   useCreateStackMutation,
   useGitRepositoriesQuery,
 } from '../../../generated/graphql'
-import {
-  appendConnection,
-  mapExistingNodes,
-  updateCache,
-} from '../../../utils/graphql'
+import { mapExistingNodes } from '../../../utils/graphql'
 import ModalAlt from '../../cd/ModalAlt'
+
+import { getStacksAbsPath } from '../../../routes/stacksRoutesConsts'
 
 import { CreateStackModalFormBasic } from './CreateStackModalFormBasic'
 import { CreateStackModalFormRepository } from './CreateStackModalFormRepository'
@@ -93,11 +92,14 @@ export type StackFileAttributesExtended = StackFileAttributes & {
 export default function CreateStackModal({
   open,
   onClose,
+  refetch,
 }: {
   open: boolean
   onClose: () => void
+  refetch?: Nullable<() => void>
 }) {
   const theme = useTheme()
+  const navigate = useNavigate()
   const [formState, setFormState] = useState<FormState>(FormState.Initial)
   const [name, setName] = useState('')
   const [type, setType] = useState<StackType>(StackType.Terraform)
@@ -154,13 +156,11 @@ export default function CreateStackModal({
           : undefined,
       },
     },
-    onCompleted: () => onClose(),
-    update: (cache, { data }) =>
-      updateCache(cache, {
-        query: StacksDocument,
-        update: (prev) =>
-          appendConnection(prev, data?.createStack, 'infrastructureStacks'),
-      }),
+    onCompleted: (data) => {
+      refetch?.()
+      onClose()
+      navigate(getStacksAbsPath(data.createStack?.id))
+    },
   })
 
   return (
