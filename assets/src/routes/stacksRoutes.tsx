@@ -12,10 +12,15 @@ import StackRunState from '../components/stacks/run/state/State'
 import StackRuns from '../components/stacks/StackRuns'
 
 import StackEnvironment from '../components/stacks/environment/StackEnvironment'
+import StackRepository from '../components/stacks/repository/StackRepository'
+
+import StackConfiguration from '../components/stacks/configuration/StackConfiguration'
 
 import {
   STACKS_ABS_PATH,
+  STACK_CONFIG_REL_PATH,
   STACK_ENV_REL_PATH,
+  STACK_REPO_REL_PATH,
   STACK_RUNS_ABS_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
   STACK_RUNS_PLAN_REL_PATH,
@@ -41,6 +46,14 @@ export const stacksRoutes = [
     <Route
       path={STACK_RUNS_REL_PATH}
       element={<StackRuns />}
+    />
+    <Route
+      path={STACK_CONFIG_REL_PATH}
+      element={<StackConfiguration />}
+    />
+    <Route
+      path={STACK_REPO_REL_PATH}
+      element={<StackRepository />}
     />
     <Route
       path={STACK_ENV_REL_PATH}
