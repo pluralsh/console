@@ -44,7 +44,7 @@ export function LabelsAnnotationsTag({ name, value }: LabelPair) {
   )
 }
 
-function renderLabel(label: Maybe<LabelPair>) {
+export function renderLabel(label: Maybe<LabelPair>) {
   return (
     <>
       {label?.name}

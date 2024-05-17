@@ -23,7 +23,10 @@ import Fuse from 'fuse.js'
 import moment from 'moment'
 
 import {
+  STACK_CONFIG_REL_PATH,
   STACK_ENV_REL_PATH,
+  STACK_JOB_REL_PATH,
+  STACK_REPO_REL_PATH,
   STACK_RUNS_REL_PATH,
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
@@ -56,7 +59,10 @@ const searchOptions = {
 
 const directory = [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
+  { path: STACK_CONFIG_REL_PATH, label: 'Configuration' },
+  { path: STACK_REPO_REL_PATH, label: 'Repository' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
+  { path: STACK_JOB_REL_PATH, label: 'Job' },
 ] as const
 
 export type StackOutletContextT = {
@@ -296,19 +302,9 @@ export default function Stacks() {
                   {capitalize(stack.type)}
                 </div>
               </SidecarItem>
-              {stack.configuration?.image && (
-                <SidecarItem heading="Image">
-                  {stack.configuration?.image}
-                </SidecarItem>
-              )}
-              <SidecarItem heading="Version">
-                {stack.configuration?.version}
-              </SidecarItem>
               <SidecarItem heading="Repository">
                 {stack.repository?.url}
               </SidecarItem>
-              <SidecarItem heading="Ref">{stack?.git?.ref}</SidecarItem>
-              <SidecarItem heading="Folder">{stack?.git?.folder}</SidecarItem>
               <SidecarItem heading="Cluster">
                 <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
                   <ClusterProviderIcon

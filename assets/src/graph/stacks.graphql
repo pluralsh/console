@@ -26,6 +26,25 @@ fragment Stack on InfrastructureStack {
     value
     secret
   }
+  jobSpec {
+    namespace
+    raw
+    annotations
+    labels
+    serviceAccount
+    containers {
+      image
+      args
+      env {
+        value
+        name
+      }
+      envFrom {
+        secret
+        configMap
+      }
+    }
+  }
 }
 
 fragment StackRun on StackRun {
@@ -106,7 +125,12 @@ fragment RunStep on RunStep {
 }
 
 query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
-  infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
+  infrastructureStacks(
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -129,7 +153,13 @@ query StackTiny($id: ID!) {
   }
 }
 
-query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+query StackRuns(
+  $id: ID!
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+) {
   infrastructureStack(id: $id) {
     runs(after: $after, before: $before, first: $first, last: $last) {
       pageInfo {
@@ -195,7 +225,7 @@ query StackRun($id: ID!) {
   }
 }
 
-mutation CreateStack($attributes: StackAttributes!){
+mutation CreateStack($attributes: StackAttributes!) {
   createStack(attributes: $attributes) {
     ...Stack
   }
@@ -212,7 +242,6 @@ mutation DetachStack($id: ID!) {
     ...Stack
   }
 }
-
 
 mutation DeleteStack($id: ID!) {
   deleteStack(id: $id) {

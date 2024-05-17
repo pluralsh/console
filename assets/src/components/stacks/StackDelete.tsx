@@ -43,13 +43,13 @@ export default function StackDelete({
 
     if (detach) detachMutation(baseOptions)
     else deleteMutation(baseOptions)
-  }, [deleteMutation, detach, detachMutation, refetch, stack.id])
+  }, [deleteMutation, detach, detachMutation, navigate, refetch, stack.id])
 
   return (
     <>
       <Button
         destructive
-        disabled={stack.deletedAt}
+        disabled={!!stack.deletedAt}
         onClick={() => setConfirm(true)}
       >
         Delete
@@ -66,7 +66,7 @@ export default function StackDelete({
             onChange={(d) => setDetach(d)}
             css={{ marginTop: theme.spacing.medium }}
           >
-            Detach stack instead of deleting it completely
+            Detach stack instead of destroying it completely
           </Switch>
         }
         label={detach ? 'Detach' : 'Delete'}
