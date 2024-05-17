@@ -7,6 +7,8 @@ import { Card } from '@pluralsh/design-system'
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 import { GqlError } from 'components/utils/Alert'
 
+import { PropWideBold } from 'components/component/info/common'
+
 import { usePolicyChartsData } from './usePolicyChartsData'
 
 type PolicyQueryFilters = {
@@ -65,11 +67,9 @@ export function PoliciesViolationsGauge({
 
 function PolicyChartCard({
   title,
-  rotate = 45,
   data,
 }: {
   title: string
-  rotate?: number
   data: PieChartData | null
 }) {
   const theme = useTheme()
@@ -87,9 +87,6 @@ function PolicyChartCard({
             <PieChart
               width={CHART_SIZE}
               height={CHART_SIZE}
-              padAngle={3}
-              startAngle={rotate}
-              endAngle={360 + rotate}
               data={data}
             />
             <ChartLegend data={data} />
@@ -107,18 +104,13 @@ const ChartWrapper = styled.div(({ theme }) => ({
 }))
 
 function ChartLegend({ data }: { data: PieChartData }) {
-  const theme = useTheme()
-
   return (
-    <div>
+    <div css={{ flex: 1 }}>
       {data.map((datum) => (
-        <div
-          key={datum.id}
-          css={{
-            ...theme.partials.text.body1,
-          }}
-        >
-          <span css={{ color: datum.color }}>{datum.value}</span> {datum.label}
+        <div key={datum.id}>
+          <PropWideBold title={datum.label}>
+            <span css={{ color: datum.color }}>{datum.value}</span>
+          </PropWideBold>
         </div>
       ))}
     </div>

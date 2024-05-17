@@ -15,11 +15,14 @@ export function PieChart({
   data,
   width,
   height,
+  rotate = 45,
   ...props
-}: { data: PieChartData; width?: string; height?: string } & Omit<
-  ComponentProps<typeof ResponsivePie>,
-  'data'
->) {
+}: {
+  data: PieChartData
+  width?: string
+  height?: string
+  rotate?: number
+} & Omit<ComponentProps<typeof ResponsivePie>, 'data'>) {
   const chartTheme = useChartTheme()
   const theme = useTheme()
   const isEmpty = useMemo(
@@ -54,6 +57,8 @@ export function PieChart({
         enableArcLabels={false}
         enableArcLinkLabels={false}
         innerRadius={0.75}
+        startAngle={rotate}
+        endAngle={360 + rotate}
         margin={{
           top: 10,
           right: 10,
