@@ -6,7 +6,7 @@ import {
   Stepper,
   TerminalIcon,
 } from '@pluralsh/design-system'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -137,7 +137,15 @@ export default function CreateStackModal({
   )
 
   const [mutation, { loading, error }] = useCreateStackMutation({
-    variables: {
+    onCompleted: (data) => {
+      refetch?.()
+      onClose()
+      navigate(getStacksAbsPath(data.createStack?.id))
+    },
+  })
+
+  const createStack = useCallback(() => {
+    const variables = {
       attributes: {
         name,
         type,
@@ -155,19 +163,30 @@ export default function CreateStackModal({
           ? { namespace: jobNamespace, raw: jobSpec }
           : undefined,
       },
-    },
-    onCompleted: (data) => {
-      refetch?.()
-      onClose()
-      navigate(getStacksAbsPath(data.createStack?.id))
-    },
-  })
+    }
+
+    mutation({ variables })
+  }, [
+    approval,
+    clusterId,
+    environment,
+    files,
+    folder,
+    image,
+    jobNamespace,
+    jobSpec,
+    mutation,
+    name,
+    ref,
+    repositoryId,
+    type,
+    version,
+  ])
 
   return (
     <ModalAlt
       header="Create infrastracture stack"
       portal
-      asForm
       width={640}
       maxWidth={640}
       open={open}
@@ -183,7 +202,7 @@ export default function CreateStackModal({
           filesFormValid={filesFormValid}
           jobFormValid={jobFormValid}
           close={onClose}
-          submit={mutation}
+          submit={createStack}
           loading={loading}
         />
       }
