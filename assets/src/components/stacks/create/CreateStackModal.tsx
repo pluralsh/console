@@ -16,6 +16,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { GqlError } from '../../utils/Alert'
 import {
+  CreateStackMutationVariables,
   StackEnvironmentAttributes,
   StackFileAttributes,
   StackType,
@@ -155,15 +156,18 @@ export default function CreateStackModal({
         repositoryId,
         git: { ref, folder },
         environment,
-        files: files.map(({ path, content }) => ({
-          path,
-          content,
-        })),
+        files: files.map(
+          ({ path, content }) =>
+            ({
+              path,
+              content,
+            }) as StackFileAttributes
+        ),
         jobSpec: jobSpec
           ? { namespace: jobNamespace, raw: jobSpec }
           : undefined,
       },
-    }
+    } as CreateStackMutationVariables
 
     mutation({ variables })
   }, [
@@ -273,6 +277,7 @@ export default function CreateStackModal({
           setJobNamespace={setJobNamespace}
           jobSpec={jobSpec}
           setJobSpec={setJobSpec}
+          loading={loading}
         />
       )}
 
