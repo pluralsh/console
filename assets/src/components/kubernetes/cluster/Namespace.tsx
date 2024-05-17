@@ -1,23 +1,13 @@
 import { ReactElement, useMemo } from 'react'
-import {
-  Code,
-  SidecarItem,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
-import { createColumnHelper } from '@tanstack/react-table'
-import { isEmpty } from 'lodash'
+import { SidecarItem, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Outlet, useParams } from 'react-router-dom'
 
 import {
   Common_EventList as EventListT,
   Common_Event as EventT,
-  Limitrange_LimitRangeItem as LimitRangeT,
   NamespaceEventsQuery,
   NamespaceEventsQueryVariables,
   NamespaceQueryVariables,
-  Namespace_NamespaceDetail as NamespaceT,
-  Resourcequota_ResourceQuotaDetail as ResourceQuotaT,
   useNamespaceEventsQuery,
   useNamespaceQuery,
 } from '../../../generated/graphql-kubernetes'
@@ -27,8 +17,6 @@ import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 import { ResourceList } from '../common/ResourceList'
-import { SubTitle } from '../../utils/SubTitle'
-
 import { useCluster } from '../Cluster'
 
 import { Kind } from '../common/types'
@@ -38,9 +26,8 @@ import { NamespacePhaseChip } from './utils'
 import { useEventsColumns } from './Events'
 
 const directory: Array<TabEntry> = [
-  { path: '', label: 'Info' },
-  { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
+  { path: 'events', label: 'Events' },
 ] as const
 
 export default function Namespace(): ReactElement {
@@ -85,86 +72,6 @@ export default function Namespace(): ReactElement {
     >
       <Outlet context={namespace} />
     </ResourceDetails>
-  )
-}
-
-const rqColumnHelper = createColumnHelper<ResourceQuotaT>()
-
-const rqColumns = [
-  rqColumnHelper.accessor((rq) => rq?.objectMeta.name, {
-    id: 'name',
-    header: 'Name',
-    cell: ({ getValue }) => getValue(),
-  }),
-  rqColumnHelper.accessor((rq) => rq?.scopes, {
-    id: 'scopes',
-    header: 'Scopes',
-    cell: ({ getValue }) => getValue()?.map((scope) => <div>{scope}</div>),
-  }),
-  rqColumnHelper.accessor((rq) => rq?.statusList, {
-    id: 'statusList',
-    header: 'Status list',
-    cell: ({ getValue }) => <Code>{JSON.stringify(getValue())}</Code>,
-  }),
-]
-
-const lrColumnHelper = createColumnHelper<LimitRangeT>()
-
-const lrColumns = [
-  lrColumnHelper.accessor((lr) => lr?.resourceName, {
-    id: 'name',
-    header: 'Name',
-    cell: ({ getValue }) => getValue(),
-  }),
-  lrColumnHelper.accessor((lr) => lr?.resourceType, {
-    id: 'type',
-    header: 'Type',
-    cell: ({ getValue }) => getValue(),
-  }),
-  lrColumnHelper.accessor((lr) => lr?.default, {
-    id: 'default',
-    header: 'Default',
-    cell: ({ getValue }) => getValue(),
-  }),
-  lrColumnHelper.accessor((lr) => lr?.defaultRequest, {
-    id: 'defaultRequest',
-    header: 'Default request',
-    cell: ({ getValue }) => getValue(),
-  }),
-]
-
-export function NamespaceInfo(): ReactElement {
-  const namespace = useOutletContext() as NamespaceT
-
-  return (
-    <>
-      {!isEmpty(namespace?.resourceQuotaList?.items) && (
-        <section>
-          <SubTitle>Resource quotas</SubTitle>
-          <Table
-            data={namespace?.resourceQuotaList?.items}
-            columns={rqColumns}
-            css={{
-              maxHeight: '500px',
-              height: '100%',
-            }}
-          />
-        </section>
-      )}
-      {!isEmpty(namespace?.resourceLimits) && (
-        <section>
-          <SubTitle>Resource limits</SubTitle>
-          <Table
-            data={namespace?.resourceLimits}
-            columns={lrColumns}
-            css={{
-              maxHeight: '500px',
-              height: '100%',
-            }}
-          />
-        </section>
-      )}
-    </>
   )
 }
 

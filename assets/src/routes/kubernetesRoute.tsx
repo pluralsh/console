@@ -120,7 +120,6 @@ import ConfigMap, {
 } from '../components/kubernetes/configuration/ConfigMap'
 import Namespace, {
   NamespaceEvents,
-  NamespaceInfo,
 } from '../components/kubernetes/cluster/Namespace'
 
 import Raw from '../components/kubernetes/common/Raw'
@@ -788,8 +787,12 @@ export const kubernetesRoute = (
     >
       <Route
         index
-        path=""
-        element={<NamespaceInfo />}
+        element={
+          <Navigate
+            replace
+            to="raw"
+          />
+        }
       />
       <Route
         path="events"
