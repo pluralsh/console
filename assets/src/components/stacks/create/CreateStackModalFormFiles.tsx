@@ -27,10 +27,12 @@ export function CreateStackModalFormFiles({
   files,
   setFiles,
   setFilesErrors,
+  loading,
 }: {
   files: StackFileAttributesExtended[]
   setFiles: Dispatch<SetStateAction<StackFileAttributesExtended[]>>
   setFilesErrors: Dispatch<SetStateAction<boolean>>
+  loading: boolean
 }) {
   const theme = useTheme()
 
@@ -69,6 +71,7 @@ export function CreateStackModalFormFiles({
         secondary
         small
         size="tertiary"
+        disabled={loading}
         onClick={(e) => {
           e.preventDefault()
           setFiles((files) => [...files, { path: '', content: '' }])

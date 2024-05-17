@@ -45,6 +45,7 @@ export default function CreateStackModalActions({
         <Button
           secondary
           type="button"
+          disabled={loading}
           onClick={(e) => {
             e.preventDefault()
             setFormState(stepperSteps[currentStepIndex - 1]?.key)
@@ -97,7 +98,7 @@ export default function CreateStackModalActions({
         <Button
           type="button"
           secondary
-          disabled={!filesFormValid}
+          disabled={!filesFormValid || loading}
           onClick={(e) => {
             e.preventDefault()
             setFormState(FormState.Job)

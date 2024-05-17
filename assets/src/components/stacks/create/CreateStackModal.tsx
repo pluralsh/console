@@ -263,6 +263,7 @@ export default function CreateStackModal({
           files={files}
           setFiles={setFiles}
           setFilesErrors={setFilesErrors}
+          loading={loading}
         />
       )}
 

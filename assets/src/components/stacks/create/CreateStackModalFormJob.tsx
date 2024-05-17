@@ -6,11 +6,13 @@ export function CreateStackModalFormJob({
   setJobNamespace,
   jobSpec,
   setJobSpec,
+  loading,
 }: {
   jobNamespace: string
   setJobNamespace: (name: string) => void
   jobSpec: string
   setJobSpec: (image: string) => void
+  loading: boolean
 }): any {
   const inputRef = useRef<HTMLInputElement>()
 
@@ -37,6 +39,7 @@ export function CreateStackModalFormJob({
           inputProps={{ ref: inputRef }}
           value={jobNamespace}
           onChange={(e) => setJobNamespace(e.currentTarget.value)}
+          disabled={loading}
         />
       </FormField>
       <FormField
@@ -49,6 +52,7 @@ export function CreateStackModalFormJob({
         }
       >
         <CodeEditor
+          disabled={loading}
           value={jobSpec}
           onChange={(values) => setJobSpec(values)}
           language="yaml"
