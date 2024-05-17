@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react'
 import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
-
 import moment from 'moment'
 
 import { StackRun } from '../../../generated/graphql'
