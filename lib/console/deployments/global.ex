@@ -320,7 +320,8 @@ defmodule Console.Deployments.Global do
       end
     end)
     |> Enum.map(fn
-      {:ok, %{id: id}} -> id
+      {:ok, %Service{id: id}} -> id
+      %Service{id: id} -> id
       _ -> nil
     end)
     |> Enum.filter(& &1)
@@ -334,9 +335,13 @@ defmodule Console.Deployments.Global do
   Determines if a given list of service ids should be drained due to a state event
   """
   @spec maybe_drain([Service.t]) :: :ok
-  def maybe_drain(services) do
+  def maybe_drain(service_ids) do
+    Logger.info "Attempting to drain [#{Enum.join(service_ids, ", ")}]"
     bot = bot()
-    Repo.preload(services, [:owner])
+
+    Service.for_ids(service_ids)
+    |> Repo.all()
+    |> Repo.preload([:owner])
     |> Enum.each(fn
       %{owner: %GlobalService{cascade: %{delete: true}}} = svc ->
         Services.delete_service(svc.id, bot)
@@ -344,6 +349,46 @@ defmodule Console.Deployments.Global do
         Services.detach_service(svc.id, bot)
       _ -> :ok
     end)
+  end
+
+  @doc """
+  Syncs all global services and managed namespaces attached to a cluster
+  """
+  @spec sync_cluster(Cluster.t) :: :ok
+  def sync_cluster(%Cluster{} = cluster) do
+    cluster = Repo.preload(cluster, [:tags])
+    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
+    svcs =  Service.globalized()
+            |> Service.for_cluster(cluster.id)
+            |> Repo.all()
+            |> MapSet.new(& &1.id)
+
+    GlobalService.stream()
+    |> GlobalService.preloaded()
+    |> Repo.stream(method: :keyset)
+    |> Stream.filter(&__MODULE__.match?(&1, cluster))
+    |> Stream.map(fn global ->
+      case add_to_cluster(global, cluster) do
+        {:ok, svc} -> svc
+        _ -> get_service(global, cluster.id)
+      end
+    end)
+    |> Stream.map(fn
+      %Service{id: id} -> id
+      _ -> nil
+    end)
+    |> Stream.filter(& &1)
+    |> Enum.into(MapSet.new())
+    |> (fn expected -> MapSet.difference(svcs, expected) end).()
+    |> MapSet.to_list()
+    |> maybe_drain()
+
+    ManagedNamespace.for_cluster(cluster)
+    |> ManagedNamespace.preloaded()
+    |> ManagedNamespace.stream()
+    |> Repo.stream(method: :keyset)
+    |> Stream.each(&sync_namespace(cluster, &1, bot))
+    |> Stream.run()
   end
 
   @spec maybe_drain([binary], GlobalService.t) :: :ok
@@ -380,7 +425,9 @@ defmodule Console.Deployments.Global do
               |> Map.put(:dependencies, svc_deps(tpl.dependencies, dest.dependencies))
               |> Map.put(:owner_id, id)
               |> Services.update_service(dest.id, user)
-      false -> Logger.info "did not update service due to no differences"
+      false ->
+        Logger.info "did not update service due to no differences"
+        dest
     end
   end
 
@@ -407,7 +454,9 @@ defmodule Console.Deployments.Global do
         dependencies: svc_deps(source.dependencies, dest.dependencies)
       }, dest.id, user)
     else
-      err -> Logger.info "did not sync service due to: #{inspect(err)}"
+      err ->
+        Logger.info "did not sync service due to: #{inspect(err)}"
+        dest
     end
   end
 

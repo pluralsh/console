@@ -23,6 +23,7 @@ config :console, :consumers, [
 ]
 
 config :console, Console.Cron,
+  # overlap: false,
   jobs: [
     {"@daily", {Console.Cron.Jobs, :prune_builds, []}},
     {"@daily", {Console.Cron.Jobs, :prune_invites, []}},
@@ -48,6 +49,7 @@ config :console, Console.Cron,
     {"@daily", {Console.Deployments.Cron, :rotate_deploy_tokens, []}},
     {"@daily", {Console.Deployments.Cron, :prune_revisions, []}},
     {"@daily", {Console.Deployments.Cron, :prune_migrations, []}},
+    {"@daily", {Console.Deployments.Cron, :prune_logs, []}},
     {"@daily", {Console.Cron.Jobs, :prune_notifications, []}},
     {"@daily", {Console.Cron.Jobs, :prune_audits, []}},
   ]

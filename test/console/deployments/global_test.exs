@@ -174,7 +174,7 @@ defmodule Console.Deployments.GlobalTest do
         dependencies: [%{name: "cert-manager"}]
       }, insert(:cluster), admin)
 
-      {:ok, dest} = create_service(%{
+      {:ok, %{id: id} = dest} = create_service(%{
         name: "source",
         namespace: "my-service",
         repository_id: git.id,
@@ -183,7 +183,7 @@ defmodule Console.Deployments.GlobalTest do
         dependencies: [%{name: "cert-manager"}]
       }, insert(:cluster), admin)
 
-      :ok = Global.sync_service(source, dest, admin)
+      %{id: ^id} = Global.sync_service(source, dest, admin)
     end
 
     test "it can sync a template global service" do
@@ -223,9 +223,11 @@ defmodule Console.Deployments.GlobalTest do
         cascade: %{delete: true}
       )
       sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
+      sync2 = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
       ignore1 = insert(:cluster, provider: cluster.provider)
       ignore2 = insert(:cluster, tags: [%{name: "sync", value: "test"}])
       svc = insert(:service, owner: global, cluster: ignore1)
+      keep = insert(:service, name: "source", owner: global, cluster: sync2)
 
       :ok = Global.sync_clusters(global)
 
@@ -234,6 +236,10 @@ defmodule Console.Deployments.GlobalTest do
 
       synced = Services.get_service_by_name(sync.id, "source")
       refute Global.diff?(source, synced)
+
+      keep = refetch(keep)
+      refute keep.deleted_at
+      refute Global.diff?(source, keep)
 
       assert refetch(svc).deleted_at
     end

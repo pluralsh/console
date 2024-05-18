@@ -13,7 +13,8 @@ defmodule Console.Deployments.Cron do
     ManagedNamespace,
     Stack,
     StackRun,
-    PullRequest
+    PullRequest,
+    RunLog
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -220,9 +221,8 @@ defmodule Console.Deployments.Cron do
   end
 
   def poll_stacks() do
-    stack_stream()
-    |> Stream.each(fn stack ->
-      Logger.info "polling stack repository #{stack.id}"
+    Stream.each(stack_stream(), fn stack ->
+      Logger.info "polling repository for stack #{stack.id}"
       Stacks.poll(stack)
       |> log("poll stack for a new run")
     end)
@@ -230,13 +230,18 @@ defmodule Console.Deployments.Cron do
   end
 
   def dequeue_stacks() do
-    stack_stream()
-    |> Stream.each(fn stack ->
+    Stream.each(stack_stream(), fn stack ->
       Logger.info "dequeuing eligible stack runs #{stack.id}"
       Stacks.dequeue(stack)
       |> log("dequeue a new stack run")
     end)
     |> Stream.run()
+  end
+
+  def prune_logs() do
+    Logger.info "deleting old run logs"
+    RunLog.expired()
+    |> Repo.delete_all()
   end
 
   defp stack_stream() do

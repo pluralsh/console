@@ -2,6 +2,7 @@ defmodule Console.Deployments.StacksTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
+  alias Console.Schema.{StackRun}
   alias Console.Deployments.Stacks
   alias Console.Deployments.Git.Discovery
 
@@ -175,8 +176,10 @@ defmodule Console.Deployments.StacksTest do
       assert third.index == 2
 
       stack = refetch(stack)
+      assert stack.sha == "new-sha"
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
+      [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
     end
 
