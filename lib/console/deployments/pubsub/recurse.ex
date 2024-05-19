@@ -117,8 +117,21 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackDeleted do
   def process(%{item: stack}), do: Stacks.create_run(stack, stack.sha)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
+  def process(%{item: %{status: status} = run}) when status in ~w(pending running)a,
+    do: Console.Deployments.Stacks.Discovery.runner(run)
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
-  def process(%{item: run}), do: Console.Deployments.Stacks.Discovery.runner(run)
+  alias Console.Schema.Stack
+  alias Console.Deployments.Stacks
+
+  def process(%{item: run}) do
+    case Console.Repo.preload(run, [:stack]) do
+      %{stack: %Stack{} = stack} -> Stacks.dequeue(stack)
+      _ -> :ok
+    end
+  end
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do

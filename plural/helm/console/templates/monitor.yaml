@@ -6,7 +6,7 @@ metadata:
 {{ include "console.labels" . | indent 4 }}
 spec:
   podMetricsEndpoints:
-    - port: http
+    - port: metrics
       path: '/metrics'
   namespaceSelector:
     matchNames:

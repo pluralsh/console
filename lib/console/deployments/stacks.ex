@@ -113,6 +113,25 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
+  Takes a given stack run, and restarts it if it's considered the latest run
+  """
+  @spec restart_run(StackRun.t | binary, User.t) :: run_resp
+  def restart_run(%StackRun{dry_run: true}, _), do: {:error, "you cannot restart dry runs"}
+  def restart_run(%StackRun{git: %{ref: ref}, message: msg} = run, %User{} = user) do
+    with {:ok, run} <- allow(run, user, :write) do
+      case Repo.preload(run, [:stack]) do
+        %{stack: %Stack{sha: ^ref} = stack} ->
+          create_run(stack, ref, %{message: msg})
+        _ -> {:error, "you can only restart the latest run for this stack"}
+      end
+    end
+  end
+  def restart_run(id, %User{} = user) when is_binary(id) do
+    get_run!(id)
+    |> restart_run(user)
+  end
+
+  @doc """
   Posts a review comment for a completed pr stack run if possible
   """
   def post_comment(%StackRun{} = run) do

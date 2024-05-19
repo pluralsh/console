@@ -172,7 +172,7 @@ defmodule Console.Deployments.StacksTest do
       assert second.index == 1
 
       assert third.cmd == "terraform"
-      assert third.args == ["apply"]
+      assert third.args == ["apply", "terraform.tfplan"]
       assert third.index == 2
 
       stack = refetch(stack)
@@ -243,6 +243,47 @@ defmodule Console.Deployments.StacksTest do
       expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
 
       {:ok, "id"} = Stacks.post_comment(run)
+    end
+  end
+
+  describe "#restart_run/2" do
+    test "it can recreate the run for a stack if still on the sha" do
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"},
+        sha: "some-sha"
+      )
+      run = insert(:stack_run, git: %{ref: "some-sha"}, stack: stack)
+
+      {:ok, new_run} = Stacks.restart_run(run.id, admin_user())
+
+      assert new_run.stack_id == stack.id
+      assert new_run.git.ref == "some-sha"
+    end
+
+    test "it cannot restart if on the wrong sha" do
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"},
+        sha: "some-sha"
+      )
+      run = insert(:stack_run, git: %{ref: "wrong-sha"}, stack: stack)
+
+      {:error, _} = Stacks.restart_run(run.id, admin_user())
+    end
+
+    test "non-writers cannot restart" do
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"},
+        sha: "some-sha"
+      )
+      run = insert(:stack_run, git: %{ref: "some-sha"}, stack: stack)
+
+      {:error, _} = Stacks.restart_run(run.id, insert(:user))
     end
   end
 

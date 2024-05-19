@@ -717,6 +717,8 @@ type RootMutationType {
 
   approveStackRun(id: ID!): StackRun
 
+  restartStackRun(id: ID!): StackRun
+
   upsertObservabilityProvider(attributes: ObservabilityProviderAttributes!): ObservabilityProvider
 
   deleteObservabilityProvider(id: ID!): ObservabilityProvider

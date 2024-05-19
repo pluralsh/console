@@ -76,10 +76,18 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       router = insert(:notification_router, events: ["stack.run"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, stack: run.stack)
-      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+      me = self()
+      expect(HTTPoison, :post, fn _, body, _ ->
+        send me, {:body, body}
+        {:ok, %HTTPoison.Response{}}
+      end)
 
       event = %PubSub.StackRunCreated{item: run}
       :ok = Notifications.handle_event(event)
+
+      assert_receive {:body, body}
+
+      {:ok, _} = Jason.decode(body)
     end
   end
 end

@@ -105,6 +105,7 @@ defmodule Console.MixProject do
       {:timex, "~> 3.7"},
       {:quantum, "~> 3.0"},
       {:swarm, "~> 3.0"},
+      {:bandit, "~> 1.0"},
       {:yaml_elixir, "~> 2.9"},
       {:poison, "~> 5.0", override: true},
       {:ets, "~> 0.9"},

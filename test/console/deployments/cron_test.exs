@@ -234,4 +234,16 @@ defmodule Console.Deployments.CronTest do
       assert dequeued.status == :pending
     end
   end
+
+  describe "#prune_run_logs/0" do
+    test "it can remove unnnecessary run logs" do
+      rm = insert_list(3, :run_log, inserted_at: Timex.now() |> Timex.shift(days: -35))
+      keep = insert_list(3, :run_log)
+
+      Cron.prune_logs()
+
+      for l <- rm, do: refute refetch(l)
+      for l <- keep, do: assert refetch(l)
+    end
+  end
 end

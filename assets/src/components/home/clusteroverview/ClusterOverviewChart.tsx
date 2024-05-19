@@ -85,13 +85,13 @@ const useChartData = (
   return useMemo(() => {
     const chartData = [
       {
-        id: 'compliant',
+        id: 'version-compliant',
         data: [
           { color: 'blue', x: 'Latest', y: latest || 0 },
-          { color: 'purple', x: 'Compliant', y: compliant || 0 },
+          { color: 'purple', x: 'Version Compliant', y: compliant || 0 },
           {
             color: 'yellow',
-            x: 'Not Compliant',
+            x: 'Not Version Compliant',
             y: (count || 0) - (latest || 0) - (compliant || 0),
           },
         ],

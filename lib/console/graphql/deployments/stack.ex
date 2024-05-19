@@ -310,6 +310,13 @@ defmodule Console.GraphQl.Deployments.Stack do
 
       resolve &Deployments.approve_stack_run/2
     end
+
+    field :restart_stack_run, :stack_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.restart_stack_run/2
+    end
   end
 
   object :stack_subscriptions do

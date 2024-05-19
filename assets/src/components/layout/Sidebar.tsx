@@ -107,8 +107,8 @@ function getMenuItems({
     ...(showStacks
       ? [
           {
-            text: 'Infrastructure stacks',
-            expandedLabel: 'Infrastructure stacks',
+            text: 'Stacks',
+            expandedLabel: 'Stacks',
             icon: <StackIcon />,
             path: getStacksAbsPath(''),
           },
