@@ -38,9 +38,8 @@ import { NamespacePhaseChip } from './utils'
 import { useEventsColumns } from './Events'
 
 const directory: Array<TabEntry> = [
-  { path: '', label: 'Info' },
-  { path: 'events', label: 'Events' },
   { path: 'raw', label: 'Raw' },
+  { path: 'events', label: 'Events' },
 ] as const
 
 export default function Namespace(): ReactElement {
