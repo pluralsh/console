@@ -4021,6 +4021,7 @@ export type RootMutationType = {
   /** registers a list of runtime services discovered for the current cluster */
   registerRuntimeServices?: Maybe<Scalars['Int']['output']>;
   restartBuild?: Maybe<Build>;
+  restartStackRun?: Maybe<StackRun>;
   restorePostgres?: Maybe<Postgresql>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
@@ -4566,6 +4567,11 @@ export type RootMutationTypeRegisterRuntimeServicesArgs = {
 
 
 export type RootMutationTypeRestartBuildArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeRestartStackRunArgs = {
   id: Scalars['ID']['input'];
 };
 

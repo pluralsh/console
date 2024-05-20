@@ -42,71 +42,17 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceUpdated do
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.ClusterCreated, Console.PubSub.ClusterUpdated] do
-  alias Console.Repo
-  alias Console.Deployments.{Global}
-  alias Console.Services.{Users}
-  alias Console.Schema.{GlobalService, Service, ManagedNamespace}
+  alias Console.Deployments.Global
 
-  def process(%{item: cluster}) do
-    cluster = Repo.preload(cluster, [:tags])
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
-    svcs =  Service.globalized()
-            |> Service.for_cluster(cluster.id)
-            |> Repo.all()
-            |> MapSet.new(& &1.id)
-
-    GlobalService.stream()
-    |> GlobalService.preloaded()
-    |> Repo.stream(method: :keyset)
-    |> Stream.filter(&Global.match?(&1, cluster))
-    |> Stream.map(fn global ->
-      case Global.add_to_cluster(global, cluster) do
-        {:ok, svc} -> svc
-        _ -> Global.get_service(global, cluster.id)
-      end
-    end)
-    |> Stream.map(fn
-      %Service{} = svc -> svc.id
-      _ -> nil
-    end)
-    |> Stream.filter(& &1)
-    |> Enum.into(MapSet.new())
-    |> (fn expected -> MapSet.difference(svcs, expected) end).()
-    |> MapSet.to_list()
-    |> Service.for_ids()
-    |> Repo.all()
-    |> Global.maybe_drain()
-
-    ManagedNamespace.for_cluster(cluster)
-    |> ManagedNamespace.preloaded()
-    |> ManagedNamespace.stream()
-    |> Repo.stream(method: :keyset)
-    |> Stream.each(&Global.sync_namespace(cluster, &1, bot))
-    |> Stream.run()
-  end
+  def process(%{item: cluster}), do: Global.sync_cluster(cluster)
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ClusterPinged do
-  alias Console.Repo
-  alias Console.Services.Users
+  alias Console.Schema.Cluster
   alias Console.Deployments.Global
-  alias Console.Schema.{Cluster, GlobalService, ManagedNamespace}
 
-  def process(%{item: %Cluster{distro_changed: true} = cluster}) do
-    cluster = Repo.preload(cluster, [:tags])
-    bot = %{Users.get_bot!("console") | roles: %{admin: true}}
-    GlobalService.stream()
-    |> Repo.stream(method: :keyset)
-    |> Stream.filter(&Global.match?(&1, cluster))
-    |> Stream.each(&Global.add_to_cluster(&1, cluster))
-    |> Stream.run()
-
-    ManagedNamespace.for_cluster(cluster)
-    |> ManagedNamespace.stream()
-    |> Repo.stream(method: :keyset)
-    |> Stream.each(&Global.sync_namespace(cluster, &1, bot))
-    |> Stream.run()
-  end
+  def process(%{item: %Cluster{distro_changed: true} = cluster}),
+    do: Global.sync_cluster(cluster)
   def process(_), do: :ok
 end
 
@@ -171,8 +117,21 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackDeleted do
   def process(%{item: stack}), do: Stacks.create_run(stack, stack.sha)
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
+  def process(%{item: %{status: status} = run}) when status in ~w(pending running)a,
+    do: Console.Deployments.Stacks.Discovery.runner(run)
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
-  def process(%{item: run}), do: Console.Deployments.Stacks.Discovery.runner(run)
+  alias Console.Schema.Stack
+  alias Console.Deployments.Stacks
+
+  def process(%{item: run}) do
+    case Console.Repo.preload(run, [:stack]) do
+      %{stack: %Stack{} = stack} -> Stacks.dequeue(stack)
+      _ -> :ok
+    end
+  end
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do

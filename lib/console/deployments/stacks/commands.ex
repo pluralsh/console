@@ -21,7 +21,7 @@ defmodule Console.Deployments.Stacks.Commands do
     indexed([
       cmd("init", "terraform", ["init", "-upgrade"], :init),
       cmd("plan", "terraform", ["plan"], :plan),
-      cmd("apply", "terraform", ["apply"], :apply)
+      cmd("apply", "terraform", ["apply", "terraform.tfplan"], :apply)
     ])
   end
 

@@ -141,6 +141,31 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
     end
   end
 
+  describe "restartStackRun" do
+    test "it can restart a stack run" do
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"},
+        sha: "some-sha"
+      )
+      run = insert(:stack_run, git: %{ref: "some-sha"}, stack: stack)
+      admin = admin_user()
+
+      {:ok, %{data: %{"restartStackRun" => restarted}}} = run_query("""
+        mutation Restart($id: ID!) {
+          restartStackRun(id: $id) {
+            id
+            git { ref }
+          }
+        }
+      """, %{"id" => run.id}, %{current_user: admin})
+
+      refute restarted["id"] == run.id
+      assert restarted["git"]["ref"] == "some-sha"
+    end
+  end
+
   describe "updateStackRun" do
     test "clusters can update stack runs" do
       run = insert(:stack_run)

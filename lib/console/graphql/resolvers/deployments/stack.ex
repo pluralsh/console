@@ -73,6 +73,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def approve_stack_run(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.approve_stack_run(id, user)
 
+  def restart_stack_run(%{id: id}, %{context: %{current_user: user}}),
+    do: Stacks.restart_run(id, user)
+
   def update_run_step(%{id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Stacks.update_run_step(attrs, id, cluster)
 

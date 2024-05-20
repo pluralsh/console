@@ -21,7 +21,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: "/metrics"
-        prometheus.io/port: {{ .Values.service.port | quote }}
+        prometheus.io/port: 9090
         checksum/config: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
     spec:
       serviceAccountName: console
@@ -71,6 +71,9 @@ spec:
         ports:
         - name: http
           containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        - name: metrics
+          containerPort: 9090
           protocol: TCP
         - name: epmd
           containerPort: 4369

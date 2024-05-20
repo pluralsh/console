@@ -1,4 +1,3 @@
 defmodule Console.Cron do
-  use Quantum.Scheduler,
-    otp_app: :console
+  use Quantum, otp_app: :console
 end
