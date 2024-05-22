@@ -1,0 +1,24 @@
+icon: https://avatars.githubusercontent.com/u/1564818?s=48&v=4
+git_url: https://github.com/zalando/postgres-operator
+release_url: https://github.com/zalando/postgres-operator/releases/tag/{vsn}
+versions:
+- version: 1.11.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+- version: 1.10.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+- version: 1.9.0
+  kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21']
+  requirements: []
+  incompatibilities: []
+- version: 1.8.0
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
+- version: 1.7.1
+  kube: ['1.24', '1.23', '1.22', '1.21', '1.20']
+  requirements: []
+  incompatibilities: []
