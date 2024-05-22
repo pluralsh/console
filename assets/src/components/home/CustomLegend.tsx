@@ -3,14 +3,17 @@ import styled from 'styled-components'
 export function CustomLegend({
   data,
 }: {
-  data: { label: string; color: string }[]
+  data: { label: string; value?: number; color: string }[]
 }) {
   return (
     <LegendWrapperSC>
       {data.map((item, index) => (
         <LegendItemSC key={index}>
           <LegendSymbolSC color={item.color} />
-          <LegendTextSC>{item.label}</LegendTextSC>
+          <LegendTextSC>
+            {`${item.value ?? ''} `}
+            {item.label}
+          </LegendTextSC>
         </LegendItemSC>
       ))}
     </LegendWrapperSC>
@@ -20,7 +23,7 @@ export function CustomLegend({
 const LegendWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   justifyContent: 'center',
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
 }))
 const LegendItemSC = styled.div({
   display: 'flex',
@@ -34,4 +37,5 @@ const LegendSymbolSC = styled.div<{ color: string }>(({ color, theme }) => ({
 }))
 const LegendTextSC = styled.span(({ theme }) => ({
   marginLeft: theme.spacing.xsmall,
+  minWidth: 'fit-content',
 }))

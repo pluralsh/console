@@ -11,6 +11,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { getPolicyDetailsPath } from 'routes/policiesRoutesConsts'
 
+import { ColActions } from 'components/home/clusteroverview/ClusterOverviewTable'
+
 import { POLICIES_REACT_VIRTUAL_OPTIONS } from './Policies'
 import {
   ColCluster,
@@ -20,8 +22,16 @@ import {
 } from './PoliciesColumns'
 
 const columns = [ColPolicyName, ColCluster, ColViolations, ColDescription]
+const columnsWithActions = [
+  ColPolicyName,
+  ColCluster,
+  ColViolations,
+  ColDescription,
+  ColActions,
+]
 
 export function PoliciesTable({
+  caret = false,
   setRefetch,
   refetch,
   data,
@@ -29,6 +39,7 @@ export function PoliciesTable({
   loading,
   setVirtualSlice,
 }: {
+  caret?: boolean
   setRefetch?: (refetch: () => () => void) => void
   refetch: () => void
   data: PolicyConstraintsQuery
@@ -69,7 +80,7 @@ export function PoliciesTable({
           <Table
             virtualizeRows
             data={data?.policyConstraints?.edges || []}
-            columns={columns}
+            columns={caret ? columnsWithActions : columns}
             css={{
               maxHeight: 'unset',
               height: '100%',

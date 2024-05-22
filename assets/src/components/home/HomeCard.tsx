@@ -10,7 +10,7 @@ export const HOME_CARD_MAX_HEIGHT = '436px'
 export function HomeCard({
   children,
   label,
-  overflow = 'auto',
+  overflow = 'auto hidden',
 }: {
   children: ReactNode
   label?: string

@@ -44,6 +44,15 @@ const DEFAULT_LOGIN = {
 const LoginContext = createContext<Partial<Login>>(DEFAULT_LOGIN)
 
 export const useLogin = () => useContext(LoginContext)
+export const useIsManager = () => {
+  const { me } = useLogin()
+
+  return (
+    me?.personas?.find(
+      (persona) => persona?.configuration?.home?.manager === true
+    ) !== undefined
+  )
+}
 
 function completeLogout() {
   wipeToken()

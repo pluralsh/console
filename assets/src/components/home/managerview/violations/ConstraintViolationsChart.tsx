@@ -4,38 +4,35 @@ import {
   COLOR_MAP,
   createCenteredMetric,
 } from 'components/utils/RadialBarChart'
-import { UpgradeStatisticsQuery } from 'generated/graphql'
+import { PolicyStatisticsQuery } from 'generated/graphql'
 import styled from 'styled-components'
 
 import { useMemo } from 'react'
 
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
-import { CustomLegend } from '../CustomLegend'
+import { CustomLegend } from '../../CustomLegend'
 
 const CHART_SIZE = 275
 
-export function ClusterOverviewChart({
+export function ConstraintViolationsChart({
   data,
 }: {
-  data: UpgradeStatisticsQuery | undefined
+  data: PolicyStatisticsQuery | undefined
 }) {
   const chartColors = {
     green: COLOR_MAP.green,
     red: COLOR_MAP.red,
-    blue: COLOR_MAP['blue-light'],
-    purple: COLOR_MAP['purple-light'],
-    yellow: COLOR_MAP['yellow-light'],
   }
   const { chartData, legendData } = useChartData(data || {}, chartColors)
 
-  if (!data?.upgradeStatistics) {
-    return <ChartSkeleton />
+  if (!data?.policyStatistics) {
+    return <ChartSkeleton scale={0.75} />
   }
 
   const CenterLabel = createCenteredMetric(
-    `${data.upgradeStatistics.count}`,
-    `Clusters`
+    `${getPercentCompliance(data)}%`,
+    `Compliance`
   )
 
   return (
@@ -77,33 +74,30 @@ const ViewWrapperSC = styled.div({
 })
 
 const useChartData = (
-  data: UpgradeStatisticsQuery,
+  data: PolicyStatisticsQuery,
   colorMap: Record<string, string>
 ) => {
-  const { count, compliant, latest, upgradeable } = data.upgradeStatistics || {}
+  const numWithViolations =
+    data?.policyStatistics?.find((stat) => stat?.aggregate === 'exists')
+      ?.count ?? 0
+  const numWithoutViolations =
+    data?.policyStatistics?.find((stat) => stat?.aggregate === 'none')?.count ??
+    0
 
   return useMemo(() => {
     const chartData = [
       {
-        id: 'version-compliant',
+        id: 'compliance',
         data: [
-          { color: 'blue', x: 'Latest', y: latest || 0 },
-          { color: 'purple', x: 'Version Compliant', y: compliant || 0 },
-          {
-            color: 'yellow',
-            x: 'Not Version Compliant',
-            y: (count || 0) - (latest || 0) - (compliant || 0),
-          },
-        ],
-      },
-      {
-        id: 'upgradeable',
-        data: [
-          { color: 'green', x: 'Upgradeable', y: upgradeable || 0 },
           {
             color: 'red',
-            x: 'Not Upgradeable',
-            y: (count || 0) - (upgradeable || 0),
+            x: 'With Violations',
+            y: numWithViolations,
+          },
+          {
+            color: 'green',
+            x: 'Without Violations',
+            y: numWithoutViolations || 0,
           },
         ],
       },
@@ -119,5 +113,18 @@ const useChartData = (
       .reverse()
 
     return { chartData, legendData }
-  }, [upgradeable, count, compliant, latest, colorMap])
+  }, [numWithViolations, numWithoutViolations, colorMap])
+}
+
+const getPercentCompliance = (data: PolicyStatisticsQuery) => {
+  if (!data?.policyStatistics) return 0
+
+  const total = data.policyStatistics.reduce(
+    (sum, val) => sum + (val?.count || 0),
+    0
+  )
+  const numCompliant =
+    data.policyStatistics.find((stat) => stat?.aggregate === 'none')?.count || 0
+
+  return Math.round((numCompliant / total) * 100)
 }

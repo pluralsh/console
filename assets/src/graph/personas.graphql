@@ -8,6 +8,10 @@ fragment PersonaConfiguration on PersonaConfiguration {
     repositories
     services
   }
+  home {
+    manager
+    security
+  }
   sidebar {
     audits
     kubernetes

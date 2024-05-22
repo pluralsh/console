@@ -19,7 +19,7 @@ const breadcrumbs: Breadcrumb[] = [
   { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
 ]
 
-const POLICIES_QUERY_PAGE_SIZE = 100
+export const POLICIES_QUERY_PAGE_SIZE = 100
 
 export const POLL_INTERVAL = 10_000
 
