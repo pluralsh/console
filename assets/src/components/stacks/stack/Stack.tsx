@@ -166,6 +166,7 @@ export default function Stack() {
       >
         {stack && (
           <>
+            {/* TODO: When deleting show detach. */}
             <StackDelete
               stack={stack}
               refetch={refetch}
