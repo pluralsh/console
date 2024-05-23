@@ -3,6 +3,7 @@ import {
   ServiceDeploymentDetailsFragment,
   ServiceDeploymentStatus,
   ServicePromotion,
+  useKickServiceMutation,
 } from 'generated/graphql'
 import { CD_REL_PATH, CLUSTERS_REL_PATH } from 'routes/cdRoutesConsts'
 import { InlineLink } from 'components/utils/typography/InlineLink'
@@ -20,11 +21,12 @@ import { useTheme } from 'styled-components'
 
 import { getProviderIconUrl } from 'components/utils/Provider'
 
+import KickButton from 'components/utils/KickButton'
+
 import { ServiceStatusChip } from '../ServiceStatusChip'
 
 import { countDeprecations } from './deprecationUtils'
 import ServicePromote from './ServicePromote'
-import ServiceKick from './ServiceKick'
 
 export function ServiceDetailsSidecar({
   serviceDeployment,
@@ -68,9 +70,12 @@ export function ServiceDetailsSidecar({
           gap: theme.spacing.small,
         }}
       >
-        <ServiceKick
+        <KickButton
           pulledAt={repository?.pulledAt}
-          id={id}
+          kickMutationHook={useKickServiceMutation}
+          message="Resync service"
+          tooltipMessage="Use this to sync this service now instead of at the next poll interval"
+          variables={{ id }}
         />
         {status === ServiceDeploymentStatus.Paused &&
           serviceDeployment.promotion === ServicePromotion.Ignore && (

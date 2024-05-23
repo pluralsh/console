@@ -22,6 +22,8 @@ import Fuse from 'fuse.js'
 
 import moment from 'moment'
 
+import KickButton from 'components/utils/KickButton'
+
 import {
   STACK_CONFIG_REL_PATH,
   STACK_ENV_REL_PATH,
@@ -33,7 +35,11 @@ import {
 import { GqlError } from '../utils/Alert'
 import { extendConnection, mapExistingNodes } from '../../utils/graphql'
 import { StackedText } from '../utils/table/StackedText'
-import { StackFragment, useStacksQuery } from '../../generated/graphql'
+import {
+  StackFragment,
+  useKickStackMutation,
+  useStacksQuery,
+} from '../../generated/graphql'
 import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
@@ -265,6 +271,13 @@ export default function Stacks() {
       >
         {stack && (
           <>
+            <KickButton
+              pulledAt={stack.repository?.pulledAt}
+              kickMutationHook={useKickStackMutation}
+              message="Resync stack run"
+              tooltipMessage="Use this to sync this run now instead of at the next poll interval"
+              variables={{ id: stack.id }}
+            />
             <StackDelete
               stack={stack}
               refetch={refetch}

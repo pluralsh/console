@@ -1,25 +1,52 @@
 import React, { ReactNode } from 'react'
-import { Sidecar, SidecarItem } from '@pluralsh/design-system'
+import { Button, Sidecar, SidecarItem } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 import moment from 'moment'
 
-import { StackRun } from '../../../generated/graphql'
+import { GqlError } from 'components/utils/Alert'
+
+import {
+  StackRun,
+  useApproveStackRunMutation,
+} from '../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
 import UserInfo from '../../utils/UserInfo'
 import { ClusterProviderIcon } from '../../utils/Provider'
 
 interface StackRunSidecarProps {
   stackRun: StackRun
+  refetch?: Nullable<() => void>
 }
 
 export default function StackRunSidecar({
   stackRun,
+  refetch,
 }: StackRunSidecarProps): ReactNode {
   const theme = useTheme()
 
+  const [mutation, { loading, error }] = useApproveStackRunMutation({
+    variables: { id: stackRun.id },
+    onCompleted: () => refetch?.(),
+  })
+
+  if (error) return <GqlError error={error} />
+  console.log(stackRun)
+
   return (
-    <ResponsiveLayoutSidecarContainer>
+    <ResponsiveLayoutSidecarContainer
+      display="flex"
+      flexDirection="column"
+      gap="small"
+    >
+      {stackRun.approval && !stackRun.approvedAt && (
+        <Button
+          onClick={mutation}
+          loading={loading}
+        >
+          Approve Run
+        </Button>
+      )}
       <Sidecar>
         <SidecarItem heading="ID">{stackRun.id}</SidecarItem>
         <SidecarItem heading="Needs approval">
