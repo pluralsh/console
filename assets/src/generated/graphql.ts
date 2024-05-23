@@ -8661,6 +8661,7 @@ export type StackFileFragment = { __typename?: 'StackFile', path: string, conten
 export type RunStepFragment = { __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null };
 
 export type StacksQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -17333,8 +17334,14 @@ export type PolicyStatisticsLazyQueryHookResult = ReturnType<typeof usePolicySta
 export type PolicyStatisticsSuspenseQueryHookResult = ReturnType<typeof usePolicyStatisticsSuspenseQuery>;
 export type PolicyStatisticsQueryResult = Apollo.QueryResult<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>;
 export const StacksDocument = gql`
-    query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
-  infrastructureStacks(after: $after, before: $before, first: $first, last: $last) {
+    query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStacks(
+    q: $q
+    after: $after
+    before: $before
+    first: $first
+    last: $last
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -17360,6 +17367,7 @@ ${StackFragmentDoc}`;
  * @example
  * const { data, loading, error } = useStacksQuery({
  *   variables: {
+ *      q: // value for 'q'
  *      after: // value for 'after'
  *      before: // value for 'before'
  *      first: // value for 'first'
