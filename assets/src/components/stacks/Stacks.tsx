@@ -37,11 +37,7 @@ import { ColWithIcon } from '../utils/table/ColWithIcon'
 import { StackedText } from '../utils/table/StackedText'
 import { ClusterProviderIcon } from '../utils/Provider'
 import { TRUNCATE_LEFT } from '../utils/truncate'
-
-import { columnHelper } from '../cd/clusters/ClustersColumns'
 import { TableCaretLink } from '../cluster/TableElements'
-
-import { getClusterDetailsPath } from '../../routes/cdRoutesConsts'
 
 import CreateStack from './create/CreateStack'
 import { StackTypeIcon } from './common/StackTypeIcon'

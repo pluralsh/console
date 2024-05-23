@@ -48,7 +48,7 @@ export default function StackDelete({
   return (
     <>
       <Button
-        destructive
+        secondary
         disabled={!!stack.deletedAt}
         onClick={() => setConfirm(true)}
       >

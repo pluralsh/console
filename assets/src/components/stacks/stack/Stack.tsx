@@ -1,22 +1,16 @@
 import {
-  Input,
+  ListBoxFooterPlus,
+  ListBoxItem,
   LoopingLogo,
-  SearchIcon,
+  Select,
   Sidecar,
   SidecarItem,
-  SubTab,
-  TabList,
-  TreeNavEntry,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { isEmpty } from 'lodash'
-import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import capitalize from 'lodash/capitalize'
-
-import { useDebounce } from '@react-hooks-library/core'
-
-import Fuse from 'fuse.js'
 
 import moment from 'moment'
 
@@ -29,8 +23,7 @@ import {
   getStacksAbsPath,
 } from '../../../routes/stacksRoutesConsts'
 import { GqlError } from '../../utils/Alert'
-import { extendConnection, mapExistingNodes } from '../../../utils/graphql'
-import { StackedText } from '../../utils/table/StackedText'
+import { mapExistingNodes } from '../../../utils/graphql'
 import { StackFragment, useStacksQuery } from '../../../generated/graphql'
 import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../../utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
@@ -39,24 +32,19 @@ import { ClusterProviderIcon } from '../../utils/Provider'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
 
-import { StandardScroller } from '../../utils/SmoothScroller'
-
-import { LinkTabWrap } from '../../utils/Tabs'
-
-import { StackTypeIcon, StackTypeIconFrame } from '../common/StackTypeIcon'
+import { StackTypeIcon } from '../common/StackTypeIcon'
 
 import StackStatusChip from '../common/StackStatusChip'
 
+import { useFetchPaginatedData } from '../../cd/utils/useFetchPaginatedData'
+
+import { SideNavEntries } from '../../layout/SideNavEntries'
+
 import StackDelete from './StackDelete'
 
-const pollInterval = 10 * 1000
+const QUERY_PAGE_SIZE = 100
 
-const searchOptions = {
-  keys: ['name'],
-  threshold: 0.25,
-}
-
-const directory = [
+const DIRECTORY = [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
   { path: STACK_CONFIG_REL_PATH, label: 'Configuration' },
   { path: STACK_REPO_REL_PATH, label: 'Repository' },
@@ -77,25 +65,19 @@ export const getBreadcrumbs = (stackId: string) => [
 export default function Stack() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { stackId = '' } = useParams()
-  const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
-  const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
-  const [listRef, setListRef] = useState<any>(null)
-  const [searchString, setSearchString] = useState('')
-  const debouncedSearchString = useDebounce(searchString, 100)
+  const pathPrefix = getStacksAbsPath(stackId)
 
-  const { data, error, loading, fetchMore, refetch } = useStacksQuery({
-    fetchPolicy: 'cache-and-network',
-    pollInterval,
-  })
+  const { data, error, refetch, pageInfo, fetchNextPage } =
+    useFetchPaginatedData({
+      queryHook: useStacksQuery,
+      pageSize: QUERY_PAGE_SIZE,
+      queryKey: 'infrastructureStacks',
+    })
 
-  const { stacks, pageInfo } = useMemo(
-    () => ({
-      stacks: mapExistingNodes(data?.infrastructureStacks),
-      pageInfo: data?.infrastructureStacks?.pageInfo,
-    }),
+  const stacks = useMemo(
+    () => mapExistingNodes(data?.infrastructureStacks),
     [data?.infrastructureStacks]
   )
 
@@ -103,16 +85,6 @@ export default function Stack() {
     () => stacks.find(({ id }) => id === stackId),
     [stackId, stacks]
   )
-
-  // TODO: Use server-side filtering once it will be available.
-  const filteredStacks = useMemo(() => {
-    if (!debouncedSearchString) {
-      return stacks || []
-    }
-    const fuse = new Fuse(stacks || [], searchOptions)
-
-    return fuse.search(debouncedSearchString).map((result) => result.item)
-  }, [debouncedSearchString, stacks])
 
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
@@ -138,116 +110,59 @@ export default function Stack() {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer width={360}>
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.small,
-            marginBottom: theme.spacing.medium,
-          }}
+      <ResponsiveLayoutSidenavContainer>
+        <Select
+          selectedKey={stack.id}
+          onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
+          leftContent={
+            <StackTypeIcon
+              stackType={stack.type}
+              size={16}
+            />
+          }
+          // TODO: Fix onClick.
+          dropdownFooter={
+            pageInfo?.hasNextPage ? (
+              <ListBoxFooterPlus onClick={() => fetchNextPage()}>
+                Fetch more
+              </ListBoxFooterPlus>
+            ) : undefined
+          }
         >
-          <Input
-            flexGrow={1}
-            placeholder="Search"
-            startIcon={<SearchIcon />}
-            value={searchString}
-            onChange={(e) => {
-              setSearchString?.(e.currentTarget.value)
-            }}
+          {stacks.map((s) => (
+            <ListBoxItem
+              key={s.id ?? ''}
+              label={s.name}
+              aria-label={s.name}
+              textValue={s.name}
+              leftContent={
+                <StackTypeIcon
+                  stackType={s.type}
+                  size={16}
+                />
+              }
+            />
+          ))}
+        </Select>
+        <div css={{ marginTop: theme.spacing.large }}>
+          <SideNavEntries
+            // TODO
+            // @ts-ignore
+            directory={DIRECTORY}
+            pathname={pathname}
+            pathPrefix={pathPrefix}
           />
         </div>
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          items={filteredStacks}
-          loading={loading}
-          placeholder={() => (
-            <div css={{ height: 52, borderBottom: theme.borders.default }} />
-          )}
-          hasNextPage={pageInfo?.hasNextPage}
-          mapper={(stack) => (
-            <TreeNavEntry
-              key={stack.id ?? ''}
-              label={
-                <div
-                  css={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: theme.spacing.small,
-                  }}
-                >
-                  <StackTypeIconFrame
-                    size="small"
-                    stackType={stack.type}
-                  />
-                  <StackedText
-                    first={stack.name}
-                    second={stack.repository?.url}
-                  />
-                </div>
-              }
-              active={stack.id === stackId}
-              activeSecondary={false}
-              href={getStacksAbsPath(stack.id)}
-              desktop
-            />
-          )}
-          loadNextPage={() =>
-            pageInfo?.hasNextPage &&
-            fetchMore({
-              variables: { after: pageInfo?.endCursor },
-              updateQuery: (
-                prev,
-                { fetchMoreResult: { infrastructureStacks } }
-              ) =>
-                extendConnection(
-                  prev,
-                  infrastructureStacks,
-                  'infrastructureStacks'
-                ),
-            })
-          }
-          refreshKey={undefined}
-          setLoader={undefined}
-          handleScroll={undefined}
-        />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
-        <TabList
-          scrollable
-          gap="xxsmall"
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: currentTab?.path,
-          }}
-          marginRight="medium"
-          paddingBottom="small"
-        >
-          {directory.map(({ label, path }) => (
-            <LinkTabWrap
-              subTab
-              key={path}
-              textValue={label}
-              to={`${getStacksAbsPath(stackId)}/${path}`}
-            >
-              <SubTab
-                key={path}
-                textValue={label}
-              >
-                {label}
-              </SubTab>
-            </LinkTabWrap>
-          ))}
-        </TabList>
+      <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH, paddingTop: 64 }}>
         <Outlet context={{ stack, refetch } as StackOutletContextT} />
       </div>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer
         display="flex"
         flexDirection="column"
-        gap="small"
+        gap="large"
       >
         {stack && (
           <>
@@ -255,7 +170,7 @@ export default function Stack() {
               stack={stack}
               refetch={refetch}
             />
-            <Sidecar heading="Stack">
+            <Sidecar heading="Stack details">
               <SidecarItem heading="Name">
                 <div css={{ display: 'flex', gap: theme.spacing.small }}>
                   {stack.name}
