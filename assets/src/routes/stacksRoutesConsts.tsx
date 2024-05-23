@@ -1,11 +1,12 @@
 export const STACKS_ABS_PATH = 'stacks'
 
-export const STACKS_PARAM_STACK = ':stackId?'
+export const STACK_PARAM_STACK_ID = ':stackId'
+export const STACK_ABS_PATH = `stacks/${STACK_PARAM_STACK_ID}`
 
 export const STACK_RUNS_REL_PATH = `runs`
 export const STACK_RUNS_PARAM_RUN = ':runId'
 export const STACK_RUNS_ABS_PATH = getStackRunsAbsPath(
-  STACKS_PARAM_STACK,
+  STACK_PARAM_STACK_ID,
   STACK_RUNS_PARAM_RUN
 )
 

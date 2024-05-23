@@ -10,12 +10,12 @@ import { isEmpty } from 'lodash'
 
 import { useOutletContext, useParams } from 'react-router-dom'
 
-import { StackFragment, useStackRunsQuery } from '../../generated/graphql'
-import { extendConnection, mapExistingNodes } from '../../utils/graphql'
-import { StandardScroller } from '../utils/SmoothScroller'
-import { ReturnToBeginning } from '../utils/ReturnToBeginning'
+import { StackFragment, useStackRunsQuery } from '../../../generated/graphql'
+import { extendConnection, mapExistingNodes } from '../../../utils/graphql'
+import { StandardScroller } from '../../utils/SmoothScroller'
+import { ReturnToBeginning } from '../../utils/ReturnToBeginning'
 
-import { getBreadcrumbs } from './StackDetails'
+import { getBreadcrumbs } from './Stack'
 
 import StackRun from './StackRun'
 

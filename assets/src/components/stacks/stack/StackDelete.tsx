@@ -6,13 +6,13 @@ import { useTheme } from 'styled-components'
 
 import { useNavigate } from 'react-router-dom'
 
-import { Confirm } from '../utils/Confirm'
+import { Confirm } from '../../utils/Confirm'
 import {
   StackFragment,
   useDeleteStackMutation,
   useDetachStackMutation,
-} from '../../generated/graphql'
-import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
+} from '../../../generated/graphql'
+import { getStacksAbsPath } from '../../../routes/stacksRoutesConsts'
 
 export default function StackDelete({
   stack,

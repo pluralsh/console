@@ -4,10 +4,10 @@ import { Sidecar, SidecarItem } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import moment from 'moment'
 
-import { StackRun } from '../../../generated/graphql'
-import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
-import UserInfo from '../../utils/UserInfo'
-import { ClusterProviderIcon } from '../../utils/Provider'
+import { StackRun } from '../../../../generated/graphql'
+import { ResponsiveLayoutSidecarContainer } from '../../../utils/layout/ResponsiveLayoutSidecarContainer'
+import UserInfo from '../../../utils/UserInfo'
+import { ClusterProviderIcon } from '../../../utils/Provider'
 
 interface StackRunSidecarProps {
   stackRun: StackRun

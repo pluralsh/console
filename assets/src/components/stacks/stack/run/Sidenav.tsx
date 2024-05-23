@@ -3,11 +3,11 @@ import { useTheme } from 'styled-components'
 import { Link, useLocation } from 'react-router-dom'
 import { AppIcon, Tab, TabList } from '@pluralsh/design-system'
 
-import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
-import { StackedText } from '../../utils/table/StackedText'
-import { StackRun } from '../../../generated/graphql'
-import { StackTypeIcon } from '../common/StackTypeIcon'
-import { StackRunStatusChip } from '../common/StackRunStatusChip'
+import { ResponsiveLayoutSidenavContainer } from '../../../utils/layout/ResponsiveLayoutSidenavContainer'
+import { StackedText } from '../../../utils/table/StackedText'
+import { StackRun } from '../../../../generated/graphql'
+import { StackTypeIcon } from '../../common/StackTypeIcon'
+import { StackRunStatusChip } from '../../common/StackRunStatusChip'
 
 const DIRECTORY = [
   { path: '', label: 'Progress' },

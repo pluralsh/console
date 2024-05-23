@@ -4,14 +4,14 @@ import { Button, FormField, Input, Switch } from '@pluralsh/design-system'
 
 import { useOutletContext, useParams } from 'react-router-dom'
 
-import { useUpdateState } from '../../hooks/useUpdateState'
-import { GqlError } from '../../utils/Alert'
-import ModalAlt from '../../cd/ModalAlt'
+import { useUpdateState } from '../../../hooks/useUpdateState'
+import { GqlError } from '../../../utils/Alert'
+import ModalAlt from '../../../cd/ModalAlt'
 import {
   StackEnvironment,
   useUpdateStackMutation,
-} from '../../../generated/graphql'
-import { StackOutletContextT } from '../StackDetails'
+} from '../../../../generated/graphql'
+import { StackOutletContextT } from '../Stack'
 
 export default function StackEnvironmentApplyModal({
   open,

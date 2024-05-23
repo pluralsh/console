@@ -1,5 +1,4 @@
 import {
-  EmptyState,
   Input,
   LoopingLogo,
   SearchIcon,
@@ -28,26 +27,27 @@ import {
   STACK_REPO_REL_PATH,
   STACK_RUNS_REL_PATH,
   getStacksAbsPath,
-} from '../../routes/stacksRoutesConsts'
-import { GqlError } from '../utils/Alert'
-import { extendConnection, mapExistingNodes } from '../../utils/graphql'
-import { StackedText } from '../utils/table/StackedText'
-import { StackFragment, useStacksQuery } from '../../generated/graphql'
-import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
-import { ClusterProviderIcon } from '../utils/Provider'
-import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
-import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
+} from '../../../routes/stacksRoutesConsts'
+import { GqlError } from '../../utils/Alert'
+import { extendConnection, mapExistingNodes } from '../../../utils/graphql'
+import { StackedText } from '../../utils/table/StackedText'
+import { StackFragment, useStacksQuery } from '../../../generated/graphql'
+import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../../utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
+import { ClusterProviderIcon } from '../../utils/Provider'
+import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
+import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
 
-import { StandardScroller } from '../utils/SmoothScroller'
+import { StandardScroller } from '../../utils/SmoothScroller'
 
-import { LinkTabWrap } from '../utils/Tabs'
+import { LinkTabWrap } from '../../utils/Tabs'
 
-import { StackTypeIcon, StackTypeIconFrame } from './common/StackTypeIcon'
-import CreateStack from './create/CreateStack'
+import { StackTypeIcon, StackTypeIconFrame } from '../common/StackTypeIcon'
+
+import StackStatusChip from '../common/StackStatusChip'
+
 import StackDelete from './StackDelete'
-import StackStatusChip from './common/StackStatusChip'
 
 const pollInterval = 10 * 1000
 
@@ -74,7 +74,7 @@ export const getBreadcrumbs = (stackId: string) => [
   ...(stackId ? [{ label: stackId, url: getStacksAbsPath(stackId) }] : []),
 ]
 
-export default function Stacks() {
+export default function Stack() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { stackId = '' } = useParams()
@@ -132,15 +132,7 @@ export default function Stacks() {
     return <LoopingLogo />
   }
 
-  if (isEmpty(stacks)) {
-    return (
-      <EmptyState message="Looks like you don't have any infrastructure stacks yet.">
-        <CreateStack refetch={refetch} />
-      </EmptyState>
-    )
-  }
-
-  if (!stack) {
+  if (!stack || isEmpty(stacks)) {
     return <LoopingLogo />
   }
 
@@ -163,7 +155,6 @@ export default function Stacks() {
               setSearchString?.(e.currentTarget.value)
             }}
           />
-          <CreateStack refetch={refetch} />
         </div>
         <StandardScroller
           listRef={listRef}

@@ -4,7 +4,7 @@ import { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import sortBy from 'lodash/sortBy'
 
-import { StackRun } from '../../../../generated/graphql'
+import { StackRun } from '../../../../../generated/graphql'
 
 import Step from './Step'
 

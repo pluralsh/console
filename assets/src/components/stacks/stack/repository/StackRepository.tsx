@@ -5,9 +5,9 @@ import { useOutletContext, useParams } from 'react-router-dom'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { StackOutletContextT, getBreadcrumbs } from '../StackDetails'
+import { StackOutletContextT, getBreadcrumbs } from '../Stack'
 
-export default function StackConfiguration() {
+export default function StackRepository() {
   const { stackId = '' } = useParams()
   const { stack } = useOutletContext() as StackOutletContextT
 
@@ -30,10 +30,9 @@ export default function StackConfiguration() {
         flexWrap: 'wrap',
       }}
     >
-      {stack.configuration.image && (
-        <Prop title="Image">{stack.configuration.image}</Prop>
-      )}
-      <Prop title="Version">{stack.configuration.version}</Prop>
+      <Prop title="Repository">{stack.repository?.url}</Prop>
+      <Prop title="Ref">{stack.git.ref}</Prop>
+      <Prop title="Folder">{stack.git.folder}</Prop>
     </Card>
   )
 }

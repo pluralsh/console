@@ -3,7 +3,7 @@ import { useOutletContext } from 'react-router-dom'
 import { CheckIcon, CloseIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { StackOutput, StackRun } from '../../../../generated/graphql'
+import { StackOutput, StackRun } from '../../../../../generated/graphql'
 
 import OutputValue from './Value'
 
