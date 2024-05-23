@@ -391,6 +391,17 @@ defmodule Console.Deployments.Stacks do
     end
   end
 
+  @doc """
+  Ensure the stacks repo has been recently pulled and poll for a new run if so
+  """
+  @spec kick(binary | Stack.t, User.t) :: stack_resp
+  def kick(%Stack{} = stack, %User{} = user) do
+    with {:ok, stack} <- allow(stack, user, :write),
+         stack <- Repo.preload(stack, [:repository]),
+         _ <- Discovery.kick(stack.repository),
+      do: poll(stack)
+  end
+
   defp notify({:ok, %Stack{} = stack}, :create, actor),
     do: handle_notify(PubSub.StackCreated, stack, actor: actor)
   defp notify({:ok, %Stack{} = stack}, :update, actor),

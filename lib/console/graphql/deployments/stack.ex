@@ -304,6 +304,14 @@ defmodule Console.GraphQl.Deployments.Stack do
       resolve &Deployments.detach_stack/2
     end
 
+    @desc "refresh the source repo of this stack, and potentially create a fresh run"
+    field :kick_stack, :stack_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.kick_stack/2
+    end
+
     field :approve_stack_run, :stack_run do
       middleware Authenticated
       arg :id, non_null(:id)

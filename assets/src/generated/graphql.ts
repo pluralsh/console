@@ -4005,6 +4005,8 @@ export type RootMutationType = {
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;
   kickService?: Maybe<ServiceDeployment>;
+  /** refresh the source repo of this stack, and potentially create a fresh run */
+  kickStack?: Maybe<StackRun>;
   loginLink?: Maybe<User>;
   logout?: Maybe<User>;
   markRead?: Maybe<User>;
@@ -4510,6 +4512,11 @@ export type RootMutationTypeKickServiceArgs = {
   cluster?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeKickStackArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
