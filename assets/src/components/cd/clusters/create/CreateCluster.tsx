@@ -243,8 +243,7 @@ function CreateClusterModal({
               ? 'Done'
               : 'Cancel'}
           </Button>
-          {(createMode === ClusterCreateMode.New ||
-            (createMode === ClusterCreateMode.Import && !importCluster)) && (
+          {createMode === ClusterCreateMode.New && (
             <Button
               onClick={onSubmit}
               disabled={
