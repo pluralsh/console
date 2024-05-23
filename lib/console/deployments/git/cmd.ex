@@ -9,6 +9,12 @@ defmodule Console.Deployments.Git.Cmd do
   end
   def save_private_key(git), do: {:ok, git}
 
+  def refresh_key(%GitRepository{private_key_file: f} = git) when is_binary(f) do
+    File.rm(f)
+    save_private_key(git)
+  end
+  def refresh_key(git), do: save_private_key(git)
+
   def fetch(%GitRepository{} = repo) do
     with {:ok, _} <- git(repo, "fetch", ["--all", "--force", "--prune"]),
          :ok <- branches(repo),

@@ -86,7 +86,7 @@ defmodule Console.Schema.StackRun do
   end
 
   def running(query \\ __MODULE__) do
-    from(r in query, where: r.status in ^[:pending, :running])
+    from(r in query, where: r.status in ^[:pending, :running, :pending_approval])
   end
 
   def for_status(query \\ __MODULE__, status) do

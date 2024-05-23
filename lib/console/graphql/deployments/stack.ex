@@ -28,7 +28,15 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   input_object :stack_configuration_attributes do
     field :image,   :string, description: "optional custom image you might want to use"
-    field :version, non_null(:string), description: "the semver of the tool you wish to use"
+    field :version, :string, description: "the semver of the tool you wish to use"
+    field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
+    field :hooks,   list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
+  end
+
+  input_object :stack_hook_attributes do
+    field :cmd,          non_null(:string), description: "a script hook to run at a stage"
+    field :args,         list_of(:string), description: "args for `cmd`"
+    field :after_stage,  non_null(:step_stage), description: "the stage to run this hook before"
   end
 
   input_object :stack_run_attributes do
@@ -118,6 +126,14 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_configuration do
     field :image,   :string, description: "optional custom image you might want to use"
     field :version, non_null(:string), description: "the semver of the tool you wish to use"
+    field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
+    field :hooks,   list_of(:stack_hook), description: "the hooks to customize execution for this stack"
+  end
+
+  object :stack_hook do
+    field :cmd,          non_null(:string), description: "a script hook to run at a stage"
+    field :args,         list_of(:string), description: "args for `cmd`"
+    field :after_stage,  non_null(:step_stage), description: "the stage to run this hook before"
   end
 
   object :stack_run do

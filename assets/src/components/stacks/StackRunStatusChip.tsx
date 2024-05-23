@@ -12,6 +12,7 @@ export const statusToSeverity = {
   [StackStatus.Cancelled]: 'neutral',
   [StackStatus.Failed]: 'danger',
   [StackStatus.Successful]: 'success',
+  [StackStatus.PendingApproval]: 'info',
 } as const satisfies Record<
   StackStatus,
   ComponentProps<typeof Chip>['severity']
