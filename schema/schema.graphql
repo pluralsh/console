@@ -715,6 +715,9 @@ type RootMutationType {
 
   detachStack(id: ID!): InfrastructureStack
 
+  "refresh the source repo of this stack, and potentially create a fresh run"
+  kickStack(id: ID!): StackRun
+
   approveStackRun(id: ID!): StackRun
 
   restartStackRun(id: ID!): StackRun
