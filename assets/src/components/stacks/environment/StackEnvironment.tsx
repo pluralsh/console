@@ -30,7 +30,7 @@ import {
 
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { StackOutletContextT, getBreadcrumbs } from '../StackDetails'
 
 import StackEnvironmentDelete from './StackEnvironmentDelete'
 import StackEnvironmentEdit from './StackEnvironmentEdit'

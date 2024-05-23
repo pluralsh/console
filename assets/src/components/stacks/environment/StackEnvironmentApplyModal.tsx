@@ -11,7 +11,7 @@ import {
   StackEnvironment,
   useUpdateStackMutation,
 } from '../../../generated/graphql'
-import { StackOutletContextT } from '../Stacks'
+import { StackOutletContextT } from '../StackDetails'
 
 export default function StackEnvironmentApplyModal({
   open,

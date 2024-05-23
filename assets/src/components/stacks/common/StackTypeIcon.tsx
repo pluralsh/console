@@ -46,7 +46,7 @@ export function StackTypeIcon({
       alt={capitalize(stackType ?? '')}
       src={src}
       {...props}
-      {...(size ? { width: size } : {})}
+      {...(size ? { height: size } : {})}
     />
   )
 }

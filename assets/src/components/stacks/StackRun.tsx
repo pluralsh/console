@@ -9,7 +9,7 @@ import { StackRunFragment } from '../../generated/graphql'
 
 import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
 
-import { StackRunStatusChip } from './StackRunStatusChip'
+import { StackRunStatusChip } from './common/StackRunStatusChip'
 
 export default function StackRun({
   stackRun,

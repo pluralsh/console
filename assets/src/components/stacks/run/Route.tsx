@@ -8,7 +8,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
-import { getBreadcrumbs } from '../Stacks'
+import { getBreadcrumbs } from '../StackDetails'
 import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
 
 import StackRunSidenav from './Sidenav'

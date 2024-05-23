@@ -15,8 +15,9 @@ import { extendConnection, mapExistingNodes } from '../../utils/graphql'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { ReturnToBeginning } from '../utils/ReturnToBeginning'
 
+import { getBreadcrumbs } from './StackDetails'
+
 import StackRun from './StackRun'
-import { getBreadcrumbs } from './Stacks'
 
 const pollInterval = 5 * 1000
 
@@ -28,7 +29,7 @@ export default function StackRuns() {
   const [scrolled, setScrolled] = useState(false)
 
   useSetBreadcrumbs(
-    useMemo(() => [...getBreadcrumbs(stackId), { label: 'runs' }], [stackId])
+    useMemo(() => [...getBreadcrumbs(stackId), { label: 'runs' }], [])
   )
 
   const { data, loading, fetchMore } = useStackRunsQuery({

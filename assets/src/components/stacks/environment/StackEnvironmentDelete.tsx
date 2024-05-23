@@ -9,7 +9,7 @@ import {
 import { DeleteIconButton } from '../../utils/IconButtons'
 import { Confirm } from '../../utils/Confirm'
 
-import { StackOutletContextT } from '../Stacks'
+import { StackOutletContextT } from '../StackDetails'
 
 export default function StackEnvironmentDelete({
   env,

@@ -1,6 +1,6 @@
-export const STACKS_ROOT_PATH = 'stacks'
+export const STACKS_ABS_PATH = 'stacks'
+
 export const STACKS_PARAM_STACK = ':stackId?'
-export const STACKS_ABS_PATH = getStacksAbsPath(STACKS_PARAM_STACK)
 
 export const STACK_RUNS_REL_PATH = `runs`
 export const STACK_RUNS_PARAM_RUN = ':runId'
@@ -23,7 +23,7 @@ export const STACK_RUNS_OUTPUT_REL_PATH = 'output'
 export const STACK_RUNS_REPOSITORY_REL_PATH = 'repository'
 
 export function getStacksAbsPath(stackId: string | null | undefined) {
-  return `/${STACKS_ROOT_PATH}/${stackId}`
+  return `/${STACKS_ABS_PATH}/${stackId}`
 }
 
 export function getStackRunsAbsPath(

@@ -5,7 +5,7 @@ import { useOutletContext, useParams } from 'react-router-dom'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { StackOutletContextT, getBreadcrumbs } from '../StackDetails'
 
 export default function StackRepository() {
   const { stackId = '' } = useParams()

@@ -13,7 +13,7 @@ import { useTheme } from 'styled-components'
 
 import { StackType } from '../../../generated/graphql'
 
-import { StackTypeIcon } from '../StackTypeIcon'
+import { StackTypeIcon } from '../common/StackTypeIcon'
 
 export function CreateStackModalFormBasic({
   name,

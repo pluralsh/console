@@ -18,7 +18,7 @@ import { isEmpty } from 'lodash'
 
 import { useTheme } from 'styled-components'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { StackOutletContextT, getBreadcrumbs } from '../StackDetails'
 
 export default function StackJob() {
   const theme = useTheme()
