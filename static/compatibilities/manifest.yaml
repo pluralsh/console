@@ -16,4 +16,4 @@ names:
 - vitess
 - strimzi
 - keda
-- zalando-postgres
+- postgres-operator
