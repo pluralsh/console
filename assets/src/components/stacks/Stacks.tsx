@@ -38,6 +38,11 @@ import { StackedText } from '../utils/table/StackedText'
 import { ClusterProviderIcon } from '../utils/Provider'
 import { TRUNCATE_LEFT } from '../utils/truncate'
 
+import { columnHelper } from '../cd/clusters/ClustersColumns'
+import { TableCaretLink } from '../cluster/TableElements'
+
+import { getClusterDetailsPath } from '../../routes/cdRoutesConsts'
+
 import CreateStack from './create/CreateStack'
 import { StackTypeIcon } from './common/StackTypeIcon'
 import StackStatusChip from './common/StackStatusChip'
@@ -137,6 +142,17 @@ const COLUMNS = [
     id: 'approval',
     header: 'Approval',
     cell: ({ getValue }) => <StackApprovalChip approval={!!getValue()} />,
+  }),
+  COLUMN_HELPER.display({
+    id: 'actions',
+    meta: { gridTemplate: 'minmax(25px, 50px)' },
+    cell: ({ row: { original } }) => (
+      <TableCaretLink
+        style={{ alignSelf: 'end' }}
+        to={getStacksAbsPath(original?.id)}
+        textValue={`View ${original?.name} details`}
+      />
+    ),
   }),
 ]
 
