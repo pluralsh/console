@@ -2,7 +2,7 @@ import { AppIcon, Button, CollapseIcon } from '@pluralsh/design-system'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { Collapsible } from 'grommet'
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 import moment from 'moment'
 import { useContext, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -43,19 +43,23 @@ export default function Notification({ notification, closePanel }: any) {
           />
         )}
         <div>
-          <P
-            body2
-            fontWeight={600}
+          <p
+            css={{
+              ...theme.partials.text.body2,
+              fontWeight: 600,
+            }}
           >
             {title}
-          </P>
-          <P
-            caption
-            color="text-xlight"
-            whiteSpace="nowrap"
+          </p>
+          <p
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-xlight'],
+              whiteSpace: 'nowrap',
+            }}
           >
             {moment(seenAt).format('MMM D, h:mm')}
-          </P>
+          </p>
         </div>
         <Flex grow={1} />
         <NotificationSeverity severity={severity} />
@@ -89,13 +93,15 @@ export default function Notification({ notification, closePanel }: any) {
           padding="medium"
           paddingLeft={60}
         >
-          <P
-            body2
-            color="text-light"
-            wordBreak="break-word"
+          <p
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-light'],
+              wordBreak: 'break-word',
+            }}
           >
             {description}
-          </P>
+          </p>
           <div>
             <Button
               onClick={() => {

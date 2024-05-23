@@ -5,11 +5,13 @@ import yaml from 'js-yaml'
 
 import { Button, Card, ListBoxItem, Select } from '@pluralsh/design-system'
 
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 
 import isEqualWith from 'lodash/isEqualWith'
 
 import { omitBy } from 'lodash'
+
+import { useTheme } from 'styled-components'
 
 import { EXECUTE_OVERLAY } from './queries'
 import ConfigurationSettingsField from './ConfigurationSettingsField'
@@ -34,6 +36,7 @@ export function ConfigurationSettings({
     configuration: { helm },
   },
 }) {
+  const theme = useTheme()
   const navigate = useNavigate()
   const onCompleted = useCallback(() => navigate('/builds'), [navigate])
   const [ctx, setCtx] = useState({})
@@ -76,7 +79,7 @@ export function ConfigurationSettings({
         gap="medium"
         align="center"
       >
-        <div style={{ width: 240 }}>
+        <div css={{ width: 240 }}>
           <Select
             aria-label="folder"
             label="Folder"
@@ -92,7 +95,7 @@ export function ConfigurationSettings({
             ))}
           </Select>
         </div>
-        <div style={{ width: 240 }}>
+        <div css={{ width: 240 }}>
           <Select
             aria-label="subfolder"
             label="Sub-folder"
@@ -110,12 +113,14 @@ export function ConfigurationSettings({
         </div>
         <Flex grow={1} />
         {changed && (
-          <P
-            body2
-            color="text-xlight"
+          <p
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-xlight'],
+            }}
           >
             Unsaved changes
-          </P>
+          </p>
         )}
         <Button
           onClick={() => mutation()}

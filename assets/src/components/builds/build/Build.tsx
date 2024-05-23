@@ -1,6 +1,6 @@
+import { useQuery } from '@apollo/client'
 import { useContext, useEffect, useMemo, useRef } from 'react'
 import { Link, Outlet, useLocation, useParams } from 'react-router-dom'
-import { useQuery } from '@apollo/client'
 
 import { appendEdge } from 'components/graphql/utils'
 
@@ -20,11 +20,11 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 
-import { Flex, H2, P } from 'honorable'
+import { Flex } from 'honorable'
 
 import { getIcon, hasIcons } from 'components/apps/misc'
 
@@ -40,10 +40,10 @@ import { useTheme } from 'styled-components'
 
 import { BUILD_TYPE_DISPLAY_NAMES } from '../Build'
 
-import { BuildTimer } from './BuildTimer'
+import BuildApproval from './BuildApproval'
 import BuildCancel from './BuildCancel'
 import BuildRestart from './BuildRestart'
-import BuildApproval from './BuildApproval'
+import { BuildTimer } from './BuildTimer'
 
 const UPDATE_PATH = 'build.commands.edges'.split('.')
 
@@ -148,19 +148,19 @@ export default function Build() {
             />
           )}
           <div>
-            <H2
-              fontSize="20px"
-              fontWeight="500"
-              lineHeight="24px"
+            <h2
+              css={{ fontSize: '20px', fontWeight: '500', lineHeight: '24px' }}
             >
               {build.repository}
-            </H2>
-            <P
-              color="text-xlight"
-              caption
+            </h2>
+            <p
+              css={{
+                color: theme.colors['text-xlight'],
+                ...theme.partials.text.caption,
+              }}
             >
               {build.message}
-            </P>
+            </p>
           </div>
         </Flex>
         <TabList

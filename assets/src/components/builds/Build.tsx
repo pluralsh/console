@@ -8,7 +8,7 @@ import styled, { useTheme } from 'styled-components'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
 import { BuildTypes } from 'components/types'
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 import moment from 'moment'
 import { useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -65,12 +65,14 @@ export default function Build({ build }) {
       )}
       <Flex direction="column">
         <Flex gap="small">
-          <P
-            body1
-            fontWeight={600}
+          <p
+            css={{
+              ...theme.partials.text.body1,
+              fontWeight: 600,
+            }}
           >
             {repository}
-          </P>
+          </p>
           <Chip
             size="small"
             whiteSpace="nowrap"

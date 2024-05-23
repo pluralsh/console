@@ -2,11 +2,13 @@ import { Button, Card, Input } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { BuildType, useCreateBuildMutation } from 'generated/graphql'
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 export default function Uninstall() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const { appName } = useParams()
   const [confirm, setConfirm] = useState('')
@@ -41,20 +43,24 @@ export default function Uninstall() {
               error={error}
             />
           )}
-          <P
-            body1
-            fontWeight={600}
+          <p
+            css={{
+              ...theme.partials.text.body1,
+              fontWeight: 600,
+            }}
           >
             Uninstall {appName}
-          </P>
-          <P
-            body2
-            color="text-light"
+          </p>
+          <p
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-light'],
+            }}
           >
-            To uninstall the application, type the application’s name {appName}{' '}
+            To uninstall the application, type the application's name {appName}{' '}
             to confirm. This is action is <b>destructive</b> and can result in
             underlying data from the application being deleted.
-          </P>
+          </p>
           <Flex
             direction="row"
             alignItems="center"

@@ -1,7 +1,8 @@
 import { Box } from 'grommet'
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 import { Button, ContentCard, ValidatedInput } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
+import { useTheme } from 'styled-components'
 
 import { UPDATE_USER } from 'components/graphql/users'
 
@@ -21,6 +22,7 @@ export function Profile() {
   })
   const changed = name !== me.name || email !== me.email
   const valid = !isEmpty(name) && isValidEmail(email)
+  const theme = useTheme()
 
   return (
     <ScrollablePage heading="Profile">
@@ -54,12 +56,14 @@ export function Profile() {
           marginTop="small"
         >
           {changed && (
-            <P
-              body2
-              color="text-xlight"
+            <p
+              css={{
+                ...theme.partials.text.body2,
+                color: theme.colors['text-xlight'],
+              }}
             >
               Unsaved changes
-            </P>
+            </p>
           )}
           <Button
             disabled={!valid}

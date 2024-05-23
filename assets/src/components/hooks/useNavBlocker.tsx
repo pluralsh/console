@@ -5,7 +5,6 @@ import {
   unstable_useBlocker as useBlocker,
   useNavigate,
 } from 'react-router-dom'
-import { P } from 'honorable'
 
 type NavProps = Parameters<BlockerFunction>[0]
 function NavBlockerModal({
@@ -40,10 +39,11 @@ function NavBlockerModal({
       }
       {...props}
     >
-      <P>Are you sure you want to leave without saving?</P>
+      <p>Are you sure you want to leave without saving?</p>
     </Modal>
   )
 }
+
 export const useNavBlocker = (shouldBlock: boolean) => {
   const [navProps, setNavProps] = useState<NavProps | null>()
   const [go, setGo] = useState(false)

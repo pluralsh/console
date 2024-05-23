@@ -1,6 +1,6 @@
 import { RefObject, useEffect, useMemo, useRef, useState } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
-import { Flex, Form, P } from 'honorable'
+import { Flex } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
 import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
@@ -11,6 +11,7 @@ import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { isValidEmail } from 'utils/email'
 import { User, useMeQuery } from 'generated/graphql'
 import { useHelpSpacing } from 'components/help/HelpLauncher'
+import { useTheme } from 'styled-components'
 
 import { GqlError } from '../utils/Alert'
 import {
@@ -66,6 +67,7 @@ function LoginError({ error }) {
 
 export function GrantAccess() {
   const [jwt, setJwt] = useState('')
+  const theme = useTheme()
 
   return (
     <LoginPortal>
@@ -74,12 +76,14 @@ export function GrantAccess() {
           textAlign="left"
           marginBottom="xxsmall"
         />
-        <P
-          body1
-          color="text-xlight"
+        <p
+          css={{
+            ...theme.partials.text.body1,
+            color: theme.colors['text-xlight'],
+          }}
         >
           Enter the login token given to you to gain access
-        </P>
+        </p>
       </div>
       <LabelledInput
         value={jwt}
@@ -220,6 +224,8 @@ export function EnsureLogin({ children }) {
 }
 
 function OIDCLogin({ oidcUri, external, oidcName }) {
+  const theme = useTheme()
+
   return (
     <LoginPortal>
       <Flex
@@ -231,13 +237,15 @@ function OIDCLogin({ oidcUri, external, oidcName }) {
           gap="xsmall"
         >
           <WelcomeHeader />
-          <P
-            body1
-            color="text-light"
-            textAlign="center"
+          <p
+            css={{
+              ...theme.partials.text.body1,
+              color: theme.colors['text-light'],
+              textAlign: 'center',
+            }}
           >
             Connect to your Plural account for access to this Console.
-          </P>
+          </p>
         </Flex>
         <Button
           id="plrl-login"
@@ -308,7 +316,7 @@ export default function Login() {
   return (
     <LoginPortal>
       <WelcomeHeader marginBottom="xlarge" />
-      <Form onSubmit={onSubmit}>
+      <form onSubmit={onSubmit}>
         <Box
           margin={{ bottom: '10px' }}
           gap="xsmall"
@@ -354,7 +362,7 @@ export default function Login() {
             Log in
           </Button>
         </Box>
-      </Form>
+      </form>
     </LoginPortal>
   )
 }

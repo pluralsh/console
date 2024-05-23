@@ -7,11 +7,13 @@ import {
 } from '@pluralsh/design-system'
 import { DELETE_POLICY, UPGRADE_POLICIES } from 'components/graphql/builds'
 import { Collapsible } from 'grommet'
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 import { useState } from 'react'
 import { updateCache } from 'utils/graphql'
+import { useTheme } from 'styled-components'
 
 export default function UpgradePolicy({ policy, last = false }) {
+  const theme = useTheme()
   const [open, setOpen] = useState<boolean>(false)
   const [mutation] = useMutation(DELETE_POLICY, {
     variables: { id: policy.id },
@@ -43,12 +45,14 @@ export default function UpgradePolicy({ policy, last = false }) {
           gap="xxxsmall"
         >
           <Flex gap="small">
-            <P
-              body2
-              fontWeight={600}
+            <p
+              css={{
+                ...theme.partials.text.body2,
+                fontWeight: 600,
+              }}
             >
               {policy.name}
-            </P>
+            </p>
             <Chip
               size="small"
               textTransform="capitalize"
@@ -56,12 +60,14 @@ export default function UpgradePolicy({ policy, last = false }) {
               {policy.type?.toLowerCase()}
             </Chip>
           </Flex>
-          <P
-            body2
-            color="text-light"
+          <p
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-light'],
+            }}
           >
             App bindings: {policy.target}
-          </P>
+          </p>
         </Flex>
         <Flex grow={1} />
         <Chip>Weight: {policy.weight}</Chip>
@@ -94,13 +100,15 @@ export default function UpgradePolicy({ policy, last = false }) {
           gap="medium"
           padding="small"
         >
-          <P
-            body2
-            color="text-light"
-            wordBreak="break-word"
+          <p
+            css={{
+              ...theme.partials.text.body2,
+              color: theme.colors['text-light'],
+              wordBreak: 'break-word',
+            }}
           >
             {policy.description || 'No description.'}
-          </P>
+          </p>
           <Flex justify="end">
             <Button
               secondary

@@ -1,4 +1,4 @@
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 
 import { ME_Q, NOTIFICATIONS_Q } from 'components/graphql/users'
 import InfiniteScroller from 'components/utils/InfiniteScroller'
@@ -44,7 +44,9 @@ export function NotificationsPanel({
   const { edges, pageInfo } = data.notifications
 
   if (!edges.length) {
-    return <P padding="medium">You do not have any notifications yet.</P>
+    return (
+      <p css={{ padding: 'medium' }}>You do not have any notifications yet.</p>
+    )
   }
 
   return (

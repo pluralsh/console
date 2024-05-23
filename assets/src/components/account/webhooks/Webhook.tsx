@@ -1,15 +1,17 @@
-import { useState } from 'react'
 import { useMutation } from '@apollo/client'
+import { useState } from 'react'
 
 import moment from 'moment'
 
-import { Div, Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 
 import { IconFrame, SlackLogoIcon, TrashCanIcon } from '@pluralsh/design-system'
 
 import { Confirm } from 'components/utils/Confirm'
 
 import { TRUNCATE } from 'components/utils/truncate'
+
+import { useTheme } from 'styled-components'
 
 import { removeConnection, updateCache } from '../../../utils/graphql'
 
@@ -18,6 +20,7 @@ import { DELETE_WEBHOOK, WEBHOOKS_Q } from '../../graphql/webhooks'
 import WebhookHealth from './WebhookHealth'
 
 export default function Webhook({ hook: { id, url, health, insertedAt } }) {
+  const theme = useTheme()
   const [confirm, setConfirm] = useState(false)
   const [mutation, { loading }] = useMutation(DELETE_WEBHOOK, {
     variables: { id },
@@ -44,24 +47,25 @@ export default function Webhook({ hook: { id, url, health, insertedAt } }) {
           textValue="Slack"
           type="floating"
         />
-        <Div
-          flexGrow={1}
-          {...TRUNCATE}
-        >
-          <P
-            body2
-            fontWeight={600}
-            {...TRUNCATE}
+        <div css={{ flexGrow: 1, ...TRUNCATE }}>
+          <p
+            css={{
+              ...theme.partials.text.body2,
+              fontWeight: 600,
+              ...TRUNCATE,
+            }}
           >
             {url}
-          </P>
-          <P
-            caption
-            color="text-xlight"
+          </p>
+          <p
+            css={{
+              color: theme.colors['text-xlight'],
+              ...theme.partials.text.caption,
+            }}
           >
             Created on {moment(insertedAt).format('DD/MM/YY')}
-          </P>
-        </Div>
+          </p>
+        </div>
         <Flex
           direction="column"
           justify="center"

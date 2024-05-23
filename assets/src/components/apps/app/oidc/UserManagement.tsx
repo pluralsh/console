@@ -2,10 +2,11 @@ import { Button, Card, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
-import { Flex, P } from 'honorable'
+import { Flex } from 'honorable'
 import { GqlError } from 'forge-core'
 import sortBy from 'lodash/sortBy'
 import uniqBy from 'lodash/uniqBy'
+import { useTheme } from 'styled-components'
 
 import { PluralApi } from 'components/PluralApi'
 import { useNavBlocker } from 'components/hooks/useNavBlocker'
@@ -94,6 +95,7 @@ export function UserManagementCard({
   header = 'OpenID Connect',
   description = 'Control which users and groups have access to this application with OIDC.',
 }) {
+  const theme = useTheme()
   const { authMethod, redirectUris, bindings: initialBindings } = provider
   const [bindings, setBindings] = useState(initialBindings)
   const [mutation, { loading, error }] = useMutation(UPDATE_PROVIDER, {
@@ -140,18 +142,22 @@ export function UserManagementCard({
         gap="xxsmall"
         paddingVertical="xsmall"
       >
-        <P
-          body1
-          fontWeight={600}
+        <p
+          css={{
+            ...theme.partials.text.body1,
+            fontWeight: 600,
+          }}
         >
           {header}
-        </P>
-        <P
-          body2
-          color="text-light"
+        </p>
+        <p
+          css={{
+            ...theme.partials.text.body2,
+            color: theme.colors['text-light'],
+          }}
         >
           {description}
-        </P>
+        </p>
       </Flex>
       <Flex
         direction="column"
@@ -200,12 +206,14 @@ export function UserManagementCard({
           align="center"
         >
           {changed && (
-            <P
-              body2
-              color="text-xlight"
+            <p
+              css={{
+                ...theme.partials.text.body2,
+                color: theme.colors['text-xlight'],
+              }}
             >
               Unsaved changes
-            </P>
+            </p>
           )}
           <Button
             disabled={!changed}
