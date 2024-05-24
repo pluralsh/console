@@ -34,6 +34,7 @@ export { default as CheckOutlineIcon } from './components/icons/CheckOutlineIcon
 export { default as CheckRoundedIcon } from './components/icons/CheckRoundedIcon'
 export { default as ChronjobIcon } from './components/icons/ChronjobIcon'
 export { default as CliIcon } from './components/icons/CliIcon'
+export { default as ClipboardChecked } from './components/icons/ClipboardChecked'
 export { default as CloseIcon } from './components/icons/CloseIcon'
 export { default as CloseRoundedIcon } from './components/icons/CloseRoundedIcon'
 export { default as CloudIcon } from './components/icons/CloudIcon'
