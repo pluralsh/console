@@ -8675,7 +8675,7 @@ export type PolicyStatisticsQueryVariables = Exact<{
 
 export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatistics?: Array<{ __typename?: 'PolicyStatistic', count?: number | null, aggregate?: string | null } | null> | null };
 
-export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
+export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
 
@@ -8703,7 +8703,7 @@ export type StacksQueryVariables = Exact<{
 }>;
 
 
-export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null } | null } | null> | null } | null };
+export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null } | null } | null> | null } | null };
 
 export type StackTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8758,6 +8758,20 @@ export type DeleteStackMutationVariables = Exact<{
 
 
 export type DeleteStackMutation = { __typename?: 'RootMutationType', deleteStack?: { __typename?: 'InfrastructureStack', id?: string | null } | null };
+
+export type KickStackMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type KickStackMutation = { __typename?: 'RootMutationType', kickStack?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
+
+export type ApproveStackRunMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ApproveStackRunMutation = { __typename?: 'RootMutationType', approveStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
 
 export type LogsDeltaSubscriptionVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10851,6 +10865,7 @@ export const StackFragmentDoc = gql`
   repository {
     id
     url
+    pulledAt
   }
   git {
     ref
@@ -17745,6 +17760,72 @@ export function useDeleteStackMutation(baseOptions?: Apollo.MutationHookOptions<
 export type DeleteStackMutationHookResult = ReturnType<typeof useDeleteStackMutation>;
 export type DeleteStackMutationResult = Apollo.MutationResult<DeleteStackMutation>;
 export type DeleteStackMutationOptions = Apollo.BaseMutationOptions<DeleteStackMutation, DeleteStackMutationVariables>;
+export const KickStackDocument = gql`
+    mutation KickStack($id: ID!) {
+  kickStack(id: $id) {
+    ...StackRun
+  }
+}
+    ${StackRunFragmentDoc}`;
+export type KickStackMutationFn = Apollo.MutationFunction<KickStackMutation, KickStackMutationVariables>;
+
+/**
+ * __useKickStackMutation__
+ *
+ * To run a mutation, you first call `useKickStackMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useKickStackMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [kickStackMutation, { data, loading, error }] = useKickStackMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useKickStackMutation(baseOptions?: Apollo.MutationHookOptions<KickStackMutation, KickStackMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<KickStackMutation, KickStackMutationVariables>(KickStackDocument, options);
+      }
+export type KickStackMutationHookResult = ReturnType<typeof useKickStackMutation>;
+export type KickStackMutationResult = Apollo.MutationResult<KickStackMutation>;
+export type KickStackMutationOptions = Apollo.BaseMutationOptions<KickStackMutation, KickStackMutationVariables>;
+export const ApproveStackRunDocument = gql`
+    mutation ApproveStackRun($id: ID!) {
+  approveStackRun(id: $id) {
+    ...StackRun
+  }
+}
+    ${StackRunFragmentDoc}`;
+export type ApproveStackRunMutationFn = Apollo.MutationFunction<ApproveStackRunMutation, ApproveStackRunMutationVariables>;
+
+/**
+ * __useApproveStackRunMutation__
+ *
+ * To run a mutation, you first call `useApproveStackRunMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useApproveStackRunMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [approveStackRunMutation, { data, loading, error }] = useApproveStackRunMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useApproveStackRunMutation(baseOptions?: Apollo.MutationHookOptions<ApproveStackRunMutation, ApproveStackRunMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ApproveStackRunMutation, ApproveStackRunMutationVariables>(ApproveStackRunDocument, options);
+      }
+export type ApproveStackRunMutationHookResult = ReturnType<typeof useApproveStackRunMutation>;
+export type ApproveStackRunMutationResult = Apollo.MutationResult<ApproveStackRunMutation>;
+export type ApproveStackRunMutationOptions = Apollo.BaseMutationOptions<ApproveStackRunMutation, ApproveStackRunMutationVariables>;
 export const LogsDeltaDocument = gql`
     subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {
@@ -18357,6 +18438,8 @@ export const namedOperations = {
     UpdateStack: 'UpdateStack',
     DetachStack: 'DetachStack',
     DeleteStack: 'DeleteStack',
+    KickStack: 'KickStack',
+    ApproveStackRun: 'ApproveStackRun',
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken',
     Logout: 'Logout'

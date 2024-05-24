@@ -1,21 +1,24 @@
 import { Button, Tooltip } from '@pluralsh/design-system'
 import { useSyncCooldown } from 'components/hooks/useSyncCooldown'
 import { GqlError } from 'components/utils/Alert'
-import { useKickServiceMutation } from 'generated/graphql'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 
-export default function ServiceKick({
-  id,
+export default function KickButton({
   pulledAt,
+  kickMutationHook,
+  message,
+  tooltipMessage,
+  variables,
 }: {
-  id: string
   pulledAt?: string | null
+  kickMutationHook: any
+  message: string
+  tooltipMessage: string
+  variables: any
 }) {
   const theme = useTheme()
-  const [mutation, { loading, error }] = useKickServiceMutation({
-    variables: { id },
-  })
+  const [mutation, { loading, error }] = kickMutationHook({ variables })
   const [buttonClicked, setButtonClicked] = useState(false)
 
   const lastPullPlus15 =
@@ -32,13 +35,15 @@ export default function ServiceKick({
         flexDirection: 'column',
       }}
     >
-      {error && (
-        <GqlError
-          header="Failed to promote canary"
-          error={error}
-        />
-      )}
-      <Tooltip label={<TooltipLabel pulledAt={pulledAt} />}>
+      {error && <GqlError error={error} />}
+      <Tooltip
+        label={
+          <TooltipLabel
+            pulledAt={pulledAt}
+            message={tooltipMessage}
+          />
+        }
+      >
         <Button
           disabled={disabled && buttonClicked}
           onClick={() => {
@@ -49,19 +54,23 @@ export default function ServiceKick({
         >
           {disabled && buttonClicked
             ? `Resync cooldown ${secondsRemaining}`
-            : 'Resync service'}
+            : message}
         </Button>
       </Tooltip>
     </div>
   )
 }
 
-function TooltipLabel({ pulledAt }: { pulledAt?: string | null }) {
+function TooltipLabel({
+  pulledAt,
+  message,
+}: {
+  pulledAt?: string | null
+  message?: string
+}) {
   return (
     <>
-      <p>
-        Use this to sync this service now instead of in the next poll interval
-      </p>
+      <p>{message}</p>
       {pulledAt && (
         <p>
           Last synced:{' '}

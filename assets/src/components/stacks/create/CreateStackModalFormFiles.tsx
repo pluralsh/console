@@ -80,7 +80,7 @@ export function CreateStackModalFormFiles({
         Add file
       </Button>
     ),
-    [setFiles]
+    [loading, setFiles]
   )
 
   const readFile = useCallback(
