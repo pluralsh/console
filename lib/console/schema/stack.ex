@@ -18,7 +18,16 @@ defmodule Console.Schema.Stack do
   }
 
   defenum Type, terraform: 0, ansible: 1
-  defenum Status, queued: 0, pending: 1, running: 2, successful: 3, failed: 4, cancelled: 5
+  defenum Status,
+    queued: 0,
+    pending: 1,
+    running: 2,
+    successful: 3,
+    failed: 4,
+    cancelled: 5,
+    pending_approval: 6
+
+  def running_states(), do: ~w(pending running pending_approval)a
 
   defmodule Configuration do
     use Piazza.Ecto.Schema
@@ -26,12 +35,25 @@ defmodule Console.Schema.Stack do
     embedded_schema do
       field :image,   :string
       field :version, :string
+      field :tag,     :string
+
+      embeds_many :hooks, Hook, on_replace: :delete do
+        field :cmd,          :string
+        field :args,         {:array, :string}
+        field :after_stage, Console.Schema.RunStep.Stage
+      end
     end
 
     def changeset(model, attrs \\ %{}) do
       model
       |> cast(attrs, ~w(image version)a)
-      |> validate_required(~w(version)a)
+      |> cast_embed(:hooks, with: &hook_changeset/2)
+    end
+
+    defp hook_changeset(model, attrs) do
+      model
+      |> cast(attrs, ~w(cmd args after_stage)a)
+      |> validate_required(~w(cmd after_stage)a)
     end
   end
 

@@ -402,6 +402,9 @@ defmodule Console.Deployments.Stacks do
       do: poll(stack)
   end
 
+  def kick(id, user) when is_binary(id),
+    do: kick(get_stack!(id), user)
+
   defp notify({:ok, %Stack{} = stack}, :create, actor),
     do: handle_notify(PubSub.StackCreated, stack, actor: actor)
   defp notify({:ok, %Stack{} = stack}, :update, actor),

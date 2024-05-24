@@ -158,7 +158,9 @@ defmodule Console.Deployments.Git.Agent do
 
   defp refresh(%GitRepository{} = repo) do
     with %GitRepository{} = git <- Console.Repo.get(GitRepository, repo.id),
-      do: Map.merge(git, Map.take(repo, [:private_key_file, :dir]))
+         git = Map.merge(git, Map.take(repo, [:private_key_file, :dir])),
+         {:ok, git} <- refresh_key(git),
+      do: git
   end
 
   defp refresh(%GitRepository{health: :pullable} = git, cache), do: Cache.refresh(%{cache | git: git})

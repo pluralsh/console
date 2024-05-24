@@ -6604,17 +6604,25 @@ export type StackAttributes = {
 
 export type StackConfiguration = {
   __typename?: 'StackConfiguration';
+  /** the hooks to customize execution for this stack */
+  hooks?: Maybe<Array<Maybe<StackHook>>>;
   /** optional custom image you might want to use */
   image?: Maybe<Scalars['String']['output']>;
+  /** the docker image tag you wish to use if you're customizing the version */
+  tag?: Maybe<Scalars['String']['output']>;
   /** the semver of the tool you wish to use */
   version: Scalars['String']['output'];
 };
 
 export type StackConfigurationAttributes = {
+  /** the hooks to customize execution for this stack */
+  hooks?: InputMaybe<Array<InputMaybe<StackHookAttributes>>>;
   /** optional custom image you might want to use */
   image?: InputMaybe<Scalars['String']['input']>;
+  /** the docker image tag you wish to use if you're customizing the version */
+  tag?: InputMaybe<Scalars['String']['input']>;
   /** the semver of the tool you wish to use */
-  version: Scalars['String']['input'];
+  version?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type StackEnvironment = {
@@ -6639,6 +6647,25 @@ export type StackFile = {
 export type StackFileAttributes = {
   content: Scalars['String']['input'];
   path: Scalars['String']['input'];
+};
+
+export type StackHook = {
+  __typename?: 'StackHook';
+  /** the stage to run this hook before */
+  afterStage: StepStage;
+  /** args for `cmd` */
+  args?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** a script hook to run at a stage */
+  cmd: Scalars['String']['output'];
+};
+
+export type StackHookAttributes = {
+  /** the stage to run this hook before */
+  afterStage: StepStage;
+  /** args for `cmd` */
+  args?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  /** a script hook to run at a stage */
+  cmd: Scalars['String']['input'];
 };
 
 export type StackOutput = {
@@ -6765,6 +6792,7 @@ export enum StackStatus {
   Cancelled = 'CANCELLED',
   Failed = 'FAILED',
   Pending = 'PENDING',
+  PendingApproval = 'PENDING_APPROVAL',
   Queued = 'QUEUED',
   Running = 'RUNNING',
   Successful = 'SUCCESSFUL'

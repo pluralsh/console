@@ -937,6 +937,7 @@ enum StackStatus {
   SUCCESSFUL
   FAILED
   CANCELLED
+  PENDING_APPROVAL
 }
 
 enum StackType {
@@ -999,7 +1000,24 @@ input StackConfigurationAttributes {
   image: String
 
   "the semver of the tool you wish to use"
-  version: String!
+  version: String
+
+  "the docker image tag you wish to use if you're customizing the version"
+  tag: String
+
+  "the hooks to customize execution for this stack"
+  hooks: [StackHookAttributes]
+}
+
+input StackHookAttributes {
+  "a script hook to run at a stage"
+  cmd: String!
+
+  "args for `cmd`"
+  args: [String]
+
+  "the stage to run this hook before"
+  afterStage: StepStage!
 }
 
 input StackRunAttributes {
@@ -1136,6 +1154,23 @@ type StackConfiguration {
 
   "the semver of the tool you wish to use"
   version: String!
+
+  "the docker image tag you wish to use if you're customizing the version"
+  tag: String
+
+  "the hooks to customize execution for this stack"
+  hooks: [StackHook]
+}
+
+type StackHook {
+  "a script hook to run at a stage"
+  cmd: String!
+
+  "args for `cmd`"
+  args: [String]
+
+  "the stage to run this hook before"
+  afterStage: StepStage!
 }
 
 type StackRun {
