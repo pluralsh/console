@@ -1,14 +1,25 @@
-import React, { ReactNode } from 'react'
-import { Button, Sidecar, SidecarItem } from '@pluralsh/design-system'
+import { ReactNode } from 'react'
+import {
+  Button,
+  ReloadIcon,
+  Sidecar,
+  SidecarItem,
+} from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 import moment from 'moment'
 
 import { GqlError } from 'components/utils/Alert'
 
+import { useNavigate, useParams } from 'react-router-dom'
+
+import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
+
 import {
   StackRun,
+  StackStatus,
   useApproveStackRunMutation,
+  useRestartStackRunMutation,
 } from '../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
 import UserInfo from '../../utils/UserInfo'
@@ -19,19 +30,36 @@ interface StackRunSidecarProps {
   refetch?: Nullable<() => void>
 }
 
+const TERMINAL_STATES = [
+  StackStatus.Successful,
+  StackStatus.Cancelled,
+  StackStatus.Failed,
+]
+
 export default function StackRunSidecar({
   stackRun,
   refetch,
 }: StackRunSidecarProps): ReactNode {
+  const { stackId } = useParams()
   const theme = useTheme()
+  const navigate = useNavigate()
 
   const [mutation, { loading, error }] = useApproveStackRunMutation({
     variables: { id: stackRun.id },
     onCompleted: () => refetch?.(),
   })
 
+  const [restart, { loading: restartLoading, error: restartError }] =
+    useRestartStackRunMutation({
+      variables: { id: stackRun.id },
+      onCompleted: ({ restartStackRun }) =>
+        navigate(getStackRunsAbsPath(stackId, restartStackRun?.id)),
+    })
+
+  const terminal = TERMINAL_STATES.includes(stackRun.status)
+
   if (error) return <GqlError error={error} />
-  console.log(stackRun)
+  if (restartError) return <GqlError error={restartError} />
 
   return (
     <ResponsiveLayoutSidecarContainer
@@ -47,8 +75,17 @@ export default function StackRunSidecar({
           Approve Run
         </Button>
       )}
+      {terminal && (
+        <Button
+          secondary
+          onClick={restart}
+          loading={restartLoading}
+          startIcon={<ReloadIcon />}
+        >
+          Restart Run
+        </Button>
+      )}
       <Sidecar>
-        <SidecarItem heading="ID">{stackRun.id}</SidecarItem>
         <SidecarItem heading="Needs approval">
           {stackRun.approval ? 'Required' : 'Not required'}
         </SidecarItem>
