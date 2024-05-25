@@ -267,6 +267,12 @@ mutation ApproveStackRun($id: ID!) {
   }
 }
 
+mutation RestartStackRun($id: ID!) {
+  restartStackRun(id: $id) {
+    ...StackRun
+  }
+}
+
 subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {
     delta
