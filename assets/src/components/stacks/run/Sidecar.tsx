@@ -24,6 +24,7 @@ import {
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
 import UserInfo from '../../utils/UserInfo'
 import { ClusterProviderIcon } from '../../utils/Provider'
+import { StackRunStatusChip } from '../StackRunStatusChip'
 
 interface StackRunSidecarProps {
   stackRun: StackRun
@@ -86,6 +87,12 @@ export default function StackRunSidecar({
         </Button>
       )}
       <Sidecar>
+        <SidecarItem heading="Status">
+          <StackRunStatusChip
+            status={stackRun.status}
+            size="small"
+          />
+        </SidecarItem>
         <SidecarItem heading="Needs approval">
           {stackRun.approval ? 'Required' : 'Not required'}
         </SidecarItem>
