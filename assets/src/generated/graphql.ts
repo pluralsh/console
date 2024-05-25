@@ -8773,6 +8773,13 @@ export type ApproveStackRunMutationVariables = Exact<{
 
 export type ApproveStackRunMutation = { __typename?: 'RootMutationType', approveStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
 
+export type RestartStackRunMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type RestartStackRunMutation = { __typename?: 'RootMutationType', restartStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
+
 export type LogsDeltaSubscriptionVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -17826,6 +17833,39 @@ export function useApproveStackRunMutation(baseOptions?: Apollo.MutationHookOpti
 export type ApproveStackRunMutationHookResult = ReturnType<typeof useApproveStackRunMutation>;
 export type ApproveStackRunMutationResult = Apollo.MutationResult<ApproveStackRunMutation>;
 export type ApproveStackRunMutationOptions = Apollo.BaseMutationOptions<ApproveStackRunMutation, ApproveStackRunMutationVariables>;
+export const RestartStackRunDocument = gql`
+    mutation RestartStackRun($id: ID!) {
+  restartStackRun(id: $id) {
+    ...StackRun
+  }
+}
+    ${StackRunFragmentDoc}`;
+export type RestartStackRunMutationFn = Apollo.MutationFunction<RestartStackRunMutation, RestartStackRunMutationVariables>;
+
+/**
+ * __useRestartStackRunMutation__
+ *
+ * To run a mutation, you first call `useRestartStackRunMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRestartStackRunMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [restartStackRunMutation, { data, loading, error }] = useRestartStackRunMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useRestartStackRunMutation(baseOptions?: Apollo.MutationHookOptions<RestartStackRunMutation, RestartStackRunMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RestartStackRunMutation, RestartStackRunMutationVariables>(RestartStackRunDocument, options);
+      }
+export type RestartStackRunMutationHookResult = ReturnType<typeof useRestartStackRunMutation>;
+export type RestartStackRunMutationResult = Apollo.MutationResult<RestartStackRunMutation>;
+export type RestartStackRunMutationOptions = Apollo.BaseMutationOptions<RestartStackRunMutation, RestartStackRunMutationVariables>;
 export const LogsDeltaDocument = gql`
     subscription LogsDelta($id: ID!) {
   runLogsDelta(stepId: $id) {
@@ -18440,6 +18480,7 @@ export const namedOperations = {
     DeleteStack: 'DeleteStack',
     KickStack: 'KickStack',
     ApproveStackRun: 'ApproveStackRun',
+    RestartStackRun: 'RestartStackRun',
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken',
     Logout: 'Logout'

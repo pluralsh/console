@@ -84,7 +84,12 @@ function StackRunSidenavHeader({
       }}
     >
       <AppIcon
-        icon={<StackTypeIcon stackType={stackRun.type} />}
+        icon={
+          <StackTypeIcon
+            stackType={stackRun.type}
+            size={36}
+          />
+        }
         size="small"
       />
       <StackedText

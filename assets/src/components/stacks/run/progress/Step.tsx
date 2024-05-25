@@ -26,14 +26,13 @@ import CommandLog from '../../../builds/build/progress/CommandLog'
 
 interface StepProps {
   step: RunStep
+  open?: boolean
 }
 
-export default function Step({ step }: StepProps): ReactNode {
+export default function Step({ step, open }: StepProps): ReactNode {
   const ref = useRef<any>()
 
-  const [folded, setFolded] = useState(
-    step.status === StepStatus.Successful || step.status === StepStatus.Pending
-  )
+  const [folded, setFolded] = useState<boolean | undefined>(undefined)
   const [logs, setLogs] = useState(step?.logs as Array<RunLogs>)
 
   const command = useMemo(
@@ -62,6 +61,8 @@ export default function Step({ step }: StepProps): ReactNode {
     setLogs(step?.logs as Array<RunLogs>)
   }, [step?.logs])
 
+  const show = folded === undefined ? open : !folded
+
   return (
     <Div ref={ref}>
       <Flex
@@ -83,7 +84,7 @@ export default function Step({ step }: StepProps): ReactNode {
           align="center"
           grow={1}
         >
-          {folded ? (
+          {!show ? (
             <CaretRightIcon
               size={12}
               paddingRight="small"
@@ -98,7 +99,7 @@ export default function Step({ step }: StepProps): ReactNode {
         </Flex>
         <Status status={step.status} />
       </Flex>
-      {!folded && (
+      {show && (
         <CommandLog
           text={toLogsString(logs)}
           follow={step.status === StepStatus.Running}

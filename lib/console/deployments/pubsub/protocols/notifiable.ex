@@ -75,7 +75,7 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.PipelineGateU
   def message(_), do: :ok
 end
 
-defimpl Console.Deployments.PubSub.Notifiable, for: [Console.PubSub.StackRunCreated, Console.PubSub.StackRunUpdated, Console.PubSub.StackRunDeleted] do
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunCreated do
   alias Console.Deployments.Notifications.Utils
 
   def message(%{item: run}) do
