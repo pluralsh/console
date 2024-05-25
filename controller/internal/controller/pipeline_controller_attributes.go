@@ -18,13 +18,10 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/utils"
-	"github.com/pluralsh/polly/algorithms"
-	"github.com/samber/lo"
 	v1 "k8s.io/api/core/v1"
 )
 
@@ -167,61 +164,12 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 		return nil, nil
 	}
 
-	job, err := r.pipelineEdgeGateSpecJobAttributes(spec.Job)
+	job, err := gateJobAttributes(spec.Job)
 	if err != nil {
 		return nil, err
 	}
 
 	return &console.GateSpecAttributes{
 		Job: job,
-	}, nil
-}
-
-func (r *PipelineReconciler) pipelineEdgeGateSpecJobAttributes(job *v1alpha1.GateJob) (*console.GateJobAttributes, error) {
-	if job == nil {
-		return nil, nil
-	}
-
-	var annotations, labels *string
-	if job.Annotations != nil {
-		result, err := json.Marshal(job.Annotations)
-		if err != nil {
-			return nil, err
-		}
-		annotations = lo.ToPtr(string(result))
-	}
-	if job.Labels != nil {
-		result, err := json.Marshal(job.Labels)
-		if err != nil {
-			return nil, err
-		}
-		labels = lo.ToPtr(string(result))
-	}
-
-	return &console.GateJobAttributes{
-		Namespace: job.Namespace,
-		Raw:       job.Raw,
-		Containers: algorithms.Map(job.Containers,
-			func(c *v1alpha1.Container) *console.ContainerAttributes {
-				return &console.ContainerAttributes{
-					Image: c.Image,
-					Args:  c.Args,
-					Env: algorithms.Map(c.Env, func(e *v1alpha1.Env) *console.EnvAttributes {
-						return &console.EnvAttributes{
-							Name:  e.Name,
-							Value: e.Value,
-						}
-					}),
-					EnvFrom: algorithms.Map(c.EnvFrom, func(e *v1alpha1.EnvFrom) *console.EnvFromAttributes {
-						return &console.EnvFromAttributes{
-							Secret:    e.Secret,
-							ConfigMap: e.ConfigMap,
-						}
-					}),
-				}
-			}),
-		Labels:         labels,
-		Annotations:    annotations,
-		ServiceAccount: job.ServiceAccount,
 	}, nil
 }

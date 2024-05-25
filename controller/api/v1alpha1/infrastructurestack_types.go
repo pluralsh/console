@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console-client-go"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -38,15 +37,22 @@ type InfrastructureStackSpec struct {
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Cluster is immutable"
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
 
 	// Git reference w/in the repository where the IaC lives
 	Git GitRef `json:"git"`
 
+	// Whether you want Plural to manage the state of this stack
+	// +kubebuilder:validation:Optional
+	ManageState *bool `json:"manageState,omitempty"`
+
+	// The working directory within the git spec you want to run commands in (useful for projects with external modules)
+	// +kubebuilder:validation:Optional
+	Workdir *string `json:"workdir,omitempty"`
+
 	// JobSpec optional k8s job configuration for the job that will apply this stack
 	// +kubebuilder:validation:Optional
-	JobSpec *batchv1.JobSpec `json:"jobSpec,omitempty"`
+	JobSpec *JobSpec `json:"jobSpec,omitempty"`
 
 	// Configuration version/image config for the tool you're using
 	Configuration StackConfiguration `json:"configuration"`
