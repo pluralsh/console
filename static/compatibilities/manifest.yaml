@@ -14,4 +14,4 @@ names:
 - opentelemetry
 - kyverno
 - vitess
-- strimzi
+- strimzi-kafka
