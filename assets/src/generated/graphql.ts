@@ -1996,6 +1996,8 @@ export type InfrastructureStack = {
   /** A type for the stack, specifies the tool to use to apply it */
   type: StackType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the subdirectory you want to run the stack's commands w/in */
+  workdir?: Maybe<Scalars['String']['output']>;
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
@@ -6591,6 +6593,8 @@ export type StackAttributes = {
   git: GitRefAttributes;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: InputMaybe<GateJobAttributes>;
+  /** whether you want Plural to manage your terraform state for this stack */
+  manageState?: InputMaybe<Scalars['Boolean']['input']>;
   /** the name of the stack */
   name: Scalars['String']['input'];
   observableMetrics?: InputMaybe<Array<InputMaybe<ObservableMetricAttributes>>>;
@@ -6599,6 +6603,8 @@ export type StackAttributes = {
   repositoryId: Scalars['ID']['input'];
   /** A type for the stack, specifies the tool to use to apply it */
   type: StackType;
+  /** the subdirectory you want to run the stack's commands w/in */
+  workdir?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 

@@ -13,7 +13,9 @@ defmodule Console.Deployments.Policies do
     ManagedNamespace,
     StackRun,
     RunStep,
-    RunLog
+    RunLog,
+    Stack,
+    TerraformState
   }
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
@@ -47,6 +49,10 @@ defmodule Console.Deployments.Policies do
     end
   end
 
+  def can?(%Cluster{id: id}, %Stack{cluster_id: id}, :state), do: :pass
+
+  def can?(%User{} = user, %Stack{} = stack, :state), do: can?(user, stack, :write)
+
   def can?(%Cluster{id: id}, %StackRun{cluster_id: id}, _), do: :pass
 
   def can?(%Cluster{} = cluster, %RunStep{} = step, action) do
@@ -76,6 +82,11 @@ defmodule Console.Deployments.Policies do
     do: can?(user, %{svc | deleted_at: nil}, :write)
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :secrets), do: :pass
   def can?(%Cluster{id: id}, %Service{cluster_id: id}, :read), do: :pass
+
+  def can?(actor, %TerraformState{} = state, :state) do
+    %{stack: stack} = Repo.preload(state, [:stack])
+    can?(actor, stack, :state)
+  end
 
   def can?(%User{} = user, %ClusterBackup{cluster: %Cluster{} = cluster}, action),
     do: can?(user, cluster, action)
