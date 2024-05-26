@@ -1978,6 +1978,8 @@ export type InfrastructureStack = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: Maybe<JobGateSpec>;
+  /** whether you want Plural to manage the state of this stack */
+  manageState?: Maybe<Scalars['Boolean']['output']>;
   /** the name of the stack */
   name: Scalars['String']['output'];
   /** a list of metrics to poll to determine if a stack run should be cancelled */
@@ -6711,12 +6713,16 @@ export type StackRun = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: Maybe<JobGateSpec>;
+  /** whether you want Plural to manage the state of this stack */
+  manageState?: Maybe<Scalars['Boolean']['output']>;
   /** the commit message */
   message?: Maybe<Scalars['String']['output']>;
   /** the most recent output for this stack */
   output?: Maybe<Array<Maybe<StackOutput>>>;
   /** the git repository you're sourcing IaC from */
   repository?: Maybe<GitRepository>;
+  /** the stack attached to this run */
+  stack?: Maybe<InfrastructureStack>;
   /** the most recent state of this stack */
   state?: Maybe<StackState>;
   /** The status of this run */
@@ -6728,6 +6734,8 @@ export type StackRun = {
   /** A type for the stack, specifies the tool to use to apply it */
   type: StackType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the subdirectory you want to run the stack's commands w/in */
+  workdir?: Maybe<Scalars['String']['output']>;
 };
 
 export type StackRunAttributes = {

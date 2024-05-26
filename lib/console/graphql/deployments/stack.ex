@@ -99,6 +99,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :deleted_at,          :datetime, description: "whether this stack was previously deleted and is pending cleanup"
     field :cancellation_reason, :string, description: "why this run was cancelled"
     field :workdir,             :string, description: "the subdirectory you want to run the stack's commands w/in"
+    field :manage_state,        :boolean, description: "whether you want Plural to manage the state of this stack"
 
     connection field :runs, node_type: :stack_run do
       arg :pull_request_id, :id
@@ -149,6 +150,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :approval,       :boolean, description: "whether to require approval"
     field :message,        :string, description: "the commit message"
     field :approved_at,    :datetime, description: "when this run was approved"
+    field :workdir,        :string, description: "the subdirectory you want to run the stack's commands w/in"
+    field :manage_state,   :boolean, description: "whether you want Plural to manage the state of this stack"
 
     field :tarball, non_null(:string), resolve: &Deployments.stack_tarball/3, description: "https url to fetch the latest tarball of stack IaC"
 
@@ -159,6 +162,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :files, list_of(:stack_file), resolve: dataloader(Deployments), description: "files bound to a run of this stack"
     field :environment, list_of(:stack_environment), resolve: dataloader(Deployments), description: "environment variables for this stack"
 
+    field :stack,  :infrastructure_stack, resolve: dataloader(Deployments), description: "the stack attached to this run"
     field :output, list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
     field :state,  :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
     field :errors, list_of(:service_error),
