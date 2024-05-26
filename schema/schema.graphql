@@ -984,6 +984,12 @@ input StackAttributes {
   "whether to require approval"
   approval: Boolean
 
+  "whether you want Plural to manage your terraform state for this stack"
+  manageState: Boolean
+
+  "the subdirectory you want to run the stack's commands w\/in"
+  workdir: String
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -1113,6 +1119,9 @@ type InfrastructureStack {
 
   "why this run was cancelled"
   cancellationReason: String
+
+  "the subdirectory you want to run the stack's commands w\/in"
+  workdir: String
 
   runs(after: String, first: Int, before: String, last: Int, pullRequestId: ID): StackRunConnection
 

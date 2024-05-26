@@ -17,6 +17,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :job_spec,       :gate_job_attributes, description: "optional k8s job configuration for the job that will apply this stack"
     field :configuration,  non_null(:stack_configuration_attributes), description: "version/image config for the tool you're using"
     field :approval,       :boolean, description: "whether to require approval"
+    field :manage_state,   :boolean, description: "whether you want Plural to manage your terraform state for this stack"
+    field :workdir,        :string, description: "the subdirectory you want to run the stack's commands w/in"
 
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -96,6 +98,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :approval,            :boolean, description: "whether to require approval"
     field :deleted_at,          :datetime, description: "whether this stack was previously deleted and is pending cleanup"
     field :cancellation_reason, :string, description: "why this run was cancelled"
+    field :workdir,             :string, description: "the subdirectory you want to run the stack's commands w/in"
 
     connection field :runs, node_type: :stack_run do
       arg :pull_request_id, :id

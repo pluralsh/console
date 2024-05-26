@@ -66,6 +66,8 @@ defmodule Console.Schema.Stack do
     field :sha,             :string
     field :last_successful, :string
     field :deleted_at,      :utc_datetime_usec
+    field :manage_state,    :boolean, default: false
+    field :workdir,         :string
 
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
@@ -127,7 +129,7 @@ defmodule Console.Schema.Stack do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name type paused status approval connection_id repository_id cluster_id)a
+  @valid ~w(name type paused workdir manage_state status approval connection_id repository_id cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

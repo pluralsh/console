@@ -590,6 +590,12 @@ defmodule Console.Factory do
     }
   end
 
+  def terraform_state_factory do
+    %Schema.TerraformState{
+      stack: build(:stack)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
