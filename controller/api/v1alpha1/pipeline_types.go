@@ -118,11 +118,11 @@ type PipelineGate struct {
 // GateSpec is a more refined spec for parameters needed for complex gates.
 type GateSpec struct {
 	// +kubebuilder:validation:Optional
-	Job *GateJob `json:"job,omitempty"`
+	Job *JobSpec `json:"job,omitempty"`
 }
 
-// GateJob is a spec for a job gate.
-type GateJob struct {
+// JobSpec is a spec for a job gate.
+type JobSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	Namespace string `json:"namespace"`
