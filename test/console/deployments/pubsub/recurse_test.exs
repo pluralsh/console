@@ -407,6 +407,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
 
       assert run.git.ref == "last-sha"
       assert run.stack_id == stack.id
+      assert run.message =~ "destroying stack #{stack.name}"
 
       %{steps: steps} = Console.Repo.preload(run, [:steps])
       %{"init" => init, "destroy" => destroy} = Map.new(steps, & {&1.name, &1})

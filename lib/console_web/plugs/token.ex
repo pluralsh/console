@@ -35,6 +35,15 @@ defmodule ConsoleWeb.Plugs.Token do
     end
   end
 
+  def fetch_resource(:bearer, token, {conn, opts}) do
+    key = Guardian.Plug.Pipeline.fetch_key(conn, opts)
+    with {:ok, claims} <- Console.Guardian.decode_and_verify(token) do
+      conn
+      |> Guardian.Plug.put_current_token(token, key: key)
+      |> Guardian.Plug.put_current_claims(claims, key: key)
+    end
+  end
+
   def broadcast(token) do
     Console.PubSub.Broadcaster.notify(%Console.PubSub.AccessTokenUsage{
       item: token,
@@ -49,6 +58,7 @@ defmodule ConsoleWeb.Plugs.Token do
     case get_req_header(conn, "authorization") do
       ["Token deploy-" <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :deploy)
       ["Token console-" <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :user)
+      ["Token " <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :bearer)
       _ -> {:error, :unauthorized}
     end
   end

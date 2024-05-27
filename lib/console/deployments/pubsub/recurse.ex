@@ -114,7 +114,7 @@ end
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackDeleted do
   alias Console.Deployments.Stacks
 
-  def process(%{item: stack}), do: Stacks.create_run(stack, stack.sha)
+  def process(%{item: stack}), do: Stacks.create_run(stack, stack.sha, %{message: "destroying stack #{stack.name}"})
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do

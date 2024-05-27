@@ -3,8 +3,10 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   alias Console.PubSub
+  alias Console.Deployments.{Services, Clusters}
   alias Console.Deployments.Git.Discovery
   alias Console.Deployments.Pr.Dispatcher
+  alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
     User,
     Cluster,
@@ -44,6 +46,40 @@ defmodule Console.Deployments.Stacks do
   def authorized(run_id, cluster) do
     get_run!(run_id)
     |> allow(cluster, :read)
+  end
+
+  @doc """
+  If a user has write access to the run, fetches temporary plural creds for use in the given stack run.
+
+  To be set in the environment by the stack harness process
+  """
+  @spec plural_creds(StackRun.t, User.t | Cluster.t) :: {:ok, %{token: binary, url: binary}}
+  def plural_creds(%StackRun{} = run, actor) do
+    with {:ok, run} <- allow(run, actor, :state),
+      do: plural_creds(run)
+  end
+
+  def plural_creds(%StackRun{} = run) do
+    case Repo.preload(run, [:actor]) do
+      %{actor: %User{} = actor} ->
+        with {:ok, token, _} <- Console.Guardian.encode_and_sign(actor, %{}, ttl: {1, :day}),
+          do: {:ok, %{token: token, url: Console.graphql_endpoint()}}
+      _ -> {:ok, nil}
+    end
+  end
+
+  @doc """
+  Generates remote state urls for supported tools (only terraform for now)
+  """
+  @spec state_urls(StackRun.t) :: %{terraform: map}
+  def state_urls(%StackRun{stack_id: id}) do
+    %{
+      terraform: %{
+        address: Services.api_url("v1/states/terraform/#{id}"),
+        lock: Services.api_url("v1/states/terraform/#{id}/lock"),
+        unlock: Services.api_url("v1/states/terraform/#{id}/unlock")
+      }
+    }
   end
 
   @doc """
@@ -404,6 +440,17 @@ defmodule Console.Deployments.Stacks do
 
   def kick(id, user) when is_binary(id),
     do: kick(get_stack!(id), user)
+
+  @doc """
+  Fetches the k8s job resource from the stack runs configured cluster via KAS
+  """
+  @spec run_job(StackRun.t) :: {:ok, BatchV1.Job.t} | error
+  def run_job(%StackRun{job_ref: %{namespace: ns, name: name}} = run) do
+    %{cluster: cluster} = Repo.preload(run, [:cluster])
+    BatchV1.read_namespaced_job!(ns, name)
+    |> Kazan.run(server: Clusters.control_plane(cluster))
+  end
+  def run_job(_), do: {:ok, nil}
 
   defp notify({:ok, %Stack{} = stack}, :create, actor),
     do: handle_notify(PubSub.StackCreated, stack, actor: actor)

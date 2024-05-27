@@ -80,6 +80,7 @@ defmodule Console.Schema.Stack do
     belongs_to :cluster,    Cluster
     belongs_to :delete_run, StackRun
     belongs_to :connection, ScmConnection
+    belongs_to :actor,      User
 
     has_one :state, StackState,
       on_replace: :update,
@@ -129,7 +130,7 @@ defmodule Console.Schema.Stack do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name type paused workdir manage_state status approval connection_id repository_id cluster_id)a
+  @valid ~w(name type paused actor_id workdir manage_state status approval connection_id repository_id cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -145,6 +146,7 @@ defmodule Console.Schema.Stack do
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:connection_id)
+    |> foreign_key_constraint(:actor_id)
     |> unique_constraint(:name)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
