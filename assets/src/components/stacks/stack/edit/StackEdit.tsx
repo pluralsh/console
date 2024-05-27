@@ -73,10 +73,7 @@ export default function StackEdit() {
         clusterId: stack.cluster?.id ?? '',
         repositoryId,
         git: { folder, ref },
-        configuration: {
-          image,
-          version,
-        },
+        configuration: { image, version },
       },
     },
     onCompleted: () => refetch?.(),
