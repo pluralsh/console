@@ -46,6 +46,8 @@ import { SideNavEntries } from '../../layout/SideNavEntries'
 
 import KickButton from '../../utils/KickButton'
 
+import { TRUNCATE } from '../../utils/truncate'
+
 import StackDelete from './StackDelete'
 
 const QUERY_PAGE_SIZE = 100
@@ -117,7 +119,6 @@ export default function Stack() {
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <ResponsiveLayoutSidenavContainer>
-        {/* TODO: Should take one line at max. */}
         <Select
           selectedKey={stack.id}
           onSelectionChange={(id) =>
@@ -141,7 +142,7 @@ export default function Stack() {
           {stacks.map((s) => (
             <ListBoxItem
               key={s.id ?? ''}
-              label={s.name}
+              label={<div css={{ ...TRUNCATE, width: 140 }}>{s.name}</div>}
               aria-label={s.name}
               textValue={s.name}
               leftContent={
