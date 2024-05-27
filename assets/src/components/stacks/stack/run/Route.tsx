@@ -81,13 +81,12 @@ export default function StackRunDetail(): ReactNode {
   }
 
   return (
-    <ResponsiveLayoutPage>
+    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <StackRunSidenav stackRun={stackRun} />
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer>
         <div
           css={{
-            marginBottom: theme.spacing.large,
             overflow: 'hidden',
             width: '100%',
             height: '100%',
