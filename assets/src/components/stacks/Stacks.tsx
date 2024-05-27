@@ -59,7 +59,24 @@ const COLUMN_HELPER = createColumnHelper<StackFragment>()
 const COLUMNS = [
   COLUMN_HELPER.accessor((stack) => stack, {
     id: 'name',
-    header: 'Stack name / Repository', // TODO
+    header: () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
+
+      return (
+        <div>
+          <div>Stack name</div>
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-light'],
+            }}
+          >
+            Repository
+          </div>
+        </div>
+      )
+    },
     meta: { truncate: true },
     cell: ({ getValue }) => {
       const stack = getValue()
@@ -71,7 +88,6 @@ const COLUMNS = [
             <StackTypeIcon
               size={16}
               stackType={stack.type}
-              css={{ filter: 'grayscale(1) brightness(2.5)' }} // TODO
             />
           }
         >
@@ -101,7 +117,24 @@ const COLUMNS = [
   }),
   COLUMN_HELPER.accessor((stack) => stack.git, {
     id: 'git',
-    header: 'Folder / Ref', // TODO
+    header: () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
+
+      return (
+        <div>
+          <div>Folder</div>
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-light'],
+            }}
+          >
+            Ref
+          </div>
+        </div>
+      )
+    },
     cell: ({ getValue }) => {
       const git = getValue()
 
