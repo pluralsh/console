@@ -76,9 +76,8 @@ export default function StackRunSidecar({
       flexDirection="column"
       gap="small"
     >
-      {stackRun.approval &&
-        !stackRun.approvedAt &&
-        stackRun.status === StackStatus.PendingApproval && (
+      {stackRun.status === StackStatus.PendingApproval &&
+        !stackRun.approvedAt && (
           <Button
             onClick={mutation}
             loading={loading}

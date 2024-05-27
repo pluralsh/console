@@ -27,7 +27,6 @@ export default function StackRun({
     insertedAt,
     message,
     status,
-    approval,
     approvedAt,
     approver,
     git: { ref },
@@ -71,7 +70,7 @@ export default function StackRun({
         >
           {message ?? (first ? 'Initial run' : 'No message')}
         </div>
-        {approval && approvedAt && (
+        {approvedAt && approver && (
           <div
             css={{
               ...theme.partials.text.caption,

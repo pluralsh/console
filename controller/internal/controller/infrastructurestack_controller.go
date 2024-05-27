@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
@@ -151,7 +152,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return requeue, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -233,40 +234,56 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 	}
 
 	for _, file := range stack.Spec.Files {
-		configMap := &corev1.ConfigMap{}
-		name := types.NamespacedName{Name: file.Name, Namespace: stack.GetNamespace()}
-		if err := r.Get(ctx, name, configMap); err != nil {
-			return nil, err
-		}
-		for k, v := range configMap.Data {
-			attr.Files = append(attr.Files, &console.StackFileAttributes{
-				Path:    k,
-				Content: v,
-			})
-		}
-	}
-	for _, file := range stack.Spec.SecretFiles {
 		secret := &corev1.Secret{}
-		name := types.NamespacedName{Name: file.Name, Namespace: stack.GetNamespace()}
+		name := types.NamespacedName{Name: file.SecretRef.Name, Namespace: stack.GetNamespace()}
 		if err := r.Get(ctx, name, secret); err != nil {
 			return nil, err
 		}
 		for k, v := range secret.Data {
 			attr.Files = append(attr.Files, &console.StackFileAttributes{
-				Path:    k,
+				Path:    fmt.Sprintf("%s/%s", file.MountPath, k),
 				Content: string(v),
 			})
 		}
 	}
 
-	attr.Environment = algorithms.Map(stack.Spec.Environment,
-		func(b v1alpha1.StackEnvironment) *console.StackEnvironmentAttributes {
-			return &console.StackEnvironmentAttributes{
-				Name:   b.Name,
-				Value:  b.Value,
-				Secret: b.Secret,
+	for _, env := range stack.Spec.Environment {
+		var isSecret *bool
+		var value string
+
+		if env.Value != nil {
+			value = *env.Value
+		} else if env.SecretKeyRef != nil {
+			secret := &corev1.Secret{}
+			name := types.NamespacedName{Name: env.SecretKeyRef.Name, Namespace: stack.GetNamespace()}
+			if err := r.Get(ctx, name, secret); err != nil {
+				return nil, err
 			}
+			isSecret = lo.ToPtr(true)
+			rawData, ok := secret.Data[env.SecretKeyRef.Key]
+			if !ok {
+				return nil, fmt.Errorf("can not find secret data for the key %s", env.SecretKeyRef.Key)
+			}
+			value = string(rawData)
+		} else if env.ConfigMapRef != nil {
+			configMap := &corev1.ConfigMap{}
+			name := types.NamespacedName{Name: env.ConfigMapRef.Name, Namespace: stack.GetNamespace()}
+			if err := r.Get(ctx, name, configMap); err != nil {
+				return nil, err
+			}
+			rawData, ok := configMap.Data[env.ConfigMapRef.Key]
+			if !ok {
+				return nil, fmt.Errorf("can not find secret data for the key %s", env.ConfigMapRef.Key)
+			}
+			value = rawData
+		}
+
+		attr.Environment = append(attr.Environment, &console.StackEnvironmentAttributes{
+			Name:   env.Name,
+			Value:  value,
+			Secret: isSecret,
 		})
+	}
 
 	jobSpec, err := gateJobAttributes(stack.Spec.JobSpec)
 	if err != nil {

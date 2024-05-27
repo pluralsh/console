@@ -152,11 +152,11 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 	if errors.IsNotFound(err) {
 		cluster.Status.ID = nil
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find Cluster in Console API")
-		return ctrl.Result{}, nil
+		return requeue, nil
 	}
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return requeue, err
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.

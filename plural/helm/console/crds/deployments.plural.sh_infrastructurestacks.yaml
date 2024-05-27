@@ -156,38 +156,85 @@ spec:
                 - version
                 type: object
               detach:
-                description: Detach determined if user want to delete or detach stack
+                description: If true, detach the stack on CR deletion, leaving all
+                  cloud resources in-place.
                 type: boolean
               environment:
                 items:
                   properties:
+                    configMapRef:
+                      description: Selects a key from a ConfigMap.
+                      properties:
+                        key:
+                          description: The key to select.
+                          type: string
+                        name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
+                          type: string
+                        optional:
+                          description: Specify whether the ConfigMap or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                      x-kubernetes-map-type: atomic
                     name:
                       type: string
-                    secret:
-                      type: boolean
+                    secretKeyRef:
+                      description: SecretKeySelector selects a key of a Secret.
+                      properties:
+                        key:
+                          description: The key of the secret to select from.  Must
+                            be a valid secret key.
+                          type: string
+                        name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
+                          type: string
+                        optional:
+                          description: Specify whether the Secret or its key must
+                            be defined
+                          type: boolean
+                      required:
+                      - key
+                      type: object
+                      x-kubernetes-map-type: atomic
                     value:
                       type: string
                   required:
                   - name
-                  - value
                   type: object
                 type: array
               files:
-                description: Files reference to ConfigMaps with a key as a path and
-                  value as a content
+                description: Files reference to Secret with a key as a part of mount
+                  path and value as a content
                 items:
-                  description: |-
-                    LocalObjectReference contains enough information to let you locate the
-                    referenced object inside the same namespace.
                   properties:
-                    name:
-                      description: |-
-                        Name of the referent.
-                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        TODO: Add other useful fields. apiVersion, kind, uid?
+                    mountPath:
                       type: string
+                    secretRef:
+                      description: |-
+                        LocalObjectReference contains enough information to let you locate the
+                        referenced object inside the same namespace.
+                      properties:
+                        name:
+                          description: |-
+                            Name of the referent.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Add other useful fields. apiVersion, kind, uid?
+                          type: string
+                      type: object
+                      x-kubernetes-map-type: atomic
+                  required:
+                  - mountPath
+                  - secretRef
                   type: object
-                  x-kubernetes-map-type: atomic
                 type: array
               git:
                 description: Git reference w/in the repository where the IaC lives
@@ -318,23 +365,6 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-              secretFiles:
-                description: SecretFiles reference to Secrets with a key as a path
-                  and value as a content
-                items:
-                  description: |-
-                    LocalObjectReference contains enough information to let you locate the
-                    referenced object inside the same namespace.
-                  properties:
-                    name:
-                      description: |-
-                        Name of the referent.
-                        More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        TODO: Add other useful fields. apiVersion, kind, uid?
-                      type: string
-                  type: object
-                  x-kubernetes-map-type: atomic
-                type: array
               type:
                 description: Type specifies the tool to use to apply it
                 enum:
@@ -348,7 +378,6 @@ spec:
             required:
             - clusterRef
             - configuration
-            - detach
             - git
             - repositoryRef
             - type
