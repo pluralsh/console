@@ -6,14 +6,11 @@ import {
 } from '@pluralsh/design-system'
 import moment from 'moment'
 import { useTheme } from 'styled-components'
-
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 
 import { StackRunFragment } from '../../../generated/graphql'
-
 import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
-
 import { StackRunStatusChip } from '../common/StackRunStatusChip'
 
 export default function StackRun({
@@ -45,7 +42,10 @@ export default function StackRun({
         cursor: 'pointer',
         display: 'flex',
         gap: theme.spacing.medium,
-        padding: theme.spacing.medium,
+        paddingTop: theme.spacing.small,
+        paddingBottom: theme.spacing.small,
+        paddingLeft: theme.spacing.medium,
+        paddingRight: theme.spacing.medium,
         '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
       }}
       onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
@@ -71,20 +71,16 @@ export default function StackRun({
         >
           {message ?? (first ? 'Initial run' : 'No message')}
         </div>
-        {approval && (
+        {approval && approvedAt && (
           <div
             css={{
+              ...theme.partials.text.caption,
               textOverflow: 'ellipsis',
               overflow: 'hidden',
-              ...theme.partials.text.caption,
-              color: approvedAt
-                ? theme.colors['text-xlight']
-                : theme.colors['text-warning-light'],
+              color: theme.colors['text-light'],
             }}
           >
-            {approvedAt
-              ? `Approved ${moment(approvedAt).fromNow()} by ${approver?.name}`
-              : 'Pending approval'}
+            Approved {moment(approvedAt).fromNow()} by {approver?.name}
           </div>
         )}
         <div
@@ -111,7 +107,7 @@ export default function StackRun({
         {moment(insertedAt).fromNow()}
       </div>
       <StackRunStatusChip status={status} />
-      <CaretRightIcon />
+      <IconFrame icon={<CaretRightIcon />} />
     </div>
   )
 }
