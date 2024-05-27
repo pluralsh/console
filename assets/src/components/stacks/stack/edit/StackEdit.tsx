@@ -3,28 +3,35 @@ import {
   ContentCard,
   FormField,
   Input,
+  ListBoxItem,
+  Select,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import React, { useMemo, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
-import { Flex, P } from 'honorable'
 import { isEmpty } from 'lodash'
 
 import { StackOutletContextT, getBreadcrumbs } from '../Stack'
 import ConsolePageTitle from '../../../utils/layout/ConsolePageTitle'
-import { useGitRepositoriesQuery } from '../../../../generated/graphql'
+import {
+  useGitRepositoriesQuery,
+  useGitRepositoryQuery,
+  useUpdateStackMutation,
+} from '../../../../generated/graphql'
 import { RepositorySelector } from '../../../cd/services/deployModal/DeployServiceSettingsGit'
 import { mapExistingNodes } from '../../../../utils/graphql'
+import { GqlError } from '../../../utils/Alert'
+import { cleanRefs } from '../../create/CreateStackModalFormRepository'
 
 export default function StackEdit() {
   const theme = useTheme()
   const { stackId = '' } = useParams()
-  const { stack } = useOutletContext() as StackOutletContextT
+  const { stack, refetch } = useOutletContext() as StackOutletContextT
   const [image, setImage] = useState(stack.configuration.image)
   const [version, setVersion] = useState(stack.configuration.version)
-  const [repositoryId, setRepositoryId] = useState(stack.repository?.id)
+  const [repositoryId, setRepositoryId] = useState(stack.repository?.id ?? '')
   const [ref, setRef] = useState(stack.git.ref)
   const [folder, setFolder] = useState(stack.git.folder)
   const changed =
@@ -52,9 +59,28 @@ export default function StackEdit() {
     (repo) => repo.health === 'PULLABLE'
   )
 
-  // const { data: repoData } = useGitRepositoryQuery({
-  //   variables: { id: repositoryId },
-  // })
+  const { data: repoData } = useGitRepositoryQuery({
+    variables: { id: repositoryId },
+  })
+
+  // TODO: Use merge mutation once it will be available.
+  const [mutation, { loading, error }] = useUpdateStackMutation({
+    variables: {
+      id: stackId,
+      attributes: {
+        name: stack.name,
+        type: stack.type,
+        clusterId: stack.cluster?.id ?? '',
+        repositoryId,
+        git: { folder, ref },
+        configuration: {
+          image,
+          version,
+        },
+      },
+    },
+    onCompleted: () => refetch?.(),
+  })
 
   if (!stack) {
     return <LoadingIndicator />
@@ -107,10 +133,26 @@ export default function StackEdit() {
             label="Ref"
             required
           >
-            <Input
-              value={ref}
-              onChange={(e) => setRef(e.currentTarget.value)}
-            />
+            {repoData?.gitRepository?.refs && (
+              <Select
+                label="Select a branch or tag"
+                selectedKey={ref}
+                onSelectionChange={(ref) => setRef(ref as string)}
+              >
+                {cleanRefs(repoData?.gitRepository?.refs).map((ref) => (
+                  <ListBoxItem
+                    key={ref}
+                    label={ref}
+                  />
+                ))}
+              </Select>
+            )}
+            {!repoData?.gitRepository?.refs && (
+              <Input
+                value={ref}
+                onChange={(e) => setRef(e.currentTarget.value)}
+              />
+            )}
           </FormField>
           <FormField
             label="Folder"
@@ -122,28 +164,27 @@ export default function StackEdit() {
             />
           </FormField>
         </div>
-        <Flex
-          align="center"
-          gap="medium"
-          justifyContent="flex-end"
-          marginTop="small"
+        {error && <GqlError error={error} />}
+        <div
+          css={{
+            ...theme.partials.text.body2,
+            color: theme.colors['text-xlight'],
+            alignItems: 'center',
+            display: 'flex',
+            gap: theme.spacing.medium,
+            justifyContent: 'flex-end',
+            marginTop: theme.spacing.small,
+          }}
         >
-          {changed && (
-            <P
-              body2
-              color="text-xlight"
-            >
-              Unsaved changes
-            </P>
-          )}
+          {changed && 'Unsaved changes'}
           <Button
             disabled={!valid || !changed}
-            // onClick={() => mutation()}
-            // loading={loading}
+            onClick={() => mutation()}
+            loading={loading}
           >
             Save
           </Button>
-        </Flex>
+        </div>
       </ContentCard>
     </>
   )
