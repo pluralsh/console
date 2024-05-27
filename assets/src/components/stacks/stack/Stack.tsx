@@ -168,18 +168,17 @@ export default function Stack() {
       <ResponsiveLayoutSidecarContainer
         display="flex"
         flexDirection="column"
-        gap="large"
+        gap="small"
       >
         {stack && (
           <>
             <KickButton
               pulledAt={stack.repository?.pulledAt}
               kickMutationHook={useKickStackMutation}
-              message="Resync stack run"
-              tooltipMessage="Use this to sync this run now instead of at the next poll interval"
+              message="Resync stack"
+              tooltipMessage="Use this to sync this stack now instead of at the next poll interval."
               variables={{ id: stack.id }}
             />
-            {/* TODO: When deleting show detach. */}
             <StackDelete
               stack={stack}
               refetch={refetch}
