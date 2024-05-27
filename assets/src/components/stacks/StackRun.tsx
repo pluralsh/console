@@ -5,6 +5,8 @@ import { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 
+import { StackStatus } from 'generated/graphql'
+
 import { StackRunFragment } from '../../generated/graphql'
 
 import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
@@ -25,7 +27,6 @@ export default function StackRun({
     insertedAt,
     message,
     status,
-    approval,
     approvedAt,
     approver,
     git: { ref },
@@ -63,7 +64,7 @@ export default function StackRun({
         >
           {message ?? (first ? 'Initial run' : 'No message')}
         </div>
-        {approval && (
+        {stackRun.status === StackStatus.PendingApproval && approvedAt && (
           <div
             css={{
               textOverflow: 'ellipsis',
@@ -74,9 +75,7 @@ export default function StackRun({
                 : theme.colors['text-warning-light'],
             }}
           >
-            {approvedAt
-              ? `Approved ${moment(approvedAt).fromNow()} by ${approver?.name}`
-              : 'Pending approval'}
+            Approved {moment(approvedAt).fromNow()} by {approver?.name}
           </div>
         )}
         <div
