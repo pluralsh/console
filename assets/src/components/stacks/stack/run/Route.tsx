@@ -9,9 +9,11 @@ import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage
 import { ResponsiveLayoutSpacer } from '../../../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from '../../../utils/layout/ResponsiveLayoutContentContainer'
 import { getBreadcrumbs } from '../Stack'
-import { STACK_RUNS_REL_PATH,
+import {
+  STACK_RUNS_REL_PATH,
   getStackRunsAbsPath,
-  getStacksAbsPath } from '../../../../routes/stacksRoutesConsts'
+  getStacksAbsPath,
+} from '../../../../routes/stacksRoutesConsts'
 
 import StackRunSidecar from './Sidecar'
 import StackRunSidenav from './Sidenav'

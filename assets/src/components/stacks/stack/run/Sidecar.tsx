@@ -12,13 +12,16 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
 import { GqlError } from 'components/utils/Alert'
 
-import { StackRun,
+import {
+  StackRun,
   StackStatus,
   useApproveStackRunMutation,
-  useRestartStackRunMutation } from '../../../../generated/graphql'
+  useRestartStackRunMutation,
+} from '../../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../../utils/layout/ResponsiveLayoutSidecarContainer'
 import UserInfo from '../../../utils/UserInfo'
 import { ClusterProviderIcon } from '../../../utils/Provider'
+import { StackRunStatusChip } from '../../common/StackRunStatusChip'
 
 interface StackRunSidecarProps {
   stackRun: StackRun

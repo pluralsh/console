@@ -20,8 +20,6 @@ import { useNavigate } from 'react-router-dom'
 import { useDebounce } from '@react-hooks-library/core'
 import { type Row, createColumnHelper } from '@tanstack/react-table'
 
-import KickButton from 'components/utils/KickButton'
-
 import {
   STACKS_ABS_PATH,
   getStacksAbsPath,

@@ -24,7 +24,11 @@ import {
 } from '../../../routes/stacksRoutesConsts'
 import { GqlError } from '../../utils/Alert'
 import { mapExistingNodes } from '../../../utils/graphql'
-import { StackFragment, useStacksQuery } from '../../../generated/graphql'
+import {
+  StackFragment,
+  useKickStackMutation,
+  useStacksQuery,
+} from '../../../generated/graphql'
 import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../../utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
@@ -39,6 +43,8 @@ import StackStatusChip from '../common/StackStatusChip'
 import { useFetchPaginatedData } from '../../cd/utils/useFetchPaginatedData'
 
 import { SideNavEntries } from '../../layout/SideNavEntries'
+
+import KickButton from '../../utils/KickButton'
 
 import StackDelete from './StackDelete'
 
@@ -166,6 +172,13 @@ export default function Stack() {
       >
         {stack && (
           <>
+            <KickButton
+              pulledAt={stack.repository?.pulledAt}
+              kickMutationHook={useKickStackMutation}
+              message="Resync stack run"
+              tooltipMessage="Use this to sync this run now instead of at the next poll interval"
+              variables={{ id: stack.id }}
+            />
             {/* TODO: When deleting show detach. */}
             <StackDelete
               stack={stack}
