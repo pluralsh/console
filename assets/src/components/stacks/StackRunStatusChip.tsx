@@ -12,11 +12,19 @@ export const statusToSeverity = {
   [StackStatus.Cancelled]: 'neutral',
   [StackStatus.Failed]: 'danger',
   [StackStatus.Successful]: 'success',
-  [StackStatus.PendingApproval]: 'info',
+  [StackStatus.PendingApproval]: 'warning',
 } as const satisfies Record<
   StackStatus,
   ComponentProps<typeof Chip>['severity']
 >
+
+const humanize = (status) => {
+  if (status === StackStatus.PendingApproval) {
+    return 'Pending Approval'
+  }
+
+  return capitalize(status)
+}
 
 export function StackRunStatusChip({
   status,
@@ -32,7 +40,7 @@ export function StackRunStatusChip({
       severity={severity}
       {...props}
     >
-      {capitalize(status)}
+      {humanize(status)}
     </Chip>
   )
 }
