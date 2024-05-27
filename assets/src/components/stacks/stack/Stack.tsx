@@ -56,7 +56,7 @@ const DIRECTORY = [
   { path: STACK_FILES_REL_PATH, label: 'Files' },
   { path: STACK_JOB_REL_PATH, label: 'Job' },
   { path: STACK_EDIT_REL_PATH, label: 'Edit' },
-] as const
+]
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -120,7 +120,9 @@ export default function Stack() {
         {/* TODO: Should take one line at max. */}
         <Select
           selectedKey={stack.id}
-          onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
+          onSelectionChange={(id) =>
+            navigate(pathname.replace(stackId, id as string))
+          }
           leftContent={
             <StackTypeIcon
               stackType={stack.type}
@@ -153,8 +155,6 @@ export default function Stack() {
         </Select>
         <div css={{ marginTop: theme.spacing.large }}>
           <SideNavEntries
-            // TODO: Fix ignore and keep same path on nav.
-            // @ts-ignore
             directory={DIRECTORY}
             pathname={pathname}
             pathPrefix={pathPrefix}

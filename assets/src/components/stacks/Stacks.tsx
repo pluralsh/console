@@ -91,7 +91,6 @@ const COLUMNS = [
             />
           }
         >
-          {/* TODO: Change text props. */}
           <StackedText
             css={{ ...TRUNCATE_LEFT }}
             first={stack.name}
