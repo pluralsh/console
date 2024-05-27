@@ -105,7 +105,7 @@ export default function StackRunSidecar({
           Cancel
         </Button>
       )}
-      <Sidecar>
+      <Sidecar css={{ overflowX: 'auto' }}>
         <SidecarItem heading="Status">
           <StackRunStatusChip
             status={stackRun.status}
