@@ -2,6 +2,7 @@ import {
   Card,
   CheckIcon,
   CloseIcon,
+  EmptyState,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
@@ -72,7 +73,7 @@ export default function StackFiles() {
         }}
       />
       {!hasFiles ? (
-        <Card padding="large">No files available for this stack.</Card>
+        <EmptyState message="No files available for this stack." />
       ) : (
         <Table
           data={stack.files ?? []}
