@@ -15,10 +15,10 @@ import capitalize from 'lodash/capitalize'
 import moment from 'moment'
 
 import {
-  STACK_CONFIG_REL_PATH,
+  STACK_EDIT_REL_PATH,
   STACK_ENV_REL_PATH,
+  STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
-  STACK_REPO_REL_PATH,
   STACK_RUNS_REL_PATH,
   getStacksAbsPath,
 } from '../../../routes/stacksRoutesConsts'
@@ -52,10 +52,10 @@ const QUERY_PAGE_SIZE = 100
 
 const DIRECTORY = [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
-  { path: STACK_CONFIG_REL_PATH, label: 'Configuration' },
-  { path: STACK_REPO_REL_PATH, label: 'Repository' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
+  { path: STACK_FILES_REL_PATH, label: 'Files' },
   { path: STACK_JOB_REL_PATH, label: 'Job' },
+  { path: STACK_EDIT_REL_PATH, label: 'Edit' },
 ] as const
 
 export type StackOutletContextT = {
@@ -161,14 +161,14 @@ export default function Stack() {
         </div>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH, paddingTop: 64 }}>
+      <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
         <Outlet context={{ stack, refetch } as StackOutletContextT} />
       </div>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer
         display="flex"
         flexDirection="column"
-        gap="small"
+        gap="medium"
       >
         {stack && (
           <>

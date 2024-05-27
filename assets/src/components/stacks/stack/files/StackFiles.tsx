@@ -1,4 +1,4 @@
-import { Card, Prop, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Card, useSetBreadcrumbs } from '@pluralsh/design-system'
 import React, { useMemo } from 'react'
 
 import { useOutletContext, useParams } from 'react-router-dom'
@@ -7,7 +7,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { StackOutletContextT, getBreadcrumbs } from '../Stack'
 
-export default function StackConfiguration() {
+export default function StackFiles() {
   const { stackId = '' } = useParams()
   const { stack } = useOutletContext() as StackOutletContextT
 
@@ -29,11 +29,6 @@ export default function StackConfiguration() {
         display: 'flex',
         flexWrap: 'wrap',
       }}
-    >
-      {stack.configuration.image && (
-        <Prop title="Image">{stack.configuration.image}</Prop>
-      )}
-      <Prop title="Version">{stack.configuration.version}</Prop>
-    </Card>
+    />
   )
 }
