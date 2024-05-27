@@ -1,4 +1,9 @@
-import { CaretRightIcon, CliIcon, IconFrame } from '@pluralsh/design-system'
+import {
+  AppIcon,
+  CaretRightIcon,
+  CliIcon,
+  IconFrame,
+} from '@pluralsh/design-system'
 import moment from 'moment'
 import { useTheme } from 'styled-components'
 
@@ -45,7 +50,10 @@ export default function StackRun({
       }}
       onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
     >
-      <IconFrame icon={<CliIcon width={32} />} />
+      <AppIcon
+        size="xxsmall"
+        icon={<CliIcon width={32} />}
+      />
       <div
         css={{
           display: 'flex',
