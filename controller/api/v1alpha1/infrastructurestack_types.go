@@ -72,8 +72,9 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Optional
 	Files []StackFile `json:"files,omitempty"`
 
-	// Detach determined if user want to delete or detach stack
-	Detach bool `json:"detach"`
+	// If true, detach the stack on CR deletion, leaving all cloud resources in-place.
+	// +kubebuilder:validation:Optional
+	Detach bool `json:"detach,omitempty"`
 }
 
 //+kubebuilder:object:root=true
