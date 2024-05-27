@@ -53,7 +53,7 @@ const QUERY_PAGE_SIZE = 100
 const DIRECTORY = [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
-  { path: STACK_FILES_REL_PATH, label: 'Files' },
+  // TODO: Enable once ready. { path: STACK_FILES_REL_PATH, label: 'Files' },
   { path: STACK_JOB_REL_PATH, label: 'Job' },
   { path: STACK_EDIT_REL_PATH, label: 'Edit' },
 ] as const
@@ -117,6 +117,7 @@ export default function Stack() {
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <ResponsiveLayoutSidenavContainer>
+        {/* TODO: Should take one line at max. */}
         <Select
           selectedKey={stack.id}
           onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
@@ -152,7 +153,7 @@ export default function Stack() {
         </Select>
         <div css={{ marginTop: theme.spacing.large }}>
           <SideNavEntries
-            // TODO
+            // TODO: Fix ignore and keep same path on nav.
             // @ts-ignore
             directory={DIRECTORY}
             pathname={pathname}
