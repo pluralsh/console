@@ -15,10 +15,10 @@ import capitalize from 'lodash/capitalize'
 import moment from 'moment'
 
 import {
-  STACK_CONFIG_REL_PATH,
+  STACK_EDIT_REL_PATH,
   STACK_ENV_REL_PATH,
+  STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
-  STACK_REPO_REL_PATH,
   STACK_RUNS_REL_PATH,
   getStacksAbsPath,
 } from '../../../routes/stacksRoutesConsts'
@@ -52,10 +52,10 @@ const QUERY_PAGE_SIZE = 100
 
 const DIRECTORY = [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
-  { path: STACK_CONFIG_REL_PATH, label: 'Configuration' },
-  { path: STACK_REPO_REL_PATH, label: 'Repository' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
+  // TODO: Enable once ready. { path: STACK_FILES_REL_PATH, label: 'Files' },
   { path: STACK_JOB_REL_PATH, label: 'Job' },
+  { path: STACK_EDIT_REL_PATH, label: 'Edit' },
 ] as const
 
 export type StackOutletContextT = {
@@ -117,6 +117,7 @@ export default function Stack() {
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <ResponsiveLayoutSidenavContainer>
+        {/* TODO: Should take one line at max. */}
         <Select
           selectedKey={stack.id}
           onSelectionChange={(key) => navigate(getStacksAbsPath(key as string))}
@@ -152,7 +153,7 @@ export default function Stack() {
         </Select>
         <div css={{ marginTop: theme.spacing.large }}>
           <SideNavEntries
-            // TODO
+            // TODO: Fix ignore and keep same path on nav.
             // @ts-ignore
             directory={DIRECTORY}
             pathname={pathname}
@@ -161,14 +162,14 @@ export default function Stack() {
         </div>
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH, paddingTop: 64 }}>
+      <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
         <Outlet context={{ stack, refetch } as StackOutletContextT} />
       </div>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer
         display="flex"
         flexDirection="column"
-        gap="small"
+        gap="medium"
       >
         {stack && (
           <>
@@ -183,13 +184,15 @@ export default function Stack() {
               stack={stack}
               refetch={refetch}
             />
-            <Sidecar heading="Stack details">
+            <Sidecar
+              heading="Stack details"
+              css={{ overflowX: 'auto' }}
+            >
               <SidecarItem heading="Name">
                 <div css={{ display: 'flex', gap: theme.spacing.small }}>
                   {stack.name}
                 </div>
               </SidecarItem>
-              <SidecarItem heading="ID">{stack.id}</SidecarItem>
               <SidecarItem heading="Created">
                 {moment(stack.insertedAt).fromNow()}
               </SidecarItem>
@@ -204,7 +207,7 @@ export default function Stack() {
                   deleting={!!stack.deletedAt}
                 />
               </SidecarItem>
-              <SidecarItem heading="Approval">
+              <SidecarItem heading="Approvals">
                 {stack.approval ? 'Required' : 'Not required'}
               </SidecarItem>
               <SidecarItem heading="Type">
@@ -216,9 +219,6 @@ export default function Stack() {
                   {capitalize(stack.type)}
                 </div>
               </SidecarItem>
-              <SidecarItem heading="Repository">
-                {stack.repository?.url}
-              </SidecarItem>
               <SidecarItem heading="Cluster">
                 <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
                   <ClusterProviderIcon
@@ -228,6 +228,19 @@ export default function Stack() {
                   {stack.cluster?.name}
                 </div>
               </SidecarItem>
+              {stack.configuration.image && (
+                <SidecarItem heading="Image">
+                  {stack.configuration.image}
+                </SidecarItem>
+              )}
+              <SidecarItem heading="Version">
+                {stack.configuration.version}
+              </SidecarItem>
+              <SidecarItem heading="Repository">
+                {stack.repository?.url}
+              </SidecarItem>
+              <SidecarItem heading="Ref">{stack.git.ref}</SidecarItem>
+              <SidecarItem heading="Folder">{stack.git.folder}</SidecarItem>
             </Sidecar>
           </>
         )}

@@ -32,6 +32,8 @@ import { ModalMountTransition } from '../../../utils/ModalMountTransition'
 
 import { StackOutletContextT, getBreadcrumbs } from '../Stack'
 
+import ConsolePageTitle from '../../../utils/layout/ConsolePageTitle'
+
 import StackEnvironmentDelete from './StackEnvironmentDelete'
 import StackEnvironmentEdit from './StackEnvironmentEdit'
 import StackEnvironmentApplyModal from './StackEnvironmentApplyModal'
@@ -165,6 +167,13 @@ export default function StackEnvironment() {
 
   return (
     <>
+      <ConsolePageTitle
+        heading="Environment"
+        headingProps={{
+          paddingTop: theme.spacing.small,
+          paddingBottom: theme.spacing.medium,
+        }}
+      />
       <ModalMountTransition open={createOpen}>
         <StackEnvironmentApplyModal
           open={createOpen}
