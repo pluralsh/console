@@ -262,6 +262,13 @@ mutation KickStack($id: ID!) {
     ...StackRun
   }
 }
+
+mutation UpdateStackRun($id: ID!, $attributes: StackRunAttributes!) {
+  updateStackRun(id: $id, attributes: $attributes) {
+    ...StackRun
+  }
+}
+
 mutation ApproveStackRun($id: ID!) {
   approveStackRun(id: $id) {
     ...StackRun

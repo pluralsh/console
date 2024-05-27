@@ -17,6 +17,7 @@ import {
   StackStatus,
   useApproveStackRunMutation,
   useRestartStackRunMutation,
+  useUpdateStackRunMutation,
 } from '../../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../../utils/layout/ResponsiveLayoutSidecarContainer'
 import UserInfo from '../../../utils/UserInfo'
@@ -54,6 +55,16 @@ export default function StackRunSidecar({
         navigate(getStackRunsAbsPath(stackId, restartStackRun?.id)),
     })
 
+  const [cancel, { loading: cancelLoading }] = useUpdateStackRunMutation({
+    variables: {
+      id: stackRun.id,
+      attributes: {
+        status: StackStatus.Cancelled,
+      },
+    },
+    onCompleted: () => refetch?.(),
+  })
+
   const terminal = TERMINAL_STATES.includes(stackRun.status)
 
   if (error) return <GqlError error={error} />
@@ -65,14 +76,16 @@ export default function StackRunSidecar({
       flexDirection="column"
       gap="small"
     >
-      {stackRun.approval && !stackRun.approvedAt && (
-        <Button
-          onClick={mutation}
-          loading={loading}
-        >
-          Approve Run
-        </Button>
-      )}
+      {stackRun.approval &&
+        !stackRun.approvedAt &&
+        stackRun.status === StackStatus.PendingApproval && (
+          <Button
+            onClick={mutation}
+            loading={loading}
+          >
+            Approve Run
+          </Button>
+        )}
       {terminal && (
         <Button
           secondary
@@ -81,6 +94,15 @@ export default function StackRunSidecar({
           startIcon={<ReloadIcon />}
         >
           Restart Run
+        </Button>
+      )}
+      {!terminal && (
+        <Button
+          secondary
+          onClick={cancel}
+          loading={cancelLoading}
+        >
+          Cancel
         </Button>
       )}
       <Sidecar>

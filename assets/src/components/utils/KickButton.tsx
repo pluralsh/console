@@ -1,6 +1,5 @@
-import { Button, Tooltip } from '@pluralsh/design-system'
+import { Button, GraphQLToast, Tooltip } from '@pluralsh/design-system'
 import { useSyncCooldown } from 'components/hooks/useSyncCooldown'
-import { GqlError } from 'components/utils/Alert'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 
@@ -35,7 +34,14 @@ export default function KickButton({
         flexDirection: 'column',
       }}
     >
-      {error && <GqlError error={error} />}
+      {error && disabled && (
+        <GraphQLToast
+          error={{ ...error }}
+          header="Error (500)"
+          margin="xlarge"
+          marginVertical="xxxlarge"
+        />
+      )}
       <Tooltip
         label={
           <TooltipLabel

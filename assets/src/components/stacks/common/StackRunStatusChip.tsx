@@ -4,15 +4,16 @@ import { StackStatus } from 'generated/graphql'
 import capitalize from 'lodash/capitalize'
 
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
+import { startCase } from 'lodash'
 
 export const statusToSeverity = {
   [StackStatus.Queued]: 'neutral',
   [StackStatus.Pending]: 'warning',
+  [StackStatus.PendingApproval]: 'warning',
   [StackStatus.Running]: 'info',
   [StackStatus.Cancelled]: 'neutral',
   [StackStatus.Failed]: 'danger',
   [StackStatus.Successful]: 'success',
-  [StackStatus.PendingApproval]: 'info',
 } as const satisfies Record<
   StackStatus,
   ComponentProps<typeof Chip>['severity']
@@ -32,7 +33,7 @@ export function StackRunStatusChip({
       severity={severity}
       {...props}
     >
-      {capitalize(status)}
+      {capitalize(startCase(status))}
     </Chip>
   )
 }

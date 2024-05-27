@@ -30,10 +30,11 @@ interface StepProps {
 }
 
 export default function Step({ step, open }: StepProps): ReactNode {
-  const ref = useRef<any>()
+  const ref = useRef<HTMLDivElement>()
 
   const [folded, setFolded] = useState<boolean | undefined>(undefined)
   const [logs, setLogs] = useState(step?.logs as Array<RunLogs>)
+  const show = folded === undefined ? open && logs.length > 0 : !folded
 
   const command = useMemo(
     () => `${step.cmd} ${step.args?.join(' ')}`,
@@ -61,7 +62,11 @@ export default function Step({ step, open }: StepProps): ReactNode {
     setLogs(step?.logs as Array<RunLogs>)
   }, [step?.logs])
 
-  const show = folded === undefined ? open : !folded
+  useEffect(() => {
+    if (open) {
+      ref?.current?.scrollIntoView({ block: 'end' })
+    }
+  }, [open, ref])
 
   return (
     <Div ref={ref}>
@@ -71,13 +76,15 @@ export default function Step({ step, open }: StepProps): ReactNode {
         paddingVertical="xsmall"
         justify="space-between"
         backgroundColor="fill-two"
-        _hover={{ backgroundColor: 'fill-two-hover' }}
+        _hover={{
+          backgroundColor: logs.length > 0 ? 'fill-two-hover' : 'none',
+        }}
         css={{
           position: 'sticky',
           top: 0,
           cursor: logs.length > 0 ? 'pointer' : 'cursor',
         }}
-        onClick={() => logs.length > 0 && setFolded(!folded)}
+        onClick={() => logs.length > 0 && setFolded(!(folded ?? !open))}
       >
         <Flex
           gap="small"
@@ -117,7 +124,14 @@ function Status({ status }: StepStatusProps): ReactNode {
   switch (status) {
     case StepStatus.Pending:
     case StepStatus.Running:
-      return <Spinner size={12} />
+      return (
+        <Spinner
+          size={12}
+          css={{
+            alignSelf: 'center',
+          }}
+        />
+      )
     case StepStatus.Failed:
       return (
         <ErrorIcon
