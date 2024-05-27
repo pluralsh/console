@@ -31,7 +31,7 @@ export default function StackRuns() {
   const [scrolled, setScrolled] = useState(false)
 
   useSetBreadcrumbs(
-    useMemo(() => [...getBreadcrumbs(stackId), { label: 'runs' }], [])
+    useMemo(() => [...getBreadcrumbs(stackId), { label: 'runs' }], [stackId])
   )
 
   const { data, loading, fetchMore } = useStackRunsQuery({
