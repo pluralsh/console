@@ -105,7 +105,12 @@ const columns = [
     enableGlobalFilter: true,
     enableSorting: true,
     cell: (info: any) => info.getValue(),
-    header: () => <span>Function</span>,
+    header: () => (
+      <div css={{ display: 'flex', flexDirection: 'column' }}>
+        <div>Function</div>
+        <div css={{ fontSize: 12, fontWeight: 400 }}>Caption</div>
+      </div>
+    ),
   }),
   columnHelper.accessor((row) => row.id, {
     id: 'id',

@@ -204,6 +204,8 @@ const Th = styled.th<{
   top: 0,
   zIndex: 4,
   '.thOuterWrap': {
+    alignItems: 'center',
+    display: 'flex',
     position: 'relative',
     backgroundColor: theme.colors['fill-two'],
     zIndex: 4,
@@ -212,7 +214,7 @@ const Th = styled.th<{
     height: 48,
     minHeight: 48,
     whiteSpace: 'nowrap',
-    padding: '14px 12px',
+    padding: '0 12px',
     textAlign: 'left',
     ...(cursor ? { cursor } : {}),
     '.thSortIndicatorWrap': {
