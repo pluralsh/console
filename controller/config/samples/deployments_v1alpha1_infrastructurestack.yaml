@@ -4,7 +4,7 @@ metadata:
   name: existing
   namespace: default
 spec:
-  handle: mgmt
+  handle: lukasz
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: GitRepository
@@ -15,13 +15,12 @@ spec:
   url: https://github.com/zreigz/tf-hello.git
 ---
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
   name: infrastructurestack
   namespace: default
 data:
-  your-file.json: |
-    {key1: value1, key2: value2, keyN: valueN}
+  secret: dGVzdA==
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: InfrastructureStack
@@ -50,8 +49,14 @@ spec:
     ref: main
     folder: terraform
   files:
-    - name: infrastructurestack
+    - mountPath: /tmp
+      secretRef:
+        name: infrastructurestack
   environment:
-    - name: test
+    - name: TEST
       value: test
+    - name: SECRET
+      secretKeyRef:
+        name: infrastructurestack
+        key: secret
 

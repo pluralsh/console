@@ -21,6 +21,7 @@ import (
 var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
+			secretName  = "stack-secret"
 			stackName   = "stack-test"
 			clusterName = "cluster-test"
 			repoName    = "repo-test"
@@ -37,6 +38,13 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 		}
 
 		BeforeAll(func() {
+			By("creating the configuration secret")
+			Expect(common.MaybeCreate(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: namespace},
+				Data: map[string][]byte{
+					"secret": []byte("secret"),
+				},
+			}, nil)).To(Succeed())
 			By("creating the custom resource for the Kind Cluster")
 			Expect(common.MaybeCreate(k8sClient, &v1alpha1.Cluster{
 				ObjectMeta: metav1.ObjectMeta{Name: clusterName, Namespace: namespace},
@@ -78,14 +86,43 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 					Configuration: v1alpha1.StackConfiguration{
 						Version: "v0.0.1",
 					},
+					Environment: []v1alpha1.StackEnvironment{
+						{
+							Name: "testSecret",
+							SecretKeyRef: &corev1.SecretKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: secretName,
+								},
+								Key: "secret",
+							},
+						},
+						{
+							Name:  "testValue",
+							Value: lo.ToPtr("testValue"),
+						},
+					},
+					Files: []v1alpha1.StackFile{
+						{
+							MountPath: "/opt/mnt",
+							SecretRef: corev1.LocalObjectReference{
+								Name: secretName,
+							},
+						},
+					},
 				},
 			}, nil)).To(Succeed())
 
 		})
 
 		AfterAll(func() {
+			secret := &corev1.Secret{}
+			err := k8sClient.Get(ctx, types.NamespacedName{Name: secretName, Namespace: namespace}, secret)
+			Expect(err).NotTo(HaveOccurred())
+			By("Cleanup the secret")
+			Expect(k8sClient.Delete(ctx, secret)).To(Succeed())
+
 			resource := &v1alpha1.Cluster{}
-			err := k8sClient.Get(ctx, types.NamespacedName{Name: clusterName, Namespace: namespace}, resource)
+			err = k8sClient.Get(ctx, types.NamespacedName{Name: clusterName, Namespace: namespace}, resource)
 			Expect(err).NotTo(HaveOccurred())
 			By("Cleanup the specific resource instance Cluster")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
@@ -112,7 +149,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("32YZZXF6HMFYYT4XLB647U2ROKV75U54EMPOUSDBI55ZWYK2Y2QQ===="),
+					SHA: lo.ToPtr("RPLCWEQWMYPIT2FYGYK74NJLOME2Z2CGCSGNGVEFDTYQNSOGOISQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
@@ -159,7 +196,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("SSJWBR7QSBV72ZZCUX7FESBBFSC5BCZYW6EWZY5RMTTHNR5Q2MCQ===="),
+					SHA: lo.ToPtr("RGMH2ZJ63YETRBVEGA2FIEX33F43TY2NSGZQ665GN3UW2KKRHQFQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
