@@ -228,9 +228,11 @@ export default function Stack() {
                   {stack.cluster?.name}
                 </div>
               </SidecarItem>
-              <SidecarItem heading="Image">
-                {stack.configuration.image}
-              </SidecarItem>
+              {stack.configuration.image && (
+                <SidecarItem heading="Image">
+                  {stack.configuration.image}
+                </SidecarItem>
+              )}
               <SidecarItem heading="Version">
                 {stack.configuration.version}
               </SidecarItem>
