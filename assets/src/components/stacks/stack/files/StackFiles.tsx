@@ -13,6 +13,8 @@ import { useTheme } from 'styled-components'
 
 import { createColumnHelper } from '@tanstack/react-table'
 
+import { isEmpty } from 'lodash'
+
 import { StackOutletContextT, getBreadcrumbs } from '../Stack'
 import ConsolePageTitle from '../../../utils/layout/ConsolePageTitle'
 import { StackFile } from '../../../../generated/graphql'
@@ -50,7 +52,7 @@ export default function StackFiles() {
   const { stackId = '' } = useParams()
   const { stack } = useOutletContext() as StackOutletContextT
   const columns = useColumns()
-  const hasFiles = stack.files?.length ?? 0 > 0
+  const hasFiles = !isEmpty(stack.files)
 
   useSetBreadcrumbs(
     useMemo(
