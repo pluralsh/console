@@ -1,11 +1,4 @@
-import {
-  Card,
-  CheckIcon,
-  CloseIcon,
-  EmptyState,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import React, { ReactNode, useMemo } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'

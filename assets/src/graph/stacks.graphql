@@ -129,9 +129,15 @@ fragment RunStep on RunStep {
   }
 }
 
-query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int) {
+query Stacks(
+  $q: String
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+) {
   infrastructureStacks(
-    q: $q,
+    q: $q
     after: $after
     before: $before
     first: $first
