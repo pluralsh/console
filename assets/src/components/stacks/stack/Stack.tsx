@@ -183,13 +183,15 @@ export default function Stack() {
               stack={stack}
               refetch={refetch}
             />
-            <Sidecar heading="Stack details">
+            <Sidecar
+              heading="Stack details"
+              css={{ overflowX: 'auto' }}
+            >
               <SidecarItem heading="Name">
                 <div css={{ display: 'flex', gap: theme.spacing.small }}>
                   {stack.name}
                 </div>
               </SidecarItem>
-              <SidecarItem heading="ID">{stack.id}</SidecarItem>
               <SidecarItem heading="Created">
                 {moment(stack.insertedAt).fromNow()}
               </SidecarItem>
@@ -204,7 +206,7 @@ export default function Stack() {
                   deleting={!!stack.deletedAt}
                 />
               </SidecarItem>
-              <SidecarItem heading="Approval">
+              <SidecarItem heading="Approvals">
                 {stack.approval ? 'Required' : 'Not required'}
               </SidecarItem>
               <SidecarItem heading="Type">
@@ -216,9 +218,6 @@ export default function Stack() {
                   {capitalize(stack.type)}
                 </div>
               </SidecarItem>
-              <SidecarItem heading="Repository">
-                {stack.repository?.url}
-              </SidecarItem>
               <SidecarItem heading="Cluster">
                 <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
                   <ClusterProviderIcon
@@ -228,6 +227,17 @@ export default function Stack() {
                   {stack.cluster?.name}
                 </div>
               </SidecarItem>
+              <SidecarItem heading="Image">
+                {stack.configuration.image}
+              </SidecarItem>
+              <SidecarItem heading="Version">
+                {stack.configuration.version}
+              </SidecarItem>
+              <SidecarItem heading="Repository">
+                {stack.repository?.url}
+              </SidecarItem>
+              <SidecarItem heading="Ref">{stack.git.ref}</SidecarItem>
+              <SidecarItem heading="Folder">{stack.git.folder}</SidecarItem>
             </Sidecar>
           </>
         )}
