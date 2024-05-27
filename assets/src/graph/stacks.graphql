@@ -4,6 +4,10 @@ fragment Stack on InfrastructureStack {
   deletedAt
   name
   type
+  files {
+    path
+    content
+  }
   configuration {
     image
     version
