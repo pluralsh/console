@@ -1,27 +1,92 @@
-import React, { ReactNode } from 'react'
-import { Sidecar, SidecarItem } from '@pluralsh/design-system'
+import { ReactNode } from 'react'
+import {
+  Button,
+  ReloadIcon,
+  Sidecar,
+  SidecarItem,
+} from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 import moment from 'moment'
+import { useNavigate, useParams } from 'react-router-dom'
+import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
+import { GqlError } from 'components/utils/Alert'
 
-import { StackRun } from '../../../../generated/graphql'
+import { StackRun,
+  StackStatus,
+  useApproveStackRunMutation,
+  useRestartStackRunMutation } from '../../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../../utils/layout/ResponsiveLayoutSidecarContainer'
 import UserInfo from '../../../utils/UserInfo'
 import { ClusterProviderIcon } from '../../../utils/Provider'
 
 interface StackRunSidecarProps {
   stackRun: StackRun
+  refetch?: Nullable<() => void>
 }
+
+const TERMINAL_STATES = [
+  StackStatus.Successful,
+  StackStatus.Cancelled,
+  StackStatus.Failed,
+]
 
 export default function StackRunSidecar({
   stackRun,
+  refetch,
 }: StackRunSidecarProps): ReactNode {
+  const { stackId } = useParams()
   const theme = useTheme()
+  const navigate = useNavigate()
+
+  const [mutation, { loading, error }] = useApproveStackRunMutation({
+    variables: { id: stackRun.id },
+    onCompleted: () => refetch?.(),
+  })
+
+  const [restart, { loading: restartLoading, error: restartError }] =
+    useRestartStackRunMutation({
+      variables: { id: stackRun.id },
+      onCompleted: ({ restartStackRun }) =>
+        navigate(getStackRunsAbsPath(stackId, restartStackRun?.id)),
+    })
+
+  const terminal = TERMINAL_STATES.includes(stackRun.status)
+
+  if (error) return <GqlError error={error} />
+  if (restartError) return <GqlError error={restartError} />
 
   return (
-    <ResponsiveLayoutSidecarContainer>
+    <ResponsiveLayoutSidecarContainer
+      display="flex"
+      flexDirection="column"
+      gap="small"
+    >
+      {stackRun.approval && !stackRun.approvedAt && (
+        <Button
+          onClick={mutation}
+          loading={loading}
+        >
+          Approve Run
+        </Button>
+      )}
+      {terminal && (
+        <Button
+          secondary
+          onClick={restart}
+          loading={restartLoading}
+          startIcon={<ReloadIcon />}
+        >
+          Restart Run
+        </Button>
+      )}
       <Sidecar>
-        <SidecarItem heading="ID">{stackRun.id}</SidecarItem>
+        <SidecarItem heading="Status">
+          <StackRunStatusChip
+            status={stackRun.status}
+            size="small"
+          />
+        </SidecarItem>
         <SidecarItem heading="Needs approval">
           {stackRun.approval ? 'Required' : 'Not required'}
         </SidecarItem>

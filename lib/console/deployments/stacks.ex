@@ -299,7 +299,7 @@ defmodule Console.Deployments.Stacks do
       %StackRun{stack_id: stack.id, status: :queued}
       |> StackRun.changeset(
         Repo.preload(stack, [:environment, :files])
-        |> Map.take(~w(approval dry_run configuration type environment files job_spec repository_id cluster_id)a)
+        |> Map.take(~w(approval workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a)
         |> Console.clean()
         |> Map.update(:environment, [], fn env -> Enum.map(env, &Map.delete(&1, :stack_id)) end)
         |> Map.update(:files, [], fn files -> Enum.map(files, &Map.delete(&1, :stack_id)) end)
@@ -390,6 +390,20 @@ defmodule Console.Deployments.Stacks do
       {:error, "stack is currently running"}
     end
   end
+
+  @doc """
+  Ensure the stacks repo has been recently pulled and poll for a new run if so
+  """
+  @spec kick(binary | Stack.t, User.t) :: stack_resp
+  def kick(%Stack{} = stack, %User{} = user) do
+    with {:ok, stack} <- allow(stack, user, :write),
+         stack <- Repo.preload(stack, [:repository]),
+         _ <- Discovery.kick(stack.repository),
+      do: poll(stack)
+  end
+
+  def kick(id, user) when is_binary(id),
+    do: kick(get_stack!(id), user)
 
   defp notify({:ok, %Stack{} = stack}, :create, actor),
     do: handle_notify(PubSub.StackCreated, stack, actor: actor)

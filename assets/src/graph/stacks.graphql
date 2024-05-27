@@ -11,6 +11,7 @@ fragment Stack on InfrastructureStack {
   repository {
     id
     url
+    pulledAt
   }
   git {
     ref
@@ -247,6 +248,29 @@ mutation DetachStack($id: ID!) {
 mutation DeleteStack($id: ID!) {
   deleteStack(id: $id) {
     id
+  }
+}
+
+mutation KickStack($id: ID!) {
+  kickStack(id: $id) {
+    ...StackRun
+  }
+}
+
+mutation KickStack($id: ID!) {
+  kickStack(id: $id) {
+    ...StackRun
+  }
+}
+mutation ApproveStackRun($id: ID!) {
+  approveStackRun(id: $id) {
+    ...StackRun
+  }
+}
+
+mutation RestartStackRun($id: ID!) {
+  restartStackRun(id: $id) {
+    ...StackRun
   }
 }
 

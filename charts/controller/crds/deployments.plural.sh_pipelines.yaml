@@ -118,7 +118,7 @@ spec:
                               gate types.
                             properties:
                               job:
-                                description: GateJob is a spec for a job gate.
+                                description: JobSpec is a spec for a job gate.
                                 properties:
                                   annotations:
                                     additionalProperties:

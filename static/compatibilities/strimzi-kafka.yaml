@@ -2,6 +2,8 @@ icon: https://avatars.githubusercontent.com/u/34767428?s=48&v=4
 git_url: https://github.com/strimzi/strimzi-kafka-operator
 release_url: https://github.com/strimzi/strimzi-kafka-operator/releases/tag/{vsn}
 versions:
+  - version: 0.41.0
+    kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   - version: 0.40.0
     kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23']
   - version: 0.39.0

@@ -32,7 +32,7 @@ export function PrCard() {
     return <GqlError error={error} />
   }
 
-  const numPrs = data?.pullRequests?.edges?.length || '-'
+  const numPrs = data?.pullRequests?.edges?.length ?? '-'
   const headerText =
     numPrs === 1 ? `1 PR needs action` : `${numPrs} PRs need action`
 

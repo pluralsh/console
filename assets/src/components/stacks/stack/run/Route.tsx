@@ -1,7 +1,7 @@
-import React, { ReactNode, useMemo } from 'react'
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { StackRun, useStackRunQuery } from '../../../../generated/graphql'
 import LoadingIndicator from '../../../utils/LoadingIndicator'
@@ -9,10 +9,12 @@ import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage
 import { ResponsiveLayoutSpacer } from '../../../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from '../../../utils/layout/ResponsiveLayoutContentContainer'
 import { getBreadcrumbs } from '../Stack'
-import { getStackRunsAbsPath } from '../../../../routes/stacksRoutesConsts'
+import { STACK_RUNS_REL_PATH,
+  getStackRunsAbsPath,
+  getStacksAbsPath } from '../../../../routes/stacksRoutesConsts'
 
-import StackRunSidenav from './Sidenav'
 import StackRunSidecar from './Sidecar'
+import StackRunSidenav from './Sidenav'
 
 interface ZeroStateProps {
   id?: string
@@ -38,7 +40,11 @@ export default function StackRunDetail(): ReactNode {
   const { stackId, runId } = useParams()
   const theme = useTheme()
 
-  const { data: stackRunQuery, loading: loadingStackRun } = useStackRunQuery({
+  const {
+    data: stackRunQuery,
+    loading: loadingStackRun,
+    refetch,
+  } = useStackRunQuery({
     variables: {
       id: runId!,
     },
@@ -50,7 +56,10 @@ export default function StackRunDetail(): ReactNode {
     useMemo(
       () => [
         ...getBreadcrumbs(stackId ?? ''),
-        { label: 'runs', url: getStackRunsAbsPath(stackId, runId) },
+        {
+          label: 'runs',
+          url: `${getStacksAbsPath(stackId)}/${STACK_RUNS_REL_PATH}`,
+        },
         ...(runId
           ? [{ label: runId, url: getStackRunsAbsPath(stackId, runId) }]
           : []),
@@ -92,7 +101,10 @@ export default function StackRunDetail(): ReactNode {
         </div>
       </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSpacer />
-      <StackRunSidecar stackRun={stackRun} />
+      <StackRunSidecar
+        stackRun={stackRun}
+        refetch={refetch}
+      />
     </ResponsiveLayoutPage>
   )
 }

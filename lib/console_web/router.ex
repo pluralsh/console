@@ -28,6 +28,15 @@ defmodule ConsoleWeb.Router do
 
       scope "/v1", ConsoleWeb do
         post "/webhooks/:type/:id", WebhookController, :scm
+
+        scope "/states" do
+          scope "/terraform" do
+            get "/:stack_id", StackController, :get_tf_state
+            post "/:stack_id", StackController, :update_tf_state
+            post "/:stack_id/lock", StackController, :lock_tf_state
+            post "/:stack_id/unlock", StackController, :unlock_tf_state
+          end
+        end
       end
     end
 

@@ -12,14 +12,13 @@ import (
 	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
-	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-var _ = Describe("Global Service Controller", Ordered, func() {
+var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
 			stackName   = "stack-test"
@@ -160,7 +159,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("UUEALKZ6CZRN5Q2TUBQGUIMBT2R73OXSRCMUDHRNFSNM4N3WG4LQ===="),
+					SHA: lo.ToPtr("SSJWBR7QSBV72ZZCUX7FESBBFSC5BCZYW6EWZY5RMTTHNR5Q2MCQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
@@ -182,66 +181,33 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.InfrastructureStack{
 				ObjectMeta: metav1.ObjectMeta{Name: stackName, Namespace: namespace},
 			}, func(stack *v1alpha1.InfrastructureStack) {
-				stack.Spec.JobSpec = &batchv1.JobSpec{
-					Template: corev1.PodTemplateSpec{
-						Spec: corev1.PodSpec{
-							Containers: []corev1.Container{
+				stack.Spec.JobSpec = &v1alpha1.JobSpec{
+					Containers: []*v1alpha1.Container{
+						{
+							Image: "test",
+							Args:  lo.ToSlicePtr([]string{"a", "b", "c"}),
+							EnvFrom: []*v1alpha1.EnvFrom{
 								{
-									Image: "test",
-									Args:  []string{"a", "b", "c"},
-									EnvFrom: []corev1.EnvFromSource{
-										{
-											ConfigMapRef: &corev1.ConfigMapEnvSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "a",
-												},
-											},
-										},
-										{
-											SecretRef: &corev1.SecretEnvSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "b",
-												},
-											},
-										},
-									},
-									Env: []corev1.EnvVar{
-										{
-											Name:  "a",
-											Value: "b",
-										},
-										{
-											Name:  "c",
-											Value: "d",
-										},
-									},
+									ConfigMap: "a",
 								},
 								{
-									Image: "test2",
-									Args:  []string{"x", "y", "z"},
-									EnvFrom: []corev1.EnvFromSource{
-										{
-											ConfigMapRef: &corev1.ConfigMapEnvSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "c",
-												},
-											},
-										},
-										{
-											SecretRef: &corev1.SecretEnvSource{
-												LocalObjectReference: corev1.LocalObjectReference{
-													Name: "d",
-												},
-											},
-										},
-									},
+									Secret: "b",
 								},
 							},
-							ServiceAccountName: "test2",
+							Env: []*v1alpha1.Env{
+								{
+									Name:  "a",
+									Value: "b",
+								},
+								{
+									Name:  "c",
+									Value: "d",
+								},
+							},
 						},
 					},
+					ServiceAccount: lo.ToPtr("test2"),
 				}
-
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)

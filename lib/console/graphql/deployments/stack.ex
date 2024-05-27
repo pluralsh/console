@@ -17,6 +17,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :job_spec,       :gate_job_attributes, description: "optional k8s job configuration for the job that will apply this stack"
     field :configuration,  non_null(:stack_configuration_attributes), description: "version/image config for the tool you're using"
     field :approval,       :boolean, description: "whether to require approval"
+    field :manage_state,   :boolean, description: "whether you want Plural to manage your terraform state for this stack"
+    field :workdir,        :string, description: "the subdirectory you want to run the stack's commands w/in"
 
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -28,7 +30,15 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   input_object :stack_configuration_attributes do
     field :image,   :string, description: "optional custom image you might want to use"
-    field :version, non_null(:string), description: "the semver of the tool you wish to use"
+    field :version, :string, description: "the semver of the tool you wish to use"
+    field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
+    field :hooks,   list_of(:stack_hook_attributes), description: "the hooks to customize execution for this stack"
+  end
+
+  input_object :stack_hook_attributes do
+    field :cmd,          non_null(:string), description: "a script hook to run at a stage"
+    field :args,         list_of(:string), description: "args for `cmd`"
+    field :after_stage,  non_null(:step_stage), description: "the stage to run this hook before"
   end
 
   input_object :stack_run_attributes do
@@ -88,6 +98,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :approval,            :boolean, description: "whether to require approval"
     field :deleted_at,          :datetime, description: "whether this stack was previously deleted and is pending cleanup"
     field :cancellation_reason, :string, description: "why this run was cancelled"
+    field :workdir,             :string, description: "the subdirectory you want to run the stack's commands w/in"
+    field :manage_state,        :boolean, description: "whether you want Plural to manage the state of this stack"
 
     connection field :runs, node_type: :stack_run do
       arg :pull_request_id, :id
@@ -118,6 +130,14 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_configuration do
     field :image,   :string, description: "optional custom image you might want to use"
     field :version, non_null(:string), description: "the semver of the tool you wish to use"
+    field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
+    field :hooks,   list_of(:stack_hook), description: "the hooks to customize execution for this stack"
+  end
+
+  object :stack_hook do
+    field :cmd,          non_null(:string), description: "a script hook to run at a stage"
+    field :args,         list_of(:string), description: "args for `cmd`"
+    field :after_stage,  non_null(:step_stage), description: "the stage to run this hook before"
   end
 
   object :stack_run do
@@ -130,6 +150,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :approval,       :boolean, description: "whether to require approval"
     field :message,        :string, description: "the commit message"
     field :approved_at,    :datetime, description: "when this run was approved"
+    field :workdir,        :string, description: "the subdirectory you want to run the stack's commands w/in"
+    field :manage_state,   :boolean, description: "whether you want Plural to manage the state of this stack"
 
     field :tarball, non_null(:string), resolve: &Deployments.stack_tarball/3, description: "https url to fetch the latest tarball of stack IaC"
 
@@ -140,6 +162,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :files, list_of(:stack_file), resolve: dataloader(Deployments), description: "files bound to a run of this stack"
     field :environment, list_of(:stack_environment), resolve: dataloader(Deployments), description: "environment variables for this stack"
 
+    field :stack,  :infrastructure_stack, resolve: dataloader(Deployments), description: "the stack attached to this run"
     field :output, list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
     field :state,  :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
     field :errors, list_of(:service_error),
@@ -302,6 +325,14 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.detach_stack/2
+    end
+
+    @desc "refresh the source repo of this stack, and potentially create a fresh run"
+    field :kick_stack, :stack_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.kick_stack/2
     end
 
     field :approve_stack_run, :stack_run do

@@ -166,6 +166,55 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 	return serviceTemplate, nil
 }
 
+func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error) {
+	if job == nil {
+		return nil, nil
+	}
+
+	var annotations, labels *string
+	if job.Annotations != nil {
+		result, err := json.Marshal(job.Annotations)
+		if err != nil {
+			return nil, err
+		}
+		annotations = lo.ToPtr(string(result))
+	}
+	if job.Labels != nil {
+		result, err := json.Marshal(job.Labels)
+		if err != nil {
+			return nil, err
+		}
+		labels = lo.ToPtr(string(result))
+	}
+
+	return &console.GateJobAttributes{
+		Namespace: job.Namespace,
+		Raw:       job.Raw,
+		Containers: algorithms.Map(job.Containers,
+			func(c *v1alpha1.Container) *console.ContainerAttributes {
+				return &console.ContainerAttributes{
+					Image: c.Image,
+					Args:  c.Args,
+					Env: algorithms.Map(c.Env, func(e *v1alpha1.Env) *console.EnvAttributes {
+						return &console.EnvAttributes{
+							Name:  e.Name,
+							Value: e.Value,
+						}
+					}),
+					EnvFrom: algorithms.Map(c.EnvFrom, func(e *v1alpha1.EnvFrom) *console.EnvFromAttributes {
+						return &console.EnvFromAttributes{
+							Secret:    e.Secret,
+							ConfigMap: e.ConfigMap,
+						}
+					}),
+				}
+			}),
+		Labels:         labels,
+		Annotations:    annotations,
+		ServiceAccount: job.ServiceAccount,
+	}, nil
+}
+
 func mergeHelmValues(ctx context.Context, c runtimeclient.Client, secretRef *corev1.SecretReference, values *runtime.RawExtension) (*string, error) {
 	valuesFromMap := map[string]interface{}{}
 	valuesMap := map[string]interface{}{}

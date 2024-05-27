@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
@@ -219,12 +218,14 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 		Type:         stack.Spec.Type,
 		RepositoryID: repositoryID,
 		ClusterID:    clusterID,
+		ManageState:  stack.Spec.ManageState,
+		Workdir:      stack.Spec.Workdir,
 		Git: console.GitRefAttributes{
 			Ref:    stack.Spec.Git.Ref,
 			Folder: stack.Spec.Git.Folder,
 		},
 		Configuration: console.StackConfigurationAttributes{
-			Version: stack.Spec.Configuration.Version,
+			Version: lo.ToPtr(stack.Spec.Configuration.Version),
 			Image:   stack.Spec.Configuration.Image,
 		},
 		Approval: stack.Spec.Approval,
@@ -267,82 +268,11 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 			}
 		})
 
-	if stack.Spec.JobSpec != nil {
-		raw, err := json.Marshal(stack.Spec.JobSpec)
-		if err != nil {
-			return nil, err
-		}
-		containers := []*console.ContainerAttributes{}
-		for _, c := range stack.Spec.JobSpec.Template.Spec.Containers {
-			ca := &console.ContainerAttributes{
-				Image: c.Image,
-			}
-			if c.Args != nil {
-				ca.Args = algorithms.Map(c.Args,
-					func(b string) *string { return &b })
-			}
-			if c.Env != nil {
-				ca.Env = algorithms.Map(c.Env,
-					func(b corev1.EnvVar) *console.EnvAttributes {
-						return &console.EnvAttributes{
-							Name:  b.Name,
-							Value: b.Value,
-						}
-					})
-			}
-			if c.EnvFrom != nil {
-				ca.EnvFrom = algorithms.Map(c.EnvFrom,
-					func(b corev1.EnvFromSource) *console.EnvFromAttributes {
-						secret := ""
-						configMap := ""
-						if b.SecretRef != nil {
-							secret = b.SecretRef.Name
-						}
-						if b.ConfigMapRef != nil {
-							configMap = b.ConfigMapRef.Name
-						}
-						return &console.EnvFromAttributes{
-							Secret:    secret,
-							ConfigMap: configMap,
-						}
-					})
-			}
-
-			containers = append(containers, ca)
-		}
-
-		var annotations *string
-		var labels *string
-		if stack.Spec.JobSpec.Template.Annotations != nil {
-			result, err := json.Marshal(stack.Spec.JobSpec.Template.Annotations)
-			if err != nil {
-				return nil, err
-			}
-			rawAnnotations := string(result)
-			annotations = &rawAnnotations
-		}
-		if stack.Spec.JobSpec.Template.Labels != nil {
-			result, err := json.Marshal(stack.Spec.JobSpec.Template.Labels)
-			if err != nil {
-				return nil, err
-			}
-			rawLabels := string(result)
-			labels = &rawLabels
-		}
-		namespace := stack.Namespace
-		if stack.Spec.JobSpec.Template.Namespace != "" {
-			namespace = stack.Spec.JobSpec.Template.Namespace
-		}
-
-		attr.JobSpec = &console.GateJobAttributes{
-			Namespace:      namespace,
-			Raw:            lo.ToPtr(string(raw)),
-			Containers:     containers,
-			ServiceAccount: lo.ToPtr(stack.Spec.JobSpec.Template.Spec.ServiceAccountName),
-			Labels:         labels,
-			Annotations:    annotations,
-		}
+	jobSpec, err := gateJobAttributes(stack.Spec.JobSpec)
+	if err != nil {
+		return nil, err
 	}
+	attr.JobSpec = jobSpec
 
 	if stack.Spec.Bindings != nil {
 		attr.ReadBindings = make([]*console.PolicyBindingAttributes, 0)

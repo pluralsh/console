@@ -715,6 +715,9 @@ type RootMutationType {
 
   detachStack(id: ID!): InfrastructureStack
 
+  "refresh the source repo of this stack, and potentially create a fresh run"
+  kickStack(id: ID!): StackRun
+
   approveStackRun(id: ID!): StackRun
 
   restartStackRun(id: ID!): StackRun
@@ -934,6 +937,7 @@ enum StackStatus {
   SUCCESSFUL
   FAILED
   CANCELLED
+  PENDING_APPROVAL
 }
 
 enum StackType {
@@ -980,6 +984,12 @@ input StackAttributes {
   "whether to require approval"
   approval: Boolean
 
+  "whether you want Plural to manage your terraform state for this stack"
+  manageState: Boolean
+
+  "the subdirectory you want to run the stack's commands w\/in"
+  workdir: String
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -996,7 +1006,24 @@ input StackConfigurationAttributes {
   image: String
 
   "the semver of the tool you wish to use"
-  version: String!
+  version: String
+
+  "the docker image tag you wish to use if you're customizing the version"
+  tag: String
+
+  "the hooks to customize execution for this stack"
+  hooks: [StackHookAttributes]
+}
+
+input StackHookAttributes {
+  "a script hook to run at a stage"
+  cmd: String!
+
+  "args for `cmd`"
+  args: [String]
+
+  "the stage to run this hook before"
+  afterStage: StepStage!
 }
 
 input StackRunAttributes {
@@ -1093,6 +1120,12 @@ type InfrastructureStack {
   "why this run was cancelled"
   cancellationReason: String
 
+  "the subdirectory you want to run the stack's commands w\/in"
+  workdir: String
+
+  "whether you want Plural to manage the state of this stack"
+  manageState: Boolean
+
   runs(after: String, first: Int, before: String, last: Int, pullRequestId: ID): StackRunConnection
 
   pullRequests(after: String, first: Int, before: String, last: Int): PullRequestConnection
@@ -1133,6 +1166,23 @@ type StackConfiguration {
 
   "the semver of the tool you wish to use"
   version: String!
+
+  "the docker image tag you wish to use if you're customizing the version"
+  tag: String
+
+  "the hooks to customize execution for this stack"
+  hooks: [StackHook]
+}
+
+type StackHook {
+  "a script hook to run at a stage"
+  cmd: String!
+
+  "args for `cmd`"
+  args: [String]
+
+  "the stage to run this hook before"
+  afterStage: StepStage!
 }
 
 type StackRun {
@@ -1162,6 +1212,12 @@ type StackRun {
   "when this run was approved"
   approvedAt: DateTime
 
+  "the subdirectory you want to run the stack's commands w\/in"
+  workdir: String
+
+  "whether you want Plural to manage the state of this stack"
+  manageState: Boolean
+
   "https url to fetch the latest tarball of stack IaC"
   tarball: String!
 
@@ -1176,6 +1232,9 @@ type StackRun {
 
   "environment variables for this stack"
   environment: [StackEnvironment]
+
+  "the stack attached to this run"
+  stack: InfrastructureStack
 
   "the most recent output for this stack"
   output: [StackOutput]

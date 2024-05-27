@@ -17,12 +17,14 @@ defmodule Console.Schema.StackRun do
   }
 
   schema "stack_runs" do
-    field :type,        Stack.Type
-    field :status,      Stack.Status
-    field :approval,    :boolean, default: true
-    field :dry_run,     :boolean, default: false
-    field :approved_at, :utc_datetime_usec
-    field :message,     :binary
+    field :type,         Stack.Type
+    field :status,       Stack.Status
+    field :approval,     :boolean, default: true
+    field :dry_run,      :boolean, default: false
+    field :approved_at,  :utc_datetime_usec
+    field :message,      :binary
+    field :workdir,      :string
+    field :manage_state, :boolean, default: false
 
     field :cancellation_reason, :string
 
@@ -86,7 +88,7 @@ defmodule Console.Schema.StackRun do
   end
 
   def running(query \\ __MODULE__) do
-    from(r in query, where: r.status in ^[:pending, :running])
+    from(r in query, where: r.status in ^[:pending, :running, :pending_approval])
   end
 
   def for_status(query \\ __MODULE__, status) do
@@ -101,7 +103,7 @@ defmodule Console.Schema.StackRun do
     from(r in query, order_by: ^order)
   end
 
-  @valid ~w(type status message approval dry_run repository_id pull_request_id cluster_id stack_id)a
+  @valid ~w(type status workdir manage_state message approval dry_run repository_id pull_request_id cluster_id stack_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

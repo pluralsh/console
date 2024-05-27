@@ -20,6 +20,7 @@ defmodule Console do
 
   @chars String.codepoints("abcdefghijklmnopqrstuvwxyz0123456789")
 
+  def authed_user("deploy-" <> _ = deploy), do: Console.Deployments.Clusters.get_by_deploy_token(deploy)
   def authed_user("console-" <> _ = access), do: Console.Services.Users.get_by_token(access)
   def authed_user(jwt) do
     case Console.Guardian.resource_from_token(jwt) do

@@ -4,9 +4,25 @@ import { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import sortBy from 'lodash/sortBy'
 
-import { StackRun } from '../../../../../generated/graphql'
+import { StackRun, StepStatus } from '../../../../../generated/graphql'
 
 import Step from './Step'
+
+function currentStep(steps) {
+  for (let i = steps.length - 1; i > 0; i--) {
+    const { status } = steps[i]
+
+    if (
+      status === StepStatus.Running ||
+      status === StepStatus.Successful ||
+      status === StepStatus.Failed
+    ) {
+      return steps[i].id
+    }
+  }
+
+  return steps[0].id
+}
 
 export default function StackRunProgress(): ReactNode {
   const { stackRun } = useOutletContext<{ stackRun: StackRun }>()
@@ -14,6 +30,7 @@ export default function StackRunProgress(): ReactNode {
     () => sortBy(stackRun.steps, (s) => s?.index),
     [stackRun.steps]
   )
+  const openId = currentStep(sorted)
 
   return (
     <ScrollablePage
@@ -31,6 +48,7 @@ export default function StackRunProgress(): ReactNode {
           <Step
             key={s!.id}
             step={s!}
+            open={s!.id === openId}
           />
         ))}
       </Card>
