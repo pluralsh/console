@@ -68,12 +68,9 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Optional
 	Environment []StackEnvironment `json:"environment,omitempty"`
 
-	// Files reference to ConfigMaps with a key as a path and value as a content
+	// Files reference to Secret with a key as a part of mount path and value as a content
 	// +kubebuilder:validation:Optional
-	Files []corev1.LocalObjectReference `json:"files,omitempty"`
-	// SecretFiles reference to Secrets with a key as a path and value as a content
-	// +kubebuilder:validation:Optional
-	SecretFiles []corev1.LocalObjectReference `json:"secretFiles,omitempty"`
+	Files []StackFile `json:"files,omitempty"`
 
 	// Detach determined if user want to delete or detach stack
 	Detach bool `json:"detach"`
@@ -105,8 +102,8 @@ func init() {
 }
 
 type StackFile struct {
-	Path    string `json:"path"`
-	Content string `json:"content"`
+	MountPath string                      `json:"mountPath"`
+	SecretRef corev1.LocalObjectReference `json:"secretRef"`
 }
 
 type StackConfiguration struct {
@@ -118,10 +115,13 @@ type StackConfiguration struct {
 }
 
 type StackEnvironment struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
+	Name string `json:"name"`
 	// +kubebuilder:validation:Optional
-	Secret *bool `json:"secret,omitempty"`
+	Value *string `json:"value,omitempty"`
+	// +kubebuilder:validation:Optional
+	SecretKeyRef *corev1.SecretKeySelector `json:"secretKeyRef,omitempty"`
+	// +kubebuilder:validation:Optional
+	ConfigMapRef *corev1.ConfigMapKeySelector `json:"configMapRef,omitempty"`
 }
 
 func (p *InfrastructureStack) StackName() string {
