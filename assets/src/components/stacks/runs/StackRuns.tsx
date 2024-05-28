@@ -7,17 +7,14 @@ import {
 import React, { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
-
 import { useOutletContext, useParams } from 'react-router-dom'
 
 import { StackFragment, useStackRunsQuery } from '../../../generated/graphql'
 import { extendConnection, mapExistingNodes } from '../../../utils/graphql'
 import { StandardScroller } from '../../utils/SmoothScroller'
 import { ReturnToBeginning } from '../../utils/ReturnToBeginning'
-
-import ConsolePageTitle from '../../utils/layout/ConsolePageTitle'
-
 import { getBreadcrumbs } from '../Stacks'
+import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
 import StackRun from './StackRun'
 
@@ -63,17 +60,13 @@ export default function StackRuns() {
     )
 
   return (
-    <>
-      <ConsolePageTitle
-        heading="Runs"
-        headingProps={{
-          paddingTop: theme.spacing.small,
-          paddingBottom: theme.spacing.medium,
-        }}
-      />
+    <ScrollablePage
+      scrollable={false}
+      noPadding
+    >
       <Card
-        // TODO: Height should be max content.
-        height="calc(100% - 52px)"
+        flexGrow={1}
+        maxHeight="100%"
         width="100%"
         position="relative"
       >
@@ -119,6 +112,6 @@ export default function StackRuns() {
         />
         {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
       </Card>
-    </>
+    </ScrollablePage>
   )
 }

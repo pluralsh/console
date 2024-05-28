@@ -241,7 +241,15 @@ export default function Stacks() {
               width="max-content"
             />
           </div>
-          <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
+          <div
+            css={{
+              width: RESPONSIVE_LAYOUT_CONTENT_WIDTH,
+              height: '100%',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
             <TabList
               scrollable
               gap="xxsmall"

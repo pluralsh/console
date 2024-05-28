@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   AppIcon,
   Button,
+  GraphQLToast,
   ReloadIcon,
   SubTab,
   TabList,
@@ -15,11 +16,10 @@ import {
   useApproveStackRunMutation,
   useRestartStackRunMutation,
   useUpdateStackRunMutation,
-} from '../../../../generated/graphql'
-import { StackTypeIcon } from '../../common/StackTypeIcon'
-import { LinkTabWrap } from '../../../utils/Tabs'
-import { getStackRunsAbsPath } from '../../../../routes/stacksRoutesConsts'
-import { GqlError } from '../../../utils/Alert'
+} from '../../../generated/graphql'
+import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
+import { LinkTabWrap } from '../../utils/Tabs'
+import { StackTypeIcon } from '../common/StackTypeIcon'
 
 const DIRECTORY = [
   { path: '', label: 'Progress' },
@@ -162,8 +162,22 @@ function StackRunHeaderButtons({ stackRun, refetch }): ReactNode {
 
   return (
     <>
-      {error && <GqlError error={error} />}
-      {restartError && <GqlError error={restartError} />}
+      {error && (
+        <GraphQLToast
+          error={{ graphQLErrors: [...(error?.graphQLErrors ?? [])] }}
+          header="Error (500)"
+          margin="xlarge"
+          marginVertical="xxxlarge"
+        />
+      )}
+      {restartError && (
+        <GraphQLToast
+          error={{ graphQLErrors: [...(restartError?.graphQLErrors ?? [])] }}
+          header="Error (500)"
+          margin="xlarge"
+          marginVertical="xxxlarge"
+        />
+      )}
       <div
         css={{
           display: 'flex',
