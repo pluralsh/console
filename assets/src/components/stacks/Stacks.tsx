@@ -4,7 +4,6 @@ import {
   LoopingLogo,
   PlusIcon,
   SearchIcon,
-  SidecarItem,
   SubTab,
   TabList,
   TreeNavEntry,
@@ -15,11 +14,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { isEmpty } from 'lodash'
 import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { useDebounce } from '@react-hooks-library/core'
-
-import moment from 'moment'
-import capitalize from 'lodash/capitalize'
-
-import { HorizontalRule } from '@pluralsh/design-system/dist/markdoc/components'
 
 import {
   STACK_CONFIGURATION_REL_PATH,
@@ -41,7 +35,6 @@ import {
 
 import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
 import { StackedText } from '../utils/table/StackedText'
-import { ClusterProviderIcon } from '../utils/Provider'
 
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
@@ -49,10 +42,7 @@ import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayo
 import { StandardScroller } from '../utils/SmoothScroller'
 import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../utils/layout/ResponsiveLayoutContentContainer'
 import { LinkTabWrap } from '../utils/Tabs'
-import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
 
-import StackStatusChip from './common/StackStatusChip'
 import { StackTypeIcon } from './common/StackTypeIcon'
 import CreateStack from './create/CreateStack'
 import DeleteStack from './delete/DeleteStack'
@@ -133,7 +123,7 @@ export default function Stacks() {
     return <LoopingLogo />
   }
 
-  if (isEmpty(stacks)) {
+  if (isEmpty(stacks) && isEmpty(debouncedSearchString)) {
     return (
       <EmptyState message="Looks like you don't have any infrastructure stacks yet.">
         <CreateStack refetch={refetch} />
@@ -141,9 +131,12 @@ export default function Stacks() {
     )
   }
 
-  if (!stack) {
-    return <LoopingLogo />
-  }
+  // if (!stack) {
+  //   return <LoopingLogo />
+  // }
+
+  // TODO: Use separate query for stack.
+  // TODO: Fix scrolling.
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
@@ -157,7 +150,7 @@ export default function Stacks() {
         >
           <Input
             flexGrow={1}
-            placeholder="Search"
+            placeholder="Search stacks"
             startIcon={<SearchIcon />}
             value={searchString}
             onChange={(e) => {
@@ -208,6 +201,9 @@ export default function Stacks() {
           setLoader={undefined}
           handleScroll={undefined}
         />
+        {isEmpty(stacks) && !isEmpty(debouncedSearchString) && (
+          <EmptyState message="No stacks match your query." />
+        )}
       </ResponsiveLayoutSidenavContainer>
       {stack && (
         <div>
