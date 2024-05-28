@@ -154,6 +154,12 @@ query Stacks(
   }
 }
 
+query Stack($id: ID!) {
+  infrastructureStack(id: $id) {
+    ...Stack
+  }
+}
+
 query StackTiny($id: ID!) {
   infrastructureStack(id: $id) {
     id

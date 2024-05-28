@@ -1,15 +1,11 @@
 import {
-  AppIcon,
-  Card,
   EmptyState,
-  IconFrame,
   Input,
   LoopingLogo,
   PlusIcon,
   SearchIcon,
   SubTab,
   TabList,
-  TreeNavEntry,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -17,8 +13,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { isEmpty } from 'lodash'
 import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { useDebounce } from '@react-hooks-library/core'
-
-import { Div } from 'honorable'
 
 import {
   STACK_CONFIGURATION_REL_PATH,
@@ -35,22 +29,17 @@ import { mapExistingNodes } from '../../utils/graphql'
 import {
   StackFragment,
   useKickStackMutation,
+  useStackQuery,
   useStacksQuery,
 } from '../../generated/graphql'
 import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
-import { StackedText } from '../utils/table/StackedText'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
-import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { LinkTabWrap } from '../utils/Tabs'
 
-import { TRUNCATE_LEFT } from '../utils/truncate'
-
-import { StackTypeIcon } from './common/StackTypeIcon'
 import CreateStack from './create/CreateStack'
 import DeleteStack from './delete/DeleteStack'
-import StackStatusChip from './common/StackStatusChip'
 import StackEntry from './StacksEntry'
 
 export type StackOutletContextT = {
@@ -64,6 +53,8 @@ export const getBreadcrumbs = (stackId: string) => [
 ]
 
 const QUERY_PAGE_SIZE = 100
+
+const pollInterval = 5 * 1000
 
 const DIRECTORY = [
   { path: STACK_OVERVIEW_REL_PATH, label: 'Overview' },
@@ -106,10 +97,13 @@ export default function Stacks() {
     [data?.infrastructureStacks]
   )
 
-  const stack = useMemo(
-    () => stacks.find(({ id }) => id === stackId),
-    [stackId, stacks]
-  )
+  const { data: stackData } = useStackQuery({
+    variables: { id: stackId },
+    fetchPolicy: 'cache-and-network',
+    pollInterval,
+  })
+
+  const stack = useMemo(() => stackData?.infrastructureStack, [stackData])
 
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
@@ -137,11 +131,9 @@ export default function Stacks() {
     )
   }
 
-  // if (!stack) {
-  //   return <LoopingLogo />
-  // }
-
-  // TODO: Use separate query for stack.
+  if (!stack) {
+    return <LoopingLogo />
+  }
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
