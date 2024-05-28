@@ -1,5 +1,6 @@
 import {
   AppIcon,
+  Card,
   EmptyState,
   IconFrame,
   Input,
@@ -175,10 +176,12 @@ export default function Stacks() {
             <div css={{ height: 52, borderBottom: theme.borders.default }} />
           )}
           hasNextPage={pageInfo?.hasNextPage}
-          mapper={(stack) => (
+          mapper={(stack, { prev, next }) => (
             <StackEntry
               stack={stack}
               active={stack.id === stackId}
+              first={isEmpty(prev)}
+              last={isEmpty(next)}
             />
           )}
           loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
