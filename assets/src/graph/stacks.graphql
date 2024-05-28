@@ -4,6 +4,10 @@ fragment Stack on InfrastructureStack {
   deletedAt
   name
   type
+  files {
+    path
+    content
+  }
   configuration {
     image
     version
@@ -125,8 +129,15 @@ fragment RunStep on RunStep {
   }
 }
 
-query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
+query Stacks(
+  $q: String
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+) {
   infrastructureStacks(
+    q: $q
     after: $after
     before: $before
     first: $first
@@ -140,6 +151,12 @@ query Stacks($after: String, $before: String, $first: Int = 100, $last: Int) {
         ...Stack
       }
     }
+  }
+}
+
+query Stack($id: ID!) {
+  infrastructureStack(id: $id) {
+    ...Stack
   }
 }
 
@@ -261,6 +278,13 @@ mutation KickStack($id: ID!) {
     ...StackRun
   }
 }
+
+mutation UpdateStackRun($id: ID!, $attributes: StackRunAttributes!) {
+  updateStackRun(id: $id, attributes: $attributes) {
+    ...StackRun
+  }
+}
+
 mutation ApproveStackRun($id: ID!) {
   approveStackRun(id: $id) {
     ...StackRun

@@ -106,5 +106,5 @@ export function CreateStackModalFormRepository({
   )
 }
 
-const cleanRefs = (refs: string[] | null) =>
+export const cleanRefs = (refs: string[] | null) =>
   (refs || []).map((ref) => trimStart(trimStart(ref, '/'), 'refs/heads/'))

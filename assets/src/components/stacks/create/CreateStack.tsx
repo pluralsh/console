@@ -1,19 +1,19 @@
 import { Button, Tooltip } from '@pluralsh/design-system'
-import { ButtonProps } from 'honorable'
 import { ReactNode, useState } from 'react'
+import { ButtonProps } from 'honorable'
 
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 
 import CreateStackModal from './CreateStackModal'
 
 export default function CreateStack({
+  refetch,
   buttonContent = 'Create stack',
   buttonProps,
-  refetch,
 }: {
+  refetch?: Nullable<() => void>
   buttonProps?: ButtonProps
   buttonContent?: string | ReactNode
-  refetch?: Nullable<() => void>
 }) {
   const [open, setOpen] = useState(false)
 

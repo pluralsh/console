@@ -14,6 +14,8 @@ interface OutputValueProps {
   secret: boolean
 }
 
+const MULTILINE_REGEX = /(.*[\n\r])+/
+
 export default function OutputValue({
   value,
   secret,
@@ -37,6 +39,9 @@ export default function OutputValue({
     }
   }, [value])
 
+  const isMultiline = MULTILINE_REGEX.test(value)
+  const useModal = isObject || isMultiline
+
   return (
     <div
       css={{
@@ -46,13 +51,16 @@ export default function OutputValue({
       }}
     >
       <div css={{ flexGrow: 1 }}>
-        {isObject ? (
-          <OutputValueModal object={object} />
+        {useModal ? (
+          <OutputValueModal
+            value={object ?? value}
+            isObject={isObject}
+          />
         ) : (
           <span css={{ wordBreak: 'break-word' }}>{displayValue}</span>
         )}
       </div>
-      {secret && !isObject && (
+      {secret && !useModal && (
         <IconFrame
           size="medium"
           clickable
@@ -66,27 +74,38 @@ export default function OutputValue({
 }
 
 interface OutputValueModalProps {
-  object: any
+  value: any
+  isObject?: boolean
 }
 
-function OutputValueModal({ object }: OutputValueModalProps): ReactNode {
+function OutputValueModal({
+  value,
+  isObject,
+}: OutputValueModalProps): ReactNode {
   const [open, setOpen] = useState(false)
-  const tabs = object
-    ? [
-        {
-          key: 'yaml',
-          label: 'YAML',
-          language: 'yaml',
-          content: yaml.dump(object),
-        },
-        {
-          key: 'json',
-          label: 'JSON',
-          language: 'json',
-          content: JSON.stringify(object, null, 2),
-        },
-      ]
-    : []
+  const tabs =
+    value && isObject
+      ? [
+          {
+            key: 'yaml',
+            label: 'YAML',
+            language: 'yaml',
+            content: yaml.dump(value),
+          },
+          {
+            key: 'json',
+            label: 'JSON',
+            language: 'json',
+            content: JSON.stringify(value, null, 2),
+          },
+        ]
+      : [
+          {
+            key: 'text',
+            label: 'TEXT',
+            content: value ?? 'Nothing to display here',
+          },
+        ]
 
   return (
     <>

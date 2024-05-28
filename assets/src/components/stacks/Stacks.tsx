@@ -1,75 +1,48 @@
 import {
+  Button,
   EmptyState,
   Input,
   LoopingLogo,
   PlusIcon,
   SearchIcon,
-  Sidecar,
-  SidecarItem,
   SubTab,
   TabList,
-  TreeNavEntry,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { isEmpty } from 'lodash'
 import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
-import capitalize from 'lodash/capitalize'
-
 import { useDebounce } from '@react-hooks-library/core'
 
-import Fuse from 'fuse.js'
-
-import moment from 'moment'
-
-import KickButton from 'components/utils/KickButton'
-
 import {
-  STACK_CONFIG_REL_PATH,
+  STACK_CONFIGURATION_REL_PATH,
   STACK_ENV_REL_PATH,
+  STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
-  STACK_REPO_REL_PATH,
+  STACK_OVERVIEW_REL_PATH,
+  STACK_REPOSITORY_REL_PATH,
   STACK_RUNS_REL_PATH,
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
 import { GqlError } from '../utils/Alert'
-import { extendConnection, mapExistingNodes } from '../../utils/graphql'
-import { StackedText } from '../utils/table/StackedText'
+import { mapExistingNodes } from '../../utils/graphql'
 import {
   StackFragment,
   useKickStackMutation,
+  useStackQuery,
   useStacksQuery,
 } from '../../generated/graphql'
-import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSpacer } from '../utils/layout/ResponsiveLayoutSpacer'
-import { ClusterProviderIcon } from '../utils/Provider'
+import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
+import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
-import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
-
 import { StandardScroller } from '../utils/SmoothScroller'
-
 import { LinkTabWrap } from '../utils/Tabs'
+import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 
-import { StackTypeIcon, StackTypeIconFrame } from './StackTypeIcon'
 import CreateStack from './create/CreateStack'
-import StackDelete from './StackDelete'
-import StackStatusChip from './StackStatusChip'
-
-const pollInterval = 10 * 1000
-
-const searchOptions = {
-  keys: ['name'],
-  threshold: 0.25,
-}
-
-const directory = [
-  { path: STACK_RUNS_REL_PATH, label: 'Runs' },
-  { path: STACK_CONFIG_REL_PATH, label: 'Configuration' },
-  { path: STACK_REPO_REL_PATH, label: 'Repository' },
-  { path: STACK_ENV_REL_PATH, label: 'Environment' },
-  { path: STACK_JOB_REL_PATH, label: 'Job' },
-] as const
+import DeleteStack from './delete/DeleteStack'
+import StackEntry from './StacksEntry'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -81,6 +54,20 @@ export const getBreadcrumbs = (stackId: string) => [
   ...(stackId ? [{ label: stackId, url: getStacksAbsPath(stackId) }] : []),
 ]
 
+const QUERY_PAGE_SIZE = 100
+
+const pollInterval = 5 * 1000
+
+const DIRECTORY = [
+  { path: STACK_RUNS_REL_PATH, label: 'Runs' },
+  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview' },
+  { path: STACK_CONFIGURATION_REL_PATH, label: 'Configuration' },
+  { path: STACK_REPOSITORY_REL_PATH, label: 'Repository' },
+  { path: STACK_ENV_REL_PATH, label: 'Environment' },
+  { path: STACK_FILES_REL_PATH, label: 'Files' },
+  { path: STACK_JOB_REL_PATH, label: 'Job' },
+]
+
 export default function Stacks() {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -88,38 +75,37 @@ export default function Stacks() {
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
+  const currentTab = DIRECTORY.find(({ path }) => path === tab)
   const [listRef, setListRef] = useState<any>(null)
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
 
-  const { data, error, loading, fetchMore, refetch } = useStacksQuery({
+  useSetBreadcrumbs(useMemo(() => [...getBreadcrumbs(stackId)], [stackId]))
+
+  const { data, loading, error, refetch, pageInfo, fetchNextPage } =
+    useFetchPaginatedData(
+      {
+        queryHook: useStacksQuery,
+        pageSize: QUERY_PAGE_SIZE,
+        queryKey: 'infrastructureStacks',
+      },
+      {
+        q: debouncedSearchString,
+      }
+    )
+
+  const stacks = useMemo(
+    () => mapExistingNodes(data?.infrastructureStacks),
+    [data?.infrastructureStacks]
+  )
+
+  const { data: stackData } = useStackQuery({
+    variables: { id: stackId },
     fetchPolicy: 'cache-and-network',
     pollInterval,
   })
 
-  const { stacks, pageInfo } = useMemo(
-    () => ({
-      stacks: mapExistingNodes(data?.infrastructureStacks),
-      pageInfo: data?.infrastructureStacks?.pageInfo,
-    }),
-    [data?.infrastructureStacks]
-  )
-
-  const stack = useMemo(
-    () => stacks.find(({ id }) => id === stackId),
-    [stackId, stacks]
-  )
-
-  // TODO: Use server-side filtering once it will be available.
-  const filteredStacks = useMemo(() => {
-    if (!debouncedSearchString) {
-      return stacks || []
-    }
-    const fuse = new Fuse(stacks || [], searchOptions)
-
-    return fuse.search(debouncedSearchString).map((result) => result.item)
-  }, [debouncedSearchString, stacks])
+  const stack = useMemo(() => stackData?.infrastructureStack, [stackData])
 
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
@@ -139,7 +125,7 @@ export default function Stacks() {
     return <LoopingLogo />
   }
 
-  if (isEmpty(stacks)) {
+  if (isEmpty(stacks) && isEmpty(debouncedSearchString)) {
     return (
       <EmptyState message="Looks like you don't have any infrastructure stacks yet.">
         <CreateStack refetch={refetch} />
@@ -147,23 +133,19 @@ export default function Stacks() {
     )
   }
 
-  if (!stack) {
-    return <LoopingLogo />
-  }
-
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer width={360}>
+      <div css={{ marginRight: theme.spacing.xlarge, width: 340 }}>
         <div
           css={{
             display: 'flex',
             gap: theme.spacing.small,
-            marginBottom: theme.spacing.medium,
+            marginBottom: theme.spacing.large,
           }}
         >
           <Input
             flexGrow={1}
-            placeholder="Search"
+            placeholder="Search stacks"
             startIcon={<SearchIcon />}
             value={searchString}
             onChange={(e) => {
@@ -172,165 +154,114 @@ export default function Stacks() {
           />
           <CreateStack
             buttonContent={<PlusIcon />}
-            buttonProps={{ secondary: true, height: 40 }}
+            buttonProps={{ secondary: true, height: 40, width: 40 }}
             refetch={refetch}
           />
         </div>
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}
-          items={filteredStacks}
+          items={stacks}
           loading={loading}
           placeholder={() => (
             <div css={{ height: 52, borderBottom: theme.borders.default }} />
           )}
           hasNextPage={pageInfo?.hasNextPage}
-          mapper={(stack) => (
-            <TreeNavEntry
-              key={stack.id ?? ''}
-              label={
-                <div
-                  css={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: theme.spacing.small,
-                  }}
-                >
-                  <StackTypeIconFrame
-                    size="small"
-                    stackType={stack.type}
-                  />
-                  <StackedText
-                    first={stack.name}
-                    second={stack.repository?.url}
-                  />
-                </div>
-              }
+          mapper={(stack, { prev, next }) => (
+            <StackEntry
+              stack={stack}
               active={stack.id === stackId}
-              activeSecondary={false}
-              href={getStacksAbsPath(stack.id)}
-              desktop
+              first={isEmpty(prev)}
+              last={isEmpty(next)}
             />
           )}
-          loadNextPage={() =>
-            pageInfo?.hasNextPage &&
-            fetchMore({
-              variables: { after: pageInfo?.endCursor },
-              updateQuery: (
-                prev,
-                { fetchMoreResult: { infrastructureStacks } }
-              ) =>
-                extendConnection(
-                  prev,
-                  infrastructureStacks,
-                  'infrastructureStacks'
-                ),
-            })
-          }
+          loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
           refreshKey={undefined}
           setLoader={undefined}
           handleScroll={undefined}
         />
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
-        <TabList
-          scrollable
-          gap="xxsmall"
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: currentTab?.path,
-          }}
-          marginRight="medium"
-          paddingBottom="small"
-        >
-          {directory.map(({ label, path }) => (
-            <LinkTabWrap
-              subTab
-              key={path}
-              textValue={label}
-              to={`${getStacksAbsPath(stackId)}/${path}`}
+        {isEmpty(stacks) && !isEmpty(debouncedSearchString) && (
+          <EmptyState message="No stacks match your query.">
+            <Button
+              secondary
+              onClick={() => setSearchString('')}
             >
-              <SubTab
-                key={path}
-                textValue={label}
-              >
-                {label}
-              </SubTab>
-            </LinkTabWrap>
-          ))}
-        </TabList>
-        <Outlet context={{ stack, refetch } as StackOutletContextT} />
+              Reset search
+            </Button>
+          </EmptyState>
+        )}
       </div>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutSidecarContainer
-        display="flex"
-        flexDirection="column"
-        gap="small"
-      >
-        {stack && (
-          <>
-            <KickButton
-              pulledAt={stack.repository?.pulledAt}
-              kickMutationHook={useKickStackMutation}
-              message="Resync stack run"
-              tooltipMessage="Use this to sync this run now instead of at the next poll interval"
-              variables={{ id: stack.id }}
-            />
-            <StackDelete
+      {stack ? (
+        <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+          <div
+            css={{
+              alignItems: 'start',
+              display: 'flex',
+              gap: theme.spacing.medium,
+              borderBottom: theme.borders.default,
+              marginBottom: theme.spacing.medium,
+              paddingBottom: theme.spacing.medium,
+            }}
+          >
+            <div css={{ flexGrow: 1 }}>
+              <div css={{ ...theme.partials.text.subtitle1 }}>{stack.name}</div>
+              <div
+                css={{
+                  ...theme.partials.text.body1,
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                {stack.repository?.url}
+              </div>
+            </div>
+            <DeleteStack
               stack={stack}
               refetch={refetch}
             />
-            <Sidecar heading="Stack">
-              <SidecarItem heading="Name">
-                <div css={{ display: 'flex', gap: theme.spacing.small }}>
-                  {stack.name}
-                </div>
-              </SidecarItem>
-              <SidecarItem heading="ID">{stack.id}</SidecarItem>
-              <SidecarItem heading="Created">
-                {moment(stack.insertedAt).fromNow()}
-              </SidecarItem>
-              {stack.deletedAt && (
-                <SidecarItem heading="Deleted">
-                  {moment(stack.deletedAt).fromNow()}
-                </SidecarItem>
-              )}
-              <SidecarItem heading="Status">
-                <StackStatusChip
-                  paused={!!stack.paused}
-                  deleting={!!stack.deletedAt}
-                />
-              </SidecarItem>
-              <SidecarItem heading="Approval">
-                {stack.approval ? 'Required' : 'Not required'}
-              </SidecarItem>
-              <SidecarItem heading="Type">
-                <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-                  <StackTypeIcon
-                    size={16}
-                    stackType={stack.type}
-                  />
-                  {capitalize(stack.type)}
-                </div>
-              </SidecarItem>
-              <SidecarItem heading="Repository">
-                {stack.repository?.url}
-              </SidecarItem>
-              <SidecarItem heading="Cluster">
-                <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-                  <ClusterProviderIcon
-                    cluster={stack.cluster}
-                    size={16}
-                  />
-                  {stack.cluster?.name}
-                </div>
-              </SidecarItem>
-            </Sidecar>
-          </>
-        )}
-      </ResponsiveLayoutSidecarContainer>
+            <KickButton
+              pulledAt={stack.repository?.pulledAt}
+              kickMutationHook={useKickStackMutation}
+              message="Resync"
+              tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
+              variables={{ id: stack.id }}
+              width="max-content"
+            />
+          </div>
+          <TabList
+            scrollable
+            gap="xxsmall"
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: currentTab?.path,
+            }}
+            marginRight="medium"
+            paddingBottom="medium"
+            minHeight={56}
+          >
+            {DIRECTORY.map(({ label, path }) => (
+              <LinkTabWrap
+                subTab
+                key={path}
+                textValue={label}
+                to={`${getStacksAbsPath(stackId)}/${path}`}
+              >
+                <SubTab
+                  key={path}
+                  textValue={label}
+                >
+                  {label}
+                </SubTab>
+              </LinkTabWrap>
+            ))}
+          </TabList>
+          <Outlet context={{ stack, refetch } as StackOutletContextT} />
+        </div>
+      ) : (
+        <LoadingIndicatorWrap>
+          <LoopingLogo />
+        </LoadingIndicatorWrap>
+      )}
     </ResponsiveLayoutPage>
   )
 }

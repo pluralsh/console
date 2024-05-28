@@ -6,7 +6,7 @@ const StackedTextSC = styled.div((_) => ({
   flexDirection: 'column',
 }))
 const FirstSC = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2,
+  ...theme.partials.text.body2LooseLineHeight,
 }))
 const SecondSC = styled.div(({ theme }) => ({
   ...theme.partials.text.caption,

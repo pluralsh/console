@@ -4,19 +4,18 @@ import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { StackRun, useStackRunQuery } from '../../../generated/graphql'
+import { getBreadcrumbs } from '../Stacks'
 import {
   STACK_RUNS_REL_PATH,
   getStackRunsAbsPath,
   getStacksAbsPath,
 } from '../../../routes/stacksRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
-import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
-import { getBreadcrumbs } from '../Stacks'
+import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
 
+import StackRunHeader from './Header'
 import StackRunSidecar from './Sidecar'
-import StackRunSidenav from './Sidenav'
 
 interface ZeroStateProps {
   id?: string
@@ -81,13 +80,14 @@ export default function StackRunDetail(): ReactNode {
   }
 
   return (
-    <ResponsiveLayoutPage>
-      <StackRunSidenav stackRun={stackRun} />
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer>
+    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
+      <ResponsiveLayoutContentContainer maxWidth-desktopLarge-up="100%">
+        <StackRunHeader
+          stackRun={stackRun}
+          refetch={refetch}
+        />
         <div
           css={{
-            marginBottom: theme.spacing.large,
             overflow: 'hidden',
             width: '100%',
             height: '100%',
@@ -102,11 +102,7 @@ export default function StackRunDetail(): ReactNode {
           />
         </div>
       </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSpacer />
-      <StackRunSidecar
-        stackRun={stackRun}
-        refetch={refetch}
-      />
+      <StackRunSidecar stackRun={stackRun} />
     </ResponsiveLayoutPage>
   )
 }

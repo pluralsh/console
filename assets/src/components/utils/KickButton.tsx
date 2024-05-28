@@ -1,8 +1,8 @@
-import { Button, Tooltip } from '@pluralsh/design-system'
+import { Button, GraphQLToast, Tooltip } from '@pluralsh/design-system'
 import { useSyncCooldown } from 'components/hooks/useSyncCooldown'
-import { GqlError } from 'components/utils/Alert'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
+import { ButtonProps } from 'honorable'
 
 export default function KickButton({
   pulledAt,
@@ -10,13 +10,14 @@ export default function KickButton({
   message,
   tooltipMessage,
   variables,
+  ...props
 }: {
   pulledAt?: string | null
   kickMutationHook: any
   message: string
   tooltipMessage: string
   variables: any
-}) {
+} & ButtonProps) {
   const theme = useTheme()
   const [mutation, { loading, error }] = kickMutationHook({ variables })
   const [buttonClicked, setButtonClicked] = useState(false)
@@ -35,7 +36,14 @@ export default function KickButton({
         flexDirection: 'column',
       }}
     >
-      {error && <GqlError error={error} />}
+      {error && disabled && (
+        <GraphQLToast
+          error={{ ...error }}
+          header="Error (500)"
+          margin="xlarge"
+          marginVertical="xxxlarge"
+        />
+      )}
       <Tooltip
         label={
           <TooltipLabel
@@ -51,6 +59,7 @@ export default function KickButton({
             mutation()
           }}
           loading={loading}
+          {...props}
         >
           {disabled && buttonClicked
             ? `Resync cooldown ${secondsRemaining}`

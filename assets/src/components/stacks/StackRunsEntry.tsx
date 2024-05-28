@@ -1,19 +1,24 @@
-import { CaretRightIcon, CliIcon, IconFrame } from '@pluralsh/design-system'
+import {
+  AppIcon,
+  CaretRightIcon,
+  GitCommitIcon,
+  IconFrame,
+  RunBookIcon,
+  WarningShieldIcon,
+} from '@pluralsh/design-system'
 import moment from 'moment'
 import { useTheme } from 'styled-components'
-
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 
-import { StackStatus } from 'generated/graphql'
-
-import { StackRunFragment } from '../../generated/graphql'
-
+import { StackRunFragment, StackStatus } from '../../generated/graphql'
 import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
 
-import { StackRunStatusChip } from './StackRunStatusChip'
+import { TRUNCATE } from '../utils/truncate'
 
-export default function StackRun({
+import { StackRunStatusChip } from './common/StackRunStatusChip'
+
+export default function StackRunsEntry({
   stackRun,
   first,
 }: {
@@ -27,7 +32,6 @@ export default function StackRun({
     insertedAt,
     message,
     status,
-    approvedAt,
     approver,
     git: { ref },
   } = stackRun
@@ -41,12 +45,27 @@ export default function StackRun({
         cursor: 'pointer',
         display: 'flex',
         gap: theme.spacing.medium,
-        padding: theme.spacing.medium,
+        paddingTop: theme.spacing.small,
+        paddingBottom: theme.spacing.small,
+        paddingLeft: theme.spacing.medium,
+        paddingRight: theme.spacing.medium,
         '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
       }}
       onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
     >
-      <IconFrame icon={<CliIcon width={32} />} />
+      <AppIcon
+        size="xxsmall"
+        icon={
+          stackRun.status === StackStatus.PendingApproval ? (
+            <WarningShieldIcon
+              width={32}
+              color="icon-warning"
+            />
+          ) : (
+            <RunBookIcon width={32} />
+          )
+        }
+      />
       <div
         css={{
           display: 'flex',
@@ -57,35 +76,48 @@ export default function StackRun({
       >
         <div
           css={{
-            ...theme.partials.text.body2,
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
+            alignItems: 'baseline',
+            display: 'flex',
+            gap: theme.spacing.xsmall,
           }}
         >
-          {message ?? (first ? 'Initial run' : 'No message')}
-        </div>
-        {stackRun.status === StackStatus.PendingApproval && approvedAt && (
           <div
             css={{
+              ...theme.partials.text.body2,
               textOverflow: 'ellipsis',
               overflow: 'hidden',
-              ...theme.partials.text.caption,
-              color: approvedAt
-                ? theme.colors['text-xlight']
-                : theme.colors['text-warning-light'],
             }}
           >
-            Approved {moment(approvedAt).fromNow()} by {approver?.name}
+            {message ?? (first ? 'Initial run' : 'No message')}
           </div>
-        )}
+          {approver && (
+            <div
+              css={{
+                ...theme.partials.text.caption,
+                ...TRUNCATE,
+                overflow: 'hidden',
+                color: theme.colors['text-xlight'],
+              }}
+            >
+              approved by {approver?.name}
+            </div>
+          )}
+        </div>
         <div
           css={{
             ...theme.partials.text.caption,
+            display: 'flex',
+            alignItems: 'center',
             color: theme.colors['text-xlight'],
+            gap: theme.spacing.xxsmall,
             textOverflow: 'ellipsis',
             overflow: 'hidden',
           }}
         >
+          {/* TODO: Fix icon in design system. */}
+          <div css={{ marginBottom: -9 }}>
+            <GitCommitIcon size={16} />
+          </div>
           {ref}
         </div>
       </div>
@@ -102,7 +134,7 @@ export default function StackRun({
         {moment(insertedAt).fromNow()}
       </div>
       <StackRunStatusChip status={status} />
-      <CaretRightIcon />
+      <IconFrame icon={<CaretRightIcon />} />
     </div>
   )
 }

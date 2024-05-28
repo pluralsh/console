@@ -1,17 +1,16 @@
 import { useEffect, useRef } from 'react'
-
 import { Button, FormField, Input, Switch } from '@pluralsh/design-system'
+import { useOutletContext } from 'react-router-dom'
 
-import { useOutletContext, useParams } from 'react-router-dom'
-
-import { useUpdateState } from '../../hooks/useUpdateState'
-import { GqlError } from '../../utils/Alert'
-import ModalAlt from '../../cd/ModalAlt'
+import { useUpdateState } from '../hooks/useUpdateState'
+import { GqlError } from '../utils/Alert'
+import ModalAlt from '../cd/ModalAlt'
 import {
   StackEnvironment,
   useUpdateStackMutation,
-} from '../../../generated/graphql'
-import { StackOutletContextT } from '../Stacks'
+} from '../../generated/graphql'
+
+import { StackOutletContextT } from './Stacks'
 
 export default function StackEnvironmentApplyModal({
   open,
@@ -24,7 +23,6 @@ export default function StackEnvironmentApplyModal({
   mode?: 'edit' | 'create'
   initialValue?: StackEnvironment
 }) {
-  const { stackId = '' } = useParams()
   const { stack, refetch } = useOutletContext() as StackOutletContextT
   const {
     state: { name, value, secret },
@@ -47,7 +45,7 @@ export default function StackEnvironmentApplyModal({
   // TODO: Use merge mutation once it will be available.
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
-      id: stackId,
+      id: stack.id ?? '',
       attributes: {
         name: stack.name,
         type: stack.type,
