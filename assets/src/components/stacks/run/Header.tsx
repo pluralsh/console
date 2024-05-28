@@ -4,13 +4,10 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   AppIcon,
   Button,
-  CopyIcon,
   ReloadIcon,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
-
-import { Copy } from 'grommet-icons'
 
 import {
   StackRun,
@@ -23,7 +20,6 @@ import { StackTypeIcon } from '../../common/StackTypeIcon'
 import { LinkTabWrap } from '../../../utils/Tabs'
 import { getStackRunsAbsPath } from '../../../../routes/stacksRoutesConsts'
 import { GqlError } from '../../../utils/Alert'
-import CopyButton from '../../../utils/CopyButton'
 
 const DIRECTORY = [
   { path: '', label: 'Progress' },

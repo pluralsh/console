@@ -14,7 +14,7 @@ import {
 } from '../../../generated/graphql'
 import { getStacksAbsPath } from '../../../routes/stacksRoutesConsts'
 
-export default function StackDelete({
+export default function DeleteStack({
   stack,
   refetch,
 }: {
@@ -49,10 +49,10 @@ export default function StackDelete({
   return (
     <>
       <Button
-        secondary
+        destructive
         onClick={() => setConfirm(true)}
       >
-        {deleting ? 'Detach' : 'Delete'}
+        {deleting ? 'Detach stack' : 'Delete stack'}
       </Button>
       <Confirm
         open={confirm}

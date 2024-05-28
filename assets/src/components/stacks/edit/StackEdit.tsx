@@ -13,17 +13,17 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stack'
-import ConsolePageTitle from '../../../utils/layout/ConsolePageTitle'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import ConsolePageTitle from '../../utils/layout/ConsolePageTitle'
 import {
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
   useUpdateStackMutation,
-} from '../../../../generated/graphql'
-import { RepositorySelector } from '../../../cd/services/deployModal/DeployServiceSettingsGit'
-import { mapExistingNodes } from '../../../../utils/graphql'
-import { GqlError } from '../../../utils/Alert'
-import { cleanRefs } from '../../create/CreateStackModalFormRepository'
+} from '../../../generated/graphql'
+import { RepositorySelector } from '../../cd/services/deployModal/DeployServiceSettingsGit'
+import { mapExistingNodes } from '../../../utils/graphql'
+import { GqlError } from '../../utils/Alert'
+import { cleanRefs } from '../create/CreateStackModalFormRepository'
 
 export default function StackEdit() {
   const theme = useTheme()

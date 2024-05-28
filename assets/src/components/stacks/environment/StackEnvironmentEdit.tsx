@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import { GearTrainIcon, IconFrame } from '@pluralsh/design-system'
 
-import { StackEnvironment } from '../../../../generated/graphql'
-import { ModalMountTransition } from '../../../utils/ModalMountTransition'
+import { StackEnvironment } from '../../../generated/graphql'
+import { ModalMountTransition } from '../../utils/ModalMountTransition'
 
 import StackEnvironmentApplyModal from './StackEnvironmentApplyModal'
 

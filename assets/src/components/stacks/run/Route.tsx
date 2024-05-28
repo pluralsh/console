@@ -3,19 +3,19 @@ import { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { StackRun, useStackRunQuery } from '../../../../generated/graphql'
-import LoadingIndicator from '../../../utils/LoadingIndicator'
-import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage'
-import { ResponsiveLayoutContentContainer } from '../../../utils/layout/ResponsiveLayoutContentContainer'
-import { getBreadcrumbs } from '../Stack'
+import { StackRun, useStackRunQuery } from '../../../generated/graphql'
+import { getBreadcrumbs } from '../Stacks'
 import {
   STACK_RUNS_REL_PATH,
   getStackRunsAbsPath,
   getStacksAbsPath,
-} from '../../../../routes/stacksRoutesConsts'
+} from '../../../routes/stacksRoutesConsts'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
+import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
 
-import StackRunSidecar from './Sidecar'
 import StackRunHeader from './Header'
+import StackRunSidecar from './Sidecar'
 
 interface ZeroStateProps {
   id?: string

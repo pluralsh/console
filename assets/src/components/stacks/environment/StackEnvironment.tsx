@@ -26,13 +26,13 @@ import { ObscuredToken } from 'components/profile/ObscuredToken'
 import {
   StackEnvironment as StackEnvironmentT,
   StackFragment,
-} from '../../../../generated/graphql'
+} from '../../../generated/graphql'
 
-import { ModalMountTransition } from '../../../utils/ModalMountTransition'
+import { ModalMountTransition } from '../../utils/ModalMountTransition'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stack'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
-import ConsolePageTitle from '../../../utils/layout/ConsolePageTitle'
+import ConsolePageTitle from '../../utils/layout/ConsolePageTitle'
 
 import StackEnvironmentDelete from './StackEnvironmentDelete'
 import StackEnvironmentEdit from './StackEnvironmentEdit'

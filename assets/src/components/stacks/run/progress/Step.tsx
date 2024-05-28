@@ -21,8 +21,8 @@ import {
   RunStep,
   StepStatus,
   useLogsDeltaSubscription,
-} from '../../../../../generated/graphql'
-import CommandLog from '../../../../builds/build/progress/CommandLog'
+} from '../../../../generated/graphql'
+import CommandLog from '../../../builds/build/progress/CommandLog'
 
 interface StepProps {
   step: RunStep

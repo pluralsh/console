@@ -1,29 +1,30 @@
 import { Navigate, Route } from 'react-router-dom'
 
 import Stacks from '../components/stacks/Stacks'
-import StackRunDetail from '../components/stacks/stack/run/Route'
-import StackRunProgress from '../components/stacks/stack/run/progress/Progress'
-import StackRunOutput from '../components/stacks/stack/run/output/Output'
-import StackRunRepository from '../components/stacks/stack/run/repository/Repository'
-import StackRunPlan from '../components/stacks/stack/run/plan/Plan'
+import StackRunDetail from '../components/stacks/run/Route'
+import StackRunProgress from '../components/stacks/run/progress/Progress'
+import StackRunOutput from '../components/stacks/run/output/Output'
+import StackRunRepository from '../components/stacks/run/repository/Repository'
+import StackRunPlan from '../components/stacks/run/plan/Plan'
 
-import StackRunState from '../components/stacks/stack/run/state/State'
+import StackRunState from '../components/stacks/run/state/State'
 
-import Stack from '../components/stacks/stack/Stack'
+import StackRuns from '../components/stacks/runs/StackRuns'
+import StackFiles from '../components/stacks/StackFiles'
+import StackEdit from '../components/stacks/edit/StackEdit'
+import StackEnvironment from '../components/stacks/environment/StackEnvironment'
+import StackJob from '../components/stacks/StackJob'
 
-import StackRuns from '../components/stacks/stack/runs/StackRuns'
-import StackFiles from '../components/stacks/stack/files/StackFiles'
-import StackEdit from '../components/stacks/stack/edit/StackEdit'
-import StackEnvironment from '../components/stacks/stack/environment/StackEnvironment'
-import StackJob from '../components/stacks/stack/job/StackJob'
+import StackOverview from '../components/stacks/StackOverview'
 
 import {
   STACKS_ABS_PATH,
-  STACK_ABS_PATH,
-  STACK_EDIT_REL_PATH,
+  STACK_CONFIGURATION_REL_PATH,
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
+  STACK_OVERVIEW_REL_PATH,
+  STACK_REPOSITORY_REL_PATH,
   STACK_RUNS_ABS_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
   STACK_RUNS_PLAN_REL_PATH,
@@ -36,23 +37,31 @@ export const stacksRoutes = [
   <Route
     path={STACKS_ABS_PATH}
     element={<Stacks />}
-  />,
-  <Route
-    path={STACK_ABS_PATH}
-    element={<Stack />}
   >
     <Route
       index
       element={
         <Navigate
           replace
-          to={STACK_RUNS_REL_PATH}
+          to={STACK_OVERVIEW_REL_PATH}
         />
       }
     />
     <Route
+      path={STACK_OVERVIEW_REL_PATH}
+      element={<StackOverview />}
+    />
+    <Route
       path={STACK_RUNS_REL_PATH}
       element={<StackRuns />}
+    />
+    <Route
+      path={STACK_CONFIGURATION_REL_PATH}
+      element={<StackEdit />}
+    />
+    <Route
+      path={STACK_REPOSITORY_REL_PATH}
+      element={<StackEdit />}
     />
     <Route
       path={STACK_ENV_REL_PATH}
@@ -65,10 +74,6 @@ export const stacksRoutes = [
     <Route
       path={STACK_JOB_REL_PATH}
       element={<StackJob />}
-    />
-    <Route
-      path={STACK_EDIT_REL_PATH}
-      element={<StackEdit />}
     />
   </Route>,
   <Route

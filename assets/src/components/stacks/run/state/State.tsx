@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { CodeEditor } from '@pluralsh/design-system'
 
-import { StackRun } from '../../../../../generated/graphql'
+import { StackRun } from '../../../../generated/graphql'
 
 export default function StackRunState(): ReactNode {
   const { stackRun } = useOutletContext<{ stackRun: StackRun }>()
