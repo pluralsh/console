@@ -29,7 +29,6 @@ export default function StackRunsEntry({
     insertedAt,
     message,
     status,
-    approvedAt,
     approver,
     git: { ref },
   } = stackRun

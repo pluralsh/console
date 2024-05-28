@@ -37,6 +37,7 @@ import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { LinkTabWrap } from '../utils/Tabs'
+import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 
 import CreateStack from './create/CreateStack'
 import DeleteStack from './delete/DeleteStack'
@@ -131,10 +132,6 @@ export default function Stacks() {
     )
   }
 
-  if (!stack) {
-    return <LoopingLogo />
-  }
-
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <div css={{ marginRight: theme.spacing.xlarge, width: 340 }}>
@@ -186,7 +183,7 @@ export default function Stacks() {
           <EmptyState message="No stacks match your query." />
         )}
       </div>
-      {stack && (
+      {stack ? (
         <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <div
             css={{
@@ -252,6 +249,10 @@ export default function Stacks() {
           </TabList>
           <Outlet context={{ stack, refetch } as StackOutletContextT} />
         </div>
+      ) : (
+        <LoadingIndicatorWrap>
+          <LoopingLogo />
+        </LoadingIndicatorWrap>
       )}
     </ResponsiveLayoutPage>
   )
