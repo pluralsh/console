@@ -135,6 +135,7 @@ defmodule Console.Schema.StackRun do
     |> cast(attrs, ~w(status)a)
     |> cast_assoc(:state)
     |> cast_assoc(:errors)
+    |> cast_embed(:job_ref, with: &job_ref_changeset/2)
     |> validate_required(~w(status)a)
   end
 

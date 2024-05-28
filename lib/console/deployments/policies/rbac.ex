@@ -20,6 +20,7 @@ defmodule Console.Deployments.Policies.Rbac do
     PinnedCustomResource,
     Stack,
     StackRun,
+    CustomStackRun,
     RunStep
   }
 
@@ -74,6 +75,8 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(stack, user, action, & &1.cluster)
   def evaluate(%StackRun{} = run, %User{} = user, action),
     do: recurse(run, user, action, & &1.stack)
+  def evaluate(%CustomStackRun{} = run, %User{} = user, action),
+    do: recurse(run, user, action, & &1.stack)
   def evaluate(%RunStep{} = step, %User{} = user, action),
     do: recurse(step, user, action, & &1.run)
   def evaluate(%PinnedCustomResource{} = pcr, %User{} = user, action) do
@@ -111,6 +114,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(%Stack{} = stack),
     do: Repo.preload(stack, @stack_preloads)
   def preload(%StackRun{} = pcr),
+    do: Repo.preload(pcr, [stack: @stack_preloads])
+  def preload(%CustomStackRun{} = pcr),
     do: Repo.preload(pcr, [stack: @stack_preloads])
   def preload(%RunStep{} = pcr),
     do: Repo.preload(pcr, run: [stack: @stack_preloads])

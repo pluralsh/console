@@ -596,6 +596,14 @@ defmodule Console.Factory do
     }
   end
 
+  def custom_stack_run_factory do
+    %Schema.CustomStackRun{
+      stack: build(:stack),
+      name: sequence(:csr, &"csr-#{&1}"),
+      commands: [%{cmd: "echo", args: ["hello world"]}]
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

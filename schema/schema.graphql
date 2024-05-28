@@ -722,6 +722,13 @@ type RootMutationType {
 
   restartStackRun(id: ID!): StackRun
 
+  upsertCustomStackRun(attributes: CustomStackRunAttributes!): CustomStackRun
+
+  deleteCustomStackRun(id: ID!): CustomStackRun
+
+  "Creates a custom run, with the given command list, to execute w\/in the stack's environment"
+  onDemandRun(stackId: ID!, commands: [CommandAttributes]): StackRun
+
   upsertObservabilityProvider(attributes: ObservabilityProviderAttributes!): ObservabilityProvider
 
   deleteObservabilityProvider(id: ID!): ObservabilityProvider
@@ -1096,6 +1103,29 @@ input StackStateResourceAttributes {
   links: [String]
 }
 
+input CustomStackRunAttributes {
+  "human readable name for this custom run"
+  name: String!
+
+  "extended documentation to explain what this will do"
+  documentation: String
+
+  "the stack to attach it to"
+  stackId: ID
+
+  "the commands for this custom run"
+  commands: [CommandAttributes]
+
+  "self-service configuration which will be presented in UI before triggering"
+  configuration: [PrConfigurationAttributes]
+}
+
+input CommandAttributes {
+  cmd: String!
+  args: [String]
+  dir: String
+}
+
 type InfrastructureStack {
   id: ID
 
@@ -1162,6 +1192,8 @@ type InfrastructureStack {
 
   "the actor of this stack (defaults to root console user)"
   actor: User
+
+  customStackRuns(after: String, first: Int, before: String, last: Int): CustomStackRunConnection
 
   readBindings: [PolicyBinding]
 
@@ -1365,6 +1397,39 @@ type StackStateResource {
   links: [String]
 }
 
+type CustomStackRun {
+  id: ID!
+
+  "Name of the custom stack run"
+  name: String!
+
+  "Documentation to explain to users what this will do"
+  documentation: String
+
+  "the list of commands that will be executed"
+  commands: [StackCommand]
+
+  "self-service configuration fields presented in the UI to configure how this run executes"
+  configuration: [PrConfiguration]
+
+  stack: InfrastructureStack
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type StackCommand {
+  "the executable to call"
+  cmd: String!
+
+  "cli args to pass"
+  args: [String]
+
+  "working directory for this command (not required)"
+  dir: String
+}
+
 type InfrastructureStackConnection {
   pageInfo: PageInfo!
   edges: [InfrastructureStackEdge]
@@ -1373,6 +1438,11 @@ type InfrastructureStackConnection {
 type StackRunConnection {
   pageInfo: PageInfo!
   edges: [StackRunEdge]
+}
+
+type CustomStackRunConnection {
+  pageInfo: PageInfo!
+  edges: [CustomStackRunEdge]
 }
 
 type RunLogsDelta {
@@ -6173,6 +6243,11 @@ type ManagedNamespaceEdge {
 
 type GlobalServiceEdge {
   node: GlobalService
+  cursor: String
+}
+
+type CustomStackRunEdge {
+  node: CustomStackRun
   cursor: String
 }
 

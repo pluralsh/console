@@ -1009,6 +1009,12 @@ export type Command = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+export type CommandAttributes = {
+  args?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  cmd: Scalars['String']['input'];
+  dir?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type CommandConnection = {
   __typename?: 'CommandConnection';
   edges?: Maybe<Array<Maybe<CommandEdge>>>;
@@ -1339,6 +1345,47 @@ export type CrossVersionResourceTarget = {
   apiVersion?: Maybe<Scalars['String']['output']>;
   kind?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+};
+
+export type CustomStackRun = {
+  __typename?: 'CustomStackRun';
+  /** the list of commands that will be executed */
+  commands?: Maybe<Array<Maybe<StackCommand>>>;
+  /** self-service configuration fields presented in the UI to configure how this run executes */
+  configuration?: Maybe<Array<Maybe<PrConfiguration>>>;
+  /** Documentation to explain to users what this will do */
+  documentation?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Name of the custom stack run */
+  name: Scalars['String']['output'];
+  stack?: Maybe<InfrastructureStack>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type CustomStackRunAttributes = {
+  /** the commands for this custom run */
+  commands?: InputMaybe<Array<InputMaybe<CommandAttributes>>>;
+  /** self-service configuration which will be presented in UI before triggering */
+  configuration?: InputMaybe<Array<InputMaybe<PrConfigurationAttributes>>>;
+  /** extended documentation to explain what this will do */
+  documentation?: InputMaybe<Scalars['String']['input']>;
+  /** human readable name for this custom run */
+  name: Scalars['String']['input'];
+  /** the stack to attach it to */
+  stackId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type CustomStackRunConnection = {
+  __typename?: 'CustomStackRunConnection';
+  edges?: Maybe<Array<Maybe<CustomStackRunEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type CustomStackRunEdge = {
+  __typename?: 'CustomStackRunEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<CustomStackRun>;
 };
 
 export type DaemonSet = {
@@ -1968,6 +2015,7 @@ export type InfrastructureStack = {
   cluster?: Maybe<Cluster>;
   /** version/image config for the tool you're using */
   configuration: StackConfiguration;
+  customStackRuns?: Maybe<CustomStackRunConnection>;
   /** the run that physically destroys the stack */
   deleteRun?: Maybe<StackRun>;
   /** whether this stack was previously deleted and is pending cleanup */
@@ -2005,6 +2053,14 @@ export type InfrastructureStack = {
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+export type InfrastructureStackCustomStackRunsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3981,6 +4037,7 @@ export type RootMutationType = {
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   deleteCluster?: Maybe<Cluster>;
   deleteClusterProvider?: Maybe<ClusterProvider>;
+  deleteCustomStackRun?: Maybe<CustomStackRun>;
   deleteGitRepository?: Maybe<GitRepository>;
   deleteGlobalService?: Maybe<GlobalService>;
   deleteGroup?: Maybe<Group>;
@@ -4030,6 +4087,8 @@ export type RootMutationType = {
   /** merges configuration for a service */
   mergeService?: Maybe<ServiceDeployment>;
   oauthCallback?: Maybe<User>;
+  /** Creates a custom run, with the given command list, to execute w/in the stack's environment */
+  onDemandRun?: Maybe<StackRun>;
   overlayConfiguration?: Maybe<Build>;
   /** a regular status ping to be sent by the deploy operator */
   pingCluster?: Maybe<Cluster>;
@@ -4081,6 +4140,7 @@ export type RootMutationType = {
   updateStack?: Maybe<InfrastructureStack>;
   updateStackRun?: Maybe<StackRun>;
   updateUser?: Maybe<User>;
+  upsertCustomStackRun?: Maybe<CustomStackRun>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertObservabilityProvider?: Maybe<ObservabilityProvider>;
@@ -4330,6 +4390,11 @@ export type RootMutationTypeDeleteClusterProviderArgs = {
 };
 
 
+export type RootMutationTypeDeleteCustomStackRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteGitRepositoryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -4556,6 +4621,12 @@ export type RootMutationTypeMergeServiceArgs = {
 export type RootMutationTypeOauthCallbackArgs = {
   code: Scalars['String']['input'];
   redirect?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootMutationTypeOnDemandRunArgs = {
+  commands?: InputMaybe<Array<InputMaybe<CommandAttributes>>>;
+  stackId: Scalars['ID']['input'];
 };
 
 
@@ -4811,6 +4882,11 @@ export type RootMutationTypeUpdateStackRunArgs = {
 export type RootMutationTypeUpdateUserArgs = {
   attributes: UserAttributes;
   id?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootMutationTypeUpsertCustomStackRunArgs = {
+  attributes: CustomStackRunAttributes;
 };
 
 
@@ -6623,6 +6699,16 @@ export type StackAttributes = {
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type StackCommand = {
+  __typename?: 'StackCommand';
+  /** cli args to pass */
+  args?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  /** the executable to call */
+  cmd: Scalars['String']['output'];
+  /** working directory for this command (not required) */
+  dir?: Maybe<Scalars['String']['output']>;
 };
 
 export type StackConfiguration = {

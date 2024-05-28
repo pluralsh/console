@@ -90,6 +90,20 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :links,         list_of(:string), description: "identifiers this resource is linked to for graphing in the UI"
   end
 
+  input_object :custom_stack_run_attributes do
+    field :name,          non_null(:string), description: "human readable name for this custom run"
+    field :documentation, :string, description: "extended documentation to explain what this will do"
+    field :stack_id,      :id, description: "the stack to attach it to"
+    field :commands,      list_of(:command_attributes), description: "the commands for this custom run"
+    field :configuration, list_of(:pr_configuration_attributes), description: "self-service configuration which will be presented in UI before triggering"
+  end
+
+  input_object :command_attributes do
+    field :cmd,  non_null(:string)
+    field :args, list_of(:string)
+    field :dir,  :string
+  end
+
   object :infrastructure_stack do
     field :id,                  :id
     field :name,                non_null(:string), description: "the name of the stack"
@@ -126,6 +140,10 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
 
     field :actor, :user, resolve: dataloader(User), description: "the actor of this stack (defaults to root console user)"
+
+    connection field :custom_stack_runs, node_type: :custom_stack_run do
+      resolve &Deployments.list_custom_runs/3
+    end
 
     field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
@@ -264,8 +282,27 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :links,         list_of(:string), description: "identifiers this resource is linked to for graphing in the UI"
   end
 
+  object :custom_stack_run do
+    field :id,            non_null(:id)
+    field :name,          non_null(:string), description: "Name of the custom stack run"
+    field :documentation, :string, description: "Documentation to explain to users what this will do"
+    field :commands,      list_of(:stack_command), description: "the list of commands that will be executed"
+    field :configuration, list_of(:pr_configuration), description: "self-service configuration fields presented in the UI to configure how this run executes"
+
+    field :stack, :infrastructure_stack, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  object :stack_command do
+    field :cmd,  non_null(:string), description: "the executable to call"
+    field :args, list_of(:string), description: "cli args to pass"
+    field :dir,  :string, description: "working directory for this command (not required)"
+  end
+
   connection node_type: :infrastructure_stack
   connection node_type: :stack_run
+  connection node_type: :custom_stack_run
 
   delta :run_logs
 
@@ -384,6 +421,29 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.restart_stack_run/2
+    end
+
+    field :upsert_custom_stack_run, :custom_stack_run do
+      middleware Authenticated
+      arg :attributes, non_null(:custom_stack_run_attributes)
+
+      resolve &Deployments.upsert_custom_stack_run/2
+    end
+
+    field :delete_custom_stack_run, :custom_stack_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_custom_stack_run/2
+    end
+
+    @desc "Creates a custom run, with the given command list, to execute w/in the stack's environment"
+    field :on_demand_run, :stack_run do
+      middleware Authenticated
+      arg :stack_id, non_null(:id)
+      arg :commands, list_of(:command_attributes)
+
+      resolve &Deployments.create_stack_run/2
     end
   end
 
