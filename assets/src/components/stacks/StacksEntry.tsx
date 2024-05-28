@@ -15,9 +15,13 @@ import StackStatusChip from './common/StackStatusChip'
 export default function StackEntry({
   stack,
   active,
+  first,
+  last,
 }: {
   stack: StackFragment
   active: boolean
+  first: boolean
+  last: boolean
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -29,6 +33,8 @@ export default function StackEntry({
       }}
       css={{
         padding: theme.spacing.medium,
+        borderLeft: theme.borders.default,
+        borderRight: theme.borders.default,
 
         ...(active
           ? {
@@ -46,6 +52,21 @@ export default function StackEntry({
                 backgroundColor: theme.colors['fill-zero-hover'],
               },
             }),
+
+        ...(first
+          ? {
+              borderTop: theme.borders.default,
+              borderTopLeftRadius: theme.borderRadiuses.large,
+              borderTopRightRadius: theme.borderRadiuses.large,
+            }
+          : {}),
+
+        ...(last
+          ? {
+              borderBottomLeftRadius: theme.borderRadiuses.large,
+              borderBottomRightRadius: theme.borderRadiuses.large,
+            }
+          : {}),
       }}
     >
       <div
