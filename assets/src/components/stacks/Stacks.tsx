@@ -18,6 +18,8 @@ import { isEmpty } from 'lodash'
 import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { useDebounce } from '@react-hooks-library/core'
 
+import { Div } from 'honorable'
+
 import {
   STACK_CONFIGURATION_REL_PATH,
   STACK_ENV_REL_PATH,
@@ -143,12 +145,12 @@ export default function Stacks() {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer width={340}>
+      <div css={{ marginRight: theme.spacing.xlarge, width: 340 }}>
         <div
           css={{
             display: 'flex',
             gap: theme.spacing.small,
-            marginBottom: theme.spacing.medium,
+            marginBottom: theme.spacing.large,
           }}
         >
           <Input
@@ -162,7 +164,7 @@ export default function Stacks() {
           />
           <CreateStack
             buttonContent={<PlusIcon />}
-            buttonProps={{ secondary: true, height: 40 }}
+            buttonProps={{ secondary: true, height: 40, width: 40 }}
             refetch={refetch}
           />
         </div>
@@ -191,7 +193,7 @@ export default function Stacks() {
         {isEmpty(stacks) && !isEmpty(debouncedSearchString) && (
           <EmptyState message="No stacks match your query." />
         )}
-      </ResponsiveLayoutSidenavContainer>
+      </div>
       {stack && (
         <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <div
