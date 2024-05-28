@@ -74,25 +74,33 @@ export default function StackRunsEntry({
       >
         <div
           css={{
-            ...theme.partials.text.body2,
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
+            alignItems: 'baseline',
+            display: 'flex',
+            gap: theme.spacing.xsmall,
           }}
         >
-          {message ?? (first ? 'Initial run' : 'No message')}
-        </div>
-        {approvedAt && approver && (
           <div
             css={{
-              ...theme.partials.text.caption,
+              ...theme.partials.text.body2,
               textOverflow: 'ellipsis',
               overflow: 'hidden',
-              color: theme.colors['text-light'],
             }}
           >
-            Approved {moment(approvedAt).fromNow()} by {approver?.name}
+            {message ?? (first ? 'Initial run' : 'No message')}
           </div>
-        )}
+          {approver && (
+            <div
+              css={{
+                ...theme.partials.text.caption,
+                textOverflow: 'ellipsis',
+                overflow: 'hidden',
+                color: theme.colors['text-xlight'],
+              }}
+            >
+              approved by {approver?.name}
+            </div>
+          )}
+        </div>
         <div
           css={{
             ...theme.partials.text.caption,
