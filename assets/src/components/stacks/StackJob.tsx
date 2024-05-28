@@ -33,6 +33,7 @@ export default function StackJob() {
       css={{
         display: 'flex',
         flexWrap: 'wrap',
+        overflowX: 'auto',
       }}
     >
       <Prop title="Namespace">{stack.jobSpec.namespace}</Prop>

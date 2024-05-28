@@ -140,7 +140,6 @@ export default function Stacks() {
   // }
 
   // TODO: Use separate query for stack.
-  // TODO: Fix scrolling.
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
