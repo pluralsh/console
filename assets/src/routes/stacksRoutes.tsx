@@ -11,11 +11,13 @@ import StackRunState from '../components/stacks/run/state/State'
 
 import StackRuns from '../components/stacks/runs/StackRuns'
 import StackFiles from '../components/stacks/StackFiles'
-import StackEdit from '../components/stacks/edit/StackEdit'
+import StackConfiguration from '../components/stacks/StackConfiguration'
 import StackEnvironment from '../components/stacks/environment/StackEnvironment'
 import StackJob from '../components/stacks/StackJob'
 
 import StackOverview from '../components/stacks/StackOverview'
+
+import StackRepository from '../components/stacks/StackRepository'
 
 import {
   STACKS_ABS_PATH,
@@ -57,11 +59,11 @@ export const stacksRoutes = [
     />
     <Route
       path={STACK_CONFIGURATION_REL_PATH}
-      element={<StackEdit />}
+      element={<StackConfiguration />}
     />
     <Route
       path={STACK_REPOSITORY_REL_PATH}
-      element={<StackEdit />}
+      element={<StackRepository />}
     />
     <Route
       path={STACK_ENV_REL_PATH}
