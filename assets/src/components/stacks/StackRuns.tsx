@@ -64,12 +64,7 @@ export default function StackRuns() {
       scrollable={false}
       noPadding
     >
-      <Card
-        flexGrow={1}
-        maxHeight="100%"
-        width="100%"
-        position="relative"
-      >
+      <Card height="100%">
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}

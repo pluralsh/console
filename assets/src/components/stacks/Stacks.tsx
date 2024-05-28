@@ -248,6 +248,7 @@ export default function Stacks() {
             }}
             marginRight="medium"
             paddingBottom="medium"
+            minHeight={56}
           >
             {DIRECTORY.map(({ label, path }) => (
               <LinkTabWrap

@@ -1,15 +1,16 @@
 import {
   AppIcon,
   CaretRightIcon,
-  CliIcon,
   IconFrame,
+  RunBookIcon,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
 import moment from 'moment'
 import { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 
-import { StackRunFragment } from '../../generated/graphql'
+import { StackRunFragment, StackStatus } from '../../generated/graphql'
 import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
 
 import { StackRunStatusChip } from './common/StackRunStatusChip'
@@ -52,7 +53,16 @@ export default function StackRunsEntry({
     >
       <AppIcon
         size="xxsmall"
-        icon={<CliIcon width={32} />}
+        icon={
+          stackRun.status === StackStatus.PendingApproval ? (
+            <WarningShieldIcon
+              width={32}
+              color="icon-warning"
+            />
+          ) : (
+            <RunBookIcon width={32} />
+          )
+        }
       />
       <div
         css={{
