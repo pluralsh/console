@@ -32,6 +32,11 @@ defmodule Console.Schema.StackRun do
     embeds_one :job_spec,      JobSpec, on_replace: :update
     embeds_one :configuration, Stack.Configuration, on_replace: :update
 
+    embeds_one :job_ref, JobRef, on_replace: :update do
+      field :name,      :string
+      field :namespace, :string
+    end
+
     has_one :state, StackState,
       on_replace: :update,
       foreign_key: :run_id
@@ -59,6 +64,7 @@ defmodule Console.Schema.StackRun do
     belongs_to :stack,        Stack
     belongs_to :approver,     User
     belongs_to :pull_request, PullRequest
+    belongs_to :actor,        User
 
     timestamps()
   end
@@ -103,7 +109,7 @@ defmodule Console.Schema.StackRun do
     from(r in query, order_by: ^order)
   end
 
-  @valid ~w(type status workdir manage_state message approval dry_run repository_id pull_request_id cluster_id stack_id)a
+  @valid ~w(type status workdir actor_id manage_state message approval dry_run repository_id pull_request_id cluster_id stack_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -111,6 +117,7 @@ defmodule Console.Schema.StackRun do
     |> cast_embed(:git)
     |> cast_embed(:job_spec)
     |> cast_embed(:configuration)
+    |> cast_embed(:job_ref, with: &job_ref_changeset/2)
     |> cast_assoc(:state)
     |> cast_assoc(:environment)
     |> cast_assoc(:steps)
@@ -119,6 +126,7 @@ defmodule Console.Schema.StackRun do
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:stack_id)
+    |> foreign_key_constraint(:actor_id)
     |> validate_required(~w(type status)a)
   end
 
@@ -144,5 +152,11 @@ defmodule Console.Schema.StackRun do
     model
     |> cast(attrs, @approve)
     |> validate_required(@approve)
+  end
+
+  defp job_ref_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(name namespace)a)
+    |> validate_required(~w(name namespace)a)
   end
 end

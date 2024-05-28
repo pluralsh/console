@@ -101,11 +101,51 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
         query StackRun($id: ID!) {
           stackRun(id: $id) {
             id
+            stateUrls {
+              terraform { address lock unlock }
+            }
           }
         }
       """, %{"id" => run.id}, %{cluster: cluster})
 
       assert found["id"] == run.id
+
+      assert found["stateUrls"]["terraform"]["address"] =~ "/ext/v1/states/terraform/#{run.stack_id}"
+      assert found["stateUrls"]["terraform"]["lock"] =~ "/ext/v1/states/terraform/#{run.stack_id}/lock"
+      assert found["stateUrls"]["terraform"]["unlock"] =~ "/ext/v1/states/terraform/#{run.stack_id}/unlock"
+    end
+
+    test "clusters can fetch plural creds if actor is present" do
+      cluster = insert(:cluster)
+      run = insert(:stack_run, cluster: cluster, actor: build(:user))
+
+      {:ok, %{data: %{"stackRun" => found}}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            id
+            pluralCreds { token url }
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: cluster})
+
+      assert found["id"] == run.id
+
+      assert found["pluralCreds"]["token"]
+      assert found["pluralCreds"]["url"]
+    end
+
+    test "incorrect clusters cannot fetch plural creds if actor is present" do
+      cluster = insert(:cluster)
+      run = insert(:stack_run, cluster: cluster, actor: build(:user))
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query StackRun($id: ID!) {
+          stackRun(id: $id) {
+            id
+            pluralCreds { token url }
+          }
+        }
+      """, %{"id" => run.id}, %{cluster: insert(:cluster)})
     end
 
     test "users can fetch stack runs" do

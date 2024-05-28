@@ -990,6 +990,9 @@ input StackAttributes {
   "the subdirectory you want to run the stack's commands w\/in"
   workdir: String
 
+  "user id to use for default Plural authentication in this stack"
+  actorId: ID
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -1029,6 +1032,9 @@ input StackHookAttributes {
 input StackRunAttributes {
   "The status of this run"
   status: StackStatus!
+
+  "the reference to the k8s job running this stack"
+  jobRef: NamespacedName
 
   "The state from this runs plan or apply"
   state: StackStateAttributes
@@ -1139,6 +1145,9 @@ type InfrastructureStack {
   "a list of metrics to poll to determine if a stack run should be cancelled"
   observableMetrics: [ObservableMetric]
 
+  "the run that physically destroys the stack"
+  deleteRun: StackRun
+
   "the most recent output for this stack"
   output: [StackOutput]
 
@@ -1151,6 +1160,9 @@ type InfrastructureStack {
   "the git repository you're sourcing IaC from"
   repository: GitRepository
 
+  "the actor of this stack (defaults to root console user)"
+  actor: User
+
   readBindings: [PolicyBinding]
 
   writeBindings: [PolicyBinding]
@@ -1158,6 +1170,32 @@ type InfrastructureStack {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+"grab-bag of state configuration urls for supported tools"
+type StateUrls {
+  terraform: TerraformStateUrls
+}
+
+"Urls for configuring terraform HTTP remote state"
+type TerraformStateUrls {
+  "GET and POST urls for uploadnig state"
+  address: String
+
+  "POST url to lock state"
+  lock: String
+
+  "POST url to unlock state"
+  unlock: String
+}
+
+"temporary credentials for the user attached to this stack"
+type PluralCreds {
+  "authentication token to use for gql requests"
+  token: String
+
+  "the api url of this instance"
+  url: String
 }
 
 type StackConfiguration {
@@ -1218,11 +1256,22 @@ type StackRun {
   "whether you want Plural to manage the state of this stack"
   manageState: Boolean
 
+  stateUrls: StateUrls
+
+  "the kubernetes job for this run (useful for debugging if issues arise)"
+  job: Job
+
+  "temporary plural creds usable for terraform authentication"
+  pluralCreds: PluralCreds
+
   "https url to fetch the latest tarball of stack IaC"
   tarball: String!
 
   "the approver of this job"
   approver: User
+
+  "the actor of this run (defaults to root console user)"
+  actor: User
 
   "The steps to perform when running this stack"
   steps: [RunStep]
