@@ -30,7 +30,7 @@ export default function StackConfiguration() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stackId), { label: 'repository' }],
+      () => [...getBreadcrumbs(stackId), { label: 'configuration' }],
       [stackId]
     )
   )
