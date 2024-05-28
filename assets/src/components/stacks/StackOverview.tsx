@@ -1,6 +1,6 @@
 import { Card, Prop, useSetBreadcrumbs } from '@pluralsh/design-system'
 import React, { useMemo } from 'react'
-import { useOutletContext } from 'react-router-dom'
+import { Link, useNavigate, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import capitalize from 'lodash/capitalize'
@@ -9,12 +9,21 @@ import moment from 'moment/moment'
 
 import { ClusterProviderIcon } from '../utils/Provider'
 
+import {
+  CD_ABS_PATH,
+  CLUSTERS_REL_PATH,
+  getClusterDetailsPath,
+} from '../../routes/cdRoutesConsts'
+
+import { InlineLink } from '../utils/typography/InlineLink'
+
 import { StackOutletContextT, getBreadcrumbs } from './Stacks'
 import StackStatusChip from './common/StackStatusChip'
 import StackApprovalChip from './common/StackApprovalChip'
 
 export default function StackOverview() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { stack } = useOutletContext() as StackOutletContextT
 
   useSetBreadcrumbs(
@@ -89,7 +98,12 @@ export default function StackOverview() {
             cluster={stack.cluster}
             size={16}
           />
-          {stack.cluster?.name}
+          <InlineLink
+            as={Link}
+            to={getClusterDetailsPath({ clusterId: stack?.cluster?.id })}
+          >
+            {stack.cluster?.name}
+          </InlineLink>
         </div>
       </Prop>
 
