@@ -15,7 +15,7 @@ const columns = [
   columnHelper.accessor((o) => o.path, {
     id: 'path',
     header: 'Path',
-    cell: ({ getValue }) => <span>{getValue()}</span>,
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor((o) => o, {
     id: 'content',

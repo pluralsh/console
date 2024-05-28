@@ -1,5 +1,7 @@
 import {
+  AppIcon,
   EmptyState,
+  IconFrame,
   Input,
   LoopingLogo,
   PlusIcon,
@@ -40,9 +42,13 @@ import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayo
 import { StandardScroller } from '../utils/SmoothScroller'
 import { LinkTabWrap } from '../utils/Tabs'
 
+import { TRUNCATE_LEFT } from '../utils/truncate'
+
 import { StackTypeIcon } from './common/StackTypeIcon'
 import CreateStack from './create/CreateStack'
 import DeleteStack from './delete/DeleteStack'
+import StackStatusChip from './common/StackStatusChip'
+import StackEntry from './StacksEntry'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -170,27 +176,9 @@ export default function Stacks() {
           )}
           hasNextPage={pageInfo?.hasNextPage}
           mapper={(stack) => (
-            <TreeNavEntry
-              key={stack.id ?? ''}
-              label={
-                <div
-                  css={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: theme.spacing.small,
-                  }}
-                >
-                  <StackTypeIcon stackType={stack.type} />
-                  <StackedText
-                    first={stack.name}
-                    second={stack.repository?.url}
-                  />
-                </div>
-              }
+            <StackEntry
+              stack={stack}
               active={stack.id === stackId}
-              activeSecondary={false}
-              href={getStacksAbsPath(stack.id)}
-              desktop
             />
           )}
           loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
