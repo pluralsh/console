@@ -35,6 +35,8 @@ export default function StackEntry({
               backgroundColor: theme.colors['fill-zero-selected'],
               borderBottom: `2px solid ${theme.colors['border-primary']}`,
               cursor: 'default',
+              marginBottom: -1,
+              zIndex: theme.zIndexes.base + 1,
             }
           : {
               borderBottom: theme.borders.default,
