@@ -9,11 +9,12 @@ import { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 
-import { StackRunFragment } from '../../../generated/graphql'
-import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
-import { StackRunStatusChip } from '../common/StackRunStatusChip'
+import { StackRunFragment } from '../../generated/graphql'
+import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
 
-export default function StackRun({
+import { StackRunStatusChip } from './common/StackRunStatusChip'
+
+export default function StackRunsEntry({
   stackRun,
   first,
 }: {
