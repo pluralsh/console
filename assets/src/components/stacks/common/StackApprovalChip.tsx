@@ -10,7 +10,12 @@ export default function StackApprovalChip({
   approval: boolean
 } & ChipProps) {
   return approval ? (
-    <Chip {...props}>Required</Chip>
+    <Chip
+      severity="warning"
+      {...props}
+    >
+      Required
+    </Chip>
   ) : (
     <Chip {...props}>Not required</Chip>
   )

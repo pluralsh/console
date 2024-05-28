@@ -1,6 +1,11 @@
 import React, { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { CheckIcon, CloseIcon, Table } from '@pluralsh/design-system'
+import {
+  CheckIcon,
+  CloseIcon,
+  EmptyState,
+  Table,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { StackOutput, StackRun } from '../../../../../generated/graphql'
@@ -46,7 +51,7 @@ export default function StackRunOutput(): ReactNode {
   const columns = useColumns()
 
   return isEmpty ? (
-    <div>No output available for this run.</div>
+    <EmptyState message="No output available for this run." />
   ) : (
     <Table
       data={stackRun.output ?? []}

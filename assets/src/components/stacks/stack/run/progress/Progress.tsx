@@ -35,7 +35,6 @@ export default function StackRunProgress(): ReactNode {
   return (
     <ScrollablePage
       scrollable={false}
-      heading="Progress"
       noPadding
     >
       <Card
