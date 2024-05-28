@@ -32,15 +32,12 @@ import {
   useKickStackMutation,
   useStacksQuery,
 } from '../../generated/graphql'
-
 import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
 import { StackedText } from '../utils/table/StackedText'
-
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { StandardScroller } from '../utils/SmoothScroller'
-import { RESPONSIVE_LAYOUT_CONTENT_WIDTH } from '../utils/layout/ResponsiveLayoutContentContainer'
 import { LinkTabWrap } from '../utils/Tabs'
 
 import { StackTypeIcon } from './common/StackTypeIcon'
@@ -140,7 +137,7 @@ export default function Stacks() {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <ResponsiveLayoutSidenavContainer width={360}>
+      <ResponsiveLayoutSidenavContainer width={340}>
         <div
           css={{
             display: 'flex',
@@ -206,7 +203,7 @@ export default function Stacks() {
         )}
       </ResponsiveLayoutSidenavContainer>
       {stack && (
-        <div css={{ height: '100%' }}>
+        <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <div
             css={{
               alignItems: 'start',
@@ -241,36 +238,34 @@ export default function Stacks() {
               width="max-content"
             />
           </div>
-          <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH, height: '100%' }}>
-            <TabList
-              scrollable
-              gap="xxsmall"
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: currentTab?.path,
-              }}
-              marginRight="medium"
-              paddingBottom="medium"
-            >
-              {DIRECTORY.map(({ label, path }) => (
-                <LinkTabWrap
-                  subTab
+          <TabList
+            scrollable
+            gap="xxsmall"
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: currentTab?.path,
+            }}
+            marginRight="medium"
+            paddingBottom="medium"
+          >
+            {DIRECTORY.map(({ label, path }) => (
+              <LinkTabWrap
+                subTab
+                key={path}
+                textValue={label}
+                to={`${getStacksAbsPath(stackId)}/${path}`}
+              >
+                <SubTab
                   key={path}
                   textValue={label}
-                  to={`${getStacksAbsPath(stackId)}/${path}`}
                 >
-                  <SubTab
-                    key={path}
-                    textValue={label}
-                  >
-                    {label}
-                  </SubTab>
-                </LinkTabWrap>
-              ))}
-            </TabList>
-            <Outlet context={{ stack, refetch } as StackOutletContextT} />
-          </div>
+                  {label}
+                </SubTab>
+              </LinkTabWrap>
+            ))}
+          </TabList>
+          <Outlet context={{ stack, refetch } as StackOutletContextT} />
         </div>
       )}
     </ResponsiveLayoutPage>
