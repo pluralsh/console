@@ -1,6 +1,6 @@
 import { Card, Prop, useSetBreadcrumbs } from '@pluralsh/design-system'
 import React, { useMemo } from 'react'
-import { Link, useNavigate, useOutletContext } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import capitalize from 'lodash/capitalize'
 import moment from 'moment/moment'

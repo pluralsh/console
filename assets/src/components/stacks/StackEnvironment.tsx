@@ -10,30 +10,19 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import React, { useMemo, useState } from 'react'
-
-import { useOutletContext, useParams } from 'react-router-dom'
-
+import { useOutletContext } from 'react-router-dom'
 import isEmpty from 'lodash/isEmpty'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useDebounce } from '@react-hooks-library/core'
-
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import CopyButton from 'components/utils/CopyButton'
 import { ObscuredToken } from 'components/profile/ObscuredToken'
 
-import {
-  StackEnvironment as StackEnvironmentT,
-  StackFragment,
-} from '../../generated/graphql'
-
+import { StackEnvironment as StackEnvironmentT } from '../../generated/graphql'
 import { ModalMountTransition } from '../utils/ModalMountTransition'
 
-import ConsolePageTitle from '../utils/layout/ConsolePageTitle'
-
 import { StackOutletContextT, getBreadcrumbs } from './Stacks'
-
 import StackEnvironmentDelete from './StackEnvironmentDelete'
 import StackEnvironmentEdit from './StackEnvironmentEdit'
 import StackEnvironmentApplyModal from './StackEnvironmentApplyModal'
@@ -115,21 +104,16 @@ function EnvironmentValue({
 
 function EnvironmentActions({ env }: { env: StackEnvironmentT }) {
   const theme = useTheme()
-  const { stack } = useOutletContext() as { stack?: Nullable<StackFragment> }
 
   return (
     <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-      {stack && (
-        <>
-          <CopyButton
-            text={env.value || ''}
-            tooltip="Copy value"
-            type="tertiary"
-          />
-          <StackEnvironmentEdit env={env} />
-          <StackEnvironmentDelete env={env} />
-        </>
-      )}
+      <CopyButton
+        text={env.value || ''}
+        tooltip="Copy value"
+        type="tertiary"
+      />
+      <StackEnvironmentEdit env={env} />
+      <StackEnvironmentDelete env={env} />
     </div>
   )
 }
