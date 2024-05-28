@@ -206,7 +206,7 @@ export default function Stacks() {
         )}
       </ResponsiveLayoutSidenavContainer>
       {stack && (
-        <div>
+        <div css={{ height: '100%' }}>
           <div
             css={{
               alignItems: 'start',
@@ -236,12 +236,12 @@ export default function Stacks() {
               pulledAt={stack.repository?.pulledAt}
               kickMutationHook={useKickStackMutation}
               message="Resync"
-              tooltipMessage="Use this to sync this run now instead of at the next poll interval"
+              tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
               variables={{ id: stack.id }}
               width="max-content"
             />
           </div>
-          <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH }}>
+          <div css={{ width: RESPONSIVE_LAYOUT_CONTENT_WIDTH, height: '100%' }}>
             <TabList
               scrollable
               gap="xxsmall"
@@ -251,7 +251,7 @@ export default function Stacks() {
                 selectedKey: currentTab?.path,
               }}
               marginRight="medium"
-              paddingBottom="small"
+              paddingBottom="medium"
             >
               {DIRECTORY.map(({ label, path }) => (
                 <LinkTabWrap

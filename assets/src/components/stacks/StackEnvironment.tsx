@@ -26,13 +26,13 @@ import { ObscuredToken } from 'components/profile/ObscuredToken'
 import {
   StackEnvironment as StackEnvironmentT,
   StackFragment,
-} from '../../../generated/graphql'
+} from '../../generated/graphql'
 
-import { ModalMountTransition } from '../../utils/ModalMountTransition'
+import { ModalMountTransition } from '../utils/ModalMountTransition'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import ConsolePageTitle from '../utils/layout/ConsolePageTitle'
 
-import ConsolePageTitle from '../../utils/layout/ConsolePageTitle'
+import { StackOutletContextT, getBreadcrumbs } from './Stacks'
 
 import StackEnvironmentDelete from './StackEnvironmentDelete'
 import StackEnvironmentEdit from './StackEnvironmentEdit'
@@ -136,7 +136,6 @@ function EnvironmentActions({ env }: { env: StackEnvironmentT }) {
 
 export default function StackEnvironment() {
   const theme = useTheme()
-  const { stackId = '' } = useParams()
   const { stack } = useOutletContext() as StackOutletContextT
   const [createOpen, setCreateOpen] = useState(false)
   const [filterString, setFilterString] = useState('')
@@ -144,8 +143,8 @@ export default function StackEnvironment() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stackId), { label: 'environment' }],
-      [stackId]
+      () => [...getBreadcrumbs(stack.id ?? ''), { label: 'environment' }],
+      [stack.id]
     )
   )
 
@@ -161,19 +160,8 @@ export default function StackEnvironment() {
     [setCreateOpen]
   )
 
-  if (!stack) {
-    return <LoadingIndicator />
-  }
-
   return (
     <>
-      <ConsolePageTitle
-        heading="Environment"
-        headingProps={{
-          paddingTop: theme.spacing.small,
-          paddingBottom: theme.spacing.medium,
-        }}
-      />
       <ModalMountTransition open={createOpen}>
         <StackEnvironmentApplyModal
           open={createOpen}

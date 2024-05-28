@@ -9,10 +9,10 @@ import StackRunPlan from '../components/stacks/run/plan/Plan'
 
 import StackRunState from '../components/stacks/run/state/State'
 
-import StackRuns from '../components/stacks/runs/StackRuns'
+import StackRuns from '../components/stacks/StackRuns'
 import StackFiles from '../components/stacks/StackFiles'
 import StackConfiguration from '../components/stacks/StackConfiguration'
-import StackEnvironment from '../components/stacks/environment/StackEnvironment'
+import StackEnvironment from '../components/stacks/StackEnvironment'
 import StackJob from '../components/stacks/StackJob'
 
 import StackOverview from '../components/stacks/StackOverview'
