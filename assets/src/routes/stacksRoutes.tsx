@@ -45,17 +45,17 @@ export const stacksRoutes = [
       element={
         <Navigate
           replace
-          to={STACK_OVERVIEW_REL_PATH}
+          to={STACK_RUNS_REL_PATH}
         />
       }
     />
     <Route
-      path={STACK_OVERVIEW_REL_PATH}
-      element={<StackOverview />}
-    />
-    <Route
       path={STACK_RUNS_REL_PATH}
       element={<StackRuns />}
+    />
+    <Route
+      path={STACK_OVERVIEW_REL_PATH}
+      element={<StackOverview />}
     />
     <Route
       path={STACK_CONFIGURATION_REL_PATH}

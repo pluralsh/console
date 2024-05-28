@@ -1,6 +1,7 @@
 import {
   AppIcon,
   CaretRightIcon,
+  GitCommitIcon,
   IconFrame,
   RunBookIcon,
   WarningShieldIcon,
@@ -12,6 +13,8 @@ import { useParams } from 'react-router-dom'
 
 import { StackRunFragment, StackStatus } from '../../generated/graphql'
 import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
+
+import { TRUNCATE } from '../utils/truncate'
 
 import { StackRunStatusChip } from './common/StackRunStatusChip'
 
@@ -91,7 +94,7 @@ export default function StackRunsEntry({
             <div
               css={{
                 ...theme.partials.text.caption,
-                textOverflow: 'ellipsis',
+                ...TRUNCATE,
                 overflow: 'hidden',
                 color: theme.colors['text-xlight'],
               }}
@@ -103,11 +106,18 @@ export default function StackRunsEntry({
         <div
           css={{
             ...theme.partials.text.caption,
+            display: 'flex',
+            alignItems: 'center',
             color: theme.colors['text-xlight'],
+            gap: theme.spacing.xxsmall,
             textOverflow: 'ellipsis',
             overflow: 'hidden',
           }}
         >
+          {/* TODO: Fix icon in design system. */}
+          <div css={{ marginBottom: -9 }}>
+            <GitCommitIcon size={16} />
+          </div>
           {ref}
         </div>
       </div>

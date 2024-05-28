@@ -58,8 +58,8 @@ const QUERY_PAGE_SIZE = 100
 const pollInterval = 5 * 1000
 
 const DIRECTORY = [
-  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview' },
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
+  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview' },
   { path: STACK_CONFIGURATION_REL_PATH, label: 'Configuration' },
   { path: STACK_REPOSITORY_REL_PATH, label: 'Repository' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
