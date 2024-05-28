@@ -19,7 +19,7 @@ function CommandLogLine({ line, number, follow }) {
 
   useEffect(() => {
     if (!mounted.current && follow && lineRef && lineRef.current)
-      lineRef.current.scrollIntoView(true)
+      lineRef.current.scrollIntoView({ block: 'end' })
     mounted.current = true
   }, [follow, lineRef, line])
 
