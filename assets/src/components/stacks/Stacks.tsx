@@ -1,4 +1,5 @@
 import {
+  Button,
   EmptyState,
   Input,
   LoopingLogo,
@@ -180,7 +181,14 @@ export default function Stacks() {
           handleScroll={undefined}
         />
         {isEmpty(stacks) && !isEmpty(debouncedSearchString) && (
-          <EmptyState message="No stacks match your query." />
+          <EmptyState message="No stacks match your query.">
+            <Button
+              secondary
+              onClick={() => setSearchString('')}
+            >
+              Reset search
+            </Button>
+          </EmptyState>
         )}
       </div>
       {stack ? (
