@@ -76,7 +76,16 @@ export default function StackEntry({
         <StackStatusChip
           paused={!!stack.paused}
           deleting={!!stack.deletedAt}
-          {...(active ? {} : { severity: 'neutral' })} // TODO: Set to grey.
+          css={
+            // TODO: Add new severity in design system to support that.
+            active
+              ? undefined
+              : {
+                  '.children': {
+                    color: theme.colors['text-xlight'],
+                  },
+                }
+          }
         />
       </div>
       <div
