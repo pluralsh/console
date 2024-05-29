@@ -23,8 +23,8 @@ export function NameVersionHandle({
   version?: string
   setVersion?: (version: string) => void
   versions?: Nullable<Nullable<string>[]>
-  handle: string
-  setHandle: (handle: string) => void
+  handle?: string
+  setHandle?: (handle: string) => void
 }) {
   const theme = useTheme()
   const filteredVersions = useMemo(
@@ -53,7 +53,7 @@ export function NameVersionHandle({
       >
         <Input
           css={{ width: 'fit-content', flexGrow: 1 }}
-          placeholder="workload-cluster-0"
+          placeholder="your-cluster-name"
           value={name}
           onChange={({ target: { value } }) => setName(value)}
           prefix={<div>Name{isRequired('name') && '*'}</div>}
@@ -83,12 +83,14 @@ export function NameVersionHandle({
           </div>
         )}
       </div>
-      <Input
-        placeholder="custom-handle"
-        value={handle}
-        onChange={({ target: { value } }) => setHandle(value)}
-        prefix={<div>Handle{isRequired('handle') && '*'}</div>}
-      />
+      {setHandle && (
+        <Input
+          placeholder="custom-handle"
+          value={handle}
+          onChange={({ target: { value } }) => setHandle(value)}
+          prefix={<div>Handle{isRequired('handle') && '*'}</div>}
+        />
+      )}{' '}
     </div>
   )
 }
