@@ -18,17 +18,23 @@ import {
   useRestartStackRunMutation,
   useUpdateStackRunMutation,
 } from '../../../generated/graphql'
-import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
+import {
+  STACK_RUNS_OUTPUT_REL_PATH,
+  STACK_RUNS_PLAN_REL_PATH,
+  STACK_RUNS_REPOSITORY_REL_PATH,
+  STACK_RUNS_STATE_REL_PATH,
+  getStackRunsAbsPath,
+} from '../../../routes/stacksRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { StackTypeIcon } from '../common/StackTypeIcon'
 import { TRUNCATE } from '../../utils/truncate'
 
 const DIRECTORY = [
   { path: '', label: 'Progress' },
-  { path: 'repository', label: 'Repository' },
-  { path: 'state', label: 'State' },
-  { path: 'plan', label: 'Plan' },
-  { path: 'output', label: 'Output' },
+  { path: STACK_RUNS_REPOSITORY_REL_PATH, label: 'Repository' },
+  { path: STACK_RUNS_STATE_REL_PATH, label: 'State' },
+  { path: STACK_RUNS_PLAN_REL_PATH, label: 'Plan' },
+  { path: STACK_RUNS_OUTPUT_REL_PATH, label: 'Output' },
 ]
 
 const TERMINAL_STATES = [
