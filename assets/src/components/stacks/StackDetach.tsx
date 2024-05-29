@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
-
 import { Button } from '@pluralsh/design-system'
-
 import { useNavigate } from 'react-router-dom'
+import type { ApolloQueryResult } from '@apollo/client/core'
 
 import { Confirm } from '../utils/Confirm'
 import { StackFragment, useDetachStackMutation } from '../../generated/graphql'
@@ -13,7 +12,7 @@ export default function StackDetach({
   refetch,
 }: {
   stack: StackFragment
-  refetch?: Nullable<() => void>
+  refetch: (variables?: Partial<any>) => Promise<ApolloQueryResult<any>>
 }) {
   const navigate = useNavigate()
   const [confirm, setConfirm] = useState(false)
@@ -21,9 +20,8 @@ export default function StackDetach({
   const [mutation, { loading, error }] = useDetachStackMutation({
     variables: { id: stack.id ?? '' },
     onCompleted: () => {
-      refetch?.()
+      refetch().then(() => navigate(getStacksAbsPath('')))
       setConfirm(false)
-      navigate(getStacksAbsPath(''))
     },
   })
 
