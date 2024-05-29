@@ -20,7 +20,6 @@ export default function StackEnvironmentDelete({
   const { stack, refetch } = useOutletContext() as StackOutletContextT
   const [confirm, setConfirm] = useState(false)
 
-  // TODO: Use merge mutation once it will be available.
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
       id: stackId,

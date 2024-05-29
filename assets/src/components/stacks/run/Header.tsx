@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   AppIcon,
   Button,
+  GitCommitIcon,
   GraphQLToast,
   ReloadIcon,
   SubTab,
@@ -17,16 +18,23 @@ import {
   useRestartStackRunMutation,
   useUpdateStackRunMutation,
 } from '../../../generated/graphql'
-import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
+import {
+  STACK_RUNS_OUTPUT_REL_PATH,
+  STACK_RUNS_PLAN_REL_PATH,
+  STACK_RUNS_REPOSITORY_REL_PATH,
+  STACK_RUNS_STATE_REL_PATH,
+  getStackRunsAbsPath,
+} from '../../../routes/stacksRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { StackTypeIcon } from '../common/StackTypeIcon'
+import { TRUNCATE } from '../../utils/truncate'
 
 const DIRECTORY = [
   { path: '', label: 'Progress' },
-  { path: 'repository', label: 'Repository' },
-  { path: 'state', label: 'State' },
-  { path: 'plan', label: 'Plan' },
-  { path: 'output', label: 'Output' },
+  { path: STACK_RUNS_REPOSITORY_REL_PATH, label: 'Repository' },
+  { path: STACK_RUNS_STATE_REL_PATH, label: 'State' },
+  { path: STACK_RUNS_PLAN_REL_PATH, label: 'Plan' },
+  { path: STACK_RUNS_OUTPUT_REL_PATH, label: 'Output' },
 ]
 
 const TERMINAL_STATES = [
@@ -51,14 +59,13 @@ export default function StackRunHeader({
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.xlarge,
+        gap: theme.spacing.medium,
         marginBottom: theme.spacing.medium,
       }}
     >
       <div
         css={{
           display: 'flex',
-          alignItems: 'center',
           gap: theme.spacing.medium,
           paddingBottom: theme.spacing.medium,
           borderBottom: theme.borders.default,
@@ -99,9 +106,7 @@ function StackRunHeaderInfo({ stackRun }): ReactNode {
       <span
         css={{
           ...theme.partials.text.subtitle1,
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
+          ...TRUNCATE,
         }}
       >
         {stackRun.message}
@@ -109,10 +114,8 @@ function StackRunHeaderInfo({ stackRun }): ReactNode {
       <span
         css={{
           ...theme.partials.text.body2,
+          ...TRUNCATE,
           color: theme.colors['text-light'],
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
         }}
       >
         {stackRun.repository?.url}
@@ -120,12 +123,14 @@ function StackRunHeaderInfo({ stackRun }): ReactNode {
       <span
         css={{
           ...theme.partials.text.caption,
+          ...TRUNCATE,
+          display: 'flex',
           color: theme.colors['text-xlight'],
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          overflow: 'hidden',
+          gap: theme.spacing.xsmall,
+          marginTop: theme.spacing.xxsmall,
         }}
       >
+        <GitCommitIcon />
         {stackRun.git?.ref}
       </span>
     </div>

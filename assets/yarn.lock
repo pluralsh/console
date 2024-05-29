@@ -4280,15 +4280,15 @@ __metadata:
   linkType: hard
 
 "@peculiar/webcrypto@npm:^1.4.0":
-  version: 1.4.6
-  resolution: "@peculiar/webcrypto@npm:1.4.6"
+  version: 1.5.0
+  resolution: "@peculiar/webcrypto@npm:1.5.0"
   dependencies:
     "@peculiar/asn1-schema": ^2.3.8
     "@peculiar/json-schema": ^1.1.12
     pvtsutils: ^1.3.5
     tslib: ^2.6.2
-    webcrypto-core: ^1.7.9
-  checksum: 27201a9b8abf95ec70db151dc62548736e87fbacc5e534e972b1187d328826a13fd5fb1b02994dc46ab819667e5020e01893d6d143b937e6dbb99e81b3b87c90
+    webcrypto-core: ^1.8.0
+  checksum: 9022d7452d564a5a26fbacf477842be34736f2d9139f2f5026adc47fdeda7033193d727491503f2a829d35ab819bbfa61c82a785c49c999eac535ecd69a3a459
   languageName: node
   linkType: hard
 
@@ -4306,9 +4306,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:3.40.0":
-  version: 3.40.0
-  resolution: "@pluralsh/design-system@npm:3.40.0"
+"@pluralsh/design-system@npm:3.40.1":
+  version: 3.40.1
+  resolution: "@pluralsh/design-system@npm:3.40.1"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
@@ -4356,7 +4356,7 @@ __metadata:
     react-dom: ">=18.2.0"
     react-transition-group: ">=4.4.5"
     styled-components: ">=5.3.11"
-  checksum: ded90d47592d1d0470f2ccaa7a6af6c96e92976e1d5af866de51b03804cea3f757c9322c3a7e312a3e82c8147eb156fd0f10df450a4e6aa3512d1e6275748bbc
+  checksum: 498045e951826416f187598d3c5b90d84fb2c6a3374c1461b4e8ff6ccffa87d9cf23283391114073f56c1ed05cbf70c4adf5d4e24d46426eaaa6f1ee3bfa3dcd
   languageName: node
   linkType: hard
 
@@ -9045,9 +9045,9 @@ __metadata:
   linkType: hard
 
 "caniuse-lite@npm:^1.0.30001179, caniuse-lite@npm:^1.0.30001587":
-  version: 1.0.30001624
-  resolution: "caniuse-lite@npm:1.0.30001624"
-  checksum: 0b9d0c17e28c0c14c0a845fd595ab25e2c79a69f9d85b56c9459ec712ba3a912b71d2ad2e6eb2763ed1574ec80a1c2a37a3cd404dc6b6989b03658c825abeed0
+  version: 1.0.30001625
+  resolution: "caniuse-lite@npm:1.0.30001625"
+  checksum: e7f8b9e10c35a5d9a1d1db76be398cb1c592ee1bc905fabe6bd90313537099d29a65c49c85e6350132fa30ca20e8c0317ecfaa66d997f7fac21ff37ddaece2a9
   languageName: node
   linkType: hard
 
@@ -9577,7 +9577,7 @@ __metadata:
     "@nivo/pie": 0.83.0
     "@nivo/radial-bar": 0.83.0
     "@nivo/tooltip": 0.83.0
-    "@pluralsh/design-system": 3.40.0
+    "@pluralsh/design-system": 3.40.1
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
@@ -19876,9 +19876,9 @@ __metadata:
   linkType: hard
 
 "ua-parser-js@npm:^1.0.35":
-  version: 1.0.37
-  resolution: "ua-parser-js@npm:1.0.37"
-  checksum: 4d481c720d523366d7762dc8a46a1b58967d979aacf786f9ceceb1cd767de069f64a4bdffb63956294f1c0696eb465ddb950f28ba90571709e33521b4bd75e07
+  version: 1.0.38
+  resolution: "ua-parser-js@npm:1.0.38"
+  checksum: d0772b22b027338d806ab17d1ac2896ee7485bdf9217c526028159f3cd6bb10272bb18f6196d2f94dde83e3b36dc9d2533daf08a414764f6f4f1844842383838
   languageName: node
   linkType: hard
 
@@ -20565,7 +20565,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webcrypto-core@npm:^1.7.9":
+"webcrypto-core@npm:^1.8.0":
   version: 1.8.0
   resolution: "webcrypto-core@npm:1.8.0"
   dependencies:

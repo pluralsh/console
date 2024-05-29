@@ -56,7 +56,6 @@ export default function StackRepository() {
     variables: { id: repositoryId },
   })
 
-  // TODO: Use merge mutation once it will be available.
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
       id: stackId,

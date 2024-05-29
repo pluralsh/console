@@ -72,7 +72,7 @@ export default function Step({ step, open }: StepProps): ReactNode {
     <Div ref={ref}>
       <Flex
         gap="small"
-        paddingHorizontal="medium"
+        paddingHorizontal="large"
         paddingVertical="xsmall"
         justify="space-between"
         backgroundColor="fill-two"
@@ -99,7 +99,7 @@ export default function Step({ step, open }: StepProps): ReactNode {
           ) : (
             <CaretDownIcon
               size={12}
-              paddingRight="small"
+              paddingRight="medium"
             />
           )}
           <span>{command}</span>
@@ -127,9 +127,7 @@ function Status({ status }: StepStatusProps): ReactNode {
       return (
         <Spinner
           size={12}
-          css={{
-            alignSelf: 'center',
-          }}
+          css={{ alignSelf: 'center' }}
         />
       )
     case StepStatus.Failed:

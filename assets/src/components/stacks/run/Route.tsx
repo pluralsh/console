@@ -1,4 +1,4 @@
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -16,26 +16,6 @@ import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveL
 
 import StackRunHeader from './Header'
 import StackRunSidecar from './Sidecar'
-
-interface ZeroStateProps {
-  id?: string
-}
-
-function ZeroState({ id }: ZeroStateProps): ReactNode {
-  return (
-    <h2
-      css={{
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        textAlign: 'center',
-      }}
-    >
-      No stack run found <br /> {id}
-    </h2>
-  )
-}
 
 export default function StackRunDetail(): ReactNode {
   const { stackId, runId } = useParams()
@@ -76,7 +56,7 @@ export default function StackRunDetail(): ReactNode {
   }
 
   if (!stackRun) {
-    return <ZeroState id={runId} />
+    return <EmptyState message="Stack run not found." />
   }
 
   return (
@@ -95,11 +75,7 @@ export default function StackRunDetail(): ReactNode {
             flexDirection: 'column',
           }}
         >
-          <Outlet
-            context={{
-              stackRun,
-            }}
-          />
+          <Outlet context={{ stackRun }} />
         </div>
       </ResponsiveLayoutContentContainer>
       <StackRunSidecar stackRun={stackRun} />

@@ -42,7 +42,6 @@ export default function StackEnvironmentApplyModal({
 
   const disabled = !hasUpdates || !name || !value
 
-  // TODO: Use merge mutation once it will be available.
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
       id: stack.id ?? '',

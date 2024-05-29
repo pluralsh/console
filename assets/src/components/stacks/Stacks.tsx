@@ -41,8 +41,9 @@ import { LinkTabWrap } from '../utils/Tabs'
 import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 
 import CreateStack from './create/CreateStack'
-import DeleteStack from './delete/DeleteStack'
 import StackEntry from './StacksEntry'
+import StackDetach from './StackDetach'
+import StackDelete from './StackDelete'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -167,12 +168,11 @@ export default function Stacks() {
             <div css={{ height: 52, borderBottom: theme.borders.default }} />
           )}
           hasNextPage={pageInfo?.hasNextPage}
-          mapper={(stack, { prev, next }) => (
+          mapper={(stack, { prev }) => (
             <StackEntry
               stack={stack}
               active={stack.id === stackId}
               first={isEmpty(prev)}
-              last={isEmpty(next)}
             />
           )}
           loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
@@ -214,10 +214,6 @@ export default function Stacks() {
                 {stack.repository?.url}
               </div>
             </div>
-            <DeleteStack
-              stack={stack}
-              refetch={refetch}
-            />
             <KickButton
               pulledAt={stack.repository?.pulledAt}
               kickMutationHook={useKickStackMutation}
@@ -225,6 +221,14 @@ export default function Stacks() {
               tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
               variables={{ id: stack.id }}
               width="max-content"
+            />
+            <StackDetach
+              stack={stack}
+              refetch={refetch}
+            />
+            <StackDelete
+              stack={stack}
+              refetch={refetch}
             />
           </div>
           <TabList

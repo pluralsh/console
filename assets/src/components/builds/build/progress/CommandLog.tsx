@@ -34,7 +34,7 @@ function CommandLogLine({ line, number, follow }) {
     >
       <Span
         color="text-xlight"
-        width={20}
+        width={35}
       >
         {number}
       </Span>
