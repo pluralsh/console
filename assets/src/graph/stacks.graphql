@@ -66,6 +66,9 @@ fragment StackRun on StackRun {
     name
     email
   }
+  job {
+    ...Job
+  }
 }
 
 fragment StackConfiguration on StackConfiguration {
