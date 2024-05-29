@@ -1,9 +1,11 @@
 import {
   AppIcon,
   CaretRightIcon,
+  CliIcon,
   GitCommitIcon,
   IconFrame,
   RunBookIcon,
+  TerminalIcon,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import moment from 'moment'
@@ -62,7 +64,7 @@ export default function StackRunsEntry({
               color="icon-warning"
             />
           ) : (
-            <RunBookIcon width={32} />
+            <CliIcon width={32} />
           )
         }
       />
@@ -83,7 +85,7 @@ export default function StackRunsEntry({
         >
           <div
             css={{
-              ...theme.partials.text.body2,
+              ...theme.partials.text.body2Bold,
               textOverflow: 'ellipsis',
               overflow: 'hidden',
             }}
@@ -106,18 +108,13 @@ export default function StackRunsEntry({
         <div
           css={{
             ...theme.partials.text.caption,
+            ...TRUNCATE,
             display: 'flex',
-            alignItems: 'center',
             color: theme.colors['text-xlight'],
-            gap: theme.spacing.xxsmall,
-            textOverflow: 'ellipsis',
-            overflow: 'hidden',
+            gap: theme.spacing.xsmall,
           }}
         >
-          {/* TODO: Fix icon in design system. */}
-          <div css={{ marginBottom: -9 }}>
-            <GitCommitIcon size={16} />
-          </div>
+          <GitCommitIcon />
           {ref}
         </div>
       </div>

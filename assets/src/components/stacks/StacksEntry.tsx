@@ -16,12 +16,10 @@ export default function StackEntry({
   stack,
   active,
   first,
-  last,
 }: {
   stack: StackFragment
   active: boolean
   first: boolean
-  last: boolean
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -53,20 +51,7 @@ export default function StackEntry({
               },
             }),
 
-        ...(first
-          ? {
-              borderTop: theme.borders.default,
-              borderTopLeftRadius: theme.borderRadiuses.large,
-              borderTopRightRadius: theme.borderRadiuses.large,
-            }
-          : {}),
-
-        ...(last
-          ? {
-              borderBottomLeftRadius: theme.borderRadiuses.large,
-              borderBottomRightRadius: theme.borderRadiuses.large,
-            }
-          : {}),
+        ...(first ? { borderTop: theme.borders.default } : {}),
       }}
     >
       <div
@@ -80,7 +65,7 @@ export default function StackEntry({
         <AppIcon
           icon={<StackTypeIcon stackType={stack.type} />}
           size="xxsmall"
-          $boxSize={24} // TODO: Fix in design system.
+          $boxSize={24}
         />
         <div
           css={{
@@ -98,7 +83,6 @@ export default function StackEntry({
           paused={!!stack.paused}
           deleting={!!stack.deletedAt}
           css={
-            // TODO: Add new severity in design system to support that.
             active
               ? undefined
               : {
@@ -120,6 +104,4 @@ export default function StackEntry({
       </div>
     </div>
   )
-
-  //   href={}
 }
