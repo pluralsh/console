@@ -3,6 +3,8 @@ package controller_test
 import (
 	"context"
 
+	batchv1 "k8s.io/api/batch/v1"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gqlclient "github.com/pluralsh/console-client-go"
@@ -109,6 +111,21 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 							},
 						},
 					},
+					JobSpec: &v1alpha1.JobSpec{
+						Raw: &batchv1.JobSpec{
+							Template: corev1.PodTemplateSpec{
+								ObjectMeta: metav1.ObjectMeta{},
+								Spec: corev1.PodSpec{
+									Containers: []corev1.Container{
+										{
+											Name:  "test",
+											Image: "test",
+										},
+									},
+								},
+							},
+						},
+					},
 				},
 			}, nil)).To(Succeed())
 
@@ -149,7 +166,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("OIUZRXDEXB2IQZSIYTOIHYAQ525BLHLRKAA5GWAJOESA2XW6RFTA===="),
+					SHA: lo.ToPtr("UQLLCV7K3LXSH6UVRSPKDH4DTVUK25I2N7SOLTPVZQ5ZM3ATT4UQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
@@ -196,7 +213,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("3J5TXU375N3ENBVWXX3NQNKNHPQ7KF4CVWBTNAUA3WUM7LJVH54A===="),
+					SHA: lo.ToPtr("WGTHKPFBECQHAGULHCY2CV5V6HW2ONRNDOIRLJGM2V6ES7OSCBLQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
