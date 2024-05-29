@@ -17,6 +17,19 @@ import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveL
 import StackRunHeader from './Header'
 import StackRunSidecar from './Sidecar'
 
+export function getRunBreadcrumbs(stackId: string, runId: string) {
+  return [
+    ...getBreadcrumbs(stackId ?? ''),
+    {
+      label: 'runs',
+      url: `${getStacksAbsPath(stackId)}/${STACK_RUNS_REL_PATH}`,
+    },
+    ...(runId
+      ? [{ label: runId, url: getStackRunsAbsPath(stackId, runId) }]
+      : []),
+  ]
+}
+
 export default function StackRunDetail(): ReactNode {
   const { stackId, runId } = useParams()
   const theme = useTheme()
@@ -35,16 +48,7 @@ export default function StackRunDetail(): ReactNode {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [
-        ...getBreadcrumbs(stackId ?? ''),
-        {
-          label: 'runs',
-          url: `${getStacksAbsPath(stackId)}/${STACK_RUNS_REL_PATH}`,
-        },
-        ...(runId
-          ? [{ label: runId, url: getStackRunsAbsPath(stackId, runId) }]
-          : []),
-      ],
+      () => getRunBreadcrumbs(stackId || '', runId || ''),
       [runId, stackId]
     )
   )

@@ -17,7 +17,8 @@ defmodule Console.Deployments.Stacks do
     RunLog,
     GitRepository,
     PullRequest,
-    ScmConnection
+    ScmConnection,
+    CustomStackRun
   }
 
   @preloads [:environment, :files, :observable_metrics]
@@ -27,6 +28,7 @@ defmodule Console.Deployments.Stacks do
   @type run_resp :: {:ok, StackRun.t} | error
   @type step_resp :: {:ok, RunStep.t} | error
   @type log_resp :: {:ok, RunLog.t} | error
+  @type custom_resp :: {:ok, CustomStackRun.t} | error
 
   @spec get_stack!(binary) :: Stack.t
   def get_stack!(id), do: Repo.get!(Stack, id)
@@ -326,6 +328,28 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
+  Creates an ad-hoc command run w/in the stack's execution context
+  """
+  @spec create_custom_run(Stack.t, [map], User.t) :: run_resp
+  def create_custom_run(%Stack{id: id, sha: sha} = stack, commands, %User{} = user) do
+    steps = Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: :init, status: :pending, name: "cmd #{&2}"}))
+    %StackRun{stack_id: id, status: :queued}
+    |> StackRun.changeset(
+      stack_attrs(stack, sha)
+      |> Map.put(:message, "Custom stack run")
+      |> Map.put(:steps, steps)
+    )
+    |> allow(user, :write)
+    |> when_ok(:insert)
+    |> notify(:create)
+  end
+
+  def create_custom_run(stack_id, commands, user) when is_binary(stack_id) do
+    get_stack!(stack_id)
+    |> create_custom_run(commands, user)
+  end
+
+  @doc """
   Creates a new run for the stack with the given sha and optional additional attrs
   """
   @spec create_run(Stack.t, binary) :: run_resp
@@ -334,12 +358,7 @@ defmodule Console.Deployments.Stacks do
     |> add_operation(:run, fn _ ->
       %StackRun{stack_id: stack.id, status: :queued}
       |> StackRun.changeset(
-        Repo.preload(stack, [:environment, :files])
-        |> Map.take(~w(approval workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a)
-        |> Console.clean()
-        |> Map.update(:environment, [], fn env -> Enum.map(env, &Map.delete(&1, :stack_id)) end)
-        |> Map.update(:files, [], fn files -> Enum.map(files, &Map.delete(&1, :stack_id)) end)
-        |> Map.put(:git, %{ref: sha, folder: stack.git.folder})
+        stack_attrs(stack, sha)
         |> Map.put(:steps, commands(stack, !!attrs[:dry_run]))
         |> Map.merge(attrs)
       )
@@ -352,6 +371,15 @@ defmodule Console.Deployments.Stacks do
     end)
     |> execute(extract: :run)
     |> notify(:create)
+  end
+
+  defp stack_attrs(%Stack{} = stack, sha) do
+    Repo.preload(stack, [:environment, :files])
+    |> Map.take(~w(approval workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a)
+    |> Console.clean()
+    |> Map.update(:environment, [], fn env -> Enum.map(env, &Map.delete(&1, :stack_id)) end)
+    |> Map.update(:files, [], fn files -> Enum.map(files, &Map.delete(&1, :stack_id)) end)
+    |> Map.put(:git, %{ref: sha, folder: stack.git.folder})
   end
 
   defp sha_attrs(%StackRun{dry_run: true}, _sha), do: %{}
@@ -451,6 +479,30 @@ defmodule Console.Deployments.Stacks do
     |> Kazan.run(server: Clusters.control_plane(cluster))
   end
   def run_job(_), do: {:ok, nil}
+
+  @doc """
+  Adds a new custom stack run reference to a given stack
+  """
+  @spec upsert_custom_stack_run(map, User.t) :: custom_resp
+  def upsert_custom_stack_run(%{stack_id: id, name: name} = attrs, %User{} = user) do
+    case Repo.get_by(CustomStackRun, stack_id: id, name: name) do
+      %CustomStackRun{} = run -> run
+      _ -> %CustomStackRun{}
+    end
+    |> CustomStackRun.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Deletes a custom stack run entity
+  """
+  @spec delete_custom_stack_run(binary, User.t) :: custom_resp
+  def delete_custom_stack_run(id, %User{} = user) do
+    Repo.get!(CustomStackRun, id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
+  end
 
   defp notify({:ok, %Stack{} = stack}, :create, actor),
     do: handle_notify(PubSub.StackCreated, stack, actor: actor)

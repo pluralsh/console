@@ -401,10 +401,15 @@ defmodule Console.Deployments.StacksTest do
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
       run = insert(:stack_run, stack: stack)
 
-      {:ok, updated} = Stacks.update_stack_run(%{status: :successful}, run.id, user)
+      {:ok, updated} = Stacks.update_stack_run(%{
+        status: :successful,
+        job_ref: %{namespace: "ns", name: "name"}
+      }, run.id, user)
 
       assert updated.id == run.id
       assert updated.status == :successful
+      assert updated.job_ref.namespace == "ns"
+      assert updated.job_ref.name == "name"
 
       assert refetch(stack).status == :successful
 
@@ -558,6 +563,73 @@ defmodule Console.Deployments.StacksTest do
       step = insert(:run_step)
 
       {:error, _} = Stacks.add_run_logs(%{content: "some logs"}, step.id, insert(:cluster))
+    end
+  end
+
+  describe "#create_custom_run/3" do
+    test "stack writers can create custom runs" do
+      user = insert(:user)
+      stack = insert(:stack, write_bindings: [%{user_id: user.id}], sha: "test-sha")
+
+      {:ok, run} = Stacks.create_custom_run(stack.id, [%{cmd: "echo", args: ["hello world!"]}], user)
+
+      assert run.stack_id == stack.id
+      refute run.dry_run
+      assert run.git.ref == "test-sha"
+      assert run.git.folder == stack.git.folder
+
+      [step] = run.steps
+
+      assert step.cmd == "echo"
+      assert step.args == ["hello world!"]
+    end
+
+    test "non admins cannot create custom runs" do
+      user = insert(:user)
+      stack = insert(:stack)
+
+      {:error, _} = Stacks.create_custom_run(stack.id, [%{cmd: "echo", args: ["hello world!"]}], user)
+    end
+  end
+
+  describe "#upsert_custom_stack_run/2" do
+    test "admins can add custom stack run records" do
+      stack = insert(:stack)
+      {:ok, csr} = Stacks.upsert_custom_stack_run(%{
+        name: "test",
+        stack_id: stack.id,
+        commands: [%{cmd: "echo", args: ["hello world"]}]
+      }, admin_user())
+
+      assert csr.name == "test"
+      assert csr.stack_id == stack.id
+      [cmd] = csr.commands
+
+      assert cmd.cmd == "echo"
+      assert cmd.args == ["hello world"]
+    end
+
+    test "nonadmins cannot create" do
+      stack = insert(:stack)
+      {:error, _} = Stacks.upsert_custom_stack_run(%{
+        name: "test",
+        stack_id: stack.id,
+        commands: [%{cmd: "echo", args: ["hello world"]}]
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_custom_stack_run/2" do
+    test "admins can add custom stack run records" do
+      csr = insert(:custom_stack_run)
+      {:ok, csr} = Stacks.delete_custom_stack_run(csr.id, admin_user())
+
+      refute refetch(csr)
+    end
+
+    test "nonadmins cannot create" do
+      csr = insert(:custom_stack_run)
+      {:error, _} = Stacks.delete_custom_stack_run(csr.id, insert(:user))
     end
   end
 end

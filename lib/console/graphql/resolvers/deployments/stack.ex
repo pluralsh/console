@@ -4,7 +4,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   alias Console.Schema.{
     Stack,
     StackRun,
-    PullRequest
+    PullRequest,
+    CustomStackRun
   }
 
   def list_stacks(args, %{context: %{current_user: user}}) do
@@ -27,6 +28,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def list_prs_for_stack(stack, args, _) do
     PullRequest.for_stack(stack.id)
     |> PullRequest.ordered()
+    |> paginate(args)
+  end
+
+  def list_custom_runs(stack, args, _) do
+    CustomStackRun.for_stack(stack.id)
     |> paginate(args)
   end
 
@@ -84,6 +90,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def add_run_logs(%{step_id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Stacks.add_run_logs(attrs, id, cluster)
+
+  def upsert_custom_stack_run(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Stacks.upsert_custom_stack_run(attrs, user)
+
+  def delete_custom_stack_run(%{id: id}, %{context: %{current_user: user}}),
+    do: Stacks.delete_custom_stack_run(id, user)
+
+  def create_stack_run(%{stack_id: id, commands: commands}, %{context: %{current_user: user}}),
+    do: Stacks.create_custom_run(id, commands, user)
 
   def stack_tarball(%{id: id}, _, _), do: {:ok, Services.api_url("v1/git/stacks/tarballs?id=#{id}")}
 

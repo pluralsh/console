@@ -236,4 +236,66 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       assert found["logs"] == "some logs"
     end
   end
+
+  describe "upsertCustomStackRun" do
+    test "admins can upsert a custom stack run" do
+      stack = insert(:stack)
+      {:ok, %{data: %{"upsertCustomStackRun" => csr}}} = run_query("""
+        mutation Upsert($attrs: CustomStackRunAttributes!) {
+          upsertCustomStackRun(attributes: $attrs) {
+            id
+            name
+            commands { cmd args }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "test",
+        "stackId" => stack.id,
+        "commands" => [%{"cmd" => "echo", "args" => ["Hello World!"]}]
+      }}, %{current_user: admin_user()})
+
+      assert csr["name"] == "test"
+      [cmd] = csr["commands"]
+      assert cmd["cmd"] == "echo"
+      assert cmd["args"] == ["Hello World!"]
+    end
+  end
+
+  describe "deleteCustomStackRun" do
+    test "it can delete a csr" do
+      csr = insert(:custom_stack_run)
+      {:ok, %{data: %{"deleteCustomStackRun" => found}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteCustomStackRun(id: $id) { id }
+        }
+      """, %{"id" => csr.id}, %{current_user: admin_user()})
+
+      assert found["id"] == csr.id
+
+      refute refetch(csr)
+    end
+  end
+
+  describe "onDemandRun" do
+    test "it can create a custom run" do
+      stack = insert(:stack, sha: "test-sha")
+
+      {:ok, %{data: %{"onDemandRun" => run}}} = run_query("""
+        mutation Create($id: ID!, $cmds: [CommandAttributes]) {
+          onDemandRun(stackId: $id, commands: $cmds) {
+            id
+            steps { cmd args }
+            git { ref folder }
+          }
+        }
+      """, %{"id" => stack.id, "cmds" => %{"cmd" => "echo", "args" => ["Hello World!"]}}, %{current_user: admin_user()})
+
+      assert run["git"]["ref"] == "test-sha"
+      assert run["git"]["folder"] == stack.git.folder
+
+      [step] = run["steps"]
+      assert step["cmd"] == "echo"
+      assert step["args"] == ["Hello World!"]
+    end
+  end
 end

@@ -66,9 +66,6 @@ fragment StackRun on StackRun {
     name
     email
   }
-  job {
-    ...Job
-  }
 }
 
 fragment StackConfiguration on StackConfiguration {
@@ -242,6 +239,22 @@ query StackRun($id: ID!) {
     }
     steps {
       ...RunStep
+    }
+  }
+}
+
+query StackRunJob($id: ID!) {
+  stackRun(id: $id) {
+    job {
+      ...PipelineGateJob
+    }
+  }
+}
+
+query StackRunJobLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
+  stackRun(id: $id) {
+    job {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
     }
   }
 }

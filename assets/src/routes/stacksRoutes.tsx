@@ -1,5 +1,15 @@
 import { Navigate, Route } from 'react-router-dom'
 
+import RunJob from 'components/stacks/run/job/RunJob'
+
+import RunJobLogs from 'components/stacks/run/job/RunJobLogs'
+
+import RunJobStatus from 'components/stacks/run/job/RunJobStatus'
+
+import RunJobPods from 'components/stacks/run/job/RunJobPods'
+
+import RunJobSpecs from 'components/stacks/run/job/RunJobSpecs'
+
 import Stacks from '../components/stacks/Stacks'
 import StackRunDetail from '../components/stacks/run/Route'
 import StackRunProgress from '../components/stacks/run/progress/Progress'
@@ -28,6 +38,7 @@ import {
   STACK_OVERVIEW_REL_PATH,
   STACK_REPOSITORY_REL_PATH,
   STACK_RUNS_ABS_PATH,
+  STACK_RUNS_JOB_REL_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
   STACK_RUNS_PLAN_REL_PATH,
   STACK_RUNS_REL_PATH,
@@ -102,5 +113,36 @@ export const stacksRoutes = [
       path={STACK_RUNS_OUTPUT_REL_PATH}
       element={<StackRunOutput />}
     />
+    <Route
+      key="run-jobs"
+      path={STACK_RUNS_JOB_REL_PATH}
+      element={<RunJob />}
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="logs"
+          />
+        }
+      />
+      <Route
+        path="logs"
+        element={<RunJobLogs />}
+      />
+      <Route
+        path="pods"
+        element={<RunJobPods />}
+      />
+      <Route
+        path="status"
+        element={<RunJobStatus />}
+      />
+      <Route
+        path="specs/:tab?"
+        element={<RunJobSpecs />}
+      />
+    </Route>
   </Route>,
 ]
