@@ -24,6 +24,7 @@ export const STACK_JOB_REL_PATH = `job`
 export const STACK_RUNS_STATE_REL_PATH = 'state'
 export const STACK_RUNS_PLAN_REL_PATH = 'plan'
 export const STACK_RUNS_OUTPUT_REL_PATH = 'output'
+export const STACK_RUNS_JOB_REL_PATH = 'job'
 export const STACK_RUNS_REPOSITORY_REL_PATH = 'repository'
 
 export function getStacksAbsPath(stackId: string | null | undefined) {

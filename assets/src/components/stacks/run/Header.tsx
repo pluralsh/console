@@ -19,6 +19,7 @@ import {
   useUpdateStackRunMutation,
 } from '../../../generated/graphql'
 import {
+  STACK_RUNS_JOB_REL_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
   STACK_RUNS_PLAN_REL_PATH,
   STACK_RUNS_REPOSITORY_REL_PATH,
@@ -35,6 +36,7 @@ const DIRECTORY = [
   { path: STACK_RUNS_STATE_REL_PATH, label: 'State' },
   { path: STACK_RUNS_PLAN_REL_PATH, label: 'Plan' },
   { path: STACK_RUNS_OUTPUT_REL_PATH, label: 'Output' },
+  { path: STACK_RUNS_JOB_REL_PATH, label: 'Job' },
 ]
 
 const TERMINAL_STATES = [

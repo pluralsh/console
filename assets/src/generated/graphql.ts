@@ -8818,7 +8818,7 @@ export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatis
 
 export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
 
-export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null };
+export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
 
 export type StackConfigurationFragment = { __typename?: 'StackConfiguration', version: string, image?: string | null };
 
@@ -8870,7 +8870,7 @@ export type StackRunsQueryVariables = Exact<{
 }>;
 
 
-export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null } | null } | null> | null } | null } | null };
+export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
 
 export type StackRunQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8878,6 +8878,22 @@ export type StackRunQueryVariables = Exact<{
 
 
 export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version: string, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null } | null };
+
+export type StackRunJobQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackRunJobQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', job?: { __typename?: 'Job', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, count?: number | null, eventTime?: string | null, lastTimestamp?: string | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, spec: { __typename?: 'JobSpec', activeDeadlineSeconds?: number | null, backoffLimit?: number | null, parallelism?: number | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, failed?: number | null, startTime?: string | null, succeeded?: number | null } } | null } | null };
+
+export type StackRunJobLogsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  container: Scalars['String']['input'];
+  sinceSeconds: Scalars['Int']['input'];
+}>;
+
+
+export type StackRunJobLogsQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', job?: { __typename?: 'Job', logs?: Array<string | null> | null } | null } | null };
 
 export type CreateStackMutationVariables = Exact<{
   attributes: StackAttributes;
@@ -8913,7 +8929,7 @@ export type KickStackMutationVariables = Exact<{
 }>;
 
 
-export type KickStackMutation = { __typename?: 'RootMutationType', kickStack?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null } | null };
+export type KickStackMutation = { __typename?: 'RootMutationType', kickStack?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
 
 export type UpdateStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8921,21 +8937,21 @@ export type UpdateStackRunMutationVariables = Exact<{
 }>;
 
 
-export type UpdateStackRunMutation = { __typename?: 'RootMutationType', updateStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null } | null };
+export type UpdateStackRunMutation = { __typename?: 'RootMutationType', updateStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
 
 export type ApproveStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ApproveStackRunMutation = { __typename?: 'RootMutationType', approveStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null } | null };
+export type ApproveStackRunMutation = { __typename?: 'RootMutationType', approveStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
 
 export type RestartStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type RestartStackRunMutation = { __typename?: 'RootMutationType', restartStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, job?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null } | null };
+export type RestartStackRunMutation = { __typename?: 'RootMutationType', restartStackRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
 
 export type LogsDeltaSubscriptionVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10399,6 +10415,36 @@ export const IngressFragmentDoc = gql`
 }
     ${MetadataFragmentDoc}
 ${CertificateFragmentDoc}`;
+export const JobStatusFragmentDoc = gql`
+    fragment JobStatus on JobStatus {
+  active
+  completionTime
+  succeeded
+  failed
+  startTime
+}
+    `;
+export const JobFragmentDoc = gql`
+    fragment Job on Job {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...JobStatus
+  }
+  spec {
+    backoffLimit
+    parallelism
+    activeDeadlineSeconds
+  }
+  pods {
+    ...Pod
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${JobStatusFragmentDoc}
+${PodFragmentDoc}`;
 export const EventFragmentDoc = gql`
     fragment Event on Event {
   action
@@ -11040,36 +11086,6 @@ export const StackFragmentDoc = gql`
   }
 }
     ${ClusterTinyFragmentDoc}`;
-export const JobStatusFragmentDoc = gql`
-    fragment JobStatus on JobStatus {
-  active
-  completionTime
-  succeeded
-  failed
-  startTime
-}
-    `;
-export const JobFragmentDoc = gql`
-    fragment Job on Job {
-  metadata {
-    ...Metadata
-  }
-  status {
-    ...JobStatus
-  }
-  spec {
-    backoffLimit
-    parallelism
-    activeDeadlineSeconds
-  }
-  pods {
-    ...Pod
-  }
-  raw
-}
-    ${MetadataFragmentDoc}
-${JobStatusFragmentDoc}
-${PodFragmentDoc}`;
 export const StackRunFragmentDoc = gql`
     fragment StackRun on StackRun {
   id
@@ -11085,11 +11101,8 @@ export const StackRunFragmentDoc = gql`
     name
     email
   }
-  job {
-    ...Job
-  }
 }
-    ${JobFragmentDoc}`;
+    `;
 export const StackConfigurationFragmentDoc = gql`
     fragment StackConfiguration on StackConfiguration {
   version
@@ -17845,6 +17858,92 @@ export type StackRunQueryHookResult = ReturnType<typeof useStackRunQuery>;
 export type StackRunLazyQueryHookResult = ReturnType<typeof useStackRunLazyQuery>;
 export type StackRunSuspenseQueryHookResult = ReturnType<typeof useStackRunSuspenseQuery>;
 export type StackRunQueryResult = Apollo.QueryResult<StackRunQuery, StackRunQueryVariables>;
+export const StackRunJobDocument = gql`
+    query StackRunJob($id: ID!) {
+  stackRun(id: $id) {
+    job {
+      ...PipelineGateJob
+    }
+  }
+}
+    ${PipelineGateJobFragmentDoc}`;
+
+/**
+ * __useStackRunJobQuery__
+ *
+ * To run a query within a React component, call `useStackRunJobQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackRunJobQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackRunJobQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackRunJobQuery(baseOptions: Apollo.QueryHookOptions<StackRunJobQuery, StackRunJobQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackRunJobQuery, StackRunJobQueryVariables>(StackRunJobDocument, options);
+      }
+export function useStackRunJobLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackRunJobQuery, StackRunJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackRunJobQuery, StackRunJobQueryVariables>(StackRunJobDocument, options);
+        }
+export function useStackRunJobSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackRunJobQuery, StackRunJobQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackRunJobQuery, StackRunJobQueryVariables>(StackRunJobDocument, options);
+        }
+export type StackRunJobQueryHookResult = ReturnType<typeof useStackRunJobQuery>;
+export type StackRunJobLazyQueryHookResult = ReturnType<typeof useStackRunJobLazyQuery>;
+export type StackRunJobSuspenseQueryHookResult = ReturnType<typeof useStackRunJobSuspenseQuery>;
+export type StackRunJobQueryResult = Apollo.QueryResult<StackRunJobQuery, StackRunJobQueryVariables>;
+export const StackRunJobLogsDocument = gql`
+    query StackRunJobLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
+  stackRun(id: $id) {
+    job {
+      logs(container: $container, sinceSeconds: $sinceSeconds)
+    }
+  }
+}
+    `;
+
+/**
+ * __useStackRunJobLogsQuery__
+ *
+ * To run a query within a React component, call `useStackRunJobLogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackRunJobLogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackRunJobLogsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      container: // value for 'container'
+ *      sinceSeconds: // value for 'sinceSeconds'
+ *   },
+ * });
+ */
+export function useStackRunJobLogsQuery(baseOptions: Apollo.QueryHookOptions<StackRunJobLogsQuery, StackRunJobLogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackRunJobLogsQuery, StackRunJobLogsQueryVariables>(StackRunJobLogsDocument, options);
+      }
+export function useStackRunJobLogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackRunJobLogsQuery, StackRunJobLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackRunJobLogsQuery, StackRunJobLogsQueryVariables>(StackRunJobLogsDocument, options);
+        }
+export function useStackRunJobLogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackRunJobLogsQuery, StackRunJobLogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackRunJobLogsQuery, StackRunJobLogsQueryVariables>(StackRunJobLogsDocument, options);
+        }
+export type StackRunJobLogsQueryHookResult = ReturnType<typeof useStackRunJobLogsQuery>;
+export type StackRunJobLogsLazyQueryHookResult = ReturnType<typeof useStackRunJobLogsLazyQuery>;
+export type StackRunJobLogsSuspenseQueryHookResult = ReturnType<typeof useStackRunJobLogsSuspenseQuery>;
+export type StackRunJobLogsQueryResult = Apollo.QueryResult<StackRunJobLogsQuery, StackRunJobLogsQueryVariables>;
 export const CreateStackDocument = gql`
     mutation CreateStack($attributes: StackAttributes!) {
   createStack(attributes: $attributes) {
@@ -18647,6 +18746,8 @@ export const namedOperations = {
     StackTiny: 'StackTiny',
     StackRuns: 'StackRuns',
     StackRun: 'StackRun',
+    StackRunJob: 'StackRunJob',
+    StackRunJobLogs: 'StackRunJobLogs',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me',
