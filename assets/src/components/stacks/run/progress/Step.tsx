@@ -127,9 +127,7 @@ function Status({ status }: StepStatusProps): ReactNode {
       return (
         <Spinner
           size={12}
-          css={{
-            alignSelf: 'center',
-          }}
+          css={{ alignSelf: 'center' }}
         />
       )
     case StepStatus.Failed:
