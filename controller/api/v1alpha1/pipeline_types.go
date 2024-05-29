@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console-client-go"
+	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -142,8 +143,7 @@ type JobSpec struct {
 
 	// Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Type:=string
-	Raw *string `json:"raw,omitempty"`
+	Raw *batchv1.JobSpec `json:"raw,omitempty"`
 }
 
 type Container struct {

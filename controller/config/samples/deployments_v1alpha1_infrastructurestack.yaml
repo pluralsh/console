@@ -34,11 +34,12 @@ metadata:
   name: infrastructurestack-sample
   namespace: default
 spec:
-  name: "test"
+  name: "test-job"
   detach: true
   type: TERRAFORM
   configuration:
-    version: "v0.0.3"
+    version: "sha-ae2663f-terraform-1.8.2"
+    image: "ghcr.io/pluralsh/harness"
   repositoryRef:
     name: tf-hello
     namespace: default
@@ -59,5 +60,17 @@ spec:
       secretKeyRef:
         name: infrastructurestack
         key: secret
+  jobSpec:
+    namespace: default
+    raw:
+      template:
+        metadata:
+          namespace: default
+        spec:
+          containers:
+            - name: pi
+              image: perl:5.34.0
+              command: [ "perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)" ]
+          restartPolicy: Never
 
 

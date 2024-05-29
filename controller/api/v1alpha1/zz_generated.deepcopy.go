@@ -22,6 +22,7 @@ package v1alpha1
 
 import (
 	console_client_go "github.com/pluralsh/console-client-go"
+	batchv1 "k8s.io/api/batch/v1"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -1203,8 +1204,8 @@ func (in *JobSpec) DeepCopyInto(out *JobSpec) {
 	}
 	if in.Raw != nil {
 		in, out := &in.Raw, &out.Raw
-		*out = new(string)
-		**out = **in
+		*out = new(batchv1.JobSpec)
+		(*in).DeepCopyInto(*out)
 	}
 }
 

@@ -171,7 +171,7 @@ func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 		return nil, nil
 	}
 
-	var annotations, labels *string
+	var annotations, labels, raw *string
 	if job.Annotations != nil {
 		result, err := json.Marshal(job.Annotations)
 		if err != nil {
@@ -186,10 +186,17 @@ func gateJobAttributes(job *v1alpha1.JobSpec) (*console.GateJobAttributes, error
 		}
 		labels = lo.ToPtr(string(result))
 	}
+	if job.Raw != nil {
+		rawData, err := json.Marshal(job.Raw)
+		if err != nil {
+			return nil, err
+		}
+		raw = lo.ToPtr(string(rawData))
+	}
 
 	return &console.GateJobAttributes{
 		Namespace: job.Namespace,
-		Raw:       job.Raw,
+		Raw:       raw,
 		Containers: algorithms.Map(job.Containers,
 			func(c *v1alpha1.Container) *console.ContainerAttributes {
 				return &console.ContainerAttributes{
