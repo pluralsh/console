@@ -4,8 +4,6 @@ import {
   CliIcon,
   GitCommitIcon,
   IconFrame,
-  RunBookIcon,
-  TerminalIcon,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import moment from 'moment'
