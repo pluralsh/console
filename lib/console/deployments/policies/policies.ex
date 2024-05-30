@@ -51,6 +51,12 @@ defmodule Console.Deployments.Policies do
 
   def can?(%Cluster{id: id}, %Stack{cluster_id: id}, :state), do: :pass
 
+
+  def can?(user, %TerraformState{lock_id: lock_id, lock: %{id: lock_id}} = state, :state),
+    do: can?(user, %{state | lock_id: nil}, :state)
+
+  def can?(_, %TerraformState{lock_id: id, lock: lock}, :state) when is_binary(id),
+    do: {:error, {:locked, lock || %{}}}
   def can?(%User{} = user, %Stack{} = stack, :state), do: can?(user, stack, :write)
 
   def can?(%Cluster{id: id}, %StackRun{cluster_id: id}, _), do: :pass
