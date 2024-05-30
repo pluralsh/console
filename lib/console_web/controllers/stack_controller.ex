@@ -6,22 +6,24 @@ defmodule ConsoleWeb.StackController do
 
   def get_tf_state(conn, %{"stack_id" => id}) do
     case State.get_terraform_state(id, conn.assigns.actor) do
-      {:ok, %{state: state}} -> send_resp(conn, 200, state)
-      {:ok, nil} -> send_resp(conn, 204, "")
+      {:ok, %{state: state}} when is_binary(state) and byte_size(state) > 0 ->
+        send_resp(conn, 200, state)
+      {:ok, _} -> send_resp(conn, 204, "")
       _ -> send_resp(conn, 403, "Forbidden")
     end
   end
 
-  def update_tf_state(conn, %{"stack_id" => id}) do
+  def update_tf_state(conn, %{"stack_id" => id} = attrs) do
     %{raw_body: state, actor: actor} = conn.assigns
 
     IO.iodata_to_binary(state)
-    |> State.update_terraform_state(id, actor)
+    |> State.update_terraform_state(attrs["ID"], id, actor)
     |> handle_resp(conn)
   end
 
   def lock_tf_state(conn, %{"stack_id" => id} = lock) do
-    State.lock_terraform_state(lock, id, conn.assigns.actor)
+    Map.new(lock, fn {k, v} -> {String.downcase(k), v} end)
+    |> State.lock_terraform_state(id, conn.assigns.actor)
     |> handle_resp(conn)
   end
 
@@ -32,10 +34,12 @@ defmodule ConsoleWeb.StackController do
 
   defp handle_resp({:error, {:locked, lock}}, conn) do
     put_resp_header(conn, "content-type", "application/json")
-    |> send_resp(423, Poison.encode!(Map.from_struct(lock)))
+    |> send_resp(423, Jason.encode!(State.lock(lock)))
   end
 
   defp handle_resp({:error, :forbidden}, conn), do: send_resp(conn, 403, "Forbidden")
+  defp handle_resp({:error, %Ecto.Changeset{} = changeset}, conn),
+    do: send_resp(conn, 400, Console.GraphQl.Helpers.resolve_changeset(changeset) |> Enum.join(", "))
   defp handle_resp({:error, err}, conn), do: send_resp(conn, 400, inspect(err))
 
   defp handle_resp({:ok, _}, conn), do: send_resp(conn, 200, "")

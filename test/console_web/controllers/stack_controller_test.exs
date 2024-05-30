@@ -68,8 +68,21 @@ defmodule ConsoleWeb.StackControllerTest do
       |> basic_auth(state.stack.cluster)
       |> put_req_header("content-type", "application/json")
       |> post("/ext/v1/states/terraform/#{state.stack.id}/lock", Jason.encode!(%{
-        id: "lock-id",
-        owner: "someone@example.com"
+        ID: "lock-id",
+        Owner: "someone@example.com"
+      }))
+      |> response(200)
+    end
+
+    test "it can upsert and lock a tf state if no state exists", %{conn: conn} do
+      stack = insert(:stack)
+
+      conn
+      |> basic_auth(stack.cluster)
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/states/terraform/#{stack.id}/lock", Jason.encode!(%{
+        ID: "lock-id",
+        Owner: "someone@example.com"
       }))
       |> response(200)
     end
@@ -81,8 +94,8 @@ defmodule ConsoleWeb.StackControllerTest do
       |> basic_auth(state.stack.cluster)
       |> put_req_header("content-type", "application/json")
       |> post("/ext/v1/states/terraform/#{state.stack.id}/lock", Jason.encode!(%{
-        id: "lock-id",
-        owner: "someone-else@example.com"
+        ID: "lock-id",
+        Owner: "someone-else@example.com"
       }))
       |> response(423)
     end
@@ -94,8 +107,8 @@ defmodule ConsoleWeb.StackControllerTest do
       |> basic_auth(insert(:cluster))
       |> put_req_header("content-type", "application/json")
       |> post("/ext/v1/states/terraform/#{state.stack.id}/lock", Jason.encode!(%{
-        id: "lock-id",
-        owner: "someone@example.com"
+        ID: "lock-id",
+        Owner: "someone@example.com"
       }))
       |> response(403)
     end
