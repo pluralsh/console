@@ -419,6 +419,23 @@ _Appears in:_
 
 
 
+#### Container
+
+
+
+
+
+
+
+_Appears in:_
+- [JobSpec](#jobspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `image` _string_ |  |  | Required: {} <br />Type: string <br /> |
+| `args` _string array_ |  |  | Optional: {} <br /> |
+| `env` _[Env](#env) array_ |  |  | Optional: {} <br /> |
+| `envFrom` _[EnvFrom](#envfrom) array_ |  |  | Optional: {} <br /> |
 
 
 #### Env
@@ -455,27 +472,6 @@ _Appears in:_
 | `configMap` _string_ |  |  | Type: string <br /> |
 
 
-#### GateJob
-
-
-
-GateJob is a spec for a job gate.
-
-
-
-_Appears in:_
-- [GateSpec](#gatespec)
-
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `namespace` _string_ |  |  | Required: {} <br />Type: string <br /> |
-| `containers` _[Container](#container) array_ |  |  | Optional: {} <br /> |
-| `labels` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
-| `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
-| `serviceAccount` _string_ |  |  | Optional: {} <br />Type: string <br /> |
-| `raw` _string_ | Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file. |  | Optional: {} <br />Type: string <br /> |
-
-
 #### GateSpec
 
 
@@ -489,7 +485,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `job` _[GateJob](#gatejob)_ |  |  | Optional: {} <br /> |
+| `job` _[JobSpec](#jobspec)_ |  |  | Optional: {} <br /> |
 
 
 #### GitHealth
@@ -641,13 +637,37 @@ _Appears in:_
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef to source IaC from |  |  |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
 | `git` _[GitRef](#gitref)_ | Git reference w/in the repository where the IaC lives |  |  |
-| `jobSpec` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | JobSpec optional k8s job configuration for the job that will apply this stack |  | Optional: {} <br /> |
+| `manageState` _boolean_ | Whether you want Plural to manage the state of this stack |  | Optional: {} <br /> |
+| `workdir` _string_ | The working directory within the git spec you want to run commands in (useful for projects with external modules) |  | Optional: {} <br /> |
+| `jobSpec` _[JobSpec](#jobspec)_ | JobSpec optional k8s job configuration for the job that will apply this stack |  | Optional: {} <br /> |
 | `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  |  |
 | `approval` _boolean_ | Approval whether to require approval |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
 | `environment` _[StackEnvironment](#stackenvironment) array_ |  |  | Optional: {} <br /> |
-| `files` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | Files reference to ConfigMap with a key as a path and value as a content |  | Optional: {} <br /> |
-| `detach` _boolean_ | Detach determined if user want to delete or detach stack |  |  |
+| `files` _[StackFile](#stackfile) array_ | Files reference to Secret with a key as a part of mount path and value as a content |  | Optional: {} <br /> |
+| `detach` _boolean_ | If true, detach the stack on CR deletion, leaving all cloud resources in-place. |  | Optional: {} <br /> |
+
+
+#### JobSpec
+
+
+
+JobSpec is a spec for a job gate.
+
+
+
+_Appears in:_
+- [GateSpec](#gatespec)
+- [InfrastructureStackSpec](#infrastructurestackspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `namespace` _string_ |  |  | Required: {} <br />Type: string <br /> |
+| `containers` _[Container](#container) array_ |  |  | Optional: {} <br /> |
+| `labels` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
+| `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
+| `serviceAccount` _string_ |  |  | Optional: {} <br />Type: string <br /> |
+| `raw` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file. |  | Optional: {} <br /> |
 
 
 #### ManagedNamespace
@@ -1264,6 +1284,22 @@ _Appears in:_
 | `version` _string_ |  |  | Optional: {} <br /> |
 
 
+#### ServiceDependency
+
+
+
+
+
+
+
+_Appears in:_
+- [ServiceSpec](#servicespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | The name of a service on the same cluster this service depends on |  |  |
+
+
 #### ServiceDeployment
 
 
@@ -1367,9 +1403,10 @@ _Appears in:_
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
-| `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
+| `dependencies` _[ServiceDependency](#servicedependency) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
 | `contexts` _string array_ | Contexts contain dependent service context names |  | Optional: {} <br /> |
 | `templated` _boolean_ | Templated should apply liquid templating to raw yaml files, defaults to true |  | Optional: {} <br /> |
+| `detach` _boolean_ | Detach determined if user want to delete or detach service |  | Optional: {} <br /> |
 
 
 
@@ -1448,6 +1485,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `image` _string_ | Image optional custom image you might want to use |  | Optional: {} <br /> |
 | `version` _string_ | Version the semver of the tool you wish to use |  |  |
+| `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run |  | Optional: {} <br /> |
 
 
 #### StackEnvironment
@@ -1464,10 +1502,44 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ |  |  |  |
-| `value` _string_ |  |  |  |
-| `secret` _boolean_ |  |  | Optional: {} <br /> |
+| `value` _string_ |  |  | Optional: {} <br /> |
+| `secretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
+| `configMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 
+#### StackFile
+
+
+
+
+
+
+
+_Appears in:_
+- [InfrastructureStackSpec](#infrastructurestackspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `mountPath` _string_ |  |  |  |
+| `secretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ |  |  |  |
+
+
+#### StackHook
+
+
+
+
+
+
+
+_Appears in:_
+- [StackConfiguration](#stackconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `cmd` _string_ | the command this hook will execute |  |  |
+| `args` _string array_ | optional arguments to pass to the command |  | Optional: {} <br /> |
+| `afterStage` _[StepStage](#stepstage)_ |  |  | Enum: [INIT PLAN VERIFY APPLY] <br /> |
 
 
 #### Status
