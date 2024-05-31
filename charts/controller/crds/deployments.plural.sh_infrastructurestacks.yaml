@@ -40,6 +40,10 @@ spec:
           spec:
             description: InfrastructureStackSpec defines the desired state of InfrastructureStack
             properties:
+              actor:
+                description: User email to use for default Plural authentication in
+                  this stack.
+                type: string
               approval:
                 description: Approval whether to require approval
                 type: boolean
