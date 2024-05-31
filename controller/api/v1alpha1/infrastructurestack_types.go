@@ -75,6 +75,10 @@ type InfrastructureStackSpec struct {
 	// If true, detach the stack on CR deletion, leaving all cloud resources in-place.
 	// +kubebuilder:validation:Optional
 	Detach bool `json:"detach,omitempty"`
+
+	// User email to use for default Plural authentication in this stack.
+	// +kubebuilder:validation:Optional
+	Actor *string `json:"actor,omitempty"`
 }
 
 //+kubebuilder:object:root=true

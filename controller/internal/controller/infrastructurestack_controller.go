@@ -230,6 +230,14 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 		Files:         make([]*console.StackFileAttributes, 0),
 	}
 
+	if stack.Spec.Actor != nil {
+		user, err := r.ConsoleClient.GetUser(*stack.Spec.Actor)
+		if err != nil {
+			return nil, err
+		}
+		attr.ActorID = &user.ID
+	}
+
 	for _, file := range stack.Spec.Files {
 		secret := &corev1.Secret{}
 		name := types.NamespacedName{Name: file.SecretRef.Name, Namespace: stack.GetNamespace()}
