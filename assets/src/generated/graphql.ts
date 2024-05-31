@@ -1525,6 +1525,8 @@ export type DeploymentSettings = {
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** whether the byok cluster has been brought under self-management */
   selfManaged?: Maybe<Scalars['Boolean']['output']>;
+  /** global settings for stack configuration */
+  stacks?: Maybe<StackSettings>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** write policy across all clusters */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
@@ -1542,6 +1544,8 @@ export type DeploymentSettingsAttributes = {
   /** connection details for a prometheus instance to use */
   prometheusConnection?: InputMaybe<HttpConnectionAttributes>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** global configuration for stack execution */
+  stacks?: InputMaybe<StackSettingsAttributes>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
@@ -6400,6 +6404,8 @@ export type ServiceDeployment = {
   helmRepository?: Maybe<HelmRepository>;
   /** internal id of this service */
   id: Scalars['ID']['output'];
+  /** imports from stack outputs */
+  imports?: Maybe<Array<Maybe<ServiceImport>>>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the desired sync interval for this service */
   interval?: Maybe<Scalars['String']['output']>;
@@ -6470,6 +6476,7 @@ export type ServiceDeploymentAttributes = {
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
   git?: InputMaybe<GitRefAttributes>;
   helm?: InputMaybe<HelmConfigAttributes>;
+  imports?: InputMaybe<Array<InputMaybe<ServiceImportAttributes>>>;
   interval?: InputMaybe<Scalars['String']['input']>;
   kustomize?: InputMaybe<KustomizeAttributes>;
   name: Scalars['String']['input'];
@@ -6514,6 +6521,22 @@ export type ServiceError = {
 export type ServiceErrorAttributes = {
   message: Scalars['String']['input'];
   source: Scalars['String']['input'];
+};
+
+/** Import of stack data into a service's context */
+export type ServiceImport = {
+  __typename?: 'ServiceImport';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** The outputs of that stack */
+  outputs?: Maybe<Array<Maybe<StackOutput>>>;
+  /** The stack you're importing from */
+  stack?: Maybe<InfrastructureStack>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ServiceImportAttributes = {
+  stackId: Scalars['ID']['input'];
 };
 
 export type ServicePort = {
@@ -6871,6 +6894,15 @@ export type StackRunEdge = {
   __typename?: 'StackRunEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<StackRun>;
+};
+
+export type StackSettings = {
+  __typename?: 'StackSettings';
+  jobSpec?: Maybe<JobGateSpec>;
+};
+
+export type StackSettingsAttributes = {
+  jobSpec?: InputMaybe<GateJobAttributes>;
 };
 
 export type StackState = {

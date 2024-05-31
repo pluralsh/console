@@ -26,6 +26,11 @@ defmodule Console.GraphQl.Deployments.Service do
     field :read_bindings,    list_of(:policy_binding_attributes)
     field :write_bindings,   list_of(:policy_binding_attributes)
     field :context_bindings, list_of(:context_binding_attributes)
+    field :imports,          list_of(:service_import_attributes)
+  end
+
+  input_object :service_import_attributes do
+    field :stack_id, non_null(:id)
   end
 
   input_object :sync_config_attributes do
@@ -190,6 +195,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :owner,          :global_service, resolve: dataloader(Deployments), description: "whether this service is controlled by a global service"
     field :contexts,       list_of(:service_context), resolve: dataloader(Deployments), description: "bound contexts for this service"
     field :dependencies,   list_of(:service_dependency), resolve: dataloader(Deployments), description: "the dependencies of this service, actualization will not happen until all are HEALTHY"
+    field :imports,        list_of(:service_import), resolve: dataloader(Deployments), description: "imports from stack outputs"
 
     @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
     connection field :revisions, node_type: :revision do
@@ -338,6 +344,15 @@ defmodule Console.GraphQl.Deployments.Service do
     field :id,     non_null(:id)
     field :status, :service_deployment_status
     field :name,   non_null(:string)
+
+    timestamps()
+  end
+
+  @desc "Import of stack data into a service's context"
+  object :service_import do
+    field :id,      non_null(:id)
+    field :stack,   :infrastructure_stack, resolve: dataloader(Deployments), description: "The stack you're importing from"
+    field :outputs, list_of(:stack_output), resolve: dataloader(Deployments), description: "The outputs of that stack"
 
     timestamps()
   end

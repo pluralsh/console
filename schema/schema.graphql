@@ -805,6 +805,9 @@ type DeploymentSettings {
   "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
   agentHelmValues: String
 
+  "global settings for stack configuration"
+  stacks: StackSettings
+
   "The console's expected agent version"
   agentVsn: String!
 
@@ -837,6 +840,10 @@ type DeploymentSettings {
   updatedAt: DateTime
 }
 
+type StackSettings {
+  jobSpec: JobGateSpec
+}
+
 "the details of how to connect to a http service like prometheus"
 type HttpConnection {
   host: String!
@@ -855,6 +862,9 @@ input DeploymentSettingsAttributes {
 
   "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
   agentHelmValues: String
+
+  "global configuration for stack execution"
+  stacks: StackSettingsAttributes
 
   "connection details for a prometheus instance to use"
   prometheusConnection: HttpConnectionAttributes
@@ -884,6 +894,10 @@ input HttpConnectionAttributes {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+input StackSettingsAttributes {
+  jobSpec: GateJobAttributes
 }
 
 enum ObservabilityProviderType {
@@ -2538,6 +2552,12 @@ input ServiceDeploymentAttributes {
   writeBindings: [PolicyBindingAttributes]
 
   contextBindings: [ContextBindingAttributes]
+
+  imports: [ServiceImportAttributes]
+}
+
+input ServiceImportAttributes {
+  stackId: ID!
 }
 
 input SyncConfigAttributes {
@@ -2777,6 +2797,9 @@ type ServiceDeployment {
   "the dependencies of this service, actualization will not happen until all are HEALTHY"
   dependencies: [ServiceDependency]
 
+  "imports from stack outputs"
+  imports: [ServiceImport]
+
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
 
@@ -2997,6 +3020,21 @@ type ServiceDependency {
   status: ServiceDeploymentStatus
   name: String!
   insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"Import of stack data into a service's context"
+type ServiceImport {
+  id: ID!
+
+  "The stack you're importing from"
+  stack: InfrastructureStack
+
+  "The outputs of that stack"
+  outputs: [StackOutput]
+
+  insertedAt: DateTime
+
   updatedAt: DateTime
 }
 

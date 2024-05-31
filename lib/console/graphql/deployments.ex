@@ -51,6 +51,7 @@
     field :loki_connection,       :http_connection, description: "the way we can connect to your loki instance"
     field :prometheus_connection, :http_connection, description: "the way we can connect to your prometheus instance"
     field :agent_helm_values,     :string, description: "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
+    field :stacks,                :stack_settings, description: "global settings for stack configuration"
 
     field :agent_vsn, non_null(:string), description: "The console's expected agent version",
       resolve: fn _, _, _ -> {:ok, Settings.agent_vsn()} end
@@ -72,6 +73,10 @@
     timestamps()
   end
 
+  object :stack_settings do
+    field :job_spec, :job_gate_spec
+  end
+
   @desc "the details of how to connect to a http service like prometheus"
   object :http_connection do
     field :host,     non_null(:string)
@@ -83,6 +88,7 @@
     field :artifact_repository_id, :id
     field :deployer_repository_id, :id
     field :agent_helm_values,      :string, description: "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
+    field :stacks,                 :stack_settings_attributes, description: "global configuration for stack execution"
     field :prometheus_connection,  :http_connection_attributes, description: "connection details for a prometheus instance to use"
     field :loki_connection,        :http_connection_attributes, description: "connection details for a loki instance to use"
     field :read_bindings,          list_of(:policy_binding_attributes)
@@ -100,6 +106,10 @@
   input_object :rbac_attributes do
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
+  end
+
+  input_object :stack_settings_attributes do
+    field :job_spec, :gate_job_attributes
   end
 
   object :deployment_queries do
