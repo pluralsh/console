@@ -15,6 +15,7 @@ defmodule Console.Schema.Service do
     DiffNormalizer,
     Metadata,
     StageService,
+    ServiceImport,
     ServiceContextBinding,
     NamespaceInstance,
     ServiceDependency
@@ -135,6 +136,7 @@ defmodule Console.Schema.Service do
     has_one :global_service,     GlobalService
     has_one :namespace_instance, NamespaceInstance
 
+    has_many :imports, ServiceImport, on_replace: :delete
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete
     has_many :context_bindings, ServiceContextBinding, on_replace: :delete
@@ -265,6 +267,7 @@ defmodule Console.Schema.Service do
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:context_bindings)
     |> cast_assoc(:dependencies)
+    |> cast_assoc(:imports)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)

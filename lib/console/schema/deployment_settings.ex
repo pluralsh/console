@@ -1,6 +1,6 @@
 defmodule Console.Schema.DeploymentSettings do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{PolicyBinding, GitRepository}
+  alias Console.Schema.{PolicyBinding, GitRepository, Gates.JobSpec}
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -37,6 +37,10 @@ defmodule Console.Schema.DeploymentSettings do
     embeds_one :prometheus_connection, Connection, on_replace: :update
     embeds_one :loki_connection, Connection, on_replace: :update
 
+    embeds_one :stacks, Stacks, on_replace: :update do
+      embeds_one :job_spec, JobSpec, on_replace: :update
+    end
+
     belongs_to :artifact_repository, GitRepository
     belongs_to :deployer_repository, GitRepository
 
@@ -71,10 +75,17 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_assoc(:create_bindings)
     |> cast_embed(:prometheus_connection)
     |> cast_embed(:loki_connection)
+    |> cast_embed(:stacks, with: &stacks_changeset/2)
     |> change_markers(agent_helm_values: :helm_changed, agent_version: :version_changed)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:git_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)
+  end
+
+  defp stacks_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:job_spec)
   end
 end
