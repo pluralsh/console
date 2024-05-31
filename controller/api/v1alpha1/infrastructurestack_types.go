@@ -113,6 +113,21 @@ type StackConfiguration struct {
 	Image *string `json:"image,omitempty"`
 	// Version the semver of the tool you wish to use
 	Version string `json:"version"`
+	// Hooks to run at various stages of the stack run
+	// +kubebuilder:validation:Optional
+	Hooks []*StackHook `json:"hooks,omitempty"`
+}
+
+type StackHook struct {
+	// the command this hook will execute
+	Cmd string `json:"cmd"`
+
+	// optional arguments to pass to the command
+	// +kubebuilder:validation:Optional
+	Args []string `json:"args,omitempty"`
+
+	// +kubebuilder:validation:Enum=INIT;PLAN;VERIFY;APPLY
+	AfterStage console.StepStage `json:"afterStage"`
 }
 
 type StackEnvironment struct {

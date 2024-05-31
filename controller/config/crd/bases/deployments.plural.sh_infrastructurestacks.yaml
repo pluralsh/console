@@ -146,6 +146,30 @@ spec:
                 description: Configuration version/image config for the tool you're
                   using
                 properties:
+                  hooks:
+                    description: Hooks to run at various stages of the stack run
+                    items:
+                      properties:
+                        afterStage:
+                          enum:
+                          - INIT
+                          - PLAN
+                          - VERIFY
+                          - APPLY
+                          type: string
+                        args:
+                          description: optional arguments to pass to the command
+                          items:
+                            type: string
+                          type: array
+                        cmd:
+                          description: the command this hook will execute
+                          type: string
+                      required:
+                      - afterStage
+                      - cmd
+                      type: object
+                    type: array
                   image:
                     description: Image optional custom image you might want to use
                     type: string

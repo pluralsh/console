@@ -225,12 +225,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 			Ref:    stack.Spec.Git.Ref,
 			Folder: stack.Spec.Git.Folder,
 		},
-		Configuration: console.StackConfigurationAttributes{
-			Version: lo.ToPtr(stack.Spec.Configuration.Version),
-			Image:   stack.Spec.Configuration.Image,
-		},
-		Approval: stack.Spec.Approval,
-		Files:    make([]*console.StackFileAttributes, 0),
+		Configuration: r.stackConfigurationAttributes(stack.Spec.Configuration),
+		Approval:      stack.Spec.Approval,
+		Files:         make([]*console.StackFileAttributes, 0),
 	}
 
 	for _, file := range stack.Spec.Files {
@@ -301,4 +298,19 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 	}
 
 	return attr, nil
+}
+
+func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf v1alpha1.StackConfiguration) console.StackConfigurationAttributes {
+	attrs := console.StackConfigurationAttributes{
+		Version: lo.ToPtr(conf.Version),
+		Image:   conf.Image,
+	}
+
+	if conf.Hooks != nil {
+		attrs.Hooks = algorithms.Map(conf.Hooks, func(h *v1alpha1.StackHook) *console.StackHookAttributes {
+			return &console.StackHookAttributes{Cmd: h.Cmd, Args: lo.ToSlicePtr(h.Args), AfterStage: h.AfterStage}
+		})
+	}
+
+	return attrs
 }
