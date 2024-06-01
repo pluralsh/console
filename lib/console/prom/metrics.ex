@@ -13,6 +13,18 @@ defmodule Console.Prom.Metrics do
 
     Gauge.declare([name: metric_name(:local_cache_filesize),
                    help: "Count of the number of files w/in local caches at the moment"])
+
+    Gauge.declare([name: metric_name(:failed_service_count),
+                   help: "Count of number of services with errors"])
+
+    Gauge.declare([name: metric_name(:service_count),
+                   help: "Count of number of services with errors"])
+
+    Gauge.declare([name: metric_name(:cluster_count),
+                   help: "Count of number of clusters"])
+
+    Gauge.declare([name: metric_name(:unhealthy_cluster_count),
+                   help: "Count of unhealthy (unpinged) clusters"])
   end
 
   def inc(:git_agent, label) do
@@ -27,4 +39,16 @@ defmodule Console.Prom.Metrics do
     Gauge.set([name: metric_name(:local_cache_file_count)], count)
     Gauge.set([name: metric_name(:local_cache_filesize)], size)
   end
+
+  def cluster(count, unhealthy) do
+    Gauge.set([name: metric_name(:cluster_count)], safe(count))
+    Gauge.set([name: metric_name(:unhealthy_cluster_count)], safe(unhealthy))
+  end
+
+  def service(count, failed) do
+    Gauge.set([name: metric_name(:service_count)], safe(count))
+    Gauge.set([name: metric_name(:failed_service_count)], safe(failed))
+  end
+
+  defp safe(val), do: val || 0
 end
