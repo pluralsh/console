@@ -148,7 +148,6 @@ export default function RunJob() {
             alignItems: 'center',
             gap: theme.spacing.small,
             marginBottom: theme.spacing.medium,
-            marginLeft: theme.spacing.medium,
           }}
         >
           <AppIcon
