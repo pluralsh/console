@@ -43,7 +43,7 @@ export default function StackRunDetail(): ReactNode {
       id: runId!,
     },
     skip: !runId,
-    pollInterval: 10_000,
+    pollInterval: 5_000,
   })
 
   useSetBreadcrumbs(

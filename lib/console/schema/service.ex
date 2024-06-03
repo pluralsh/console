@@ -245,6 +245,16 @@ defmodule Console.Schema.Service do
     from(s in query, group_by: s.status, select: %{status: s.status, count: count(s.id, :distinct)})
   end
 
+  def stats(query \\ __MODULE__) do
+    from(s in query,
+      left_join: e in assoc(s, :errors),
+      select: %{
+        unhealthy: count(fragment("CASE WHEN ? or ? = 3 THEN ? ELSE null END", not is_nil(e.id), s.status, s.id), :distinct),
+        count: count(s.id, :distinct)
+      }
+    )
+  end
+
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 

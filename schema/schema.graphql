@@ -842,6 +842,7 @@ type DeploymentSettings {
 
 type StackSettings {
   jobSpec: JobGateSpec
+  connectionId: ID
 }
 
 "the details of how to connect to a http service like prometheus"
@@ -898,6 +899,7 @@ input RbacAttributes {
 
 input StackSettingsAttributes {
   jobSpec: GateJobAttributes
+  connectionId: ID
 }
 
 enum ObservabilityProviderType {

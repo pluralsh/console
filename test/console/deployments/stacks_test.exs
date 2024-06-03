@@ -188,6 +188,7 @@ defmodule Console.Deployments.StacksTest do
         environment: [%{name: "ENV", value: "1"}],
         files: [%{path: "test.txt", content: "test"}],
         git: %{ref: "main", folder: "terraform"},
+        actor: build(:user),
         configuration: %{
           version: "1.5.0",
           hooks: [
@@ -207,6 +208,7 @@ defmodule Console.Deployments.StacksTest do
       assert run.repository_id == stack.repository_id
       assert run.git.ref == "new-sha"
       assert run.git.folder == stack.git.folder
+      assert run.actor_id == stack.actor_id
       [first, second, third, fourth] = run.steps
 
       assert first.cmd == "terraform"

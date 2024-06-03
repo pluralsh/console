@@ -39,6 +39,7 @@ defmodule Console.Schema.DeploymentSettings do
 
     embeds_one :stacks, Stacks, on_replace: :update do
       embeds_one :job_spec, JobSpec, on_replace: :update
+      field :connection_id, :binary_id
     end
 
     belongs_to :artifact_repository, GitRepository
@@ -85,7 +86,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp stacks_changeset(model, attrs) do
     model
-    |> cast(attrs, [])
+    |> cast(attrs, ~w(connection_id)a)
     |> cast_embed(:job_spec)
   end
 end

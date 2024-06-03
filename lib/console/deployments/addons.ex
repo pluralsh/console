@@ -3,7 +3,7 @@ defmodule Console.Deployments.AddOns do
   use Nebulex.Caching
   alias Console.Schema.User
   alias Console.Deployments.Git
-  alias Console.Deployments.{AddOn, Services, Global}
+  alias Console.Deployments.{AddOn, Services, Global, Tar}
 
   @local_adapter Console.conf(:local_cache)
   @ttl :timer.minutes(30)
@@ -16,7 +16,7 @@ defmodule Console.Deployments.AddOns do
   def addons() do
     artifacts = Git.artifacts_repo!()
     with {:ok, f} <- Git.Discovery.addons(artifacts),
-         {:ok, contents} <- tar_stream(f),
+         {:ok, contents} <- Tar.tar_stream(f),
       do: {:ok, parse_addons(contents)}
   end
 
