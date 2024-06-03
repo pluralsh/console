@@ -230,7 +230,7 @@ function StackRunNav(): ReactNode {
   const tabStateRef = useRef<any>(null)
   const currentTab = useMemo(
     () =>
-      DIRECTORY.find((d) => d.path && pathname.endsWith(d.path)) ??
+      DIRECTORY.find((d) => d.path && pathname.includes(d.path)) ??
       DIRECTORY[0],
     [pathname]
   )
