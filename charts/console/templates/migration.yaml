@@ -36,6 +36,8 @@ spec:
         volumeMounts:
         - mountPath: /opt/app/var
           name: scratch
+        - mountPath: /tmp
+          name: temp-dir
       restartPolicy: Never
       {{ with .Values.migrator.nodeSelector}}
       nodeSelector:
@@ -47,5 +49,7 @@ spec:
       {{- end }}
       volumes:
       - name: scratch
+        emptyDir: {}
+      - name: temp-dir
         emptyDir: {}
   backoffLimit: 5
