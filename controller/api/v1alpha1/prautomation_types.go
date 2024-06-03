@@ -300,6 +300,7 @@ type PrAutomationConfiguration struct {
 	Name string `json:"name"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=STRING;INT;BOOL;DOMAIN;BUCKET;FILE;FUNCTION;PASSWORD
 	Type console.ConfigurationType `json:"type"`
 
 	// +kubebuilder:validation:Optional
@@ -340,6 +341,7 @@ type Condition struct {
 	Field string `json:"field"`
 
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=NOT;GT;LT;EQ;GTE;LTE;PREFIX;SUFFIX
 	console.Operation `json:"operation"`
 
 	// +kubebuilder:validation:Optional

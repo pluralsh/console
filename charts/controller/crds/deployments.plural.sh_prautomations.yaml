@@ -143,6 +143,15 @@ spec:
                         field:
                           type: string
                         operation:
+                          enum:
+                          - NOT
+                          - GT
+                          - LT
+                          - EQ
+                          - GTE
+                          - LTE
+                          - PREFIX
+                          - SUFFIX
                           type: string
                         value:
                           type: string
@@ -163,6 +172,15 @@ spec:
                     placeholder:
                       type: string
                     type:
+                      enum:
+                      - STRING
+                      - INT
+                      - BOOL
+                      - DOMAIN
+                      - BUCKET
+                      - FILE
+                      - FUNCTION
+                      - PASSWORD
                       type: string
                   required:
                   - name

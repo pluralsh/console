@@ -17,7 +17,6 @@ limitations under the License.
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console-client-go"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,10 +28,8 @@ type CustomStackRunSpec struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
-	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Stack is immutable"
-	// StackRef to source InfrastructureStack
-	StackRef corev1.LocalObjectReference `json:"stackRef"`
+	// +kubebuilder:validation:Optional
+	StackRef *corev1.LocalObjectReference `json:"stackRef"`
 
 	// Documentation to explain what this will do
 	// +kubebuilder:validation:Optional
@@ -41,7 +38,7 @@ type CustomStackRunSpec struct {
 	// Commands the commands for this custom run
 	Commands []CommandAttributes `json:"commands,omitempty"`
 	// Configuration self-service configuration which will be presented in UI before triggering
-	Configuration []ConfigurationAttributes `json:"configuration,omitempty"`
+	Configuration []PrAutomationConfiguration `json:"configuration,omitempty"`
 }
 
 type CommandAttributes struct {
@@ -52,27 +49,6 @@ type CommandAttributes struct {
 	Args []string `json:"args,omitempty"`
 	// +kubebuilder:validation:Optional
 	Dir *string `json:"dir,omitempty"`
-}
-
-// ConfigurationAttributes the configuration item for creating a new pr
-type ConfigurationAttributes struct {
-	// +kubebuilder:validation:Enum=STRING;INT;BOOL;DOMAIN;BUCKET;FILE;FUNCTION;PASSWORD
-	Type          console.ConfigurationType `json:"type"`
-	Name          string                    `json:"name"`
-	Default       *string                   `json:"default,omitempty"`
-	Documentation *string                   `json:"documentation,omitempty"`
-	Longform      *string                   `json:"longform,omitempty"`
-	Placeholder   *string                   `json:"placeholder,omitempty"`
-	Optional      *bool                     `json:"optional,omitempty"`
-	Condition     *ConditionAttributes      `json:"condition,omitempty"`
-}
-
-// ConditionAttributes attributes for declaratively specifying whether a config item is relevant given prior config
-type ConditionAttributes struct {
-	// +kubebuilder:validation:Enum=NOT;GT;LT;EQ;GTE;LTE;PREFIX;SUFFIX
-	Operation console.Operation `json:"operation"`
-	Field     string            `json:"field"`
-	Value     *string           `json:"value,omitempty"`
 }
 
 //+kubebuilder:object:root=true

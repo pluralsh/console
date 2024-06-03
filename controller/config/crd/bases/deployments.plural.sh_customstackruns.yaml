@@ -66,12 +66,10 @@ spec:
                 description: Configuration self-service configuration which will be
                   presented in UI before triggering
                 items:
-                  description: ConfigurationAttributes the configuration item for
-                    creating a new pr
+                  description: PrAutomationConfiguration ...
                   properties:
                     condition:
-                      description: ConditionAttributes attributes for declaratively
-                        specifying whether a config item is relevant given prior config
+                      description: Condition ...
                       properties:
                         field:
                           type: string
@@ -128,7 +126,9 @@ spec:
                   own name from CustomStackRun.ObjectMeta will be used.
                 type: string
               stackRef:
-                description: StackRef to source InfrastructureStack
+                description: |-
+                  LocalObjectReference contains enough information to let you locate the
+                  referenced object inside the same namespace.
                 properties:
                   name:
                     description: |-
@@ -138,11 +138,6 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-                x-kubernetes-validations:
-                - message: Stack is immutable
-                  rule: self == oldSelf
-            required:
-            - stackRef
             type: object
           status:
             properties:
