@@ -6,7 +6,7 @@ import { PropWideBold } from 'components/component/info/common'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useLayoutEffect, useRef, useState } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 
 import { LinkTabWrap } from 'components/utils/Tabs'
 
