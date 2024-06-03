@@ -19,12 +19,13 @@ package controller
 import (
 	"context"
 
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/utils"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	"github.com/pluralsh/console/controller/api/v1alpha1"
 )
 
 // CustomStackRunReconciler reconciles a CustomStackRun object
@@ -42,8 +43,29 @@ type CustomStackRunReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
-func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
+	logger := log.FromContext(ctx)
+
+	stack := &v1alpha1.CustomStackRun{}
+	if err := r.Get(ctx, req.NamespacedName, stack); err != nil {
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	scope, err := NewCustomStackRunScope(ctx, r.Client, stack)
+	if err != nil {
+		logger.Error(err, "failed to create stack")
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	// Always patch object when exiting this function, so we can persist any object changes.
+	defer func() {
+		if err := scope.PatchObject(); err != nil && reterr == nil {
+			reterr = err
+		}
+	}()
+	if !stack.GetDeletionTimestamp().IsZero() {
+		return r.handleDelete(ctx, stack)
+	}
 
 	return ctrl.Result{}, nil
 }
@@ -53,4 +75,9 @@ func (r *CustomStackRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.CustomStackRun{}).
 		Complete(r)
+}
+
+func (r *CustomStackRunReconciler) handleDelete(ctx context.Context, stack *v1alpha1.CustomStackRun) (ctrl.Result, error) {
+
+	return ctrl.Result{}, nil
 }
