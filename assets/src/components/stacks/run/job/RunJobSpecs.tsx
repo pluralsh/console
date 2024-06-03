@@ -6,34 +6,34 @@ import { PropWideBold } from 'components/component/info/common'
 
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { useLayoutEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, useState } from 'react'
 
 import { LinkTabWrap } from 'components/utils/Tabs'
 
-import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
-
 import { RawYaml } from 'components/component/ComponentRaw'
+
+import { getStackRunsAbsPath } from '../../../../routes/stacksRoutesConsts'
 
 import { useRunJob } from './RunJob'
 
 const TABS = [
-  { path: '', label: 'Info', enabled: true },
-  { path: 'raw', label: 'Raw', enabled: true },
+  { path: '', label: 'Info' },
+  { path: 'raw', label: 'Raw' },
 ]
 
 export default function RunJobSpecs() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { raw, spec } = useRunJob()
-  const { tab: tabName, jobId } = useParams()
+  const { tab: tabName, jobId, stackId, runId } = useParams()
   const tabStateRef = useRef<any>(null)
   const currentTab = TABS.find((tab) => tab.path === (tabName ?? ''))
+  const pathPrefix = `${getStackRunsAbsPath(stackId, runId)}/job/specs`
 
   useLayoutEffect(() => {
-    if (!currentTab) {
-      navigate(`${PIPELINES_ABS_PATH}/jobs/${jobId}/specs`)
-    }
-  }, [currentTab, jobId, navigate])
+    if (!currentTab) navigate(`${pathPrefix}/specs`)
+  }, [currentTab, jobId, navigate, pathPrefix])
+
   if (!currentTab) return null
 
   return (
@@ -53,7 +53,7 @@ export default function RunJobSpecs() {
               subTab
               key={path}
               textValue={label}
-              to={`${PIPELINES_ABS_PATH}/jobs/${jobId}/specs/${path}`}
+              to={`${pathPrefix}/${path}`}
             >
               <SubTab
                 key={path}
@@ -66,8 +66,9 @@ export default function RunJobSpecs() {
         </TabList>
       }
     >
-      {currentTab?.path === 'raw' && <RawYaml raw={raw} />}
-      {currentTab?.path === '' && (
+      {currentTab.path === 'raw' ? (
+        <RawYaml raw={raw} />
+      ) : (
         <Card
           css={{
             display: 'flex',

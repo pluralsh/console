@@ -14,35 +14,29 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-
 import {
   JobFragment,
   PipelineGateJobFragment,
   useStackRunJobQuery,
 } from 'generated/graphql'
-
 import { GqlError } from 'components/utils/Alert'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { SideNavEntries } from 'components/layout/SideNavEntries'
-
 import { useTheme } from 'styled-components'
-
-import { Body2P, Subtitle2H1 } from 'components/utils/typography/Text'
-
+import { Subtitle2H1 } from 'components/utils/typography/Text'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-
 import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
 
 import { getRunBreadcrumbs } from '../Route'
+import { TRUNCATE } from '../../../utils/truncate'
 
-const getDirectory = () => [
-  { path: 'logs', label: 'Logs', enabled: true },
-  { path: 'pods', label: 'Pods', enabled: true },
-  { path: 'status', label: 'Status', enabled: true },
-  { path: 'specs', label: 'Specs', enabled: true },
+const DIRECTORY = [
+  { path: 'logs', label: 'Logs' },
+  { path: 'pods', label: 'Pods' },
+  { path: 'status', label: 'Status' },
+  { path: 'specs', label: 'Specs' },
 ]
 
 const getStackRunJobCrumbs = ({
@@ -55,7 +49,7 @@ const getStackRunJobCrumbs = ({
   tab: string
 }) => [
   ...getRunBreadcrumbs(stackId, runId),
-  { label: 'jobs' },
+  { label: 'job' },
   { label: tab, url: `${getStackRunsAbsPath(stackId, runId)}/${tab}` },
 ]
 
@@ -88,9 +82,7 @@ export default function RunJob() {
   const { pathname } = useLocation()
 
   const pathPrefix = `${getStackRunsAbsPath(stackId, runId)}/job`
-  const tab = useMatch(`${pathPrefix}/:tab`)?.params?.tab || ''
-
-  const directory = getDirectory().filter(({ enabled }) => enabled)
+  const tab = useMatch(`${pathPrefix}/:tab/*`)?.params?.tab || ''
 
   const { data, error, refetch } = useStackRunJobQuery({
     variables: { id: runId || '' },
@@ -140,55 +132,38 @@ export default function RunJob() {
   }
 
   return (
-    <ResponsiveLayoutPage>
+    <div
+      css={{
+        display: 'flex',
+        height: '100%',
+        width: '100%',
+        overflowY: 'hidden',
+        flexGrow: 1,
+      }}
+    >
       <ResponsiveLayoutSidenavContainer>
         <div
           css={{
             display: 'flex',
-            alignItem: 'center',
+            alignItems: 'center',
             gap: theme.spacing.small,
-            marginBottom: theme.spacing.xsmall,
+            marginBottom: theme.spacing.medium,
+            marginLeft: theme.spacing.medium,
           }}
         >
           <AppIcon
             size="xsmall"
             icon={<BriefcaseIcon size={theme.spacing.large} />}
           />
-          <div
-            css={{
-              minWidth: 0,
-              '&>*': {
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap',
-              },
-            }}
-          >
+          <div css={{ minWidth: 0, '&>*': { ...TRUNCATE } }}>
             <Tooltip label={name}>
-              <Subtitle2H1
-                css={{
-                  margin: 0,
-                }}
-              >
-                {name}
-              </Subtitle2H1>
+              <Subtitle2H1 css={{ margin: 0 }}>{name}</Subtitle2H1>
             </Tooltip>
-            {name && (
-              <Tooltip label={name}>
-                <Body2P
-                  css={{
-                    color: theme.colors['text-light'],
-                  }}
-                >
-                  Job gate
-                </Body2P>
-              </Tooltip>
-            )}
           </div>
         </div>
 
         <SideNavEntries
-          directory={directory}
+          directory={DIRECTORY}
           pathname={pathname}
           pathPrefix={pathPrefix}
         />
@@ -202,6 +177,6 @@ export default function RunJob() {
           {content}
         </PodsContext.Provider>
       </TabPanel>
-    </ResponsiveLayoutPage>
+    </div>
   )
 }
