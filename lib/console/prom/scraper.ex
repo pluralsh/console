@@ -13,6 +13,7 @@ defmodule Console.Prom.Scraper do
   end
 
   def handle_info(:scrape, state) do
+    Console.Deployments.Statistics.compile()
     Console.Deployments.Git.Statistics.disk()
     {:noreply, state}
   end

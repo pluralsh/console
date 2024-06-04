@@ -47,8 +47,6 @@ import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
 import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
 
-import { isEmpty } from 'lodash'
-
 import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
@@ -79,8 +77,6 @@ function getMenuItems({
   isByok: boolean
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
-  const showStacks = !isEmpty(localStorage.getItem(`plural-stacks`))
-
   return [
     {
       text: 'Home',
@@ -104,16 +100,12 @@ function getMenuItems({
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
     },
-    ...(showStacks
-      ? [
-          {
-            text: 'Stacks',
-            expandedLabel: 'Stacks',
-            icon: <StackIcon />,
-            path: getStacksAbsPath(''),
-          },
-        ]
-      : []),
+    {
+      text: 'Stacks',
+      expandedLabel: 'Stacks',
+      icon: <StackIcon />,
+      path: getStacksAbsPath(''),
+    },
     {
       text: 'Kubernetes',
       expandedLabel: 'Kubernetes',

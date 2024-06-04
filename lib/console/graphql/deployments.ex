@@ -74,7 +74,8 @@
   end
 
   object :stack_settings do
-    field :job_spec, :job_gate_spec
+    field :job_spec,      :job_gate_spec
+    field :connection_id, :id
   end
 
   @desc "the details of how to connect to a http service like prometheus"
@@ -109,7 +110,8 @@
   end
 
   input_object :stack_settings_attributes do
-    field :job_spec, :gate_job_attributes
+    field :job_spec,      :gate_job_attributes
+    field :connection_id, :id
   end
 
   object :deployment_queries do

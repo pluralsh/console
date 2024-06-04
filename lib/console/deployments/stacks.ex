@@ -3,7 +3,7 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters}
+  alias Console.Deployments.{Services, Clusters, Settings, Git}
   alias Console.Deployments.Git.Discovery
   alias Console.Deployments.Pr.Dispatcher
   alias Kazan.Apis.Batch.V1, as: BatchV1
@@ -63,7 +63,7 @@ defmodule Console.Deployments.Stacks do
 
   def plural_creds(%StackRun{} = run) do
     case Repo.preload(run, [:actor]) do
-      %{actor: %User{} = actor} ->
+      %StackRun{actor: %User{} = actor} ->
         with {:ok, token, _} <- Console.Guardian.encode_and_sign(actor, %{}, ttl: {1, :day}),
           do: {:ok, %{token: token, url: Console.graphql_endpoint()}}
       _ -> {:ok, nil}
@@ -173,26 +173,34 @@ defmodule Console.Deployments.Stacks do
   Posts a review comment for a completed pr stack run if possible
   """
   def post_comment(%StackRun{} = run) do
-    case Repo.preload(run, [:pull_request, :state, stack: :connection]) do
-      %StackRun{
+    run = Repo.preload(run, [:pull_request, :state, stack: :connection])
+    case {run, scm_connection(run)}  do
+      {%StackRun{
         id: id,
         stack_id: stack_id,
         state: %StackState{plan: plan},
-        stack: %Stack{connection: %ScmConnection{} = conn},
         pull_request: %PullRequest{} = pr
-      } when is_binary(plan) ->
+      }, %ScmConnection{} = conn}  when is_binary(plan) ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
         Dispatcher.review(conn, pr, pr_blob("stack_summary", plan: plan, link: url))
-      %StackRun{
+      {%StackRun{
         id: id,
         stack_id: stack_id,
         status: :failed,
-        stack: %Stack{connection: %ScmConnection{} = conn},
         pull_request: %PullRequest{} = pr
-      } ->
+      }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
         Dispatcher.review(conn, pr, pr_blob("failed", link: url))
       _ -> {:error, "cannot post review for this stack run"}
+    end
+  end
+
+  defp scm_connection(%StackRun{} = run) do
+    case {run, Settings.fetch()} do
+      {%StackRun{stack: %{connection: %ScmConnection{} = conn}}, _} -> conn
+      {_, %{stacks: %{connection_id: conn_id}}} when is_binary(conn_id) ->
+        Git.get_scm_connection(conn_id)
+      _ -> nil
     end
   end
 
@@ -375,7 +383,7 @@ defmodule Console.Deployments.Stacks do
 
   defp stack_attrs(%Stack{} = stack, sha) do
     Repo.preload(stack, [:environment, :files])
-    |> Map.take(~w(approval workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a)
+    |> Map.take(~w(approval actor_id workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a)
     |> Console.clean()
     |> Map.update(:environment, [], fn env -> Enum.map(env, &Map.delete(&1, :stack_id)) end)
     |> Map.update(:files, [], fn files -> Enum.map(files, &Map.delete(&1, :stack_id)) end)

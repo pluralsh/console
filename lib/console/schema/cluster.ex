@@ -239,6 +239,16 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  def stats(query \\ __MODULE__) do
+    unhealthy = Timex.now() |> Timex.shift(minutes: -4)
+    from(c in query,
+      select: %{
+        count: count(c.id),
+        unhealthy: sum(fragment("CASE WHEN ? < ? THEN 1 ELSE 0 END", c.pinged_at, ^unhealthy))
+      }
+    )
+  end
+
   def health(query \\ __MODULE__, health)
   def health(query, true) do
     expired = health_threshold()

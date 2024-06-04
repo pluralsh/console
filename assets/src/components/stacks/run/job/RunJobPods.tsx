@@ -62,7 +62,7 @@ export default function RunJobPods() {
           pods={podsWithId}
           columns={columns}
           refetch={refetch}
-          //   reactTableOptions={reactTableOptions}
+          // reactTableOptions={reactTableOptions}
           css={{
             maxHeight: 'unset',
             height: '100%',

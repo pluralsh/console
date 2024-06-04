@@ -130,7 +130,7 @@ defmodule Console.MixProject do
       {:erlsom, "~> 1.4"},
       {:inflex, "~> 2.0.0"},
       {:websockex, "~> 0.4.3"},
-      {:briefly, "~> 0.4.0"},
+      {:briefly, "~> 0.5.0"},
       {:libring, "~> 1.0"},
       {:http_stream, "~> 1.0.0"},
       {:solid, "~> 0.15"},
