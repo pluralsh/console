@@ -10,7 +10,10 @@ export default function GroupView({ group, open, onClose }: any) {
       onClose={onClose}
       portal
     >
-      <GroupMembers group={group} />
+      <GroupMembers
+        group={group}
+        skip={!open}
+      />
     </Modal>
   )
 }

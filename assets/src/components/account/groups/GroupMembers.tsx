@@ -9,11 +9,16 @@ import { List } from '../../utils/List'
 
 import GroupMember from './GroupMember'
 
-export default function GroupMembers({ group, edit = false }: any) {
+export default function GroupMembers({
+  group,
+  edit = false,
+  skip = false,
+}: any) {
   const [listRef, setListRef] = useState<any>(null)
   const { data, loading, fetchMore } = useGroupMembersQuery({
     variables: { id: group.id },
     fetchPolicy: 'network-only',
+    skip,
   })
 
   if (!data?.groupMembers) return null

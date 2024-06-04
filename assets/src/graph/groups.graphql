@@ -15,8 +15,8 @@ fragment Group on Group {
   updatedAt
 }
 
-query Groups($q: String, $cursor: String) {
-  groups(q: $q, first: 20, after: $cursor) {
+query Groups($q: String, $first: Int = 20, $after: String) {
+  groups(q: $q, first: $first, after: $after) {
     pageInfo {
       ...PageInfo
     }

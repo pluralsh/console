@@ -8427,7 +8427,8 @@ export type GroupFragment = { __typename?: 'Group', id: string, name: string, de
 
 export type GroupsQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
-  cursor?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -9042,7 +9043,7 @@ export type MeQuery = { __typename?: 'RootQueryType', externalToken?: string | n
 
 export type UsersQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
-  cursor?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -15804,8 +15805,8 @@ export type PostgresDatabaseLazyQueryHookResult = ReturnType<typeof usePostgresD
 export type PostgresDatabaseSuspenseQueryHookResult = ReturnType<typeof usePostgresDatabaseSuspenseQuery>;
 export type PostgresDatabaseQueryResult = Apollo.QueryResult<PostgresDatabaseQuery, PostgresDatabaseQueryVariables>;
 export const GroupsDocument = gql`
-    query Groups($q: String, $cursor: String) {
-  groups(q: $q, first: 20, after: $cursor) {
+    query Groups($q: String, $first: Int = 20, $after: String) {
+  groups(q: $q, first: $first, after: $after) {
     pageInfo {
       ...PageInfo
     }
@@ -15832,7 +15833,8 @@ ${GroupFragmentDoc}`;
  * const { data, loading, error } = useGroupsQuery({
  *   variables: {
  *      q: // value for 'q'
- *      cursor: // value for 'cursor'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
  *   },
  * });
  */
@@ -18515,8 +18517,8 @@ export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeSuspenseQueryHookResult = ReturnType<typeof useMeSuspenseQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const UsersDocument = gql`
-    query Users($q: String, $cursor: String) {
-  users(q: $q, first: 20, after: $cursor) {
+    query Users($q: String, $after: String) {
+  users(q: $q, first: 20, after: $after) {
     pageInfo {
       ...PageInfo
     }
@@ -18543,7 +18545,7 @@ ${UserFragmentDoc}`;
  * const { data, loading, error } = useUsersQuery({
  *   variables: {
  *      q: // value for 'q'
- *      cursor: // value for 'cursor'
+ *      after: // value for 'after'
  *   },
  * });
  */

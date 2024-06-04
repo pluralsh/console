@@ -1,78 +1,71 @@
-import isEmpty from 'lodash/isEmpty'
-import { EmptyState } from '@pluralsh/design-system'
-import { useState } from 'react'
-import { Div } from 'honorable'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useGroupsQuery } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
+import { ComponentProps, useContext, useMemo } from 'react'
 
-import { extendConnection } from '../../../utils/graphql'
-import { ListItem } from '../../utils/List'
-import { StandardScroller } from '../../utils/SmoothScroller'
+import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+
+import { GqlError } from 'components/utils/Alert'
+
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+
+import { LoginContext } from 'components/contexts'
+
+import { Permissions, hasRbac } from '../misc'
 
 import GroupCreate from './GroupCreate'
-import Group from './Group'
+import { groupsColsEditable, groupsColsView } from './GroupsColumns'
 
 export function GroupsList({ q }: any) {
-  const { data, loading, fetchMore } = useGroupsQuery({ variables: { q } })
-  const [listRef, setListRef] = useState<any>(null)
+  const { me } = useContext(LoginContext)
+  const editable = !!me?.roles?.admin || hasRbac(me, Permissions.USERS)
 
-  if (!data?.groups) return <LoadingIndicator />
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      { queryHook: useGroupsQuery, queryKey: 'groups' },
+      { q }
+    )
 
-  const { edges, pageInfo } = data.groups
+  const groups = useMemo(
+    () => data?.groups?.edges?.map((edge) => edge?.node),
+    [data?.groups?.edges]
+  )
 
-  return (
-    <Div
-      flexGrow={1}
-      maxHeight="max-content"
+  if (error) return <GqlError error={error} />
+  if (!data?.groups?.edges) return <LoadingIndicator />
+
+  const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
+    meta: { q, gridTemplateColumns: '1fr auto' },
+  }
+
+  return !isEmpty(groups) ? (
+    <FullHeightTableWrap>
+      <Table
+        virtualizeRows
+        data={groups || []}
+        columns={editable ? groupsColsEditable : groupsColsView}
+        hideHeader
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+        reactVirtualOptions={{ overscan: 10 }}
+        reactTableOptions={reactTableOptions}
+        css={{
+          height: '100%',
+        }}
+      />
+    </FullHeightTableWrap>
+  ) : (
+    <EmptyState
+      message={
+        isEmpty(q)
+          ? "Looks like you don't have any groups yet."
+          : `No groups found for ${q}`
+      }
     >
-      {!isEmpty(edges) ? (
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          items={edges}
-          mapper={({ node: group }, { next }) => (
-            <ListItem
-              key={group.id}
-              last={!next.node}
-            >
-              <Group
-                group={group}
-                q={q}
-              />
-            </ListItem>
-          )}
-          loadNextPage={() =>
-            pageInfo.hasNextPage &&
-            fetchMore({
-              variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { groups } }) =>
-                extendConnection(prev, groups, 'groups'),
-            })
-          }
-          hasNextPage={pageInfo.hasNextPage}
-          loading={loading}
-          placeholder={() => (
-            <Div
-              flex={false}
-              height="50px"
-              padding="small"
-            />
-          )}
-          handleScroll={undefined}
-          refreshKey={undefined}
-          setLoader={undefined}
-        />
-      ) : (
-        <EmptyState
-          message={
-            isEmpty(q)
-              ? "Looks like you don't have any groups yet."
-              : `No groups found for ${q}`
-          }
-        >
-          <GroupCreate q={q} />
-        </EmptyState>
-      )}
-    </Div>
+      <GroupCreate q={q} />
+    </EmptyState>
   )
 }
