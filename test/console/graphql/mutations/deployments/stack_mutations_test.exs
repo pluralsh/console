@@ -237,12 +237,12 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
     end
   end
 
-  describe "upsertCustomStackRun" do
-    test "admins can upsert a custom stack run" do
+  describe "createCustomStackRun" do
+    test "admins can create a custom stack run" do
       stack = insert(:stack)
-      {:ok, %{data: %{"upsertCustomStackRun" => csr}}} = run_query("""
-        mutation Upsert($attrs: CustomStackRunAttributes!) {
-          upsertCustomStackRun(attributes: $attrs) {
+      {:ok, %{data: %{"createCustomStackRun" => csr}}} = run_query("""
+        mutation create($attrs: CustomStackRunAttributes!) {
+          createCustomStackRun(attributes: $attrs) {
             id
             name
             commands { cmd args }
@@ -251,6 +251,29 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       """, %{"attrs" => %{
         "name" => "test",
         "stackId" => stack.id,
+        "commands" => [%{"cmd" => "echo", "args" => ["Hello World!"]}]
+      }}, %{current_user: admin_user()})
+
+      assert csr["name"] == "test"
+      [cmd] = csr["commands"]
+      assert cmd["cmd"] == "echo"
+      assert cmd["args"] == ["Hello World!"]
+    end
+  end
+
+  describe "updateCustomStackRun" do
+    test "admins can update a custom stack run" do
+      csr = insert(:custom_stack_run)
+      {:ok, %{data: %{"updateCustomStackRun" => csr}}} = run_query("""
+        mutation update($id: ID!, $attrs: CustomStackRunAttributes!) {
+          updateCustomStackRun(id: $id, attributes: $attrs) {
+            id
+            name
+            commands { cmd args }
+          }
+        }
+      """, %{"id" => csr.id, "attrs" => %{
+        "name" => "test",
         "commands" => [%{"cmd" => "echo", "args" => ["Hello World!"]}]
       }}, %{current_user: admin_user()})
 

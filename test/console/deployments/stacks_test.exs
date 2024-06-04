@@ -276,6 +276,45 @@ defmodule Console.Deployments.StacksTest do
       assert refetch(pr).ref == "new-sha"
     end
 
+    test "it can create a new run an ansible stack" do
+      stack = insert(:stack,
+        type: :ansible,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "ansible"},
+        sha: "old-sha"
+      )
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["ansible/main.yaml"], "a commit message"} end)
+
+      {:ok, run} = Stacks.poll(stack)
+
+      assert run.stack_id == stack.id
+      assert run.status == :queued
+      assert run.message == "a commit message"
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+      assert run.git.folder == stack.git.folder
+      [first, second] = run.steps
+
+      assert first.cmd == "ansible-playbook"
+      assert first.args == ["main.yaml", "--diff", "--check"]
+      assert first.stage == :plan
+      assert first.index == 0
+
+      assert second.cmd == "ansible-playbook"
+      assert second.args == ["main.yaml"]
+      assert second.stage == :apply
+      assert second.index == 1
+
+      stack = refetch(stack)
+      assert stack.sha == "new-sha"
+      %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
+
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+    end
+
     test "it will ignore if the shas are the same" do
       stack = insert(:stack, sha: "old-sha")
       expect(Discovery, :sha, fn _, _ -> {:ok, "old-sha"} end)
@@ -594,10 +633,10 @@ defmodule Console.Deployments.StacksTest do
     end
   end
 
-  describe "#upsert_custom_stack_run/2" do
+  describe "#create_custom_stack_run/2" do
     test "admins can add custom stack run records" do
       stack = insert(:stack)
-      {:ok, csr} = Stacks.upsert_custom_stack_run(%{
+      {:ok, csr} = Stacks.create_custom_stack_run(%{
         name: "test",
         stack_id: stack.id,
         commands: [%{cmd: "echo", args: ["hello world"]}]
@@ -611,9 +650,30 @@ defmodule Console.Deployments.StacksTest do
       assert cmd.args == ["hello world"]
     end
 
+    test "it can upsert non-stack-linked custom stack run records" do
+      {:ok, csr} = Stacks.create_custom_stack_run(%{
+        name: "test",
+        commands: [%{cmd: "echo", args: ["hello world"]}]
+      }, admin_user())
+
+      assert csr.name == "test"
+      refute csr.stack_id
+      [cmd] = csr.commands
+
+      assert cmd.cmd == "echo"
+      assert cmd.args == ["hello world"]
+
+      {:ok, updated} = Stacks.update_custom_stack_run(%{
+        name: "test",
+        commands: [%{cmd: "echo", args: ["hello world"]}]
+      }, csr.id, admin_user())
+
+      assert updated.id == csr.id
+    end
+
     test "nonadmins cannot create" do
       stack = insert(:stack)
-      {:error, _} = Stacks.upsert_custom_stack_run(%{
+      {:error, _} = Stacks.create_custom_stack_run(%{
         name: "test",
         stack_id: stack.id,
         commands: [%{cmd: "echo", args: ["hello world"]}]

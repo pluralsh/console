@@ -4009,6 +4009,7 @@ export type RootMutationType = {
   createClusterBackup?: Maybe<ClusterBackup>;
   createClusterProvider?: Maybe<ClusterProvider>;
   createClusterRestore?: Maybe<ClusterRestore>;
+  createCustomStackRun?: Maybe<CustomStackRun>;
   createGitRepository?: Maybe<GitRepository>;
   createGlobalService?: Maybe<GlobalService>;
   createGroup?: Maybe<Group>;
@@ -4121,6 +4122,7 @@ export type RootMutationType = {
   updateClusterProvider?: Maybe<ClusterProvider>;
   updateClusterRestore?: Maybe<ClusterRestore>;
   updateConfiguration?: Maybe<Configuration>;
+  updateCustomStackRun?: Maybe<CustomStackRun>;
   updateDeploymentSettings?: Maybe<DeploymentSettings>;
   updateGate?: Maybe<PipelineGate>;
   updateGitRepository?: Maybe<GitRepository>;
@@ -4144,7 +4146,6 @@ export type RootMutationType = {
   updateStack?: Maybe<InfrastructureStack>;
   updateStackRun?: Maybe<StackRun>;
   updateUser?: Maybe<User>;
-  upsertCustomStackRun?: Maybe<CustomStackRun>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertObservabilityProvider?: Maybe<ObservabilityProvider>;
@@ -4231,6 +4232,11 @@ export type RootMutationTypeCreateClusterProviderArgs = {
 
 export type RootMutationTypeCreateClusterRestoreArgs = {
   backupId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeCreateCustomStackRunArgs = {
+  attributes: CustomStackRunAttributes;
 };
 
 
@@ -4760,6 +4766,12 @@ export type RootMutationTypeUpdateConfigurationArgs = {
 };
 
 
+export type RootMutationTypeUpdateCustomStackRunArgs = {
+  attributes: CustomStackRunAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateDeploymentSettingsArgs = {
   attributes: DeploymentSettingsAttributes;
 };
@@ -4886,11 +4898,6 @@ export type RootMutationTypeUpdateStackRunArgs = {
 export type RootMutationTypeUpdateUserArgs = {
   attributes: UserAttributes;
   id?: InputMaybe<Scalars['ID']['input']>;
-};
-
-
-export type RootMutationTypeUpsertCustomStackRunArgs = {
-  attributes: CustomStackRunAttributes;
 };
 
 
@@ -6898,10 +6905,12 @@ export type StackRunEdge = {
 
 export type StackSettings = {
   __typename?: 'StackSettings';
+  connectionId?: Maybe<Scalars['ID']['output']>;
   jobSpec?: Maybe<JobGateSpec>;
 };
 
 export type StackSettingsAttributes = {
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
   jobSpec?: InputMaybe<GateJobAttributes>;
 };
 

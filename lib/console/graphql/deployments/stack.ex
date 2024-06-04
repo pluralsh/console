@@ -425,11 +425,19 @@ defmodule Console.GraphQl.Deployments.Stack do
       resolve &Deployments.restart_stack_run/2
     end
 
-    field :upsert_custom_stack_run, :custom_stack_run do
+    field :create_custom_stack_run, :custom_stack_run do
       middleware Authenticated
       arg :attributes, non_null(:custom_stack_run_attributes)
 
-      resolve &Deployments.upsert_custom_stack_run/2
+      resolve &Deployments.create_custom_stack_run/2
+    end
+
+    field :update_custom_stack_run, :custom_stack_run do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:custom_stack_run_attributes)
+
+      resolve &Deployments.update_custom_stack_run/2
     end
 
     field :delete_custom_stack_run, :custom_stack_run do

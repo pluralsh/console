@@ -92,8 +92,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def add_run_logs(%{step_id: id, attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Stacks.add_run_logs(attrs, id, cluster)
 
-  def upsert_custom_stack_run(%{attributes: attrs}, %{context: %{current_user: user}}),
-    do: Stacks.upsert_custom_stack_run(attrs, user)
+  def create_custom_stack_run(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Stacks.create_custom_stack_run(attrs, user)
+
+  def update_custom_stack_run(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Stacks.update_custom_stack_run(attrs, id, user)
 
   def delete_custom_stack_run(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.delete_custom_stack_run(id, user)
