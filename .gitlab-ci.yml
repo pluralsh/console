@@ -1,7 +1,7 @@
 default:
   image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
   services:
-  - docker:20.10.17-dind
+  - docker:20.10.24-dind
   before_script:
   - until docker info; do sleep 1; done
 
