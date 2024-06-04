@@ -140,6 +140,7 @@ export function EditGroupMembers({
         <GroupMembers
           group={group}
           edit
+          skip={!open}
         />
       </Flex>
     </Modal>

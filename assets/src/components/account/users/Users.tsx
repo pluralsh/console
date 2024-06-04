@@ -1,30 +1,16 @@
 import { Flex } from 'honorable'
-import { TabPanel } from '@pluralsh/design-system'
-import { useContext, useRef, useState } from 'react'
+import { useContext } from 'react'
 
 import { LoginContext } from 'components/contexts'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
-import UserList from './UsersList'
-import UserInvite from './UserInvite'
 import { OIDCInvite } from './OIDCInvite'
-
-// const directory = [
-//   {
-//     key: 'Users',
-//     label: 'Users',
-//   },
-//   {
-//     key: 'Invites',
-//     label: 'Invites',
-//   },
-// ]
+import UserInvite from './UserInvite'
+import UserList from './UsersList'
 
 export default function Users() {
-  const { configuration } = useContext<any>(LoginContext)
-  const [selectedKey] = useState<any>('Users')
-  const tabStateRef = useRef<any>(null)
+  const { configuration } = useContext(LoginContext)
 
   return (
     <ScrollablePage
@@ -35,41 +21,20 @@ export default function Users() {
           alignItems="flex-end"
           gap="medium"
         >
-          {/* <TabList
-          gap="xxsmall"
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey,
-            onSelectionChange: setSelectedKey,
-          }}
-        >
-          {directory.map(({ label, key }) => (
-            <SubTab
-              key={key}
-              textValue={label}
-            >
-              {label}
-            </SubTab>
-          ))}
-        </TabList> */}
           {configuration && !configuration?.pluralLogin && <UserInvite />}
           {configuration?.pluralLogin && <OIDCInvite />}
         </Flex>
       }
     >
-      <TabPanel
-        as={
-          <Flex
-            direction="column"
-            height="100%"
-          />
-        }
-        stateRef={tabStateRef}
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+        }}
       >
-        {/* {selectedKey === 'Invites' && <Invites />} Add it once API will be ready. */}
-        {selectedKey === 'Users' && <UserList />}
-      </TabPanel>
+        <UserList />
+      </div>
     </ScrollablePage>
   )
 }

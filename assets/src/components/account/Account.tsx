@@ -15,13 +15,17 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { LoginContext } from 'components/contexts'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { useTheme } from 'styled-components'
+import { ConsoleConfiguration, User } from 'generated/graphql'
 
-const getDirectory = (me, configuration) => [
+const getDirectory = (
+  me: User,
+  configuration: Nullable<ConsoleConfiguration>
+) => [
   { path: 'users', label: 'Users', enabled: true },
   { path: 'groups', label: 'Groups', enabled: true },
-  { path: 'roles', label: 'Roles', enabled: true },
+  { path: 'roles', label: 'Roles', enabled: !configuration?.byok },
   { path: 'personas', label: 'Personas', enabled: true },
-  { path: 'webhooks', label: 'Webhooks', enabled: true },
+  { path: 'webhooks', label: 'Webhooks', enabled: !configuration?.byok },
   {
     path: 'vpn',
     label: 'VPN clients',
@@ -33,7 +37,6 @@ const getDirectory = (me, configuration) => [
     enabled: me?.roles?.admin && configuration?.gitStatus?.cloned,
   },
   { path: 'settings', label: 'Account settings', enabled: true },
-  { path: 'cookies', label: 'Cookie settings', enabled: true },
 ]
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'account', url: '/account' }]
@@ -41,7 +44,7 @@ const breadcrumbs: Breadcrumb[] = [{ label: 'account', url: '/account' }]
 export default function Account() {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const { me, configuration } = useContext<any>(LoginContext)
+  const { me, configuration } = useContext(LoginContext)
   const { pathname } = useLocation()
   const pathPrefix = '/account'
 

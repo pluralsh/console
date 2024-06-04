@@ -10,6 +10,8 @@ import {
   QueryResult,
 } from '@apollo/client'
 
+const DEFAULT_PAGE_SIZE = 100
+
 type GenericQueryHook<TQueryType, TVariables extends OperationVariables> = (
   baseOptions: QueryHookOptions<TQueryType, TVariables>
 ) => QueryResult<TQueryType, TVariables> & {
@@ -18,7 +20,7 @@ type GenericQueryHook<TQueryType, TVariables extends OperationVariables> = (
 
 type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   queryHook: GenericQueryHook<TQueryType, TVariables>
-  pageSize: number
+  pageSize?: number
   queryKey: string
   pollInterval?: number
   errorPolicy?: ErrorPolicy
@@ -63,7 +65,7 @@ export function useFetchPaginatedData<
 
   const { refetch } = useSlicePolling(queryResult, {
     virtualSlice,
-    pageSize: options.pageSize,
+    pageSize: options.pageSize ?? DEFAULT_PAGE_SIZE,
     key: options.queryKey,
     interval: options.pollInterval || POLL_INTERVAL,
   })
