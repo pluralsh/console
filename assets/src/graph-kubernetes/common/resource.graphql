@@ -66,7 +66,12 @@ mutation ResourceScale(
   }
 }
 
-mutation ResourceDelete($kind: String!, $name: String!, $deleteNow: String, $propagation: String) {
+mutation ResourceDelete(
+  $kind: String!
+  $name: String!
+  $deleteNow: String
+  $propagation: String
+) {
   handleDeleteResource(
     kind: $kind
     name: $name

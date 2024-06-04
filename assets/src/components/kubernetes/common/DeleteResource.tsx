@@ -1,4 +1,4 @@
-import { Key, ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import {
   Checkbox,
   FormField,
@@ -10,8 +10,6 @@ import {
 import { useParams } from 'react-router-dom'
 import { QueryHookOptions } from '@apollo/client/react/types/types'
 import { useTheme } from 'styled-components'
-
-import SelectItem from '@pluralsh/design-system/dist/components/SelectItem'
 
 import { Confirm } from '../../utils/Confirm'
 import {
