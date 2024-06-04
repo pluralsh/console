@@ -10,6 +10,7 @@ import {
 import { useParams } from 'react-router-dom'
 import { QueryHookOptions } from '@apollo/client/react/types/types'
 import { useTheme } from 'styled-components'
+import { ApolloError, FetchResult, ServerError } from '@apollo/client'
 
 import { Confirm } from '../../utils/Confirm'
 import {
@@ -60,10 +61,34 @@ enum DeletionPropagation {
   DeletePropagationOrphan = 'Orphan',
 }
 
+function toServerError(data: FetchResult): ServerError {
+  const defaultError: ServerError = {
+    statusCode: 500,
+    result: 'Could not delete resource',
+  } as ServerError
+
+  if (!data.errors) {
+    return defaultError
+  }
+
+  if (!((data.errors as unknown) instanceof ApolloError)) {
+    return defaultError
+  }
+
+  const apolloError: ApolloError = data.errors as unknown as ApolloError
+  const networkError: ServerError = apolloError?.networkError as ServerError
+
+  return {
+    statusCode: networkError?.statusCode,
+    result: networkError?.result ?? networkError?.message,
+  } as ServerError
+}
+
 function DeleteResourceModal({ open, setOpen, resource, refetch }): ReactNode {
   const theme = useTheme()
   const [deleting, setDeleting] = useState(false)
   const [deleteNow, setDeleteNow] = useState(false)
+  const [serverError, setServerError] = useState<ServerError>()
   const [propagation, setPropagation] = useState(
     DeletionPropagation.DeletePropagationBackground
   )
@@ -104,12 +129,14 @@ function DeleteResourceModal({ open, setOpen, resource, refetch }): ReactNode {
       label="Delete"
       loading={deleting}
       error={error}
-      errorMessage="Could not delete resource"
+      errorMessage={
+        serverError?.result?.toString() ?? 'Could not delete resource'
+      }
       errorHeader="Something went wrong"
       open={open}
       submit={() => {
         setDeleting(true)
-        deleteResource()
+        deleteResource().then((data) => setServerError(toServerError(data)))
       }}
       title={`Delete ${kind}`}
       text={`The ${kind} "${name}"${

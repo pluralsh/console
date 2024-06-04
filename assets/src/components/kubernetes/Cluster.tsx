@@ -4,6 +4,8 @@ import { isEmpty } from 'lodash'
 
 import { useTheme } from 'styled-components'
 
+import { EmptyState } from '@pluralsh/design-system'
+
 import {
   KubernetesClusterFragment,
   Maybe,
@@ -86,7 +88,7 @@ export default function Cluster() {
   const { search } = useLocation()
   const navigate = useNavigate()
 
-  const { data, error, refetch } = useKubernetesClustersQuery({
+  const { data, error, refetch, loading } = useKubernetesClustersQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
   })
@@ -139,7 +141,9 @@ export default function Cluster() {
       </div>
     )
 
-  if (!cluster) return <LoadingIndicator />
+  if (loading) return <LoadingIndicator />
+
+  if (!cluster) return <EmptyState message="No clusters found." />
 
   return (
     <ClusterContext.Provider value={context}>
