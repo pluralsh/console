@@ -1,14 +1,18 @@
-import { Div } from 'honorable'
+import { useTheme } from 'styled-components'
 
 export default function GraphHeader({ title }: { title: string }) {
+  const theme = useTheme()
+
   return (
-    <Div
-      color="text-light"
-      justifyContent="center"
-      overline
-      textAlign="center"
+    <div
+      css={{
+        color: theme.colors['text-light'],
+        justifyContent: 'center',
+        ...theme.partials.text.overline,
+        textAlign: 'center',
+      }}
     >
       {title}
-    </Div>
+    </div>
   )
 }

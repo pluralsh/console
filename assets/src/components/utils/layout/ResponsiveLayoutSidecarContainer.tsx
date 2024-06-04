@@ -1,12 +1,15 @@
-import { Div } from 'honorable'
+import { useTheme } from 'styled-components'
 
 export function ResponsiveLayoutSidecarContainer(props: any) {
+  const theme = useTheme()
+
   return (
-    <Div
-      marginLeft="xlarge"
-      display-desktop-down="none"
-      width={200}
-      flexShrink={0}
+    <div
+      css={{
+        marginLeft: theme.spacing.xlarge,
+        width: 200,
+        flexShrink: 0,
+      }}
       {...props}
     />
   )

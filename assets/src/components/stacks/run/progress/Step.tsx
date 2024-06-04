@@ -5,7 +5,7 @@ import {
   ErrorIcon,
   Spinner,
 } from '@pluralsh/design-system'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import {
   ReactNode,
   useCallback,
@@ -30,7 +30,7 @@ interface StepProps {
 }
 
 export default function Step({ step, open }: StepProps): ReactNode {
-  const ref = useRef<HTMLDivElement>()
+  const ref = useRef<HTMLDivElement>(null)
 
   const [folded, setFolded] = useState<boolean | undefined>(undefined)
   const [logs, setLogs] = useState(step?.logs as Array<RunLogs>)
@@ -69,7 +69,7 @@ export default function Step({ step, open }: StepProps): ReactNode {
   }, [open, ref])
 
   return (
-    <Div ref={ref}>
+    <div ref={ref}>
       <Flex
         gap="small"
         paddingHorizontal="large"
@@ -112,7 +112,7 @@ export default function Step({ step, open }: StepProps): ReactNode {
           follow={step.status === StepStatus.Running}
         />
       )}
-    </Div>
+    </div>
   )
 }
 

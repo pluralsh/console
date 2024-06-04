@@ -1,6 +1,6 @@
 import { Tooltip } from '@pluralsh/design-system'
-import { Div, Flex, Span } from 'honorable'
-import styled from 'styled-components'
+import { Flex } from 'honorable'
+import styled, { useTheme } from 'styled-components'
 import { Readiness, ReadinessT, readinessToContainerLabel } from 'utils/status'
 
 import { ReactElement } from 'react'
@@ -75,6 +75,7 @@ export function ContainerStatus({
 }: {
   status: ContainerStatusT
 }): ReactElement {
+  const theme = useTheme()
   const { name, readiness } = status
 
   return (
@@ -82,22 +83,26 @@ export function ContainerStatus({
       label={
         <>
           {name && <span>{name}:&nbsp;</span>}
-          <Span
-            color={readinessToTooltipColor[readiness]}
-            fontWeight={600}
+          <span
+            css={{
+              color: theme.colors[readinessToTooltipColor[readiness]],
+              fontWeight: 600,
+            }}
           >
             {readinessToContainerLabel[readiness]}
-          </Span>
+          </span>
         </>
       }
     >
-      <Div
-        borderRadius={3}
-        padding={2}
-        _hover={{ backgroundColor: 'fill-two-hover' }}
+      <div
+        css={{
+          borderRadius: 3,
+          padding: 2,
+          ':hover': { backgroundColor: 'fill-two-hover' },
+        }}
       >
         {readinessToIcon[readiness]}
-      </Div>
+      </div>
     </Tooltip>
   )
 }

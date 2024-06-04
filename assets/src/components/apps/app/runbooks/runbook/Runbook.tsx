@@ -16,7 +16,7 @@ import {
 } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import { Div, Flex, H3 } from 'honorable'
+import { Flex } from 'honorable'
 
 import { DURATIONS, SECOND_TO_MILLISECONDS } from 'utils/time'
 
@@ -54,12 +54,7 @@ export function ActionPortal({ children }) {
 function ActionContainer() {
   const { setRef } = useContext(ActionContext)
 
-  return (
-    <Div
-      ref={setRef}
-      flex={false}
-    />
-  )
+  return <div ref={setRef} />
 }
 
 export default function Runbook() {
@@ -187,7 +182,13 @@ export default function Runbook() {
             gap="xxlarge"
           >
             <div>
-              <H3 subtitle1>Scaling</H3>
+              <h3
+                css={{
+                  ...theme.partials.text.subtitle1,
+                }}
+              >
+                Scaling
+              </h3>
               <Flex
                 direction="row"
                 gap="medium"
@@ -213,12 +214,14 @@ export default function Runbook() {
             </div>
             {runbook?.status?.alerts?.length > 0 && (
               <div>
-                <H3
-                  subtitle1
-                  marginBottom="medium"
+                <h3
+                  css={{
+                    ...theme.partials.text.subtitle1,
+                    marginBottom: theme.spacing.medium,
+                  }}
                 >
                   Alerts
-                </H3>
+                </h3>
                 <RunbookAlerts alerts={runbook.status.alerts} />
               </div>
             )}

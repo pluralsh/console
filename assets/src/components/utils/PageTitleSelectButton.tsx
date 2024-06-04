@@ -1,39 +1,46 @@
 import { DropdownArrowIcon } from '@pluralsh/design-system'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { Key, forwardRef } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 export const PageTitleSelectButton = styled(
-  forwardRef<any, { title: string; label: string | Key }>((props, ref) => (
-    <Div
-      ref={ref}
-      cursor="pointer"
-      outline="none"
-      {...props}
-    >
-      <div>
-        <Div
-          color="text-xlight"
-          overline
-          textAlign="start"
-        >
-          {props.title}
-        </Div>
-        <Flex
-          direction="row"
-          gap="xsmall"
-        >
-          <Div
-            subtitle2
-            _hover={{ textDecoration: 'underline' }}
+  forwardRef<any, { title: string; label: string | Key }>((props, ref) => {
+    const theme = useTheme()
+
+    return (
+      <div
+        ref={ref}
+        css={{ cursor: 'pointer', outline: 'none' }}
+        {...props}
+      >
+        <div>
+          <div
+            style={{
+              color: theme.colors['text-xlight'],
+              ...theme.partials.text.overline,
+              textAlign: 'start',
+            }}
           >
-            {props.label}
-          </Div>
-          <DropdownArrowIcon className="dropdownIcon" />
-        </Flex>
+            {props.title}
+          </div>
+          <Flex
+            direction="row"
+            gap={theme.spacing.xsmall}
+          >
+            <div
+              css={{
+                ...theme.partials.text.subtitle2,
+                ':hover': { textDecoration: 'underline' },
+              }}
+            >
+              {props.label as string}
+            </div>
+            <DropdownArrowIcon className="dropdownIcon" />
+          </Flex>
+        </div>
       </div>
-    </Div>
-  ))
+    )
+  })
 )<{ isOpen?: boolean }>(({ isOpen = false }) => ({
   '.dropdownIcon': {
     transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)',

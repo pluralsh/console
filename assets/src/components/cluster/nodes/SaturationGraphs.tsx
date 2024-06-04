@@ -4,8 +4,6 @@ import { format } from 'components/apps/app/dashboards/dashboard/misc'
 
 import { Graph } from 'components/utils/Graph'
 
-import { Div } from 'honorable'
-
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 import { CLUSTER_SATURATION } from '../queries'
@@ -57,15 +55,17 @@ export function SaturationGraphs({
   }
 
   return (
-    <Div
-      height="240px"
-      width="300px"
-      flexGrow={1}
+    <div
+      css={{
+        height: '240px',
+        width: '300px',
+        flexGrow: 1,
+      }}
     >
       <Graph
         data={result}
         yFormat={(v) => format(v, 'percent')}
       />
-    </Div>
+    </div>
   )
 }

@@ -1,5 +1,5 @@
 import { CardProps, Chip, ChipList } from '@pluralsh/design-system'
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
 import { ReactNode } from 'react'
 import type { LabelPair, Maybe, Metadata as MetadataT } from 'generated/graphql'
 import { CARD_CONTENT_MAX_WIDTH, MetadataCard } from 'components/utils/Metadata'
@@ -15,15 +15,18 @@ export function LabelsAnnotationsRow({
   name: ReactNode
   children: ReactNode
 }) {
+  const theme = useTheme()
+
   return (
     <div>
-      <Div
-        body1
-        bold
-        marginBottom="small"
+      <div
+        css={{
+          ...theme.partials.text.body1Bold,
+          marginBottom: theme.spacing.small,
+        }}
       >
         {name}
-      </Div>
+      </div>
       <Flex
         direction="row"
         wrap

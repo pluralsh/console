@@ -6,11 +6,12 @@ import {
   useActive,
 } from '@pluralsh/design-system'
 import { Box } from 'grommet'
-import { Div, Span } from 'honorable'
 
 import { useQuery } from '@apollo/client'
 
 import { isNonNullable } from 'utils/isNonNullable'
+
+import { useTheme } from 'styled-components'
 
 import { RECIPES_Q, RECIPE_Q } from '../../graphql/plural'
 import { Recipe, RepositoryContext } from '../../../generated/graphql'
@@ -35,6 +36,7 @@ const findContext = (
     .reduce((acc, ctx) => ({ ...acc, ...ctx }), {})
 
 export function Application({ ...props }: any): ReactElement {
+  const theme = useTheme()
   const { active, setData } = useActive<StepData>()
   const [context, setContext] = useState<Record<string, unknown>>(
     active.data?.context || {}
@@ -110,28 +112,34 @@ export function Application({ ...props }: any): ReactElement {
         valid={false}
         {...props}
       >
-        <Div
-          marginTop="xxsmall"
-          marginBottom="medium"
-          display="flex"
-          gap="medium"
-          flexDirection="column"
+        <div
+          css={{
+            marginTop: theme.spacing.xxsmall,
+            marginBottom: theme.spacing.medium,
+            display: 'flex',
+            gap: theme.spacing.medium,
+            flexDirection: 'column',
+          }}
         >
-          <Span
-            color="text-xlight"
-            overline
+          <span
+            css={{
+              color: theme.colors['text-xlight'],
+              ...theme.partials.text.overline,
+            }}
           >
             Cannot install app
-          </Span>
-          <Span
-            color="text-light"
-            body2
+          </span>
+          <span
+            css={{
+              color: theme.colors['text-light'],
+              ...theme.partials.text.body2,
+            }}
           >
             This application has been marked restricted because it requires
             configuration, like ssh keys, that are only able to be securely
             configured locally.
-          </Span>
-        </Div>
+          </span>
+        </div>
       </WizardStep>
     )
   }
@@ -142,19 +150,23 @@ export function Application({ ...props }: any): ReactElement {
       data={stepData}
       {...props}
     >
-      <Div
-        marginBottom="medium"
-        display="flex"
-        lineHeight="24px"
-        alignItems="center"
-        height="24px"
+      <div
+        css={{
+          marginBottom: theme.spacing.medium,
+          display: 'flex',
+          lineHeight: '24px',
+          alignItems: 'center',
+          height: '24px',
+        }}
       >
-        <Span
-          overline
-          color="text-xlight"
+        <span
+          css={{
+            ...theme.partials.text.overline,
+            color: theme.colors['text-xlight'],
+          }}
         >
           configure {active.label}
-        </Span>
+        </span>
         {active.isDependency && (
           <Chip
             size="small"
@@ -164,7 +176,7 @@ export function Application({ ...props }: any): ReactElement {
             Dependency
           </Chip>
         )}
-      </Div>
+      </div>
       <Configuration
         recipe={recipe.recipe}
         context={mergedContext}

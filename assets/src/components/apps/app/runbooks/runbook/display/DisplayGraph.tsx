@@ -1,7 +1,7 @@
 import { ValueFormats } from 'components/runbooks/utils'
 import { Graph } from 'components/utils/Graph'
-import { Div } from 'honorable'
 import { useContext, useMemo } from 'react'
+import { useTheme } from 'styled-components'
 
 import { DisplayContext } from '../RunbookDisplay'
 
@@ -21,6 +21,7 @@ const formatLegend = (legend, props) =>
 
 export function DisplayGraph({ attributes: { datasource, label } }) {
   const { datasources } = useContext(DisplayContext)
+  const theme = useTheme()
   const { metrics, format } = useMemo(() => {
     const { prometheus, source } = datasources[datasource]
     const legend = source?.prometheus.legend
@@ -34,23 +35,27 @@ export function DisplayGraph({ attributes: { datasource, label } }) {
   }, [datasources, datasource])
 
   return (
-    <Div
-      height={300}
-      width="100%"
+    <div
+      css={{
+        height: '300px',
+        width: '100%',
+      }}
     >
-      <Div
-        color="text-light"
-        justifyContent="center"
-        overline
-        textAlign="center"
+      <div
+        css={{
+          color: theme.colors['text-light'],
+          justifyContent: 'center',
+          ...theme.partials.text.overline,
+          textAlign: 'center',
+        }}
       >
         {label}
-      </Div>
+      </div>
       <Graph
         data={metrics}
         yFormat={format}
         tickRotation={45}
       />
-    </Div>
+    </div>
   )
 }

@@ -1,6 +1,7 @@
 import { Card, CloseIcon } from '@pluralsh/design-system'
 import { Layer } from 'grommet'
-import { Div, Flex, Span } from 'honorable'
+import { Flex } from 'honorable'
+import { useTheme } from 'styled-components'
 
 export function LogsInfoPanel({
   title,
@@ -10,6 +11,8 @@ export function LogsInfoPanel({
   children,
   marginTop = '0',
 }) {
+  const theme = useTheme()
+
   return (
     <Layer
       plain
@@ -21,39 +24,47 @@ export function LogsInfoPanel({
         fillLevel={2}
         width={420}
         overflow="hidden"
-        margin="large"
+        margin={theme.spacing.large}
       >
-        <Div
-          height={80}
-          padding="medium"
-          borderBottom="1px solid border-fill-two"
+        <div
+          css={{
+            height: '80px',
+            padding: theme.spacing.medium,
+            borderBottom: '1px solid border-fill-two',
+          }}
         >
           <Flex justify="space-between">
-            <Span
-              fontSize={18}
-              fontWeight={500}
-              lineHeight="24px"
+            <span
+              css={{
+                fontSize: '18px',
+                fontWeight: 500,
+                lineHeight: '24px',
+              }}
             >
               {title}
-            </Span>
+            </span>
             <CloseIcon
               cursor="pointer"
               onClick={(e) => onClose(e)}
             />
           </Flex>
-          <Div
-            body2
-            color="text-xlight"
+          <div
+            css={{
+              ...theme.partials.text.body2,
+              color: 'text-xlight',
+            }}
           >
             {subtitle}
-          </Div>
-        </Div>
-        <Div
-          overflowY="auto"
-          height={contentHeight}
+          </div>
+        </div>
+        <div
+          css={{
+            overflowY: 'auto',
+            height: contentHeight,
+          }}
         >
           {children}
-        </Div>
+        </div>
       </Card>
     </Layer>
   )

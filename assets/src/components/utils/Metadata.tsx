@@ -1,7 +1,7 @@
 import { Card, type Sidecar } from '@pluralsh/design-system'
-import { CardProps, Div, Flex, H2 } from 'honorable'
+import { CardProps, Flex } from 'honorable'
 import { Children, ComponentProps, forwardRef } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { makeGrid } from 'utils/makeGrid'
 
 const MAX_COLS = 4
@@ -19,6 +19,8 @@ const MetadataGridGrid = styled.div<{ maxCols: number }>(
 )
 
 export function MetadataCard({ children, ...props }: CardProps) {
+  const theme = useTheme()
+
   return (
     <Card
       display="flex"
@@ -26,13 +28,15 @@ export function MetadataCard({ children, ...props }: CardProps) {
       {...props}
     >
       {/* 1526 is magic number which is the card's width when screen is 1940px wide */}
-      <Div
-        maxWidth={CARD_CONTENT_MAX_WIDTH}
-        width="100%"
-        padding="xlarge"
+      <div
+        css={{
+          maxWidth: CARD_CONTENT_MAX_WIDTH,
+          width: '100%',
+          padding: theme.spacing.xlarge,
+        }}
       >
         {children}
-      </Div>
+      </div>
     </Card>
   )
 }
@@ -54,32 +58,38 @@ export function MetadataGrid(props) {
 export const MetadataItem = forwardRef<
   HTMLDivElement,
   ComponentProps<typeof Sidecar>
->(({ heading, headingProps, contentProps, children, ...props }, ref) => (
-  <Flex
-    ref={ref}
-    direction="column"
-    gap="xsmall"
-    {...props}
-  >
-    {heading && (
-      <H2
-        body1
-        bold
-        color="text-default"
-        {...headingProps}
-      >
-        {heading}
-      </H2>
-    )}
-    {children && (
-      <Div
-        body1
-        color="text-xlight"
-        overflowWrap="anywhere"
-        {...contentProps}
-      >
-        {children}
-      </Div>
-    )}
-  </Flex>
-))
+>(({ heading, headingProps, contentProps, children, ...props }, ref) => {
+  const theme = useTheme()
+
+  return (
+    <Flex
+      ref={ref}
+      direction="column"
+      gap="xsmall"
+      {...props}
+    >
+      {heading && (
+        <h2
+          css={{
+            ...theme.partials.text.body1Bold,
+          }}
+          {...headingProps}
+        >
+          {heading}
+        </h2>
+      )}
+      {children && (
+        <div
+          css={{
+            ...theme.partials.text.body1,
+            color: theme.colors['text-xlight'],
+            overflowWrap: 'anywhere',
+          }}
+          {...contentProps}
+        >
+          {children}
+        </div>
+      )}
+    </Flex>
+  )
+})

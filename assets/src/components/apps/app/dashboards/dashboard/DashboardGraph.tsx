@@ -1,12 +1,13 @@
-import { Div } from 'honorable'
 import { useMemo } from 'react'
 import { Graph } from 'components/utils/Graph'
+import { useTheme } from 'styled-components'
 
 import GraphHeader from 'components/utils/GraphHeader'
 
 import { format } from './misc'
 
 export default function DashboardGraph({ graph, tick }) {
+  const theme = useTheme()
   const data = useMemo(
     () =>
       graph.queries.map(({ legend, results }) => ({
@@ -20,11 +21,13 @@ export default function DashboardGraph({ graph, tick }) {
   )
 
   return (
-    <Div
+    <div
       className="dashboard"
-      padding="large"
-      height={360}
-      width="100%"
+      css={{
+        padding: theme.spacing.large,
+        height: '360px',
+        width: '100%',
+      }}
     >
       <GraphHeader title={graph.name} />
       <Graph
@@ -34,6 +37,6 @@ export default function DashboardGraph({ graph, tick }) {
         tick={tick}
         tickRotation={45}
       />
-    </Div>
+    </div>
   )
 }

@@ -1,4 +1,3 @@
-import { Div } from 'honorable'
 import styled from 'styled-components'
 
 import { LOGIN_BREAKPOINT } from './constants'
@@ -20,9 +19,11 @@ export const FooterLink = styled.a(({ theme }) => ({
 
 export function Footer(props) {
   return (
-    <Div
-      flexGrow={1}
-      flexShrink={0}
+    <div
+      css={{
+        flexGrow: 1,
+        flexShrink: 0,
+      }}
       {...props}
     >
       <FooterList>
@@ -42,7 +43,7 @@ export function Footer(props) {
           Terms & Conditions
         </FooterLink>
       </FooterList>
-    </Div>
+    </div>
   )
 }
 

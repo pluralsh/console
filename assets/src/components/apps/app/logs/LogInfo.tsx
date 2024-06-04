@@ -1,4 +1,5 @@
-import { Div, Flex } from 'honorable'
+import { Flex } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import { LogsInfoPanel } from './LogsInfoPanel'
 import { ts } from './misc'
@@ -10,6 +11,8 @@ export default function LogInfo({
   onClose,
   marginTop = '0',
 }) {
+  const theme = useTheme()
+
   return (
     <LogsInfoPanel
       title="Log info"
@@ -22,30 +25,32 @@ export default function LogInfo({
           <Flex
             key={key}
             direction="row"
-            paddingHorizontal="medium"
-            paddingVertical="small"
+            paddingHorizontal={theme.spacing.medium}
+            paddingVertical={theme.spacing.small}
             borderBottom="1px solid border-fill-two"
-            gap="small"
+            gap={theme.spacing.small}
             cursor="pointer"
             _hover={{ backgroundColor: 'fill-three' }}
             onClick={() => addLabel(key, value)}
           >
-            <Div
-              body1
-              fontWeight={600}
-              width={120}
-              wordWrap="wrap"
+            <div
+              css={{
+                ...theme.partials.text.body1,
+                fontWeight: 600,
+                width: '120px',
+              }}
             >
               {key}
-            </Div>
-            <Div
-              body2
-              color="text-light"
-              width={300}
-              wordWrap="wrap"
+            </div>
+            <div
+              css={{
+                ...theme.partials.text.body2,
+                color: theme.colors['text-light'],
+                width: 300,
+              }}
             >
               {value}
-            </Div>
+            </div>
           </Flex>
         )
       )}

@@ -22,7 +22,6 @@ import AppStatus from 'components/apps/AppStatus'
 import Fuse from 'fuse.js'
 import isEmpty from 'lodash/isEmpty'
 import { useOnClickOutside } from 'components/hooks/useOnClickOutside'
-import { Div } from 'honorable'
 import { useTransition } from 'react-spring'
 import { createPortal } from 'react-dom'
 
@@ -169,12 +168,14 @@ export function StatusPanel({ statuses, open, onClose }) {
   }, [query, statuses])
 
   let content = (
-    <Div
+    <div
       ref={ref}
-      position="absolute"
-      top={104}
-      right={theme.spacing.large}
-      bottom={theme.spacing.large}
+      css={{
+        position: 'absolute',
+        top: 104,
+        right: theme.spacing.large,
+        bottom: theme.spacing.large,
+      }}
     >
       <Card
         fillLevel={2}
@@ -225,7 +226,7 @@ export function StatusPanel({ statuses, open, onClose }) {
           />
         )}
       </Card>
-    </Div>
+    </div>
   )
 
   content = transitions((styles) => (

@@ -19,8 +19,6 @@ import { useResizeDetector } from 'react-resize-detector'
 
 import { socket } from 'helpers/client'
 
-import { Div } from 'honorable'
-
 import { normalizedThemes } from './themes'
 import TerminalThemeContext from './TerminalThemeContext'
 
@@ -178,7 +176,7 @@ export function TerminalScreen({
       ref={terminalContainerRef}
       $backgroundColor={normalizedThemes[terminalTheme].background}
     >
-      <Div
+      <div
         id="terminal"
         className="terminal"
         ref={terminalRef as Ref<any>}

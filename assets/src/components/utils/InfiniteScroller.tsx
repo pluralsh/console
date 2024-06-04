@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { Div } from 'honorable'
 
 function InfiniteScroller({
   loading = false,
@@ -43,13 +42,15 @@ function InfiniteScroller({
   }, [loading, hasMore, loadMore, loadMoreArgs])
 
   return (
-    <Div
+    <div
+      css={{
+        overflowY: 'auto',
+      }}
       ref={scrollRef}
-      overflowY="auto"
       {...props}
     >
       {children}
-    </Div>
+    </div>
   )
 }
 

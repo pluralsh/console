@@ -6,7 +6,7 @@ import LegacyScroller from 'components/utils/LegacyScroller'
 
 import { last } from 'lodash'
 
-import { Div } from 'honorable'
+import { useTheme } from 'styled-components'
 
 import LogLine from './LogLine'
 import { Level } from './misc'
@@ -48,21 +48,26 @@ function* crossStreams(streams) {
 }
 
 function Placeholder() {
+  const theme = useTheme()
+
   return (
-    <Div
-      borderLeft="4px solid border"
-      height={20}
-      flex={false}
-      fontFamily="monospace"
-      paddingHorizontal="small"
-      paddinbVertical="xxsmall"
+    <div
+      css={{
+        borderLeft: '4px solid border',
+        height: '20px',
+        fontFamily: 'monospace',
+        paddingHorizontal: theme.spacing.small,
+        paddingVertical: theme.spacing.xxsmall,
+      }}
     >
-      <Div
-        height={16}
-        width={`${40 + Math.ceil(Math.random() * 40)}%`}
-        backgroundColor="fill-two"
+      <div
+        css={{
+          height: theme.spacing.medium,
+          width: `${40 + Math.ceil(Math.random() * 40)}%`,
+          backgroundColor: theme.colors['fill-two'],
+        }}
       />
-    </Div>
+    </div>
   )
 }
 
