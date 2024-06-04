@@ -67,7 +67,7 @@ ARG TARGETARCH=amd64
 ENV HELM_VERSION=v3.10.3
 
 # renovate: datasource=github-releases depName=hashicorp/terraform
-ENV TERRAFORM_VERSION=v1.2.9
+ENV TERRAFORM_VERSION=v1.8.4
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
 ENV CLI_VERSION=v0.9.4
