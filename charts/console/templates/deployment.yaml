@@ -64,6 +64,8 @@ spec:
         {{- toYaml .Values.extraEnv | nindent 8 }}
         {{- end }}
         volumeMounts:
+        - name: temp-dir
+          mountPath: /tmp
         {{ if .Values.cliContainer.enabled }}
         - name: cli-override
           mountPath: /usr/local/bin/plural
@@ -107,6 +109,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       volumes:
+      - name: temp-dir
+        emptyDir: {}
       {{ if .Values.cliContainer.enabled }}
       - name: cli-override
         emptyDir: {}

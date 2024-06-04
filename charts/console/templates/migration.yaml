@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: console-migration-v2-{{ .Values.image.tag | default .Chart.AppVersion | sha256sum | trunc 8 }}
+  name: console-migration-v3-{{ .Values.image.tag | default .Chart.AppVersion | sha256sum | trunc 8 }}
   labels:
     platform.plural.sh/ignore: 'true'
     {{ include "console.labels" . | nindent 4 }}
@@ -36,6 +36,8 @@ spec:
         volumeMounts:
         - mountPath: /opt/app/var
           name: scratch
+        - mountPath: /tmp
+          name: temp-dir
       restartPolicy: Never
       {{ with .Values.migrator.nodeSelector}}
       nodeSelector:
@@ -47,5 +49,7 @@ spec:
       {{- end }}
       volumes:
       - name: scratch
+        emptyDir: {}
+      - name: temp-dir
         emptyDir: {}
   backoffLimit: 5
