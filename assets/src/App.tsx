@@ -18,7 +18,6 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components'
 
 import DocSearchStyles from 'components/help/DocSearchStyles'
 import { OverlayContextProvider } from 'components/layout/Overlay'
-import { CookieSettingsProvider } from 'components/tracking/CookieSettings'
 import { updateIntercomUnread } from 'components/help/IntercomUpdateUnread'
 
 import { DEFAULT_THEME } from './theme'
@@ -60,21 +59,19 @@ function ThemeProviders({ children }: { children: ReactNode }) {
     <ThemeProvider theme={honorableTheme}>
       <StyledThemeProvider theme={mergedStyledTheme}>
         <OverlayContextProvider>
-          <CookieSettingsProvider>
-            <CssBaseline />
-            <GlobalStyle />
-            <DocSearchStyles />
-            <PluralErrorBoundary>
-              <Grommet
-                className="grommet-root"
-                // @ts-ignore
-                theme={mergedStyledTheme}
-                themeMode="dark"
-              >
-                {children}
-              </Grommet>
-            </PluralErrorBoundary>
-          </CookieSettingsProvider>
+          <CssBaseline />
+          <GlobalStyle />
+          <DocSearchStyles />
+          <PluralErrorBoundary>
+            <Grommet
+              className="grommet-root"
+              // @ts-ignore
+              theme={mergedStyledTheme}
+              themeMode="dark"
+            >
+              {children}
+            </Grommet>
+          </PluralErrorBoundary>
         </OverlayContextProvider>
       </StyledThemeProvider>
     </ThemeProvider>

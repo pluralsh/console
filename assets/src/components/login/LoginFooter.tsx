@@ -1,8 +1,6 @@
 import { Div } from 'honorable'
 import styled from 'styled-components'
 
-import { useCookieSettings } from 'components/tracking/CookieSettings'
-
 import { LOGIN_BREAKPOINT } from './constants'
 
 export const FooterLink = styled.a(({ theme }) => ({
@@ -21,8 +19,6 @@ export const FooterLink = styled.a(({ theme }) => ({
 }))
 
 export function Footer(props) {
-  const cookieSettings = useCookieSettings()
-
   return (
     <Div
       flexGrow={1}
@@ -44,15 +40,6 @@ export function Footer(props) {
           target="_blank"
         >
           Terms & Conditions
-        </FooterLink>
-        <FooterLink
-          href=""
-          onClick={(e) => {
-            e.preventDefault()
-            cookieSettings.show()
-          }}
-        >
-          Cookie settings
         </FooterLink>
       </FooterList>
     </Div>
