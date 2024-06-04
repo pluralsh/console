@@ -18,6 +18,12 @@ defmodule Console.Deployments.Settings do
   @preloads ~w(read_bindings write_bindings git_bindings create_bindings deployer_repository artifact_repository)a
 
   @doc """
+  same as `fetch/0` but caches in the process dict
+  """
+  @spec cached() :: DeploymentSettings.t | nil
+  def cached(), do: Console.Cache.process_cache(:settings, &fetch/0)
+
+  @doc """
   Fetches and caches the global deployment settings object, preloads also fetched along the way
   """
   @spec fetch() :: DeploymentSettings.t | nil

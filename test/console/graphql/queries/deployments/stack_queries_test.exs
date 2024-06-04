@@ -82,7 +82,12 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       {:ok, %{data: %{"clusterStackRuns" => found}}} = run_query("""
         query {
           clusterStackRuns(first: 5) {
-            edges { node { id } }
+            edges {
+              node {
+                id
+                jobSpec { namespace serviceAccount }
+              }
+            }
           }
         }
       """, %{}, %{cluster: cluster})

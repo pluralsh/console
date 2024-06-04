@@ -1,11 +1,12 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Stacks, Services}
+  alias Console.Deployments.{Stacks, Services, Settings}
   alias Console.Schema.{
     Stack,
     StackRun,
     PullRequest,
-    CustomStackRun
+    CustomStackRun,
+    DeploymentSettings
   }
 
   def list_stacks(args, %{context: %{current_user: user}}) do
@@ -99,6 +100,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def create_stack_run(%{stack_id: id, commands: commands}, %{context: %{current_user: user}}),
     do: Stacks.create_custom_run(id, commands, user)
+
+  def job_spec(%StackRun{job_spec: %{} = spec}, _, _), do: {:ok, spec}
+  def job_spec(_, _, _) do
+    case Settings.cached() do
+      %DeploymentSettings{stacks: %{job_spec: %{} = spec}} -> {:ok, spec}
+      _ -> {:ok, nil}
+    end
+  end
 
   def stack_tarball(%{id: id}, _, _), do: {:ok, Services.api_url("v1/git/stacks/tarballs?id=#{id}")}
 
