@@ -1,5 +1,12 @@
 import { ReactNode, useMemo, useState } from 'react'
-import { Checkbox, IconFrame, TrashCanIcon } from '@pluralsh/design-system'
+import {
+  Checkbox,
+  FormField,
+  IconFrame,
+  ListBoxItem,
+  Select,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { useParams } from 'react-router-dom'
 import { QueryHookOptions } from '@apollo/client/react/types/types'
 import { useTheme } from 'styled-components'
@@ -47,10 +54,19 @@ export default function DeleteResourceButton({
   )
 }
 
+enum DeletionPropagation {
+  DeletePropagationBackground = 'Background',
+  DeletePropagationForeground = 'Foreground',
+  DeletePropagationOrphan = 'Orphan',
+}
+
 function DeleteResourceModal({ open, setOpen, resource, refetch }): ReactNode {
   const theme = useTheme()
   const [deleting, setDeleting] = useState(false)
   const [deleteNow, setDeleteNow] = useState(false)
+  const [propagation, setPropagation] = useState(
+    DeletionPropagation.DeletePropagationBackground
+  )
   const { clusterId } = useParams()
   const name = resource?.objectMeta?.name ?? ''
   const namespace = resource?.objectMeta?.namespace ?? ''
@@ -63,12 +79,13 @@ function DeleteResourceModal({ open, setOpen, resource, refetch }): ReactNode {
     [namespace]
   )
 
-  const [mutation, { error }] = deleteMutation({
+  const [deleteResource, { error }] = deleteMutation({
     client: KubernetesClient(clusterId ?? ''),
     variables: {
       name,
       namespace,
       kind,
+      propagation,
       deleteNow: `${deleteNow}`,
     },
     onError: () => setDeleting(false),
@@ -92,22 +109,43 @@ function DeleteResourceModal({ open, setOpen, resource, refetch }): ReactNode {
       open={open}
       submit={() => {
         setDeleting(true)
-        mutation()
+        deleteResource()
       }}
       title={`Delete ${kind}`}
       text={`The ${kind} "${name}"${
         namespace ? ` in namespace "${namespace}"` : ''
       } will be deleted.`}
       extraContent={
-        <Checkbox
-          checked={deleteNow}
-          onChange={(e) => setDeleteNow(e.target.checked)}
+        <div
           css={{
             paddingTop: theme.spacing.medium,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.medium,
           }}
         >
-          Delete now (sets delete grace period to 1 second)
-        </Checkbox>
+          <FormField label="Propagation policy">
+            <Select
+              selectedKey={propagation}
+              onSelectionChange={(key) =>
+                setPropagation(key as DeletionPropagation)
+              }
+            >
+              {Object.values(DeletionPropagation).map((d) => (
+                <ListBoxItem
+                  key={d}
+                  label={d}
+                />
+              ))}
+            </Select>
+          </FormField>
+          <Checkbox
+            checked={deleteNow}
+            onChange={(e) => setDeleteNow(e.target.checked)}
+          >
+            Delete now (sets delete grace period to 1 second)
+          </Checkbox>
+        </div>
       }
     />
   )

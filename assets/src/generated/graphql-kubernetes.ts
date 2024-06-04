@@ -122,6 +122,7 @@ export type MutationHandleDeleteResourceArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   page?: InputMaybe<Scalars['String']['input']>;
+  propagation?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1606,6 +1607,12 @@ export type StateWrapper = {
   state: ContainerState;
 };
 
+export type StringWrapper = {
+  __typename?: 'StringWrapper';
+  optionalString?: Maybe<Scalars['String']['output']>;
+  string: Scalars['String']['output'];
+};
+
 export type Api_DataPoint = {
   __typename?: 'api_DataPoint';
   x: Scalars['BigInt']['output'];
@@ -1630,6 +1637,11 @@ export type Big_Int = {
   __typename?: 'big_Int';
   abs: Array<Maybe<Scalars['Int']['output']>>;
   neg: Scalars['Boolean']['output'];
+};
+
+export type Big_Int_Input = {
+  abs: Array<InputMaybe<Scalars['Int']['input']>>;
+  neg: Scalars['Boolean']['input'];
 };
 
 export type Clusterrole_ClusterRole = {
@@ -1883,12 +1895,12 @@ export type Deployment_AppDeploymentSpec_Input = {
   containerCommand: Scalars['String']['input'];
   containerCommandArgs: Scalars['String']['input'];
   containerImage: Scalars['String']['input'];
-  cpuRequirement: Scalars['String']['input'];
+  cpuRequirement: Resource_Quantity_Input5;
   description: Scalars['String']['input'];
   imagePullSecret: Scalars['String']['input'];
   isExternal: Scalars['Boolean']['input'];
   labels: Array<InputMaybe<Deployment_Label_Input>>;
-  memoryRequirement: Scalars['String']['input'];
+  memoryRequirement: Resource_Quantity_Input5;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   portMappings: Array<InputMaybe<Deployment_PortMapping_Input>>;
@@ -2060,6 +2072,11 @@ export type Inf_Dec = {
   unscaled: Big_Int;
 };
 
+export type Inf_Dec_Input = {
+  scale: Scalars['Int']['input'];
+  unscaled: Big_Int_Input;
+};
+
 export type Ingress_Ingress = {
   __typename?: 'ingress_Ingress';
   endpoints: Array<Maybe<Common_Endpoint>>;
@@ -2098,6 +2115,13 @@ export type Ingressclass_IngressClassList = {
   errors: Array<Maybe<Scalars['JSON']['output']>>;
   items: Array<Maybe<Ingressclass_IngressClass>>;
   listMeta: Types_ListMeta;
+};
+
+export type Intstr_IntOrString = {
+  __typename?: 'intstr_IntOrString';
+  IntVal: Scalars['Int']['output'];
+  StrVal: Scalars['String']['output'];
+  Type: Scalars['BigInt']['output'];
 };
 
 export type Job_Job = {
@@ -2494,31 +2518,31 @@ export type Query_HandleGetPersistentVolumeList_Items_Items_Capacity = {
 /** Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ */
 export type Query_HandleGetPodDetail_Containers_Items_Resources_Limits = {
   __typename?: 'query_handleGetPodDetail_containers_items_resources_limits';
-  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity5_Entry>>>;
+  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity6_Entry>>>;
 };
 
 /** Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ */
 export type Query_HandleGetPodDetail_Containers_Items_Resources_Requests = {
   __typename?: 'query_handleGetPodDetail_containers_items_resources_requests';
-  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity6_Entry>>>;
+  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity7_Entry>>>;
 };
 
 /** AllocatedResources represents the compute resources allocated for this container by the node. Kubelet sets this value to Container.Resources.Requests upon successful pod admission and after successfully admitting desired pod resize. */
 export type Query_HandleGetPodDetail_Containers_Items_Status_AllocatedResources = {
   __typename?: 'query_handleGetPodDetail_containers_items_status_allocatedResources';
-  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity7_Entry>>>;
+  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity8_Entry>>>;
 };
 
 /** Limits describes the maximum amount of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ */
 export type Query_HandleGetPodDetail_Containers_Items_VolumeMounts_Items_Volume_Ephemeral_VolumeClaimTemplate_Spec_Resources_Limits = {
   __typename?: 'query_handleGetPodDetail_containers_items_volumeMounts_items_volume_ephemeral_volumeClaimTemplate_spec_resources_limits';
-  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity8_Entry>>>;
+  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity9_Entry>>>;
 };
 
 /** Requests describes the minimum amount of compute resources required. If Requests is omitted for a container, it defaults to Limits if that is explicitly specified, otherwise to an implementation-defined value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ */
 export type Query_HandleGetPodDetail_Containers_Items_VolumeMounts_Items_Volume_Ephemeral_VolumeClaimTemplate_Spec_Resources_Requests = {
   __typename?: 'query_handleGetPodDetail_containers_items_volumeMounts_items_volume_ephemeral_volumeClaimTemplate_spec_resources_requests';
-  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity9_Entry>>>;
+  additionalProperties?: Maybe<Array<Maybe<Resource_Quantity10_Entry>>>;
 };
 
 export type Replicaset_ReplicaSet = {
@@ -2642,12 +2666,6 @@ export type Resource_Quantity5 = {
   s: Scalars['String']['output'];
 };
 
-export type Resource_Quantity5_Entry = {
-  __typename?: 'resource_Quantity5_entry';
-  key: Scalars['ID']['output'];
-  value?: Maybe<Resource_Quantity5>;
-};
-
 export type Resource_Quantity6 = {
   __typename?: 'resource_Quantity6';
   Format: Scalars['String']['output'];
@@ -2704,6 +2722,27 @@ export type Resource_Quantity9_Entry = {
   value?: Maybe<Resource_Quantity9>;
 };
 
+export type Resource_Quantity10 = {
+  __typename?: 'resource_Quantity10';
+  Format: Scalars['String']['output'];
+  d: Resource_InfDecAmount;
+  i: Resource_Int64Amount;
+  s: Scalars['String']['output'];
+};
+
+export type Resource_Quantity10_Entry = {
+  __typename?: 'resource_Quantity10_entry';
+  key: Scalars['ID']['output'];
+  value?: Maybe<Resource_Quantity10>;
+};
+
+export type Resource_Quantity_Input5 = {
+  Format: Scalars['String']['input'];
+  d: Resource_InfDecAmount_Input;
+  i: Resource_Int64Amount_Input;
+  s: Scalars['String']['input'];
+};
+
 export type Resource_Quantity_Entry = {
   __typename?: 'resource_Quantity_entry';
   key: Scalars['ID']['output'];
@@ -2715,10 +2754,19 @@ export type Resource_InfDecAmount = {
   Dec: Inf_Dec;
 };
 
+export type Resource_InfDecAmount_Input = {
+  Dec: Inf_Dec_Input;
+};
+
 export type Resource_Int64Amount = {
   __typename?: 'resource_int64Amount';
   scale: Scalars['Int']['output'];
   value: Scalars['BigInt']['output'];
+};
+
+export type Resource_Int64Amount_Input = {
+  scale: Scalars['Int']['input'];
+  value: Scalars['BigInt']['input'];
 };
 
 export type Resourcequota_ResourceQuotaDetail = {
@@ -3035,6 +3083,20 @@ export type V1_AwsElasticBlockStoreVolumeSource = {
   volumeID: Scalars['String']['output'];
 };
 
+/** AppArmorProfile defines a pod or container's AppArmor settings. */
+export type V1_AppArmorProfile = {
+  __typename?: 'v1_AppArmorProfile';
+  /** localhostProfile indicates a profile loaded on the node that should be used. The profile must be preconfigured on the node to work. Must match the loaded name of the profile. Must be set if and only if type is "Localhost". */
+  localhostProfile?: Maybe<Scalars['String']['output']>;
+  /**
+   * type indicates which kind of AppArmor profile will be applied. Valid options are:
+   * Localhost - a profile pre-loaded on the node.
+   * RuntimeDefault - the container runtime's default profile.
+   * Unconfined - no AppArmor enforcement.
+   */
+  type: Scalars['String']['output'];
+};
+
 /** AzureDisk represents an Azure Data Disk mount on the host and bind mount to the pod. */
 export type V1_AzureDiskVolumeSource = {
   __typename?: 'v1_AzureDiskVolumeSource';
@@ -3243,7 +3305,6 @@ export type V1_ContainerState = {
 /** ContainerStateRunning is a running state of a container. */
 export type V1_ContainerStateRunning = {
   __typename?: 'v1_ContainerStateRunning';
-  /** Time at which the container was last (re-)started */
   startedAt?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3254,7 +3315,6 @@ export type V1_ContainerStateTerminated = {
   containerID?: Maybe<Scalars['String']['output']>;
   /** Exit status from the last termination of the container */
   exitCode: Scalars['Int']['output'];
-  /** Time at which the container last terminated */
   finishedAt?: Maybe<Scalars['String']['output']>;
   /** Message regarding the last termination of the container */
   message?: Maybe<Scalars['String']['output']>;
@@ -3262,7 +3322,6 @@ export type V1_ContainerStateTerminated = {
   reason?: Maybe<Scalars['String']['output']>;
   /** Signal from the last termination of the container */
   signal?: Maybe<Scalars['Int']['output']>;
-  /** Time at which previous execution of the container started */
   startedAt?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3300,6 +3359,8 @@ export type V1_ContainerStatus = {
   /** Started indicates whether the container has finished its postStart lifecycle hook and passed its startup probe. Initialized as false, becomes true after startupProbe is considered successful. Resets to false when the container is restarted, or if kubelet loses state temporarily. In both cases, startup probes will run again. Is always true when no startupProbe is defined and container is running and has passed the postStart lifecycle hook. The null value must be treated the same as false. */
   started?: Maybe<Scalars['Boolean']['output']>;
   state?: Maybe<V1_ContainerState>;
+  /** Status of volume mounts. */
+  volumeMounts?: Maybe<Array<Maybe<V1_VolumeMountStatus>>>;
 };
 
 /** Represents downward API info for projecting into a projected volume. Note that this is identical to a downwardAPI volume source without the default mode. */
@@ -3334,7 +3395,6 @@ export type V1_EmptyDirVolumeSource = {
   __typename?: 'v1_EmptyDirVolumeSource';
   /** medium represents what type of storage medium should back this directory. The default is "" which means to use the node's default medium. Must be an empty string (default) or Memory. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir */
   medium?: Maybe<Scalars['String']['output']>;
-  /** sizeLimit is the total amount of local storage required for this EmptyDir volume. The size limit is also applicable for memory medium. The maximum usage on memory medium EmptyDir would be the minimum value between the SizeLimit specified here and the sum of memory limits of all containers in a pod. The default is nil which means that the limit is undefined. More info: https://kubernetes.io/docs/concepts/storage/volumes#emptydir */
   sizeLimit?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3347,9 +3407,9 @@ export type V1_EndpointPort = {
    * * Un-prefixed protocol names - reserved for IANA standard service names (as per RFC-6335 and https://www.iana.org/assignments/service-names).
    *
    * * Kubernetes-defined prefixed names:
-   *   * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
-   *   * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
-   *   * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
+   * * 'kubernetes.io/h2c' - HTTP/2 prior knowledge over cleartext as described in https://www.rfc-editor.org/rfc/rfc9113.html#name-starting-http-2-with-prior-
+   * * 'kubernetes.io/ws'  - WebSocket over cleartext as described in https://www.rfc-editor.org/rfc/rfc6455
+   * * 'kubernetes.io/wss' - WebSocket over TLS as described in https://www.rfc-editor.org/rfc/rfc6455
    *
    * * Other protocols should use implementation-defined prefixed names such as mycompany.com/my-custom-protocol.
    */
@@ -3513,7 +3573,6 @@ export type V1_HttpGetAction = {
   httpHeaders?: Maybe<Array<Maybe<V1_HttpHeader>>>;
   /** Path to access on the HTTP server. */
   path?: Maybe<Scalars['String']['output']>;
-  /** Name or number of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME. */
   port: Scalars['String']['output'];
   /** Scheme to use for connecting to the host. Defaults to HTTP. */
   scheme?: Maybe<Scalars['String']['output']>;
@@ -3536,15 +3595,15 @@ export type V1_HttpIngressPath = {
   path?: Maybe<Scalars['String']['output']>;
   /**
    * pathType determines the interpretation of the path matching. PathType can be one of the following values: * Exact: Matches the URL path exactly. * Prefix: Matches based on a URL path prefix split by '/'. Matching is
-   *   done on a path element by element basis. A path element refers is the
-   *   list of labels in the path split by the '/' separator. A request is a
-   *   match for path p if every p is an element-wise prefix of p of the
-   *   request path. Note that if the last element of the path is a substring
-   *   of the last element in request path, it is not a match (e.g. /foo/bar
-   *   matches /foo/bar/baz, but does not match /foo/barbaz).
+   * done on a path element by element basis. A path element refers is the
+   * list of labels in the path split by the '/' separator. A request is a
+   * match for path p if every p is an element-wise prefix of p of the
+   * request path. Note that if the last element of the path is a substring
+   * of the last element in request path, it is not a match (e.g. /foo/bar
+   * matches /foo/bar/baz, but does not match /foo/barbaz).
    * * ImplementationSpecific: Interpretation of the Path matching is up to
-   *   the IngressClass. Implementations can treat this as a separate PathType
-   *   or treat it identically to Prefix or Exact path types.
+   * the IngressClass. Implementations can treat this as a separate PathType
+   * or treat it identically to Prefix or Exact path types.
    * Implementations are required to support all path types.
    */
   pathType: Scalars['String']['output'];
@@ -3657,9 +3716,9 @@ export type V1_IngressPortStatus = {
   __typename?: 'v1_IngressPortStatus';
   /**
    * error is to record the problem with the service port The format of the error shall comply with the following rules: - built-in error values shall be specified in this file and those shall use
-   *   CamelCase names
+   * CamelCase names
    * - cloud provider specific error values must have names that comply with the
-   *   format foo.example.com/CamelCase.
+   * format foo.example.com/CamelCase.
    */
   error?: Maybe<Scalars['String']['output']>;
   /** port is the port number of the ingress port. */
@@ -3673,10 +3732,10 @@ export type V1_IngressRule = {
   __typename?: 'v1_IngressRule';
   /**
    * host is the fully qualified domain name of a network host, as defined by RFC 3986. Note the following deviations from the "host" part of the URI as defined in RFC 3986: 1. IPs are not allowed. Currently an IngressRuleValue can only apply to
-   *    the IP in the Spec of the parent Ingress.
+   * the IP in the Spec of the parent Ingress.
    * 2. The `:` delimiter is not respected because ports are not allowed.
-   * 	  Currently the port of an Ingress is implicitly :80 for http and
-   * 	  :443 for https.
+   * Currently the port of an Ingress is implicitly :80 for http and
+   * :443 for https.
    * Both these may change in the future. Incoming requests are matched against the host before the IngressRuleValue. If the host is unspecified, the Ingress routes all traffic based on the specified IngressRuleValue.
    *
    * host can be "precise" which is a domain name without the terminating dot of a network host (e.g. "foo.bar.com") or "wildcard", which is a domain name prefixed with a single wildcard label (e.g. "*.foo.com"). The wildcard character '*' must appear by itself as the first DNS label and matches only a single label. You cannot have a wildcard label by itself (e.g. Host == "*"). Requests will be matched against the Host field in the following way: 1. If host is precise, the request matches this rule if the http host header is equal to Host. 2. If host is a wildcard, then the request matches this rule if the http host header is to equal to the suffix (removing the first label) of the wildcard rule.
@@ -3774,15 +3833,20 @@ export type V1_ManagedFieldsEntry = {
   apiVersion?: Maybe<Scalars['String']['output']>;
   /** FieldsType is the discriminator for the different fields format and version. There is currently only one possible value: "FieldsV1" */
   fieldsType?: Maybe<Scalars['String']['output']>;
-  /** FieldsV1 holds the first JSON version format as described in the "FieldsV1" type. */
-  fieldsV1?: Maybe<Scalars['String']['output']>;
+  /**
+   * FieldsV1 stores a set of fields in a data structure like a Trie, in JSON format.
+   *
+   * Each key is either a '.' representing the field itself, and will always map to an empty set, or a string representing a sub-field or item. The string will follow one of these four formats: 'f:<name>', where <name> is the name of a field in a struct, or key in a map 'v:<value>', where <value> is the exact json formatted value of a list item 'i:<index>', where <index> is position of a item in a list 'k:<keys>', where <keys> is a map of  a list item's key fields to their unique values If a key maps to an empty Fields value, the field that key represents is part of the set.
+   *
+   * The exact format is defined in sigs.k8s.io/structured-merge-diff
+   */
+  fieldsV1?: Maybe<Scalars['JSON']['output']>;
   /** Manager is an identifier of the workflow managing these fields. */
   manager?: Maybe<Scalars['String']['output']>;
   /** Operation is the type of operation which lead to this ManagedFieldsEntry being created. The only valid values for this field are 'Apply' and 'Update'. */
   operation?: Maybe<Scalars['String']['output']>;
   /** Subresource is the name of the subresource used to update that object, or empty string if the object was updated through the main resource. The value of this field is used to distinguish between managers, even if they share the same name. For example, a status update will be distinct from a regular update using the same manager name. Note that the APIVersion field is not related to the Subresource field and it always corresponds to the version of the main resource. */
   subresource?: Maybe<Scalars['String']['output']>;
-  /** Time is the timestamp of when the ManagedFields entry was added. The timestamp will also be updated if a field is added, the manager changes any of the owned fields value or removes a field. The timestamp does not update when a field is removed from the entry because another manager took it over. */
   time?: Maybe<Scalars['String']['output']>;
 };
 
@@ -3828,7 +3892,6 @@ export type V1_NetworkPolicyPort = {
   __typename?: 'v1_NetworkPolicyPort';
   /** endPort indicates that the range of ports from port to endPort if set, inclusive, should be allowed by the policy. This field cannot be defined if the port field is not defined or if the port field is defined as a named (string) port. The endPort must be equal or greater than port. */
   endPort?: Maybe<Scalars['Int']['output']>;
-  /** port represents the port on the given protocol. This can either be a numerical or named port on a pod. If this field is not provided, this matches all port names and numbers. If present, only traffic on the specified protocol AND port will be matched. */
   port?: Maybe<Scalars['String']['output']>;
   /** protocol represents the protocol (TCP, UDP, or SCTP) which traffic must match. If not specified, this field defaults to TCP. */
   protocol?: Maybe<Scalars['String']['output']>;
@@ -3882,19 +3945,9 @@ export type V1_ObjectMeta = {
   __typename?: 'v1_ObjectMeta';
   /** Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations */
   annotations?: Maybe<Scalars['JSON']['output']>;
-  /**
-   * CreationTimestamp is a timestamp representing the server time when this object was created. It is not guaranteed to be set in happens-before order across separate operations. Clients may not set this value. It is represented in RFC3339 form and is in UTC.
-   *
-   * Populated by the system. Read-only. Null for lists. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-   */
   creationTimestamp?: Maybe<Scalars['String']['output']>;
   /** Number of seconds allowed for this object to gracefully terminate before it will be removed from the system. Only set when deletionTimestamp is also set. May only be shortened. Read-only. */
   deletionGracePeriodSeconds?: Maybe<Scalars['BigInt']['output']>;
-  /**
-   * DeletionTimestamp is RFC 3339 date and time at which this resource will be deleted. This field is set by the server when a graceful deletion is requested by the user, and is not directly settable by a client. The resource is expected to be deleted (no longer visible from resource lists, and not reachable by name) after the time in this field, once the finalizers list is empty. As long as the finalizers list contains items, deletion is blocked. Once the deletionTimestamp is set, this value may not be unset or be set further into the future, although it may be shortened or the resource may be deleted prior to this time. For example, a user may request that a pod is deleted in 30 seconds. The Kubelet will react by sending a graceful termination signal to the containers in the pod. After that 30 seconds, the Kubelet will send a hard termination signal (SIGKILL) to the container and after cleanup, remove the pod from the API. In the presence of network partitions, this object may still exist after this timestamp, until an administrator or automated process can determine the resource is fully terminated. If not set, graceful deletion of the object has not been requested.
-   *
-   * Populated by the system when a graceful deletion is requested. Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
-   */
   deletionTimestamp?: Maybe<Scalars['String']['output']>;
   /** Must be empty before the object is deleted from the registry. Each entry is an identifier for the responsible component that will remove the entry from the list. If the deletionTimestamp of the object is non-nil, entries in this list can only be removed. Finalizers may be processed and removed in any order.  Order is NOT enforced because it introduces significant risk of stuck finalizers. finalizers is a shared field, any actor with permission can reorder it. If the finalizer list is processed in order, then this can lead to a situation in which the component responsible for the first finalizer in the list is waiting for a signal (field value, external system, or other) produced by a component responsible for a finalizer later in the list, resulting in a deadlock. Without enforced ordering finalizers are free to order amongst themselves and are not vulnerable to ordering changes in the list. */
   finalizers?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -3985,7 +4038,7 @@ export type V1_PersistentVolumeClaimSpec = {
   selector?: Maybe<V1_LabelSelector>;
   /** storageClassName is the name of the StorageClass required by the claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#class-1 */
   storageClassName?: Maybe<Scalars['String']['output']>;
-  /** volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim. If specified, the CSI driver will create or update the volume with the attributes defined in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName, it can be changed after the claim is created. An empty string value means that no VolumeAttributesClass will be applied to the claim but it's not allowed to reset this field to empty string once it is set. If unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass will be set by the persistentvolume controller if it exists. If the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#volumeattributesclass (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled. */
+  /** volumeAttributesClassName may be used to set the VolumeAttributesClass used by this claim. If specified, the CSI driver will create or update the volume with the attributes defined in the corresponding VolumeAttributesClass. This has a different purpose than storageClassName, it can be changed after the claim is created. An empty string value means that no VolumeAttributesClass will be applied to the claim but it's not allowed to reset this field to empty string once it is set. If unspecified and the PersistentVolumeClaim is unbound, the default VolumeAttributesClass will be set by the persistentvolume controller if it exists. If the resource referred to by volumeAttributesClass does not exist, this PersistentVolumeClaim will be set to a Pending state, as reflected by the modifyVolumeStatus field, until such as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/ (Alpha) Using this field requires the VolumeAttributesClass feature gate to be enabled. */
   volumeAttributesClassName?: Maybe<Scalars['String']['output']>;
   /** volumeMode defines what type of volume is required by the claim. Value of Filesystem is implied when not included in claim spec. */
   volumeMode?: Maybe<Scalars['String']['output']>;
@@ -4048,6 +4101,7 @@ export type V1_PhotonPersistentDiskVolumeSource = {
 /** PodSecurityContext holds pod-level security attributes and common container settings. Some fields are also present in container.securityContext.  Field values of container.securityContext take precedence over field values of PodSecurityContext. */
 export type V1_PodSecurityContext = {
   __typename?: 'v1_PodSecurityContext';
+  appArmorProfile?: Maybe<V1_AppArmorProfile>;
   /**
    * A special supplemental group that applies to all containers in a pod. Some volume types allow the Kubelet to change the ownership of that volume to be owned by the pod:
    *
@@ -4196,7 +4250,6 @@ export type V1_ResourceFieldSelector = {
   __typename?: 'v1_ResourceFieldSelector';
   /** Container name: required for volumes, optional for env vars */
   containerName?: Maybe<Scalars['String']['output']>;
-  /** Specifies the output format of the exposed resources, defaults to "1" */
   divisor?: Maybe<Scalars['String']['output']>;
   /** Required: resource to select */
   resource: Scalars['String']['output'];
@@ -4359,6 +4412,7 @@ export type V1_SecurityContext = {
   __typename?: 'v1_SecurityContext';
   /** AllowPrivilegeEscalation controls whether a process can gain more privileges than its parent process. This bool directly controls if the no_new_privs flag will be set on the container process. AllowPrivilegeEscalation is true always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN Note that this field cannot be set when spec.os.name is windows. */
   allowPrivilegeEscalation?: Maybe<Scalars['Boolean']['output']>;
+  appArmorProfile?: Maybe<V1_AppArmorProfile>;
   capabilities?: Maybe<V1_Capabilities>;
   /** Run container in privileged mode. Processes in privileged containers are essentially equivalent to root on the host. Defaults to false. Note that this field cannot be set when spec.os.name is windows. */
   privileged?: Maybe<Scalars['Boolean']['output']>;
@@ -4452,7 +4506,6 @@ export type V1_TcpSocketAction = {
   __typename?: 'v1_TCPSocketAction';
   /** Optional: Host name to connect to, defaults to the pod IP. */
   host?: Maybe<Scalars['String']['output']>;
-  /** Number or name of the port to access on the container. Number must be in the range 1 to 65535. Name must be an IANA_SVC_NAME. */
   port: Scalars['String']['output'];
 };
 
@@ -4463,10 +4516,14 @@ export type V1_Taint = {
   effect: Scalars['String']['output'];
   /** Required. The taint key to be applied to a node. */
   key: Scalars['String']['output'];
-  /** TimeAdded represents the time at which the taint was added. It is only written for NoExecute taints. */
   timeAdded?: Maybe<Scalars['String']['output']>;
   /** The taint value corresponding to the taint key. */
   value?: Maybe<Scalars['String']['output']>;
+};
+
+export type V1_Time = {
+  __typename?: 'v1_Time';
+  Time: Scalars['DateTime']['output'];
 };
 
 /** TypeMeta describes an individual object in an API response or request with strings representing the type of the object and its API schema version. Structures that are versioned or persisted should inline TypeMeta. */
@@ -4535,6 +4592,19 @@ export type V1_Volume = {
   secret?: Maybe<V1_SecretVolumeSource>;
   storageos?: Maybe<V1_StorageOsVolumeSource>;
   vsphereVolume?: Maybe<V1_VsphereVirtualDiskVolumeSource>;
+};
+
+/** VolumeMountStatus shows status of volume mounts. */
+export type V1_VolumeMountStatus = {
+  __typename?: 'v1_VolumeMountStatus';
+  /** MountPath corresponds to the original VolumeMount. */
+  mountPath: Scalars['String']['output'];
+  /** Name corresponds to the name of the original VolumeMount. */
+  name: Scalars['String']['output'];
+  /** ReadOnly corresponds to the original VolumeMount. */
+  readOnly?: Maybe<Scalars['Boolean']['output']>;
+  /** RecursiveReadOnly must be set to Disabled, Enabled, or unspecified (for non-readonly mounts). An IfPossible value in the original VolumeMount must be translated to Disabled or Enabled, depending on the mount result. */
+  recursiveReadOnly?: Maybe<Scalars['String']['output']>;
 };
 
 /** Projection that may be projected along with other supported volume types */
@@ -4896,6 +4966,7 @@ export type ResourceDeleteMutationVariables = Exact<{
   kind: Scalars['String']['input'];
   name: Scalars['String']['input'];
   deleteNow?: InputMaybe<Scalars['String']['input']>;
+  propagation?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -4906,6 +4977,7 @@ export type NamespacedResourceDeleteMutationVariables = Exact<{
   namespace: Scalars['String']['input'];
   name: Scalars['String']['input'];
   deleteNow?: InputMaybe<Scalars['String']['input']>;
+  propagation?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -7900,13 +7972,14 @@ export type ResourceScaleMutationHookResult = ReturnType<typeof useResourceScale
 export type ResourceScaleMutationResult = Apollo.MutationResult<ResourceScaleMutation>;
 export type ResourceScaleMutationOptions = Apollo.BaseMutationOptions<ResourceScaleMutation, ResourceScaleMutationVariables>;
 export const ResourceDeleteDocument = gql`
-    mutation ResourceDelete($kind: String!, $name: String!, $deleteNow: String) {
+    mutation ResourceDelete($kind: String!, $name: String!, $deleteNow: String, $propagation: String) {
   handleDeleteResource(
     kind: $kind
     name: $name
     namespace: ""
     deleteNow: $deleteNow
-  ) @rest(type: "Void", path: "_raw/{args.kind}/name/{args.name}?deleteNow={args.deleteNow}", method: "DELETE")
+    propagation: $propagation
+  ) @rest(type: "Void", path: "_raw/{args.kind}/name/{args.name}?deleteNow={args.deleteNow}&propagation={args.propagation}", method: "DELETE")
 }
     `;
 export type ResourceDeleteMutationFn = Apollo.MutationFunction<ResourceDeleteMutation, ResourceDeleteMutationVariables>;
@@ -7927,6 +8000,7 @@ export type ResourceDeleteMutationFn = Apollo.MutationFunction<ResourceDeleteMut
  *      kind: // value for 'kind'
  *      name: // value for 'name'
  *      deleteNow: // value for 'deleteNow'
+ *      propagation: // value for 'propagation'
  *   },
  * });
  */
@@ -7938,13 +8012,14 @@ export type ResourceDeleteMutationHookResult = ReturnType<typeof useResourceDele
 export type ResourceDeleteMutationResult = Apollo.MutationResult<ResourceDeleteMutation>;
 export type ResourceDeleteMutationOptions = Apollo.BaseMutationOptions<ResourceDeleteMutation, ResourceDeleteMutationVariables>;
 export const NamespacedResourceDeleteDocument = gql`
-    mutation NamespacedResourceDelete($kind: String!, $namespace: String!, $name: String!, $deleteNow: String) {
+    mutation NamespacedResourceDelete($kind: String!, $namespace: String!, $name: String!, $deleteNow: String, $propagation: String) {
   handleDeleteResource(
     kind: $kind
     namespace: $namespace
     name: $name
     deleteNow: $deleteNow
-  ) @rest(type: "Void", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}?deleteNow={args.deleteNow}", method: "DELETE")
+    propagation: $propagation
+  ) @rest(type: "Void", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}?deleteNow={args.deleteNow}&propagation={args.propagation}", method: "DELETE")
 }
     `;
 export type NamespacedResourceDeleteMutationFn = Apollo.MutationFunction<NamespacedResourceDeleteMutation, NamespacedResourceDeleteMutationVariables>;
@@ -7966,6 +8041,7 @@ export type NamespacedResourceDeleteMutationFn = Apollo.MutationFunction<Namespa
  *      namespace: // value for 'namespace'
  *      name: // value for 'name'
  *      deleteNow: // value for 'deleteNow'
+ *      propagation: // value for 'propagation'
  *   },
  * });
  */
