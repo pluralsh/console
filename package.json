@@ -141,6 +141,9 @@
     "@storybook/mdx2-csf": "0.1.0-next.8"
   },
   "lint-staged": {
-    "./src/**/*.{js,jsx,ts,tsx}": "prettier --write"
+    "./src/**/*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix --ext ts,tsx,js,jsx"
+    ]
   }
 }

@@ -66,6 +66,7 @@ export type TableProps = Omit<
 > & {
   data: any[]
   columns: any[]
+  hideHeader?: boolean
   getRowCanExpand?: any
   renderExpanded?: any
   loose?: boolean
@@ -198,59 +199,67 @@ const Tr = styled.tr<{
 const Th = styled.th<{
   $stickyColumn: boolean
   $cursor?: CSSProperties['cursor']
-}>(({ theme, $stickyColumn: stickyColumn, $cursor: cursor }) => ({
-  padding: 0,
-  position: 'sticky',
-  top: 0,
-  zIndex: 4,
-  '.thOuterWrap': {
-    alignItems: 'center',
-    display: 'flex',
-    position: 'relative',
-    backgroundColor: theme.colors['fill-two'],
+  $hideHeader?: boolean
+}>(
+  ({
+    theme,
+    $stickyColumn: stickyColumn,
+    $cursor: cursor,
+    $hideHeader: hideHeader,
+  }) => ({
+    padding: 0,
+    position: 'sticky',
+    top: 0,
     zIndex: 4,
-    borderBottom: theme.borders['fill-three'],
-    color: theme.colors.text,
-    height: 48,
-    minHeight: 48,
-    whiteSpace: 'nowrap',
-    padding: '0 12px',
-    textAlign: 'left',
-    ...(cursor ? { cursor } : {}),
-    '.thSortIndicatorWrap': {
-      display: 'flex',
-      gap: theme.spacing.xsmall,
-    },
-  },
-  '&:last-child': {
-    /* Hackery to hide unpredictable visible gap between columns */
-    zIndex: 3,
-    '&::before': {
-      content: '""',
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      width: 10000,
+    '.thOuterWrap': {
+      alignItems: 'center',
+      display: hideHeader ? 'none' : 'flex',
+      position: 'relative',
       backgroundColor: theme.colors['fill-two'],
+      zIndex: 4,
       borderBottom: theme.borders['fill-three'],
+      color: theme.colors.text,
+      height: 48,
+      minHeight: 48,
+      whiteSpace: 'nowrap',
+      padding: '0 12px',
+      textAlign: 'left',
+      ...(cursor ? { cursor } : {}),
+      '.thSortIndicatorWrap': {
+        display: 'flex',
+        gap: theme.spacing.xsmall,
+      },
     },
-  },
-  '&:first-child': {
-    ...(stickyColumn
-      ? {
-          backgroundColor: 'inherit',
-          position: 'sticky',
-          left: 0,
-          zIndex: 5,
-          '.thOuterWrap': {
-            boxShadow: theme.boxShadows.slight,
+    '&:last-child': {
+      /* Hackery to hide unpredictable visible gap between columns */
+      zIndex: 3,
+      '&::before': {
+        content: '""',
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width: 10000,
+        backgroundColor: theme.colors['fill-two'],
+        borderBottom: hideHeader ? 'none' : theme.borders['fill-three'],
+      },
+    },
+    '&:first-child': {
+      ...(stickyColumn
+        ? {
+            backgroundColor: 'inherit',
+            position: 'sticky',
+            left: 0,
             zIndex: 5,
-          },
-        }
-      : {}),
-  },
-}))
+            '.thOuterWrap': {
+              boxShadow: theme.boxShadows.slight,
+              zIndex: 5,
+            },
+          }
+        : {}),
+    },
+  })
+)
 
 // TODO: Set vertical align to top for tall cells (~3 lines of text or more). See ENG-683.
 const Td = styled.td<{
@@ -521,6 +530,7 @@ function TableRef(
   {
     data,
     columns,
+    hideHeader = false,
     getRowCanExpand,
     renderExpanded,
     loose = false,
@@ -700,6 +710,7 @@ function TableRef(
                 {headerGroup.headers.map((header) => (
                   <Th
                     key={header.id}
+                    $hideHeader={hideHeader}
                     $stickyColumn={stickyColumn}
                     {...(header.column.getCanSort()
                       ? {
