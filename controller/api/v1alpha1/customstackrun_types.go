@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/polly/algorithms"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,7 +31,7 @@ type CustomStackRunSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// +kubebuilder:validation:Optional
-	StackRef *corev1.LocalObjectReference `json:"stackRef"`
+	StackRef *corev1.LocalObjectReference `json:"stackRef,omitempty"`
 
 	// Documentation to explain what this will do
 	// +kubebuilder:validation:Optional
@@ -49,6 +51,14 @@ type CommandAttributes struct {
 	Args []string `json:"args,omitempty"`
 	// +kubebuilder:validation:Optional
 	Dir *string `json:"dir,omitempty"`
+}
+
+func (in *CommandAttributes) Attributes() *console.CommandAttributes {
+	return &console.CommandAttributes{
+		Cmd:  in.Cmd,
+		Args: algorithms.Map(in.Args, func(b string) *string { return &b }),
+		Dir:  in.Dir,
+	}
 }
 
 //+kubebuilder:object:root=true
@@ -78,7 +88,7 @@ func init() {
 	SchemeBuilder.Register(&CustomStackRun{}, &CustomStackRunList{})
 }
 
-func (p *CustomStackRun) StackName() string {
+func (p *CustomStackRun) CustomStackRunName() string {
 	if p.Spec.Name != nil && len(*p.Spec.Name) > 0 {
 		return *p.Spec.Name
 	}

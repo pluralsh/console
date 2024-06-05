@@ -64,3 +64,26 @@ func (c *client) UpdateStack(ctx context.Context, id string, attributes console.
 	return result.UpdateStack, nil
 
 }
+
+func (c *client) DeleteCustomStackRun(ctx context.Context, id string) error {
+	response, err := c.consoleClient.DeleteCustomStackRun(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.DeleteCustomStackRun == nil) {
+		return errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	return err
+}
+
+func (c *client) UpsertCustomStackRun(ctx context.Context, attributes console.CustomStackRunAttributes) (*console.CustomStackRunFragment, error) {
+	result, err := c.consoleClient.UpsertCustomStackRun(ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, fmt.Errorf("upsert custom stack run %s is nil", attributes.Name)
+	}
+	return result.UpsertCustomStackRun, nil
+
+}

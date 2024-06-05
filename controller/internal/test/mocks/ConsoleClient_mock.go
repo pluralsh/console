@@ -853,6 +853,53 @@ func (_c *ConsoleClientMock_DeleteCluster_Call) RunAndReturn(run func(string) (*
 	return _c
 }
 
+// DeleteCustomStackRun provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteCustomStackRun(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteCustomStackRun")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteCustomStackRun_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteCustomStackRun'
+type ConsoleClientMock_DeleteCustomStackRun_Call struct {
+	*mock.Call
+}
+
+// DeleteCustomStackRun is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteCustomStackRun(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteCustomStackRun_Call {
+	return &ConsoleClientMock_DeleteCustomStackRun_Call{Call: _e.mock.On("DeleteCustomStackRun", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteCustomStackRun_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteCustomStackRun_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteCustomStackRun_Call) Return(_a0 error) *ConsoleClientMock_DeleteCustomStackRun_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteCustomStackRun_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteCustomStackRun_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteGlobalService provides a mock function with given fields: id
 func (_m *ConsoleClientMock) DeleteGlobalService(id string) error {
 	ret := _m.Called(id)
@@ -4285,6 +4332,65 @@ func (_c *ConsoleClientMock_UpdateStack_Call) Return(_a0 *gqlclient.Infrastructu
 }
 
 func (_c *ConsoleClientMock_UpdateStack_Call) RunAndReturn(run func(context.Context, string, gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error)) *ConsoleClientMock_UpdateStack_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertCustomStackRun provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) UpsertCustomStackRun(ctx context.Context, attributes gqlclient.CustomStackRunAttributes) (*gqlclient.CustomStackRunFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertCustomStackRun")
+	}
+
+	var r0 *gqlclient.CustomStackRunFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.CustomStackRunAttributes) (*gqlclient.CustomStackRunFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.CustomStackRunAttributes) *gqlclient.CustomStackRunFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.CustomStackRunFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.CustomStackRunAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertCustomStackRun_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertCustomStackRun'
+type ConsoleClientMock_UpsertCustomStackRun_Call struct {
+	*mock.Call
+}
+
+// UpsertCustomStackRun is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes gqlclient.CustomStackRunAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertCustomStackRun(ctx interface{}, attributes interface{}) *ConsoleClientMock_UpsertCustomStackRun_Call {
+	return &ConsoleClientMock_UpsertCustomStackRun_Call{Call: _e.mock.On("UpsertCustomStackRun", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertCustomStackRun_Call) Run(run func(ctx context.Context, attributes gqlclient.CustomStackRunAttributes)) *ConsoleClientMock_UpsertCustomStackRun_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(gqlclient.CustomStackRunAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertCustomStackRun_Call) Return(_a0 *gqlclient.CustomStackRunFragment, _a1 error) *ConsoleClientMock_UpsertCustomStackRun_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertCustomStackRun_Call) RunAndReturn(run func(context.Context, gqlclient.CustomStackRunAttributes) (*gqlclient.CustomStackRunFragment, error)) *ConsoleClientMock_UpsertCustomStackRun_Call {
 	_c.Call.Return(run)
 	return _c
 }

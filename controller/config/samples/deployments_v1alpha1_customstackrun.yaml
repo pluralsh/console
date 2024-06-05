@@ -1,4 +1,79 @@
 apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: existing
+  namespace: default
+spec:
+  handle: lukasz
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: tf-hello
+  namespace: default
+spec:
+  url: https://github.com/zreigz/tf-hello.git
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: infrastructurestack
+  namespace: default
+data:
+  secret: dGVzdA==
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  labels:
+    app.kubernetes.io/name: infrastructurestack
+    app.kubernetes.io/instance: infrastructurestack-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: infrastructurestack-sample
+  namespace: default
+spec:
+  name: "test-job"
+  detach: true
+  type: TERRAFORM
+  configuration:
+    version: "sha-ae2663f-terraform-1.8.2"
+    image: "ghcr.io/pluralsh/harness"
+  repositoryRef:
+    name: tf-hello
+    namespace: default
+  clusterRef:
+    name: existing
+    namespace: default
+  git:
+    ref: main
+    folder: terraform
+  files:
+    - mountPath: /tmp
+      secretRef:
+        name: infrastructurestack
+  environment:
+    - name: TEST
+      value: test
+    - name: SECRET
+      secretKeyRef:
+        name: infrastructurestack
+        key: secret
+  jobSpec:
+    namespace: default
+    raw:
+      template:
+        metadata:
+          namespace: default
+        spec:
+          containers:
+            - name: pi
+              image: perl:5.34.0
+              command: [ "perl",  "-Mbignum=bpi", "-wle", "print bpi(2000)" ]
+          restartPolicy: Never
+---
+apiVersion: deployments.plural.sh/v1alpha1
 kind: CustomStackRun
 metadata:
   labels:
@@ -8,5 +83,9 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
   name: customstackrun-sample
+  namespace: default
 spec:
-  # TODO(user): Add fields here
+  name: test
+  documentation: "short description"
+  stackRef:
+    name: infrastructurestack-sample
