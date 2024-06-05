@@ -107,6 +107,8 @@ type ConsoleClient interface {
 	UpdateCustomStackRun(ctx context.Context, id string, attributes console.CustomStackRunAttributes) (*console.CustomStackRunFragment, error)
 	CreateCustomStackRun(ctx context.Context, attributes console.CustomStackRunAttributes) (*console.CustomStackRunFragment, error)
 	GetCustomStackRun(ctx context.Context, id string) (*console.CustomStackRunFragment, error)
+	UpdateDeploymentSettings(ctx context.Context, attr console.DeploymentSettingsAttributes) (*console.UpdateDeploymentSettings, error)
+	GetDeploymentSettings(ctx context.Context) (*console.DeploymentSettingsFragment, error)
 }
 
 func New(url, token string) ConsoleClient {

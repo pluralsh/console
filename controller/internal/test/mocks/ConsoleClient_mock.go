@@ -1871,6 +1871,64 @@ func (_c *ConsoleClientMock_GetCustomStackRun_Call) RunAndReturn(run func(contex
 	return _c
 }
 
+// GetDeploymentSettings provides a mock function with given fields: ctx
+func (_m *ConsoleClientMock) GetDeploymentSettings(ctx context.Context) (*gqlclient.DeploymentSettingsFragment, error) {
+	ret := _m.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDeploymentSettings")
+	}
+
+	var r0 *gqlclient.DeploymentSettingsFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context) (*gqlclient.DeploymentSettingsFragment, error)); ok {
+		return rf(ctx)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context) *gqlclient.DeploymentSettingsFragment); ok {
+		r0 = rf(ctx)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.DeploymentSettingsFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetDeploymentSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetDeploymentSettings'
+type ConsoleClientMock_GetDeploymentSettings_Call struct {
+	*mock.Call
+}
+
+// GetDeploymentSettings is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *ConsoleClientMock_Expecter) GetDeploymentSettings(ctx interface{}) *ConsoleClientMock_GetDeploymentSettings_Call {
+	return &ConsoleClientMock_GetDeploymentSettings_Call{Call: _e.mock.On("GetDeploymentSettings", ctx)}
+}
+
+func (_c *ConsoleClientMock_GetDeploymentSettings_Call) Run(run func(ctx context.Context)) *ConsoleClientMock_GetDeploymentSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetDeploymentSettings_Call) Return(_a0 *gqlclient.DeploymentSettingsFragment, _a1 error) *ConsoleClientMock_GetDeploymentSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetDeploymentSettings_Call) RunAndReturn(run func(context.Context) (*gqlclient.DeploymentSettingsFragment, error)) *ConsoleClientMock_GetDeploymentSettings_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetGlobalService provides a mock function with given fields: id
 func (_m *ConsoleClientMock) GetGlobalService(id string) (*gqlclient.GlobalServiceFragment, error) {
 	ret := _m.Called(id)
@@ -4045,6 +4103,65 @@ func (_c *ConsoleClientMock_UpdateCustomStackRun_Call) Return(_a0 *gqlclient.Cus
 }
 
 func (_c *ConsoleClientMock_UpdateCustomStackRun_Call) RunAndReturn(run func(context.Context, string, gqlclient.CustomStackRunAttributes) (*gqlclient.CustomStackRunFragment, error)) *ConsoleClientMock_UpdateCustomStackRun_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateDeploymentSettings provides a mock function with given fields: ctx, attr
+func (_m *ConsoleClientMock) UpdateDeploymentSettings(ctx context.Context, attr gqlclient.DeploymentSettingsAttributes) (*gqlclient.UpdateDeploymentSettings, error) {
+	ret := _m.Called(ctx, attr)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateDeploymentSettings")
+	}
+
+	var r0 *gqlclient.UpdateDeploymentSettings
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.DeploymentSettingsAttributes) (*gqlclient.UpdateDeploymentSettings, error)); ok {
+		return rf(ctx, attr)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.DeploymentSettingsAttributes) *gqlclient.UpdateDeploymentSettings); ok {
+		r0 = rf(ctx, attr)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.UpdateDeploymentSettings)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.DeploymentSettingsAttributes) error); ok {
+		r1 = rf(ctx, attr)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateDeploymentSettings_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateDeploymentSettings'
+type ConsoleClientMock_UpdateDeploymentSettings_Call struct {
+	*mock.Call
+}
+
+// UpdateDeploymentSettings is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attr gqlclient.DeploymentSettingsAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateDeploymentSettings(ctx interface{}, attr interface{}) *ConsoleClientMock_UpdateDeploymentSettings_Call {
+	return &ConsoleClientMock_UpdateDeploymentSettings_Call{Call: _e.mock.On("UpdateDeploymentSettings", ctx, attr)}
+}
+
+func (_c *ConsoleClientMock_UpdateDeploymentSettings_Call) Run(run func(ctx context.Context, attr gqlclient.DeploymentSettingsAttributes)) *ConsoleClientMock_UpdateDeploymentSettings_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(gqlclient.DeploymentSettingsAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateDeploymentSettings_Call) Return(_a0 *gqlclient.UpdateDeploymentSettings, _a1 error) *ConsoleClientMock_UpdateDeploymentSettings_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateDeploymentSettings_Call) RunAndReturn(run func(context.Context, gqlclient.DeploymentSettingsAttributes) (*gqlclient.UpdateDeploymentSettings, error)) *ConsoleClientMock_UpdateDeploymentSettings_Call {
 	_c.Call.Return(run)
 	return _c
 }
