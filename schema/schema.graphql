@@ -722,7 +722,9 @@ type RootMutationType {
 
   restartStackRun(id: ID!): StackRun
 
-  upsertCustomStackRun(attributes: CustomStackRunAttributes!): CustomStackRun
+  createCustomStackRun(attributes: CustomStackRunAttributes!): CustomStackRun
+
+  updateCustomStackRun(id: ID!, attributes: CustomStackRunAttributes!): CustomStackRun
 
   deleteCustomStackRun(id: ID!): CustomStackRun
 

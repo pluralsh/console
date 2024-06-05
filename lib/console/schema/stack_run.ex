@@ -122,6 +122,7 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:environment)
     |> cast_assoc(:steps)
     |> cast_assoc(:files)
+    |> cast_assoc(:errors)
     |> put_new_change(:id, &Piazza.Ecto.UUID.generate_monotonic/0)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:cluster_id)

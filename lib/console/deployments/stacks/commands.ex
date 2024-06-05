@@ -1,8 +1,15 @@
 defmodule Console.Deployments.Stacks.Commands do
   alias Console.Schema.{Stack}
 
-  def commands(%Stack{type: :terraform} = stack, dry \\ false) do
+  def commands(stack, dry \\ false)
+
+  def commands(%Stack{type: :terraform} = stack, dry) do
     terraform_commands(stack, dry)
+    |> stitch_hooks(stack)
+  end
+
+  def commands(%Stack{type: :ansible} = stack, dry) do
+    ansible_commands(stack, dry)
     |> stitch_hooks(stack)
   end
 
@@ -31,6 +38,22 @@ defmodule Console.Deployments.Stacks.Commands do
       %{^stg => res} -> Map.put(acc, stg, [cmd | res])
       _ -> Map.put(acc, stg, [cmd])
     end
+  end
+
+  defp ansible_commands(%Stack{}, true) do
+    indexed([
+      cmd("plan", "ansible-playbook", ["main.yaml", "--diff", "--check"], :plan)
+    ])
+  end
+
+  defp ansible_commands(%Stack{deleted_at: d} = s, _) when not is_nil(d),
+    do: ansible_commands(s, true)
+
+  defp ansible_commands(%Stack{}, _) do
+    indexed([
+      cmd("plan", "ansible-playbook", ["main.yaml", "--diff", "--check"], :plan),
+      cmd("apply", "ansible-playbook", ["main.yaml"], :apply)
+    ])
   end
 
   defp terraform_commands(%Stack{}, true) do

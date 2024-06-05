@@ -28,6 +28,7 @@ defmodule Console.Schema.CustomStackRun do
     |> cast(attrs, ~w(name documentation stack_id)a)
     |> cast_embed(:configuration)
     |> cast_embed(:commands, with: &command_changeset/2)
+    |> unique_constraint([:stack_id, :name])
     |> foreign_key_constraint(:stack_id)
     |> validate_required([:name])
   end

@@ -491,15 +491,23 @@ defmodule Console.Deployments.Stacks do
   @doc """
   Adds a new custom stack run reference to a given stack
   """
-  @spec upsert_custom_stack_run(map, User.t) :: custom_resp
-  def upsert_custom_stack_run(%{stack_id: id, name: name} = attrs, %User{} = user) do
-    case Repo.get_by(CustomStackRun, stack_id: id, name: name) do
-      %CustomStackRun{} = run -> run
-      _ -> %CustomStackRun{}
-    end
+  @spec create_custom_stack_run(map, User.t) :: custom_resp
+  def create_custom_stack_run(attrs, %User{} = user) do
+    %CustomStackRun{}
     |> CustomStackRun.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Updates a custom stack run reference
+  """
+  @spec update_custom_stack_run(map, binary, User.t) :: custom_resp
+  def update_custom_stack_run(attrs, id, %User{} = user) do
+    Repo.get!(CustomStackRun, id)
+    |> CustomStackRun.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
   end
 
   @doc """
