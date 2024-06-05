@@ -1,5 +1,4 @@
 import { Div, type DivProps, Flex, H1, H3, P } from 'honorable'
-import PropTypes from 'prop-types'
 import { type Ref, forwardRef } from 'react'
 
 import Card from './Card'
@@ -29,18 +28,6 @@ const hueToColor = {
   blue: 'border-outline-focused',
   yellow: 'text-warning-light',
 }
-
-const propTypes = {
-  title: PropTypes.string,
-  description: PropTypes.string,
-  apps: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      imageUrl: PropTypes.string.isRequired,
-    }).isRequired
-  ).isRequired,
-  hue: PropTypes.oneOf(HUES),
-} as const
 
 function StackCardRef(
   { title, description, apps = [], hue = 'neutral', ...props }: StackCardProps,
@@ -139,7 +126,5 @@ function StackCardRef(
 }
 
 const StackCard = forwardRef(StackCardRef)
-
-StackCard.propTypes = propTypes
 
 export default StackCard

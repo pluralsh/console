@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types'
 import {
   type ComponentProps,
   type ReactElement,
@@ -44,16 +43,6 @@ type AppIconProps = {
   className?: string
   onClose?: () => void
 }
-
-const propTypes = {
-  size: PropTypes.oneOf(SIZES),
-  spacing: PropTypes.oneOf(SPACINGS),
-  hue: PropTypes.oneOf(HUES),
-  clickable: PropTypes.bool,
-  url: PropTypes.string,
-  IconComponent: PropTypes.elementType,
-  alt: PropTypes.string,
-} as const
 
 const parentFillLevelToHue = {
   0: 'default',
@@ -226,8 +215,6 @@ function AppIconRef(
 }
 
 const AppIcon = forwardRef(AppIconRef)
-
-AppIcon.propTypes = propTypes
 
 export default AppIcon
 export type { AppIconProps }

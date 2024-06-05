@@ -1,6 +1,5 @@
 import {
   type Dispatch,
-  type Key,
   type MutableRefObject,
   type RefObject,
   type SetStateAction,
@@ -8,7 +7,7 @@ import {
   useRef,
 } from 'react'
 import { type ListState } from 'react-stately'
-import { type Selection } from '@react-types/shared'
+import { type Key, type Selection } from '@react-types/shared'
 import { isNil } from 'lodash-es'
 
 import { FOOTER_KEY, HEADER_KEY, useItemWrappedChildren } from './ListBox'

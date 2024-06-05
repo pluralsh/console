@@ -1,7 +1,10 @@
 import {
   type ComponentProps,
+  type ComponentType,
   type ReactElement,
   type ReactFragment,
+  type Ref,
+  type RefAttributes,
   createContext,
   forwardRef,
   useContext,
@@ -41,7 +44,7 @@ type TextSwitchOption = { value: string } & (
 )
 type TextSwitchOptions = TextSwitchOption[]
 
-type TextSwitchProps = SetRequired<
+export type TextSwitchProps = SetRequired<
   Omit<AriaRadioGroupProps, 'orientation'>,
   'value'
 > & {
@@ -104,7 +107,7 @@ const SwitchHandleSC = styled(AnimatedDiv)<{
   }
 })
 
-function TextSwitch(
+function TextSwitchRef(
   {
     name,
     label,
@@ -121,7 +124,7 @@ function TextSwitch(
     size,
     ...props
   }: TextSwitchProps,
-  refProp: any
+  refProp: Ref<any>
 ) {
   const switchRef = useRef<HTMLDivElement>(null)
   const selectedElt = useRef<HTMLElement>(null)
@@ -361,4 +364,7 @@ function TextSwitchOption({
   )
 }
 
-export default forwardRef(TextSwitch)
+const TextSwitch: ComponentType<TextSwitchProps & RefAttributes<any>> =
+  forwardRef(TextSwitchRef)
+
+export default TextSwitch

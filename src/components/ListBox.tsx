@@ -1,7 +1,6 @@
 import {
   Children,
   type ComponentPropsWithRef,
-  type Key,
   type ReactElement,
   type ReactNode,
   type RefObject,
@@ -17,6 +16,8 @@ import { mergeRefs } from 'react-merge-refs'
 import styled, { type DefaultTheme, useTheme } from 'styled-components'
 
 import { Item } from 'react-stately'
+
+import { type Key } from '@react-types/shared'
 
 import { type CSSObject } from '../types'
 

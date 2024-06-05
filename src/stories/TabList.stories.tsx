@@ -1,6 +1,8 @@
 import { Button, Div, Flex, H1 } from 'honorable'
-import { type Key, forwardRef, useRef, useState } from 'react'
+import { forwardRef, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+
+import { type Key } from '@react-types/shared'
 
 import {
   Tab,

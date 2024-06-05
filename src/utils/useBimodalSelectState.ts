@@ -19,9 +19,9 @@ import { useFormValidationState } from '@react-stately/form'
 import { useMenuTriggerState } from 'react-stately'
 import { type AriaSelectProps } from '@react-types/select'
 import { type ListProps, type SelectState, useListState } from 'react-stately'
-import { type Key, useCallback, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { useControlledState } from '@react-stately/utils'
-import { type Node } from '@react-types/shared'
+import { type Key, type Node } from '@react-types/shared'
 
 export type BimodalSelectState<T = object> = SelectState<T> & {
   selectedKeys: Set<Key>

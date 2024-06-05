@@ -155,8 +155,6 @@ type HighlightProps = Omit<ComponentPropsWithoutRef<'pre'>, 'children'> & {
   children: string
 }
 
-const propTypes = {}
-
 function HighlightRef(
   { language, children, showLineNumbers, ...props }: HighlightProps,
   ref: Ref<any>
@@ -198,7 +196,5 @@ function HighlightRef(
 }
 
 const Highlight = forwardRef(HighlightRef)
-
-Highlight.propTypes = propTypes
 
 export default Highlight

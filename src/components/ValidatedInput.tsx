@@ -6,7 +6,6 @@ import {
   useCallback,
   useState,
 } from 'react'
-import PropTypes from 'prop-types'
 import { Input, type InputProps } from 'honorable'
 
 import FormField from './FormField'
@@ -20,13 +19,6 @@ export type ValidatedInputProps = InputProps &
     hint?: ReactNode
     validation?: (val: string) => ValidationResponse
   }>
-
-const propTypes = {
-  label: PropTypes.node,
-  hint: PropTypes.node,
-  caption: PropTypes.func,
-  validation: PropTypes.func,
-}
 
 function ValidatedInputRef(
   { label, hint, validation, onChange, width, ...input }: ValidatedInputProps,
@@ -63,7 +55,5 @@ function ValidatedInputRef(
 }
 
 const ValidatedInput = forwardRef(ValidatedInputRef)
-
-ValidatedInput.propTypes = propTypes
 
 export default ValidatedInput

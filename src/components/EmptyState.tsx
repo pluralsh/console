@@ -4,19 +4,12 @@ import {
   type Ref,
   forwardRef,
 } from 'react'
-import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 type EmptyStateProps = ComponentProps<typeof EmptyStateSC> & {
   message: string
   description?: string
   icon?: ReactElement
-}
-
-const propTypes = {
-  message: PropTypes.string.isRequired,
-  description: PropTypes.string,
-  icon: PropTypes.element,
 }
 
 const EmptyStateSC = styled.div(({ theme }) => ({
@@ -59,7 +52,5 @@ function EmptyStateRef(
 }
 
 const EmptyState = forwardRef(EmptyStateRef)
-
-EmptyState.propTypes = propTypes
 
 export default EmptyState

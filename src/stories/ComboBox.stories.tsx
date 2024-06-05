@@ -1,9 +1,11 @@
 import { Flex } from 'honorable'
-import { type ComponentProps, type Key, useMemo, useState } from 'react'
+import { type ComponentProps, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import Fuse from 'fuse.js'
 
 import { isEqual, uniqWith } from 'lodash-es'
+
+import { type Key } from '@react-types/shared'
 
 import {
   AppIcon,

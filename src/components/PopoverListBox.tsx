@@ -18,7 +18,7 @@ type PopoverListBoxProps = {
   isOpen: boolean
   onClose: () => void
   listBoxState: ListState<object>
-  listBoxProps: AriaListBoxOptions<object>
+  listBoxProps: Omit<AriaListBoxOptions<object>, 'autoFocus'>
   floating: UseFloatingReturn<any>
 } & Pick<PopoverProps, 'popoverRef'> &
   Pick<ListBoxUnmanagedProps, 'listBoxRef'> &

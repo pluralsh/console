@@ -94,8 +94,6 @@ type VirtualSlice = {
   end: VirtualItem | undefined
 }
 
-const propTypes = {}
-
 function getGridTemplateCols(columnDefs: ColumnDef<unknown>[] = []): string {
   return columnDefs
     .reduce(
@@ -866,7 +864,5 @@ function TableRef(
 }
 
 const Table = forwardRef(TableRef)
-
-Table.propTypes = propTypes
 
 export default Table

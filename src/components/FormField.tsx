@@ -1,6 +1,5 @@
 import { type AriaLabelingProps, type DOMProps } from '@react-types/shared'
 import { Div, type DivProps, Flex, Label, P } from 'honorable'
-import PropTypes from 'prop-types'
 import {
   type LabelHTMLAttributes,
   type PropsWithChildren,
@@ -43,16 +42,6 @@ export function useFormField() {
   const context = useContext(FormFieldContext)
 
   return context
-}
-
-const propTypes = {
-  label: PropTypes.node,
-  caption: PropTypes.node,
-  hint: PropTypes.node,
-  length: PropTypes.number,
-  maxLength: PropTypes.number,
-  required: PropTypes.bool,
-  small: PropTypes.bool,
 }
 
 function FormFieldRef(
@@ -180,7 +169,5 @@ function FormFieldRef(
 }
 
 const FormField = forwardRef(FormFieldRef)
-
-FormField.propTypes = propTypes
 
 export default FormField

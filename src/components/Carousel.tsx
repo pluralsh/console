@@ -9,7 +9,6 @@ import {
 } from 'react'
 import { CSSTransition } from 'react-transition-group'
 import { keyframes } from '@emotion/react'
-import PropTypes from 'prop-types'
 
 type DotProps = DivProps & {
   active?: boolean
@@ -18,10 +17,6 @@ type DotProps = DivProps & {
 
 export type CarouselProps = DivProps & {
   autoAdvanceTime?: number
-}
-
-const propTypes = {
-  autoAdvanceTime: PropTypes.number,
 }
 
 const dotAnimationIn = keyframes`
@@ -171,7 +166,5 @@ function CarouselRef(
 }
 
 const Carousel = forwardRef(CarouselRef)
-
-Carousel.propTypes = propTypes
 
 export default Carousel

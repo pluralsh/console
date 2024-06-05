@@ -1,7 +1,12 @@
-import { type ComponentProps, useState } from 'react'
+import {
+  type ComponentProps,
+  type ComponentType,
+  type RefAttributes,
+  useState,
+} from 'react'
 import { Flex } from 'honorable'
 
-import TextSwitch from '../components/TextSwitch'
+import TextSwitch, { type TextSwitchProps } from '../components/TextSwitch'
 
 export default {
   title: 'TextSwitch',
@@ -12,6 +17,15 @@ export default {
       control: { type: 'select' },
     },
   },
+} as {
+  title: string
+  component: ComponentType<TextSwitchProps & RefAttributes<any>>
+  argTypes: {
+    size: {
+      options: string[]
+      control: { type: string }
+    }
+  }
 }
 
 const options1 = [

@@ -3,7 +3,6 @@ import { isEmpty, isUndefined, omit, pick } from 'lodash-es'
 import {
   type ComponentProps,
   type HTMLAttributes,
-  type Key,
   type KeyboardEvent,
   type KeyboardEventHandler,
   type MouseEventHandler,
@@ -24,6 +23,8 @@ import {
   useComboBoxState,
 } from 'react-stately'
 import styled, { useTheme } from 'styled-components'
+
+import { type Key } from '@react-types/shared'
 
 import { useFloatingDropdown } from '../hooks/useFloatingDropdown'
 

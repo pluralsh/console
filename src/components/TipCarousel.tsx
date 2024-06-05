@@ -3,8 +3,6 @@ import { Div, P } from 'honorable'
 
 import Carousel, { type CarouselProps } from './Carousel'
 
-const propTypes = {}
-
 function TipCarouselRef({ children, ...props }: CarouselProps, ref: Ref<any>) {
   return (
     <Carousel
@@ -35,7 +33,5 @@ function TipCarouselRef({ children, ...props }: CarouselProps, ref: Ref<any>) {
 }
 
 const TipCarousel = forwardRef(TipCarouselRef)
-
-TipCarousel.propTypes = propTypes
 
 export default TipCarousel

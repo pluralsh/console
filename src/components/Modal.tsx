@@ -1,5 +1,4 @@
 import { type ReactNode, type Ref, forwardRef, useEffect } from 'react'
-import PropTypes from 'prop-types'
 
 import styled, { type StyledComponentPropsWithRef } from 'styled-components'
 
@@ -39,15 +38,6 @@ type ModalPropsType = Omit<ModalProps, 'size'> & {
   scrollable?: boolean
   [x: string]: unknown
 }
-
-const propTypes = {
-  form: PropTypes.bool,
-  size: PropTypes.oneOf(SIZES),
-  header: PropTypes.node,
-  actions: PropTypes.node,
-  severity: PropTypes.oneOf(SEVERITIES),
-  lockBody: PropTypes.bool,
-} as const
 
 const severityToIconColorKey = {
   default: 'icon-default',
@@ -208,7 +198,5 @@ function ModalRef(
 }
 
 const Modal = forwardRef(ModalRef)
-
-Modal.propTypes = propTypes
 
 export default Modal

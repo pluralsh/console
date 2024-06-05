@@ -1,6 +1,5 @@
 import { type ReactNode, type Ref, forwardRef } from 'react'
 import { Div, Flex, type FlexProps, Span, type SpanProps } from 'honorable'
-import PropTypes from 'prop-types'
 import styled from 'styled-components'
 
 import { type ColorKey, type SeverityExt, sanitizeSeverity } from '../types'
@@ -176,10 +175,5 @@ function BannerRef(
 }
 
 const Banner = forwardRef(BannerRef)
-
-Banner.propTypes = {
-  severity: PropTypes.oneOf(BANNER_SEVERITIES),
-  onClose: PropTypes.func,
-}
 
 export default Banner

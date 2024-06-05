@@ -11,8 +11,6 @@ type CodelineProps = FlexProps & {
   onCopyClick?: (text: string) => Promise<void>
 }
 
-const propTypes = {}
-
 function CodelineRef(
   { children, displayText, onCopyClick, ...props }: CodelineProps,
   ref: Ref<any>
@@ -109,7 +107,5 @@ function CodelineRef(
 }
 
 const Codeline = forwardRef(CodelineRef)
-
-Codeline.propTypes = propTypes
 
 export default Codeline

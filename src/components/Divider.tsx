@@ -1,15 +1,10 @@
 import { type Ref, forwardRef } from 'react'
 import { Div, Flex, type FlexProps, P } from 'honorable'
-import PropTypes from 'prop-types'
 
 type DividerProps = FlexProps & {
   text?: string
   color?: string
   backgroundColor?: string
-}
-
-const propTypes = {
-  text: PropTypes.string,
 }
 
 function DividerRef(
@@ -54,7 +49,5 @@ function DividerRef(
 }
 
 const Divider = forwardRef(DividerRef)
-
-Divider.propTypes = propTypes
 
 export default Divider

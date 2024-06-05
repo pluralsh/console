@@ -1,5 +1,4 @@
 import {
-  type Key,
   type PropsWithChildren,
   type ReactNode,
   createContext,
@@ -8,6 +7,8 @@ import {
   useState,
 } from 'react'
 import styled from 'styled-components'
+
+import { type Key } from '@react-types/shared'
 
 import { TabList, TabPanel } from '../../index'
 import type { TabListStateProps } from '../../index'

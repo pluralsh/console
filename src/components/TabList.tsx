@@ -3,13 +3,12 @@ import { type AriaTabListProps } from '@react-types/tabs'
 import { useTab, useTabList } from 'react-aria'
 import { mergeRefs } from '@react-aria/utils'
 import { type TabListState, useTabListState } from 'react-stately'
-import { type Node } from '@react-types/shared'
+import { type Key, type Node } from '@react-types/shared'
 import {
   Children,
   type ComponentProps,
   type ForwardedRef,
   type HTMLAttributes,
-  type Key,
   type MutableRefObject,
   type ReactElement,
   type ReactNode,

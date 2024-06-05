@@ -1,11 +1,7 @@
-import {
-  type ComponentProps,
-  type Key,
-  forwardRef,
-  useEffect,
-  useState,
-} from 'react'
+import { type ComponentProps, forwardRef, useEffect, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+
+import { type Key } from '@react-types/shared'
 
 import {
   AppIcon,

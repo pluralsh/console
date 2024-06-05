@@ -1,6 +1,5 @@
 import {
   type HTMLAttributes,
-  type Key,
   type ReactElement,
   type ReactNode,
   type RefObject,
@@ -14,6 +13,8 @@ import styled, { useTheme } from 'styled-components'
 import { type AriaSelectProps } from '@react-types/select'
 
 import { type Placement } from '@floating-ui/react-dom-interactions'
+
+import { type Key } from '@react-types/shared'
 
 import {
   type BimodalSelectProps,

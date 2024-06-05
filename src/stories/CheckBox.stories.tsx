@@ -1,5 +1,7 @@
 import { Div } from 'honorable'
-import { type Key, useState } from 'react'
+import { useState } from 'react'
+
+import { type Key } from '@react-types/shared'
 
 import { Button, Checkbox } from '..'
 

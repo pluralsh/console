@@ -1,5 +1,7 @@
 import { Div, Flex, H1 } from 'honorable'
-import { type Key, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
+
+import { type Key } from '@react-types/shared'
 
 import { SubTab, TabList, type TabListStateProps, TabPanel } from '..'
 

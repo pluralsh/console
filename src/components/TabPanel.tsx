@@ -3,7 +3,6 @@ import { mergeProps, useTabPanel, useVisuallyHidden } from 'react-aria'
 import { mergeRefs } from '@react-aria/utils'
 import {
   type ComponentProps,
-  type Key,
   type MutableRefObject,
   type ReactElement,
   type Ref,
@@ -16,6 +15,8 @@ import {
 } from 'react'
 
 import styled from 'styled-components'
+
+import { type Key } from '@react-types/shared'
 
 import { type MakeOptional, type Renderer, type TabStateRef } from './TabList'
 

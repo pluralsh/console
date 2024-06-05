@@ -1,5 +1,4 @@
 import classNames from 'classnames'
-import PropTypes from 'prop-types'
 import { type Dispatch, type PropsWithChildren, forwardRef, useId } from 'react'
 import styled, { useTheme } from 'styled-components'
 
@@ -374,13 +373,5 @@ const CalloutSC = styled.div<{
       }
     : {}),
 }))
-
-Callout.propTypes = {
-  severity: PropTypes.oneOf(CALLOUT_SEVERITIES),
-  title: PropTypes.string,
-  size: PropTypes.oneOf(['compact', 'full']),
-  fillLevel: PropTypes.oneOf([0, 1, 2, 3]),
-  className: PropTypes.string,
-}
 
 export default Callout
