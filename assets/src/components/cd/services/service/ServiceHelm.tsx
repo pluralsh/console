@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Button, usePrevious } from '@pluralsh/design-system'
+import { Button, usePrevious, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import isEmpty from 'lodash/isEmpty'
 
 import {
   CD_ABS_PATH,
+  CD_REL_PATH,
   SERVICES_REL_PATH,
-  SERVICE_PARAM_ID,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 import {
@@ -24,14 +24,33 @@ import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import { ServiceSettingsHelmValues } from '../deployModal/DeployServiceSettingsHelmValues'
 
-import { useServiceContext } from './ServiceDetails'
+import {
+  getServiceDetailsBreadcrumbs,
+  useServiceContext,
+} from './ServiceDetails'
 
 export default function ServiceHelm() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const serviceId = useParams()[SERVICE_PARAM_ID]
+  const { serviceId, clusterId } = useParams()
   const { service } = useServiceContext()
   const prevServiceId = usePrevious(service.id)
+
+  const breadcrumbs = useMemo(
+    () => [
+      ...getServiceDetailsBreadcrumbs({
+        cluster: service?.cluster || { id: clusterId || '' },
+        service: service || { id: serviceId || '' },
+      }),
+      {
+        label: 'helm',
+        url: `${CD_REL_PATH}/services/${serviceId}/helm`,
+      },
+    ],
+    [clusterId, service, serviceId]
+  )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   const filteredValuesFiles = service?.helm?.valuesFiles?.filter(isNonNullable)
 

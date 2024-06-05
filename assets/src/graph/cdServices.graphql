@@ -36,6 +36,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   cluster {
     id
     name
+    handle
     provider {
       name
       cloud
