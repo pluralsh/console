@@ -695,6 +695,8 @@ type RootMutationType {
 
   deleteGlobalService(id: ID!): GlobalService
 
+  syncGlobalService(id: ID!): GlobalService
+
   createManagedNamespace(attributes: ManagedNamespaceAttributes!): ManagedNamespace
 
   updateManagedNamespace(id: ID!, attributes: ManagedNamespaceAttributes!): ManagedNamespace

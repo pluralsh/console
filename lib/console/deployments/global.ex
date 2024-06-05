@@ -52,6 +52,16 @@ defmodule Console.Deployments.Global do
 
   def create(attrs, %User{} = user), do: create(attrs, nil, user)
 
+  @doc """
+  Force syncs a global service to any target cluster
+  """
+  @spec sync(GlobalService.t, User.t) :: global_resp
+  def sync(%GlobalService{} = global, %User{} = user) do
+    with {:ok, global} <- allow(global, user, :write),
+         :ok <- sync_clusters(global),
+      do: {:ok, global}
+  end
+
 
   @doc """
   Updates a global service by id
@@ -205,8 +215,16 @@ defmodule Console.Deployments.Global do
     |> Services.create_service(id, user)
   end
 
-  def add_to_cluster(%GlobalService{id: gid, service_id: sid}, %Cluster{id: cid}, user),
-    do: Services.clone_service(%{owner_id: gid}, sid, cid, user)
+  def add_to_cluster(%GlobalService{id: gid, service_id: sid} = global, %Cluster{id: cid}, user) do
+    global = load_configuration(global)
+    case {global, Services.get_service_by_name(cid, svc_name(global))} do
+      {%GlobalService{id: id}, %Service{owner_id: id} = svc} -> sync_service(global, svc, user)
+      {%GlobalService{reparent: true}, %Service{} = svc} -> sync_service(global, svc, user)
+      {%GlobalService{}, nil} -> Services.clone_service(%{owner_id: gid}, sid, cid, user)
+      {_, svc} -> {:error, {:already_exists, svc}}
+    end
+  end
+
 
   @doc """
   Ensures a managed namespace is synchronized across all target clusters
@@ -306,19 +324,14 @@ defmodule Console.Deployments.Global do
     global = load_configuration(global)
     bot = bot()
 
-    service_ids = GlobalService.service_ids(gid) |> Repo.all() |> MapSet.new()
+    service_ids = GlobalService.service_ids(gid)
+                  |> Repo.all()
+                  |> MapSet.new()
 
     Cluster.ignore_ids(if not is_nil(svc), do: [svc.cluster_id], else: [])
     |> Cluster.target(global)
     |> Repo.all()
-    |> Enum.map(fn %{id: cluster_id} = cluster ->
-      case {global, Services.get_service_by_name(cluster_id, svc_name(global))} do
-        {_, %Service{owner_id: ^gid} = dest} -> sync_service(global, dest, bot)
-        {%GlobalService{reparent: true}, %Service{} = dest} -> sync_service(global, dest, bot)
-        {_, %Service{}} -> :ok # ignore if the service was created out of band
-        {_, nil} -> add_to_cluster(global, cluster, bot)
-      end
-    end)
+    |> Enum.map(&add_to_cluster(global, &1, bot))
     |> Enum.map(fn
       {:ok, %Service{id: id}} -> id
       %Service{id: id} -> id
@@ -370,6 +383,8 @@ defmodule Console.Deployments.Global do
     |> Stream.map(fn global ->
       case add_to_cluster(global, cluster) do
         {:ok, svc} -> svc
+        %Service{} = svc -> svc
+        {:error, {:already_exists, svc}} -> svc
         _ -> get_service(global, cluster.id)
       end
     end)

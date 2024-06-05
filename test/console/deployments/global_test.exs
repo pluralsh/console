@@ -272,6 +272,44 @@ defmodule Console.Deployments.GlobalTest do
       refute Global.diff?(source, synced)
     end
 
+    test "it will reparent legacy services when present" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      git = insert(:git_repository)
+      cluster = insert(:cluster)
+      admin = admin_user()
+
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, admin)
+
+      global = insert(:global_service, reparent: true, service: source, distro: :eks, tags: [%{name: "sync", value: "test"}])
+      sync = insert(:cluster, distro: :eks, tags: [%{name: "sync", value: "test"}])
+      ignore1 = insert(:cluster, distro: :eks)
+      ignore2 = insert(:cluster, distro: :k3s, tags: [%{name: "sync", value: "test"}])
+
+      {:ok, legacy} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: git.id,
+        git: %{ref: "main", folder: "wrong"},
+        configuration: [%{name: "name", value: "value"}]
+      }, sync, admin)
+
+      :ok = Global.sync_clusters(global)
+
+      refute Services.get_service_by_name(ignore1.id, "source")
+      refute Services.get_service_by_name(ignore2.id, "source")
+
+      synced = Services.get_service_by_name(sync.id, "source")
+      assert synced.id == legacy.id
+      assert synced.owner_id == global.id
+      refute Global.diff?(source, synced)
+    end
+
     test "it will sync too if provider is unspecified" do
       insert(:user, bot_name: "console", roles: %{admin: true})
       git = insert(:git_repository)

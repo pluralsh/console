@@ -170,7 +170,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	existingGlobalService, err := r.ConsoleClient.GetGlobalService(globalService.Status.GetID())
 	if errors.IsNotFound(err) {
 		globalService.Status.ID = nil
-		return ctrl.Result{}, r.handleCreate(sha, globalService, service, attr)
+		return requeue, r.handleCreate(sha, globalService, service, attr)
 	}
 
 	if err != nil {
@@ -182,7 +182,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		_, err := r.ConsoleClient.UpdateGlobalService(existingGlobalService.ID, attr)
 		if err != nil {
 			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+			return requeue, err
 		}
 	}
 
