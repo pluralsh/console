@@ -351,6 +351,8 @@ type RootQueryType {
 
   managedNamespace(id: ID!): ManagedNamespace
 
+  customStackRun(id: ID!): CustomStackRun
+
   clusterStackRuns(after: String, first: Int, before: String, last: Int): StackRunConnection
 
   stackRun(id: ID!): StackRun

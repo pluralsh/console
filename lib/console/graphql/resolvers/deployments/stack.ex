@@ -59,6 +59,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     |> allow(user, :read)
   end
 
+  def resolve_custom_stack_run(%{id: id}, %{context: %{current_user: user}}) do
+    Stacks.get_custom_run!(id)
+    |> allow(user, :read)
+  end
+
   def create_stack(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Stacks.create_stack(attrs, user)
 

@@ -42,6 +42,9 @@ defmodule Console.Deployments.Stacks do
   @spec get_step!(binary) :: RunStep.t
   def get_step!(id), do: Repo.get!(RunStep, id)
 
+  @spec get_custom_run!(binary) :: CustomStackRun.t | nil
+  def get_custom_run!(id), do: Repo.get!(CustomStackRun, id)
+
   def preloaded(%Stack{} = stack), do: Repo.preload(stack, @preloads)
 
   @spec authorized(binary, Cluster.t) :: run_resp

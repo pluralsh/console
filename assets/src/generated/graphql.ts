@@ -4967,6 +4967,7 @@ export type RootQueryType = {
   configurationOverlays?: Maybe<Array<Maybe<ConfigurationOverlay>>>;
   context?: Maybe<Array<Maybe<RepositoryContext>>>;
   cronJob?: Maybe<CronJob>;
+  customStackRun?: Maybe<CustomStackRun>;
   daemonSet?: Maybe<DaemonSet>;
   dashboard?: Maybe<Dashboard>;
   dashboards?: Maybe<Array<Maybe<Dashboard>>>;
@@ -5270,6 +5271,11 @@ export type RootQueryTypeCronJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeCustomStackRunArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
