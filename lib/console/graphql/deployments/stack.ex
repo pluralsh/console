@@ -309,6 +309,13 @@ defmodule Console.GraphQl.Deployments.Stack do
   delta :run_logs
 
   object :public_stack_queries do
+    field :custom_stack_run, :custom_stack_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_custom_stack_run/2
+    end
+
     connection field :cluster_stack_runs, node_type: :stack_run do
       middleware ClusterAuthenticated
 
