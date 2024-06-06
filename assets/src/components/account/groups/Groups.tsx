@@ -12,6 +12,8 @@ import { GroupsList } from './GroupsList'
 import GroupCreate from './GroupCreate'
 import GroupSearchHeader from './GroupsSearchHeader'
 
+export const GROUPS_QUERY_PAGE_SIZE = 100
+
 export function Groups() {
   const theme = useTheme()
   const [q, setQ] = useState('')
