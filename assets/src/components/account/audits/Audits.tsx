@@ -1,13 +1,12 @@
-import { Key, useMemo, useRef, useState } from 'react'
-import { SubTab, TabList, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Key, useRef, useState } from 'react'
+import { SubTab, TabList } from '@pluralsh/design-system'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
-import { BREADCRUMBS } from '../Account'
 
 const DIRECTORY = [
-  { path: 'table', label: 'Table view' },
-  { path: 'graph', label: 'Graph view' },
+  { path: 'list', label: 'List view' },
+  { path: 'map', label: 'Map view' },
 ]
 
 export default function Audits() {
@@ -18,13 +17,6 @@ export default function Audits() {
     DIRECTORY.find((tab) => pathname?.startsWith(`/audits/${tab.path}`))
       ?.path || DIRECTORY[0].path
   const [view, setView] = useState<Key>(currentView)
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [...BREADCRUMBS, { label: 'audits', url: '/account/audits' }],
-      []
-    )
-  )
 
   return (
     <ScrollablePage

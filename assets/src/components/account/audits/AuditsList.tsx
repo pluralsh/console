@@ -1,4 +1,4 @@
-import { AppIcon, Table } from '@pluralsh/design-system'
+import { AppIcon, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
@@ -7,15 +7,13 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { Link } from 'react-router-dom'
-
 import { useTheme } from 'styled-components'
 
 import { InlineLink } from '../../utils/typography/InlineLink'
-
 import { formatLocation } from '../../../utils/geo'
-
 import { StackedText } from '../../utils/table/StackedText'
 import { useAuditsQuery } from '../../../generated/graphql'
+import { BREADCRUMBS } from '../Account'
 
 const FETCH_MARGIN = 30
 
@@ -125,7 +123,18 @@ const columns = [
   }),
 ]
 
-export default function AuditsTable() {
+export default function AuditsList() {
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...BREADCRUMBS,
+        { label: 'audits', url: '/account/audits' },
+        { label: 'list', url: '/account/audits/list' },
+      ],
+      []
+    )
+  )
+
   const { data, loading, fetchMore } = useAuditsQuery({
     fetchPolicy: 'cache-and-network',
   })

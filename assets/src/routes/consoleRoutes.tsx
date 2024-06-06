@@ -6,8 +6,8 @@ import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
 
 import Audits from 'components/account/audits/Audits'
-import AuditsTable from 'components/account/audits/AuditTable'
-import AuditsGraph from 'components/account/audits/AuditsGraph'
+import AuditsList from 'components/account/audits/AuditsList'
+import AuditsMap from 'components/account/audits/AuditsMap'
 
 import MyProfile from 'components/profile/MyProfile'
 import { Profile } from 'components/profile/Profile'
@@ -162,17 +162,17 @@ const accountRoutes = [
         element={
           <Navigate
             replace
-            to="table"
+            to="list"
           />
         }
       />
       <Route
-        path="table"
-        element={<AuditsTable />}
+        path="list"
+        element={<AuditsList />}
       />
       <Route
-        path="graph"
-        element={<AuditsGraph />}
+        path="map"
+        element={<AuditsMap />}
       />
     </Route>
     ,
