@@ -1,16 +1,27 @@
 import { Flex } from 'honorable'
-import { useContext } from 'react'
+import { useMemo } from 'react'
 
-import { LoginContext } from 'components/contexts'
+import { useLogin } from 'components/contexts'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
+import { BREADCRUMBS } from '../Account'
 
 import { OIDCInvite } from './OIDCInvite'
 import UserInvite from './UserInvite'
 import UserList from './UsersList'
 
 export default function Users() {
-  const { configuration } = useContext(LoginContext)
+  const { configuration } = useLogin()
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...BREADCRUMBS, { label: 'users', url: '/account/users' }],
+      []
+    )
+  )
 
   return (
     <ScrollablePage

@@ -1,10 +1,12 @@
-import { useContext, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
-import { Input, SearchIcon } from '@pluralsh/design-system'
+import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
+
+import { BREADCRUMBS } from '../Account'
 
 import { GroupsList } from './GroupsList'
 import GroupCreate from './GroupCreate'
@@ -13,6 +15,13 @@ export function Groups() {
   const [q, setQ] = useState('')
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...BREADCRUMBS, { label: 'groups', url: '/account/groups' }],
+      []
+    )
+  )
 
   return (
     <ScrollablePage

@@ -51,7 +51,7 @@ const getDirectory = (
   },
 ]
 
-const breadcrumbs: Breadcrumb[] = [{ label: 'account', url: '/account' }]
+export const BREADCRUMBS: Breadcrumb[] = [{ label: 'account', url: '/account' }]
 
 export default function Account() {
   const theme = useTheme()
@@ -60,7 +60,7 @@ export default function Account() {
   const { pathname } = useLocation()
   const pathPrefix = '/account'
 
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs(BREADCRUMBS)
 
   if (!me) return null
 

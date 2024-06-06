@@ -1,39 +1,14 @@
-import { Key, useRef, useState } from 'react'
-import { Box, Text } from 'grommet'
+import { Key, useMemo, useRef, useState } from 'react'
 import { SubTab, TabList, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { Flex, Span } from 'honorable'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
-import Avatar from '../../utils/Avatar'
-
-export function AvatarCell({ user, width }) {
-  return (
-    <Box
-      flex={false}
-      direction="row"
-      width={width}
-      align="center"
-      gap="xsmall"
-    >
-      <Avatar
-        user={user}
-        size="30px"
-        onClick={undefined}
-        round={undefined}
-      />
-      <Text size="small">{user.email}</Text>
-    </Box>
-  )
-}
+import { ScrollablePage } from '../../utils/layout/ScrollablePage'
+import { BREADCRUMBS } from '../Account'
 
 const DIRECTORY = [
   { path: 'table', label: 'Table view' },
   { path: 'graph', label: 'Graph view' },
 ]
-
-const breadcrumbs = [{ label: 'audits', url: '/audits' }]
 
 export default function Audits() {
   const navigate = useNavigate()
@@ -44,42 +19,44 @@ export default function Audits() {
       ?.path || DIRECTORY[0].path
   const [view, setView] = useState<Key>(currentView)
 
-  useSetBreadcrumbs(breadcrumbs)
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...BREADCRUMBS, { label: 'audits', url: '/account/audits' }],
+      []
+    )
+  )
 
   return (
-    <ResponsivePageFullWidth
+    <ScrollablePage
       scrollable={false}
       heading="Audits"
       headingContent={
-        <>
-          <Flex grow={1} />
-          <TabList
-            gap="xxsmall"
-            margin={1}
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              // @ts-ignore
-              selectedKey: view,
-              onSelectionChange: (view) => {
-                setView(view)
-                navigate(view as string)
-              },
-            }}
-          >
-            {DIRECTORY.map(({ path, label }) => (
-              <SubTab
-                key={path}
-                textValue={label}
-              >
-                <Span fontWeight={600}>{label}</Span>
-              </SubTab>
-            ))}
-          </TabList>
-        </>
+        <TabList
+          gap="xxsmall"
+          margin={1}
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            // @ts-ignore
+            selectedKey: view,
+            onSelectionChange: (view) => {
+              setView(view)
+              navigate(view as string)
+            },
+          }}
+        >
+          {DIRECTORY.map(({ path, label }) => (
+            <SubTab
+              key={path}
+              textValue={label}
+            >
+              {label}
+            </SubTab>
+          ))}
+        </TabList>
       }
     >
       <Outlet />
-    </ResponsivePageFullWidth>
+    </ScrollablePage>
   )
 }

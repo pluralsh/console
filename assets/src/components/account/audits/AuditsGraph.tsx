@@ -4,7 +4,7 @@ import { byIso } from 'country-code-lookup'
 import { Chloropleth } from 'components/utils/Chloropleth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { AUDIT_METRICS } from '../queries'
+import { AUDIT_METRICS } from './queries'
 
 export default function AuditsGraph() {
   const { data } = useQuery(AUDIT_METRICS, { fetchPolicy: 'cache-and-network' })
