@@ -2051,6 +2051,8 @@ export type InfrastructureStack = {
   runs?: Maybe<StackRunConnection>;
   /** the most recent state of this stack */
   state?: Maybe<StackState>;
+  /** key/value tags to filter stacks */
+  tags?: Maybe<Array<Maybe<Tag>>>;
   /** A type for the stack, specifies the tool to use to apply it */
   type: StackType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -6736,6 +6738,7 @@ export type StackAttributes = {
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** The repository to source IaC from */
   repositoryId: Scalars['ID']['input'];
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   /** A type for the stack, specifies the tool to use to apply it */
   type: StackType;
   /** the subdirectory you want to run the stack's commands w/in */

@@ -1026,6 +1026,8 @@ input StackAttributes {
 
   writeBindings: [PolicyBindingAttributes]
 
+  tags: [TagAttributes]
+
   files: [StackFileAttributes]
 
   environment: [StackEnvironmentAttributes]
@@ -1216,6 +1218,9 @@ type InfrastructureStack {
   actor: User
 
   customStackRuns(after: String, first: Int, before: String, last: Int): CustomStackRunConnection
+
+  "key\/value tags to filter stacks"
+  tags: [Tag]
 
   readBindings: [PolicyBinding]
 
