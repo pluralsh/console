@@ -6,8 +6,6 @@ import { isEmpty } from 'lodash'
 
 import { Row } from '@tanstack/react-table'
 
-import { original } from 'immer'
-
 import { useNavigate } from 'react-router-dom'
 
 import { ScrollablePage } from '../../../utils/layout/ScrollablePage'

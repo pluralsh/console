@@ -6,8 +6,8 @@ import { TableText } from 'components/cluster/TableElements'
 import {
   ArrowTopRightIcon,
   BlockedIcon,
+  Chip,
   IconFrame,
-  Tooltip,
 } from '@pluralsh/design-system'
 
 import styled, { useTheme } from 'styled-components'
@@ -166,19 +166,23 @@ const colKubVersion = columnHelperRuntime.accessor((row) => row?.addonVersion, {
 })
 const colBlocking = columnHelperRuntime.accessor((row) => row?.addonVersion, {
   id: 'blocking',
-  header: 'Blocks k8s upgrade',
-  cell: ({ getValue }) => {
+  header: 'Blocks upgrade',
+  cell: function Cell({ getValue }) {
+    const theme = useTheme()
     const addonVersion = getValue()
 
     if (!addonVersion?.blocking) return null
 
     return (
-      <Tooltip label="Blocking">
+      <Chip severity="danger">
         <BlockedIcon
           color="icon-danger"
-          size={16}
+          size={theme.spacing.small}
         />
-      </Tooltip>
+        <span css={{ alignSelf: 'center', marginLeft: theme.spacing.xxsmall }}>
+          Blocking
+        </span>
+      </Chip>
     )
   },
 })

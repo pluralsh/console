@@ -14,8 +14,10 @@ export function getClusterKubeVersion(
 
 export default function RuntimeServices({
   data,
+  flush,
 }: {
   data?: RuntimeServicesQuery
+  flush?: boolean
 }) {
   const addOns = useMemo(
     () => data?.cluster?.runtimeServices?.filter(isNonNullable) || [],
@@ -27,6 +29,7 @@ export default function RuntimeServices({
 
   return (
     <Table
+      flush={flush}
       data={addOns}
       columns={runtimeColumns}
       reactTableOptions={{ meta: { clusterId: data?.cluster?.id } }}

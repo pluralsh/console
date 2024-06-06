@@ -32,7 +32,7 @@ export default function ClusterUpgrade({
     <>
       <Button
         small
-        floating
+        secondary
         minWidth="fit-content"
         startIcon={
           numUpgrades < 2 ? (

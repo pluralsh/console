@@ -71,6 +71,7 @@ export function PoliciesTable({
         flexDirection: 'column',
         gap: theme.spacing.small,
         height: '100%',
+        width: '100%',
       }}
     >
       {!data ? (

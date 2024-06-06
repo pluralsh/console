@@ -2,11 +2,11 @@ import {
   Accordion,
   AppIcon,
   Button,
+  ChecklistIcon,
   ClusterIcon,
   ConfettiIcon,
   Flyover,
   ListBoxItem,
-  MarketPlusIcon,
   Select,
   SuccessIcon,
   Table,
@@ -319,18 +319,20 @@ function FlyoverContent({ open, cluster, refetch }) {
           meta: { refetch, setError, data },
         }}
       />
-      <Accordion
+      <FlyoverAccordionSC
+        padContent={isEmpty(apiDeprecations)}
         label={
           <ClusterUpgradeAccordionTrigger
             checked={cluster?.upgradePlan?.deprecations || false}
-            icon={ClusterIcon}
-            title="Check API Deprecations"
-            subtitle="Ensure that all k8s yaml you're deploying is conformant with the next k8s version"
+            icon={ChecklistIcon}
+            title="Check API deprecations"
+            subtitle="Ensure that all K8s YAML you're deploying is conformant with the next K8s version"
           />
         }
       >
         {!isEmpty(apiDeprecations) ? (
           <Table
+            flush
             data={apiDeprecations || []}
             columns={deprecationsColumns}
             css={{
@@ -341,35 +343,39 @@ function FlyoverContent({ open, cluster, refetch }) {
         ) : (
           <EmptyState description="No services with api deprecations discovered!" />
         )}
-      </Accordion>
-      <Accordion
+      </FlyoverAccordionSC>
+      <FlyoverAccordionSC
+        padContent={isEmpty(runtimeServices)}
         label={
           <ClusterUpgradeAccordionTrigger
             checked={cluster?.upgradePlan?.compatibilities || false}
-            icon={MarketPlusIcon}
-            title="Check Add-On Compatibilities"
-            subtitle="Ensure all known third-party add-ons are supported on the next k8s version"
+            icon={ChecklistIcon}
+            title="Check add-on compatibilities"
+            subtitle="Ensure all known third-party add-ons are supported on the next K8s version"
           />
         }
       >
         {!isEmpty(runtimeServices) ? (
-          <RuntimeServices data={data} />
+          <RuntimeServices
+            flush
+            data={data}
+          />
         ) : (
           <EmptyState description="No known add-ons found" />
         )}
-      </Accordion>
-      <Accordion
+      </FlyoverAccordionSC>
+      <FlyoverAccordionSC
         label={
           <ClusterUpgradeAccordionTrigger
             checked={cluster?.upgradePlan?.incompatibilities || false}
-            icon={MarketPlusIcon}
-            title="Check Add-On Mutual Incompatibilities"
+            icon={ChecklistIcon}
+            title="Check add-on mutual incompatibilities"
             subtitle="Use suggested version for each add-on to resolve mutual incompatibilities"
           />
         }
       >
         <EmptyState description="No mutually incompatible add-ons detected!" />
-      </Accordion>
+      </FlyoverAccordionSC>
     </div>
   )
 }
@@ -456,12 +462,9 @@ function ClusterUpgradeAccordionTrigger({
         size="xxsmall"
         icon={
           checked ? (
-            <SuccessIcon
-              width={16}
-              color="icon-success"
-            />
+            <SuccessIcon color="icon-success" />
           ) : (
-            <Icon width={16} />
+            <Icon color="icon-warning" />
           )
         }
       />
@@ -482,4 +485,8 @@ const TriggerWrapperSC = styled.div(({ theme }) => ({
   fontSize: '18px',
   display: 'flex',
   alignItems: 'center',
+}))
+
+const FlyoverAccordionSC = styled(Accordion)(({ theme }) => ({
+  backgroundColor: theme.colors['fill-one'],
 }))

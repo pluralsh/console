@@ -55,11 +55,11 @@ export function ClusterOverViewTable({
 export const ColActions = columnHelper.display({
   id: 'actions',
   meta: {
-    gridTemplate: 'minmax(25px, 50px)',
+    gridTemplate: 'minmax(auto, 80px)',
   },
   cell: ({ row: { original } }) => (
     <TableCaretLink
-      style={{ alignSelf: 'end' }}
+      css={{ alignSelf: 'end' }}
       to={getClusterDetailsPath({
         clusterId: original?.node?.id,
       })}
