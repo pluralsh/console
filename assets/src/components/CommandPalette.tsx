@@ -10,7 +10,6 @@ import {
   useMatches,
   useRegisterActions,
 } from 'kbar'
-import { type Merge } from 'type-fest'
 import {
   ComponentProps,
   Fragment,
@@ -23,6 +22,7 @@ import {
   useContext,
   useMemo,
 } from 'react'
+import { type Merge } from 'type-fest'
 
 import {
   ApiIcon,
@@ -47,6 +47,11 @@ import { useNavigate } from 'react-router-dom'
 import styled, { createGlobalStyle, useTheme } from 'styled-components'
 
 import {
+  ClusterAddOnFragment,
+  ClusterTinyFragment,
+  useClustersTinyQuery,
+} from 'generated/graphql'
+import {
   ADDONS_REL_PATH,
   CD_ABS_PATH,
   CLUSTERS_REL_PATH,
@@ -55,20 +60,15 @@ import {
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
-import {
-  ClusterAddOnFragment,
-  ClusterTinyFragment,
-  useClustersTinyQuery,
-} from 'generated/graphql'
 import { Edges } from 'utils/graphql'
 
 import { toNiceVersion } from 'utils/semver'
 
-import { getIcon, hasIcons } from './apps/misc'
 import { InstallationContext } from './Installations'
 import AppStatus from './apps/AppStatus'
-import { usePlatform } from './hooks/usePlatform'
+import { getIcon, hasIcons } from './apps/misc'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
+import { usePlatform } from './hooks/usePlatform'
 
 export enum PaletteSection {
   Actions = 'Actions',
@@ -361,7 +361,18 @@ function InstallAddonItem({ addon }: { addon: ClusterAddOnFragment }) {
 }
 
 const ResultItem = forwardRef(
-  ({ action, active, currentRootActionId }, ref: Ref<any>) => {
+  (
+    {
+      action,
+      active,
+      currentRootActionId,
+    }: {
+      action: any
+      active: boolean
+      currentRootActionId: Nullable<string>
+    },
+    ref: Ref<any>
+  ) => {
     const theme = useTheme()
     const ancestors = useMemo(() => {
       if (!currentRootActionId) return action.ancestors
