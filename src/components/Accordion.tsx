@@ -15,7 +15,7 @@ import styled, { useTheme } from 'styled-components'
 
 import useResizeObserver from '../hooks/useResizeObserver'
 import { type UseDisclosureProps, useDisclosure } from '../hooks/useDisclosure'
-import { CaretDownIcon } from '../icons'
+import { DropdownArrowIcon } from '../icons'
 
 import Card from './Card'
 import { AnimatedDiv } from './AnimatedDiv'
@@ -32,7 +32,7 @@ function AccordionTriggerUnstyled({
     <div {...props}>
       <div className="label">{children}</div>
       <div className="icon">
-        <CaretDownIcon size={14} />
+        <DropdownArrowIcon size={14} />
       </div>
     </div>
   )
