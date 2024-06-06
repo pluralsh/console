@@ -4,12 +4,21 @@ import {
 } from 'generated/graphql'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useEffect, useMemo } from 'react'
-import { Button, Switch, usePrevious } from '@pluralsh/design-system'
+import {
+  Button,
+  Switch,
+  usePrevious,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 
 import { useUpdateState } from 'components/hooks/useUpdateState'
 
 import { useTheme } from 'styled-components'
+
+import { CD_REL_PATH } from 'routes/cdRoutesConsts'
+
+import { useParams } from 'react-router-dom'
 
 import { ChartUpdate } from '../ServiceSettings'
 import {
@@ -17,12 +26,32 @@ import {
   ServiceGitRefField,
 } from '../deployModal/DeployServiceSettingsGit'
 
-import { useServiceContext } from './ServiceDetails'
+import {
+  getServiceDetailsBreadcrumbs,
+  useServiceContext,
+} from './ServiceDetails'
 
 export default function ServiceSettings() {
   const theme = useTheme()
   const { service } = useServiceContext()
   const prevServiceId = usePrevious(service.id)
+  const { serviceId, clusterId } = useParams()
+
+  const breadcrumbs = useMemo(
+    () => [
+      ...getServiceDetailsBreadcrumbs({
+        cluster: service?.cluster || { id: clusterId || '' },
+        service: service || { id: serviceId || '' },
+      }),
+      {
+        label: 'settings',
+        url: `${CD_REL_PATH}/services/${serviceId}/settings`,
+      },
+    ],
+    [clusterId, service, serviceId]
+  )
+
+  useSetBreadcrumbs(breadcrumbs)
 
   const {
     state,
