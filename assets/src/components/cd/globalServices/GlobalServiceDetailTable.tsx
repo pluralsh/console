@@ -40,7 +40,7 @@ export function GlobalServiceDetailTable({
   }
 
   return (
-    <FullHeightTableWrap>
+    <FullHeightTableWrap flex={1}>
       <Table
         virtualizeRows
         data={services || []}

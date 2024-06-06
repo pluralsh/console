@@ -1,12 +1,16 @@
-import { ComponentProps, useCallback, useMemo } from 'react'
 import {
   Chip,
   EmptyState,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { ComponentProps, useCallback, useMemo } from 'react'
 
-import { AuthMethod, useGetServiceDataQuery } from 'generated/graphql'
+import {
+  AuthMethod,
+  useGetServiceDataQuery,
+  useSyncGlobalServiceMutation,
+} from 'generated/graphql'
 import {
   CD_REL_PATH,
   GLOBAL_SERVICES_REL_PATH,
@@ -18,28 +22,26 @@ import { useParams } from 'react-router-dom'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
-import { Flex } from 'honorable'
-
 import { useTheme } from 'styled-components'
 
 import { extendConnection } from 'utils/graphql'
 
-import { Title1H1 } from 'components/utils/typography/Text'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import KickButton from 'components/utils/KickButton'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import { SERVICES_QUERY_PAGE_SIZE } from '../services/Services'
 
+import { GlobalServiceDetailTable } from './GlobalServiceDetailTable'
+import GlobalServiceSidecar from './GlobalServiceSidecar'
 import {
   ColDistribution,
   ColLastActivity,
   ColServiceName,
   ColTags,
 } from './GlobalServicesColumns'
-import { GlobalServiceDetailTable } from './GlobalServiceDetailTable'
-import GlobalServiceSidecar from './GlobalServiceSidecar'
 
 const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
   {
@@ -141,41 +143,44 @@ export default function GlobalServiceDetailView() {
 
   return (
     <ResponsivePageFullWidth scrollable={false}>
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: theme.spacing.small,
-          height: '100%',
-          flexGrow: 1,
-        }}
-      >
-        {!data ? (
-          <LoadingIndicator />
-        ) : services?.length ? (
-          <>
-            <Title1H1>{globalService?.name}</Title1H1>
-
-            <Flex
-              gap={theme.spacing.medium}
-              alignItems="flex-start"
-              height="85%"
-            >
-              <GlobalServiceDetailTable
-                data={data}
-                error={error}
-                fetchNextPage={fetchNextPage}
-                loading={loading}
-              />
-              <GlobalServiceSidecar globalService={globalService} />
-            </Flex>
-          </>
-        ) : (
-          <div css={{ height: '100%' }}>
-            <EmptyState message="Looks like this service does not exist." />
+      {!data ? (
+        <LoadingIndicator />
+      ) : services?.length ? (
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.medium,
+            alignItems: 'flex-start',
+            height: '100%',
+          }}
+        >
+          <GlobalServiceDetailTable
+            data={data}
+            error={error}
+            fetchNextPage={fetchNextPage}
+            loading={loading}
+          />
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.medium,
+            }}
+          >
+            <KickButton
+              kickMutationHook={useSyncGlobalServiceMutation}
+              message="Resync"
+              tooltipMessage="Sync this service now instead of at the next poll interval"
+              variables={{ id: globalService?.id }}
+            />
+            <GlobalServiceSidecar globalService={globalService} />
           </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div css={{ height: '100%' }}>
+          <EmptyState message="Looks like this service does not exist." />
+        </div>
+      )}
     </ResponsivePageFullWidth>
   )
 }

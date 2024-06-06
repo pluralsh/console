@@ -75,3 +75,9 @@ query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
     }
   }
 }
+
+mutation SyncGlobalService($id: ID!) {
+  syncGlobalService(id: $id) {
+    ...GlobalService
+  }
+}
