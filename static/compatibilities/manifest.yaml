@@ -16,3 +16,4 @@ names:
 - vitess
 - strimzi-kafka
 - contour
+- keda
