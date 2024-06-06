@@ -80,27 +80,48 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	if !stack.Status.IsSHAEqual(sha) {
+	// Check if resource already exists in the API and only sync the ID
+	exists, err := r.isAlreadyExists(ctx, stack)
+	if err != nil {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if !exists {
+		logger.Info("create custom stack run", "name", stack.CustomStackRunName())
+		attr, err := r.genCustomStackRunAttr(ctx, stack)
+		if err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+
+		st, err := r.ConsoleClient.CreateCustomStackRun(ctx, *attr)
+		if err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return ctrl.Result{}, err
+		}
+		stack.Status.ID = lo.ToPtr(st.ID)
+		stack.Status.SHA = lo.ToPtr(sha)
+		controllerutil.AddFinalizer(stack, CustomStackRunFinalizer)
+	}
+	if exists && !stack.Status.IsSHAEqual(sha) {
 		logger.Info("upsert custom stack run", "name", stack.CustomStackRunName())
 		attr, err := r.genCustomStackRunAttr(ctx, stack)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		ns, err := r.ConsoleClient.UpsertCustomStackRun(ctx, *attr)
+		_, err = r.ConsoleClient.UpdateCustomStackRun(ctx, stack.Status.GetID(), *attr)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		stack.Status.ID = lo.ToPtr(ns.ID)
 		stack.Status.SHA = lo.ToPtr(sha)
-		controllerutil.AddFinalizer(stack, CustomStackRunFinalizer)
 	}
 
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return ctrl.Result{}, nil
+	return requeue, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -108,6 +129,22 @@ func (r *CustomStackRunReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.CustomStackRun{}).
 		Complete(r)
+}
+
+func (r *CustomStackRunReconciler) isAlreadyExists(ctx context.Context, stack *v1alpha1.CustomStackRun) (bool, error) {
+	if !stack.Status.HasID() {
+		return false, nil
+	}
+
+	_, err := r.ConsoleClient.GetCustomStackRun(ctx, stack.Status.GetID())
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (r *CustomStackRunReconciler) handleDelete(ctx context.Context, stack *v1alpha1.CustomStackRun) error {

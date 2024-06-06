@@ -76,14 +76,41 @@ func (c *client) DeleteCustomStackRun(ctx context.Context, id string) error {
 	return err
 }
 
-func (c *client) UpsertCustomStackRun(ctx context.Context, attributes console.CustomStackRunAttributes) (*console.CustomStackRunFragment, error) {
-	result, err := c.consoleClient.UpsertCustomStackRun(ctx, attributes)
+func (c *client) UpdateCustomStackRun(ctx context.Context, id string, attributes console.CustomStackRunAttributes) (*console.CustomStackRunFragment, error) {
+	result, err := c.consoleClient.UpdateCustomStackRun(ctx, id, attributes)
 	if err != nil {
 		return nil, err
 	}
 	if result == nil {
-		return nil, fmt.Errorf("upsert custom stack run %s is nil", attributes.Name)
+		return nil, fmt.Errorf("update custom stack run %s is nil", attributes.Name)
 	}
-	return result.UpsertCustomStackRun, nil
+	return result.UpdateCustomStackRun, nil
 
+}
+
+func (c *client) CreateCustomStackRun(ctx context.Context, attributes console.CustomStackRunAttributes) (*console.CustomStackRunFragment, error) {
+	result, err := c.consoleClient.CreateCustomStackRun(ctx, attributes)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, fmt.Errorf("create custom stack run %s is nil", attributes.Name)
+	}
+	return result.CreateCustomStackRun, nil
+
+}
+
+func (c *client) GetCustomStackRun(ctx context.Context, id string) (*console.CustomStackRunFragment, error) {
+	response, err := c.consoleClient.GetCustomStackRun(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.CustomStackRun == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.CustomStackRun, err
 }

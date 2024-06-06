@@ -146,7 +146,7 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("UpsertCustomStackRun", mock.Anything, mock.Anything).Return(test.returnCreateCustomStackRun, nil)
+			fakeConsoleClient.On("CreateCustomStackRun", mock.Anything, mock.Anything).Return(test.returnCreateCustomStackRun, nil)
 			reconciler := &controller.CustomStackRunReconciler{
 				Client:        k8sClient,
 				Scheme:        k8sClient.Scheme(),
@@ -205,7 +205,8 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
-			fakeConsoleClient.On("UpsertCustomStackRun", mock.Anything, mock.Anything).Return(test.returnUpdateCustomStack, nil)
+			fakeConsoleClient.On("GetCustomStackRun", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("UpdateCustomStackRun", mock.Anything, mock.Anything, mock.Anything).Return(test.returnUpdateCustomStack, nil)
 
 			reconciler := &controller.CustomStackRunReconciler{
 				Client:        k8sClient,
@@ -236,6 +237,7 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetCustomStackRun", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("DeleteCustomStackRun", mock.Anything, mock.Anything).Return(nil)
 			reconciler := &controller.CustomStackRunReconciler{
 				Client:        k8sClient,
