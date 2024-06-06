@@ -15,7 +15,6 @@ import {
   HomeIcon,
   KubernetesIcon,
   LightningIcon,
-  ListIcon,
   LogoutIcon,
   PeopleIcon,
   PersonIcon,
@@ -194,13 +193,6 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
-    },
-    {
-      text: 'Audits',
-      expandedLabel: 'Audits',
-      icon: <ListIcon />,
-      path: '/audits',
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.audits),
     },
     {
       text: 'Account',

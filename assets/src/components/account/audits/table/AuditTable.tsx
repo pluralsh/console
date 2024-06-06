@@ -10,7 +10,7 @@ import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { Link } from 'react-router-dom'
 
 import { AUDITS_Q } from '../queries'
-import { InlineLink } from '../../utils/typography/InlineLink'
+import { InlineLink } from '../../../utils/typography/InlineLink'
 
 import { AuditLocation } from './AuditLocation'
 import { AuditAction } from './AuditAction'

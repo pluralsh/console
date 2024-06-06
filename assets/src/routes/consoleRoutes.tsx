@@ -5,9 +5,9 @@ import Build from 'components/builds/build/Build'
 import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
 
-import Audits from 'components/audits/Audits'
-import AuditsTable from 'components/audits/table/AuditTable'
-import AuditsGraph from 'components/audits/graph/AuditsGraph'
+import Audits from 'components/account/audits/Audits'
+import AuditsTable from 'components/account/audits/table/AuditTable'
+import AuditsGraph from 'components/account/audits/graph/AuditsGraph'
 
 import MyProfile from 'components/profile/MyProfile'
 import { Profile } from 'components/profile/Profile'
@@ -66,31 +66,6 @@ const buildsRoutes = [
     <Route
       path="changelog"
       element={<Changelog />}
-    />
-  </Route>,
-]
-
-const auditsRoutes = [
-  <Route
-    path="audits"
-    element={<Audits />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to="table"
-        />
-      }
-    />
-    <Route
-      path="table"
-      element={<AuditsTable />}
-    />
-    <Route
-      path="graph"
-      element={<AuditsGraph />}
     />
   </Route>,
 ]
@@ -178,6 +153,29 @@ const accountRoutes = [
       path="settings"
       element={<AccountSettings />}
     />
+    <Route
+      path="audits"
+      element={<Audits />}
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="table"
+          />
+        }
+      />
+      <Route
+        path="table"
+        element={<AuditsTable />}
+      />
+      <Route
+        path="graph"
+        element={<AuditsGraph />}
+      />
+    </Route>
+    ,
   </Route>,
 ]
 
@@ -222,9 +220,6 @@ export const consoleComponentRoutes = [
 
   /* BACKUPS */
   ...backupsRoutes,
-
-  /* AUDITS */
-  ...auditsRoutes,
 
   /* ACCOUNT */
   ...accountRoutes,

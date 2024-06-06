@@ -6,7 +6,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
-import Avatar from '../utils/Avatar'
+import Avatar from '../../utils/Avatar'
 
 export function AvatarCell({ user, width }) {
   return (
