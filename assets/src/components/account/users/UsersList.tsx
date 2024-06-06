@@ -1,4 +1,4 @@
-import { Card, EmptyState, SearchIcon, Table } from '@pluralsh/design-system'
+import { EmptyState, Input, SearchIcon, Table } from '@pluralsh/design-system'
 import { isEmpty } from 'lodash'
 import { ComponentProps, useContext, useMemo, useState } from 'react'
 
@@ -7,21 +7,16 @@ import { useUsersQuery } from 'generated/graphql'
 import { LoginContext } from 'components/contexts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { useTheme } from 'styled-components'
-
 import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
-import ListInput from '../../utils/ListInput'
-
 import UserInvite from './UserInvite'
 import { usersCols } from './UsersColumns'
 
 export default function UsersList() {
-  const theme = useTheme()
   const { configuration } = useContext<any>(LoginContext)
   const [q, setQ] = useState('')
 
@@ -45,16 +40,14 @@ export default function UsersList() {
 
   return (
     <>
-      <Card css={{ marginBottom: theme.spacing.small }}>
-        <ListInput
-          width="100%"
-          value={q}
-          placeholder="Search a user"
-          startIcon={<SearchIcon color="text-light" />}
-          onChange={({ target: { value } }) => setQ(value)}
-          flexGrow={0}
-        />
-      </Card>
+      <Input
+        value={q}
+        placeholder="Search a user"
+        startIcon={<SearchIcon color="text-light" />}
+        onChange={({ target: { value } }) => setQ(value)}
+        backgroundColor="fill-one"
+        marginBottom="small"
+      />
       {!isEmpty(users) ? (
         <FullHeightTableWrap>
           <Table

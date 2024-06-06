@@ -5,11 +5,12 @@ import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
+import { Input, SearchIcon } from '@pluralsh/design-system'
+
 import { List } from '../../utils/List'
 
 import RoleCreate from './RoleCreate'
 import RolesList from './RolesList'
-import RolesSearchHeader from './RolesSearchHeader'
 
 export default function Roles() {
   const [q, setQ] = useState('')
@@ -28,13 +29,19 @@ export default function Roles() {
       >
         <BillingLegacyUserBanner feature="roles" />
         {isAvailable ? (
-          <List height="100%">
-            <RolesSearchHeader
-              q={q}
-              setQ={setQ}
+          <>
+            <Input
+              value={q}
+              placeholder="Search a role"
+              startIcon={<SearchIcon color="text-light" />}
+              onChange={({ target: { value } }) => setQ(value)}
+              backgroundColor="fill-one"
+              marginBottom="small"
             />
-            <RolesList q={q} />
-          </List>
+            <List height="100%">
+              <RolesList q={q} />
+            </List>
+          </>
         ) : (
           <BillingFeatureBlockBanner
             feature="roles"
