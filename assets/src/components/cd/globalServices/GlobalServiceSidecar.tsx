@@ -22,6 +22,10 @@ function GlobalServiceSidecar({
       width={200}
       minWidth={200}
     >
+      <SidecarItem heading="Service Name">{globalService?.name}</SidecarItem>
+      <SidecarItem heading="Reparent">
+        {globalService?.reparent ? 'True' : 'False'}
+      </SidecarItem>
       <SidecarItem heading="Last Updated">
         {moment(globalService?.updatedAt || globalService?.insertedAt).format(
           'M/D/YYYY'
