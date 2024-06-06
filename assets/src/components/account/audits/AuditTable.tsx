@@ -1,6 +1,6 @@
 import { AppIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { Flex } from 'honorable'
+import { Flex, Span } from 'honorable'
 import { useCallback, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { extendConnection } from 'utils/graphql'
@@ -9,11 +9,13 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { Link } from 'react-router-dom'
 
-import { AUDITS_Q } from '../queries'
-import { InlineLink } from '../../../utils/typography/InlineLink'
+import { useTheme } from 'styled-components'
 
-import { AuditLocation } from './AuditLocation'
-import { AuditAction } from './AuditAction'
+import { InlineLink } from '../../utils/typography/InlineLink'
+
+import { formatLocation } from '../../../utils/geo'
+
+import { AUDITS_Q } from './queries'
 
 const FETCH_MARGIN = 30
 
@@ -22,8 +24,39 @@ const COLUMN_HELPER = createColumnHelper<any>()
 const columns = [
   COLUMN_HELPER.accessor((audit) => audit, {
     id: 'action',
-    cell: (audit: any) => <AuditAction audit={audit.getValue()} />,
-    header: 'Action / Type',
+    header: () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
+
+      return (
+        <div>
+          <div>Action</div>
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-light'],
+            }}
+          >
+            Type
+          </div>
+        </div>
+      )
+    },
+    cell: (audit) => {
+      const { action, type } = audit.getValue()
+
+      return (
+        <Flex direction="column">
+          {action || 'n/a'}
+          <Span
+            caption
+            color="text-xlight"
+          >
+            {type}
+          </Span>
+        </Flex>
+      )
+    },
   }),
   COLUMN_HELPER.accessor((audit) => audit.repository, {
     id: 'repository',
@@ -66,18 +99,41 @@ const columns = [
   }),
   COLUMN_HELPER.accessor((audit) => audit, {
     id: 'locationIp',
-    cell: (audit: any) => {
-      const a = audit.getValue()
+    header: () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
 
       return (
-        <AuditLocation
-          ip={a.ip}
-          country={a.country}
-          city={a.city}
-        />
+        <div>
+          <div>Location</div>
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-light'],
+            }}
+          >
+            IP
+          </div>
+        </div>
       )
     },
-    header: 'Location / IP',
+    cell: (audit: any) => {
+      const { ip, country, city } = audit.getValue()
+
+      if (!ip) return <span>n/a</span>
+
+      return (
+        <Flex direction="column">
+          {country && <div>{formatLocation(country, city)}</div>}
+          <Span
+            caption
+            color="text-xlight"
+          >
+            {ip}
+          </Span>
+        </Flex>
+      )
+    },
   }),
 ]
 

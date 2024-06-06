@@ -6,8 +6,8 @@ import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
 
 import Audits from 'components/account/audits/Audits'
-import AuditsTable from 'components/account/audits/table/AuditTable'
-import AuditsGraph from 'components/account/audits/graph/AuditsGraph'
+import AuditsTable from 'components/account/audits/AuditTable'
+import AuditsGraph from 'components/account/audits/AuditsGraph'
 
 import MyProfile from 'components/profile/MyProfile'
 import { Profile } from 'components/profile/Profile'
