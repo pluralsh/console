@@ -33,7 +33,7 @@ export default function AuditsMap() {
   if (!data) return <LoadingIndicator />
 
   return (
-    <Card height="100%">
+    <Card height={500}>
       <Chloropleth data={metrics} />
     </Card>
   )
