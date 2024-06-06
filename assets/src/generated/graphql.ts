@@ -4118,6 +4118,7 @@ export type RootMutationType = {
   setupRenovate?: Maybe<ServiceDeployment>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
+  syncGlobalService?: Maybe<GlobalService>;
   updateCluster?: Maybe<Cluster>;
   updateClusterProvider?: Maybe<ClusterProvider>;
   updateClusterRestore?: Maybe<ClusterRestore>;
@@ -4737,6 +4738,11 @@ export type RootMutationTypeSignInArgs = {
 export type RootMutationTypeSignupArgs = {
   attributes: UserAttributes;
   inviteId: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeSyncGlobalServiceArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

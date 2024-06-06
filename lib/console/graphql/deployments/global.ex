@@ -198,6 +198,13 @@ defmodule Console.GraphQl.Deployments.Global do
       safe_resolve &Deployments.delete_global_service/2
     end
 
+    field :sync_global_service, :global_service do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.sync_global_service/2
+    end
+
     field :create_managed_namespace, :managed_namespace do
       middleware Authenticated
       arg :attributes, non_null(:managed_namespace_attributes)

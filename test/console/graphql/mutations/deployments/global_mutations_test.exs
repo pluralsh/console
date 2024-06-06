@@ -9,6 +9,7 @@ defmodule Console.GraphQl.Deployments.GlobalMutationsTest do
         mutation Create($sid: ID!, $attrs: GlobalServiceAttributes!) {
           createGlobalService(serviceId: $sid, attributes: $attrs) {
             service { id }
+            reparent
             tags { name value }
           }
         }
@@ -16,11 +17,14 @@ defmodule Console.GraphQl.Deployments.GlobalMutationsTest do
         "sid" => svc.id,
         "attrs" => %{
           "name" => "test",
+          "reparent" => true,
           "tags" => [%{"name" => "name", "value" => "value"}]
         }
       }, %{current_user: admin_user()})
 
       assert create["service"]["id"] == svc.id
+      assert create["reparent"]
+
       [tag] = create["tags"]
       assert tag["name"] == "name"
       assert tag["value"] == "value"
@@ -166,6 +170,50 @@ defmodule Console.GraphQl.Deployments.GlobalMutationsTest do
 
       assert deleted["id"] == ns.id
       assert refetch(ns).deleted_at
+    end
+  end
+
+  describe "syncGlobalService" do
+    test "admins can force sync a global service" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      cluster = insert(:cluster)
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: insert(:git_repository).id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, admin_user())
+
+      global = insert(:global_service, reparent: true, service: source, distro: :eks, tags: [%{name: "sync", value: "test"}])
+
+      {:ok, %{data: %{"syncGlobalService" => synced}}} = run_query("""
+        mutation Sync($id: ID!) {
+          syncGlobalService(id: $id) { id }
+        }
+      """, %{"id" => global.id}, %{current_user: admin_user()})
+
+      assert synced["id"] == global.id
+    end
+
+    test "non-admins cannot force sync a global service" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      cluster = insert(:cluster)
+      {:ok, source} = create_service(%{
+        name: "source",
+        namespace: "my-service",
+        repository_id: insert(:git_repository).id,
+        git: %{ref: "main", folder: "k8s"},
+        configuration: [%{name: "name", value: "value"}]
+      }, cluster, admin_user())
+
+      global = insert(:global_service, reparent: true, service: source, distro: :eks, tags: [%{name: "sync", value: "test"}])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Sync($id: ID!) {
+          syncGlobalService(id: $id) { id }
+        }
+      """, %{"id" => global.id}, %{current_user: insert(:user)})
     end
   end
 end

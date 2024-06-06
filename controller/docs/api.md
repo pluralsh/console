@@ -646,6 +646,7 @@ _Appears in:_
 | `environment` _[StackEnvironment](#stackenvironment) array_ |  |  | Optional: {} <br /> |
 | `files` _[StackFile](#stackfile) array_ | Files reference to Secret with a key as a part of mount path and value as a content |  | Optional: {} <br /> |
 | `detach` _boolean_ | If true, detach the stack on CR deletion, leaving all cloud resources in-place. |  | Optional: {} <br /> |
+| `actor` _string_ | User email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
 
 
 #### JobSpec

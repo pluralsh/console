@@ -42,8 +42,8 @@ export function DetachService({
           <span css={{ color: theme.colors['text-danger'] }}>
             “{serviceDeployment.name}”{' '}
           </span>
-          deployment? The service will be removed from storage without waiting
-          for the agent to fully drain it from its hosting cluster
+          deployment? The service will be removed from the database but all
+          resources will remain in Kubernetes.
         </>
       }
     />

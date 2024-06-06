@@ -58,4 +58,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
 
   def delete_managed_namespace(%{id: id}, %{context: %{current_user: user}}),
     do: Global.delete_managed_namespace(id, user)
+
+  def sync_global_service(%{id: id}, %{context: %{current_user: user}}) do
+    Global.get!(id)
+    |> Global.sync(user)
+  end
 end
