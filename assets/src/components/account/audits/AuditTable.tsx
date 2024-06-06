@@ -1,6 +1,6 @@
 import { AppIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { Flex, Span } from 'honorable'
+import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
 import { useQuery } from '@apollo/client'
 import { extendConnection } from 'utils/graphql'
@@ -14,6 +14,8 @@ import { useTheme } from 'styled-components'
 import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { formatLocation } from '../../../utils/geo'
+
+import { StackedText } from '../../utils/table/StackedText'
 
 import { AUDITS_Q } from './queries'
 
@@ -46,15 +48,10 @@ const columns = [
       const { action, type } = audit.getValue()
 
       return (
-        <Flex direction="column">
-          {action || 'n/a'}
-          <Span
-            caption
-            color="text-xlight"
-          >
-            {type}
-          </Span>
-        </Flex>
+        <StackedText
+          first={action}
+          second={type}
+        />
       )
     },
   }),
@@ -120,18 +117,11 @@ const columns = [
     cell: (audit: any) => {
       const { ip, country, city } = audit.getValue()
 
-      if (!ip) return <span>n/a</span>
-
       return (
-        <Flex direction="column">
-          {country && <div>{formatLocation(country, city)}</div>}
-          <Span
-            caption
-            color="text-xlight"
-          >
-            {ip}
-          </Span>
-        </Flex>
+        <StackedText
+          first={country && formatLocation(country, city)}
+          second={ip}
+        />
       )
     },
   }),
