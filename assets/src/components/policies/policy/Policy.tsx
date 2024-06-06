@@ -11,7 +11,10 @@ import {
   POLICIES_DETAILS_PATH,
   POLICIES_REL_PATH,
 } from 'routes/policiesRoutesConsts'
-import styled from 'styled-components'
+
+import { ResponsiveLayoutSidenavContainer } from '../../utils/layout/ResponsiveLayoutSidenavContainer'
+
+import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 
 import PolicyDetails from './details/PolicyDetails'
 import PolicyAffectedResources from './affectedResources/PolicyAffectedResources'
@@ -54,8 +57,8 @@ function Policy() {
   )
 
   return (
-    <PolicyContainer>
-      <div css={{ width: '250px', minWidth: '250px' }}>
+    <ResponsiveLayoutPage>
+      <ResponsiveLayoutSidenavContainer paddingTop={57}>
         <TreeNav>
           <TreeNavEntry
             key={POLICIES_DETAILS_PATH}
@@ -82,7 +85,7 @@ function Policy() {
             active={route?.includes(POLICIES_AFFECTED_RESOURCES_PATH)}
           />
         </TreeNav>
-      </div>
+      </ResponsiveLayoutSidenavContainer>
       {isDetailsPath ? (
         <PolicyDetails policy={policy} />
       ) : (
@@ -92,16 +95,8 @@ function Policy() {
           loading={loading}
         />
       )}
-    </PolicyContainer>
+    </ResponsiveLayoutPage>
   )
 }
 
 export default Policy
-
-const PolicyContainer = styled.div(({ theme }) => ({
-  display: 'flex',
-  padding: theme.spacing.large,
-  paddingLeft: theme.spacing.xsmall,
-  alignItems: 'flex-start',
-  gap: theme.spacing.xlarge,
-}))

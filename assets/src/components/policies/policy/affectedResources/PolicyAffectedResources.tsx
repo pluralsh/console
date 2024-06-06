@@ -1,11 +1,10 @@
 import { EmptyState, Table } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { Title1H1 } from 'components/utils/typography/Text'
 import { Violation } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 
-import styled, { useTheme } from 'styled-components'
+import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
 
 import {
   ColErrorMessage,
@@ -16,7 +15,7 @@ import {
 
 const columns = [ColRessourceName, ColNamespace, ColKind, ColErrorMessage]
 
-function PolicyAffectedResources({
+export default function PolicyAffectedResources({
   policyName,
   violations,
   loading,
@@ -25,26 +24,19 @@ function PolicyAffectedResources({
   violations?: Array<Violation | null> | null
   loading: boolean
 }) {
-  const theme = useTheme()
+  if (loading) return <LoadingIndicator />
+
+  if (isEmpty(violations))
+    return (
+      <EmptyState message="Looks like you don't have any violations yet." />
+    )
 
   return (
-    <PolicyAffectedResourcesContainer>
-      {policyName && (
-        <Title1H1
-          css={{
-            marginTop: 0,
-            borderBottom: theme.borders.default,
-            paddingBottom: theme.spacing.medium,
-            width: '100%',
-          }}
-        >
-          {policyName}
-        </Title1H1>
-      )}
-
-      {loading ? (
-        <LoadingIndicator />
-      ) : !isEmpty(violations) ? (
+    <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+      <ScrollablePage
+        scrollable={false}
+        heading={policyName}
+      >
         <FullHeightTableWrap>
           <Table
             virtualizeRows
@@ -56,21 +48,7 @@ function PolicyAffectedResources({
             }}
           />
         </FullHeightTableWrap>
-      ) : (
-        <div css={{ height: '100%' }}>
-          <EmptyState message="Looks like you don't have any violations yet." />
-        </div>
-      )}
-    </PolicyAffectedResourcesContainer>
+      </ScrollablePage>
+    </div>
   )
 }
-
-export default PolicyAffectedResources
-
-const PolicyAffectedResourcesContainer = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flexGrow: 1,
-  gap: theme.spacing.xlarge,
-  justifyContent: 'center',
-}))
