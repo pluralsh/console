@@ -105,6 +105,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - customstackruns
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - customstackruns/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - customstackruns/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - gitrepositories
   verbs:
   - create
