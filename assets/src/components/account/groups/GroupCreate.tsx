@@ -11,6 +11,8 @@ import { useTheme } from 'styled-components'
 import { appendConnection, updateCache } from '../../../utils/graphql'
 import { GqlError } from '../../utils/Alert'
 
+import { GROUPS_QUERY_PAGE_SIZE } from './Groups'
+
 export default function GroupCreate({ q }: { q: string }) {
   const theme = useTheme()
   const { availableFeatures } = useContext(SubscriptionContext)
@@ -32,7 +34,7 @@ export default function GroupCreate({ q }: { q: string }) {
     update: (cache, { data }) =>
       updateCache(cache, {
         query: GroupsDocument,
-        variables: { q },
+        variables: { q, first: GROUPS_QUERY_PAGE_SIZE },
         update: (prev) => appendConnection(prev, data?.createGroup, 'groups'),
       }),
   })

@@ -16,6 +16,7 @@ import { Permissions, hasRbac } from '../misc'
 
 import GroupCreate from './GroupCreate'
 import { groupsColsEditable, groupsColsView } from './GroupsColumns'
+import { GROUPS_QUERY_PAGE_SIZE } from './Groups'
 
 export function GroupsList({ q }: any) {
   const { me } = useContext(LoginContext)
@@ -23,7 +24,11 @@ export function GroupsList({ q }: any) {
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useGroupsQuery, queryKey: 'groups' },
+      {
+        queryHook: useGroupsQuery,
+        queryKey: 'groups',
+        pageSize: GROUPS_QUERY_PAGE_SIZE,
+      },
       { q }
     )
 

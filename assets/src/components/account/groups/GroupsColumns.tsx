@@ -20,6 +20,7 @@ import { removeConnection, updateCache } from 'utils/graphql'
 
 import { EditGroupAttributes, EditGroupMembers } from './GroupEdit'
 import GroupView from './GroupView'
+import { GROUPS_QUERY_PAGE_SIZE } from './Groups'
 
 const columnHelper = createColumnHelper<Group>()
 const ColGroupInfo = columnHelper.accessor((group) => group, {
@@ -54,7 +55,10 @@ const ColEditableActions = columnHelper.accessor((group) => group, {
       update: (cache, { data }) =>
         updateCache(cache, {
           query: GroupsDocument,
-          variables: { q: table.options.meta?.q },
+          variables: {
+            q: table.options.meta?.q,
+            first: GROUPS_QUERY_PAGE_SIZE,
+          },
           update: (prev) => removeConnection(prev, data?.deleteGroup, 'groups'),
         }),
     })

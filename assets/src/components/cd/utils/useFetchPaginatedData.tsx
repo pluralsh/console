@@ -10,7 +10,7 @@ import {
   QueryResult,
 } from '@apollo/client'
 
-const DEFAULT_PAGE_SIZE = 100
+export const DEFAULT_PAGE_SIZE = 100
 
 type GenericQueryHook<TQueryType, TVariables extends OperationVariables> = (
   baseOptions: QueryHookOptions<TQueryType, TVariables>
@@ -44,7 +44,7 @@ export function useFetchPaginatedData<
   const queryResult = options.queryHook({
     variables: {
       ...variables,
-      first: options.pageSize,
+      first: options.pageSize ?? DEFAULT_PAGE_SIZE,
     },
     errorPolicy: options.errorPolicy,
     fetchPolicy: 'cache-and-network',
