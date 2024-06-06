@@ -2,8 +2,7 @@ import { AppIcon, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
-import { useQuery } from '@apollo/client'
-import { extendConnection } from 'utils/graphql'
+import { extendConnection, mapExistingNodes } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
@@ -16,8 +15,7 @@ import { InlineLink } from '../../utils/typography/InlineLink'
 import { formatLocation } from '../../../utils/geo'
 
 import { StackedText } from '../../utils/table/StackedText'
-
-import { AUDITS_Q } from './queries'
+import { useAuditsQuery } from '../../../generated/graphql'
 
 const FETCH_MARGIN = 30
 
@@ -128,12 +126,11 @@ const columns = [
 ]
 
 export default function AuditsTable() {
-  const { data, loading, fetchMore } = useQuery(AUDITS_Q, {
+  const { data, loading, fetchMore } = useAuditsQuery({
     fetchPolicy: 'cache-and-network',
   })
   const pageInfo = data?.audits?.pageInfo
-  const edges = data?.audits?.edges
-  const audits = useMemo(() => edges?.map(({ node }) => node), [edges])
+  const audits = useMemo(() => mapExistingNodes(data?.audits), [data])
 
   const fetchMoreOnBottomReached = useCallback(
     (element?: HTMLDivElement | undefined) => {
@@ -145,10 +142,10 @@ export default function AuditsTable() {
       if (
         scrollHeight - scrollTop - clientHeight < FETCH_MARGIN &&
         !loading &&
-        pageInfo.hasNextPage
+        pageInfo?.hasNextPage
       ) {
         fetchMore({
-          variables: { cursor: pageInfo.endCursor },
+          variables: { cursor: pageInfo?.endCursor },
           updateQuery: (prev, { fetchMoreResult: { audits } }) =>
             extendConnection(prev, audits, 'audits'),
         })
@@ -162,7 +159,7 @@ export default function AuditsTable() {
   return (
     <FullHeightTableWrap>
       <Table
-        data={audits}
+        data={audits || []}
         columns={columns}
         onScrollCapture={(e) => fetchMoreOnBottomReached(e?.target)}
         maxHeight="100%"

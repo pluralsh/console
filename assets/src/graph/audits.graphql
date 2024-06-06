@@ -1,0 +1,35 @@
+fragment Audit on Audit {
+  id
+  type
+  action
+  repository
+  ip
+  city
+  country
+  latitude
+  longitude
+  actor {
+    ...User
+  }
+  insertedAt
+}
+
+query Audits($repo: String, $cursor: String) {
+  audits(repo: $repo, after: $cursor, first: 50) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Audit
+      }
+    }
+  }
+}
+
+query AuditMetrics {
+  auditMetrics {
+    country
+    count
+  }
+}
