@@ -112,7 +112,8 @@ export function Policies() {
 
 const PoliciesContainer = styled.div(({ theme }) => ({
   display: 'grid',
-  overflow: 'auto',
+  overflowX: 'hidden',
+  overflowY: 'auto',
   padding: theme.spacing.large,
   gridTemplateColumns: 'auto max(230px)',
   gridTemplateRows: 'auto 1fr',
