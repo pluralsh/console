@@ -136,7 +136,13 @@ export default function Stacks() {
 
   return (
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
-      <div css={{ marginRight: theme.spacing.xlarge, width: 340 }}>
+      <div
+        css={{
+          marginRight: theme.spacing.xlarge,
+          paddingBottom: theme.spacing.xxxlarge,
+          width: 340,
+        }}
+      >
         <div
           css={{
             display: 'flex',
