@@ -102,7 +102,6 @@ function FlyoverRef(
       width={width}
       minWidth={minWidth}
       alignSelf="flex-end"
-      BackdropProps={{ backgroundColor: 'transparent' }}
       InnerDefaultStyle={{
         opacity: 0,
         transform: 'translateX(0)',

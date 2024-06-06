@@ -72,6 +72,7 @@ export type TableProps = Omit<
   loose?: boolean
   stickyColumn?: boolean
   scrollTopMargin?: number
+  flush?: boolean
   virtualizeRows?: boolean
   lockColumnsOnScroll?: boolean
   reactVirtualOptions?: Partial<
@@ -534,6 +535,7 @@ function TableRef(
     loose = false,
     stickyColumn = false,
     scrollTopMargin = 500,
+    flush = false,
     width,
     virtualizeRows = false,
     lockColumnsOnScroll,
@@ -691,8 +693,12 @@ function TableRef(
     >
       <Div
         backgroundColor="fill-two"
-        border="1px solid border-fill-two"
-        borderRadius="large"
+        border={flush ? 'none' : '1px solid border-fill-two'}
+        borderRadius={
+          flush
+            ? `0 0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px`
+            : 'large'
+        }
         overflow="auto"
         ref={tableContainerRef}
         onScroll={({ target }: { target: HTMLDivElement }) =>
