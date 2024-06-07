@@ -260,6 +260,9 @@ const ColStatusSC = styled.div(({ theme }) => ({
 export const ColStatus = columnHelper.accessor(({ node }) => node, {
   id: 'status',
   header: 'Status',
+  meta: {
+    gridTemplate: 'min-content',
+  },
   cell: ({ table, getValue, row: { original } }) => {
     const cluster = getValue()
     const { refetch } = table.options.meta as { refetch?: () => void }
