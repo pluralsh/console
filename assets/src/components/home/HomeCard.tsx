@@ -23,7 +23,7 @@ export function HomeCard({
       {label && <Title2H1>{label}</Title2H1>}
       <Card
         css={{
-          maxHeight: HOME_CARD_MAX_HEIGHT,
+          height: HOME_CARD_MAX_HEIGHT,
           overflow,
         }}
       >

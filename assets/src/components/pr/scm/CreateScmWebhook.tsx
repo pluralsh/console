@@ -138,6 +138,11 @@ export function CreateScmWebhookModal({
             />
             <FormField
               label={formState?.type === ScmType.Gitlab ? `Group` : 'Owner'}
+              hint={
+                formState?.type === ScmType.Github
+                  ? 'should be a GitHub organization or repo slug'
+                  : ''
+              }
               required
             >
               <Input2
@@ -147,6 +152,11 @@ export function CreateScmWebhookModal({
             </FormField>
             <FormField
               label="Secret"
+              hint={
+                formState?.type === ScmType.Github
+                  ? 'a secure random string, will be added as the GitHub webhook secret'
+                  : ''
+              }
               required
             >
               <Input2
