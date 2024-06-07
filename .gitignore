@@ -36,4 +36,5 @@ watchman-*.tar
 .yalc
 yalc.lock
 
+**/venv
 # config/pubkey.pem
