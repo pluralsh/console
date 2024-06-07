@@ -27,14 +27,11 @@ else:
     if manifest:
         if "names" in manifest:
             for name in manifest["names"]:
-                if name == "ingress-nginx":
-                    print(
-                        Fore.GREEN
-                        + f"Calling scraper for {name}"
-                        + Style.RESET_ALL
-                    )
-                    call_scraper(name)
-                    print("\n")
+                print(
+                    Fore.GREEN + f"Calling scraper for {name}" + Style.RESET_ALL
+                )
+                call_scraper(name)
+                print("\n")
         else:
             printError("No names found in the manifest file.")
     else:
