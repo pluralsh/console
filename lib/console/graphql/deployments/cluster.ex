@@ -39,6 +39,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   input_object :cluster_ping do
     field :current_version, non_null(:string)
+    field :kubelet_version, :string
     field :distro,          :cluster_distro
   end
 
@@ -224,6 +225,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :distro,          :cluster_distro, description: "the distribution of kubernetes this cluster is running"
     field :metadata,        :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
     field :current_version, :string, description: "current k8s version as told to us by the deployment operator"
+    field :kubelet_version, :string, description: "The lowest discovered kubelet version for all nodes in the cluster"
     field :handle,          :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
     field :settings,        :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"

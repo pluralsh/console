@@ -69,6 +69,7 @@ defmodule Console.Schema.Stack do
     field :deleted_at,      :utc_datetime_usec
     field :manage_state,    :boolean, default: false
     field :workdir,         :string
+    field :locked_at,       :utc_datetime_usec
 
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
@@ -106,6 +107,8 @@ defmodule Console.Schema.Stack do
 
     timestamps()
   end
+
+  def lock(query \\ __MODULE__), do: from(s in query, lock: "FOR UPDATE")
 
   def search(query \\ __MODULE__, sq) do
     from(s in query, where: ilike(s.name, ^"#{sq}%"))
@@ -166,5 +169,10 @@ defmodule Console.Schema.Stack do
   def delete_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(deleted_at delete_run_id)a)
+  end
+
+  def lock_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(locked_at)a)
   end
 end

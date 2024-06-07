@@ -3143,6 +3143,7 @@ input TagAttributes {
 
 input ClusterPing {
   currentVersion: String!
+  kubeletVersion: String
   distro: ClusterDistro
 }
 
@@ -3385,6 +3386,9 @@ type Cluster {
 
   "current k8s version as told to us by the deployment operator"
   currentVersion: String
+
+  "The lowest discovered kubelet version for all nodes in the cluster"
+  kubeletVersion: String
 
   "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
   handle: String

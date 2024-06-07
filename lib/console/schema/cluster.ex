@@ -91,6 +91,7 @@ defmodule Console.Schema.Cluster do
 
     field :version,         :string
     field :current_version, :string
+    field :kubelet_version, :string
     field :deploy_token,    :string
     field :write_policy_id, :binary_id
     field :read_policy_id,  :binary_id
@@ -352,7 +353,7 @@ defmodule Console.Schema.Cluster do
 
   def ping_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(pinged_at distro current_version installed)a)
+    |> cast(attrs, ~w(pinged_at distro kubelet_version current_version installed)a)
     |> change_markers(distro: :distro_changed)
     |> update_vsn()
   end
