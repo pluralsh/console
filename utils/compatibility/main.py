@@ -1,7 +1,8 @@
 # main.py
 import os
 import importlib
-from utils import readYaml
+from utils import readYaml, printError, printWarning
+from colorama import Fore, Style
 
 
 def call_scraper(scraper):
@@ -9,31 +10,32 @@ def call_scraper(scraper):
         scraper_module = importlib.import_module(f"scrapers.{scraper}")
         scraper_module.scrape()
     except ModuleNotFoundError:
-        print(f"Error: No scraper found for {scraper}")
+        printWarning(f"No scraper found for {scraper}")
     except AttributeError:
-        print(
-            f"Error: The scraper module {scraper} does not have a 'scrape' function."
-        )
+        printError(f"Scrape function not found in the scraper for {scraper}")
     except Exception as e:
-        print(
-            f"An unexpected error occurred while calling scraper for {scraper}: {e}"
-        )
+        printError(f"An unexpected error occurred: {e}")
 
 
 manifestFile = "../../static/compatibilities/manifest.yaml"
 
 if not os.path.exists(manifestFile):
-    print(f"Error: The file {manifestFile} does not exist.\n")
+    printError(f"Manifest file not found at {manifestFile}")
 else:
     manifest = readYaml(manifestFile)
+    print()
     if manifest:
         if "names" in manifest:
             for name in manifest["names"]:
                 if name == "ingress-nginx":
-                    print(f"Calling scraper for {name}")
+                    print(
+                        Fore.GREEN
+                        + f"Calling scraper for {name}"
+                        + Style.RESET_ALL
+                    )
                     call_scraper(name)
                     print("\n")
         else:
-            print("No 'names' key found in the manifest.\n")
+            printError("No names found in the manifest file.")
     else:
-        print("Failed to read the manifest file.\n")
+        printError("Failed to read the manifest file.")
