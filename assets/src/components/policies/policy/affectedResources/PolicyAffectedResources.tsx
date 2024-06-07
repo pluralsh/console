@@ -1,11 +1,18 @@
 import { EmptyState, Table } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { Title1H1 } from 'components/utils/typography/Text'
 import { Violation } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 
-import styled, { useTheme } from 'styled-components'
+import { Row } from '@tanstack/react-table'
+
+import { original } from 'immer'
+
+import { useNavigate } from 'react-router-dom'
+
+import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
+
+import { getKubernetesResourcePath } from '../../../../routes/kubernetesRoutesConsts'
 
 import {
   ColErrorMessage,
@@ -16,35 +23,32 @@ import {
 
 const columns = [ColRessourceName, ColNamespace, ColKind, ColErrorMessage]
 
-function PolicyAffectedResources({
+export default function PolicyAffectedResources({
   policyName,
   violations,
+  clusterId,
   loading,
 }: {
   policyName?: string
   violations?: Array<Violation | null> | null
+  clusterId?: Nullable<string>
   loading: boolean
 }) {
-  const theme = useTheme()
+  const navigate = useNavigate()
+
+  if (loading) return <LoadingIndicator />
+
+  if (isEmpty(violations))
+    return (
+      <EmptyState message="Looks like you don't have any violations yet." />
+    )
 
   return (
-    <PolicyAffectedResourcesContainer>
-      {policyName && (
-        <Title1H1
-          css={{
-            marginTop: 0,
-            borderBottom: theme.borders.default,
-            paddingBottom: theme.spacing.medium,
-            width: '100%',
-          }}
-        >
-          {policyName}
-        </Title1H1>
-      )}
-
-      {loading ? (
-        <LoadingIndicator />
-      ) : !isEmpty(violations) ? (
+    <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+      <ScrollablePage
+        scrollable={false}
+        heading={policyName}
+      >
         <FullHeightTableWrap>
           <Table
             virtualizeRows
@@ -54,23 +58,28 @@ function PolicyAffectedResources({
               maxHeight: 'unset',
               height: '100%',
             }}
+            onRowClick={(
+              _e,
+              {
+                original: { group, version, kind, name, namespace },
+              }: Row<Violation>
+            ) => {
+              const path = getKubernetesResourcePath({
+                clusterId,
+                group,
+                version,
+                kind,
+                name,
+                namespace,
+              })
+
+              console.log(path)
+
+              if (path) navigate(path)
+            }}
           />
         </FullHeightTableWrap>
-      ) : (
-        <div css={{ height: '100%' }}>
-          <EmptyState message="Looks like you don't have any violations yet." />
-        </div>
-      )}
-    </PolicyAffectedResourcesContainer>
+      </ScrollablePage>
+    </div>
   )
 }
-
-export default PolicyAffectedResources
-
-const PolicyAffectedResourcesContainer = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  flexGrow: 1,
-  gap: theme.spacing.xlarge,
-  justifyContent: 'center',
-}))

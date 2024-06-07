@@ -111,7 +111,7 @@ const columnHelper = createColumnHelper<CustomResourceT>()
 
 export function CustomRersourceDefinitionObjects(): ReactElement {
   const crd = useOutletContext() as CustomResourceDefinitionT
-  const namespaced = crd.scope.toLowerCase() === 'namespaced'
+  const namespaced = crd?.scope.toLowerCase() === 'namespaced'
   const dataSelect = useDataSelect()
   const { name } = useParams()
   const [params, setParams] = useSearchParams()

@@ -1,12 +1,14 @@
 import { Chip, ErrorIcon, Sidecar, SidecarItem } from '@pluralsh/design-system'
-import { Body1P, Title1H1, Title2H1 } from 'components/utils/typography/Text'
+import { Body1P, Title2H1 } from 'components/utils/typography/Text'
 import { PolicyConstraintQuery } from 'generated/graphql'
 import { A } from 'honorable'
 import moment from 'moment'
 import { Link } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
+
+import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
 
 function PolicyDetails({
   policy,
@@ -22,31 +24,37 @@ function PolicyDetails({
     policy
 
   return (
-    <PolicyDetailsContainer>
-      <div css={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-        <Title1H1
-          css={{
-            marginTop: 0,
-            borderBottom: theme.borders.default,
-            paddingBottom: theme.spacing.medium,
-          }}
+    <div
+      css={{
+        display: 'flex',
+        flexGrow: 1,
+        alignItems: 'flex-start',
+        gap: theme.spacing.xlarge,
+        height: '100%',
+      }}
+    >
+      <div css={{ flexGrow: 1, height: '100%' }}>
+        <ScrollablePage
+          heading={name}
+          scrollable
+          fullWidth
         >
-          {name}
-        </Title1H1>
-        <Title2H1>Description</Title2H1>
-        <Body1P css={{ color: theme.colors['text-long-form'] }}>
-          {policy.description ||
-            'No description found for this policy, this must be set in an annotation'}
-        </Body1P>
-        <Title2H1>Recommended action</Title2H1>
-        <Body1P css={{ color: theme.colors['text-long-form'] }}>
-          {policy.recommendation ||
-            'No recommendation found for this policy, this must be set in an annotation'}
-        </Body1P>
+          <Title2H1 css={{ marginTop: 0 }}>Description</Title2H1>
+          <Body1P css={{ color: theme.colors['text-long-form'] }}>
+            {policy.description ||
+              'No description found for this policy, this must be set in an annotation'}
+          </Body1P>
+          <Title2H1>Recommended action</Title2H1>
+          <Body1P css={{ color: theme.colors['text-long-form'] }}>
+            {policy.recommendation ||
+              'No recommendation found for this policy, this must be set in an annotation'}
+          </Body1P>
+        </ScrollablePage>
       </div>
       <Sidecar
         width={200}
         minWidth={200}
+        marginTop={57}
       >
         <SidecarItem heading="Policy name"> {name}</SidecarItem>
         <SidecarItem heading="Last Updated">
@@ -81,15 +89,8 @@ function PolicyDetails({
           </SidecarItem>
         )}
       </Sidecar>
-    </PolicyDetailsContainer>
+    </div>
   )
 }
 
 export default PolicyDetails
-
-const PolicyDetailsContainer = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexGrow: 1,
-  alignItems: 'flex-start',
-  gap: theme.spacing.xlarge,
-}))

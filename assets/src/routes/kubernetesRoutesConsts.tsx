@@ -87,7 +87,7 @@ export function getCustomResourcesAbsPath(
 
 export function getResourceDetailsAbsPath(
   clusterId: Nullable<string>,
-  kind: Nullable<Kind>,
+  kind: Nullable<Kind | string>,
   name: Nullable<string>,
   namespace?: Nullable<string>
 ): string {
@@ -107,4 +107,64 @@ export function getCustomResourceDetailsAbsPath(
   return namespace
     ? `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}/${kind}/${namespace}/${name}`
     : `/${KUBERNETES_ROOT_PATH}/${clusterId}/${CUSTOM_RESOURCES_REL_PATH}/${kind}/${name}`
+}
+
+const supportedGVKs = new Set([
+  // Workloads
+  'v1/pod',
+  'apps/v1/deployment',
+  'apps/v1/replicaset',
+  'apps/v1/statefulset',
+  'apps/v1/daemonset',
+  'batch/v1/job',
+  'batch/v1/cronjob',
+  'v1/replicationcontroller',
+
+  // Network
+  'v1/service',
+  'networking.k8s.io/v1/ingress',
+  'networking.k8s.io/v1/ingressclass',
+  'networking.k8s.io/v1/networkpolicy',
+
+  // Storage
+  'v1/persistentvolume',
+  'v1/persistentvolumeclaim',
+  'storage.k8s.io/v1/storageclass',
+
+  // Configuration
+  'v1/configmap',
+  'v1/secret',
+
+  // RBAC
+  'rbac.authorization.k8s.io/v1/role',
+  'rbac.authorization.k8s.io/v1/rolebinding',
+  'rbac.authorization.k8s.io/v1/clusterrole',
+  'rbac.authorization.k8s.io/v1/clusterrolebinding',
+  'v1/serviceaccount',
+
+  // Cluster
+  'v1/node',
+  'v1/namespace',
+])
+
+export function getKubernetesResourcePath({
+  clusterId,
+  group,
+  version,
+  kind,
+  name,
+  namespace,
+}: {
+  clusterId: Nullable<string>
+  group?: Nullable<string>
+  version: Nullable<string>
+  kind: Nullable<string>
+  name: Nullable<string>
+  namespace?: Nullable<string>
+}) {
+  const gvk = `${group ? `${group}/` : ''}${version}/${kind}`.toLowerCase()
+
+  return supportedGVKs.has(gvk)
+    ? getResourceDetailsAbsPath(clusterId, kind, name, namespace)
+    : undefined
 }
