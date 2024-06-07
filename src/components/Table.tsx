@@ -276,6 +276,7 @@ const Td = styled.td<{
     $truncateColumn: truncateColumn = false,
     $center: center,
   }) => ({
+    ...theme.partials.text.body2LooseLineHeight,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -285,7 +286,7 @@ const Td = styled.td<{
 
     backgroundColor: 'inherit',
     borderTop: firstRow ? '' : theme.borders.default,
-    color: theme.colors.text,
+    color: theme.colors['text-light'],
 
     padding: loose ? '16px 12px' : '8px 12px',
     '&:first-child': stickyColumn
@@ -314,7 +315,7 @@ const TdExpand = styled.td(({ theme }) => ({
     gridColumn: '2 / -1',
   },
   backgroundColor: 'inherit',
-  color: theme.colors.text,
+  color: theme.colors['text-light'],
   height: 'auto',
   minHeight: 52,
   padding: '16px 12px',
