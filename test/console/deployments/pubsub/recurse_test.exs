@@ -155,7 +155,7 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     test "it will apply global services" do
       bot("console")
       cluster = insert(:cluster, tags: [%{name: "test", value: "tag"}])
-      global  = insert(:global_service, provider: cluster.provider)
+      global  = insert(:global_service, provider: cluster.provider, cascade: %{delete: true})
       global2 = insert(:global_service, tags: [%{name: "test", value: "tag"}])
       global3 = insert(:global_service)
       ignore  = insert(:global_service, tags: [%{name: "ignore", value: "tag"}])
@@ -180,6 +180,26 @@ defmodule Console.Deployments.PubSub.RecurseTest do
       assert res.repository_id == repo.id
       assert res.git.ref == "main"
       assert res.git.folder == "runtime"
+
+      # run again to ensure idempotency
+      :ok = Recurse.handle_event(event)
+
+      for gs <- [global, global2, global3] do
+        svc = Services.get_service_by_name(cluster.id, gs.service.name)
+        assert svc
+        refute svc.deleted_at
+      end
+      for gs <- [ignore, ignore1],
+        do: refute Services.get_service_by_name(cluster.id, gs.service.name)
+
+      res = Services.get_service_by_name(cluster.id, "svc")
+      assert res.owner_id == templated.id
+      assert res.name == "svc"
+      assert res.namespace == "ns"
+      assert res.repository_id == repo.id
+      assert res.git.ref == "main"
+      assert res.git.folder == "runtime"
+      refute res.deleted_at
     end
 
     test "it will apply managed namespaces" do

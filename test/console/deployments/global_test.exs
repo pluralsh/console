@@ -242,6 +242,14 @@ defmodule Console.Deployments.GlobalTest do
       refute Global.diff?(source, keep)
 
       assert refetch(svc).deleted_at
+
+      :ok = Global.sync_clusters(global)
+
+      for cluster <- [sync, sync2] do
+        synced = Services.get_service_by_name(cluster.id, "source")
+        refute Global.diff?(source, synced)
+        refute synced.deleted_at
+      end
     end
 
     test "it will sync by distro" do
@@ -378,6 +386,7 @@ defmodule Console.Deployments.GlobalTest do
           git: %{ref: "main", folder: "k8s"},
           configuration: [%{name: "name", value: "value"}]
         ),
+        cascade: %{delete: true},
         tags: [%{name: "sync", value: "test"}]
       )
       sync = insert(:cluster, provider: cluster.provider, tags: [%{name: "sync", value: "test"}])
@@ -391,10 +400,21 @@ defmodule Console.Deployments.GlobalTest do
       assert svc.git.ref == "main"
       assert svc.git.folder == "k8s"
       assert svc.namespace == "my-service"
+      assert svc.owner_id == global.id
 
       for cluster <- [sync2, sync3] do
         refute Services.get_service_by_name(cluster.id, "source")
       end
+
+      :ok = Global.sync_clusters(global)
+
+      svc = Services.get_service_by_name(sync.id, "source")
+
+      assert svc.git.ref == "main"
+      assert svc.git.folder == "k8s"
+      assert svc.namespace == "my-service"
+      assert svc.owner_id == global.id
+      refute svc.deleted_at
     end
   end
 
