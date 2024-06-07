@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console-client-go"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -45,7 +46,7 @@ type DeploymentSettingsSpec struct {
 
 type HTTPConnection struct {
 	Host string `json:"host"`
-	// user to connect w/ for basic auth
+	// user to connect with basic auth
 	User *string `json:"user,omitempty"`
 	// password to connect w/ for basic auth
 	Password *string `json:"password,omitempty"`
@@ -81,6 +82,9 @@ type StackSettings struct {
 	// JobSpec optional k8s job configuration for the job that will apply this stack
 	// +kubebuilder:validation:Optional
 	JobSpec *JobSpec `json:"jobSpec,omitempty"`
+	// ConnectionRef reference to ScmConnection
+	// +kubebuilder:validation:Optional
+	ConnectionRef *corev1.ObjectReference `json:"connectionRef,omitempty"`
 }
 
 //+kubebuilder:object:root=true

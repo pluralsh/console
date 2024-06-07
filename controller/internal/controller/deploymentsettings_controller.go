@@ -19,8 +19,6 @@ package controller
 import (
 	"context"
 
-	"sigs.k8s.io/yaml"
-
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
@@ -29,9 +27,11 @@ import (
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -97,7 +97,7 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 	if !settings.Status.IsSHAEqual(sha) {
 		logger.Info("upsert deployment settings", "name", settings.Name)
-		attr, err := r.genDeploymentSettingsAttr(settings)
+		attr, err := r.genDeploymentSettingsAttr(ctx, settings)
 		if err != nil {
 			utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -122,7 +122,7 @@ func (r *DeploymentSettingsReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		Complete(r)
 }
 
-func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(settings *v1alpha1.DeploymentSettings) (*console.DeploymentSettingsAttributes, error) {
+func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Context, settings *v1alpha1.DeploymentSettings) (*console.DeploymentSettingsAttributes, error) {
 	attr := &console.DeploymentSettingsAttributes{}
 	if settings.Spec.AgentHelmValues != nil {
 		var obj runtime.Object
@@ -141,13 +141,26 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(settings *v1alp
 	if settings.Spec.LokiConnection != nil {
 		attr.LokiConnection = settings.Spec.LokiConnection.Attributes()
 	}
-	if settings.Spec.Stacks != nil && settings.Spec.Stacks.JobSpec != nil {
-		jobSpec, err := gateJobAttributes(settings.Spec.Stacks.JobSpec)
-		if err != nil {
-			return nil, err
+	if settings.Spec.Stacks != nil {
+		var jobSpec *console.GateJobAttributes
+		var err error
+		var connectionID *string
+		if settings.Spec.Stacks.JobSpec != nil {
+			jobSpec, err = gateJobAttributes(settings.Spec.Stacks.JobSpec)
+			if err != nil {
+				return nil, err
+			}
+		}
+		if settings.Spec.Stacks.ConnectionRef != nil {
+			connection := &v1alpha1.ScmConnection{}
+			if err := r.Get(ctx, types.NamespacedName{Name: settings.Spec.Stacks.ConnectionRef.Name, Namespace: settings.Spec.Stacks.ConnectionRef.Namespace}, connection); err != nil {
+				return nil, err
+			}
+			connectionID = connection.Status.ID
 		}
 		attr.Stacks = &console.StackSettingsAttributes{
-			JobSpec: jobSpec,
+			JobSpec:      jobSpec,
+			ConnectionID: connectionID,
 		}
 	}
 	if settings.Spec.Bindings != nil {
