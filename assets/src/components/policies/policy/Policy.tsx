@@ -91,6 +91,7 @@ function Policy() {
       ) : (
         <PolicyAffectedResources
           policyName={policy?.name}
+          clusterId={policy?.cluster?.id}
           violations={policy?.violations}
           loading={loading}
         />

@@ -4,7 +4,15 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import { Violation } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 
+import { Row } from '@tanstack/react-table'
+
+import { original } from 'immer'
+
+import { useNavigate } from 'react-router-dom'
+
 import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
+
+import { getKubernetesResourcePath } from '../../../../routes/kubernetesRoutesConsts'
 
 import {
   ColErrorMessage,
@@ -18,12 +26,16 @@ const columns = [ColRessourceName, ColNamespace, ColKind, ColErrorMessage]
 export default function PolicyAffectedResources({
   policyName,
   violations,
+  clusterId,
   loading,
 }: {
   policyName?: string
   violations?: Array<Violation | null> | null
+  clusterId?: Nullable<string>
   loading: boolean
 }) {
+  const navigate = useNavigate()
+
   if (loading) return <LoadingIndicator />
 
   if (isEmpty(violations))
@@ -45,6 +57,25 @@ export default function PolicyAffectedResources({
             css={{
               maxHeight: 'unset',
               height: '100%',
+            }}
+            onRowClick={(
+              _e,
+              {
+                original: { group, version, kind, name, namespace },
+              }: Row<Violation>
+            ) => {
+              const path = getKubernetesResourcePath({
+                clusterId,
+                group,
+                version,
+                kind,
+                name,
+                namespace,
+              })
+
+              console.log(path)
+
+              if (path) navigate(path)
             }}
           />
         </FullHeightTableWrap>
