@@ -1,0 +1,17 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: DeploymentSettings
+metadata:
+  labels:
+    app.kubernetes.io/name: deploymentsettings
+    app.kubernetes.io/instance: deploymentsettings-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: global
+spec:
+  agentHelmValues:
+    replicaCount: 1
+    args:
+      processingTimeout: 4m
+      enableHelmDependencyUpdate: false
+      disableHelmTemplateDryRunServer: false
