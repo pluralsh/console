@@ -17,7 +17,7 @@ import { PoliciesTable } from 'components/policies/PoliciesTable'
 
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 
-import { HOME_CARD_MAX_HEIGHT, HomeCard } from '../../HomeCard'
+import { HomeCard } from '../../HomeCard'
 
 import { ConstraintViolationsChart } from './ConstraintViolationsChart'
 
@@ -55,7 +55,7 @@ export function ConstraintViolationsCard() {
       <div
         css={{
           display: 'flex',
-          maxHeight: HOME_CARD_MAX_HEIGHT,
+          height: '100%',
         }}
       >
         <div css={{ minWidth: 'fit-content', padding: theme.spacing.xlarge }}>
