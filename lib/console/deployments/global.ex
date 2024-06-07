@@ -208,19 +208,18 @@ defmodule Console.Deployments.Global do
   def add_to_cluster(global, cluster), do: add_to_cluster(global, cluster, bot())
 
   @spec add_to_cluster(GlobalService.t, Cluster.t, User.t) :: Services.service_resp
-  def add_to_cluster(%GlobalService{id: gid, template: %ServiceTemplate{} = tpl}, %Cluster{id: id}, user) do
-    ServiceTemplate.attributes(tpl)
-    |> Map.put(:owner_id, gid)
-    |> Map.put(:dependences, svc_deps(tpl.dependencies, []))
-    |> Services.create_service(id, user)
-  end
-
-  def add_to_cluster(%GlobalService{id: gid, service_id: sid} = global, %Cluster{id: cid}, user) do
+  def add_to_cluster(%GlobalService{} = global, %Cluster{id: cid}, user) do
     global = load_configuration(global)
     case {global, Services.get_service_by_name(cid, svc_name(global))} do
       {%GlobalService{id: id}, %Service{owner_id: id} = svc} -> sync_service(global, svc, user)
       {%GlobalService{reparent: true}, %Service{} = svc} -> sync_service(global, svc, user)
-      {%GlobalService{}, nil} -> Services.clone_service(%{owner_id: gid}, sid, cid, user)
+      {%GlobalService{id: gid, template: %ServiceTemplate{} = tpl}, nil} ->
+        ServiceTemplate.attributes(tpl)
+        |> Map.put(:owner_id, gid)
+        |> Map.put(:dependences, svc_deps(tpl.dependencies, []))
+        |> Services.create_service(cid, user)
+      {%GlobalService{id: gid, service_id: sid}, nil} when is_binary(sid) ->
+        Services.clone_service(%{owner_id: gid}, sid, cid, user)
       {_, svc} -> {:error, {:already_exists, svc}}
     end
   end
@@ -335,6 +334,7 @@ defmodule Console.Deployments.Global do
     |> Enum.map(fn
       {:ok, %Service{id: id}} -> id
       %Service{id: id} -> id
+      {:error, {:already_exists, %Service{id: id}}} -> id
       _ -> nil
     end)
     |> Enum.filter(& &1)
@@ -382,15 +382,11 @@ defmodule Console.Deployments.Global do
     |> Stream.filter(&__MODULE__.match?(&1, cluster))
     |> Stream.map(fn global ->
       case add_to_cluster(global, cluster) do
-        {:ok, svc} -> svc
-        %Service{} = svc -> svc
-        {:error, {:already_exists, svc}} -> svc
-        _ -> get_service(global, cluster.id)
+        {:ok, %Service{id: id}} -> id
+        %Service{id: id} -> id
+        {:error, {:already_exists, %Service{id: id}}} -> id
+        _ -> nil
       end
-    end)
-    |> Stream.map(fn
-      %Service{id: id} -> id
-      _ -> nil
     end)
     |> Stream.filter(& &1)
     |> Enum.into(MapSet.new())
@@ -421,8 +417,8 @@ defmodule Console.Deployments.Global do
 
   def maybe_drain(_, _), do: :ok
 
-  defp svc_name(%GlobalService{service: %Service{name: name}}), do: name
   defp svc_name(%GlobalService{template: %ServiceTemplate{name: name}}), do: name
+  defp svc_name(%GlobalService{service: %Service{name: name}}), do: name
   defp svc_name(%GlobalService{name: name}), do: name
 
   defp bot(), do: %{Users.get_bot!("console") | roles: %{admin: true}}

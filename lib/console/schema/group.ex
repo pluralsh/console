@@ -13,7 +13,7 @@ defmodule Console.Schema.Group do
   end
 
   def search(query \\ __MODULE__, name) do
-    from(g in query, where: like(g.name, ^"#{name}%"))
+    from(g in query, where: ilike(g.name, ^"%#{name}%"))
   end
 
   def global(query \\ __MODULE__) do
