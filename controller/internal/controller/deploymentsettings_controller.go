@@ -19,6 +19,8 @@ package controller
 import (
 	"context"
 
+	"sigs.k8s.io/yaml"
+
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
@@ -30,6 +32,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+)
+
+const (
+	deploymentSettingsName      = "global"
+	deploymentSettingsNamespace = "plrl-deploy-operator"
 )
 
 // DeploymentSettingsReconciler reconciles a DeploymentSettings object
@@ -56,9 +63,14 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	// make sure there is only one CRD object with the `global` name and the agent namespace
+	if settings.Name != deploymentSettingsName || settings.Namespace != deploymentSettingsNamespace {
+		return ctrl.Result{}, nil
+	}
+
 	scope, err := NewDeploymentSettingsScope(ctx, r.Client, settings)
 	if err != nil {
-		logger.Error(err, "failed to create custom stack run")
+		logger.Error(err, "failed to create deployment settings scope")
 		utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -113,7 +125,14 @@ func (r *DeploymentSettingsReconciler) SetupWithManager(mgr ctrl.Manager) error 
 func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(settings *v1alpha1.DeploymentSettings) (*console.DeploymentSettingsAttributes, error) {
 	attr := &console.DeploymentSettingsAttributes{}
 	if settings.Spec.AgentHelmValues != nil {
-		rawHelmValues := settings.Spec.AgentHelmValues.Raw
+		var obj runtime.Object
+		if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(settings.Spec.AgentHelmValues, &obj, nil); err != nil {
+			return nil, err
+		}
+		rawHelmValues, err := yaml.Marshal(obj)
+		if err != nil {
+			return nil, err
+		}
 		attr.AgentHelmValues = lo.ToPtr(string(rawHelmValues))
 	}
 	if settings.Spec.PrometheusConnection != nil {

@@ -30,6 +30,7 @@ const (
 	ManagedNamespaceReconciler      Reconciler = "managednamespace"
 	StackReconciler                 Reconciler = "stack"
 	CustomStackRunReconciler                   = "customstackrun"
+	DeploymentSettingsReconciler               = "deploymentsettings"
 )
 
 // ToReconciler maps reconciler string to a Reconciler type.
@@ -66,6 +67,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case StackReconciler:
 		fallthrough
 	case CustomStackRunReconciler:
+		fallthrough
+	case DeploymentSettingsReconciler:
 		fallthrough
 	case ProviderReconciler:
 		return Reconciler(reconciler), nil
@@ -175,6 +178,12 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case CustomStackRunReconciler:
 		return &controller.CustomStackRunReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}, nil
+	case DeploymentSettingsReconciler:
+		return &controller.DeploymentSettingsReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
