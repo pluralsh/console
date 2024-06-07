@@ -11,6 +11,8 @@ import { isEmpty } from 'lodash'
 
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import VPNClientList from '../../vpn/VPNClientList'
 import {
   ColumnActions,
@@ -26,9 +28,15 @@ import { WireguardPeers } from '../../vpn/graphql/queries'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 import { SHORT_POLL_INTERVAL } from '../../cluster/constants'
 
+import { BREADCRUMBS } from '../Account'
+
 import { VPNHeaderActions } from './VPNHeaderActions'
 
 function VPN() {
+  useSetBreadcrumbs(
+    useMemo(() => [...BREADCRUMBS, { label: 'vpn', url: '/account/vpn' }], [])
+  )
+
   const {
     data: { wireguardPeers } = {},
     loading,

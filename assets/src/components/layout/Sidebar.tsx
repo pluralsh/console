@@ -1,4 +1,4 @@
-import { DISCORD_LINK, GITHUB_LINK } from 'utils/constants'
+import { GITHUB_LINK } from 'utils/constants'
 
 import {
   ApiIcon,
@@ -8,7 +8,6 @@ import {
   BuildIcon,
   Sidebar as DSSidebar,
   DatabaseIcon,
-  DiscordIcon,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
@@ -16,7 +15,6 @@ import {
   HomeIcon,
   KubernetesIcon,
   LightningIcon,
-  ListIcon,
   LogoutIcon,
   PeopleIcon,
   PersonIcon,
@@ -197,13 +195,6 @@ function getMenuItems({
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
     },
     {
-      text: 'Audits',
-      expandedLabel: 'Audits',
-      icon: <ListIcon />,
-      path: '/audits',
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.audits),
-    },
-    {
       text: 'Account',
       expandedLabel: 'Account',
       icon: <PeopleIcon />,
@@ -355,18 +346,6 @@ export default function Sidebar() {
           ))}
           <Flex grow={1} />
           <SidebarExpandButton />
-          <SidebarItem
-            tooltip="Discord"
-            className="sidebar-discord"
-            clickable
-            as="a"
-            target="_blank"
-            rel="noopener noreferrer"
-            href={DISCORD_LINK}
-            expandedLabel="Discord"
-          >
-            <DiscordIcon />
-          </SidebarItem>
           <SidebarItem
             tooltip="GitHub"
             className="sidebar-github"

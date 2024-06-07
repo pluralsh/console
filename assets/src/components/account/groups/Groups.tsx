@@ -1,24 +1,29 @@
-import { useContext, useState } from 'react'
+import { useContext, useMemo, useState } from 'react'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
-import { Card } from '@pluralsh/design-system'
+import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { useTheme } from 'styled-components'
+import { BREADCRUMBS } from '../Account'
 
 import { GroupsList } from './GroupsList'
 import GroupCreate from './GroupCreate'
-import GroupSearchHeader from './GroupsSearchHeader'
 
 export const GROUPS_QUERY_PAGE_SIZE = 100
 
 export function Groups() {
-  const theme = useTheme()
   const [q, setQ] = useState('')
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...BREADCRUMBS, { label: 'groups', url: '/account/groups' }],
+      []
+    )
+  )
 
   return (
     <ScrollablePage
@@ -35,12 +40,14 @@ export function Groups() {
             height: '100%',
           }}
         >
-          <Card css={{ marginBottom: theme.spacing.small }}>
-            <GroupSearchHeader
-              q={q}
-              setQ={setQ}
-            />
-          </Card>
+          <Input
+            value={q}
+            placeholder="Search a group"
+            startIcon={<SearchIcon color="text-light" />}
+            onChange={({ target: { value } }) => setQ(value)}
+            backgroundColor="fill-one"
+            marginBottom="small"
+          />
           <GroupsList q={q} />
         </div>
       ) : (

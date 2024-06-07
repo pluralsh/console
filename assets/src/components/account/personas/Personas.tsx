@@ -1,10 +1,14 @@
-import { useContext } from 'react'
+import { useContext, useMemo } from 'react'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
+
 import { List } from '../../utils/List'
+
+import { BREADCRUMBS } from '../Account'
 
 import { PersonasList } from './PersonasList'
 import PersonaCreate from './PersonaCreate'
@@ -12,6 +16,13 @@ import PersonaCreate from './PersonaCreate'
 export function Personas() {
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...BREADCRUMBS, { label: 'personas', url: '/account/personas' }],
+      []
+    )
+  )
 
   return (
     <ScrollablePage

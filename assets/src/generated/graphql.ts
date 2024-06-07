@@ -7466,6 +7466,21 @@ export type RepositoryQueryVariables = Exact<{
 
 export type RepositoryQuery = { __typename?: 'RootQueryType', repository?: { __typename?: 'Repository', id: string, name: string, icon?: string | null, description?: string | null, grafanaDns?: string | null, configuration?: { __typename?: 'Configuration', helm?: string | null, terraform?: string | null } | null, docs?: Array<{ __typename?: 'FileContent', content?: string | null, path?: string | null } | null> | null } | null };
 
+export type AuditFragment = { __typename?: 'Audit', id: string, type: AuditType, action: AuditAction, repository?: string | null, ip?: string | null, city?: string | null, country?: string | null, latitude?: string | null, longitude?: string | null, insertedAt?: string | null, actor?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
+
+export type AuditsQueryVariables = Exact<{
+  repo?: InputMaybe<Scalars['String']['input']>;
+  cursor?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AuditsQuery = { __typename?: 'RootQueryType', audits?: { __typename?: 'AuditConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AuditEdge', node?: { __typename?: 'Audit', id: string, type: AuditType, action: AuditAction, repository?: string | null, ip?: string | null, city?: string | null, country?: string | null, latitude?: string | null, longitude?: string | null, insertedAt?: string | null, actor?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null } | null } | null> | null } | null };
+
+export type AuditMetricsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type AuditMetricsQuery = { __typename?: 'RootQueryType', auditMetrics?: Array<{ __typename?: 'AuditMetric', country?: string | null, count?: number | null } | null> | null };
+
 export type PrAutomationFragment = { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, identifier: string, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null };
 
 export type PrAutomationsQueryVariables = Exact<{
@@ -9220,6 +9235,93 @@ export const RepositoryFragmentDoc = gql`
 }
     ${ConfigurationFragmentDoc}
 ${FileContentFragmentDoc}`;
+export const PolicyBindingFragmentDoc = gql`
+    fragment PolicyBinding on PolicyBinding {
+  id
+  user {
+    id
+    name
+    email
+  }
+  group {
+    id
+    name
+  }
+}
+    `;
+export const PersonaConfigurationFragmentDoc = gql`
+    fragment PersonaConfiguration on PersonaConfiguration {
+  all
+  deployments {
+    addOns
+    clusters
+    pipelines
+    providers
+    repositories
+    services
+  }
+  home {
+    manager
+    security
+  }
+  sidebar {
+    audits
+    kubernetes
+    pullRequests
+    settings
+    backups
+    stacks
+  }
+}
+    `;
+export const PersonaFragmentDoc = gql`
+    fragment Persona on Persona {
+  id
+  name
+  description
+  bindings {
+    ...PolicyBinding
+  }
+  configuration {
+    ...PersonaConfiguration
+  }
+}
+    ${PolicyBindingFragmentDoc}
+${PersonaConfigurationFragmentDoc}`;
+export const UserFragmentDoc = gql`
+    fragment User on User {
+  id
+  pluralId
+  name
+  email
+  profile
+  backgroundColor
+  readTimestamp
+  roles {
+    admin
+  }
+  personas {
+    ...Persona
+  }
+}
+    ${PersonaFragmentDoc}`;
+export const AuditFragmentDoc = gql`
+    fragment Audit on Audit {
+  id
+  type
+  action
+  repository
+  ip
+  city
+  country
+  latitude
+  longitude
+  actor {
+    ...User
+  }
+  insertedAt
+}
+    ${UserFragmentDoc}`;
 export const ScmWebhookFragmentDoc = gql`
     fragment ScmWebhook on ScmWebhook {
   id
@@ -9395,20 +9497,6 @@ export const RuntimeServiceFragmentDoc = gql`
 }
     ${AddonVersionFragmentDoc}
 ${AddonVersionBlockingFragmentDoc}`;
-export const PolicyBindingFragmentDoc = gql`
-    fragment PolicyBinding on PolicyBinding {
-  id
-  user {
-    id
-    name
-    email
-  }
-  group {
-    id
-    name
-  }
-}
-    `;
 export const ClusterBindingsFragmentDoc = gql`
     fragment ClusterBindings on Cluster {
   readBindings {
@@ -9628,62 +9716,6 @@ export const ServiceTemplateFragmentDoc = gql`
   templated
 }
     ${GitRepositoryFragmentDoc}`;
-export const PersonaConfigurationFragmentDoc = gql`
-    fragment PersonaConfiguration on PersonaConfiguration {
-  all
-  deployments {
-    addOns
-    clusters
-    pipelines
-    providers
-    repositories
-    services
-  }
-  home {
-    manager
-    security
-  }
-  sidebar {
-    audits
-    kubernetes
-    pullRequests
-    settings
-    backups
-    stacks
-  }
-}
-    `;
-export const PersonaFragmentDoc = gql`
-    fragment Persona on Persona {
-  id
-  name
-  description
-  bindings {
-    ...PolicyBinding
-  }
-  configuration {
-    ...PersonaConfiguration
-  }
-}
-    ${PolicyBindingFragmentDoc}
-${PersonaConfigurationFragmentDoc}`;
-export const UserFragmentDoc = gql`
-    fragment User on User {
-  id
-  pluralId
-  name
-  email
-  profile
-  backgroundColor
-  readTimestamp
-  roles {
-    admin
-  }
-  personas {
-    ...Persona
-  }
-}
-    ${PersonaFragmentDoc}`;
 export const ContainerSpecFragmentDoc = gql`
     fragment ContainerSpec on ContainerSpec {
   args
@@ -11447,6 +11479,95 @@ export type RepositoryQueryHookResult = ReturnType<typeof useRepositoryQuery>;
 export type RepositoryLazyQueryHookResult = ReturnType<typeof useRepositoryLazyQuery>;
 export type RepositorySuspenseQueryHookResult = ReturnType<typeof useRepositorySuspenseQuery>;
 export type RepositoryQueryResult = Apollo.QueryResult<RepositoryQuery, RepositoryQueryVariables>;
+export const AuditsDocument = gql`
+    query Audits($repo: String, $cursor: String) {
+  audits(repo: $repo, after: $cursor, first: 50) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Audit
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${AuditFragmentDoc}`;
+
+/**
+ * __useAuditsQuery__
+ *
+ * To run a query within a React component, call `useAuditsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAuditsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAuditsQuery({
+ *   variables: {
+ *      repo: // value for 'repo'
+ *      cursor: // value for 'cursor'
+ *   },
+ * });
+ */
+export function useAuditsQuery(baseOptions?: Apollo.QueryHookOptions<AuditsQuery, AuditsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AuditsQuery, AuditsQueryVariables>(AuditsDocument, options);
+      }
+export function useAuditsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AuditsQuery, AuditsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AuditsQuery, AuditsQueryVariables>(AuditsDocument, options);
+        }
+export function useAuditsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AuditsQuery, AuditsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AuditsQuery, AuditsQueryVariables>(AuditsDocument, options);
+        }
+export type AuditsQueryHookResult = ReturnType<typeof useAuditsQuery>;
+export type AuditsLazyQueryHookResult = ReturnType<typeof useAuditsLazyQuery>;
+export type AuditsSuspenseQueryHookResult = ReturnType<typeof useAuditsSuspenseQuery>;
+export type AuditsQueryResult = Apollo.QueryResult<AuditsQuery, AuditsQueryVariables>;
+export const AuditMetricsDocument = gql`
+    query AuditMetrics {
+  auditMetrics {
+    country
+    count
+  }
+}
+    `;
+
+/**
+ * __useAuditMetricsQuery__
+ *
+ * To run a query within a React component, call `useAuditMetricsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAuditMetricsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAuditMetricsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useAuditMetricsQuery(baseOptions?: Apollo.QueryHookOptions<AuditMetricsQuery, AuditMetricsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AuditMetricsQuery, AuditMetricsQueryVariables>(AuditMetricsDocument, options);
+      }
+export function useAuditMetricsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AuditMetricsQuery, AuditMetricsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AuditMetricsQuery, AuditMetricsQueryVariables>(AuditMetricsDocument, options);
+        }
+export function useAuditMetricsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AuditMetricsQuery, AuditMetricsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AuditMetricsQuery, AuditMetricsQueryVariables>(AuditMetricsDocument, options);
+        }
+export type AuditMetricsQueryHookResult = ReturnType<typeof useAuditMetricsQuery>;
+export type AuditMetricsLazyQueryHookResult = ReturnType<typeof useAuditMetricsLazyQuery>;
+export type AuditMetricsSuspenseQueryHookResult = ReturnType<typeof useAuditMetricsSuspenseQuery>;
+export type AuditMetricsQueryResult = Apollo.QueryResult<AuditMetricsQuery, AuditMetricsQueryVariables>;
 export const PrAutomationsDocument = gql`
     query PrAutomations($first: Int = 100, $after: String) {
   prAutomations(first: $first, after: $after) {
@@ -18754,6 +18875,8 @@ export const namedOperations = {
     App: 'App',
     AppInfo: 'AppInfo',
     Repository: 'Repository',
+    Audits: 'Audits',
+    AuditMetrics: 'AuditMetrics',
     PrAutomations: 'PrAutomations',
     ScmConnections: 'ScmConnections',
     ScmWebhooks: 'ScmWebhooks',
@@ -18942,6 +19065,7 @@ export const namedOperations = {
     Application: 'Application',
     ConfigurationOverlay: 'ConfigurationOverlay',
     Repository: 'Repository',
+    Audit: 'Audit',
     PrAutomation: 'PrAutomation',
     ScmConnection: 'ScmConnection',
     ScmWebhook: 'ScmWebhook',

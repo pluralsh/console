@@ -1,19 +1,19 @@
-import { AppIcon, Table } from '@pluralsh/design-system'
+import { AppIcon, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
-import { useQuery } from '@apollo/client'
-import { extendConnection } from 'utils/graphql'
+import { extendConnection, mapExistingNodes } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { Link } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
-import { AUDITS_Q } from '../queries'
 import { InlineLink } from '../../utils/typography/InlineLink'
-
-import { AuditLocation } from './AuditLocation'
-import { AuditAction } from './AuditAction'
+import { formatLocation } from '../../../utils/geo'
+import { StackedText } from '../../utils/table/StackedText'
+import { useAuditsQuery } from '../../../generated/graphql'
+import { BREADCRUMBS } from '../Account'
 
 const FETCH_MARGIN = 30
 
@@ -22,8 +22,34 @@ const COLUMN_HELPER = createColumnHelper<any>()
 const columns = [
   COLUMN_HELPER.accessor((audit) => audit, {
     id: 'action',
-    cell: (audit: any) => <AuditAction audit={audit.getValue()} />,
-    header: 'Action / Type',
+    header: () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
+
+      return (
+        <div>
+          <div>Action</div>
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-light'],
+            }}
+          >
+            Type
+          </div>
+        </div>
+      )
+    },
+    cell: (audit) => {
+      const { action, type } = audit.getValue()
+
+      return (
+        <StackedText
+          first={action}
+          second={type}
+        />
+      )
+    },
   }),
   COLUMN_HELPER.accessor((audit) => audit.repository, {
     id: 'repository',
@@ -66,28 +92,54 @@ const columns = [
   }),
   COLUMN_HELPER.accessor((audit) => audit, {
     id: 'locationIp',
-    cell: (audit: any) => {
-      const a = audit.getValue()
+    header: () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const theme = useTheme()
 
       return (
-        <AuditLocation
-          ip={a.ip}
-          country={a.country}
-          city={a.city}
+        <div>
+          <div>Location</div>
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-light'],
+            }}
+          >
+            IP
+          </div>
+        </div>
+      )
+    },
+    cell: (audit: any) => {
+      const { ip, country, city } = audit.getValue()
+
+      return (
+        <StackedText
+          first={country && formatLocation(country, city)}
+          second={ip}
         />
       )
     },
-    header: 'Location / IP',
   }),
 ]
 
-export default function AuditsTable() {
-  const { data, loading, fetchMore } = useQuery(AUDITS_Q, {
+export default function AuditsList() {
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        ...BREADCRUMBS,
+        { label: 'audits', url: '/account/audits' },
+        { label: 'list', url: '/account/audits/list' },
+      ],
+      []
+    )
+  )
+
+  const { data, loading, fetchMore } = useAuditsQuery({
     fetchPolicy: 'cache-and-network',
   })
   const pageInfo = data?.audits?.pageInfo
-  const edges = data?.audits?.edges
-  const audits = useMemo(() => edges?.map(({ node }) => node), [edges])
+  const audits = useMemo(() => mapExistingNodes(data?.audits), [data])
 
   const fetchMoreOnBottomReached = useCallback(
     (element?: HTMLDivElement | undefined) => {
@@ -99,10 +151,10 @@ export default function AuditsTable() {
       if (
         scrollHeight - scrollTop - clientHeight < FETCH_MARGIN &&
         !loading &&
-        pageInfo.hasNextPage
+        pageInfo?.hasNextPage
       ) {
         fetchMore({
-          variables: { cursor: pageInfo.endCursor },
+          variables: { cursor: pageInfo?.endCursor },
           updateQuery: (prev, { fetchMoreResult: { audits } }) =>
             extendConnection(prev, audits, 'audits'),
         })
@@ -116,7 +168,7 @@ export default function AuditsTable() {
   return (
     <FullHeightTableWrap>
       <Table
-        data={audits}
+        data={audits || []}
         columns={columns}
         onScrollCapture={(e) => fetchMoreOnBottomReached(e?.target)}
         maxHeight="100%"
