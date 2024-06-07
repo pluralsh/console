@@ -2,6 +2,8 @@
 
 import requests
 from bs4 import BeautifulSoup
+from collections import OrderedDict
+from utils import printError, write_compatibility_info
 
 icon = "https://github.com/pluralsh/plural-artifacts/blob/main/ingress-nginx/plural/icons/nginx.png?raw=true"
 git_url = "https://github.com/kubernetes/ingress-nginx"
@@ -26,22 +28,36 @@ def scrape():
                 rows = []
                 for row in table.find_all("tr")[1:]:  # Skip the header row
                     columns = row.find_all("td")
-                    if len(columns) >= 3:  # check column length
+                    if len(columns) >= 3:  # Ensure there are enough columns
                         ingress_nginx_version = (
                             columns[1].get_text(strip=True).lstrip("v")
                         )
-                        k8s_supported_versions = columns[2].get_text(strip=True)
-                        rows.append(
-                            (ingress_nginx_version, k8s_supported_versions)
+                        k8s_supported_versions = (
+                            columns[2].get_text(strip=True).split(", ")
                         )
+                        version_info = OrderedDict(
+                            [
+                                ("version", ingress_nginx_version),
+                                ("kube", k8s_supported_versions),
+                                ("requirements", []),
+                                ("incompatibilities", []),
+                            ]
+                        )
+                        rows.append(version_info)
 
-                for ingress_nginx_version, k8s_supported_versions in rows:
-                    print(
-                        f"Ingress-NGINX version: {ingress_nginx_version}, k8s supported versions: {k8s_supported_versions}"
-                    )
+                # Write the compatibility info to a file
+                write_compatibility_info(
+                    "../../static/compatibilities/ingress-nginx.yaml",
+                    icon,
+                    git_url,
+                    release_url,
+                    rows,
+                )
             else:
-                print("No table found in the README section.")
+                printError("No table found in the README section.")
         else:
-            print("Could not find the README section on the page.")
+            printError("Could not find the README section on the page.")
     else:
-        print(f"Failed to fetch the page. Status code: {response.status_code}")
+        printError(
+            f"Failed to fetch the page. Status code: {response.status_code}"
+        )
