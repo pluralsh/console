@@ -14,7 +14,8 @@ defmodule Console.Schema.Stack do
     StackFile,
     User,
     ObservableMetric,
-    ScmConnection
+    ScmConnection,
+    Tag
   }
 
   defenum Type, terraform: 0, ansible: 1
@@ -90,6 +91,7 @@ defmodule Console.Schema.Stack do
     has_many :files,       StackFile, on_replace: :delete
     has_many :output,      StackOutput, on_replace: :delete
     has_many :runs,        StackRun
+    has_many :tags,        Tag, on_replace: :delete
 
     has_many :observable_metrics, ObservableMetric, on_replace: :delete
 

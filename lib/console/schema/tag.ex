@@ -1,6 +1,6 @@
 defmodule Console.Schema.Tag do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service}
+  alias Console.Schema.{Cluster, Service, Stack}
 
   schema "tags" do
     field :name,  :string
@@ -8,6 +8,7 @@ defmodule Console.Schema.Tag do
 
     belongs_to :cluster, Cluster
     belongs_to :service, Service
+    belongs_to :stack,   Stack
 
     timestamps()
   end
@@ -58,13 +59,14 @@ defmodule Console.Schema.Tag do
   def as_map([_ | _] = tags), do: Map.new(tags, & {&1.name, &1.value})
   def as_map(_), do: %{}
 
-  @valid ~w(name value cluster_id service_id)a
+  @valid ~w(name value cluster_id service_id stack_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
+    |> foreign_key_constraint(:stack_id)
     |> unique_constraint([:cluster_id, :name])
     |> unique_constraint([:service_id, :name])
     |> validate_required([:name, :value])

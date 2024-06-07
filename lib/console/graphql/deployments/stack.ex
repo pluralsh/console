@@ -25,6 +25,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
 
+    field :tags,               list_of(:tag_attributes)
     field :files,              list_of(:stack_file_attributes)
     field :environment,        list_of(:stack_environment_attributes)
     field :observable_metrics, list_of(:observable_metric_attributes)
@@ -144,6 +145,8 @@ defmodule Console.GraphQl.Deployments.Stack do
     connection field :custom_stack_runs, node_type: :custom_stack_run do
       resolve &Deployments.list_custom_runs/3
     end
+
+    field :tags, list_of(:tag), resolve: dataloader(Deployments), description: "key/value tags to filter stacks"
 
     field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments)
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
