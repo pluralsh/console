@@ -622,6 +622,8 @@ export type Cluster = {
   installed?: Maybe<Scalars['Boolean']['output']>;
   /** the url of the kas server you can access this cluster from */
   kasUrl?: Maybe<Scalars['String']['output']>;
+  /** The lowest discovered kubelet version for all nodes in the cluster */
+  kubeletVersion?: Maybe<Scalars['String']['output']>;
   /** Queries logs for a cluster out of loki */
   logs?: Maybe<Array<Maybe<LogStream>>>;
   /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
@@ -819,6 +821,7 @@ export type ClusterInfo = {
 export type ClusterPing = {
   currentVersion: Scalars['String']['input'];
   distro?: InputMaybe<ClusterDistro>;
+  kubeletVersion?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** a CAPI provider for a cluster, cloud is inferred from name if not provided manually */

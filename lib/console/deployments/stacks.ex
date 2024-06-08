@@ -289,6 +289,39 @@ defmodule Console.Deployments.Stacks do
     |> notify(:create)
   end
 
+  defp lock(%Stack{id: id}) do
+    start_transaction()
+    |> add_operation(:fetch, fn _ ->
+      Stack.lock()
+      |> Repo.get(id)
+      |> ok()
+    end)
+    |> add_operation(:lock, fn
+      %{fetch: %Stack{locked_at: l} = s} when not is_nil(l) ->
+        Timex.now()
+        |> Timex.shift(minutes: -1)
+        |> Timex.after?(l)
+        |> case do
+          true -> {:ok, s}
+          _ -> {:error, "stack is locked for update"}
+        end
+      %{fetch: %Stack{} = s} ->
+        Stack.lock_changeset(s, %{locked_at: Timex.now()})
+        |> Repo.update()
+    end)
+    |> execute(extract: :lock)
+  end
+
+  defp unlock(%Stack{} = s) do
+    Stack.lock_changeset(s, %{locked_at: nil})
+    |> Repo.update()
+  end
+
+  defp unlock(res, %Stack{} = s) do
+    unlock(s)
+    res
+  end
+
   @poll_preloads ~w(repository environment files)a
 
   @doc """
@@ -298,14 +331,17 @@ defmodule Console.Deployments.Stacks do
   def poll(%Stack{delete_run_id: id}) when is_binary(id),
     do: {:error, "stack is deleting"}
 
-  def poll(%Stack{sha: sha, git: git} = stack) do
-    %{repository: repo} = stack = Repo.preload(stack, @poll_preloads)
-    case Discovery.sha(repo, git.ref) do
-      {:ok, ^sha} -> {:error, "no new commit in repo"}
-      {:ok, new_sha} ->
-        with {:ok, new_sha, msg} <- new_changes(repo, git, sha, new_sha),
-          do: create_run(stack, new_sha, %{message: msg})
-      err -> err
+  def poll(%Stack{} = stack) do
+    with {:ok, %Stack{sha: sha, git: git} = stack} <- lock(stack) do
+      %{repository: repo} = stack = Repo.preload(stack, @poll_preloads)
+      case Discovery.sha(repo, git.ref) do
+        {:ok, ^sha} -> {:error, "no new commit in repo"}
+        {:ok, new_sha} ->
+          with {:ok, new_sha, msg} <- new_changes(repo, git, sha, new_sha),
+            do: create_run(stack, new_sha, %{message: msg})
+        err -> err
+      end
+      |> unlock(stack)
     end
   end
 
