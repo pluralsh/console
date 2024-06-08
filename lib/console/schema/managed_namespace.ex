@@ -33,6 +33,7 @@ defmodule Console.Schema.ManagedNamespace do
     embeds_one :target,  Target, on_replace: :update
     embeds_one :cascade, GlobalService.Cascade, on_replace: :update
 
+    belongs_to :project, Project
     belongs_to :service, ServiceTemplate, on_replace: :update
 
     has_many :clusters, NamespaceCluster,
@@ -52,7 +53,8 @@ defmodule Console.Schema.ManagedNamespace do
     from(mn in query,
       left_join: nc in assoc(mn, :clusters),
       where: (is_nil(mn.target) or fragment("? = 'null'::jsonb", mn.target["tags"]) or fragment("?::jsonb <@ ?", ^tags, mn.target["tags"]))
-                and (is_nil(mn.target) or fragment("? = 'null'::jsonb", mn.target["distro"]) or mn.target["distro"] == ^cluster.distro),
+                and (is_nil(mn.target) or fragment("? = 'null'::jsonb", mn.target["distro"]) or mn.target["distro"] == ^cluster.distro)
+                and (is_nil(mn.project_id) or mn.project_id == ^cluster.project_id),
       or_where: nc.cluster_id == ^cluster.id,
       distinct: true
     )
@@ -72,7 +74,7 @@ defmodule Console.Schema.ManagedNamespace do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name description labels annotations pull_secrets)a
+  @valid ~w(name description project_id labels annotations pull_secrets)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
   import Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Clusters, Services, Settings, AddOns}
+  alias Console.Deployments.{Clusters, Services, AddOns}
   alias Console.Schema.{
     Cluster,
     ClusterNodePool,
@@ -53,9 +53,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     StackFile,
     StackOutput,
     StackState,
-    ServiceDependency
+    ServiceDependency,
+    Project
   }
 
+  def query(Project, _), do: Project
   def query(Pipeline, _), do: Pipeline
   def query(PipelineStage, _), do: PipelineStage
   def query(PipelineEdge, _), do: PipelineEdge
@@ -117,6 +119,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Observability
   delegates Console.GraphQl.Resolvers.Deployments.Global
   delegates Console.GraphQl.Resolvers.Deployments.Stack
+  delegates Console.GraphQl.Resolvers.Deployments.Settings
 
   def list_addons(_, _), do: AddOns.addons()
 
@@ -147,16 +150,6 @@ defmodule Console.GraphQl.Resolvers.Deployments do
 
   defp tag_args(%{tag: _}), do: {[asc: :value], :value}
   defp tag_args(_), do: {[asc: :name], :name}
-
-  def settings(_, _), do: {:ok, Settings.fetch_consistent()}
-
-  def enable(_, %{context: %{current_user: user}}), do: Settings.enable(user)
-
-  def self_manage(%{values: values}, %{context: %{current_user: user}}),
-    do: Services.self_manage(values, user)
-
-  def update_settings(%{attributes: attrs}, %{context: %{current_user: user}}),
-    do: Settings.update(attrs, user)
 
   def editable(resource, _, %{context: %{current_user: user}}) do
     case allow(resource, user, :write) do

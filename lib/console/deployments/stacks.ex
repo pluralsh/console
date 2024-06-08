@@ -93,7 +93,7 @@ defmodule Console.Deployments.Stacks do
   @spec create_stack(map, User.t) :: stack_resp
   def create_stack(attrs, %User{} = user) do
     %Stack{status: :queued}
-    |> Stack.changeset(attrs)
+    |> Stack.changeset(Settings.add_project_id(attrs))
     |> allow(user, :write)
     |> when_ok(:insert)
     |> notify(:create, user)
@@ -107,6 +107,7 @@ defmodule Console.Deployments.Stacks do
     get_stack!(id)
     |> preloaded()
     |> Stack.changeset(attrs)
+    |> Stack.update_changeset()
     |> allow(user, :write)
     |> when_ok(:update)
     |> notify(:update, user)

@@ -198,7 +198,7 @@ type RootQueryType {
 
   "a relay connection of all clusters visible to the current user"
   clusters(
-    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean
+    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean, projectId: ID
   ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
@@ -279,7 +279,7 @@ type RootQueryType {
   "Fetches the manifests from cache once the agent has given us them, will be null otherwise"
   fetchManifests(id: ID!): [String]
 
-  pipelines(after: String, first: Int, before: String, last: Int, q: String): PipelineConnection
+  pipelines(after: String, first: Int, before: String, last: Int, q: String, projectId: ID): PipelineConnection
 
   pipeline(id: ID!): Pipeline
 
@@ -359,13 +359,17 @@ type RootQueryType {
 
   infrastructureStack(id: ID!): InfrastructureStack
 
-  infrastructureStacks(after: String, first: Int, before: String, last: Int, q: String): InfrastructureStackConnection
+  infrastructureStacks(after: String, first: Int, before: String, last: Int, q: String, projectId: ID): InfrastructureStackConnection
 
   observabilityProvider(id: ID!): ObservabilityProvider
 
   observabilityProviders(after: String, first: Int, before: String, last: Int): ObservabilityProviderConnection
 
   deploymentSettings: DeploymentSettings
+
+  projects(after: String, first: Int, before: String, last: Int, q: String): ProjectConnection
+
+  project(id: ID, name: String): Project
 }
 
 type RootMutationType {
@@ -739,12 +743,16 @@ type RootMutationType {
 
   deleteObservabilityProvider(id: ID!): ObservabilityProvider
 
-  "a reusable mutation for updating rbac settings on core services"
-  updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
-
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
 
   enableDeployments: DeploymentSettings
+
+  createProject(attributes: ProjectAttributes!): Project
+
+  updateProject(id: ID!, attributes: ProjectAttributes!): Project
+
+  "a reusable mutation for updating rbac settings on core services"
+  updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
 }
 
 type RootSubscriptionType {
@@ -790,6 +798,80 @@ type PolicyBinding {
   group: Group
 }
 
+input RbacAttributes {
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+}
+
+input ProjectAttributes {
+  name: String!
+  description: String
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
+}
+
+input DeploymentSettingsAttributes {
+  artifactRepositoryId: ID
+
+  deployerRepositoryId: ID
+
+  "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
+  agentHelmValues: String
+
+  "global configuration for stack execution"
+  stacks: StackSettingsAttributes
+
+  "connection details for a prometheus instance to use"
+  prometheusConnection: HttpConnectionAttributes
+
+  "connection details for a loki instance to use"
+  lokiConnection: HttpConnectionAttributes
+
+  readBindings: [PolicyBindingAttributes]
+
+  writeBindings: [PolicyBindingAttributes]
+
+  gitBindings: [PolicyBindingAttributes]
+
+  createBindings: [PolicyBindingAttributes]
+}
+
+input HttpConnectionAttributes {
+  host: String!
+
+  "user to connect w\/ for basic auth"
+  user: String
+
+  "password to connect w\/ for basic auth"
+  password: String
+}
+
+input StackSettingsAttributes {
+  jobSpec: GateJobAttributes
+  connectionId: ID
+}
+
+"A unit of organization to control permissions for a set of objects within your Console instance"
+type Project {
+  id: ID!
+
+  name: String!
+
+  description: String
+
+  default: Boolean
+
+  "read policy across this project"
+  readBindings: [PolicyBinding]
+
+  "write policy across this project"
+  writeBindings: [PolicyBinding]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 "global settings for CD, these specify global read\/write policies and also allow for customization of the repos for CAPI resources and the deploy operator"
 type DeploymentSettings {
   id: ID!
@@ -829,16 +911,16 @@ type DeploymentSettings {
   "the repo to fetch the deploy operators manifests from"
   deployerRepository: GitRepository
 
-  "read policy across all clusters"
+  "read policy across all objects"
   readBindings: [PolicyBinding]
 
-  "write policy across all clusters"
+  "write policy across all objects"
   writeBindings: [PolicyBinding]
 
   "policy for managing git repos"
   gitBindings: [PolicyBinding]
 
-  "policy for creation of new clusters"
+  "policy for creation of new objects"
   createBindings: [PolicyBinding]
 
   insertedAt: DateTime
@@ -862,50 +944,9 @@ type HttpConnection {
   password: String
 }
 
-input DeploymentSettingsAttributes {
-  artifactRepositoryId: ID
-
-  deployerRepositoryId: ID
-
-  "custom helm values to apply to all agents (useful for things like adding customary annotations\/labels)"
-  agentHelmValues: String
-
-  "global configuration for stack execution"
-  stacks: StackSettingsAttributes
-
-  "connection details for a prometheus instance to use"
-  prometheusConnection: HttpConnectionAttributes
-
-  "connection details for a loki instance to use"
-  lokiConnection: HttpConnectionAttributes
-
-  readBindings: [PolicyBindingAttributes]
-
-  writeBindings: [PolicyBindingAttributes]
-
-  gitBindings: [PolicyBindingAttributes]
-
-  createBindings: [PolicyBindingAttributes]
-}
-
-input HttpConnectionAttributes {
-  host: String!
-
-  "user to connect w\/ for basic auth"
-  user: String
-
-  "password to connect w\/ for basic auth"
-  password: String
-}
-
-input RbacAttributes {
-  readBindings: [PolicyBindingAttributes]
-  writeBindings: [PolicyBindingAttributes]
-}
-
-input StackSettingsAttributes {
-  jobSpec: GateJobAttributes
-  connectionId: ID
+type ProjectConnection {
+  pageInfo: PageInfo!
+  edges: [ProjectEdge]
 }
 
 enum ObservabilityProviderType {
@@ -1021,6 +1062,9 @@ input StackAttributes {
 
   "user id to use for default Plural authentication in this stack"
   actorId: ID
+
+  "the project id this stack will belong to"
+  projectId: ID
 
   readBindings: [PolicyBindingAttributes]
 
@@ -1207,6 +1251,9 @@ type InfrastructureStack {
 
   "the most recent state of this stack"
   state: StackState
+
+  "The project this stack belongs to"
+  project: Project
 
   "the cluster this stack runs on"
   cluster: Cluster
@@ -1491,6 +1538,9 @@ input GlobalServiceAttributes {
   "cluster api provider to target"
   providerId: ID
 
+  "a project this global service will sync across"
+  projectId: ID
+
   "whether you want the global service to take ownership of existing plural services"
   reparent: Boolean
 
@@ -1516,6 +1566,9 @@ input ManagedNamespaceAttributes {
 
   "a list of pull secrets to attach to this namespace"
   pullSecrets: [String]
+
+  "a project this managed namespace will sync across"
+  projectId: ID
 
   service: ServiceTemplateAttributes
 
@@ -1595,6 +1648,9 @@ type GlobalService {
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
 
+  "a project this global service is bound to"
+  project: Project
+
   "the service template used to spawn services"
   template: ServiceTemplate
 
@@ -1638,6 +1694,9 @@ type ManagedNamespace {
 
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
+
+  "a project this global service is bound to"
+  project: Project
 
   "A template for creating the core service for this namespace"
   service: ServiceTemplate
@@ -2102,6 +2161,7 @@ enum GateType {
 
 "the top level input object for creating\/deleting pipelines"
 input PipelineAttributes {
+  projectId: ID
   stages: [PipelineStageAttributes]
   edges: [PipelineEdgeAttributes]
 }
@@ -2250,6 +2310,9 @@ type Pipeline {
   stages: [PipelineStage]
 
   status: PipelineStatus
+
+  "the project this pipeline belongs to"
+  project: Project
 
   "edges linking two stages w\/in the pipeline in a full DAG"
   edges: [PipelineStageEdge]
@@ -3120,6 +3183,9 @@ input ClusterAttributes {
 
   cloudSettings: CloudSettingsAttributes
 
+  "the project id this cluster will belong to"
+  projectId: ID
+
   "status of the upgrade plan for this cluster"
   upgradePlan: UpgradePlanAttributes
 
@@ -3419,6 +3485,9 @@ type Cluster {
 
   "write policy for this cluster"
   writeBindings: [PolicyBinding]
+
+  "the project this cluster belongs to"
+  project: Project
 
   "list of node pool specs managed by CAPI"
   nodePools: [NodePool]
@@ -6318,5 +6387,10 @@ type InfrastructureStackEdge {
 
 type ObservabilityProviderEdge {
   node: ObservabilityProvider
+  cursor: String
+}
+
+type ProjectEdge {
+  node: Project
   cursor: String
 }

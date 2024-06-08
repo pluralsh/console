@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :protect,        :boolean
     field :kubeconfig,     :kubeconfig_attributes
     field :cloud_settings, :cloud_settings_attributes
+    field :project_id,     :id, description: "the project id this cluster will belong to"
     field :upgrade_plan,   :upgrade_plan_attributes, description: "status of the upgrade plan for this cluster"
     field :node_pools,     list_of(:node_pool_attributes)
     field :read_bindings,  list_of(:policy_binding_attributes)
@@ -244,6 +245,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :read_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy for this cluster"
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy for this cluster"
 
+    field :project,          :project, resolve: dataloader(Deployments), description: "the project this cluster belongs to"
     field :node_pools,       list_of(:node_pool), resolve: dataloader(Deployments), description: "list of node pool specs managed by CAPI"
     field :provider,         :cluster_provider, resolve: dataloader(Deployments), description: "the provider we use to create this cluster (null if BYOK)"
     field :credential,       :provider_credential, resolve: dataloader(Deployments), description: "a custom credential to use when provisioning this cluster"
@@ -587,11 +589,12 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "a relay connection of all clusters visible to the current user"
     connection field :clusters, node_type: :cluster do
       middleware Authenticated
-      arg :q,         :string
-      arg :healthy,   :boolean
-      arg :tag,       :tag_input
-      arg :tag_query, :tag_query
-      arg :backups,   :boolean
+      arg :q,          :string
+      arg :healthy,    :boolean
+      arg :tag,        :tag_input
+      arg :tag_query,  :tag_query
+      arg :backups,    :boolean
+      arg :project_id, :id
 
       resolve &Deployments.list_clusters/2
     end

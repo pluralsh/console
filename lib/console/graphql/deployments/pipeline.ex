@@ -9,8 +9,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "the top level input object for creating/deleting pipelines"
   input_object :pipeline_attributes do
-    field :stages, list_of(:pipeline_stage_attributes)
-    field :edges,  list_of(:pipeline_edge_attributes)
+    field :project_id, :id
+    field :stages,     list_of(:pipeline_stage_attributes)
+    field :edges,      list_of(:pipeline_edge_attributes)
   end
 
   @desc "specification of a stage of a pipeline"
@@ -118,6 +119,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
         manual_dataloader(loader, Console.GraphQl.Resolvers.PipelineGateLoader, :pipeline, id)
     end
 
+    field :project, :project, resolve: dataloader(Deployments), description: "the project this pipeline belongs to"
+
     field :edges,  list_of(:pipeline_stage_edge),
       description: "edges linking two stages w/in the pipeline in a full DAG",
       resolve: dataloader(Deployments)
@@ -147,6 +150,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :pipeline_stage do
     field :id,        non_null(:id)
     field :name,      non_null(:string), description: "the name of this stage (eg dev, prod, staging)"
+
     field :services,  list_of(:stage_service), description: "the services within this stage", resolve: dataloader(Deployments)
     field :context,   :pipeline_context,
       description: "the context that is to be applied to this stage for PR promotions",
@@ -329,7 +333,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :pipeline_queries do
     connection field :pipelines, node_type: :pipeline do
       middleware Authenticated
-      arg :q, :string
+      arg :q,          :string
+      arg :project_id, :id
 
       resolve &Deployments.list_pipelines/2
     end

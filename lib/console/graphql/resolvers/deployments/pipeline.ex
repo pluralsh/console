@@ -6,6 +6,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
   def list_pipelines(args, %{context: %{current_user: user}}) do
     Pipeline.for_user(user)
     |> Pipeline.ordered()
+    |> pipeline_filters(args)
     |> maybe_search(Pipeline, args)
     |> paginate(args)
   end
@@ -62,4 +63,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
 
   def create_pipeline_context(%{pipeline_id: pipe_id, attributes: attrs}, %{context: %{current_user: user}}),
     do: Pipelines.create_pipeline_context(attrs, pipe_id, user)
+
+  defp pipeline_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:project_id, id}, q -> Pipeline.for_project(q, id)
+      _, q -> q
+    end)
+  end
 end

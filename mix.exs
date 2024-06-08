@@ -118,7 +118,7 @@ defmodule Console.MixProject do
       {:prometheus_ecto, "~> 1.4.3"},
       {:guardian, "~> 1.2.1"},
       {:httpoison, "~> 1.7", override: true},
-      {:nebulex, "== 2.0.0"},
+      {:nebulex, "~> 2.6"},
       {:shards, "~> 1.0"},      #=> For using :shards as backend
       {:decorator, "~> 1.3"},   #=> For using Caching Annotations
       {:telemetry, "~> 0.4"},

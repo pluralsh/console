@@ -11,6 +11,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def list_stacks(args, %{context: %{current_user: user}}) do
     Stack.for_user(user)
+    |> stack_filters(args)
     |> maybe_search(Stack, args)
     |> Stack.ordered()
     |> paginate(args)
@@ -21,6 +22,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     |> filters(args)
     |> StackRun.ordered()
     |> paginate(args)
+  end
+
+  defp stack_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:project_id, id}, q -> Stack.for_project(q, id)
+      _, q -> q
+    end)
   end
 
   defp filters(query, %{pull_request_id: id}) when is_binary(id), do: StackRun.for_pr(query, id)

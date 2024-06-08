@@ -17,6 +17,7 @@ defmodule Console.Schema.GlobalService do
       field :value, :string
     end
 
+    belongs_to :project,  Project
     belongs_to :template, ServiceTemplate, on_replace: :update
     belongs_to :service,  Service
     belongs_to :provider, ClusterProvider
@@ -43,7 +44,7 @@ defmodule Console.Schema.GlobalService do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name reparent service_id distro provider_id)a
+  @valid ~w(name reparent service_id project_id distro provider_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

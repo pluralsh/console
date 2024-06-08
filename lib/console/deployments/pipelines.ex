@@ -4,7 +4,7 @@ defmodule Console.Deployments.Pipelines do
   import Console.Deployments.Policies
   import Console.Deployments.Pipelines.Stability
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters, Git}
+  alias Console.Deployments.{Services, Clusters, Git, Settings}
   alias Console.Services.Users
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Console.Schema.{
@@ -62,7 +62,7 @@ defmodule Console.Deployments.Pipelines do
     |> add_operation(:pipe, fn _ ->
       case pipe do
         %Pipeline{} = pipe -> pipe
-        nil -> %Pipeline{}
+        nil -> %Pipeline{project_id: Settings.default_project!().id}
       end
       |> ok()
     end)
@@ -189,8 +189,9 @@ defmodule Console.Deployments.Pipelines do
   Used to check if a pipeline has sent notifications recently
   """
   @spec debounce(binary) :: DateTime.t
-  @decorate cacheable(cache: @cache, key: {:pipe_debounce, id}, opts: [ttl: @ttl])
-  def debounce(id), do: Timex.now()
+  def debounce(id) do
+    Console.Cache.cached(@cache, {:pipe_debounce, id}, fn -> Timex.now() end, ttl: @ttl)
+  end
 
   @doc """
   Has this pipeline id had recent notifications delivered

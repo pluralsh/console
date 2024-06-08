@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :manage_state,   :boolean, description: "whether you want Plural to manage your terraform state for this stack"
     field :workdir,        :string, description: "the subdirectory you want to run the stack's commands w/in"
     field :actor_id,       :id, description: "user id to use for default Plural authentication in this stack"
+    field :project_id,     :id, description: "the project id this stack will belong to"
 
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -137,6 +138,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :output, list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
     field :state,  :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
 
+    field :project,    :project, resolve: dataloader(Project), description: "The project this stack belongs to"
     field :cluster,    :cluster, resolve: dataloader(Deployments), description: "the cluster this stack runs on"
     field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
 
@@ -377,7 +379,8 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     connection field :infrastructure_stacks, node_type: :infrastructure_stack do
       middleware Authenticated
-      arg :q, :string
+      arg :q,          :string
+      arg :project_id, :id
 
       resolve &Deployments.list_stacks/2
     end
