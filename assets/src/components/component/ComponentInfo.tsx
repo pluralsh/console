@@ -31,31 +31,25 @@ function hasPods(kind: string): boolean {
   return componentsWithPods.includes(kind)
 }
 
+const componentInfoMap: { [key: string]: JSX.Element } = {
+  certificate: <Certificate />,
+  cronjob: <CronJob />,
+  deployment: <Deployment />,
+  ingress: <Ingress />,
+  job: <Job />,
+  service: <Service />,
+  statefulset: <StatefulSet />,
+  daemonset: <DaemonSet />,
+  canary: <CanaryInfo />,
+  servicedeployment: <PluralServiceDeployment />,
+}
+
 function getInfo(kind: string): JSX.Element | undefined {
-  switch (kind) {
-    case 'certificate':
-      return <Certificate />
-    case 'cronjob':
-      return <CronJob />
-    case 'deployment':
-      return <Deployment />
-    case 'ingress':
-      return <Ingress />
-    case 'job':
-      return <Job />
-    case 'service':
-      return <Service />
-    case 'statefulset':
-      return <StatefulSet />
-    case 'daemonset':
-      return <DaemonSet />
-    case 'canary':
-      return <CanaryInfo />
-    case 'servicedeployment':
-      return <PluralServiceDeployment />
-    default:
-      return undefined
-  }
+  return componentInfoMap[kind]
+}
+
+export function isUnstructured(kind: string): boolean {
+  return componentInfoMap[kind.toLowerCase()] === undefined
 }
 
 const Section = styled.section((_) => ({
