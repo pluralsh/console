@@ -1,14 +1,26 @@
-import { ReactElement, createContext, useContext, useMemo } from 'react'
+import {
+  Dispatch,
+  ReactElement,
+  SetStateAction,
+  createContext,
+  useContext,
+  useMemo,
+} from 'react'
 
 import { ProjectFragment, useProjectsTinyQuery } from '../../generated/graphql'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import ShowAfterDelay from '../utils/ShowAfterDelay'
 import { mapExistingNodes } from '../../utils/graphql'
+import usePersistedState from '../hooks/usePersistedState'
 
 interface ProjectsContextT {
   projects: ProjectFragment[]
   project: ProjectFragment
+  projectId: string
+  setProjectId: Dispatch<SetStateAction<string>>
 }
+
+const localStorageId = 'plural-project-id'
 
 const ProjectsContext = createContext<ProjectsContextT | undefined | null>(null)
 
@@ -20,12 +32,6 @@ export function useProjectsContext() {
   }
 
   return ctx
-}
-
-export function useProjects() {
-  const { projects } = useProjectsContext()
-
-  return projects
 }
 
 export function useProject() {
@@ -48,9 +54,19 @@ export function ProjectsProvider({
     [data?.projects]
   )
 
-  const context = useMemo(() => ({ projects }) as ProjectsContextT, [projects])
+  const [projectId, setProjectId] = usePersistedState(localStorageId, '')
 
-  // TODO: How to persist currently selected project?
+  const project = useMemo(
+    () => projects.find(({ id }) => id === projectId),
+    [projects, projectId]
+  )
+
+  const context = useMemo(
+    () => ({ projects, project, projectId, setProjectId }) as ProjectsContextT,
+    [projects, project, projectId, setProjectId]
+  )
+
+  // TODO: Error handling.
   // TODO: What to do during loading?
   if (loading) {
     return (
