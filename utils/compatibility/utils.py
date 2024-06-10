@@ -30,15 +30,6 @@ def readYaml(file_path):
     return None
 
 
-def convert_version_to_int(version):
-    # Remove non-numeric characters except dots and then convert to an integer
-    version_parts = version.split(".")
-    major = version_parts[0]
-    minor = version_parts[1] if len(version_parts) > 1 else "0"
-    patch = version_parts[2] if len(version_parts) > 2 else "0"
-    return int(major) * 10000 + int(minor) * 100 + int(patch)
-
-
 # Custom YAML representer for lists that contain only strings
 # This is to ensure that lists of strings are represented as flow style e.g. [a, b, c]
 def represent_kube_list(dumper, data):
