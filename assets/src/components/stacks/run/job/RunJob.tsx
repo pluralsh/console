@@ -2,11 +2,10 @@ import {
   AppIcon,
   BriefcaseIcon,
   LoopingLogo,
-  TabPanel,
   Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { createContext, useContext, useMemo, useRef } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import {
   Outlet,
   useLocation,
@@ -17,6 +16,7 @@ import {
 import {
   JobFragment,
   PipelineGateJobFragment,
+  StackRun,
   useStackRunJobQuery,
 } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
@@ -77,7 +77,10 @@ export const useRunJob = () => useOutletContext<OutletContextT>()
 
 export default function RunJob() {
   const theme = useTheme()
-  const tabStateRef = useRef<any>(null)
+  const {
+    stackRun: { cluster },
+  } = useOutletContext() as { stackRun: StackRun }
+
   const { stackId, runId } = useParams()
   const { pathname } = useLocation()
 
@@ -107,8 +110,10 @@ export default function RunJob() {
       metadata: data?.stackRun?.job?.metadata,
       raw: data?.stackRun?.job?.raw,
       spec: data?.stackRun?.job?.spec,
+      clusterId: cluster?.id,
     }),
     [
+      cluster?.id,
       data?.stackRun?.job?.metadata,
       data?.stackRun?.job?.raw,
       data?.stackRun?.job?.spec,
@@ -168,14 +173,11 @@ export default function RunJob() {
         />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <TabPanel
-        as={<ResponsiveLayoutContentContainer />}
-        stateRef={tabStateRef}
-      >
+      <ResponsiveLayoutContentContainer>
         <PodsContext.Provider value={podsContext}>
           {content}
         </PodsContext.Provider>
-      </TabPanel>
+      </ResponsiveLayoutContentContainer>
     </div>
   )
 }

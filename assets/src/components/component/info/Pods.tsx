@@ -11,10 +11,7 @@ import {
 import { useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import {
-  SERVICE_PARAM_CLUSTER_ID,
-  getServicePodDetailsPath,
-} from '../../../routes/cdRoutesConsts'
+import { SERVICE_PARAM_CLUSTER_ID } from '../../../routes/cdRoutesConsts'
 
 import { InfoSectionH2 } from './common'
 
@@ -52,16 +49,9 @@ export default function Pods({ pods }) {
       <PodsList
         pods={pods}
         columns={columns}
+        clusterId={clusterId}
         serviceId={rest?.serviceId}
         refetch={refetch}
-        {...(clusterId && rest?.serviceId
-          ? {
-              linkBasePath: getServicePodDetailsPath({
-                serviceId: rest?.serviceId,
-                clusterId,
-              }),
-            }
-          : {})}
       />
     </div>
   )
