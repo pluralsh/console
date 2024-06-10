@@ -6,6 +6,24 @@ from collections import OrderedDict
 from utils import printError, update_compatibility_info
 
 
+def expand_kube_versions(version_range):
+    start_version, end_version = version_range.split(" → ")
+    start_major, start_minor = map(int, start_version.split("."))
+    end_major, end_minor = map(int, end_version.split("."))
+
+    expanded_versions = []
+    major = start_major
+    minor = start_minor
+    while (major < end_major) or (major == end_major and minor <= end_minor):
+        expanded_versions.append(f"{major}.{minor}")
+        if minor == 9:
+            major += 1
+            minor = 0
+        else:
+            minor += 1
+    return expanded_versions
+
+
 def scrape():
     url = "https://cert-manager.io/docs/releases/"
     response = requests.get(url)
@@ -38,10 +56,13 @@ def scrape():
                         k8s_supported_versions = (
                             columns[3].get_text(strip=True).split(" → ")
                         )
+                        expanded_versions = expand_kube_versions(
+                            " → ".join(k8s_supported_versions)
+                        )
                         version_info = OrderedDict(
                             [
                                 ("version", cert_manager_version),
-                                ("kube", k8s_supported_versions),
+                                ("kube", expanded_versions),
                                 ("requirements", []),
                                 ("incompatibilities", []),
                             ]
