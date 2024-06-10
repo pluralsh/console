@@ -2,7 +2,7 @@ defmodule Console.Deployments.PipelinesTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.{Pipelines, Services}
+  alias Console.Deployments.{Pipelines, Services, Settings}
 
   describe "#upsert/3" do
     test "it can create a new pipeline w/ stages and gates" do
@@ -36,6 +36,7 @@ defmodule Console.Deployments.PipelinesTest do
       }, "my-pipeline", user)
 
       assert pipeline.name == "my-pipeline"
+      assert pipeline.project_id == Settings.default_project!().id
       [dev, prod] = pipeline.stages
 
       assert dev.name == "dev"

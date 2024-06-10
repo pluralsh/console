@@ -15,7 +15,8 @@ defmodule Console.Schema.Stack do
     User,
     ObservableMetric,
     ScmConnection,
-    Tag
+    Tag,
+    Project
   }
 
   defenum Type, terraform: 0, ansible: 1
@@ -83,6 +84,7 @@ defmodule Console.Schema.Stack do
     belongs_to :delete_run, StackRun
     belongs_to :connection, ScmConnection
     belongs_to :actor,      User
+    belongs_to :project,    Project
 
     has_one :state, StackState,
       on_replace: :update,
@@ -114,6 +116,10 @@ defmodule Console.Schema.Stack do
     from(s in query, where: ilike(s.name, ^"#{sq}%"))
   end
 
+  def for_project(query \\ __MODULE__, pid) do
+    from(s in query, where: s.project_id == ^pid)
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(s in query,
@@ -135,7 +141,9 @@ defmodule Console.Schema.Stack do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name type paused actor_id workdir manage_state status approval connection_id repository_id cluster_id)a
+  @valid ~w(name type paused actor_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
+  @immutable ~w(project_id)a
+
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -156,6 +164,15 @@ defmodule Console.Schema.Stack do
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required(~w(name type status)a)
+  end
+
+  def update_changeset(changeset) do
+    Enum.reduce(@immutable, changeset, fn field, cs ->
+      case get_change(cs, field) do
+        nil -> cs
+        _ -> add_error(cs, field, "Field is immutable")
+      end
+    end)
   end
 
   def complete_changeset(model, attrs) do

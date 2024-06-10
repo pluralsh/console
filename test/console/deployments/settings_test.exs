@@ -80,4 +80,31 @@ defmodule Console.Deployments.SettingsTest do
       {:error, _} = Settings.migrate_agents()
     end
   end
+
+  describe "#create_project/2" do
+    test "admins can create a new project" do
+      {:ok, proj} = Settings.create_project(%{name: "test"}, admin_user())
+
+      assert proj.name == "test"
+    end
+
+    test "nonadmins cannot create projects" do
+      {:error, _} = Settings.create_project(%{name: "test"}, insert(:user))
+    end
+  end
+
+  describe "#update_project/3" do
+    test "admins can create a new project" do
+      proj = insert(:project)
+      {:ok, updated} = Settings.update_project(%{name: "test"}, proj.id, admin_user())
+
+      assert updated.id == proj.id
+      assert updated.name == "test"
+    end
+
+    test "nonadmins cannot create projects" do
+      proj = insert(:project)
+      {:error, _} = Settings.update_project(%{name: "test"}, proj.id, insert(:user))
+    end
+  end
 end

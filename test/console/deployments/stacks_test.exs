@@ -3,7 +3,7 @@ defmodule Console.Deployments.StacksTest do
   use Mimic
   alias Console.PubSub
   alias Console.Schema.{StackRun}
-  alias Console.Deployments.Stacks
+  alias Console.Deployments.{Stacks, Settings}
   alias Console.Deployments.Git.Discovery
 
   describe "#create_stack/2" do
@@ -27,13 +27,15 @@ defmodule Console.Deployments.StacksTest do
       assert stack.cluster_id == cluster.id
       assert stack.git.ref == "main"
       assert stack.git.folder == "terraform"
+      assert stack.project_id == Settings.default_project!().id
 
       assert_receive {:event, %PubSub.StackCreated{item: ^stack}}
     end
 
-    test "cluster writers can create a stack" do
+    test "project writers can create a stack" do
       user = insert(:user)
-      cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
+      cluster = insert(:cluster)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
       repo = insert(:git_repository)
 
       {:ok, stack} = Stacks.create_stack(%{
@@ -41,6 +43,7 @@ defmodule Console.Deployments.StacksTest do
         type: :terraform,
         approval: true,
         repository_id: repo.id,
+        project_id: project.id,
         cluster_id: cluster.id,
         git: %{ref: "main", folder: "terraform"},
       }, user)

@@ -15,6 +15,7 @@ defmodule Console.Schema.Cluster do
     PrAutomation,
     ClusterRestore,
     ObjectStore,
+    Project
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -114,6 +115,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :credential,   ProviderCredential
     belongs_to :object_store, ObjectStore
     belongs_to :restore,      ClusterRestore
+    belongs_to :project,      Project
 
     has_many :node_pools, ClusterNodePool, on_replace: :delete
     has_many :service_errors, ServiceError, on_replace: :delete
@@ -166,10 +168,11 @@ defmodule Console.Schema.Cluster do
   end
 
   def target(query \\ __MODULE__, %{} = resource) do
-    Map.take(resource, [:provider_id, :tags, :distro])
+    Map.take(resource, [:provider_id, :project_id, :tags, :distro])
     |> Enum.reduce(query, fn
       {:distro, distro}, q when not is_nil(distro) -> for_distro(q, distro)
       {:provider_id, prov_id}, q when is_binary(prov_id) -> for_provider(q, prov_id)
+      {:project_id, proj_id}, q when is_binary(proj_id) -> for_project(q, proj_id)
       {:tags, [_ | _] = tags}, q -> for_tags(q, tags)
       {:tags, %{} = tags}, q -> for_tags(q, tags)
       _, q -> q
@@ -195,14 +198,20 @@ defmodule Console.Schema.Cluster do
     from(c in query, where: c.service_id == ^service_id)
   end
 
+  def for_project(query \\ __MODULE__, pid) do
+    from(c in query, where: c.project_id == ^pid)
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       sub = Service.for_user(user)
       from(c in query,
         left_join: s in subquery(sub),
           on: s.cluster_id == c.id,
+        join: p in assoc(c, :project),
         left_join: b in PolicyBinding,
-          on: b.policy_id == c.read_policy_id or b.policy_id == c.write_policy_id,
+          on: b.policy_id == c.read_policy_id or b.policy_id == c.write_policy_id
+                or b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
         where: b.user_id == ^id or b.group_id in ^groups or not is_nil(s.id),
         distinct: true
       )
@@ -310,7 +319,7 @@ defmodule Console.Schema.Cluster do
 
   def preloaded(query \\ __MODULE__, preloads \\ [:provider, :credential]), do: from(c in query, preload: ^preloads)
 
-  @valid ~w(provider_id distro metadata protect service_id credential_id self version current_version name handle installed)a
+  @valid ~w(provider_id distro metadata protect project_id service_id credential_id self version current_version name handle installed)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -339,7 +348,7 @@ defmodule Console.Schema.Cluster do
     |> backfill_handle()
     |> validate_vsn()
     |> update_vsn()
-    |> validate_required(~w(name handle)a)
+    |> validate_required(~w(name handle project_id)a)
   end
 
   def update_changeset(model, attrs \\ %{}) do

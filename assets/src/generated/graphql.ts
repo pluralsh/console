@@ -646,6 +646,8 @@ export type Cluster = {
   policyConstraints?: Maybe<PolicyConstraintConnection>;
   /** pr automations that are relevant to managing this cluster */
   prAutomations?: Maybe<Array<Maybe<PrAutomation>>>;
+  /** the project this cluster belongs to */
+  project?: Maybe<Project>;
   /** if true, this cluster cannot be deleted */
   protect?: Maybe<Scalars['Boolean']['output']>;
   /** the provider we use to create this cluster (null if BYOK) */
@@ -742,6 +744,8 @@ export type ClusterAttributes = {
   metadata?: InputMaybe<Scalars['Json']['input']>;
   name: Scalars['String']['input'];
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
+  /** the project id this cluster will belong to */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -1507,7 +1511,7 @@ export type DeploymentSettings = {
   artifactRepository?: Maybe<GitRepository>;
   /** your compliant k8s version */
   compliantK8sVsn: Scalars['String']['output'];
-  /** policy for creation of new clusters */
+  /** policy for creation of new objects */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the repo to fetch the deploy operators manifests from */
   deployerRepository?: Maybe<GitRepository>;
@@ -1524,14 +1528,14 @@ export type DeploymentSettings = {
   name: Scalars['String']['output'];
   /** the way we can connect to your prometheus instance */
   prometheusConnection?: Maybe<HttpConnection>;
-  /** read policy across all clusters */
+  /** read policy across all objects */
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** whether the byok cluster has been brought under self-management */
   selfManaged?: Maybe<Scalars['Boolean']['output']>;
   /** global settings for stack configuration */
   stacks?: Maybe<StackSettings>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
-  /** write policy across all clusters */
+  /** write policy across all objects */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
@@ -1787,6 +1791,8 @@ export type GlobalService = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a human readable name for this global service */
   name: Scalars['String']['output'];
+  /** a project this global service is bound to */
+  project?: Maybe<Project>;
   /** whether to only apply to clusters with this provider */
   provider?: Maybe<ClusterProvider>;
   /** whether you want to reparent existing plural services under this global service */
@@ -1819,6 +1825,8 @@ export type GlobalServiceAttributes = {
   distro?: InputMaybe<ClusterDistro>;
   /** name for this global service */
   name: Scalars['String']['input'];
+  /** a project this global service will sync across */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   /** cluster api provider to target */
   providerId?: InputMaybe<Scalars['ID']['input']>;
   /** whether you want the global service to take ownership of existing plural services */
@@ -2047,6 +2055,8 @@ export type InfrastructureStack = {
   output?: Maybe<Array<Maybe<StackOutput>>>;
   /** whether the stack is actively tracking changes in git */
   paused?: Maybe<Scalars['Boolean']['output']>;
+  /** The project this stack belongs to */
+  project?: Maybe<Project>;
   pullRequests?: Maybe<PullRequestConnection>;
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the git repository you're sourcing IaC from */
@@ -2384,6 +2394,8 @@ export type ManagedNamespace = {
   labels?: Maybe<Scalars['Map']['output']>;
   /** the name of this namespace once its placed on a cluster */
   name: Scalars['String']['output'];
+  /** a project this global service is bound to */
+  project?: Maybe<Project>;
   /** a list of pull secrets to attach to this namespace */
   pullSecrets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** A template for creating the core service for this namespace */
@@ -2416,6 +2428,8 @@ export type ManagedNamespaceAttributes = {
   labels?: InputMaybe<Scalars['Json']['input']>;
   /** the name of this namespace once its placed on a cluster */
   name: Scalars['String']['input'];
+  /** a project this managed namespace will sync across */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of pull secrets to attach to this namespace */
   pullSecrets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   service?: InputMaybe<ServiceTemplateAttributes>;
@@ -2991,6 +3005,8 @@ export type Pipeline = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of the pipeline */
   name: Scalars['String']['output'];
+  /** the project this pipeline belongs to */
+  project?: Maybe<Project>;
   /** the stages of this pipeline */
   stages?: Maybe<Array<Maybe<PipelineStage>>>;
   status?: Maybe<PipelineStatus>;
@@ -3009,6 +3025,7 @@ export type PipelineContextsArgs = {
 /** the top level input object for creating/deleting pipelines */
 export type PipelineAttributes = {
   edges?: InputMaybe<Array<InputMaybe<PipelineEdgeAttributes>>>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   stages?: InputMaybe<Array<InputMaybe<PipelineStageAttributes>>>;
 };
 
@@ -3614,6 +3631,40 @@ export type PrUpdateSpec = {
   yq?: Maybe<Scalars['String']['output']>;
 };
 
+/** A unit of organization to control permissions for a set of objects within your Console instance */
+export type Project = {
+  __typename?: 'Project';
+  default?: Maybe<Scalars['Boolean']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  /** read policy across this project */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy across this project */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+export type ProjectAttributes = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ProjectConnection = {
+  __typename?: 'ProjectConnection';
+  edges?: Maybe<Array<Maybe<ProjectEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ProjectEdge = {
+  __typename?: 'ProjectEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Project>;
+};
+
 export type PrometheusDatasource = {
   __typename?: 'PrometheusDatasource';
   format?: Maybe<Scalars['String']['output']>;
@@ -4028,6 +4079,7 @@ export type RootMutationType = {
   /** creates a new pipeline context and binds it to the beginning stage */
   createPipelineContext?: Maybe<PipelineContext>;
   createPrAutomation?: Maybe<PrAutomation>;
+  createProject?: Maybe<Project>;
   createProviderCredential?: Maybe<ProviderCredential>;
   createPullRequest?: Maybe<PullRequest>;
   /** just registers a pointer record to a PR after it was created externally be some other automation */
@@ -4138,6 +4190,7 @@ export type RootMutationType = {
   updateObjectStore?: Maybe<ObjectStore>;
   updatePersona?: Maybe<Persona>;
   updatePrAutomation?: Maybe<PrAutomation>;
+  updateProject?: Maybe<Project>;
   updatePullRequest?: Maybe<PullRequest>;
   /** a reusable mutation for updating rbac settings on core services */
   updateRbac?: Maybe<Scalars['Boolean']['output']>;
@@ -4310,6 +4363,11 @@ export type RootMutationTypeCreatePipelineContextArgs = {
 
 export type RootMutationTypeCreatePrAutomationArgs = {
   attributes: PrAutomationAttributes;
+};
+
+
+export type RootMutationTypeCreateProjectArgs = {
+  attributes: ProjectAttributes;
 };
 
 
@@ -4836,6 +4894,12 @@ export type RootMutationTypeUpdatePrAutomationArgs = {
 };
 
 
+export type RootMutationTypeUpdateProjectArgs = {
+  attributes: ProjectAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdatePullRequestArgs = {
   attributes?: InputMaybe<PullRequestUpdateAttributes>;
   id: Scalars['ID']['input'];
@@ -5047,6 +5111,8 @@ export type RootQueryType = {
   postgresDatabases?: Maybe<Array<Maybe<Postgresql>>>;
   prAutomation?: Maybe<PrAutomation>;
   prAutomations?: Maybe<PrAutomationConnection>;
+  project?: Maybe<Project>;
+  projects?: Maybe<ProjectConnection>;
   pullRequests?: Maybe<PullRequestConnection>;
   recipe?: Maybe<Recipe>;
   recipes?: Maybe<RecipeConnection>;
@@ -5250,6 +5316,7 @@ export type RootQueryTypeClustersArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   healthy?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
   tagQuery?: InputMaybe<TagQuery>;
@@ -5397,6 +5464,7 @@ export type RootQueryTypeInfrastructureStacksArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -5599,6 +5667,7 @@ export type RootQueryTypePipelinesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -5690,6 +5759,21 @@ export type RootQueryTypePrAutomationsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeProjectArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeProjectsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -6738,6 +6822,8 @@ export type StackAttributes = {
   /** the name of the stack */
   name: Scalars['String']['input'];
   observableMetrics?: InputMaybe<Array<InputMaybe<ObservableMetricAttributes>>>;
+  /** the project id this stack will belong to */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** The repository to source IaC from */
   repositoryId: Scalars['ID']['input'];

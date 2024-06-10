@@ -21,7 +21,8 @@ defmodule Console.Deployments.Policies.Rbac do
     Stack,
     StackRun,
     CustomStackRun,
-    RunStep
+    RunStep,
+    Project
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -47,8 +48,10 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(ctx, user, action, & &1.pipeline)
   def evaluate(%PipelineGate{} = gate, %User{} = user, action),
     do: recurse(gate, user, action, & &1.edge.pipeline)
-  def evaluate(%Pipeline{} = pipe, %User{} = user, action),
+  def evaluate(%Project{} = pipe, %User{} = user, action),
     do: recurse(pipe, user, action, fn _ -> Settings.fetch() end)
+  def evaluate(%Pipeline{} = pipe, %User{} = user, action),
+    do: recurse(pipe, user, action, & &1.project)
   def evaluate(%Service{} = svc, %User{} = user, action),
     do: recurse(svc, user, action, & &1.cluster)
   def evaluate(%RuntimeService{} = svc, %User{} = user, action),
@@ -56,7 +59,7 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%AgentMigration{}, %User{} = user, action),
     do: recurse(Settings.fetch(), user, action)
   def evaluate(%Cluster{} = cluster, %User{} = user, action),
-    do: recurse(cluster, user, action, fn _ -> Settings.fetch() end)
+    do: recurse(cluster, user, action, & &1.project)
   def evaluate(%ClusterProvider{} = cluster, %User{} = user, action),
     do: recurse(cluster, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%ProviderCredential{} = cred, %User{} = user, action),
@@ -72,7 +75,7 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%PolicyConstraint{} = constraint, %User{} = user, action),
     do: recurse(constraint, user, action, & &1.cluster)
   def evaluate(%Stack{} = stack, %User{} = user, action),
-    do: recurse(stack, user, action, & &1.cluster)
+    do: recurse(stack, user, action, & &1.project)
   def evaluate(%StackRun{} = run, %User{} = user, action),
     do: recurse(run, user, action, & &1.stack)
   def evaluate(%CustomStackRun{} = run, %User{} = user, action),
@@ -88,17 +91,20 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(_, _, _), do: false
 
   @bindings [:read_bindings, :write_bindings]
-  @stack_preloads [:read_bindings, :write_bindings, cluster: @bindings]
+  @top_preloads [:read_bindings, :write_bindings, project: @bindings]
+  @stack_preloads [:read_bindings, :write_bindings, project: @bindings, cluster: @bindings]
 
-  def preload(%PipelineContext{} = ctx), do: Repo.preload(ctx, [pipeline: @bindings])
-  def preload(%PipelineGate{} = gate), do: Repo.preload(gate, [edge: [pipeline: @bindings]])
-  def preload(%Pipeline{} = pipe), do: Repo.preload(pipe, @bindings)
+  def preload(%PipelineContext{} = ctx), do: Repo.preload(ctx, [pipeline: @top_preloads])
+  def preload(%PipelineGate{} = gate), do: Repo.preload(gate, [edge: [pipeline: @top_preloads]])
+  def preload(%Pipeline{} = pipe), do: Repo.preload(pipe, @top_preloads)
   def preload(%Service{} = service),
-    do: Repo.preload(service, [:read_bindings, :write_bindings, cluster: @bindings])
+    do: Repo.preload(service, [:read_bindings, :write_bindings, cluster: @top_preloads])
   def preload(%Cluster{} = cluster),
+    do: Repo.preload(cluster, @top_preloads)
+  def preload(%Project{} = cluster),
     do: Repo.preload(cluster, @bindings)
   def preload(%RuntimeService{} = cluster),
-    do: Repo.preload(cluster, [cluster: @bindings])
+    do: Repo.preload(cluster, [cluster: @top_preloads])
   def preload(%ClusterProvider{} = cluster),
     do: Repo.preload(cluster, @bindings)
   def preload(%ProviderCredential{} = cred),
@@ -108,9 +114,9 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(%PrAutomation{} = pr),
     do: Repo.preload(pr, [:write_bindings, :create_bindings])
   def preload(%PolicyConstraint{} = pr),
-    do: Repo.preload(pr, [:cluster])
+    do: Repo.preload(pr, [cluster: @top_preloads])
   def preload(%PinnedCustomResource{} = pcr),
-    do: Repo.preload(pcr, [:cluster])
+    do: Repo.preload(pcr, [cluster: @top_preloads])
   def preload(%Stack{} = stack),
     do: Repo.preload(stack, @stack_preloads)
   def preload(%StackRun{} = pcr),

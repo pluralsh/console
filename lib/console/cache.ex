@@ -4,6 +4,16 @@ defmodule Console.Cache do
     adapter: Nebulex.Adapters.Partitioned,
     primary_storage_adapter: Nebulex.Adapters.Local
 
+  def cached(adapter, key, fun, opts \\ []) do
+    case adapter.get(key) do
+      nil ->
+        val = fun.()
+        adapter.put(key, val, opts)
+        val
+      res -> res
+    end
+  end
+
   def process_cache(key, fun) do
     case Process.get(key, :miss) do
       :miss ->

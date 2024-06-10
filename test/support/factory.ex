@@ -1,6 +1,7 @@
 defmodule Console.Factory do
   use ExMachina.Ecto, repo: Console.Repo
   alias Console.Schema
+  alias Console.Deployments.Settings
 
   def build_factory do
     %Schema.Build{
@@ -155,6 +156,7 @@ defmodule Console.Factory do
   def cluster_factory do
     %Schema.Cluster{
       version: "1.24",
+      project: Settings.default_project!(),
       handle: sequence(:cluster_handle, & "handle-#{&1}"),
       provider: build(:cluster_provider),
       write_policy_id: Ecto.UUID.generate(),
@@ -267,6 +269,7 @@ defmodule Console.Factory do
   def pipeline_factory do
     %Schema.Pipeline{
       name: sequence(:pipeline, & "pipeline-#{&1}"),
+      project: Settings.default_project!(),
       write_policy_id: Ecto.UUID.generate(),
       read_policy_id: Ecto.UUID.generate()
     }
@@ -516,6 +519,7 @@ defmodule Console.Factory do
       name: sequence(:stacks, & "stack-#{&1}"),
       status: :queued,
       type: :terraform,
+      project: Settings.default_project!(),
       write_policy_id: Ecto.UUID.generate(),
       read_policy_id: Ecto.UUID.generate(),
       git: %{ref: "main", folder: "terraform"},
@@ -601,6 +605,14 @@ defmodule Console.Factory do
       stack: build(:stack),
       name: sequence(:csr, &"csr-#{&1}"),
       commands: [%{cmd: "echo", args: ["hello world"]}]
+    }
+  end
+
+  def project_factory do
+    %Schema.Project{
+      name: sequence(:project, & "project-#{&1}"),
+      write_policy_id: Ecto.UUID.generate(),
+      read_policy_id: Ecto.UUID.generate(),
     }
   end
 

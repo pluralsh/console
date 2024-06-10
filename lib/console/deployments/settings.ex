@@ -2,11 +2,11 @@ defmodule Console.Deployments.Settings do
   use Console.Services.Base
   use Nebulex.Caching
   import Console.Deployments.Policies
-  alias Console.PubSub
+  alias Console.{PubSub, Schema}
   alias Console.Commands.Plural
   alias Console.Services.Users
   alias Console.Deployments.{Clusters, Services}
-  alias Console.Schema.{DeploymentSettings, User}
+  alias Console.Schema.{DeploymentSettings, User, Project}
 
   @agent_vsn File.read!("AGENT_VERSION")
   @kube_vsn File.read!("KUBE_VERSION")
@@ -14,8 +14,15 @@ defmodule Console.Deployments.Settings do
   @ttl :timer.minutes(45)
 
   @type settings_resp :: {:ok, DeploymentSettings.t} | Console.error
+  @type project_resp :: {:ok, Project.t} | Console.error
 
   @preloads ~w(read_bindings write_bindings git_bindings create_bindings deployer_repository artifact_repository)a
+
+  @spec get_project!(binary) :: Project.t
+  def get_project!(id), do: Repo.get!(Project, id)
+
+  @spec get_project_by_name!(binary) :: Project.t
+  def get_project_by_name!(name), do: Repo.get_by!(Project, name: name)
 
   @doc """
   same as `fetch/0` but caches in the process dict
@@ -69,6 +76,63 @@ defmodule Console.Deployments.Settings do
       %DeploymentSettings{agent_helm_values: vs} when is_binary(vs) and byte_size(vs) > 0 -> vs
       _ -> nil
     end
+  end
+
+  def create_default_project() do
+    start_transaction()
+    |> add_operation(:project, fn _ ->
+      %Project{}
+      |> Project.changeset(%{name: "default", description: "initial project created by plural", default: true})
+      |> Repo.insert()
+    end)
+    |> add_operation(:clusters, fn %{project: proj} ->
+      Schema.Cluster
+      |> Repo.update_all(set: [project_id: proj.id])
+      |> ok()
+    end)
+    |> add_operation(:stacks, fn %{project: proj} ->
+      Schema.Stack
+      |> Repo.update_all(set: [project_id: proj.id])
+      |> ok()
+    end)
+    |> add_operation(:pipelines, fn %{project: proj} ->
+      Schema.Pipeline
+      |> Repo.update_all(set: [project_id: proj.id])
+      |> ok()
+    end)
+    |> execute()
+  end
+
+  def default_project!(), do: Repo.get_by(Project, default: true)
+
+  def add_project_id(%{project_id: id} = attrs) when is_binary(id), do: attrs
+  def add_project_id(attrs) do
+    proj = default_project!()
+    Map.put(attrs, :project_id, proj.id)
+  end
+
+
+  @doc """
+  Creates a new project, fails if no perms
+  """
+  @spec create_project(map, User.t) :: project_resp
+  def create_project(attrs, %User{} = user) do
+    %Project{}
+    |> Project.changeset(attrs)
+    |> allow(user, :create)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+  Updates a project in place, fails if no perms
+  """
+  @spec update_project(map, binary, User.t) :: project_resp
+  def update_project(attrs, id, %User{} = user) do
+    get_project!(id)
+    |> Repo.preload([:read_bindings, :write_bindings])
+    |> Project.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
   end
 
   @doc """

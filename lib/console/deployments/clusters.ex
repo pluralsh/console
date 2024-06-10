@@ -4,7 +4,7 @@ defmodule Console.Deployments.Clusters do
   import Console.Deployments.Policies
   alias Console.PubSub
   alias Console.Commands.Tee
-  alias Console.Deployments.{Services, Git, Providers.Configuration}
+  alias Console.Deployments.{Services, Git, Providers.Configuration, Settings}
   alias Console.Deployments.Providers.Versions
   alias Console.Deployments.Compatibilities.{Table, AddOn, Version}
   alias Console.Deployments.Ecto.Validations
@@ -120,8 +120,8 @@ defmodule Console.Deployments.Clusters do
   Fetches the nodes for a cluster, this query is heavily cached for performance
   """
   @spec nodes(Cluster.t) :: {:ok, term} | Console.error
-  @decorate cacheable(cache: @local_adapter, key: {:nodes, id}, opts: [ttl: @node_ttl])
-  def nodes(%Cluster{id: id} = cluster), do: fetch_nodes(cluster)
+  @decorate cacheable(cache: @local_adapter, key: {:nodes, cluster.id}, opts: [ttl: @node_ttl])
+  def nodes(%Cluster{} = cluster), do: fetch_nodes(cluster)
 
   defp fetch_nodes(%Cluster{pinged_at: nil, self: false}), do: {:ok, []}
   defp fetch_nodes(%Cluster{} = cluster) do
@@ -139,8 +139,8 @@ defmodule Console.Deployments.Clusters do
   Fetches the node metrics for a cluster, this query is heavily cached for performance
   """
   @spec node_metrics(Cluster.t) :: {:ok, term} | Console.error
-  @decorate cacheable(cache: @local_adapter, key: {:node_metrics, id}, opts: [ttl: @node_ttl])
-  def node_metrics(%Cluster{id: id} = cluster), do: fetch_node_metrics(cluster)
+  @decorate cacheable(cache: @local_adapter, key: {:node_metrics, cluster.id}, opts: [ttl: @node_ttl])
+  def node_metrics(%Cluster{} = cluster), do: fetch_node_metrics(cluster)
 
   defp fetch_node_metrics(%Cluster{pinged_at: nil, self: false}), do: {:ok, []}
   defp fetch_node_metrics(%Cluster{} = cluster) do
@@ -286,7 +286,7 @@ defmodule Console.Deployments.Clusters do
     start_transaction()
     |> add_operation(:cluster, fn _ ->
       %Cluster{}
-      |> Cluster.changeset(attrs)
+      |> Cluster.changeset(Settings.add_project_id(attrs))
       |> allow(user, :create)
       |> when_ok(:insert)
     end)
@@ -654,14 +654,14 @@ defmodule Console.Deployments.Clusters do
   Grabs the readme for a runtime service registered in a cluster
   """
   @spec readme(AddOn.t) :: {:ok, binary} | Console.error
-  @decorate cacheable(cache: @cache_adapter, key: {:readme, url}, opts: [ttl: @readme_ttl])
   def readme(%AddOn{readme_url: url}) when is_binary(url), do: readme_fetch(url)
   def readme(%AddOn{git_url: "https://github.com" <> _ = url}),
     do: readme_fetch("#{url}/raw/{branch}/README.md")
   def readme(%AddOn{git_url: "https://gitlab.com" <> _ = url}),
     do: readme_fetch("#{url}/-/raw/{branch}/README.md")
-  def readme(%AddOn{git_url: url}), do: {:ok, nil}
+  def readme(_), do: {:ok, nil}
 
+  @decorate cacheable(cache: @cache_adapter, key: {:readme, url}, opts: [ttl: @readme_ttl])
   defp readme_fetch(url) do
     Enum.find_value(~w(main master), {:ok, nil}, fn branch ->
       String.replace(url, "{branch}", branch)
@@ -679,7 +679,7 @@ defmodule Console.Deployments.Clusters do
   @spec release(AddOn.t, binary) :: {:ok, binary} | Console.error
   def release(%AddOn{release_url: release}, vsn) when is_binary(release),
     do: {:ok, String.replace(release, "{vsn}", vsn)}
-  def release(%AddOn{release_url: release}, vsn), do: {:ok, nil}
+  def release(%AddOn{}, _vsn), do: {:ok, nil}
 
   @spec runtime_services(Cluster.t | binary) :: [RuntimeService.t]
   def runtime_services(%Cluster{id: id}), do: runtime_services(id)

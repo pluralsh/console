@@ -180,15 +180,17 @@ defmodule Console.Deployments.Global do
     Enum.all?([
       {:field, global.distro, cluster.distro},
       {:field, global.provider_id, cluster.provider_id},
+      {:field, global.project_id, cluster.project_id},
       {:tags, global.tags, cluster.tags},
     ], &matcher/1)
   end
 
   def match?(%ManagedNamespace{target: nil}, _), do: true
-  def match?(%ManagedNamespace{target: %{} = target}, %Cluster{} = cluster) do
+  def match?(%ManagedNamespace{target: %{} = target} = mn, %Cluster{} = cluster) do
     Enum.all?([
       {:field, target.distro, cluster.distro},
       {:tags, target.tags, cluster.tags},
+      {:field, mn.project_id, cluster.project_id},
     ], &matcher/1)
   end
 

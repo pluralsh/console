@@ -25,6 +25,7 @@ defmodule Console.Deployments.ClustersTest do
       assert cluster.provider_id == provider.id
       assert cluster.deploy_token
       assert cluster.token_readable
+      assert cluster.project_id == Settings.default_project!().id
 
       assert_receive {:event, %PubSub.ClusterCreated{item: ^cluster}}
 

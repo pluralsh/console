@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :tags,        list_of(:tag_attributes), description: "the cluster tags to target"
     field :distro,      :cluster_distro, description: "kubernetes distribution to target"
     field :provider_id, :id, description: "cluster api provider to target"
+    field :project_id,  :id, description: "a project this global service will sync across"
     field :reparent,    :boolean, description: "whether you want the global service to take ownership of existing plural services"
     field :template,    :service_template_attributes
     field :cascade,     :cascade_attributes, description: "behavior for all owned resources when this global service is deleted"
@@ -20,6 +21,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :labels,       :json, description: "labels for this namespace"
     field :annotations,  :json, description: "annotations for this namespace"
     field :pull_secrets, list_of(:string), description: "a list of pull secrets to attach to this namespace"
+    field :project_id,  :id, description: "a project this managed namespace will sync across"
     field :service,      :service_template_attributes
     field :target,       :cluster_target_attributes
     field :cascade,      :cascade_attributes, description: "behavior for all owned resources when this global service is deleted"
@@ -62,6 +64,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :reparent, :boolean, description: "whether you want to reparent existing plural services under this global service"
     field :cascade,  :cascade, description: "behavior for all owned resources when this global service is deleted"
 
+    field :project,  :project,            resolve: dataloader(Deployments), description: "a project this global service is bound to"
     field :template, :service_template,   resolve: dataloader(Deployments), description: "the service template used to spawn services"
     field :service,  :service_deployment, resolve: dataloader(Deployments), description: "the service to replicate across clusters"
     field :provider, :cluster_provider,   resolve: dataloader(Deployments), description: "whether to only apply to clusters with this provider"
@@ -87,6 +90,9 @@ defmodule Console.GraphQl.Deployments.Global do
     field :deleted_at,   :datetime, description: "the timestamp this namespace was deleted at, indicating it's currently draining"
     field :cascade,      :cascade, description: "behavior for all owned resources when this global service is deleted"
 
+    field :project,      :project,
+      description: "a project this global service is bound to",
+      resolve: dataloader(Deployments)
     field :service,      :service_template,
       description: "A template for creating the core service for this namespace",
       resolve: dataloader(Deployments)

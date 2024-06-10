@@ -164,6 +164,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
       {:tag_query, tq}, q -> Cluster.with_tag_query(q, tq)
       {:healthy, h}, q -> Cluster.health(q, h)
       {:backups, e}, q -> Cluster.with_backups(q, !!e)
+      {:project_id, id}, q -> Cluster.for_project(q, id)
       _, q -> q
     end)
   end

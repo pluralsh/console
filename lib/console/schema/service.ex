@@ -181,13 +181,22 @@ defmodule Console.Schema.Service do
     )
   end
 
+  def for_project(query \\ __MODULE__, pid) do
+    from(s in query,
+      join: p in assoc(s, :project),
+      where: s.project_id == ^pid
+    )
+  end
+
   def for_user(query \\ __MODULE__, %User{} = user) do
     Rbac.globally_readable(query, user, fn query, id, groups ->
       from(s in query,
         join: c in assoc(s, :cluster),
+        join: p in assoc(c, :project),
         left_join: b in PolicyBinding,
           on: b.policy_id == c.read_policy_id or b.policy_id == c.write_policy_id
-                or b.policy_id == s.read_policy_id or b.policy_id == s.write_policy_id,
+                or b.policy_id == s.read_policy_id or b.policy_id == s.write_policy_id
+                or b.policy_id == p.read_policy_id or b.policy_id == p.write_policy_id,
         where: b.user_id == ^id or b.group_id in ^groups,
         distinct: true
       )
