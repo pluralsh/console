@@ -17948,7 +17948,7 @@ export type PolicyStatisticsLazyQueryHookResult = ReturnType<typeof usePolicySta
 export type PolicyStatisticsSuspenseQueryHookResult = ReturnType<typeof usePolicyStatisticsSuspenseQuery>;
 export type PolicyStatisticsQueryResult = Apollo.QueryResult<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>;
 export const ProjectsDocument = gql`
-    query Projects($after: String, $before: String, $first: Int, $last: Int, $q: String) {
+    query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
     pageInfo {
       ...PageInfo
@@ -18000,7 +18000,7 @@ export type ProjectsLazyQueryHookResult = ReturnType<typeof useProjectsLazyQuery
 export type ProjectsSuspenseQueryHookResult = ReturnType<typeof useProjectsSuspenseQuery>;
 export type ProjectsQueryResult = Apollo.QueryResult<ProjectsQuery, ProjectsQueryVariables>;
 export const ProjectsTinyDocument = gql`
-    query ProjectsTiny($after: String, $before: String, $first: Int, $last: Int, $q: String) {
+    query ProjectsTiny($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
     pageInfo {
       ...PageInfo

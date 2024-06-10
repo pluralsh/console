@@ -19,7 +19,7 @@ fragment ProjectTiny on Project {
   default
 }
 
-query Projects($after: String, $before: String, $first: Int, $last: Int, $q: String) {
+query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
     pageInfo {
       ...PageInfo
@@ -32,7 +32,7 @@ query Projects($after: String, $before: String, $first: Int, $last: Int, $q: Str
   }
 }
 
-query ProjectsTiny($after: String, $before: String, $first: Int, $last: Int, $q: String) {
+query ProjectsTiny($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
     pageInfo {
       ...PageInfo
