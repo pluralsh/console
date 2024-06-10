@@ -20,7 +20,13 @@ fragment ProjectTiny on Project {
   description
 }
 
-query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
+query Projects(
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+  $q: String
+) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
     pageInfo {
       ...PageInfo
@@ -33,7 +39,13 @@ query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $
   }
 }
 
-query ProjectsTiny($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {
+query ProjectsTiny(
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+  $q: String
+) {
   projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
     pageInfo {
       ...PageInfo
@@ -63,5 +75,3 @@ mutation UpdateProject($id: ID!, $attributes: ProjectAttributes!) {
     ...Project
   }
 }
-
-

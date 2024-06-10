@@ -231,6 +231,7 @@ query Clusters(
   $q: String
   $healthy: Boolean
   $tagQuery: TagQuery
+  $projectId: ID
 ) {
   clusters(
     first: $first
@@ -238,6 +239,7 @@ query Clusters(
     q: $q
     healthy: $healthy
     tagQuery: $tagQuery
+    projectId: $projectId
   ) {
     pageInfo {
       ...PageInfo
@@ -273,8 +275,8 @@ fragment ClusterBasic on Cluster {
   currentVersion
 }
 
-query ClustersTiny {
-  clusters(first: 200) {
+query ClustersTiny($projectId: ID) {
+  clusters(first: 200, projectId: $projectId) {
     edges {
       node {
         ...ClusterTiny
@@ -288,8 +290,9 @@ query ClusterSelector(
   $after: String
   $q: String
   $currentClusterId: ID
+  $projectId: ID
 ) {
-  clusters(first: $first, after: $after, q: $q) {
+  clusters(first: $first, after: $after, q: $q, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }
@@ -432,7 +435,7 @@ fragment ClusterStatusInfo on ClusterStatusInfo {
   healthy
 }
 
-query ClusterStatuses($clusterId: ID) {
+query ClusterStatuses {
   clusterStatuses {
     ...ClusterStatusInfo
   }

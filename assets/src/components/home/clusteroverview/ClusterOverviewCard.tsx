@@ -13,11 +13,14 @@ import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
 import { HOME_CARD_MAX_HEIGHT, HomeCard } from '../HomeCard'
 
+import { useProjectId } from '../../contexts/ProjectsContext'
+
 import { ClusterOverViewTable } from './ClusterOverviewTable'
 import { ClusterOverviewChart } from './ClusterOverviewChart'
 
 export function ClusterOverviewCard() {
   const theme = useTheme()
+  const projectId = useProjectId()
   const {
     data: tableData,
     loading,
@@ -26,11 +29,16 @@ export function ClusterOverviewCard() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useClustersQuery,
-    pageSize: CLUSTERS_QUERY_PAGE_SIZE,
-    queryKey: 'clusters',
-  })
+  } = useFetchPaginatedData(
+    {
+      queryHook: useClustersQuery,
+      pageSize: CLUSTERS_QUERY_PAGE_SIZE,
+      queryKey: 'clusters',
+    },
+    {
+      projectId,
+    }
+  )
 
   const { data: chartData, error: chartError } = useUpgradeStatisticsQuery({
     pollInterval: POLL_INTERVAL,

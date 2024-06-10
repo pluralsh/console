@@ -42,6 +42,8 @@ import ModalAlt from '../ModalAlt'
 import { GlobalServiceFields } from '../services/GlobalServiceFields'
 import { tagsToNameValue } from '../services/CreateGlobalService'
 
+import { useProjectId } from '../../contexts/ProjectsContext'
+
 import { AddOnConfigurationFields } from './AddOnBasicSettings'
 import { validateAndFilterConfig } from './configurationUtils'
 import { ClusterSelect } from './ClusterSelect'
@@ -107,6 +109,7 @@ export function InstallAddOnModal({
   onClose: Nullable<() => void>
 }) {
   const theme = useTheme()
+  const projectId = useProjectId()
   const [formState, setFormState] = useState(FormState.Basic)
   const [serviceDeployment, setServiceDeployment] =
     useState<Nullable<ServiceDeploymentsRowFragment>>()
@@ -142,6 +145,7 @@ export function InstallAddOnModal({
 
   const { data } = useClustersTinySuspenseQuery({
     fetchPolicy: 'cache-and-network',
+    variables: { projectId },
   })
   const { data: providersData } = useClusterProvidersSuspenseQuery({
     fetchPolicy: 'cache-and-network',

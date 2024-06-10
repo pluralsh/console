@@ -7840,6 +7840,7 @@ export type ClustersQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   healthy?: InputMaybe<Scalars['Boolean']['input']>;
   tagQuery?: InputMaybe<TagQuery>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -7849,7 +7850,9 @@ export type ClusterTinyFragment = { __typename?: 'Cluster', id: string, name: st
 
 export type ClusterBasicFragment = { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
 
-export type ClustersTinyQueryVariables = Exact<{ [key: string]: never; }>;
+export type ClustersTinyQueryVariables = Exact<{
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
 export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
@@ -7859,6 +7862,7 @@ export type ClusterSelectorQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   currentClusterId?: InputMaybe<Scalars['ID']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -7960,9 +7964,7 @@ export type DetachClusterMutation = { __typename?: 'RootMutationType', detachClu
 
 export type ClusterStatusInfoFragment = { __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null };
 
-export type ClusterStatusesQueryVariables = Exact<{
-  clusterId?: InputMaybe<Scalars['ID']['input']>;
-}>;
+export type ClusterStatusesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type ClusterStatusesQuery = { __typename?: 'RootQueryType', clusterStatuses?: Array<{ __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null } | null> | null };
@@ -12819,13 +12821,14 @@ export type InstallAddOnMutationHookResult = ReturnType<typeof useInstallAddOnMu
 export type InstallAddOnMutationResult = Apollo.MutationResult<InstallAddOnMutation>;
 export type InstallAddOnMutationOptions = Apollo.BaseMutationOptions<InstallAddOnMutation, InstallAddOnMutationVariables>;
 export const ClustersDocument = gql`
-    query Clusters($first: Int = 100, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery) {
+    query Clusters($first: Int = 100, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID) {
   clusters(
     first: $first
     after: $after
     q: $q
     healthy: $healthy
     tagQuery: $tagQuery
+    projectId: $projectId
   ) {
     pageInfo {
       ...PageInfo
@@ -12862,6 +12865,7 @@ ${ClusterStatusInfoFragmentDoc}`;
  *      q: // value for 'q'
  *      healthy: // value for 'healthy'
  *      tagQuery: // value for 'tagQuery'
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
@@ -12882,8 +12886,8 @@ export type ClustersLazyQueryHookResult = ReturnType<typeof useClustersLazyQuery
 export type ClustersSuspenseQueryHookResult = ReturnType<typeof useClustersSuspenseQuery>;
 export type ClustersQueryResult = Apollo.QueryResult<ClustersQuery, ClustersQueryVariables>;
 export const ClustersTinyDocument = gql`
-    query ClustersTiny {
-  clusters(first: 200) {
+    query ClustersTiny($projectId: ID) {
+  clusters(first: 200, projectId: $projectId) {
     edges {
       node {
         ...ClusterTiny
@@ -12905,6 +12909,7 @@ export const ClustersTinyDocument = gql`
  * @example
  * const { data, loading, error } = useClustersTinyQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
@@ -12925,8 +12930,8 @@ export type ClustersTinyLazyQueryHookResult = ReturnType<typeof useClustersTinyL
 export type ClustersTinySuspenseQueryHookResult = ReturnType<typeof useClustersTinySuspenseQuery>;
 export type ClustersTinyQueryResult = Apollo.QueryResult<ClustersTinyQuery, ClustersTinyQueryVariables>;
 export const ClusterSelectorDocument = gql`
-    query ClusterSelector($first: Int = 100, $after: String, $q: String, $currentClusterId: ID) {
-  clusters(first: $first, after: $after, q: $q) {
+    query ClusterSelector($first: Int = 100, $after: String, $q: String, $currentClusterId: ID, $projectId: ID) {
+  clusters(first: $first, after: $after, q: $q, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }
@@ -12959,6 +12964,7 @@ ${ClusterTinyFragmentDoc}`;
  *      after: // value for 'after'
  *      q: // value for 'q'
  *      currentClusterId: // value for 'currentClusterId'
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
@@ -13457,7 +13463,7 @@ export type DetachClusterMutationHookResult = ReturnType<typeof useDetachCluster
 export type DetachClusterMutationResult = Apollo.MutationResult<DetachClusterMutation>;
 export type DetachClusterMutationOptions = Apollo.BaseMutationOptions<DetachClusterMutation, DetachClusterMutationVariables>;
 export const ClusterStatusesDocument = gql`
-    query ClusterStatuses($clusterId: ID) {
+    query ClusterStatuses {
   clusterStatuses {
     ...ClusterStatusInfo
   }
@@ -13476,7 +13482,6 @@ export const ClusterStatusesDocument = gql`
  * @example
  * const { data, loading, error } = useClusterStatusesQuery({
  *   variables: {
- *      clusterId: // value for 'clusterId'
  *   },
  * });
  */
