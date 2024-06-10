@@ -5938,6 +5938,7 @@ export type RootQueryTypeServiceDeploymentsArgs = {
   errored?: InputMaybe<Scalars['Boolean']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
 };
@@ -6811,6 +6812,8 @@ export type StackAttributes = {
   clusterId: Scalars['ID']['input'];
   /** version/image config for the tool you're using */
   configuration: StackConfigurationAttributes;
+  /** id of an scm connection to use for pr callbacks */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
   environment?: InputMaybe<Array<InputMaybe<StackEnvironmentAttributes>>>;
   files?: InputMaybe<Array<InputMaybe<StackFileAttributes>>>;
   /** reference w/in the repository where the IaC lives */
