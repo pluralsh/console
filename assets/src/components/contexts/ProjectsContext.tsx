@@ -42,6 +42,12 @@ export function useProject() {
   return project
 }
 
+export function useProjectId() {
+  const { projectId } = useProjectsContext()
+
+  return projectId
+}
+
 export function ProjectsProvider({
   children,
 }: {
