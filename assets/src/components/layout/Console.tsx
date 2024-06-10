@@ -28,20 +28,17 @@ import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
 
-export const TOOLBAR_HEIGHT = '55px'
-export const SIDEBAR_WIDTH = '200px'
-
 export default function Console() {
   return (
     <CursorPositionProvider>
       <MarkdocContextProvider value={{ variant: 'console' }}>
         <ConsoleNavContextProvider>
           <EnsureLogin>
-            <InstallationsProvider>
-              <PluralProvider>
-                <CommandPalette>
-                  <BillingSubscriptionProvider>
-                    <ProjectsProvider>
+            <ProjectsProvider>
+              <InstallationsProvider>
+                <PluralProvider>
+                  <CommandPalette>
+                    <BillingSubscriptionProvider>
                       <BreadcrumbsProvider>
                         <TerminalThemeProvider>
                           <DeploymentSettingsProvider>
@@ -49,11 +46,11 @@ export default function Console() {
                           </DeploymentSettingsProvider>
                         </TerminalThemeProvider>
                       </BreadcrumbsProvider>
-                    </ProjectsProvider>
-                  </BillingSubscriptionProvider>
-                </CommandPalette>
-              </PluralProvider>
-            </InstallationsProvider>
+                    </BillingSubscriptionProvider>
+                  </CommandPalette>
+                </PluralProvider>
+              </InstallationsProvider>
+            </ProjectsProvider>
           </EnsureLogin>
         </ConsoleNavContextProvider>
       </MarkdocContextProvider>
