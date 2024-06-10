@@ -257,6 +257,10 @@ func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v
 }
 
 func (r *ScmConnectionReconciler) tryAddControllerRef(ctx context.Context, scm *v1alpha1.ScmConnection) error {
+	if scm.Spec.TokenSecretRef == nil {
+		return nil
+	}
+
 	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
 	if err != nil {
 		return err
