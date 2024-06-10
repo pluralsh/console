@@ -18,7 +18,7 @@ const SubheaderSC = styled.div(({ theme }) => ({
   minHeight: 48,
   paddingLeft: theme.spacing.large,
   paddingRight: theme.spacing.large,
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
 }))
 
 const BreadcrumbsContainerSC = styled.div(({ theme }) => ({
@@ -40,6 +40,7 @@ export default function Subheader() {
 
   return (
     <SubheaderSC>
+      <ProjectSelect />
       <div css={{ display: 'flex', gap: theme.spacing.small }}>
         <IconFrame
           clickable
@@ -61,7 +62,6 @@ export default function Subheader() {
       <BreadcrumbsContainerSC>
         <Breadcrumbs className="crumbs" />
       </BreadcrumbsContainerSC>
-      <ProjectSelect />
     </SubheaderSC>
   )
 }
