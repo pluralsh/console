@@ -5,11 +5,13 @@ import {
   createContext,
   useContext,
   useMemo,
+  useState,
 } from 'react'
+import { ApolloError } from '@apollo/client'
+import { Banner } from '@pluralsh/design-system'
 
 import { ProjectFragment, useProjectsTinyQuery } from '../../generated/graphql'
 import LoadingIndicator from '../utils/LoadingIndicator'
-import ShowAfterDelay from '../utils/ShowAfterDelay'
 import { mapExistingNodes } from '../../utils/graphql'
 import usePersistedState from '../hooks/usePersistedState'
 
@@ -45,8 +47,14 @@ export function ProjectsProvider({
 }: {
   children: React.ReactNode
 }): ReactElement {
+  const [error, setError] = useState<ApolloError>()
+
   const { data, loading } = useProjectsTinyQuery({
     pollInterval: 60_000,
+    onError: (error) => {
+      setError(error)
+      setTimeout(() => setError(undefined), 5000)
+    },
   })
 
   const projects = useMemo(
@@ -66,19 +74,24 @@ export function ProjectsProvider({
     [projects, project, projectId, setProjectId]
   )
 
-  // TODO: Error handling.
-  // TODO: What to do during loading?
-  if (loading) {
-    return (
-      <ShowAfterDelay>
-        <LoadingIndicator />
-      </ShowAfterDelay>
-    )
-  }
+  if (loading) return <LoadingIndicator />
 
   return (
     <ProjectsContext.Provider value={context}>
       {children}
+      {error && (
+        <Banner
+          heading="Failed to fetch projects"
+          severity="error"
+          position="fixed"
+          bottom={24}
+          right={100}
+          zIndex={1000}
+          onClose={() => setError(undefined)}
+        >
+          {error.message}
+        </Banner>
+      )}
     </ProjectsContext.Provider>
   )
 }
