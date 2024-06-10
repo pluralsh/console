@@ -46,7 +46,6 @@ def scrape():
                                 ("incompatibilities", []),
                             ]
                         )
-                        print(cert_manager_version)
                         rows.append(version_info)
 
             update_compatibility_info(
