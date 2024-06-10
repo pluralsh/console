@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 
+	"github.com/pluralsh/console/controller/internal/cache"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/pluralsh/console/controller/internal/client"
@@ -78,7 +80,7 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 }
 
 // ToController creates Controller instance based on this Reconciler.
-func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient) (Controller, error) {
+func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache) (Controller, error) {
 	switch sc {
 	case GitRepositoryReconciler:
 		return &controller.GitRepositoryReconciler{
@@ -88,15 +90,17 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case ServiceDeploymentReconciler:
 		return &controller.ServiceReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
 		}, nil
 	case ClusterReconciler:
 		return &controller.ClusterReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
 		}, nil
 	case ClusterRestoreReconciler:
 		return &controller.ClusterRestoreReconciler{
@@ -172,9 +176,10 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case StackReconciler:
 		return &controller.InfrastructureStackReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
 		}, nil
 	case CustomStackRunReconciler:
 		return &controller.CustomStackRunReconciler{
@@ -204,10 +209,10 @@ func Reconcilers() ReconcilerList {
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
-func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, consoleClient client.ConsoleClient) ([]Controller, error) {
+func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache) ([]Controller, error) {
 	result := make([]Controller, len(rl))
 	for i, r := range rl {
-		controller, err := r.ToController(mgr, consoleClient)
+		controller, err := r.ToController(mgr, consoleClient, userGroupCache)
 		if err != nil {
 			return nil, err
 		}

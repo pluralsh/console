@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/pluralsh/console/controller/internal/cache"
+
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
@@ -34,8 +36,9 @@ const (
 // ServiceReconciler reconciles a Service object
 type ServiceReconciler struct {
 	client.Client
-	ConsoleClient consoleclient.ConsoleClient
-	Scheme        *runtime.Scheme
+	ConsoleClient  consoleclient.ConsoleClient
+	UserGroupCache cache.UserGroupCache
+	Scheme         *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments,verbs=get;list;watch;create;update;patch;delete
@@ -506,13 +509,13 @@ func (r *ServiceReconciler) ensureService(service *v1alpha1.ServiceDeployment) e
 		return nil
 	}
 
-	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.ConsoleClient)
+	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	service.Spec.Bindings.Read = bindings
 
-	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.ConsoleClient)
+	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}

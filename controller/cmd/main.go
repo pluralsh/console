@@ -24,11 +24,11 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
+	"github.com/pluralsh/console/controller/internal/cache"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -136,7 +136,8 @@ func main() {
 	}
 
 	consoleClient := client.New(opt.consoleUrl, opt.consoleToken)
-	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient)
+	userGroupCache := cache.NewUserGroupCache(consoleClient)
+	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient, userGroupCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)

@@ -7,7 +7,7 @@ import (
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/cache"
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -27,9 +27,9 @@ var (
 	requeue = ctrl.Result{RequeueAfter: requeueAfter}
 )
 
-func ensureBindings(bindings []v1alpha1.Binding, client client.ConsoleClient) ([]v1alpha1.Binding, error) {
+func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, error) {
 	for i := range bindings {
-		binding, err := ensureBinding(bindings[i], client)
+		binding, err := ensureBinding(bindings[i], userGroupCache)
 		if err != nil {
 			return bindings, err
 		}
@@ -40,27 +40,27 @@ func ensureBindings(bindings []v1alpha1.Binding, client client.ConsoleClient) ([
 	return bindings, nil
 }
 
-func ensureBinding(binding v1alpha1.Binding, client client.ConsoleClient) (v1alpha1.Binding, error) {
+func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache) (v1alpha1.Binding, error) {
 	if binding.GroupName == nil && binding.UserEmail == nil {
 		return binding, nil
 	}
 
 	if binding.GroupName != nil {
-		group, err := client.GetGroup(*binding.GroupName)
+		groupID, err := userGroupCache.GetGroupID(*binding.GroupName)
 		if err != nil {
 			return binding, err
 		}
 
-		binding.GroupID = &group.ID
+		binding.GroupID = &groupID
 	}
 
 	if binding.UserEmail != nil {
-		user, err := client.GetUser(*binding.UserEmail)
+		userID, err := userGroupCache.GetUserID(*binding.UserEmail)
 		if err != nil {
 			return binding, err
 		}
 
-		binding.UserID = &user.ID
+		binding.UserID = &userID
 	}
 
 	return binding, nil

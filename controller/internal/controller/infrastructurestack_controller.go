@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pluralsh/console/controller/internal/cache"
+
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
@@ -42,8 +44,9 @@ const InfrastructureStackFinalizer = "deployments.plural.sh/stack-protection"
 // InfrastructureStackReconciler reconciles a InfrastructureStack object
 type InfrastructureStackReconciler struct {
 	client.Client
-	Scheme        *runtime.Scheme
-	ConsoleClient consoleclient.ConsoleClient
+	Scheme         *runtime.Scheme
+	ConsoleClient  consoleclient.ConsoleClient
+	UserGroupCache cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
@@ -231,11 +234,11 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 	}
 
 	if stack.Spec.Actor != nil {
-		user, err := r.ConsoleClient.GetUser(*stack.Spec.Actor)
+		userID, err := r.UserGroupCache.GetUserID(*stack.Spec.Actor)
 		if err != nil {
 			return nil, err
 		}
-		attr.ActorID = &user.ID
+		attr.ActorID = &userID
 	}
 
 	for _, file := range stack.Spec.Files {
