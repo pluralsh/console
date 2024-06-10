@@ -8204,6 +8204,7 @@ export type PipelinesQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -14475,8 +14476,8 @@ export type GetManagedNamespaceLazyQueryHookResult = ReturnType<typeof useGetMan
 export type GetManagedNamespaceSuspenseQueryHookResult = ReturnType<typeof useGetManagedNamespaceSuspenseQuery>;
 export type GetManagedNamespaceQueryResult = Apollo.QueryResult<GetManagedNamespaceQuery, GetManagedNamespaceQueryVariables>;
 export const PipelinesDocument = gql`
-    query Pipelines($q: String, $first: Int = 50, $after: String) {
-  pipelines(q: $q, first: $first, after: $after) {
+    query Pipelines($q: String, $first: Int = 50, $after: String, $projectId: ID) {
+  pipelines(q: $q, first: $first, after: $after, projectId: $projectId) {
     edges {
       cursor
       node {
@@ -14506,6 +14507,7 @@ ${PageInfoFragmentDoc}`;
  *      q: // value for 'q'
  *      first: // value for 'first'
  *      after: // value for 'after'
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */

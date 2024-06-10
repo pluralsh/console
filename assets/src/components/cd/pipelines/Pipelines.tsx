@@ -25,6 +25,8 @@ import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
+import { useProjectId } from '../../contexts/ProjectsContext'
+
 import { columns } from './PipelinesColumns'
 
 export const QUERY_PAGE_SIZE = 100
@@ -37,6 +39,7 @@ export const PIPELINES_CRUMBS = [
 export default function PipelineList() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 100)
 
@@ -49,6 +52,7 @@ export default function PipelineList() {
       },
       {
         q: debouncedSearchString,
+        projectId,
       }
     )
 

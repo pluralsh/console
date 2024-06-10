@@ -31,6 +31,8 @@ import { SplitPane } from 'components/utils/SplitPane'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
+import { useProjectId } from '../../contexts/ProjectsContext'
+
 import { Pipeline } from './PipelineGraph'
 import { PIPELINES_CRUMBS } from './Pipelines'
 import { PipelineContexts } from './PipelineContexts'
@@ -117,11 +119,12 @@ function PipelineSelector({
   pipeline: Nullable<PipelineFragment>
 }) {
   const theme = useTheme()
+  const projectId = useProjectId()
   const [inputValue, setInputValue] = useState('')
   const throttledInputValue = useThrottle(inputValue, 100)
   const [isOpen, setIsOpen] = useState(false)
   const { data } = usePipelinesQuery({
-    variables: { first: 20, q: throttledInputValue },
+    variables: { first: 20, q: throttledInputValue, projectId },
   })
   const navigate = useNavigate()
 

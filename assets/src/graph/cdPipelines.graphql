@@ -195,8 +195,8 @@ fragment Pipeline on Pipeline {
   }
 }
 
-query Pipelines($q: String, $first: Int = 50, $after: String) {
-  pipelines(q: $q, first: $first, after: $after) {
+query Pipelines($q: String, $first: Int = 50, $after: String, $projectId: ID) {
+  pipelines(q: $q, first: $first, after: $after, projectId: $projectId) {
     edges {
       cursor
       node {
