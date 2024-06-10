@@ -20,6 +20,8 @@ import { CursorPositionProvider } from '../utils/CursorPosition'
 
 import HelpLauncher from '../help/HelpLauncher'
 
+import { ProjectsProvider } from '../contexts/ProjectsContext'
+
 import Header from './Header'
 import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
@@ -39,13 +41,15 @@ export default function Console() {
               <PluralProvider>
                 <CommandPalette>
                   <BillingSubscriptionProvider>
-                    <BreadcrumbsProvider>
-                      <TerminalThemeProvider>
-                        <DeploymentSettingsProvider>
-                          <ConsoleContent />
-                        </DeploymentSettingsProvider>
-                      </TerminalThemeProvider>
-                    </BreadcrumbsProvider>
+                    <ProjectsProvider>
+                      <BreadcrumbsProvider>
+                        <TerminalThemeProvider>
+                          <DeploymentSettingsProvider>
+                            <ConsoleContent />
+                          </DeploymentSettingsProvider>
+                        </TerminalThemeProvider>
+                      </BreadcrumbsProvider>
+                    </ProjectsProvider>
                   </BillingSubscriptionProvider>
                 </CommandPalette>
               </PluralProvider>
