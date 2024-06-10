@@ -3,7 +3,7 @@
 import requests
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import printError, update_compatibility_info, convert_version_to_int
+from utils import printError, update_compatibility_info
 
 
 def scrape():
