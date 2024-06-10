@@ -8984,6 +8984,40 @@ export type PolicyStatisticsQueryVariables = Exact<{
 
 export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatistics?: Array<{ __typename?: 'PolicyStatistic', count?: number | null, aggregate?: string | null } | null> | null };
 
+export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type ProjectTinyFragment = { __typename?: 'Project', id: string, name: string, default?: boolean | null };
+
+export type ProjectsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ProjectsQuery = { __typename?: 'RootQueryType', projects?: { __typename?: 'ProjectConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectEdge', node?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null } | null };
+
+export type ProjectsTinyQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ProjectsTinyQuery = { __typename?: 'RootQueryType', projects?: { __typename?: 'ProjectConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectEdge', node?: { __typename?: 'Project', id: string, name: string, default?: boolean | null } | null } | null> | null } | null };
+
+export type ProjectQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ProjectQuery = { __typename?: 'RootQueryType', project?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, approval?: boolean | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
@@ -11217,6 +11251,29 @@ export const PolicyConstraintFragmentDoc = gql`
   violationCount
 }
     ${ClusterFragmentDoc}`;
+export const ProjectFragmentDoc = gql`
+    fragment Project on Project {
+  id
+  insertedAt
+  updatedAt
+  name
+  default
+  description
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
+export const ProjectTinyFragmentDoc = gql`
+    fragment ProjectTiny on Project {
+  id
+  name
+  default
+}
+    `;
 export const StackFragmentDoc = gql`
     fragment Stack on InfrastructureStack {
   id
@@ -17875,6 +17932,151 @@ export type PolicyStatisticsQueryHookResult = ReturnType<typeof usePolicyStatist
 export type PolicyStatisticsLazyQueryHookResult = ReturnType<typeof usePolicyStatisticsLazyQuery>;
 export type PolicyStatisticsSuspenseQueryHookResult = ReturnType<typeof usePolicyStatisticsSuspenseQuery>;
 export type PolicyStatisticsQueryResult = Apollo.QueryResult<PolicyStatisticsQuery, PolicyStatisticsQueryVariables>;
+export const ProjectsDocument = gql`
+    query Projects($after: String, $before: String, $first: Int, $last: Int, $q: String) {
+  projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Project
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ProjectFragmentDoc}`;
+
+/**
+ * __useProjectsQuery__
+ *
+ * To run a query within a React component, call `useProjectsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function useProjectsQuery(baseOptions?: Apollo.QueryHookOptions<ProjectsQuery, ProjectsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectsQuery, ProjectsQueryVariables>(ProjectsDocument, options);
+      }
+export function useProjectsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectsQuery, ProjectsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectsQuery, ProjectsQueryVariables>(ProjectsDocument, options);
+        }
+export function useProjectsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ProjectsQuery, ProjectsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ProjectsQuery, ProjectsQueryVariables>(ProjectsDocument, options);
+        }
+export type ProjectsQueryHookResult = ReturnType<typeof useProjectsQuery>;
+export type ProjectsLazyQueryHookResult = ReturnType<typeof useProjectsLazyQuery>;
+export type ProjectsSuspenseQueryHookResult = ReturnType<typeof useProjectsSuspenseQuery>;
+export type ProjectsQueryResult = Apollo.QueryResult<ProjectsQuery, ProjectsQueryVariables>;
+export const ProjectsTinyDocument = gql`
+    query ProjectsTiny($after: String, $before: String, $first: Int, $last: Int, $q: String) {
+  projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ProjectTiny
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ProjectTinyFragmentDoc}`;
+
+/**
+ * __useProjectsTinyQuery__
+ *
+ * To run a query within a React component, call `useProjectsTinyQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectsTinyQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectsTinyQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function useProjectsTinyQuery(baseOptions?: Apollo.QueryHookOptions<ProjectsTinyQuery, ProjectsTinyQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectsTinyQuery, ProjectsTinyQueryVariables>(ProjectsTinyDocument, options);
+      }
+export function useProjectsTinyLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectsTinyQuery, ProjectsTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectsTinyQuery, ProjectsTinyQueryVariables>(ProjectsTinyDocument, options);
+        }
+export function useProjectsTinySuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ProjectsTinyQuery, ProjectsTinyQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ProjectsTinyQuery, ProjectsTinyQueryVariables>(ProjectsTinyDocument, options);
+        }
+export type ProjectsTinyQueryHookResult = ReturnType<typeof useProjectsTinyQuery>;
+export type ProjectsTinyLazyQueryHookResult = ReturnType<typeof useProjectsTinyLazyQuery>;
+export type ProjectsTinySuspenseQueryHookResult = ReturnType<typeof useProjectsTinySuspenseQuery>;
+export type ProjectsTinyQueryResult = Apollo.QueryResult<ProjectsTinyQuery, ProjectsTinyQueryVariables>;
+export const ProjectDocument = gql`
+    query Project($id: ID, $name: String) {
+  project(id: $id, name: $name) {
+    ...Project
+  }
+}
+    ${ProjectFragmentDoc}`;
+
+/**
+ * __useProjectQuery__
+ *
+ * To run a query within a React component, call `useProjectQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useProjectQuery(baseOptions?: Apollo.QueryHookOptions<ProjectQuery, ProjectQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectQuery, ProjectQueryVariables>(ProjectDocument, options);
+      }
+export function useProjectLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectQuery, ProjectQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectQuery, ProjectQueryVariables>(ProjectDocument, options);
+        }
+export function useProjectSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ProjectQuery, ProjectQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ProjectQuery, ProjectQueryVariables>(ProjectDocument, options);
+        }
+export type ProjectQueryHookResult = ReturnType<typeof useProjectQuery>;
+export type ProjectLazyQueryHookResult = ReturnType<typeof useProjectLazyQuery>;
+export type ProjectSuspenseQueryHookResult = ReturnType<typeof useProjectSuspenseQuery>;
+export type ProjectQueryResult = Apollo.QueryResult<ProjectQuery, ProjectQueryVariables>;
 export const StacksDocument = gql`
     query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStacks(
@@ -19052,6 +19254,9 @@ export const namedOperations = {
     PolicyConstraint: 'PolicyConstraint',
     ViolationStatistics: 'ViolationStatistics',
     PolicyStatistics: 'PolicyStatistics',
+    Projects: 'Projects',
+    ProjectsTiny: 'ProjectsTiny',
+    Project: 'Project',
     Stacks: 'Stacks',
     Stack: 'Stack',
     StackTiny: 'StackTiny',
@@ -19266,6 +19471,8 @@ export const namedOperations = {
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
     PolicyConstraint: 'PolicyConstraint',
+    Project: 'Project',
+    ProjectTiny: 'ProjectTiny',
     Stack: 'Stack',
     StackRun: 'StackRun',
     StackConfiguration: 'StackConfiguration',
