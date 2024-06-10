@@ -5,8 +5,9 @@ import {
   IconFrame,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
-
 import styled, { useTheme } from 'styled-components'
+
+import ProjectSelect from './ProjectSelect'
 
 const SubheaderSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -60,6 +61,7 @@ export default function Subheader() {
       <BreadcrumbsContainerSC>
         <Breadcrumbs className="crumbs" />
       </BreadcrumbsContainerSC>
+      <ProjectSelect />
     </SubheaderSC>
   )
 }
