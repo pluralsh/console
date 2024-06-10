@@ -260,6 +260,7 @@ require (
 require (
 	github.com/elastic/crd-ref-docs v0.0.12
 	github.com/onsi/ginkgo/v2 v2.13.1
+	github.com/orcaman/concurrent-map/v2 v2.0.1
 )
 
 require (

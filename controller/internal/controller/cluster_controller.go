@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/internal/cache"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -29,8 +30,9 @@ const (
 // ClusterReconciler reconciles a Cluster object.
 type ClusterReconciler struct {
 	client.Client
-	ConsoleClient consoleclient.ConsoleClient
-	Scheme        *runtime.Scheme
+	ConsoleClient  consoleclient.ConsoleClient
+	Scheme         *runtime.Scheme
+	UserGroupCache cache.UserGroupCache
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -306,13 +308,13 @@ func (r *ClusterReconciler) ensureCluster(cluster *v1alpha1.Cluster) error {
 		return nil
 	}
 
-	bindings, err := ensureBindings(cluster.Spec.Bindings.Read, r.ConsoleClient)
+	bindings, err := ensureBindings(cluster.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	cluster.Spec.Bindings.Read = bindings
 
-	bindings, err = ensureBindings(cluster.Spec.Bindings.Write, r.ConsoleClient)
+	bindings, err = ensureBindings(cluster.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
