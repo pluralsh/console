@@ -134,14 +134,14 @@ query Stacks(
   $after: String
   $before: String
   $first: Int = 100
-  $last: Int
+  $last: Int, $projectId: ID,
 ) {
   infrastructureStacks(
     q: $q
     after: $after
     before: $before
     first: $first
-    last: $last
+    last: $last, projectId: $projectId,
   ) {
     pageInfo {
       ...PageInfo

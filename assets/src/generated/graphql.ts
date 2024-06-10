@@ -9059,6 +9059,7 @@ export type StacksQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -18161,13 +18162,14 @@ export type UpdateProjectMutationHookResult = ReturnType<typeof useUpdateProject
 export type UpdateProjectMutationResult = Apollo.MutationResult<UpdateProjectMutation>;
 export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProjectMutation, UpdateProjectMutationVariables>;
 export const StacksDocument = gql`
-    query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int) {
+    query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int, $projectId: ID) {
   infrastructureStacks(
     q: $q
     after: $after
     before: $before
     first: $first
     last: $last
+    projectId: $projectId
   ) {
     pageInfo {
       ...PageInfo
@@ -18199,6 +18201,7 @@ ${StackFragmentDoc}`;
  *      before: // value for 'before'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */

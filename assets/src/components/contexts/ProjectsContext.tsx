@@ -36,16 +36,10 @@ export function useProjectsContext() {
   return ctx
 }
 
-export function useProject() {
-  const { project } = useProjectsContext()
-
-  return project
-}
-
 export function useProjectId() {
   const { projectId } = useProjectsContext()
 
-  return projectId
+  return projectId || undefined // Need to use undefined instead of empty string in queries.
 }
 
 export function ProjectsProvider({

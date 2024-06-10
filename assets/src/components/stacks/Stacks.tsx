@@ -40,6 +40,8 @@ import { StandardScroller } from '../utils/SmoothScroller'
 import { LinkTabWrap } from '../utils/Tabs'
 import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 
+import { useProjectId } from '../contexts/ProjectsContext'
+
 import CreateStack from './create/CreateStack'
 import StackEntry from './StacksEntry'
 import StackDetach from './StackDetach'
@@ -73,6 +75,7 @@ export default function Stacks() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { stackId = '' } = useParams()
+  const projectId = useProjectId()
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
   const tab = pathMatch?.params?.tab || ''
@@ -92,6 +95,7 @@ export default function Stacks() {
       },
       {
         q: debouncedSearchString,
+        projectId,
       }
     )
 
