@@ -1,6 +1,19 @@
 import yaml
 from collections import OrderedDict
 from colorama import Fore, Style
+from packaging.version import Version
+
+
+def printError(message):
+    print(Fore.RED + "💔 Error:" + Style.RESET_ALL + f" {message}")
+
+
+def printSuccess(message):
+    print(Fore.GREEN + "✅ Success:" + Style.RESET_ALL + f" {message}")
+
+
+def printWarning(message):
+    print(Fore.YELLOW + "⚠️ Warning:" + Style.RESET_ALL + f" {message}")
 
 
 def readYaml(file_path):
@@ -17,16 +30,13 @@ def readYaml(file_path):
     return None
 
 
-def printError(message):
-    print(Fore.RED + "💔 Error:" + Style.RESET_ALL + f" {message}")
-
-
-def printSuccess(message):
-    print(Fore.GREEN + "✅ Success:" + Style.RESET_ALL + f" {message}")
-
-
-def printWarning(message):
-    print(Fore.YELLOW + "⚠️ Warning:" + Style.RESET_ALL + f" {message}")
+def convert_version_to_int(version):
+    # Remove non-numeric characters except dots and then convert to an integer
+    version_parts = version.split(".")
+    major = version_parts[0]
+    minor = version_parts[1] if len(version_parts) > 1 else "0"
+    patch = version_parts[2] if len(version_parts) > 2 else "0"
+    return int(major) * 10000 + int(minor) * 100 + int(patch)
 
 
 # Custom YAML representer for lists that contain only strings
@@ -54,8 +64,6 @@ yaml.add_representer(OrderedDict, represent_ordereddict)
 
 
 def sort_versions(versions):
-    from packaging.version import Version
-
     return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
 
 
@@ -71,7 +79,9 @@ def update_compatibility_info(filepath, new_versions):
             data["versions"] = sort_versions(list(existing_versions.values()))
             with open(filepath, "w") as file:
                 yaml.dump(data, file, default_flow_style=False, sort_keys=False)
-            printSuccess(f"Updated compatibility info in {filepath}")
+            printSuccess(
+                "Updated compatibility info in" + Fore.CYAN + f" {filepath}"
+            )
         else:
             printWarning("No existing versions found. Writing new data.")
             with open(filepath, "w") as file:
@@ -81,6 +91,10 @@ def update_compatibility_info(filepath, new_versions):
                     default_flow_style=False,
                     sort_keys=False,
                 )
-            printSuccess(f"Written new compatibility info to {filepath}")
+            printSuccess(
+                "Written new compatibility info to "
+                + Fore.CYAN
+                + f" {filepath}"
+            )
     except Exception as e:
         printError(f"Failed to update compatibility info: {e}")

@@ -27,7 +27,7 @@ else:
     if manifest:
         if "names" in manifest:
             for name in manifest["names"]:
-                if name == "ingress-nginx":
+                if name == "cert-manager":
                     print(
                         Fore.GREEN
                         + f"Calling scraper for {name}"
