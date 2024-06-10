@@ -3,13 +3,7 @@
 import requests
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import printError, write_compatibility_info
-
-icon = "https://github.com/pluralsh/plural-artifacts/blob/main/ingress-nginx/plural/icons/nginx.png?raw=true"
-git_url = "https://github.com/kubernetes/ingress-nginx"
-release_url = (
-    "https://github.com/kubernetes/ingress-nginx/releases/tag/controller-v{vsn}"
-)
+from utils import printError, update_compatibility_info
 
 
 def scrape():
@@ -45,13 +39,8 @@ def scrape():
                         )
                         rows.append(version_info)
 
-                # Write the compatibility info to a file
-                write_compatibility_info(
-                    "../../static/compatibilities/ingress-nginx.yaml",
-                    icon,
-                    git_url,
-                    release_url,
-                    rows,
+                update_compatibility_info(
+                    "../../static/compatibilities/ingress-nginx.yaml", rows
                 )
             else:
                 printError("No table found in the README section.")

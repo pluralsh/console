@@ -53,18 +53,34 @@ def represent_ordereddict(dumper, data):
 yaml.add_representer(OrderedDict, represent_ordereddict)
 
 
-def write_compatibility_info(filepath, icon, git_url, release_url, versions):
-    data = {
-        "icon": icon,
-        "git_url": git_url,
-        "release_url": release_url,
-        "versions": versions,
-    }
+def sort_versions(versions):
+    from packaging.version import Version
+
+    return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
+
+
+def update_compatibility_info(filepath, new_versions):
     try:
-        with open(filepath, "w") as file:
-            yaml.dump(data, file, default_flow_style=False, sort_keys=False)
-        printSuccess(
-            "Compatibility info written to " + Fore.CYAN + f"{filepath}"
-        )
+        data = readYaml(filepath)
+        if data and "versions" in data:
+            existing_versions = {v["version"]: v for v in data["versions"]}
+            for new_version in new_versions:
+                version_num = new_version["version"]
+                if version_num not in existing_versions:
+                    existing_versions[version_num] = new_version
+            data["versions"] = sort_versions(list(existing_versions.values()))
+            with open(filepath, "w") as file:
+                yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+            printSuccess(f"Updated compatibility info in {filepath}")
+        else:
+            printWarning("No existing versions found. Writing new data.")
+            with open(filepath, "w") as file:
+                yaml.dump(
+                    {"versions": sort_versions(new_versions)},
+                    file,
+                    default_flow_style=False,
+                    sort_keys=False,
+                )
+            printSuccess(f"Written new compatibility info to {filepath}")
     except Exception as e:
-        printError(f"Failed to write compatibility info: {e}")
+        printError(f"Failed to update compatibility info: {e}")
