@@ -51,4 +51,16 @@ query Project($id: ID, $name: String) {
   }
 }
 
+mutation CreateProject($attributes: ProjectAttributes!) {
+  createProject(attributes: $attributes) {
+    ...Project
+  }
+}
+
+mutation UpdateProject($id: ID!, $attributes: ProjectAttributes!) {
+  updateProject(id: $id, attributes: $attributes) {
+    ...Project
+  }
+}
+
 
