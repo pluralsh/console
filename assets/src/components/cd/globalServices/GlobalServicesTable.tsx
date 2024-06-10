@@ -1,9 +1,8 @@
 import { ComponentProps, useEffect, useMemo } from 'react'
-import { EmptyState, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
-import isEmpty from 'lodash/isEmpty'
 import {
   type ServiceDeploymentsRowFragment,
   useGetGlobalServicesQuery,
@@ -76,7 +75,7 @@ export function GlobalServicesTable({
     >
       {!data ? (
         <LoadingIndicator />
-      ) : !isEmpty(data?.globalServices?.edges) ? (
+      ) : (
         <FullHeightTableWrap>
           <Table
             virtualizeRows
@@ -102,12 +101,11 @@ export function GlobalServicesTable({
             reactTableOptions={reactTableOptions}
             reactVirtualOptions={GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
+            emptyStateProps={{
+              message: "Looks like you don't have any service deployments yet.",
+            }}
           />
         </FullHeightTableWrap>
-      ) : (
-        <div css={{ height: '100%' }}>
-          <EmptyState message="Looks like you don't have any service deployments yet." />
-        </div>
       )}
     </div>
   )
