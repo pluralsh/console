@@ -17,6 +17,7 @@ fragment ProjectTiny on Project {
   id
   name
   default
+  description
 }
 
 query Projects($after: String, $before: String, $first: Int = 100, $last: Int, $q: String) {

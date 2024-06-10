@@ -8986,7 +8986,7 @@ export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatis
 
 export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
-export type ProjectTinyFragment = { __typename?: 'Project', id: string, name: string, default?: boolean | null };
+export type ProjectTinyFragment = { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null };
 
 export type ProjectsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9008,7 +9008,7 @@ export type ProjectsTinyQueryVariables = Exact<{
 }>;
 
 
-export type ProjectsTinyQuery = { __typename?: 'RootQueryType', projects?: { __typename?: 'ProjectConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectEdge', node?: { __typename?: 'Project', id: string, name: string, default?: boolean | null } | null } | null> | null } | null };
+export type ProjectsTinyQuery = { __typename?: 'RootQueryType', projects?: { __typename?: 'ProjectConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectEdge', node?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null } | null> | null } | null };
 
 export type ProjectQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -11287,6 +11287,7 @@ export const ProjectTinyFragmentDoc = gql`
   id
   name
   default
+  description
 }
     `;
 export const StackFragmentDoc = gql`
