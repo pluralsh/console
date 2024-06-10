@@ -8,6 +8,7 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -27,7 +28,8 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			scmType         = gqlclient.ScmTypeGithub
 			namespace       = "default"
 			id              = "123"
-			sha             = "SJQ6GH4SZX7YCR7PM726XIBLSLH5TP6Q33HX4OMUARQGCULTOXTA===="
+			sha             = "6L2JPZZWD3FCA7SB7I2WXH2XTRJR5VID37X3RVIZ2NSKYKOSGLGQ===="
+			secretName      = "test-secret"
 			readonlyScmName = "readonly-scm-connection"
 			readonlyScmID   = "readonly"
 		)
@@ -45,6 +47,18 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 		}
 
 		BeforeAll(func() {
+			By("creating the secret")
+			secret := &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      secretName,
+					Namespace: namespace,
+				},
+				StringData: map[string]string{
+					"token": "test-token",
+				},
+			}
+			Expect(k8sClient.Create(ctx, secret)).To(Succeed())
+
 			By("creating the custom resource for the Kind ScmConnection")
 			scm := &v1alpha1.ScmConnection{}
 			if err := k8sClient.Get(ctx, typeNamespacedName, scm); err == nil {
@@ -58,6 +72,10 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 				Spec: v1alpha1.ScmConnectionSpec{
 					Name: scmName,
 					Type: scmType,
+					TokenSecretRef: &corev1.SecretReference{
+						Name:      "test-secret",
+						Namespace: namespace,
+					},
 				},
 			}
 			Expect(k8sClient.Create(ctx, resource)).To(Succeed())
@@ -245,6 +263,63 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 			scm := &v1alpha1.ScmConnection{}
 			err = k8sClient.Get(ctx, typeNamespacedName, scm)
 			Expect(err).To(HaveOccurred())
+		})
+
+		It("should requeue reconcile when tokenSecretRef is nil", func() {
+			test := struct {
+				returnGetScmConnection *gqlclient.ScmConnectionFragment
+				expectedStatus         v1alpha1.Status
+			}{
+				&gqlclient.ScmConnectionFragment{
+					ID:   readonlyScmID,
+					Name: readonlyScmName,
+				},
+				v1alpha1.Status{
+					ID:  nil,
+					SHA: nil,
+					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionTrue,
+							Reason:  v1alpha1.ReadonlyConditionType.String(),
+							Message: v1alpha1.ReadonlyTrueConditionMessage.String(),
+						},
+						{
+							Type:   v1alpha1.ReadyConditionType.String(),
+							Status: metav1.ConditionFalse,
+							Reason: v1alpha1.ReadyConditionReason.String(),
+						},
+						{
+							Type:    v1alpha1.SynchronizedConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.SynchronizedConditionReasonNotFound.String(),
+							Message: v1alpha1.SynchronizedNotFoundConditionMessage.String(),
+						},
+					},
+				},
+			}
+
+			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("GetScmConnectionByName", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, readonlyScmName))
+			fakeConsoleClient.On("IsScmConnectionExists", mock.Anything, mock.Anything).Return(false, nil)
+
+			scmReconciler := &controller.ScmConnectionReconciler{
+				Client:        k8sClient,
+				Scheme:        k8sClient.Scheme(),
+				ConsoleClient: fakeConsoleClient,
+			}
+
+			_, err := scmReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: readonlyTypeNamespacedName,
+			})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			scm := &v1alpha1.ScmConnection{}
+			err = k8sClient.Get(ctx, readonlyTypeNamespacedName, scm)
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(common.SanitizeStatusConditions(scm.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
 		})
 
 		It("should successfully reconcile readonly resource", func() {
