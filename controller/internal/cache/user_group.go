@@ -14,6 +14,7 @@ type userGroupCache struct {
 type UserGroupCache interface {
 	GetGroupID(name string) (string, error)
 	GetUserID(email string) (string, error)
+	Wipe()
 }
 
 func NewUserGroupCache(consoleClient client.ConsoleClient) UserGroupCache {
@@ -48,4 +49,9 @@ func (u *userGroupCache) GetGroupID(name string) (string, error) {
 	}
 	u.groupMap.Set(name, group.ID)
 	return group.ID, nil
+}
+
+func (u *userGroupCache) Wipe() {
+	u.userMap.Clear()
+	u.groupMap.Clear()
 }

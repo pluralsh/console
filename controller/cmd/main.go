@@ -17,10 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"os"
 	"strings"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -68,6 +71,8 @@ type controllerRunOptions struct {
 	consoleToken         string
 	reconcilers          types.ReconcilerList
 }
+
+const defaultWipeCacheInterval = time.Minute * 30
 
 func main() {
 	klog.InitFlags(nil)
@@ -137,6 +142,12 @@ func main() {
 
 	consoleClient := client.New(opt.consoleUrl, opt.consoleToken)
 	userGroupCache := cache.NewUserGroupCache(consoleClient)
+	go func() {
+		_ = wait.PollUntilContextCancel(context.Background(), defaultWipeCacheInterval, true, func(ctx context.Context) (done bool, err error) {
+			userGroupCache.Wipe()
+			return true, nil
+		})
+	}()
 	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient, userGroupCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
