@@ -65,6 +65,9 @@ export function GlobalServiceDetailTable({
         isFetchingNextPage={loading}
         reactTableOptions={{ meta: { refetch: () => undefined } }}
         reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+        emptyStateProps={{
+          message: 'Looks like this service does not exist.',
+        }}
       />
     </FullHeightTableWrap>
   )
