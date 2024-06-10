@@ -8,6 +8,7 @@ import CaretDownIcon from '../components/icons/CaretDownIcon'
 import SearchIcon from '../components/icons/SearchIcon'
 import Input from '../components/Input'
 import Input2 from '../components/Input2'
+import { Card } from '../index'
 
 export default {
   title: 'Input',
@@ -18,7 +19,7 @@ function InputSet(props: any) {
   return (
     <Flex
       direction="column"
-      maxWidth="400px"
+      maxWidth="500px"
       gap="large"
     >
       <Input {...props} />
@@ -51,7 +52,7 @@ function Template(args: any) {
   return (
     <Flex
       direction="column"
-      maxWidth="400px"
+      maxWidth="500px"
       gap="large"
     >
       <InputSet
@@ -63,6 +64,21 @@ function Template(args: any) {
         {...props}
         small
       />
+      <Card padding="large">
+        <InputSet {...props} />
+      </Card>
+      <Card
+        fillLevel={2}
+        padding="large"
+      >
+        <InputSet {...props} />
+      </Card>
+      <Card
+        fillLevel={3}
+        padding="large"
+      >
+        <InputSet {...props} />
+      </Card>
     </Flex>
   )
 }
@@ -81,7 +97,7 @@ function CustomInputTemplate(args: any) {
   return (
     <Flex
       direction="column"
-      maxWidth="400px"
+      maxWidth="500px"
     >
       <Div>
         <Input
@@ -123,7 +139,7 @@ function CustomInputV2Template(args: any) {
   return (
     <Flex
       direction="column"
-      maxWidth="400px"
+      maxWidth="500px"
     >
       <Div marginTop="medium">
         <Input2

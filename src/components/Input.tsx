@@ -1,13 +1,13 @@
 import { ExtendTheme, Input as HonorableInput, mergeTheme } from 'honorable'
 import type { InputProps as HonorableInputProps } from 'honorable'
 import { type ComponentProps, type ReactNode, forwardRef, useRef } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { mergeRefs } from 'react-merge-refs'
 import { mergeProps } from 'react-aria'
 
 import { simulateInputChange } from '../utils/simulateInputChange'
 
-import { useFillLevel } from './contexts/FillLevelContext'
+import { type FillLevel, useFillLevel } from './contexts/FillLevelContext'
 import { TitleContent } from './Select'
 import Tooltip from './Tooltip'
 import IconFrame from './IconFrame'
@@ -44,6 +44,13 @@ const startEndStyles = {
   paddingRight: 0,
   paddingLeft: 0,
 }
+
+const parentFillLevelToBackground = {
+  0: 'fill-one',
+  1: 'fill-two',
+  2: 'fill-three',
+  3: 'fill-three',
+} as const satisfies Record<FillLevel, string>
 
 const ClearButton = styled(
   ({
@@ -90,6 +97,7 @@ const Input = forwardRef(
     }: InputProps,
     ref
   ) => {
+    const theme = useTheme()
     const inputRef = useRef<HTMLInputElement>(null)
 
     inputProps = {
@@ -192,6 +200,9 @@ const Input = forwardRef(
                 {startIcon}
               </>
             ) : undefined
+          }
+          backgroundColor={
+            theme.colors[parentFillLevelToBackground[parentFillLevel]]
           }
           inputProps={inputProps}
           {...props}
