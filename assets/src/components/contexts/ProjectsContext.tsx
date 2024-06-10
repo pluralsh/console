@@ -13,7 +13,6 @@ import { Banner } from '@pluralsh/design-system'
 import { ProjectFragment, useProjectsTinyQuery } from '../../generated/graphql'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { mapExistingNodes } from '../../utils/graphql'
-import usePersistedState from '../hooks/usePersistedState'
 
 interface ProjectsContextT {
   projects: ProjectFragment[]
@@ -21,8 +20,6 @@ interface ProjectsContextT {
   projectId: string
   setProjectId: Dispatch<SetStateAction<string>>
 }
-
-const localStorageId = 'plural-project-id'
 
 const ProjectsContext = createContext<ProjectsContextT | undefined | null>(null)
 
@@ -62,7 +59,7 @@ export function ProjectsProvider({
     [data?.projects]
   )
 
-  const [projectId, setProjectId] = usePersistedState(localStorageId, '')
+  const [projectId, setProjectId] = useState('') // usePersistedState('plural-project-id', '')
 
   const project = useMemo(
     () => projects.find(({ id }) => id === projectId),
