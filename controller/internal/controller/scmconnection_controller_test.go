@@ -305,27 +305,3 @@ var _ = Describe("SCM Connection Controller", Ordered, func() {
 		})
 	})
 })
-
-//func createService(ctx context.Context, namespace, name, clusterName, repoName string) {
-//	serviceDep1 := &v1alpha1.ServiceDeployment{}
-//	if err := k8sClient.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, serviceDep1); err == nil {
-//		Expect(k8sClient.Delete(ctx, serviceDep1)).To(Succeed())
-//	}
-//	resource := &v1alpha1.ServiceDeployment{
-//		ObjectMeta: metav1.ObjectMeta{
-//			Name:      name,
-//			Namespace: namespace,
-//		},
-//		Spec: v1alpha1.ServiceSpec{
-//			Version:       lo.ToPtr("1.24"),
-//			ClusterRef:    corev1.ObjectReference{Name: clusterName, Namespace: namespace},
-//			RepositoryRef: &corev1.ObjectReference{Name: repoName, Namespace: namespace},
-//			SyncConfig: &v1alpha1.SyncConfigAttributes{
-//				CreateNamespace: lo.ToPtr(true),
-//				Labels:          map[string]string{"a": "a"},
-//				Annotations:     map[string]string{"b": "b"},
-//			},
-//		},
-//	}
-//	Expect(k8sClient.Create(ctx, resource)).To(Succeed())
-//}
