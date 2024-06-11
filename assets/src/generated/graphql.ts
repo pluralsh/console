@@ -7155,6 +7155,7 @@ export type StatusCondition = {
 
 export enum StepStage {
   Apply = 'APPLY',
+  Destroy = 'DESTROY',
   Init = 'INIT',
   Plan = 'PLAN',
   Verify = 'VERIFY'
