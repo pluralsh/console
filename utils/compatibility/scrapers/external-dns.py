@@ -24,30 +24,47 @@ def get_github_tags():
 
 
 def expand_kube_versions(version_range):
-    if "<=" in version_range:
-        start_version, end_version = "1.9", version_range.split("<= ")[1]
-    elif ">=" in version_range:
-        start_version = version_range.split(">= ")[1]
-        end_version = (
-            "1.28"  # assuming the latest version is 1.28 for example purposes
-        )
-    elif ">=" in version_range and "<=" in version_range:
-        start_version = version_range.split(">= ")[1].split(" ")[0]
-        end_version = version_range.split("<= ")[1]
+    version_range = version_range.replace("<= ", "").replace(">= ", "")
+    ranges = version_range.split("and")
+    expanded_versions = []
 
+    for version in ranges:
+        if ">" in version and "<" in version:
+            start_version, end_version = version.split("<")
+            start_version = start_version.strip()
+            end_version = end_version.strip()
+            expanded_versions.extend(
+                generate_versions(start_version, end_version)
+            )
+        elif ">" in version:
+            start_version = version.strip()
+            expanded_versions.extend(
+                generate_versions(start_version, "1.28")
+            )  # assuming 1.28 is the latest version
+        elif "<" in version:
+            end_version = version.strip()
+            expanded_versions.extend(generate_versions("1.9", end_version))
+        else:
+            expanded_versions.append(version.strip())
+
+    return list(sorted(set(expanded_versions)))
+
+
+def generate_versions(start_version, end_version):
     start_major, start_minor = map(int, start_version.split("."))
     end_major, end_minor = map(int, end_version.split("."))
+    versions = []
 
-    expanded_versions = []
     major, minor = start_major, start_minor
     while (major < end_major) or (major == end_major and minor <= end_minor):
-        expanded_versions.append(f"{major}.{minor}")
+        versions.append(f"{major}.{minor}")
         if minor == 9:
             major += 1
             minor = 0
         else:
             minor += 1
-    return expanded_versions
+
+    return versions
 
 
 def scrape():
