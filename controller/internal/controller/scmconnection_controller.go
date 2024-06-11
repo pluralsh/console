@@ -89,6 +89,11 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return r.handleExistingScmConnection(ctx, scm)
 	}
+	if r.shouldMarkAsReadonly(scm) {
+		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
+		return requeue, nil
+	}
 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
@@ -132,7 +137,7 @@ func (r *ScmConnectionReconciler) handleExistingScmConnection(ctx context.Contex
 
 	if !exists {
 		scm.Status.ID = nil
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, "Could not find ScmConnection in Console API")
+		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
 		return ctrl.Result{}, nil
 	}
 
@@ -257,12 +262,20 @@ func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v
 }
 
 func (r *ScmConnectionReconciler) tryAddControllerRef(ctx context.Context, scm *v1alpha1.ScmConnection) error {
+	if scm.Spec.TokenSecretRef == nil {
+		return nil
+	}
+
 	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
 	if err != nil {
 		return err
 	}
 
 	return utils.TryAddControllerRef(ctx, r.Client, scm, secret, r.Scheme)
+}
+
+func (r *ScmConnectionReconciler) shouldMarkAsReadonly(scm *v1alpha1.ScmConnection) bool {
+	return scm.Spec.TokenSecretRef == nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
