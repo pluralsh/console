@@ -755,7 +755,7 @@ type RootMutationType {
   updateProject(id: ID!, attributes: ProjectAttributes!): Project
 
   "a reusable mutation for updating rbac settings on core services"
-  updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID): Boolean
+  updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID): Boolean
 }
 
 type RootSubscriptionType {
@@ -2171,6 +2171,8 @@ input PipelineAttributes {
   projectId: ID
   stages: [PipelineStageAttributes]
   edges: [PipelineEdgeAttributes]
+  readBindings: [PolicyBindingAttributes]
+  writeBindings: [PolicyBindingAttributes]
 }
 
 "specification of a stage of a pipeline"
@@ -2320,6 +2322,12 @@ type Pipeline {
 
   "the project this pipeline belongs to"
   project: Project
+
+  "read policy for this pipeline"
+  readBindings: [PolicyBinding]
+
+  "write policy of this pipeline"
+  writeBindings: [PolicyBinding]
 
   "edges linking two stages w\/in the pipeline in a full DAG"
   edges: [PipelineStageEdge]
