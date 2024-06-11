@@ -233,6 +233,14 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 		Files:         make([]*console.StackFileAttributes, 0),
 	}
 
+	if stack.Spec.ScmConnectionRef != nil {
+		connection := &v1alpha1.ScmConnection{}
+		if err := r.Get(ctx, types.NamespacedName{Name: stack.Spec.ScmConnectionRef.Name, Namespace: stack.Spec.ScmConnectionRef.Namespace}, connection); err != nil {
+			return nil, err
+		}
+		attr.ConnectionID = connection.Status.ID
+	}
+
 	if stack.Spec.Actor != nil {
 		userID, err := r.UserGroupCache.GetUserID(*stack.Spec.Actor)
 		if err != nil {
