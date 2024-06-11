@@ -149,6 +149,9 @@ export default function Cluster() {
               .filter((t) => tabEnabled(t, logs))
               .map(({ label, path }) => (
                 <LinkTabWrap
+                  css={{
+                    minWidth: 'fit-content',
+                  }}
                   subTab
                   key={path}
                   textValue={label}

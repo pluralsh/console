@@ -220,6 +220,9 @@ export default function ContinuousDeployment() {
             >
               {directory.map(({ label, path }) => (
                 <LinkTabWrap
+                  css={{
+                    minWidth: 'fit-content',
+                  }}
                   subTab
                   key={path}
                   textValue={label}
