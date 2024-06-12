@@ -3007,10 +3007,14 @@ export type Pipeline = {
   name: Scalars['String']['output'];
   /** the project this pipeline belongs to */
   project?: Maybe<Project>;
+  /** read policy for this pipeline */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the stages of this pipeline */
   stages?: Maybe<Array<Maybe<PipelineStage>>>;
   status?: Maybe<PipelineStatus>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy of this pipeline */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
 
 
@@ -3026,7 +3030,9 @@ export type PipelineContextsArgs = {
 export type PipelineAttributes = {
   edges?: InputMaybe<Array<InputMaybe<PipelineEdgeAttributes>>>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   stages?: InputMaybe<Array<InputMaybe<PipelineStageAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 export type PipelineConnection = {
@@ -4908,6 +4914,7 @@ export type RootMutationTypeUpdatePullRequestArgs = {
 
 export type RootMutationTypeUpdateRbacArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  pipelineId?: InputMaybe<Scalars['ID']['input']>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
   rbac: RbacAttributes;
   serviceId?: InputMaybe<Scalars['ID']['input']>;

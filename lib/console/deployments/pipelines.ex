@@ -85,6 +85,19 @@ defmodule Console.Deployments.Pipelines do
   end
 
   @doc """
+  modifies rbac settings for this pipeline
+  """
+  @spec rbac(map, binary, User.t) :: pipeline_resp
+  def rbac(attrs, pipeline_id, %User{} = user) do
+    get_pipeline!(pipeline_id)
+    |> Repo.preload([:write_bindings, :read_bindings])
+    |> allow(user, :write)
+    |> when_ok(&Pipeline.rbac_changeset(&1, attrs))
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
   Creates a context which can be used for promotions throughout a pipeline. This will be an arbitrary
   data-map for things like contextualizing pr automations
   """
