@@ -1,4 +1,9 @@
-import { ListBoxFooter, ListBoxItem, Select } from '@pluralsh/design-system'
+import {
+  CheckRoundedIcon,
+  ListBoxFooter,
+  ListBoxItem,
+  Select,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { useProjectsContext } from '../contexts/ProjectsContext'
@@ -83,8 +88,13 @@ export default function ProjectSelect() {
         aria-label="project"
         titleContent={<ProjectIcon color={theme.colors['icon-light']} />}
         dropdownFooterFixed={
-          <ListBoxFooter onClick={() => setProjectId('')}>
-            Select all projects
+          <ListBoxFooter
+            onClick={() => setProjectId('')}
+            leftContent={<CheckRoundedIcon color="icon-info" />}
+          >
+            <span css={{ color: theme.colors['text-primary-accent'] }}>
+              Select all projects
+            </span>
           </ListBoxFooter>
         }
         label="All projects"
