@@ -144,6 +144,7 @@ export default function Stacks() {
         css={{
           marginRight: theme.spacing.xlarge,
           paddingBottom: theme.spacing.xxxlarge,
+          minWidth: 340,
           width: 340,
         }}
       >
