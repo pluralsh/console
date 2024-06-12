@@ -79,6 +79,9 @@ type InfrastructureStackSpec struct {
 	// User email to use for default Plural authentication in this stack.
 	// +kubebuilder:validation:Optional
 	Actor *string `json:"actor,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	ScmConnectionRef *corev1.ObjectReference `json:"scmConnectionRef,omitempty"`
 }
 
 //+kubebuilder:object:root=true

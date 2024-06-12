@@ -259,6 +259,9 @@ type RootQueryType {
 
     errored: Boolean
 
+    "a project to filter services w\/in"
+    projectId: ID
+
     "the handle of the cluster for this service"
     cluster: String
   ): ServiceDeploymentConnection
@@ -1027,6 +1030,7 @@ enum StepStage {
   VERIFY
   APPLY
   INIT
+  DESTROY
 }
 
 input StackAttributes {
@@ -1065,6 +1069,9 @@ input StackAttributes {
 
   "the project id this stack will belong to"
   projectId: ID
+
+  "id of an scm connection to use for pr callbacks"
+  connectionId: ID
 
   readBindings: [PolicyBindingAttributes]
 

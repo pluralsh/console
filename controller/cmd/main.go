@@ -17,27 +17,29 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-
+	deploymentsv1alpha "github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
+	"k8s.io/apimachinery/pkg/util/wait"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/klog"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	ctrlruntimezap "sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-
-	deploymentsv1alpha "github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/types"
 )
 
 var reconcilersUsage = fmt.Sprintf(
@@ -68,6 +70,8 @@ type controllerRunOptions struct {
 	consoleToken         string
 	reconcilers          types.ReconcilerList
 }
+
+const defaultWipeCacheInterval = time.Minute * 30
 
 func main() {
 	klog.InitFlags(nil)
@@ -136,7 +140,15 @@ func main() {
 	}
 
 	consoleClient := client.New(opt.consoleUrl, opt.consoleToken)
-	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient)
+	userGroupCache := cache.NewUserGroupCache(consoleClient)
+	go func() {
+		_ = wait.PollUntilContextCancel(context.Background(), defaultWipeCacheInterval, true,
+			func(ctx context.Context) (done bool, err error) {
+				userGroupCache.Wipe()
+				return true, nil
+			})
+	}()
+	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient, userGroupCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)

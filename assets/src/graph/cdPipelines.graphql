@@ -39,6 +39,9 @@ fragment PipelineGate on PipelineGate {
   name
   state
   type
+  cluster {
+    id
+  }
   approver {
     ...User
   }

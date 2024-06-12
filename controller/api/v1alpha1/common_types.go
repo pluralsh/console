@@ -119,7 +119,8 @@ func (c ConditionMessage) String() string {
 }
 
 const (
-	ReadonlyTrueConditionMessage ConditionMessage = "Running in read-only mode"
+	ReadonlyTrueConditionMessage         ConditionMessage = "Running in read-only mode"
+	SynchronizedNotFoundConditionMessage ConditionMessage = "Could not find ScmConnection in Console API"
 )
 
 // GitRef ...

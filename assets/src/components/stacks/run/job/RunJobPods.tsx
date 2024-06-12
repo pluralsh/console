@@ -17,6 +17,8 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
+import { useOutletContext } from 'react-router-dom'
+
 import { useJobPods, useRunJob } from './RunJob'
 
 const columns = [
@@ -32,6 +34,7 @@ const columns = [
 
 export default function RunJobPods() {
   const pods = useJobPods()
+  const { clusterId } = useOutletContext() as { clusterId: string | undefined }
 
   const { refetch } = useRunJob()
 
@@ -60,6 +63,7 @@ export default function RunJobPods() {
       <FullHeightTableWrap>
         <PodsList
           pods={podsWithId}
+          clusterId={clusterId}
           columns={columns}
           refetch={refetch}
           // reactTableOptions={reactTableOptions}

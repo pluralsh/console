@@ -27,6 +27,8 @@ import { TruncateStart } from 'components/utils/table/TruncateStart'
 
 import { InlineLink } from 'components/utils/typography/InlineLink'
 
+import { getKubernetesAbsPath } from 'routes/kubernetesRoutesConsts'
+
 import {
   LabelWithIcon,
   TableCaretLink,
@@ -310,6 +312,7 @@ type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
   applications?: Maybe<Maybe<Application>[]>
   columns: any[]
   linkBasePath?: string
+  clusterId?: string | null
   serviceId?: string | null
 }
 
@@ -344,6 +347,7 @@ export const PodsList = memo(
     pods,
     applications,
     columns,
+    clusterId,
     serviceId,
     linkBasePath = `/pods`,
     refetch,
@@ -420,7 +424,13 @@ export const PodsList = memo(
           reactTableOptions={reactTableOptions}
           {...props}
           onRowClick={(_e, { original }: Row<PodTableRow>) =>
-            navigate(`${linkBasePath}/${original.namespace}/${original.name}`)
+            navigate(
+              clusterId
+                ? `${getKubernetesAbsPath(clusterId)}/pods/${
+                    original.namespace
+                  }/${original.name}`
+                : `${linkBasePath}/${original.namespace}/${original.name}`
+            )
           }
         />
       </PodsListContext.Provider>

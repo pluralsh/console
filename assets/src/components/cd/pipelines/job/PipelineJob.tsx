@@ -6,11 +6,10 @@ import {
   LoopingLogo,
   Sidecar,
   SidecarItem,
-  TabPanel,
   Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { createContext, useContext, useMemo, useRef } from 'react'
+import { createContext, useContext, useMemo } from 'react'
 import {
   Outlet,
   useLocation,
@@ -61,7 +60,7 @@ const getPipelineJobBreadcrumbs = ({
   ...PIPELINES_CRUMBS,
   {
     label: gate?.edge?.pipeline?.name || 'pipeline',
-    url: `${PIPELINES_ABS_PATH}/${gate?.edge?.pipeline?.id}`,
+    url: `${PIPELINES_ABS_PATH}/${gate?.edge?.pipeline?.id ?? ''}`,
   },
   { label: 'jobs' },
   ...(!gate
@@ -85,7 +84,7 @@ export const useJobPods = () => {
     throw new Error('useJobPods must be used within a PodsContext.Provider')
   }
 
-  return useContext(PodsContext)
+  return ctx
 }
 
 type OutletContextT = {
@@ -99,7 +98,6 @@ export const usePipelineJob = () => useOutletContext<OutletContextT>()
 
 export default function PipelineJob() {
   const theme = useTheme()
-  const tabStateRef = useRef<any>(null)
   const jobId = useParams().jobId!
   const { pathname } = useLocation()
 
@@ -126,8 +124,10 @@ export default function PipelineJob() {
       metadata: data?.pipelineGate?.job?.metadata,
       raw: data?.pipelineGate?.job?.raw,
       spec: data?.pipelineGate?.job?.spec,
+      clusterId: data?.pipelineGate?.cluster?.id,
     }),
     [
+      data?.pipelineGate?.cluster?.id,
       data?.pipelineGate?.job?.metadata,
       data?.pipelineGate?.job?.raw,
       data?.pipelineGate?.job?.spec,
@@ -205,14 +205,11 @@ export default function PipelineJob() {
         />
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
-      <TabPanel
-        as={<ResponsiveLayoutContentContainer />}
-        stateRef={tabStateRef}
-      >
+      <ResponsiveLayoutContentContainer>
         <PodsContext.Provider value={podsContext}>
           {content}
         </PodsContext.Provider>
-      </TabPanel>
+      </ResponsiveLayoutContentContainer>
       <ResponsiveLayoutSidecarContainer>
         {gate && (
           <Sidecar>

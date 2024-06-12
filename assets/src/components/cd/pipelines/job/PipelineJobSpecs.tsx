@@ -21,7 +21,7 @@ const TABS = [
   { path: 'raw', label: 'Raw', enabled: true },
 ]
 
-export default function PipelineJobStatus() {
+export default function PipelineJobSpecs() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { raw, spec } = usePipelineJob()

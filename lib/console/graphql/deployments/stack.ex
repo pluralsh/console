@@ -22,6 +22,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :workdir,        :string, description: "the subdirectory you want to run the stack's commands w/in"
     field :actor_id,       :id, description: "user id to use for default Plural authentication in this stack"
     field :project_id,     :id, description: "the project id this stack will belong to"
+    field :connection_id,  :id, description: "id of an scm connection to use for pr callbacks"
 
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)

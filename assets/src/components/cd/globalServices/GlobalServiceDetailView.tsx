@@ -1,9 +1,4 @@
-import {
-  Chip,
-  EmptyState,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ComponentProps, useCallback, useMemo } from 'react'
 
 import {
@@ -99,7 +94,6 @@ export default function GlobalServiceDetailView() {
 
   const globalService = data?.globalService
   const pageInfo = globalService?.services?.pageInfo
-  const services = globalService?.services?.edges
 
   const fetchNextPage = useCallback(() => {
     if (!pageInfo?.endCursor) {
@@ -145,7 +139,7 @@ export default function GlobalServiceDetailView() {
     <ResponsivePageFullWidth scrollable={false}>
       {!data ? (
         <LoadingIndicator />
-      ) : services?.length ? (
+      ) : (
         <div
           css={{
             display: 'flex',
@@ -175,10 +169,6 @@ export default function GlobalServiceDetailView() {
             />
             <GlobalServiceSidecar globalService={globalService} />
           </div>
-        </div>
-      ) : (
-        <div css={{ height: '100%' }}>
-          <EmptyState message="Looks like this service does not exist." />
         </div>
       )}
     </ResponsivePageFullWidth>
