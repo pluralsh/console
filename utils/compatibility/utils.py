@@ -72,13 +72,11 @@ def sort_versions(versions):
     return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
 
 
-def sort_kube_versions(versions):
-    return sorted(versions, key=lambda v: Version(v), reverse=True)
-
-
 def update_compatibility_info(filepath, new_versions):
     for version in new_versions:
-        version["kube"] = sort_kube_versions(version["kube"])
+        version["kube"] = sorted(
+            version["kube"], key=lambda v: Version(v), reverse=True
+        )
     try:
         data = readYaml(filepath)
         if data and "versions" in data:
