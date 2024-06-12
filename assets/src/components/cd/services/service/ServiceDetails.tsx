@@ -48,6 +48,8 @@ import FractionalChip from 'components/utils/FractionalChip'
 
 import ServiceSelector from '../ServiceSelector'
 
+import { useProjectId } from '../../../contexts/ProjectsContext'
+
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 
 type ServiceContextType = {
@@ -166,6 +168,7 @@ function ServiceDetailsBase() {
   const { me } = useContext<any>(LoginContext)
   const isAdmin = !!me.roles?.admin
   const params = useParams()
+  const projectId = useProjectId()
   const serviceId = params[SERVICE_PARAM_ID] as string
   const clusterId = params[SERVICE_PARAM_CLUSTER_ID] as string
   const pathPrefix = getServiceDetailsPath({
@@ -176,7 +179,7 @@ function ServiceDetailsBase() {
   const logsEnabled = useLogsEnabled()
 
   const { data: serviceListData } = useServiceDeploymentsTinyQuery({
-    variables: { clusterId },
+    variables: { clusterId, projectId },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })

@@ -8375,6 +8375,7 @@ export type ServiceDeploymentsQueryVariables = Exact<{
   cluster?: InputMaybe<Scalars['String']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -8382,6 +8383,7 @@ export type ServiceDeploymentsQuery = { __typename?: 'RootQueryType', serviceDep
 
 export type ServiceDeploymentsTinyQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -15200,7 +15202,7 @@ export type PullRequestsLazyQueryHookResult = ReturnType<typeof usePullRequestsL
 export type PullRequestsSuspenseQueryHookResult = ReturnType<typeof usePullRequestsSuspenseQuery>;
 export type PullRequestsQueryResult = Apollo.QueryResult<PullRequestsQuery, PullRequestsQueryVariables>;
 export const ServiceDeploymentsDocument = gql`
-    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus) {
+    query ServiceDeployments($first: Int = 100, $after: String, $q: String, $cluster: String, $clusterId: ID, $status: ServiceDeploymentStatus, $projectId: ID) {
   serviceDeployments(
     first: $first
     after: $after
@@ -15208,6 +15210,7 @@ export const ServiceDeploymentsDocument = gql`
     cluster: $cluster
     clusterId: $clusterId
     status: $status
+    projectId: $projectId
   ) {
     pageInfo {
       ...PageInfo
@@ -15244,6 +15247,7 @@ ${ServiceStatusCountFragmentDoc}`;
  *      cluster: // value for 'cluster'
  *      clusterId: // value for 'clusterId'
  *      status: // value for 'status'
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
@@ -15264,8 +15268,8 @@ export type ServiceDeploymentsLazyQueryHookResult = ReturnType<typeof useService
 export type ServiceDeploymentsSuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentsSuspenseQuery>;
 export type ServiceDeploymentsQueryResult = Apollo.QueryResult<ServiceDeploymentsQuery, ServiceDeploymentsQueryVariables>;
 export const ServiceDeploymentsTinyDocument = gql`
-    query ServiceDeploymentsTiny($clusterId: ID) {
-  serviceDeployments(first: 100, clusterId: $clusterId) {
+    query ServiceDeploymentsTiny($clusterId: ID, $projectId: ID) {
+  serviceDeployments(first: 100, clusterId: $clusterId, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }
@@ -15292,6 +15296,7 @@ ${ServiceDeploymentTinyFragmentDoc}`;
  * const { data, loading, error } = useServiceDeploymentsTinyQuery({
  *   variables: {
  *      clusterId: // value for 'clusterId'
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */

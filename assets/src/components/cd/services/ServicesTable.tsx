@@ -17,6 +17,8 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
+import { useProjectId } from '../../contexts/ProjectsContext'
+
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import {
   SERVICES_QUERY_PAGE_SIZE,
@@ -33,6 +35,7 @@ export function ServicesTable({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
+  const projectId = useProjectId()
   const [clusterIdInternal, setClusterId] = useState<string>('')
   const clusterId = clusterIdProp ?? clusterIdInternal
   const tabStateRef = useRef<any>(null)
@@ -56,6 +59,7 @@ export function ServicesTable({
     },
     {
       q: queryString,
+      projectId,
       ...(clusterId ? { clusterId } : {}),
       ...(queryStatusFilter !== 'ALL' ? { status: queryStatusFilter } : {}),
     }

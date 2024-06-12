@@ -7,8 +7,6 @@ import {
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 
-import ProjectSelect from './ProjectSelect'
-
 const SubheaderSC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
