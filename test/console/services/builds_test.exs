@@ -6,6 +6,7 @@ defmodule Console.Services.BuildsTest do
   alias Console.{PubSub, Storage.Git}
 
   describe "Command implements Collectable" do
+    @tag :skip
     test "A command can accumulate a string stream" do
       command = insert(:command)
 

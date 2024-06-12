@@ -139,7 +139,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :output, list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
     field :state,  :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
 
-    field :project,    :project, resolve: dataloader(Project), description: "The project this stack belongs to"
+    field :project,    :project, resolve: dataloader(Deployments), description: "The project this stack belongs to"
     field :cluster,    :cluster, resolve: dataloader(Deployments), description: "the cluster this stack runs on"
     field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
 

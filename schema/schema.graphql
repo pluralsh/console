@@ -202,10 +202,10 @@ type RootQueryType {
   ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
-  clusterStatuses(q: String, tag: TagInput): [ClusterStatusInfo]
+  clusterStatuses(q: String, tag: TagInput, projectId: ID): [ClusterStatusInfo]
 
   "gets summary information for upgradeability in your fleet"
-  upgradeStatistics(q: String, tag: TagInput): UpgradeStatistics
+  upgradeStatistics(q: String, tag: TagInput, projectId: ID): UpgradeStatistics
 
   "lists tags applied to any clusters in the fleet"
   tags(tag: String): [String]
@@ -266,7 +266,7 @@ type RootQueryType {
     cluster: String
   ): ServiceDeploymentConnection
 
-  serviceStatuses(clusterId: ID, q: String, status: ServiceDeploymentStatus): [ServiceStatusCount]
+  serviceStatuses(clusterId: ID, q: String, status: ServiceDeploymentStatus, projectId: ID): [ServiceStatusCount]
 
   serviceContext(name: String!): ServiceContext
 
@@ -344,11 +344,11 @@ type RootQueryType {
 
   policyConstraint(id: ID!): PolicyConstraint
 
-  managedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
+  managedNamespaces(after: String, first: Int, before: String, last: Int, projectId: ID): ManagedNamespaceConnection
 
   globalService(id: ID!): GlobalService
 
-  globalServices(after: String, first: Int, before: String, last: Int): GlobalServiceConnection
+  globalServices(after: String, first: Int, before: String, last: Int, projectId: ID): GlobalServiceConnection
 
   clusterManagedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
 

@@ -449,6 +449,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :cluster_id, :id
       arg :q,          :string
       arg :status,     :service_deployment_status
+      arg :project_id, :id
 
       safe_resolve &Deployments.service_statuses/2
     end

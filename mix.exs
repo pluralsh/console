@@ -72,6 +72,7 @@ defmodule Console.MixProject do
       {:distillery, "~> 2.1"},
       {:libcluster, "~> 3.2"},
       {:horde, "~> 0.8"},
+      {:crontab, "~> 1.1"},
       {:tentacat, "~> 2.0"},
       {:absinthe_client, "~> 0.1.0"},
       {:postgrex, ">= 0.0.0"},

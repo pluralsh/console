@@ -15,11 +15,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
 
   def list_global_services(args, _) do
     GlobalService.ordered()
+    |> apply_filters(GlobalService, args)
     |> paginate(args)
   end
 
   def list_managed_namespaces(args, _) do
     ManagedNamespace.ordered()
+    |> apply_filters(ManagedNamespace, args)
     |> paginate(args)
   end
 
@@ -62,5 +64,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
   def sync_global_service(%{id: id}, %{context: %{current_user: user}}) do
     Global.get!(id)
     |> Global.sync(user)
+  end
+
+  defp apply_filters(query, schema, args) do
+    Enum.reduce(args, query, fn
+      {:project_id, id}, q when is_binary(id) -> schema.for_project(q, id)
+      _, q -> q
+    end)
   end
 end

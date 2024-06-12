@@ -70,6 +70,18 @@ defmodule Console.GraphQl.DeploymentMutationsTest do
         }
       """, %{"id" => cluster.id, "rbac" => %{"readBindings" => [%{"userId" => user.id}]}}, %{current_user: admin})
     end
+
+    test "it can update rbac for a pipeline" do
+      admin = admin_user()
+      user = insert(:user)
+      pipeline = insert(:pipeline)
+
+      {:ok, %{data: %{"updateRbac" => true}}} = run_query("""
+        mutation Rbac($id: ID!, $rbac: RbacAttributes!) {
+          updateRbac(pipelineId: $id, rbac: $rbac)
+        }
+      """, %{"id" => pipeline.id, "rbac" => %{"readBindings" => [%{"userId" => user.id}]}}, %{current_user: admin})
+    end
   end
 
   describe "createAgentMigration" do

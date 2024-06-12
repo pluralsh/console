@@ -5311,6 +5311,7 @@ export type RootQueryTypeClusterStackRunsArgs = {
 
 
 export type RootQueryTypeClusterStatusesArgs = {
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
 };
@@ -5429,6 +5430,7 @@ export type RootQueryTypeGlobalServicesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -5532,6 +5534,7 @@ export type RootQueryTypeManagedNamespacesArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -5953,6 +5956,7 @@ export type RootQueryTypeServiceDeploymentsArgs = {
 
 export type RootQueryTypeServiceStatusesArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
 };
@@ -6013,6 +6017,7 @@ export type RootQueryTypeUpgradePlanArgs = {
 
 
 export type RootQueryTypeUpgradeStatisticsArgs = {
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
 };

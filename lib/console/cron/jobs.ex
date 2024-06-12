@@ -4,6 +4,8 @@ defmodule Console.Cron.Jobs do
   alias Console.PubSub.BuildFailed
   require Logger
 
+  def noop(), do: Logger.info "hello world"
+
   def prune_builds() do
     Build.expired()
     |> Repo.delete_all()

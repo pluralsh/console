@@ -160,6 +160,7 @@ defmodule Console.GraphQl.Deployments.Global do
   object :global_queries do
     connection field :managed_namespaces, node_type: :managed_namespace do
       middleware Authenticated
+      arg :project_id, :id
 
       resolve &Deployments.list_managed_namespaces/2
     end
@@ -173,6 +174,7 @@ defmodule Console.GraphQl.Deployments.Global do
 
     connection field :global_services, node_type: :global_service do
       middleware Authenticated
+      arg :project_id, :id
 
       safe_resolve &Deployments.list_global_services/2
     end
