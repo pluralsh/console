@@ -40,7 +40,6 @@ export default function Subheader() {
 
   return (
     <SubheaderSC>
-      <ProjectSelect />
       <div css={{ display: 'flex', gap: theme.spacing.small }}>
         <IconFrame
           clickable
