@@ -311,6 +311,7 @@ type PodListProps = Omit<ComponentProps<typeof Table>, 'data'> & {
   refetch: Nullable<() => void>
   applications?: Maybe<Maybe<Application>[]>
   columns: any[]
+  linkToK8sDashboard?: boolean
   linkBasePath?: string
   clusterId?: string | null
   serviceId?: string | null
@@ -349,6 +350,7 @@ export const PodsList = memo(
     columns,
     clusterId,
     serviceId,
+    linkToK8sDashboard = false,
     linkBasePath = `/pods`,
     refetch,
     reactTableOptions: reactTableOptionsProp,
@@ -425,7 +427,7 @@ export const PodsList = memo(
           {...props}
           onRowClick={(_e, { original }: Row<PodTableRow>) =>
             navigate(
-              clusterId
+              clusterId && linkToK8sDashboard
                 ? `${getKubernetesAbsPath(clusterId)}/pods/${
                     original.namespace
                   }/${original.name}`

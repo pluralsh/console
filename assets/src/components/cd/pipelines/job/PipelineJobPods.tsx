@@ -65,6 +65,7 @@ export default function PipelineJobLogs() {
         <PodsList
           pods={podsWithId}
           clusterId={clusterId}
+          linkToK8sDashboard
           columns={columns}
           refetch={refetch}
           //   reactTableOptions={reactTableOptions}

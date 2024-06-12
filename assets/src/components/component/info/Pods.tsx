@@ -11,7 +11,12 @@ import {
 import { useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { SERVICE_PARAM_CLUSTER_ID } from '../../../routes/cdRoutesConsts'
+import {
+  SERVICE_PARAM_CLUSTER_ID,
+  getServicePodDetailsPath,
+} from '../../../routes/cdRoutesConsts'
+
+import { ComponentDetailsContext } from '../ComponentDetails'
 
 import { InfoSectionH2 } from './common'
 
@@ -32,8 +37,13 @@ const columns = [
 
 export default function Pods({ pods }) {
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
-  const { refetch, ...rest } = useOutletContext<any>()
+  const { refetch, component, ...rest } =
+    useOutletContext<ComponentDetailsContext>()
   const theme = useTheme()
+
+  const linkToK8sDashboard =
+    component.kind.toLowerCase() === 'job' ||
+    component.kind.toLowerCase() === 'cronjob'
 
   return (
     <div
@@ -49,9 +59,18 @@ export default function Pods({ pods }) {
       <PodsList
         pods={pods}
         columns={columns}
+        linkToK8sDashboard={linkToK8sDashboard}
         clusterId={clusterId}
         serviceId={rest?.serviceId}
         refetch={refetch}
+        {...(clusterId && rest?.serviceId
+          ? {
+              linkBasePath: getServicePodDetailsPath({
+                serviceId: rest?.serviceId,
+                clusterId,
+              }),
+            }
+          : {})}
       />
     </div>
   )
