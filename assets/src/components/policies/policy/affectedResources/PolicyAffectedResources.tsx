@@ -71,8 +71,6 @@ export default function PolicyAffectedResources({
                 namespace,
               })
 
-              console.log(path)
-
               if (path) navigate(path)
             }}
           />
