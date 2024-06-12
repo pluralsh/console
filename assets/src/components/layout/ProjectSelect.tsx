@@ -6,6 +6,8 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
+import { isEmpty } from 'lodash'
+
 import { useProjectsContext } from '../contexts/ProjectsContext'
 
 function ProjectIcon({ size = 16, color = '#C5C9D3' }) {
@@ -108,6 +110,7 @@ export default function ProjectSelect() {
             label={p.name}
             textValue={p.name}
             description={p.description}
+            selected={isEmpty(projectId)} // Show checkboxes next to all projects if that option is selected.
           />
         ))}
       </Select>
