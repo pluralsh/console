@@ -24,6 +24,8 @@ import { useComponentKindSelect } from 'components/apps/app/components/Component
 import { ComponentList } from 'components/apps/app/components/ComponentList'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import { isUnstructured } from 'components/component/ComponentInfo'
+
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
@@ -128,6 +130,7 @@ export default function ServiceComponents() {
               ? `${getServiceComponentPath({
                   clusterId,
                   serviceId,
+                  defaultRaw: isUnstructured(c.kind),
                   componentId: c.id,
                 })}`
               : undefined

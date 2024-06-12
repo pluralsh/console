@@ -165,7 +165,8 @@ export function ComponentDetails({
       navigate(`/cd/clusters/${service?.cluster?.id}/services/${service?.id}`)
     } else {
       navigate(
-        `/cd/clusters/${service?.cluster?.id}/services/${service?.id}/components/${component.id}/${filteredDirectory[0].path}`
+        `/cd/clusters/${service?.cluster?.id}/services/${service?.id}/components/${component.id}/${filteredDirectory[0].path}`,
+        { replace: true }
       )
     }
   }, [navigate, currentTab, filteredDirectory, service, component, cdView])

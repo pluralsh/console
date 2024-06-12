@@ -163,13 +163,15 @@ export function getClusterAddOnDetailsPath({
 
 export function getServiceComponentPath({
   componentId,
+  defaultRaw = false,
   ...props
 }: Parameters<typeof getServiceDetailsPath>[0] & {
   componentId: string | null | undefined
+  defaultRaw?: boolean
 }) {
   return `${getServiceDetailsPath({
     ...props,
-  })}/${SERVICE_COMPONENTS_PATH}/${componentId}`
+  })}/${SERVICE_COMPONENTS_PATH}/${componentId}${defaultRaw ? '/raw' : ''}`
 }
 
 export function getNodeDetailsPath({
