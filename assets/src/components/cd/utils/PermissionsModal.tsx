@@ -60,9 +60,15 @@ export function Permissions({
   )
 }
 
+export enum PermissionsIdType {
+  Cluster = 'clusterId',
+  Service = 'serviceId',
+  Pipeline = 'pipelineId',
+}
+
 export function PermissionsModal({
-  clusterId,
-  serviceId,
+  id,
+  type: idType,
   bindings,
   header,
   name,
@@ -70,8 +76,8 @@ export function PermissionsModal({
   onClose,
   refetch,
 }: {
-  clusterId?: string
-  serviceId?: string
+  id: string
+  type: PermissionsIdType
   bindings: {
     readBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
     writeBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
@@ -114,25 +120,27 @@ export function PermissionsModal({
   const onSubmit = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
-      if ((serviceId || clusterId) && readBindings && writeBindings) {
-        mutation({
-          variables: {
-            ...(clusterId ? { clusterId } : serviceId ? { serviceId } : {}),
-            rbac: {
-              readBindings: readBindings
-                ?.filter(isNonNullable)
-                .map(bindingToBindingAttributes),
-              writeBindings: writeBindings
-                ?.filter(isNonNullable)
-                .map(bindingToBindingAttributes),
-            },
+
+      if (!allowSubmit) return
+
+      mutation({
+        variables: {
+          [idType]: id,
+          rbac: {
+            readBindings: readBindings
+              ?.filter(isNonNullable)
+              .map(bindingToBindingAttributes),
+            writeBindings: writeBindings
+              ?.filter(isNonNullable)
+              .map(bindingToBindingAttributes),
           },
-        })
-      }
+        },
+      })
     },
-    [clusterId, mutation, readBindings, serviceId, writeBindings]
+    [allowSubmit, mutation, idType, id, readBindings, writeBindings]
   )
-  const forLabel = clusterId ? 'cluster' : serviceId ? 'service' : undefined
+  // idType expected to be in the form 'labelId'
+  const forLabel = idType.slice(0, -2)
 
   return (
     <Modal

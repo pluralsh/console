@@ -212,6 +212,21 @@ query Pipelines($q: String, $first: Int = 50, $after: String, $projectId: ID) {
   }
 }
 
+fragment PipelineBindings on Pipeline {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+query PipelineBindings($id: ID!) {
+  pipeline(id: $id) {
+    ...PipelineBindings
+  }
+}
+
 fragment PipelineGateJob on Job {
   events {
     action

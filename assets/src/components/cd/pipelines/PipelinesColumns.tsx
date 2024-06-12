@@ -1,4 +1,9 @@
-import { Chip } from '@pluralsh/design-system'
+import {
+  Chip,
+  ListBoxItem,
+  PeopleIcon,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { PipelineFragment } from 'generated/graphql'
@@ -6,11 +11,14 @@ import { useTheme } from 'styled-components'
 
 import { Edge } from 'utils/graphql'
 
-import { ComponentProps } from 'react'
+import { ComponentProps, useState } from 'react'
 
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
-import { DeletePipelineButton } from './DeletePipeline'
+import { MoreMenu } from 'components/utils/MoreMenu'
+
+import { DeletePipelineModal } from './DeletePipeline'
+import { PipelinePermissions } from './PipelinePermissions'
 
 export const columnHelper = createColumnHelper<Edge<PipelineFragment>>()
 
@@ -72,11 +80,18 @@ const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   },
 })
 
+enum MenuItemKey {
+  Permissions = 'permissions',
+  Delete = 'delete',
+}
+
 export const ColActions = columnHelper.display({
   id: 'actions',
   header: '',
   cell: function Cell({ row: { original } }) {
+    const theme = useTheme()
     const pipeline = original.node
+    const [menuKey, setMenuKey] = useState<Nullable<string>>('')
 
     if (!pipeline) {
       return null
@@ -87,7 +102,33 @@ export const ColActions = columnHelper.display({
         onClick={(e) => e.stopPropagation()}
         css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}
       >
-        <DeletePipelineButton pipeline={pipeline} />
+        <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+          <ListBoxItem
+            key={MenuItemKey.Permissions}
+            leftContent={<PeopleIcon />}
+            label="Permissions"
+            textValue="Permissions"
+          />
+          <ListBoxItem
+            key={MenuItemKey.Delete}
+            leftContent={
+              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+            }
+            label="Delete pipeline"
+            textValue="Delete pipeline"
+          />
+        </MoreMenu>
+        {/* Modals */}
+        <PipelinePermissions
+          pipeline={pipeline}
+          open={menuKey === MenuItemKey.Permissions}
+          onClose={() => setMenuKey('')}
+        />
+        <DeletePipelineModal
+          pipeline={pipeline}
+          open={menuKey === MenuItemKey.Delete}
+          onClose={() => setMenuKey('')}
+        />
       </div>
     )
   },

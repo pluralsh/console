@@ -6,7 +6,7 @@ import {
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { PermissionsModal } from '../utils/PermissionsModal'
+import { PermissionsIdType, PermissionsModal } from '../utils/PermissionsModal'
 
 function ServicePermissionsModal({
   serviceDeployment,
@@ -14,7 +14,7 @@ function ServicePermissionsModal({
   ...props
 }: Omit<
   ComponentProps<typeof PermissionsModal>,
-  'bindings' | 'clusterId' | 'serviceId' | 'header'
+  'bindings' | 'id' | 'type' | 'header'
 > & {
   header?: ReactNode
   serviceDeployment: ServiceDeploymentsRowFragment
@@ -32,10 +32,11 @@ function ServicePermissionsModal({
 
   return (
     <PermissionsModal
-      header={header || `Service permissions – ${serviceDeployment.name}`}
+      header={header || `Service permissions - ${serviceDeployment.name}`}
       name={serviceDeployment.name}
       bindings={bindings}
-      serviceId={serviceDeployment.id}
+      id={serviceDeployment.id}
+      type={PermissionsIdType.Service}
       refetch={refetch}
       {...props}
     />

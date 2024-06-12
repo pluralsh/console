@@ -2,10 +2,6 @@ import { useTheme } from 'styled-components'
 
 import { removeConnection, updateCache } from 'utils/graphql'
 
-import { DeleteIconButton } from 'components/utils/IconButtons'
-
-import { ComponentProps, useState } from 'react'
-
 import { Confirm } from '../../utils/Confirm'
 import {
   PipelineFragment,
@@ -13,7 +9,7 @@ import {
   useDeletePipelineMutation,
 } from '../../../generated/graphql'
 
-export function DeletePipeline({
+export function DeletePipelineModal({
   pipeline,
   open,
   onClose,
@@ -57,22 +53,5 @@ export function DeletePipeline({
         </>
       }
     />
-  )
-}
-
-export function DeletePipelineButton(
-  props: Omit<ComponentProps<typeof DeletePipeline>, 'open' | 'onClose'>
-) {
-  const [open, setOpen] = useState(false)
-
-  return (
-    <>
-      <DeleteIconButton onClick={() => setOpen(true)} />
-      <DeletePipeline
-        open={open}
-        onClose={() => setOpen(false)}
-        {...props}
-      />
-    </>
   )
 }

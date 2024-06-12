@@ -9,7 +9,7 @@ import {
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { PermissionsModal } from '../utils/PermissionsModal'
+import { PermissionsIdType, PermissionsModal } from '../utils/PermissionsModal'
 
 type Cluster = Pick<ClusterFragment, 'id' | 'name' | 'version'>
 
@@ -19,12 +19,12 @@ function ClusterPermissionsModalInner({
   ...props
 }: Omit<
   ComponentProps<typeof PermissionsModal>,
-  'bindings' | 'clusterId' | 'serviceId' | 'header'
+  'bindings' | 'id' | 'type' | 'header'
 > & {
   header?: ReactNode
   cluster: ClustersRowFragment
 }) {
-  const { data } = useClusterBindingsQuery({
+  const { data, refetch } = useClusterBindingsQuery({
     variables: { id: cluster.id },
     fetchPolicy: 'no-cache',
     skip: !cluster.id || !props.open,
@@ -37,10 +37,12 @@ function ClusterPermissionsModalInner({
 
   return (
     <PermissionsModal
-      header={header || `Cluster permissions – ${cluster.name}`}
+      header={header || `Cluster permissions - ${cluster.name}`}
       name={cluster.name}
       bindings={bindings}
-      clusterId={cluster.id}
+      id={cluster.id}
+      type={PermissionsIdType.Cluster}
+      refetch={refetch}
       {...props}
     />
   )
