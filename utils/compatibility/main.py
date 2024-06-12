@@ -28,7 +28,9 @@ else:
         if "names" in manifest:
             for name in manifest["names"]:
                 print(
-                    Fore.GREEN + f"Calling scraper for {name}" + Style.RESET_ALL
+                    Fore.GREEN
+                    + f"Calling scraper for {name}"
+                    + Style.RESET_ALL
                 )
                 call_scraper(name)
                 print("\n")

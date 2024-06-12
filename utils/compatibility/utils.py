@@ -31,7 +31,8 @@ def readYaml(file_path):
 
 
 # Custom YAML representer for lists that contain only strings
-# This is to ensure that lists of strings are represented as flow style e.g. [a, b, c]
+# This is to ensure that lists of strings are represented as flow style
+#  e.g. [a, b, c]
 def represent_kube_list(dumper, data):
     if isinstance(data, list) and all(isinstance(i, str) for i in data):
         return dumper.represent_sequence(
@@ -45,7 +46,8 @@ yaml.add_representer(list, represent_kube_list)
 
 
 # Custom YAML representer for OrderedDict
-# This is to ensure that OrderedDict is represented as a map and in the order of insertion
+# This is to ensure that OrderedDict is represented as a map
+# and in the order of insertion
 def represent_ordereddict(dumper, data):
     return dumper.represent_mapping("tag:yaml.org,2002:map", data.items())
 
@@ -69,7 +71,9 @@ def update_compatibility_info(filepath, new_versions):
                     existing_versions[version_num] = new_version
             data["versions"] = sort_versions(list(existing_versions.values()))
             with open(filepath, "w") as file:
-                yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+                yaml.dump(
+                    data, file, default_flow_style=False, sort_keys=False
+                )
             printSuccess(
                 "Updated compatibility info in" + Fore.CYAN + f" {filepath}"
             )
