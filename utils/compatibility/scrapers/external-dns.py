@@ -63,10 +63,7 @@ def scrape():
             version_info = OrderedDict(
                 [
                     ("version", tag_version),
-                    (
-                        "kube",
-                        kube_versions.copy(),
-                    ),  # Ensure a distinct copy of the list
+                    ("kube", kube_versions.copy()),
                     ("requirements", []),
                     ("incompatibilities", []),
                 ]
@@ -77,4 +74,4 @@ def scrape():
             "../../static/compatibilities/external-dns.yaml", rows
         )
     else:
-        printError("No tags found.")
+        printError("No release tags found.")
