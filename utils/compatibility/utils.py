@@ -1,4 +1,6 @@
 import yaml
+import requests
+
 from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
@@ -28,6 +30,16 @@ def readYaml(file_path):
     except Exception as e:
         printError(f"{e}")
     return None
+
+
+def fetch_page(url):
+    response = requests.get(url)
+    if response.status_code != 200:
+        printError(
+            f"Failed to fetch the page. Status code: {response.status_code}"
+        )
+        return None
+    return response.content
 
 
 # Custom YAML representer for lists that contain only strings

@@ -1,52 +1,58 @@
 # scrapers/ingress_nginx.py
 
-import requests
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import printError, update_compatibility_info
+from utils import printError, fetch_page, update_compatibility_info
+
+
+def parse_page(content):
+    soup = BeautifulSoup(content, "html.parser")
+    readme_section = soup.find(
+        "article", class_="markdown-body entry-content container-lg"
+    )
+    if not readme_section:
+        printError("Could not find the README section on the page.")
+        return None
+    return readme_section
+
+
+def extract_table_data(table):
+    rows = []
+    for row in table.find_all("tr")[1:]:  # Skip the header row
+        columns = row.find_all("td")
+        if len(columns) >= 3:  # Ensure there are enough columns
+            ingress_nginx_version = columns[1].get_text(strip=True).lstrip("v")
+            k8s_supported_versions = (
+                columns[2].get_text(strip=True).split(", ")
+            )
+            version_info = OrderedDict(
+                [
+                    ("version", ingress_nginx_version),
+                    ("kube", k8s_supported_versions),
+                    ("requirements", []),
+                    ("incompatibilities", []),
+                ]
+            )
+            rows.append(version_info)
+    return rows
 
 
 def scrape():
     url = "https://github.com/kubernetes/ingress-nginx"
-    response = requests.get(url)
-
-    if response.status_code != 200:
-        printError(
-            f"Failed to fetch the page. Status code: {response.status_code}"
-        )
+    page_content = fetch_page(url)
+    if not page_content:
         return
 
-    soup = BeautifulSoup(response.content, "html.parser")
-    readme_section = soup.find(
-        "article", class_="markdown-body entry-content container-lg"
-    )
-    if readme_section:
-        table = readme_section.find("table")
-        if table:
-            rows = []
-            for row in table.find_all("tr")[1:]:  # Skip the header row
-                columns = row.find_all("td")
-                if len(columns) >= 3:  # Ensure there are enough columns
-                    ingress_nginx_version = (
-                        columns[1].get_text(strip=True).lstrip("v")
-                    )
-                    k8s_supported_versions = (
-                        columns[2].get_text(strip=True).split(", ")
-                    )
-                    version_info = OrderedDict(
-                        [
-                            ("version", ingress_nginx_version),
-                            ("kube", k8s_supported_versions),
-                            ("requirements", []),
-                            ("incompatibilities", []),
-                        ]
-                    )
-                    rows.append(version_info)
+    readme_section = parse_page(page_content)
+    if not readme_section:
+        return
 
-            update_compatibility_info(
-                "../../static/compatibilities/ingress-nginx.yaml", rows
-            )
-        else:
-            printError("No table found in the README section.")
-    else:
-        printError("Could not find the README section on the page.")
+    table = readme_section.find("table")
+    if not table:
+        printError("No table found in the README section.")
+        return
+
+    rows = extract_table_data(table)
+    update_compatibility_info(
+        "../../static/compatibilities/ingress-nginx.yaml", rows
+    )
