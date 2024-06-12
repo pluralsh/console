@@ -15,6 +15,8 @@ import { useThrottle } from 'components/hooks/useThrottle'
 import isEmpty from 'lodash/isEmpty'
 import { extendConnection } from 'utils/graphql'
 
+import { useProjectId } from '../../contexts/ProjectsContext'
+
 export default function ClusterSelector({
   onClusterChange,
   clusterId,
@@ -29,6 +31,7 @@ export default function ClusterSelector({
   placeholder?: string
 }) {
   const theme = useTheme()
+  const projectId = useProjectId()
   const [inputValue, setInputValue] = useState('')
   const throttledInput = useThrottle(inputValue, 100)
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
@@ -38,7 +41,11 @@ export default function ClusterSelector({
     previousData,
     loading,
   } = useClusterSelectorQuery({
-    variables: { q: throttledInput || null, currentClusterId: clusterId },
+    variables: {
+      q: throttledInput || null,
+      currentClusterId: clusterId,
+      projectId,
+    },
     fetchPolicy: 'cache-and-network',
     errorPolicy: 'ignore',
   })

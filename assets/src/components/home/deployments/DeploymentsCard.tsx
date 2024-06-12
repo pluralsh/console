@@ -14,9 +14,12 @@ import pluralize from 'pluralize'
 import { Title2H1 } from '../../utils/typography/Text'
 import { HOME_CARD_MAX_HEIGHT } from '../HomeCard'
 
+import { useProjectId } from '../../contexts/ProjectsContext'
+
 import { DeploymentsTable } from './DeploymentsTable'
 
 export function DeploymentsCard() {
+  const projectId = useProjectId()
   const {
     data,
     loading,
@@ -33,6 +36,7 @@ export function DeploymentsCard() {
     },
     {
       status: ServiceDeploymentStatus.Failed,
+      projectId,
     }
   )
 

@@ -20,14 +20,13 @@ import { CursorPositionProvider } from '../utils/CursorPosition'
 
 import HelpLauncher from '../help/HelpLauncher'
 
+import { ProjectsProvider } from '../contexts/ProjectsContext'
+
 import Header from './Header'
 import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
-
-export const TOOLBAR_HEIGHT = '55px'
-export const SIDEBAR_WIDTH = '200px'
 
 export default function Console() {
   return (
@@ -35,21 +34,23 @@ export default function Console() {
       <MarkdocContextProvider value={{ variant: 'console' }}>
         <ConsoleNavContextProvider>
           <EnsureLogin>
-            <InstallationsProvider>
-              <PluralProvider>
-                <CommandPalette>
-                  <BillingSubscriptionProvider>
-                    <BreadcrumbsProvider>
-                      <TerminalThemeProvider>
-                        <DeploymentSettingsProvider>
-                          <ConsoleContent />
-                        </DeploymentSettingsProvider>
-                      </TerminalThemeProvider>
-                    </BreadcrumbsProvider>
-                  </BillingSubscriptionProvider>
-                </CommandPalette>
-              </PluralProvider>
-            </InstallationsProvider>
+            <ProjectsProvider>
+              <InstallationsProvider>
+                <PluralProvider>
+                  <CommandPalette>
+                    <BillingSubscriptionProvider>
+                      <BreadcrumbsProvider>
+                        <TerminalThemeProvider>
+                          <DeploymentSettingsProvider>
+                            <ConsoleContent />
+                          </DeploymentSettingsProvider>
+                        </TerminalThemeProvider>
+                      </BreadcrumbsProvider>
+                    </BillingSubscriptionProvider>
+                  </CommandPalette>
+                </PluralProvider>
+              </InstallationsProvider>
+            </ProjectsProvider>
           </EnsureLogin>
         </ConsoleNavContextProvider>
       </MarkdocContextProvider>

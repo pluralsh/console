@@ -1,0 +1,77 @@
+fragment Project on Project {
+  id
+  insertedAt
+  updatedAt
+  name
+  default
+  description
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+fragment ProjectTiny on Project {
+  id
+  name
+  default
+  description
+}
+
+query Projects(
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+  $q: String
+) {
+  projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Project
+      }
+    }
+  }
+}
+
+query ProjectsTiny(
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+  $q: String
+) {
+  projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ProjectTiny
+      }
+    }
+  }
+}
+
+query Project($id: ID, $name: String) {
+  project(id: $id, name: $name) {
+    ...Project
+  }
+}
+
+mutation CreateProject($attributes: ProjectAttributes!) {
+  createProject(attributes: $attributes) {
+    ...Project
+  }
+}
+
+mutation UpdateProject($id: ID!, $attributes: ProjectAttributes!) {
+  updateProject(id: $id, attributes: $attributes) {
+    ...Project
+  }
+}

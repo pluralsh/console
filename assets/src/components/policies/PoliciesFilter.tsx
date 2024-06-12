@@ -8,6 +8,8 @@ import { Flex } from 'honorable'
 import { Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 
+import { useProjectId } from '../contexts/ProjectsContext'
+
 function PoliciesFilter({
   selectedKinds,
   setSelectedKinds,
@@ -23,6 +25,7 @@ function PoliciesFilter({
   selectedClusters: (string | null)[]
   setSelectedClusters: Dispatch<SetStateAction<(string | null)[]>>
 }) {
+  const projectId = useProjectId()
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: {
       field: ConstraintViolationField.Kind,
@@ -36,6 +39,7 @@ function PoliciesFilter({
   const { data: clustersData } = useClustersQuery({
     variables: {
       first: 100,
+      projectId,
     },
   })
 

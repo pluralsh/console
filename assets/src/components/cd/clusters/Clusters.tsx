@@ -51,6 +51,8 @@ import { ClusterTagsFilter } from '../services/ClusterTagsFilter'
 
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
+import { useProjectId } from '../../contexts/ProjectsContext'
+
 import CreateCluster from './create/CreateCluster'
 import { DemoTable } from './ClustersDemoTable'
 import { ClustersGettingStarted } from './ClustersGettingStarted'
@@ -97,6 +99,7 @@ export const TableWrapperSC = styled(FullHeightTableWrap)<TableWrapperSCProps>(
 export default function Clusters() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const projectId = useProjectId()
   const cdIsEnabled = useCDEnabled()
   const tabStateRef = useRef<any>(null)
   const [statusFilter, setStatusFilter] = useState<ClusterStatusTabKey>('ALL')
@@ -132,6 +135,7 @@ export default function Clusters() {
     },
     {
       q: debouncedSearchString,
+      projectId,
       ...(statusFilter !== 'ALL'
         ? { healthy: statusFilter === 'HEALTHY' }
         : {}),

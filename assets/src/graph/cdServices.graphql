@@ -150,6 +150,7 @@ query ServiceDeployments(
   $cluster: String
   $clusterId: ID
   $status: ServiceDeploymentStatus
+  $projectId: ID
 ) {
   serviceDeployments(
     first: $first
@@ -158,6 +159,7 @@ query ServiceDeployments(
     cluster: $cluster
     clusterId: $clusterId
     status: $status
+    projectId: $projectId
   ) {
     pageInfo {
       ...PageInfo
@@ -173,8 +175,8 @@ query ServiceDeployments(
   }
 }
 
-query ServiceDeploymentsTiny($clusterId: ID) {
-  serviceDeployments(first: 100, clusterId: $clusterId) {
+query ServiceDeploymentsTiny($clusterId: ID, $projectId: ID) {
+  serviceDeployments(first: 100, clusterId: $clusterId, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }

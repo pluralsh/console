@@ -8,9 +8,10 @@ import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessag
 import CommandPaletteLauncher from 'components/CommandPaletteLauncher'
 
 import DemoBanner from './DemoBanner'
+import ProjectSelect from './ProjectSelect'
 
-const APP_ICON_LIGHT = '/header-logo-light.png'
-const APP_ICON_DARK = '/header-logo-dark.png'
+const APP_ICON_LIGHT = '/console-logo.png'
+const APP_ICON_DARK = '/console-white.png'
 
 const HeaderSC = styled.div(({ theme }) => ({
   backgroundColor:
@@ -27,7 +28,7 @@ const HeaderContentSC = styled.div(({ theme }) => ({
 
 const LogoSC = styled.img(({ theme }) => ({
   cursor: 'pointer',
-  marginLeft: -2.0 /* Optically center with sidebar buttons */,
+  marginLeft: -7 /* Optically center with sidebar buttons */,
   height: 32,
   marginTop: theme.spacing.xxsmall,
   marginBottom: theme.spacing.xxsmall,
@@ -46,6 +47,7 @@ export default function Header() {
           alt="Plural console"
           onClick={() => navigate('/')}
         />
+        <ProjectSelect />
         <Flex grow={1} />
         <BillingLegacyUserMessage />
         <BillingSubscriptionChip />

@@ -69,6 +69,7 @@ import AppStatus from './apps/AppStatus'
 import { getIcon, hasIcons } from './apps/misc'
 import { HelpMenuState, launchHelp } from './help/HelpLauncher'
 import { usePlatform } from './hooks/usePlatform'
+import { useProjectId } from './contexts/ProjectsContext'
 
 export enum PaletteSection {
   Actions = 'Actions',
@@ -442,10 +443,12 @@ function RenderResults() {
 
 function useActions() {
   const theme = useTheme()
+  const projectId = useProjectId()
   const { applications } = useContext(InstallationContext) as any
   const { data: clustersData } = useClustersTinyQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
+    variables: { projectId },
   })
   const clusterEdges = clustersData?.clusters?.edges
 

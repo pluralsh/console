@@ -135,6 +135,7 @@ query Stacks(
   $before: String
   $first: Int = 100
   $last: Int
+  $projectId: ID
 ) {
   infrastructureStacks(
     q: $q
@@ -142,6 +143,7 @@ query Stacks(
     before: $before
     first: $first
     last: $last
+    projectId: $projectId
   ) {
     pageInfo {
       ...PageInfo

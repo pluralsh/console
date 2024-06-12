@@ -5,7 +5,6 @@ import {
   IconFrame,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
-
 import styled, { useTheme } from 'styled-components'
 
 const SubheaderSC = styled.div(({ theme }) => ({
@@ -17,7 +16,7 @@ const SubheaderSC = styled.div(({ theme }) => ({
   minHeight: 48,
   paddingLeft: theme.spacing.large,
   paddingRight: theme.spacing.large,
-  gap: theme.spacing.large,
+  gap: theme.spacing.medium,
 }))
 
 const BreadcrumbsContainerSC = styled.div(({ theme }) => ({
