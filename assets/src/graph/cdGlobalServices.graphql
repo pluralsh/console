@@ -2,6 +2,9 @@ fragment GlobalService on GlobalService {
   id
   distro
   name
+  project {
+    name
+  }
   cascade {
     delete
     detach
@@ -47,8 +50,8 @@ mutation DeleteGlobalService($id: ID!) {
   }
 }
 
-query GetGlobalServices($first: Int, $after: String) {
-  globalServices(first: $first, after: $after) {
+query GlobalServices($first: Int, $after: String, $projectId: ID) {
+  globalServices(first: $first, after: $after, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }

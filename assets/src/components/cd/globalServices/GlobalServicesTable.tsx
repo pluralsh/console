@@ -5,13 +5,15 @@ import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
 import {
   type ServiceDeploymentsRowFragment,
-  useGetGlobalServicesQuery,
+  useGlobalServicesQuery,
 } from 'generated/graphql'
 import { getGlobalServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
+
+import { useProjectId } from 'components/contexts/ProjectsContext'
 
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
@@ -28,6 +30,7 @@ export function GlobalServicesTable({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
+  const projectId = useProjectId()
 
   const {
     data,
@@ -37,11 +40,14 @@ export function GlobalServicesTable({
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useGetGlobalServicesQuery,
-    pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
-    queryKey: 'globalServices',
-  })
+  } = useFetchPaginatedData(
+    {
+      queryHook: useGlobalServicesQuery,
+      pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
+      queryKey: 'globalServices',
+    },
+    { projectId }
+  )
 
   useEffect(() => {
     setRefetch?.(() => refetch)

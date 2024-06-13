@@ -10,6 +10,9 @@ fragment ManagedNamespace on ManagedNamespace {
   insertedAt
   labels
   name
+  project {
+    name
+  }
   pullSecrets
   target {
     distro
@@ -60,8 +63,8 @@ fragment ServiceTemplate on ServiceTemplate {
   templated
 }
 
-query ManagedNamespaces($first: Int, $after: String) {
-  managedNamespaces(first: $first, after: $after) {
+query ManagedNamespaces($first: Int, $after: String, $projectId: ID) {
+  managedNamespaces(first: $first, after: $after, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }

@@ -12,6 +12,7 @@ import {
   ColLabels,
   ColLastActivity,
   ColName,
+  ColProject,
 } from './NamespacesColumns'
 import { NamespacesTable } from './NamespacesTable'
 
@@ -39,7 +40,13 @@ export const NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const columns = [ColName, ColAnnotations, ColLabels, ColLastActivity]
+export const columns = [
+  ColName,
+  ColAnnotations,
+  ColLabels,
+  ColProject,
+  ColLastActivity,
+]
 
 const crumbs = [
   ...CD_BASE_CRUMBS,

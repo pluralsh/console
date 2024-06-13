@@ -67,7 +67,6 @@ export const ColTags = columnHelper.accessor(({ node }) => node, {
   header: 'Tags',
   meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
   cell: ({ getValue }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const svc = getValue()
 
     const tags = svc?.tags
@@ -77,6 +76,15 @@ export const ColTags = columnHelper.accessor(({ node }) => node, {
     return tags || ''
   },
 })
+
+export const ColProject = columnHelper.accessor(
+  ({ node }) => node?.project?.name,
+  {
+    id: 'project',
+    header: 'Project',
+    meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
+  }
+)
 
 export const ColLastActivity = columnHelper.accessor(
   ({ node }) => {

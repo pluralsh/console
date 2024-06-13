@@ -40,7 +40,6 @@ export const ColLabels = columnHelper.accessor(({ node }) => node, {
   header: 'Labels',
   meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
   cell: ({ getValue }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const namespace = getValue()
 
     const labels = Object.keys(namespace?.labels || {})
@@ -51,12 +50,20 @@ export const ColLabels = columnHelper.accessor(({ node }) => node, {
   },
 })
 
+export const ColProject = columnHelper.accessor(
+  ({ node }) => node?.project?.name,
+  {
+    id: 'project',
+    header: 'Project',
+    meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
+  }
+)
+
 export const ColAnnotations = columnHelper.accessor(({ node }) => node, {
   id: 'annotations',
   header: 'Annotations',
   meta: { truncate: true, gridTemplate: 'minmax(150px,1fr)' },
   cell: ({ getValue }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const namespace = getValue()
 
     const annotations = Object.keys(namespace?.annotations || {})
