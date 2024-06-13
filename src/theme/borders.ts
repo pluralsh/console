@@ -24,5 +24,4 @@ export const borders = {
 export const borderRadiuses = {
   medium: 3,
   large: 6,
-  normal: 3, // deprecated in favor of medium
 } as const satisfies Record<string, number>

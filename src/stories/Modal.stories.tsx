@@ -154,8 +154,6 @@ const NonScrollCode = styled(Code)((_) => ({
 function NonScrollTemplate(args: any) {
   const [open, setOpen] = useState(false)
 
-  console.log('args', args)
-
   return (
     <>
       <H3 marginBottom={8}>{args.header} Modal</H3>

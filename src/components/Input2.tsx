@@ -128,7 +128,7 @@ const InputRootSC = styled.div<{
   borderColor: $error
     ? theme.colors['border-danger']
     : theme.colors['border-input'],
-  borderRadius: theme.borderRadiuses.normal,
+  borderRadius: theme.borderRadiuses.medium,
   '&:focus-within': {
     borderColor: theme.colors['border-outline-focused'],
   },

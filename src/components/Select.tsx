@@ -50,6 +50,7 @@ type SelectButtonProps = {
   showArrow?: boolean
   isOpen?: boolean
   size?: Size
+  transparent?: boolean
 }
 
 export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
@@ -101,42 +102,57 @@ function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
 export const TitleContent = styled.div<{
   $size: Size
   $parentFillLevel: FillLevel
-}>(({ theme, $size: size, $parentFillLevel: parentFillLevel }) => {
-  const hPad = theme.spacing.small
-  const vPad = size === 'small' ? 5 : 9
+  $matchFill?: boolean
+}>(
+  ({
+    theme,
+    $size: size,
+    $parentFillLevel: parentFillLevel,
+    $matchFill: matchFill = false,
+  }) => {
+    const hPad = theme.spacing.small
+    const vPad = size === 'small' ? 5 : 9
 
-  return {
-    ...theme.partials.text.caption,
-    alignItems: 'center',
-    backgroundColor:
-      theme.colors[parentFillLevel < 2 ? 'fill-three' : 'fill-three-selected'],
-    color: theme.colors.text,
-    display: 'flex',
-    flexDirection: 'row',
-    fontWeight: 600,
-    // Must specify individual padding to override Honorable styles on <Input>
-    paddingTop: vPad,
-    paddingBottom: vPad,
-    paddingLeft: hPad,
-    paddingRight: hPad,
-    borderRight: theme.borders.input,
+    return {
+      ...theme.partials.text.caption,
+      alignItems: 'center',
+      backgroundColor: matchFill
+        ? theme.colors[parentFillLevelToBackground[parentFillLevel]]
+        : theme.colors[
+            parentFillLevel < 2 ? 'fill-three' : 'fill-three-selected'
+          ],
+      color: theme.colors.text,
+      display: 'flex',
+      flexDirection: 'row',
+      fontWeight: 600,
+      // Must specify individual padding to override Honorable styles on <Input>
+      paddingTop: vPad,
+      paddingBottom: vPad,
+      paddingLeft: hPad,
+      paddingRight: hPad,
+      borderRight: theme.borders.input,
+    }
   }
-})
+)
 
 const SelectButtonInner = styled.div<{
   $isOpen: boolean
   $size: Size
   $parentFillLevel: FillLevel
+  $transparent?: boolean
 }>(
   ({
     theme,
     $isOpen: isOpen,
     $size: size,
     $parentFillLevel: parentFillLevel,
+    $transparent: transparent = false,
   }) => ({
     ...theme.partials.reset.button,
     ...theme.partials.text.body2,
-    backgroundColor: theme.colors[parentFillLevelToBackground[parentFillLevel]],
+    backgroundColor: transparent
+      ? 'transparent'
+      : theme.colors[parentFillLevelToBackground[parentFillLevel]],
     display: 'flex',
     flexDirection: 'row',
     flexShrink: 1,
@@ -176,6 +192,10 @@ const SelectButtonInner = styled.div<{
     '&:focus-visible': {
       ...theme.partials.focus.default,
     },
+    '&:hover': {
+      color: theme.colors.text,
+      cursor: 'pointer',
+    },
   })
 )
 
@@ -192,6 +212,7 @@ const SelectButton = forwardRef<
       showArrow = true,
       isOpen,
       size = 'medium',
+      transparent = false,
       ...props
     },
     ref
@@ -204,12 +225,14 @@ const SelectButton = forwardRef<
         $isOpen={isOpen}
         $size={size}
         $parentFillLevel={parentFillLevel}
+        $transparent={transparent}
         {...props}
       >
         {titleContent && (
           <TitleContent
             $size={size}
             $parentFillLevel={parentFillLevel}
+            $matchFill={transparent}
           >
             {titleContent}
           </TitleContent>
@@ -271,6 +294,7 @@ function Select({
   size = 'medium',
   width,
   maxHeight,
+  transparent = false,
   ...props
 }: SelectProps) {
   const stateRef = useRef<BimodalSelectState<object> | null>(null)
@@ -326,6 +350,7 @@ function Select({
       isOpen={state.isOpen}
       showArrow={!props.isDisabled}
       size={size}
+      transparent={transparent}
     >
       {(props.selectionMode === 'multiple' &&
         state.selectedItems.length > 0 &&
