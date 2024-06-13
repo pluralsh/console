@@ -145,6 +145,7 @@ defmodule Console.Schema.StackRun do
     |> cast(attrs, ~w(status cancellation_reason)a)
     |> cast_assoc(:state)
     |> cast_assoc(:output)
+    |> cast_assoc(:errors)
     |> validate_required(~w(status)a)
   end
 

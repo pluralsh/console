@@ -49,6 +49,59 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       assert file["path"] == "test"
       assert file["content"] == "test"
     end
+
+    test "it can create a stack for a project" do
+      project = insert(:project)
+      repo = insert(:git_repository)
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"createStack" => found}}} = run_query("""
+        mutation Create($attrs: StackAttributes!) {
+          createStack(attributes: $attrs) {
+            id
+            name
+            type
+            cluster { id }
+            repository { id }
+            git { ref folder }
+            project { id name }
+            configuration { version }
+            environment { name value secret }
+            files { path content }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "some-stack",
+        "type" => "TERRAFORM",
+        "repositoryId" => repo.id,
+        "clusterId" => cluster.id,
+        "projectId" => project.id,
+        "git" => %{"ref" => "main", "folder" => "terraform"},
+        "configuration" => %{"version" => "1.7.0"},
+        "environment" => [%{"secret" => true, "name" => "TEST_ENV_VAR", "value" => "dummy"}],
+        "files" => [%{"path" => "test", "content" => "test"}]
+      }}, %{current_user: admin_user()})
+
+      assert found["id"]
+      assert found["name"] == "some-stack"
+      assert found["type"] == "TERRAFORM"
+      assert found["repository"]["id"] == repo.id
+      assert found["cluster"]["id"] == cluster.id
+      assert found["project"]["id"] == project.id
+      assert found["project"]["name"] == project.name
+      assert found["git"]["ref"] == "main"
+      assert found["git"]["folder"] == "terraform"
+      assert found["configuration"]["version"] == "1.7.0"
+
+      [env] = found["environment"]
+      assert env["name"] == "TEST_ENV_VAR"
+      assert env["value"] == "dummy"
+      assert env["secret"]
+
+      [file] = found["files"]
+      assert file["path"] == "test"
+      assert file["content"] == "test"
+    end
   end
 
   describe "updateStack" do

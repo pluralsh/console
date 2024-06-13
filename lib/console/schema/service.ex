@@ -183,8 +183,8 @@ defmodule Console.Schema.Service do
 
   def for_project(query \\ __MODULE__, pid) do
     from(s in query,
-      join: p in assoc(s, :project),
-      where: s.project_id == ^pid
+      join: c in assoc(s, :cluster),
+      where: c.project_id == ^pid
     )
   end
 

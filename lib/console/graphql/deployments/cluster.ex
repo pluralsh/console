@@ -602,8 +602,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "gets summary information for all healthy/unhealthy clusters in your fleet"
     field :cluster_statuses, list_of(:cluster_status_info) do
       middleware Authenticated
-      arg :q,      :string
-      arg :tag,    :tag_input
+      arg :q,          :string
+      arg :tag,        :tag_input
+      arg :project_id, :id
 
       resolve &Deployments.cluster_statuses/2
     end
@@ -611,8 +612,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "gets summary information for upgradeability in your fleet"
     field :upgrade_statistics, :upgrade_statistics do
       middleware Authenticated
-      arg :q,      :string
-      arg :tag,    :tag_input
+      arg :q,          :string
+      arg :tag,        :tag_input
+      arg :project_id, :id
 
       resolve &Deployments.upgrade_statistics/2
     end

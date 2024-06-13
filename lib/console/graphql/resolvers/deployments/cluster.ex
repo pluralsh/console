@@ -10,14 +10,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
-  def resolve_cluster(%{handle: handle}, %{context: %{current_user: user}}) do
+  def resolve_cluster(%{handle: handle}, %{context: %{current_user: user}}) when is_binary(handle) do
     Clusters.find!(handle)
     |> allow(user, :view)
   end
-  def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) do
+  def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
     Clusters.get_cluster(id)
     |> allow(user, :view)
   end
+  def resolve_cluster(_, _), do: {:error, "must provide either handle or id"}
 
   def resolve_runtime_service(%{id: id}, %{context: %{current_user: user}}) do
     Clusters.get_runtime_service(id)

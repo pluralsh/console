@@ -25,6 +25,10 @@ defmodule Console.Schema.GlobalService do
     timestamps()
   end
 
+  def for_project(query \\ __MODULE__, id) do
+    from(g in query, where: g.project_id == ^id)
+  end
+
   def service_ids(query \\ __MODULE__, id) do
     from(g in query,
       join: s in Service,

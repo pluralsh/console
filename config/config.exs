@@ -104,6 +104,10 @@ config :console, Console.PartitionedCache,
     allocated_memory: 1000 * 1000 * 500
   ]
 
+config :console, Console.Cron.Scheduler,
+  # overlap: false,
+  jobs: [{"* * * * *", {Console.Cron.Jobs, :noop, []}}]
+
 config :console, :login_link, []
 
 config :hammer,

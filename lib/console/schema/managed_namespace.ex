@@ -47,6 +47,10 @@ defmodule Console.Schema.ManagedNamespace do
     timestamps()
   end
 
+  def for_project(query \\ __MODULE__, id) do
+    from(g in query, where: g.project_id == ^id)
+  end
+
   def for_cluster(query \\ __MODULE__, %Cluster{} = cluster) do
     cluster = Console.Repo.preload(cluster, [:tags])
     tags = Map.new(cluster.tags, & {&1.name, &1.value})

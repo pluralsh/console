@@ -22,7 +22,7 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Notifications,
 ]
 
-config :console, Console.Cron,
+config :console, Console.Cron.Scheduler,
   # overlap: false,
   jobs: [
     {"@daily", {Console.Cron.Jobs, :prune_builds, []}},

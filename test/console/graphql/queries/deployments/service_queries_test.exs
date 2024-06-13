@@ -21,6 +21,26 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       assert Enum.all?(found, & &1["name"])
     end
 
+    test "it can list services by project" do
+      project = insert(:project)
+      insert_list(3, :service)
+      services = for _ <- 1..3,
+        do: insert(:service, cluster: insert(:cluster, project: project))
+
+      {:ok, %{data: %{"serviceDeployments" => found}}} = run_query("""
+        query Services($projectId: ID!) {
+          serviceDeployments(projectId: $projectId, first: 5) {
+            edges { node { id name } }
+          }
+        }
+      """, %{"projectId" => project.id}, %{current_user: admin_user()})
+
+      found = from_connection(found)
+
+      assert ids_equal(found, services)
+      assert Enum.all?(found, & &1["name"])
+    end
+
     test "it can sideload helm repositories" do
       cluster = insert(:cluster)
       services = insert_list(3, :service, cluster: cluster)

@@ -221,7 +221,7 @@ defmodule Console.Deployments.Stacks do
     start_transaction()
     |> add_operation(:run, fn _ ->
       get_run!(id)
-      |> Repo.preload([:state, :output])
+      |> Repo.preload([:state, :output, :errors])
       |> StackRun.complete_changeset(attrs)
       |> allow(actor, :write)
       |> when_ok(:update)

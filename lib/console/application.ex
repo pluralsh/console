@@ -22,7 +22,7 @@ defmodule Console.Application do
       ConsoleWeb.Endpoint,
       Console.Plural.Config,
       Console.Features,
-      Console.Cron,
+      Console.Cron.Scheduler,
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Stacks.Worker.registry()]},
