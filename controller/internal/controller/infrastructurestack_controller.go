@@ -110,9 +110,21 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		return requeue, nil
 	}
 	project := &v1alpha1.Project{}
-	if err := r.Get(ctx, client.ObjectKey{Name: stack.ProjectName()}, project); client.IgnoreNotFound(err) != nil {
-		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+	if stack.HasProjectRef() {
+		if err := r.Get(ctx, client.ObjectKey{Name: stack.ProjectName()}, project); err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return requeue, err
+		}
+
+		if project.Status.ID == nil {
+			logger.Info("Project is not ready")
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
+			return requeue, nil
+		}
+
+		if err := controllerutil.SetOwnerReference(project, stack, r.Scheme); err != nil {
+			return requeue, fmt.Errorf("could not set stack owner reference, got error: %+v", err)
+		}
 	}
 
 	sha, err := utils.HashObject(stack.Spec)

@@ -169,6 +169,10 @@ func (p *InfrastructureStack) ProjectName() string {
 	return p.Spec.ProjectRef.Name
 }
 
+func (p *InfrastructureStack) HasProjectRef() bool {
+	return p.Spec.ProjectRef != nil
+}
+
 func (p *InfrastructureStack) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&p.Status.Conditions, condition)
 }

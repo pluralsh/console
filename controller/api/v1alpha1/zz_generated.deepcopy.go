@@ -1307,6 +1307,11 @@ func (in *GlobalServiceSpec) DeepCopyInto(out *GlobalServiceSpec) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.ProjectRef != nil {
+		in, out := &in.ProjectRef, &out.ProjectRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	if in.Template != nil {
 		in, out := &in.Template, &out.Template
 		*out = new(ServiceTemplate)
@@ -1639,6 +1644,11 @@ func (in *ManagedNamespaceSpec) DeepCopyInto(out *ManagedNamespaceSpec) {
 		in, out := &in.Target, &out.Target
 		*out = new(ClusterTarget)
 		(*in).DeepCopyInto(*out)
+	}
+	if in.ProjectRef != nil {
+		in, out := &in.ProjectRef, &out.ProjectRef
+		*out = new(v1.ObjectReference)
+		**out = **in
 	}
 }
 

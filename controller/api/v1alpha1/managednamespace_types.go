@@ -48,6 +48,10 @@ type ManagedNamespaceSpec struct {
 	Service *ServiceTemplate `json:"service,omitempty"`
 	// +kubebuilder:validation:Optional
 	Target *ClusterTarget `json:"target,omitempty"`
+
+	// ProjectRef allows a managed namespace to span a specific project only
+	// +kubebuilder:validation:Optional
+	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 }
 
 // A spec for targeting clusters

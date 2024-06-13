@@ -111,7 +111,7 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if err != nil {
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
+			return requeue, err
 		}
 		_, err = r.ConsoleClient.UpdateNamespace(ctx, managedNamespace.Status.GetID(), *attr)
 		if err != nil {
@@ -175,6 +175,7 @@ func (r *ManagedNamespaceReconciler) isAlreadyExists(ctx context.Context, namesp
 }
 
 func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context, ns *v1alpha1.ManagedNamespace) (*console.ManagedNamespaceAttributes, error) {
+	logger := log.FromContext(ctx)
 	attr := &console.ManagedNamespaceAttributes{
 		Name:        ns.NamespaceName(),
 		Description: ns.Spec.Description,
@@ -235,6 +236,26 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		}
 		attr.Service = st
 	}
+
+	project := &v1alpha1.Project{}
+	if ns.Spec.ProjectRef != nil {
+		if err := r.Get(ctx, client.ObjectKey{Name: ns.Spec.ProjectRef.Name}, project); err != nil {
+			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return nil, err
+		}
+
+		if project.Status.ID == nil {
+			logger.Info("Project is not ready")
+			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
+			return nil, nil
+		}
+
+		if err := controllerutil.SetOwnerReference(project, ns, r.Scheme); err != nil {
+			return nil, fmt.Errorf("could not set global service owner reference, got error: %+v", err)
+		}
+	}
+
+	attr.ProjectID = project.Status.ID
 
 	return attr, nil
 }

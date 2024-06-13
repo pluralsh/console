@@ -127,12 +127,32 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 	}
 
+	project := &v1alpha1.Project{}
+	if globalService.Spec.ProjectRef != nil {
+		if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ProjectRef.Name}, project); err != nil {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return requeue, err
+		}
+
+		if project.Status.ID == nil {
+			logger.Info("Project is not ready")
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
+			return requeue, nil
+		}
+
+		if err := controllerutil.SetOwnerReference(project, globalService, r.Scheme); err != nil {
+			return requeue, fmt.Errorf("could not set global service owner reference, got error: %+v", err)
+		}
+	}
+
 	attr := console.GlobalServiceAttributes{
 		Name:       globalService.Name,
 		Distro:     globalService.Spec.Distro,
 		ProviderID: provider.Status.ID,
+		ProjectID:  project.Status.ID,
 		Reparent:   globalService.Spec.Reparent,
 	}
+
 	if globalService.Spec.Template != nil {
 		namespace := globalService.GetNamespace()
 		repository, err := r.getRepository(ctx, globalService)

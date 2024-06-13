@@ -63,6 +63,11 @@ type GlobalServiceSpec struct {
 	// ProviderRef apply to clusters with this provider
 	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
+
+	// ProjectRef allows a global service to span a specific project only
+	// +kubebuilder:validation:Optional
+	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Template *ServiceTemplate `json:"template,omitempty"`
 }

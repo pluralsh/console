@@ -209,6 +209,10 @@ func (p *Pipeline) ProjectName() string {
 	return p.Spec.ProjectRef.Name
 }
 
+func (p *Pipeline) HasProjectRef() bool {
+	return p.Spec.ProjectRef != nil
+}
+
 // PipelineList contains a list of Pipeline
 // +kubebuilder:object:root=true
 type PipelineList struct {
