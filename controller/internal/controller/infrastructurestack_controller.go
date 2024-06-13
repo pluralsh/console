@@ -23,9 +23,6 @@ import (
 	"github.com/pluralsh/console/controller/internal/cache"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -37,6 +34,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/utils"
 )
 
 const InfrastructureStackFinalizer = "deployments.plural.sh/stack-protection"
@@ -108,6 +109,11 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		logger.Info("Repository is not healthy")
 		return requeue, nil
 	}
+	project := &v1alpha1.Project{}
+	if err := r.Get(ctx, client.ObjectKey{Name: stack.ProjectName()}, project); client.IgnoreNotFound(err) != nil {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return requeue, err
+	}
 
 	sha, err := utils.HashObject(stack.Spec)
 	if err != nil {
@@ -121,7 +127,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 	if !exists {
 		logger.Info("create stack", "name", stack.StackName())
-		attr, err := r.getStackAttributes(ctx, stack, *cluster.Status.ID, *repository.Status.ID)
+		attr, err := r.getStackAttributes(ctx, stack, *cluster.Status.ID, *repository.Status.ID, project.Status.ID)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -138,7 +144,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 	if exists && !stack.Status.IsSHAEqual(sha) {
 		logger.Info("update stack", "name", stack.StackName())
-		attr, err := r.getStackAttributes(ctx, stack, *cluster.Status.ID, *repository.Status.ID)
+		attr, err := r.getStackAttributes(ctx, stack, *cluster.Status.ID, *repository.Status.ID, project.Status.ID)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -216,12 +222,13 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 	return ctrl.Result{}, nil
 }
 
-func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, stack *v1alpha1.InfrastructureStack, clusterID, repositoryID string) (*console.StackAttributes, error) {
+func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, stack *v1alpha1.InfrastructureStack, clusterID, repositoryID string, projectID *string) (*console.StackAttributes, error) {
 	attr := &console.StackAttributes{
 		Name:         stack.StackName(),
 		Type:         stack.Spec.Type,
 		RepositoryID: repositoryID,
 		ClusterID:    clusterID,
+		ProjectID:    projectID,
 		ManageState:  stack.Spec.ManageState,
 		Workdir:      stack.Spec.Workdir,
 		Git: console.GitRefAttributes{

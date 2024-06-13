@@ -31,6 +31,11 @@ type PipelineSpec struct {
 
 	// Edges of a pipeline.
 	Edges []PipelineEdge `json:"edges,omitempty"`
+
+	// ProjectRef references project this stack belongs to.
+	// If not provided, it will use the default project.
+	// +kubebuilder:validation:Optional
+	ProjectRef *v1.ObjectReference `json:"projectRef,omitempty"`
 }
 
 // PipelineStage defines the Pipeline stage.
@@ -194,6 +199,14 @@ type Pipeline struct {
 
 func (p *Pipeline) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&p.Status.Conditions, condition)
+}
+
+func (p *Pipeline) ProjectName() string {
+	if p.Spec.ProjectRef == nil {
+		return ""
+	}
+
+	return p.Spec.ProjectRef.Name
 }
 
 // PipelineList contains a list of Pipeline

@@ -34,10 +34,16 @@ type InfrastructureStackSpec struct {
 	Type console.StackType `json:"type"`
 
 	// RepositoryRef to source IaC from
+	// +kubebuilder:validation:Required
 	RepositoryRef corev1.ObjectReference `json:"repositoryRef"`
 
 	// +kubebuilder:validation:Required
 	ClusterRef corev1.ObjectReference `json:"clusterRef"`
+
+	// ProjectRef references project this stack belongs to.
+	// If not provided, it will use the default project.
+	// +kubebuilder:validation:Optional
+	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
 	// Git reference w/in the repository where the IaC lives
 	Git GitRef `json:"git"`
@@ -153,6 +159,14 @@ func (p *InfrastructureStack) StackName() string {
 	}
 
 	return p.Name
+}
+
+func (p *InfrastructureStack) ProjectName() string {
+	if p.Spec.ProjectRef == nil {
+		return ""
+	}
+
+	return p.Spec.ProjectRef.Name
 }
 
 func (p *InfrastructureStack) SetCondition(condition metav1.Condition) {

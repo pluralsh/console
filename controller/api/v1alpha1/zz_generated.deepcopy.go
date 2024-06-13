@@ -1418,6 +1418,11 @@ func (in *InfrastructureStackSpec) DeepCopyInto(out *InfrastructureStackSpec) {
 	}
 	out.RepositoryRef = in.RepositoryRef
 	out.ClusterRef = in.ClusterRef
+	if in.ProjectRef != nil {
+		in, out := &in.ProjectRef, &out.ProjectRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	in.Git.DeepCopyInto(&out.Git)
 	if in.ManageState != nil {
 		in, out := &in.ManageState, &out.ManageState
@@ -2060,6 +2065,11 @@ func (in *PipelineSpec) DeepCopyInto(out *PipelineSpec) {
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
+	}
+	if in.ProjectRef != nil {
+		in, out := &in.ProjectRef, &out.ProjectRef
+		*out = new(v1.ObjectReference)
+		**out = **in
 	}
 }
 
