@@ -50,6 +50,10 @@ func (c *client) UpdateCluster(id string, attrs console.ClusterUpdateAttributes)
 }
 
 func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
+	if id == nil {
+		return nil, errors.NewNotFound(schema.GroupResource{}, "")
+	}
+
 	response, err := c.consoleClient.GetCluster(c.ctx, id)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, *id)

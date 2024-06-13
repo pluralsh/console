@@ -111,28 +111,25 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		}
 	}
 
-	provider := &v1alpha1.Provider{}
-	providerName := ""
-	if globalService.Spec.ProviderRef != nil {
-		providerName = globalService.Spec.ProviderRef.Name
+	provider, err := r.getProvider(ctx, globalService)
+	if err != nil {
+		return requeue, err
+	}
 
-		if err := r.Get(ctx, types.NamespacedName{Name: providerName}, provider); err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
-		}
-		if provider.Status.ID == nil {
-			logger.Info("Provider is not ready")
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "provider is not ready")
-			return requeue, nil
-		}
+	project, err := r.getProject(ctx, globalService)
+	if err != nil {
+		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
+		return requeue, err
 	}
 
 	attr := console.GlobalServiceAttributes{
 		Name:       globalService.Name,
 		Distro:     globalService.Spec.Distro,
 		ProviderID: provider.Status.ID,
+		ProjectID:  project.Status.ID,
 		Reparent:   globalService.Spec.Reparent,
 	}
+
 	if globalService.Spec.Template != nil {
 		namespace := globalService.GetNamespace()
 		repository, err := r.getRepository(ctx, globalService)
@@ -196,6 +193,47 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	globalService.Status.SHA = &sha
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	return ctrl.Result{}, nil
+}
+
+func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Provider, error) {
+	logger := log.FromContext(ctx)
+	provider := &v1alpha1.Provider{}
+	providerName := ""
+	if globalService.Spec.ProviderRef != nil {
+		providerName = globalService.Spec.ProviderRef.Name
+		if err := r.Get(ctx, types.NamespacedName{Name: providerName}, provider); err != nil {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return provider, err
+		}
+		if provider.Status.ID == nil {
+			logger.Info("Provider is not ready")
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "provider is not ready")
+			return provider, fmt.Errorf("provider is not yet ready")
+		}
+	}
+
+	return provider, nil
+}
+
+func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Project, error) {
+	logger := log.FromContext(ctx)
+	project := &v1alpha1.Project{}
+	if globalService.Spec.ProjectRef != nil {
+		if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ProjectRef.Name}, project); err != nil {
+			return project, err
+		}
+
+		if project.Status.ID == nil {
+			logger.Info("Project is not ready")
+			return project, fmt.Errorf("project is not yet ready")
+		}
+
+		if err := controllerutil.SetOwnerReference(project, globalService, r.Scheme); err != nil {
+			return project, fmt.Errorf("could not set global service owner reference, got error: %+v", err)
+		}
+	}
+
+	return project, nil
 }
 
 func (r *GlobalServiceReconciler) handleCreate(sha string, global *v1alpha1.GlobalService, svc *v1alpha1.ServiceDeployment, attrs console.GlobalServiceAttributes) error {

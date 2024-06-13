@@ -20,12 +20,13 @@ import (
 	"context"
 
 	console "github.com/pluralsh/console-client-go"
+	v1 "k8s.io/api/core/v1"
+
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/utils"
-	v1 "k8s.io/api/core/v1"
 )
 
-func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1.Pipeline) (*console.PipelineAttributes, error) {
+func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1.Pipeline, projectID *string) (*console.PipelineAttributes, error) {
 	stages := make([]*console.PipelineStageAttributes, 0)
 	for _, stage := range p.Spec.Stages {
 		services := make([]*console.StageServiceAttributes, 0)
@@ -64,8 +65,9 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 	}
 
 	return &console.PipelineAttributes{
-		Stages: stages,
-		Edges:  edges,
+		Stages:    stages,
+		Edges:     edges,
+		ProjectID: projectID,
 	}, nil
 }
 

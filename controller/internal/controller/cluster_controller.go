@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/internal/cache"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -17,6 +16,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/controller/internal/cache"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
@@ -96,6 +97,13 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		return *result, err
 	}
 
+	// Get Project ID from the reference if it is set and ensure that controller reference is set properly.
+	projectId, result, err := r.getProjectIdAndSetOwnerRef(ctx, cluster)
+	if result != nil || err != nil {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, "")
+		return *result, err
+	}
+
 	// Calculate SHA to detect changes that should be applied in the Console API.
 	sha, err := utils.HashObject(cluster.UpdateAttributes())
 	if err != nil {
@@ -104,7 +112,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 	}
 
 	// Sync resource with Console API.
-	apiCluster, err := r.sync(ctx, cluster, providerId, sha)
+	apiCluster, err := r.sync(ctx, cluster, providerId, projectId, sha)
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -276,7 +284,31 @@ func (r *ClusterReconciler) getProviderIdAndSetControllerRef(ctx context.Context
 	return nil, nil, nil
 }
 
-func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId *string, sha string) (*console.ClusterFragment, error) {
+func (r *ClusterReconciler) getProjectIdAndSetOwnerRef(ctx context.Context, cluster *v1alpha1.Cluster) (*string, *ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+
+	if !cluster.Spec.HasProjectRef() {
+		return nil, nil, nil
+	}
+
+	project := &v1alpha1.Project{}
+	if err := r.Get(ctx, types.NamespacedName{Name: cluster.Spec.ProjectRef.Name}, project); err != nil {
+		return nil, &ctrl.Result{}, fmt.Errorf("could not get project: %+v", err)
+	}
+
+	if !project.Status.HasID() {
+		logger.Info("project does not have ID set yet")
+		return nil, &requeue, nil
+	}
+
+	if err := controllerutil.SetOwnerReference(project, cluster, r.Scheme); err != nil {
+		return nil, &ctrl.Result{}, fmt.Errorf("could not set cluster owner reference, got error: %+v", err)
+	}
+
+	return project.Status.ID, nil, nil
+}
+
+func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster, providerId, projectId *string, sha string) (*console.ClusterFragment, error) {
 	logger := log.FromContext(ctx)
 	exists, err := r.ConsoleClient.IsClusterExisting(cluster.Status.ID)
 	if err != nil {
@@ -298,7 +330,7 @@ func (r *ClusterReconciler) sync(ctx context.Context, cluster *v1alpha1.Cluster,
 		return nil, err
 	}
 
-	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId))
+	return r.ConsoleClient.CreateCluster(cluster.Attributes(providerId, projectId))
 }
 
 // ensureCluster makes sure that user-friendly input such as userEmail/groupName in

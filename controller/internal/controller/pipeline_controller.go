@@ -82,8 +82,26 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		return *result, nil
 	}
 
+	project := &v1alpha1.Project{}
+	if pipeline.HasProjectRef() {
+		if err := r.Get(ctx, client.ObjectKey{Name: pipeline.ProjectName()}, project); err != nil {
+			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return requeue, err
+		}
+
+		if project.Status.ID == nil {
+			logger.Info("Project is not ready")
+			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
+			return requeue, nil
+		}
+
+		if err := controllerutil.SetOwnerReference(project, pipeline, r.Scheme); err != nil {
+			return requeue, fmt.Errorf("could not set pipeline owner reference, got error: %+v", err)
+		}
+	}
+
 	// Prepare attributes object that is used to calculate SHA and save changes.
-	attrs, err := r.pipelineAttributes(ctx, pipeline)
+	attrs, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
 	if err != nil {
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
