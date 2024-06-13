@@ -72,9 +72,9 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
-	result, err := in.addOrRemoveFinalizer(project)
+	result := in.addOrRemoveFinalizer(project)
 	if result != nil {
-		return *result, err
+		return *result, nil
 	}
 
 	// Check if resource already exists in the API and only sync the ID
@@ -116,7 +116,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	return requeue, nil
 }
 
-func (in *ProjectReconciler) addOrRemoveFinalizer(project *v1alpha1.Project) (*ctrl.Result, error) {
+func (in *ProjectReconciler) addOrRemoveFinalizer(project *v1alpha1.Project) *ctrl.Result {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if project.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(project, ProjectProtectionFinalizerName) {
@@ -129,10 +129,10 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(project *v1alpha1.Project) (*c
 	if !project.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Stop reconciliation as the item is being deleted
 		controllerutil.RemoveFinalizer(project, ProjectProtectionFinalizerName)
-		return &ctrl.Result{}, nil
+		return &ctrl.Result{}
 	}
 
-	return nil, nil
+	return nil
 }
 
 func (in *ProjectReconciler) isAlreadyExists(ctx context.Context, project *v1alpha1.Project) (bool, error) {
