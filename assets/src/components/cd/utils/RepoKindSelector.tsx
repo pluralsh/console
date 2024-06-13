@@ -51,7 +51,7 @@ export function RepoKindSelector({
         css={{
           width: 'fit-content',
           position: 'relative',
-          borderRadius: theme.borderRadiuses.normal,
+          borderRadius: theme.borderRadiuses.medium,
           '&::after': {
             pointerEvents: 'none',
             content: '""',
@@ -62,7 +62,7 @@ export function RepoKindSelector({
             bottom: 0,
             left: 0,
             outlineOffset: -1,
-            borderRadius: theme.borderRadiuses.normal,
+            borderRadius: theme.borderRadiuses.medium,
           },
         }}
       >
