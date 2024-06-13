@@ -64,7 +64,7 @@ export const CommandPaletteLauncherSC = styled.button(({ theme }) => ({
   ...theme.partials.text.body2,
   height: theme.spacing.xlarge,
   padding: `${0}px ${theme.spacing.medium}px`,
-  background: theme.colors['fill-one'],
+  background: 'transparent',
   border: theme.borders.input,
   borderRadius: theme.borderRadiuses.medium,
   color: theme.colors['text-xlight'],
@@ -78,7 +78,7 @@ export const CommandPaletteLauncherSC = styled.button(({ theme }) => ({
     gap: theme.spacing.small,
   },
   '&:hover': {
-    background: theme.colors['fill-one-hover'],
+    background: theme.colors['fill-zero'],
   },
   '&:focus, &:focus-visible': {
     outline: 'none',

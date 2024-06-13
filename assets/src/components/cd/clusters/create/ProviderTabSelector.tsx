@@ -49,7 +49,7 @@ export function ProviderTabSelector({
         css={{
           width: 'fit-content',
           border: theme.borders.default,
-          borderRadius: theme.borderRadiuses.normal,
+          borderRadius: theme.borderRadiuses.medium,
         }}
       >
         {Object.values(ProviderCloud).map((p) => {

@@ -7,7 +7,7 @@ import { Level } from './misc'
 
 export const LegendColor = styled.div(({ theme, color = '#ffffff' }) => ({
   backgroundColor: color,
-  borderRadius: theme.borderRadiuses.normal,
+  borderRadius: theme.borderRadiuses.medium,
   height: 12,
   width: 12,
 }))

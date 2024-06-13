@@ -702,7 +702,10 @@ export function CommandPalette({ children }) {
   )
 
   return (
-    <KBarProvider actions={baseActions}>
+    <KBarProvider
+      actions={baseActions}
+      options={{ disableScrollbarManagement: true }}
+    >
       <Palette />
       {children}
     </KBarProvider>
