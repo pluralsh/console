@@ -19,7 +19,9 @@ type NamespacedName struct {
 	Namespace string `json:"namespace"`
 }
 
-// Bindings ...
+// Bindings represents a policy bindings that
+// can be used to define read/write permissions
+// to this resource for users/groups in the system.
 type Bindings struct {
 	// Read bindings.
 	// +kubebuilder:validation:Optional
