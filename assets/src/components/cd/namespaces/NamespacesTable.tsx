@@ -11,6 +11,8 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
+import { useProjectId } from 'components/contexts/ProjectsContext'
+
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
 import {
@@ -22,6 +24,7 @@ import {
 export function NamespacesTable() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const projectId = useProjectId()
 
   const {
     data,
@@ -31,11 +34,14 @@ export function NamespacesTable() {
     pageInfo,
     fetchNextPage,
     setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useManagedNamespacesQuery,
-    pageSize: NAMESPACES_QUERY_PAGE_SIZE,
-    queryKey: 'managedNamespaces',
-  })
+  } = useFetchPaginatedData(
+    {
+      queryHook: useManagedNamespacesQuery,
+      pageSize: NAMESPACES_QUERY_PAGE_SIZE,
+      queryKey: 'managedNamespaces',
+    },
+    { projectId }
+  )
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
     useMemo(
