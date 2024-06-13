@@ -2,7 +2,11 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
+	console "github.com/pluralsh/console-client-go"
+	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -14,6 +18,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/utils"
 )
@@ -23,8 +28,9 @@ import (
 type ProjectReconciler struct {
 	client.Client
 
-	ConsoleClient consoleclient.ConsoleClient
-	Scheme        *runtime.Scheme
+	ConsoleClient  consoleclient.ConsoleClient
+	Scheme         *runtime.Scheme
+	UserGroupCache cache.UserGroupCache
 }
 
 const (
@@ -78,10 +84,34 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 		return ctrl.Result{}, err
 	}
 	if exists {
-		logger.V(9).Info("Project already exists in the API, running in read-only mode")
 		utils.MarkCondition(project.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return in.handleExistingProject(ctx, project)
 	}
+
+	// Mark resource as managed by this operator.
+	utils.MarkCondition(project.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
+
+	// Get Project SHA that can be saved back in the status to check for changes
+	changed, sha, err := project.Diff(utils.HashObject)
+	if err != nil {
+		logger.Error(err, "unable to calculate project SHA")
+		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	// Sync Project CRD with the Console API
+	apiProject, err := in.sync(ctx, project, changed)
+	if err != nil {
+		logger.Error(err, "unable to create or update project")
+		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	project.Status.ID = &apiProject.ID
+	project.Status.SHA = &sha
+
+	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -106,11 +136,98 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(project *v1alpha1.Project) (*c
 }
 
 func (in *ProjectReconciler) isAlreadyExists(ctx context.Context, project *v1alpha1.Project) (bool, error) {
+	if project.Status.HasReadonlyCondition() {
+		return project.Status.IsReadonly(), nil
+	}
+
+	_, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
+	if errors.IsNotFound(err) {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+
+	if !project.Status.HasID() {
+		log.FromContext(ctx).Info("Project already exists in the API, running in read-only mode")
+		return true, nil
+	}
+
 	return false, nil
 }
 
 func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project *v1alpha1.Project) (ctrl.Result, error) {
-	return ctrl.Result{}, nil
+	exists, err := in.ConsoleClient.IsProjectExists(ctx, project.ConsoleName())
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if !exists {
+		project.Status.ID = nil
+		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
+		return ctrl.Result{}, nil
+	}
+
+	apiProject, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
+	if err != nil {
+		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	project.Status.ID = &apiProject.ID
+
+	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+
+	return requeue, nil
+}
+
+func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project, changed bool) (*console.ProjectFragment, error) {
+	logger := log.FromContext(ctx)
+	exists, err := in.ConsoleClient.IsProjectExists(ctx, project.ConsoleName())
+	if err != nil {
+		return nil, err
+	}
+
+	// Update only if Project has changed
+	if changed && exists {
+		logger.Info(fmt.Sprintf("updating project %s", project.ConsoleName()))
+		return in.ConsoleClient.UpdateProject(ctx, project.Status.GetID(), project.Attributes())
+	}
+
+	// Read the Project from Console API if it already exists
+	if exists {
+		return in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
+	}
+
+	logger.Info(fmt.Sprintf("%s project does not exist, creating it", project.ConsoleName()))
+	if err := in.ensure(project); err != nil {
+		return nil, err
+	}
+
+	return in.ConsoleClient.CreateProject(ctx, project.Attributes())
+}
+
+// ensure makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
+	if project.Spec.Bindings == nil {
+		return nil
+	}
+
+	bindings, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	project.Spec.Bindings.Read = bindings
+
+	bindings, err = ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	project.Spec.Bindings.Write = bindings
+
+	return nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.

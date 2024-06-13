@@ -57,11 +57,12 @@ func (c *Cluster) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&c.Status.Conditions, condition)
 }
 
-func (c *Cluster) Attributes(providerId *string) console.ClusterAttributes {
+func (c *Cluster) Attributes(providerId, projectId *string) console.ClusterAttributes {
 	attrs := console.ClusterAttributes{
 		Name:          c.ConsoleName(),
 		Handle:        c.Spec.Handle,
 		ProviderID:    providerId,
+		ProjectID:     projectId,
 		Version:       c.Spec.Version,
 		Protect:       c.Spec.Protect,
 		CloudSettings: c.Spec.CloudSettings.Attributes(),
@@ -147,6 +148,11 @@ type ClusterSpec struct {
 	// +kubebuilder:validation:Optional
 	ProviderRef *corev1.ObjectReference `json:"providerRef,omitempty"`
 
+	// ProjectRef references project this cluster belongs to.
+	// If not provided, it will use the default project.
+	// +kubebuilder:validation:Optional
+	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
+
 	// Cloud provider to use for this cluster.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
@@ -192,6 +198,10 @@ func (cs *ClusterSpec) IsProviderRefRequired() bool {
 
 func (cs *ClusterSpec) HasProviderRef() bool {
 	return cs.ProviderRef != nil
+}
+
+func (cs *ClusterSpec) HasProjectRef() bool {
+	return cs.ProjectRef != nil
 }
 
 type ClusterCloudSettings struct {

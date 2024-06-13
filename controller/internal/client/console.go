@@ -109,6 +109,10 @@ type ConsoleClient interface {
 	GetCustomStackRun(ctx context.Context, id string) (*console.CustomStackRunFragment, error)
 	UpdateDeploymentSettings(ctx context.Context, attr console.DeploymentSettingsAttributes) (*console.UpdateDeploymentSettings, error)
 	GetDeploymentSettings(ctx context.Context) (*console.DeploymentSettingsFragment, error)
+	CreateProject(ctx context.Context, attributes console.ProjectAttributes) (*console.ProjectFragment, error)
+	GetProject(ctx context.Context, id, name *string) (*console.ProjectFragment, error)
+	UpdateProject(ctx context.Context, id string, attributes console.ProjectAttributes) (*console.ProjectFragment, error)
+	IsProjectExists(ctx context.Context, name string) (bool, error)
 }
 
 func New(url, token string) ConsoleClient {

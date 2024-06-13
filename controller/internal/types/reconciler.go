@@ -33,7 +33,7 @@ const (
 	StackReconciler                 Reconciler = "stack"
 	CustomStackRunReconciler        Reconciler = "customstackrun"
 	DeploymentSettingsReconciler    Reconciler = "deploymentsettings"
-	ProjectReconciler               Reconciler = "projects"
+	ProjectReconciler               Reconciler = "project"
 )
 
 // ToReconciler maps reconciler string to a Reconciler type.
@@ -198,9 +198,10 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case ProjectReconciler:
 		return &controller.ProjectReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
 		}, nil
 	default:
 		return nil, fmt.Errorf("reconciler %q is not supported", sc)

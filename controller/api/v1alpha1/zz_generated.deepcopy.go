@@ -591,6 +591,11 @@ func (in *ClusterSpec) DeepCopyInto(out *ClusterSpec) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.ProjectRef != nil {
+		in, out := &in.ProjectRef, &out.ProjectRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	if in.Protect != nil {
 		in, out := &in.Protect, &out.Protect
 		*out = new(bool)
