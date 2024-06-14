@@ -105,7 +105,7 @@ defmodule Console.Deployments.Settings do
 
   def default_project!(), do: Repo.get_by(Project, default: true)
 
-  def add_project_id(%{project_id: id} = attrs) when is_binary(id), do: attrs
+  def add_project_id(%{project_id: id} = attrs) when is_binary(id) and byte_size(id) > 0, do: attrs
   def add_project_id(attrs) do
     proj = default_project!()
     Map.put(attrs, :project_id, proj.id)

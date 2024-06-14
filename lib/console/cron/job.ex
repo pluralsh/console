@@ -11,11 +11,11 @@ defmodule Console.Cron.Job do
 
   def due?(%__MODULE__{next_run_at: at}), do: Timex.before?(at, Timex.now())
 
-  def exec(%__MODULE__{crontab: tab, next_run_at: at, job: {m, f, a}} = job) do
+  def exec(%__MODULE__{crontab: tab, job: {m, f, a}} = job) do
     Task.async(fn ->
       apply(m, f, a)
     end)
-    %{job | next_run_at: Scheduler.get_next_run_date!(tab, at)}
+    %{job | next_run_at: Scheduler.get_next_run_date!(tab)}
   end
 
   defp convert("@daily"), do: "0 0 * * *"

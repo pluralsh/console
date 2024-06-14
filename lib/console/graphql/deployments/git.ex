@@ -70,6 +70,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :placeholder,   :string
     field :optional,      :boolean
     field :condition,     :condition_attributes
+    field :values,        list_of(:string)
   end
 
   @desc "attributes for declaratively specifying whether a config item is relevant given prior config"

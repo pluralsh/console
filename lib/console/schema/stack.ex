@@ -163,7 +163,7 @@ defmodule Console.Schema.Stack do
     |> unique_constraint(:name)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
-    |> validate_required(~w(name type status)a)
+    |> validate_required(~w(name type status project_id)a)
   end
 
   def update_changeset(changeset) do

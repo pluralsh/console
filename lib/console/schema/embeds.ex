@@ -44,7 +44,8 @@ defmodule Console.Schema.Configuration do
     bucket: 4,
     file: 5,
     function: 6,
-    password: 7
+    password: 7,
+    enum: 8
 
   defmodule Condition do
     use Piazza.Ecto.Schema
@@ -74,13 +75,14 @@ defmodule Console.Schema.Configuration do
     field :longform,      :string
     field :placeholder,   :string
     field :optional,      :boolean
+    field :values,        {:array, :string}
 
     embeds_one :condition, Condition
   end
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(type name default documentation longform placeholder optional)a)
+    |> cast(attrs, ~w(type name default values documentation longform placeholder optional)a)
     |> cast_embed(:condition)
     |> validate_required([:type, :name])
   end

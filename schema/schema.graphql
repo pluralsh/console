@@ -3941,6 +3941,7 @@ enum ConfigurationType {
   FILE
   FUNCTION
   PASSWORD
+  ENUM
 }
 
 enum Operation {
@@ -4056,6 +4057,7 @@ input PrConfigurationAttributes {
   placeholder: String
   optional: Boolean
   condition: ConditionAttributes
+  values: [String]
 }
 
 "attributes for declaratively specifying whether a config item is relevant given prior config"

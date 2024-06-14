@@ -1170,6 +1170,7 @@ export enum ConfigurationType {
   Bool = 'BOOL',
   Bucket = 'BUCKET',
   Domain = 'DOMAIN',
+  Enum = 'ENUM',
   File = 'FILE',
   Function = 'FUNCTION',
   Int = 'INT',
@@ -3583,6 +3584,7 @@ export type PrConfigurationAttributes = {
   optional?: InputMaybe<Scalars['Boolean']['input']>;
   placeholder?: InputMaybe<Scalars['String']['input']>;
   type: ConfigurationType;
+  values?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 
 /** declaritive spec for whether a config item is relevant given prior config */
