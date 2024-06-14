@@ -112,7 +112,7 @@ export default function Navigation() {
           overflow: 'hidden',
         }}
       >
-        <div css={{ display: 'flex' }}>
+        <div css={{ display: 'flex', gap: theme.spacing.small }}>
           {headerContent}
           <DataSelectInputs dataSelect={dataSelect} />
         </div>

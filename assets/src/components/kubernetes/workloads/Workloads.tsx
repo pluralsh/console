@@ -62,8 +62,6 @@ export default function Workloads() {
           orientation: 'horizontal',
           selectedKey: currentTab?.path,
         }}
-        marginRight="medium"
-        paddingBottom="xxsmall"
       >
         {directory.map(({ label, path }) => (
           <LinkTabWrap
