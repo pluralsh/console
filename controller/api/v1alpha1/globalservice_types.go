@@ -112,7 +112,7 @@ type GlobalService struct {
 }
 
 func (gs *GlobalService) Attributes(providerId, projectId *string) console.GlobalServiceAttributes {
-	attr := console.GlobalServiceAttributes{
+	return console.GlobalServiceAttributes{
 		Name:       gs.Name,
 		Distro:     gs.Spec.Distro,
 		ProviderID: providerId,
@@ -121,8 +121,6 @@ func (gs *GlobalService) Attributes(providerId, projectId *string) console.Globa
 		Cascade:    gs.Spec.Cascade.Attributes(),
 		Tags:       gs.Spec.TagsAttribute(),
 	}
-
-	return attr
 }
 
 func (p *GlobalService) SetCondition(condition metav1.Condition) {
