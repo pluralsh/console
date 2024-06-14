@@ -102,37 +102,19 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return requeue, err
 	}
 
-	attr := console.GlobalServiceAttributes{
-		Name:       globalService.Name,
-		Distro:     globalService.Spec.Distro,
-		ProviderID: provider.Status.ID,
-		ProjectID:  project.Status.ID,
-		Reparent:   globalService.Spec.Reparent,
-	}
-
+	attr := globalService.Attributes(provider.Status.ID, project.Status.ID)
 	if globalService.Spec.Template != nil {
-		namespace := globalService.GetNamespace()
 		repository, err := r.getRepository(ctx, globalService)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		st, err := genServiceTemplate(ctx, r.Client, namespace, globalService.Spec.Template, repository.Status.ID)
+		st, err := genServiceTemplate(ctx, r.Client, globalService.GetNamespace(), globalService.Spec.Template, repository.Status.ID)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 		attr.Template = st
 	}
 
-	if globalService.Spec.Cascade != nil {
-		attr.Cascade = &console.CascadeAttributes{
-			Delete: globalService.Spec.Cascade.Delete,
-			Detach: globalService.Spec.Cascade.Detach,
-		}
-	}
-
-	if globalService.Spec.Tags != nil {
-		attr.Tags = genGlobalServiceTags(globalService.Spec.Tags)
-	}
 	sha, err := utils.HashObject(attr)
 	if err != nil {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -149,7 +131,6 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		globalService.Status.ID = nil
 		return requeue, r.handleCreate(sha, globalService, service, attr)
 	}
-
 	if err != nil {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, err
@@ -277,17 +258,6 @@ func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1a
 		controllerutil.RemoveFinalizer(service, GlobalServiceFinalizer)
 	}
 	return nil
-}
-
-func genGlobalServiceTags(existing map[string]string) []*console.TagAttributes {
-	tags := make([]*console.TagAttributes, 0)
-	for k, v := range existing {
-		tags = append(tags, &console.TagAttributes{
-			Name:  k,
-			Value: v,
-		})
-	}
-	return tags
 }
 
 // SetupWithManager sets up the controller with the Manager.
