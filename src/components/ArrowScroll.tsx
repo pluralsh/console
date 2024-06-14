@@ -1,7 +1,6 @@
 import {
   Children,
   type ComponentProps,
-  type ReactElement,
   cloneElement,
   useEffect,
   useRef,
@@ -82,7 +81,7 @@ const scroll = (
   }
 }
 
-function ArrowScroll({ children, ...props }: { children?: ReactElement }) {
+function ArrowScroll({ children, ...props }: { children?: any }) {
   const containerRef = useRef<HTMLElement>(undefined)
   const [showLeftArrow, setShowLeftArrow] = useState(false)
   const [showRightArrow, setShowRightArrow] = useState(false)
@@ -117,7 +116,16 @@ function ArrowScroll({ children, ...props }: { children?: ReactElement }) {
       />
       {cloneElement(Children.only(children), {
         onScroll: checkScroll,
-        ref: containerRef,
+        ref: (node: HTMLElement) => {
+          containerRef.current = node
+          if (children.ref) {
+            if (typeof children.ref === 'function') {
+              children.ref(node)
+            } else if (children.ref) {
+              children.ref.current = node
+            }
+          }
+        },
       })}
     </ComponentWrapperSC>
   )
