@@ -53,7 +53,7 @@ type GlobalServiceReconciler struct {
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=globalservices/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
+// move the current state of the global service closer to the desired state.
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
@@ -84,31 +84,10 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		return ctrl.Result{}, fmt.Errorf("the spec.serviceRef and spec.template can't be null")
 	}
 
-	var service *v1alpha1.ServiceDeployment
-	if globalService.Spec.ServiceRef != nil {
-		service = &v1alpha1.ServiceDeployment{}
-		if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ServiceRef.Name, Namespace: globalService.Spec.ServiceRef.Namespace}, service); err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
-		}
-		if !service.DeletionTimestamp.IsZero() {
-			logger.Info("deleting global service after service deployment deletion")
-			if err := r.Delete(ctx, globalService); err != nil {
-				utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return ctrl.Result{}, err
-			}
-			return requeue, nil
-		}
-		if service.Status.ID == nil {
-			logger.Info("Service is not ready")
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "service is not ready")
-			return requeue, nil
-		}
-		cluster := &v1alpha1.Cluster{}
-		if err := r.Get(ctx, client.ObjectKey{Name: service.Spec.ClusterRef.Name, Namespace: service.Spec.ClusterRef.Namespace}, cluster); err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			return ctrl.Result{}, err
-		}
+	service, res, err := r.getService(ctx, globalService)
+	if res != nil {
+		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, defaultErrMessage(err, "service is not ready"))
+		return *res, err
 	}
 
 	provider, err := r.getProvider(ctx, globalService)
@@ -193,6 +172,33 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	globalService.Status.SHA = &sha
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	return ctrl.Result{}, nil
+}
+
+func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.ServiceDeployment, *ctrl.Result, error) {
+	if globalService.Spec.ServiceRef == nil {
+		return nil, nil, nil
+	}
+
+	service := &v1alpha1.ServiceDeployment{}
+	if err := r.Get(ctx, client.ObjectKey{Name: globalService.Spec.ServiceRef.Name, Namespace: globalService.Spec.ServiceRef.Namespace}, service); err != nil {
+		return service, &ctrl.Result{}, err
+	}
+
+	logger := log.FromContext(ctx)
+	if !service.DeletionTimestamp.IsZero() {
+		logger.Info("deleting global service after service deployment deletion")
+		if err := r.Delete(ctx, globalService); err != nil {
+			return nil, &ctrl.Result{}, err
+		}
+		return service, &requeue, nil
+	}
+
+	if service.Status.ID == nil {
+		logger.Info("service is not ready")
+		return service, &requeue, nil
+	}
+
+	return service, nil, nil
 }
 
 func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Provider, error) {
