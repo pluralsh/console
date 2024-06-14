@@ -1,4 +1,8 @@
-import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  EmptyState,
+  GraphQLToast,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -13,6 +17,10 @@ import {
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
+
+import { GqlError } from '../../utils/Alert'
+
+import { ErrorToast } from '../../kubernetes/common/errors'
 
 import StackRunHeader from './Header'
 import StackRunSidecar from './Sidecar'
@@ -38,12 +46,14 @@ export default function StackRunDetail(): ReactNode {
     data: stackRunQuery,
     loading: loadingStackRun,
     refetch,
+    error,
   } = useStackRunQuery({
     variables: {
       id: runId!,
     },
     skip: !runId,
     pollInterval: 5_000,
+    fetchPolicy: 'network-only',
   })
 
   useSetBreadcrumbs(
@@ -59,8 +69,20 @@ export default function StackRunDetail(): ReactNode {
     return <LoadingIndicator />
   }
 
-  if (!stackRun) {
-    return <EmptyState message="Stack run not found." />
+  if (!stackRun || error) {
+    return (
+      <>
+        {error && (
+          <GraphQLToast
+            error={{ graphQLErrors: [{ ...error }] }}
+            header="Error"
+            margin="medium"
+            marginHorizontal="xxxxlarge"
+          />
+        )}
+        <EmptyState message="Stack run not found." />
+      </>
+    )
   }
 
   return (
