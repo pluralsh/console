@@ -243,7 +243,6 @@ export default function Stacks() {
             />
           </div>
           <TabList
-            scrollable
             gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{

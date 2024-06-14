@@ -1,4 +1,8 @@
-import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  EmptyState,
+  GraphQLToast,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -38,6 +42,7 @@ export default function StackRunDetail(): ReactNode {
     data: stackRunQuery,
     loading: loadingStackRun,
     refetch,
+    error,
   } = useStackRunQuery({
     variables: {
       id: runId!,
@@ -59,8 +64,20 @@ export default function StackRunDetail(): ReactNode {
     return <LoadingIndicator />
   }
 
-  if (!stackRun) {
-    return <EmptyState message="Stack run not found." />
+  if (!stackRun || error) {
+    return (
+      <>
+        {error && (
+          <GraphQLToast
+            error={{ graphQLErrors: [{ ...error }] }}
+            header="Error"
+            margin="medium"
+            marginHorizontal="xxxxlarge"
+          />
+        )}
+        <EmptyState message="Stack run not found." />
+      </>
+    )
   }
 
   return (
