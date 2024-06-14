@@ -3,7 +3,7 @@
 import requests
 from collections import OrderedDict
 from packaging.version import Version
-from utils import printError, update_compatibility_info
+from utils import print_error, update_compatibility_info
 
 GITHUB_REPO_URL = "https://github.com/kubernetes-sigs/external-dns"
 GITHUB_API_TAGS_URL = (
@@ -18,7 +18,7 @@ with open("../../KUBE_VERSION", "r") as file:
 def fetch_github_tags():
     response = requests.get(GITHUB_API_TAGS_URL)
     if response.status_code != 200:
-        printError(
+        print_error(
             f"Failed to fetch GitHub tags. Status code: {response.status_code}"
         )
         return []
@@ -74,7 +74,7 @@ def extract_version_info(release_tags):
 def scrape():
     release_tags = fetch_github_tags()
     if not release_tags:
-        printError("No release tags found.")
+        print_error("No release tags found.")
         return
 
     rows = extract_version_info(release_tags)

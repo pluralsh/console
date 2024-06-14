@@ -1,7 +1,7 @@
 # main.py
 import os
 import importlib
-from utils import readYaml, printError, printWarning
+from utils import read_yaml, print_error, print_warning
 from colorama import Fore, Style
 
 
@@ -10,28 +10,28 @@ def call_scraper(scraper):
         scraper_module = importlib.import_module(f"scrapers.{scraper}")
         scraper_module.scrape()
     except ModuleNotFoundError:
-        printWarning(f"No scraper found for {scraper}")
+        print_warning(f"No scraper found for {scraper}")
     except AttributeError:
-        printError(f"Scrape function not found in the scraper for {scraper}")
+        print_error(f"Scrape function not found in the scraper for {scraper}")
     except Exception as e:
-        printError(f"An unexpected error occurred: {e}")
+        print_error(f"An unexpected error occurred: {e}")
 
 
 manifestFile = "../../static/compatibilities/manifest.yaml"
 
 if not os.path.exists(manifestFile):
-    printError(f"Manifest file not found at {manifestFile}")
+    print_error(f"Manifest file not found at {manifestFile}")
     exit()
 
-manifest = readYaml(manifestFile)
+manifest = read_yaml(manifestFile)
 print()
 
 if not manifest:
-    printError("Failed to read the manifest file.")
+    print_error("Failed to read the manifest file.")
     exit()
 
 if "names" not in manifest:
-    printError("No names found in the manifest file.")
+    print_error("No names found in the manifest file.")
 
 for name in manifest["names"]:
     print(Fore.GREEN + f"Calling scraper for {name}" + Style.RESET_ALL)

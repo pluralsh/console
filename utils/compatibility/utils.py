@@ -6,36 +6,36 @@ from colorama import Fore, Style
 from packaging.version import Version
 
 
-def printError(message):
+def print_error(message):
     print(Fore.RED + "💔 Error:" + Style.RESET_ALL + f" {message}")
 
 
-def printSuccess(message):
+def print_success(message):
     print(Fore.GREEN + "✅ Success:" + Style.RESET_ALL + f" {message}")
 
 
-def printWarning(message):
+def print_warning(message):
     print(Fore.YELLOW + "⚠️ Warning:" + Style.RESET_ALL + f" {message}")
 
 
-def readYaml(file_path):
+def read_yaml(file_path):
     try:
         with open(file_path, "r") as file:
             yaml_file = yaml.safe_load(file)
         return yaml_file
     except FileNotFoundError:
-        printError(f"File not found at {file_path}")
+        print_error(f"File not found at {file_path}")
     except yaml.YAMLError as exc:
-        printError(f"Reading the YAML file: {exc}")
+        print_error(f"Reading the YAML file: {exc}")
     except Exception as e:
-        printError(f"{e}")
+        print_error(f"{e}")
     return None
 
 
 def fetch_page(url):
     response = requests.get(url)
     if response.status_code != 200:
-        printError(
+        print_error(
             f"Failed to fetch the page. Status code: {response.status_code}"
         )
         return None
@@ -78,7 +78,7 @@ def update_compatibility_info(filepath, new_versions):
             version["kube"], key=lambda v: Version(v), reverse=True
         )
     try:
-        data = readYaml(filepath)
+        data = read_yaml(filepath)
         if data and "versions" in data:
             existing_versions = {v["version"]: v for v in data["versions"]}
             for new_version in new_versions:
@@ -90,11 +90,11 @@ def update_compatibility_info(filepath, new_versions):
                 yaml.dump(
                     data, file, default_flow_style=False, sort_keys=False
                 )
-            printSuccess(
+            print_success(
                 "Updated compatibility info in" + Fore.CYAN + f" {filepath}"
             )
         else:
-            printWarning("No existing versions found. Writing new data.")
+            print_warning("No existing versions found. Writing new data.")
             with open(filepath, "w") as file:
                 yaml.dump(
                     {"versions": sort_versions(new_versions)},
@@ -102,10 +102,10 @@ def update_compatibility_info(filepath, new_versions):
                     default_flow_style=False,
                     sort_keys=False,
                 )
-            printSuccess(
+            print_success(
                 "Written new compatibility info to "
                 + Fore.CYAN
                 + f" {filepath}"
             )
     except Exception as e:
-        printError(f"Failed to update compatibility info: {e}")
+        print_error(f"Failed to update compatibility info: {e}")

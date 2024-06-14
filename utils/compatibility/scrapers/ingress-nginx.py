@@ -2,7 +2,7 @@
 
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import printError, fetch_page, update_compatibility_info
+from utils import print_error, fetch_page, update_compatibility_info
 
 
 def parse_page(content):
@@ -11,7 +11,7 @@ def parse_page(content):
         "article", class_="markdown-body entry-content container-lg"
     )
     if not readme_section:
-        printError("Could not find the README section on the page.")
+        print_error("Could not find the README section on the page.")
         return None
     return readme_section
 
@@ -49,7 +49,7 @@ def scrape():
 
     table = readme_section.find("table")
     if not table:
-        printError("No table found in the README section.")
+        print_error("No table found in the README section.")
         return
 
     rows = extract_table_data(table)

@@ -2,7 +2,7 @@
 
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import printError, fetch_page, update_compatibility_info
+from utils import print_error, fetch_page, update_compatibility_info
 
 
 def parse_page(content):
@@ -78,7 +78,7 @@ def scrape():
     sections = parse_page(page_content)
     target_tables = find_target_tables(sections)
     if not target_tables:
-        printError("No target tables found in the README section.")
+        print_error("No target tables found in the README section.")
         return
 
     rows = extract_table_data(target_tables)
