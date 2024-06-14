@@ -257,7 +257,7 @@ func mergeHelmValues(ctx context.Context, c runtimeclient.Client, secretRef *cor
 
 func defaultErrMessage(err error, defaultMessage string) string {
 	if err != nil {
-		err.Error()
+		return err.Error()
 	}
 
 	return defaultMessage
