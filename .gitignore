@@ -36,4 +36,8 @@ watchman-*.tar
 .yalc
 yalc.lock
 
+# python
+**/__pycache__
+**/venv
+
 # config/pubkey.pem
