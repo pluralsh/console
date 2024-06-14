@@ -92,6 +92,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	provider, err := r.getProvider(ctx, globalService)
 	if err != nil {
+		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, err
 	}
 
@@ -204,16 +205,12 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService *v1alpha1.GlobalService) (*v1alpha1.Provider, error) {
 	logger := log.FromContext(ctx)
 	provider := &v1alpha1.Provider{}
-	providerName := ""
 	if globalService.Spec.ProviderRef != nil {
-		providerName = globalService.Spec.ProviderRef.Name
-		if err := r.Get(ctx, types.NamespacedName{Name: providerName}, provider); err != nil {
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		if err := r.Get(ctx, types.NamespacedName{Name: globalService.Spec.ProviderRef.Name}, provider); err != nil {
 			return provider, err
 		}
 		if provider.Status.ID == nil {
 			logger.Info("Provider is not ready")
-			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "provider is not ready")
 			return provider, fmt.Errorf("provider is not yet ready")
 		}
 	}
