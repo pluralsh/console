@@ -17,6 +17,7 @@ defmodule Console.Deployments.StacksTest do
         approval: true,
         repository_id: repo.id,
         cluster_id: cluster.id,
+        project_id: nil,
         git: %{ref: "main", folder: "terraform"},
       }, admin_user())
 
