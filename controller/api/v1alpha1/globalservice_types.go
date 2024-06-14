@@ -38,6 +38,17 @@ type Cascade struct {
 	Delete *bool `json:"delete,omitempty"`
 }
 
+func (c *Cascade) Attributes() *console.CascadeAttributes {
+	if c == nil {
+		return nil
+	}
+
+	return &console.CascadeAttributes{
+		Delete: c.Delete,
+		Detach: c.Detach,
+	}
+}
+
 // GlobalServiceSpec defines the desired state of GlobalService
 type GlobalServiceSpec struct {
 	// Tags a set of tags to select clusters for this global service
@@ -72,6 +83,22 @@ type GlobalServiceSpec struct {
 	Template *ServiceTemplate `json:"template,omitempty"`
 }
 
+func (gss *GlobalServiceSpec) TagsAttribute() []*console.TagAttributes {
+	if gss.Tags == nil {
+		return nil
+	}
+
+	tags := make([]*console.TagAttributes, 0)
+	for k, v := range gss.Tags {
+		tags = append(tags, &console.TagAttributes{
+			Name:  k,
+			Value: v,
+		})
+	}
+
+	return tags
+}
+
 // GlobalService is the Schema for the globalservices API
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
@@ -82,6 +109,18 @@ type GlobalService struct {
 
 	Spec   GlobalServiceSpec `json:"spec,omitempty"`
 	Status Status            `json:"status,omitempty"`
+}
+
+func (gs *GlobalService) Attributes(providerId, projectId *string) console.GlobalServiceAttributes {
+	return console.GlobalServiceAttributes{
+		Name:       gs.Name,
+		Distro:     gs.Spec.Distro,
+		ProviderID: providerId,
+		ProjectID:  projectId,
+		Reparent:   gs.Spec.Reparent,
+		Cascade:    gs.Spec.Cascade.Attributes(),
+		Tags:       gs.Spec.TagsAttribute(),
+	}
 }
 
 func (p *GlobalService) SetCondition(condition metav1.Condition) {
