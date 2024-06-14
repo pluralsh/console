@@ -53,7 +53,6 @@ export default function StackRunDetail(): ReactNode {
     },
     skip: !runId,
     pollInterval: 5_000,
-    fetchPolicy: 'network-only',
   })
 
   useSetBreadcrumbs(
