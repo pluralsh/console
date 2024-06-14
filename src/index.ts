@@ -8,6 +8,7 @@ export * from './plural-logos'
 
 // Components
 export { default as Accordion } from './components/Accordion'
+export { default as ArrowScroll } from './components/ArrowScroll'
 export { default as Banner } from './components/Banner'
 export { default as Button } from './components/Button'
 export type { CardProps } from './components/Card'

@@ -23,6 +23,8 @@ import {
 import styled, { useTheme } from 'styled-components'
 
 import { useItemWrappedChildren } from './ListBox'
+import ArrowScroll from './ArrowScroll'
+import WrapWithIf from './WrapWithIf'
 
 export type MakeOptional<Type, Key extends keyof Type> = Omit<Type, Key> &
   Partial<Pick<Type, Key>>
@@ -135,23 +137,28 @@ function TabListRef(
   }
 
   return (
-    <Flex
-      {...tabListProps}
-      {...props}
-      flexDirection={stateProps.orientation === 'vertical' ? 'column' : 'row'}
-      alignItems={
-        stateProps.orientation === 'vertical' ? 'flex-start' : 'flex-end'
-      }
-      css={{
-        ...(scrollable && {
-          overflow: 'auto',
-          whiteSpace: 'nowrap',
-        }),
-      }}
-      ref={mergedRef as any}
+    <WrapWithIf
+      condition={scrollable}
+      wrapper={<ArrowScroll />}
     >
-      {tabChildren}
-    </Flex>
+      <Flex
+        {...tabListProps}
+        {...props}
+        flexDirection={stateProps.orientation === 'vertical' ? 'column' : 'row'}
+        alignItems={
+          stateProps.orientation === 'vertical' ? 'flex-start' : 'flex-end'
+        }
+        css={{
+          ...(scrollable && {
+            overflow: 'auto',
+            whiteSpace: 'nowrap',
+          }),
+        }}
+        ref={mergedRef as any}
+      >
+        {tabChildren}
+      </Flex>
+    </WrapWithIf>
   )
 }
 
