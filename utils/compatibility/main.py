@@ -21,20 +21,19 @@ manifestFile = "../../static/compatibilities/manifest.yaml"
 
 if not os.path.exists(manifestFile):
     printError(f"Manifest file not found at {manifestFile}")
-else:
-    manifest = readYaml(manifestFile)
-    print()
-    if manifest:
-        if "names" in manifest:
-            for name in manifest["names"]:
-                print(
-                    Fore.GREEN
-                    + f"Calling scraper for {name}"
-                    + Style.RESET_ALL
-                )
-                call_scraper(name)
-                print("\n")
-        else:
-            printError("No names found in the manifest file.")
-    else:
-        printError("Failed to read the manifest file.")
+    exit()
+
+manifest = readYaml(manifestFile)
+print()
+
+if not manifest:
+    printError("Failed to read the manifest file.")
+    exit()
+
+if "names" not in manifest:
+    printError("No names found in the manifest file.")
+
+for name in manifest["names"]:
+    print(Fore.GREEN + f"Calling scraper for {name}" + Style.RESET_ALL)
+    call_scraper(name)
+    print("\n")
