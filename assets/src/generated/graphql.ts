@@ -1686,6 +1686,8 @@ export type GcsStoreAttributes = {
 };
 
 export type GitAttributes = {
+  /** id of a scm connection to use for authentication */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** whether to run plural crypto on this repo */
   decrypt?: InputMaybe<Scalars['Boolean']['input']>;
   /** a manually supplied https path for non standard git setups.  This is auto-inferred in many cases */
@@ -6332,8 +6334,6 @@ export type ScmConnection = {
 export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
-  /** id of a scm connection to use for authentication */
-  connectionId?: InputMaybe<Scalars['ID']['input']>;
   github?: InputMaybe<GithubAppAttributes>;
   name: Scalars['String']['input'];
   /** the owning entity in this scm provider, eg a github organization */

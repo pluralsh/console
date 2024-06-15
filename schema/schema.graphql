@@ -3977,6 +3977,9 @@ input GitAttributes {
   "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}\/tree\/{ref}\/{folder}"
   urlFormat: String
 
+  "id of a scm connection to use for authentication"
+  connectionId: ID
+
   "whether to run plural crypto on this repo"
   decrypt: Boolean
 }
@@ -3997,9 +4000,6 @@ input ScmConnectionAttributes {
   baseUrl: String
 
   apiUrl: String
-
-  "id of a scm connection to use for authentication"
-  connectionId: ID
 
   github: GithubAppAttributes
 
