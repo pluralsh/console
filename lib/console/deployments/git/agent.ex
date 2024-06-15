@@ -8,6 +8,7 @@ defmodule Console.Deployments.Git.Agent do
   """
   use GenServer, restart: :transient
   import Console.Deployments.Git.Cmd
+  alias Console.Repo
   alias Console.Prom.Metrics
   alias Console.Deployments.{Git.Cache, Git, Services}
   alias Console.Schema.{GitRepository, Service}
@@ -157,7 +158,7 @@ defmodule Console.Deployments.Git.Agent do
   def terminate(_, _), do: :ok
 
   defp refresh(%GitRepository{} = repo) do
-    with %GitRepository{} = git <- Console.Repo.get(GitRepository, repo.id),
+    with %GitRepository{} = git <- Repo.get(GitRepository, repo.id) |> Repo.preload([:connection]),
          git = Map.merge(git, Map.take(repo, [:private_key_file, :dir])),
          {:ok, git} <- refresh_key(git),
       do: git

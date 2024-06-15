@@ -3998,8 +3998,25 @@ input ScmConnectionAttributes {
 
   apiUrl: String
 
+  "id of a scm connection to use for authentication"
+  connectionId: ID
+
+  github: GithubAppAttributes
+
   "a ssh private key to be used for commit signing"
   signingPrivateKey: String
+}
+
+"Requirements to perform Github App authentication"
+input GithubAppAttributes {
+  "Github App ID"
+  appId: String!
+
+  "ID of this github app installation"
+  installationId: String!
+
+  "PEM-encoded private key for this app"
+  privateKey: String!
 }
 
 "A way to create a self-service means of generating PRs against an IaC repo"

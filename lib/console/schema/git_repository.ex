@@ -1,5 +1,6 @@
 defmodule Console.Schema.GitRepository do
   use Piazza.Ecto.Schema
+  alias Console.Schema.ScmConnection
   alias Console.Deployments.Git.{Pathing, Utils}
 
   defenum AuthMethod, basic: 0, ssh: 1
@@ -22,6 +23,8 @@ defmodule Console.Schema.GitRepository do
     field :dir,              :string, virtual: true
     field :private_key_file, :string, virtual: true
 
+    belongs_to :connection, ScmConnection
+
     timestamps()
   end
 
@@ -29,7 +32,7 @@ defmodule Console.Schema.GitRepository do
     from(g in query, order_by: ^order)
   end
 
-  @valid ~w(url pulled_at private_key decrypt passphrase username password https_path url_format)a
+  @valid ~w(url pulled_at private_key connection_id decrypt passphrase username password https_path url_format)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -37,6 +40,7 @@ defmodule Console.Schema.GitRepository do
     |> foreign_key_constraint(:id, name: :service_template, match: :prefix, message: "There is a service template attached to an active managed namespace or global service using this repository")
     |> foreign_key_constraint(:id, name: :services, match: :prefix, message: "there is an active service using this repository")
     |> foreign_key_constraint(:id, name: :stacks, match: :prefix, message: "there is an active stack using this repository")
+    |> foreign_key_constraint(:connection_id)
     |> validate_format(:url, ~r/((git|ssh|http(s)?)|(git@[\w\.-]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/, message: "must provide a valid git url")
     |> add_auth_method()
     |> validate_required([:url])

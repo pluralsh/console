@@ -32,7 +32,16 @@ defmodule Console.GraphQl.Deployments.Git do
     field :token,               :string
     field :base_url,            :string
     field :api_url,             :string
+    field :connection_id,       :id, description: "id of a scm connection to use for authentication"
+    field :github,              :github_app_attributes
     field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"
+  end
+
+  @desc "Requirements to perform Github App authentication"
+  input_object :github_app_attributes do
+    field :app_id,          non_null(:string), description: "Github App ID"
+    field :installation_id, non_null(:string), description: "ID of this github app installation"
+    field :private_key,     non_null(:string), description: "PEM-encoded private key for this app"
   end
 
   @desc "A way to create a self-service means of generating PRs against an IaC repo"

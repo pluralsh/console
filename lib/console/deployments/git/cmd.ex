@@ -1,11 +1,20 @@
 defmodule Console.Deployments.Git.Cmd do
-  alias Console.Schema.GitRepository
+  alias Console.Schema.{GitRepository, ScmConnection}
+  alias Console.Jwt.Github
 
   def save_private_key(%GitRepository{private_key: pk} = git) when is_binary(pk) do
     with {:ok, path} <- Briefly.create(),
          :ok <- File.write(path, pk),
          :ok <- File.chmod(path, 0o400),
       do: {:ok, %{git | private_key_file: path}}
+  end
+  def save_private_key(%GitRepository{connection: %ScmConnection{token: t}} = git) when is_binary(t),
+    do: {:ok, %{git | password: t}}
+  def save_private_key(%GitRepository{
+    connection: %ScmConnection{base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}}
+  } = git) do
+    with {:ok, token} <- Github.app_token(url, app_id, inst_id, pk),
+      do: {:ok, %{git | password: token}}
   end
   def save_private_key(git), do: {:ok, git}
 
