@@ -88,11 +88,15 @@ const useChartData = (
         id: 'version-compliant',
         data: [
           { color: 'blue', x: 'Latest', y: latest || 0 },
-          { color: 'purple', x: 'Version Compliant', y: compliant || 0 },
+          {
+            color: 'purple',
+            x: 'Version Compliant',
+            y: (compliant || 0) - (latest || 0),
+          },
           {
             color: 'yellow',
             x: 'Not Version Compliant',
-            y: (count || 0) - (latest || 0) - (compliant || 0),
+            y: (count || 0) - (compliant || 0),
           },
         ],
       },
