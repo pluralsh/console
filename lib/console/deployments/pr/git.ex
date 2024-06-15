@@ -1,4 +1,5 @@
 defmodule Console.Deployments.Pr.Git do
+  alias Console.Jwt.Github
   alias Console.Schema.{ScmConnection, User}
 
   @type git_resp :: {:ok, binary} | Console.error
@@ -7,6 +8,7 @@ defmodule Console.Deployments.Pr.Git do
   def setup(%ScmConnection{} = conn, id, branch) do
     with {:ok, dir} <- Briefly.create(directory: true),
          conn = %{conn | dir: dir},
+         {:ok, conn} <- backfill_token(conn),
          {:ok, _} <- git(conn, "clone", branch_args(conn) ++ [url(conn, id), dir]),
          {:ok, b} <- branch(conn),
          {:ok, _} <- git(conn, "config", ["user.email", conn.author.email]),
@@ -34,6 +36,12 @@ defmodule Console.Deployments.Pr.Git do
       {out, _} -> {:error, out}
     end
   end
+
+  defp backfill_token(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
+    with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk),
+      do: {:ok, %{conn | token: token}}
+  end
+  defp backfill_token(%ScmConnection{} = conn), do: conn
 
   defp url(%ScmConnection{username: nil} = conn, id), do: url(%{conn | username: "apikey"}, id)
   defp url(%ScmConnection{username: username} = conn, id) do
