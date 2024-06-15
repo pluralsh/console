@@ -13,14 +13,15 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :operation, Configuration.Condition.Operation
 
   input_object :git_attributes do
-    field :url,         non_null(:string), description: "the url of this repository"
-    field :private_key, :string, description: "an ssh private key to use with this repo if an ssh url was given"
-    field :passphrase,  :string, description: "a passphrase to decrypt the given private key"
-    field :username,    :string, description: "the http username for authenticated http repos, defaults to apiKey for github"
-    field :password,    :string, description: "the http password for http authenticated repos"
-    field :https_path,  :string, description: "a manually supplied https path for non standard git setups.  This is auto-inferred in many cases"
-    field :url_format,  :string, description: "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
-    field :decrypt,     :boolean, description: "whether to run plural crypto on this repo"
+    field :url,           non_null(:string), description: "the url of this repository"
+    field :private_key,   :string, description: "an ssh private key to use with this repo if an ssh url was given"
+    field :passphrase,    :string, description: "a passphrase to decrypt the given private key"
+    field :username,      :string, description: "the http username for authenticated http repos, defaults to apiKey for github"
+    field :password,      :string, description: "the http password for http authenticated repos"
+    field :https_path,    :string, description: "a manually supplied https path for non standard git setups.  This is auto-inferred in many cases"
+    field :url_format,    :string, description: "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
+    field :connection_id, :id, description: "id of a scm connection to use for authentication"
+    field :decrypt,       :boolean, description: "whether to run plural crypto on this repo"
   end
 
   @desc "an object representing a means to authenticate to a source control provider like Github"
@@ -32,7 +33,6 @@ defmodule Console.GraphQl.Deployments.Git do
     field :token,               :string
     field :base_url,            :string
     field :api_url,             :string
-    field :connection_id,       :id, description: "id of a scm connection to use for authentication"
     field :github,              :github_app_attributes
     field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"
   end
