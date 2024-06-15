@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: netobserv-metrics-service
+  labels:
+    {{- include "network-observability-operator.labels" . | nindent 4 }}
+spec:
+  ports:
+    - name: https
+      port: 8443
+      protocol: TCP
+      targetPort: https
+  selector:
+    {{- include "network-observability-operator.selectorLabels" . | nindent 4 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    {{- include "network-observability-operator.labels" . | nindent 4 }}
+  name: netobserv-webhook-service
+spec:
+  ports:
+    - port: 443
+      protocol: TCP
+      targetPort: 9443
+  selector:
+    {{- include "network-observability-operator.selectorLabels" . | nindent 4 }}

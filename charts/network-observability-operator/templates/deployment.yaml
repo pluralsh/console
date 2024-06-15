@@ -1,0 +1,161 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "network-observability-operator.fullname" . }}
+  labels:
+    {{- include "network-observability-operator.labels" . | nindent 4 }}
+spec:
+  progressDeadlineSeconds: 600
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "network-observability-operator.selectorLabels" . | nindent 6 }}
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "network-observability-operator.labels" . | nindent 8 }}
+          {{- with .Values.podLabels }}
+          {{- toYaml . | nindent 8 }}
+          {{- end }}
+    spec:
+      containers:
+        - args: {{- toYaml .Values.controllerManager.manager.args | nindent 10 }}
+          command:
+            - /manager
+          env:
+            - name: ENABLE_WEBHOOKS
+              value: "false"
+            - name: RELATED_IMAGE_EBPF_AGENT
+              value: quay.io/netobserv/netobserv-ebpf-agent:v0.3.3
+            - name: RELATED_IMAGE_FLOWLOGS_PIPELINE
+              value: quay.io/netobserv/flowlogs-pipeline:v0.1.11
+            - name: RELATED_IMAGE_CONSOLE_PLUGIN
+              value: quay.io/netobserv/network-observability-console-plugin:v0.1.12
+            - name: DOWNSTREAM_DEPLOYMENT
+              value: "false"
+            - name: PROFILING_BIND_ADDRESS
+            - name: OPERATOR_CONDITION_NAME
+              value: netobserv-operator.v1.0.5
+          image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default (printf "%s" .Chart.AppVersion) }}
+          imagePullPolicy: {{ .Values.controllerManager.manager.imagePullPolicy }}
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: manager
+          ports:
+            - containerPort: 9443
+              name: webhook-server
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /readyz
+              port: 8081
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {{- toYaml .Values.controllerManager.manager.resources | nindent 12
+            }}
+          securityContext: {{- toYaml .Values.controllerManager.manager.containerSecurityContext
+            | nindent 12 }}
+          volumeMounts:
+            - mountPath: /tmp/k8s-webhook-server/serving-certs
+              name: cert
+              readOnly: true
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        - args: {{- toYaml .Values.controllerManager.kubeRbacProxy.args | nindent 10 }}
+          env:
+            - name: OPERATOR_CONDITION_NAME
+              value: {{ quote .Values.controllerManager.kubeRbacProxy.operatorConditionName }}
+          image: {{ .Values.controllerManager.kubeRbacProxy.image.repository }}:{{ .Values.controllerManager.kubeRbacProxy.image.tag | default (printf "v%s" .Chart.AppVersion) }}
+          name: kube-rbac-proxy
+          ports:
+            - containerPort: 8443
+              name: https
+              protocol: TCP
+          resources: {{- toYaml .Values.controllerManager.kubeRbacProxy.resources | nindent
+                         12 }}
+          securityContext: {{- toYaml .Values.controllerManager.kubeRbacProxy.containerSecurityContext
+            | nindent 12 }}          
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext:
+        runAsNonRoot: true
+      serviceAccount: {{ include "network-observability-operator.serviceAccountName" . }}
+      serviceAccountName: {{ include "network-observability-operator.serviceAccountName" . }}
+      terminationGracePeriodSeconds: 10
+      volumes:
+        - name: cert
+          secret:
+            defaultMode: 420
+            secretName: webhook-server-cert
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    service.beta.openshift.io/inject-cabundle: "true"
+  name: netobserv-validating-webhook-configuration
+webhooks:
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: netobserv-webhook-service
+        namespace: '{{ .Release.Namespace }}'
+        path: /validate-netobserv-io-v1beta2-flowcollector
+    failurePolicy: Fail
+    name: flowcollectorconversionwebhook.netobserv.io
+    rules:
+      - apiGroups:
+          - netobserv.io
+        apiVersions:
+          - v1beta2
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - flowcollectors
+    sideEffects: None
+  - admissionReviewVersions:
+      - v1
+    clientConfig:
+      service:
+        name: netobserv-webhook-service
+        namespace: '{{ .Release.Namespace }}'
+        path: /validate-flows-netobserv-io-v1alpha1-flowmetric
+    failurePolicy: Fail
+    name: flowmetricvalidationwebhook.netobserv.io
+    rules:
+      - apiGroups:
+          - flows.netobserv.io
+        apiVersions:
+          - v1alpha1
+        operations:
+          - CREATE
+          - UPDATE
+        resources:
+          - flowmetrics
+    sideEffects: None
