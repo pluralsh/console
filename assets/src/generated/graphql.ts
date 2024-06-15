@@ -1780,6 +1780,16 @@ export type GitStatus = {
   output?: Maybe<Scalars['String']['output']>;
 };
 
+/** Requirements to perform Github App authentication */
+export type GithubAppAttributes = {
+  /** Github App ID */
+  appId: Scalars['String']['input'];
+  /** ID of this github app installation */
+  installationId: Scalars['String']['input'];
+  /** PEM-encoded private key for this app */
+  privateKey: Scalars['String']['input'];
+};
+
 /** a rules based mechanism to redeploy a service across a fleet of clusters */
 export type GlobalService = {
   __typename?: 'GlobalService';
@@ -6322,6 +6332,9 @@ export type ScmConnection = {
 export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
+  /** id of a scm connection to use for authentication */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
+  github?: InputMaybe<GithubAppAttributes>;
   name: Scalars['String']['input'];
   /** the owning entity in this scm provider, eg a github organization */
   owner?: InputMaybe<Scalars['String']['input']>;

@@ -83,7 +83,7 @@ defmodule Console.MixProject do
       {:phoenix_ecto, "~>4.0"},
       {:ecto_sql, "~> 3.10.0"},
       {:yajwt, "~> 1.4"},
-      {:joken, "~> 2.5.0"},
+      {:joken, "~> 2.6"},
       {:piazza_core, "~> 0.3.8", git: "https://github.com/michaeljguarino/piazza_core"},
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},
@@ -135,6 +135,7 @@ defmodule Console.MixProject do
       {:libring, "~> 1.0"},
       {:http_stream, "~> 1.0.0"},
       {:solid, "~> 0.15"},
+      {:x509, "~> 0.8.5"},
 
       # if using the Mint adapter:
       {:castore, "~> 0.1.7"},

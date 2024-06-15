@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Pr.Impl.Github do
   import Console.Deployments.Pr.Utils
   alias Console.Schema.{PrAutomation, PullRequest, ScmWebhook, ScmConnection}
+  alias Console.Jwt.Github
   @behaviour Console.Deployments.Pr.Dispatcher
 
   def create(pr, branch, ctx) do
@@ -77,11 +78,18 @@ defmodule Console.Deployments.Pr.Impl.Github do
 
   defp client(pr) do
     case url_and_token(pr, :pass) do
+      {:ok, url, nil} -> fetch_app_token(url, pr)
       {:ok, :pass, token} -> {:ok, Tentacat.Client.new(%{access_token: token})}
       {:ok, url, token} -> {:ok, Tentacat.Client.new(%{access_token: token}, url)}
       err -> err
     end
   end
+
+  defp fetch_app_token(url, %PrAutomation{connection: %ScmConnection{} = conn}),
+    do: fetch_app_token(url, conn)
+  defp fetch_app_token(url, %ScmConnection{github: %{app_id: app_id, installation_id: inst_id, private_key: pk}}),
+    do: Github.gh_client(url, app_id, inst_id, pk)
+  defp fetch_app_token(_, _), do: {:error, "could not find github app credentials on this connection"}
 
   defp owner(%{"user" => %{"login" => owner}}), do: owner
   defp owner(_), do: nil

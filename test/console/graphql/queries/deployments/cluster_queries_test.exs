@@ -266,7 +266,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert svc["name"] == "cert-manager"
       assert svc["version"] == "1.13.1"
       refute svc["addonVersion"]["blocking"]
-      assert svc["addonVersion"]["kube"] == ~w(1.28 1.27 1.26 1.25 1.24 1.23)
+      assert svc["addonVersion"]["kube"] == ~w(1.27 1.26 1.25 1.24 1.23 1.22 1.21)
     end
 
     test "it respects rbac" do

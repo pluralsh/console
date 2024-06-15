@@ -16,6 +16,12 @@ defmodule Console.Schema.ScmConnection do
     field :author,   :map, virtual: true
     field :branch,   :string, virtual: true
 
+    embeds_one :github, GithubApp, on_replace: :update do
+      field :app_id,          :string
+      field :installation_id, :string
+      field :private_key,     EncryptedString
+    end
+
     field :signing_private_key, EncryptedString
 
     timestamps()
@@ -30,9 +36,16 @@ defmodule Console.Schema.ScmConnection do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_embed(:github, with: &github_changeset/2)
     |> unique_constraint(:name)
-    |> validate_required([:name, :type, :token])
+    |> validate_required([:name, :type])
     |> normalize_pk()
+  end
+
+  defp github_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(app_id installation_id private_key)a)
+    |> validate_required(~w(app_id installation_id private_key)a)
   end
 
   defp normalize_pk(cs) do
