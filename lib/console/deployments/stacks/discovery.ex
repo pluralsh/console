@@ -12,15 +12,7 @@ defmodule Console.Deployments.Stacks.Discovery do
     end
   end
 
-  def worker_node(id) do
-    ring()
-    |> HashRing.key_to_node(id)
-  end
+  def worker_node(id), do: HashRing.Managed.key_to_node(:cluster, id)
 
   def local?(id), do: worker_node(id) == node()
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
-  end
 end

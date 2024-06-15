@@ -29,6 +29,7 @@ type ConsoleClient interface {
 	GetService(clusterID, serviceName string) (*console.ServiceDeploymentExtended, error)
 	UpdateComponents(id string, components []*console.ComponentAttributes, errs []*console.ServiceErrorAttributes) error
 	CreateRepository(url string, privateKey, passphrase, username, password *string) (*console.CreateGitRepository, error)
+	CreateGitRepository(attrs console.GitAttributes) (*console.CreateGitRepository, error)
 	ListRepositories() (*console.ListGitRepositories, error)
 	UpdateRepository(id string, attrs console.GitAttributes) (*console.UpdateGitRepository, error)
 	DeleteRepository(id string) error

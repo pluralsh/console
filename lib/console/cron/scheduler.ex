@@ -17,7 +17,9 @@ defmodule Console.Cron.Scheduler do
   end
 
   def handle_info(:tick, jobs) do
+    Logger.info "checking for crons to run..."
     {jobs, ignore} = Enum.split_with(jobs, & local?(&1) && Job.due?(&1))
+    Logger.info "executing #{length(jobs)} crons"
     jobs = Enum.map(jobs, &Job.exec/1)
     {:noreply, jobs ++ ignore}
   end
@@ -26,13 +28,5 @@ defmodule Console.Cron.Scheduler do
 
   defp local?(%Job{} = job), do: job_node(job) == node()
 
-  defp job_node(%Job{job: job}) do
-    ring()
-    |> HashRing.key_to_node(job)
-  end
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
-  end
+  defp job_node(%Job{job: job}), do: HashRing.Managed.key_to_node(:cluster, job)
 end

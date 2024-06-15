@@ -7,6 +7,7 @@ defmodule Console.Deployments.Pipelines.Discovery do
   alias Console.Deployments.Pipelines.{PromotionWorker, StageWorker}
 
   @shards 5
+  @shard_ring HashRing.new() |> HashRing.add_nodes(Enum.to_list(0..@shards))
 
   def promotion(%PipelinePromotion{id: id} = promo),
     do: maybe_rpc(id, __MODULE__, :dispatch, [promo])
@@ -24,16 +25,9 @@ defmodule Console.Deployments.Pipelines.Discovery do
 
   def shards(), do: @shards
 
-  def worker_shard(id) do
-    shards()
-    |> ring()
-    |> HashRing.key_to_node(id)
-  end
+  def worker_shard(id), do: HashRing.key_to_node(@shard_ring, id)
 
-  def worker_node(id) do
-    ring()
-    |> HashRing.key_to_node(id)
-  end
+  def worker_node(id), do: HashRing.Managed.key_to_node(:cluster, id)
 
   def local?(id), do: worker_node(id) == node()
 
@@ -43,15 +37,5 @@ defmodule Console.Deployments.Pipelines.Discovery do
       ^me -> apply(module, func, args)
       node -> :rpc.call(node, module, func, args)
     end
-  end
-
-  defp ring(n) do
-    HashRing.new()
-    |> HashRing.add_nodes(Enum.to_list(0..n))
-  end
-
-  defp ring() do
-    HashRing.new()
-    |> HashRing.add_nodes([node() | Node.list()])
   end
 end

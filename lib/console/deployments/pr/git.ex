@@ -41,7 +41,7 @@ defmodule Console.Deployments.Pr.Git do
     with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk),
       do: {:ok, %{conn | token: token}}
   end
-  defp backfill_token(%ScmConnection{} = conn), do: conn
+  defp backfill_token(%ScmConnection{} = conn), do: {:ok, conn}
 
   defp url(%ScmConnection{username: nil} = conn, id), do: url(%{conn | username: "apikey"}, id)
   defp url(%ScmConnection{username: username} = conn, id) do

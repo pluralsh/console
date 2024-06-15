@@ -223,7 +223,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 				expectedStatus: v1alpha1.GitRepositoryStatus{
 					Status: v1alpha1.Status{
 						ID:  lo.ToPtr("123"),
-						SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
+						SHA: lo.ToPtr("NIDONAJF4QLR3LFF2JF6EAWMZ3CE53R4OZNEWGAXYZSNPO5UHVSA===="),
 						Conditions: []metav1.Condition{
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
@@ -256,7 +256,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("GetRepository", mock.AnythingOfType("*string")).Return(test.returnGetRepository, test.returnErrorGetRepository)
-			fakeConsoleClient.On("CreateRepository", mock.AnythingOfType("string"), mock.AnythingOfType("*string"), mock.AnythingOfType("*string"), mock.AnythingOfType("*string"), mock.AnythingOfType("*string")).Return(test.returnCreateRepository, test.returnErrorCreateRepository)
+			fakeConsoleClient.On("CreateGitRepository", mock.Anything).Return(test.returnCreateRepository, test.returnErrorCreateRepository)
 
 			controllerReconciler := &controller.GitRepositoryReconciler{
 				Client:        k8sClient,
@@ -288,7 +288,7 @@ var _ = Describe("Repository Controller", Ordered, func() {
 				expectedStatus: v1alpha1.GitRepositoryStatus{
 					Status: v1alpha1.Status{
 						ID:  lo.ToPtr(repoID),
-						SHA: lo.ToPtr("TEFHFGIB5PQMBLUWST2R6DXTY5QGH74WVGIKYQI7I3BY7BCSBDLA===="),
+						SHA: lo.ToPtr("NIDONAJF4QLR3LFF2JF6EAWMZ3CE53R4OZNEWGAXYZSNPO5UHVSA===="),
 						Conditions: []metav1.Condition{
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
