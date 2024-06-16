@@ -92,12 +92,12 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	utils.MarkCondition(repo.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	cred, err := r.getRepositoryCredentials(ctx, repo)
+	attrs, err := r.getRepositoryAttributes(ctx, repo)
 	if err != nil {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return requeue, err
 	}
-	sha, err := utils.HashObject(cred)
+	sha, err := utils.HashObject(attrs)
 	if err != nil {
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -109,7 +109,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 	if apiRepo == nil {
 		controllerutil.AddFinalizer(repo, RepoFinalizer)
-		resp, err := r.ConsoleClient.CreateRepository(repo.Spec.Url, cred.PrivateKey, cred.Passphrase, cred.Username, cred.Password)
+		resp, err := r.ConsoleClient.CreateGitRepository(*attrs)
 		if err != nil {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -119,13 +119,7 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 
 	if repo.Status.HasSHA() && !repo.Status.IsSHAEqual(sha) {
-		_, err := r.ConsoleClient.UpdateRepository(apiRepo.ID, console.GitAttributes{
-			URL:        repo.Spec.Url,
-			PrivateKey: cred.PrivateKey,
-			Passphrase: cred.Passphrase,
-			Username:   cred.Username,
-			Password:   cred.Password,
-		})
+		_, err := r.ConsoleClient.UpdateRepository(apiRepo.ID, *attrs)
 		if err != nil {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -179,8 +173,20 @@ func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alph
 	return ctrl.Result{}, nil
 }
 
-func (r *GitRepositoryReconciler) getRepositoryCredentials(ctx context.Context, repo *v1alpha1.GitRepository) (*GitRepoCred, error) {
-	cred := &GitRepoCred{}
+func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, repo *v1alpha1.GitRepository) (*console.GitAttributes, error) {
+	attrs := console.GitAttributes{URL: repo.Spec.Url}
+	if repo.Spec.ConnectionRef != nil {
+		connection := &v1alpha1.ScmConnection{}
+		if err := r.Get(ctx, types.NamespacedName{Name: repo.Spec.ConnectionRef.Name, Namespace: repo.Spec.ConnectionRef.Namespace}, connection); err != nil {
+			return nil, err
+		}
+
+		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {
+			return nil, err
+		}
+		attrs.ConnectionID = connection.Status.ID
+	}
+
 	if repo.Spec.CredentialsRef != nil {
 		secret := &corev1.Secret{}
 		name := types.NamespacedName{Name: repo.Spec.CredentialsRef.Name, Namespace: repo.Spec.CredentialsRef.Namespace}
@@ -199,19 +205,23 @@ func (r *GitRepositoryReconciler) getRepositoryCredentials(ctx context.Context, 
 		username := string(secret.Data[username])
 		password := string(secret.Data[password])
 		if privateKey != "" {
-			cred.PrivateKey = &privateKey
+			attrs.PrivateKey = &privateKey
 		}
+
 		if passphrase != "" {
-			cred.Passphrase = &passphrase
+			attrs.Passphrase = &passphrase
 		}
+
 		if username != "" {
-			cred.Username = &username
+			attrs.Username = &username
 		}
+
 		if password != "" {
-			cred.Password = &password
+			attrs.Password = &password
 		}
 	}
-	return cred, nil
+
+	return &attrs, nil
 }
 
 func (r *GitRepositoryReconciler) getRepository(url string) (*console.GitRepositoryFragment, error) {

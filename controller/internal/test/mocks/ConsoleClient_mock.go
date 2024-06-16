@@ -200,6 +200,64 @@ func (_c *ConsoleClientMock_CreateCustomStackRun_Call) RunAndReturn(run func(con
 	return _c
 }
 
+// CreateGitRepository provides a mock function with given fields: attrs
+func (_m *ConsoleClientMock) CreateGitRepository(attrs gqlclient.GitAttributes) (*gqlclient.CreateGitRepository, error) {
+	ret := _m.Called(attrs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateGitRepository")
+	}
+
+	var r0 *gqlclient.CreateGitRepository
+	var r1 error
+	if rf, ok := ret.Get(0).(func(gqlclient.GitAttributes) (*gqlclient.CreateGitRepository, error)); ok {
+		return rf(attrs)
+	}
+	if rf, ok := ret.Get(0).(func(gqlclient.GitAttributes) *gqlclient.CreateGitRepository); ok {
+		r0 = rf(attrs)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.CreateGitRepository)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(gqlclient.GitAttributes) error); ok {
+		r1 = rf(attrs)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateGitRepository_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateGitRepository'
+type ConsoleClientMock_CreateGitRepository_Call struct {
+	*mock.Call
+}
+
+// CreateGitRepository is a helper method to define mock.On call
+//   - attrs gqlclient.GitAttributes
+func (_e *ConsoleClientMock_Expecter) CreateGitRepository(attrs interface{}) *ConsoleClientMock_CreateGitRepository_Call {
+	return &ConsoleClientMock_CreateGitRepository_Call{Call: _e.mock.On("CreateGitRepository", attrs)}
+}
+
+func (_c *ConsoleClientMock_CreateGitRepository_Call) Run(run func(attrs gqlclient.GitAttributes)) *ConsoleClientMock_CreateGitRepository_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(gqlclient.GitAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateGitRepository_Call) Return(_a0 *gqlclient.CreateGitRepository, _a1 error) *ConsoleClientMock_CreateGitRepository_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateGitRepository_Call) RunAndReturn(run func(gqlclient.GitAttributes) (*gqlclient.CreateGitRepository, error)) *ConsoleClientMock_CreateGitRepository_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateGlobalService provides a mock function with given fields: serviceID, attributes
 func (_m *ConsoleClientMock) CreateGlobalService(serviceID string, attributes gqlclient.GlobalServiceAttributes) (*gqlclient.GlobalServiceFragment, error) {
 	ret := _m.Called(serviceID, attributes)

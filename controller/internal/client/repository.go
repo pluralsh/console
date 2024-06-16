@@ -16,6 +16,10 @@ func (c *client) CreateRepository(url string, privateKey, passphrase, username, 
 
 }
 
+func (c *client) CreateGitRepository(attrs console.GitAttributes) (*console.CreateGitRepository, error) {
+	return c.consoleClient.CreateGitRepository(c.ctx, attrs)
+}
+
 func (c *client) ListRepositories() (*console.ListGitRepositories, error) {
 	return c.consoleClient.ListGitRepositories(c.ctx, nil, nil, nil)
 }

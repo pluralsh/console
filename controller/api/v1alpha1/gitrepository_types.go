@@ -14,6 +14,10 @@ type GitRepositorySpec struct {
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Url is immutable"
 	Url string `json:"url"`
 
+	// Reference a ScmConnection to reuse its credentials for this GitRepository's authentication
+	// +kubebuilder:validation:Optional
+	ConnectionRef *corev1.ObjectReference `json:"connectionRef,omitempty"`
+
 	// CredentialsRef is a secret reference which should contain privateKey, passphrase, username and password.
 	// +kubebuilder:validation:Optional
 	CredentialsRef *corev1.SecretReference `json:"credentialsRef,omitempty"`

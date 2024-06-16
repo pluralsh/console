@@ -15,7 +15,13 @@ defmodule Console.Cron.Job do
     Task.async(fn ->
       apply(m, f, a)
     end)
-    %{job | next_run_at: Scheduler.get_next_run_date!(tab)}
+    %{job | next_run_at: Scheduler.get_next_run_date!(tab, next_date())}
+  end
+
+  defp next_date() do
+    Timex.now()
+    |> Timex.shift(minutes: 1)
+    |> Timex.to_naive_datetime()
   end
 
   defp convert("@daily"), do: "0 0 * * *"

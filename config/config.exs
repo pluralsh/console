@@ -114,4 +114,10 @@ config :hammer,
   backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4,
                                  cleanup_interval_ms: 60_000 * 10]}
 
+config :libring,
+  rings: [
+    cluster: [monitor_nodes: true, node_type: :visible]
+  ]
+
+
 import_config "#{Mix.env()}.exs"
