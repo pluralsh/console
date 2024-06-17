@@ -325,6 +325,9 @@ type PrAutomationConfiguration struct {
 
 	// +kubebuilder:validation:Optional
 	Placeholder *string `json:"placeholder,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Values []*string `json:"values,omitempty"`
 }
 
 func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttributes {
@@ -337,6 +340,7 @@ func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttrib
 		Placeholder:   in.Placeholder,
 		Optional:      in.Optional,
 		Condition:     in.Condition.Attributes(),
+		Values:        in.Values,
 	}
 }
 

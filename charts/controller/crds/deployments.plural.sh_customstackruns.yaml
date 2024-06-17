@@ -114,6 +114,10 @@ spec:
                       - PASSWORD
                       - ENUM
                       type: string
+                    values:
+                      items:
+                        type: string
+                      type: array
                   required:
                   - name
                   - type
