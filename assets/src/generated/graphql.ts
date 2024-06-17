@@ -243,6 +243,78 @@ export type ApplicationStatus = {
   conditions?: Maybe<Array<Maybe<StatusCondition>>>;
 };
 
+export type ArgoAnalysis = {
+  __typename?: 'ArgoAnalysis';
+  templates?: Maybe<Array<Maybe<ArgoAnalysisTemplate>>>;
+};
+
+export type ArgoAnalysisTemplate = {
+  __typename?: 'ArgoAnalysisTemplate';
+  templateName?: Maybe<Scalars['String']['output']>;
+};
+
+export type ArgoBlueGreenStrategy = {
+  __typename?: 'ArgoBlueGreenStrategy';
+  activeService?: Maybe<Scalars['String']['output']>;
+  autoPromotionEnabled?: Maybe<Scalars['Boolean']['output']>;
+  autoPromotionSeconds?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ArgoCanaryStrategy = {
+  __typename?: 'ArgoCanaryStrategy';
+  steps?: Maybe<Array<Maybe<ArgoStrategyStep>>>;
+};
+
+export type ArgoExperiment = {
+  __typename?: 'ArgoExperiment';
+  templates?: Maybe<Array<Maybe<ArgoExperimentTemplate>>>;
+};
+
+export type ArgoExperimentTemplate = {
+  __typename?: 'ArgoExperimentTemplate';
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type ArgoRollout = {
+  __typename?: 'ArgoRollout';
+  events?: Maybe<Array<Maybe<Event>>>;
+  metadata: Metadata;
+  pods?: Maybe<Array<Maybe<Pod>>>;
+  raw: Scalars['String']['output'];
+  spec: ArgoRolloutSpec;
+  status: ArgoRolloutStatus;
+};
+
+export type ArgoRolloutSpec = {
+  __typename?: 'ArgoRolloutSpec';
+  replicas?: Maybe<Scalars['Int']['output']>;
+  strategy?: Maybe<ArgoRolloutStrategy>;
+};
+
+export type ArgoRolloutStatus = {
+  __typename?: 'ArgoRolloutStatus';
+  abort?: Maybe<Scalars['Boolean']['output']>;
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
+  pauseConditions?: Maybe<Array<Maybe<PauseCondition>>>;
+  phase?: Maybe<Scalars['String']['output']>;
+  readyReplicas?: Maybe<Scalars['Int']['output']>;
+  replicas?: Maybe<Scalars['Int']['output']>;
+};
+
+export type ArgoRolloutStrategy = {
+  __typename?: 'ArgoRolloutStrategy';
+  blueGreen?: Maybe<ArgoBlueGreenStrategy>;
+  canary?: Maybe<ArgoCanaryStrategy>;
+};
+
+export type ArgoStrategyStep = {
+  __typename?: 'ArgoStrategyStep';
+  analysis?: Maybe<ArgoAnalysis>;
+  experiment?: Maybe<ArgoExperiment>;
+  pause?: Maybe<CanaryPause>;
+  stepWeight?: Maybe<Scalars['Int']['output']>;
+};
+
 export type Audit = {
   __typename?: 'Audit';
   action: AuditAction;
@@ -498,6 +570,11 @@ export type CanaryAnalysis = {
   stepWeight?: Maybe<Scalars['Int']['output']>;
   stepWeights?: Maybe<Array<Maybe<Scalars['Int']['output']>>>;
   threshold?: Maybe<Scalars['Int']['output']>;
+};
+
+export type CanaryPause = {
+  __typename?: 'CanaryPause';
+  duration?: Maybe<Scalars['String']['output']>;
 };
 
 export type CanarySpec = {
@@ -2868,6 +2945,12 @@ export type PathUpdate = {
   valueFrom: Scalars['String']['output'];
 };
 
+export type PauseCondition = {
+  __typename?: 'PauseCondition';
+  reason?: Maybe<Scalars['String']['output']>;
+  startTime?: Maybe<Scalars['String']['output']>;
+};
+
 export enum Permission {
   Configure = 'CONFIGURE',
   Deploy = 'DEPLOY',
@@ -3584,6 +3667,7 @@ export type PrConfiguration = {
   optional?: Maybe<Scalars['Boolean']['output']>;
   placeholder?: Maybe<Scalars['String']['output']>;
   type: ConfigurationType;
+  values?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
 /** the a configuration item for creating a new pr */
@@ -5024,6 +5108,7 @@ export type RootQueryType = {
   ai?: Maybe<Scalars['String']['output']>;
   application?: Maybe<Application>;
   applications?: Maybe<Array<Maybe<Application>>>;
+  argoRollout?: Maybe<ArgoRollout>;
   auditMetrics?: Maybe<Array<Maybe<AuditMetric>>>;
   audits?: Maybe<AuditConnection>;
   build?: Maybe<Build>;
@@ -5207,6 +5292,13 @@ export type RootQueryTypeAiArgs = {
 
 export type RootQueryTypeApplicationArgs = {
   name: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeArgoRolloutArgs = {
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
