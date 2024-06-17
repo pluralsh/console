@@ -14,12 +14,17 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { ScmConnectionForm } from './EditScmConnection'
 
-const DEFAULT_ATTRIBUTES: Partial<ScmConnectionAttributes> = {
+export const DEFAULT_ATTRIBUTES: Partial<ScmConnectionAttributes> = {
   apiUrl: '',
   baseUrl: '',
   name: '',
   signingPrivateKey: '',
   token: '',
+  github: {
+    appId: '',
+    installationId: '',
+    privateKey: '',
+  },
   type: undefined,
   username: '',
 }
@@ -50,8 +55,11 @@ export function CreateScmConnectionModal({
       refetch?.()
     },
   })
-  const { name, token, type } = formState
-  const allowSubmit = name && token && type
+  const { name, token, github, type } = formState
+  const allowSubmit =
+    name &&
+    type &&
+    (token || (github?.appId && github?.privateKey && github?.installationId))
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
@@ -59,7 +67,7 @@ export function CreateScmConnectionModal({
       if (allowSubmit) {
         const attributes: ScmConnectionAttributes = {
           name,
-          token,
+          ...(token !== '' ? { token } : { github }),
           type,
           apiUrl: formState.apiUrl || null,
           baseUrl: formState.baseUrl || null,
@@ -76,6 +84,7 @@ export function CreateScmConnectionModal({
       formState.baseUrl,
       formState.signingPrivateKey,
       formState.username,
+      github,
       mutation,
       name,
       token,

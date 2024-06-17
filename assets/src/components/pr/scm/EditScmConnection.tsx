@@ -1,18 +1,21 @@
-import { type ComponentProps, useCallback } from 'react'
+import { type ComponentProps, useCallback, useState } from 'react'
 import {
   Accordion,
   Button,
   FormField,
   Input,
   Modal,
+  Switch,
 } from '@pluralsh/design-system'
 import Input2 from '@pluralsh/design-system/dist/components/Input2'
 import { useTheme } from 'styled-components'
 import pick from 'lodash/pick'
 
 import {
+  GithubAppAttributes,
   ScmConnectionAttributes,
   ScmConnectionFragment,
+  ScmType,
   useUpdateScmConnectionMutation,
 } from 'generated/graphql'
 
@@ -23,7 +26,10 @@ import { GqlError } from 'components/utils/Alert'
 
 import { ApolloError } from '@apollo/client'
 
+import SshKeyUpload from 'components/cd/utils/SshKeyUpload'
+
 import GitProviderSelect from './GitProviderSelect'
+import { DEFAULT_ATTRIBUTES } from './CreateScmConnection'
 
 function EditScmConnectionModalBase({
   open,
@@ -39,8 +45,9 @@ function EditScmConnectionModalBase({
     state: formState,
     update: updateFormState,
     hasUpdates,
-  } = useUpdateState<Partial<ScmConnectionAttributes>>(
-    pick(scmConnection, [
+  } = useUpdateState<Partial<ScmConnectionAttributes>>({
+    ...DEFAULT_ATTRIBUTES,
+    ...pick(scmConnection, [
       'apiUrl',
       'baseUrl',
       'name',
@@ -48,14 +55,16 @@ function EditScmConnectionModalBase({
       'token',
       'type',
       'username',
-    ])
-  )
+      'github',
+    ]),
+  })
 
   const [mutation, { loading, error }] = useUpdateScmConnectionMutation({
     onCompleted: () => {
       onClose?.()
     },
   })
+
   const { name, type } = formState
   const allowSubmit = name && type && hasUpdates
   const onSubmit = useCallback(
@@ -70,6 +79,7 @@ function EditScmConnectionModalBase({
           baseUrl: formState.baseUrl || '',
           username: formState.username || '',
           ...(!formState.token ? {} : { token: formState.token }),
+          ...(!formState.github ? {} : { github: formState.github }),
           ...(!formState.signingPrivateKey
             ? {}
             : { signingPrivateKey: formState.signingPrivateKey }),
@@ -133,6 +143,24 @@ export function ScmConnectionForm({
   error: ApolloError | undefined
 }) {
   const theme = useTheme()
+  const [ghAppAuth, setGhAppAuth] = useState(!!formState.github?.appId)
+
+  const toggleGhAppAuth = (isToggled: boolean) => {
+    setGhAppAuth(isToggled)
+    updateFormState({
+      token: DEFAULT_ATTRIBUTES.token,
+      github: DEFAULT_ATTRIBUTES.github,
+    })
+  }
+
+  const updateGhFormField = (key: string, val: Nullable<string>) => {
+    updateFormState({
+      github: {
+        ...formState.github,
+        [key]: val,
+      } as GithubAppAttributes,
+    })
+  }
 
   return (
     <div
@@ -155,16 +183,54 @@ export function ScmConnectionForm({
           onChange={(e) => updateFormState({ name: e.target.value })}
         />
       </FormField>
-      <FormField
-        label="Token"
-        required={type === 'create'}
-      >
-        <InputRevealer
-          defaultRevealed={false}
-          value={formState.token || ''}
-          onChange={(e) => updateFormState({ token: e.target.value })}
-        />
-      </FormField>
+      {ghAppAuth ? (
+        <>
+          <FormField
+            label="App ID"
+            required
+          >
+            <Input2
+              value={formState.github?.appId}
+              onChange={(e) => updateGhFormField('appId', e.target.value)}
+            />
+          </FormField>
+          <FormField
+            label="Installation ID"
+            required
+          >
+            <Input2
+              value={formState.github?.installationId}
+              onChange={(e) =>
+                updateGhFormField('installationId', e.target.value)
+              }
+            />
+          </FormField>
+          <SshKeyUpload
+            privateKey={formState.github?.privateKey}
+            setPrivateKey={(key) => updateGhFormField('privateKey', key)}
+          />
+        </>
+      ) : (
+        <FormField
+          label="Token"
+          required={type === 'create'}
+        >
+          <InputRevealer
+            defaultRevealed={false}
+            value={formState.token || ''}
+            onChange={(e) => updateFormState({ token: e.target.value })}
+          />
+        </FormField>
+      )}
+      {formState.type === ScmType.Github && (
+        <Switch
+          checked={ghAppAuth}
+          onChange={toggleGhAppAuth}
+          css={{ alignSelf: 'flex-end' }}
+        >
+          Use GitHub App Auth
+        </Switch>
+      )}
       <Accordion label="Advanced configuration">
         <div
           css={{
