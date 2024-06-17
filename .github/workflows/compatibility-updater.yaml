@@ -21,10 +21,6 @@ jobs:
 
     - name: setup pyenv
       uses: "gabrielfalcao/pyenv-action@v18"
-      with:
-        commands: |
-          cd ~/.pyenv
-          git pull
     
     - name: Run compatibility matrix updater
       run: |
