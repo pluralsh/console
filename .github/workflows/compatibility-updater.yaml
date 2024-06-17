@@ -53,10 +53,10 @@ jobs:
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
       env:
-        TIMESTAMP: ${{ github.run_id }}
+        TIMESTAMP: $(date +'%m-%d-%y')
       with:
         title: Compatibility Matrix Update ${{ env.TIMESTAMP }}
         body: Automated Pull Request to update compatibility matrix
         commit-message: Updated compatibility matrix ${{ env.TIMESTAMP }}
         branch: compatibility-matrix-update-${{ env.TIMESTAMP }}
-        base: PROD-2278/use-a-cron-github-action-to-automate-compatibility-gathering
+        base: master
