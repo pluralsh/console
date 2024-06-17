@@ -68,6 +68,7 @@ func (in *PrAutomation) ConsoleName() string {
 func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connectionID *string, repositoryID *string) *console.PrAutomationAttributes {
 	attrs := console.PrAutomationAttributes{
 		Name:          lo.ToPtr(in.ConsoleName()),
+		Role:          in.Spec.Role,
 		Identifier:    in.Spec.Identifier,
 		Documentation: in.Spec.Documentation,
 		Title:         in.Spec.Title,
@@ -110,6 +111,10 @@ func (in *PrAutomation) SetCondition(condition metav1.Condition) {
 
 // PrAutomationSpec ...
 type PrAutomationSpec struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum=CLUSTER;SERVICE;PIPELINE;UPDATE;UPGRADE
+	Role *console.PrRole `json:"role,omitempty"`
+
 	// Addon is a link to an addon name
 	// +kubebuilder:validation:Optional
 	Addon *string `json:"addon,omitempty"`

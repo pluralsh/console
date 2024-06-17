@@ -286,6 +286,14 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              role:
+                enum:
+                - CLUSTER
+                - SERVICE
+                - PIPELINE
+                - UPDATE
+                - UPGRADE
+                type: string
               scmConnectionRef:
                 description: ScmConnectionRef ...
                 properties:
