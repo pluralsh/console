@@ -1,6 +1,9 @@
 name: Utility / Compatibility Matrix Update
 
 on:
+  push:
+    branches:
+      - "PROD-2278/use-a-cron-github-action-to-automate-compatibility-gathering"
   schedule:
     # Runs at 00:00 UTC every day
     - cron: '0 0 * * *'
