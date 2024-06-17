@@ -1,4 +1,4 @@
-name: Run Python Script on Schedule
+name: Python Compatibility Matrix Update
 
 on:
   schedule:
