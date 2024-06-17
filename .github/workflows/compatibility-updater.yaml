@@ -21,6 +21,8 @@ jobs:
         curl https://pyenv.run | bash
         echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc
         echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc
+        echo 'eval "$(pyenv virtualenv-init -)"' >> $HOME/.bashrc
+        cat $HOME/.bashrc
 
     - name: Run script
       run: |
