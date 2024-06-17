@@ -1,4 +1,4 @@
-name: Compatibility Matrix Update
+name: Utility / Compatibility Matrix Update
 
 on:
   schedule:
