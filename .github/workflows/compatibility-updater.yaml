@@ -42,14 +42,6 @@ jobs:
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
-
-    - name: Commit Changes
-      run: |
-        git config --global user.name 'github-actions[bot]'
-        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-        git add .
-        git commit -m 'Automated changes to compatibility matrix ${{ steps.date.outputs.date }}'
-      continue-on-error: true  # Continue even if there are no changes to commit
     
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
