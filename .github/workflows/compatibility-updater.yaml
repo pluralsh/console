@@ -31,23 +31,13 @@ jobs:
     - name: Install pyenv
       run: |
         curl https://pyenv.run | bash
-        echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc
-        echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc
-        echo 'eval "$(pyenv init --path)"' >> $HOME/.bashrc
-        echo 'eval "$(pyenv init -)"' >> $HOME/.bashrc
-        source $HOME/.bashrc
     
-    - name: Set up Python environment
+    - name: Set up Env and Run script
       run: |
         export PYENV_ROOT="$HOME/.pyenv"
         export PATH="$PYENV_ROOT/bin:$PATH"
         eval "$(pyenv init --path)"
         eval "$(pyenv init -)"
-        cd $SCRIPTS_DIR
-        source setup_env.sh
-    
-    - name: Run script
-      run: |
         cd $SCRIPTS_DIR
         source setup_env.sh
         python main.py
