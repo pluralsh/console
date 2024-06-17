@@ -9,8 +9,11 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
-  run-script:
+  run-compatibility-updater:
     runs-on: ubuntu-latest
+
+    env:
+      SCRIPTS_DIR: utils/compatibility
 
     steps:
     - name: Checkout repository
@@ -40,11 +43,12 @@ jobs:
         export PATH="$PYENV_ROOT/bin:$PATH"
         eval "$(pyenv init --path)"
         eval "$(pyenv init -)"
-        source utils/compatibility/setup_env.sh
+        cd $SCRIPTS_DIR
+        source setup_env.sh
     
     - name: Run script
       run: |
-        cd utils/compatibility
+        cd $SCRIPTS_DIR
         source setup_env.sh
         python main.py
     
