@@ -1,4 +1,4 @@
-name: Python Compatibility Matrix Update
+name: Compatibility Matrix Update
 
 on:
   schedule:
