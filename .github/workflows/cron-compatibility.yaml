@@ -1,0 +1,35 @@
+name: Run Python Script on Schedule
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Install pyenv
+      run: |
+        curl https://pyenv.run | bash
+
+    - name: Run script
+      run: |
+        source utils/compatibility/setup_env.sh
+        python utils/compatibility/main.py
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      env:
+        TIMESTAMP: ${{ github.run_id }}
+      with:
+        title: Compatibility Matrix Update ${TIMESTAMP}
+        body: Automated Pull Request to update compatibility matrix
+        commit-message: Updated compatibility matrix ${TIMESTAMP}
+        branch: compatibility-matrix-update-${TIMESTAMP}
+        base: master
+  
