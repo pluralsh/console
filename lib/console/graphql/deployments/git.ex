@@ -307,6 +307,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :longform,      :string
     field :placeholder,   :string
     field :optional,      :boolean
+    field :values,        list_of(:string)
     field :condition,     :pr_configuration_condition
   end
 

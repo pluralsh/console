@@ -91,6 +91,7 @@ defmodule Console.GraphQl.Kubernetes do
   import_types Console.GraphQl.Kubernetes.VPN
   import_types Console.GraphQl.Kubernetes.Config
   import_types Console.GraphQl.Kubernetes.Canary
+  import_types Console.GraphQl.Kubernetes.Rollout
   import_types Console.GraphQl.Kubernetes.UpgradePlan
   import_types Console.GraphQl.Kubernetes.DaemonSet
   import_types Console.GraphQl.Kubernetes.Plural
@@ -297,6 +298,15 @@ defmodule Console.GraphQl.Kubernetes do
       middleware CheckComponent
     end
 
+    field :argo_rollout, :argo_rollout do
+      middleware Authenticated
+      arg :namespace, non_null(:string)
+      arg :name,      non_null(:string)
+      service_authorized :read
+
+      safe_resolve &Kubernetes.resolve_rollout/2
+      middleware CheckComponent
+    end
 
     field :upgrade_plan, :upgrade_plan do
       middleware Authenticated

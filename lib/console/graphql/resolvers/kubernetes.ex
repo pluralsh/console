@@ -97,6 +97,8 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
 
   def resolve_canary(%{namespace: ns, name: name}, _), do: Client.get_canary(ns, name)
 
+  def resolve_rollout(%{namespace: ns, name: name}, _), do: Client.get_rollout(ns, name)
+
   def resolve_upgrade_plan(%{namespace: ns, name: name}, _), do: Client.get_upgrade_plan(ns, name)
 
   ## plural cd resources
@@ -311,6 +313,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     (build_labels(labels) ++ build_expressions(expressions))
     |> Enum.join(",")
   end
+  defp construct_label_selector(selector) when is_binary(selector), do: selector
   defp construct_label_selector(%{} = labels), do: Enum.join(build_labels(labels), ",")
 
   defp build_labels(labels) when map_size(labels) > 0,

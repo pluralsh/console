@@ -9,6 +9,7 @@ Kube.Parser.parse(path: "static/crds/helmrepository.yaml", module: Kube.HelmRepo
 Kube.Parser.parse(path: "static/crds/helmchart.yaml", module: Kube.HelmChart)
 Kube.Parser.parse(path: "static/crds/flagger-canary.yaml", module: Kube.Canary)
 Kube.Parser.parse(path: "static/crds/upgrade-plan.yaml", module: Kube.UpgradePlan)
+Kube.Parser.parse(path: "static/crds/rollout.yaml", module: Kube.Rollout)
 
 # plural crds
 Kube.Parser.parse(path: "static/crds/license.yaml", module: Kube.License)

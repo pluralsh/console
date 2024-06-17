@@ -123,6 +123,8 @@ type RootQueryType {
 
   canary(namespace: String!, name: String!, serviceId: ID): Canary
 
+  argoRollout(namespace: String!, name: String!, serviceId: ID): ArgoRollout
+
   upgradePlan(namespace: String!, name: String!, serviceId: ID): UpgradePlan
 
   configurationOverlays(namespace: String!): [ConfigurationOverlay]
@@ -4376,6 +4378,7 @@ type PrConfiguration {
   longform: String
   placeholder: String
   optional: Boolean
+  values: [String]
   condition: PrConfigurationCondition
 }
 
@@ -5022,6 +5025,76 @@ type UpgradePlanSpec {
   version: String
   cordon: Boolean
   concurrency: Int
+}
+
+type ArgoRollout {
+  metadata: Metadata!
+  status: ArgoRolloutStatus!
+  spec: ArgoRolloutSpec!
+  pods: [Pod]
+  raw: String!
+  events: [Event]
+}
+
+type ArgoRolloutSpec {
+  replicas: Int
+  strategy: ArgoRolloutStrategy
+}
+
+type ArgoRolloutStrategy {
+  blueGreen: ArgoBlueGreenStrategy
+  canary: ArgoCanaryStrategy
+}
+
+type ArgoBlueGreenStrategy {
+  activeService: String
+  autoPromotionEnabled: Boolean
+  autoPromotionSeconds: Int
+}
+
+type ArgoCanaryStrategy {
+  steps: [ArgoStrategyStep]
+}
+
+type ArgoStrategyStep {
+  stepWeight: Int
+  pause: CanaryPause
+  experiment: ArgoExperiment
+  analysis: ArgoAnalysis
+}
+
+type ArgoExperiment {
+  templates: [ArgoExperimentTemplate]
+}
+
+type ArgoAnalysis {
+  templates: [ArgoAnalysisTemplate]
+}
+
+type ArgoExperimentTemplate {
+  name: String
+}
+
+type ArgoAnalysisTemplate {
+  templateName: String
+}
+
+type CanaryPause {
+  duration: String
+}
+
+type PauseCondition {
+  reason: String
+  startTime: String
+}
+
+type ArgoRolloutStatus {
+  abort: Boolean
+  phase: String
+  replicas: Int
+  readyReplicas: Int
+  pauseConditions: [PauseCondition]
+  conditions: [StatusCondition]
 }
 
 type Canary {
