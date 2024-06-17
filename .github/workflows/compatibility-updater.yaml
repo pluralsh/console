@@ -59,4 +59,4 @@ jobs:
         body: Automated Pull Request to update compatibility matrix
         commit-message: Updated compatibility matrix ${{ env.TIMESTAMP }}
         branch: compatibility-matrix-update-${{ env.TIMESTAMP }}
-        base: master
+        base: PROD-2278/use-a-cron-github-action-to-automate-compatibility-gathering
