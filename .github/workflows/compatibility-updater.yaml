@@ -1,9 +1,6 @@
 name: Utility / Compatibility Matrix Update
 
 on:
-  push:
-    branches:
-      - "PROD-2278/use-a-cron-github-action-to-automate-compatibility-gathering"
   schedule:
     # Runs at 00:00 UTC every day
     - cron: '0 0 * * *'
@@ -59,4 +56,4 @@ jobs:
         body: Automated Pull Request to update compatibility matrix
         commit-message: Updated compatibility matrix ${{ env.TIMESTAMP }}
         branch: compatibility-matrix-update-${{ env.TIMESTAMP }}
-        base: PROD-2278/use-a-cron-github-action-to-automate-compatibility-gathering
+        base: master
