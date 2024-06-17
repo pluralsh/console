@@ -181,7 +181,12 @@ spec:
                       - FILE
                       - FUNCTION
                       - PASSWORD
+                      - ENUM
                       type: string
+                    values:
+                      items:
+                        type: string
+                      type: array
                   required:
                   - name
                   - type
@@ -286,6 +291,14 @@ spec:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
+              role:
+                enum:
+                - CLUSTER
+                - SERVICE
+                - PIPELINE
+                - UPDATE
+                - UPGRADE
+                type: string
               scmConnectionRef:
                 description: ScmConnectionRef ...
                 properties:

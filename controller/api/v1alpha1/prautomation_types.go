@@ -68,6 +68,7 @@ func (in *PrAutomation) ConsoleName() string {
 func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connectionID *string, repositoryID *string) *console.PrAutomationAttributes {
 	attrs := console.PrAutomationAttributes{
 		Name:          lo.ToPtr(in.ConsoleName()),
+		Role:          in.Spec.Role,
 		Identifier:    in.Spec.Identifier,
 		Documentation: in.Spec.Documentation,
 		Title:         in.Spec.Title,
@@ -110,6 +111,10 @@ func (in *PrAutomation) SetCondition(condition metav1.Condition) {
 
 // PrAutomationSpec ...
 type PrAutomationSpec struct {
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum=CLUSTER;SERVICE;PIPELINE;UPDATE;UPGRADE
+	Role *console.PrRole `json:"role,omitempty"`
+
 	// Addon is a link to an addon name
 	// +kubebuilder:validation:Optional
 	Addon *string `json:"addon,omitempty"`
@@ -300,7 +305,7 @@ type PrAutomationConfiguration struct {
 	Name string `json:"name"`
 
 	// +kubebuilder:validation:Required
-	// +kubebuilder:validation:Enum=STRING;INT;BOOL;DOMAIN;BUCKET;FILE;FUNCTION;PASSWORD
+	// +kubebuilder:validation:Enum=STRING;INT;BOOL;DOMAIN;BUCKET;FILE;FUNCTION;PASSWORD;ENUM
 	Type console.ConfigurationType `json:"type"`
 
 	// +kubebuilder:validation:Optional
@@ -320,6 +325,9 @@ type PrAutomationConfiguration struct {
 
 	// +kubebuilder:validation:Optional
 	Placeholder *string `json:"placeholder,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Values []*string `json:"values,omitempty"`
 }
 
 func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttributes {
@@ -332,6 +340,7 @@ func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttrib
 		Placeholder:   in.Placeholder,
 		Optional:      in.Optional,
 		Condition:     in.Condition.Attributes(),
+		Values:        in.Values,
 	}
 }
 
