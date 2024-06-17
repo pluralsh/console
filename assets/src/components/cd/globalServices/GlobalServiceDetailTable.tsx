@@ -13,24 +13,22 @@ import { GqlError } from 'components/utils/Alert'
 
 import { ApolloError } from '@apollo/client'
 
+import { ComponentProps } from 'react'
+
 import { SERVICES_REACT_VIRTUAL_OPTIONS, columns } from '../services/Services'
 
 export function GlobalServiceDetailTable({
   error,
   data,
-  fetchNextPage,
-  loading,
+  ...props
 }: {
   error?: ApolloError
   data?: GetServiceDataQuery
-  fetchNextPage: () => void
-  loading: boolean
-}) {
+} & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
   const navigate = useNavigate()
 
   const globalService = data?.globalService
   const services = globalService?.services?.edges
-  const pageInfo = globalService?.services?.pageInfo
 
   if (error) {
     return <GqlError error={error} />
@@ -60,14 +58,12 @@ export function GlobalServiceDetailTable({
             })
           )
         }
-        hasNextPage={pageInfo?.hasNextPage}
-        fetchNextPage={fetchNextPage}
-        isFetchingNextPage={loading}
         reactTableOptions={{ meta: { refetch: () => undefined } }}
         reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
         emptyStateProps={{
           message: 'Looks like this service does not exist.',
         }}
+        {...props}
       />
     </FullHeightTableWrap>
   )

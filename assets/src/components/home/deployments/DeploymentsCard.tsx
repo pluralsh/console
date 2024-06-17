@@ -32,7 +32,7 @@ export function DeploymentsCard() {
     {
       queryHook: useServiceDeploymentsQuery,
       pageSize: SERVICES_QUERY_PAGE_SIZE,
-      queryKey: 'serviceDeployments',
+      keyPath: ['serviceDeployments'],
     },
     {
       status: ServiceDeploymentStatus.Failed,

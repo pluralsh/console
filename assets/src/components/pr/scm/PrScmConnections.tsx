@@ -48,7 +48,7 @@ export default function ScmConnections() {
   } = useFetchPaginatedData({
     queryHook: useScmConnectionsQuery,
     pageSize: PR_QUERY_PAGE_SIZE,
-    queryKey: 'scmConnections',
+    keyPath: ['scmConnections'],
   })
 
   useSetPageHeaderContent(

@@ -51,7 +51,7 @@ export default function ScmWebhooks() {
   } = useFetchPaginatedData({
     queryHook: useScmWebhooksQuery,
     pageSize: SCM_WEBHOOKS_Q_VARS.first,
-    queryKey: 'scmWebhooks',
+    keyPath: ['scmWebhooks'],
   })
 
   useSetPageHeaderContent(

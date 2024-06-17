@@ -1,5 +1,5 @@
 import { Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { ComponentProps, useCallback, useMemo } from 'react'
+import { ComponentProps, useMemo } from 'react'
 
 import {
   AuthMethod,
@@ -19,8 +19,6 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 
 import { useTheme } from 'styled-components'
 
-import { extendConnection } from 'utils/graphql'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import KickButton from 'components/utils/KickButton'
@@ -28,6 +26,8 @@ import KickButton from 'components/utils/KickButton'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import { SERVICES_QUERY_PAGE_SIZE } from '../services/Services'
+
+import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
 import { GlobalServiceDetailTable } from './GlobalServiceDetailTable'
 import GlobalServiceSidecar from './GlobalServiceSidecar'
@@ -74,47 +74,17 @@ export default function GlobalServiceDetailView() {
   const theme = useTheme()
   const serviceId = params[GLOBAL_SERVICE_PARAM_ID]
 
-  const queryResult = useGetServiceDataQuery({
-    variables: {
-      first: SERVICES_QUERY_PAGE_SIZE,
-      serviceId: serviceId || '',
-    },
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
-  const {
-    error,
-    fetchMore,
-    loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: useGetServiceDataQuery,
+        pageSize: SERVICES_QUERY_PAGE_SIZE,
+        keyPath: ['globalService', 'services'],
+      },
+      { serviceId: serviceId ?? '' }
+    )
 
   const globalService = data?.globalService
-  const pageInfo = globalService?.services?.pageInfo
-
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) => {
-        if (!prev.globalService) return prev
-
-        return {
-          ...prev,
-          globalService: extendConnection(
-            prev.globalService,
-            fetchMoreResult.globalService?.services,
-            'services'
-          ),
-        }
-      },
-    })
-  }, [fetchMore, pageInfo?.endCursor])
 
   useSetBreadcrumbs(
     useMemo(
@@ -151,8 +121,10 @@ export default function GlobalServiceDetailView() {
           <GlobalServiceDetailTable
             data={data}
             error={error}
+            hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
-            loading={loading}
+            isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
           />
           <div
             css={{

@@ -155,7 +155,7 @@ export default function Restores() {
     {
       queryHook: useClusterRestoresQuery,
       pageSize: QUERY_PAGE_SIZE,
-      queryKey: 'clusterRestores',
+      keyPath: ['clusterRestores'],
     },
     {
       clusterId,

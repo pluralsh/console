@@ -1,7 +1,10 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { VirtualItem } from '@tanstack/react-virtual'
-import { extendConnection } from 'utils/graphql'
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
+import { extendConnection, updateNestedConnection } from 'utils/graphql'
+import {
+  reduceNestedData,
+  useSlicePolling,
+} from 'components/utils/tableFetchHelpers'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   ErrorPolicy,
@@ -21,7 +24,7 @@ type GenericQueryHook<TQueryType, TVariables extends OperationVariables> = (
 type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   queryHook: GenericQueryHook<TQueryType, TVariables>
   pageSize?: number
-  queryKey: string
+  keyPath: string[]
   pollInterval?: number
   errorPolicy?: ErrorPolicy
 }
@@ -40,6 +43,11 @@ export function useFetchPaginatedData<
       }
     | undefined
   >()
+
+  const queryKey = useMemo(
+    () => options.keyPath[options.keyPath.length - 1],
+    [options.keyPath]
+  )
 
   const queryResult = options.queryHook({
     variables: {
@@ -61,28 +69,38 @@ export function useFetchPaginatedData<
   } = queryResult
 
   const data = currentData || previousData
-  const pageInfo = currentData?.[options.queryKey]?.pageInfo
+  const { pageInfo, reducedQueryResult } = useMemo(() => {
+    const reducedData = reduceNestedData(options.keyPath, currentData)
 
-  const { refetch } = useSlicePolling(queryResult, {
+    return {
+      pageInfo: reducedData?.[queryKey]?.pageInfo,
+      reducedQueryResult: { ...queryResult, data: reducedData as TQueryType },
+    }
+  }, [currentData, options.keyPath, queryKey, queryResult])
+
+  const { refetch } = useSlicePolling(reducedQueryResult, {
     virtualSlice,
     pageSize: options.pageSize ?? DEFAULT_PAGE_SIZE,
-    key: options.queryKey,
     interval: options.pollInterval || POLL_INTERVAL,
+    keyPath: options.keyPath,
   })
 
   const fetchNextPage = useCallback(() => {
     if (pageInfo?.endCursor) {
       fetchMore({
         variables: { after: pageInfo.endCursor },
-        updateQuery: (prev, { fetchMoreResult }) =>
-          extendConnection(
-            prev as Partial<Record<string, any>>,
-            fetchMoreResult[options.queryKey],
-            options.queryKey
-          ),
+        updateQuery: (prev, { fetchMoreResult }) => {
+          const newConnection = extendConnection(
+            reduceNestedData(options.keyPath, prev),
+            reduceNestedData(options.keyPath, fetchMoreResult)[queryKey],
+            queryKey
+          )
+
+          return updateNestedConnection(options.keyPath, prev, newConnection)
+        },
       })
     }
-  }, [fetchMore, pageInfo, options.queryKey])
+  }, [pageInfo, fetchMore, options.keyPath, queryKey])
 
   return {
     data,

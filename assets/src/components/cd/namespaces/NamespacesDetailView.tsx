@@ -1,4 +1,4 @@
-import { ComponentProps, useCallback, useMemo, useRef } from 'react'
+import { ComponentProps, useMemo, useRef } from 'react'
 import {
   Chip,
   EmptyState,
@@ -22,13 +22,13 @@ import { Title1H1 } from 'components/utils/typography/Text'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
 
-import { extendConnection } from 'utils/graphql'
-
 import { Flex } from 'honorable'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
 import { SERVICES_QUERY_PAGE_SIZE } from '../services/Services'
+
+import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
 import { NamespacesDetailTable } from './NamespacesDetailTable'
 import NamespaceSidecar from './NamespaceSidecar'
@@ -63,48 +63,18 @@ export default function NamespacesDetailView() {
   const namespaceId = params[NAMESPACES_PARAM_ID]
   const titleRef = useRef<HTMLHeadingElement | null>(null)
 
-  const queryResult = useGetManagedNamespaceQuery({
-    variables: {
-      first: SERVICES_QUERY_PAGE_SIZE,
-      namespaceId: namespaceId || '',
-    },
-    fetchPolicy: 'cache-and-network',
-    // Important so loading will be updated on fetchMore to send to Table
-    notifyOnNetworkStatusChange: true,
-  })
-  const {
-    error,
-    fetchMore,
-    loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: useGetManagedNamespaceQuery,
+        pageSize: SERVICES_QUERY_PAGE_SIZE,
+        keyPath: ['managedNamespace', 'services'],
+      },
+      { namespaceId: namespaceId ?? '' }
+    )
 
   const managedNamespace = data?.managedNamespace
-  const services = managedNamespace?.services?.edges
-  const pageInfo = managedNamespace?.services?.pageInfo
-
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) => {
-        if (!prev.managedNamespace) return prev
-
-        return {
-          ...prev,
-          managedNamespace: extendConnection(
-            prev.managedNamespace,
-            fetchMoreResult.managedNamespace?.services,
-            'services'
-          ),
-        }
-      },
-    })
-  }, [fetchMore, pageInfo?.endCursor])
+  const services = data?.managedNamespace?.services?.edges
 
   useSetBreadcrumbs(
     useMemo(
@@ -148,8 +118,10 @@ export default function NamespacesDetailView() {
             <NamespacesDetailTable
               data={data}
               error={error}
+              hasNextPage={pageInfo?.hasNextPage}
               fetchNextPage={fetchNextPage}
-              loading={loading}
+              isFetchingNextPage={loading}
+              onVirtualSliceChange={setVirtualSlice}
             />
             <NamespaceSidecar namespace={managedNamespace} />
           </Flex>

@@ -58,7 +58,7 @@ export default function ObjectStores() {
   } = useFetchPaginatedData({
     queryHook: useObjectStoresQuery,
     pageSize: QUERY_PAGE_SIZE,
-    queryKey: 'objectStores',
+    keyPath: ['objectStores'],
   })
 
   const objectStores = data?.objectStores

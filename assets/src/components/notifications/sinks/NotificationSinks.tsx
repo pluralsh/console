@@ -56,7 +56,7 @@ export default function AutomationPr() {
   } = useFetchPaginatedData({
     queryHook: useNotificationSinksQuery,
     pageSize: QUERY_PAGE_SIZE,
-    queryKey: 'notificationSinks',
+    keyPath: ['notificationSinks'],
   })
 
   useSetPageHeaderContent(useMemo(() => <CreateSinkButton />, []))

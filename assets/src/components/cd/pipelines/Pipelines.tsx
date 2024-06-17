@@ -48,7 +48,7 @@ export default function PipelineList() {
       {
         queryHook: usePipelinesQuery,
         pageSize: QUERY_PAGE_SIZE,
-        queryKey: 'pipelines',
+        keyPath: ['pipelines'],
       },
       {
         q: debouncedSearchString,

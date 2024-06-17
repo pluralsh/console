@@ -26,7 +26,7 @@ export function GroupsList({ q }: any) {
     useFetchPaginatedData(
       {
         queryHook: useGroupsQuery,
-        queryKey: 'groups',
+        keyPath: ['groups'],
         pageSize: GROUPS_QUERY_PAGE_SIZE,
       },
       { q }

@@ -10,19 +10,13 @@ import {
 
 import { useObservabilityProvidersQuery } from 'generated/graphql'
 
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
-
-import { extendConnection } from 'utils/graphql'
-
-import { useSlicePolling } from 'components/utils/tableFetchHelpers'
-
-import { VirtualItem } from '@tanstack/react-virtual'
+import { ComponentProps, useMemo, useState } from 'react'
 
 import { GqlError } from 'components/utils/Alert'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
-import { POLL_INTERVAL } from '../../ContinuousDeployment'
+import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import { getGlobalSettingsBreadcrumbs } from '../GlobalSettings'
 
@@ -44,51 +38,18 @@ function ObservabilityProviders() {
     )
   )
 
-  const [virtualSlice, _setVirtualSlice] = useState<
-    | {
-        start: VirtualItem | undefined
-        end: VirtualItem | undefined
-      }
-    | undefined
-  >()
-  const queryResult = useObservabilityProvidersQuery({
-    fetchPolicy: 'cache-and-network',
-    variables: {
-      first: OBSERVABILITY_PROVIDER_QUERY_PAGE_SIZE,
-    },
-  })
   const {
-    error,
-    fetchMore,
+    data,
     loading,
-    data: currentData,
-    previousData,
-  } = queryResult
-  const data = currentData || previousData
-
-  const pageInfo = data?.observabilityProviders?.pageInfo
-
-  const fetchNextPage = useCallback(() => {
-    if (!pageInfo?.endCursor) {
-      return
-    }
-
-    fetchMore({
-      variables: { after: pageInfo.endCursor },
-      updateQuery: (prev, { fetchMoreResult }) =>
-        extendConnection(
-          prev,
-          fetchMoreResult.observabilityProviders,
-          'observabilityProviders'
-        ),
-    })
-  }, [fetchMore, pageInfo?.endCursor])
-
-  const { refetch } = useSlicePolling(queryResult, {
-    virtualSlice,
+    error,
+    refetch,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData({
+    queryHook: useObservabilityProvidersQuery,
     pageSize: OBSERVABILITY_PROVIDER_QUERY_PAGE_SIZE,
-    key: 'observabilityProviders',
-    interval: POLL_INTERVAL,
+    keyPath: ['observabilityProviders'],
   })
 
   if (error) {
@@ -113,6 +74,7 @@ function ObservabilityProviders() {
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
+          onVirtualSliceChange={setVirtualSlice}
           css={{
             maxHeight: 'unset',
             height: '100%',

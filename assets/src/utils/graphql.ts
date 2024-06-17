@@ -45,6 +45,31 @@ export function extendConnection<
 }
 
 /**
+ *
+ */
+export function updateNestedConnection<TData>(
+  keyPath: string[],
+  fullQuery: TData,
+  newConnection: any
+): TData {
+  if (keyPath.length < 2) return newConnection
+
+  const res = { ...fullQuery }
+  let cur = res
+
+  for (let i = 0; i < keyPath.length - 2; i++) {
+    const key = keyPath[i]
+
+    if (!cur[key]) cur[key] = {}
+    cur = cur[key]
+  }
+
+  cur[keyPath[keyPath.length - 2]] = newConnection
+
+  return res
+}
+
+/**
  * Update a connection where incoming values overwrite previous existing values
  */
 export function updateConnection<
