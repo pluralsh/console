@@ -16,20 +16,45 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
+    - name: Install dependencies
+      run: |
+        # Install pyenv dependencies
+        sudo apt-get update
+        sudo apt-get install -y make build-essential libssl-dev zlib1g-dev \
+            libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
+            libncurses5-dev libncursesw5-dev xz-utils tk-dev libffi-dev \
+            liblzma-dev python-openssl git
+
     - name: Install pyenv
       run: |
         curl https://pyenv.run | bash
         echo 'export PYENV_ROOT="$HOME/.pyenv"' >> $HOME/.bashrc
         echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> $HOME/.bashrc
-        echo 'eval "$(pyenv virtualenv-init -)"' >> $HOME/.bashrc
-        cat $HOME/.bashrc
-
+        echo 'eval "$(pyenv init --path)"' >> $HOME/.bashrc
+        echo 'eval "$(pyenv init -)"' >> $HOME/.bashrc
+        source $HOME/.bashrc
+    
+    - name: Set up Python environment
+      run: |
+        export PYENV_ROOT="$HOME/.pyenv"
+        export PATH="$PYENV_ROOT/bin:$PATH"
+        eval "$(pyenv init --path)"
+        eval "$(pyenv init -)"
+        source utils/compatibility/setup_env.sh
+    
     - name: Run script
       run: |
-        source $HOME/.bashrc
         cd utils/compatibility
         source setup_env.sh
         python main.py
+    
+    - name: Commit Changes
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+        git add .
+        git commit -m 'Automated changes to compatibility matrix ${{ github.run_id }}'
+      continue-on-error: true  # Continue even if there are no changes to commit
 
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v5
