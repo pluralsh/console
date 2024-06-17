@@ -17,3 +17,4 @@ names:
 - strimzi-kafka
 - contour
 - keda
+- harbor
