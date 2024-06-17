@@ -181,6 +181,7 @@ spec:
                       - FILE
                       - FUNCTION
                       - PASSWORD
+                      - ENUM
                       type: string
                   required:
                   - name
