@@ -1,10 +1,4 @@
-import {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useState,
-} from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { FormField, Input, usePrevious } from '@pluralsh/design-system'
 import { FileDrop, FileDropFile } from 'components/utils/FileDrop'
 import { InlineLink } from 'components/utils/typography/InlineLink'
@@ -18,7 +12,7 @@ function SshKeyUpload({
   setPrivateKey,
 }: {
   privateKey?: Nullable<string>
-  setPrivateKey: Dispatch<SetStateAction<Nullable<string>>>
+  setPrivateKey: (value: Nullable<string>) => void
 }) {
   const [fileName, setFileName] = useState<string | undefined>()
   const [fileError, setFileError] = useState<Nullable<string>>()
