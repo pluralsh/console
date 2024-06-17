@@ -113,6 +113,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :type,                non_null(:stack_type), description: "A type for the stack, specifies the tool to use to apply it"
     field :git,                 non_null(:git_ref), description: "reference w/in the repository where the IaC lives"
     field :paused,              :boolean, description: "whether the stack is actively tracking changes in git"
+    field :status,              non_null(:stack_status), description: "The status of the last run of the stack"
     field :job_spec,            :job_gate_spec, description: "optional k8s job configuration for the job that will apply this stack"
     field :configuration,       non_null(:stack_configuration), description: "version/image config for the tool you're using"
     field :approval,            :boolean, description: "whether to require approval"

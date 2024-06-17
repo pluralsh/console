@@ -1,7 +1,7 @@
 defmodule Console.Schema.ScmConnection do
   use Piazza.Ecto.Schema
   alias Piazza.Ecto.EncryptedString
-  alias Console.Deployments.Git.Utils
+  import Console.Deployments.Git.Utils
 
   defenum Type, github: 0, gitlab: 1
 
@@ -39,20 +39,13 @@ defmodule Console.Schema.ScmConnection do
     |> cast_embed(:github, with: &github_changeset/2)
     |> unique_constraint(:name)
     |> validate_required([:name, :type])
-    |> normalize_pk()
+    |> validate_private_key(:signing_private_key)
   end
 
   defp github_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(app_id installation_id private_key)a)
     |> validate_required(~w(app_id installation_id private_key)a)
-  end
-
-  defp normalize_pk(cs) do
-    case get_change(cs, :signing_private_key) do
-      key when is_binary(key) ->
-        put_change(cs, :signing_private_key, Utils.normalize_pk(key))
-      _ -> cs
-    end
+    |> validate_private_key(:private_key)
   end
 end

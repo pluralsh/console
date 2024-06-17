@@ -1218,6 +1218,9 @@ type InfrastructureStack {
   "whether the stack is actively tracking changes in git"
   paused: Boolean
 
+  "The status of the last run of the stack"
+  status: StackStatus!
+
   "optional k8s job configuration for the job that will apply this stack"
   jobSpec: JobGateSpec
 
