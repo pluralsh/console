@@ -91,7 +91,7 @@ export default function Stacks() {
       {
         queryHook: useStacksQuery,
         pageSize: QUERY_PAGE_SIZE,
-        queryKey: 'infrastructureStacks',
+        keyPath: ['infrastructureStacks'],
       },
       {
         q: debouncedSearchString,

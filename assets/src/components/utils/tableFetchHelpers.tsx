@@ -1,87 +1,39 @@
-import { InputMaybe, PageInfoFragment } from 'generated/graphql'
-import {
-  Connection,
-  PaginatedResult,
-  extendConnection,
-  updateConnection,
-} from 'utils/graphql'
-import { ApolloQueryResult, QueryResult } from '@apollo/client'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { QueryResult } from '@apollo/client'
 import { VirtualItem } from '@tanstack/react-virtual'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import { InputMaybe } from 'generated/graphql'
 import { usePrevious } from 'honorable'
-import { FetchMoreQueryOptions } from 'apollo-boost'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
-type FetchMoreT<
-  TData extends Partial<
-    Record<K, (Connection<any> & PaginatedResult<any>) | null>
-  >,
-  K extends string,
-  TVariables extends { after: string | null | undefined } = {
-    after: string | null | undefined
-  },
-> = (
-  fetchMoreOptions: { variables: TVariables } & {
-    updateQuery?: (
-      previousQueryResult: TData,
-      options: {
-        fetchMoreResult: TData
-      }
-    ) => TData
-  }
-) => Promise<ApolloQueryResult<TData>>
-
-type FetchSliceOptions<K extends string> = {
-  key: K
+type FetchSliceOptions = {
+  keyPath: string[]
   virtualSlice:
     | { start: VirtualItem | undefined; end: VirtualItem | undefined }
     | undefined
   pageSize: number
 }
 
-export function fetchMoreAndExtend<
-  TData extends Partial<
-    Record<K, (Connection<any> & PaginatedResult<any>) | null>
-  >,
-  K extends string,
->({
-  fetchMore,
-  pageInfo,
-  key,
-}: {
-  pageInfo: PageInfoFragment | null | undefined
-  fetchMore: FetchMoreT<TData, K>
-  key: K
-}) {
-  if (!pageInfo?.endCursor) {
-    return
-  }
-  fetchMore({
-    variables: { after: pageInfo.endCursor },
-    updateQuery: (prev, { fetchMoreResult }) => {
-      const ret = extendConnection(prev, fetchMoreResult[key], key)
-
-      return ret
-    },
-  })
-}
-
 export function useSlicePolling<
-  QData extends Partial<Record<K, any>>,
+  QData,
   QVariables extends {
     first?: InputMaybe<number> | undefined
     after?: InputMaybe<string> | undefined
   },
-  K extends string,
 >(
   queryResult: QueryResult<QData, QVariables>,
   {
     interval = POLL_INTERVAL,
     ...fetchSliceOpts
-  }: { interval?: number } & FetchSliceOptions<K>
+  }: { interval?: number } & FetchSliceOptions
 ) {
   const { data, loading, refetch: originalRefetch } = queryResult
-  const edges = data?.[fetchSliceOpts.key]?.edges
+  const edges = useMemo(() => {
+    const queryKey = fetchSliceOpts.keyPath[fetchSliceOpts.keyPath.length - 1]
+
+    return data?.[queryKey]?.edges
+  }, [data, fetchSliceOpts.keyPath])
+
   const fetchSlice = useFetchSlice(queryResult, fetchSliceOpts)
   const refetch = !fetchSliceOpts?.virtualSlice?.start?.index
     ? originalRefetch
@@ -114,45 +66,20 @@ export function useSlicePolling<
   )
 }
 
-export function fetchMoreAndUpdate<
-  QData extends Partial<Record<K, any>>,
-  QVariables extends {
-    first?: InputMaybe<number> | undefined
-    after?: InputMaybe<string> | undefined
-  },
-  K extends string,
->(
-  queryResult: Pick<QueryResult<QData, QVariables>, 'fetchMore' | 'variables'>,
-  key: K,
-  queryVariables?: FetchMoreQueryOptions<
-    QVariables,
-    'first' | 'after'
-  >['variables']
-) {
-  const first = queryVariables?.first || queryResult.variables?.first
-  const after = queryVariables?.after || queryResult.variables?.after
-
-  queryResult.fetchMore({
-    variables: { after, first },
-    updateQuery: (prev, next) =>
-      updateConnection(prev, next.fetchMoreResult[key], key),
-  })
-}
-
 export function useFetchSlice<
-  QData extends Partial<Record<K, any>>,
+  QData,
   QVariables extends {
     first?: InputMaybe<number> | undefined
     after?: InputMaybe<string> | undefined
   },
-  K extends string,
->(queryResult: QueryResult<QData, QVariables>, options: FetchSliceOptions<K>) {
-  const { virtualSlice, pageSize, key } = options
+>(queryResult: QueryResult<QData, QVariables>, options: FetchSliceOptions) {
+  const { virtualSlice, pageSize, keyPath } = options
+  const queryKey = useMemo(() => keyPath[keyPath.length - 1], [keyPath])
   const [endCursors, setEndCursors] = useState<
     { index: number; cursor: string }[]
   >([])
-  const endCursor = queryResult?.data?.[key]?.pageInfo.endCursor
-  const endCursorIndex = (queryResult?.data?.[key]?.edges?.length ?? 0) - 1
+  const endCursor = queryResult?.data?.[queryKey]?.pageInfo.endCursor
+  const endCursorIndex = (queryResult?.data?.[queryKey]?.edges?.length ?? 0) - 1
   const prevEndCursor = usePrevious(endCursor)
 
   useEffect(() => {
@@ -185,13 +112,24 @@ export function useFetchSlice<
     virtualSlice?.end?.index,
     virtualSlice?.start?.index,
   ])
+
   const { fetchMore } = queryResult
 
   return useCallback(() => {
     fetchMore({
       variables: { after, first },
-      updateQuery: (prev, next) =>
-        updateConnection(prev, next.fetchMoreResult[key], key),
+      updateQuery: (prev, { fetchMoreResult }) => {
+        const newConnection = extendConnection(
+          reduceNestedData(keyPath, prev),
+          reduceNestedData(keyPath, fetchMoreResult)[queryKey],
+          queryKey
+        )
+
+        return updateNestedConnection(keyPath, prev, newConnection)
+      },
     })
-  }, [after, first, key, fetchMore])
+  }, [fetchMore, after, first, keyPath, queryKey])
 }
+
+export const reduceNestedData = (path: string[], data: any) =>
+  path.slice(0, -1).reduce((acc, key) => acc?.[key], data)

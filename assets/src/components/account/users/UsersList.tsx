@@ -22,7 +22,7 @@ export default function UsersList() {
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      { queryHook: useUsersQuery, queryKey: 'users' },
+      { queryHook: useUsersQuery, keyPath: ['users'] },
       { q }
     )
 

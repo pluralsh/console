@@ -59,7 +59,7 @@ export default function Clusters() {
     {
       queryHook: useClustersObjectStoresQuery,
       pageSize: QUERY_PAGE_SIZE,
-      queryKey: 'clusters',
+      keyPath: ['clusters'],
     },
     {
       backups: true,

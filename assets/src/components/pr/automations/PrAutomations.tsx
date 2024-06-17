@@ -54,7 +54,7 @@ export default function AutomationPr() {
   } = useFetchPaginatedData({
     queryHook: usePrAutomationsQuery,
     pageSize: QUERY_PAGE_SIZE,
-    queryKey: 'prAutomations',
+    keyPath: ['prAutomations'],
   })
 
   useSetPageHeaderContent(

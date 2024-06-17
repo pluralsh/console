@@ -54,7 +54,7 @@ export function Policies() {
       {
         queryHook: usePolicyConstraintsQuery,
         pageSize: POLICIES_QUERY_PAGE_SIZE,
-        queryKey: 'policyConstraints',
+        keyPath: ['policyConstraints'],
       },
       policyQFilters
     )

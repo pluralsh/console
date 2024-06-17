@@ -38,7 +38,7 @@ export function NamespacesTable() {
     {
       queryHook: useManagedNamespacesQuery,
       pageSize: NAMESPACES_QUERY_PAGE_SIZE,
-      queryKey: 'managedNamespaces',
+      keyPath: ['managedNamespaces'],
     },
     { projectId }
   )

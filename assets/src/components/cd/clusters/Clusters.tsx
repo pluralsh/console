@@ -131,7 +131,7 @@ export default function Clusters() {
     {
       queryHook: useClustersQuery,
       pageSize: CLUSTERS_QUERY_PAGE_SIZE,
-      queryKey: 'clusters',
+      keyPath: ['clusters'],
     },
     {
       q: debouncedSearchString,

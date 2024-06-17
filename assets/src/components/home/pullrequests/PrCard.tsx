@@ -21,7 +21,7 @@ export function PrCard() {
     {
       queryHook: usePullRequestsQuery,
       pageSize: PR_QUERY_PAGE_SIZE,
-      queryKey: 'pullRequests',
+      keyPath: ['pullRequests'],
     },
     {
       open: true,

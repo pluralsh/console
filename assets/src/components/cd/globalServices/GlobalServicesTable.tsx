@@ -1,4 +1,4 @@
-import { ComponentProps, useEffect, useMemo } from 'react'
+import { ComponentProps, memo, useEffect, useMemo } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -23,7 +23,7 @@ import {
   columns,
 } from './GlobalService'
 
-export function GlobalServicesTable({
+function GlobalServicesTableComponent({
   setRefetch,
 }: {
   setRefetch?: (refetch: () => () => void) => void
@@ -44,7 +44,7 @@ export function GlobalServicesTable({
     {
       queryHook: useGlobalServicesQuery,
       pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
-      queryKey: 'globalServices',
+      keyPath: ['globalServices'],
     },
     { projectId }
   )
@@ -116,3 +116,5 @@ export function GlobalServicesTable({
     </div>
   )
 }
+
+export const GlobalServicesTable = memo(GlobalServicesTableComponent)

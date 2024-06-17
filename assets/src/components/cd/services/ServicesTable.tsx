@@ -1,4 +1,11 @@
-import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  ComponentProps,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
@@ -26,7 +33,7 @@ import {
   columns,
 } from './Services'
 
-export function ServicesTable({
+function ServicesTableComponent({
   setRefetch,
   clusterId: clusterIdProp,
 }: {
@@ -55,7 +62,7 @@ export function ServicesTable({
     {
       queryHook: useServiceDeploymentsQuery,
       pageSize: SERVICES_QUERY_PAGE_SIZE,
-      queryKey: 'serviceDeployments',
+      keyPath: ['serviceDeployments'],
     },
     {
       q: queryString,
@@ -172,3 +179,5 @@ export function ServicesTable({
     </div>
   )
 }
+
+export const ServicesTable = memo(ServicesTableComponent)

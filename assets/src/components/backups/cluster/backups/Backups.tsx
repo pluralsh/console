@@ -68,7 +68,7 @@ export default function Backups() {
     {
       queryHook: useClusterBackupsQuery,
       pageSize: QUERY_PAGE_SIZE,
-      queryKey: 'clusterBackups',
+      keyPath: ['clusterBackups'],
     },
     {
       clusterId,

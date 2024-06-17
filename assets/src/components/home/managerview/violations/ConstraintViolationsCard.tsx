@@ -33,7 +33,7 @@ export function ConstraintViolationsCard() {
   } = useFetchPaginatedData({
     queryHook: usePolicyConstraintsQuery,
     pageSize: POLICIES_QUERY_PAGE_SIZE,
-    queryKey: 'policyConstraints',
+    keyPath: ['policyConstraints'],
   })
 
   const { data: chartData, error: chartError } = usePolicyStatisticsQuery({

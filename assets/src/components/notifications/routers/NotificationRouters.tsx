@@ -76,7 +76,7 @@ export default function NotificationRouters() {
     queryHook: useNotificationRoutersQuery,
     pageSize: QUERY_PAGE_SIZE,
     errorPolicy: 'all',
-    queryKey: 'notificationRouters',
+    keyPath: ['notificationRouters'],
   })
 
   useSetPageHeaderContent(useMemo(() => <CreateRouterButton />, []))
