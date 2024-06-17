@@ -26,6 +26,7 @@ jobs:
     
     - name: Run compatibility matrix updater
       run: |
+        pyenv install --list
         cd $SCRIPTS_DIR
         source setup_env.sh
         python main.py    
