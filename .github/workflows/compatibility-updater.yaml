@@ -22,7 +22,7 @@ jobs:
     - name: setup pyenv
       uses: "gabrielfalcao/pyenv-action@v18"
       with:
-          default: 3.12
+          default: 3.12.0
     
     - name: Run compatibility matrix updater
       run: |
