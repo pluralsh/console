@@ -240,9 +240,11 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		DocsPath:        service.Spec.DocsPath,
 		Protect:         &service.Spec.Protect,
 		RepositoryID:    repositoryId,
+		Git:             service.Spec.Git.Attributes(),
 		ContextBindings: make([]*console.ContextBindingAttributes, 0),
-		Templated:       lo.ToPtr(true),
+		Templated:       service.Spec.TemplatedAttribute(),
 		Kustomize:       service.Spec.Kustomize.Attributes(),
+		Dependencies:    service.Spec.DependenciesAttribute(),
 		Imports:         make([]*console.ServiceImportAttributes, 0),
 		SyncConfig:      syncConfigAttributes,
 	}
@@ -254,33 +256,6 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
 	}
 
-	if len(service.Spec.Dependencies) > 0 {
-		attr.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
-
-		for _, dep := range service.Spec.Dependencies {
-			attr.Dependencies = append(attr.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
-		}
-	}
-
-	if service.Spec.Templated != nil {
-		attr.Templated = service.Spec.Templated
-	}
-
-	for _, contextName := range service.Spec.Contexts {
-		sc, err := r.ConsoleClient.GetServiceContext(contextName)
-		if err != nil {
-			return nil, err
-		}
-		attr.ContextBindings = append(attr.ContextBindings, &console.ContextBindingAttributes{ContextID: sc.ID})
-	}
-
-	if service.Spec.Git != nil {
-		attr.Git = &console.GitRefAttributes{
-			Ref:    service.Spec.Git.Ref,
-			Folder: service.Spec.Git.Folder,
-			Files:  service.Spec.Git.Files,
-		}
-	}
 	if service.Spec.ConfigurationRef != nil {
 		attr.Configuration = make([]*console.ConfigAttributes, 0)
 		secret := &corev1.Secret{}
@@ -297,6 +272,15 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			})
 		}
 	}
+
+	for _, contextName := range service.Spec.Contexts {
+		sc, err := r.ConsoleClient.GetServiceContext(contextName)
+		if err != nil {
+			return nil, err
+		}
+		attr.ContextBindings = append(attr.ContextBindings, &console.ContextBindingAttributes{ContextID: sc.ID})
+	}
+
 	if service.Spec.Helm != nil {
 		attr.Helm = &console.HelmConfigAttributes{
 			Release:     service.Spec.Helm.Release,

@@ -166,6 +166,27 @@ type ServiceSpec struct {
 	Detach bool `json:"detach,omitempty"`
 }
 
+func (ss *ServiceSpec) DependenciesAttribute() []*console.ServiceDependencyAttributes {
+	if len(ss.Dependencies) < 1 {
+		return nil
+	}
+
+	deps := make([]*console.ServiceDependencyAttributes, 0)
+	for _, dep := range ss.Dependencies {
+		deps = append(deps, &console.ServiceDependencyAttributes{Name: dep.Name})
+	}
+
+	return deps
+}
+
+func (ss *ServiceSpec) TemplatedAttribute() *bool {
+	if ss.Templated == nil {
+		return lo.ToPtr(true)
+	}
+
+	return ss.Templated
+}
+
 type ServiceStatus struct {
 	Status `json:",inline"`
 

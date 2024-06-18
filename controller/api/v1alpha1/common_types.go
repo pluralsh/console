@@ -148,6 +148,7 @@ func (in *GitRef) Attributes() *console.GitRefAttributes {
 	return &console.GitRefAttributes{
 		Ref:    in.Ref,
 		Folder: in.Folder,
+		Files:  in.Files,
 	}
 }
 
