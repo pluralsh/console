@@ -1,0 +1,36 @@
+name: Utility / Compatibility Matrix Update
+
+on:
+  schedule:
+    # Runs at 00:00 UTC every day
+    - cron: '0 0 * * *'
+
+jobs:
+  run-compatibility-updater:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: setup pyenv
+      uses: "gabrielfalcao/pyenv-action@v18"
+    
+    - name: Run compatibility matrix updater
+      run: |
+        cd utils/compatibility
+        source setup_env.sh
+        python main.py    
+
+    - name: Get current date
+      id: date
+      run: echo "DATE=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+    
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        title: Compatibility Matrix Update ${{ steps.date.outputs.DATE }}
+        body: Automated Pull Request to update compatibility matrix
+        commit-message: Updated compatibility matrix ${{ steps.date.outputs.DATE }}
+        branch: compatibility-matrix-update-${{ steps.date.outputs.DATE }}
+        base: master
