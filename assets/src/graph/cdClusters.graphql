@@ -162,6 +162,7 @@ fragment ClustersRow on Cluster {
     }
   }
   version
+  kubeletVersion
   tags {
     name
     value

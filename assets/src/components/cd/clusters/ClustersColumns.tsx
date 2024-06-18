@@ -147,7 +147,24 @@ export const ColHealth = columnHelper.accessor(({ node }) => node, {
 
 export const ColVersion = columnHelper.accessor(({ node }) => node, {
   id: 'version',
-  header: 'Deployed version',
+  header: () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const theme = useTheme()
+
+    return (
+      <div>
+        <div>Deployed version</div>
+        <div
+          css={{
+            ...theme.partials.text.caption,
+            color: theme.colors['text-light'],
+          }}
+        >
+          Least kubelet version
+        </div>
+      </div>
+    )
+  },
   cell: function Cell({
     row: {
       original: { node },
@@ -158,17 +175,18 @@ export const ColVersion = columnHelper.accessor(({ node }) => node, {
         {node?.currentVersion && (
           <StackedText
             first={
-              <TabularNumbers>
-                Current: {toNiceVersion(node?.currentVersion)}
-              </TabularNumbers>
+              <div css={{ display: 'flex', flexDirection: 'column' }}>
+                <TabularNumbers>
+                  Current: {toNiceVersion(node?.currentVersion)}
+                </TabularNumbers>
+                <TabularNumbers>
+                  {node?.self || !node?.version
+                    ? null
+                    : `Target: ${toNiceVersion(node?.version)}`}
+                </TabularNumbers>
+              </div>
             }
-            second={
-              node?.self || !node?.version ? null : (
-                <TabularNumbers>{`Target: ${toNiceVersion(
-                  node?.version
-                )}`}</TabularNumbers>
-              )
-            }
+            second={toNiceVersion(node?.kubeletVersion)}
           />
         )}
         {!node?.currentVersion && <>-</>}
