@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 
@@ -229,6 +228,11 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 }
 
 func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
+	syncConfigAttributes, err := service.Spec.SyncConfig.Attributes()
+	if err != nil {
+		return nil, err
+	}
+
 	attr := &console.ServiceDeploymentAttributes{
 		Name:            service.ConsoleName(),
 		Namespace:       service.ConsoleNamespace(),
@@ -238,14 +242,24 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		RepositoryID:    repositoryId,
 		ContextBindings: make([]*console.ContextBindingAttributes, 0),
 		Templated:       lo.ToPtr(true),
+		Kustomize:       service.Spec.Kustomize.Attributes(),
 		Imports:         make([]*console.ServiceImportAttributes, 0),
+		SyncConfig:      syncConfigAttributes,
+	}
+
+	if service.Spec.Bindings != nil {
+		attr.ReadBindings = algorithms.Map(service.Spec.Bindings.Read,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attr.WriteBindings = algorithms.Map(service.Spec.Bindings.Write,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
 	}
 
 	if len(service.Spec.Dependencies) > 0 {
 		attr.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
-	}
-	for _, dep := range service.Spec.Dependencies {
-		attr.Dependencies = append(attr.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
+
+		for _, dep := range service.Spec.Dependencies {
+			attr.Dependencies = append(attr.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
+		}
 	}
 
 	if service.Spec.Templated != nil {
@@ -260,20 +274,6 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		attr.ContextBindings = append(attr.ContextBindings, &console.ContextBindingAttributes{ContextID: sc.ID})
 	}
 
-	if service.Spec.Bindings != nil {
-		attr.ReadBindings = make([]*console.PolicyBindingAttributes, 0)
-		attr.WriteBindings = make([]*console.PolicyBindingAttributes, 0)
-		attr.ReadBindings = algorithms.Map(service.Spec.Bindings.Read,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attr.WriteBindings = algorithms.Map(service.Spec.Bindings.Write,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-	}
-
-	if service.Spec.Kustomize != nil {
-		attr.Kustomize = &console.KustomizeAttributes{
-			Path: service.Spec.Kustomize.Path,
-		}
-	}
 	if service.Spec.Git != nil {
 		attr.Git = &console.GitRefAttributes{
 			Ref:    service.Spec.Git.Ref,
@@ -342,38 +342,6 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 
 		if service.Spec.Helm.Chart != nil {
 			attr.Helm.Chart = service.Spec.Helm.Chart
-		}
-	}
-	if service.Spec.SyncConfig != nil {
-		var annotations *string
-		var labels *string
-		createNamespace := true
-		if service.Spec.SyncConfig.CreateNamespace != nil {
-			createNamespace = *service.Spec.SyncConfig.CreateNamespace
-		}
-
-		if service.Spec.SyncConfig.Annotations != nil {
-			result, err := json.Marshal(service.Spec.SyncConfig.Annotations)
-			if err != nil {
-				return nil, err
-			}
-			rawAnnotations := string(result)
-			annotations = &rawAnnotations
-		}
-		if service.Spec.SyncConfig.Labels != nil {
-			result, err := json.Marshal(service.Spec.SyncConfig.Labels)
-			if err != nil {
-				return nil, err
-			}
-			rawLabels := string(result)
-			labels = &rawLabels
-		}
-		attr.SyncConfig = &console.SyncConfigAttributes{
-			CreateNamespace: &createNamespace,
-			NamespaceMetadata: &console.MetadataAttributes{
-				Labels:      labels,
-				Annotations: annotations,
-			},
 		}
 	}
 

@@ -1,6 +1,10 @@
 package v1alpha1
 
 import (
+	"encoding/json"
+
+	console "github.com/pluralsh/console-client-go"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +25,14 @@ const (
 
 type ServiceKustomize struct {
 	Path string `json:"path"`
+}
+
+func (sk *ServiceKustomize) Attributes() *console.KustomizeAttributes {
+	if sk == nil {
+		return nil
+	}
+
+	return &console.KustomizeAttributes{Path: sk.Path}
 }
 
 type ServiceHelm struct {
@@ -66,6 +78,43 @@ type SyncConfigAttributes struct {
 
 	// +kubebuilder:validation:Optional
 	Annotations map[string]string `json:"annotations,omitempty"`
+}
+
+func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, error) {
+	if sca == nil {
+		return nil, nil
+	}
+
+	createNamespace := true
+	if sca.CreateNamespace != nil {
+		createNamespace = *sca.CreateNamespace
+	}
+
+	var annotations *string
+	if sca.Annotations != nil {
+		result, err := json.Marshal(sca.Annotations)
+		if err != nil {
+			return nil, err
+		}
+		annotations = lo.ToPtr(string(result))
+	}
+
+	var labels *string
+	if sca.Labels != nil {
+		result, err := json.Marshal(sca.Labels)
+		if err != nil {
+			return nil, err
+		}
+		labels = lo.ToPtr(string(result))
+	}
+
+	return &console.SyncConfigAttributes{
+		CreateNamespace: &createNamespace,
+		NamespaceMetadata: &console.MetadataAttributes{
+			Labels:      labels,
+			Annotations: annotations,
+		},
+	}, nil
 }
 
 type ServiceSpec struct {
