@@ -238,6 +238,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		RepositoryID:    repositoryId,
 		ContextBindings: make([]*console.ContextBindingAttributes, 0),
 		Templated:       lo.ToPtr(true),
+		Imports:         make([]*console.ServiceImportAttributes, 0),
 	}
 
 	if len(service.Spec.Dependencies) > 0 {
