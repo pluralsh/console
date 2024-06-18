@@ -1,7 +1,52 @@
 apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: mgmt
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: GitRepository
+metadata:
+  name: test
+  namespace: default
+spec:
+  url: https://github.com/zreigz/tf-hello.git
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: test-secret
+  namespace: default
+data:
+  secret: dGVzdA==
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: InfrastructureStack
+metadata:
+  name: test-stack
+  namespace: default
+spec:
+  name: "test"
+  type: TERRAFORM
+  configuration:
+    version: "sha-ae2663f-terraform-1.8.2"
+    image: "ghcr.io/pluralsh/harness"
+  repositoryRef:
+    name: test
+    namespace: default
+  clusterRef:
+    name: mgmt
+    namespace: default
+  git:
+    ref: main
+    folder: terraform
+---
+apiVersion: deployments.plural.sh/v1alpha1
 kind: ServiceDeployment
 metadata:
-  name: k8saws
+  name: test
   namespace: default
 spec:
   version: 0.0.1
@@ -10,9 +55,13 @@ spec:
     ref: master
   repositoryRef:
     kind: GitRepository
-    name: k8shelm
+    name: test
     namespace: default
   clusterRef:
     kind: Cluster
-    name: aws
+    name: mgmt
     namespace: default
+  imports:
+    - kind: InfrastructureStack
+      name: test-stack
+      namespace: default
