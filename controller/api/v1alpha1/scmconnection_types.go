@@ -1,10 +1,14 @@
 package v1alpha1
 
 import (
+	"context"
+	"fmt"
+
 	console "github.com/pluralsh/console-client-go"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 func init() {
@@ -46,8 +50,8 @@ func (s *ScmConnection) ConsoleName() string {
 	return s.Spec.Name
 }
 
-func (s *ScmConnection) Attributes(token *string) console.ScmConnectionAttributes {
-	return console.ScmConnectionAttributes{
+func (s *ScmConnection) Attributes(ctx context.Context, kubeClient client.Client, token *string) (*console.ScmConnectionAttributes, error) {
+	attr := &console.ScmConnectionAttributes{
 		Name:     s.ConsoleName(),
 		Type:     s.Spec.Type,
 		Username: s.Spec.Username,
@@ -55,6 +59,25 @@ func (s *ScmConnection) Attributes(token *string) console.ScmConnectionAttribute
 		APIURL:   s.Spec.APIUrl,
 		Token:    token,
 	}
+	if s.Spec.Github != nil {
+		attr.Github = &console.GithubAppAttributes{
+			AppID:          s.Spec.Github.AppID,
+			InstallationID: s.Spec.Github.InstallationId,
+		}
+		if s.Spec.Github.PrivateKeyRef != nil {
+			secret := new(corev1.Secret)
+			if err := kubeClient.Get(ctx, client.ObjectKey{Name: s.Spec.Github.PrivateKeyRef.Name, Namespace: s.Namespace}, secret); err != nil {
+				return nil, err
+			}
+			secretKey, ok := secret.Data[s.Spec.Github.PrivateKeyRef.Key]
+			if !ok {
+				return nil, fmt.Errorf("could not find secret by key %s", s.Spec.Github.PrivateKeyRef.Key)
+			}
+			attr.Github.PrivateKey = string(secretKey)
+		}
+	}
+
+	return attr, nil
 }
 
 func (s *ScmConnection) Diff(hasher Hasher) (changed bool, sha string, err error) {
@@ -93,4 +116,13 @@ type ScmConnectionSpec struct {
 	// APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl.
 	// +kubebuilder:validation:Optional
 	APIUrl *string `json:"apiUrl,omitempty"`
+	// +kubebuilder:validation:Optional
+	Github *ScmGithubConnection `json:"github,omitempty"`
+}
+
+type ScmGithubConnection struct {
+	AppID          string `json:"appId"`
+	InstallationId string `json:"installationId"`
+	// +kubebuilder:validation:Optional
+	PrivateKeyRef *corev1.SecretKeySelector `json:"privateKeyRef,omitempty"`
 }
