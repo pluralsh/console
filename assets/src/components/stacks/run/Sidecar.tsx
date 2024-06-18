@@ -7,12 +7,12 @@ import { Link } from 'react-router-dom'
 
 import { StackRun } from '../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
-import { StackRunStatusChip } from '../common/StackRunStatusChip'
 import StackApprovalChip from '../common/StackApprovalChip'
 import { ClusterProviderIcon } from '../../utils/Provider'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts'
 import { StackedText } from '../../utils/table/StackedText'
+import StackStatusChip from '../common/StackStatusChip'
 
 interface StackRunSidecarProps {
   stackRun: StackRun
@@ -31,7 +31,7 @@ export default function StackRunSidecar({
     >
       <Sidecar css={{ overflowX: 'auto' }}>
         <SidecarItem heading="Status">
-          <StackRunStatusChip
+          <StackStatusChip
             status={stackRun.status}
             size="small"
           />

@@ -38,7 +38,7 @@ export default function StackOverview() {
         margin={0}
       >
         <StackStatusChip
-          paused={!!stack.paused}
+          status={stack.status}
           deleting={!!stack.deletedAt}
         />
       </Prop>
