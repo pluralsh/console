@@ -201,7 +201,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
         {
           buttonMedium: true,
           display: 'flex',
-          borderRadius: 'normal',
+          borderRadius: 'medium',
           color: 'text-always-white',
           backgroundColor: 'action-primary',
           border: '1px solid action-primary',
@@ -460,7 +460,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
         {
           width: 24,
           height: 24,
-          borderRadius: 'normal',
+          borderRadius: 'medium',
         },
         ({ small }: any) =>
           small && {
@@ -527,7 +527,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           paddingRight: 'medium',
           paddingLeft: 'medium',
           border: '1px solid border-input',
-          borderRadius: 'normal',
+          borderRadius: 'medium',
           _focusWithin: {
             borderColor: 'border-outline-focused',
           },
@@ -630,7 +630,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           paddingBottom: '4px',
           backgroundColor: 'fill-two',
           border: '1px solid border',
-          borderRadius: 'normal',
+          borderRadius: 'medium',
           boxShadow: 'moderate',
           elevation: 0, // reset from honorable-theme-default
         },

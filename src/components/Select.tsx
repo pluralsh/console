@@ -160,6 +160,7 @@ const SelectButtonInner = styled.div<{
     color: theme.colors['text-light'],
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.medium,
+    overflow: 'hidden',
     '.content': {
       alignItems: 'center',
       display: 'flex',
