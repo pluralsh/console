@@ -55,6 +55,37 @@ spec:
                 description: BaseUrl is a base URL for Git clones for self-hosted
                   versions.
                 type: string
+              github:
+                properties:
+                  appId:
+                    type: string
+                  installationId:
+                    type: string
+                  privateKeyRef:
+                    description: SecretKeySelector selects a key of a Secret.
+                    properties:
+                      key:
+                        description: The key of the secret to select from.  Must be
+                          a valid secret key.
+                        type: string
+                      name:
+                        description: |-
+                          Name of the referent.
+                          More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Add other useful fields. apiVersion, kind, uid?
+                        type: string
+                      optional:
+                        description: Specify whether the Secret or its key must be
+                          defined
+                        type: boolean
+                    required:
+                    - key
+                    type: object
+                    x-kubernetes-map-type: atomic
+                required:
+                - appId
+                - installationId
+                type: object
               name:
                 description: Name is a human-readable name of the ScmConnection.
                 type: string

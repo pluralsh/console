@@ -230,7 +230,11 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 	// Update only if ScmConnection has changed
 	if changed && exists {
 		logger.Info("Updating ScmConnection")
-		return r.ConsoleClient.UpdateScmConnection(ctx, scm.Status.GetID(), scm.Attributes(token))
+		attr, err := scm.Attributes(ctx, r.Client, token)
+		if err != nil {
+			return nil, err
+		}
+		return r.ConsoleClient.UpdateScmConnection(ctx, scm.Status.GetID(), *attr)
 	}
 
 	// Read the ScmConnection from Console API if it already exists
@@ -240,7 +244,11 @@ func (r *ScmConnectionReconciler) sync(ctx context.Context, scm *v1alpha1.ScmCon
 
 	// Create the ScmConnection in Console API if it doesn't exist
 	logger.Info("Creating ScmConnection")
-	return r.ConsoleClient.CreateScmConnection(ctx, scm.Attributes(token))
+	attr, err := scm.Attributes(ctx, r.Client, token)
+	if err != nil {
+		return nil, err
+	}
+	return r.ConsoleClient.CreateScmConnection(ctx, *attr)
 }
 
 func (r *ScmConnectionReconciler) getTokenFromSecret(ctx context.Context, scm *v1alpha1.ScmConnection) (*string, error) {
