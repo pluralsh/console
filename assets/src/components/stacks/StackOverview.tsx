@@ -49,6 +49,12 @@ export default function StackOverview() {
         {capitalize(stack.type)}
       </Prop>
       <Prop
+        title="Paused"
+        margin={0}
+      >
+        {stack.paused ? 'Paused' : 'Active'}
+      </Prop>
+      <Prop
         title="Ref"
         margin={0}
       >
