@@ -160,10 +160,15 @@ type ServiceSpec struct {
 	Templated *bool `json:"templated,omitempty"`
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Imports are immutable"
-	Imports []corev1.ObjectReference `json:"imports"`
+	Imports []ServiceImport `json:"imports"`
 	// Detach determined if user want to delete or detach service
 	// +kubebuilder:validation:Optional
 	Detach bool `json:"detach,omitempty"`
+}
+
+type ServiceImport struct {
+	// +kubebuilder:validation:Required
+	StackRef corev1.ObjectReference `json:"stackRef"`
 }
 
 func (ss *ServiceSpec) DependenciesAttribute() []*console.ServiceDependencyAttributes {

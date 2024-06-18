@@ -62,6 +62,7 @@ spec:
     name: mgmt
     namespace: default
   imports:
-    - kind: InfrastructureStack
-      name: test-stack
-      namespace: default
+    - stackRef:
+        kind: InfrastructureStack
+        name: test-stack
+        namespace: default

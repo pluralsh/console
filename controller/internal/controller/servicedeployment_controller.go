@@ -251,7 +251,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	if len(service.Spec.Imports) > 0 {
 		attr.Imports = make([]*console.ServiceImportAttributes, 0)
 		for _, imp := range service.Spec.Imports {
-			stackID, err := r.getStackID(ctx, imp)
+			stackID, err := r.getStackID(ctx, imp.StackRef)
 			if err != nil {
 				return nil, err
 			}
