@@ -147,24 +147,7 @@ export const ColHealth = columnHelper.accessor(({ node }) => node, {
 
 export const ColVersion = columnHelper.accessor(({ node }) => node, {
   id: 'version',
-  header: () => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const theme = useTheme()
-
-    return (
-      <div>
-        <div>Deployed version</div>
-        <div
-          css={{
-            ...theme.partials.text.caption,
-            color: theme.colors['text-light'],
-          }}
-        >
-          Least kubelet version
-        </div>
-      </div>
-    )
-  },
+  header: 'Version',
   cell: function Cell({
     row: {
       original: { node },
@@ -186,7 +169,7 @@ export const ColVersion = columnHelper.accessor(({ node }) => node, {
                 </TabularNumbers>
               </div>
             }
-            second={toNiceVersion(node?.kubeletVersion)}
+            second={`Kubelet: ${toNiceVersion(node?.kubeletVersion)}`}
           />
         )}
         {!node?.currentVersion && <>-</>}
