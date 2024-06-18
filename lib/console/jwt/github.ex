@@ -24,7 +24,7 @@ defmodule Console.Jwt.Github do
   @spec gh_client(binary | nil, binary, binary, binary) :: {:ok, Tentacat.Client.t} | error
   def gh_client(url, app_id, inst_id, pem) do
     with {:ok, token} <- app_token(url, app_id, inst_id, pem),
-      do: client(:access_token, token, url)
+      do: {:ok, client(:access_token, token, url)}
   end
 
   @doc """

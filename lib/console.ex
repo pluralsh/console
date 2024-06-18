@@ -18,6 +18,17 @@ defmodule Console do
     end
   end
 
+  def keypair(email) do
+    with private <- :public_key.generate_key({:rsa, 2048, 65537}),
+         %ExPublicKey.RSAPrivateKey{} = pk <- ExPublicKey.RSAPrivateKey.from_sequence(private),
+         pub <- ExPublicKey.RSAPrivateKey.get_public(pk),
+         entry <- :public_key.pem_entry_encode(:RSAPrivateKey, private),
+         pem_private <- :public_key.pem_encode([entry]),
+         {:ok, public} <- ExPublicKey.RSAPublicKey.as_sequence(pub),
+         ssh_public <- :ssh_file.encode([{public, [{:comment, email}]}], :openssh_key),
+      do: {:ok, pem_private, ssh_public}
+  end
+
   @chars String.codepoints("abcdefghijklmnopqrstuvwxyz0123456789")
 
   def authed_user("deploy-" <> _ = deploy), do: Console.Deployments.Clusters.get_by_deploy_token(deploy)

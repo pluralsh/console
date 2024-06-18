@@ -2154,6 +2154,8 @@ export type InfrastructureStack = {
   runs?: Maybe<StackRunConnection>;
   /** the most recent state of this stack */
   state?: Maybe<StackState>;
+  /** The status of the last run of the stack */
+  status: StackStatus;
   /** key/value tags to filter stacks */
   tags?: Maybe<Array<Maybe<Tag>>>;
   /** A type for the stack, specifies the tool to use to apply it */

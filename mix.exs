@@ -60,7 +60,7 @@ defmodule Console.MixProject do
   def application do
     [
       mod: {Console.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :ssh]
     ]
   end
 

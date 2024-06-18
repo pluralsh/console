@@ -284,6 +284,38 @@ defmodule Console.Deployments.GitTest do
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end
 
+    test "it can create a pull request with a github app" do
+      user = insert(:user)
+      {:ok, pem_string, _} = Console.keypair("console@plural.sh")
+      conn = insert(:scm_connection, token: nil, github: %{app_id: "123", installation_id: "234", private_key: pem_string})
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
+        write_bindings: [%{user_id: user.id}],
+        create_bindings: [%{user_id: user.id}]
+      )
+      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Tentacat.App.Installations, :token, fn _, "234" ->
+        {:ok, %{"token" => "some-pat"}, %HTTPoison.Response{}}
+      end)
+      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
+        {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
+      end)
+      expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", "pr-test" -> {:ok, conn} end)
+      expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
+      expect(Console.Deployments.Pr.Git, :push, fn _, "pr-test" -> {:ok, ""} end)
+
+      {:ok, pr} = Git.create_pull_request(%{}, pra.id, "pr-test", user)
+
+      assert pr.cluster_id == pra.cluster_id
+      assert pr.url == "https://github.com/pr/url"
+      assert pr.title == pra.title
+
+      assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
+    end
+
     test "users cannot create if they don't have permissions" do
       user = insert(:user)
       conn = insert(:scm_connection, token: "some-pat")
