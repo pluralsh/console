@@ -245,15 +245,21 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		Templated:       service.Spec.TemplatedAttribute(),
 		Kustomize:       service.Spec.Kustomize.Attributes(),
 		Dependencies:    service.Spec.DependenciesAttribute(),
-		Imports:         make([]*console.ServiceImportAttributes, 0),
 		SyncConfig:      syncConfigAttributes,
 	}
 
-	if service.Spec.Bindings != nil {
-		attr.ReadBindings = algorithms.Map(service.Spec.Bindings.Read,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attr.WriteBindings = algorithms.Map(service.Spec.Bindings.Write,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+	if len(service.Spec.Imports) > 0 {
+		attr.Imports = make([]*console.ServiceImportAttributes, 0)
+		for _, imp := range service.Spec.Imports {
+			stackID, err := r.getStackID(ctx, imp)
+			if err != nil {
+				return nil, err
+			}
+			if stackID == nil {
+				return nil, fmt.Errorf("stack ID is missing")
+			}
+			attr.Imports = append(attr.Imports, &console.ServiceImportAttributes{StackID: *stackID})
+		}
 	}
 
 	if service.Spec.ConfigurationRef != nil {
@@ -279,6 +285,13 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			return nil, err
 		}
 		attr.ContextBindings = append(attr.ContextBindings, &console.ContextBindingAttributes{ContextID: sc.ID})
+	}
+
+	if service.Spec.Bindings != nil {
+		attr.ReadBindings = algorithms.Map(service.Spec.Bindings.Read,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attr.WriteBindings = algorithms.Map(service.Spec.Bindings.Write,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
 	}
 
 	if service.Spec.Helm != nil {
@@ -330,6 +343,17 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	}
 
 	return attr, nil
+}
+
+func (r *ServiceReconciler) getStackID(ctx context.Context, obj corev1.ObjectReference) (*string, error) {
+	stack := &v1alpha1.InfrastructureStack{}
+	if err := r.Get(ctx, client.ObjectKey{Name: obj.Name, Namespace: obj.Namespace}, stack); err != nil {
+		return nil, err
+	}
+	if !stack.Status.HasID() {
+		return nil, fmt.Errorf("stack is not ready yet")
+	}
+	return stack.Status.ID, nil
 }
 
 func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *corev1.SecretReference, values *runtime.RawExtension) (*string, error) {

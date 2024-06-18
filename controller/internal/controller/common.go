@@ -75,9 +75,10 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 	}
 	if len(srv.Dependencies) > 0 {
 		serviceTemplate.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
-	}
-	for _, dep := range srv.Dependencies {
-		serviceTemplate.Dependencies = append(serviceTemplate.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
+
+		for _, dep := range srv.Dependencies {
+			serviceTemplate.Dependencies = append(serviceTemplate.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
+		}
 	}
 
 	if srv.Templated != nil {
