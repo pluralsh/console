@@ -160,7 +160,7 @@ export const ColVersion = columnHelper.accessor(({ node }) => node, {
             color: theme.colors['text-light'],
           }}
         >
-          Minimum kubelet version
+          Least kubelet version
         </div>
       </div>
     )
