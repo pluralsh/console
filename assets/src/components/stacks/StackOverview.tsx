@@ -38,7 +38,7 @@ export default function StackOverview() {
         margin={0}
       >
         <StackStatusChip
-          paused={!!stack.paused}
+          status={stack.status}
           deleting={!!stack.deletedAt}
         />
       </Prop>
@@ -47,6 +47,12 @@ export default function StackOverview() {
         margin={0}
       >
         {capitalize(stack.type)}
+      </Prop>
+      <Prop
+        title="Paused"
+        margin={0}
+      >
+        {stack.paused ? 'Paused' : 'Active'}
       </Prop>
       <Prop
         title="Ref"

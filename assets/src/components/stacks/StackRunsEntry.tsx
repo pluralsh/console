@@ -16,7 +16,7 @@ import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
 
 import { TRUNCATE } from '../utils/truncate'
 
-import { StackRunStatusChip } from './common/StackRunStatusChip'
+import StackStatusChip from './common/StackStatusChip'
 
 export default function StackRunsEntry({
   stackRun,
@@ -128,7 +128,7 @@ export default function StackRunsEntry({
       >
         {moment(insertedAt).fromNow()}
       </div>
-      <StackRunStatusChip status={status} />
+      <StackStatusChip status={status} />
       <IconFrame icon={<CaretRightIcon />} />
     </div>
   )

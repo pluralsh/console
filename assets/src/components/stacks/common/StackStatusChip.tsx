@@ -1,16 +1,33 @@
-import React from 'react'
+import React, { ComponentProps } from 'react'
 import { Chip } from '@pluralsh/design-system'
-
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
+import capitalize from 'lodash/capitalize'
+
+import { StackStatus } from '../../../generated/graphql'
+
+const statusToSeverity = {
+  [StackStatus.Queued]: 'neutral',
+  [StackStatus.Pending]: 'warning',
+  [StackStatus.Running]: 'info',
+  [StackStatus.Cancelled]: 'neutral',
+  [StackStatus.Failed]: 'danger',
+  [StackStatus.Successful]: 'success',
+  [StackStatus.PendingApproval]: 'warning',
+} as const satisfies Record<
+  StackStatus,
+  ComponentProps<typeof Chip>['severity']
+>
 
 export default function StackStatusChip({
-  paused,
-  deleting,
+  status,
+  deleting = false,
   ...props
 }: {
-  paused: boolean
-  deleting: boolean
+  status?: StackStatus
+  deleting?: boolean
 } & ChipProps) {
+  const severity = statusToSeverity[status ?? '']
+
   return deleting ? (
     <Chip
       severity="danger"
@@ -18,19 +35,14 @@ export default function StackStatusChip({
     >
       Deleting
     </Chip>
-  ) : paused ? (
-    <Chip
-      severity="warning"
-      {...props}
-    >
-      Paused
-    </Chip>
   ) : (
     <Chip
-      severity="info"
+      severity={severity}
       {...props}
     >
-      Active
+      {status === StackStatus.PendingApproval
+        ? 'Pending Approval'
+        : capitalize(status)}
     </Chip>
   )
 }

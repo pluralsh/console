@@ -80,7 +80,7 @@ export default function StackEntry({
           {stack.name}
         </div>
         <StackStatusChip
-          paused={!!stack.paused}
+          status={stack.status}
           deleting={!!stack.deletedAt}
           css={
             active

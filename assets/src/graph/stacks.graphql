@@ -25,6 +25,7 @@ fragment Stack on InfrastructureStack {
     ...ClusterTiny
   }
   paused
+  status
   approval
   environment {
     name
