@@ -234,7 +234,7 @@ function CreatePrModalBase({
             <Body1P>Provide some basic configuration for this PR:</Body1P>
             <PrConfigurationFields
               {...{
-                configuration: prAutomation.configuration,
+                configuration,
                 configVals,
                 setConfigVals,
               }}
