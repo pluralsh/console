@@ -70,17 +70,18 @@ export function ServiceDetailsSidecar({
           gap: theme.spacing.small,
         }}
       >
+        {status === ServiceDeploymentStatus.Paused &&
+          serviceDeployment.promotion === ServicePromotion.Ignore && (
+            <ServicePromote id={id} />
+          )}
         <KickButton
+          secondary
           pulledAt={repository?.pulledAt}
           kickMutationHook={useKickServiceMutation}
           message="Resync service"
           tooltipMessage="Use this to sync this service now instead of at the next poll interval"
           variables={{ id }}
         />
-        {status === ServiceDeploymentStatus.Paused &&
-          serviceDeployment.promotion === ServicePromotion.Ignore && (
-            <ServicePromote id={id} />
-          )}
       </div>
       <Sidecar>
         {name && <SidecarItem heading="Service name"> {name}</SidecarItem>}

@@ -5,39 +5,60 @@ import { useTheme } from 'styled-components'
 
 import { DeploymentFragment } from 'generated/graphql'
 
-import { InfoSectionH2, PaddedCard, PropWideBold } from './common'
+import { InfoSectionH2, PaddedCard, PropGroup, PropWideBold } from './common'
 
 export function StatusChart({
-  available,
-  unavailable,
-  pending,
+  green,
+  red,
+  yellow,
+  greenLabel = 'Available',
+  redLabel = 'Unavailable',
+  yellowLabel = 'Pending',
+  width,
+  height,
 }: {
-  available: number
-  unavailable: number
-  pending: number
+  green: number
+  red: number
+  yellow: number
+  greenLabel?: string
+  redLabel?: string
+  yellowLabel?: string
+  width?: number | string
+  height?: number | string
 }) {
   const theme = useTheme()
   const data = useMemo(
     () => [
-      { id: 'Available', value: available, color: theme.colors.semanticGreen },
+      { id: greenLabel, value: green, color: theme.colors.semanticGreen },
       {
-        id: 'Unavailable',
-        value: unavailable,
+        id: redLabel,
+        value: red,
         color: theme.colors.semanticRedLight,
       },
-      { id: 'Pending', value: pending, color: theme.colors.semanticYellow },
+      { id: yellowLabel, value: yellow, color: theme.colors.semanticYellow },
     ],
     [
-      available,
-      unavailable,
-      pending,
+      greenLabel,
+      green,
       theme.colors.semanticGreen,
       theme.colors.semanticRedLight,
       theme.colors.semanticYellow,
+      redLabel,
+      red,
+      yellowLabel,
+      yellow,
     ]
   )
 
-  return <PieChart data={data} />
+  return (
+    <PieChart
+      data={data}
+      {...{
+        width,
+        height,
+      }}
+    />
+  )
 }
 
 export default function DeploymentOutlet() {
@@ -78,31 +99,18 @@ export function DeploymentBase({
             gap: theme.spacing.xlarge,
           }}
         >
-          <div
-            css={{
-              display: 'flex',
-              width: 180,
-              height: 180,
-            }}
-          >
-            <StatusChart
-              available={availableReplicas ?? 0}
-              unavailable={unavailableReplicas ?? 0}
-              pending={
-                (replicas ?? 0) -
-                (availableReplicas ?? 0) -
-                (unavailableReplicas ?? 0)
-              }
-            />
-          </div>
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              flexGrow: 1,
-              justifyContent: 'center',
-            }}
-          >
+          <StatusChart
+            width={180}
+            height={180}
+            green={availableReplicas ?? 0}
+            red={unavailableReplicas ?? 0}
+            yellow={
+              (replicas ?? 0) -
+              (availableReplicas ?? 0) -
+              (unavailableReplicas ?? 0)
+            }
+          />
+          <PropGroup>
             <PropWideBold title="Replicas">{replicas || 0}</PropWideBold>
             <PropWideBold title="Available">
               {availableReplicas || 0}
@@ -110,7 +118,7 @@ export function DeploymentBase({
             <PropWideBold title="Unavailable">
               {unavailableReplicas || 0}
             </PropWideBold>
-          </div>
+          </PropGroup>
         </div>
       </PaddedCard>
       <InfoSectionH2

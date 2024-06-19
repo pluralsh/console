@@ -16,6 +16,7 @@ import { ComponentDetailsContext } from './ComponentDetails'
 import DaemonSet from './info/Daemonset'
 import CanaryInfo from './info/Canary'
 import PluralServiceDeployment from './info/PluralServiceDeployment'
+import { Rollout } from './info/rollout/Rollout'
 
 const componentsWithPods: string[] = [
   'deployment',
@@ -23,6 +24,7 @@ const componentsWithPods: string[] = [
   'service',
   'statefulset',
   'daemonset',
+  'rollout',
 ]
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
@@ -42,7 +44,10 @@ const componentInfoMap: { [key: string]: JSX.Element } = {
   daemonset: <DaemonSet />,
   canary: <CanaryInfo />,
   servicedeployment: <PluralServiceDeployment />,
+  rollout: <Rollout />,
 }
+
+const hideMetadataKinds = ['rollout']
 
 function getInfo(kind: string): JSX.Element | undefined {
   return componentInfoMap[kind]
@@ -86,11 +91,13 @@ export default function ComponentInfo() {
       }}
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
-      <div css={{ display: 'flex', gap: theme.spacing.large }}>
+      <div css={{ display: 'flex', gap: theme.spacing.xxlarge }}>
         {info && value && <Section>{info}</Section>}
-        <Section>
-          <Metadata />
-        </Section>
+        {!hideMetadataKinds.includes(componentKind) && (
+          <Section>
+            <Metadata />
+          </Section>
+        )}
       </div>
     </div>
   )

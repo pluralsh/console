@@ -19,8 +19,8 @@ export function PieChart({
   ...props
 }: {
   data: PieChartData
-  width?: string
-  height?: string
+  width?: number | string
+  height?: number | string
   rotate?: number
 } & Omit<ComponentProps<typeof ResponsivePie>, 'data'>) {
   const chartTheme = useChartTheme()
@@ -85,8 +85,8 @@ function ChartSizeOption({
   height,
   children,
 }: {
-  width?: string
-  height?: string
+  width?: number | string
+  height?: number | string
   children: ReactNode
 }) {
   return width || height ? (

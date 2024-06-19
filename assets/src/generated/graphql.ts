@@ -312,7 +312,7 @@ export type ArgoStrategyStep = {
   analysis?: Maybe<ArgoAnalysis>;
   experiment?: Maybe<ArgoExperiment>;
   pause?: Maybe<CanaryPause>;
-  stepWeight?: Maybe<Scalars['Int']['output']>;
+  setWeight?: Maybe<Scalars['Int']['output']>;
 };
 
 export type Audit = {
@@ -8793,6 +8793,21 @@ export type UnpinCustomResourceMutationVariables = Exact<{
 
 export type UnpinCustomResourceMutation = { __typename?: 'RootMutationType', deletePinnedCustomResource?: { __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
+export type ArgoRolloutStatusFragment = { __typename?: 'ArgoRolloutStatus', abort?: boolean | null, phase?: string | null, replicas?: number | null, readyReplicas?: number | null, pauseConditions?: Array<{ __typename?: 'PauseCondition', reason?: string | null, startTime?: string | null } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
+
+export type ArgoRolloutSpecFragment = { __typename?: 'ArgoRolloutSpec', replicas?: number | null, strategy?: { __typename?: 'ArgoRolloutStrategy', blueGreen?: { __typename?: 'ArgoBlueGreenStrategy', activeService?: string | null, autoPromotionEnabled?: boolean | null, autoPromotionSeconds?: number | null } | null, canary?: { __typename?: 'ArgoCanaryStrategy', steps?: Array<{ __typename?: 'ArgoStrategyStep', setWeight?: number | null, analysis?: { __typename?: 'ArgoAnalysis', templates?: Array<{ __typename?: 'ArgoAnalysisTemplate', templateName?: string | null } | null> | null } | null, experiment?: { __typename?: 'ArgoExperiment', templates?: Array<{ __typename?: 'ArgoExperimentTemplate', name?: string | null } | null> | null } | null, pause?: { __typename?: 'CanaryPause', duration?: string | null } | null } | null> | null } | null } | null };
+
+export type ArgoRolloutFragment = { __typename?: 'ArgoRollout', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ArgoRolloutStatus', abort?: boolean | null, phase?: string | null, replicas?: number | null, readyReplicas?: number | null, pauseConditions?: Array<{ __typename?: 'PauseCondition', reason?: string | null, startTime?: string | null } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'ArgoRolloutSpec', replicas?: number | null, strategy?: { __typename?: 'ArgoRolloutStrategy', blueGreen?: { __typename?: 'ArgoBlueGreenStrategy', activeService?: string | null, autoPromotionEnabled?: boolean | null, autoPromotionSeconds?: number | null } | null, canary?: { __typename?: 'ArgoCanaryStrategy', steps?: Array<{ __typename?: 'ArgoStrategyStep', setWeight?: number | null, analysis?: { __typename?: 'ArgoAnalysis', templates?: Array<{ __typename?: 'ArgoAnalysisTemplate', templateName?: string | null } | null> | null } | null, experiment?: { __typename?: 'ArgoExperiment', templates?: Array<{ __typename?: 'ArgoExperimentTemplate', name?: string | null } | null> | null } | null, pause?: { __typename?: 'CanaryPause', duration?: string | null } | null } | null> | null } | null } | null } };
+
+export type ArgoRolloutQueryVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ArgoRolloutQuery = { __typename?: 'RootQueryType', argoRollout?: { __typename?: 'ArgoRollout', raw: string, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ArgoRolloutStatus', abort?: boolean | null, phase?: string | null, replicas?: number | null, readyReplicas?: number | null, pauseConditions?: Array<{ __typename?: 'PauseCondition', reason?: string | null, startTime?: string | null } | null> | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null }, spec: { __typename?: 'ArgoRolloutSpec', replicas?: number | null, strategy?: { __typename?: 'ArgoRolloutStrategy', blueGreen?: { __typename?: 'ArgoBlueGreenStrategy', activeService?: string | null, autoPromotionEnabled?: boolean | null, autoPromotionSeconds?: number | null } | null, canary?: { __typename?: 'ArgoCanaryStrategy', steps?: Array<{ __typename?: 'ArgoStrategyStep', setWeight?: number | null, analysis?: { __typename?: 'ArgoAnalysis', templates?: Array<{ __typename?: 'ArgoAnalysisTemplate', templateName?: string | null } | null> | null } | null, experiment?: { __typename?: 'ArgoExperiment', templates?: Array<{ __typename?: 'ArgoExperimentTemplate', name?: string | null } | null> | null } | null, pause?: { __typename?: 'CanaryPause', duration?: string | null } | null } | null> | null } | null } | null } } | null };
+
 export type CanaryStatusFragment = { __typename?: 'CanaryStatus', failedChecks?: number | null, canaryWeight?: number | null, iterations?: number | null, phase?: string | null, conditions?: Array<{ __typename?: 'StatusCondition', message: string, reason: string, status: string, type: string } | null> | null };
 
 export type CanarySpecFragment = { __typename?: 'CanarySpec', provider?: string | null, analysis?: { __typename?: 'CanaryAnalysis', interval?: string | null, maxWeight?: number | null, stepWeight?: number | null, stepWeights?: Array<number | null> | null, threshold?: number | null } | null };
@@ -10620,6 +10635,70 @@ export const KubernetesClusterFragmentDoc = gql`
 }
     ${ClusterTinyFragmentDoc}
 ${PinnedCustomResourceFragmentDoc}`;
+export const ArgoRolloutStatusFragmentDoc = gql`
+    fragment ArgoRolloutStatus on ArgoRolloutStatus {
+  abort
+  phase
+  replicas
+  readyReplicas
+  pauseConditions {
+    reason
+    startTime
+  }
+  conditions {
+    message
+    reason
+    status
+    type
+  }
+}
+    `;
+export const ArgoRolloutSpecFragmentDoc = gql`
+    fragment ArgoRolloutSpec on ArgoRolloutSpec {
+  replicas
+  strategy {
+    blueGreen {
+      activeService
+      autoPromotionEnabled
+      autoPromotionSeconds
+    }
+    canary {
+      steps {
+        analysis {
+          templates {
+            templateName
+          }
+        }
+        experiment {
+          templates {
+            name
+          }
+        }
+        pause {
+          duration
+        }
+        setWeight
+      }
+    }
+  }
+}
+    `;
+export const ArgoRolloutFragmentDoc = gql`
+    fragment ArgoRollout on ArgoRollout {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...ArgoRolloutStatus
+  }
+  spec {
+    ...ArgoRolloutSpec
+  }
+  raw
+}
+    ${MetadataFragmentDoc}
+${ArgoRolloutStatusFragmentDoc}
+${ArgoRolloutSpecFragmentDoc}`;
 export const StatusConditionFragmentDoc = gql`
     fragment StatusCondition on StatusCondition {
   message
@@ -16838,6 +16917,56 @@ export function useUnpinCustomResourceMutation(baseOptions?: Apollo.MutationHook
 export type UnpinCustomResourceMutationHookResult = ReturnType<typeof useUnpinCustomResourceMutation>;
 export type UnpinCustomResourceMutationResult = Apollo.MutationResult<UnpinCustomResourceMutation>;
 export type UnpinCustomResourceMutationOptions = Apollo.BaseMutationOptions<UnpinCustomResourceMutation, UnpinCustomResourceMutationVariables>;
+export const ArgoRolloutDocument = gql`
+    query ArgoRollout($name: String!, $namespace: String!, $serviceId: ID) {
+  argoRollout(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...ArgoRollout
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}
+    ${ArgoRolloutFragmentDoc}
+${PodFragmentDoc}
+${EventFragmentDoc}`;
+
+/**
+ * __useArgoRolloutQuery__
+ *
+ * To run a query within a React component, call `useArgoRolloutQuery` and pass it any options that fit your needs.
+ * When your component renders, `useArgoRolloutQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useArgoRolloutQuery({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useArgoRolloutQuery(baseOptions: Apollo.QueryHookOptions<ArgoRolloutQuery, ArgoRolloutQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ArgoRolloutQuery, ArgoRolloutQueryVariables>(ArgoRolloutDocument, options);
+      }
+export function useArgoRolloutLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ArgoRolloutQuery, ArgoRolloutQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ArgoRolloutQuery, ArgoRolloutQueryVariables>(ArgoRolloutDocument, options);
+        }
+export function useArgoRolloutSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ArgoRolloutQuery, ArgoRolloutQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ArgoRolloutQuery, ArgoRolloutQueryVariables>(ArgoRolloutDocument, options);
+        }
+export type ArgoRolloutQueryHookResult = ReturnType<typeof useArgoRolloutQuery>;
+export type ArgoRolloutLazyQueryHookResult = ReturnType<typeof useArgoRolloutLazyQuery>;
+export type ArgoRolloutSuspenseQueryHookResult = ReturnType<typeof useArgoRolloutSuspenseQuery>;
+export type ArgoRolloutQueryResult = Apollo.QueryResult<ArgoRolloutQuery, ArgoRolloutQueryVariables>;
 export const CanaryDocument = gql`
     query Canary($name: String!, $namespace: String!, $serviceId: ID) {
   canary(name: $name, namespace: $namespace, serviceId: $serviceId) {
@@ -19537,6 +19666,7 @@ export const namedOperations = {
     GroupMembers: 'GroupMembers',
     UpgradeStatistics: 'UpgradeStatistics',
     KubernetesClusters: 'KubernetesClusters',
+    ArgoRollout: 'ArgoRollout',
     Canary: 'Canary',
     Certificate: 'Certificate',
     CronJob: 'CronJob',
@@ -19741,6 +19871,9 @@ export const namedOperations = {
     Group: 'Group',
     KubernetesCluster: 'KubernetesCluster',
     PinnedCustomResource: 'PinnedCustomResource',
+    ArgoRolloutStatus: 'ArgoRolloutStatus',
+    ArgoRolloutSpec: 'ArgoRolloutSpec',
+    ArgoRollout: 'ArgoRollout',
     CanaryStatus: 'CanaryStatus',
     CanarySpec: 'CanarySpec',
     Canary: 'Canary',

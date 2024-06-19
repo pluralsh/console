@@ -43,9 +43,9 @@ export default function DaemonSet() {
             }}
           >
             <StatusChart
-              available={numberReady}
-              unavailable={currentNumberScheduled - numberReady}
-              pending={desiredNumberScheduled - currentNumberScheduled}
+              green={numberReady}
+              red={currentNumberScheduled - numberReady}
+              yellow={desiredNumberScheduled - currentNumberScheduled}
             />
           </div>
           <div

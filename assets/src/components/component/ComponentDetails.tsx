@@ -15,6 +15,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 import { directory } from 'components/component/directory'
 import {
+  ArgoRolloutDocument,
   CanaryDocument,
   CertificateDocument,
   CronJobDocument,
@@ -46,6 +47,7 @@ export const kindToQuery = {
   daemonset: DaemonSetDocument,
   canary: CanaryDocument,
   servicedeployment: PluralServiceDeploymentDocument,
+  rollout: ArgoRolloutDocument,
 } as const
 
 type DetailsComponent = {

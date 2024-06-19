@@ -2,11 +2,10 @@ import { useOutletContext } from 'react-router-dom'
 import { useMemo } from 'react'
 import { LabelsAnnotations } from 'components/cluster/LabelsAnnotations'
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
-import { useTheme } from 'styled-components'
 
 import { ComponentStatusChip } from '../../apps/app/components/misc'
 
-import { InfoSectionH2 } from './common'
+import { InfoSection } from './common'
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
 
@@ -38,18 +37,11 @@ export function MetadataBase({
   component: Nullable<Record<string, any>>
   metadata: Nullable<Record<string, any>>
 }) {
-  const theme = useTheme()
-
   return (
-    <div
-      css={{
-        flexDirection: 'column',
-        flexGrow: 1,
-      }}
+    <InfoSection
+      css={{ flexGrow: 1 }}
+      title="Metadata"
     >
-      <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
-        Metadata
-      </InfoSectionH2>
       <MetadataGrid>
         {(metadata?.name || component?.name) && (
           <MetadataItem heading="Name">
@@ -74,12 +66,7 @@ export function MetadataBase({
           </MetadataItem>
         )}
       </MetadataGrid>
-      {metadata && (
-        <LabelsAnnotations
-          metadata={metadata as any}
-          marginTop="large"
-        />
-      )}
-    </div>
+      {metadata && <LabelsAnnotations metadata={metadata as any} />}
+    </InfoSection>
   )
 }
