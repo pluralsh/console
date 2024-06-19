@@ -89,6 +89,10 @@ defmodule Console.Schema.StackRun do
     from(r in query, where: r.pull_request_id == ^pr_id)
   end
 
+  def without_pr(query \\ __MODULE__) do
+    from(r in query, where: is_nil(r.pull_request_id))
+  end
+
   def pending(query \\ __MODULE__) do
     from(r in query, where: r.status == ^:pending)
   end

@@ -135,16 +135,17 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.StackRunCompleted] do
-  alias Console.Schema.{Stack, StackRun}
+  alias Console.Schema.{Stack, StackRun, PullRequest}
   alias Console.Deployments.Stacks
 
   def process(%{item: %{id: id} = run}) do
+    run = Console.Repo.preload(run, [:pull_request])
     case {Stacks.get_stack!(run.stack_id), run} do
       {%Stack{delete_run_id: ^id} = stack, %StackRun{status: :successful}} ->
         Console.Repo.delete(stack)
-      {stack, %StackRun{pull_request_id: id} = run} when is_binary(id) ->
+      {_, %StackRun{pull_request: %PullRequest{} = pr} = run} ->
         Stacks.post_comment(run)
-        Stacks.dequeue(stack)
+        Stacks.dequeue(pr)
       {stack, _} -> Stacks.dequeue(stack)
     end
   end

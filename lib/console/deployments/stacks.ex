@@ -357,7 +357,7 @@ defmodule Console.Deployments.Stacks do
             create_run(stack, new_sha, %{pull_request_id: pr.id, message: msg, dry_run: true})
           end)
           |> add_operation(:pr, fn _ ->
-            Ecto.Changeset.change(pr, %{ref: new_sha})
+            Ecto.Changeset.change(pr, %{sha: new_sha})
             |> Repo.update()
           end)
           |> execute(extract: :run)

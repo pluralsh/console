@@ -5,24 +5,28 @@ defmodule Console.Deployments.Stacks.Commands do
 
   def commands(%Stack{type: :terraform} = stack, dry) do
     terraform_commands(stack, dry)
-    |> stitch_hooks(stack)
+    |> stitch_hooks(stack, dry)
   end
 
   def commands(%Stack{type: :ansible} = stack, dry) do
     ansible_commands(stack, dry)
-    |> stitch_hooks(stack)
+    |> stitch_hooks(stack, dry)
   end
 
-  defp stitch_hooks(commands, %Stack{configuration: %{hooks: [_ | _] = hooks}}) do
+  defp stitch_hooks(commands, %Stack{configuration: %{hooks: [_ | _] = hooks}}, dry) do
     cmds = group_by_stage(commands)
     hooks = group_by_stage(hooks)
 
-    Enum.flat_map(~w(init plan verify apply)a, fn stage ->
+    stages(dry)
+    |> Enum.flat_map(fn stage ->
       (cmds[stage] || []) ++ (hooks[stage] || [])
     end)
     |> indexed()
   end
-  defp stitch_hooks(cmds, _), do: cmds
+  defp stitch_hooks(cmds, _, _), do: cmds
+
+  defp stages(true), do: ~w(init plan verify)a
+  defp stages(_), do: ~w(init plan verify apply destroy)a
 
   defp group_by_stage(cmds) do
     Enum.reduce(cmds, %{}, fn
