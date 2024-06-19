@@ -32,7 +32,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   end
 
   defp filters(query, %{pull_request_id: id}) when is_binary(id), do: StackRun.for_pr(query, id)
-  defp filters(query, _), do: query
+  defp filters(query, _), do: StackRun.without_pr(query)
 
   def list_prs_for_stack(stack, args, _) do
     PullRequest.for_stack(stack.id)

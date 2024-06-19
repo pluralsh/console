@@ -32,6 +32,7 @@ fragment PrAutomation on PrAutomation {
       operation
       value
     }
+    values
     default
     documentation
     longform

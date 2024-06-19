@@ -277,7 +277,7 @@ defmodule Console.Deployments.StacksTest do
 
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
 
-      assert refetch(pr).ref == "new-sha"
+      assert refetch(pr).sha == "new-sha"
     end
 
     test "it can create a new run an ansible stack" do
