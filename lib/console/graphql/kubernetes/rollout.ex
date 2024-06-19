@@ -39,7 +39,7 @@ defmodule Console.GraphQl.Kubernetes.Rollout do
   end
 
   object :argo_strategy_step do
-    field :step_weight, :integer
+    field :set_weight,  :integer
     field :pause,       :canary_pause
     field :experiment,  :argo_experiment
     field :analysis,    :argo_analysis

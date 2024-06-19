@@ -74,12 +74,6 @@ export function RolloutStatus({
 
   return (
     <InfoSection title="Status">
-      <PropListCard>
-        <PropWideBold title="pause">
-          {`${!!status.pauseConditions?.length}`}
-        </PropWideBold>
-        <PropWideBold title="abort">{`${!!status.abort}`}</PropWideBold>
-      </PropListCard>
       <PaddedCard>
         <div
           css={{
@@ -90,19 +84,27 @@ export function RolloutStatus({
           <StatusChart
             width={180}
             height={180}
-            available={readyReplicas ?? 0}
-            unavailable={(replicas ?? 0) - (readyReplicas ?? 0)}
-            pending={0}
+            green={readyReplicas ?? 0}
+            greenLabel="Ready"
+            red={(replicas ?? 0) - (readyReplicas ?? 0)}
+            redLabel="Unready"
+            yellow={0}
           />
           <PropGroup>
             <PropWideBold title="Replicas">{replicas || 0}</PropWideBold>
-            <PropWideBold title="Available">{readyReplicas ?? 0}</PropWideBold>
-            <PropWideBold title="Unavailable">
+            <PropWideBold title="Ready">{readyReplicas ?? 0}</PropWideBold>
+            <PropWideBold title="Unready">
               {(replicas ?? 0) - (readyReplicas ?? 0)}
             </PropWideBold>
           </PropGroup>
         </div>
       </PaddedCard>
+      <PropListCard>
+        <PropWideBold title="pause">
+          {`${!!status.pauseConditions?.length}`}
+        </PropWideBold>
+        <PropWideBold title="abort">{`${!!status.abort}`}</PropWideBold>
+      </PropListCard>
     </InfoSection>
   )
 }

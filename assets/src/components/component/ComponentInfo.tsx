@@ -47,6 +47,8 @@ const componentInfoMap: { [key: string]: JSX.Element } = {
   rollout: <Rollout />,
 }
 
+const hideMetadataKinds = ['rollout']
+
 function getInfo(kind: string): JSX.Element | undefined {
   return componentInfoMap[kind]
 }
@@ -91,9 +93,11 @@ export default function ComponentInfo() {
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
       <div css={{ display: 'flex', gap: theme.spacing.xxlarge }}>
         {info && value && <Section>{info}</Section>}
-        <Section>
-          <Metadata />
-        </Section>
+        {!hideMetadataKinds.includes(componentKind) && (
+          <Section>
+            <Metadata />
+          </Section>
+        )}
       </div>
     </div>
   )

@@ -9,13 +9,14 @@ const ColType = columnHelper.accessor((step) => step, {
   cell: function Cell({ getValue }) {
     if (getValue().analysis) return <Chip>analysis</Chip>
     if (getValue().experiment) return <Chip>experiment</Chip>
+    if (getValue().pause) return <Chip>pause</Chip>
 
-    return null
+    return <Chip>scale</Chip>
   },
 })
 
 const ColWeight = columnHelper.accessor(
-  (step) => (step.stepWeight ? `${step.stepWeight}%` : ''),
+  (step) => (step.setWeight ? `${step.setWeight}%` : ''),
   {
     id: 'weight',
     header: 'Weight',
@@ -29,15 +30,13 @@ const ColPause = columnHelper.accessor((step) => step.pause?.duration, {
 const ColConfiguration = columnHelper.accessor(
   (step) =>
     JSON.stringify(
-      step.analysis?.templates || step.experiment?.templates || {},
-      null,
-      1
+      step.analysis?.templates || step.experiment?.templates || {}
     ),
   {
     id: 'configuration',
     header: 'Configuration',
     cell: function Cell({ getValue }) {
-      return <pre>{getValue()}</pre>
+      return <span>{getValue()}</span>
     },
   }
 )

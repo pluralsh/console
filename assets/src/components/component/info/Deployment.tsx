@@ -8,36 +8,45 @@ import { DeploymentFragment } from 'generated/graphql'
 import { InfoSectionH2, PaddedCard, PropGroup, PropWideBold } from './common'
 
 export function StatusChart({
-  available,
-  unavailable,
-  pending,
+  green,
+  red,
+  yellow,
+  greenLabel = 'Available',
+  redLabel = 'Unavailable',
+  yellowLabel = 'Pending',
   width,
   height,
 }: {
-  available: number
-  unavailable: number
-  pending: number
+  green: number
+  red: number
+  yellow: number
+  greenLabel?: string
+  redLabel?: string
+  yellowLabel?: string
   width?: number | string
   height?: number | string
 }) {
   const theme = useTheme()
   const data = useMemo(
     () => [
-      { id: 'Available', value: available, color: theme.colors.semanticGreen },
+      { id: greenLabel, value: green, color: theme.colors.semanticGreen },
       {
-        id: 'Unavailable',
-        value: unavailable,
+        id: redLabel,
+        value: red,
         color: theme.colors.semanticRedLight,
       },
-      { id: 'Pending', value: pending, color: theme.colors.semanticYellow },
+      { id: yellowLabel, value: yellow, color: theme.colors.semanticYellow },
     ],
     [
-      available,
-      unavailable,
-      pending,
+      greenLabel,
+      green,
       theme.colors.semanticGreen,
       theme.colors.semanticRedLight,
       theme.colors.semanticYellow,
+      redLabel,
+      red,
+      yellowLabel,
+      yellow,
     ]
   )
 
@@ -93,9 +102,9 @@ export function DeploymentBase({
           <StatusChart
             width={180}
             height={180}
-            available={availableReplicas ?? 0}
-            unavailable={unavailableReplicas ?? 0}
-            pending={
+            green={availableReplicas ?? 0}
+            red={unavailableReplicas ?? 0}
+            yellow={
               (replicas ?? 0) -
               (availableReplicas ?? 0) -
               (unavailableReplicas ?? 0)

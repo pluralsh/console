@@ -5060,7 +5060,7 @@ type ArgoCanaryStrategy {
 }
 
 type ArgoStrategyStep {
-  stepWeight: Int
+  setWeight: Int
   pause: CanaryPause
   experiment: ArgoExperiment
   analysis: ArgoAnalysis

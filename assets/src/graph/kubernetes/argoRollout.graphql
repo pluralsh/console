@@ -38,7 +38,7 @@ fragment ArgoRolloutSpec on ArgoRolloutSpec {
         pause {
           duration
         }
-        stepWeight
+        setWeight
       }
     }
   }
