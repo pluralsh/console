@@ -667,6 +667,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `url` _string_ |  |  |  |
+| `connectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | Reference a ScmConnection to reuse its credentials for this GitRepository's authentication |  | Optional: {} <br /> |
 | `credentialsRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | CredentialsRef is a secret reference which should contain privateKey, passphrase, username and password. |  | Optional: {} <br /> |
 
 
@@ -1156,13 +1157,14 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ |  |  | Required: {} <br /> |
-| `type` _[ConfigurationType](#configurationtype)_ |  |  | Enum: [STRING INT BOOL DOMAIN BUCKET FILE FUNCTION PASSWORD] <br />Required: {} <br /> |
+| `type` _[ConfigurationType](#configurationtype)_ |  |  | Enum: [STRING INT BOOL DOMAIN BUCKET FILE FUNCTION PASSWORD ENUM] <br />Required: {} <br /> |
 | `condition` _[Condition](#condition)_ |  |  | Optional: {} <br /> |
 | `default` _string_ |  |  | Optional: {} <br /> |
 | `documentation` _string_ |  |  | Optional: {} <br /> |
 | `longform` _string_ |  |  | Optional: {} <br /> |
 | `optional` _boolean_ |  |  | Optional: {} <br /> |
 | `placeholder` _string_ |  |  | Optional: {} <br /> |
+| `values` _string array_ |  |  | Optional: {} <br /> |
 
 
 #### PrAutomationCreateConfiguration
@@ -1195,6 +1197,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `role` _[PrRole](#prrole)_ |  |  | Enum: [CLUSTER SERVICE PIPELINE UPDATE UPGRADE] <br />Optional: {} <br /> |
 | `addon` _string_ | Addon is a link to an addon name |  | Optional: {} <br /> |
 | `branch` _string_ | Branch ... |  | Optional: {} <br /> |
 | `documentation` _string_ | Documentation ... |  | Optional: {} <br /> |
@@ -1436,6 +1439,25 @@ _Appears in:_
 | `username` _string_ | Username ... |  | Optional: {} <br /> |
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: {} <br /> |
 | `apiUrl` _string_ | APIUrl is a base URL for HTTP apis for shel-hosted versions if different from BaseUrl. |  | Optional: {} <br /> |
+| `github` _[ScmGithubConnection](#scmgithubconnection)_ |  |  | Optional: {} <br /> |
+
+
+#### ScmGithubConnection
+
+
+
+
+
+
+
+_Appears in:_
+- [ScmConnectionSpec](#scmconnectionspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `appId` _string_ |  |  |  |
+| `installationId` _string_ |  |  |  |
+| `privateKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 
 #### ServiceComponent
