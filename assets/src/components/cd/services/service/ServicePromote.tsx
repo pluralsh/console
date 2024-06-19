@@ -13,7 +13,7 @@ export default function ServicePromote({ id }) {
 
   return (
     <div
-      style={{
+      css={{
         display: 'flex',
         gap: theme.spacing.small,
         flexDirection: 'column',
@@ -25,22 +25,26 @@ export default function ServicePromote({ id }) {
           error={error}
         />
       )}
-      <Button
-        onClick={mutation}
-        loading={!rollback && loading}
-      >
-        Promote Canary
-      </Button>
-      <Button
-        secondary
-        loading={rollback && loading}
-        onClick={() => {
-          setRollback(true)
-          mutation({ variables: { id, promotion: ServicePromotion.Rollback } })
-        }}
-      >
-        Rollback Canary
-      </Button>
+      <div css={{ display: 'flex', gap: theme.spacing.small }}>
+        <Button
+          onClick={mutation}
+          loading={!rollback && loading}
+        >
+          Promote
+        </Button>
+        <Button
+          secondary
+          loading={rollback && loading}
+          onClick={() => {
+            setRollback(true)
+            mutation({
+              variables: { id, promotion: ServicePromotion.Rollback },
+            })
+          }}
+        >
+          Rollback
+        </Button>
+      </div>
     </div>
   )
 }
