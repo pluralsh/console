@@ -1,0 +1,70 @@
+fragment ArgoRolloutStatus on ArgoRolloutStatus {
+  abort
+  phase
+  replicas
+  readyReplicas
+  pauseConditions {
+    reason
+    startTime
+  }
+  conditions {
+    message
+    reason
+    status
+    type
+  }
+}
+
+fragment ArgoRolloutSpec on ArgoRolloutSpec {
+  replicas
+  strategy {
+    blueGreen {
+      activeService
+      autoPromotionEnabled
+      autoPromotionSeconds
+    }
+    canary {
+      steps {
+        analysis {
+          templates {
+            templateName
+          }
+        }
+        experiment {
+          templates {
+            name
+          }
+        }
+        pause {
+          duration
+        }
+        stepWeight
+      }
+    }
+  }
+}
+
+fragment ArgoRollout on ArgoRollout {
+  metadata {
+    ...Metadata
+  }
+  status {
+    ...ArgoRolloutStatus
+  }
+  spec {
+    ...ArgoRolloutSpec
+  }
+  raw
+}
+
+query ArgoRollout($name: String!, $namespace: String!, $serviceId: ID) {
+  argoRollout(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...ArgoRollout
+    pods {
+      ...Pod
+    }
+    events {
+      ...Event
+    }
+  }
+}

@@ -44,6 +44,8 @@ import { ContainerStatuses } from '../ContainerStatuses'
 
 import { getPodResources } from './getPodResources'
 
+export const PODS_TABLE_MAX_HEIGHT = '256px'
+
 function DeletePod({
   name,
   namespace,
@@ -420,6 +422,9 @@ export const PodsList = memo(
     return (
       <PodsListContext.Provider value={contextVal}>
         <Table
+          css={{
+            maxHeight: PODS_TABLE_MAX_HEIGHT,
+          }}
           data={tableData}
           columns={columns}
           virtualizeRows
