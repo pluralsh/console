@@ -11,12 +11,12 @@ import { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 
-import { StackRunFragment, StackStatus } from '../../generated/graphql'
-import { getStackRunsAbsPath } from '../../routes/stacksRoutesConsts'
+import { StackRunFragment, StackStatus } from '../../../generated/graphql'
+import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
 
-import { TRUNCATE } from '../utils/truncate'
+import { TRUNCATE } from '../../utils/truncate'
 
-import StackStatusChip from './common/StackStatusChip'
+import StackStatusChip from '../common/StackStatusChip'
 
 export default function StackRunsEntry({
   stackRun,

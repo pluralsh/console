@@ -10,6 +10,8 @@ import RunJobPods from 'components/stacks/run/job/RunJobPods'
 
 import RunJobSpecs from 'components/stacks/run/job/RunJobSpecs'
 
+import { StackPrs } from 'components/stacks/prs/StackPrs'
+
 import Stacks from '../components/stacks/Stacks'
 import StackRunDetail from '../components/stacks/run/Route'
 import StackRunProgress from '../components/stacks/run/progress/Progress'
@@ -19,15 +21,15 @@ import StackRunPlan from '../components/stacks/run/plan/Plan'
 
 import StackRunState from '../components/stacks/run/state/State'
 
-import StackRuns from '../components/stacks/StackRuns'
-import StackFiles from '../components/stacks/StackFiles'
-import StackConfiguration from '../components/stacks/StackConfiguration'
-import StackEnvironment from '../components/stacks/StackEnvironment'
-import StackJob from '../components/stacks/StackJob'
+import StackRuns from '../components/stacks/runs/StackRuns'
+import StackFiles from '../components/stacks/files/StackFiles'
+import StackConfiguration from '../components/stacks/configuration/StackConfiguration'
+import StackEnvironment from '../components/stacks/environment/StackEnvironment'
+import StackJob from '../components/stacks/job/StackJob'
 
-import StackOverview from '../components/stacks/StackOverview'
+import StackOverview from '../components/stacks/overview/StackOverview'
 
-import StackRepository from '../components/stacks/StackRepository'
+import StackRepository from '../components/stacks/repository/StackRepository'
 
 import {
   STACKS_ABS_PATH,
@@ -36,6 +38,7 @@ import {
   STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
+  STACK_PRS_REL_PATH,
   STACK_REPOSITORY_REL_PATH,
   STACK_RUNS_ABS_PATH,
   STACK_RUNS_JOB_REL_PATH,
@@ -63,6 +66,10 @@ export const stacksRoutes = [
     <Route
       path={STACK_RUNS_REL_PATH}
       element={<StackRuns />}
+    />
+    <Route
+      path={STACK_PRS_REL_PATH}
+      element={<StackPrs />}
     />
     <Route
       path={STACK_OVERVIEW_REL_PATH}

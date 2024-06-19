@@ -11,10 +11,10 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
 
-import { useUpdateStackMutation } from '../../generated/graphql'
-import { GqlError } from '../utils/Alert'
+import { useUpdateStackMutation } from '../../../generated/graphql'
+import { GqlError } from '../../utils/Alert'
 
-import { StackOutletContextT, getBreadcrumbs } from './Stacks'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
 export default function StackConfiguration() {
   const theme = useTheme()

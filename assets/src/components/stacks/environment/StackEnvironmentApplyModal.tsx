@@ -2,15 +2,15 @@ import { useEffect, useRef } from 'react'
 import { Button, FormField, Input, Switch } from '@pluralsh/design-system'
 import { useOutletContext } from 'react-router-dom'
 
-import { useUpdateState } from '../hooks/useUpdateState'
-import { GqlError } from '../utils/Alert'
-import ModalAlt from '../cd/ModalAlt'
+import { useUpdateState } from '../../hooks/useUpdateState'
+import { GqlError } from '../../utils/Alert'
+import ModalAlt from '../../cd/ModalAlt'
 import {
   StackEnvironment,
   useUpdateStackMutation,
-} from '../../generated/graphql'
+} from '../../../generated/graphql'
 
-import { StackOutletContextT } from './Stacks'
+import { StackOutletContextT } from '../Stacks'
 
 export default function StackEnvironmentApplyModal({
   open,

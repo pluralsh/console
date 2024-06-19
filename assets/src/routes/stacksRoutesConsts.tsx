@@ -9,6 +9,8 @@ export const STACK_RUNS_ABS_PATH = getStackRunsAbsPath(
   STACK_RUNS_PARAM_RUN
 )
 
+export const STACK_PRS_REL_PATH = `prs`
+
 export const STACK_OVERVIEW_REL_PATH = `overview`
 
 export const STACK_CONFIGURATION_REL_PATH = `configuration`

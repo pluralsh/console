@@ -17,14 +17,14 @@ import {
   useGitRepositoriesQuery,
   useGitRepositoryQuery,
   useUpdateStackMutation,
-} from '../../generated/graphql'
-import { RepositorySelector } from '../cd/services/deployModal/DeployServiceSettingsGit'
-import { mapExistingNodes } from '../../utils/graphql'
-import { GqlError } from '../utils/Alert'
+} from '../../../generated/graphql'
+import { RepositorySelector } from '../../cd/services/deployModal/DeployServiceSettingsGit'
+import { mapExistingNodes } from '../../../utils/graphql'
+import { GqlError } from '../../utils/Alert'
 
-import { StackOutletContextT, getBreadcrumbs } from './Stacks'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
-import { cleanRefs } from './create/CreateStackModalFormRepository'
+import { cleanRefs } from '../create/CreateStackModalFormRepository'
 
 export default function StackRepository() {
   const theme = useTheme()

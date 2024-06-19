@@ -9,14 +9,15 @@ import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
 import { useOutletContext, useParams } from 'react-router-dom'
 
-import { StackFragment, useStackRunsQuery } from '../../generated/graphql'
-import { extendConnection, mapExistingNodes } from '../../utils/graphql'
-import { StandardScroller } from '../utils/SmoothScroller'
-import { ReturnToBeginning } from '../utils/ReturnToBeginning'
-import { ScrollablePage } from '../utils/layout/ScrollablePage'
+import { StackFragment, useStackRunsQuery } from '../../../generated/graphql'
+import { extendConnection, mapExistingNodes } from '../../../utils/graphql'
+import { StandardScroller } from '../../utils/SmoothScroller'
+import { ReturnToBeginning } from '../../utils/ReturnToBeginning'
+import { ScrollablePage } from '../../utils/layout/ScrollablePage'
+
+import { getBreadcrumbs } from '../Stacks'
 
 import StackRunsEntry from './StackRunsEntry'
-import { getBreadcrumbs } from './Stacks'
 
 const pollInterval = 5 * 1000
 
