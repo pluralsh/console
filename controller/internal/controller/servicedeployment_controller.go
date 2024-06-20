@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"sort"
 
@@ -229,6 +228,11 @@ func updateStatus(r *v1alpha1.ServiceDeployment, existingService *console.Servic
 }
 
 func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v1alpha1.ServiceDeployment, repositoryId *string) (*console.ServiceDeploymentAttributes, error) {
+	syncConfigAttributes, err := service.Spec.SyncConfig.Attributes()
+	if err != nil {
+		return nil, err
+	}
+
 	attr := &console.ServiceDeploymentAttributes{
 		Name:            service.ConsoleName(),
 		Namespace:       service.ConsoleNamespace(),
@@ -236,50 +240,28 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		DocsPath:        service.Spec.DocsPath,
 		Protect:         &service.Spec.Protect,
 		RepositoryID:    repositoryId,
+		Git:             service.Spec.Git.Attributes(),
 		ContextBindings: make([]*console.ContextBindingAttributes, 0),
-		Templated:       lo.ToPtr(true),
+		Templated:       service.Spec.TemplatedAttribute(),
+		Kustomize:       service.Spec.Kustomize.Attributes(),
+		Dependencies:    service.Spec.DependenciesAttribute(),
+		SyncConfig:      syncConfigAttributes,
 	}
 
-	if len(service.Spec.Dependencies) > 0 {
-		attr.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
-	}
-	for _, dep := range service.Spec.Dependencies {
-		attr.Dependencies = append(attr.Dependencies, &console.ServiceDependencyAttributes{Name: dep.Name})
-	}
-
-	if service.Spec.Templated != nil {
-		attr.Templated = service.Spec.Templated
-	}
-
-	for _, contextName := range service.Spec.Contexts {
-		sc, err := r.ConsoleClient.GetServiceContext(contextName)
-		if err != nil {
-			return nil, err
-		}
-		attr.ContextBindings = append(attr.ContextBindings, &console.ContextBindingAttributes{ContextID: sc.ID})
-	}
-
-	if service.Spec.Bindings != nil {
-		attr.ReadBindings = make([]*console.PolicyBindingAttributes, 0)
-		attr.WriteBindings = make([]*console.PolicyBindingAttributes, 0)
-		attr.ReadBindings = algorithms.Map(service.Spec.Bindings.Read,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attr.WriteBindings = algorithms.Map(service.Spec.Bindings.Write,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-	}
-
-	if service.Spec.Kustomize != nil {
-		attr.Kustomize = &console.KustomizeAttributes{
-			Path: service.Spec.Kustomize.Path,
+	if len(service.Spec.Imports) > 0 {
+		attr.Imports = make([]*console.ServiceImportAttributes, 0)
+		for _, imp := range service.Spec.Imports {
+			stackID, err := r.getStackID(ctx, imp.StackRef)
+			if err != nil {
+				return nil, err
+			}
+			if stackID == nil {
+				return nil, fmt.Errorf("stack ID is missing")
+			}
+			attr.Imports = append(attr.Imports, &console.ServiceImportAttributes{StackID: *stackID})
 		}
 	}
-	if service.Spec.Git != nil {
-		attr.Git = &console.GitRefAttributes{
-			Ref:    service.Spec.Git.Ref,
-			Folder: service.Spec.Git.Folder,
-			Files:  service.Spec.Git.Files,
-		}
-	}
+
 	if service.Spec.ConfigurationRef != nil {
 		attr.Configuration = make([]*console.ConfigAttributes, 0)
 		secret := &corev1.Secret{}
@@ -296,6 +278,22 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			})
 		}
 	}
+
+	for _, contextName := range service.Spec.Contexts {
+		sc, err := r.ConsoleClient.GetServiceContext(contextName)
+		if err != nil {
+			return nil, err
+		}
+		attr.ContextBindings = append(attr.ContextBindings, &console.ContextBindingAttributes{ContextID: sc.ID})
+	}
+
+	if service.Spec.Bindings != nil {
+		attr.ReadBindings = algorithms.Map(service.Spec.Bindings.Read,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attr.WriteBindings = algorithms.Map(service.Spec.Bindings.Write,
+			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+	}
+
 	if service.Spec.Helm != nil {
 		attr.Helm = &console.HelmConfigAttributes{
 			Release:     service.Spec.Helm.Release,
@@ -343,40 +341,19 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			attr.Helm.Chart = service.Spec.Helm.Chart
 		}
 	}
-	if service.Spec.SyncConfig != nil {
-		var annotations *string
-		var labels *string
-		createNamespace := true
-		if service.Spec.SyncConfig.CreateNamespace != nil {
-			createNamespace = *service.Spec.SyncConfig.CreateNamespace
-		}
-
-		if service.Spec.SyncConfig.Annotations != nil {
-			result, err := json.Marshal(service.Spec.SyncConfig.Annotations)
-			if err != nil {
-				return nil, err
-			}
-			rawAnnotations := string(result)
-			annotations = &rawAnnotations
-		}
-		if service.Spec.SyncConfig.Labels != nil {
-			result, err := json.Marshal(service.Spec.SyncConfig.Labels)
-			if err != nil {
-				return nil, err
-			}
-			rawLabels := string(result)
-			labels = &rawLabels
-		}
-		attr.SyncConfig = &console.SyncConfigAttributes{
-			CreateNamespace: &createNamespace,
-			NamespaceMetadata: &console.MetadataAttributes{
-				Labels:      labels,
-				Annotations: annotations,
-			},
-		}
-	}
 
 	return attr, nil
+}
+
+func (r *ServiceReconciler) getStackID(ctx context.Context, obj corev1.ObjectReference) (*string, error) {
+	stack := &v1alpha1.InfrastructureStack{}
+	if err := r.Get(ctx, client.ObjectKey{Name: obj.Name, Namespace: obj.Namespace}, stack); err != nil {
+		return nil, err
+	}
+	if !stack.Status.HasID() {
+		return nil, fmt.Errorf("stack is not ready yet")
+	}
+	return stack.Status.ID, nil
 }
 
 func (r *ServiceReconciler) MergeHelmValues(ctx context.Context, secretRef *corev1.SecretReference, values *runtime.RawExtension) (*string, error) {
@@ -443,6 +420,21 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 		err = utils.TryAddOwnerRef(ctx, r.Client, service, configMap, r.Scheme)
 		if err != nil {
 			return err
+		}
+	}
+
+	if len(service.Spec.Imports) > 0 {
+		for _, imp := range service.Spec.Imports {
+			stack := &v1alpha1.InfrastructureStack{}
+			name := types.NamespacedName{Name: imp.StackRef.Name, Namespace: imp.StackRef.Namespace}
+			err := r.Get(ctx, name, stack)
+			if err != nil {
+				return err
+			}
+			err = utils.TryAddOwnerRef(ctx, r.Client, service, stack, r.Scheme)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -547,5 +539,6 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		Owns(&v1alpha1.InfrastructureStack{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }

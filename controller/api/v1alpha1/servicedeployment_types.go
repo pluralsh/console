@@ -1,6 +1,10 @@
 package v1alpha1
 
 import (
+	"encoding/json"
+
+	console "github.com/pluralsh/console-client-go"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +25,14 @@ const (
 
 type ServiceKustomize struct {
 	Path string `json:"path"`
+}
+
+func (sk *ServiceKustomize) Attributes() *console.KustomizeAttributes {
+	if sk == nil {
+		return nil
+	}
+
+	return &console.KustomizeAttributes{Path: sk.Path}
 }
 
 type ServiceHelm struct {
@@ -68,6 +80,43 @@ type SyncConfigAttributes struct {
 	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
+func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, error) {
+	if sca == nil {
+		return nil, nil
+	}
+
+	createNamespace := true
+	if sca.CreateNamespace != nil {
+		createNamespace = *sca.CreateNamespace
+	}
+
+	var annotations *string
+	if sca.Annotations != nil {
+		result, err := json.Marshal(sca.Annotations)
+		if err != nil {
+			return nil, err
+		}
+		annotations = lo.ToPtr(string(result))
+	}
+
+	var labels *string
+	if sca.Labels != nil {
+		result, err := json.Marshal(sca.Labels)
+		if err != nil {
+			return nil, err
+		}
+		labels = lo.ToPtr(string(result))
+	}
+
+	return &console.SyncConfigAttributes{
+		CreateNamespace: &createNamespace,
+		NamespaceMetadata: &console.MetadataAttributes{
+			Labels:      labels,
+			Annotations: annotations,
+		},
+	}, nil
+}
+
 type ServiceSpec struct {
 	// the name of this service, if not provided ServiceDeployment's own name from ServiceDeployment.ObjectMeta will be used.
 	// +kubebuilder:validation:Optional
@@ -109,10 +158,38 @@ type ServiceSpec struct {
 	// Templated should apply liquid templating to raw yaml files, defaults to true
 	// +kubebuilder:validation:Optional
 	Templated *bool `json:"templated,omitempty"`
-
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="Imports are immutable"
+	Imports []ServiceImport `json:"imports"`
 	// Detach determined if user want to delete or detach service
 	// +kubebuilder:validation:Optional
 	Detach bool `json:"detach,omitempty"`
+}
+
+type ServiceImport struct {
+	// +kubebuilder:validation:Required
+	StackRef corev1.ObjectReference `json:"stackRef"`
+}
+
+func (ss *ServiceSpec) DependenciesAttribute() []*console.ServiceDependencyAttributes {
+	if len(ss.Dependencies) < 1 {
+		return nil
+	}
+
+	deps := make([]*console.ServiceDependencyAttributes, 0)
+	for _, dep := range ss.Dependencies {
+		deps = append(deps, &console.ServiceDependencyAttributes{Name: dep.Name})
+	}
+
+	return deps
+}
+
+func (ss *ServiceSpec) TemplatedAttribute() *bool {
+	if ss.Templated == nil {
+		return lo.ToPtr(true)
+	}
+
+	return ss.Templated
 }
 
 type ServiceStatus struct {
