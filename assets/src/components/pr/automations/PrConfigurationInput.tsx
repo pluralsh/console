@@ -37,9 +37,9 @@ export function PrConfigurationInput({
           selectedKey={value}
           onSelectionChange={(key) => setValue(key as string)}
         >
-          {(config?.values || [])?.map((val, index) => (
+          {(config?.values || [])?.map((val) => (
             <ListBoxItem
-              key={`${index}`}
+              key={`${val}`}
               label={val}
               textValue={val ?? ''}
             />
