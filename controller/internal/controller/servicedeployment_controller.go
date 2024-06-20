@@ -423,6 +423,21 @@ func (r *ServiceReconciler) addOwnerReferences(ctx context.Context, service *v1a
 		}
 	}
 
+	if len(service.Spec.Imports) > 0 {
+		for _, imp := range service.Spec.Imports {
+			stack := &v1alpha1.InfrastructureStack{}
+			name := types.NamespacedName{Name: imp.StackRef.Name, Namespace: imp.StackRef.Namespace}
+			err := r.Get(ctx, name, stack)
+			if err != nil {
+				return err
+			}
+			err = utils.TryAddOwnerRef(ctx, r.Client, service, stack, r.Scheme)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -524,5 +539,6 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		Owns(&v1alpha1.InfrastructureStack{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
