@@ -83,10 +83,8 @@ func (c *Cluster) Attributes(providerId, projectId *string) console.ClusterAttri
 	}
 
 	if c.Spec.Bindings != nil {
-		attrs.ReadBindings = algorithms.Map(c.Spec.Bindings.Read,
-			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attrs.WriteBindings = algorithms.Map(c.Spec.Bindings.Write,
-			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attrs.ReadBindings = PolicyBindings(c.Spec.Bindings.Read)
+		attrs.WriteBindings = PolicyBindings(c.Spec.Bindings.Write)
 	}
 
 	return attrs

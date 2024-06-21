@@ -218,6 +218,8 @@ defmodule Console.GraphQl.Deployments.Stack do
 
     field :tarball, non_null(:string), resolve: &Deployments.stack_tarball/3, description: "https url to fetch the latest tarball of stack IaC"
 
+    field :pull_request, :pull_request, resolve: dataloader(Deployments), description: "the pull request this stack belongs to"
+
     field :approver, :user, resolve: dataloader(User), description: "the approver of this job"
     field :actor, :user, resolve: dataloader(User), description: "the actor of this run (defaults to root console user)"
 

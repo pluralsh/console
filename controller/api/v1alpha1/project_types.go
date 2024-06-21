@@ -2,7 +2,6 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/polly/algorithms"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -57,10 +56,8 @@ func (in *Project) Attributes() console.ProjectAttributes {
 	}
 
 	if in.Spec.Bindings != nil {
-		attrs.ReadBindings = algorithms.Map(in.Spec.Bindings.Read,
-			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attrs.WriteBindings = algorithms.Map(in.Spec.Bindings.Write,
-			func(b Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attrs.ReadBindings = PolicyBindings(in.Spec.Bindings.Read)
+		attrs.WriteBindings = PolicyBindings(in.Spec.Bindings.Write)
 	}
 
 	return attrs

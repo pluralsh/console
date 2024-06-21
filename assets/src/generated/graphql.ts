@@ -7084,6 +7084,8 @@ export type StackRun = {
   output?: Maybe<Array<Maybe<StackOutput>>>;
   /** temporary plural creds usable for terraform authentication */
   pluralCreds?: Maybe<PluralCreds>;
+  /** the pull request this stack belongs to */
+  pullRequest?: Maybe<PullRequest>;
   /** the git repository you're sourcing IaC from */
   repository?: Maybe<GitRepository>;
   /** the stack attached to this run */

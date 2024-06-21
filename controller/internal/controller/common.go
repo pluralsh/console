@@ -6,9 +6,6 @@ import (
 	"time"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/cache"
-	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -16,6 +13,11 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
+
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/errors"
+	"github.com/pluralsh/console/controller/internal/utils"
 )
 
 const (
@@ -47,23 +49,37 @@ func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache
 
 	if binding.GroupName != nil {
 		groupID, err := userGroupCache.GetGroupID(*binding.GroupName)
-		if err != nil {
+		if err != nil && !errors.IsNotFound(err) {
 			return binding, err
 		}
 
-		binding.GroupID = &groupID
+		binding.GroupID = lo.EmptyableToPtr(groupID)
 	}
 
 	if binding.UserEmail != nil {
 		userID, err := userGroupCache.GetUserID(*binding.UserEmail)
-		if err != nil {
+		if err != nil && !errors.IsNotFound(err) {
 			return binding, err
 		}
 
-		binding.UserID = &userID
+		binding.UserID = lo.EmptyableToPtr(userID)
 	}
 
 	return binding, nil
+}
+
+func policyBindings(bindings []v1alpha1.Binding) []*console.PolicyBindingAttributes {
+	if bindings == nil {
+		return nil
+	}
+
+	filtered := algorithms.Filter(bindings, func(b v1alpha1.Binding) bool {
+		return b.UserID != nil || b.GroupID != nil
+	})
+
+	return algorithms.Map(filtered, func(b v1alpha1.Binding) *console.PolicyBindingAttributes {
+		return b.Attributes()
+	})
 }
 
 func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {

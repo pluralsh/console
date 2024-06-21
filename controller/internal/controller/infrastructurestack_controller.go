@@ -327,12 +327,8 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 	attr.JobSpec = jobSpec
 
 	if stack.Spec.Bindings != nil {
-		attr.ReadBindings = make([]*console.PolicyBindingAttributes, 0)
-		attr.WriteBindings = make([]*console.PolicyBindingAttributes, 0)
-		attr.ReadBindings = algorithms.Map(stack.Spec.Bindings.Read,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attr.WriteBindings = algorithms.Map(stack.Spec.Bindings.Write,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attr.ReadBindings = policyBindings(stack.Spec.Bindings.Read)
+		attr.WriteBindings = policyBindings(stack.Spec.Bindings.Write)
 	}
 
 	return attr, nil
