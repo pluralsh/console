@@ -232,6 +232,9 @@ func Reconcilers() ReconcilerList {
 		ManagedNamespaceReconciler,
 		StackReconciler,
 		ProjectReconciler,
+		DeploymentSettingsReconciler,
+		CustomStackRunReconciler,
+		ClusterRestoreReconciler,
 	}
 }
 
