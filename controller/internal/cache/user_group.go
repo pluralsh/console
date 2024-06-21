@@ -2,6 +2,7 @@ package cache
 
 import (
 	cmap "github.com/orcaman/concurrent-map/v2"
+
 	"github.com/pluralsh/console/controller/internal/client"
 )
 
