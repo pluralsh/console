@@ -5,11 +5,11 @@ import { useOutletContext, useParams } from 'react-router-dom'
 import {
   StackEnvironment,
   useUpdateStackMutation,
-} from '../../generated/graphql'
-import { DeleteIconButton } from '../utils/IconButtons'
-import { Confirm } from '../utils/Confirm'
+} from '../../../generated/graphql'
+import { DeleteIconButton } from '../../utils/IconButtons'
+import { Confirm } from '../../utils/Confirm'
 
-import { StackOutletContextT } from './Stacks'
+import { StackOutletContextT } from '../Stacks'
 
 export default function StackEnvironmentDelete({
   env,

@@ -130,6 +130,27 @@ fragment RunStep on RunStep {
   }
 }
 
+query StackPrs(
+  $id: ID!
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+) {
+  infrastructureStack(id: $id) {
+    pullRequests(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PullRequest
+        }
+      }
+    }
+  }
+}
+
 query Stacks(
   $q: String
   $after: String
@@ -180,9 +201,16 @@ query StackRuns(
   $before: String
   $first: Int = 100
   $last: Int
+  $pullRequestId: ID
 ) {
   infrastructureStack(id: $id) {
-    runs(after: $after, before: $before, first: $first, last: $last) {
+    runs(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+      pullRequestId: $pullRequestId
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -221,6 +249,9 @@ query StackRun($id: ID!) {
       files
       ref
       folder
+    }
+    pullRequest {
+      ...PullRequest
     }
     output {
       ...StackOutput

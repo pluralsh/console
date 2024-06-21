@@ -29,13 +29,26 @@ type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   errorPolicy?: ErrorPolicy
 }
 
+export type FetchPaginatedDataResult<TQueryType> = {
+  data: TQueryType | undefined
+  loading: boolean
+  error: any
+  refetch: () => void
+  pageInfo: any
+  fetchNextPage: () => void
+  setVirtualSlice: (slice: {
+    start: VirtualItem | undefined
+    end: VirtualItem | undefined
+  }) => void
+}
+
 export function useFetchPaginatedData<
   TQueryType extends Partial<Record<string, any>>,
   TVariables extends OperationVariables,
 >(
   options: FetchDataOptions<TQueryType, TVariables>,
   variables: TVariables = {} as TVariables
-) {
+): FetchPaginatedDataResult<TQueryType> {
   const [virtualSlice, setVirtualSlice] = useState<
     | {
         start: VirtualItem | undefined

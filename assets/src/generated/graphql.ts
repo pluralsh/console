@@ -9212,6 +9212,17 @@ export type StackFileFragment = { __typename?: 'StackFile', path: string, conten
 
 export type RunStepFragment = { __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null };
 
+export type StackPrsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type StackPrsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null } | null };
+
 export type StacksQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9244,6 +9255,7 @@ export type StackRunsQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  pullRequestId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -9254,7 +9266,7 @@ export type StackRunQueryVariables = Exact<{
 }>;
 
 
-export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version: string, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null } | null };
+export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version: string, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null } | null };
 
 export type StackRunJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18511,6 +18523,60 @@ export function useUpdateProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProjectMutationHookResult = ReturnType<typeof useUpdateProjectMutation>;
 export type UpdateProjectMutationResult = Apollo.MutationResult<UpdateProjectMutation>;
 export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProjectMutation, UpdateProjectMutationVariables>;
+export const StackPrsDocument = gql`
+    query StackPrs($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStack(id: $id) {
+    pullRequests(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PullRequest
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PullRequestFragmentDoc}`;
+
+/**
+ * __useStackPrsQuery__
+ *
+ * To run a query within a React component, call `useStackPrsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackPrsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackPrsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useStackPrsQuery(baseOptions: Apollo.QueryHookOptions<StackPrsQuery, StackPrsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackPrsQuery, StackPrsQueryVariables>(StackPrsDocument, options);
+      }
+export function useStackPrsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackPrsQuery, StackPrsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackPrsQuery, StackPrsQueryVariables>(StackPrsDocument, options);
+        }
+export function useStackPrsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackPrsQuery, StackPrsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackPrsQuery, StackPrsQueryVariables>(StackPrsDocument, options);
+        }
+export type StackPrsQueryHookResult = ReturnType<typeof useStackPrsQuery>;
+export type StackPrsLazyQueryHookResult = ReturnType<typeof useStackPrsLazyQuery>;
+export type StackPrsSuspenseQueryHookResult = ReturnType<typeof useStackPrsSuspenseQuery>;
+export type StackPrsQueryResult = Apollo.QueryResult<StackPrsQuery, StackPrsQueryVariables>;
 export const StacksDocument = gql`
     query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int, $projectId: ID) {
   infrastructureStacks(
@@ -18657,9 +18723,15 @@ export type StackTinyLazyQueryHookResult = ReturnType<typeof useStackTinyLazyQue
 export type StackTinySuspenseQueryHookResult = ReturnType<typeof useStackTinySuspenseQuery>;
 export type StackTinyQueryResult = Apollo.QueryResult<StackTinyQuery, StackTinyQueryVariables>;
 export const StackRunsDocument = gql`
-    query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+    query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int, $pullRequestId: ID) {
   infrastructureStack(id: $id) {
-    runs(after: $after, before: $before, first: $first, last: $last) {
+    runs(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+      pullRequestId: $pullRequestId
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -18691,6 +18763,7 @@ ${StackRunFragmentDoc}`;
  *      before: // value for 'before'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      pullRequestId: // value for 'pullRequestId'
  *   },
  * });
  */
@@ -18738,6 +18811,9 @@ export const StackRunDocument = gql`
       ref
       folder
     }
+    pullRequest {
+      ...PullRequest
+    }
     output {
       ...StackOutput
     }
@@ -18765,6 +18841,7 @@ export const StackRunDocument = gql`
 ${StackConfigurationFragmentDoc}
 ${StackStateFragmentDoc}
 ${GitRepositoryFragmentDoc}
+${PullRequestFragmentDoc}
 ${StackOutputFragmentDoc}
 ${ClusterTinyFragmentDoc}
 ${StackEnvironmentFragmentDoc}
@@ -19695,6 +19772,7 @@ export const namedOperations = {
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
+    StackPrs: 'StackPrs',
     Stacks: 'Stacks',
     Stack: 'Stack',
     StackTiny: 'StackTiny',

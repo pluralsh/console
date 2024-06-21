@@ -4,10 +4,10 @@ import { useOutletContext } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 
-import { StackFile } from '../../generated/graphql'
+import { StackFile } from '../../../generated/graphql'
 
-import OutputValue from './run/output/Value'
-import { StackOutletContextT, getBreadcrumbs } from './Stacks'
+import OutputValue from '../run/output/Value'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
 const columnHelper = createColumnHelper<StackFile>()
 

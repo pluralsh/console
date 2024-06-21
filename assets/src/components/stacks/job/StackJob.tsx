@@ -11,7 +11,7 @@ import { useOutletContext } from 'react-router-dom'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'
 
-import { StackOutletContextT, getBreadcrumbs } from './Stacks'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
 export default function StackJob() {
   const theme = useTheme()

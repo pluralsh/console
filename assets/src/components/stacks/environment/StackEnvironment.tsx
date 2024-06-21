@@ -19,12 +19,15 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import CopyButton from 'components/utils/CopyButton'
 import { ObscuredToken } from 'components/profile/ObscuredToken'
 
-import { StackEnvironment as StackEnvironmentT } from '../../generated/graphql'
-import { ModalMountTransition } from '../utils/ModalMountTransition'
+import { StackEnvironment as StackEnvironmentT } from '../../../generated/graphql'
+import { ModalMountTransition } from '../../utils/ModalMountTransition'
 
-import { StackOutletContextT, getBreadcrumbs } from './Stacks'
-import StackEnvironmentDelete from './StackEnvironmentDelete'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+
 import StackEnvironmentEdit from './StackEnvironmentEdit'
+
+import StackEnvironmentDelete from './StackEnvironmentDelete'
+
 import StackEnvironmentApplyModal from './StackEnvironmentApplyModal'
 
 const columnHelper = createColumnHelper<StackEnvironmentT>()

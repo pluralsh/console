@@ -21,6 +21,7 @@ import {
   STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
+  STACK_PRS_REL_PATH,
   STACK_REPOSITORY_REL_PATH,
   STACK_RUNS_REL_PATH,
   getStacksAbsPath,
@@ -63,12 +64,13 @@ const pollInterval = 5 * 1000
 
 const DIRECTORY = [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
-  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview' },
+  { path: STACK_PRS_REL_PATH, label: 'PRs' },
   { path: STACK_CONFIGURATION_REL_PATH, label: 'Configuration' },
   { path: STACK_REPOSITORY_REL_PATH, label: 'Repository' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
   { path: STACK_FILES_REL_PATH, label: 'Files' },
   { path: STACK_JOB_REL_PATH, label: 'Job' },
+  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview' },
 ]
 
 export default function Stacks() {

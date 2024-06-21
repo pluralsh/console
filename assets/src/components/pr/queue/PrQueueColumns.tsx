@@ -1,4 +1,4 @@
-import { ComponentProps, ReactElement, useMemo, useState } from 'react'
+import { ReactElement, useState } from 'react'
 import {
   Chip,
   EditIcon,
@@ -22,6 +22,8 @@ import { Edge } from 'utils/graphql'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
+
+import { Severity } from '@pluralsh/design-system/dist/types'
 
 import DecoratedName from '../../cd/services/DecoratedName'
 import { ProtectBadge } from '../../cd/clusters/ProtectBadge'
@@ -85,25 +87,31 @@ const ColTitle = columnHelper.accessor(({ node }) => node?.title, {
   },
 })
 
+export function PrStatusChip({ status }: { status?: PrStatus | null }) {
+  if (!status) return null
+
+  let severity: Severity = 'neutral'
+
+  switch (status) {
+    case PrStatus.Open:
+      severity = 'info'
+      break
+    case PrStatus.Closed:
+      severity = 'danger'
+      break
+    case PrStatus.Merged:
+      severity = 'success'
+      break
+  }
+
+  return <Chip severity={severity}>{capitalize(status)}</Chip>
+}
+
 const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   id: 'status',
   header: 'Status',
   cell: function Cell({ getValue }) {
-    const status = getValue()
-    const severity: ComponentProps<typeof Chip>['severity'] = useMemo(() => {
-      switch (status) {
-        case PrStatus.Open:
-          return 'info'
-        case PrStatus.Closed:
-          return 'danger'
-        case PrStatus.Merged:
-          return 'success'
-      }
-    }, [status])
-
-    if (!status) return null
-
-    return <Chip severity={severity}>{capitalize(status)}</Chip>
+    return <PrStatusChip status={getValue()} />
   },
 })
 

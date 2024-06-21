@@ -5,13 +5,13 @@ import { useTheme } from 'styled-components'
 import capitalize from 'lodash/capitalize'
 import moment from 'moment/moment'
 
-import { ClusterProviderIcon } from '../utils/Provider'
-import { getClusterDetailsPath } from '../../routes/cdRoutesConsts'
-import { InlineLink } from '../utils/typography/InlineLink'
+import { ClusterProviderIcon } from '../../utils/Provider'
+import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts'
+import { InlineLink } from '../../utils/typography/InlineLink'
 
-import { StackOutletContextT, getBreadcrumbs } from './Stacks'
-import StackStatusChip from './common/StackStatusChip'
-import StackApprovalChip from './common/StackApprovalChip'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import StackStatusChip from '../common/StackStatusChip'
+import StackApprovalChip from '../common/StackApprovalChip'
 
 export default function StackOverview() {
   const theme = useTheme()
