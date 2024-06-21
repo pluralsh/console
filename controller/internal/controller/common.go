@@ -16,6 +16,7 @@ import (
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/errors"
 	"github.com/pluralsh/console/controller/internal/utils"
 )
 
@@ -48,7 +49,7 @@ func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache
 
 	if binding.GroupName != nil {
 		groupID, err := userGroupCache.GetGroupID(*binding.GroupName)
-		if runtimeclient.IgnoreNotFound(err) != nil {
+		if err != nil && !errors.IsNotFound(err) {
 			return binding, err
 		}
 
@@ -57,8 +58,8 @@ func ensureBinding(binding v1alpha1.Binding, userGroupCache cache.UserGroupCache
 
 	if binding.UserEmail != nil {
 		userID, err := userGroupCache.GetUserID(*binding.UserEmail)
-		if runtimeclient.IgnoreNotFound(err) != nil {
-			return binding, runtimeclient.IgnoreNotFound(err)
+		if err != nil && !errors.IsNotFound(err) {
+			return binding, err
 		}
 
 		binding.UserID = lo.EmptyableToPtr(userID)
