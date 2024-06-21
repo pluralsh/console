@@ -67,6 +67,7 @@ export type TableProps = Omit<
   data: any[]
   columns: any[]
   hideHeader?: boolean
+  padCells?: boolean
   getRowCanExpand?: any
   renderExpanded?: any
   loose?: boolean
@@ -264,6 +265,7 @@ const Th = styled.th<{
 const Td = styled.td<{
   $firstRow?: boolean
   $loose?: boolean
+  $padCells?: boolean
   $stickyColumn: boolean
   $truncateColumn: boolean
   $center?: boolean
@@ -272,6 +274,7 @@ const Td = styled.td<{
     theme,
     $firstRow: firstRow,
     $loose: loose,
+    $padCells: padCells,
     $stickyColumn: stickyColumn,
     $truncateColumn: truncateColumn = false,
     $center: center,
@@ -288,7 +291,7 @@ const Td = styled.td<{
     borderTop: firstRow ? '' : theme.borders.default,
     color: theme.colors['text-light'],
 
-    padding: loose ? '16px 12px' : '8px 12px',
+    padding: padCells ? (loose ? '16px 12px' : '8px 12px') : 0,
     '&:first-child': stickyColumn
       ? {
           boxShadow: theme.boxShadows.slight,
@@ -534,6 +537,7 @@ function TableRef(
     getRowCanExpand,
     renderExpanded,
     loose = false,
+    padCells = true,
     stickyColumn = false,
     scrollTopMargin = 500,
     flush = false,
@@ -790,6 +794,7 @@ function TableRef(
                       <TdLoading
                         key={i}
                         $firstRow={i === 0}
+                        $padCells={padCells}
                         $loose={loose}
                         $stickyColumn={stickyColumn}
                         $truncateColumn={false}
@@ -804,6 +809,7 @@ function TableRef(
                         <Td
                           key={cell.id}
                           $firstRow={i === 0}
+                          $padCells={padCells}
                           $loose={loose}
                           $stickyColumn={stickyColumn}
                           $truncateColumn={
