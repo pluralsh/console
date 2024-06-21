@@ -1,9 +1,18 @@
 import React, { ReactNode } from 'react'
-import { Sidecar, SidecarItem } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Button,
+  IconFrame,
+  PrOpenIcon,
+  Sidecar,
+  SidecarItem,
+} from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import moment from 'moment'
 
 import { Link } from 'react-router-dom'
+
+import { PrStatusChip } from 'components/pr/queue/PrQueueColumns'
 
 import { StackRun } from '../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
@@ -22,13 +31,45 @@ export default function StackRunSidecar({
   stackRun,
 }: StackRunSidecarProps): ReactNode {
   const theme = useTheme()
+  const pr = stackRun.pullRequest
 
   return (
     <ResponsiveLayoutSidecarContainer
       display="flex"
       flexDirection="column"
-      gap="small"
+      gap="medium"
     >
+      {pr && (
+        <Sidecar
+          css={{ paddingTop: theme.spacing.xsmall }}
+          heading={
+            <div css={{ display: 'flex', alignItems: 'center' }}>
+              <IconFrame
+                icon={<PrOpenIcon />}
+                textValue="Delete"
+              />
+              <span>PARENT PR</span>
+            </div>
+          }
+        >
+          <SidecarItem heading="PR title">
+            <span>{pr.title}</span>
+          </SidecarItem>
+          <SidecarItem heading="PR status">
+            <PrStatusChip status={pr.status} />
+          </SidecarItem>
+          <SidecarItem>
+            <Button
+              floating
+              endIcon={<ArrowTopRightIcon />}
+              as={Link}
+              to={pr.url}
+            >
+              Go to PR
+            </Button>
+          </SidecarItem>
+        </Sidecar>
+      )}
       <Sidecar css={{ overflowX: 'auto' }}>
         <SidecarItem heading="Status">
           <StackStatusChip
