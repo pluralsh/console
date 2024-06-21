@@ -4,58 +4,38 @@ import {
   LoopingLogo,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import React, { useCallback, useMemo, useState } from 'react'
-import { useTheme } from 'styled-components'
+import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import { useOutletContext, useParams } from 'react-router-dom'
 
 import { StackFragment, useStackRunsQuery } from '../../../generated/graphql'
-import { extendConnection, mapExistingNodes } from '../../../utils/graphql'
-import { StandardScroller } from '../../utils/SmoothScroller'
-import { ReturnToBeginning } from '../../utils/ReturnToBeginning'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
 import { getBreadcrumbs } from '../Stacks'
 
-import StackRunsEntry from './StackRunsEntry'
+import { StackRunsScroller } from './StackRunsScroller'
 
 const pollInterval = 5 * 1000
 
 export default function StackRuns() {
-  const theme = useTheme()
   const { stackId = '' } = useParams()
   const { stack } = useOutletContext() as { stack?: Nullable<StackFragment> }
-  const [listRef, setListRef] = useState<any>(null)
-  const [scrolled, setScrolled] = useState(false)
 
   useSetBreadcrumbs(
     useMemo(() => [...getBreadcrumbs(stackId), { label: 'runs' }], [stackId])
   )
 
-  const { data, loading, fetchMore } = useStackRunsQuery({
+  const queryResult = useStackRunsQuery({
     variables: { id: stack?.id ?? '' },
     fetchPolicy: 'cache-and-network',
     pollInterval,
   })
 
-  const { runs, pageInfo } = useMemo(
-    () => ({
-      runs: mapExistingNodes(data?.infrastructureStack?.runs),
-      pageInfo: data?.infrastructureStack?.runs?.pageInfo,
-    }),
-    [data?.infrastructureStack?.runs]
-  )
-
-  const returnToBeginning = useCallback(
-    () => listRef.scrollToItem(0),
-    [listRef]
-  )
-
-  if (!data) {
+  if (!queryResult.data) {
     return <LoopingLogo />
   }
 
-  if (isEmpty(runs))
+  if (isEmpty(queryResult.data.infrastructureStack?.runs))
     return (
       <EmptyState message="Looks like this stack doesn't have any runs yet." />
     )
@@ -66,47 +46,7 @@ export default function StackRuns() {
       noPadding
     >
       <Card height="100%">
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          items={runs}
-          loading={loading}
-          handleScroll={setScrolled}
-          placeholder={() => (
-            <div css={{ height: 71, borderBottom: theme.borders.default }} />
-          )}
-          hasNextPage={pageInfo?.hasNextPage}
-          mapper={(run, { next }) => (
-            <div>
-              <StackRunsEntry
-                key={run.id}
-                stackRun={run}
-                first={isEmpty(next)}
-              />
-            </div>
-          )}
-          loadNextPage={() =>
-            pageInfo?.hasNextPage &&
-            fetchMore({
-              variables: { after: pageInfo?.endCursor },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (!prev.infrastructureStack) return prev
-
-                return {
-                  ...prev,
-                  infrastructureStack: extendConnection(
-                    prev.infrastructureStack,
-                    fetchMoreResult.infrastructureStack?.runs,
-                    'runs'
-                  ),
-                }
-              },
-            })
-          }
-          refreshKey={undefined}
-          setLoader={undefined}
-        />
-        {scrolled && <ReturnToBeginning beginning={returnToBeginning} />}
+        <StackRunsScroller queryResult={queryResult} />
       </Card>
     </ScrollablePage>
   )

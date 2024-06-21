@@ -4,10 +4,11 @@ import {
   CliIcon,
   GitCommitIcon,
   IconFrame,
+  Tooltip,
   WarningShieldIcon,
 } from '@pluralsh/design-system'
 import moment from 'moment'
-import { useTheme } from 'styled-components'
+import { CSSObject, useTheme } from 'styled-components'
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 
@@ -21,9 +22,11 @@ import StackStatusChip from '../common/StackStatusChip'
 export default function StackRunsEntry({
   stackRun,
   first,
+  entryStyles,
 }: {
   stackRun: StackRunFragment
   first: boolean
+  entryStyles?: CSSObject
 }) {
   const navigate = useNavigate()
   const { stackId } = useParams()
@@ -50,6 +53,7 @@ export default function StackRunsEntry({
         paddingLeft: theme.spacing.medium,
         paddingRight: theme.spacing.medium,
         '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
+        ...entryStyles,
       }}
       onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
     >
@@ -69,40 +73,46 @@ export default function StackRunsEntry({
       <div
         css={{
           display: 'flex',
+          flex: 1,
           flexDirection: 'column',
           gap: theme.spacing.xxxsmall,
           overflow: 'hidden',
         }}
       >
-        <div
-          css={{
-            alignItems: 'baseline',
-            display: 'flex',
-            gap: theme.spacing.xsmall,
-          }}
+        <Tooltip
+          placement="top-start"
+          label={message ?? (first ? 'Initial run' : 'No message')}
         >
           <div
             css={{
-              ...theme.partials.text.body2Bold,
-              textOverflow: 'ellipsis',
-              overflow: 'hidden',
+              alignItems: 'baseline',
+              display: 'flex',
+              gap: theme.spacing.medium,
             }}
           >
-            {message ?? (first ? 'Initial run' : 'No message')}
-          </div>
-          {approver && (
             <div
               css={{
-                ...theme.partials.text.caption,
+                ...theme.partials.text.body2Bold,
                 ...TRUNCATE,
-                overflow: 'hidden',
-                color: theme.colors['text-xlight'],
+                maxWidth: '50%',
               }}
             >
-              approved by {approver?.name}
+              {message ?? (first ? 'Initial run' : 'No message')}
             </div>
-          )}
-        </div>
+            {approver && (
+              <div
+                css={{
+                  ...theme.partials.text.caption,
+                  ...TRUNCATE,
+
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                approved by {approver?.name}
+              </div>
+            )}
+          </div>
+        </Tooltip>
         <div
           css={{
             ...theme.partials.text.caption,
@@ -121,7 +131,6 @@ export default function StackRunsEntry({
           ...theme.partials.text.caption,
           color: theme.colors['text-xlight'],
           display: 'flex',
-          flexGrow: 1,
           justifyContent: 'end',
           whiteSpace: 'nowrap',
         }}

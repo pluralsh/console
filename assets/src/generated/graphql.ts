@@ -9212,6 +9212,17 @@ export type StackFileFragment = { __typename?: 'StackFile', path: string, conten
 
 export type RunStepFragment = { __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null };
 
+export type StackPrsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type StackPrsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null } | null };
+
 export type StacksQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9244,6 +9255,7 @@ export type StackRunsQueryVariables = Exact<{
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  pullRequestId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -18511,6 +18523,60 @@ export function useUpdateProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProjectMutationHookResult = ReturnType<typeof useUpdateProjectMutation>;
 export type UpdateProjectMutationResult = Apollo.MutationResult<UpdateProjectMutation>;
 export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProjectMutation, UpdateProjectMutationVariables>;
+export const StackPrsDocument = gql`
+    query StackPrs($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStack(id: $id) {
+    pullRequests(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...PullRequest
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${PullRequestFragmentDoc}`;
+
+/**
+ * __useStackPrsQuery__
+ *
+ * To run a query within a React component, call `useStackPrsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackPrsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackPrsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useStackPrsQuery(baseOptions: Apollo.QueryHookOptions<StackPrsQuery, StackPrsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackPrsQuery, StackPrsQueryVariables>(StackPrsDocument, options);
+      }
+export function useStackPrsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackPrsQuery, StackPrsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackPrsQuery, StackPrsQueryVariables>(StackPrsDocument, options);
+        }
+export function useStackPrsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackPrsQuery, StackPrsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackPrsQuery, StackPrsQueryVariables>(StackPrsDocument, options);
+        }
+export type StackPrsQueryHookResult = ReturnType<typeof useStackPrsQuery>;
+export type StackPrsLazyQueryHookResult = ReturnType<typeof useStackPrsLazyQuery>;
+export type StackPrsSuspenseQueryHookResult = ReturnType<typeof useStackPrsSuspenseQuery>;
+export type StackPrsQueryResult = Apollo.QueryResult<StackPrsQuery, StackPrsQueryVariables>;
 export const StacksDocument = gql`
     query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int, $projectId: ID) {
   infrastructureStacks(
@@ -18657,9 +18723,15 @@ export type StackTinyLazyQueryHookResult = ReturnType<typeof useStackTinyLazyQue
 export type StackTinySuspenseQueryHookResult = ReturnType<typeof useStackTinySuspenseQuery>;
 export type StackTinyQueryResult = Apollo.QueryResult<StackTinyQuery, StackTinyQueryVariables>;
 export const StackRunsDocument = gql`
-    query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+    query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int, $pullRequestId: ID) {
   infrastructureStack(id: $id) {
-    runs(after: $after, before: $before, first: $first, last: $last) {
+    runs(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+      pullRequestId: $pullRequestId
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -18691,6 +18763,7 @@ ${StackRunFragmentDoc}`;
  *      before: // value for 'before'
  *      first: // value for 'first'
  *      last: // value for 'last'
+ *      pullRequestId: // value for 'pullRequestId'
  *   },
  * });
  */
@@ -19695,6 +19768,7 @@ export const namedOperations = {
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
+    StackPrs: 'StackPrs',
     Stacks: 'Stacks',
     Stack: 'Stack',
     StackTiny: 'StackTiny',
