@@ -23,7 +23,6 @@ import (
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/utils"
-	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -164,26 +163,10 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 	}
 	if settings.Spec.Bindings != nil {
-		if settings.Spec.Bindings.Read != nil {
-			attr.ReadBindings = make([]*console.PolicyBindingAttributes, 0)
-			attr.ReadBindings = algorithms.Map(settings.Spec.Bindings.Read,
-				func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		}
-		if settings.Spec.Bindings.Write != nil {
-			attr.WriteBindings = make([]*console.PolicyBindingAttributes, 0)
-			attr.WriteBindings = algorithms.Map(settings.Spec.Bindings.Write,
-				func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		}
-		if settings.Spec.Bindings.Create != nil {
-			attr.CreateBindings = make([]*console.PolicyBindingAttributes, 0)
-			attr.CreateBindings = algorithms.Map(settings.Spec.Bindings.Create,
-				func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		}
-		if settings.Spec.Bindings.Git != nil {
-			attr.GitBindings = make([]*console.PolicyBindingAttributes, 0)
-			attr.GitBindings = algorithms.Map(settings.Spec.Bindings.Git,
-				func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		}
+		attr.ReadBindings = policyBindings(settings.Spec.Bindings.Read)
+		attr.WriteBindings = policyBindings(settings.Spec.Bindings.Write)
+		attr.CreateBindings = policyBindings(settings.Spec.Bindings.Create)
+		attr.GitBindings = policyBindings(settings.Spec.Bindings.Git)
 	}
 	return attr, nil
 }

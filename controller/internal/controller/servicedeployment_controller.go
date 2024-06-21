@@ -288,10 +288,8 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 	}
 
 	if service.Spec.Bindings != nil {
-		attr.ReadBindings = algorithms.Map(service.Spec.Bindings.Read,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
-		attr.WriteBindings = algorithms.Map(service.Spec.Bindings.Write,
-			func(b v1alpha1.Binding) *console.PolicyBindingAttributes { return b.Attributes() })
+		attr.ReadBindings = policyBindings(service.Spec.Bindings.Read)
+		attr.WriteBindings = policyBindings(service.Spec.Bindings.Write)
 	}
 
 	if service.Spec.Helm != nil {
