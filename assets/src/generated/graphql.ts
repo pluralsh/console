@@ -676,6 +676,8 @@ export type CloudSettingsAttributes = {
 /** a representation of a cluster you can deploy to */
 export type Cluster = {
   __typename?: 'Cluster';
+  /** the url this clusters deployment operator will use for gql requests */
+  agentUrl?: Maybe<Scalars['String']['output']>;
   /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
   /** a custom credential to use when provisioning this cluster */

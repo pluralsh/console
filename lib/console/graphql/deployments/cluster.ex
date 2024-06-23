@@ -231,9 +231,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :installed,       :boolean, description: "whether the deploy operator has been registered for this cluster"
     field :settings,        :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
     field :upgrade_plan,    :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
+
     field :kas_url, :string, description: "the url of the kas server you can access this cluster from", resolve: fn
       _, _, _ -> {:ok, Console.Deployments.Clusters.kas_proxy_url()}
     end
+
+    field :agent_url, :string,
+      description: "the url this clusters deployment operator will use for gql requests",
+      resolve: fn _, _, _ -> {:ok, Console.Deployments.Services.api_url("gql")} end
 
     field :deploy_token, :string,
       description: "a auth token to be used by the deploy operator, only readable on create",
