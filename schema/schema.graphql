@@ -3494,6 +3494,9 @@ type Cluster {
   "the url of the kas server you can access this cluster from"
   kasUrl: String
 
+  "the url this clusters deployment operator will use for gql requests"
+  agentUrl: String
+
   "a auth token to be used by the deploy operator, only readable on create"
   deployToken: String
 
