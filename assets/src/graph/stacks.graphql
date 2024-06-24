@@ -138,6 +138,7 @@ query StackPrs(
   $last: Int
 ) {
   infrastructureStack(id: $id) {
+    id
     pullRequests(after: $after, before: $before, first: $first, last: $last) {
       pageInfo {
         ...PageInfo
@@ -204,6 +205,7 @@ query StackRuns(
   $pullRequestId: ID
 ) {
   infrastructureStack(id: $id) {
+    id
     runs(
       after: $after
       before: $before

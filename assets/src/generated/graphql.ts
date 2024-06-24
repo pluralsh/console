@@ -9223,7 +9223,7 @@ export type StackPrsQueryVariables = Exact<{
 }>;
 
 
-export type StackPrsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null } | null };
+export type StackPrsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, pullRequests?: { __typename?: 'PullRequestConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'PullRequestEdge', node?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null } | null };
 
 export type StacksQueryVariables = Exact<{
   q?: InputMaybe<Scalars['String']['input']>;
@@ -9261,7 +9261,7 @@ export type StackRunsQueryVariables = Exact<{
 }>;
 
 
-export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
+export type StackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, runs?: { __typename?: 'StackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'StackRunEdge', node?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null } | null> | null } | null } | null };
 
 export type StackRunQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -18528,6 +18528,7 @@ export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProj
 export const StackPrsDocument = gql`
     query StackPrs($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStack(id: $id) {
+    id
     pullRequests(after: $after, before: $before, first: $first, last: $last) {
       pageInfo {
         ...PageInfo
@@ -18727,6 +18728,7 @@ export type StackTinyQueryResult = Apollo.QueryResult<StackTinyQuery, StackTinyQ
 export const StackRunsDocument = gql`
     query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int, $pullRequestId: ID) {
   infrastructureStack(id: $id) {
+    id
     runs(
       after: $after
       before: $before
