@@ -12,6 +12,11 @@ export const directory: {
     onlyIfNoError: true,
   },
   {
+    label: 'Raw',
+    path: 'raw',
+    onlyIfNoError: true,
+  },
+  {
     label: 'Metrics',
     path: 'metrics',
     onlyFor: ['deployment', 'statefulset'],
@@ -24,11 +29,6 @@ export const directory: {
     onlyIfNoError: true,
   },
   {
-    label: 'Raw',
-    path: 'raw',
-    onlyIfNoError: true,
-  },
-  {
     label: 'Tree view',
     path: 'tree',
     onlyIfNoError: true,
@@ -37,5 +37,9 @@ export const directory: {
     label: 'Dry run',
     path: 'dryrun',
     onlyIfDryRun: true,
+  },
+  {
+    label: 'Metadata',
+    path: 'metadata',
   },
 ]

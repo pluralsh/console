@@ -9,6 +9,8 @@ import { Canary, Deployment, Ingress } from 'generated/graphql'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import { MetadataBase } from '../ComponentMetadata'
+
 import {
   InfoSectionH2,
   InfoSectionH3,
@@ -17,7 +19,6 @@ import {
 } from './common'
 import { ConditionsTable } from './Conditions'
 import { IngressBase } from './Ingress'
-import { MetadataBase } from './Metadata'
 import { DeploymentBase } from './Deployment'
 
 const deploymentHelper = createColumnHelper<Deployment>()
