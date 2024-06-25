@@ -9,6 +9,7 @@ import { useUpdateStackMutation } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
 
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { OverlineH1 } from '../../utils/typography/Text'
 
 export default function StackConfiguration() {
   const theme = useTheme()
@@ -43,6 +44,15 @@ export default function StackConfiguration() {
 
   return (
     <Card padding="large">
+      <OverlineH1
+        as="h3"
+        css={{
+          color: theme.colors['text-xlight'],
+          marginBottom: theme.spacing.large,
+        }}
+      >
+        Configuration
+      </OverlineH1>
       <div
         css={{
           display: 'flex',

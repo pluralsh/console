@@ -25,6 +25,7 @@ import { GqlError } from '../../utils/Alert'
 import { StackOutletContextT } from '../Stacks'
 
 import { cleanRefs } from '../create/CreateStackModalFormRepository'
+import { OverlineH1 } from '../../utils/typography/Text'
 
 export default function StackRepository() {
   const theme = useTheme()
@@ -73,6 +74,15 @@ export default function StackRepository() {
 
   return (
     <Card padding="large">
+      <OverlineH1
+        as="h3"
+        css={{
+          color: theme.colors['text-xlight'],
+          marginBottom: theme.spacing.large,
+        }}
+      >
+        Repository
+      </OverlineH1>
       <div
         css={{
           display: 'flex',
