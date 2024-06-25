@@ -183,6 +183,13 @@ defmodule Console.Schema.Stack do
     |> validate_required(~w(status)a)
   end
 
+  def rbac_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
+  end
+
   def delete_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(deleted_at delete_run_id)a)

@@ -5020,6 +5020,7 @@ export type RootMutationTypeUpdateRbacArgs = {
   providerId?: InputMaybe<Scalars['ID']['input']>;
   rbac: RbacAttributes;
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+  stackId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
