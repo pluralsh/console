@@ -137,6 +137,19 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
+  modifies rbac settings for this stack
+  """
+  @spec rbac(map, binary, User.t) :: stack_resp
+  def rbac(attrs, stack_id, %User{} = user) do
+    get_stack!(stack_id)
+    |> Repo.preload([:read_bindings, :write_bindings])
+    |> allow(user, :write)
+    |> when_ok(&Stack.rbac_changeset(&1, attrs))
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
   Updates basic attributes of a run, clusters and users are authorized to perform
   """
   @spec update_stack_run(map, binary, User.t | Cluster.t) :: run_resp
