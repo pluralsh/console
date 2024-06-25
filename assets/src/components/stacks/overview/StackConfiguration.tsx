@@ -1,10 +1,4 @@
-import {
-  Button,
-  ContentCard,
-  FormField,
-  Input,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Button, Card, FormField, Input } from '@pluralsh/design-system'
 import React, { useMemo, useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -28,13 +22,6 @@ export default function StackConfiguration() {
     version !== stack.configuration.version
   const valid = !isEmpty(version)
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [...getBreadcrumbs(stackId), { label: 'configuration' }],
-      [stackId]
-    )
-  )
-
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
       id: stackId,
@@ -55,7 +42,7 @@ export default function StackConfiguration() {
   }
 
   return (
-    <ContentCard>
+    <Card padding="large">
       <div
         css={{
           display: 'flex',
@@ -101,6 +88,6 @@ export default function StackConfiguration() {
           Save
         </Button>
       </div>
-    </ContentCard>
+    </Card>
   )
 }
