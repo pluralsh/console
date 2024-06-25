@@ -11,7 +11,7 @@ import { getServiceComponentPath } from 'routes/cdRoutesConsts'
 import { ComponentDetailsContext } from '../ComponentDetails'
 
 import { DeleteJob } from './Job'
-import { InfoSectionH2, PaddedCard, PropWideBold } from './common'
+import { InfoSection, PaddedCard, PropWideBold } from './common'
 
 const columnHelper = createColumnHelper<any>()
 
@@ -151,7 +151,6 @@ function CronJobJobs({ jobs, namespace, refetch }) {
 }
 
 export default function CronJob() {
-  const theme = useTheme()
   const { data, refetch, component } = useOutletContext<any>()
   const namespace = component.namespace?.toLowerCase()
 
@@ -160,47 +159,34 @@ export default function CronJob() {
   const { cronJob } = data
 
   return (
-    <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-      <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
-        Jobs
-      </InfoSectionH2>
-      <CronJobJobs
-        jobs={cronJob.jobs}
-        namespace={namespace}
-        refetch={refetch}
-      />
-      <InfoSectionH2
-        css={{
-          marginBottom: theme.spacing.medium,
-          marginTop: theme.spacing.large,
-        }}
-      >
-        Status
-      </InfoSectionH2>
-      <PaddedCard>
-        <PropWideBold title="Last scheduled">
-          {cronJob.status?.lastScheduleTime || 0}
-        </PropWideBold>
-      </PaddedCard>
-      <InfoSectionH2
-        css={{
-          marginBottom: theme.spacing.medium,
-          marginTop: theme.spacing.large,
-        }}
-      >
-        Spec
-      </InfoSectionH2>
-      <PaddedCard>
-        <PropWideBold title="Schedule">
-          {cronJob.spec?.schedule || '-'}
-        </PropWideBold>
-        <PropWideBold title="Concurrency">
-          {cronJob.spec?.concurrencyPolicy || '-'}
-        </PropWideBold>
-        <PropWideBold title="Suspended">
-          {cronJob.spec?.suspend ? 'Yes' : 'No'}
-        </PropWideBold>
-      </PaddedCard>
-    </div>
+    <>
+      <InfoSection title="Jobs">
+        <CronJobJobs
+          jobs={cronJob.jobs}
+          namespace={namespace}
+          refetch={refetch}
+        />
+      </InfoSection>
+      <InfoSection title="Status">
+        <PaddedCard>
+          <PropWideBold title="Last scheduled">
+            {cronJob.status?.lastScheduleTime || 0}
+          </PropWideBold>
+        </PaddedCard>
+      </InfoSection>
+      <InfoSection title="Spec">
+        <PaddedCard>
+          <PropWideBold title="Schedule">
+            {cronJob.spec?.schedule || '-'}
+          </PropWideBold>
+          <PropWideBold title="Concurrency">
+            {cronJob.spec?.concurrencyPolicy || '-'}
+          </PropWideBold>
+          <PropWideBold title="Suspended">
+            {cronJob.spec?.suspend ? 'Yes' : 'No'}
+          </PropWideBold>
+        </PaddedCard>
+      </InfoSection>
+    </>
   )
 }

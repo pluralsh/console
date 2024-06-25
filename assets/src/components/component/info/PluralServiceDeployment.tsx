@@ -6,7 +6,7 @@ import { useMemo } from 'react'
 
 import { RawYaml } from '../ComponentRaw'
 
-import { InfoSectionH2 } from './common'
+import { InfoSection } from './common'
 import { ConditionsTable } from './Conditions'
 
 function getSpecRaw(componentRaw: Nullable<string>) {
@@ -41,26 +41,16 @@ export default function PluralServiceDeployment() {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        flexGrow: 1,
+        flex: 1,
         gap: theme.spacing.large,
       }}
     >
-      <section>
-        <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
-          Conditions
-        </InfoSectionH2>
+      <InfoSection title="Conditions">
         <ConditionsTable conditions={status.conditions} />
-      </section>
-      <section>
-        <InfoSectionH2
-          css={{
-            marginBottom: theme.spacing.medium,
-          }}
-        >
-          Spec
-        </InfoSectionH2>
+      </InfoSection>
+      <InfoSection title="Spec">
         <RawYaml raw={specRaw} />
-      </section>
+      </InfoSection>
     </div>
   )
 }

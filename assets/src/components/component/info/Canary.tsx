@@ -11,12 +11,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { MetadataBase } from '../ComponentMetadata'
 
-import {
-  InfoSectionH2,
-  InfoSectionH3,
-  PaddedCard,
-  PropWideBold,
-} from './common'
+import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
 import { ConditionsTable } from './Conditions'
 import { IngressBase } from './Ingress'
 import { DeploymentBase } from './Deployment'
@@ -180,50 +175,37 @@ const ColIngClass = ingressHelper.accessor(
 const ingressColumns = [ColIngName, ColIngStatus, ColIngClass]
 
 function CanaryDeployments({ canary }: { canary: Canary }) {
-  const theme = useTheme()
-
   return (
-    <>
-      <InfoSectionH3
-        css={{
-          marginBottom: theme.spacing.medium,
-          marginTop: theme.spacing.large,
-        }}
-      >
-        Deployments
-      </InfoSectionH3>
+    <InfoSection
+      title="Deployments"
+      headerSize={3}
+    >
       <Table
         data={[canary.primaryDeployment, canary.canaryDeployment].filter(
           (v) => !!v
         )}
         columns={depColumns}
       />
-    </>
+    </InfoSection>
   )
 }
 
 function CanaryIngresses({ canary }: { canary: Canary }) {
-  const theme = useTheme()
   const ingresses = useMemo(
     () => [canary.ingress, canary.ingressCanary].filter((v) => !!v),
     [canary.ingress, canary.ingressCanary]
   )
 
   return (
-    <>
-      <InfoSectionH3
-        css={{
-          marginBottom: theme.spacing.medium,
-          marginTop: theme.spacing.large,
-        }}
-      >
-        Ingresses
-      </InfoSectionH3>
+    <InfoSection
+      title="Ingresses"
+      headerSize={3}
+    >
       <Table
         data={ingresses}
         columns={ingressColumns}
       />
-    </>
+    </InfoSection>
   )
 }
 
@@ -237,39 +219,14 @@ export default function CanaryInfo() {
   const { status } = canary
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        flexGrow: 1,
-      }}
-    >
-      <InfoSectionH2>References</InfoSectionH2>
-      <CanaryDeployments canary={canary} />
-      <CanaryIngresses canary={canary} />
-      <InfoSectionH2
-        css={{
-          marginBottom: theme.spacing.medium,
-          marginTop: theme.spacing.xlarge,
-        }}
-      >
-        Status
-      </InfoSectionH2>
-      <PaddedCard>
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.xlarge,
-          }}
-        >
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              flexGrow: 1,
-              justifyContent: 'center',
-            }}
-          >
+    <>
+      <InfoSection title="References">
+        <CanaryDeployments canary={canary} />
+        <CanaryIngresses canary={canary} />
+      </InfoSection>
+      <InfoSection title="Status">
+        <PaddedCard>
+          <PropGroup>
             <PropWideBold title="Failed Checks">
               {status?.failedChecks || 0}
             </PropWideBold>
@@ -279,12 +236,12 @@ export default function CanaryInfo() {
             <PropWideBold title="Iterations">
               {status?.iterations || 0}
             </PropWideBold>
-          </div>
-        </div>
-      </PaddedCard>
+          </PropGroup>
+        </PaddedCard>
+      </InfoSection>
       <div css={{ marginTop: theme.spacing.medium }}>
         <ConditionsTable conditions={status?.conditions} />
       </div>
-    </div>
+    </>
   )
 }

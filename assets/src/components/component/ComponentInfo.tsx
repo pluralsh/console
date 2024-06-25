@@ -1,7 +1,7 @@
 import { useOutletContext } from 'react-router-dom'
 import { useMemo } from 'react'
 
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import Pods from './info/Pods'
 import Job from './info/Job'
@@ -77,12 +77,18 @@ export default function ComponentInfo() {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.large,
+        gap: theme.spacing.xlarge,
         paddingBottom: theme.spacing.xxlarge,
       }}
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
-      {info && value && info}
+      {info && value && <InfoWrapperSC>{info}</InfoWrapperSC>}
     </div>
   )
 }
+
+const InfoWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing.xlarge,
+}))
