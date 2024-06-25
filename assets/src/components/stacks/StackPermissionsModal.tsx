@@ -33,7 +33,7 @@ export default function StackPermissionsModal({
       name={stack.name}
       bindings={bindings}
       id={stack.id ?? ''}
-      type={PermissionsIdType.Pipeline} // TODO: Switch to stack once it will be supported.
+      type={PermissionsIdType.Stack}
       refetch={refetch}
       open={open}
       onClose={onClose}

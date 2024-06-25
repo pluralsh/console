@@ -293,12 +293,14 @@ mutation UpdateRbac(
   $serviceId: ID
   $clusterId: ID
   $pipelineId: ID
+  $stackId: ID
   $rbac: RbacAttributes!
 ) {
   updateRbac(
     serviceId: $serviceId
     clusterId: $clusterId
     pipelineId: $pipelineId
+    stackId: $stackId
     rbac: $rbac
   )
 }

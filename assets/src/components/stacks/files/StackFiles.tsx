@@ -7,6 +7,7 @@ import { StackFile, useStackFilesQuery } from '../../../generated/graphql'
 
 import OutputValue from '../run/output/Value'
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 const columnHelper = createColumnHelper<StackFile>()
 
@@ -35,20 +36,22 @@ const columns = [
 export default function StackFiles() {
   const { stack } = useOutletContext() as StackOutletContextT
 
-  const { data } = useStackFilesQuery({
-    variables: { id: stack.id ?? '' },
-    fetchPolicy: 'no-cache',
-    skip: !stack.id,
-  })
-
-  const files = data?.infrastructureStack?.files
-
   useSetBreadcrumbs(
     useMemo(
       () => [...getBreadcrumbs(stack.id ?? ''), { label: 'files' }],
       [stack.id]
     )
   )
+
+  const { data, loading } = useStackFilesQuery({
+    variables: { id: stack.id ?? '' },
+    fetchPolicy: 'no-cache',
+    skip: !stack.id,
+  })
+
+  if (loading) return <LoadingIndicator />
+
+  const files = data?.infrastructureStack?.files
 
   return (
     <Table

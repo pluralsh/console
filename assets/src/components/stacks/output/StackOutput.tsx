@@ -22,6 +22,7 @@ import {
 } from '../../../generated/graphql'
 
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 const columnHelper = createColumnHelper<StackOutputT>()
 
@@ -104,20 +105,22 @@ export default function StackOutput() {
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 100)
 
-  const { data } = useStackOutputQuery({
-    variables: { id: stack.id ?? '' },
-    fetchPolicy: 'no-cache',
-    skip: !stack.id,
-  })
-
-  const output = data?.infrastructureStack?.output
-
   useSetBreadcrumbs(
     useMemo(
       () => [...getBreadcrumbs(stack.id ?? ''), { label: 'output' }],
       [stack.id]
     )
   )
+
+  const { data, loading } = useStackOutputQuery({
+    variables: { id: stack.id ?? '' },
+    fetchPolicy: 'no-cache',
+    skip: !stack.id,
+  })
+
+  if (loading) return <LoadingIndicator />
+
+  const output = data?.infrastructureStack?.output
 
   return (
     <div

@@ -64,6 +64,7 @@ export enum PermissionsIdType {
   Cluster = 'clusterId',
   Service = 'serviceId',
   Pipeline = 'pipelineId',
+  Stack = 'stackId',
 }
 
 export function PermissionsModal({
