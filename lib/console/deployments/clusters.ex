@@ -711,32 +711,62 @@ defmodule Console.Deployments.Clusters do
     replace = if is_nil(service_id),
                 do: [:name, :version],
                 else: [:name, :version, :service_id]
+    merge_attrs = %{cluster_id: id, inserted_at: Timex.now(), updated_at: Timex.now()}
+    merge_attrs = if is_nil(service_id),
+                    do: merge_attrs,
+                    else: Map.put(merge_attrs, :service_id, service_id)
+
     Enum.filter(svcs, fn
       %{name: n} -> Table.fetch(n)
       _ -> false
     end)
     |> Enum.map(fn
-      %{version: v} = map -> Map.put(map, :version, Validations.clean_version(v))
+      %{version: v} = map when is_binary(v) ->
+        Map.put(map, :version, Validations.clean_version(v))
       m -> m
     end)
-    |> Enum.map(&Map.merge(&1, %{
-      cluster_id: id,
-      service_id: service_id,
-      inserted_at: Timex.now(),
-      updated_at: Timex.now()
-    }))
+    |> Enum.map(&Map.merge(&1, merge_attrs))
     |> case do
       [_ | _] = services ->
-        {count, _} = Repo.insert_all(
-          RuntimeService,
-          services,
-          on_conflict: {:replace, replace},
-          conflict_target: [:cluster_id, :name]
-        )
-        Logger.info "persisted #{count} runtime services out of #{length(services)} sent"
-        {:ok, count}
-
+        with {:ok, {count, del_count}} = insert_and_prune_runtime(id, services, replace) do
+          Logger.info "persisted #{count} runtime services and pruned #{del_count} services"
+          {:ok, count}
+        end
       _ -> {:ok, 0}
+    end
+  end
+
+  defp insert_and_prune_runtime(cluster_id, services, replace) do
+    start_transaction()
+    |> add_operation(:insert, fn _ ->
+      {count, created} = Repo.insert_all(
+        RuntimeService,
+        services,
+        returning: true,
+        on_conflict: {:replace, replace},
+        conflict_target: [:cluster_id, :name]
+      )
+      {:ok, {count, created}}
+    end)
+    |> add_operation(:prune, fn %{insert: {_, created}} ->
+      svcs = RuntimeService.for_cluster(cluster_id) |> Repo.all()
+      keep = MapSet.new(created, & &1.id)
+      filtered = Enum.filter(svcs, & !MapSet.member?(keep, &1.id))
+                 |> Enum.map(& &1.id)
+
+      case Enum.empty?(filtered) do
+        true -> {:ok, 0}
+        false ->
+          RuntimeService.for_ids(filtered)
+          |> Repo.delete_all()
+          |> elem(0)
+          |> ok()
+      end
+    end)
+    |> execute()
+    |> case do
+      {:ok, %{insert: {count, _}, prune: del_count}} -> {:ok, {count, del_count}}
+      err -> err
     end
   end
 

@@ -898,6 +898,18 @@ defmodule Console.Deployments.ClustersTest do
       assert runtime.service_id == svc.id
     end
 
+    test "it can prune uneeded runtime services" do
+      cluster = insert(:cluster)
+      prune = insert(:runtime_service, name: "pruned", cluster: cluster)
+
+      {:ok, 1} = Clusters.create_runtime_services([
+        %{name: "ingress-nginx", version: "1.8.1"},
+        %{name: "bogus", version: "2.0.0"}
+      ], nil, cluster)
+
+      refute refetch(prune)
+    end
+
     test "it can create with goofy semvers" do
       cluster = insert(:cluster)
 
