@@ -1,8 +1,11 @@
 import {
   Button,
   EmptyState,
+  IconFrame,
   Input,
+  ListBoxItem,
   LoopingLogo,
+  MoreIcon,
   PlusIcon,
   SearchIcon,
   SubTab,
@@ -43,10 +46,12 @@ import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 
+import { MoreMenu, MoreMenuTrigger } from '../utils/MoreMenu'
+
 import CreateStack from './create/CreateStack'
 import StackEntry from './StacksEntry'
-import StackDetach from './StackDetach'
-import StackDelete from './StackDelete'
+import StackDetachModal from './StackDetachModal'
+import StackDeleteModal from './StackDeleteModal'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -57,6 +62,12 @@ export const getBreadcrumbs = (stackId: string) => [
   { label: 'stacks', url: getStacksAbsPath('') },
   ...(stackId ? [{ label: stackId, url: getStacksAbsPath(stackId) }] : []),
 ]
+
+enum MenuItemKey {
+  None = '',
+  Detach = 'detach',
+  Delete = 'delete',
+}
 
 const QUERY_PAGE_SIZE = 100
 
@@ -85,6 +96,7 @@ export default function Stacks() {
   const [listRef, setListRef] = useState<any>(null)
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
+  const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
 
   useSetBreadcrumbs(useMemo(() => [...getBreadcrumbs(stackId)], [stackId]))
 
@@ -113,6 +125,7 @@ export default function Stacks() {
   })
 
   const stack = useMemo(() => stackData?.infrastructureStack, [stackData])
+  const deleteLabel = stack?.deletedAt ? 'Retry delete' : 'Delete'
 
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
@@ -235,13 +248,42 @@ export default function Stacks() {
               variables={{ id: stack.id }}
               width="max-content"
             />
-            <StackDetach
+            <MoreMenu
+              onSelectionChange={(newKey) => setMenuKey(newKey)}
+              triggerButton={
+                <IconFrame
+                  textValue="Menu"
+                  clickable
+                  size="large"
+                  icon={<MoreIcon width={16} />}
+                  type="floating"
+                />
+              }
+            >
+              <ListBoxItem
+                destructive
+                key={MenuItemKey.Detach}
+                label="Detach"
+                textValue="Detach"
+              />
+              <ListBoxItem
+                destructive
+                key={MenuItemKey.Delete}
+                label={deleteLabel}
+                textValue={deleteLabel}
+              />
+            </MoreMenu>
+            <StackDetachModal
               stack={stack}
               refetch={refetch}
+              open={menuKey === MenuItemKey.Detach}
+              onClose={() => setMenuKey(MenuItemKey.None)}
             />
-            <StackDelete
+            <StackDeleteModal
               stack={stack}
               refetch={refetch}
+              open={menuKey === MenuItemKey.Delete}
+              onClose={() => setMenuKey(MenuItemKey.None)}
             />
           </div>
           <TabList
