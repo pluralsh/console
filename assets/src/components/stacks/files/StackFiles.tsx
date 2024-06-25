@@ -1,14 +1,9 @@
-import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import React, { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
-import { isEmpty } from 'lodash'
 
-import {
-  StackFile,
-  useStackBindingsQuery,
-  useStackFilesQuery,
-} from '../../../generated/graphql'
+import { StackFile, useStackFilesQuery } from '../../../generated/graphql'
 
 import OutputValue from '../run/output/Value'
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'

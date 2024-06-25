@@ -22,9 +22,11 @@ import {
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
+  STACK_OUTPUT_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
   STACK_PRS_REL_PATH,
   STACK_RUNS_REL_PATH,
+  STACK_STATE_REL_PATH,
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
 import { GqlError } from '../utils/Alert'
@@ -76,6 +78,8 @@ const pollInterval = 5 * 1000
 const DIRECTORY = [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
   { path: STACK_PRS_REL_PATH, label: 'PRs' },
+  { path: STACK_STATE_REL_PATH, label: 'State' },
+  { path: STACK_OUTPUT_REL_PATH, label: 'Output' },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
   { path: STACK_FILES_REL_PATH, label: 'Files' },
   { path: STACK_JOB_REL_PATH, label: 'Job' },
