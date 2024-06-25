@@ -65,6 +65,7 @@ export const getBreadcrumbs = (stackId: string) => [
 
 enum MenuItemKey {
   None = '',
+  ManagePermissions = 'managePermissions',
   Detach = 'detach',
   Delete = 'delete',
 }
@@ -125,7 +126,7 @@ export default function Stacks() {
   })
 
   const stack = useMemo(() => stackData?.infrastructureStack, [stackData])
-  const deleteLabel = stack?.deletedAt ? 'Retry delete' : 'Delete'
+  const deleteLabel = stack?.deletedAt ? 'Retry stack delete' : 'Delete  stack'
 
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
@@ -250,6 +251,7 @@ export default function Stacks() {
             />
             <MoreMenu
               onSelectionChange={(newKey) => setMenuKey(newKey)}
+              width={240}
               triggerButton={
                 <IconFrame
                   textValue="Menu"
@@ -261,10 +263,15 @@ export default function Stacks() {
               }
             >
               <ListBoxItem
+                key={MenuItemKey.ManagePermissions}
+                label="Manage permissions"
+                textValue="Manage permissions"
+              />
+              <ListBoxItem
                 destructive
                 key={MenuItemKey.Detach}
-                label="Detach"
-                textValue="Detach"
+                label="Detach stack"
+                textValue="Detach stack"
               />
               <ListBoxItem
                 destructive
