@@ -2,12 +2,12 @@ import {
   Children,
   type ComponentProps,
   cloneElement,
-  useEffect,
   useRef,
   useState,
 } from 'react'
 import styled from 'styled-components'
 
+import useResizeObserver from '../hooks/useResizeObserver'
 import { ArrowLeftIcon, ArrowRightIcon } from '../icons'
 
 const ComponentWrapperSC = styled.div({
@@ -37,7 +37,9 @@ const ArrowWrapperSC = styled.div<{
   transition: 'opacity .2s ease',
   background: `linear-gradient(${
     $direction === 'left' ? 'to left' : 'to right'
-  }, transparent 0%, #303540 70%, #303540 100%)`,
+  }, transparent 0%, ${theme.colors['fill-one-selected']} 70%, ${
+    theme.colors['fill-one-selected']
+  } 100%)`,
   ...($direction === 'left' ? { left: 0 } : { right: 0 }),
   '&.visible': {
     cursor: 'pointer',
@@ -95,12 +97,7 @@ function ArrowScroll({ children, ...props }: { children?: any }) {
     }
   }
 
-  useEffect(() => {
-    checkScroll()
-    window.addEventListener('resize', checkScroll)
-
-    return () => window.removeEventListener('resize', checkScroll)
-  }, [])
+  useResizeObserver(containerRef, checkScroll)
 
   return (
     <ComponentWrapperSC {...props}>
