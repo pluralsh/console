@@ -757,7 +757,7 @@ type RootMutationType {
   updateProject(id: ID!, attributes: ProjectAttributes!): Project
 
   "a reusable mutation for updating rbac settings on core services"
-  updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID): Boolean
+  updateRbac(rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID): Boolean
 }
 
 type RootSubscriptionType {

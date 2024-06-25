@@ -94,6 +94,7 @@
       arg :cluster_id,  :id
       arg :provider_id, :id
       arg :pipeline_id, :id
+      arg :stack_id,    :id
 
       safe_resolve &Deployments.rbac/2
     end
