@@ -13,6 +13,10 @@ export const STACK_PRS_REL_PATH = `prs`
 
 export const STACK_OVERVIEW_REL_PATH = `overview`
 
+export const STACK_STATE_REL_PATH = `state`
+
+export const STACK_OUTPUT_REL_PATH = `output`
+
 export const STACK_ENV_REL_PATH = `env`
 
 export const STACK_FILES_REL_PATH = `files`

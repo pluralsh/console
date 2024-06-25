@@ -28,11 +28,16 @@ import StackJob from '../components/stacks/job/StackJob'
 
 import StackOverview from '../components/stacks/overview/StackOverview'
 
+import StackOutput from '../components/stacks/output/StackOutput'
+
+import StackState from '../components/stacks/state/StackState'
+
 import {
   STACKS_ABS_PATH,
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
+  STACK_OUTPUT_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
   STACK_PRS_REL_PATH,
   STACK_RUNS_ABS_PATH,
@@ -42,6 +47,7 @@ import {
   STACK_RUNS_REL_PATH,
   STACK_RUNS_REPOSITORY_REL_PATH,
   STACK_RUNS_STATE_REL_PATH,
+  STACK_STATE_REL_PATH,
 } from './stacksRoutesConsts'
 
 export const stacksRoutes = [
@@ -65,6 +71,14 @@ export const stacksRoutes = [
     <Route
       path={STACK_PRS_REL_PATH}
       element={<StackPrs />}
+    />
+    <Route
+      path={STACK_STATE_REL_PATH}
+      element={<StackState />}
+    />
+    <Route
+      path={STACK_OUTPUT_REL_PATH}
+      element={<StackOutput />}
     />
     <Route
       path={STACK_OVERVIEW_REL_PATH}
