@@ -9251,6 +9251,13 @@ export type StackTinyQueryVariables = Exact<{
 
 export type StackTinyQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, paused?: boolean | null, type: StackType, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type StackBindingsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackBindingsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+
 export type StackRunsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   after?: InputMaybe<Scalars['String']['input']>;
@@ -18725,6 +18732,51 @@ export type StackTinyQueryHookResult = ReturnType<typeof useStackTinyQuery>;
 export type StackTinyLazyQueryHookResult = ReturnType<typeof useStackTinyLazyQuery>;
 export type StackTinySuspenseQueryHookResult = ReturnType<typeof useStackTinySuspenseQuery>;
 export type StackTinyQueryResult = Apollo.QueryResult<StackTinyQuery, StackTinyQueryVariables>;
+export const StackBindingsDocument = gql`
+    query StackBindings($id: ID!) {
+  infrastructureStack(id: $id) {
+    writeBindings {
+      ...PolicyBinding
+    }
+    readBindings {
+      ...PolicyBinding
+    }
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
+
+/**
+ * __useStackBindingsQuery__
+ *
+ * To run a query within a React component, call `useStackBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackBindingsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackBindingsQuery(baseOptions: Apollo.QueryHookOptions<StackBindingsQuery, StackBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackBindingsQuery, StackBindingsQueryVariables>(StackBindingsDocument, options);
+      }
+export function useStackBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackBindingsQuery, StackBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackBindingsQuery, StackBindingsQueryVariables>(StackBindingsDocument, options);
+        }
+export function useStackBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackBindingsQuery, StackBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackBindingsQuery, StackBindingsQueryVariables>(StackBindingsDocument, options);
+        }
+export type StackBindingsQueryHookResult = ReturnType<typeof useStackBindingsQuery>;
+export type StackBindingsLazyQueryHookResult = ReturnType<typeof useStackBindingsLazyQuery>;
+export type StackBindingsSuspenseQueryHookResult = ReturnType<typeof useStackBindingsSuspenseQuery>;
+export type StackBindingsQueryResult = Apollo.QueryResult<StackBindingsQuery, StackBindingsQueryVariables>;
 export const StackRunsDocument = gql`
     query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int, $pullRequestId: ID) {
   infrastructureStack(id: $id) {
@@ -19780,6 +19832,7 @@ export const namedOperations = {
     Stacks: 'Stacks',
     Stack: 'Stack',
     StackTiny: 'StackTiny',
+    StackBindings: 'StackBindings',
     StackRuns: 'StackRuns',
     StackRun: 'StackRun',
     StackRunJob: 'StackRunJob',

@@ -46,12 +46,13 @@ import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 
-import { MoreMenu, MoreMenuTrigger } from '../utils/MoreMenu'
+import { MoreMenu } from '../utils/MoreMenu'
 
 import CreateStack from './create/CreateStack'
 import StackEntry from './StacksEntry'
 import StackDetachModal from './StackDetachModal'
 import StackDeleteModal from './StackDeleteModal'
+import StackPermissionsModal from './StackPermissionsModal'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -280,6 +281,11 @@ export default function Stacks() {
                 textValue={deleteLabel}
               />
             </MoreMenu>
+            <StackPermissionsModal
+              stack={stack}
+              open={menuKey === MenuItemKey.ManagePermissions}
+              onClose={() => setMenuKey(MenuItemKey.None)}
+            />
             <StackDetachModal
               stack={stack}
               refetch={refetch}

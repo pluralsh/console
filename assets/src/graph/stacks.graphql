@@ -196,6 +196,13 @@ query StackTiny($id: ID!) {
   }
 }
 
+query StackBindings($id: ID!) {
+  infrastructureStack(id: $id) {
+    writeBindings { ...PolicyBinding }
+    readBindings { ...PolicyBinding }
+  }
+}
+
 query StackRuns(
   $id: ID!
   $after: String
