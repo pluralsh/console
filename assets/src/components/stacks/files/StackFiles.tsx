@@ -4,7 +4,11 @@ import { useOutletContext } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 
-import { StackFile } from '../../../generated/graphql'
+import {
+  StackFile,
+  useStackBindingsQuery,
+  useStackFilesQuery,
+} from '../../../generated/graphql'
 
 import OutputValue from '../run/output/Value'
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
@@ -36,6 +40,14 @@ const columns = [
 export default function StackFiles() {
   const { stack } = useOutletContext() as StackOutletContextT
 
+  const { data } = useStackFilesQuery({
+    variables: { id: stack.id ?? '' },
+    fetchPolicy: 'no-cache',
+    skip: !stack.id,
+  })
+
+  const files = data?.infrastructureStack?.files
+
   useSetBreadcrumbs(
     useMemo(
       () => [...getBreadcrumbs(stack.id ?? ''), { label: 'files' }],
@@ -43,12 +55,12 @@ export default function StackFiles() {
     )
   )
 
-  if (isEmpty(stack.files))
+  if (isEmpty(files))
     return <EmptyState message="No files available for this stack." />
 
   return (
     <Table
-      data={stack.files ?? []}
+      data={files ?? []}
       columns={columns}
       maxHeight="100%"
     />

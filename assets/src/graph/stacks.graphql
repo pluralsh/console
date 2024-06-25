@@ -1,13 +1,21 @@
+fragment StackTiny on InfrastructureStack {
+  id
+  insertedAt
+  updatedAt
+  deletedAt
+  name
+  type
+  repository { url }
+  paused
+  status
+}
+
 fragment Stack on InfrastructureStack {
   id
   insertedAt
   deletedAt
   name
   type
-  files {
-    path
-    content
-  }
   configuration {
     image
     version
@@ -173,7 +181,7 @@ query Stacks(
     }
     edges {
       node {
-        ...Stack
+        ...StackTiny
       }
     }
   }
@@ -187,12 +195,42 @@ query Stack($id: ID!) {
 
 query StackTiny($id: ID!) {
   infrastructureStack(id: $id) {
-    id
-    name
-    paused
-    type
-    insertedAt
-    updatedAt
+    ...StackTiny
+  }
+}
+
+query StackState($id: ID!) {
+  infrastructureStack(id: $id) {
+    state {
+      id
+      plan
+      state {
+        name
+        identifier
+        configuration
+        links
+        resource
+      }
+    }
+  }
+}
+
+query StackOutput($id: ID!) {
+  infrastructureStack(id: $id) {
+    output {
+      name
+      secret
+      value
+    }
+  }
+}
+
+query StackFiles($id: ID!) {
+  infrastructureStack(id: $id) {
+    files {
+      path
+      content
+    }
   }
 }
 
