@@ -55,14 +55,12 @@ export default function StackFiles() {
     )
   )
 
-  if (isEmpty(files))
-    return <EmptyState message="No files available for this stack." />
-
   return (
     <Table
       data={files ?? []}
       columns={columns}
       maxHeight="100%"
+      emptyStateProps={{ message: 'No files found.' }}
     />
   )
 }

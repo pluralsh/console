@@ -51,7 +51,7 @@ export function StackPrs() {
         reactVirtualOptions={{ overscan: 10 }}
         css={{ height: '100%' }}
         emptyStateProps={{
-          message: 'No PRs found',
+          message: 'No PRs found.',
         }}
       />
     </FullHeightTableWrap>

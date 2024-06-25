@@ -135,18 +135,6 @@ export default function StackEnvironment() {
     )
   )
 
-  const addButton = useMemo(
-    () => (
-      <Button
-        secondary
-        onClick={() => setCreateOpen(true)}
-      >
-        Add environment variable
-      </Button>
-    ),
-    [setCreateOpen]
-  )
-
   return (
     <>
       <ModalMountTransition open={createOpen}>
@@ -163,43 +151,41 @@ export default function StackEnvironment() {
           height: '100%',
         }}
       >
-        {isEmpty(stack.environment) ? (
-          <EmptyState message="Looks like this stack doesn't have any environment variables set.">
-            {addButton}
-          </EmptyState>
-        ) : (
-          <>
-            <div
-              css={{
-                display: 'flex',
-                columnGap: theme.spacing.medium,
-                flexShrink: 0,
-              }}
-            >
-              <Input
-                placeholder="Search"
-                startIcon={<SearchIcon />}
-                value={filterString}
-                onChange={(e) => setFilterString(e.currentTarget.value)}
-                css={{ flexGrow: 1 }}
-              />
-              {addButton}
-            </div>
-            <FullHeightTableWrap>
-              <Table
-                data={stack.environment || []}
-                columns={columns}
-                css={{
-                  maxHeight: 'unset',
-                  height: '100%',
-                }}
-                reactTableOptions={{
-                  state: { globalFilter: debouncedFilterString },
-                }}
-              />
-            </FullHeightTableWrap>
-          </>
-        )}
+        <div
+          css={{
+            display: 'flex',
+            columnGap: theme.spacing.medium,
+            flexShrink: 0,
+          }}
+        >
+          <Input
+            placeholder="Search"
+            startIcon={<SearchIcon />}
+            value={filterString}
+            onChange={(e) => setFilterString(e.currentTarget.value)}
+            css={{ flexGrow: 1 }}
+          />
+          <Button
+            secondary
+            onClick={() => setCreateOpen(true)}
+          >
+            Add environment variable
+          </Button>
+        </div>
+        <FullHeightTableWrap>
+          <Table
+            data={stack.environment || []}
+            columns={columns}
+            css={{
+              maxHeight: 'unset',
+              height: '100%',
+            }}
+            reactTableOptions={{
+              state: { globalFilter: debouncedFilterString },
+            }}
+            emptyStateProps={{ message: 'No environment variables set.' }}
+          />
+        </FullHeightTableWrap>
       </div>
     </>
   )
