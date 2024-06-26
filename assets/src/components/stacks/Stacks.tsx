@@ -33,6 +33,7 @@ import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
 import {
   StackFragment,
+  StackType,
   useKickStackMutation,
   useStackQuery,
   useStacksQuery,
@@ -75,11 +76,19 @@ const QUERY_PAGE_SIZE = 100
 
 const pollInterval = 5 * 1000
 
-const DIRECTORY = [
+const getDirectory = (type: Nullable<StackType>) => [
   { path: STACK_RUNS_REL_PATH, label: 'Runs' },
-  { path: STACK_PRS_REL_PATH, label: 'PRs' },
-  { path: STACK_STATE_REL_PATH, label: 'State' },
-  { path: STACK_OUTPUT_REL_PATH, label: 'Output' },
+  { path: STACK_PRS_REL_PATH, label: 'PRs', enabled: true },
+  {
+    path: STACK_STATE_REL_PATH,
+    label: 'State',
+    enabled: type === StackType.Terraform,
+  },
+  {
+    path: STACK_OUTPUT_REL_PATH,
+    label: 'Output',
+    enabled: type === StackType.Terraform,
+  },
   { path: STACK_ENV_REL_PATH, label: 'Environment' },
   { path: STACK_FILES_REL_PATH, label: 'Files' },
   { path: STACK_JOB_REL_PATH, label: 'Job' },
@@ -94,7 +103,6 @@ export default function Stacks() {
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = DIRECTORY.find(({ path }) => path === tab)
   const [listRef, setListRef] = useState<any>(null)
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
@@ -127,6 +135,8 @@ export default function Stacks() {
   })
 
   const stack = useMemo(() => stackData?.infrastructureStack, [stackData])
+  const directory = useMemo(() => getDirectory(stack?.type), [stack?.type])
+  const currentTab = directory.find(({ path }) => path === tab)
   const deleteLabel = stack?.deletedAt ? 'Retry stack delete' : 'Delete  stack'
 
   useEffect(() => {
@@ -310,21 +320,23 @@ export default function Stacks() {
             paddingBottom="medium"
             minHeight={56}
           >
-            {DIRECTORY.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`${getStacksAbsPath(stackId)}/${path}`}
-              >
-                <SubTab
+            {directory
+              .filter(({ enabled }) => enabled)
+              .map(({ label, path }) => (
+                <LinkTabWrap
+                  subTab
                   key={path}
                   textValue={label}
+                  to={`${getStacksAbsPath(stackId)}/${path}`}
                 >
-                  {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
+                  <SubTab
+                    key={path}
+                    textValue={label}
+                  >
+                    {label}
+                  </SubTab>
+                </LinkTabWrap>
+              ))}
           </TabList>
           <Outlet context={{ stack, refetch } as StackOutletContextT} />
         </div>
