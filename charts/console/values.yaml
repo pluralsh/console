@@ -166,6 +166,7 @@ affinity:
 
 monitoring:
   enabled: false
+  prometheus: k8s
 
 dashboard:
   enabled: true

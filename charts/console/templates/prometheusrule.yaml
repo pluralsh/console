@@ -4,7 +4,7 @@ kind: PrometheusRule
 metadata:
   creationTimestamp: null
   labels:
-    prometheus: k8s
+    prometheus: {{ .Values.monitoring.prometheus || "k8s"}}
     role: alert-rules
   name: console-rules
 spec:
