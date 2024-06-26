@@ -77,7 +77,7 @@ const QUERY_PAGE_SIZE = 100
 const pollInterval = 5 * 1000
 
 const getDirectory = (type: Nullable<StackType>) => [
-  { path: STACK_RUNS_REL_PATH, label: 'Runs' },
+  { path: STACK_RUNS_REL_PATH, label: 'Runs', enabled: true },
   { path: STACK_PRS_REL_PATH, label: 'PRs', enabled: true },
   {
     path: STACK_STATE_REL_PATH,
@@ -89,10 +89,10 @@ const getDirectory = (type: Nullable<StackType>) => [
     label: 'Output',
     enabled: type === StackType.Terraform,
   },
-  { path: STACK_ENV_REL_PATH, label: 'Environment' },
-  { path: STACK_FILES_REL_PATH, label: 'Files' },
-  { path: STACK_JOB_REL_PATH, label: 'Job' },
-  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview' },
+  { path: STACK_ENV_REL_PATH, label: 'Environment', enabled: true },
+  { path: STACK_FILES_REL_PATH, label: 'Files', enabled: true },
+  { path: STACK_JOB_REL_PATH, label: 'Job', enabled: true },
+  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview', enabled: true },
 ]
 
 export default function Stacks() {
