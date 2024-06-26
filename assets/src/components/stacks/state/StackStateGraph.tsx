@@ -26,13 +26,12 @@ import {
   getLayoutedElements,
 } from '../../cd/pipelines/utils/nodeLayouter'
 
-import { EdgeLineMarkerDefs, edgeTypes } from '../../cd/pipelines/EdgeLine'
+import { edgeTypes } from '../../cd/pipelines/EdgeLine'
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { isNonNullable } from '../../../utils/isNonNullable'
 
-import { baseEdgeProps } from '../../component/tree/getTreeNodesAndEdges'
-
 import { StackStateGraphNode } from './StackStateGraphNode'
+import { STACK_STATE_GRAPH_EDGE_NAME } from './StackStateGraphEdge'
 
 const nodeTypes = {
   [NodeType.Stage]: StackStateGraphNode,
@@ -52,7 +51,8 @@ export function getNodesAndEdges(state: StackState) {
 
     edges.push(
       ...(stage.links ?? []).filter(isNonNullable).map((link) => ({
-        ...baseEdgeProps,
+        type: STACK_STATE_GRAPH_EDGE_NAME,
+        updatable: false,
         id: `${stage.identifier}${link}`,
         source: stage.identifier,
         target: link,
@@ -153,7 +153,6 @@ export function StackStateGraph({ state }: { state: StackState }) {
             size={1}
             color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
           />
-          <EdgeLineMarkerDefs />
         </ReactFlow>
         <div
           css={{

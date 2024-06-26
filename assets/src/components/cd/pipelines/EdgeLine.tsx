@@ -5,6 +5,11 @@ import { useTheme } from 'styled-components'
 
 import { useEdgeNodes } from 'components/hooks/reactFlowHooks'
 
+import {
+  STACK_STATE_GRAPH_EDGE_NAME,
+  StackStateGraphEdge,
+} from '../../stacks/state/StackStateGraphEdge'
+
 export const PIPELINE_EDGE_NAME = 'plural-pipeline-edge' as const
 export const BASIC_EDGE_NAME = 'plural-basic-edge' as const
 const MARKER_ACTIVE_ID = 'pipeline-markerArrowActive'
@@ -57,9 +62,10 @@ export function BasicEdgeLine({
 export const edgeTypes = {
   [PIPELINE_EDGE_NAME]: GateEdgeLine,
   [BASIC_EDGE_NAME]: BasicEdgeLine,
+  [STACK_STATE_GRAPH_EDGE_NAME]: StackStateGraphEdge,
 } as const
 
-function EdgeLineMarker({ id, color }: { id: string; color: string }) {
+export function EdgeLineMarker({ id, color }: { id: string; color: string }) {
   return (
     <marker
       id={id}

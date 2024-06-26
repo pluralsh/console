@@ -28,7 +28,12 @@ export function BaseNode({
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
         position={Position.Left}
-        css={{ '&&': { backgroundColor: theme.colors['border-selected'] } }}
+        css={{
+          '&&': {
+            backgroundColor: theme.colors['border-selected'],
+            borderColor: theme.colors['border-selected'],
+          },
+        }}
       />
       {children}
       <HandleSC
@@ -36,7 +41,12 @@ export function BaseNode({
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
         position={Position.Right}
-        css={{ '&&': { backgroundColor: theme.colors['border-selected'] } }}
+        css={{
+          '&&': {
+            backgroundColor: theme.colors['border-selected'],
+            borderColor: theme.colors['border-selected'],
+          },
+        }}
       />
     </BaseNodeSC>
   )
