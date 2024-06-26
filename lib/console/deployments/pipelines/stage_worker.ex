@@ -27,7 +27,9 @@ defmodule Console.Deployments.Pipelines.StageWorker do
   def handle_cast({:context, stage}, state) do
     case Pipelines.apply_pipeline_context(stage) do
       {:ok, _} -> Logger.info "stage #{stage.id} context applied successfully"
-      {:error, err} -> Logger.info "failed to apply stage context #{stage.id} reason: #{inspect(err)}"
+      {:error, err} ->
+        Logger.info "failed to apply stage context #{stage.id} reason: #{inspect(err)}"
+        Pipelines.add_stage_error(stage, "context", "Failed to apply stage context with error: #{inspect(err)}")
     end
     {:noreply, state}
   end

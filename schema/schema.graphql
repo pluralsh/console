@@ -742,7 +742,7 @@ type RootMutationType {
   deleteCustomStackRun(id: ID!): CustomStackRun
 
   "Creates a custom run, with the given command list, to execute w\/in the stack's environment"
-  onDemandRun(stackId: ID!, commands: [CommandAttributes]): StackRun
+  onDemandRun(stackId: ID!, commands: [CommandAttributes], context: Json): StackRun
 
   upsertObservabilityProvider(attributes: ObservabilityProviderAttributes!): ObservabilityProvider
 
@@ -2374,6 +2374,9 @@ type PipelineStage {
 
   "the name of this stage (eg dev, prod, staging)"
   name: String!
+
+  "the errors for this stage"
+  errors: [ServiceError]
 
   "the services within this stage"
   services: [StageService]

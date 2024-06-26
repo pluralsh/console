@@ -18,6 +18,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
 	v1 "k8s.io/api/core/v1"
@@ -77,11 +78,15 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 		return nil, err
 	}
 
-	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).
-	cluster, err := utils.GetCluster(ctx, r.Client, &service.Spec.ClusterRef)
-	if err != nil {
-		return nil, err
+	if service.Status.ID == nil {
+		return nil, fmt.Errorf("service %s is not yet ready", service.Name)
 	}
+
+	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).
+	// cluster, err := utils.GetCluster(ctx, r.Client, &service.Spec.ClusterRef)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	criteria, err := r.pipelineStageServiceCriteriaAttributes(ctx, stageService.Criteria)
 	if err != nil {
@@ -89,8 +94,8 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	}
 
 	return &console.StageServiceAttributes{
-		Handle:    cluster.Status.ID, // Using cluster ID instead of handle.
-		Name:      nil,               // Using ServiceID instead.
+		// Handle:    cluster.Status.ID, // Using cluster ID instead of handle.
+		Name:      nil, // Using ServiceID instead.
 		ServiceID: service.Status.ID,
 		Criteria:  criteria,
 	}, nil
@@ -111,6 +116,11 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		if err != nil {
 			return nil, err
 		}
+
+		if prAutomation.Status.ID == nil {
+			return nil, fmt.Errorf("pr automation %s is not yet ready", prAutomation.Name)
+		}
+
 		prAutomationID = prAutomation.Status.ID
 	}
 	if criteria.ServiceRef != nil {

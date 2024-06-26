@@ -331,6 +331,7 @@ defmodule Console.Deployments.StacksTest do
     test "it can post a comment to a pr" do
       run = insert(:stack_run,
         state: build(:stack_state),
+        status: :pending_approval,
         pull_request: build(:pull_request, url: "https://github.com/pluralsh/console/pull/10"),
         stack: build(:stack, connection: build(:scm_connection))
       )

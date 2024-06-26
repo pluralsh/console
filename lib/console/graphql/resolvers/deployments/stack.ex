@@ -114,8 +114,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def delete_custom_stack_run(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.delete_custom_stack_run(id, user)
 
-  def create_stack_run(%{stack_id: id, commands: commands}, %{context: %{current_user: user}}),
-    do: Stacks.create_custom_run(id, commands, user)
+  def create_stack_run(%{stack_id: id, commands: commands} = args, %{context: %{current_user: user}}),
+    do: Stacks.create_custom_run(id, commands, args[:context], user)
 
   def job_spec(%StackRun{job_spec: %{} = spec}, _, _), do: {:ok, spec}
   def job_spec(_, _, _) do

@@ -118,8 +118,21 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackDeleted do
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
+  alias Console.Schema.{StackRun, PullRequest, StackState}
+  alias Console.Deployments.Stacks
+
+  def process(%{item: %{dry_run: true, status: :pending_approval} = run}) do
+    case Console.Repo.preload(run, [:pull_request, :state]) do
+      %StackRun{pull_request: %PullRequest{}, state: %StackState{plan: p}} = run when is_binary(p) ->
+        Stacks.post_comment(run)
+      _ -> :ok
+    end
+  end
+
   def process(%{item: %{status: status} = run}) when status in ~w(pending running)a,
     do: Console.Deployments.Stacks.Discovery.runner(run)
+
+  def process(_), do: :ok
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
