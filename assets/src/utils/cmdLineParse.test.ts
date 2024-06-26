@@ -1,5 +1,38 @@
 /* eslint-disable no-useless-escape */
-import { splitCommand } from './cmdLineParse'
+import { parseScript, splitCommand } from './cmdLineParse'
+
+describe('parseScript', () => {
+  it('can parse a script with multiline commands', () => {
+    const script = `echo "hello world"
+    some --long "command" \
+      --multi-line \
+      --command
+    sleep 100
+    `
+
+    const res = parseScript(script)
+
+    expect(res[0]).to.deep.equal({ cmd: 'echo', args: ['hello world'] })
+    expect(res[1]).to.deep.equal({
+      cmd: 'some',
+      args: ['--long', 'command', '--multi-line', '--command'],
+    })
+    expect(res[2]).to.deep.equal({ cmd: 'sleep', args: ['100'] })
+  })
+
+  it('can parse a without multiline commands', () => {
+    const script = `echo "hello world"
+    some --long "command"
+    sleep 100
+    `
+
+    const res = parseScript(script)
+
+    expect(res[0]).to.deep.equal({ cmd: 'echo', args: ['hello world'] })
+    expect(res[1]).to.deep.equal({ cmd: 'some', args: ['--long', 'command'] })
+    expect(res[2]).to.deep.equal({ cmd: 'sleep', args: ['100'] })
+  })
+})
 
 describe('splitCommand', () => {
   it('should handle simple command with spaces', () => {
