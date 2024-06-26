@@ -1,5 +1,32 @@
-export function splitCommand(command) {
-  const result: { cmd: string; args: string[] } = {
+type Command = {
+  cmd: string
+  args: string[]
+}
+
+export function parseScript(script: string) {
+  const lines = script.split('\n')
+  const res: Command[] = []
+  let curr = 0
+
+  while (curr < lines.length) {
+    let line = lines[curr]
+    let lookahead = curr
+
+    while (lookahead < lines.length && lines[lookahead].endsWith('\\')) {
+      lookahead++
+    }
+
+    line = lines.slice(curr, lookahead + 1).join(' ')
+    res.push(splitCommand(line))
+
+    curr = lookahead + 1
+  }
+
+  return res
+}
+
+export function splitCommand(command: string) {
+  const result: Command = {
     cmd: '',
     args: [],
   }
