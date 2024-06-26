@@ -61,19 +61,16 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
     <BaseNode {...props}>
       <div
         css={{
-          alignItems: 'center',
           display: 'flex',
-          gap: theme.spacing.medium,
-          justifyContent: 'center',
+          flexDirection: 'column',
         }}
       >
         <div
           css={{
-            display: 'flex',
-            gap: theme.spacing.xxsmall,
-            flexDirection: 'column',
-            flexGrow: 1,
             alignItems: 'center',
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: theme.spacing.small,
           }}
         >
           <div
@@ -84,40 +81,39 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
           >
             {data.resource}
           </div>
-          <div css={{ ...theme.partials.text.body2Bold }}>{data.name}</div>
-          <div
-            css={{
-              ...theme.partials.text.caption,
-              color: theme.colors['text-light'],
+          <IconFrame
+            clickable
+            icon={<InfoOutlineIcon />}
+            onClick={(e: Event) => {
+              e.stopPropagation()
+              setOpen(true)
             }}
+            tooltip="See configuration"
+          />
+          <Modal
+            header={`${data.identifier} configuration`}
+            size="large"
+            onClose={() => setOpen(false)}
+            open={open}
+            portal
           >
-            {data.identifier}
-          </div>
+            <Code
+              language="JSON"
+              maxHeight="80vh"
+              overflow="auto"
+            >
+              {JSON.stringify(data.configuration ?? {}, null, 2)}
+            </Code>
+          </Modal>
         </div>
-        <IconFrame
-          clickable
-          icon={<InfoOutlineIcon />}
-          onClick={(e: Event) => {
-            e.stopPropagation()
-            setOpen(true)
+        <div
+          css={{
+            ...theme.partials.text.body2Bold,
+            paddingRight: theme.spacing.large,
           }}
-          tooltip="See configuration"
-        />
-        <Modal
-          header={`${data.identifier} configuration`}
-          size="large"
-          onClose={() => setOpen(false)}
-          open={open}
-          portal
         >
-          <Code
-            language="JSON"
-            maxHeight="80vh"
-            overflow="auto"
-          >
-            {JSON.stringify(data.configuration ?? {}, null, 2)}
-          </Code>
-        </Modal>
+          {data.name}
+        </div>
       </div>
     </BaseNode>
   )

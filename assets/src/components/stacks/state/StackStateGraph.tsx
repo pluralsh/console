@@ -125,6 +125,7 @@ export function StackStateGraph({ state }: { state: StackState }) {
   return (
     <div
       css={{
+        backgroundColor: theme.colors.grey['950'],
         border: theme.borders.default,
         width: '100%',
         height: '100%',
