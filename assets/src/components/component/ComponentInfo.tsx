@@ -11,7 +11,6 @@ import Service from './info/Service'
 import Ingress from './info/Ingress'
 import Deployment from './info/Deployment'
 import StatefulSet from './info/StatefulSet'
-import Metadata from './info/Metadata'
 import { ComponentDetailsContext } from './ComponentDetails'
 import DaemonSet from './info/Daemonset'
 import CanaryInfo from './info/Canary'
@@ -47,8 +46,6 @@ const componentInfoMap: { [key: string]: JSX.Element } = {
   rollout: <Rollout />,
 }
 
-const hideMetadataKinds = ['rollout']
-
 function getInfo(kind: string): JSX.Element | undefined {
   return componentInfoMap[kind]
 }
@@ -56,13 +53,6 @@ function getInfo(kind: string): JSX.Element | undefined {
 export function isUnstructured(kind: string): boolean {
   return componentInfoMap[kind.toLowerCase()] === undefined
 }
-
-const Section = styled.section((_) => ({
-  display: 'flex',
-  flexDirection: 'row',
-  flexBasis: '50%',
-  flexGrow: 1,
-}))
 
 export default function ComponentInfo() {
   const theme = useTheme()
@@ -87,18 +77,18 @@ export default function ComponentInfo() {
       css={{
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.large,
+        gap: theme.spacing.xlarge,
+        paddingBottom: theme.spacing.xxlarge,
       }}
     >
       {hasPods(componentKind) && <Pods pods={value?.pods} />}
-      <div css={{ display: 'flex', gap: theme.spacing.xxlarge }}>
-        {info && value && <Section>{info}</Section>}
-        {!hideMetadataKinds.includes(componentKind) && (
-          <Section>
-            <Metadata />
-          </Section>
-        )}
-      </div>
+      {info && value && <InfoWrapperSC>{info}</InfoWrapperSC>}
     </div>
   )
 }
+
+const InfoWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexWrap: 'wrap',
+  gap: theme.spacing.xlarge,
+}))

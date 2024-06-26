@@ -34,26 +34,34 @@ export const PropGroup = styled.div(({ theme }) => ({
 export function InfoSection({
   title,
   children,
+  headerSize = 2,
   ...props
 }: {
   title: string
   children: ReactNode
+  headerSize?: 2 | 3 | 4
 }) {
   const theme = useTheme()
+  const Header = {
+    2: InfoSectionH2,
+    3: InfoSectionH3,
+    4: InfoSectionH4,
+  }[headerSize]
 
   return (
     <section
       css={{
         display: 'flex',
         flexDirection: 'column',
+        flex: 1,
         gap: theme.spacing.small,
         '& > :first-child': {
-          marginBottom: -theme.spacing.xxsmall,
+          marginBottom: -theme.spacing.xxxsmall,
         },
       }}
       {...props}
     >
-      {title && <InfoSectionH2>{title}</InfoSectionH2>}
+      {title && <Header>{title}</Header>}
       {children}
     </section>
   )

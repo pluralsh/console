@@ -36,6 +36,8 @@ import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
+import { isUnstructured } from './ComponentInfo'
+
 export const kindToQuery = {
   certificate: CertificateDocument,
   cronjob: CronJobDocument,
@@ -151,11 +153,12 @@ export function ComponentDetails({
   )
 
   const filteredDirectory = directory.filter(
-    ({ onlyFor, onlyIfNoError, onlyIfDryRun, prometheus }) =>
+    ({ onlyFor, onlyIfNoError, onlyIfDryRun, prometheus, label }) =>
       (!onlyFor || (componentKind && onlyFor.includes(componentKind))) &&
       (!prometheus || !service?.cluster?.id || hasPrometheus) &&
       (!onlyIfNoError || !hasNotFoundError) &&
-      (!onlyIfDryRun || (cdView && service?.dryRun))
+      (!onlyIfDryRun || (cdView && service?.dryRun)) &&
+      !(label === 'Info' && isUnstructured(componentKind))
   )
 
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
