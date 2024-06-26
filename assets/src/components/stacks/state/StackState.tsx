@@ -1,14 +1,14 @@
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import { EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
 import React, { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import { useTheme } from 'styled-components'
+import { ReactFlowProvider } from 'reactflow'
 
 import { useStackStateQuery } from '../../../generated/graphql'
-
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
+import { StackStateGraph } from './StackStateGraph'
+
 export default function StackState() {
-  const theme = useTheme()
   const { stack } = useOutletContext() as StackOutletContextT
 
   const { data } = useStackStateQuery({
@@ -27,15 +27,14 @@ export default function StackState() {
   )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        rowGap: theme.spacing.medium,
-        height: '100%',
-      }}
-    >
-      {JSON.stringify(state)}
+    <div css={{ height: '100%' }}>
+      {state ? (
+        <ReactFlowProvider>
+          <StackStateGraph state={state} />
+        </ReactFlowProvider>
+      ) : (
+        <EmptyState message="No state found." />
+      )}
     </div>
   )
 }
