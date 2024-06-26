@@ -58,6 +58,7 @@ export const getLayoutedElements = (
 
   return {
     nodes: nodes.map((node) => {
+      console.log(dagre.node(node.id)) // FIXME: It fails when node id contains special characters like "null_resource.printer[\"1\"]".
       const { x, y, width, height } = dagre.node(node.id)
 
       // Dagre returns center of node, but react-flow expects top/left
