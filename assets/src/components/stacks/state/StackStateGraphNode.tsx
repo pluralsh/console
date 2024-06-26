@@ -18,6 +18,7 @@ export function BaseNode({
   children,
   ...props
 }: NodeProps & { children: ReactNode } & ComponentProps<typeof BaseNodeSC>) {
+  const theme = useTheme()
   const { incomers, outgoers } = useNodeEdges(id)
 
   return (
@@ -27,6 +28,7 @@ export function BaseNode({
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
         position={Position.Left}
+        css={{ '&&': { backgroundColor: theme.colors['border-selected'] } }}
       />
       {children}
       <HandleSC
@@ -34,6 +36,7 @@ export function BaseNode({
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
         position={Position.Right}
+        css={{ '&&': { backgroundColor: theme.colors['border-selected'] } }}
       />
     </BaseNodeSC>
   )

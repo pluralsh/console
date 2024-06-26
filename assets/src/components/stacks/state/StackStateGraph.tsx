@@ -141,7 +141,7 @@ export function StackStateGraph({ state }: { state: StackState }) {
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           draggable
-          nodesDraggable={false}
+          nodesDraggable
           edgesUpdatable={false}
           edgesFocusable={false}
           nodesConnectable={false}
