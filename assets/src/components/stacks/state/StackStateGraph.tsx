@@ -10,6 +10,8 @@ import {
 import ReactFlow, {
   Background,
   BackgroundVariant,
+  type Edge,
+  type Node,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -18,8 +20,6 @@ import chroma from 'chroma-js'
 
 import 'reactflow/dist/style.css'
 import styled, { useTheme } from 'styled-components'
-
-import { isEmpty } from 'lodash'
 
 import {
   type DagreDirection,
@@ -39,56 +39,29 @@ const nodeTypes = {
 }
 
 export function getNodesAndEdges(state: StackState) {
-  const stateResources =
-    state?.state?.filter(isNonNullable).map((stage) => ({
+  const nodes: Node[] = []
+  const edges: Edge[] = []
+
+  state?.state?.filter(isNonNullable).forEach((stage) => {
+    nodes.push({
       id: stage.identifier,
       position: { x: 0, y: 0 },
       type: NodeType.Stage,
-      data: {
-        ...stage,
-      },
-    })) ?? []
+      data: { ...stage },
+    })
 
-  const edges: any[] = []
-
-  state?.state
-    ?.filter(isNonNullable)
-    .filter((stage) => !isEmpty(stage.links))
-    .forEach((stage) =>
-      edges.push(
-        ...(stage.links ?? []).map((link) => ({
-          ...baseEdgeProps,
-          id: '',
-          source: stage.identifier,
-          target: link,
-          data: {},
-        }))
-      )
+    edges.push(
+      ...(stage.links ?? []).filter(isNonNullable).map((link) => ({
+        ...baseEdgeProps,
+        id: `${stage.identifier}${link}`,
+        source: stage.identifier,
+        target: link,
+      }))
     )
+  })
 
-  console.log(edges)
-
-  return {
-    nodes: [...stateResources],
-    edges,
-  }
+  return { nodes, edges }
 }
-
-// function getGateNodes(pipeEdges: PipelineStageEdgeFragment[]) {
-//   const allEdges: Edge<any>[] = []
-//
-//   const nodes = pipeEdges?.flatMap((e) => {
-//     let edge = e
-//
-//     if (PIPELINE_DEBUG_MODE) {
-//       // @ts-ignore
-//       edge = { ...edge, gates: DEMO_GATES }
-//     }
-//     if (edge && isEmpty(edge?.gates)) {
-//       allEdges.push({
-//
-//       })
-//     }
 
 export function StackStateGraph({ state }: { state: StackState }) {
   const theme = useTheme()
@@ -107,7 +80,6 @@ export function StackStateGraph({ state }: { state: StackState }) {
 
   const layoutNodes = useCallback(
     (direction: DagreDirection = 'LR') => {
-      // todo TB
       const layouted = getLayoutedElements(nodes, edges, {
         direction,
         zoom: getViewport().zoom,
@@ -140,7 +112,7 @@ export function StackStateGraph({ state }: { state: StackState }) {
   ])
 
   useEffect(() => {
-    // Don't run for initial value of pipeline, only for changes
+    // Don't run for initial value, only for changes
     if (prevState && prevState !== state) {
       const { nodes, edges } = getNodesAndEdges(state)
 

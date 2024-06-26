@@ -6,25 +6,18 @@ import {
   InfoOutlineIcon,
   Modal,
 } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { ComponentProps, ReactNode, useState } from 'react'
 
-import {
-  BaseNodeSC,
-  HandleSC,
-  NodeMeta,
-} from '../../cd/pipelines/nodes/BaseNode'
+import { BaseNodeSC, HandleSC } from '../../cd/pipelines/nodes/BaseNode'
 import { StackStateResource } from '../../../generated/graphql'
-import { PIPELINE_GRID_GAP } from '../../cd/pipelines/PipelineGraph'
 import { useNodeEdges } from '../../hooks/reactFlowHooks'
 
 export function BaseNode({
   id,
   children,
   ...props
-}: NodeProps<NodeMeta> & { children: ReactNode } & ComponentProps<
-    typeof BaseNodeSC
-  >) {
+}: NodeProps & { children: ReactNode } & ComponentProps<typeof BaseNodeSC>) {
   const { incomers, outgoers } = useNodeEdges(id)
 
   return (
@@ -33,7 +26,6 @@ export function BaseNode({
         type="target"
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
-        $isOpen
         position={Position.Left}
       />
       {children}
@@ -41,27 +33,19 @@ export function BaseNode({
         type="source"
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
-        $isOpen
         position={Position.Right}
       />
     </BaseNodeSC>
   )
 }
 
-const StageNodeSC = styled(BaseNode)((_) => ({
-  '&&': { minWidth: 10 * PIPELINE_GRID_GAP },
-}))
-
 export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  // const { incomers, outgoers } = useNodeEdges(props.id)
-  // const pipelineId = useParams().pipelineId!
-
   const { data } = props
 
   return (
-    <StageNodeSC {...props}>
+    <BaseNode {...props}>
       <div
         css={{
           alignItems: 'center',
@@ -122,6 +106,6 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
           </Code>
         </Modal>
       </div>
-    </StageNodeSC>
+    </BaseNode>
   )
 }
