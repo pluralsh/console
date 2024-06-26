@@ -1,5 +1,5 @@
 import { IconFrame, ReloadIcon, usePrevious } from '@pluralsh/design-system'
-import { GateState, StackState } from 'generated/graphql'
+import { StackState } from 'generated/graphql'
 import {
   useCallback,
   useEffect,
@@ -10,7 +10,6 @@ import {
 import ReactFlow, {
   Background,
   BackgroundVariant,
-  type Edge,
   useEdgesState,
   useNodesState,
   useReactFlow,
@@ -20,7 +19,7 @@ import chroma from 'chroma-js'
 import 'reactflow/dist/style.css'
 import styled, { useTheme } from 'styled-components'
 
-import { StageNode, StageStatus } from '../../cd/pipelines/nodes/StageNode'
+import { isEmpty } from 'lodash'
 
 import {
   type DagreDirection,
@@ -31,36 +30,47 @@ import { EdgeLineMarkerDefs, edgeTypes } from '../../cd/pipelines/EdgeLine'
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { isNonNullable } from '../../../utils/isNonNullable'
 
+import { baseEdgeProps } from '../../component/tree/getTreeNodesAndEdges'
+
+import { StackStateGraphNode } from './StackStateGraphNode'
+
 const nodeTypes = {
-  [NodeType.Stage]: StageNode,
+  [NodeType.Stage]: StackStateGraphNode,
 }
 
 export function getNodesAndEdges(state: StackState) {
   const stateResources =
-    state?.state?.filter(isNonNullable).map((stage) => {
-      const stageStatus = StageStatus.Complete // todo getStageStatus(stage)
+    state?.state?.filter(isNonNullable).map((stage) => ({
+      id: stage.identifier,
+      position: { x: 0, y: 0 },
+      type: NodeType.Stage,
+      data: {
+        ...stage,
+      },
+    })) ?? []
 
-      return {
-        id: stage.identifier,
-        position: { x: 0, y: 0 },
-        type: NodeType.Stage,
-        data: {
-          ...stage,
-          meta: {
-            stageStatus,
-            state:
-              stageStatus === StageStatus.Complete
-                ? GateState.Open
-                : GateState.Pending,
-          },
-        },
-      }
-    }) ?? []
+  const edges: any[] = []
+
+  state?.state
+    ?.filter(isNonNullable)
+    .filter((stage) => !isEmpty(stage.links))
+    .forEach((stage) =>
+      edges.push(
+        ...(stage.links ?? []).map((link) => ({
+          ...baseEdgeProps,
+          id: '',
+          source: stage.identifier,
+          target: link,
+          data: {},
+        }))
+      )
+    )
+
+  console.log(edges)
 
   return {
-    nodes: [...stateResources /* ...gateNodes */],
-    // edges,
-    edges: [],
+    nodes: [...stateResources],
+    edges,
   }
 }
 
@@ -76,11 +86,7 @@ export function getNodesAndEdges(state: StackState) {
 //     }
 //     if (edge && isEmpty(edge?.gates)) {
 //       allEdges.push({
-//         ...baseEdgeProps,
-//         id: edge.id,
-//         source: edge.from.id,
-//         target: edge.to.id,
-//         data: edge,
+//
 //       })
 //     }
 
@@ -101,6 +107,7 @@ export function StackStateGraph({ state }: { state: StackState }) {
 
   const layoutNodes = useCallback(
     (direction: DagreDirection = 'LR') => {
+      // todo TB
       const layouted = getLayoutedElements(nodes, edges, {
         direction,
         zoom: getViewport().zoom,
@@ -112,7 +119,7 @@ export function StackStateGraph({ state }: { state: StackState }) {
       setEdges([...layouted.edges])
       setNeedsLayout(false)
     },
-    [nodes, edges, getViewport, margin, setNodes, setEdges]
+    [nodes, edges, getViewport, theme.spacing.large, margin, setNodes, setEdges]
   )
 
   useLayoutEffect(() => {

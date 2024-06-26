@@ -46,7 +46,7 @@ export const NodeCardList = styled.ul(({ theme }) => ({
   gap: theme.spacing.xsmall,
 }))
 
-const BaseNodeSC = styled(Card)(({ theme }) => ({
+export const BaseNodeSC = styled(Card)(({ theme }) => ({
   '&&': {
     position: 'relative',
     padding: theme.spacing.small,
@@ -84,26 +84,27 @@ const BaseNodeSC = styled(Card)(({ theme }) => ({
   },
 }))
 
-const HandleSC = styled(Handle)<{ $isConnected?: boolean; $isOpen?: boolean }>(
-  ({ theme, $isConnected, $isOpen = true }) => ({
-    '&&': {
-      visibility: $isConnected ? 'visible' : 'hidden',
-      width: HANDLE_SIZE,
-      height: HANDLE_SIZE,
-      borderColor: $isOpen
-        ? theme.colors['border-secondary']
-        : theme.colors.border,
-      borderWidth: theme.borderWidths.default,
-      backgroundColor: theme.colors['fill-zero'],
-      '&.react-flow__handle-left': {
-        left: -HANDLE_SIZE / 2,
-      },
-      '&.react-flow__handle-right': {
-        right: -HANDLE_SIZE / 2,
-      },
+export const HandleSC = styled(Handle)<{
+  $isConnected?: boolean
+  $isOpen?: boolean
+}>(({ theme, $isConnected, $isOpen = true }) => ({
+  '&&': {
+    visibility: $isConnected ? 'visible' : 'hidden',
+    width: HANDLE_SIZE,
+    height: HANDLE_SIZE,
+    borderColor: $isOpen
+      ? theme.colors['border-secondary']
+      : theme.colors.border,
+    borderWidth: theme.borderWidths.default,
+    backgroundColor: theme.colors['fill-zero'],
+    '&.react-flow__handle-left': {
+      left: -HANDLE_SIZE / 2,
     },
-  })
-)
+    '&.react-flow__handle-right': {
+      right: -HANDLE_SIZE / 2,
+    },
+  },
+}))
 
 export function BaseNode({
   id,

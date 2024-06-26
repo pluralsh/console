@@ -6,18 +6,12 @@ import { ReactFlowProvider } from 'reactflow'
 import { useStackStateQuery } from '../../../generated/graphql'
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
+import LoadingIndicator from '../../utils/LoadingIndicator'
+
 import { StackStateGraph } from './StackStateGraph'
 
 export default function StackState() {
   const { stack } = useOutletContext() as StackOutletContextT
-
-  const { data } = useStackStateQuery({
-    variables: { id: stack.id ?? '' },
-    fetchPolicy: 'no-cache',
-    skip: !stack.id,
-  })
-
-  const state = data?.infrastructureStack?.state
 
   useSetBreadcrumbs(
     useMemo(
@@ -25,6 +19,16 @@ export default function StackState() {
       [stack.id]
     )
   )
+
+  const { data, loading } = useStackStateQuery({
+    variables: { id: stack.id ?? '' },
+    fetchPolicy: 'no-cache',
+    skip: !stack.id,
+  })
+
+  if (loading) return <LoadingIndicator />
+
+  const state = data?.infrastructureStack?.state
 
   return (
     <div css={{ height: '100%' }}>
