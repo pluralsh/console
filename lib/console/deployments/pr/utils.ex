@@ -51,6 +51,16 @@ defmodule Console.Deployments.Pr.Utils do
       do: {:ok, title, body}
   end
 
+  def render_solid_raw(template, ctx) do
+    with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
+         {:render, {:ok, res}} <- {:render, Solid.render(tpl, %{"context" => ctx})} do
+      {:ok, IO.iodata_to_binary(res)}
+    else
+      {:parse, {:error, %Solid.TemplateError{message: message}}} -> {:error, message}
+      {:render, {:error, errs, _}} -> {:error, Enum.map(errs, &inspect/1) |> Enum.join(", ")}
+    end
+  end
+
   def render_solid(template, ctx) do
     with {:parse, {:ok, tpl}} <- {:parse, Solid.parse(template)},
          {:render, {:ok, res}} <- {:render, Solid.render(tpl, %{"context" => ctx})} do

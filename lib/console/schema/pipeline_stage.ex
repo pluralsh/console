@@ -6,6 +6,7 @@ defmodule Console.Schema.PipelineStage do
     PipelinePromotion,
     PipelineEdge,
     PipelineContext,
+    ServiceError
   }
 
   schema "pipeline_stages" do
@@ -19,6 +20,7 @@ defmodule Console.Schema.PipelineStage do
     has_many :services, StageService, foreign_key: :stage_id, on_replace: :delete
     has_many :from_edges, PipelineEdge, foreign_key: :from_id
     has_many :to_edges, PipelineEdge, foreign_key: :to_id
+    has_many :errors, ServiceError, foreign_key: :pipeline_stage_id, on_replace: :delete
 
     belongs_to :context, PipelineContext
     belongs_to :applied_context, PipelineContext
@@ -41,6 +43,7 @@ defmodule Console.Schema.PipelineStage do
     model
     |> cast(attrs, ~w(name cursor last_deployment_at stabilized_at context_id applied_context_id)a)
     |> cast_assoc(:services)
+    |> cast_assoc(:errors)
     |> foreign_key_constraint(:pipeline_id)
     |> validate_required([:name])
   end

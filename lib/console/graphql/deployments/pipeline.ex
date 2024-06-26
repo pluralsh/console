@@ -156,6 +156,10 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :id,        non_null(:id)
     field :name,      non_null(:string), description: "the name of this stage (eg dev, prod, staging)"
 
+    field :errors, list_of(:service_error),
+      description: "the errors for this stage",
+      resolve: dataloader(Deployments)
+
     field :services,  list_of(:stage_service), description: "the services within this stage", resolve: dataloader(Deployments)
     field :context,   :pipeline_context,
       description: "the context that is to be applied to this stage for PR promotions",

@@ -4,6 +4,10 @@ defprotocol Console.GraphQl.Exception do
   def error(event)
 end
 
+defimpl Console.GraphQl.Exception, for: Console.InternalException do
+  def error(%Console.InternalException{message: message}), do: {400, message}
+end
+
 defimpl Console.GraphQl.Exception, for: Any do
   def error(_), do: {500, "unknown error (check the logs for more details)"}
 end
