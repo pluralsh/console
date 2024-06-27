@@ -8227,14 +8227,21 @@ export type GlobalServicesQueryVariables = Exact<{
 
 export type GlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', name: string } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null } | null> | null } | null };
 
-export type GetServiceDataQueryVariables = Exact<{
+export type GetGlobalServiceQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+}>;
+
+
+export type GetGlobalServiceQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', name: string } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+
+export type GetGlobalServiceServicesQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetServiceDataQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, project?: { __typename?: 'Project', name: string } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+export type GetGlobalServiceServicesQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null } | null };
 
 export type SyncGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -14411,10 +14418,49 @@ export type GlobalServicesQueryHookResult = ReturnType<typeof useGlobalServicesQ
 export type GlobalServicesLazyQueryHookResult = ReturnType<typeof useGlobalServicesLazyQuery>;
 export type GlobalServicesSuspenseQueryHookResult = ReturnType<typeof useGlobalServicesSuspenseQuery>;
 export type GlobalServicesQueryResult = Apollo.QueryResult<GlobalServicesQuery, GlobalServicesQueryVariables>;
-export const GetServiceDataDocument = gql`
-    query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
+export const GetGlobalServiceDocument = gql`
+    query GetGlobalService($serviceId: ID!) {
   globalService(id: $serviceId) {
     ...GlobalService
+  }
+}
+    ${GlobalServiceFragmentDoc}`;
+
+/**
+ * __useGetGlobalServiceQuery__
+ *
+ * To run a query within a React component, call `useGetGlobalServiceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalServiceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGlobalServiceQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useGetGlobalServiceQuery(baseOptions: Apollo.QueryHookOptions<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>(GetGlobalServiceDocument, options);
+      }
+export function useGetGlobalServiceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>(GetGlobalServiceDocument, options);
+        }
+export function useGetGlobalServiceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>(GetGlobalServiceDocument, options);
+        }
+export type GetGlobalServiceQueryHookResult = ReturnType<typeof useGetGlobalServiceQuery>;
+export type GetGlobalServiceLazyQueryHookResult = ReturnType<typeof useGetGlobalServiceLazyQuery>;
+export type GetGlobalServiceSuspenseQueryHookResult = ReturnType<typeof useGetGlobalServiceSuspenseQuery>;
+export type GetGlobalServiceQueryResult = Apollo.QueryResult<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>;
+export const GetGlobalServiceServicesDocument = gql`
+    query GetGlobalServiceServices($serviceId: ID!, $first: Int, $after: String) {
+  globalService(id: $serviceId) {
     services(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
@@ -14427,21 +14473,20 @@ export const GetServiceDataDocument = gql`
     }
   }
 }
-    ${GlobalServiceFragmentDoc}
-${PageInfoFragmentDoc}
+    ${PageInfoFragmentDoc}
 ${ServiceDeploymentsRowFragmentDoc}`;
 
 /**
- * __useGetServiceDataQuery__
+ * __useGetGlobalServiceServicesQuery__
  *
- * To run a query within a React component, call `useGetServiceDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetServiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetGlobalServiceServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalServiceServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetServiceDataQuery({
+ * const { data, loading, error } = useGetGlobalServiceServicesQuery({
  *   variables: {
  *      serviceId: // value for 'serviceId'
  *      first: // value for 'first'
@@ -14449,22 +14494,22 @@ ${ServiceDeploymentsRowFragmentDoc}`;
  *   },
  * });
  */
-export function useGetServiceDataQuery(baseOptions: Apollo.QueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+export function useGetGlobalServiceServicesQuery(baseOptions: Apollo.QueryHookOptions<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+        return Apollo.useQuery<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>(GetGlobalServiceServicesDocument, options);
       }
-export function useGetServiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+export function useGetGlobalServiceServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+          return Apollo.useLazyQuery<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>(GetGlobalServiceServicesDocument, options);
         }
-export function useGetServiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+export function useGetGlobalServiceServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+          return Apollo.useSuspenseQuery<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>(GetGlobalServiceServicesDocument, options);
         }
-export type GetServiceDataQueryHookResult = ReturnType<typeof useGetServiceDataQuery>;
-export type GetServiceDataLazyQueryHookResult = ReturnType<typeof useGetServiceDataLazyQuery>;
-export type GetServiceDataSuspenseQueryHookResult = ReturnType<typeof useGetServiceDataSuspenseQuery>;
-export type GetServiceDataQueryResult = Apollo.QueryResult<GetServiceDataQuery, GetServiceDataQueryVariables>;
+export type GetGlobalServiceServicesQueryHookResult = ReturnType<typeof useGetGlobalServiceServicesQuery>;
+export type GetGlobalServiceServicesLazyQueryHookResult = ReturnType<typeof useGetGlobalServiceServicesLazyQuery>;
+export type GetGlobalServiceServicesSuspenseQueryHookResult = ReturnType<typeof useGetGlobalServiceServicesSuspenseQuery>;
+export type GetGlobalServiceServicesQueryResult = Apollo.QueryResult<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>;
 export const SyncGlobalServiceDocument = gql`
     mutation SyncGlobalService($id: ID!) {
   syncGlobalService(id: $id) {
@@ -20088,7 +20133,8 @@ export const namedOperations = {
     HelmRepository: 'HelmRepository',
     GitRepository: 'GitRepository',
     GlobalServices: 'GlobalServices',
-    GetServiceData: 'GetServiceData',
+    GetGlobalService: 'GetGlobalService',
+    GetGlobalServiceServices: 'GetGlobalServiceServices',
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProviders: 'ObservabilityProviders',
     ManagedNamespaces: 'ManagedNamespaces',

@@ -1,21 +1,9 @@
-import {
-  ReloadIcon,
-  SubTab,
-  TabList,
-  TabPanel,
-  Table,
-} from '@pluralsh/design-system'
-import {
-  ComponentProps,
-  ReactNode,
-  Suspense,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ReloadIcon, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
+import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
 
 import {
   GlobalServiceFragment,
+  useGetGlobalServiceQuery,
   useSyncGlobalServiceMutation,
 } from 'generated/graphql'
 import {
@@ -42,27 +30,15 @@ import {
 
 import { LinkTabWrap } from '../../../utils/Tabs'
 
-import {
-  ColDistribution,
-  ColLastActivity,
-  ColServiceName,
-  ColTags,
-} from '../GlobalServicesColumns'
-
 import { PluralErrorBoundary } from '../../PluralErrorBoundary'
 import KickButton from '../../../utils/KickButton'
+import { GqlError } from '../../../utils/Alert'
 
-const directory = [
-  { path: GLOBAL_SERVICE_INFO_PATH, label: 'Info' },
-  { path: GLOBAL_SERVICE_SERVICES_PATH, label: 'Services' },
-] as const
-
-export const columns = [
-  ColServiceName,
-  ColDistribution,
-  ColTags,
-  ColLastActivity,
-]
+export type GlobalServiceContextT = {
+  globalServiceId: string
+  globalService: Nullable<GlobalServiceFragment>
+  refetch: () => void
+}
 
 export const getBreadcrumbs = (
   globalServiceId: string,
@@ -78,6 +54,11 @@ export const getBreadcrumbs = (
     url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${globalServiceId}`,
   },
 ]
+
+const directory = [
+  { path: GLOBAL_SERVICE_INFO_PATH, label: 'Info' },
+  { path: GLOBAL_SERVICE_SERVICES_PATH, label: 'Services' },
+] as const
 
 export default function GlobalService() {
   const theme = useTheme()
@@ -97,13 +78,29 @@ export default function GlobalService() {
     []
   )
 
-  const params = useParams()
-  const serviceId = params[GLOBAL_SERVICE_PARAM_ID]
-  const pathRoot = `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${serviceId}`
+  const globalServiceId = useParams()[GLOBAL_SERVICE_PARAM_ID] ?? ''
+  const pathRoot = `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${globalServiceId}`
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${pathRoot}/:tab/*`)
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
+
+  const { data, loading, error, refetch } = useGetGlobalServiceQuery({
+    variables: { serviceId: globalServiceId },
+  })
+
+  const globalServiceContext: GlobalServiceContextT = useMemo(
+    () => ({
+      globalServiceId,
+      globalService: data?.globalService,
+      refetch,
+    }),
+    [data, refetch]
+  )
+
+  if (error) return <GqlError error={error} />
+
+  if (loading) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth
@@ -124,7 +121,7 @@ export default function GlobalService() {
             kickMutationHook={useSyncGlobalServiceMutation}
             message="Resync"
             tooltipMessage="Sync this service now instead of at the next poll interval"
-            variables={{ id: serviceId }}
+            variables={{ id: globalServiceId }}
           />
           {headerContent}
           <TabList
@@ -162,7 +159,7 @@ export default function GlobalService() {
           <PageHeaderContext.Provider value={pageHeaderContext}>
             <PageScrollableContext.Provider value={pageScrollableContext}>
               <Suspense fallback={<LoadingIndicator />}>
-                <Outlet />
+                <Outlet context={globalServiceContext} />
               </Suspense>
             </PageScrollableContext.Provider>
           </PageHeaderContext.Provider>

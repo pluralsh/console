@@ -3,23 +3,33 @@ import { useNavigate } from 'react-router'
 import type { Row } from '@tanstack/react-table'
 import {
   type ServiceDeploymentsRowFragment,
-  useGetServiceDataQuery,
+  useGetGlobalServiceServicesQuery,
 } from 'generated/graphql'
-import {
-  GLOBAL_SERVICE_PARAM_ID,
-  getServiceDetailsPath,
-} from 'routes/cdRoutesConsts'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
-import { useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 import { ComponentProps, useMemo } from 'react'
 
-import { columns } from '../../services/Services'
 import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
 
-import { getBreadcrumbs } from './GlobalService'
+import {
+  ColDistribution,
+  ColLastActivity,
+  ColServiceName,
+  ColTags,
+} from '../GlobalServicesColumns'
+
+import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
+
+export const COLUMNS = [
+  ColServiceName,
+  ColDistribution,
+  ColTags,
+  ColLastActivity,
+]
 
 const GLOBAL_SERVICES_QUERY_PAGE_SIZE = 100
 
@@ -31,12 +41,16 @@ const GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 export function GlobalServiceServices() {
   const navigate = useNavigate()
-  const serviceId = useParams()[GLOBAL_SERVICE_PARAM_ID] ?? ''
+  const { globalServiceId, globalService } =
+    useOutletContext<GlobalServiceContextT>()
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(serviceId, null), { label: 'services' }],
-      [serviceId]
+      () => [
+        ...getBreadcrumbs(globalServiceId, globalService),
+        { label: 'services' },
+      ],
+      [globalServiceId, globalService]
     )
   )
 
@@ -50,11 +64,11 @@ export function GlobalServiceServices() {
     setVirtualSlice,
   } = useFetchPaginatedData(
     {
-      queryHook: useGetServiceDataQuery,
+      queryHook: useGetGlobalServiceServicesQuery,
       pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
       keyPath: ['globalService', 'services'],
     },
-    { serviceId }
+    { serviceId: globalServiceId }
   )
 
   const services = data?.globalService?.services?.edges
@@ -73,7 +87,7 @@ export function GlobalServiceServices() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        columns={columns}
+        columns={COLUMNS}
         css={{
           maxHeight: 'unset',
           height: '100%',

@@ -63,9 +63,14 @@ query GlobalServices($first: Int, $after: String, $projectId: ID) {
   }
 }
 
-query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
+query GetGlobalService($serviceId: ID!) {
   globalService(id: $serviceId) {
     ...GlobalService
+  }
+}
+
+query GetGlobalServiceServices($serviceId: ID!, $first: Int, $after: String) {
+  globalService(id: $serviceId) {
     services(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
