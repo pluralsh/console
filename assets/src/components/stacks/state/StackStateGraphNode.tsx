@@ -61,7 +61,10 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
   const { data } = props
 
   return (
-    <BaseNode {...props}>
+    <BaseNode
+      {...props}
+      css={{ '&&': { minWidth: 200 } }}
+    >
       <div
         css={{
           display: 'flex',
