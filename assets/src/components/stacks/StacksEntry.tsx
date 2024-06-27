@@ -5,7 +5,7 @@ import { useTheme } from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 
 import { TRUNCATE, TRUNCATE_LEFT } from '../utils/truncate'
-import { StackFragment, StackTinyFragment } from '../../generated/graphql'
+import { StackTinyFragment } from '../../generated/graphql'
 
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
 

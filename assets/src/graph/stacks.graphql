@@ -5,7 +5,9 @@ fragment StackTiny on InfrastructureStack {
   deletedAt
   name
   type
-  repository { url }
+  repository {
+    url
+  }
   paused
   status
 }
@@ -236,8 +238,12 @@ query StackFiles($id: ID!) {
 
 query StackBindings($id: ID!) {
   infrastructureStack(id: $id) {
-    writeBindings { ...PolicyBinding }
-    readBindings { ...PolicyBinding }
+    writeBindings {
+      ...PolicyBinding
+    }
+    readBindings {
+      ...PolicyBinding
+    }
   }
 }
 

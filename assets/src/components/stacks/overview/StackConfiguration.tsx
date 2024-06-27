@@ -1,5 +1,5 @@
 import { Button, Card, FormField, Input } from '@pluralsh/design-system'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
@@ -8,7 +8,7 @@ import { isEmpty } from 'lodash'
 import { useUpdateStackMutation } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { StackOutletContextT } from '../Stacks'
 import { OverlineH1 } from '../../utils/typography/Text'
 
 export default function StackConfiguration() {

@@ -1,6 +1,5 @@
 import {
   Button,
-  EmptyState,
   EyeClosedIcon,
   EyeIcon,
   IconFrame,
@@ -11,7 +10,6 @@ import {
 } from '@pluralsh/design-system'
 import React, { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
-import isEmpty from 'lodash/isEmpty'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useDebounce } from '@react-hooks-library/core'
