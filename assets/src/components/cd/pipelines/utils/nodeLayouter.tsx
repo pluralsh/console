@@ -5,10 +5,10 @@ function measureNode(node: FlowNode, zoom) {
   let domNode
 
   try {
-    const selector = `[data-id="${node.id}"]`
-
-    domNode = document.querySelector(selector)
+    domNode = document.querySelector(CSS.escape(`[data-id="${node.id}"]`))
   } catch (e) {
+    console.error(e)
+
     return
   }
 
@@ -58,8 +58,11 @@ export const getLayoutedElements = (
 
   return {
     nodes: nodes.map((node) => {
-      console.log(dagre.node(node.id)) // FIXME: It fails when node id contains special characters like "null_resource.printer[\"1\"]".
-      const { x, y, width, height } = dagre.node(node.id)
+      const dagreNode = dagre.node(node.id)
+
+      if (dagreNode!) return node
+
+      const { x, y, width, height } = dagreNode
 
       // Dagre returns center of node, but react-flow expects top/left
       return { ...node, position: { x: x - width / 2, y: y - height / 2 } }
