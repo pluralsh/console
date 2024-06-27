@@ -135,11 +135,21 @@ defmodule Console.Deployments.Pipelines do
     |> notify(:update)
   end
 
+  @doc """
+  Adds an error to a pipeline stage, eg for when prs don't spawn smoothly
+  """
+  @spec add_stage_error(PipelineStage.t, binary, binary) :: stage_resp
+  def add_stage_error(%PipelineStage{} = stage, source, msg) do
+    Repo.preload(stage, [:errors])
+    |> PipelineStage.changeset(%{errors: [%{source: source, message: msg}]})
+    |> Repo.update()
+  end
+
   def apply_pipeline_context(%PipelineStage{context_id: ctx_id, applied_context_id: ctx_id} = stage),
     do: {:ok, stage}
   def apply_pipeline_context(%PipelineStage{} = stage) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
-    %{context: ctx} = stage = Repo.preload(stage, [:pipeline, :context, services: [:service, criteria: :pr_automation]])
+    %{context: ctx} = stage = Repo.preload(stage, [:pipeline, :context, :errors, services: [:service, criteria: :pr_automation]])
     Enum.filter(stage.services, & &1.criteria && &1.criteria.pr_automation_id)
     |> Enum.reduce(start_transaction(), fn svc, xact ->
       service = svc.service
@@ -156,7 +166,7 @@ defmodule Console.Deployments.Pipelines do
       end)
     end)
     |> add_operation(:stg, fn _ ->
-      PipelineStage.changeset(stage, %{applied_context_id: ctx.id})
+      PipelineStage.changeset(stage, %{applied_context_id: ctx.id, errors: []})
       |> Repo.update()
     end)
     |> execute()

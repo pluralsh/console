@@ -61,7 +61,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	pipline := &v1alpha1.Pipeline{}
 	if err := r.Get(ctx, client.ObjectKey{Name: pipelineContext.Spec.PipelineRef.Name, Namespace: pipelineContext.Spec.PipelineRef.Namespace}, pipline); err != nil {
 		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return requeue, err
 	}
 
 	if !pipline.DeletionTimestamp.IsZero() {

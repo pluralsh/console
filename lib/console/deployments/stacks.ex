@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Stacks do
   use Console.Services.Base
+  import Console.Deployments.Pr.Utils, only: [render_solid_raw: 2]
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   alias Console.PubSub
@@ -195,6 +196,7 @@ defmodule Console.Deployments.Stacks do
       {%StackRun{
         id: id,
         stack_id: stack_id,
+        status: :pending_approval,
         state: %StackState{plan: plan},
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn}  when is_binary(plan) ->
@@ -208,6 +210,14 @@ defmodule Console.Deployments.Stacks do
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
         Dispatcher.review(conn, pr, pr_blob("failed", link: url))
+      {%StackRun{
+        id: id,
+        stack_id: stack_id,
+        status: :succeeded,
+        pull_request: %PullRequest{} = pr
+      }, %ScmConnection{} = conn} ->
+        url = Console.url("/stacks/#{stack_id}/runs/#{id}")
+        Dispatcher.review(conn, pr, pr_blob("succeeded", link: url))
       _ -> {:error, "cannot post review for this stack run"}
     end
   end
@@ -391,9 +401,12 @@ defmodule Console.Deployments.Stacks do
   @doc """
   Creates an ad-hoc command run w/in the stack's execution context
   """
-  @spec create_custom_run(Stack.t, [map], User.t) :: run_resp
-  def create_custom_run(%Stack{id: id, sha: sha} = stack, commands, %User{} = user) do
-    steps = Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: :init, status: :pending, name: "cmd #{&2}"}))
+  @spec create_custom_run(Stack.t, [map], map | nil, User.t) :: run_resp
+  def create_custom_run(stack, commands, ctx \\ nil, user)
+  def create_custom_run(%Stack{id: id, sha: sha} = stack, commands, ctx, %User{} = user) do
+    steps =
+      Enum.with_index(commands, &Map.merge(&1, %{index: &2, stage: :init, status: :pending, name: "cmd #{&2}"}))
+      |> template_cmds(ctx)
     %StackRun{stack_id: id, status: :queued}
     |> StackRun.changeset(
       stack_attrs(stack, sha)
@@ -404,11 +417,24 @@ defmodule Console.Deployments.Stacks do
     |> when_ok(:insert)
     |> notify(:create)
   end
-
-  def create_custom_run(stack_id, commands, user) when is_binary(stack_id) do
+  def create_custom_run(stack_id, commands, ctx, user) when is_binary(stack_id) do
     get_stack!(stack_id)
-    |> create_custom_run(commands, user)
+    |> create_custom_run(commands, ctx, user)
   end
+
+  defp template_cmds(commands, ctx) when is_map(ctx) do
+    Enum.map(commands, fn %{args: args} = cmd ->
+      args = Enum.map(args, fn arg ->
+        case render_solid_raw(arg, ctx) do
+          {:ok, arg} -> arg
+          {:error, err} ->
+            raise Console.InternalException, message: "Failed to template #{arg}, error: #{err}"
+        end
+      end)
+      Map.put(cmd, :args, args)
+    end)
+  end
+  defp template_cmds(commands, _), do: commands
 
   @doc """
   Creates a new run for the stack with the given sha and optional additional attrs

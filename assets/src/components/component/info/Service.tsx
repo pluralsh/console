@@ -2,12 +2,7 @@ import isEmpty from 'lodash/isEmpty'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import {
-  InfoSectionH2,
-  InfoSectionH4,
-  PaddedCard,
-  PropWideBold,
-} from './common'
+import { InfoSection, PaddedCard, PropWideBold } from './common'
 
 export default function Service() {
   const theme = useTheme()
@@ -24,49 +19,38 @@ export default function Service() {
   return (
     <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
       {hasIngress && (
-        <>
-          <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
-            Status
-          </InfoSectionH2>
+        <InfoSection title="Status">
           <PaddedCard>
             <PropWideBold title="IP">{loadBalancer.ingress[0].ip}</PropWideBold>
           </PaddedCard>
-        </>
+        </InfoSection>
       )}
-      <InfoSectionH2
-        css={{
-          marginBottom: theme.spacing.medium,
-          marginTop: hasIngress ? theme.spacing.large : 0,
-        }}
-      >
-        Spec
-      </InfoSectionH2>
-      <PaddedCard>
-        <PropWideBold title="Type">{service.spec?.type}</PropWideBold>
-        <PropWideBold title="Cluster IP">
-          {service.spec?.clusterIp || '-'}
-        </PropWideBold>
-        {hasPorts && (
-          <>
-            <InfoSectionH4
+      <InfoSection title="Spec">
+        <PaddedCard css={{ width: '70%' }}>
+          <PropWideBold title="Type">{service.spec?.type}</PropWideBold>
+          <PropWideBold title="Cluster IP">
+            {service.spec?.clusterIp || '-'}
+          </PropWideBold>
+          {hasPorts && (
+            <InfoSection
+              title="Ports"
+              headerSize={4}
               css={{
-                marginBottom: theme.spacing.medium,
-                marginTop: theme.spacing.xlarge,
+                marginTop: theme.spacing.medium,
               }}
             >
-              Ports
-            </InfoSectionH4>
-            {ports.map(({ name, protocol, port, targetPort }, i) => (
-              <PropWideBold
-                key={i}
-                title={name || '-'}
-              >
-                {protocol} {port} → {targetPort}
-              </PropWideBold>
-            ))}
-          </>
-        )}
-      </PaddedCard>
+              {ports.map(({ name, protocol, port, targetPort }, i) => (
+                <PropWideBold
+                  key={i}
+                  title={name || '-'}
+                >
+                  {protocol} {port} → {targetPort}
+                </PropWideBold>
+              ))}
+            </InfoSection>
+          )}
+        </PaddedCard>
+      </InfoSection>
     </div>
   )
 }

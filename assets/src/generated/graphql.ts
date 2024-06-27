@@ -3272,6 +3272,8 @@ export type PipelineStage = {
   __typename?: 'PipelineStage';
   /** the context that is to be applied to this stage for PR promotions */
   context?: Maybe<PipelineContext>;
+  /** the errors for this stage */
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of this stage (eg dev, prod, staging) */
@@ -4808,6 +4810,7 @@ export type RootMutationTypeOauthCallbackArgs = {
 
 export type RootMutationTypeOnDemandRunArgs = {
   commands?: InputMaybe<Array<InputMaybe<CommandAttributes>>>;
+  context?: InputMaybe<Scalars['Json']['input']>;
   stackId: Scalars['ID']['input'];
 };
 

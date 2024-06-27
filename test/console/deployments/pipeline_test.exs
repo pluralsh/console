@@ -496,6 +496,18 @@ defmodule Console.Deployments.PipelinesTest do
     end
   end
 
+  describe "#add_stage_error/3" do
+    test "it will persist a linked service error" do
+      stage = insert(:pipeline_stage)
+
+      {:ok, _} = Pipelines.add_stage_error(stage, "context", "some error")
+
+      %{errors: [error]} = Console.Repo.preload(refetch(stage), [:errors])
+
+      assert error.message == "some error"
+    end
+  end
+
   describe "#apply_promotion" do
     test "it can apply a promotion to all adjacent pipeline stages" do
       admin = admin_user()

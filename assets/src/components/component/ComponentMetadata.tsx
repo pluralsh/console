@@ -3,9 +3,9 @@ import { useMemo } from 'react'
 import { LabelsAnnotations } from 'components/cluster/LabelsAnnotations'
 import { MetadataGrid, MetadataItem } from 'components/utils/Metadata'
 
-import { ComponentStatusChip } from '../../apps/app/components/misc'
+import { ComponentStatusChip } from '../apps/app/components/misc'
 
-import { InfoSection } from './common'
+import { InfoSection } from './info/common'
 
 export const componentsWithLogs: string[] = ['deployment', 'statefulset']
 

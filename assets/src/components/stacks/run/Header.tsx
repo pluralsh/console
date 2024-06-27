@@ -11,6 +11,8 @@ import {
   TabList,
 } from '@pluralsh/design-system'
 
+import { isEmpty } from 'lodash'
+
 import {
   StackRun,
   StackStatus,
@@ -33,9 +35,21 @@ import { TRUNCATE } from '../../utils/truncate'
 const DIRECTORY = [
   { path: '', label: 'Progress' },
   { path: STACK_RUNS_REPOSITORY_REL_PATH, label: 'Repository' },
-  { path: STACK_RUNS_STATE_REL_PATH, label: 'State' },
-  { path: STACK_RUNS_PLAN_REL_PATH, label: 'Plan' },
-  { path: STACK_RUNS_OUTPUT_REL_PATH, label: 'Output' },
+  {
+    path: STACK_RUNS_STATE_REL_PATH,
+    label: 'State',
+    condition: (s: StackRun) => !isEmpty(s.state?.state),
+  },
+  {
+    path: STACK_RUNS_PLAN_REL_PATH,
+    label: 'Plan',
+    condition: (s: StackRun) => !isEmpty(s.state?.plan),
+  },
+  {
+    path: STACK_RUNS_OUTPUT_REL_PATH,
+    label: 'Output',
+    condition: (s: StackRun) => !isEmpty(s.output),
+  },
   { path: STACK_RUNS_JOB_REL_PATH, label: 'Job' },
 ]
 
@@ -88,7 +102,7 @@ export default function StackRunHeader({
           refetch={refetch}
         />
       </div>
-      <StackRunNav />
+      <StackRunNav stackRun={stackRun} />
     </div>
   )
 }
@@ -225,7 +239,7 @@ function StackRunHeaderButtons({ stackRun, refetch }): ReactNode {
   )
 }
 
-function StackRunNav(): ReactNode {
+function StackRunNav({ stackRun }: { stackRun: StackRun }): ReactNode {
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
   const currentTab = useMemo(
@@ -245,21 +259,23 @@ function StackRunNav(): ReactNode {
         selectedKey: currentTab?.path,
       }}
     >
-      {DIRECTORY.map(({ label, path }) => (
-        <LinkTabWrap
-          subTab
-          key={path}
-          textValue={label}
-          to={path}
-        >
-          <SubTab
+      {DIRECTORY.filter((d) => d.condition?.(stackRun) ?? true).map(
+        ({ label, path }) => (
+          <LinkTabWrap
+            subTab
             key={path}
             textValue={label}
+            to={path}
           >
-            {label}
-          </SubTab>
-        </LinkTabWrap>
-      ))}
+            <SubTab
+              key={path}
+              textValue={label}
+            >
+              {label}
+            </SubTab>
+          </LinkTabWrap>
+        )
+      )}
     </TabList>
   )
 }

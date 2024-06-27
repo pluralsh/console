@@ -469,6 +469,7 @@ defmodule Console.GraphQl.Deployments.Stack do
       middleware Authenticated
       arg :stack_id, non_null(:id)
       arg :commands, list_of(:command_attributes)
+      arg :context,  :json
 
       resolve &Deployments.create_stack_run/2
     end

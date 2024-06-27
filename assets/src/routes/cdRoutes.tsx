@@ -52,6 +52,8 @@ import ServiceDependencies from 'components/cd/services/service/ServiceDependenc
 
 import ObservabilityProviders from 'components/cd/globalSettings/observability/ObservabilityProviders'
 
+import ComponentMetadata from 'components/component/ComponentMetadata'
+
 import Cluster from '../components/cd/cluster/Cluster'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
@@ -159,6 +161,10 @@ export const componentRoutes = (
     <Route
       path="dryrun"
       element={<ComponentDryRun />}
+    />
+    <Route
+      path="metadata"
+      element={<ComponentMetadata />}
     />
   </Route>
 )
