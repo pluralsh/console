@@ -30,6 +30,22 @@ export function ServiceErrorsChip({
   )
 }
 
+export function ServiceErrorsModal({ isOpen, setIsOpen, header, errors }) {
+  return (
+    <ModalMountTransition open={isOpen}>
+      <Modal
+        portal
+        size="large"
+        header={header}
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+      >
+        <ServiceErrorsTable errors={errors} />
+      </Modal>
+    </ModalMountTransition>
+  )
+}
+
 export function ServicesTableErrors({
   service,
 }: {

@@ -15,6 +15,7 @@ defmodule Console.Deployments.Policies.Rbac do
     PipelineContext,
     AgentMigration,
     RuntimeService,
+    ManagedNamespace,
     PrAutomation,
     PolicyConstraint,
     PinnedCustomResource,
@@ -68,8 +69,18 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(pr, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%GitRepository{}, %User{} = user, action),
     do: recurse(Settings.fetch(), user, action)
-  def evaluate(%GlobalService{}, %User{} = user, action),
-    do: recurse(Settings.fetch(), user, action)
+  def evaluate(%GlobalService{} = global, %User{} = user, action) do
+    recurse(global, user, action, fn
+      %{project: %Project{} = project} -> project
+      _ -> Settings.fetch()
+    end)
+  end
+  def evaluate(%ManagedNamespace{} = ns, %User{} = user, action) do
+    recurse(ns, user, action, fn
+      %{project: %Project{} = project} -> project
+      _ -> Settings.fetch()
+    end)
+  end
   def evaluate(%DeploymentSettings{} = settings, %User{} = user, action),
     do: recurse(settings, user, action)
   def evaluate(%PolicyConstraint{} = constraint, %User{} = user, action),
@@ -121,6 +132,10 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(stack, @stack_preloads)
   def preload(%StackRun{} = pcr),
     do: Repo.preload(pcr, [stack: @stack_preloads])
+  def preload(%GlobalService{} = global),
+    do: Repo.preload(global, [project: @bindings])
+  def preload(%ManagedNamespace{} = ns),
+    do: Repo.preload(ns, [project: @bindings])
   def preload(%CustomStackRun{} = pcr),
     do: Repo.preload(pcr, [stack: @stack_preloads])
   def preload(%RunStep{} = pcr),

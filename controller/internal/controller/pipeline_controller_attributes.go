@@ -135,6 +135,7 @@ func (r *PipelineReconciler) pipelineStageServiceCriteriaAttributes(ctx context.
 		SourceID:       sourceID,
 		PrAutomationID: prAutomationID,
 		Secrets:        criteria.Secrets,
+		Repository:     criteria.Repository,
 	}, nil
 }
 

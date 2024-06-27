@@ -1102,6 +1102,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef pointing to source service to promote from. |  | Optional: {} <br /> |
 | `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to source PR automation to promote from. |  | Optional: {} <br /> |
+| `repository` _string_ | The repository slug the pr automation will use (eg pluralsh/console if you will pr against https://github.com/pluralsh/console) |  | Optional: {} <br /> |
 | `secrets` _string array_ | Secrets to copy over in a promotion. |  | Optional: {} <br /> |
 
 
@@ -1199,7 +1200,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `role` _[PrRole](#prrole)_ |  |  | Enum: [CLUSTER SERVICE PIPELINE UPDATE UPGRADE] <br />Optional: {} <br /> |
 | `addon` _string_ | Addon is a link to an addon name |  | Optional: {} <br /> |
-| `branch` _string_ | Branch ... |  | Optional: {} <br /> |
+| `branch` _string_ | The base branch this pr will be based on (defaults to the repo's main branch) |  | Optional: {} <br /> |
 | `documentation` _string_ | Documentation ... |  | Optional: {} <br /> |
 | `identifier` _string_ | Identifier is a string referencing the repository, i.e. for GitHub it would be "<organization>/<repositoryName>" |  | Optional: {} <br /> |
 | `message` _string_ | Message ... |  | Optional: {} <br /> |
@@ -1559,6 +1560,22 @@ _Appears in:_
 | `repository` _[NamespacedName](#namespacedname)_ | pointer to the FluxCD helm repository to use |  | Optional: {} <br /> |
 
 
+#### ServiceImport
+
+
+
+
+
+
+
+_Appears in:_
+- [ServiceSpec](#servicespec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `stackRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
+
+
 #### ServiceKustomize
 
 
@@ -1605,6 +1622,7 @@ _Appears in:_
 | `dependencies` _[ServiceDependency](#servicedependency) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
 | `contexts` _string array_ | Contexts contain dependent service context names |  | Optional: {} <br /> |
 | `templated` _boolean_ | Templated should apply liquid templating to raw yaml files, defaults to true |  | Optional: {} <br /> |
+| `imports` _[ServiceImport](#serviceimport) array_ |  |  | Optional: {} <br /> |
 | `detach` _boolean_ | Detach determined if user want to delete or detach service |  | Optional: {} <br /> |
 
 

@@ -3,9 +3,9 @@ import styled, { useTheme } from 'styled-components'
 import {
   Button,
   Chip,
-  ClusterIcon,
   CodeEditor,
   FormField,
+  GitPullIcon,
   IconFrame,
   Modal,
   PrOpenIcon,
@@ -41,6 +41,11 @@ import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
 import { CountBadge } from 'components/help/CountBadge'
+
+import {
+  ServiceErrorsChip,
+  ServiceErrorsModal,
+} from 'components/cd/services/ServicesTableErrors'
 
 import { PIPELINE_GRID_GAP } from '../PipelineGraph'
 import { PipelinePullRequestsModal } from '../PipelinePullRequests'
@@ -186,6 +191,38 @@ function PrsButton({
   )
 }
 
+function HeaderChip({ stage, isOpen, setIsOpen, status }) {
+  if ((stage.errors || []).length > 0) {
+    return (
+      <>
+        <ServiceErrorsChip
+          clickable
+          onClick={(e) => {
+            setIsOpen(true)
+            e.target?.blur()
+          }}
+          errors={stage.errors}
+        />
+        <ServiceErrorsModal
+          header={`Errors applying stage ${stage.name}`}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+          errors={stage.errors}
+        />
+      </>
+    )
+  }
+
+  return (
+    <Chip
+      size="small"
+      severity={stageStatusToSeverity[status]}
+    >
+      {status}
+    </Chip>
+  )
+}
+
 export function StageNode(
   props: NodeProps<
     PipelineStageFragment &
@@ -195,6 +232,7 @@ export function StageNode(
   const navigate = useNavigate()
   const { incomers, outgoers } = useNodeEdges(props.id)
   const pipelineId = useParams().pipelineId!
+  const [isOpen, setIsOpen] = useState(false)
 
   const {
     data: { meta, ...stage },
@@ -219,14 +257,14 @@ export function StageNode(
     <StageNodeSC {...props}>
       <div className="headerArea">
         <h2 className="heading">STAGE</h2>
-        <Chip
-          size="small"
-          severity={stageStatusToSeverity[status]}
-        >
-          {status}
-        </Chip>
+        <HeaderChip
+          stage={stage}
+          status={status}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        />
       </div>
-      <IconHeading icon={<ClusterIcon />}>
+      <IconHeading icon={<GitPullIcon />}>
         <IconHeadingInnerSC>Deploy to {stage.name}</IconHeadingInnerSC>
       </IconHeading>
 

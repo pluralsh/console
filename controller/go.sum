@@ -629,6 +629,8 @@ github.com/pluralsh/console-client-go v0.8.1 h1:FuQMMts09IBzlbcjADYb2RRVkEMKunOK
 github.com/pluralsh/console-client-go v0.8.1/go.mod h1:eyCiLA44YbXiYyJh8303jk5JdPkt9McgCo5kBjk4lKo=
 github.com/pluralsh/console-client-go v0.8.2 h1:XxvOnitrpab8GRFjrtETREdynQ/AxJp4rZcQRuyviEE=
 github.com/pluralsh/console-client-go v0.8.2/go.mod h1:eyCiLA44YbXiYyJh8303jk5JdPkt9McgCo5kBjk4lKo=
+github.com/pluralsh/console-client-go v0.9.2 h1:m3rEshxsq6nTWVQkvbp1wwzXw8hVArf+09GJfbTGcF8=
+github.com/pluralsh/console-client-go v0.9.2/go.mod h1:eyCiLA44YbXiYyJh8303jk5JdPkt9McgCo5kBjk4lKo=
 github.com/pluralsh/polly v0.1.7 h1:MUuTb6rCUV1doisaFGC+iz+33ZPU4FZHOb/kFwSDkjw=
 github.com/pluralsh/polly v0.1.7/go.mod h1:Yo1/jcW+4xwhWG+ZJikZy4J4HJkMNPZ7sq5auL2c/tY=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

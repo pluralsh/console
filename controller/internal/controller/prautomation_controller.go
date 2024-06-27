@@ -84,7 +84,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	if err != nil {
 		logger.Error(err, "unable to create or update prAutomation")
 		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return requeue, err
 	}
 	if apiPrAutomation == nil {
 		logger.Info("PR automation already exists in the Console API. Won't reconcile again.")

@@ -8925,6 +8925,11 @@ spec:
                                     type: string
                                 type: object
                                 x-kubernetes-map-type: atomic
+                              repository:
+                                description: The repository slug the pr automation
+                                  will use (eg pluralsh/console if you will pr against
+                                  https://github.com/pluralsh/console)
+                                type: string
                               secrets:
                                 description: Secrets to copy over in a promotion.
                                 items:
