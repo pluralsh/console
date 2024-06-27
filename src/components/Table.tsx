@@ -43,31 +43,12 @@ import { FillLevelProvider } from './contexts/FillLevelContext'
 import EmptyState from './EmptyState'
 import { Spinner } from './Spinner'
 
-export type TableProps = Omit<
-  DivProps,
-  | 'data'
-  | 'columns'
-  | 'getRowCanExpand'
-  | 'renderExpanded'
-  | 'loose'
-  | 'stickyColumn'
-  | 'scrollTopMargin'
-  | 'virtualizeRows'
-  | 'virtualizerOptions'
-  | 'lockColumnsOnScroll'
-  | 'reactVirtualOptions'
-  | 'reactTableOptions'
-  | 'onRowClick'
-  | 'emptyStateProps'
-  | 'hasNextPage'
-  | 'fetchNextPage'
-  | 'isFetchingNextPage'
-  | 'onVirtualWindowChange'
-> & {
+export type TableProps = DivProps & {
   data: any[]
   columns: any[]
   hideHeader?: boolean
   padCells?: boolean
+  rowBg?: 'base' | 'raised' | 'stripes'
   getRowCanExpand?: any
   renderExpanded?: any
   loose?: boolean
@@ -166,21 +147,21 @@ const Tr = styled.tr<{
   $selected?: boolean
   $selectable?: boolean
   $clickable?: boolean
-  $lighter?: boolean
+  $raised?: boolean
 }>(
   ({
     theme,
     $clickable: clickable = false,
-    $lighter: lighter = false,
+    $raised: raised = false,
     $selectable: selectable = false,
     $selected: selected = false,
   }) => ({
     display: 'contents',
     backgroundColor: selected
       ? theme.colors['fill-one-selected']
-      : lighter || (selectable && !selected)
-      ? theme.colors['fill-one']
-      : theme.colors['fill-one-hover'],
+      : raised || (selectable && !selected)
+      ? theme.colors['fill-one-hover']
+      : theme.colors['fill-one'],
 
     ...(clickable && {
       cursor: 'pointer',
@@ -402,7 +383,7 @@ function FillerRow({
   return (
     <Tr
       aria-hidden="true"
-      $lighter={index % 2 === 0}
+      $raised={index % 2 === 1}
       $selected={false}
       $selectable={selectable}
     >
@@ -538,6 +519,7 @@ function TableRef(
     renderExpanded,
     loose = false,
     padCells = true,
+    rowBg = 'stripes',
     stickyColumn = false,
     scrollTopMargin = 500,
     flush = false,
@@ -773,14 +755,15 @@ function TableRef(
                 ? null
                 : tableRows[maybeRow.index]
               const key = row?.id ?? maybeRow.index
-              const lighter = i % 2 === 0
+              const raised =
+                rowBg === 'raised' || (rowBg === 'stripes' && i % 2 === 1)
 
               return (
                 <Fragment key={key}>
                   <Tr
                     key={key}
                     onClick={(e) => onRowClick?.(e, row)}
-                    $lighter={lighter}
+                    $raised={raised}
                     $selectable={row?.getCanSelect() ?? false}
                     $selected={row?.getIsSelected() ?? false}
                     $clickable={!!onRowClick}
@@ -826,7 +809,7 @@ function TableRef(
                     )}
                   </Tr>
                   {row?.getIsExpanded() && (
-                    <Tr $lighter={i % 2 === 0}>
+                    <Tr $raised={i % 2 === 1}>
                       <TdExpand />
                       <TdExpand colSpan={row.getVisibleCells().length - 1}>
                         {renderExpanded({ row })}
