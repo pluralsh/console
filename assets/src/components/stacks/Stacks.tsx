@@ -1,8 +1,11 @@
 import {
   Button,
   EmptyState,
+  IconFrame,
   Input,
+  ListBoxItem,
   LoopingLogo,
+  MoreIcon,
   PlusIcon,
   SearchIcon,
   SubTab,
@@ -16,20 +19,21 @@ import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { useDebounce } from '@react-hooks-library/core'
 
 import {
-  STACK_CONFIGURATION_REL_PATH,
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
+  STACK_OUTPUT_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
   STACK_PRS_REL_PATH,
-  STACK_REPOSITORY_REL_PATH,
   STACK_RUNS_REL_PATH,
+  STACK_STATE_REL_PATH,
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
 import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
 import {
   StackFragment,
+  StackType,
   useKickStackMutation,
   useStackQuery,
   useStacksQuery,
@@ -43,10 +47,13 @@ import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 
+import { MoreMenu } from '../utils/MoreMenu'
+
 import CreateStack from './create/CreateStack'
 import StackEntry from './StacksEntry'
-import StackDetach from './StackDetach'
-import StackDelete from './StackDelete'
+import StackDetachModal from './StackDetachModal'
+import StackDeleteModal from './StackDeleteModal'
+import StackPermissionsModal from './StackPermissionsModal'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -58,19 +65,34 @@ export const getBreadcrumbs = (stackId: string) => [
   ...(stackId ? [{ label: stackId, url: getStacksAbsPath(stackId) }] : []),
 ]
 
+enum MenuItemKey {
+  None = '',
+  ManagePermissions = 'managePermissions',
+  Detach = 'detach',
+  Delete = 'delete',
+}
+
 const QUERY_PAGE_SIZE = 100
 
 const pollInterval = 5 * 1000
 
-const DIRECTORY = [
-  { path: STACK_RUNS_REL_PATH, label: 'Runs' },
-  { path: STACK_PRS_REL_PATH, label: 'PRs' },
-  { path: STACK_CONFIGURATION_REL_PATH, label: 'Configuration' },
-  { path: STACK_REPOSITORY_REL_PATH, label: 'Repository' },
-  { path: STACK_ENV_REL_PATH, label: 'Environment' },
-  { path: STACK_FILES_REL_PATH, label: 'Files' },
-  { path: STACK_JOB_REL_PATH, label: 'Job' },
-  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview' },
+const getDirectory = (type: Nullable<StackType>) => [
+  { path: STACK_RUNS_REL_PATH, label: 'Runs', enabled: true },
+  { path: STACK_PRS_REL_PATH, label: 'PRs', enabled: true },
+  {
+    path: STACK_STATE_REL_PATH,
+    label: 'State',
+    enabled: type === StackType.Terraform,
+  },
+  {
+    path: STACK_OUTPUT_REL_PATH,
+    label: 'Output',
+    enabled: type === StackType.Terraform,
+  },
+  { path: STACK_ENV_REL_PATH, label: 'Environment', enabled: true },
+  { path: STACK_FILES_REL_PATH, label: 'Files', enabled: true },
+  { path: STACK_JOB_REL_PATH, label: 'Job', enabled: true },
+  { path: STACK_OVERVIEW_REL_PATH, label: 'Overview', enabled: true },
 ]
 
 export default function Stacks() {
@@ -81,10 +103,10 @@ export default function Stacks() {
   const tabStateRef = useRef<any>(null)
   const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = DIRECTORY.find(({ path }) => path === tab)
   const [listRef, setListRef] = useState<any>(null)
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
+  const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
 
   useSetBreadcrumbs(useMemo(() => [...getBreadcrumbs(stackId)], [stackId]))
 
@@ -113,6 +135,9 @@ export default function Stacks() {
   })
 
   const stack = useMemo(() => stackData?.infrastructureStack, [stackData])
+  const directory = useMemo(() => getDirectory(stack?.type), [stack?.type])
+  const currentTab = directory.find(({ path }) => path === tab)
+  const deleteLabel = stack?.deletedAt ? 'Retry stack delete' : 'Delete  stack'
 
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
@@ -235,13 +260,53 @@ export default function Stacks() {
               variables={{ id: stack.id }}
               width="max-content"
             />
-            <StackDetach
+            <MoreMenu
+              onSelectionChange={(newKey) => setMenuKey(newKey)}
+              width={240}
+              triggerButton={
+                <IconFrame
+                  textValue="Menu"
+                  clickable
+                  size="large"
+                  icon={<MoreIcon width={16} />}
+                  type="floating"
+                />
+              }
+            >
+              <ListBoxItem
+                key={MenuItemKey.ManagePermissions}
+                label="Manage permissions"
+                textValue="Manage permissions"
+              />
+              <ListBoxItem
+                destructive
+                key={MenuItemKey.Detach}
+                label="Detach stack"
+                textValue="Detach stack"
+              />
+              <ListBoxItem
+                destructive
+                key={MenuItemKey.Delete}
+                label={deleteLabel}
+                textValue={deleteLabel}
+              />
+            </MoreMenu>
+            <StackPermissionsModal
               stack={stack}
-              refetch={refetch}
+              open={menuKey === MenuItemKey.ManagePermissions}
+              onClose={() => setMenuKey(MenuItemKey.None)}
             />
-            <StackDelete
+            <StackDetachModal
               stack={stack}
               refetch={refetch}
+              open={menuKey === MenuItemKey.Detach}
+              onClose={() => setMenuKey(MenuItemKey.None)}
+            />
+            <StackDeleteModal
+              stack={stack}
+              refetch={refetch}
+              open={menuKey === MenuItemKey.Delete}
+              onClose={() => setMenuKey(MenuItemKey.None)}
             />
           </div>
           <TabList
@@ -255,21 +320,23 @@ export default function Stacks() {
             paddingBottom="medium"
             minHeight={56}
           >
-            {DIRECTORY.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`${getStacksAbsPath(stackId)}/${path}`}
-              >
-                <SubTab
+            {directory
+              .filter(({ enabled }) => enabled)
+              .map(({ label, path }) => (
+                <LinkTabWrap
+                  subTab
                   key={path}
                   textValue={label}
+                  to={`${getStacksAbsPath(stackId)}/${path}`}
                 >
-                  {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
+                  <SubTab
+                    key={path}
+                    textValue={label}
+                  >
+                    {label}
+                  </SubTab>
+                </LinkTabWrap>
+              ))}
           </TabList>
           <Outlet context={{ stack, refetch } as StackOutletContextT} />
         </div>

@@ -1,13 +1,12 @@
 import {
   Button,
-  ContentCard,
+  Card,
   FormField,
   Input,
   ListBoxItem,
   Select,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
@@ -22,9 +21,10 @@ import { RepositorySelector } from '../../cd/services/deployModal/DeployServiceS
 import { mapExistingNodes } from '../../../utils/graphql'
 import { GqlError } from '../../utils/Alert'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { StackOutletContextT } from '../Stacks'
 
 import { cleanRefs } from '../create/CreateStackModalFormRepository'
+import { OverlineH1 } from '../../utils/typography/Text'
 
 export default function StackRepository() {
   const theme = useTheme()
@@ -38,13 +38,6 @@ export default function StackRepository() {
     ref !== stack.git.ref ||
     folder !== stack.git.folder
   const valid = !isEmpty(repositoryId) && !isEmpty(ref) && !isEmpty(folder)
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [...getBreadcrumbs(stackId), { label: 'repository' }],
-      [stackId]
-    )
-  )
 
   const { data } = useGitRepositoriesQuery()
 
@@ -79,7 +72,16 @@ export default function StackRepository() {
   }
 
   return (
-    <ContentCard>
+    <Card padding="large">
+      <OverlineH1
+        as="h3"
+        css={{
+          color: theme.colors['text-xlight'],
+          marginBottom: theme.spacing.large,
+        }}
+      >
+        Repository
+      </OverlineH1>
       <div
         css={{
           display: 'flex',
@@ -154,6 +156,6 @@ export default function StackRepository() {
           Save
         </Button>
       </div>
-    </ContentCard>
+    </Card>
   )
 }

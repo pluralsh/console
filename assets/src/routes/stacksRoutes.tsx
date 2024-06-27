@@ -23,23 +23,23 @@ import StackRunState from '../components/stacks/run/state/State'
 
 import StackRuns from '../components/stacks/runs/StackRuns'
 import StackFiles from '../components/stacks/files/StackFiles'
-import StackConfiguration from '../components/stacks/configuration/StackConfiguration'
 import StackEnvironment from '../components/stacks/environment/StackEnvironment'
 import StackJob from '../components/stacks/job/StackJob'
 
 import StackOverview from '../components/stacks/overview/StackOverview'
 
-import StackRepository from '../components/stacks/repository/StackRepository'
+import StackOutput from '../components/stacks/output/StackOutput'
+
+import StackState from '../components/stacks/state/StackState'
 
 import {
   STACKS_ABS_PATH,
-  STACK_CONFIGURATION_REL_PATH,
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
   STACK_JOB_REL_PATH,
+  STACK_OUTPUT_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
   STACK_PRS_REL_PATH,
-  STACK_REPOSITORY_REL_PATH,
   STACK_RUNS_ABS_PATH,
   STACK_RUNS_JOB_REL_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
@@ -47,6 +47,7 @@ import {
   STACK_RUNS_REL_PATH,
   STACK_RUNS_REPOSITORY_REL_PATH,
   STACK_RUNS_STATE_REL_PATH,
+  STACK_STATE_REL_PATH,
 } from './stacksRoutesConsts'
 
 export const stacksRoutes = [
@@ -72,16 +73,16 @@ export const stacksRoutes = [
       element={<StackPrs />}
     />
     <Route
+      path={STACK_STATE_REL_PATH}
+      element={<StackState />}
+    />
+    <Route
+      path={STACK_OUTPUT_REL_PATH}
+      element={<StackOutput />}
+    />
+    <Route
       path={STACK_OVERVIEW_REL_PATH}
       element={<StackOverview />}
-    />
-    <Route
-      path={STACK_CONFIGURATION_REL_PATH}
-      element={<StackConfiguration />}
-    />
-    <Route
-      path={STACK_REPOSITORY_REL_PATH}
-      element={<StackRepository />}
     />
     <Route
       path={STACK_ENV_REL_PATH}

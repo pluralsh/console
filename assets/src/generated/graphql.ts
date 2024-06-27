@@ -8623,6 +8623,7 @@ export type UpdateRbacMutationVariables = Exact<{
   serviceId?: InputMaybe<Scalars['ID']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   pipelineId?: InputMaybe<Scalars['ID']['input']>;
+  stackId?: InputMaybe<Scalars['ID']['input']>;
   rbac: RbacAttributes;
 }>;
 
@@ -9198,7 +9199,9 @@ export type UpdateProjectMutationVariables = Exact<{
 
 export type UpdateProjectMutation = { __typename?: 'RootMutationType', updateProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
-export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
+export type StackTinyFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string } | null };
+
+export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
 
@@ -9239,21 +9242,49 @@ export type StacksQueryVariables = Exact<{
 }>;
 
 
-export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null } | null } | null> | null } | null };
+export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string } | null } | null } | null> | null } | null };
 
 export type StackQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type StackQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null } | null };
+export type StackQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null } | null };
 
 export type StackTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type StackTinyQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, paused?: boolean | null, type: StackType, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type StackTinyQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string } | null } | null };
+
+export type StackStateQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackStateQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, identifier: string, configuration?: Record<string, unknown> | null, links?: Array<string | null> | null, resource: string } | null> | null } | null } | null };
+
+export type StackOutputQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackOutputQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', output?: Array<{ __typename?: 'StackOutput', name: string, secret?: boolean | null, value: string } | null> | null } | null };
+
+export type StackFilesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackFilesQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null } | null };
+
+export type StackBindingsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type StackBindingsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type StackRunsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11553,6 +11584,21 @@ export const ProjectTinyFragmentDoc = gql`
   description
 }
     `;
+export const StackTinyFragmentDoc = gql`
+    fragment StackTiny on InfrastructureStack {
+  id
+  insertedAt
+  updatedAt
+  deletedAt
+  name
+  type
+  repository {
+    url
+  }
+  paused
+  status
+}
+    `;
 export const StackFragmentDoc = gql`
     fragment Stack on InfrastructureStack {
   id
@@ -11560,10 +11606,6 @@ export const StackFragmentDoc = gql`
   deletedAt
   name
   type
-  files {
-    path
-    content
-  }
   configuration {
     image
     version
@@ -16069,11 +16111,12 @@ export type ProceedServiceMutationHookResult = ReturnType<typeof useProceedServi
 export type ProceedServiceMutationResult = Apollo.MutationResult<ProceedServiceMutation>;
 export type ProceedServiceMutationOptions = Apollo.BaseMutationOptions<ProceedServiceMutation, ProceedServiceMutationVariables>;
 export const UpdateRbacDocument = gql`
-    mutation UpdateRbac($serviceId: ID, $clusterId: ID, $pipelineId: ID, $rbac: RbacAttributes!) {
+    mutation UpdateRbac($serviceId: ID, $clusterId: ID, $pipelineId: ID, $stackId: ID, $rbac: RbacAttributes!) {
   updateRbac(
     serviceId: $serviceId
     clusterId: $clusterId
     pipelineId: $pipelineId
+    stackId: $stackId
     rbac: $rbac
   )
 }
@@ -16096,6 +16139,7 @@ export type UpdateRbacMutationFn = Apollo.MutationFunction<UpdateRbacMutation, U
  *      serviceId: // value for 'serviceId'
  *      clusterId: // value for 'clusterId'
  *      pipelineId: // value for 'pipelineId'
+ *      stackId: // value for 'stackId'
  *      rbac: // value for 'rbac'
  *   },
  * });
@@ -18599,13 +18643,13 @@ export const StacksDocument = gql`
     }
     edges {
       node {
-        ...Stack
+        ...StackTiny
       }
     }
   }
 }
     ${PageInfoFragmentDoc}
-${StackFragmentDoc}`;
+${StackTinyFragmentDoc}`;
 
 /**
  * __useStacksQuery__
@@ -18687,15 +18731,10 @@ export type StackQueryResult = Apollo.QueryResult<StackQuery, StackQueryVariable
 export const StackTinyDocument = gql`
     query StackTiny($id: ID!) {
   infrastructureStack(id: $id) {
-    id
-    name
-    paused
-    type
-    insertedAt
-    updatedAt
+    ...StackTiny
   }
 }
-    `;
+    ${StackTinyFragmentDoc}`;
 
 /**
  * __useStackTinyQuery__
@@ -18729,6 +18768,188 @@ export type StackTinyQueryHookResult = ReturnType<typeof useStackTinyQuery>;
 export type StackTinyLazyQueryHookResult = ReturnType<typeof useStackTinyLazyQuery>;
 export type StackTinySuspenseQueryHookResult = ReturnType<typeof useStackTinySuspenseQuery>;
 export type StackTinyQueryResult = Apollo.QueryResult<StackTinyQuery, StackTinyQueryVariables>;
+export const StackStateDocument = gql`
+    query StackState($id: ID!) {
+  infrastructureStack(id: $id) {
+    state {
+      id
+      plan
+      state {
+        name
+        identifier
+        configuration
+        links
+        resource
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useStackStateQuery__
+ *
+ * To run a query within a React component, call `useStackStateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackStateQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackStateQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackStateQuery(baseOptions: Apollo.QueryHookOptions<StackStateQuery, StackStateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackStateQuery, StackStateQueryVariables>(StackStateDocument, options);
+      }
+export function useStackStateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackStateQuery, StackStateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackStateQuery, StackStateQueryVariables>(StackStateDocument, options);
+        }
+export function useStackStateSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackStateQuery, StackStateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackStateQuery, StackStateQueryVariables>(StackStateDocument, options);
+        }
+export type StackStateQueryHookResult = ReturnType<typeof useStackStateQuery>;
+export type StackStateLazyQueryHookResult = ReturnType<typeof useStackStateLazyQuery>;
+export type StackStateSuspenseQueryHookResult = ReturnType<typeof useStackStateSuspenseQuery>;
+export type StackStateQueryResult = Apollo.QueryResult<StackStateQuery, StackStateQueryVariables>;
+export const StackOutputDocument = gql`
+    query StackOutput($id: ID!) {
+  infrastructureStack(id: $id) {
+    output {
+      name
+      secret
+      value
+    }
+  }
+}
+    `;
+
+/**
+ * __useStackOutputQuery__
+ *
+ * To run a query within a React component, call `useStackOutputQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackOutputQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackOutputQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackOutputQuery(baseOptions: Apollo.QueryHookOptions<StackOutputQuery, StackOutputQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackOutputQuery, StackOutputQueryVariables>(StackOutputDocument, options);
+      }
+export function useStackOutputLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackOutputQuery, StackOutputQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackOutputQuery, StackOutputQueryVariables>(StackOutputDocument, options);
+        }
+export function useStackOutputSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackOutputQuery, StackOutputQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackOutputQuery, StackOutputQueryVariables>(StackOutputDocument, options);
+        }
+export type StackOutputQueryHookResult = ReturnType<typeof useStackOutputQuery>;
+export type StackOutputLazyQueryHookResult = ReturnType<typeof useStackOutputLazyQuery>;
+export type StackOutputSuspenseQueryHookResult = ReturnType<typeof useStackOutputSuspenseQuery>;
+export type StackOutputQueryResult = Apollo.QueryResult<StackOutputQuery, StackOutputQueryVariables>;
+export const StackFilesDocument = gql`
+    query StackFiles($id: ID!) {
+  infrastructureStack(id: $id) {
+    files {
+      path
+      content
+    }
+  }
+}
+    `;
+
+/**
+ * __useStackFilesQuery__
+ *
+ * To run a query within a React component, call `useStackFilesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackFilesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackFilesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackFilesQuery(baseOptions: Apollo.QueryHookOptions<StackFilesQuery, StackFilesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackFilesQuery, StackFilesQueryVariables>(StackFilesDocument, options);
+      }
+export function useStackFilesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackFilesQuery, StackFilesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackFilesQuery, StackFilesQueryVariables>(StackFilesDocument, options);
+        }
+export function useStackFilesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackFilesQuery, StackFilesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackFilesQuery, StackFilesQueryVariables>(StackFilesDocument, options);
+        }
+export type StackFilesQueryHookResult = ReturnType<typeof useStackFilesQuery>;
+export type StackFilesLazyQueryHookResult = ReturnType<typeof useStackFilesLazyQuery>;
+export type StackFilesSuspenseQueryHookResult = ReturnType<typeof useStackFilesSuspenseQuery>;
+export type StackFilesQueryResult = Apollo.QueryResult<StackFilesQuery, StackFilesQueryVariables>;
+export const StackBindingsDocument = gql`
+    query StackBindings($id: ID!) {
+  infrastructureStack(id: $id) {
+    writeBindings {
+      ...PolicyBinding
+    }
+    readBindings {
+      ...PolicyBinding
+    }
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
+
+/**
+ * __useStackBindingsQuery__
+ *
+ * To run a query within a React component, call `useStackBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useStackBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useStackBindingsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useStackBindingsQuery(baseOptions: Apollo.QueryHookOptions<StackBindingsQuery, StackBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<StackBindingsQuery, StackBindingsQueryVariables>(StackBindingsDocument, options);
+      }
+export function useStackBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<StackBindingsQuery, StackBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<StackBindingsQuery, StackBindingsQueryVariables>(StackBindingsDocument, options);
+        }
+export function useStackBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<StackBindingsQuery, StackBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<StackBindingsQuery, StackBindingsQueryVariables>(StackBindingsDocument, options);
+        }
+export type StackBindingsQueryHookResult = ReturnType<typeof useStackBindingsQuery>;
+export type StackBindingsLazyQueryHookResult = ReturnType<typeof useStackBindingsLazyQuery>;
+export type StackBindingsSuspenseQueryHookResult = ReturnType<typeof useStackBindingsSuspenseQuery>;
+export type StackBindingsQueryResult = Apollo.QueryResult<StackBindingsQuery, StackBindingsQueryVariables>;
 export const StackRunsDocument = gql`
     query StackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int, $pullRequestId: ID) {
   infrastructureStack(id: $id) {
@@ -19784,6 +20005,10 @@ export const namedOperations = {
     Stacks: 'Stacks',
     Stack: 'Stack',
     StackTiny: 'StackTiny',
+    StackState: 'StackState',
+    StackOutput: 'StackOutput',
+    StackFiles: 'StackFiles',
+    StackBindings: 'StackBindings',
     StackRuns: 'StackRuns',
     StackRun: 'StackRun',
     StackRunJob: 'StackRunJob',
@@ -20003,6 +20228,7 @@ export const namedOperations = {
     PolicyConstraint: 'PolicyConstraint',
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
+    StackTiny: 'StackTiny',
     Stack: 'Stack',
     StackRun: 'StackRun',
     StackConfiguration: 'StackConfiguration',

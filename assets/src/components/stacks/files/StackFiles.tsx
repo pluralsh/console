@@ -1,13 +1,13 @@
-import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import React, { ReactNode, useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
-import { isEmpty } from 'lodash'
 
-import { StackFile } from '../../../generated/graphql'
+import { StackFile, useStackFilesQuery } from '../../../generated/graphql'
 
 import OutputValue from '../run/output/Value'
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 const columnHelper = createColumnHelper<StackFile>()
 
@@ -43,14 +43,22 @@ export default function StackFiles() {
     )
   )
 
-  if (isEmpty(stack.files))
-    return <EmptyState message="No files available for this stack." />
+  const { data, loading } = useStackFilesQuery({
+    variables: { id: stack.id ?? '' },
+    fetchPolicy: 'no-cache',
+    skip: !stack.id,
+  })
+
+  if (loading) return <LoadingIndicator />
+
+  const files = data?.infrastructureStack?.files
 
   return (
     <Table
-      data={stack.files ?? []}
+      data={files ?? []}
       columns={columns}
       maxHeight="100%"
+      emptyStateProps={{ message: 'No files found.' }}
     />
   )
 }

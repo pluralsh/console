@@ -1,11 +1,5 @@
-import {
-  Button,
-  ContentCard,
-  FormField,
-  Input,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import React, { useMemo, useState } from 'react'
+import { Button, Card, FormField, Input } from '@pluralsh/design-system'
+import React, { useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
@@ -14,7 +8,8 @@ import { isEmpty } from 'lodash'
 import { useUpdateStackMutation } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
 
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import { StackOutletContextT } from '../Stacks'
+import { OverlineH1 } from '../../utils/typography/Text'
 
 export default function StackConfiguration() {
   const theme = useTheme()
@@ -27,13 +22,6 @@ export default function StackConfiguration() {
     image !== stack.configuration.image ||
     version !== stack.configuration.version
   const valid = !isEmpty(version)
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [...getBreadcrumbs(stackId), { label: 'configuration' }],
-      [stackId]
-    )
-  )
 
   const [mutation, { loading, error }] = useUpdateStackMutation({
     variables: {
@@ -55,7 +43,16 @@ export default function StackConfiguration() {
   }
 
   return (
-    <ContentCard>
+    <Card padding="large">
+      <OverlineH1
+        as="h3"
+        css={{
+          color: theme.colors['text-xlight'],
+          marginBottom: theme.spacing.large,
+        }}
+      >
+        Configuration
+      </OverlineH1>
       <div
         css={{
           display: 'flex',
@@ -101,6 +98,6 @@ export default function StackConfiguration() {
           Save
         </Button>
       </div>
-    </ContentCard>
+    </Card>
   )
 }
