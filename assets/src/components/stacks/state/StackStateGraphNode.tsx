@@ -22,7 +22,10 @@ export function BaseNode({
   const { incomers, outgoers } = useNodeEdges(id)
 
   return (
-    <BaseNodeSC {...props}>
+    <BaseNodeSC
+      {...props}
+      css={{ backgroundColor: theme.colors['fill-zero'] }}
+    >
       <HandleSC
         type="target"
         isConnectable={false}
@@ -67,20 +70,14 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
       >
         <div
           css={{
+            ...theme.partials.text.body2Bold,
             alignItems: 'center',
             display: 'flex',
             justifyContent: 'space-between',
-            gap: theme.spacing.small,
+            gap: theme.spacing.medium,
           }}
         >
-          <div
-            css={{
-              ...theme.partials.text.overline,
-              color: theme.colors['text-xlight'],
-            }}
-          >
-            {data.resource}
-          </div>
+          <div>{data.name}</div>
           <IconFrame
             clickable
             icon={<InfoOutlineIcon />}
@@ -106,13 +103,14 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
             </Code>
           </Modal>
         </div>
+
         <div
           css={{
-            ...theme.partials.text.body2Bold,
-            paddingRight: theme.spacing.large,
+            ...theme.partials.text.caption,
+            color: theme.colors['text-light'],
           }}
         >
-          {data.name}
+          {data.identifier}
         </div>
       </div>
     </BaseNode>

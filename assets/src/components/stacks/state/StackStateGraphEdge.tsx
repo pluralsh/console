@@ -14,7 +14,7 @@ export function StackStateGraphEdge({
     <StepEdge
       data-something="data-something"
       {...props}
-      pathOptions={{ borderRadius: theme.borderRadiuses.large }}
+      pathOptions={{ borderRadius: theme.borderRadiuses.medium }}
       style={{
         ...style,
         stroke: theme.colors['border-input'],
