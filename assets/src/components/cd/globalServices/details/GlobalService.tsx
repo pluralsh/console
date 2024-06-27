@@ -95,7 +95,7 @@ export default function GlobalService() {
       globalService: data?.globalService,
       refetch,
     }),
-    [data, refetch]
+    [data, globalServiceId, refetch]
   )
 
   if (error) return <GqlError error={error} />

@@ -22,6 +22,8 @@ import {
   ColTags,
 } from '../GlobalServicesColumns'
 
+import { useSetPageScrollable } from '../../ContinuousDeployment'
+
 import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
 
 export const COLUMNS = [
@@ -53,6 +55,8 @@ export function GlobalServiceServices() {
       [globalServiceId, globalService]
     )
   )
+
+  useSetPageScrollable(false)
 
   const {
     data,

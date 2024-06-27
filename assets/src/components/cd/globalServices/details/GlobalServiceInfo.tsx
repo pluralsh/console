@@ -4,6 +4,8 @@ import { useMemo } from 'react'
 
 import { useOutletContext } from 'react-router-dom'
 
+import { useSetPageScrollable } from '../../ContinuousDeployment'
+
 import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
 
 export default function GlobalServiceInfo() {
@@ -20,6 +22,8 @@ export default function GlobalServiceInfo() {
       [globalServiceId, globalService]
     )
   )
+
+  useSetPageScrollable(true)
 
   return (
     <div
