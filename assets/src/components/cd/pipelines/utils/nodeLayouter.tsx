@@ -60,7 +60,7 @@ export const getLayoutedElements = (
     nodes: nodes.map((node) => {
       const dagreNode = dagre.node(node.id)
 
-      if (dagreNode!) return node
+      if (!dagreNode) return node
 
       const { x, y, width, height } = dagreNode
 
