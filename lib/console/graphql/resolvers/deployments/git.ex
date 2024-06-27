@@ -96,8 +96,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def delete_pr_automation(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_pr_automation(id, user)
 
-  def create_pull_request(%{id: id, branch: branch, context: ctx}, %{context: %{current_user: user}}),
-    do: Git.create_pull_request(ctx, id, branch, user)
+  def create_pull_request(%{id: id, branch: branch, context: ctx} = args, %{context: %{current_user: user}}),
+    do: Git.create_pull_request(%{}, ctx, id, branch, args[:identifier], user)
 
   def create_pr(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_pull_request(attrs, user)

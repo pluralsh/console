@@ -3787,6 +3787,8 @@ export type PromotionCriteria = {
   __typename?: 'PromotionCriteria';
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** overrides the repository slug for the referenced pr automation */
+  repository?: Maybe<Scalars['String']['output']>;
   /** whether you want to copy any configuration values from the source service */
   secrets?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   /** the source service in a prior stage to promote settings from */
@@ -3802,6 +3804,8 @@ export type PromotionCriteriaAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   /** the id of a pr automation to update this service */
   prAutomationId?: InputMaybe<Scalars['ID']['input']>;
+  /** overrides the repository slug for the referenced pr automation */
+  repository?: InputMaybe<Scalars['String']['input']>;
   /** the secrets to copy over in a promotion */
   secrets?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   /** the id of the service to promote from */
@@ -4491,6 +4495,7 @@ export type RootMutationTypeCreatePullRequestArgs = {
   branch?: InputMaybe<Scalars['String']['input']>;
   context?: InputMaybe<Scalars['Json']['input']>;
   id: Scalars['ID']['input'];
+  identifier?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -8463,6 +8468,7 @@ export type PullRequestFragment = { __typename?: 'PullRequest', id: string, titl
 export type CreatePullRequestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   branch: Scalars['String']['input'];
+  identifier?: InputMaybe<Scalars['String']['input']>;
   context: Scalars['Json']['input'];
 }>;
 
@@ -15375,8 +15381,13 @@ export type DeleteClusterProviderMutationHookResult = ReturnType<typeof useDelet
 export type DeleteClusterProviderMutationResult = Apollo.MutationResult<DeleteClusterProviderMutation>;
 export type DeleteClusterProviderMutationOptions = Apollo.BaseMutationOptions<DeleteClusterProviderMutation, DeleteClusterProviderMutationVariables>;
 export const CreatePullRequestDocument = gql`
-    mutation CreatePullRequest($id: ID!, $branch: String!, $context: Json!) {
-  createPullRequest(id: $id, branch: $branch, context: $context) {
+    mutation CreatePullRequest($id: ID!, $branch: String!, $identifier: String, $context: Json!) {
+  createPullRequest(
+    id: $id
+    branch: $branch
+    identifier: $identifier
+    context: $context
+  ) {
     ...PullRequest
   }
 }
@@ -15398,6 +15409,7 @@ export type CreatePullRequestMutationFn = Apollo.MutationFunction<CreatePullRequ
  *   variables: {
  *      id: // value for 'id'
  *      branch: // value for 'branch'
+ *      identifier: // value for 'identifier'
  *      context: // value for 'context'
  *   },
  * });
