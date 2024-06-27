@@ -3,7 +3,8 @@ defmodule Console.Schema.PromotionCriteria do
   alias Console.Schema.{StageService, Service, PrAutomation}
 
   schema "promotion_criteria" do
-    field :secrets, {:array, :string}
+    field :secrets,    {:array, :string}
+    field :repository, :string
 
     belongs_to :pr_automation, PrAutomation
     belongs_to :stage_service, StageService
@@ -12,7 +13,7 @@ defmodule Console.Schema.PromotionCriteria do
     timestamps()
   end
 
-  @valid ~w(source_id pr_automation_id secrets)a
+  @valid ~w(repository source_id pr_automation_id secrets)a
 
   def changeset(model, attrs \\ %{}) do
     model

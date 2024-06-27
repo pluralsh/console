@@ -266,11 +266,11 @@ defmodule Console.Deployments.Git do
   Creates a pull request given a pr automation instance
   """
   @spec create_pull_request(map, binary, binary, User.t) :: pull_request_resp
-  def create_pull_request(attrs \\ %{}, ctx, id, branch, %User{} = user) do
+  def create_pull_request(attrs \\ %{}, ctx, id, branch, identifier \\ nil, %User{} = user) do
     pr = get_pr_automation!(id)
          |> Repo.preload([:write_bindings, :create_bindings, :connection])
     with {:ok, pr} <- allow(pr, user, :create),
-         {:ok, pr_attrs} <- Dispatcher.create(put_in(pr.connection.author, user), branch, ctx) do
+         {:ok, pr_attrs} <- Dispatcher.create(prep(pr, user, identifier), branch, ctx) do
       %PullRequest{}
       |> PullRequest.changeset(
         Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))
@@ -281,6 +281,12 @@ defmodule Console.Deployments.Git do
       |> notify(:create, user)
     end
   end
+
+  defp prep(pr, %User{} = user, identifier) when is_binary(identifier) do
+    prep(pr, user, nil)
+    |> Map.put(:identifier, identifier)
+  end
+  defp prep(pr, %User{} = user, nil), do: put_in(pr.connection.author, user)
 
   @doc """
   Create a pull request record if a user has permissions

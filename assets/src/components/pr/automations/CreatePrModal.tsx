@@ -68,6 +68,7 @@ function CreatePrModalBase({
     )
   )
   const [branch, setBranch] = useState<string>('')
+  const [identifier, setIdentifier] = useState<string>(prAutomation.identifier)
   const [successPr, setSuccessPr] = useState<PullRequestFragment>()
 
   const theme = useTheme()
@@ -105,6 +106,7 @@ function CreatePrModalBase({
               variables: {
                 id: prAutomation.id,
                 branch,
+                identifier,
                 context: JSON.stringify(
                   Object.fromEntries(
                     filteredConfig.map((cfg) => [cfg.name, cfg.value])
@@ -259,6 +261,16 @@ function CreatePrModalBase({
               >
                 {configJson || ''}
               </Code>
+            </FormField>
+            <FormField
+              label="Repository"
+              required
+              name="repository"
+            >
+              <Input2
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+              />
             </FormField>
             <FormField
               label="Branch"

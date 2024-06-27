@@ -156,7 +156,8 @@ defmodule Console.Deployments.Pipelines do
       add_operation(xact, {:pull, svc.id}, fn _ ->
         branch = "plrl-svc/#{service.name}/pipeline-#{stage.pipeline.name}-#{String.slice(service.id, 0..4)}-#{String.slice(ctx.id, 0..4)}"
         context = build_pr_context(ctx.context, svc, stage)
-        Git.create_pull_request(%{service_id: service.id}, context, svc.criteria.pr_automation_id, branch, bot)
+        %{pr_automation_id: id, repository: repo} = svc.criteria
+        Git.create_pull_request(%{service_id: service.id}, context, id, branch, repo, bot)
       end)
       |> add_operation({:ptr, svc.id}, fn res ->
         pr = Map.get(res, {:pull, svc.id})

@@ -107,6 +107,7 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :name,             :string, description: "the name of the source service"
     field :source_id,        :id, description: "the id of the service to promote from"
     field :pr_automation_id, :id, description: "the id of a pr automation to update this service"
+    field :repository,       :string, description: "overrides the repository slug for the referenced pr automation"
     field :secrets,          list_of(:string), description: "the secrets to copy over in a promotion"
   end
 
@@ -259,8 +260,9 @@ defmodule Console.GraphQl.Deployments.Pipeline do
 
   @desc "how a promotion for a service will be performed"
   object :promotion_criteria do
-    field :id,      non_null(:id)
-    field :source,  :service_deployment,
+    field :id,         non_null(:id)
+    field :repository, :string, description: "overrides the repository slug for the referenced pr automation"
+    field :source,     :service_deployment,
       description: "the source service in a prior stage to promote settings from",
       resolve: dataloader(Deployments)
     field :secrets, list_of(:string),

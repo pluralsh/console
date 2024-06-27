@@ -514,6 +514,8 @@ type RootMutationType {
     "the id of the PR automation instance to use"
     id: ID!
 
+    identifier: String
+
     branch: String
 
     context: Json
@@ -2312,6 +2314,9 @@ input PromotionCriteriaAttributes {
   "the id of a pr automation to update this service"
   prAutomationId: ID
 
+  "overrides the repository slug for the referenced pr automation"
+  repository: String
+
   "the secrets to copy over in a promotion"
   secrets: [String]
 }
@@ -2517,6 +2522,9 @@ type StageService {
 "how a promotion for a service will be performed"
 type PromotionCriteria {
   id: ID!
+
+  "overrides the repository slug for the referenced pr automation"
+  repository: String
 
   "the source service in a prior stage to promote settings from"
   source: ServiceDeployment
