@@ -1,5 +1,5 @@
 import { ComponentProps } from 'react'
-import { StepEdge } from 'reactflow'
+import { SmoothStepEdge, StepEdge } from 'reactflow'
 import { useTheme } from 'styled-components'
 
 export const STACK_STATE_GRAPH_EDGE_NAME = 'plural-stack-edge' as const
@@ -11,7 +11,7 @@ export function StackStateGraphEdge({
   const theme = useTheme()
 
   return (
-    <StepEdge
+    <SmoothStepEdge
       data-something="data-something"
       {...props}
       pathOptions={{ borderRadius: theme.borderRadiuses.medium }}
