@@ -3,7 +3,7 @@ fragment GlobalService on GlobalService {
   distro
   name
   project {
-    name
+    ...ProjectTiny
   }
   cascade {
     delete
@@ -19,6 +19,9 @@ fragment GlobalService on GlobalService {
   service {
     id
     name
+    cluster {
+      id
+    }
   }
   tags {
     name

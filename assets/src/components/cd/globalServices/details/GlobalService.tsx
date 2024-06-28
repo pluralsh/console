@@ -52,6 +52,7 @@ import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
 import { useProjectId } from '../../../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../../../utils/graphql'
 import { DistroProviderIcon } from '../../../utils/ClusterDistro'
+import { TRUNCATE } from '../../../utils/truncate'
 
 export type GlobalServiceContextT = {
   globalServiceId: string
@@ -152,7 +153,7 @@ export default function GlobalService() {
           }}
         >
           <div css={{ display: 'flex', gap: theme.spacing.small }}>
-            <div css={{ width: 320 }}>
+            <div css={{ minWidth: 320 }}>
               <Select
                 titleContent={
                   globalService?.distro ? (
@@ -173,7 +174,9 @@ export default function GlobalService() {
                 {globalServices.map((gs) => (
                   <ListBoxItem
                     key={gs?.id}
-                    label={gs?.name}
+                    label={
+                      <div css={{ ...TRUNCATE, maxWidth: 210 }}>{gs?.name}</div>
+                    }
                     textValue={gs?.name}
                     leftContent={
                       gs?.distro ? (
