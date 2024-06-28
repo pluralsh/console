@@ -8199,7 +8199,9 @@ export type UpdateGitRepositoryMutationVariables = Exact<{
 
 export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
 
-export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', name: string } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
+export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null };
+
+export type ServiceTemplateWithoutConfigurationFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
 
 export type CreateGlobalServiceMutationVariables = Exact<{
   attributes: GlobalServiceAttributes;
@@ -8209,7 +8211,15 @@ export type CreateGlobalServiceMutationVariables = Exact<{
 }>;
 
 
-export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', name: string } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null } | null };
+
+export type UpdateGlobalServiceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: GlobalServiceAttributes;
+}>;
+
+
+export type UpdateGlobalServiceMutation = { __typename?: 'RootMutationType', updateGlobalService?: { __typename?: 'GlobalService', id: string } | null };
 
 export type DeleteGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -8225,23 +8235,30 @@ export type GlobalServicesQueryVariables = Exact<{
 }>;
 
 
-export type GlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', name: string } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null } | null> | null } | null };
+export type GlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null } | null } | null> | null } | null };
 
-export type GetServiceDataQueryVariables = Exact<{
+export type GetGlobalServiceQueryVariables = Exact<{
+  serviceId: Scalars['ID']['input'];
+}>;
+
+
+export type GetGlobalServiceQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null } | null };
+
+export type GetGlobalServiceServicesQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetServiceDataQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, project?: { __typename?: 'Project', name: string } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+export type GetGlobalServiceServicesQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null } | null };
 
 export type SyncGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type SyncGlobalServiceMutation = { __typename?: 'RootMutationType', syncGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', name: string } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
+export type SyncGlobalServiceMutation = { __typename?: 'RootMutationType', syncGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null } | null };
 
 export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: string, user?: string | null, password?: string | null };
 
@@ -9936,42 +9953,12 @@ export const HelmChartVersionFragmentDoc = gql`
   digest
 }
     `;
-export const GlobalServiceFragmentDoc = gql`
-    fragment GlobalService on GlobalService {
+export const ProjectTinyFragmentDoc = gql`
+    fragment ProjectTiny on Project {
   id
-  distro
   name
-  project {
-    name
-  }
-  cascade {
-    delete
-    detach
-  }
-  provider {
-    id
-    name
-    cloud
-    namespace
-  }
-  reparent
-  service {
-    id
-    name
-  }
-  tags {
-    name
-    value
-  }
-  insertedAt
-  updatedAt
-}
-    `;
-export const HttpConnectionFragmentDoc = gql`
-    fragment HttpConnection on HttpConnection {
-  host
-  user
-  password
+  default
+  description
 }
     `;
 export const GitRepositoryFragmentDoc = gql`
@@ -9987,6 +9974,90 @@ export const GitRepositoryFragmentDoc = gql`
   updatedAt
   urlFormat
   httpsPath
+}
+    `;
+export const ServiceTemplateWithoutConfigurationFragmentDoc = gql`
+    fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
+  contexts
+  git {
+    folder
+    ref
+  }
+  helm {
+    chart
+    repository {
+      name
+      namespace
+    }
+    set {
+      name
+      value
+    }
+    valuesFiles
+    version
+  }
+  kustomize {
+    path
+  }
+  name
+  namespace
+  repository {
+    ...GitRepository
+  }
+  repositoryId
+  syncConfig {
+    createNamespace
+    namespaceMetadata {
+      annotations
+      labels
+    }
+  }
+  templated
+}
+    ${GitRepositoryFragmentDoc}`;
+export const GlobalServiceFragmentDoc = gql`
+    fragment GlobalService on GlobalService {
+  id
+  distro
+  name
+  project {
+    ...ProjectTiny
+  }
+  cascade {
+    delete
+    detach
+  }
+  provider {
+    id
+    name
+    cloud
+    namespace
+  }
+  reparent
+  service {
+    id
+    name
+    cluster {
+      id
+    }
+  }
+  tags {
+    name
+    value
+  }
+  template {
+    ...ServiceTemplateWithoutConfiguration
+  }
+  insertedAt
+  updatedAt
+}
+    ${ProjectTinyFragmentDoc}
+${ServiceTemplateWithoutConfigurationFragmentDoc}`;
+export const HttpConnectionFragmentDoc = gql`
+    fragment HttpConnection on HttpConnection {
+  host
+  user
+  password
 }
     `;
 export const DeploymentSettingsFragmentDoc = gql`
@@ -11612,14 +11683,6 @@ export const ProjectFragmentDoc = gql`
   }
 }
     ${PolicyBindingFragmentDoc}`;
-export const ProjectTinyFragmentDoc = gql`
-    fragment ProjectTiny on Project {
-  id
-  name
-  default
-  description
-}
-    `;
 export const StackTinyFragmentDoc = gql`
     fragment StackTiny on InfrastructureStack {
   id
@@ -14328,6 +14391,40 @@ export function useCreateGlobalServiceMutation(baseOptions?: Apollo.MutationHook
 export type CreateGlobalServiceMutationHookResult = ReturnType<typeof useCreateGlobalServiceMutation>;
 export type CreateGlobalServiceMutationResult = Apollo.MutationResult<CreateGlobalServiceMutation>;
 export type CreateGlobalServiceMutationOptions = Apollo.BaseMutationOptions<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>;
+export const UpdateGlobalServiceDocument = gql`
+    mutation UpdateGlobalService($id: ID!, $attributes: GlobalServiceAttributes!) {
+  updateGlobalService(id: $id, attributes: $attributes) {
+    id
+  }
+}
+    `;
+export type UpdateGlobalServiceMutationFn = Apollo.MutationFunction<UpdateGlobalServiceMutation, UpdateGlobalServiceMutationVariables>;
+
+/**
+ * __useUpdateGlobalServiceMutation__
+ *
+ * To run a mutation, you first call `useUpdateGlobalServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGlobalServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateGlobalServiceMutation, { data, loading, error }] = useUpdateGlobalServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateGlobalServiceMutation(baseOptions?: Apollo.MutationHookOptions<UpdateGlobalServiceMutation, UpdateGlobalServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateGlobalServiceMutation, UpdateGlobalServiceMutationVariables>(UpdateGlobalServiceDocument, options);
+      }
+export type UpdateGlobalServiceMutationHookResult = ReturnType<typeof useUpdateGlobalServiceMutation>;
+export type UpdateGlobalServiceMutationResult = Apollo.MutationResult<UpdateGlobalServiceMutation>;
+export type UpdateGlobalServiceMutationOptions = Apollo.BaseMutationOptions<UpdateGlobalServiceMutation, UpdateGlobalServiceMutationVariables>;
 export const DeleteGlobalServiceDocument = gql`
     mutation DeleteGlobalService($id: ID!) {
   deleteGlobalService(id: $id) {
@@ -14411,10 +14508,49 @@ export type GlobalServicesQueryHookResult = ReturnType<typeof useGlobalServicesQ
 export type GlobalServicesLazyQueryHookResult = ReturnType<typeof useGlobalServicesLazyQuery>;
 export type GlobalServicesSuspenseQueryHookResult = ReturnType<typeof useGlobalServicesSuspenseQuery>;
 export type GlobalServicesQueryResult = Apollo.QueryResult<GlobalServicesQuery, GlobalServicesQueryVariables>;
-export const GetServiceDataDocument = gql`
-    query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
+export const GetGlobalServiceDocument = gql`
+    query GetGlobalService($serviceId: ID!) {
   globalService(id: $serviceId) {
     ...GlobalService
+  }
+}
+    ${GlobalServiceFragmentDoc}`;
+
+/**
+ * __useGetGlobalServiceQuery__
+ *
+ * To run a query within a React component, call `useGetGlobalServiceQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalServiceQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetGlobalServiceQuery({
+ *   variables: {
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useGetGlobalServiceQuery(baseOptions: Apollo.QueryHookOptions<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>(GetGlobalServiceDocument, options);
+      }
+export function useGetGlobalServiceLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>(GetGlobalServiceDocument, options);
+        }
+export function useGetGlobalServiceSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>(GetGlobalServiceDocument, options);
+        }
+export type GetGlobalServiceQueryHookResult = ReturnType<typeof useGetGlobalServiceQuery>;
+export type GetGlobalServiceLazyQueryHookResult = ReturnType<typeof useGetGlobalServiceLazyQuery>;
+export type GetGlobalServiceSuspenseQueryHookResult = ReturnType<typeof useGetGlobalServiceSuspenseQuery>;
+export type GetGlobalServiceQueryResult = Apollo.QueryResult<GetGlobalServiceQuery, GetGlobalServiceQueryVariables>;
+export const GetGlobalServiceServicesDocument = gql`
+    query GetGlobalServiceServices($serviceId: ID!, $first: Int, $after: String) {
+  globalService(id: $serviceId) {
     services(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
@@ -14427,21 +14563,20 @@ export const GetServiceDataDocument = gql`
     }
   }
 }
-    ${GlobalServiceFragmentDoc}
-${PageInfoFragmentDoc}
+    ${PageInfoFragmentDoc}
 ${ServiceDeploymentsRowFragmentDoc}`;
 
 /**
- * __useGetServiceDataQuery__
+ * __useGetGlobalServiceServicesQuery__
  *
- * To run a query within a React component, call `useGetServiceDataQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetServiceDataQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetGlobalServiceServicesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetGlobalServiceServicesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetServiceDataQuery({
+ * const { data, loading, error } = useGetGlobalServiceServicesQuery({
  *   variables: {
  *      serviceId: // value for 'serviceId'
  *      first: // value for 'first'
@@ -14449,22 +14584,22 @@ ${ServiceDeploymentsRowFragmentDoc}`;
  *   },
  * });
  */
-export function useGetServiceDataQuery(baseOptions: Apollo.QueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+export function useGetGlobalServiceServicesQuery(baseOptions: Apollo.QueryHookOptions<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+        return Apollo.useQuery<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>(GetGlobalServiceServicesDocument, options);
       }
-export function useGetServiceDataLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+export function useGetGlobalServiceServicesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+          return Apollo.useLazyQuery<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>(GetGlobalServiceServicesDocument, options);
         }
-export function useGetServiceDataSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetServiceDataQuery, GetServiceDataQueryVariables>) {
+export function useGetGlobalServiceServicesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<GetServiceDataQuery, GetServiceDataQueryVariables>(GetServiceDataDocument, options);
+          return Apollo.useSuspenseQuery<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>(GetGlobalServiceServicesDocument, options);
         }
-export type GetServiceDataQueryHookResult = ReturnType<typeof useGetServiceDataQuery>;
-export type GetServiceDataLazyQueryHookResult = ReturnType<typeof useGetServiceDataLazyQuery>;
-export type GetServiceDataSuspenseQueryHookResult = ReturnType<typeof useGetServiceDataSuspenseQuery>;
-export type GetServiceDataQueryResult = Apollo.QueryResult<GetServiceDataQuery, GetServiceDataQueryVariables>;
+export type GetGlobalServiceServicesQueryHookResult = ReturnType<typeof useGetGlobalServiceServicesQuery>;
+export type GetGlobalServiceServicesLazyQueryHookResult = ReturnType<typeof useGetGlobalServiceServicesLazyQuery>;
+export type GetGlobalServiceServicesSuspenseQueryHookResult = ReturnType<typeof useGetGlobalServiceServicesSuspenseQuery>;
+export type GetGlobalServiceServicesQueryResult = Apollo.QueryResult<GetGlobalServiceServicesQuery, GetGlobalServiceServicesQueryVariables>;
 export const SyncGlobalServiceDocument = gql`
     mutation SyncGlobalService($id: ID!) {
   syncGlobalService(id: $id) {
@@ -20088,7 +20223,8 @@ export const namedOperations = {
     HelmRepository: 'HelmRepository',
     GitRepository: 'GitRepository',
     GlobalServices: 'GlobalServices',
-    GetServiceData: 'GetServiceData',
+    GetGlobalService: 'GetGlobalService',
+    GetGlobalServiceServices: 'GetGlobalServiceServices',
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProviders: 'ObservabilityProviders',
     ManagedNamespaces: 'ManagedNamespaces',
@@ -20194,6 +20330,7 @@ export const namedOperations = {
     DeleteGitRepository: 'DeleteGitRepository',
     UpdateGitRepository: 'UpdateGitRepository',
     CreateGlobalService: 'CreateGlobalService',
+    UpdateGlobalService: 'UpdateGlobalService',
     DeleteGlobalService: 'DeleteGlobalService',
     SyncGlobalService: 'SyncGlobalService',
     UpdateDeploymentSettings: 'UpdateDeploymentSettings',
@@ -20295,6 +20432,7 @@ export const namedOperations = {
     HelmRepository: 'HelmRepository',
     HelmChartVersion: 'HelmChartVersion',
     GlobalService: 'GlobalService',
+    ServiceTemplateWithoutConfiguration: 'ServiceTemplateWithoutConfiguration',
     HttpConnection: 'HttpConnection',
     DeploymentSettings: 'DeploymentSettings',
     ObservabilityProvider: 'ObservabilityProvider',

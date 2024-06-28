@@ -3,7 +3,7 @@ fragment GlobalService on GlobalService {
   distro
   name
   project {
-    name
+    ...ProjectTiny
   }
   cascade {
     delete
@@ -19,13 +19,57 @@ fragment GlobalService on GlobalService {
   service {
     id
     name
+    cluster {
+      id
+    }
   }
   tags {
     name
     value
   }
+  template {
+    ...ServiceTemplateWithoutConfiguration
+  }
   insertedAt
   updatedAt
+}
+
+fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
+  contexts
+  git {
+    folder
+    ref
+  }
+  helm {
+    chart
+    repository {
+      name
+      namespace
+    }
+    set {
+      name
+      value
+    }
+    valuesFiles
+    version
+  }
+  kustomize {
+    path
+  }
+  name
+  namespace
+  repository {
+    ...GitRepository
+  }
+  repositoryId
+  syncConfig {
+    createNamespace
+    namespaceMetadata {
+      annotations
+      labels
+    }
+  }
+  templated
 }
 
 mutation CreateGlobalService(
@@ -41,6 +85,12 @@ mutation CreateGlobalService(
     serviceId: $serviceId
   ) {
     ...GlobalService
+  }
+}
+
+mutation UpdateGlobalService($id: ID!, $attributes: GlobalServiceAttributes!) {
+  updateGlobalService(id: $id, attributes: $attributes) {
+    id
   }
 }
 
@@ -63,9 +113,14 @@ query GlobalServices($first: Int, $after: String, $projectId: ID) {
   }
 }
 
-query GetServiceData($serviceId: ID!, $first: Int, $after: String) {
+query GetGlobalService($serviceId: ID!) {
   globalService(id: $serviceId) {
     ...GlobalService
+  }
+}
+
+query GetGlobalServiceServices($serviceId: ID!, $first: Int, $after: String) {
+  globalService(id: $serviceId) {
     services(first: $first, after: $after) {
       pageInfo {
         ...PageInfo

@@ -59,7 +59,7 @@ export const columns = [
 const crumbs = [
   ...CD_BASE_CRUMBS,
   {
-    label: 'global-services',
+    label: 'global services',
     url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}`,
   },
 ]

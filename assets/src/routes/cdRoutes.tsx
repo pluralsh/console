@@ -42,8 +42,6 @@ import ClusterLogs from 'components/cd/cluster/ClusterLogs'
 
 import GlobalServices from 'components/cd/globalServices/GlobalService'
 
-import GlobalServiceDetailView from 'components/cd/globalServices/GlobalServiceDetailView'
-
 import Namespaces from 'components/cd/namespaces/Namespaces'
 
 import NamespacesDetailView from 'components/cd/namespaces/NamespacesDetailView'
@@ -83,6 +81,12 @@ import ServicePod from '../components/cd/services/service/pod/Pod'
 
 import ComponentDryRun from '../components/component/ComponentDryRun'
 
+import GlobalServiceInfo from '../components/cd/globalServices/details/GlobalServiceInfo'
+
+import { GlobalServiceServices } from '../components/cd/globalServices/details/GlobalServiceServices'
+
+import GlobalService from '../components/cd/globalServices/details/GlobalService'
+
 import {
   ADDONS_REL_PATH,
   CD_REL_PATH,
@@ -96,7 +100,9 @@ import {
   CLUSTER_REL_PATH,
   CLUSTER_SERVICES_PATH,
   GLOBAL_SERVICES_REL_PATH,
+  GLOBAL_SERVICE_INFO_PATH,
   GLOBAL_SERVICE_PARAM_ID,
+  GLOBAL_SERVICE_SERVICES_PATH,
   GLOBAL_SETTINGS_REL_PATH,
   NAMESPACES_PARAM_ID,
   NAMESPACES_REL_PATH,
@@ -219,9 +225,27 @@ const mainRoutes = (
 
 const globalServiceRoutes = (
   <Route
-    path={`${GLOBAL_SERVICES_REL_PATH}/:${GLOBAL_SERVICE_PARAM_ID}?`}
-    element={<GlobalServiceDetailView />}
-  />
+    path={`${GLOBAL_SERVICES_REL_PATH}/:${GLOBAL_SERVICE_PARAM_ID}`}
+    element={<GlobalService />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={GLOBAL_SERVICE_INFO_PATH}
+        />
+      }
+    />
+    <Route
+      path={GLOBAL_SERVICE_INFO_PATH}
+      element={<GlobalServiceInfo />}
+    />
+    <Route
+      path={GLOBAL_SERVICE_SERVICES_PATH}
+      element={<GlobalServiceServices />}
+    />
+  </Route>
 )
 
 const namespacesRoutes = (
