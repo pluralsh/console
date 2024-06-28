@@ -47,6 +47,12 @@ mutation CreateGlobalService(
   }
 }
 
+mutation UpdateGlobalService($id: ID!, $attributes: GlobalServiceAttributes!) {
+  updateGlobalService(id: $id, attributes: $attributes ) {
+    id
+  }
+}
+
 mutation DeleteGlobalService($id: ID!) {
   deleteGlobalService(id: $id) {
     id

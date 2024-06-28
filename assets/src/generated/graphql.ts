@@ -8211,6 +8211,14 @@ export type CreateGlobalServiceMutationVariables = Exact<{
 
 export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
 
+export type UpdateGlobalServiceMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: GlobalServiceAttributes;
+}>;
+
+
+export type UpdateGlobalServiceMutation = { __typename?: 'RootMutationType', updateGlobalService?: { __typename?: 'GlobalService', id: string } | null };
+
 export type DeleteGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -14338,6 +14346,40 @@ export function useCreateGlobalServiceMutation(baseOptions?: Apollo.MutationHook
 export type CreateGlobalServiceMutationHookResult = ReturnType<typeof useCreateGlobalServiceMutation>;
 export type CreateGlobalServiceMutationResult = Apollo.MutationResult<CreateGlobalServiceMutation>;
 export type CreateGlobalServiceMutationOptions = Apollo.BaseMutationOptions<CreateGlobalServiceMutation, CreateGlobalServiceMutationVariables>;
+export const UpdateGlobalServiceDocument = gql`
+    mutation UpdateGlobalService($id: ID!, $attributes: GlobalServiceAttributes!) {
+  updateGlobalService(id: $id, attributes: $attributes) {
+    id
+  }
+}
+    `;
+export type UpdateGlobalServiceMutationFn = Apollo.MutationFunction<UpdateGlobalServiceMutation, UpdateGlobalServiceMutationVariables>;
+
+/**
+ * __useUpdateGlobalServiceMutation__
+ *
+ * To run a mutation, you first call `useUpdateGlobalServiceMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateGlobalServiceMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateGlobalServiceMutation, { data, loading, error }] = useUpdateGlobalServiceMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateGlobalServiceMutation(baseOptions?: Apollo.MutationHookOptions<UpdateGlobalServiceMutation, UpdateGlobalServiceMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateGlobalServiceMutation, UpdateGlobalServiceMutationVariables>(UpdateGlobalServiceDocument, options);
+      }
+export type UpdateGlobalServiceMutationHookResult = ReturnType<typeof useUpdateGlobalServiceMutation>;
+export type UpdateGlobalServiceMutationResult = Apollo.MutationResult<UpdateGlobalServiceMutation>;
+export type UpdateGlobalServiceMutationOptions = Apollo.BaseMutationOptions<UpdateGlobalServiceMutation, UpdateGlobalServiceMutationVariables>;
 export const DeleteGlobalServiceDocument = gql`
     mutation DeleteGlobalService($id: ID!) {
   deleteGlobalService(id: $id) {
@@ -20243,6 +20285,7 @@ export const namedOperations = {
     DeleteGitRepository: 'DeleteGitRepository',
     UpdateGitRepository: 'UpdateGitRepository',
     CreateGlobalService: 'CreateGlobalService',
+    UpdateGlobalService: 'UpdateGlobalService',
     DeleteGlobalService: 'DeleteGlobalService',
     SyncGlobalService: 'SyncGlobalService',
     UpdateDeploymentSettings: 'UpdateDeploymentSettings',
