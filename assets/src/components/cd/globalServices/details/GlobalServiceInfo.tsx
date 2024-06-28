@@ -7,6 +7,7 @@ import {
   CardProps,
   Chip,
   ChipList,
+  Code,
   FormField,
   GlobeIcon,
   Modal,
@@ -28,6 +29,8 @@ import { tagsToNameValue } from '../../services/CreateGlobalService'
 import { TagSelection } from '../../services/TagSelection'
 import { GqlError } from '../../../utils/Alert'
 import { ModalMountTransition } from '../../../utils/ModalMountTransition'
+
+import { deepOmitKey } from '../../../../utils/deepOmitKey'
 
 import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
 
@@ -202,101 +205,137 @@ export default function GlobalServiceInfo() {
   return (
     <div
       css={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gridGap: theme.spacing.large,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
+        height: '100%',
       }}
     >
-      {globalService?.service && (
+      <div
+        css={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridAutoRows: 'min-content',
+          gridGap: theme.spacing.large,
+        }}
+      >
+        {globalService?.service && (
+          <PropCard
+            title="Root service"
+            titleContent={
+              <Button
+                small
+                secondary
+                endIcon={<ArrowTopRightIcon />}
+                onClick={() =>
+                  navigate(
+                    getServiceDetailsPath({
+                      serviceId: globalService.service?.id ?? '',
+                      clusterId: globalService.service?.cluster?.id ?? '',
+                    })
+                  )
+                }
+              >
+                Go to root service
+              </Button>
+            }
+            css={{ gridColumn: 'span 2' }}
+          >
+            {globalService.service.name}
+          </PropCard>
+        )}
         <PropCard
-          title="Root service"
+          title="Tags"
           titleContent={
             <Button
               small
               secondary
-              endIcon={<ArrowTopRightIcon />}
-              onClick={() =>
-                navigate(
-                  getServiceDetailsPath({
-                    serviceId: globalService.service?.id ?? '',
-                    clusterId: globalService.service?.cluster?.id ?? '',
-                  })
-                )
-              }
+              onClick={() => setOpen(true)}
             >
-              Go to root service
+              Edit tags
             </Button>
           }
           css={{ gridColumn: 'span 2' }}
         >
-          {globalService.service.name}
+          <ChipList
+            limit={8}
+            values={globalService?.tags ?? []}
+            transformValue={(tag) => `${tag?.name}: ${tag?.value}`}
+            emptyState={<div>No tags found</div>}
+          />
         </PropCard>
-      )}
-      <PropCard
-        title="Tags"
-        titleContent={
-          <Button
-            small
-            secondary
-            onClick={() => setOpen(true)}
-          >
-            Edit tags
-          </Button>
-        }
-        css={{ gridColumn: 'span 2' }}
-      >
-        <ChipList
-          limit={8}
-          values={globalService?.tags ?? []}
-          transformValue={(tag) => `${tag?.name}: ${tag?.value}`}
-          emptyState={<div>No tags found</div>}
+        <TagsModal
+          open={open}
+          onClose={() => setOpen(false)}
         />
-      </PropCard>
-      <TagsModal
-        open={open}
-        onClose={() => setOpen(false)}
-      />
-      <PropCard title="Distribution">
-        <div
+        <PropCard title="Distribution">
+          <div
+            css={{
+              ...theme.partials.text.body2,
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.small,
+            }}
+          >
+            <AppIcon
+              spacing="padding"
+              size="xxsmall"
+              icon={globalService?.distro ? undefined : <GlobeIcon size={16} />}
+              url={
+                globalService?.distro
+                  ? getDistroProviderIconUrl({
+                      distro: globalService?.distro,
+                      provider: globalService?.provider?.cloud,
+                      mode: theme.mode,
+                    })
+                  : undefined
+              }
+            />
+            {globalService?.distro || 'All distribution'}
+          </div>
+        </PropCard>
+        {globalService?.cascade && (
+          <PropCard title="Cascade">
+            {globalService.cascade.delete && <Chip>Delete</Chip>}
+            {globalService.cascade.detach && <Chip>Detach</Chip>}
+          </PropCard>
+        )}
+        <PropCard title="Reparent">
+          <Chip severity={globalService?.reparent ? 'success' : 'danger'}>
+            {globalService?.reparent ? 'True' : 'False'}
+          </Chip>
+        </PropCard>
+        {globalService?.project && (
+          <PropCard title="Cascade">
+            <PropCard title="Project">{globalService.project.name}</PropCard>
+          </PropCard>
+        )}
+      </div>
+      {globalService?.template ? (
+        <Code
+          language="JSON"
+          title="Template"
+          css={{ height: '100%' }}
+        >
+          {JSON.stringify(
+            deepOmitKey(globalService?.template, '__typename' as const),
+            null,
+            2
+          )}
+        </Code>
+      ) : (
+        <Card
           css={{
-            ...theme.partials.text.body2,
-            display: 'flex',
             alignItems: 'center',
-            gap: theme.spacing.small,
+            display: 'flex',
+            color: theme.colors['text-xlight'],
+            justifyContent: 'center',
+            padding: theme.spacing.medium,
+            height: '100%',
           }}
         >
-          <AppIcon
-            spacing="padding"
-            size="xxsmall"
-            icon={globalService?.distro ? undefined : <GlobeIcon size={16} />}
-            url={
-              globalService?.distro
-                ? getDistroProviderIconUrl({
-                    distro: globalService?.distro,
-                    provider: globalService?.provider?.cloud,
-                    mode: theme.mode,
-                  })
-                : undefined
-            }
-          />
-          {globalService?.distro || 'All distribution'}
-        </div>
-      </PropCard>
-      {globalService?.cascade && (
-        <PropCard title="Cascade">
-          {globalService.cascade.delete && <Chip>Delete</Chip>}
-          {globalService.cascade.detach && <Chip>Detach</Chip>}
-        </PropCard>
-      )}
-      <PropCard title="Reparent">
-        <Chip severity={globalService?.reparent ? 'success' : 'danger'}>
-          {globalService?.reparent ? 'True' : 'False'}
-        </Chip>
-      </PropCard>
-      {globalService?.project && (
-        <PropCard title="Cascade">
-          <PropCard title="Project">{globalService.project.name}</PropCard>
-        </PropCard>
+          <div>This global service is not based on service template.</div>
+        </Card>
       )}
     </div>
   )

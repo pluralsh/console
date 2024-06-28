@@ -27,8 +27,47 @@ fragment GlobalService on GlobalService {
     name
     value
   }
+  template { ...ServiceTemplateWithoutConfiguration }
   insertedAt
   updatedAt
+}
+
+fragment ServiceTemplateWithoutConfiguration on ServiceTemplate {
+  contexts
+  git {
+    folder
+    ref
+  }
+  helm {
+    chart
+    repository {
+      name
+      namespace
+    }
+    set {
+      name
+      value
+    }
+    valuesFiles
+    version
+  }
+  kustomize {
+    path
+  }
+  name
+  namespace
+  repository {
+    ...GitRepository
+  }
+  repositoryId
+  syncConfig {
+    createNamespace
+    namespaceMetadata {
+      annotations
+      labels
+    }
+  }
+  templated
 }
 
 mutation CreateGlobalService(
