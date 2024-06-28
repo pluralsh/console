@@ -57,6 +57,7 @@ import StackEntry from './StacksEntry'
 import StackDetachModal from './StackDetachModal'
 import StackDeleteModal from './StackDeleteModal'
 import StackPermissionsModal from './StackPermissionsModal'
+import StackCustomRun from './customrun/StackCustomRun'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -255,6 +256,7 @@ export default function Stacks() {
                 {stack.repository?.url}
               </div>
             </div>
+            <StackCustomRun stack={stack} />
             <KickButton
               pulledAt={stack.repository?.pulledAt}
               kickMutationHook={useKickStackMutation}

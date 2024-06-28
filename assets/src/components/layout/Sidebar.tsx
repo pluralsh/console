@@ -13,7 +13,7 @@ import {
   GitPullIcon,
   HistoryIcon,
   HomeIcon,
-  KubernetesIcon,
+  KubernetesAltIcon,
   LightningIcon,
   LogoutIcon,
   PeopleIcon,
@@ -107,7 +107,7 @@ function getMenuItems({
     {
       text: 'Kubernetes',
       expandedLabel: 'Kubernetes',
-      icon: <KubernetesIcon />,
+      icon: <KubernetesAltIcon />,
       path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },

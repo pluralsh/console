@@ -104,7 +104,9 @@ export function RunbookExecutions() {
       <Table
         data={executions}
         columns={columns}
-        onScrollCapture={(e) => fetchMoreOnBottomReached(e?.target)}
+        onScrollCapture={(e) =>
+          fetchMoreOnBottomReached(e?.target as HTMLDivElement)
+        }
         maxHeight="100%"
       />
     </FullHeightTableWrap>

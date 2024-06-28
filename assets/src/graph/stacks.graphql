@@ -79,6 +79,19 @@ fragment StackRun on StackRun {
   }
 }
 
+fragment CustomStackRun on CustomStackRun {
+  id
+  name
+  documentation
+  commands {
+    args
+    cmd
+  }
+  configuration {
+    ...PrConfiguration
+  }
+}
+
 fragment StackConfiguration on StackConfiguration {
   version
   image
@@ -346,9 +359,46 @@ query StackRunJobLogs($id: ID!, $container: String!, $sinceSeconds: Int!) {
   }
 }
 
+query CustomStackRuns(
+  $id: ID!
+  $after: String
+  $before: String
+  $first: Int = 100
+  $last: Int
+) {
+  infrastructureStack(id: $id) {
+    id
+    customStackRuns(
+      after: $after
+      before: $before
+      first: $first
+      last: $last
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...CustomStackRun
+        }
+      }
+    }
+  }
+}
+
 mutation CreateStack($attributes: StackAttributes!) {
   createStack(attributes: $attributes) {
     id
+  }
+}
+
+mutation CreateOnDemandRun(
+  $stackId: ID!
+  $context: Json
+  $commands: [CommandAttributes]
+) {
+  onDemandRun(stackId: $stackId, context: $context, commands: $commands) {
+    ...StackRun
   }
 }
 
