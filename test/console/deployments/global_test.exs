@@ -18,6 +18,26 @@ defmodule Console.Deployments.GlobalTest do
       assert_receive {:event, %PubSub.GlobalServiceCreated{item: ^global}}
     end
 
+    test "project writers can create project-scoped global services" do
+      user = insert(:user)
+      svc = insert(:service)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, global} = Global.create(%{
+        name: "test",
+        project_id: project.id,
+        tags: [%{name: "name", value: "value"}]
+      }, svc.id, user)
+
+      assert global.service_id == svc.id
+      assert global.project_id == project.id
+      [tag] = global.tags
+      assert tag.name == "name"
+      assert tag.value == "value"
+
+      assert_receive {:event, %PubSub.GlobalServiceCreated{item: ^global}}
+    end
+
     test "it can create a template global service" do
       git = insert(:git_repository)
       {:ok, global} = Global.create(%{

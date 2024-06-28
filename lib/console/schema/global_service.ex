@@ -1,6 +1,6 @@
 defmodule Console.Schema.GlobalService do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, Cluster, ClusterProvider, ServiceTemplate}
+  alias Console.Schema.{Service, Cluster, Project, ClusterProvider, ServiceTemplate}
 
   schema "global_services" do
     field :reparent, :boolean

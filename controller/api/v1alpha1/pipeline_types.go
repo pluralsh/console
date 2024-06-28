@@ -68,6 +68,10 @@ type PipelineStageServicePromotionCriteria struct {
 	// +kubebuilder:validation:Optional
 	PrAutomationRef *v1.ObjectReference `json:"prAutomationRef,omitempty"`
 
+	// The repository slug the pr automation will use (eg pluralsh/console if you will pr against https://github.com/pluralsh/console)
+	// +kubebuilder:validation:Optional
+	Repository *string `json:"repository,omitempty"`
+
 	// Secrets to copy over in a promotion.
 	// +kubebuilder:validation:Optional
 	Secrets []*string `json:"secrets,omitempty"`

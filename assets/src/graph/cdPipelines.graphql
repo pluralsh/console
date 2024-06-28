@@ -132,6 +132,10 @@ fragment PipelineStage on PipelineStage {
   context {
     ...PipelineContext
   }
+  errors {
+    message
+    source
+  }
 }
 
 fragment PipelineStageEdge on PipelineStageEdge {
