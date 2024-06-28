@@ -34,6 +34,7 @@ export function PrConfigurationFields({
 
         return (
           <FormField
+            key={name}
             required={!optional}
             label={upperFirst(name)}
             hint={upperFirst(documentation || '')}

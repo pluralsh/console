@@ -170,7 +170,9 @@ export default function AuditsList() {
       <Table
         data={audits || []}
         columns={columns}
-        onScrollCapture={(e) => fetchMoreOnBottomReached(e?.target)}
+        onScrollCapture={(e) =>
+          fetchMoreOnBottomReached(e?.target as HTMLDivElement)
+        }
         maxHeight="100%"
       />
     </FullHeightTableWrap>
