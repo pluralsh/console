@@ -52,6 +52,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     |> paginate(args)
   end
 
+  def resolve_stack_definition(%{id: id}, _), do: {:ok, Stacks.get_definition!(id)}
+
   def resolve_stack(%{id: id}, ctx) do
     Stacks.get_stack!(id)
     |> allow(actor(ctx), :read)
@@ -114,8 +116,20 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   def delete_custom_stack_run(%{id: id}, %{context: %{current_user: user}}),
     do: Stacks.delete_custom_stack_run(id, user)
 
+  def create_stack_definition(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Stacks.create_stack_definition(attrs, user)
+
+  def update_stack_definition(%{id: id, attributes: attrs}, %{context: %{current_user: user}}),
+    do: Stacks.update_stack_definition(attrs, id, user)
+
+  def delete_stack_definition(%{id: id}, %{context: %{current_user: user}}),
+    do: Stacks.delete_stack_definition(id, user)
+
   def create_stack_run(%{stack_id: id, commands: commands} = args, %{context: %{current_user: user}}),
     do: Stacks.create_custom_run(id, commands, args[:context], user)
+
+  def trigger_run(%{id: id}, %{context: %{current_user: user}}),
+    do: Stacks.trigger_run(id, user)
 
   def job_spec(%StackRun{job_spec: %{} = spec}, _, _), do: {:ok, spec}
   def job_spec(_, _, _) do

@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Stacks.Commands do
-  alias Console.Schema.{Stack}
+  alias Console.Schema.{Stack, StackDefinition}
 
   def commands(stack, dry \\ false)
 
@@ -11,6 +11,13 @@ defmodule Console.Deployments.Stacks.Commands do
   def commands(%Stack{type: :ansible} = stack, dry) do
     ansible_commands(stack, dry)
     |> stitch_hooks(stack, dry)
+  end
+
+  def commands(%Stack{type: :custom}, true), do: []
+  def commands(%Stack{type: :custom, definition: %StackDefinition{name: n, steps: steps}} = stack, _) do
+    Enum.map(steps, &Map.take(&1, ~w(cmd args stage require_approval)a))
+    |> Enum.with_index(&Map.merge(&1, %{index: &2, name: "#{n}-#{&2}", status: :pending}))
+    |> stitch_hooks(stack, false)
   end
 
   defp stitch_hooks(commands, %Stack{configuration: %{hooks: [_ | _] = hooks}}, dry) do

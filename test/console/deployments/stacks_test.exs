@@ -35,8 +35,8 @@ defmodule Console.Deployments.StacksTest do
 
     test "project writers can create a stack" do
       user = insert(:user)
-      cluster = insert(:cluster)
       project = insert(:project, write_bindings: [%{user_id: user.id}])
+      cluster = insert(:cluster, project: project)
       repo = insert(:git_repository)
 
       {:ok, stack} = Stacks.create_stack(%{
@@ -56,6 +56,23 @@ defmodule Console.Deployments.StacksTest do
       assert stack.cluster_id == cluster.id
       assert stack.git.ref == "main"
       assert stack.git.folder == "terraform"
+    end
+
+    test "non-cluster writers cannot create a stack" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      cluster = insert(:cluster)
+      repo = insert(:git_repository)
+
+      {:error, _} = Stacks.create_stack(%{
+        name: "my-stack",
+        type: :terraform,
+        approval: true,
+        repository_id: repo.id,
+        project_id: project.id,
+        cluster_id: cluster.id,
+        git: %{ref: "main", folder: "terraform"},
+      }, user)
     end
 
     test "random users cannot create" do
@@ -187,6 +204,20 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
     end
 
+    test "it will not create a new run if there are no file changes" do
+      stack = insert(:stack,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"}
+      )
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:error, "no changes"} end)
+
+      {:error, _} = Stacks.poll(stack)
+
+      assert refetch(stack).polled_sha == "new-sha"
+    end
+
     test "it can create a new run with hooks interleaved" do
       stack = insert(:stack,
         environment: [%{name: "ENV", value: "1"}],
@@ -230,6 +261,50 @@ defmodule Console.Deployments.StacksTest do
       assert fourth.cmd == "terraform"
       assert fourth.args == ["apply", "terraform.tfplan"]
       assert fourth.index == 3
+
+      stack = refetch(stack)
+      assert stack.sha == "new-sha"
+      %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
+
+      [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+    end
+
+    test "it can create a new run with a stack definition" do
+      definition = insert(:stack_definition, steps: [
+        %{cmd: "echo", args: ["hello world"], stage: :plan},
+        %{cmd: "sleep", args: ["100"], stage: :apply}
+      ])
+      stack = insert(:stack,
+        definition: definition,
+        type: :custom,
+        environment: [%{name: "ENV", value: "1"}],
+        files: [%{path: "test.txt", content: "test"}],
+        git: %{ref: "main", folder: "terraform"}
+      )
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["terraform/main.tf"], "a commit message"} end)
+
+      {:ok, run} = Stacks.poll(stack)
+
+      assert run.stack_id == stack.id
+      assert run.status == :queued
+      assert run.message == "a commit message"
+      assert run.cluster_id == stack.cluster_id
+      assert run.repository_id == stack.repository_id
+      assert run.git.ref == "new-sha"
+      assert run.git.folder == stack.git.folder
+      [first, second] = run.steps
+
+      assert first.cmd == "echo"
+      assert first.args == ["hello world"]
+      assert first.index == 0
+      assert first.stage == :plan
+
+      assert second.cmd == "sleep"
+      assert second.args == ["100"]
+      assert second.index == 1
+      assert second.stage == :apply
 
       stack = refetch(stack)
       assert stack.sha == "new-sha"
@@ -380,6 +455,24 @@ defmodule Console.Deployments.StacksTest do
       run = insert(:stack_run, git: %{ref: "some-sha"}, stack: stack)
 
       {:error, _} = Stacks.restart_run(run.id, insert(:user))
+    end
+  end
+
+  describe "#trigger_run/2" do
+    test "admins can trigger a new run for a stack" do
+      stack = insert(:stack,  git: %{ref: "main", folder: "terraform"})
+      run = insert(:stack_run, stack: stack, git: %{ref: "some-sha"})
+
+      {:ok, new_run} = Stacks.trigger_run(stack.id, admin_user())
+
+      assert new_run.git.ref == run.git.ref
+    end
+
+    test "non-admins cannot trigger" do
+      stack = insert(:stack)
+      insert(:stack_run, stack: stack, git: %{ref: "some-sha"})
+
+      {:error, _} = Stacks.trigger_run(stack.id, insert(:user))
     end
   end
 
@@ -697,6 +790,70 @@ defmodule Console.Deployments.StacksTest do
     test "nonadmins cannot create" do
       csr = insert(:custom_stack_run)
       {:error, _} = Stacks.delete_custom_stack_run(csr.id, insert(:user))
+    end
+  end
+
+  describe "#create_stack_definition/2" do
+    test "admins can create a stack definition" do
+      {:ok, def} = Stacks.create_stack_definition(%{
+        name: "custom",
+        steps: [
+          %{cmd: "some", args: ["arg"], stage: :apply}
+        ],
+        configuration: %{image: "some/image", tag: "0.1.0"}
+      }, admin_user())
+
+      assert def.name == "custom"
+      assert hd(def.steps).cmd == "some"
+      assert hd(def.steps).args == ["arg"]
+      assert hd(def.steps).stage == :apply
+
+      assert def.configuration.image == "some/image"
+      assert def.configuration.tag == "0.1.0"
+    end
+
+    test "non-admins cannot create" do
+      {:error, _} = Stacks.create_stack_definition(%{
+        name: "custom",
+        steps: [
+          %{cmd: "some", args: ["arg"], stage: :apply}
+        ],
+        configuration: %{image: "some/image", tag: "0.1.0"}
+      }, insert(:user))
+    end
+  end
+
+  describe "#update_stack_definition/3" do
+    test "admins can update a stack definition" do
+      def = insert(:stack_definition)
+
+      {:ok, updated} = Stacks.update_stack_definition(%{description: "something"}, def.id, admin_user())
+
+      assert updated.id == def.id
+      assert updated.description == "something"
+    end
+
+    test "non-admins cannot update a stack definition" do
+      def = insert(:stack_definition)
+
+      {:error, _} = Stacks.update_stack_definition(%{description: "something"}, def.id, insert(:user))
+    end
+  end
+
+  describe "#delete_stack_definition/2" do
+    test "admins can delete a stack definition" do
+      def = insert(:stack_definition)
+
+      {:ok, deleted} = Stacks.delete_stack_definition(def.id, admin_user())
+
+      assert deleted.id == def.id
+      refute refetch(deleted)
+    end
+
+    test "non-admins cannot delete a stack definition" do
+      def = insert(:stack_definition)
+
+      {:error, _} = Stacks.delete_stack_definition(def.id, insert(:user))
     end
   end
 end

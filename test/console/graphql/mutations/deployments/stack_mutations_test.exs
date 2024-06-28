@@ -352,6 +352,91 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
     end
   end
 
+  describe "createStackDefinition" do
+    test "admins can create a custom stack run" do
+      {:ok, %{data: %{"createStackDefinition" => def}}} = run_query("""
+        mutation create($attrs: StackDefinitionAttributes!) {
+          createStackDefinition(attributes: $attrs) {
+            id
+            name
+            configuration { image tag }
+            steps { cmd args stage }
+          }
+        }
+      """, %{"attrs" => %{
+        "name" => "test",
+        "configuration" => %{"image" => "some/image", "tag" => "0.1.0"},
+        "steps" => [%{"cmd" => "echo", "args" => ["Hello World!"], "stage" => "APPLY"}]
+      }}, %{current_user: admin_user()})
+
+      assert def["name"] == "test"
+      assert def["configuration"]["image"] == "some/image"
+      assert def["configuration"]["tag"] == "0.1.0"
+      [cmd] = def["steps"]
+      assert cmd["cmd"] == "echo"
+      assert cmd["args"] == ["Hello World!"]
+      assert cmd["stage"] == "APPLY"
+    end
+  end
+
+  describe "updateStackDefinition" do
+    test "admins can update a custom stack run" do
+      def = insert(:stack_definition)
+      {:ok, %{data: %{"updateStackDefinition" => def}}} = run_query("""
+        mutation update($id: ID!, $attrs: StackDefinitionAttributes!) {
+          updateStackDefinition(id: $id, attributes: $attrs) {
+            id
+            name
+            steps { cmd args stage }
+          }
+        }
+      """, %{"id" => def.id, "attrs" => %{
+        "name" => "test",
+        "steps" => [%{"cmd" => "echo", "args" => ["Hello World!"], "stage" => "APPLY"}]
+      }}, %{current_user: admin_user()})
+
+      assert def["name"] == "test"
+      [cmd] = def["steps"]
+      assert cmd["cmd"] == "echo"
+      assert cmd["args"] == ["Hello World!"]
+      assert cmd["stage"] == "APPLY"
+    end
+  end
+
+  describe "deleteStackDefinition" do
+    test "it can delete a csr" do
+      def = insert(:stack_definition)
+      {:ok, %{data: %{"deleteStackDefinition" => found}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteStackDefinition(id: $id) { id }
+        }
+      """, %{"id" => def.id}, %{current_user: admin_user()})
+
+      assert found["id"] == def.id
+
+      refute refetch(def)
+    end
+  end
+
+  describe "triggerRun" do
+    test "admins can trigger a new run for a stack" do
+      stack = insert(:stack,  git: %{ref: "main", folder: "terraform"})
+      run = insert(:stack_run, stack: stack, git: %{ref: "some-sha"})
+
+      {:ok, %{data: %{"triggerRun" => triggered}}} = run_query("""
+        mutation Trigger($id: ID!) {
+          triggerRun(id: $id) {
+            id
+            git { ref }
+          }
+        }
+      """, %{"id" => stack.id}, %{current_user: admin_user()})
+
+      assert triggered["id"]
+      assert triggered["git"]["ref"] == run.git.ref
+    end
+  end
+
   describe "onDemandRun" do
     test "it can create a custom run" do
       stack = insert(:stack, sha: "test-sha")

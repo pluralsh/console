@@ -29,10 +29,13 @@ defmodule Console.Deployments.Pipelines.StageWorker do
       {:ok, _} -> Logger.info "stage #{stage.id} context applied successfully"
       {:error, err} ->
         Logger.info "failed to apply stage context #{stage.id} reason: #{inspect(err)}"
-        Pipelines.add_stage_error(stage, "context", "Failed to apply stage context with error: #{inspect(err)}")
+        Pipelines.add_stage_error(stage, "context", "Failed to apply stage context with error: #{format_error(err)}")
     end
     {:noreply, state}
   end
+
+  defp format_error(err) when is_binary(err), do: "\n#{err}"
+  defp format_error(err), do: inspect(err)
 
   def handle_cast(%PipelineStage{} = stage, state) do
     case Pipelines.build_promotion(stage) do

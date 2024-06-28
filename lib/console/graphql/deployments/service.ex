@@ -35,6 +35,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
   input_object :sync_config_attributes do
     field :create_namespace,   :boolean
+    field :enforce_namespace,  :boolean
     field :namespace_metadata, :metadata_attributes
   end
 
@@ -320,6 +321,7 @@ defmodule Console.GraphQl.Deployments.Service do
   @desc "Advanced configuration of how to sync resources"
   object :sync_config do
     field :create_namespace,   :boolean, description: "whether the agent should auto-create the namespace for this service"
+    field :enforce_namespace,  :boolean, description: "Whether to require all resources are placed in the same namespace"
     field :namespace_metadata, :namespace_metadata
   end
 

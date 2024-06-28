@@ -1434,6 +1434,14 @@ export type CrossVersionResourceTarget = {
   name?: Maybe<Scalars['String']['output']>;
 };
 
+export type CustomRunStep = {
+  __typename?: 'CustomRunStep';
+  args?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  cmd: Scalars['String']['output'];
+  requireApproval?: Maybe<Scalars['Boolean']['output']>;
+  stage: StepStage;
+};
+
 export type CustomStackRun = {
   __typename?: 'CustomStackRun';
   /** the list of commands that will be executed */
@@ -1473,6 +1481,13 @@ export type CustomStackRunEdge = {
   __typename?: 'CustomStackRunEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<CustomStackRun>;
+};
+
+export type CustomStepAttributes = {
+  args?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  cmd: Scalars['String']['input'];
+  requireApproval?: InputMaybe<Scalars['Boolean']['input']>;
+  stage?: InputMaybe<StepStage>;
 };
 
 export type DaemonSet = {
@@ -2123,6 +2138,8 @@ export type InfrastructureStack = {
   /** version/image config for the tool you're using */
   configuration: StackConfiguration;
   customStackRuns?: Maybe<CustomStackRunConnection>;
+  /** the stack definition in-use by this stack */
+  definition?: Maybe<StackDefinition>;
   /** the run that physically destroys the stack */
   deleteRun?: Maybe<StackRun>;
   /** whether this stack was previously deleted and is pending cleanup */
@@ -4207,6 +4224,7 @@ export type RootMutationType = {
   createServiceAccountToken?: Maybe<AccessToken>;
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createStack?: Maybe<InfrastructureStack>;
+  createStackDefinition?: Maybe<StackDefinition>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -4238,6 +4256,7 @@ export type RootMutationType = {
   deleteServiceContext?: Maybe<ServiceContext>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteStack?: Maybe<InfrastructureStack>;
+  deleteStackDefinition?: Maybe<StackDefinition>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteWebhook?: Maybe<Webhook>;
@@ -4290,6 +4309,8 @@ export type RootMutationType = {
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   syncGlobalService?: Maybe<GlobalService>;
+  /** start a new run from the newest sha in the stack's run history */
+  triggerRun?: Maybe<StackRun>;
   updateCluster?: Maybe<Cluster>;
   updateClusterProvider?: Maybe<ClusterProvider>;
   updateClusterRestore?: Maybe<ClusterRestore>;
@@ -4317,6 +4338,7 @@ export type RootMutationType = {
   updateServiceDeployment?: Maybe<ServiceDeployment>;
   updateSmtp?: Maybe<Smtp>;
   updateStack?: Maybe<InfrastructureStack>;
+  updateStackDefinition?: Maybe<StackDefinition>;
   updateStackRun?: Maybe<StackRun>;
   updateUser?: Maybe<User>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
@@ -4548,6 +4570,11 @@ export type RootMutationTypeCreateStackArgs = {
 };
 
 
+export type RootMutationTypeCreateStackDefinitionArgs = {
+  attributes: StackDefinitionAttributes;
+};
+
+
 export type RootMutationTypeCreateUpgradePolicyArgs = {
   attributes: UpgradePolicyAttributes;
 };
@@ -4705,6 +4732,11 @@ export type RootMutationTypeDeleteServiceDeploymentArgs = {
 
 
 export type RootMutationTypeDeleteStackArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteStackDefinitionArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -4925,6 +4957,11 @@ export type RootMutationTypeSyncGlobalServiceArgs = {
 };
 
 
+export type RootMutationTypeTriggerRunArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateClusterArgs = {
   attributes: ClusterUpdateAttributes;
   id: Scalars['ID']['input'];
@@ -5078,6 +5115,12 @@ export type RootMutationTypeUpdateSmtpArgs = {
 
 export type RootMutationTypeUpdateStackArgs = {
   attributes: StackAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateStackDefinitionArgs = {
+  attributes: StackDefinitionAttributes;
   id: Scalars['ID']['input'];
 };
 
@@ -5262,6 +5305,7 @@ export type RootQueryType = {
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
+  stackDefinition?: Maybe<StackDefinition>;
   stackRun?: Maybe<StackRun>;
   statefulSet?: Maybe<StatefulSet>;
   /** adds the ability to search/filter through all tag name/value pairs */
@@ -6086,6 +6130,11 @@ export type RootQueryTypeStackArgs = {
 };
 
 
+export type RootQueryTypeStackDefinitionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootQueryTypeStackRunArgs = {
   id: Scalars['ID']['input'];
 };
@@ -6240,6 +6289,7 @@ export type RunStep = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   logs?: Maybe<Array<Maybe<RunLogs>>>;
   name: Scalars['String']['output'];
+  requireApproval?: Maybe<Scalars['Boolean']['output']>;
   stage: StepStage;
   status: StepStatus;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -6946,6 +6996,8 @@ export type StackAttributes = {
   configuration: StackConfigurationAttributes;
   /** id of an scm connection to use for pr callbacks */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
+  /** the id of a stack definition to use */
+  definitionId?: InputMaybe<Scalars['ID']['input']>;
   environment?: InputMaybe<Array<InputMaybe<StackEnvironmentAttributes>>>;
   files?: InputMaybe<Array<InputMaybe<StackFileAttributes>>>;
   /** reference w/in the repository where the IaC lives */
@@ -7001,6 +7053,24 @@ export type StackConfigurationAttributes = {
   tag?: InputMaybe<Scalars['String']['input']>;
   /** the semver of the tool you wish to use */
   version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type StackDefinition = {
+  __typename?: 'StackDefinition';
+  configuration: StackConfiguration;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  steps?: Maybe<Array<Maybe<CustomRunStep>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type StackDefinitionAttributes = {
+  configuration?: InputMaybe<StackConfigurationAttributes>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  steps?: InputMaybe<Array<InputMaybe<CustomStepAttributes>>>;
 };
 
 export type StackEnvironment = {
@@ -7206,6 +7276,7 @@ export enum StackStatus {
 
 export enum StackType {
   Ansible = 'ANSIBLE',
+  Custom = 'CUSTOM',
   Terraform = 'TERRAFORM'
 }
 
@@ -7307,11 +7378,14 @@ export type SyncConfig = {
   __typename?: 'SyncConfig';
   /** whether the agent should auto-create the namespace for this service */
   createNamespace?: Maybe<Scalars['Boolean']['output']>;
+  /** Whether to require all resources are placed in the same namespace */
+  enforceNamespace?: Maybe<Scalars['Boolean']['output']>;
   namespaceMetadata?: Maybe<NamespaceMetadata>;
 };
 
 export type SyncConfigAttributes = {
   createNamespace?: InputMaybe<Scalars['Boolean']['input']>;
+  enforceNamespace?: InputMaybe<Scalars['Boolean']['input']>;
   namespaceMetadata?: InputMaybe<MetadataAttributes>;
 };
 

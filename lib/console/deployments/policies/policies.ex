@@ -125,6 +125,18 @@ defmodule Console.Deployments.Policies do
 
   def can?(%User{roles: %{admin: true}}, _, _), do: :pass
 
+  def can?(%User{id: id} = user, %Stack{actor_id: id, actor_changed: true} = stack, action),
+    do: can?(user, %{stack | actor_changed: false}, action)
+
+  def can?(_, %Stack{actor_changed: true}, :write),
+    do: {:error, "you can only set yourself as actor unless you're an admin"}
+
+  def can?(%User{} = user, %Stack{} = stack, :create) do
+    %{cluster: %Cluster{} = cluster} = Repo.preload(stack, [:cluster])
+
+    rbac(user, stack, :write) && can?(user, cluster, :write)
+  end
+
   def can?(%User{} = user, resource, action),
     do: rbac(resource, user, action)
 
