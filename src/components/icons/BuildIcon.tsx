@@ -46,8 +46,8 @@ export default createIcon(({ size, color }) => (
     <defs>
       <clipPath id="clip0_1441_192">
         <rect
-          width={size}
-          height={size}
+          width={16}
+          height={16}
           fill={color}
         />
       </clipPath>
