@@ -9,14 +9,27 @@ export function parseScript(script: string) {
   let curr = 0
 
   while (curr < lines.length) {
-    let line = lines[curr]
+    let line = lines[curr].split('#')[0].trim()
     let lookahead = curr
 
-    while (lookahead < lines.length && lines[lookahead].endsWith('\\')) {
+    if (line === '') {
+      curr++
+      continue
+    }
+
+    while (
+      lookahead < lines.length &&
+      (lines[lookahead].trim().endsWith('\\') ||
+        lines[lookahead].split('#')[0].trim() === '')
+    ) {
       lookahead++
     }
 
-    line = lines.slice(curr, lookahead + 1).join(' ')
+    line = lines
+      .slice(curr, lookahead + 1)
+      .map((line) => line.split('#')[0].trim())
+      .join('')
+
     res.push(splitCommand(line))
 
     curr = lookahead + 1

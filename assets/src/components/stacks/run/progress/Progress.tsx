@@ -21,7 +21,7 @@ function currentStep(steps: Array<RunStep>): string {
     }
   }
 
-  return steps[0].id
+  return steps[0]?.id
 }
 
 export default function StackRunProgress(): ReactNode {

@@ -4,10 +4,36 @@ import { parseScript, splitCommand } from './cmdLineParse'
 describe('parseScript', () => {
   it('can parse a script with multiline commands', () => {
     const script = `echo "hello world"
-    some --long "command" \
-      --multi-line \
+    some --long "command" \\
+      --multi-line \\
       --command
     sleep 100
+    `
+
+    const res = parseScript(script)
+
+    expect(res[0]).to.deep.equal({ cmd: 'echo', args: ['hello world'] })
+    expect(res[1]).to.deep.equal({
+      cmd: 'some',
+      args: ['--long', 'command', '--multi-line', '--command'],
+    })
+    expect(res[2]).to.deep.equal({ cmd: 'sleep', args: ['100'] })
+  })
+
+  it('can parse a script with comments, blank lines, and trailing whitespace', () => {
+    const script = `
+    
+        echo "hello world"  
+    # this is a comment  
+    some --long "command" \\   
+      # comment within multi-line command
+      --multi-line \\
+
+      # other comment
+
+
+      --command   # trailing comment
+    sleep 100   
     `
 
     const res = parseScript(script)
@@ -31,6 +57,14 @@ describe('parseScript', () => {
     expect(res[0]).to.deep.equal({ cmd: 'echo', args: ['hello world'] })
     expect(res[1]).to.deep.equal({ cmd: 'some', args: ['--long', 'command'] })
     expect(res[2]).to.deep.equal({ cmd: 'sleep', args: ['100'] })
+  })
+
+  it('can parse a blank script', () => {
+    const script = ``
+
+    const res = parseScript(script)
+
+    expect(res).to.deep.equal([])
   })
 })
 

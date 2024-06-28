@@ -158,6 +158,8 @@ export function removeConnection(prev, val, key) {
 export function updateCache(cache, { query, variables, update }: any) {
   const prev = cache.readQuery({ query, variables })
 
+  if (!prev) return
+
   cache.writeQuery({ query, variables, data: update(prev) })
 }
 

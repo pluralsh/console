@@ -7713,6 +7713,8 @@ export type AuditMetricsQuery = { __typename?: 'RootQueryType', auditMetrics?: A
 
 export type PrAutomationFragment = { __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, identifier: string, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null };
 
+export type PrConfigurationFragment = { __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null };
+
 export type PrAutomationsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9211,6 +9213,8 @@ export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | 
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
 
+export type CustomStackRunFragment = { __typename?: 'CustomStackRun', id: string, name: string, documentation?: string | null, commands?: Array<{ __typename?: 'StackCommand', args?: Array<string | null> | null, cmd: string } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null };
+
 export type StackConfigurationFragment = { __typename?: 'StackConfiguration', version: string, image?: string | null };
 
 export type StackStateResourceFragment = { __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null };
@@ -9327,12 +9331,32 @@ export type StackRunJobLogsQueryVariables = Exact<{
 
 export type StackRunJobLogsQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', job?: { __typename?: 'Job', logs?: Array<string | null> | null } | null } | null };
 
+export type CustomStackRunsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type CustomStackRunsQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, customStackRuns?: { __typename?: 'CustomStackRunConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CustomStackRunEdge', node?: { __typename?: 'CustomStackRun', id: string, name: string, documentation?: string | null, commands?: Array<{ __typename?: 'StackCommand', args?: Array<string | null> | null, cmd: string } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null } | null> | null } | null } | null };
+
 export type CreateStackMutationVariables = Exact<{
   attributes: StackAttributes;
 }>;
 
 
 export type CreateStackMutation = { __typename?: 'RootMutationType', createStack?: { __typename?: 'InfrastructureStack', id?: string | null } | null };
+
+export type CreateOnDemandRunMutationVariables = Exact<{
+  stackId: Scalars['ID']['input'];
+  context?: InputMaybe<Scalars['Json']['input']>;
+  commands?: InputMaybe<Array<InputMaybe<CommandAttributes>> | InputMaybe<CommandAttributes>>;
+}>;
+
+
+export type CreateOnDemandRunMutation = { __typename?: 'RootMutationType', onDemandRun?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
 
 export type UpdateStackMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11318,6 +11342,23 @@ export const ScmConnectionFragmentDoc = gql`
   apiUrl
 }
     `;
+export const PrConfigurationFragmentDoc = gql`
+    fragment PrConfiguration on PrConfiguration {
+  condition {
+    field
+    operation
+    value
+  }
+  values
+  default
+  documentation
+  longform
+  name
+  optional
+  placeholder
+  type
+}
+    `;
 export const PrAutomationFragmentDoc = gql`
     fragment PrAutomation on PrAutomation {
   id
@@ -11348,24 +11389,13 @@ export const PrAutomationFragmentDoc = gql`
     ...PolicyBinding
   }
   configuration {
-    condition {
-      field
-      operation
-      value
-    }
-    values
-    default
-    documentation
-    longform
-    name
-    optional
-    placeholder
-    type
+    ...PrConfiguration
   }
 }
     ${ClusterBasicFragmentDoc}
 ${ScmConnectionFragmentDoc}
-${PolicyBindingFragmentDoc}`;
+${PolicyBindingFragmentDoc}
+${PrConfigurationFragmentDoc}`;
 export const ClusterConditionFragmentDoc = gql`
     fragment ClusterCondition on ClusterCondition {
   lastTransitionTime
@@ -11674,6 +11704,20 @@ export const StackRunFragmentDoc = gql`
   }
 }
     `;
+export const CustomStackRunFragmentDoc = gql`
+    fragment CustomStackRun on CustomStackRun {
+  id
+  name
+  documentation
+  commands {
+    args
+    cmd
+  }
+  configuration {
+    ...PrConfiguration
+  }
+}
+    ${PrConfigurationFragmentDoc}`;
 export const StackConfigurationFragmentDoc = gql`
     fragment StackConfiguration on StackConfiguration {
   version
@@ -19209,6 +19253,61 @@ export type StackRunJobLogsQueryHookResult = ReturnType<typeof useStackRunJobLog
 export type StackRunJobLogsLazyQueryHookResult = ReturnType<typeof useStackRunJobLogsLazyQuery>;
 export type StackRunJobLogsSuspenseQueryHookResult = ReturnType<typeof useStackRunJobLogsSuspenseQuery>;
 export type StackRunJobLogsQueryResult = Apollo.QueryResult<StackRunJobLogsQuery, StackRunJobLogsQueryVariables>;
+export const CustomStackRunsDocument = gql`
+    query CustomStackRuns($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
+  infrastructureStack(id: $id) {
+    id
+    customStackRuns(after: $after, before: $before, first: $first, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...CustomStackRun
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${CustomStackRunFragmentDoc}`;
+
+/**
+ * __useCustomStackRunsQuery__
+ *
+ * To run a query within a React component, call `useCustomStackRunsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCustomStackRunsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCustomStackRunsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useCustomStackRunsQuery(baseOptions: Apollo.QueryHookOptions<CustomStackRunsQuery, CustomStackRunsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CustomStackRunsQuery, CustomStackRunsQueryVariables>(CustomStackRunsDocument, options);
+      }
+export function useCustomStackRunsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CustomStackRunsQuery, CustomStackRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CustomStackRunsQuery, CustomStackRunsQueryVariables>(CustomStackRunsDocument, options);
+        }
+export function useCustomStackRunsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CustomStackRunsQuery, CustomStackRunsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CustomStackRunsQuery, CustomStackRunsQueryVariables>(CustomStackRunsDocument, options);
+        }
+export type CustomStackRunsQueryHookResult = ReturnType<typeof useCustomStackRunsQuery>;
+export type CustomStackRunsLazyQueryHookResult = ReturnType<typeof useCustomStackRunsLazyQuery>;
+export type CustomStackRunsSuspenseQueryHookResult = ReturnType<typeof useCustomStackRunsSuspenseQuery>;
+export type CustomStackRunsQueryResult = Apollo.QueryResult<CustomStackRunsQuery, CustomStackRunsQueryVariables>;
 export const CreateStackDocument = gql`
     mutation CreateStack($attributes: StackAttributes!) {
   createStack(attributes: $attributes) {
@@ -19242,6 +19341,41 @@ export function useCreateStackMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateStackMutationHookResult = ReturnType<typeof useCreateStackMutation>;
 export type CreateStackMutationResult = Apollo.MutationResult<CreateStackMutation>;
 export type CreateStackMutationOptions = Apollo.BaseMutationOptions<CreateStackMutation, CreateStackMutationVariables>;
+export const CreateOnDemandRunDocument = gql`
+    mutation CreateOnDemandRun($stackId: ID!, $context: Json, $commands: [CommandAttributes]) {
+  onDemandRun(stackId: $stackId, context: $context, commands: $commands) {
+    ...StackRun
+  }
+}
+    ${StackRunFragmentDoc}`;
+export type CreateOnDemandRunMutationFn = Apollo.MutationFunction<CreateOnDemandRunMutation, CreateOnDemandRunMutationVariables>;
+
+/**
+ * __useCreateOnDemandRunMutation__
+ *
+ * To run a mutation, you first call `useCreateOnDemandRunMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateOnDemandRunMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createOnDemandRunMutation, { data, loading, error }] = useCreateOnDemandRunMutation({
+ *   variables: {
+ *      stackId: // value for 'stackId'
+ *      context: // value for 'context'
+ *      commands: // value for 'commands'
+ *   },
+ * });
+ */
+export function useCreateOnDemandRunMutation(baseOptions?: Apollo.MutationHookOptions<CreateOnDemandRunMutation, CreateOnDemandRunMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateOnDemandRunMutation, CreateOnDemandRunMutationVariables>(CreateOnDemandRunDocument, options);
+      }
+export type CreateOnDemandRunMutationHookResult = ReturnType<typeof useCreateOnDemandRunMutation>;
+export type CreateOnDemandRunMutationResult = Apollo.MutationResult<CreateOnDemandRunMutation>;
+export type CreateOnDemandRunMutationOptions = Apollo.BaseMutationOptions<CreateOnDemandRunMutation, CreateOnDemandRunMutationVariables>;
 export const UpdateStackDocument = gql`
     mutation UpdateStack($id: ID!, $attributes: StackAttributes!) {
   updateStack(id: $id, attributes: $attributes) {
@@ -20025,6 +20159,7 @@ export const namedOperations = {
     StackRun: 'StackRun',
     StackRunJob: 'StackRunJob',
     StackRunJobLogs: 'StackRunJobLogs',
+    CustomStackRuns: 'CustomStackRuns',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
     Me: 'Me',
@@ -20102,6 +20237,7 @@ export const namedOperations = {
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
     CreateStack: 'CreateStack',
+    CreateOnDemandRun: 'CreateOnDemandRun',
     UpdateStack: 'UpdateStack',
     DetachStack: 'DetachStack',
     DeleteStack: 'DeleteStack',
@@ -20127,6 +20263,7 @@ export const namedOperations = {
     Repository: 'Repository',
     Audit: 'Audit',
     PrAutomation: 'PrAutomation',
+    PrConfiguration: 'PrConfiguration',
     ScmConnection: 'ScmConnection',
     ScmWebhook: 'ScmWebhook',
     ObjectStore: 'ObjectStore',
@@ -20243,6 +20380,7 @@ export const namedOperations = {
     StackTiny: 'StackTiny',
     Stack: 'Stack',
     StackRun: 'StackRun',
+    CustomStackRun: 'CustomStackRun',
     StackConfiguration: 'StackConfiguration',
     StackStateResource: 'StackStateResource',
     StackState: 'StackState',

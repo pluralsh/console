@@ -27,20 +27,24 @@ fragment PrAutomation on PrAutomation {
     ...PolicyBinding
   }
   configuration {
-    condition {
-      field
-      operation
-      value
-    }
-    values
-    default
-    documentation
-    longform
-    name
-    optional
-    placeholder
-    type
+    ...PrConfiguration
   }
+}
+
+fragment PrConfiguration on PrConfiguration {
+  condition {
+    field
+    operation
+    value
+  }
+  values
+  default
+  documentation
+  longform
+  name
+  optional
+  placeholder
+  type
 }
 
 query PrAutomations($first: Int = 100, $after: String) {
