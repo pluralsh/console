@@ -27,7 +27,9 @@ fragment GlobalService on GlobalService {
     name
     value
   }
-  template { ...ServiceTemplateWithoutConfiguration }
+  template {
+    ...ServiceTemplateWithoutConfiguration
+  }
   insertedAt
   updatedAt
 }
@@ -87,7 +89,7 @@ mutation CreateGlobalService(
 }
 
 mutation UpdateGlobalService($id: ID!, $attributes: GlobalServiceAttributes!) {
-  updateGlobalService(id: $id, attributes: $attributes ) {
+  updateGlobalService(id: $id, attributes: $attributes) {
     id
   }
 }
