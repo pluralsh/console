@@ -6,10 +6,13 @@ import {
   ListBoxItem,
   LoopingLogo,
   MoreIcon,
+  PeopleIcon,
   PlusIcon,
+  ReturnIcon,
   SearchIcon,
   SubTab,
   TabList,
+  TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -277,18 +280,23 @@ export default function Stacks() {
                 key={MenuItemKey.ManagePermissions}
                 label="Manage permissions"
                 textValue="Manage permissions"
+                leftContent={<PeopleIcon />}
               />
               <ListBoxItem
                 destructive
                 key={MenuItemKey.Detach}
                 label="Detach stack"
                 textValue="Detach stack"
+                leftContent={<ReturnIcon color={theme.colors['icon-danger']} />}
               />
               <ListBoxItem
                 destructive
                 key={MenuItemKey.Delete}
                 label={deleteLabel}
                 textValue={deleteLabel}
+                leftContent={
+                  <TrashCanIcon color={theme.colors['icon-danger']} />
+                }
               />
             </MoreMenu>
             <StackPermissionsModal
