@@ -86,7 +86,6 @@ export function GlobalServiceServices() {
       <Table
         virtualizeRows
         data={services || []}
-        error={error}
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
@@ -109,9 +108,7 @@ export function GlobalServiceServices() {
         }
         reactTableOptions={{ meta: { refetch } }}
         reactVirtualOptions={GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS}
-        emptyStateProps={{
-          message: 'No services found.',
-        }}
+        emptyStateProps={{ message: 'No services found.' }}
       />
     </FullHeightTableWrap>
   )

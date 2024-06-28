@@ -1,9 +1,18 @@
-import { ReloadIcon, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
+import {
+  GlobeIcon,
+  ListBoxItem,
+  ReloadIcon,
+  Select,
+  SubTab,
+  TabList,
+  TabPanel,
+} from '@pluralsh/design-system'
 import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
 
 import {
   GlobalServiceFragment,
   useGetGlobalServiceQuery,
+  useGlobalServicesQuery,
   useSyncGlobalServiceMutation,
 } from 'generated/graphql'
 import {
@@ -14,7 +23,13 @@ import {
   GLOBAL_SERVICE_SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
 
-import { Outlet, useMatch, useParams } from 'react-router-dom'
+import {
+  Outlet,
+  useLocation,
+  useMatch,
+  useNavigate,
+  useParams,
+} from 'react-router-dom'
 
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 
@@ -33,6 +48,10 @@ import { LinkTabWrap } from '../../../utils/Tabs'
 import { PluralErrorBoundary } from '../../PluralErrorBoundary'
 import KickButton from '../../../utils/KickButton'
 import { GqlError } from '../../../utils/Alert'
+import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
+import { useProjectId } from '../../../contexts/ProjectsContext'
+import { mapExistingNodes } from '../../../../utils/graphql'
+import { DistroProviderIcon } from '../../../utils/ClusterDistro'
 
 export type GlobalServiceContextT = {
   globalServiceId: string
@@ -62,6 +81,8 @@ const directory = [
 
 export default function GlobalService() {
   const theme = useTheme()
+  const navigate = useNavigate()
+  const projectId = useProjectId()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [scrollable, setScrollable] = useState(false)
 
@@ -78,6 +99,7 @@ export default function GlobalService() {
     []
   )
 
+  const { pathname } = useLocation()
   const globalServiceId = useParams()[GLOBAL_SERVICE_PARAM_ID] ?? ''
   const pathRoot = `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${globalServiceId}`
   const tabStateRef = useRef<any>(null)
@@ -85,22 +107,36 @@ export default function GlobalService() {
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 
-  const { data, loading, error, refetch } = useGetGlobalServiceQuery({
+  const { data, error, refetch } = useGetGlobalServiceQuery({
     variables: { serviceId: globalServiceId },
   })
 
+  const globalService = data?.globalService
+
   const globalServiceContext: GlobalServiceContextT = useMemo(
-    () => ({
-      globalServiceId,
-      globalService: data?.globalService,
-      refetch,
-    }),
-    [data, globalServiceId, refetch]
+    () => ({ globalServiceId, globalService, refetch }),
+    [globalService, globalServiceId, refetch]
+  )
+
+  const { data: globalServicesData, error: globalServicesError } =
+    useFetchPaginatedData(
+      {
+        queryHook: useGlobalServicesQuery,
+        keyPath: ['globalServices'],
+      },
+      { projectId }
+    )
+
+  const globalServices = useMemo(
+    () => mapExistingNodes(globalServicesData?.globalServices),
+    [globalServicesData?.globalServices]
   )
 
   if (error) return <GqlError error={error} />
 
-  if (loading) return <LoadingIndicator />
+  if (globalServicesError) return <GqlError error={globalServicesError} />
+
+  if (!globalService || !globalServices) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth
@@ -115,15 +151,55 @@ export default function GlobalService() {
             justifyContent: 'space-between',
           }}
         >
-          <KickButton
-            secondary
-            startIcon={<ReloadIcon />}
-            kickMutationHook={useSyncGlobalServiceMutation}
-            message="Resync"
-            tooltipMessage="Sync this service now instead of at the next poll interval"
-            variables={{ id: globalServiceId }}
-          />
-          {headerContent}
+          <div css={{ display: 'flex', gap: theme.spacing.small }}>
+            <div css={{ width: 320 }}>
+              <Select
+                titleContent={
+                  globalService?.distro ? (
+                    <DistroProviderIcon
+                      distro={globalService.distro}
+                      provider={globalService.provider?.name}
+                      size={16}
+                    />
+                  ) : (
+                    <GlobeIcon size={16} />
+                  )
+                }
+                onSelectionChange={(id) =>
+                  navigate(pathname.replace(globalServiceId, id as string))
+                }
+                selectedKey={globalServiceId}
+              >
+                {globalServices.map((gs) => (
+                  <ListBoxItem
+                    key={gs?.id}
+                    label={gs?.name}
+                    textValue={gs?.name}
+                    leftContent={
+                      gs?.distro ? (
+                        <DistroProviderIcon
+                          distro={gs.distro}
+                          provider={gs.provider?.name}
+                          size={16}
+                        />
+                      ) : (
+                        <GlobeIcon size={16} />
+                      )
+                    }
+                  />
+                ))}
+              </Select>
+            </div>
+            <KickButton
+              secondary
+              startIcon={<ReloadIcon />}
+              kickMutationHook={useSyncGlobalServiceMutation}
+              message="Resync"
+              tooltipMessage="Sync this service now instead of at the next poll interval"
+              variables={{ id: globalServiceId }}
+            />
+            {headerContent}
+          </div>
           <TabList
             gap="xxsmall"
             stateRef={tabStateRef}
