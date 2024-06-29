@@ -5,7 +5,7 @@ function measureNode(node: FlowNode, zoom) {
   let domNode
 
   try {
-    domNode = document.querySelector(CSS.escape(`[data-id="${node.id}"]`))
+    domNode = document.querySelector(`[data-id="${CSS.escape(node.id)}"]`)
   } catch (e) {
     console.error(e)
 
