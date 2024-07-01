@@ -33,10 +33,6 @@ type ServiceAccountReconciler struct {
 }
 
 const (
-	// ServiceAccountProtectionFinalizerName defines name for the main finalizer that synchronizes
-	// resource deletion from the Console API prior to removing the CRD.
-	ServiceAccountProtectionFinalizerName = "serviceaccounts.deployments.plural.sh/serviceaccount-protection"
-
 	tokenKeyName = "token"
 )
 
@@ -72,12 +68,6 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 
 	// Mark resource as not ready. This will be overridden in the end.
 	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
-	// Handle proper resource deletion via finalizer
-	result, err := r.addOrRemoveFinalizer(ctx, sa)
-	if result != nil {
-		return *result, err
-	}
 
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, sa)
@@ -171,45 +161,6 @@ func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1al
 	}
 
 	return false, nil
-}
-
-func (r *ServiceAccountReconciler) addOrRemoveFinalizer(ctx context.Context, sa *v1alpha1.ServiceAccount) (*ctrl.Result, error) {
-	logger := log.FromContext(ctx)
-
-	// If object is not being deleted and if it does not have our finalizer,
-	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if sa.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(sa, ServiceAccountProtectionFinalizerName) {
-		controllerutil.AddFinalizer(sa, ServiceAccountProtectionFinalizerName)
-	}
-
-	// If object is being deleted cleanup and remove the finalizer.
-	if !sa.ObjectMeta.DeletionTimestamp.IsZero() {
-		// Remove ServiceAccount from Console API if it exists
-		exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.ConsoleName())
-		if err != nil {
-			return &ctrl.Result{}, err
-		}
-
-		if exists && !sa.Status.IsReadonly() {
-			logger.Info("Deleting ServiceAccount")
-			if err = r.ConsoleClient.DeleteServiceAccount(ctx, sa.Status.GetID()); err != nil {
-				// if it fails to delete the external dependency here, return with error
-				// so that it can be retried.
-				utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return &ctrl.Result{}, err
-			}
-
-			// If deletion process started requeue so that we can make sure sa
-			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
-		}
-
-		// Stop reconciliation as the item is being deleted
-		controllerutil.RemoveFinalizer(sa, ServiceAccountProtectionFinalizerName)
-		return &ctrl.Result{}, nil
-	}
-
-	return nil, nil
 }
 
 func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.ServiceAccount, changed bool) (*console.UserFragment, error) {
