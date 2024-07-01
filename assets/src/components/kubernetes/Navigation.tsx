@@ -63,13 +63,15 @@ export default function Navigation() {
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
   useLayoutEffect(() => {
-    if (isEmpty(dataSelect.filter)) params.delete(FILTER_PARAM)
-    else params.set(FILTER_PARAM, dataSelect.filter)
+    const newParams = new URLSearchParams()
 
-    if (isEmpty(dataSelect.namespace)) params.delete(NAMESPACE_PARAM)
-    else params.set(NAMESPACE_PARAM, dataSelect.namespace)
+    if (!isEmpty(dataSelect.filter))
+      newParams.set(FILTER_PARAM, dataSelect.filter)
 
-    setParams(params)
+    if (!isEmpty(dataSelect.namespace))
+      newParams.set(NAMESPACE_PARAM, dataSelect.namespace)
+
+    if (newParams.toString() !== params.toString()) setParams(newParams)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataSelect, pathname])

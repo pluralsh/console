@@ -126,7 +126,9 @@ export default function Cluster() {
       const mgmtCluster = clusters.find(({ self }) => !!self)
 
       if (mgmtCluster) {
-        navigate(getWorkloadsAbsPath(mgmtCluster.id) + search)
+        navigate(getWorkloadsAbsPath(mgmtCluster.id) + search, {
+          replace: true,
+        })
       }
     }
   }, [clusters, navigate, search, clusterId])
