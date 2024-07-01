@@ -115,6 +115,7 @@ export function ResourceList<
     client: KubernetesClient(cluster?.id ?? ''),
     skip: !cluster,
     pollInterval: 30_000,
+    fetchPolicy: 'cache-and-network',
     variables: {
       filterBy: `name,${filter}`,
       sortBy,
@@ -125,24 +126,28 @@ export function ResourceList<
   })
 
   const resourceList = data?.[queryName] as TResourceList
+  const isLoading = useMemo(
+    () => loading && !resourceList,
+    [loading, resourceList]
+  )
   const items = useMemo(
     () =>
-      loading
+      isLoading
         ? Array(SKELETON_ITEMS).fill({})
         : (resourceList?.[itemsKey] as Array<TResource>) ?? [],
-    [itemsKey, loading, resourceList]
+    [isLoading, itemsKey, resourceList]
   )
   const { page, hasNextPage } = usePageInfo(items, resourceList?.listMeta)
 
   const columnsData = useMemo(
     () =>
-      loading
+      isLoading
         ? columns.map((col) => ({
             ...col,
             cell: <Skeleton />,
           }))
         : columns,
-    [columns, loading]
+    [isLoading, columns]
   )
 
   const fetchNextPage = useCallback(() => {
