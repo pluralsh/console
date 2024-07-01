@@ -18,7 +18,7 @@ defmodule Console.Schema.PrAutomation do
     field :create_policy_id, :binary_id
 
     embeds_one :creates, CreateSpec, on_replace: :update do
-      embeds_one :git, Service.Git
+      embeds_one :git, Service.Git, on_replace: :update
 
       embeds_many :templates, TemplateSpec, on_replace: :delete do
         field :source,      :string
@@ -66,7 +66,7 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name role identifier message title branch documentation addon cluster_id service_id connection_id)a
+  @valid ~w(name role identifier message title branch documentation addon repository_id cluster_id service_id connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
