@@ -23,6 +23,7 @@ const (
 	GlobalServiceReconciler         Reconciler = "globalservice"
 	PipelineReconciler              Reconciler = "pipeline"
 	ScmConnectionReconciler         Reconciler = "scmconnection"
+	ServiceAccountReconciler        Reconciler = "serviceaccount"
 	PrAutomationReconciler          Reconciler = "prautomation"
 	PipelineContextReconciler       Reconciler = "pipelinecontext"
 	ClusterRestoreTriggerReconciler Reconciler = "restoretrigger"
@@ -52,6 +53,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case PipelineReconciler:
 		fallthrough
 	case ScmConnectionReconciler:
+		fallthrough
+	case ServiceAccountReconciler:
 		fallthrough
 	case PrAutomationReconciler:
 		fallthrough
@@ -131,6 +134,12 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case ScmConnectionReconciler:
 		return &controller.ScmConnectionReconciler{
+			Client:        mgr.GetClient(),
+			ConsoleClient: consoleClient,
+			Scheme:        mgr.GetScheme(),
+		}, nil
+	case ServiceAccountReconciler:
+		return &controller.ServiceAccountReconciler{
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
