@@ -25,6 +25,15 @@ func (c *client) CreateServiceAccount(ctx context.Context, attributes console.Se
 	return response.CreateServiceAccount, err
 }
 
+func (c *client) CreateServiceAccountToken(ctx context.Context, id string, scopes []*console.ScopeAttributes) (*console.AccessTokenFragment, error) {
+	response, err := c.consoleClient.CreateServiceAccountToken(ctx, id, scopes)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.CreateServiceAccountToken, err
+}
+
 func (c *client) UpdateServiceAccount(ctx context.Context, id string, attributes console.ServiceAccountAttributes) (*console.UserFragment, error) {
 	response, err := c.consoleClient.UpdateServiceAccount(ctx, id, attributes)
 	if err != nil {
