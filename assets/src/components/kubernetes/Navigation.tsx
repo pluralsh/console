@@ -22,7 +22,7 @@ import {
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutSidenavContainer } from '../utils/layout/ResponsiveLayoutSidenavContainer'
 import { Directory, SideNavEntries } from '../layout/SideNavEntries'
-import { ClusterSelect } from '../cd/addOns/ClusterSelect'
+import { ClusterSelect } from '../cd/utils/ClusterSelect'
 import { PageHeaderContext } from '../cd/ContinuousDeployment'
 
 import { useClusters } from './Cluster'

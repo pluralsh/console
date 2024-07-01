@@ -96,7 +96,6 @@ export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
   componentId: `:${COMPONENT_PARAM_ID}`,
 })
 export const SERVICE_COMPONENT_PATH_MATCHER_ABS = `${CD_ABS_PATH}/${SERVICE_COMPONENT_PATH_MATCHER_REL}`
-export const ADDONS_REL_PATH = 'addons'
 
 export const NAMESPACES_REL_PATH = 'namespaces'
 

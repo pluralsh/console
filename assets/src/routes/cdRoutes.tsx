@@ -68,7 +68,6 @@ import NodeEvents from '../components/cd/cluster/node/NodeEvents'
 import NodeRaw from '../components/cd/cluster/node/NodeRaw'
 import NodeMetadata from '../components/cd/cluster/node/NodeMetadata'
 
-import AddOns from '../components/cd/addOns/AddOns'
 import Pod from '../components/cd/cluster/pod/Pod'
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
 import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
@@ -88,7 +87,6 @@ import { GlobalServiceServices } from '../components/cd/globalServices/details/G
 import GlobalService from '../components/cd/globalServices/details/GlobalService'
 
 import {
-  ADDONS_REL_PATH,
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
   CLUSTER_ADDONS_PARAM_ID,
@@ -211,10 +209,6 @@ const mainRoutes = (
     <Route
       path={NAMESPACES_REL_PATH}
       element={<Namespaces />}
-    />
-    <Route
-      path={ADDONS_REL_PATH}
-      element={<AddOns />}
     />
     <Route
       path={GLOBAL_SERVICES_REL_PATH}

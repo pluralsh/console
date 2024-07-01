@@ -8007,27 +8007,6 @@ export type CreateBuildMutationVariables = Exact<{
 
 export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
-export type AddOnConfigConditionFragment = { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null };
-
-export type AddOnConfigurationFragment = { __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null };
-
-export type ClusterAddOnFragment = { __typename?: 'ClusterAddOn', global?: boolean | null, icon?: string | null, name?: string | null, version?: string | null, configuration?: Array<{ __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null } | null> | null };
-
-export type ClusterAddOnsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type ClusterAddOnsQuery = { __typename?: 'RootQueryType', clusterAddOns?: Array<{ __typename?: 'ClusterAddOn', global?: boolean | null, icon?: string | null, name?: string | null, version?: string | null, configuration?: Array<{ __typename?: 'AddOnConfiguration', documentation?: string | null, name?: string | null, type?: string | null, values?: Array<string | null> | null, condition?: { __typename?: 'AddOnConfigCondition', field?: string | null, operation?: string | null, value?: string | null } | null } | null> | null } | null> | null };
-
-export type InstallAddOnMutationVariables = Exact<{
-  clusterId: Scalars['ID']['input'];
-  name: Scalars['String']['input'];
-  configuration?: InputMaybe<Array<InputMaybe<ConfigAttributes>> | InputMaybe<ConfigAttributes>>;
-  global?: InputMaybe<GlobalServiceAttributes>;
-}>;
-
-
-export type InstallAddOnMutation = { __typename?: 'RootMutationType', installAddOn?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null };
-
 export type ClusterNodeFragment = { __typename?: 'Node', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } };
 
 export type ClusterConditionFragment = { __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null };
@@ -9889,35 +9868,6 @@ export const PageInfoFragmentDoc = gql`
   startCursor
 }
     `;
-export const AddOnConfigConditionFragmentDoc = gql`
-    fragment AddOnConfigCondition on AddOnConfigCondition {
-  field
-  operation
-  value
-}
-    `;
-export const AddOnConfigurationFragmentDoc = gql`
-    fragment AddOnConfiguration on AddOnConfiguration {
-  documentation
-  name
-  type
-  values
-  condition {
-    ...AddOnConfigCondition
-  }
-}
-    ${AddOnConfigConditionFragmentDoc}`;
-export const ClusterAddOnFragmentDoc = gql`
-    fragment ClusterAddOn on ClusterAddOn {
-  global
-  icon
-  name
-  version
-  configuration {
-    ...AddOnConfiguration
-  }
-}
-    ${AddOnConfigurationFragmentDoc}`;
 export const AddonVersionFragmentDoc = gql`
     fragment AddonVersion on AddonVersion {
   version
@@ -13234,86 +13184,6 @@ export function useCreateBuildMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMutation>;
 export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
 export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
-export const ClusterAddOnsDocument = gql`
-    query ClusterAddOns {
-  clusterAddOns {
-    ...ClusterAddOn
-  }
-}
-    ${ClusterAddOnFragmentDoc}`;
-
-/**
- * __useClusterAddOnsQuery__
- *
- * To run a query within a React component, call `useClusterAddOnsQuery` and pass it any options that fit your needs.
- * When your component renders, `useClusterAddOnsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useClusterAddOnsQuery({
- *   variables: {
- *   },
- * });
- */
-export function useClusterAddOnsQuery(baseOptions?: Apollo.QueryHookOptions<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>(ClusterAddOnsDocument, options);
-      }
-export function useClusterAddOnsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>(ClusterAddOnsDocument, options);
-        }
-export function useClusterAddOnsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>(ClusterAddOnsDocument, options);
-        }
-export type ClusterAddOnsQueryHookResult = ReturnType<typeof useClusterAddOnsQuery>;
-export type ClusterAddOnsLazyQueryHookResult = ReturnType<typeof useClusterAddOnsLazyQuery>;
-export type ClusterAddOnsSuspenseQueryHookResult = ReturnType<typeof useClusterAddOnsSuspenseQuery>;
-export type ClusterAddOnsQueryResult = Apollo.QueryResult<ClusterAddOnsQuery, ClusterAddOnsQueryVariables>;
-export const InstallAddOnDocument = gql`
-    mutation InstallAddOn($clusterId: ID!, $name: String!, $configuration: [ConfigAttributes], $global: GlobalServiceAttributes) {
-  installAddOn(
-    clusterId: $clusterId
-    configuration: $configuration
-    global: $global
-    name: $name
-  ) {
-    ...ServiceDeploymentsRow
-  }
-}
-    ${ServiceDeploymentsRowFragmentDoc}`;
-export type InstallAddOnMutationFn = Apollo.MutationFunction<InstallAddOnMutation, InstallAddOnMutationVariables>;
-
-/**
- * __useInstallAddOnMutation__
- *
- * To run a mutation, you first call `useInstallAddOnMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useInstallAddOnMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [installAddOnMutation, { data, loading, error }] = useInstallAddOnMutation({
- *   variables: {
- *      clusterId: // value for 'clusterId'
- *      name: // value for 'name'
- *      configuration: // value for 'configuration'
- *      global: // value for 'global'
- *   },
- * });
- */
-export function useInstallAddOnMutation(baseOptions?: Apollo.MutationHookOptions<InstallAddOnMutation, InstallAddOnMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<InstallAddOnMutation, InstallAddOnMutationVariables>(InstallAddOnDocument, options);
-      }
-export type InstallAddOnMutationHookResult = ReturnType<typeof useInstallAddOnMutation>;
-export type InstallAddOnMutationResult = Apollo.MutationResult<InstallAddOnMutation>;
-export type InstallAddOnMutationOptions = Apollo.BaseMutationOptions<InstallAddOnMutation, InstallAddOnMutationVariables>;
 export const ClustersDocument = gql`
     query Clusters($first: Int = 100, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID) {
   clusters(
@@ -20281,7 +20151,6 @@ export const namedOperations = {
     ClusterBackups: 'ClusterBackups',
     ClusterRestores: 'ClusterRestores',
     PluralContext: 'PluralContext',
-    ClusterAddOns: 'ClusterAddOns',
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     ClusterSelector: 'ClusterSelector',
@@ -20398,7 +20267,6 @@ export const namedOperations = {
     DelinkBackups: 'DelinkBackups',
     CreateClusterRestore: 'CreateClusterRestore',
     CreateBuild: 'CreateBuild',
-    InstallAddOn: 'InstallAddOn',
     UpdateClusterBindings: 'UpdateClusterBindings',
     UpdateCluster: 'UpdateCluster',
     CreateCluster: 'CreateCluster',
@@ -20486,9 +20354,6 @@ export const namedOperations = {
     ClusterBackup: 'ClusterBackup',
     ClusterRestore: 'ClusterRestore',
     PageInfo: 'PageInfo',
-    AddOnConfigCondition: 'AddOnConfigCondition',
-    AddOnConfiguration: 'AddOnConfiguration',
-    ClusterAddOn: 'ClusterAddOn',
     ClusterNode: 'ClusterNode',
     ClusterCondition: 'ClusterCondition',
     Taint: 'Taint',
