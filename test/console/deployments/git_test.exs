@@ -197,17 +197,20 @@ defmodule Console.Deployments.GitTest do
     test "admins can create" do
       admin = admin_user()
       conn = insert(:scm_connection)
+      git = insert(:git_repository)
 
       {:ok, pr} = Git.create_pr_automation(%{
         name: "cluster-upgrade",
         title: "pr title",
         message: "pr message",
         connection_id: conn.id,
+        repository_id: git.id,
         creates: %{templates: [%{source: "somewhere", destination: "elsewhere"}]}
       }, admin)
 
       assert pr.name == "cluster-upgrade"
       assert pr.connection_id == conn.id
+      assert pr.repository_id == git.id
       assert pr.message == "pr message"
     end
 

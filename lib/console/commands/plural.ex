@@ -48,7 +48,7 @@ defmodule Console.Commands.Plural do
   def repair(), do: plural("repair", [])
 
   def template(conf, dir, nil), do: cmd_tee("plural", ["pr", "template", "--file", conf], dir, [])
-  def template(conf, dir, ext) when is_binary(ext), do: cmd_tee("plural", ["pr", "tempate", "--file", conf, "--templates", ext], dir, [])
+  def template(conf, dir, ext) when is_binary(ext), do: cmd_tee("plural", ["pr", "template", "--file", conf, "--templates", ext], dir, [])
 
   def plural_home(command, args, env \\ []),
     do: cmd_tee("plural", [command | args], System.user_home(), env)
