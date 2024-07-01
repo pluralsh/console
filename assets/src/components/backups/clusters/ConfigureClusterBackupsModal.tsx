@@ -9,7 +9,7 @@ import {
   useObjectStoresQuery,
 } from '../../../generated/graphql'
 import { GqlError } from '../../utils/Alert'
-import { ClusterSelect } from '../../cd/addOns/ClusterSelect'
+import { ClusterSelect } from '../../cd/utils/ClusterSelect'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 const QUERY_PAGE_SIZE = 100

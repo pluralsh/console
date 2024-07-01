@@ -38,7 +38,6 @@ import {
   GitPullIcon,
   LifePreserverIcon,
   LogsIcon,
-  MarketPlusIcon,
   PipelineIcon,
   RunBookIcon,
   ServersIcon,
@@ -46,13 +45,8 @@ import {
 import { useNavigate } from 'react-router-dom'
 import styled, { createGlobalStyle, useTheme } from 'styled-components'
 
+import { ClusterTinyFragment, useClustersTinyQuery } from 'generated/graphql'
 import {
-  ClusterAddOnFragment,
-  ClusterTinyFragment,
-  useClustersTinyQuery,
-} from 'generated/graphql'
-import {
-  ADDONS_REL_PATH,
   CD_ABS_PATH,
   CLUSTERS_REL_PATH,
   PIPELINES_REL_PATH,
@@ -80,7 +74,6 @@ export enum PaletteSection {
   Account = 'Account',
   Cd = 'Continuous Deployment (CD)',
   CdClusters = 'CD – Clusters',
-  Addons = 'Add-ons',
 }
 
 function buildAppActions(applications, nav, theme) {
@@ -339,28 +332,6 @@ function AppItem({ app }) {
   )
 }
 
-function InstallAddonItem({ addon }: { addon: ClusterAddOnFragment }) {
-  return (
-    <ItemSC>
-      <ItemContentSC>
-        {addon.icon && <AppIcon src={addon.icon} />}
-        <ItemContentTextSC>
-          <AppName>{addon.name}</AppName>
-          {addon.version && (
-            <AppVersion>{toNiceVersion(addon.version)}</AppVersion>
-          )}
-        </ItemContentTextSC>
-      </ItemContentSC>
-      <Chip
-        clickable
-        size="small"
-      >
-        Install
-      </Chip>
-    </ItemSC>
-  )
-}
-
 const ResultItem = forwardRef(
   (
     {
@@ -407,8 +378,6 @@ const ResultItem = forwardRef(
       >
         {action.app ? (
           <AppItem app={action.app} />
-        ) : action.addon ? (
-          <InstallAddonItem addon={action.addon} />
         ) : (
           <ItemInner
             action={action}
@@ -648,13 +617,6 @@ export function CommandPalette({ children }) {
         shortcut: [],
         section: PaletteSection.Cd,
         perform: () => navigate(`${CD_ABS_PATH}/${PROVIDERS_REL_PATH}`),
-      }),
-      createAction({
-        name: 'Add-ons',
-        icon: <MarketPlusIcon />,
-        shortcut: [],
-        section: PaletteSection.Cd,
-        perform: () => navigate(`${CD_ABS_PATH}/${ADDONS_REL_PATH}`),
       }),
       // End CD
 

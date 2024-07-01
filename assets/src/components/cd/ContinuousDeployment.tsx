@@ -13,7 +13,6 @@ import { Outlet, useMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import {
-  ADDONS_REL_PATH,
   CD_ABS_PATH,
   CD_DEFAULT_ABS_PATH,
   CD_DEFAULT_REL_PATH,
@@ -153,11 +152,6 @@ function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
         path: NAMESPACES_REL_PATH,
         label: 'Namespaces',
         enabled: personaConfiguration?.all || config?.services,
-      },
-      {
-        path: ADDONS_REL_PATH,
-        label: 'Add-ons',
-        enabled: personaConfiguration?.all || config?.addOns,
       },
     ]
 
