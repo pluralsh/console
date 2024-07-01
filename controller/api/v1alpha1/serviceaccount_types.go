@@ -76,9 +76,9 @@ type ServiceAccountSpec struct {
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=some@email.com
-	Email string `json:"name"`
+	Email string `json:"email"`
 
 	// TokenSecretRef is a secret reference that should contain token.
 	// +kubebuilder:validation:Optional
-	TokenSecretRef *corev1.SecretReference `json:"credentialsRef,omitempty"`
+	TokenSecretRef *corev1.SecretReference `json:"tokenSecretRef,omitempty"`
 }
