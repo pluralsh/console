@@ -1,4 +1,10 @@
-import { Card, Modal, Tooltip } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Card,
+  IconFrame,
+  Modal,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { PipelineStageEdgeFragment } from 'generated/graphql'
 import {
   ComponentProps,
@@ -16,6 +22,14 @@ import { TreeNodeMeta } from 'components/component/tree/getTreeNodesAndEdges'
 import { ComponentIcon } from 'components/apps/app/components/misc'
 import { TRUNCATE } from 'components/utils/truncate'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { Link, useParams } from 'react-router-dom'
+
+import {
+  getCustomResourceDetailsAbsPath,
+  getResourceDetailsAbsPath,
+} from 'routes/kubernetesRoutesConsts'
+import { CLUSTER_PARAM_ID } from 'routes/cdRoutesConsts'
 
 import { RawYaml } from '../ComponentRaw'
 
@@ -91,12 +105,26 @@ export function ComponentTreeNode({
   data,
   ...props
 }: NodeProps<TreeNodeMeta> & ComponentProps<typeof ComponentTreeNodeSC>) {
+  const clusterId = useParams()[CLUSTER_PARAM_ID]
   const [open, setOpen] = useState(false)
   const { incomers, outgoers } = useNodeEdges(id)
-  const metadata = data?.metadata
   const kind = data?.kind?.toLowerCase()
-
   const clickable = !!data?.raw
+
+  const { name, namespace } = data?.metadata ?? {
+    name: undefined,
+    namespace: undefined,
+  }
+
+  const dashboardUrl =
+    kind === 'certificate'
+      ? getCustomResourceDetailsAbsPath(
+          clusterId,
+          'certificates.cert-manager.io',
+          name,
+          namespace
+        )
+      : getResourceDetailsAbsPath(clusterId, kind, name, namespace)
 
   return (
     <ComponentTreeNodeSC
@@ -123,13 +151,13 @@ export function ComponentTreeNode({
         size={16}
       />
       <div className="content">
-        {metadata?.name && (
+        {name && (
           <p className="name">
             <Tooltip
-              label={metadata.name}
+              label={name}
               placement="bottom"
             >
-              <span>{metadata.name}</span>
+              <span>{name}</span>
             </Tooltip>
           </p>
         )}
@@ -141,6 +169,17 @@ export function ComponentTreeNode({
           </p>
         )}
       </div>
+      <IconFrame
+        clickable
+        forwardedAs={Link}
+        replace
+        to={dashboardUrl}
+        icon={<ArrowTopRightIcon />}
+        tooltip="View details on K8s dashboard"
+        tooltipProps={{
+          placement: 'right',
+        }}
+      />
       <HandleSC
         type="source"
         isConnectable={false}
