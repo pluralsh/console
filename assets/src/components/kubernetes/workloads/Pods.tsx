@@ -5,7 +5,6 @@ import {
   Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
 import { filesize } from 'filesize'
 
 import {
@@ -26,11 +25,8 @@ import {
 import { useCluster } from '../Cluster'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { ContainerStatusT } from '../../cluster/pods/PodsList'
-
 import { Kind } from '../common/types'
-
 import ResourceLink from '../common/ResourceLink'
-
 import { UsageText } from '../../cluster/TableElements'
 
 import { WorkloadImages, toReadiness } from './utils'
