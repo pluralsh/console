@@ -1,4 +1,11 @@
-import { IconFrame, ReloadIcon, usePrevious } from '@pluralsh/design-system'
+import {
+  CloseIcon,
+  IconFrame,
+  LinkoutIcon,
+  ReloadIcon,
+  WrapWithIf,
+  usePrevious,
+} from '@pluralsh/design-system'
 import { StackState } from 'generated/graphql'
 import {
   useCallback,
@@ -20,6 +27,8 @@ import chroma from 'chroma-js'
 
 import 'reactflow/dist/style.css'
 import styled, { useTheme } from 'styled-components'
+
+import { useKeyDown } from '@react-hooks-library/core'
 
 import {
   type DagreDirection,
@@ -66,6 +75,10 @@ export function getNodesAndEdges(state: StackState) {
 export function StackStateGraph({ state }: { state: StackState }) {
   const theme = useTheme()
   const margin = theme.spacing.large
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useKeyDown('Escape', () => setIsFullscreen(false))
+
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
     () => getNodesAndEdges(state),
     [state]
@@ -123,61 +136,75 @@ export function StackStateGraph({ state }: { state: StackState }) {
   }, [state, prevState, setEdges, setNodes])
 
   return (
-    <div
-      css={{
-        backgroundColor: theme.colors.grey['950'],
-        border: theme.borders.default,
-        width: '100%',
-        height: '100%',
-        borderRadius: theme.borderRadiuses.large,
-        position: 'relative',
-        overflow: 'hidden',
-      }}
+    <WrapWithIf
+      condition={isFullscreen}
+      wrapper={<FullScreenWrapperSC />}
     >
-      <ReactFlowWrapperSC>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          draggable
-          nodesDraggable
-          edgesUpdatable={false}
-          edgesFocusable={false}
-          nodesConnectable={false}
-          edgeTypes={edgeTypes}
-        >
-          <Background
-            variant={BackgroundVariant.Dots}
-            gap={theme.spacing.large}
-            size={1}
-            color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
-          />
-        </ReactFlow>
-        <div
-          css={{
-            position: 'absolute',
-            top: theme.spacing.xsmall,
-            right: theme.spacing.xsmall,
-            display: 'flex',
-            gap: theme.spacing.xsmall,
-          }}
-        >
-          <IconFrame
-            clickable
-            type="floating"
-            icon={<ReloadIcon />}
-            tooltip="Reset view"
-            onClick={() =>
-              setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })
-            }
+      <div
+        css={{
+          backgroundColor: theme.colors.grey['950'],
+          border: theme.borders.default,
+          width: '100%',
+          height: '100%',
+          borderRadius: theme.borderRadiuses.large,
+          position: 'relative',
+          overflow: 'hidden',
+        }}
+      >
+        <ReactFlowWrapperSC>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            nodeTypes={nodeTypes}
+            draggable
+            nodesDraggable
+            edgesUpdatable={false}
+            edgesFocusable={false}
+            nodesConnectable={false}
+            edgeTypes={edgeTypes}
           >
-            Reset view
-          </IconFrame>
-        </div>
-      </ReactFlowWrapperSC>
-    </div>
+            <Background
+              variant={BackgroundVariant.Dots}
+              gap={theme.spacing.large}
+              size={1}
+              color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
+            />
+          </ReactFlow>
+          <div
+            css={{
+              position: 'absolute',
+              top: theme.spacing.xsmall,
+              right: theme.spacing.xsmall,
+              display: 'flex',
+              gap: theme.spacing.xsmall,
+            }}
+          >
+            <IconFrame
+              clickable
+              type="floating"
+              icon={isFullscreen ? <CloseIcon /> : <LinkoutIcon />}
+              tooltip={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+              onClick={() => setIsFullscreen(!isFullscreen)}
+            >
+              Fullscreen
+            </IconFrame>
+            <IconFrame
+              clickable
+              type="floating"
+              icon={<ReloadIcon />}
+              tooltip="Reset view"
+              onClick={() =>
+                setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })
+              }
+            >
+              Reset view
+            </IconFrame>
+          </div>
+        </ReactFlowWrapperSC>
+      </div>
+    </WrapWithIf>
   )
 }
 
@@ -194,4 +221,12 @@ const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
     pointerEvents: 'none',
     cursor: 'unset',
   },
+}))
+
+const FullScreenWrapperSC = styled.div((_) => ({
+  position: 'absolute',
+  top: 0,
+  bottom: 0,
+  left: 0,
+  right: 0,
 }))
