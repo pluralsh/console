@@ -23,6 +23,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :actor_id,       :id, description: "user id to use for default Plural authentication in this stack"
     field :project_id,     :id, description: "the project id this stack will belong to"
     field :connection_id,  :id, description: "id of an scm connection to use for pr callbacks"
+    field :definition_id,  :id, description: "the id of a stack definition to use"
 
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -107,6 +108,20 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :dir,  :string
   end
 
+  input_object :stack_definition_attributes do
+    field :name,          non_null(:string)
+    field :description,   :string
+    field :steps,         list_of(:custom_step_attributes)
+    field :configuration, :stack_configuration_attributes
+  end
+
+  input_object :custom_step_attributes do
+    field :stage,            :step_stage
+    field :cmd,              non_null(:string)
+    field :args,             list_of(:string)
+    field :require_approval, :boolean
+  end
+
   object :infrastructure_stack do
     field :id,                  :id
     field :name,                non_null(:string), description: "the name of the stack"
@@ -143,6 +158,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :project,    :project, resolve: dataloader(Deployments), description: "The project this stack belongs to"
     field :cluster,    :cluster, resolve: dataloader(Deployments), description: "the cluster this stack runs on"
     field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
+    field :definition, :stack_definition, resolve: dataloader(Deployments), description: "the stack definition in-use by this stack"
 
     field :actor, :user, resolve: dataloader(User), description: "the actor of this stack (defaults to root console user)"
 
@@ -242,13 +258,14 @@ defmodule Console.GraphQl.Deployments.Stack do
   end
 
   object :run_step do
-    field :id,     non_null(:id)
-    field :status, non_null(:step_status)
-    field :stage,  non_null(:step_stage)
-    field :name,   non_null(:string)
-    field :cmd,    non_null(:string)
-    field :args,   list_of(non_null(:string))
-    field :index,  non_null(:integer)
+    field :id,               non_null(:id)
+    field :status,           non_null(:step_status)
+    field :stage,            non_null(:step_stage)
+    field :name,             non_null(:string)
+    field :cmd,              non_null(:string)
+    field :args,             list_of(non_null(:string))
+    field :require_approval, :boolean
+    field :index,            non_null(:integer)
 
     field :logs, list_of(:run_logs), resolve: dataloader(Deployments)
 
@@ -303,6 +320,25 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :stack, :infrastructure_stack, resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  object :stack_definition do
+    field :id,          non_null(:id)
+    field :name,        non_null(:string)
+    field :description, :string
+
+    field :configuration, non_null(:stack_configuration)
+
+    field :steps, list_of(:custom_run_step)
+
+    timestamps()
+  end
+
+  object :custom_run_step do
+    field :cmd,              non_null(:string)
+    field :args,             list_of(:string)
+    field :stage,            non_null(:step_stage)
+    field :require_approval, :boolean
   end
 
   object :stack_command do
@@ -379,6 +415,13 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_stack/2
+    end
+
+    field :stack_definition, :stack_definition do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_stack_definition/2
     end
 
     connection field :infrastructure_stacks, node_type: :infrastructure_stack do
@@ -464,6 +507,28 @@ defmodule Console.GraphQl.Deployments.Stack do
       resolve &Deployments.delete_custom_stack_run/2
     end
 
+    field :create_stack_definition, :stack_definition do
+      middleware Authenticated
+      arg :attributes, non_null(:stack_definition_attributes)
+
+      resolve &Deployments.create_stack_definition/2
+    end
+
+    field :update_stack_definition, :stack_definition do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:stack_definition_attributes)
+
+      resolve &Deployments.update_stack_definition/2
+    end
+
+    field :delete_stack_definition, :stack_definition do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_stack_definition/2
+    end
+
     @desc "Creates a custom run, with the given command list, to execute w/in the stack's environment"
     field :on_demand_run, :stack_run do
       middleware Authenticated
@@ -472,6 +537,14 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :context,  :json
 
       resolve &Deployments.create_stack_run/2
+    end
+
+    @desc "start a new run from the newest sha in the stack's run history"
+    field :trigger_run, :stack_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.trigger_run/2
     end
   end
 

@@ -19,7 +19,8 @@ defmodule Console.Deployments.Stacks do
     GitRepository,
     PullRequest,
     ScmConnection,
-    CustomStackRun
+    CustomStackRun,
+    StackDefinition
   }
 
   @preloads [:environment, :files, :observable_metrics]
@@ -30,6 +31,7 @@ defmodule Console.Deployments.Stacks do
   @type step_resp :: {:ok, RunStep.t} | error
   @type log_resp :: {:ok, RunLog.t} | error
   @type custom_resp :: {:ok, CustomStackRun.t} | error
+  @type def_resp :: {:ok, StackDefinition.t} | error
 
   @spec get_stack!(binary) :: Stack.t
   def get_stack!(id), do: Repo.get!(Stack, id)
@@ -45,6 +47,17 @@ defmodule Console.Deployments.Stacks do
 
   @spec get_custom_run!(binary) :: CustomStackRun.t | nil
   def get_custom_run!(id), do: Repo.get!(CustomStackRun, id)
+
+  @spec get_definition!(binary) :: StackDefinition.t
+  def get_definition!(id), do: Repo.get!(StackDefinition, id)
+
+  @spec latest_run(binary) :: StackRun.t | nil
+  def latest_run(stack_id) do
+    StackRun.for_stack(stack_id)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Repo.one()
+  end
 
   def preloaded(%Stack{} = stack), do: Repo.preload(stack, @preloads)
 
@@ -95,7 +108,7 @@ defmodule Console.Deployments.Stacks do
   def create_stack(attrs, %User{} = user) do
     %Stack{status: :queued}
     |> Stack.changeset(Settings.add_project_id(attrs))
-    |> allow(user, :write)
+    |> allow(user, :create)
     |> when_ok(:insert)
     |> notify(:create, user)
   end
@@ -135,6 +148,39 @@ defmodule Console.Deployments.Stacks do
     |> allow(user, :write)
     |> when_ok(:update)
     |> notify(:delete, user)
+  end
+
+
+  @doc """
+  creates a new stack definition
+  """
+  @spec create_stack_definition(map, User.t) :: def_resp
+  def create_stack_definition(attrs, %User{} = user) do
+    %StackDefinition{}
+    |> StackDefinition.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:insert)
+  end
+
+  @doc """
+  updates a stack definition
+  """
+  @spec update_stack_definition(map, binary, User.t) :: def_resp
+  def update_stack_definition(attrs, id, %User{} = user) do
+    get_definition!(id)
+    |> StackDefinition.changeset(attrs)
+    |> allow(user, :write)
+    |> when_ok(:update)
+  end
+
+  @doc """
+  deletes a stack definition
+  """
+  @spec delete_stack_definition(binary, User.t) :: def_resp
+  def delete_stack_definition(id, %User{} = user) do
+    get_definition!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @doc """
@@ -355,26 +401,27 @@ defmodule Console.Deployments.Stacks do
   def poll(%Stack{delete_run_id: id}) when is_binary(id),
     do: {:error, "stack is deleting"}
 
-  def poll(%Stack{} = stack) do
+  def poll(%Stack{polled_sha: ps} = stack) do
     with {:ok, %Stack{sha: sha, git: git} = stack} <- lock(stack) do
       %{repository: repo} = stack = Repo.preload(stack, @poll_preloads)
-      case Discovery.sha(repo, git.ref) do
-        {:ok, ^sha} -> {:error, "no new commit in repo"}
-        {:ok, new_sha} ->
-          with {:ok, new_sha, msg} <- new_changes(repo, git, sha, new_sha),
-            do: create_run(stack, new_sha, %{message: msg})
-        err -> err
-      end
+      on_new_sha(repo, git.ref, sha, ps, fn new_sha ->
+        case new_changes(repo, git, sha, new_sha) do
+          {:ok, new_sha, msg} ->
+           create_run(stack, new_sha, %{message: msg})
+          err ->
+            add_polled_sha(stack, new_sha)
+            err
+        end
+      end)
       |> unlock(stack)
     end
   end
 
-  def poll(%PullRequest{sha: sha, ref: ref, stack_id: id} = pr) when is_binary(id) do
+  def poll(%PullRequest{sha: sha, polled_sha: ps, ref: ref, stack_id: id} = pr) when is_binary(id) do
     %{stack: %{repository: repo} = stack} = pr = Repo.preload(pr, [stack: @poll_preloads])
-    case Discovery.sha(repo, ref) do
-      {:ok, ^sha} -> {:error, "no new commit in repo for branch #{ref}"}
-      {:ok, new_sha} ->
-        with {:ok, new_sha, msg} <- new_changes(repo, stack.git, sha, new_sha) do
+    on_new_sha(repo, ref, sha, ps, fn new_sha ->
+      case new_changes(repo, stack.git, sha, new_sha) do
+        {:ok, new_sha, msg} ->
           start_transaction()
           |> add_operation(:run, fn _ ->
             create_run(stack, new_sha, %{pull_request_id: pr.id, message: msg, dry_run: true})
@@ -384,12 +431,28 @@ defmodule Console.Deployments.Stacks do
             |> Repo.update()
           end)
           |> execute(extract: :run)
-        end
+        err ->
+          add_polled_sha(pr, new_sha)
+          err
+      end
+    end)
+  end
+
+  def poll(_), do: {:error, "invalid parent"}
+
+  defp on_new_sha(repo, ref, sha, ps, fun) do
+    case Discovery.sha(repo, ref) do
+      {:ok, ^ps} -> {:error, "this sha has already been polled"}
+      {:ok, ^sha} -> {:error, "no new commit in repo for branch #{ref}"}
+      {:ok, found} -> fun.(found)
       err -> err
     end
   end
 
-  def poll(_), do: {:error, "invalid parent"}
+  defp add_polled_sha(record, sha) do
+    Ecto.Changeset.change(record, %{polled_sha: sha})
+    |> Repo.update()
+  end
 
   defp new_changes(repo, %{folder: folder}, sha1, sha2) do
     case Discovery.changes(repo, sha1, sha2, folder) do
@@ -437,10 +500,30 @@ defmodule Console.Deployments.Stacks do
   defp template_cmds(commands, _), do: commands
 
   @doc """
+  Creates a fresh run from the last sha of the stack
+  """
+  @spec trigger_run(binary, User.t) :: run_resp
+  def trigger_run(stack_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:stack, fn _ ->
+      get_stack!(stack_id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:run, fn %{stack: stack} ->
+      case latest_run(stack.id) do
+        %StackRun{git: %{ref: sha}} -> create_run(stack, sha)
+        _ -> poll(stack)
+      end
+    end)
+    |> execute(extract: :run)
+  end
+
+  @doc """
   Creates a new run for the stack with the given sha and optional additional attrs
   """
   @spec create_run(Stack.t, binary) :: run_resp
   def create_run(%Stack{} = stack, sha, attrs \\ %{}) do
+    stack = Repo.preload(stack, [:definition])
     start_transaction()
     |> add_operation(:run, fn _ ->
       %StackRun{stack_id: stack.id, status: :queued}
@@ -463,11 +546,24 @@ defmodule Console.Deployments.Stacks do
   defp stack_attrs(%Stack{} = stack, sha) do
     Repo.preload(stack, [:environment, :files])
     |> Map.take(~w(approval actor_id workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a)
+    |> Map.put(:configuration, ensure_configuration(stack))
     |> Console.clean()
     |> Map.update(:environment, [], fn env -> Enum.map(env, &Map.delete(&1, :stack_id)) end)
     |> Map.update(:files, [], fn files -> Enum.map(files, &Map.delete(&1, :stack_id)) end)
     |> Map.put(:git, %{ref: sha, folder: stack.git.folder})
   end
+
+  defp ensure_configuration(
+    %Stack{
+      definition: %StackDefinition{configuration: %Stack.Configuration{} = def_conf},
+      configuration: conf
+    }
+  ) do
+    (conf || %{})
+    |> Map.put_new(:image, def_conf.image)
+    |> Map.put_new(:tag, def_conf.tag)
+  end
+  defp ensure_configuration(%Stack{configuration: configuration}), do: configuration
 
   defp sha_attrs(%StackRun{dry_run: true}, _sha), do: %{}
   defp sha_attrs(%StackRun{}, sha), do: %{sha: sha}

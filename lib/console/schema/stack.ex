@@ -16,10 +16,11 @@ defmodule Console.Schema.Stack do
     ObservableMetric,
     ScmConnection,
     Tag,
-    Project
+    Project,
+    StackDefinition
   }
 
-  defenum Type, terraform: 0, ansible: 1
+  defenum Type, terraform: 0, ansible: 1, custom: 2
   defenum Status,
     queued: 0,
     pending: 1,
@@ -40,15 +41,15 @@ defmodule Console.Schema.Stack do
       field :tag,     :string
 
       embeds_many :hooks, Hook, on_replace: :delete do
-        field :cmd,          :string
-        field :args,         {:array, :string}
+        field :cmd,         :string
+        field :args,        {:array, :string}
         field :after_stage, Console.Schema.RunStep.Stage
       end
     end
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(image version)a)
+      |> cast(attrs, ~w(image version tag)a)
       |> cast_embed(:hooks, with: &hook_changeset/2)
     end
 
@@ -71,6 +72,9 @@ defmodule Console.Schema.Stack do
     field :manage_state,    :boolean, default: false
     field :workdir,         :string
     field :locked_at,       :utc_datetime_usec
+    field :polled_sha,      :string
+
+    field :actor_changed, :boolean, virtual: true
 
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
@@ -85,6 +89,7 @@ defmodule Console.Schema.Stack do
     belongs_to :connection, ScmConnection
     belongs_to :actor,      User
     belongs_to :project,    Project
+    belongs_to :definition, StackDefinition
 
     has_one :state, StackState,
       on_replace: :update,
@@ -141,7 +146,7 @@ defmodule Console.Schema.Stack do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name type paused actor_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
+  @valid ~w(name type paused actor_id definition_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
   @immutable ~w(project_id)a
 
 
@@ -163,6 +168,7 @@ defmodule Console.Schema.Stack do
     |> unique_constraint(:name)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
+    |> change_markers(actor_id: :actor_changed)
     |> validate_required(~w(name type status project_id)a)
   end
 

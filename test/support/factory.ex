@@ -616,6 +616,14 @@ defmodule Console.Factory do
     }
   end
 
+  def stack_definition_factory do
+    %Schema.StackDefinition{
+      name: sequence(:def, & "stack-def-#{&1}"),
+      configuration: %{image: "stack/harness", tag: "0.1.0"},
+      steps: [%{cmd: "cmd", args: ["arg"], stage: :apply}]
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

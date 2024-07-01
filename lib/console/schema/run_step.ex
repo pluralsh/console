@@ -6,12 +6,13 @@ defmodule Console.Schema.RunStep do
   defenum Stage,  plan: 0, verify: 1, apply: 2, init: 3, destroy: 4
 
   schema "run_steps" do
-    field :name,   :string
-    field :status, Status
-    field :stage,  Stage
-    field :cmd,    :string
-    field :args,   {:array, :string}
-    field :index,  :integer
+    field :name,             :string
+    field :status,           Status
+    field :stage,            Stage
+    field :cmd,              :string
+    field :args,             {:array, :string}
+    field :index,            :integer
+    field :require_approval, :boolean
 
     has_many :logs, RunLog, foreign_key: :step_id
 
@@ -20,7 +21,7 @@ defmodule Console.Schema.RunStep do
     timestamps()
   end
 
-  @valid ~w(name status stage cmd args index run_id)a
+  @valid ~w(name status stage cmd args require_approval index run_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

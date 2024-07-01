@@ -5,13 +5,14 @@ defmodule Console.Schema.PullRequest do
   defenum Status, open: 0, merged: 1, closed: 2
 
   schema "pull_requests" do
-    field :url,     :string
-    field :status,  Status, default: :open
-    field :title,   :string
-    field :creator, :string
-    field :labels,  {:array, :string}
-    field :ref,     :string
-    field :sha,     :string
+    field :url,        :string
+    field :status,     Status, default: :open
+    field :title,      :string
+    field :creator,    :string
+    field :labels,     {:array, :string}
+    field :ref,        :string
+    field :sha,        :string
+    field :polled_sha, :string
 
     field :review_id, :string
 

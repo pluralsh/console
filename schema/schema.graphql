@@ -364,6 +364,8 @@ type RootQueryType {
 
   infrastructureStack(id: ID!): InfrastructureStack
 
+  stackDefinition(id: ID!): StackDefinition
+
   infrastructureStacks(after: String, first: Int, before: String, last: Int, q: String, projectId: ID): InfrastructureStackConnection
 
   observabilityProvider(id: ID!): ObservabilityProvider
@@ -743,8 +745,17 @@ type RootMutationType {
 
   deleteCustomStackRun(id: ID!): CustomStackRun
 
+  createStackDefinition(attributes: StackDefinitionAttributes!): StackDefinition
+
+  updateStackDefinition(id: ID!, attributes: StackDefinitionAttributes!): StackDefinition
+
+  deleteStackDefinition(id: ID!): StackDefinition
+
   "Creates a custom run, with the given command list, to execute w\/in the stack's environment"
   onDemandRun(stackId: ID!, commands: [CommandAttributes], context: Json): StackRun
+
+  "start a new run from the newest sha in the stack's run history"
+  triggerRun(id: ID!): StackRun
 
   upsertObservabilityProvider(attributes: ObservabilityProviderAttributes!): ObservabilityProvider
 
@@ -1020,6 +1031,7 @@ enum StackStatus {
 enum StackType {
   TERRAFORM
   ANSIBLE
+  CUSTOM
 }
 
 enum StepStatus {
@@ -1076,6 +1088,9 @@ input StackAttributes {
 
   "id of an scm connection to use for pr callbacks"
   connectionId: ID
+
+  "the id of a stack definition to use"
+  definitionId: ID
 
   readBindings: [PolicyBindingAttributes]
 
@@ -1205,6 +1220,20 @@ input CommandAttributes {
   dir: String
 }
 
+input StackDefinitionAttributes {
+  name: String!
+  description: String
+  steps: [CustomStepAttributes]
+  configuration: StackConfigurationAttributes
+}
+
+input CustomStepAttributes {
+  stage: StepStage
+  cmd: String!
+  args: [String]
+  requireApproval: Boolean
+}
+
 type InfrastructureStack {
   id: ID
 
@@ -1274,6 +1303,9 @@ type InfrastructureStack {
 
   "the git repository you're sourcing IaC from"
   repository: GitRepository
+
+  "the stack definition in-use by this stack"
+  definition: StackDefinition
 
   "the actor of this stack (defaults to root console user)"
   actor: User
@@ -1435,6 +1467,7 @@ type RunStep {
   name: String!
   cmd: String!
   args: [String!]
+  requireApproval: Boolean
   index: Int!
   logs: [RunLogs]
   insertedAt: DateTime
@@ -1508,6 +1541,23 @@ type CustomStackRun {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type StackDefinition {
+  id: ID!
+  name: String!
+  description: String
+  configuration: StackConfiguration!
+  steps: [CustomRunStep]
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type CustomRunStep {
+  cmd: String!
+  args: [String]
+  stage: StepStage!
+  requireApproval: Boolean
 }
 
 type StackCommand {
@@ -2672,6 +2722,7 @@ input ServiceImportAttributes {
 
 input SyncConfigAttributes {
   createNamespace: Boolean
+  enforceNamespace: Boolean
   namespaceMetadata: MetadataAttributes
 }
 
@@ -3104,6 +3155,9 @@ type ServiceStatusCount {
 type SyncConfig {
   "whether the agent should auto-create the namespace for this service"
   createNamespace: Boolean
+
+  "Whether to require all resources are placed in the same namespace"
+  enforceNamespace: Boolean
 
   namespaceMetadata: NamespaceMetadata
 }
