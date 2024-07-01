@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -51,15 +51,15 @@ const (
 func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
-	scm := new(v1alpha1.ServiceAccount)
-	if err := r.Get(ctx, req.NamespacedName, scm); err != nil {
+	sa := new(v1alpha1.ServiceAccount)
+	if err := r.Get(ctx, req.NamespacedName, sa); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	scope, err := NewServiceAccountScope(ctx, r.Client, scm)
+	scope, err := NewServiceAccountScope(ctx, r.Client, sa)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
@@ -71,87 +71,83 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 	}()
 
 	// Mark resource as not ready. This will be overridden in the end.
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
-	result, err := r.addOrRemoveFinalizer(ctx, scm)
+	result, err := r.addOrRemoveFinalizer(ctx, sa)
 	if result != nil {
 		return *result, err
 	}
 
 	// Check if resource already exists in the API and only sync the ID
-	exists, err := r.isAlreadyExists(ctx, scm)
+	exists, err := r.isAlreadyExists(ctx, sa)
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if exists {
 		logger.V(9).Info("ServiceAccount already exists in the API, running in read-only mode")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		return r.handleExistingServiceAccount(ctx, scm)
-	}
-	if r.shouldMarkAsReadonly(scm) {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
-		return requeue, nil
+		utils.MarkCondition(sa.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		return r.handleExistingServiceAccount(ctx, sa)
 	}
 
 	// Mark resource as managed by this operator.
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
-
-	err = r.tryAddControllerRef(ctx, scm)
-	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
+	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
 	// Get ServiceAccount SHA that can be saved back in the status to check for changes
-	changed, sha, err := scm.Diff(utils.HashObject)
+	changed, sha, err := sa.Diff(utils.HashObject)
 	if err != nil {
-		logger.Error(err, "unable to calculate scm SHA")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "unable to calculate sa SHA")
+		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
 	// Sync ServiceAccount CRD with the Console API
-	apiServiceAccount, err := r.sync(ctx, scm, changed)
+	apiServiceAccount, err := r.sync(ctx, sa, changed)
 	if err != nil {
-		logger.Error(err, "unable to create or update scm")
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		logger.Error(err, "unable to create or update sa")
+		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	scm.Status.ID = &apiServiceAccount.ID
-	scm.Status.SHA = &sha
+	sa.Status.ID = &apiServiceAccount.ID
+	sa.Status.SHA = &sha
 
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	err = r.syncToken(ctx, sa)
+	if err != nil {
+		logger.Error(err, "unable to create token secret")
+		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
 
-func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Context, scm *v1alpha1.ServiceAccount) (reconcile.Result, error) {
-	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, scm.ConsoleName())
+func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Context, sa *v1alpha1.ServiceAccount) (reconcile.Result, error) {
+	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.ConsoleName())
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
 	if !exists {
-		scm.Status.ID = nil
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
+		sa.Status.ID = nil
+		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
 		return ctrl.Result{}, nil
 	}
 
-	apiServiceAccount, err := r.ConsoleClient.GetUser(scm.Spec.Email)
+	apiServiceAccount, err := r.ConsoleClient.GetUser(sa.Spec.Email)
 	if err != nil {
-		utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	scm.Status.ID = &apiServiceAccount.ID
+	sa.Status.ID = &apiServiceAccount.ID
 
-	utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }
@@ -177,39 +173,39 @@ func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1al
 	return false, nil
 }
 
-func (r *ServiceAccountReconciler) addOrRemoveFinalizer(ctx context.Context, scm *v1alpha1.ServiceAccount) (*ctrl.Result, error) {
+func (r *ServiceAccountReconciler) addOrRemoveFinalizer(ctx context.Context, sa *v1alpha1.ServiceAccount) (*ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
-	if scm.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(scm, ServiceAccountProtectionFinalizerName) {
-		controllerutil.AddFinalizer(scm, ServiceAccountProtectionFinalizerName)
+	if sa.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(sa, ServiceAccountProtectionFinalizerName) {
+		controllerutil.AddFinalizer(sa, ServiceAccountProtectionFinalizerName)
 	}
 
 	// If object is being deleted cleanup and remove the finalizer.
-	if !scm.ObjectMeta.DeletionTimestamp.IsZero() {
+	if !sa.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Remove ServiceAccount from Console API if it exists
-		exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, scm.ConsoleName())
+		exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.ConsoleName())
 		if err != nil {
 			return &ctrl.Result{}, err
 		}
 
-		if exists && !scm.Status.IsReadonly() {
+		if exists && !sa.Status.IsReadonly() {
 			logger.Info("Deleting ServiceAccount")
-			if err = r.ConsoleClient.DeleteServiceAccount(ctx, scm.Status.GetID()); err != nil {
+			if err = r.ConsoleClient.DeleteServiceAccount(ctx, sa.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
-				utils.MarkCondition(scm.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return &ctrl.Result{}, err
 			}
 
-			// If deletion process started requeue so that we can make sure scm
+			// If deletion process started requeue so that we can make sure sa
 			// has been deleted from Console API before removing the finalizer.
 			return &requeue, nil
 		}
 
 		// Stop reconciliation as the item is being deleted
-		controllerutil.RemoveFinalizer(scm, ServiceAccountProtectionFinalizerName)
+		controllerutil.RemoveFinalizer(sa, ServiceAccountProtectionFinalizerName)
 		return &ctrl.Result{}, nil
 	}
 
@@ -219,11 +215,6 @@ func (r *ServiceAccountReconciler) addOrRemoveFinalizer(ctx context.Context, scm
 func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.ServiceAccount, changed bool) (*console.UserFragment, error) {
 	logger := log.FromContext(ctx)
 	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.ConsoleName())
-	if err != nil {
-		return nil, err
-	}
-
-	token, err := r.getTokenFromSecret(ctx, sa)
 	if err != nil {
 		return nil, err
 	}
@@ -244,43 +235,58 @@ func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.Servic
 	logger.Info("Creating ServiceAccount")
 	attr := sa.Attributes()
 
-	// todo token
-
 	return r.ConsoleClient.CreateServiceAccount(ctx, attr)
 }
 
-func (r *ServiceAccountReconciler) getTokenFromSecret(ctx context.Context, scm *v1alpha1.ServiceAccount) (*string, error) {
-	if scm.Spec.TokenSecretRef == nil {
-		return nil, nil
-	}
+func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.ServiceAccount) error {
+	logger := log.FromContext(ctx)
 
-	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
-	if err != nil {
-		return nil, err
-	}
-
-	token, exists := secret.Data[tokenKeyName]
-	if !exists {
-		return nil, fmt.Errorf("%q key does not exist in referenced credential secret", tokenKeyName)
-	}
-	return lo.ToPtr(string(token)), nil
-}
-
-func (r *ServiceAccountReconciler) tryAddControllerRef(ctx context.Context, scm *v1alpha1.ServiceAccount) error {
-	if scm.Spec.TokenSecretRef == nil {
+	if sa.Spec.TokenSecretRef == nil {
+		logger.Info("no token secret ref found in service account, skipping token creation")
 		return nil
 	}
 
-	secret, err := utils.GetSecret(ctx, r.Client, scm.Spec.TokenSecretRef)
+	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, nil)
 	if err != nil {
+		logger.Info("failed to create service account token")
+		return err
+	}
+	if token.Token == nil {
+		logger.Info("service account token is empty")
+		return fmt.Errorf("service account token is empty")
+	}
+
+	secret := &corev1.Secret{}
+	err = r.Client.Get(ctx, types.NamespacedName{Name: sa.Spec.TokenSecretRef.Name, Namespace: sa.Spec.TokenSecretRef.Namespace}, secret)
+	if err != nil && !errors.IsNotFound(err) {
+		logger.Info("failed to get token secret")
 		return err
 	}
 
-	return utils.TryAddControllerRef(ctx, r.Client, scm, secret, r.Scheme)
-}
+	if err == nil {
+		logger.Info("updating existing token secret")
+		secret.StringData = map[string]string{"token": *token.Token}
+		err = controllerutil.SetControllerReference(sa, secret, r.Scheme)
+		if err != nil {
+			return err
+		}
+		err = r.Client.Update(ctx, secret)
+		return err
+	}
 
-func (r *ServiceAccountReconciler) shouldMarkAsReadonly(scm *v1alpha1.ServiceAccount) bool {
-	return scm.Spec.TokenSecretRef == nil
+	logger.Info("creating new token secret")
+	secret = &corev1.Secret{
+		ObjectMeta: v1.ObjectMeta{
+			Name:      sa.Spec.TokenSecretRef.Name,
+			Namespace: sa.Spec.TokenSecretRef.Namespace,
+		},
+		StringData: map[string]string{"token": *token.Token},
+	}
+	err = controllerutil.SetControllerReference(sa, secret, r.Scheme)
+	if err != nil {
+		return err
+	}
+	return r.Client.Create(ctx, secret)
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
