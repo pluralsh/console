@@ -232,6 +232,7 @@ func Reconcilers() ReconcilerList {
 		GlobalServiceReconciler,
 		PipelineReconciler,
 		ScmConnectionReconciler,
+		ServiceAccountReconciler,
 		PrAutomationReconciler,
 		PipelineContextReconciler,
 		PrAutomationTriggerReconciler,
