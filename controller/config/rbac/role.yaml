@@ -493,6 +493,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - serviceaccounts/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - serviceaccounts/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - servicedeployments
   verbs:
   - create

@@ -64,6 +64,12 @@ type ConsoleClient interface {
 	IsPipelineExisting(id string) (bool, error)
 	GetUser(email string) (*console.UserFragment, error)
 	GetGroup(name string) (*console.GroupFragment, error)
+	GetServiceAccount(ctx context.Context, email string) (*console.UserFragment, error)
+	CreateServiceAccount(ctx context.Context, attributes console.ServiceAccountAttributes) (*console.UserFragment, error)
+	UpdateServiceAccount(ctx context.Context, id string, attributes console.ServiceAccountAttributes) (*console.UserFragment, error)
+	DeleteServiceAccount(ctx context.Context, id string) error
+	IsServiceAccountExists(ctx context.Context, email string) (bool, error)
+	CreateServiceAccountToken(ctx context.Context, id string, scopes []*console.ScopeAttributes) (*console.AccessTokenFragment, error)
 	CreateScmConnection(ctx context.Context, attributes console.ScmConnectionAttributes) (*console.ScmConnectionFragment, error)
 	UpdateScmConnection(ctx context.Context, id string, attributes console.ScmConnectionAttributes) (*console.ScmConnectionFragment, error)
 	DeleteScmConnection(ctx context.Context, id string) error
