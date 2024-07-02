@@ -216,7 +216,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 
 	if err == nil {
 		logger.Info("updating existing token secret")
-		secret.StringData = map[string]string{"token": *token.Token}
+		secret.StringData = map[string]string{tokenKeyName: *token.Token}
 		err = controllerutil.SetControllerReference(sa, secret, r.Scheme)
 		if err != nil {
 			return err
@@ -228,7 +228,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 	logger.Info("creating new token secret")
 	secret = &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)},
-		StringData: map[string]string{"token": *token.Token},
+		StringData: map[string]string{tokenKeyName: *token.Token},
 	}
 	err = controllerutil.SetControllerReference(sa, secret, r.Scheme)
 	if err != nil {
