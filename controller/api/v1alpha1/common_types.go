@@ -110,6 +110,7 @@ func (c ConditionType) String() string {
 const (
 	ReadonlyConditionType     ConditionType = "Readonly"
 	ReadyConditionType        ConditionType = "Ready"
+	ReadyTokenConditionType   ConditionType = "ReadyToken"
 	SynchronizedConditionType ConditionType = "Synchronized"
 )
 
@@ -127,6 +128,8 @@ const (
 	SynchronizedConditionReasonError    ConditionReason = "Error"
 	SynchronizedConditionReasonNotFound ConditionReason = "NotFound"
 	SynchronizedConditionReasonDeleting ConditionReason = "Deleting"
+	ReadyTokenConditionReason           ConditionReason = "Ready"
+	ReadyTokenConditionReasonError      ConditionReason = "Error"
 )
 
 type ConditionMessage string
@@ -137,7 +140,7 @@ func (c ConditionMessage) String() string {
 
 const (
 	ReadonlyTrueConditionMessage         ConditionMessage = "Running in read-only mode"
-	SynchronizedNotFoundConditionMessage ConditionMessage = "Could not find ScmConnection in Console API"
+	SynchronizedNotFoundConditionMessage ConditionMessage = "Could not find resource in Console API"
 )
 
 // GitRef ...
