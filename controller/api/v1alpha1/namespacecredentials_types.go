@@ -35,6 +35,10 @@ type NamespaceCredentials struct {
 	Status NamespaceCredentialsStatus `json:"status,omitempty"`
 }
 
+func (in *NamespaceCredentials) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&in.Status.Conditions, condition)
+}
+
 type NamespaceCredentialsSpec struct {
 	// Namespaces that will be connected with credentials from SecretRef.
 	// +kubebuilder:validation:Required
