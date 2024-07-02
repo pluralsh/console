@@ -55,16 +55,12 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 		}
 	}()
 
-	// Mark resource as not ready. This will be overridden in the end.
-	utils.MarkCondition(nc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-
 	// TODO:
 	// 		Create global concurrent map with mapping between namespace and credentials/client to use.
 	//		Map has to be initialized before other reconcilers will start.
 	//		Add impersonate func to console client interface that will switch tokens that are used. Then we can use separate clients for all reconcilers.
 	//		Each reconciler has to check if it is reconciling object that should use namespace credentials instead of default ones.
 
-	utils.MarkCondition(nc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
