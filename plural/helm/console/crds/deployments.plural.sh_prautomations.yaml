@@ -86,7 +86,8 @@ spec:
                     type: array
                 type: object
               branch:
-                description: Branch ...
+                description: The base branch this pr will be based on (defaults to
+                  the repo's main branch)
                 type: string
               clusterRef:
                 description: ClusterRef ...
