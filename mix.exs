@@ -112,7 +112,7 @@ defmodule Console.MixProject do
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},
       {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "ef2050c547ab74c283ef02397925d48637bd67a1"},
-      {:comeonin, "~> 5.1.2"},
+      {:comeonin, "~> 5.4.0"},
       {:argon2_elixir, "~> 2.0"},
       {:prometheus_ex, "~> 3.0"},
       {:prometheus_plugs, "~> 1.1.1"},
