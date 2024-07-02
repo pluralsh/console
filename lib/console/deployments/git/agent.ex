@@ -87,7 +87,8 @@ defmodule Console.Deployments.Git.Agent do
   end
 
   def handle_call({:changes, sha1, sha2, folder}, _, %State{cache: cache} = state) do
-    {:reply, Cache.changes(cache, sha1, sha2, folder), state}
+    {cache, result} = Cache.cached_changes(cache, sha1, sha2, folder)
+    {:reply, result, %{state | cache: cache}}
   end
 
   def handle_call({:fetch, %Service.Git{} = ref}, _, %State{cache: cache} = state) do

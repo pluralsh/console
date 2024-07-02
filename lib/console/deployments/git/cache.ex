@@ -10,7 +10,7 @@ defmodule Console.Deployments.Git.Cache do
   import Console.Deployments.Git.Cmd
   alias Console.Schema.{GitRepository, Service.Git}
 
-  defstruct [:git, :dir, :heads, cache: %{}]
+  defstruct [:git, :dir, :heads, cache: %{}, changes: %{}]
 
   defmodule Line do
     @expiry [minutes: -10]
@@ -18,6 +18,23 @@ defmodule Console.Deployments.Git.Cache do
 
     def new(file, sha, message) do
       %__MODULE__{file: file, sha: sha, message: message, touched: Timex.now()}
+    end
+
+    def touch(%__MODULE__{} = mod), do: %{mod | touched: Timex.now()}
+
+    def expired?(%__MODULE__{touched: touched}) do
+      Timex.now()
+      |> Timex.shift(@expiry)
+      |> Timex.after?(touched)
+    end
+  end
+
+  defmodule Change do
+    @expiry [hours: -1]
+    defstruct [:from, :to, :touched, :result]
+
+    def new(from, to, result) do
+      %__MODULE__{from: from, to: to, result: result, touched: Timex.now()}
     end
 
     def touch(%__MODULE__{} = mod), do: %{mod | touched: Timex.now()}
@@ -44,10 +61,11 @@ defmodule Console.Deployments.Git.Cache do
       do: {:ok, line, put_in(cache.cache[cache_key(sha, path, filter)], line)}
   end
 
-  def refresh(%__MODULE__{git: git, cache: cache} = c) do
+  def refresh(%__MODULE__{git: git, cache: cache, changes: changes} = c) do
     {expired, keep} = Enum.split_with(cache, fn {_, line} -> Line.expired?(line) end)
     Enum.each(expired, fn {_, %Line{file: f}} -> File.rm!(f) end)
-    %{c | heads: heads(git), cache: Map.new(keep)}
+    {_, keep_changes} = Enum.split_with(changes, fn {_, line} -> Change.expired?(line) end)
+    %{c | heads: heads(git), cache: Map.new(keep), changes: Map.new(keep_changes)}
   end
 
   defp find_commit(%__MODULE__{git: g, cache: cache} = c, sha, path, filter) do
@@ -65,9 +83,22 @@ defmodule Console.Deployments.Git.Cache do
     end
   end
 
+  def cached_changes(%__MODULE__{changes: changes} = c, from, to, folder) do
+    key = {from, to, folder}
+    with {:cache, nil} <- {:cache, Map.get(changes, key)},
+         {:ok, _, _} = result <- changes(c, from, to, folder) do
+      line = Change.new(from, to, result)
+      {put_in(c.changes[key], line), result}
+    else
+      {:cache, %Change{result: result} = line} ->
+        {put_in(c.changes[key], Change.touch(line)), result}
+      err -> {c, err}
+    end
+  end
+
   def changes(%__MODULE__{git: g} = c, sha1, sha2, folder) do
     case file_changes(g, sha1, sha2, folder) do
-      {:ok, [""]} -> {:ok, []}
+      {:ok, [""]} -> {:ok, [], ""}
       {:ok, [_ | _] = changes} -> add_msgs(c, changes, sha2)
       {:ok, :pass} -> add_msgs(c, :pass, sha2)
       pass -> pass

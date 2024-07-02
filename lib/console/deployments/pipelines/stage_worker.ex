@@ -34,9 +34,6 @@ defmodule Console.Deployments.Pipelines.StageWorker do
     {:noreply, state}
   end
 
-  defp format_error(err) when is_binary(err), do: "\n#{err}"
-  defp format_error(err), do: inspect(err)
-
   def handle_cast(%PipelineStage{} = stage, state) do
     case Pipelines.build_promotion(stage) do
       {:ok, _} -> Logger.info "stage #{stage.id} applied successfully"
@@ -51,4 +48,7 @@ defmodule Console.Deployments.Pipelines.StageWorker do
   end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  defp format_error(err) when is_binary(err), do: "\n#{err}"
+  defp format_error(err), do: inspect(err)
 end
