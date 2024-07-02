@@ -5,6 +5,7 @@ import {
   ReloadIcon,
   WrapWithIf,
   usePrevious,
+  useThemeColorMode,
 } from '@pluralsh/design-system'
 import { StackState } from 'generated/graphql'
 import {
@@ -74,6 +75,7 @@ export function getNodesAndEdges(state: StackState) {
 
 export function StackStateGraph({ state }: { state: StackState }) {
   const theme = useTheme()
+  const mode = useThemeColorMode()
   const margin = theme.spacing.large
   const [isFullscreen, setIsFullscreen] = useState(false)
 
@@ -142,7 +144,10 @@ export function StackStateGraph({ state }: { state: StackState }) {
     >
       <div
         css={{
-          backgroundColor: theme.colors.grey['950'],
+          backgroundColor:
+            mode === 'dark'
+              ? theme.colors.grey[950]
+              : theme.colors['fill-zero'],
           border: theme.borders.default,
           width: '100%',
           height: '100%',
