@@ -92,6 +92,11 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 		return ctrl.Result{}, err
 	}
 
+	// Mark token as not ready if found any changes in the resource
+	if changed {
+		utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyTokenConditionType, v1.ConditionFalse, v1alpha1.ReadyTokenConditionReasonError, "token not synchronized yet")
+	}
+
 	// Sync ServiceAccount CRD with the Console API
 	apiServiceAccount, err := r.sync(ctx, sa, changed)
 	if err != nil {
@@ -111,6 +116,7 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 	}
 
 	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyTokenConditionType, v1.ConditionTrue, v1alpha1.ReadyTokenConditionReason, "")
 	utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
@@ -192,6 +198,10 @@ func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.Servic
 func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.ServiceAccount) error {
 	logger := log.FromContext(ctx)
 
+	if sa.Status.IsStatusConditionTrue(v1alpha1.ReadyTokenConditionType) {
+		return nil
+	}
+
 	if sa.Spec.TokenSecretRef == nil {
 		logger.Info("no token secret ref found in service account, skipping token creation")
 		return nil
@@ -217,8 +227,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 	if err == nil {
 		logger.Info("updating existing token secret")
 		secret.StringData = map[string]string{tokenKeyName: *token.Token}
-		err = controllerutil.SetControllerReference(sa, secret, r.Scheme)
-		if err != nil {
+		if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
 			return err
 		}
 		err = r.Client.Update(ctx, secret)
@@ -230,8 +239,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 		ObjectMeta: v1.ObjectMeta{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)},
 		StringData: map[string]string{tokenKeyName: *token.Token},
 	}
-	err = controllerutil.SetControllerReference(sa, secret, r.Scheme)
-	if err != nil {
+	if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
 		return err
 	}
 	return r.Client.Create(ctx, secret)
