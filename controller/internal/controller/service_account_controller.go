@@ -117,7 +117,7 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 }
 
 func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Context, sa *v1alpha1.ServiceAccount) (reconcile.Result, error) {
-	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.ConsoleName())
+	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.Spec.Email)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -165,7 +165,7 @@ func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1al
 
 func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.ServiceAccount, changed bool) (*console.UserFragment, error) {
 	logger := log.FromContext(ctx)
-	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.ConsoleName())
+	exists, err := r.ConsoleClient.IsServiceAccountExists(ctx, sa.Spec.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (r *ServiceAccountReconciler) sync(ctx context.Context, sa *v1alpha1.Servic
 
 	// Read the ServiceAccount from Console API if it already exists
 	if exists {
-		return r.ConsoleClient.GetServiceAccount(ctx, sa.ConsoleName())
+		return r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	}
 
 	// Create the ServiceAccount in Console API if it doesn't exist
@@ -197,7 +197,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 		return nil
 	}
 
-	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, nil)
+	token, err := r.ConsoleClient.CreateServiceAccountToken(ctx, *sa.Status.ID, []*console.ScopeAttributes{})
 	if err != nil {
 		logger.Info("failed to create service account token")
 		return err
@@ -208,7 +208,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 	}
 
 	secret := &corev1.Secret{}
-	err = r.Client.Get(ctx, types.NamespacedName{Name: sa.Spec.TokenSecretRef.Name, Namespace: sa.Spec.TokenSecretRef.Namespace}, secret)
+	err = r.Client.Get(ctx, types.NamespacedName{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)}, secret)
 	if err != nil && !errors.IsNotFound(err) {
 		logger.Info("failed to get token secret")
 		return err
@@ -227,10 +227,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 
 	logger.Info("creating new token secret")
 	secret = &corev1.Secret{
-		ObjectMeta: v1.ObjectMeta{
-			Name:      sa.Spec.TokenSecretRef.Name,
-			Namespace: sa.Spec.TokenSecretRef.Namespace,
-		},
+		ObjectMeta: v1.ObjectMeta{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)},
 		StringData: map[string]string{"token": *token.Token},
 	}
 	err = controllerutil.SetControllerReference(sa, secret, r.Scheme)
@@ -238,6 +235,18 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 		return err
 	}
 	return r.Client.Create(ctx, secret)
+}
+
+func getTokenSecretNamespace(sa *v1alpha1.ServiceAccount) string {
+	if sa.Spec.TokenSecretRef.Namespace != "" {
+		return sa.Spec.TokenSecretRef.Namespace
+	}
+
+	if sa.Namespace != "" {
+		return sa.Namespace
+	}
+
+	return "default"
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
