@@ -128,7 +128,7 @@ func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Cont
 		return ctrl.Result{}, nil
 	}
 
-	apiServiceAccount, err := r.ConsoleClient.GetUser(sa.Spec.Email)
+	apiServiceAccount, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	if err != nil {
 		utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -147,7 +147,7 @@ func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1al
 		return sa.Status.IsReadonly(), nil
 	}
 
-	_, err := r.ConsoleClient.GetUser(sa.Spec.Email)
+	_, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
