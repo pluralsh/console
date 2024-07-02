@@ -1,8 +1,8 @@
 # main.py
 import os
 import importlib
-from utils import read_yaml, print_error, print_warning
 from colorama import Fore, Style
+from utils import read_yaml, print_error, print_warning, update_chart_versions
 
 
 def call_scraper(scraper):
@@ -35,5 +35,7 @@ if "names" not in manifest:
 
 for name in manifest["names"]:
     print(Fore.GREEN + f"Calling scraper for {name}" + Style.RESET_ALL)
-    call_scraper(name)
+    # call_scraper(name)
+    if name == "ingress-nginx":
+        update_chart_versions(name)
     print("\n")

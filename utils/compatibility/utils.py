@@ -32,6 +32,48 @@ def read_yaml(file_path):
     return None
 
 
+def update_chart_versions(app_name, chart_name):
+    compatibility_yaml = read_yaml(
+        f"../../static/compatibilities/{app_name}.yaml"
+    )
+    if not compatibility_yaml or "versions" not in compatibility_yaml:
+        print_error(
+            f"No versions found for {app_name}, cannot update chart version."
+        )
+        return
+
+    chart_url = compatibility_yaml["chart_url"]
+    chart_index = fetch_page(chart_url)
+    if not chart_index:
+        print_error(f"Failed to fetch the index.yaml from {chart_url}")
+        return
+
+    index_yaml = yaml.safe_load(chart_index)
+    if not index_yaml:
+        print_error(f"Failed to parse the index.yaml for {app_name}")
+        return
+
+    try:
+        for versions in compatibility_yaml["versions"]:
+            bin_version = versions["version"]
+            chart_entries = index_yaml["entries"].get(chart_name, [])
+            if not chart_entries:
+                print_warning(f"No chart entries found for {chart_name}")
+                continue
+            latest_chart = max(
+                chart_entries, key=lambda x: Version(x["version"])
+            )
+            chart_version = latest_chart["version"]
+            print("Chart Version: ", chart_version)
+            print("App Version: ", bin_version)
+    except KeyError as e:
+        print_error(f"Key error while processing {app_name}: {e}")
+    except Exception as e:
+        print_error(
+            f"An unexpected error occurred while processing {app_name}: {e}"
+        )
+
+
 def fetch_page(url):
     response = requests.get(url)
     if response.status_code != 200:
