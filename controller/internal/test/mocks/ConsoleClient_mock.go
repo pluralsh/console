@@ -912,6 +912,125 @@ func (_c *ConsoleClientMock_CreateService_Call) RunAndReturn(run func(*string, g
 	return _c
 }
 
+// CreateServiceAccount provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateServiceAccount(ctx context.Context, attributes gqlclient.ServiceAccountAttributes) (*gqlclient.UserFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateServiceAccount")
+	}
+
+	var r0 *gqlclient.UserFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ServiceAccountAttributes) (*gqlclient.UserFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.ServiceAccountAttributes) *gqlclient.UserFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.UserFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.ServiceAccountAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateServiceAccount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateServiceAccount'
+type ConsoleClientMock_CreateServiceAccount_Call struct {
+	*mock.Call
+}
+
+// CreateServiceAccount is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes gqlclient.ServiceAccountAttributes
+func (_e *ConsoleClientMock_Expecter) CreateServiceAccount(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateServiceAccount_Call {
+	return &ConsoleClientMock_CreateServiceAccount_Call{Call: _e.mock.On("CreateServiceAccount", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateServiceAccount_Call) Run(run func(ctx context.Context, attributes gqlclient.ServiceAccountAttributes)) *ConsoleClientMock_CreateServiceAccount_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(gqlclient.ServiceAccountAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateServiceAccount_Call) Return(_a0 *gqlclient.UserFragment, _a1 error) *ConsoleClientMock_CreateServiceAccount_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateServiceAccount_Call) RunAndReturn(run func(context.Context, gqlclient.ServiceAccountAttributes) (*gqlclient.UserFragment, error)) *ConsoleClientMock_CreateServiceAccount_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateServiceAccountToken provides a mock function with given fields: ctx, id, scopes
+func (_m *ConsoleClientMock) CreateServiceAccountToken(ctx context.Context, id string, scopes []*gqlclient.ScopeAttributes) (*gqlclient.AccessTokenFragment, error) {
+	ret := _m.Called(ctx, id, scopes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateServiceAccountToken")
+	}
+
+	var r0 *gqlclient.AccessTokenFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, []*gqlclient.ScopeAttributes) (*gqlclient.AccessTokenFragment, error)); ok {
+		return rf(ctx, id, scopes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, []*gqlclient.ScopeAttributes) *gqlclient.AccessTokenFragment); ok {
+		r0 = rf(ctx, id, scopes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.AccessTokenFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, []*gqlclient.ScopeAttributes) error); ok {
+		r1 = rf(ctx, id, scopes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateServiceAccountToken_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateServiceAccountToken'
+type ConsoleClientMock_CreateServiceAccountToken_Call struct {
+	*mock.Call
+}
+
+// CreateServiceAccountToken is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - scopes []*gqlclient.ScopeAttributes
+func (_e *ConsoleClientMock_Expecter) CreateServiceAccountToken(ctx interface{}, id interface{}, scopes interface{}) *ConsoleClientMock_CreateServiceAccountToken_Call {
+	return &ConsoleClientMock_CreateServiceAccountToken_Call{Call: _e.mock.On("CreateServiceAccountToken", ctx, id, scopes)}
+}
+
+func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) Run(run func(ctx context.Context, id string, scopes []*gqlclient.ScopeAttributes)) *ConsoleClientMock_CreateServiceAccountToken_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].([]*gqlclient.ScopeAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) Return(_a0 *gqlclient.AccessTokenFragment, _a1 error) *ConsoleClientMock_CreateServiceAccountToken_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateServiceAccountToken_Call) RunAndReturn(run func(context.Context, string, []*gqlclient.ScopeAttributes) (*gqlclient.AccessTokenFragment, error)) *ConsoleClientMock_CreateServiceAccountToken_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateStack provides a mock function with given fields: ctx, attributes
 func (_m *ConsoleClientMock) CreateStack(ctx context.Context, attributes gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error) {
 	ret := _m.Called(ctx, attributes)
@@ -1550,6 +1669,53 @@ func (_c *ConsoleClientMock_DeleteService_Call) Return(_a0 error) *ConsoleClient
 }
 
 func (_c *ConsoleClientMock_DeleteService_Call) RunAndReturn(run func(string) error) *ConsoleClientMock_DeleteService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteServiceAccount provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteServiceAccount(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteServiceAccount")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteServiceAccount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteServiceAccount'
+type ConsoleClientMock_DeleteServiceAccount_Call struct {
+	*mock.Call
+}
+
+// DeleteServiceAccount is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteServiceAccount(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteServiceAccount_Call {
+	return &ConsoleClientMock_DeleteServiceAccount_Call{Call: _e.mock.On("DeleteServiceAccount", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteServiceAccount_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteServiceAccount_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteServiceAccount_Call) Return(_a0 error) *ConsoleClientMock_DeleteServiceAccount_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteServiceAccount_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteServiceAccount_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3105,6 +3271,65 @@ func (_c *ConsoleClientMock_GetService_Call) RunAndReturn(run func(string, strin
 	return _c
 }
 
+// GetServiceAccount provides a mock function with given fields: ctx, email
+func (_m *ConsoleClientMock) GetServiceAccount(ctx context.Context, email string) (*gqlclient.UserFragment, error) {
+	ret := _m.Called(ctx, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetServiceAccount")
+	}
+
+	var r0 *gqlclient.UserFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.UserFragment, error)); ok {
+		return rf(ctx, email)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.UserFragment); ok {
+		r0 = rf(ctx, email)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.UserFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetServiceAccount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetServiceAccount'
+type ConsoleClientMock_GetServiceAccount_Call struct {
+	*mock.Call
+}
+
+// GetServiceAccount is a helper method to define mock.On call
+//   - ctx context.Context
+//   - email string
+func (_e *ConsoleClientMock_Expecter) GetServiceAccount(ctx interface{}, email interface{}) *ConsoleClientMock_GetServiceAccount_Call {
+	return &ConsoleClientMock_GetServiceAccount_Call{Call: _e.mock.On("GetServiceAccount", ctx, email)}
+}
+
+func (_c *ConsoleClientMock_GetServiceAccount_Call) Run(run func(ctx context.Context, email string)) *ConsoleClientMock_GetServiceAccount_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceAccount_Call) Return(_a0 *gqlclient.UserFragment, _a1 error) *ConsoleClientMock_GetServiceAccount_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetServiceAccount_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.UserFragment, error)) *ConsoleClientMock_GetServiceAccount_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetServiceContext provides a mock function with given fields: name
 func (_m *ConsoleClientMock) GetServiceContext(name string) (*gqlclient.ServiceContextFragment, error) {
 	ret := _m.Called(name)
@@ -3880,6 +4105,63 @@ func (_c *ConsoleClientMock_IsScmConnectionExists_Call) Return(_a0 bool, _a1 err
 }
 
 func (_c *ConsoleClientMock_IsScmConnectionExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsScmConnectionExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsServiceAccountExists provides a mock function with given fields: ctx, email
+func (_m *ConsoleClientMock) IsServiceAccountExists(ctx context.Context, email string) (bool, error) {
+	ret := _m.Called(ctx, email)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsServiceAccountExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, email)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, email)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsServiceAccountExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsServiceAccountExists'
+type ConsoleClientMock_IsServiceAccountExists_Call struct {
+	*mock.Call
+}
+
+// IsServiceAccountExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - email string
+func (_e *ConsoleClientMock_Expecter) IsServiceAccountExists(ctx interface{}, email interface{}) *ConsoleClientMock_IsServiceAccountExists_Call {
+	return &ConsoleClientMock_IsServiceAccountExists_Call{Call: _e.mock.On("IsServiceAccountExists", ctx, email)}
+}
+
+func (_c *ConsoleClientMock_IsServiceAccountExists_Call) Run(run func(ctx context.Context, email string)) *ConsoleClientMock_IsServiceAccountExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsServiceAccountExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsServiceAccountExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsServiceAccountExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsServiceAccountExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -4861,6 +5143,66 @@ func (_c *ConsoleClientMock_UpdateService_Call) Return(_a0 error) *ConsoleClient
 }
 
 func (_c *ConsoleClientMock_UpdateService_Call) RunAndReturn(run func(string, gqlclient.ServiceUpdateAttributes) error) *ConsoleClientMock_UpdateService_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateServiceAccount provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateServiceAccount(ctx context.Context, id string, attributes gqlclient.ServiceAccountAttributes) (*gqlclient.UserFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateServiceAccount")
+	}
+
+	var r0 *gqlclient.UserFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ServiceAccountAttributes) (*gqlclient.UserFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.ServiceAccountAttributes) *gqlclient.UserFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.UserFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.ServiceAccountAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateServiceAccount_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateServiceAccount'
+type ConsoleClientMock_UpdateServiceAccount_Call struct {
+	*mock.Call
+}
+
+// UpdateServiceAccount is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes gqlclient.ServiceAccountAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateServiceAccount(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateServiceAccount_Call {
+	return &ConsoleClientMock_UpdateServiceAccount_Call{Call: _e.mock.On("UpdateServiceAccount", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateServiceAccount_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.ServiceAccountAttributes)) *ConsoleClientMock_UpdateServiceAccount_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.ServiceAccountAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateServiceAccount_Call) Return(_a0 *gqlclient.UserFragment, _a1 error) *ConsoleClientMock_UpdateServiceAccount_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateServiceAccount_Call) RunAndReturn(run func(context.Context, string, gqlclient.ServiceAccountAttributes) (*gqlclient.UserFragment, error)) *ConsoleClientMock_UpdateServiceAccount_Call {
 	_c.Call.Return(run)
 	return _c
 }
