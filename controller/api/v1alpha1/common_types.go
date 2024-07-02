@@ -108,9 +108,10 @@ func (c ConditionType) String() string {
 }
 
 const (
-	ReadonlyConditionType     ConditionType = "Readonly"
-	ReadyConditionType        ConditionType = "Ready"
-	SynchronizedConditionType ConditionType = "Synchronized"
+	ReadonlyConditionType          ConditionType = "Readonly"
+	ReadyConditionType             ConditionType = "Ready"
+	SynchronizedConditionType      ConditionType = "Synchronized"
+	SynchronizedTokenConditionType ConditionType = "SynchronizedToken"
 )
 
 type ConditionReason string
@@ -120,13 +121,15 @@ func (c ConditionReason) String() string {
 }
 
 const (
-	ReadonlyConditionReason             ConditionReason = "Readonly"
-	ReadyConditionReason                ConditionReason = "Ready"
-	ReadyConditionReasonDeleting        ConditionReason = "Deleting"
-	SynchronizedConditionReason         ConditionReason = "Synchronized"
-	SynchronizedConditionReasonError    ConditionReason = "Error"
-	SynchronizedConditionReasonNotFound ConditionReason = "NotFound"
-	SynchronizedConditionReasonDeleting ConditionReason = "Deleting"
+	ReadonlyConditionReason               ConditionReason = "Readonly"
+	ReadyConditionReason                  ConditionReason = "Ready"
+	ReadyConditionReasonDeleting          ConditionReason = "Deleting"
+	SynchronizedConditionReason           ConditionReason = "Synchronized"
+	SynchronizedConditionReasonError      ConditionReason = "Error"
+	SynchronizedConditionReasonNotFound   ConditionReason = "NotFound"
+	SynchronizedConditionReasonDeleting   ConditionReason = "Deleting"
+	SynchronizedTokenConditionReason      ConditionReason = "Synchronized"
+	SynchronizedTokenConditionReasonError ConditionReason = "Error"
 )
 
 type ConditionMessage string
@@ -218,6 +221,10 @@ func (p *Status) IsSHAEqual(sha string) bool {
 
 func (p *Status) HasReadonlyCondition() bool {
 	return meta.FindStatusCondition(p.Conditions, ReadonlyConditionType.String()) != nil
+}
+
+func (p *Status) HasSynchronizedTokenCondition() bool {
+	return meta.FindStatusCondition(p.Conditions, SynchronizedTokenConditionType.String()) != nil
 }
 
 func (p *Status) IsReadonly() bool {
