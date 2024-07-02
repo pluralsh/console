@@ -108,10 +108,10 @@ func (c ConditionType) String() string {
 }
 
 const (
-	ReadonlyConditionType          ConditionType = "Readonly"
-	ReadyConditionType             ConditionType = "Ready"
-	SynchronizedConditionType      ConditionType = "Synchronized"
-	SynchronizedTokenConditionType ConditionType = "SynchronizedToken"
+	ReadonlyConditionType     ConditionType = "Readonly"
+	ReadyConditionType        ConditionType = "Ready"
+	ReadyTokenConditionType   ConditionType = "ReadyToken"
+	SynchronizedConditionType ConditionType = "Synchronized"
 )
 
 type ConditionReason string
@@ -121,15 +121,15 @@ func (c ConditionReason) String() string {
 }
 
 const (
-	ReadonlyConditionReason               ConditionReason = "Readonly"
-	ReadyConditionReason                  ConditionReason = "Ready"
-	ReadyConditionReasonDeleting          ConditionReason = "Deleting"
-	SynchronizedConditionReason           ConditionReason = "Synchronized"
-	SynchronizedConditionReasonError      ConditionReason = "Error"
-	SynchronizedConditionReasonNotFound   ConditionReason = "NotFound"
-	SynchronizedConditionReasonDeleting   ConditionReason = "Deleting"
-	SynchronizedTokenConditionReason      ConditionReason = "Synchronized"
-	SynchronizedTokenConditionReasonError ConditionReason = "Error"
+	ReadonlyConditionReason             ConditionReason = "Readonly"
+	ReadyConditionReason                ConditionReason = "Ready"
+	ReadyConditionReasonDeleting        ConditionReason = "Deleting"
+	SynchronizedConditionReason         ConditionReason = "Synchronized"
+	SynchronizedConditionReasonError    ConditionReason = "Error"
+	SynchronizedConditionReasonNotFound ConditionReason = "NotFound"
+	SynchronizedConditionReasonDeleting ConditionReason = "Deleting"
+	ReadyTokenConditionReason           ConditionReason = "Ready"
+	ReadyTokenConditionReasonError      ConditionReason = "Error"
 )
 
 type ConditionMessage string
@@ -224,7 +224,7 @@ func (p *Status) HasReadonlyCondition() bool {
 }
 
 func (p *Status) HasSynchronizedTokenCondition() bool {
-	return meta.FindStatusCondition(p.Conditions, SynchronizedTokenConditionType.String()) != nil
+	return meta.FindStatusCondition(p.Conditions, ReadyTokenConditionType.String()) != nil
 }
 
 func (p *Status) IsReadonly() bool {
