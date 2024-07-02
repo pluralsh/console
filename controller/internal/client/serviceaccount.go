@@ -4,12 +4,22 @@ import (
 	"context"
 
 	console "github.com/pluralsh/console-client-go"
+	internalerror "github.com/pluralsh/console/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func (c *client) GetServiceAccount(ctx context.Context, email string) (*console.UserFragment, error) {
 	response, err := c.consoleClient.GetUser(ctx, email)
-	if err != nil {
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, email)
+	}
+
+	if err == nil && (response == nil || response.User == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, email)
+	}
+
+	if response == nil {
 		return nil, err
 	}
 
