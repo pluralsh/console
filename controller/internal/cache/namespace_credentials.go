@@ -20,13 +20,19 @@ type NamespaceCredentialsCache interface {
 	GetNamespaceToken(namespace string) (string, error)
 }
 
-func NewNamespaceCredentialsCache(client client.Client, defaultConsoleToken string) NamespaceCredentialsCache {
-	return &namespaceCredentialsCache{
+func NewNamespaceCredentialsCache(client client.Client, defaultConsoleToken string) (NamespaceCredentialsCache, error) {
+	cache := &namespaceCredentialsCache{
 		cache:               cmap.New[NamespaceCredentials](),
 		ctx:                 context.Background(),
 		client:              client,
 		defaultConsoleToken: defaultConsoleToken,
 	}
+
+	if err := cache.Init(); err != nil {
+		return nil, err
+	}
+
+	return cache, nil
 }
 
 type namespaceCredentialsCache struct {
