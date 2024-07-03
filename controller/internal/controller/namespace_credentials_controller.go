@@ -2,14 +2,15 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
-	corev1 "k8s.io/api/core/v1"
+	"github.com/pluralsh/console/controller/internal/cache"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -18,12 +19,17 @@ import (
 	"github.com/pluralsh/console/controller/internal/utils"
 )
 
+const (
+	NamespaceCredentialsFinalizer = "deployments.plural.sh/namespace-credentials-protection"
+)
+
 // NamespaceCredentialsReconciler reconciles a v1alpha1.NamespaceCredentials object.
 // Implements reconcile.Reconciler and types.Controller
 type NamespaceCredentialsReconciler struct {
 	client.Client
-	ConsoleClient consoleclient.ConsoleClient
-	Scheme        *runtime.Scheme
+	ConsoleClient    consoleclient.ConsoleClient
+	Scheme           *runtime.Scheme
+	CredentialsCache cache.NamespaceCredentialsCache
 }
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=namespacecredentialss,verbs=get;list;watch;create;update;patch;delete
@@ -34,8 +40,6 @@ type NamespaceCredentialsReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to sync v1alpha1.NamespaceCredentials
 // with a global credentials map that will be later used by other reconcilers.
 func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
-	logger := log.FromContext(ctx)
-
 	nc := new(v1alpha1.NamespaceCredentials)
 	if err := r.Get(ctx, req.NamespacedName, nc); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -43,25 +47,41 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 
 	scope, err := NewNamespaceCredentialsScope(ctx, r.Client, nc)
 	if err != nil {
-		logger.Error(err, "failed to create scope")
-		utils.MarkCondition(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		utils.MarkCondition(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to create scope: %s", err.Error()))
 		return ctrl.Result{}, err
 	}
 
-	// Always patch object when exiting this function, so we can persist any object changes.
+	// Always patch the object when exiting this function, so we can persist any object changes.
 	defer func() {
 		if err := scope.PatchObject(); err != nil && reterr == nil {
 			reterr = err
 		}
 	}()
 
+	// If the object is not being deleted and if it does not have our finalizer, then lets add the finalizer.
+	// This is equivalent to registering our finalizer.
+	if nc.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(nc, NamespaceCredentialsFinalizer) {
+		controllerutil.AddFinalizer(nc, NamespaceCredentialsFinalizer)
+	}
+
+	// If the object is being deleted, cleanup, remove the finalizer and stop reconciliation.
+	if !nc.ObjectMeta.DeletionTimestamp.IsZero() {
+		r.CredentialsCache.RemoveNamespaceCredentials(nc)
+		controllerutil.RemoveFinalizer(nc, NamespaceCredentialsFinalizer)
+		return ctrl.Result{}, nil
+	}
+
+	// Try to add namespace credentials to cache.
+	if err := r.CredentialsCache.AddNamespaceCredentials(nc); err != nil {
+		utils.MarkFalse(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	// TODO:
-	// 		Create global concurrent map with mapping between namespace and credentials/client to use.
-	//		Map has to be initialized before other reconcilers will start.
 	//		Add impersonate func to console client interface that will switch tokens that are used. Then we can use separate clients for all reconcilers.
 	//		Each reconciler has to check if it is reconciling object that should use namespace credentials instead of default ones.
 
-	utils.MarkCondition(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkTrue(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }
@@ -71,6 +91,5 @@ func (r *NamespaceCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) erro
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "namespacecredentials_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.NamespaceCredentials{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
