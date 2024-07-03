@@ -34,7 +34,7 @@ if "names" not in manifest:
     print_error("No names found in the manifest file.")
 
 for name in manifest["names"]:
-    if name == "cert-manager":
+    if name == "ingress-nginx":
         print(
             Fore.BLUE
             + "Calling scraper for"
