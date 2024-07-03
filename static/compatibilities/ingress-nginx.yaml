@@ -7,10 +7,12 @@ versions:
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  chart_version: 0.8.1
 - version: 1.10.0
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  chart_version: 0.8.0
 - version: 1.9.6
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25']
   requirements: []
@@ -31,10 +33,12 @@ versions:
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  chart_version: 0.7.1
 - version: 1.9.0
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  chart_version: 0.7.0
 - version: 1.8.4
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
@@ -43,6 +47,7 @@ versions:
   kube: ['1.27', '1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  chart_version: 0.5.1
 - version: 1.6.4
   kube: ['1.26', '1.25', '1.24', '1.23']
   requirements: []
@@ -51,6 +56,7 @@ versions:
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  chart_version: 0.3.1
 - version: 1.4.0
   kube: ['1.25', '1.24', '1.23', '1.22']
   requirements: []

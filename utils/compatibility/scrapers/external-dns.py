@@ -3,7 +3,7 @@
 import requests
 from collections import OrderedDict
 from packaging.version import Version
-from utils import print_error, update_compatibility_info
+from utils import print_error, update_compatibility_info, update_chart_versions
 
 GITHUB_REPO_URL = "https://github.com/kubernetes-sigs/external-dns"
 GITHUB_API_TAGS_URL = (
@@ -81,3 +81,4 @@ def scrape():
     update_compatibility_info(
         "../../static/compatibilities/external-dns.yaml", rows
     )
+    update_chart_versions("external-dns")

@@ -1,5 +1,3 @@
-# scrapers/ingress_nginx.py
-
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from utils import (
@@ -12,13 +10,34 @@ from utils import (
 
 def parse_page(content):
     soup = BeautifulSoup(content, "html.parser")
-    readme_section = soup.find(
-        "article", class_="markdown-body entry-content container-lg"
+    supported_versions_section = soup.find(
+        "h3", text="Supported Versions table"
     )
-    if not readme_section:
-        print_error("Could not find the README section on the page.")
+    if not supported_versions_section:
+        print_error(
+            "Could not find the 'Supported Versions table' section on the page."
+        )
         return None
-    return readme_section
+
+    table = supported_versions_section.find_next("table")
+    if not table:
+        print_error(
+            "Could not find the table following the 'Supported Versions table' section."
+        )
+        return None
+    return table
+
+
+def clean_versions(versions):
+    clean_list = []
+    for version in versions:
+        version = version.replace(
+            "\xa0", " "
+        ).strip()  # Replace non-breaking space with a normal space and strip
+        clean_list.extend(
+            version.split(", ")
+        )  # Split by comma and space and extend the list
+    return clean_list
 
 
 def extract_table_data(table):
@@ -27,9 +46,13 @@ def extract_table_data(table):
         columns = row.find_all("td")
         if len(columns) >= 3:  # Ensure there are enough columns
             ingress_nginx_version = columns[1].get_text(strip=True).lstrip("v")
-            k8s_supported_versions = (
+            k8s_supported_versions = clean_versions(
                 columns[2].get_text(strip=True).split(", ")
             )
+
+            if not ingress_nginx_version:
+                continue
+
             version_info = OrderedDict(
                 [
                     ("version", ingress_nginx_version),
@@ -48,13 +71,8 @@ def scrape():
     if not page_content:
         return
 
-    readme_section = parse_page(page_content)
-    if not readme_section:
-        return
-
-    table = readme_section.find("table")
+    table = parse_page(page_content)
     if not table:
-        print_error("No table found in the README section.")
         return
 
     rows = extract_table_data(table)
