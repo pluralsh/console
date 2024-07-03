@@ -7,6 +7,7 @@ import (
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/controller"
+	"github.com/pluralsh/console/controller/internal/log"
 	"github.com/pluralsh/console/controller/internal/utils"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -73,7 +74,8 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 	for _, namespace := range namespaceCredentials.Spec.Namespaces {
 		nc, ok := in.cache.Get(namespace)
 		if ok && nc.namespaceCredentials != nil && *nc.namespaceCredentials != namespaceCredentials.Name {
-			// TODO: Found an entry for this namespace that belongs to different namespaceCredentials.
+			log.Logger.Warnf("found conflicting entries for %s namespace: %s and %s",
+				namespace, *nc.namespaceCredentials, namespaceCredentials.Name)
 		}
 
 		in.cache.Set(namespace, NamespaceCredentials{
