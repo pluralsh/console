@@ -35,6 +35,12 @@ if "names" not in manifest:
 
 for name in manifest["names"]:
     if name == "cert-manager":
-        print(Fore.GREEN + f"Calling scraper for {name}" + Style.RESET_ALL)
+        print(
+            Fore.BLUE
+            + "Calling scraper for"
+            + Fore.YELLOW
+            + f" {name}"
+            + Style.RESET_ALL
+        )
         call_scraper(name)
         print("\n")

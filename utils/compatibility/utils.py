@@ -18,6 +18,16 @@ def print_warning(message):
     print(Fore.YELLOW + "⚠️ Warning:" + Style.RESET_ALL + f" {message}")
 
 
+def fetch_page(url):
+    response = requests.get(url)
+    if response.status_code != 200:
+        print_error(
+            f"Failed to fetch the page. Status code: {response.status_code}"
+        )
+        return None
+    return response.content
+
+
 def read_yaml(file_path):
     try:
         with open(file_path, "r") as file:
@@ -82,19 +92,11 @@ def update_chart_versions(app_name, chart_name=""):
                 row["chart_version"] = chart_version
 
     if write_yaml(yaml_file_name, compatibility_yaml):
-        print_success(f"Updated chart versions for {app_name}")
+        print_success(
+            "Updated chart versions for" + Fore.CYAN + f" {app_name}"
+        )
     else:
         print_error(f"Failed to update chart versions for {app_name}")
-
-
-def fetch_page(url):
-    response = requests.get(url)
-    if response.status_code != 200:
-        print_error(
-            f"Failed to fetch the page. Status code: {response.status_code}"
-        )
-        return None
-    return response.content
 
 
 # Custom YAML representer for lists that contain only strings
@@ -146,7 +148,9 @@ def update_compatibility_info(filepath, new_versions):
                     data, file, default_flow_style=False, sort_keys=False
                 )
             print_success(
-                "Updated compatibility info in" + Fore.CYAN + f" {filepath}"
+                "Updated compatibility info table: "
+                + Fore.CYAN
+                + f" {filepath}"
             )
         else:
             print_warning("No existing versions found. Writing new data.")
