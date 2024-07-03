@@ -99,6 +99,52 @@ def update_chart_versions(app_name, chart_name=""):
         print_error(f"Failed to update chart versions for {app_name}")
 
 
+def sort_versions(versions):
+    return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
+
+
+def merge_versions(existing_versions, new_versions):
+    for new_version in new_versions:
+        version_num = new_version["version"]
+        if version_num not in existing_versions:
+            existing_versions[version_num] = new_version
+    return existing_versions
+
+
+def update_versions_data(data, new_versions):
+    existing_versions = {v["version"]: v for v in data.get("versions", [])}
+    merged_versions = merge_versions(existing_versions, new_versions)
+    data["versions"] = sort_versions(list(merged_versions.values()))
+
+
+def save_versions(filepath, data):
+    try:
+        with open(filepath, "w") as file:
+            yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+        print_success(
+            f"Updated compatibility info table: {Fore.CYAN}{filepath}"
+        )
+    except Exception as e:
+        print_error(f"Failed to update compatibility info: {e}")
+
+
+def update_compatibility_info(filepath, new_versions):
+    for version in new_versions:
+        version["kube"] = sorted(
+            version["kube"], key=lambda v: Version(v), reverse=True
+        )
+    try:
+        data = read_yaml(filepath)
+        if data:
+            update_versions_data(data, new_versions)
+        else:
+            print_warning("No existing versions found. Writing new data.")
+            data = {"versions": sort_versions(new_versions)}
+        save_versions(filepath, data)
+    except Exception as e:
+        print_error(f"Failed to update compatibility info: {e}")
+
+
 # Custom YAML representer for lists that contain only strings
 # This is to ensure that lists of strings are represented as flow style
 #  e.g. [a, b, c]
@@ -123,48 +169,3 @@ def represent_ordereddict(dumper, data):
 
 # Add the custom representer to the yaml loader
 yaml.add_representer(OrderedDict, represent_ordereddict)
-
-
-def sort_versions(versions):
-    return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
-
-
-def update_compatibility_info(filepath, new_versions):
-    for version in new_versions:
-        version["kube"] = sorted(
-            version["kube"], key=lambda v: Version(v), reverse=True
-        )
-    try:
-        data = read_yaml(filepath)
-        if data and "versions" in data:
-            existing_versions = {v["version"]: v for v in data["versions"]}
-            for new_version in new_versions:
-                version_num = new_version["version"]
-                if version_num not in existing_versions:
-                    existing_versions[version_num] = new_version
-            data["versions"] = sort_versions(list(existing_versions.values()))
-            with open(filepath, "w") as file:
-                yaml.dump(
-                    data, file, default_flow_style=False, sort_keys=False
-                )
-            print_success(
-                "Updated compatibility info table: "
-                + Fore.CYAN
-                + f" {filepath}"
-            )
-        else:
-            print_warning("No existing versions found. Writing new data.")
-            with open(filepath, "w") as file:
-                yaml.dump(
-                    {"versions": sort_versions(new_versions)},
-                    file,
-                    default_flow_style=False,
-                    sort_keys=False,
-                )
-            print_success(
-                "Written new compatibility info to "
-                + Fore.CYAN
-                + f" {filepath}"
-            )
-    except Exception as e:
-        print_error(f"Failed to update compatibility info: {e}")
