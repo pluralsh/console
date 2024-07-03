@@ -74,7 +74,7 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 	for _, namespace := range namespaceCredentials.Spec.Namespaces {
 		nc, ok := in.cache.Get(namespace)
 		if ok && nc.namespaceCredentials != nil && *nc.namespaceCredentials != namespaceCredentials.Name {
-			log.Logger.Warnf("found conflicting entries for %s namespace: %s and %s",
+			log.Logger.Warnf("found conflicting credentials for %s namespace: %s and %s",
 				namespace, *nc.namespaceCredentials, namespaceCredentials.Name)
 		}
 
