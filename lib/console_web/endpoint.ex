@@ -32,6 +32,7 @@ defmodule ConsoleWeb.Endpoint do
   plug CORSPlug
   plug ConsoleWeb.Plugs.RemoteIp
   plug ConsoleWeb.Plugs.AuditContext
+  plug ConsoleWeb.Plugs.SecureHeaders
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
