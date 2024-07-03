@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/credentials"
 
 	ctrl "sigs.k8s.io/controller-runtime"
 
@@ -90,7 +91,7 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 
 // ToController creates Controller instance based on this Reconciler.
 func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient,
-	userGroupCache cache.UserGroupCache, credentialsCache cache.NamespaceCredentialsCache) (Controller, error) {
+	userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) (Controller, error) {
 	switch sc {
 	case GitRepositoryReconciler:
 		return &controller.GitRepositoryReconciler{
@@ -263,7 +264,7 @@ func Reconcilers() ReconcilerList {
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
 func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, url, token string,
-	userGroupCache cache.UserGroupCache, credentialsCache cache.NamespaceCredentialsCache) ([]Controller, error) {
+	userGroupCache cache.UserGroupCache, credentialsCache credentials.NamespaceCredentialsCache) ([]Controller, error) {
 	result := make([]Controller, len(rl))
 	for i, r := range rl {
 		controller, err := r.ToController(mgr, client.New(url, token), userGroupCache, credentialsCache)

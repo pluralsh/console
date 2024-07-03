@@ -6,6 +6,8 @@ import (
 	context "context"
 
 	gqlclient "github.com/pluralsh/console-client-go"
+	credentials "github.com/pluralsh/console/controller/internal/credentials"
+
 	mock "github.com/stretchr/testify/mock"
 
 	v1alpha1 "github.com/pluralsh/console/controller/api/v1alpha1"
@@ -5381,6 +5383,53 @@ func (_c *ConsoleClientMock_UpsertNotificationSink_Call) Return(_a0 *gqlclient.N
 }
 
 func (_c *ConsoleClientMock_UpsertNotificationSink_Call) RunAndReturn(run func(context.Context, gqlclient.NotificationSinkAttributes) (*gqlclient.NotificationSinkFragment, error)) *ConsoleClientMock_UpsertNotificationSink_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UseNamespaceCredentials provides a mock function with given fields: namespace, credentialsCache
+func (_m *ConsoleClientMock) UseNamespaceCredentials(namespace string, credentialsCache credentials.NamespaceCredentialsCache) error {
+	ret := _m.Called(namespace, credentialsCache)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UseNamespaceCredentials")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, credentials.NamespaceCredentialsCache) error); ok {
+		r0 = rf(namespace, credentialsCache)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_UseNamespaceCredentials_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UseNamespaceCredentials'
+type ConsoleClientMock_UseNamespaceCredentials_Call struct {
+	*mock.Call
+}
+
+// UseNamespaceCredentials is a helper method to define mock.On call
+//   - namespace string
+//   - credentialsCache credentials.NamespaceCredentialsCache
+func (_e *ConsoleClientMock_Expecter) UseNamespaceCredentials(namespace interface{}, credentialsCache interface{}) *ConsoleClientMock_UseNamespaceCredentials_Call {
+	return &ConsoleClientMock_UseNamespaceCredentials_Call{Call: _e.mock.On("UseNamespaceCredentials", namespace, credentialsCache)}
+}
+
+func (_c *ConsoleClientMock_UseNamespaceCredentials_Call) Run(run func(namespace string, credentialsCache credentials.NamespaceCredentialsCache)) *ConsoleClientMock_UseNamespaceCredentials_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(string), args[1].(credentials.NamespaceCredentialsCache))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UseNamespaceCredentials_Call) Return(_a0 error) *ConsoleClientMock_UseNamespaceCredentials_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UseNamespaceCredentials_Call) RunAndReturn(run func(string, credentials.NamespaceCredentialsCache) error) *ConsoleClientMock_UseNamespaceCredentials_Call {
 	_c.Call.Return(run)
 	return _c
 }

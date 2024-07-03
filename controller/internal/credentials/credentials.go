@@ -1,4 +1,4 @@
-package cache
+package credentials
 
 import (
 	"context"
@@ -6,10 +6,14 @@ import (
 
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/controller"
 	"github.com/pluralsh/console/controller/internal/log"
-	"github.com/pluralsh/console/controller/internal/utils"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+)
+
+const (
+	CredentialsSecretTokenKey = "token"
 )
 
 type NamespaceCredentialsCache interface {
@@ -88,14 +92,14 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 }
 
 func (in *namespaceCredentialsCache) getNamespaceCredentialsToken(nc *v1alpha1.NamespaceCredentials) (string, error) {
-	secret, err := utils.GetSecret(in.ctx, in.client, &nc.Spec.SecretRef)
-	if err != nil {
+	secret := &corev1.Secret{}
+	if err := in.client.Get(in.ctx, types.NamespacedName{Name: nc.Spec.SecretRef.Name, Namespace: nc.Spec.SecretRef.Namespace}, secret); err != nil {
 		return "", fmt.Errorf("failed to get secret: %s", err)
 	}
 
-	token, ok := secret.StringData[controller.CredentialsSecretTokenKey]
+	token, ok := secret.StringData[CredentialsSecretTokenKey]
 	if !ok {
-		return "", fmt.Errorf("did not found %s data in a secret", controller.CredentialsSecretTokenKey)
+		return "", fmt.Errorf("did not found %s data in a secret", CredentialsSecretTokenKey)
 	}
 
 	return token, nil

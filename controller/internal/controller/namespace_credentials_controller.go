@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -29,7 +29,7 @@ type NamespaceCredentialsReconciler struct {
 	client.Client
 	ConsoleClient    consoleclient.ConsoleClient
 	Scheme           *runtime.Scheme
-	CredentialsCache cache.NamespaceCredentialsCache
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=namespacecredentialss,verbs=get;list;watch;create;update;patch;delete

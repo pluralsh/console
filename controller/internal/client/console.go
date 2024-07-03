@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/credentials"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 )
@@ -122,7 +122,7 @@ type ConsoleClient interface {
 	GetProject(ctx context.Context, id, name *string) (*console.ProjectFragment, error)
 	UpdateProject(ctx context.Context, id string, attributes console.ProjectAttributes) (*console.ProjectFragment, error)
 	IsProjectExists(ctx context.Context, name string) (bool, error)
-	UseNamespaceCredentials(namespace string, credentialsCache cache.NamespaceCredentialsCache) error
+	UseNamespaceCredentials(namespace string, credentialsCache credentials.NamespaceCredentialsCache) error
 }
 
 func New(url, token string) ConsoleClient {

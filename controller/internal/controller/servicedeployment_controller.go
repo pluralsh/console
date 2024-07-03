@@ -6,6 +6,7 @@ import (
 	"sort"
 
 	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/credentials"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
@@ -38,7 +39,7 @@ type ServiceReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	UserGroupCache   cache.UserGroupCache
 	Scheme           *runtime.Scheme
-	CredentialsCache cache.NamespaceCredentialsCache
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments,verbs=get;list;watch;create;update;patch;delete

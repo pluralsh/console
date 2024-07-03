@@ -29,6 +29,7 @@ import (
 	deploymentsv1alpha "github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/cache"
 	"github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/pluralsh/console/controller/internal/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -149,7 +150,7 @@ func main() {
 			})
 	}()
 
-	credentialsCache, err := cache.NewNamespaceCredentialsCache(mgr.GetClient(), opt.consoleToken)
+	credentialsCache, err := credentials.NewNamespaceCredentialsCache(mgr.GetClient(), opt.consoleToken)
 	if err != nil {
 		setupLog.Error(err, "unable to initialize credentials cache")
 		os.Exit(1)
