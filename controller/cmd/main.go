@@ -155,7 +155,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient, userGroupCache, credentialsCache)
+	controllers, err := opt.reconcilers.ToControllers(mgr, opt.consoleUrl, opt.consoleToken, userGroupCache, credentialsCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)

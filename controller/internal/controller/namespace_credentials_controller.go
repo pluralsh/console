@@ -77,9 +77,7 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 		return ctrl.Result{}, err
 	}
 
-	// TODO:
-	//		Then we can use separate clients for all reconcilers.
-	//		Each reconciler has to check if it is reconciling object that should use namespace credentials instead of default ones.
+	// TODO: Each reconciler has to check if it is reconciling object that should use namespace credentials instead of default ones.
 
 	utils.MarkTrue(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")
 

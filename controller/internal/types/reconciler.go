@@ -261,11 +261,11 @@ func Reconcilers() ReconcilerList {
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
-func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, url, token string,
 	userGroupCache cache.UserGroupCache, credentialsCache cache.NamespaceCredentialsCache) ([]Controller, error) {
 	result := make([]Controller, len(rl))
 	for i, r := range rl {
-		controller, err := r.ToController(mgr, consoleClient, userGroupCache, credentialsCache)
+		controller, err := r.ToController(mgr, client.New(url, token), userGroupCache, credentialsCache)
 		if err != nil {
 			return nil, err
 		}
