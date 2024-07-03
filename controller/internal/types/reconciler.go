@@ -35,6 +35,7 @@ const (
 	CustomStackRunReconciler        Reconciler = "customstackrun"
 	DeploymentSettingsReconciler    Reconciler = "deploymentsettings"
 	ProjectReconciler               Reconciler = "project"
+	NamespaceCredentialsReconciler  Reconciler = "namespacecredentials"
 )
 
 // ToReconciler maps reconciler string to a Reconciler type.
@@ -78,6 +79,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 		fallthrough
 	case ProjectReconciler:
 		fallthrough
+	case NamespaceCredentialsReconciler:
+		fallthrough
 	case ProviderReconciler:
 		return Reconciler(reconciler), nil
 	}
@@ -86,7 +89,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 }
 
 // ToController creates Controller instance based on this Reconciler.
-func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache) (Controller, error) {
+func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+	userGroupCache cache.UserGroupCache, credentialsCache cache.NamespaceCredentialsCache) (Controller, error) {
 	switch sc {
 	case GitRepositoryReconciler:
 		return &controller.GitRepositoryReconciler{
@@ -212,6 +216,13 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			Scheme:         mgr.GetScheme(),
 			UserGroupCache: userGroupCache,
 		}, nil
+	case NamespaceCredentialsReconciler:
+		return &controller.NamespaceCredentialsReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}, nil
 	default:
 		return nil, fmt.Errorf("reconciler %q is not supported", sc)
 	}
@@ -245,14 +256,16 @@ func Reconcilers() ReconcilerList {
 		DeploymentSettingsReconciler,
 		CustomStackRunReconciler,
 		ClusterRestoreReconciler,
+		NamespaceCredentialsReconciler,
 	}
 }
 
 // ToControllers returns a list of Controller instances based on this Reconciler array.
-func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, consoleClient client.ConsoleClient, userGroupCache cache.UserGroupCache) ([]Controller, error) {
+func (rl ReconcilerList) ToControllers(mgr ctrl.Manager, consoleClient client.ConsoleClient,
+	userGroupCache cache.UserGroupCache, credentialsCache cache.NamespaceCredentialsCache) ([]Controller, error) {
 	result := make([]Controller, len(rl))
 	for i, r := range rl {
-		controller, err := r.ToController(mgr, consoleClient, userGroupCache)
+		controller, err := r.ToController(mgr, consoleClient, userGroupCache, credentialsCache)
 		if err != nil {
 			return nil, err
 		}

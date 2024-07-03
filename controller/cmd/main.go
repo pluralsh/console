@@ -148,7 +148,14 @@ func main() {
 				return true, nil
 			})
 	}()
-	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient, userGroupCache)
+
+	credentialsCache, err := cache.NewNamespaceCredentialsCache(mgr.GetClient(), opt.consoleToken)
+	if err != nil {
+		setupLog.Error(err, "unable to initialize credentials cache")
+		os.Exit(1)
+	}
+
+	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient, userGroupCache, credentialsCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)
