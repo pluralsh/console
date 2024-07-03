@@ -78,7 +78,7 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 	}
 
 	// TODO:
-	//		Add impersonate func to console client interface that will switch tokens that are used. Then we can use separate clients for all reconcilers.
+	//		Then we can use separate clients for all reconcilers.
 	//		Each reconciler has to check if it is reconciling object that should use namespace credentials instead of default ones.
 
 	utils.MarkTrue(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")

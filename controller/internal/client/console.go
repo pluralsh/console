@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/internal/cache"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 )
@@ -21,6 +22,7 @@ func (t *authedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 type client struct {
 	ctx           context.Context
+	url           string
 	consoleClient console.ConsoleClient
 }
 
@@ -120,18 +122,17 @@ type ConsoleClient interface {
 	GetProject(ctx context.Context, id, name *string) (*console.ProjectFragment, error)
 	UpdateProject(ctx context.Context, id string, attributes console.ProjectAttributes) (*console.ProjectFragment, error)
 	IsProjectExists(ctx context.Context, name string) (bool, error)
+	UseNamespaceCredentials(namespace string, credentialsCache cache.NamespaceCredentialsCache) error
 }
 
 func New(url, token string) ConsoleClient {
-	httpClient := http.Client{
-		Transport: &authedTransport{
-			token:   token,
-			wrapped: http.DefaultTransport,
-		},
-	}
-
 	return &client{
-		consoleClient: console.NewClient(&httpClient, url, nil),
+		consoleClient: console.NewClient(NewHttpClient(token), url, nil),
+		url:           url,
 		ctx:           context.Background(),
 	}
+}
+
+func NewHttpClient(token string) *http.Client {
+	return &http.Client{Transport: &authedTransport{token: token, wrapped: http.DefaultTransport}}
 }
