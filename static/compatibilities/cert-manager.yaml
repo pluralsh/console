@@ -1,6 +1,7 @@
 icon: https://raw.githubusercontent.com/cert-manager/cert-manager/d53c0b9270f8cd90d908460d69502694e1838f5f/logo/logo-small.png
 git_url: https://github.com/cert-manager/cert-manager
 release_url: https://github.com/cert-manager/cert-manager/releases/tag/v{vsn}
+chart_url: https://charts.jetstack.io
 versions:
 - version: 1.15.0
   kube: ['1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24']

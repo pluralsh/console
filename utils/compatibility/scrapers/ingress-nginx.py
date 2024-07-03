@@ -2,7 +2,12 @@
 
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import print_error, fetch_page, update_compatibility_info
+from utils import (
+    print_error,
+    fetch_page,
+    update_compatibility_info,
+    update_chart_versions,
+)
 
 
 def parse_page(content):
@@ -56,3 +61,4 @@ def scrape():
     update_compatibility_info(
         "../../static/compatibilities/ingress-nginx.yaml", rows
     )
+    update_chart_versions("ingress-nginx", "nginx-ingress")
