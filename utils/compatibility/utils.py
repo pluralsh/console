@@ -32,17 +32,26 @@ def read_yaml(file_path):
     return None
 
 
+def write_yaml(file_path, data):
+    try:
+        with open(file_path, "w") as file:
+            yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+            return True
+    except Exception as e:
+        print_error(f"Failed to write to {file_path}: {e}")
+    return False
+
+
 def update_chart_versions(app_name, chart_name=""):
+
     if not chart_name:
         chart_name = app_name
 
-    compatibility_yaml = read_yaml(
-        f"../../static/compatibilities/{app_name}.yaml"
-    )
+    yaml_file_name = f"../../static/compatibilities/{app_name}.yaml"
+    compatibility_yaml = read_yaml(yaml_file_name)
+
     if not compatibility_yaml or "versions" not in compatibility_yaml:
-        print_error(
-            f"No versions found for {app_name}, cannot update chart version."
-        )
+        print_error(f"No versions found for {app_name}")
         return
 
     chart_url = compatibility_yaml["chart_url"]
@@ -56,7 +65,26 @@ def update_chart_versions(app_name, chart_name=""):
         print_error(f"Failed to parse the index.yaml for {app_name}")
         return
 
-    print(index_yaml["entries"][chart_name])
+    chart_versions = index_yaml["entries"][chart_name]
+    if not chart_versions:
+        print_error(f"No versions found for {chart_name}")
+        return
+
+    for chart_entry in chart_versions:
+        app_version = chart_entry["appVersion"]
+        app_version = app_version.lstrip("v")
+
+        chart_version = chart_entry["version"]
+        chart_version = chart_version.lstrip("v")
+
+        for row in compatibility_yaml["versions"]:
+            if row["version"] == app_version:
+                row["chart_version"] = chart_version
+
+    if write_yaml(yaml_file_name, compatibility_yaml):
+        print_success(f"Updated chart versions for {app_name}")
+    else:
+        print_error(f"Failed to update chart versions for {app_name}")
 
 
 def fetch_page(url):

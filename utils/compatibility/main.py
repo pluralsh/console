@@ -34,6 +34,7 @@ if "names" not in manifest:
     print_error("No names found in the manifest file.")
 
 for name in manifest["names"]:
-    print(Fore.GREEN + f"Calling scraper for {name}" + Style.RESET_ALL)
-    call_scraper(name)
-    print("\n")
+    if name == "cert-manager":
+        print(Fore.GREEN + f"Calling scraper for {name}" + Style.RESET_ALL)
+        call_scraper(name)
+        print("\n")
