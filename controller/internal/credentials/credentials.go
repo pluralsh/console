@@ -104,12 +104,12 @@ func (in *namespaceCredentialsCache) getNamespaceCredentialsToken(nc *v1alpha1.N
 		return "", fmt.Errorf("failed to get secret: %s", err)
 	}
 
-	token, ok := secret.StringData[CredentialsSecretTokenKey]
+	token, ok := secret.Data[CredentialsSecretTokenKey]
 	if !ok {
 		return "", fmt.Errorf("did not found %s data in a secret", CredentialsSecretTokenKey)
 	}
 
-	return token, nil
+	return string(token), nil
 }
 
 func (in *namespaceCredentialsCache) RemoveNamespaceCredentials(namespaceCredentials *v1alpha1.NamespaceCredentials) {
