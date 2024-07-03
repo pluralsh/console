@@ -92,7 +92,9 @@ def update_chart_versions(app_name, chart_name=""):
                 row["chart_version"] = chart_version
 
     if write_yaml(yaml_file_name, compatibility_yaml):
-        print_success("Updated chart versions for" + Fore.CYAN + f" {app_name}")
+        print_success(
+            "Updated chart versions for" + Fore.CYAN + f" {app_name}"
+        )
     else:
         print_error(f"Failed to update chart versions for {app_name}")
 

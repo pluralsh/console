@@ -14,15 +14,13 @@ def parse_page(content):
         "h3", text="Supported Versions table"
     )
     if not supported_versions_section:
-        print_error(
-            "Could not find the 'Supported Versions table' section on the page."
-        )
+        print_error("Could not find the 'Supported Versions table' section.")
         return None
 
     table = supported_versions_section.find_next("table")
     if not table:
         print_error(
-            "Could not find the table following the 'Supported Versions table' section."
+            "Could not find the table 'Supported Versions table' section."
         )
         return None
     return table
