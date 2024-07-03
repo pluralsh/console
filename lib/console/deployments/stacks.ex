@@ -456,7 +456,8 @@ defmodule Console.Deployments.Stacks do
 
   defp new_changes(repo, %{folder: folder}, sha1, sha2) do
     case Discovery.changes(repo, sha1, sha2, folder) do
-      {:ok, _, msg} -> {:ok, sha2, msg}
+      {:ok, [_ | _], msg} -> {:ok, sha2, msg}
+      {:ok, :pass, msg} -> {:ok, sha2, msg}
       _ -> {:error, "no changes within #{folder}"}
     end
   end
