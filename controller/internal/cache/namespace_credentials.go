@@ -15,7 +15,7 @@ type NamespaceCredentialsCache interface {
 	Init() error
 	Wipe()
 	Reset() error
-	AddNamespaceCredentials(nc *v1alpha1.NamespaceCredentials)
+	AddNamespaceCredentials(nc *v1alpha1.NamespaceCredentials) error
 	GetNamespaceCredentials(namespace string) NamespaceCredentials
 	GetNamespaceToken(namespace string) (string, error)
 }
@@ -64,7 +64,7 @@ func (in *namespaceCredentialsCache) Reset() error {
 	return in.Init()
 }
 
-func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredentials *v1alpha1.NamespaceCredentials) {
+func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredentials *v1alpha1.NamespaceCredentials) error {
 	token, err := in.getNamespaceCredentialsToken(namespaceCredentials)
 	for _, namespace := range namespaceCredentials.Spec.Namespaces {
 		in.cache.Set(namespace, NamespaceCredentials{
@@ -73,6 +73,7 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 			err:                  err,
 		})
 	}
+	return err
 }
 
 func (in *namespaceCredentialsCache) getNamespaceCredentialsToken(nc *v1alpha1.NamespaceCredentials) (string, error) {
