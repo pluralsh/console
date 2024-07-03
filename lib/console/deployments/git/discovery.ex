@@ -26,6 +26,7 @@ defmodule Console.Deployments.Git.Discovery do
       do: Agent.sha(pid, ref)
   end
 
+  @spec changes(GitRepository.t, binary, binary, binary) :: {:ok, [binary] | :pass, binary} | error
   def changes(%GitRepository{} = repo, sha1, sha2, folder) do
     with {:ok, pid} <- find(repo),
       do: Agent.changes(pid, sha1, sha2, folder)
