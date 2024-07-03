@@ -140,7 +140,12 @@ def update_compatibility_info(filepath, new_versions):
         else:
             print_warning("No existing versions found. Writing new data.")
             data = {"versions": sort_versions(new_versions)}
-        save_versions(filepath, data)
+        if write_yaml(filepath, data):
+            print_success(
+                f"Updated compatibility info table: {Fore.CYAN}{filepath}"
+            )
+        else:
+            print_error(f"Failed to update compatibility info for {filepath}")
     except Exception as e:
         print_error(f"Failed to update compatibility info: {e}")
 
