@@ -7,6 +7,7 @@ import (
 
 	"github.com/pluralsh/console/controller/internal/cache"
 	"github.com/pluralsh/console/controller/internal/credentials"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
@@ -541,6 +542,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
