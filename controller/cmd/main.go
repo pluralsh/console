@@ -150,7 +150,7 @@ func main() {
 			})
 	}()
 
-	credentialsCache, err := credentials.NewNamespaceCredentialsCache(mgr.GetClient(), opt.consoleToken)
+	credentialsCache, err := credentials.NewNamespaceCredentialsCache(opt.consoleToken, scheme)
 	if err != nil {
 		setupLog.Error(err, "unable to initialize credentials cache")
 		os.Exit(1)

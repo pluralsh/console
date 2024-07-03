@@ -8,8 +8,10 @@ import (
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/log"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
 )
 
 const (
@@ -26,15 +28,20 @@ type NamespaceCredentialsCache interface {
 	GetNamespaceToken(namespace string) (string, error)
 }
 
-func NewNamespaceCredentialsCache(client client.Client, defaultConsoleToken string) (NamespaceCredentialsCache, error) {
+func NewNamespaceCredentialsCache(defaultConsoleToken string, scheme *runtime.Scheme) (NamespaceCredentialsCache, error) {
+	c, err := client.New(config.GetConfigOrDie(), client.Options{Scheme: scheme})
+	if err != nil {
+		return nil, err
+	}
+
 	cache := &namespaceCredentialsCache{
 		cache:               cmap.New[NamespaceCredentials](),
 		ctx:                 context.Background(),
-		client:              client,
+		client:              c,
 		defaultConsoleToken: defaultConsoleToken,
 	}
 
-	if err := cache.Init(); err != nil {
+	if err = cache.Init(); err != nil {
 		return nil, err
 	}
 
