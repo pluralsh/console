@@ -64,10 +64,12 @@ def update_chart_versions(app_name, chart_name=""):
         print_error(f"No versions found for {app_name}")
         return
 
-    chart_url = compatibility_yaml["chart_url"]
-    chart_index = fetch_page(chart_url + "/index.yaml")
+    helm_repository_url = compatibility_yaml["helm_repository_url"]
+    chart_index = fetch_page(helm_repository_url + "/index.yaml")
     if not chart_index:
-        print_error(f"Failed to fetch the index.yaml from {chart_url}")
+        print_error(
+            f"Failed to fetch the index.yaml from {helm_repository_url}"
+        )
         return
 
     index_yaml = yaml.safe_load(chart_index)

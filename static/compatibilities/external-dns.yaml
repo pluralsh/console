@@ -1,7 +1,7 @@
 icon: https://github.com/kubernetes-sigs/external-dns/blob/master/docs/img/external-dns.png?raw=true
 git_url: https://github.com/kubernetes-sigs/external-dns
 release_url: https://github.com/kubernetes-sigs/external-dns/releases/tag/v{vsn}
-chart_url: https://kubernetes-sigs.github.io/external-dns
+helm_repository_url: https://kubernetes-sigs.github.io/external-dns
 versions:
 - version: 0.14.2
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20',

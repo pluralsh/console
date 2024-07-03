@@ -77,4 +77,4 @@ def scrape():
     update_compatibility_info(
         "../../static/compatibilities/ingress-nginx.yaml", rows
     )
-    update_chart_versions("ingress-nginx", "nginx-ingress")
+    update_chart_versions("ingress-nginx")
