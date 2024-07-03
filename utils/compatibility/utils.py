@@ -117,17 +117,6 @@ def update_versions_data(data, new_versions):
     data["versions"] = sort_versions(list(merged_versions.values()))
 
 
-def save_versions(filepath, data):
-    try:
-        with open(filepath, "w") as file:
-            yaml.dump(data, file, default_flow_style=False, sort_keys=False)
-        print_success(
-            f"Updated compatibility info table: {Fore.CYAN}{filepath}"
-        )
-    except Exception as e:
-        print_error(f"Failed to update compatibility info: {e}")
-
-
 def update_compatibility_info(filepath, new_versions):
     for version in new_versions:
         version["kube"] = sorted(
