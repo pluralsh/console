@@ -35,9 +35,10 @@ const (
 // ServiceReconciler reconciles a Service object
 type ServiceReconciler struct {
 	client.Client
-	ConsoleClient  consoleclient.ConsoleClient
-	UserGroupCache cache.UserGroupCache
-	Scheme         *runtime.Scheme
+	ConsoleClient    consoleclient.ConsoleClient
+	UserGroupCache   cache.UserGroupCache
+	Scheme           *runtime.Scheme
+	CredentialsCache cache.NamespaceCredentialsCache
 }
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments,verbs=get;list;watch;create;update;patch;delete
@@ -48,6 +49,11 @@ type ServiceReconciler struct {
 
 func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
+	if err := r.ConsoleClient.UseNamespaceCredentials(req.Namespace, r.CredentialsCache); err != nil {
+		logger.Error(err, "failed to use namespace credentials", req.NamespacedName)
+		return ctrl.Result{}, err
+	}
+
 	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
