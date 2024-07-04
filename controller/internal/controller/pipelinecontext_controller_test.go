@@ -89,6 +89,12 @@ var _ = Describe("Context Pipeline Controller", Ordered, func() {
 				SHA: lo.ToPtr("XSVPPXNATKHUWFMR4ZD65KSTAKEO5L5EIOQNXV545JZTG4YRUQSA===="),
 				Conditions: []metav1.Condition{
 					{
+						Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+						Message: "using default credentials",
+					},
+					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
 						Reason: v1alpha1.SynchronizedConditionReason.String(),

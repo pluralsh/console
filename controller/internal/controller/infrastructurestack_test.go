@@ -170,6 +170,12 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 					SHA: lo.ToPtr("UQLLCV7K3LXSH6UVRSPKDH4DTVUK25I2N7SOLTPVZQ5ZM3ATT4UQ===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:   v1alpha1.ReadyConditionType.String(),
 							Status: metav1.ConditionTrue,
 							Reason: v1alpha1.ReadyConditionReason.String(),
@@ -217,6 +223,12 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 					ID:  lo.ToPtr(id),
 					SHA: lo.ToPtr("WGTHKPFBECQHAGULHCY2CV5V6HW2ONRNDOIRLJGM2V6ES7OSCBLQ===="),
 					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
 							Status: metav1.ConditionTrue,
@@ -284,7 +296,6 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			err = k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
-
 		})
 
 		It("should successfully reconcile the resource", func() {

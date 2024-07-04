@@ -129,6 +129,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 						SHA: lo.ToPtr(sha),
 						Conditions: []metav1.Condition{
 							{
+								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+								Message: "using default credentials",
+							},
+							{
 								Type:    v1alpha1.ReadyConditionType.String(),
 								Status:  metav1.ConditionFalse,
 								Reason:  v1alpha1.ReadyConditionReason.String(),
@@ -182,6 +188,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 						ID:  lo.ToPtr("123"),
 						SHA: lo.ToPtr(sha),
 						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+								Message: "using default credentials",
+							},
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
 								Status:  metav1.ConditionFalse,
@@ -242,6 +254,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 						ID:  lo.ToPtr(id),
 						SHA: lo.ToPtr("HNVNOPAXHYMV5XQMPCT3ILWU4LQKJFEFF5EF5SDVNZRDLSP7E6DQ===="),
 						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+								Message: "using default credentials",
+							},
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
 								Status:  metav1.ConditionFalse,
@@ -315,11 +333,13 @@ var _ = Describe("Service Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
 			serviceReconciler := &controller.ServiceReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{

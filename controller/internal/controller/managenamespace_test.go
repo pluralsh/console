@@ -100,6 +100,12 @@ var _ = Describe("ManagedNamespace Service Controller", Ordered, func() {
 					SHA: lo.ToPtr("DJCZHRJXVA2HKOIRZQKKLVCPP7TJ5MZMMEPDD2YANTAAEGDZMXNQ===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:    v1alpha1.ReadyConditionType.String(),
 							Status:  metav1.ConditionTrue,
 							Reason:  v1alpha1.ReadyConditionReason.String(),
@@ -118,6 +124,7 @@ var _ = Describe("ManagedNamespace Service Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("CreateNamespace", mock.Anything, mock.Anything).Return(test.returnCreateNamespace, nil)
 			namespaceReconciler := &controller.ManagedNamespaceReconciler{
 				Client:        k8sClient,

@@ -173,6 +173,12 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 					SHA: lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:   v1alpha1.ReadonlyConditionType.String(),
 							Status: metav1.ConditionFalse,
 							Reason: v1alpha1.ReadonlyConditionReason.String(),
@@ -219,6 +225,12 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 					ID:  lo.ToPtr(awsClusterConsoleID),
 					SHA: lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
 					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
 						{
 							Type:   v1alpha1.ReadonlyConditionType.String(),
 							Status: metav1.ConditionFalse,
@@ -268,6 +280,12 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 					SHA: lo.ToPtr("IO7U7VEWAH4NIU5U2647LKOD4DZU2V3YLLRSAPXXBHXZA55KANEA===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:   v1alpha1.ReadonlyConditionType.String(),
 							Status: metav1.ConditionFalse,
 							Reason: v1alpha1.ReadonlyConditionReason.String(),
@@ -305,6 +323,12 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
 				Status: v1alpha1.Status{
 					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
 							Status:  metav1.ConditionTrue,
@@ -357,6 +381,12 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 					SHA: lo.ToPtr("CPYLCGRGF2JWFBF3OGRHQQUSBDXW6Y4VMUDQDCQQDEA6G6CAZORQ===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
 							Status:  metav1.ConditionTrue,
 							Reason:  v1alpha1.ReadonlyConditionReason.String(),
@@ -399,6 +429,12 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 					SHA: lo.ToPtr("L3KK4BYJRB2JTXZVEU6NBBLEQUHLTNVQE2OHMRNDJBY6WKZFFA4A===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
 							Status:  metav1.ConditionTrue,
 							Reason:  v1alpha1.ReadonlyConditionReason.String(),
@@ -417,6 +453,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 
 		It("should successfully reconcile BYOK readonly cluster", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetClusterByHandle", mock.AnythingOfType("*string")).Return(&gqlclient.ClusterFragment{
 				ID:             byokReadonlyClusterConsoleID,
 				CurrentVersion: lo.ToPtr("1.24.11"),
@@ -424,9 +461,10 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			fakeConsoleClient.On("UpdateCluster", mock.Anything, mock.Anything).Return(nil, nil)
 
 			controllerReconciler := &controller.ClusterReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: byokReadonlyNamespacedName})
@@ -440,6 +478,12 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 					ID:  lo.ToPtr(byokReadonlyClusterConsoleID),
 					SHA: lo.ToPtr("KUEGIQWRYFJEEYRIYV5KIVVWP6AWD66YSD3AODQ54VEIM27IX44A===="),
 					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
 							Status:  metav1.ConditionTrue,

@@ -130,6 +130,12 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 					SHA: lo.ToPtr("HQOM6JFXYFND7G7CYINDOXMSLWQSMBMJFLE3GK4AVDNPDBCU6COQ===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:   v1alpha1.ReadyConditionType.String(),
 							Status: metav1.ConditionTrue,
 							Reason: v1alpha1.ReadyConditionReason.String(),
@@ -178,6 +184,12 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 					ID:  lo.ToPtr(id),
 					SHA: lo.ToPtr("22DSNVGBN5ZUDLAIPTN7WE74JXC5X4BXNHRQUN4BQ6EW47CYCJNA===="),
 					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
 							Status: metav1.ConditionTrue,

@@ -72,6 +72,12 @@ var _ = Describe("NotificationRouter Service Controller", Ordered, func() {
 					SHA: lo.ToPtr("PWP5EBI7YMVTF7VLCCKG7K3LXEKCNK36HGVFIOJIT3MJFBSKVEOQ===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.ReadonlyConditionReason.String(),

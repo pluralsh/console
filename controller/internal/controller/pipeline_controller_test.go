@@ -248,6 +248,12 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				SHA: lo.ToPtr("LCRWA6OVJKINWVJ6YI3BWBBK3YXM2GWKMYOTTJRCAPJBIZ7Q2VGA===="),
 				Conditions: []metav1.Condition{
 					{
+						Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+						Message: "using default credentials",
+					},
+					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
 						Reason: v1alpha1.SynchronizedConditionReason.String(),
@@ -285,6 +291,12 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 				ID:  lo.ToPtr(pipelineConsoleID),
 				SHA: lo.ToPtr("LCRWA6OVJKINWVJ6YI3BWBBK3YXM2GWKMYOTTJRCAPJBIZ7Q2VGA===="),
 				Conditions: []metav1.Condition{
+					{
+						Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+						Message: "using default credentials",
+					},
 					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,

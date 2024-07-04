@@ -92,6 +92,12 @@ var _ = Describe("Cluster Restore Controller", Ordered, func() {
 				Status: gqlclient.RestoreStatusSuccessful,
 				Conditions: []metav1.Condition{
 					{
+						Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+						Status:  metav1.ConditionFalse,
+						Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+						Message: "using default credentials",
+					},
+					{
 						Type:   v1alpha1.ReadyConditionType.String(),
 						Status: metav1.ConditionTrue,
 						Reason: v1alpha1.ReadyConditionReason.String(),
