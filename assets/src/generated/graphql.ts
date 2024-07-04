@@ -2137,6 +2137,8 @@ export type InfrastructureStack = {
   cluster?: Maybe<Cluster>;
   /** version/image config for the tool you're using */
   configuration: StackConfiguration;
+  /** a cron to spawn runs for this stack */
+  cron?: Maybe<StackCron>;
   customStackRuns?: Maybe<CustomStackRunConnection>;
   /** the stack definition in-use by this stack */
   definition?: Maybe<StackDefinition>;
@@ -6996,6 +6998,8 @@ export type StackAttributes = {
   configuration: StackConfigurationAttributes;
   /** id of an scm connection to use for pr callbacks */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
+  /** a cron to spawn runs for this stack */
+  cron?: InputMaybe<StackCronAttributes>;
   /** the id of a stack definition to use */
   definitionId?: InputMaybe<Scalars['ID']['input']>;
   environment?: InputMaybe<Array<InputMaybe<StackEnvironmentAttributes>>>;
@@ -7053,6 +7057,21 @@ export type StackConfigurationAttributes = {
   tag?: InputMaybe<Scalars['String']['input']>;
   /** the semver of the tool you wish to use */
   version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type StackCron = {
+  __typename?: 'StackCron';
+  /** whether you want any cron-derived runs to automatically approve changes */
+  autoApprove?: Maybe<Scalars['Boolean']['output']>;
+  /** the crontab used to independently spawn runs for this stack */
+  crontab: Scalars['String']['output'];
+};
+
+export type StackCronAttributes = {
+  /** whether you want to auto approve any changes spawned by the cron worker */
+  autoApprove?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the crontab to use for spawning stack runs */
+  crontab: Scalars['String']['input'];
 };
 
 export type StackDefinition = {

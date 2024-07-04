@@ -56,7 +56,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ServiceDependency,
     Project,
     ServiceImport,
-    StackDefinition
+    StackDefinition,
+    StackCron
   }
 
   def query(Project, _), do: Project
@@ -111,6 +112,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ServiceDependency, _), do: ServiceDependency
   def query(ServiceImport, _), do: ServiceImport
   def query(StackDefinition, _), do: StackDefinition
+  def query(StackCron, _), do: StackCron
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

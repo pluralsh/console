@@ -246,4 +246,23 @@ defmodule Console.Deployments.CronTest do
       for l <- keep, do: assert refetch(l)
     end
   end
+
+  describe "#spawn_stack_crons/0" do
+    test "it can spawn cron runs for a stack" do
+      crons = for _ <- 1..3,
+        do: insert(:stack_cron, next_run_at: Timex.now() |> Timex.shift(minutes: -5), stack: build(:stack, sha: "sha"))
+      ignore = for _ <- 1..3,
+        do: insert(:stack_cron, next_run_at: Timex.now() |> Timex.shift(minutes: 5), stack: build(:stack, sha: "sha"))
+
+      Cron.spawn_stack_crons()
+
+      for c <- crons do
+        assert refetch(c).last_run_at
+      end
+
+      for c <- ignore do
+        refute refetch(c).last_run_at
+      end
+    end
+  end
 end

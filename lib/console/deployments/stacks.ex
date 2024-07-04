@@ -20,10 +20,11 @@ defmodule Console.Deployments.Stacks do
     PullRequest,
     ScmConnection,
     CustomStackRun,
-    StackDefinition
+    StackDefinition,
+    StackCron
   }
 
-  @preloads [:environment, :files, :observable_metrics]
+  @preloads [:environment, :files, :observable_metrics, :cron]
 
   @type error :: Console.error
   @type stack_resp :: {:ok, Stack.t} | error
@@ -460,6 +461,26 @@ defmodule Console.Deployments.Stacks do
       {:ok, :pass, msg} -> {:ok, sha2, msg}
       _ -> {:error, "no changes within #{folder}"}
     end
+  end
+
+  @doc """
+  Spawns a new run in response to a stack cron being executable
+  """
+  @spec spawn_cron(StackCron.t) :: run_resp
+  def spawn_cron(%StackCron{auto_approve: approve} = cron) do
+    %{stack: stack} = Repo.preload(cron, [stack: @poll_preloads])
+    start_transaction()
+    |> add_operation(:run, fn _ ->
+      create_run(stack, stack.sha, %{
+        message: "cron run for #{stack.name}",
+        approval: stack.approval || approve
+      })
+    end)
+    |> add_operation(:cron, fn _ ->
+      StackCron.changeset(cron, %{last_run_at: Timex.now()})
+      |> Repo.update()
+    end)
+    |> execute(extract: :run)
   end
 
   @doc """

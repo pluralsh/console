@@ -624,6 +624,14 @@ defmodule Console.Factory do
     }
   end
 
+  def stack_cron_factory do
+    %Schema.StackCron{
+      crontab: "*/5 * * * *",
+      stack: build(:stack),
+      next_run_at: Timex.now(),
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

@@ -1092,6 +1092,9 @@ input StackAttributes {
   "the id of a stack definition to use"
   definitionId: ID
 
+  "a cron to spawn runs for this stack"
+  cron: StackCronAttributes
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -1128,6 +1131,14 @@ input StackHookAttributes {
 
   "the stage to run this hook before"
   afterStage: StepStage!
+}
+
+input StackCronAttributes {
+  "the crontab to use for spawning stack runs"
+  crontab: String!
+
+  "whether you want to auto approve any changes spawned by the cron worker"
+  autoApprove: Boolean
 }
 
 input StackRunAttributes {
@@ -1307,6 +1318,9 @@ type InfrastructureStack {
   "the stack definition in-use by this stack"
   definition: StackDefinition
 
+  "a cron to spawn runs for this stack"
+  cron: StackCron
+
   "the actor of this stack (defaults to root console user)"
   actor: User
 
@@ -1322,6 +1336,14 @@ type InfrastructureStack {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type StackCron {
+  "the crontab used to independently spawn runs for this stack"
+  crontab: String!
+
+  "whether you want any cron-derived runs to automatically approve changes"
+  autoApprove: Boolean
 }
 
 "grab-bag of state configuration urls for supported tools"
