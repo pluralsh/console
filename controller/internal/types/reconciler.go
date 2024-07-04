@@ -123,9 +123,10 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case PipelineReconciler:
 		return &controller.PipelineReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case ProviderReconciler:
 		return &controller.ProviderReconciler{
@@ -160,9 +161,10 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case PipelineContextReconciler:
 		return &controller.PipelineContextReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case ClusterRestoreTriggerReconciler:
 		return &controller.ClusterRestoreTriggerReconciler{

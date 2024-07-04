@@ -18,11 +18,13 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	deploymentsv1alpha1 "github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -30,6 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -37,8 +40,9 @@ import (
 // PipelineContextReconciler reconciles a PipelineContext object
 type PipelineContextReconciler struct {
 	client.Client
-	ConsoleClient consoleclient.ConsoleClient
-	Scheme        *runtime.Scheme
+	ConsoleClient    consoleclient.ConsoleClient
+	Scheme           *runtime.Scheme
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=pipelinecontexts,verbs=get;list;watch;create;update;patch;delete
@@ -90,6 +94,15 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		}
 	}()
 
+	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
+	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
+	utils.MarkCredentialsCondition(pipelineContext.SetCondition, nc, err)
+	if err != nil {
+		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
+		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		return ctrl.Result{}, err
+	}
+
 	// Mark resource as not ready. This will be overridden in the end.
 	utils.MarkFalse(pipelineContext.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
 
@@ -125,6 +138,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 // SetupWithManager sets up the controller with the Manager.
 func (r *PipelineContextReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
 		For(&deploymentsv1alpha1.PipelineContext{}).
 		Complete(r)
 }
