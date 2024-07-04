@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pluralsh/console/controller/internal/controller"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	common "github.com/pluralsh/console/controller/internal/test/common"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -104,13 +105,15 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetDeploymentSettings", mock.Anything).Return(test.returnResource, nil)
 			fakeConsoleClient.On("UpdateDeploymentSettings", mock.Anything, mock.Anything).Return(nil, nil)
 
 			controllerReconciler := &controller.DeploymentSettingsReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{

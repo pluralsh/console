@@ -8,6 +8,7 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/controller"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/samber/lo"
@@ -67,12 +68,14 @@ var _ = Describe("Context Pipeline Controller", Ordered, func() {
 		})
 		It("should successfully create pipeline context", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("CreatePipelineContext", mock.Anything, mock.Anything, mock.Anything).Return(&gqlclient.CreatePipelineContext{CreatePipelineContext: &gqlclient.PipelineContextFragment{ID: pipelineContextID}}, nil)
 
 			controllerReconciler := &controller.PipelineContextReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: pipelineContextNamespacedName})

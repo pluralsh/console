@@ -3,6 +3,7 @@ package controller_test
 import (
 	"context"
 
+	"github.com/pluralsh/console/controller/internal/credentials"
 	batchv1 "k8s.io/api/batch/v1"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -186,6 +187,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("CreateStack", mock.Anything, mock.Anything).Return(test.returnCreateStack, nil)
 			reconciler := &controller.InfrastructureStackReconciler{
 				Client:        k8sClient,
@@ -265,13 +267,15 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetStack", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("UpdateStack", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 
 			reconciler := &controller.InfrastructureStackReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
@@ -305,12 +309,14 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetStack", mock.Anything, mock.Anything).Return(test.returnResource, nil)
 			fakeConsoleClient.On("DeleteStack", mock.Anything, mock.Anything).Return(nil)
 			reconciler := &controller.InfrastructureStackReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err = reconciler.Reconcile(ctx, reconcile.Request{

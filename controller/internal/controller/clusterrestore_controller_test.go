@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	gqlclient "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -69,14 +70,15 @@ var _ = Describe("Cluster Restore Controller", Ordered, func() {
 
 		It("should successfully reconcile cluster restore", func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetClusterRestore", mock.Anything, mock.AnythingOfType("string")).Return(nil, errors.NewNotFound(schema.GroupResource{}, restoreName))
 			fakeConsoleClient.On("IsClusterRestoreExisting", mock.Anything, mock.AnythingOfType("string")).Return(false, nil)
 			fakeConsoleClient.On("CreateClusterRestore", mock.Anything, restoreBackupID).Return(&gqlclient.ClusterRestoreFragment{ID: restoreConsoleID, Status: gqlclient.RestoreStatusSuccessful}, nil)
-
 			controllerReconciler := &controller.ClusterRestoreReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
