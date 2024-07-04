@@ -282,6 +282,13 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 		attr.ActorID = &userID
 	}
 
+	if stack.Spec.Cron != nil {
+		attr.Cron = &console.StackCronAttributes{
+			Crontab:     stack.Spec.Cron.Crontab,
+			AutoApprove: stack.Spec.Cron.AutoApprove,
+		}
+	}
+
 	for _, file := range stack.Spec.Files {
 		secret := &corev1.Secret{}
 		name := types.NamespacedName{Name: file.SecretRef.Name, Namespace: stack.GetNamespace()}
