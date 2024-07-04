@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,10 +32,6 @@ type ServiceAccountReconciler struct {
 	ConsoleClient consoleclient.ConsoleClient
 	Scheme        *runtime.Scheme
 }
-
-const (
-	tokenKeyName = "token"
-)
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=serviceaccounts,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=serviceaccounts/status,verbs=get;update;patch
@@ -226,7 +223,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 
 	if err == nil {
 		logger.Info("updating existing token secret")
-		secret.StringData = map[string]string{tokenKeyName: *token.Token}
+		secret.StringData = map[string]string{credentials.CredentialsSecretTokenKey: *token.Token}
 		if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
 			return err
 		}
@@ -237,7 +234,7 @@ func (r *ServiceAccountReconciler) syncToken(ctx context.Context, sa *v1alpha1.S
 	logger.Info("creating new token secret")
 	secret = &corev1.Secret{
 		ObjectMeta: v1.ObjectMeta{Name: sa.Spec.TokenSecretRef.Name, Namespace: getTokenSecretNamespace(sa)},
-		StringData: map[string]string{tokenKeyName: *token.Token},
+		StringData: map[string]string{credentials.CredentialsSecretTokenKey: *token.Token},
 	}
 	if err = controllerutil.SetControllerReference(sa, secret, r.Scheme); err != nil {
 		return err

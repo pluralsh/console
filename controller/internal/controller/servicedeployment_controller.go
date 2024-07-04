@@ -6,6 +6,8 @@ import (
 	"sort"
 
 	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/credentials"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
@@ -35,9 +37,10 @@ const (
 // ServiceReconciler reconciles a Service object
 type ServiceReconciler struct {
 	client.Client
-	ConsoleClient  consoleclient.ConsoleClient
-	UserGroupCache cache.UserGroupCache
-	Scheme         *runtime.Scheme
+	ConsoleClient    consoleclient.ConsoleClient
+	UserGroupCache   cache.UserGroupCache
+	Scheme           *runtime.Scheme
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=servicedeployments,verbs=get;list;watch;create;update;patch;delete
@@ -64,6 +67,15 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			reterr = err
 		}
 	}()
+
+	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
+	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
+	utils.MarkCredentialsCondition(service.SetCondition, nc, err)
+	if err != nil {
+		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		return ctrl.Result{}, err
+	}
 
 	if !service.GetDeletionTimestamp().IsZero() {
 		return r.handleDelete(ctx, service)
@@ -534,6 +546,7 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).

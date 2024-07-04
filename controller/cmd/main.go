@@ -29,6 +29,7 @@ import (
 	deploymentsv1alpha "github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/cache"
 	"github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/pluralsh/console/controller/internal/types"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -148,7 +149,15 @@ func main() {
 				return true, nil
 			})
 	}()
-	controllers, err := opt.reconcilers.ToControllers(mgr, consoleClient, userGroupCache)
+
+	credentialsCache, err := credentials.NewNamespaceCredentialsCache(opt.consoleToken, scheme)
+	if err != nil {
+		setupLog.Error(err, "unable to initialize credentials cache")
+		os.Exit(1)
+	}
+
+	controllers, err := opt.reconcilers.ToControllers(
+		mgr, opt.consoleUrl, opt.consoleToken, userGroupCache, credentialsCache)
 	if err != nil {
 		setupLog.Error(err, "error when creating controllers")
 		os.Exit(1)

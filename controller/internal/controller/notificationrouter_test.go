@@ -8,6 +8,7 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/controller"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/samber/lo"
@@ -71,6 +72,12 @@ var _ = Describe("NotificationRouter Service Controller", Ordered, func() {
 					SHA: lo.ToPtr("PWP5EBI7YMVTF7VLCCKG7K3LXEKCNK36HGVFIOJIT3MJFBSKVEOQ===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.ReadonlyConditionReason.String(),
@@ -95,12 +102,14 @@ var _ = Describe("NotificationRouter Service Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetNotificationRouterByName", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, id))
 			fakeConsoleClient.On("UpsertNotificationRouter", mock.Anything, mock.Anything).Return(test.notificationRouterFragment, nil)
 			nr := &controller.NotificationRouterReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := nr.Reconcile(ctx, reconcile.Request{
@@ -139,12 +148,14 @@ var _ = Describe("NotificationRouter Service Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetNotificationRouter", mock.Anything, mock.Anything).Return(test.returnGetNs, nil)
 			fakeConsoleClient.On("DeleteNotificationRouter", mock.Anything, mock.Anything).Return(nil)
 			nsReconciler := &controller.NotificationRouterReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err = nsReconciler.Reconcile(ctx, reconcile.Request{

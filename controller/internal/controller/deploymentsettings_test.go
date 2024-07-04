@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/pluralsh/console/controller/internal/controller"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	common "github.com/pluralsh/console/controller/internal/test/common"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -87,6 +88,12 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 					SHA: lo.ToPtr("DCEAWIBB4LMCBZMS2RLT55CFYHVD2MEYN4B3AOFSKP7SO55HFKZA===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:   v1alpha1.ReadyConditionType.String(),
 							Status: metav1.ConditionTrue,
 							Reason: v1alpha1.ReadyConditionReason.String(),
@@ -104,13 +111,15 @@ var _ = Describe("DeploymentSettings Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetDeploymentSettings", mock.Anything).Return(test.returnResource, nil)
 			fakeConsoleClient.On("UpdateDeploymentSettings", mock.Anything, mock.Anything).Return(nil, nil)
 
 			controllerReconciler := &controller.DeploymentSettingsReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{

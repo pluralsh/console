@@ -8,6 +8,7 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/controller"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/samber/lo"
@@ -129,6 +130,12 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 					SHA: lo.ToPtr("HQOM6JFXYFND7G7CYINDOXMSLWQSMBMJFLE3GK4AVDNPDBCU6COQ===="),
 					Conditions: []metav1.Condition{
 						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
+						{
 							Type:   v1alpha1.ReadyConditionType.String(),
 							Status: metav1.ConditionTrue,
 							Reason: v1alpha1.ReadyConditionReason.String(),
@@ -146,11 +153,13 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("CreateCustomStackRun", mock.Anything, mock.Anything).Return(test.returnCreateCustomStackRun, nil)
 			reconciler := &controller.CustomStackRunReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := reconciler.Reconcile(ctx, reconcile.Request{
@@ -175,6 +184,12 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 					ID:  lo.ToPtr(id),
 					SHA: lo.ToPtr("22DSNVGBN5ZUDLAIPTN7WE74JXC5X4BXNHRQUN4BQ6EW47CYCJNA===="),
 					Conditions: []metav1.Condition{
+						{
+							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+							Message: "using default credentials",
+						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
 							Status: metav1.ConditionTrue,
@@ -205,13 +220,15 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetCustomStackRun", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("UpdateCustomStackRun", mock.Anything, mock.Anything, mock.Anything).Return(test.returnUpdateCustomStack, nil)
 
 			reconciler := &controller.CustomStackRunReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
@@ -237,12 +254,14 @@ var _ = Describe("Custom Stack Run Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetCustomStackRun", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("DeleteCustomStackRun", mock.Anything, mock.Anything).Return(nil)
 			reconciler := &controller.CustomStackRunReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err = reconciler.Reconcile(ctx, reconcile.Request{

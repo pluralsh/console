@@ -9,6 +9,7 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/controller"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	common "github.com/pluralsh/console/controller/internal/test/common"
 	"github.com/pluralsh/console/controller/internal/test/mocks"
 	"github.com/samber/lo"
@@ -128,6 +129,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 						SHA: lo.ToPtr(sha),
 						Conditions: []metav1.Condition{
 							{
+								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+								Message: "using default credentials",
+							},
+							{
 								Type:    v1alpha1.ReadyConditionType.String(),
 								Status:  metav1.ConditionFalse,
 								Reason:  v1alpha1.ReadyConditionReason.String(),
@@ -147,13 +154,15 @@ var _ = Describe("Service Controller", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
 			fakeConsoleClient.On("CreateService", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
 			serviceReconciler := &controller.ServiceReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
@@ -179,6 +188,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 						ID:  lo.ToPtr("123"),
 						SHA: lo.ToPtr(sha),
 						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+								Message: "using default credentials",
+							},
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
 								Status:  metav1.ConditionFalse,
@@ -206,12 +221,14 @@ var _ = Describe("Service Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
 			fakeConsoleClient.On("UpdateService", mock.Anything, mock.Anything).Return(nil)
 			serviceReconciler := &controller.ServiceReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
@@ -237,6 +254,12 @@ var _ = Describe("Service Controller", Ordered, func() {
 						ID:  lo.ToPtr(id),
 						SHA: lo.ToPtr("HNVNOPAXHYMV5XQMPCT3ILWU4LQKJFEFF5EF5SDVNZRDLSP7E6DQ===="),
 						Conditions: []metav1.Condition{
+							{
+								Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
+								Status:  metav1.ConditionFalse,
+								Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
+								Message: "using default credentials",
+							},
 							{
 								Type:    v1alpha1.ReadyConditionType.String(),
 								Status:  metav1.ConditionFalse,
@@ -279,12 +302,14 @@ var _ = Describe("Service Controller", Ordered, func() {
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(test.returnGetService, nil)
 			fakeConsoleClient.On("UpdateService", mock.Anything, mock.Anything).Return(nil)
 			serviceReconciler := &controller.ServiceReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err := serviceReconciler.Reconcile(ctx, reconcile.Request{
@@ -308,11 +333,13 @@ var _ = Describe("Service Controller", Ordered, func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetService", mock.Anything, mock.Anything).Return(nil, nil).Once()
 			serviceReconciler := &controller.ServiceReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			_, err = serviceReconciler.Reconcile(ctx, reconcile.Request{
@@ -394,10 +421,12 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			serviceReconciler := &controller.ServiceReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			out, err := serviceReconciler.MergeHelmValues(ctx, test.SecretRef, test.Values)
@@ -428,10 +457,12 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			serviceReconciler := &controller.ServiceReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			out, err := serviceReconciler.MergeHelmValues(ctx, test.SecretRef, test.Values)
@@ -458,10 +489,12 @@ var _ = Describe("Merge Helm Values", Ordered, func() {
 			}
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
+			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			serviceReconciler := &controller.ServiceReconciler{
-				Client:        k8sClient,
-				Scheme:        k8sClient.Scheme(),
-				ConsoleClient: fakeConsoleClient,
+				Client:           k8sClient,
+				Scheme:           k8sClient.Scheme(),
+				ConsoleClient:    fakeConsoleClient,
+				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
 			}
 
 			out, err := serviceReconciler.MergeHelmValues(ctx, test.SecretRef, test.Values)
