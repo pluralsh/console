@@ -63,6 +63,10 @@ type InfrastructureStackSpec struct {
 	// Configuration version/image config for the tool you're using
 	Configuration StackConfiguration `json:"configuration"`
 
+	// Configuration for cron generation of stack runs
+	// +kubebuilder:validation:Optional
+	Cron *StackCron `json:"cron,omitempty"`
+
 	// Approval whether to require approval
 	// +kubebuilder:validation:Optional
 	Approval *bool `json:"approval,omitempty"`
@@ -129,6 +133,14 @@ type StackConfiguration struct {
 	// Hooks to run at various stages of the stack run
 	// +kubebuilder:validation:Optional
 	Hooks []*StackHook `json:"hooks,omitempty"`
+}
+
+type StackCron struct {
+	// The crontab on which to spawn stack runs
+	Crontab string `json:"crontab"`
+	// Whether to automatically approve cron-spawned runs
+	// +kubebuilder:validation:Optional
+	AutoApprove *bool `json:"autoApprove"`
 }
 
 type StackHook struct {

@@ -18,6 +18,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [GlobalService](#globalservice)
 - [InfrastructureStack](#infrastructurestack)
 - [ManagedNamespace](#managednamespace)
+- [NamespaceCredentials](#namespacecredentials)
 - [NotificationRouter](#notificationrouter)
 - [NotificationSink](#notificationsink)
 - [Pipeline](#pipeline)
@@ -27,6 +28,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [Project](#project)
 - [Provider](#provider)
 - [ScmConnection](#scmconnection)
+- [ServiceAccount](#serviceaccount)
 - [ServiceDeployment](#servicedeployment)
 
 
@@ -775,6 +777,7 @@ _Appears in:_
 | `workdir` _string_ | The working directory within the git spec you want to run commands in (useful for projects with external modules) |  | Optional: {} <br /> |
 | `jobSpec` _[JobSpec](#jobspec)_ | JobSpec optional k8s job configuration for the job that will apply this stack |  | Optional: {} <br /> |
 | `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  |  |
+| `cron` _[StackCron](#stackcron)_ | Configuration for cron generation of stack runs |  | Optional: {} <br /> |
 | `approval` _boolean_ | Approval whether to require approval |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
 | `environment` _[StackEnvironment](#stackenvironment) array_ |  |  | Optional: {} <br /> |
@@ -847,6 +850,44 @@ _Appears in:_
 | `service` _[ServiceTemplate](#servicetemplate)_ |  |  | Optional: {} <br /> |
 | `target` _[ClusterTarget](#clustertarget)_ |  |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef allows a managed namespace to span a specific project only |  | Optional: {} <br /> |
+
+
+#### NamespaceCredentials
+
+
+
+NamespaceCredentials connects namespaces with credentials from secret ref,
+which are then used by other controllers during reconciling.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `NamespaceCredentials` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[NamespaceCredentialsSpec](#namespacecredentialsspec)_ |  |  | Required: {} <br /> |
+
+
+#### NamespaceCredentialsSpec
+
+
+
+
+
+
+
+_Appears in:_
+- [NamespaceCredentials](#namespacecredentials)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `namespaces` _string array_ | Namespaces that will be connected with credentials from SecretRef. |  | Required: {} <br /> |
+| `secretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretRef contains reference to secret with credentials. |  | Required: {} <br /> |
+
+
 
 
 #### NamespacedName
@@ -1461,6 +1502,41 @@ _Appears in:_
 | `privateKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 
 
+#### ServiceAccount
+
+
+
+ServiceAccount is a type of non-human account that provides distinct identity.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `ServiceAccount` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[ServiceAccountSpec](#serviceaccountspec)_ | Spec reflects a Console API service account spec. |  | Required: {} <br /> |
+
+
+#### ServiceAccountSpec
+
+
+
+
+
+
+
+_Appears in:_
+- [ServiceAccount](#serviceaccount)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `email` _string_ | Email address to that will be bound to this service account. |  | Required: {} <br />Type: string <br /> |
+| `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | TokenSecretRef is a secret reference that should contain token. |  | Optional: {} <br /> |
+
+
 #### ServiceComponent
 
 
@@ -1703,6 +1779,23 @@ _Appears in:_
 | `image` _string_ | Image optional custom image you might want to use |  | Optional: {} <br /> |
 | `version` _string_ | Version the semver of the tool you wish to use |  |  |
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run |  | Optional: {} <br /> |
+
+
+#### StackCron
+
+
+
+
+
+
+
+_Appears in:_
+- [InfrastructureStackSpec](#infrastructurestackspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `crontab` _string_ | The crontab on which to spawn stack runs |  |  |
+| `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs |  | Optional: {} <br /> |
 
 
 #### StackEnvironment

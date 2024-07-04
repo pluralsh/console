@@ -183,6 +183,18 @@ spec:
                 required:
                 - version
                 type: object
+              cron:
+                description: Configuration for cron generation of stack runs
+                properties:
+                  autoApprove:
+                    description: Whether to automatically approve cron-spawned runs
+                    type: boolean
+                  crontab:
+                    description: The crontab on which to spawn stack runs
+                    type: string
+                required:
+                - crontab
+                type: object
               detach:
                 description: If true, detach the stack on CR deletion, leaving all
                   cloud resources in-place.
