@@ -69,9 +69,11 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}()
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
-	if err := r.ConsoleClient.UseNamespaceCredentials(req.Namespace, r.CredentialsCache); err != nil {
-		logger.Error(err, "failed to use namespace credentials", req.NamespacedName)
-		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use namespace credentials: %s", err.Error()))
+	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
+	utils.MarkCredentialsCondition(service.SetCondition, nc)
+	if err != nil {
+		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
 		return ctrl.Result{}, err
 	}
 

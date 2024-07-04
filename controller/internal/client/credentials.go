@@ -7,12 +7,12 @@ import (
 	"github.com/pluralsh/console/controller/internal/credentials"
 )
 
-func (c *client) UseNamespaceCredentials(namespace string, credentialsCache credentials.NamespaceCredentialsCache) error {
-	token, err := credentialsCache.GetNamespaceToken(namespace)
-	if err != nil {
-		return fmt.Errorf("cannot use %s namespace credentials, got error: %s", namespace, err.Error())
+func (c *client) UseCredentials(namespace string, credentialsCache credentials.NamespaceCredentialsCache) (string, error) {
+	nc := credentialsCache.GetNamespaceCredentials(namespace)
+	if nc.Err != nil {
+		return nc.NamespaceCredentials, fmt.Errorf("cannot use %s namespace credentials, got error: %s", nc.NamespaceCredentials, nc.Err.Error())
 	}
 
-	c.consoleClient = console.NewClient(NewHttpClient(token), c.url, nil)
-	return nil
+	c.consoleClient = console.NewClient(NewHttpClient(nc.Token), c.url, nil)
+	return nc.NamespaceCredentials, nil
 }

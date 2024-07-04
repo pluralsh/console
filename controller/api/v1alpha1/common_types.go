@@ -108,10 +108,11 @@ func (c ConditionType) String() string {
 }
 
 const (
-	ReadonlyConditionType     ConditionType = "Readonly"
-	ReadyConditionType        ConditionType = "Ready"
-	ReadyTokenConditionType   ConditionType = "ReadyToken"
-	SynchronizedConditionType ConditionType = "Synchronized"
+	ReadonlyConditionType              ConditionType = "Readonly"
+	ReadyConditionType                 ConditionType = "Ready"
+	ReadyTokenConditionType            ConditionType = "ReadyToken"
+	SynchronizedConditionType          ConditionType = "Synchronized"
+	NamespacedCredentialsConditionType ConditionType = "NamespacedCredentials"
 )
 
 type ConditionReason string
@@ -130,6 +131,8 @@ const (
 	SynchronizedConditionReasonDeleting ConditionReason = "Deleting"
 	ReadyTokenConditionReason           ConditionReason = "Ready"
 	ReadyTokenConditionReasonError      ConditionReason = "Error"
+	NamespacedCredentialsReason         ConditionReason = "NamespacedCredentials"
+	NamespacedCredentialsReasonDefault  ConditionReason = "DefaultCredentials"
 )
 
 type ConditionMessage string

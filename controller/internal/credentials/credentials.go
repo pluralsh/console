@@ -25,7 +25,6 @@ type NamespaceCredentialsCache interface {
 	AddNamespaceCredentials(nc *v1alpha1.NamespaceCredentials) error
 	RemoveNamespaceCredentials(nc *v1alpha1.NamespaceCredentials)
 	GetNamespaceCredentials(namespace string) NamespaceCredentials
-	GetNamespaceToken(namespace string) (string, error)
 }
 
 func NewNamespaceCredentialsCache(defaultConsoleToken string, scheme *runtime.Scheme) (NamespaceCredentialsCache, error) {
@@ -84,15 +83,15 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 	token, err := in.getNamespaceCredentialsToken(namespaceCredentials)
 	for _, namespace := range namespaceCredentials.Spec.Namespaces {
 		nc, ok := in.cache.Get(namespace)
-		if ok && nc.namespaceCredentials != nil && *nc.namespaceCredentials != namespaceCredentials.Name {
+		if ok && nc.NamespaceCredentials != namespaceCredentials.Name {
 			log.Logger.Warnf("found conflicting credentials for %s namespace: %s and %s",
-				namespace, *nc.namespaceCredentials, namespaceCredentials.Name)
+				namespace, nc.NamespaceCredentials, namespaceCredentials.Name)
 		}
 
 		in.cache.Set(namespace, NamespaceCredentials{
-			namespaceCredentials: &namespaceCredentials.Name,
-			token:                token,
-			err:                  err,
+			NamespaceCredentials: namespaceCredentials.Name,
+			Token:                token,
+			Err:                  err,
 		})
 	}
 	return err
@@ -123,21 +122,16 @@ func (in *namespaceCredentialsCache) GetNamespaceCredentials(namespace string) N
 		return nc
 	}
 
-	return NamespaceCredentials{token: in.defaultConsoleToken}
-}
-
-func (in *namespaceCredentialsCache) GetNamespaceToken(namespace string) (string, error) {
-	nc := in.GetNamespaceCredentials(namespace)
-	return nc.token, nc.err
+	return NamespaceCredentials{Token: in.defaultConsoleToken}
 }
 
 type NamespaceCredentials struct {
-	// namespaceCredentials is the name of NamespaceCredentials object for this namespace.
-	namespaceCredentials *string
+	// NamespaceCredentials resource name for this namespace.
+	NamespaceCredentials string
 
-	// token that controllers should use when reconciling objects from this namespace.
-	token string
+	// Token that controllers should use when reconciling objects from this namespace.
+	Token string
 
-	// err stores error that may occur while reading credentials for this namespace.
-	err error
+	// Err stores error that may occur while reading credentials for this namespace.
+	Err error
 }
