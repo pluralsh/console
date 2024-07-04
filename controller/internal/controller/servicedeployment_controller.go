@@ -51,11 +51,6 @@ type ServiceReconciler struct {
 
 func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
-	if err := r.ConsoleClient.UseNamespaceCredentials(req.Namespace, r.CredentialsCache); err != nil {
-		logger.Error(err, "failed to use namespace credentials", req.NamespacedName)
-		return ctrl.Result{}, err
-	}
-
 	service := &v1alpha1.ServiceDeployment{}
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
@@ -72,6 +67,13 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			reterr = err
 		}
 	}()
+
+	// Switch to proper namespace credentials if required. This has to be done before sending any request to the console.
+	if err := r.ConsoleClient.UseNamespaceCredentials(req.Namespace, r.CredentialsCache); err != nil {
+		logger.Error(err, "failed to use namespace credentials", req.NamespacedName)
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
 
 	if !service.GetDeletionTimestamp().IsZero() {
 		return r.handleDelete(ctx, service)
