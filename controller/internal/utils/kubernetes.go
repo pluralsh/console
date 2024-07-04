@@ -259,7 +259,7 @@ func MarkFalse(set func(metav1.Condition), conditionType v1alpha1.ConditionType,
 	MarkCondition(set, conditionType, metav1.ConditionFalse, conditionReason, message, messageArgs...)
 }
 
-func MarkCredentialsCondition(set func(condition metav1.Condition), namespacedCredentials string) {
+func MarkCredentialsCondition(set func(condition metav1.Condition), namespacedCredentials string, err error) {
 	condition := metav1.Condition{Type: v1alpha1.NamespacedCredentialsConditionType.String()}
 
 	if namespacedCredentials != "" {
@@ -270,6 +270,10 @@ func MarkCredentialsCondition(set func(condition metav1.Condition), namespacedCr
 		condition.Reason = v1alpha1.NamespacedCredentialsReasonDefault.String()
 		condition.Status = metav1.ConditionFalse
 		condition.Message = "using default credentials"
+	}
+
+	if err != nil {
+		condition.Message += fmt.Sprintf(", got error: %s", err.Error())
 	}
 
 	set(condition)
