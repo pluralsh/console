@@ -13,6 +13,7 @@ defmodule Console.Deployments.Cron do
     ManagedNamespace,
     Stack,
     StackRun,
+    StackCron,
     PullRequest,
     RunLog
   }
@@ -261,6 +262,18 @@ defmodule Console.Deployments.Cron do
     |> Stream.each(fn run ->
       Logger.info "ensuring run worker #{run.id} is placed"
       Stacks.Discovery.runner(run)
+    end)
+    |> Stream.run()
+  end
+
+  def spawn_stack_crons() do
+    StackCron.executable()
+    |> StackCron.ordered()
+    |> Repo.all()
+    |> Console.throttle()
+    |> Stream.each(fn cron ->
+      Logger.info "spawning stack cron run for #{cron.stack_id}"
+      Stacks.spawn_cron(cron)
     end)
     |> Stream.run()
   end

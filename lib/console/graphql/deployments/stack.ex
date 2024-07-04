@@ -24,6 +24,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :project_id,     :id, description: "the project id this stack will belong to"
     field :connection_id,  :id, description: "id of an scm connection to use for pr callbacks"
     field :definition_id,  :id, description: "the id of a stack definition to use"
+    field :cron,           :stack_cron_attributes, description: "a cron to spawn runs for this stack"
 
     field :read_bindings,  list_of(:policy_binding_attributes)
     field :write_bindings, list_of(:policy_binding_attributes)
@@ -45,6 +46,11 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :cmd,          non_null(:string), description: "a script hook to run at a stage"
     field :args,         list_of(:string), description: "args for `cmd`"
     field :after_stage,  non_null(:step_stage), description: "the stage to run this hook before"
+  end
+
+  input_object :stack_cron_attributes do
+    field :crontab,      non_null(:string), description: "the crontab to use for spawning stack runs"
+    field :auto_approve, :boolean, description: "whether you want to auto approve any changes spawned by the cron worker"
   end
 
   input_object :stack_run_attributes do
@@ -159,6 +165,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :cluster,    :cluster, resolve: dataloader(Deployments), description: "the cluster this stack runs on"
     field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
     field :definition, :stack_definition, resolve: dataloader(Deployments), description: "the stack definition in-use by this stack"
+    field :cron,       :stack_cron, resolve: dataloader(Deployments), description: "a cron to spawn runs for this stack"
 
     field :actor, :user, resolve: dataloader(User), description: "the actor of this stack (defaults to root console user)"
 
@@ -172,6 +179,11 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :write_bindings, list_of(:policy_binding), resolve: dataloader(Deployments)
 
     timestamps()
+  end
+
+  object :stack_cron do
+    field :crontab, non_null(:string), description: "the crontab used to independently spawn runs for this stack"
+    field :auto_approve, :boolean, description: "whether you want any cron-derived runs to automatically approve changes"
   end
 
   @desc "grab-bag of state configuration urls for supported tools"

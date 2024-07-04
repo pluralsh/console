@@ -12,6 +12,7 @@ defmodule Console.Schema.Stack do
     StackEnvironment,
     StackOutput,
     StackFile,
+    StackCron,
     User,
     ObservableMetric,
     ScmConnection,
@@ -95,6 +96,10 @@ defmodule Console.Schema.Stack do
       on_replace: :update,
       foreign_key: :stack_id
 
+    has_one :cron, StackCron,
+      on_replace: :update,
+      foreign_key: :stack_id
+
     has_many :environment, StackEnvironment, on_replace: :delete
     has_many :files,       StackFile, on_replace: :delete
     has_many :output,      StackOutput, on_replace: :delete
@@ -160,6 +165,7 @@ defmodule Console.Schema.Stack do
     |> cast_assoc(:read_bindings)
     |> cast_assoc(:environment)
     |> cast_assoc(:files)
+    |> cast_assoc(:cron)
     |> cast_assoc(:observable_metrics)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:cluster_id)

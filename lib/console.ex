@@ -232,5 +232,18 @@ defmodule Console do
 
   def lines(str), do: String.split(str, ~r/\R/)
 
+  def throttle(enum, opts \\ %{count: 30, pause: 1})
+  def throttle(enum, opts) when is_list(opts), do: throttle(enum, Map.new(opts))
+  def throttle(enum, %{count: count, pause: pause}) do
+    Stream.with_index(enum)
+    |> Stream.map(fn {r, ind} ->
+      if rem(ind, count) == 0 do
+        :timer.sleep(pause)
+      end
+
+      r
+    end)
+  end
+
   def storage, do: Console.Storage.Git
 end
