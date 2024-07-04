@@ -192,9 +192,10 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case ManagedNamespaceReconciler:
 		return &controller.ManagedNamespaceReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case StackReconciler:
 		return &controller.InfrastructureStackReconciler{
