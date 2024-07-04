@@ -195,10 +195,11 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case StackReconciler:
 		return &controller.InfrastructureStackReconciler{
-			Client:         mgr.GetClient(),
-			ConsoleClient:  consoleClient,
-			Scheme:         mgr.GetScheme(),
-			UserGroupCache: userGroupCache,
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
+			CredentialsCache: credentialsCache,
 		}, nil
 	case CustomStackRunReconciler:
 		return &controller.CustomStackRunReconciler{

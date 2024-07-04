@@ -21,6 +21,8 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/controller/internal/cache"
+	"github.com/pluralsh/console/controller/internal/credentials"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
@@ -45,9 +47,10 @@ const InfrastructureStackFinalizer = "deployments.plural.sh/stack-protection"
 // InfrastructureStackReconciler reconciles a InfrastructureStack object
 type InfrastructureStackReconciler struct {
 	client.Client
-	Scheme         *runtime.Scheme
-	ConsoleClient  consoleclient.ConsoleClient
-	UserGroupCache cache.UserGroupCache
+	Scheme           *runtime.Scheme
+	ConsoleClient    consoleclient.ConsoleClient
+	UserGroupCache   cache.UserGroupCache
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=infrastructurestacks,verbs=get;list;watch;create;update;patch;delete
@@ -79,6 +82,16 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 			reterr = err
 		}
 	}()
+
+	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
+	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
+	utils.MarkCredentialsCondition(stack.SetCondition, nc, err)
+	if err != nil {
+		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
+		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		return ctrl.Result{}, err
+	}
+
 	if !stack.GetDeletionTimestamp().IsZero() {
 		return r.handleDelete(ctx, stack)
 	}
@@ -179,6 +192,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 // SetupWithManager sets up the controller with the Manager.
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
 		For(&v1alpha1.InfrastructureStack{}).
 		Complete(r)
 }
