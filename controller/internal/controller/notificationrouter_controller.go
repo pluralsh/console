@@ -23,6 +23,7 @@ import (
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/containers"
 	"github.com/samber/lo"
@@ -32,6 +33,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -41,8 +43,9 @@ const NotificationRouterFinalizer = "deployments.plural.sh/notification-router-p
 // NotificationRouterReconciler reconciles a NotificationRouter object
 type NotificationRouterReconciler struct {
 	client.Client
-	ConsoleClient consoleclient.ConsoleClient
-	Scheme        *runtime.Scheme
+	ConsoleClient    consoleclient.ConsoleClient
+	Scheme           *runtime.Scheme
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=notificationrouters,verbs=get;list;watch;create;update;patch;delete
@@ -73,6 +76,15 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 			reterr = err
 		}
 	}()
+
+	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
+	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
+	utils.MarkCredentialsCondition(notificationRouter.SetCondition, nc, err)
+	if err != nil {
+		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
+		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		return ctrl.Result{}, err
+	}
 
 	if !notificationRouter.GetDeletionTimestamp().IsZero() {
 		return ctrl.Result{}, r.handleDelete(ctx, notificationRouter)
@@ -225,6 +237,7 @@ func (r *NotificationRouterReconciler) getPipelineID(ctx context.Context, objRef
 // SetupWithManager sets up the controller with the Manager.
 func (r *NotificationRouterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
 		For(&v1alpha1.NotificationRouter{}).
 		Complete(r)
 }

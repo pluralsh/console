@@ -117,9 +117,10 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case ClusterRestoreReconciler:
 		return &controller.ClusterRestoreReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case PipelineReconciler:
 		return &controller.PipelineReconciler{
@@ -168,27 +169,31 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case ClusterRestoreTriggerReconciler:
 		return &controller.ClusterRestoreTriggerReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case PrAutomationTriggerReconciler:
 		return &controller.PrAutomationTriggerReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case NotificationSinkReconciler:
 		return &controller.NotificationSinkReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case NotificationRouterReconciler:
 		return &controller.NotificationRouterReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case ManagedNamespaceReconciler:
 		return &controller.ManagedNamespaceReconciler{
@@ -207,15 +212,17 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 		}, nil
 	case CustomStackRunReconciler:
 		return &controller.CustomStackRunReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case DeploymentSettingsReconciler:
 		return &controller.DeploymentSettingsReconciler{
-			Client:        mgr.GetClient(),
-			ConsoleClient: consoleClient,
-			Scheme:        mgr.GetScheme(),
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
 		}, nil
 	case ProjectReconciler:
 		return &controller.ProjectReconciler{

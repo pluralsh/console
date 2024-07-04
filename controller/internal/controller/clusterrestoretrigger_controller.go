@@ -18,9 +18,11 @@ package controller
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -28,6 +30,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -35,8 +38,9 @@ import (
 // ClusterRestoreTriggerReconciler reconciles a ClusterRestoreTrigger object
 type ClusterRestoreTriggerReconciler struct {
 	client.Client
-	ConsoleClient consoleclient.ConsoleClient
-	Scheme        *runtime.Scheme
+	ConsoleClient    consoleclient.ConsoleClient
+	Scheme           *runtime.Scheme
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=clusterrestoretriggers,verbs=get;list;watch;create;update;patch;delete
@@ -87,6 +91,16 @@ func (r *ClusterRestoreTriggerReconciler) Reconcile(ctx context.Context, req ctr
 			reterr = err
 		}
 	}()
+
+	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
+	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
+	utils.MarkCredentialsCondition(trigger.SetCondition, nc, err)
+	if err != nil {
+		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
+		utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		return ctrl.Result{}, err
+	}
+
 	// Mark resource as not ready. This will be overridden in the end.
 	utils.MarkFalse(trigger.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
 
@@ -135,6 +149,7 @@ func (r *ClusterRestoreTriggerReconciler) isAlreadyExists(ctx context.Context, t
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClusterRestoreTriggerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
 		For(&v1alpha1.ClusterRestoreTrigger{}).
 		Complete(r)
 }
