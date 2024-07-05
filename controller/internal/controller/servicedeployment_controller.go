@@ -551,8 +551,8 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		// Setting max concurrent reconciles is a hard requirement for current namespace credentials implementation.
 		// Following watch ensures that if namespaced credentials change, all objects that use them will be reconciled.
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		Watches(&v1alpha1.NamespaceCredentials{}, handler.EnqueueRequestsFromMapFunc(func(_ context.Context, credentials client.Object) []reconcile.Request {
-			list := List[*v1alpha1.ServiceDeploymentList](r.Client, new(v1alpha1.ServiceDeploymentList))
+		Watches(&v1alpha1.NamespaceCredentials{}, handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, credentials client.Object) []reconcile.Request {
+			list := List[*v1alpha1.ServiceDeploymentList](ctx, r.Client, new(v1alpha1.ServiceDeploymentList))
 			return Req[*v1alpha1.ServiceDeployment](algorithms.Map(list.Items, func(s v1alpha1.ServiceDeployment) *v1alpha1.ServiceDeployment { return &s }), credentials)
 		})).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
@@ -562,8 +562,8 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func List[T client.ObjectList](c client.Client, list T) T {
-	_ = c.List(context.Background(), list)
+func List[T client.ObjectList](ctx context.Context, c client.Client, list T) T {
+	_ = c.List(ctx, list)
 	return list
 }
 
