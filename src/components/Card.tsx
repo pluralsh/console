@@ -133,34 +133,6 @@ export const getFillToLightBgC = memoize(
   })
 )
 
-const getLightModeBorderMapper = memoize(
-  (theme: DefaultTheme): Record<Exclude<CardSeverity, 'neutral'>, string> => ({
-    info: theme.colors['border-info'],
-    success: theme.colors['border-success'],
-    warning: theme.colors['border-warning'],
-    danger: theme.colors['border-danger-light'],
-    critical: theme.colors['border-danger'],
-  })
-)
-
-const getBorderColor = ({
-  theme,
-  fillLevel,
-  severity = 'neutral',
-}: {
-  theme: DefaultTheme
-  fillLevel: CardFillLevel
-  severity?: CardSeverity
-}) => {
-  const fillLevelToLightBorderColor = getLightModeBorderMapper(theme)
-
-  if (theme.mode === 'dark' || severity === 'neutral') {
-    return theme.colors[fillToNeutralBorderC[fillLevel]]
-  }
-
-  return fillLevelToLightBorderColor[severity]
-}
-
 const getBgColor = ({
   theme,
   fillLevel,
@@ -197,15 +169,11 @@ const CardSC = styled(Div)<{
     disabled,
   }) => ({
     ...theme.partials.reset.button,
-    border: `1px solid ${getBorderColor({
-      theme,
-      fillLevel,
-      severity,
-    })}`,
+    border: `1px solid ${theme.colors[fillToNeutralBorderC[fillLevel]]}`,
     borderRadius: theme.borderRadiuses[cornerSize],
     backgroundColor: selected
       ? theme.colors[fillToNeutralSelectedBgC[fillLevel]]
-      : getBgColor({ theme, fillLevel, severity }),
+      : getBgColor({ theme, fillLevel }),
     '&:focus, &:focus-visible': {
       outline: 'none',
     },

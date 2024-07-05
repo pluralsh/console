@@ -1,4 +1,3 @@
-import chroma from 'chroma-js'
 import { type CSSProperties } from 'styled-components'
 
 import { blue, green, grey, purple, red, yellow } from './colors-base'
@@ -10,20 +9,21 @@ export const semanticColorsDark = {
   //
   // fill-zero
   'fill-zero': grey[900],
-  'fill-zero-hover': grey[875],
-  'fill-zero-selected': grey[825],
+  'fill-zero-hover': grey[850],
+  'fill-zero-selected': grey[875],
   // fill-one
   'fill-one': grey[850],
-  'fill-one-hover': grey[825],
-  'fill-one-selected': grey[775],
+  'fill-one-hover': grey[800],
+  'fill-one-selected': grey[825],
   // fill-two
   'fill-two': grey[800],
-  'fill-two-hover': grey[775],
-  'fill-two-selected': grey[725],
+  'fill-two-hover': grey[750],
+  'fill-two-selected': grey[775],
   // fill-three
   'fill-three': grey[750],
-  'fill-three-hover': grey[725],
-  'fill-three-selected': grey[675],
+  'fill-three-hover': grey[700],
+  'fill-three-selected': grey[725],
+  // primary
   'fill-primary': purple[400],
   'fill-primary-hover': purple[350],
 
@@ -45,9 +45,11 @@ export const semanticColorsDark = {
   'action-link-inline-hover': blue[100],
   'action-link-inline-visited': purple[300],
   'action-link-inline-visited-hover': purple[200],
-  'action-input-hover': `${chroma('#E9ECF0').alpha(0.04)}`,
+  // input
+  'action-input-hover': '#E9ECF00A',
   // always-white
   'action-always-white': grey[50],
+  'action-on-filled-bg': grey[25],
 
   // Border
   //
@@ -63,7 +65,7 @@ export const semanticColorsDark = {
   'border-success': green[300],
   'border-warning': yellow[200],
   'border-danger': red[300],
-  'border-danger-light': red[300],
+  'border-danger-light': red[200],
   'border-outline-focused': blue[300],
 
   // Text
@@ -83,6 +85,7 @@ export const semanticColorsDark = {
   'text-danger': red[400],
   'text-danger-light': red[200],
   'text-always-white': grey[50],
+  'text-on-filled-bg': grey[50],
 
   // Icon
   //
@@ -133,11 +136,4 @@ export const semanticColorsDark = {
   semanticYellow: '#FFF9C2',
   semanticRedLight: '#F599A8',
   semanticRedDark: '#E95374',
-
-  // Deprecated (Remove after all 'error' colors converted to 'danger' in app)
-  //
-  'border-error': red[300],
-  'text-error': red[400],
-  'text-error-light': red[200],
-  'icon-error': red[200],
 } as const satisfies Record<string, CSSProperties['color']>

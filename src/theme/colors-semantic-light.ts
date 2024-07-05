@@ -1,7 +1,6 @@
-import chroma from 'chroma-js'
 import { type CSSProperties } from 'styled-components'
 
-import { blue, green, grey, purple, red } from './colors-base'
+import { blue, green, grey, purple, red, yellow } from './colors-base'
 import { colorsCloudShellLight } from './colors-cloudshell-light'
 import { colorsCodeBlockLight } from './colors-codeblock-light'
 import { semanticColorsDark } from './colors-semantic-dark'
@@ -10,21 +9,21 @@ export const semanticColorsLight = {
   // Fill
   //
   // fill-zero
-  'fill-zero': '#F3F5F6',
-  'fill-zero-hover': '#F5F5F5',
-  'fill-zero-selected': '#E5E6E7',
+  'fill-zero': '#FFFFFF',
+  'fill-zero-hover': grey[50],
+  'fill-zero-selected': grey[25],
   // fill-one
-  'fill-one': '#F9FAFB',
-  'fill-one-hover': '#F3F5F7',
-  'fill-one-selected': '#EEF0F2',
+  'fill-one': grey[25],
+  'fill-one-hover': grey[75],
+  'fill-one-selected': grey[50],
   // fill-two
-  'fill-two': '#F5F5F5',
-  'fill-two-hover': '#EBEDEE',
-  'fill-two-selected': '#E6E8E9',
+  'fill-two': grey[50],
+  'fill-two-hover': grey[100],
+  'fill-two-selected': grey[75],
   // fill-three
-  'fill-three': '#E2E3E8',
-  'fill-three-hover': '#D6D6D8',
-  'fill-three-selected': '#D3D3D3',
+  'fill-three': grey[75],
+  'fill-three-hover': grey[125],
+  'fill-three-selected': grey[100],
   // primary
   'fill-primary': purple[400],
   'fill-primary-hover': purple[350],
@@ -32,8 +31,8 @@ export const semanticColorsLight = {
   // Action
   //
   // primary
-  'action-primary': purple[400],
-  'action-primary-hover': purple[350],
+  'action-primary': purple[350],
+  'action-primary-hover': purple[300],
   'action-primary-disabled': grey[100],
   // link
   'action-link-inactive': grey[300],
@@ -43,64 +42,74 @@ export const semanticColorsLight = {
   'action-link-active-hover': grey[50],
   'action-link-active-disabled': grey[200],
   // link-inline
-  'action-link-inline': '#539AC3',
+  'action-link-inline': blue[700],
   'action-link-inline-hover': blue[600],
-  'action-link-inline-visited': purple[300],
-  'action-link-inline-visited-hover': purple[200],
+  'action-link-inline-visited': purple[500],
+  'action-link-inline-visited-hover': purple[350],
   // input
-  'action-input-hover': `${chroma('#C3C3C4').alpha(0.1)}`, // text color w/ alpha
+  'action-input-hover': 'C3C3C419',
   // always white
   'action-always-white': semanticColorsDark['action-always-white'],
+  'action-on-filled-bg': grey[25],
 
   // Border
   //
-  border: '#DFE2E7',
-  'border-fill-two': '#C5C9D3',
-  'border-fill-three': grey[400],
-  'border-selected': grey[600],
-  'border-input': '#C6CBD7',
-  'border-disabled': grey[100],
-  'border-primary': purple[400],
-  'border-secondary': blue[400],
-  'border-info': blue[300],
+  border: grey[75],
+  'border-fill-two': grey[100],
+  'border-fill-three': grey[125],
+  'border-selected': grey[800],
+  'border-input': grey[100],
+  'border-disabled': grey[75],
+  'border-primary': purple[500],
+  'border-secondary': blue[700],
+  'border-info': blue[600],
   'border-success': green[700],
-  'border-warning': '#C3B853',
-  'border-danger': '#ED4578',
-  'border-danger-light': '#F599A8',
-  'border-outline-focused': blue[400],
+  'border-warning': yellow[700],
+  'border-danger': red[600],
+  'border-danger-light': red[600],
+  'border-outline-focused': blue[500],
 
   // Text
   //
-  text: grey[950],
+  text: grey[800],
   'text-light': grey[600],
-  'text-xlight': '#8B8F97',
-  'text-long-form': grey[300],
+  'text-xlight': grey[500],
+  'text-long-form': grey[700],
   'text-disabled': grey[200],
-  'text-input-disabled': grey[200],
-  'text-primary-accent': '#38B6FF',
-  'text-primary-disabled': grey[400],
-  'text-success': green[700],
-  'text-success-light': green[600],
-  'text-warning': '#FF9900',
-  'text-warning-light': '#DCBC40',
-  'text-danger': '#E54064',
-  'text-danger-light': red[300],
+  'text-input-disabled': grey[400],
+  'text-primary-accent': blue[600],
+  'text-primary-disabled': grey[500],
+  'text-success': green[800],
+  'text-success-light': green[700],
+  'text-warning': yellow[800],
+  'text-warning-light': yellow[700],
+  'text-danger': red[700],
+  'text-danger-light': red[600],
   'text-always-white': semanticColorsDark['text-always-white'],
+  'text-on-filled-bg': grey[950],
 
   // Icon
   //
-  'icon-default': grey[600],
-  'icon-light': grey[500],
+  'icon-default': grey[900],
+  'icon-light': grey[700],
   'icon-xlight': grey[400],
   'icon-disabled': grey[100],
   'icon-primary': purple[300],
   'icon-secondary': blue[400],
   'icon-info': blue[350],
   'icon-success': green[700],
-  'icon-warning': '#FF9900',
+  'icon-warning': yellow[600],
   'icon-danger': red[300],
   'icon-danger-critical': '#ED4578',
   'icon-always-white': semanticColorsDark['icon-always-white'],
+
+  // Graph
+  //
+  'graph-blue': blue[500],
+  'graph-lilac': '#BE5EEB',
+  'graph-green': green[500],
+  'graph-purple': purple[350],
+  'graph-red': red[400],
 
   // Marketing
   //
@@ -127,21 +136,6 @@ export const semanticColorsLight = {
   semanticYellow: '#C3B853',
   semanticRedLight: '#F599A8',
   semanticRedDark: '#E95374',
-
-  // Graph
-  //
-  'graph-blue': blue[500],
-  'graph-lilac': '#BE5EEB',
-  'graph-green': green[500],
-  'graph-purple': purple[350],
-  'graph-red': red[400],
-
-  // Deprecated (Remove after all 'error' colors converted to 'danger' in app)
-  //
-  'border-error': red[300],
-  'text-error': 'blue',
-  'text-error-light': 'blue',
-  'icon-error': 'blue',
 } as const satisfies Record<
   keyof typeof semanticColorsDark,
   CSSProperties['color']

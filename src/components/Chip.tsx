@@ -11,15 +11,12 @@ import styled, {
   useTheme,
 } from 'styled-components'
 
-import chroma from 'chroma-js'
-
 import { type SEVERITIES } from '../types'
 
 import { Spinner } from './Spinner'
 import Card, {
   type BaseCardProps,
   type CardFillLevel,
-  getFillToLightBgC,
   useDecideFillLevel,
 } from './Card'
 import CloseIcon from './icons/CloseIcon'
@@ -84,9 +81,7 @@ const ChipCardSC = styled(Card)<{
   $condensed?: boolean
 }>(({ $size, $severity, $truncateWidth, $truncateEdge, $condensed, theme }) => {
   const textColor =
-    theme.mode === 'light'
-      ? theme.colors['text-light']
-      : theme.colors[severityToColor[$severity]] || theme.colors.text
+    theme.colors[severityToColor[$severity]] || theme.colors.text
 
   return {
     '&&': {
@@ -136,43 +131,35 @@ const ChipCardSC = styled(Card)<{
 })
 
 const CloseButtonSC = styled.button<{
-  $severity: ChipSeverity
   $fillLevel: CardFillLevel
-}>(({ theme, $fillLevel, $severity }) => {
-  const lightBg = chroma(getFillToLightBgC(theme)[$severity][$fillLevel])
-  const lightBgHover = `${lightBg.alpha(lightBg.alpha() + 0.15)}`
-
-  return {
-    ...theme.partials.reset.button,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: theme.borderRadiuses.medium,
-    padding: theme.spacing.xsmall - theme.spacing.xxsmall,
-    margin: -(theme.spacing.xsmall - theme.spacing.xxsmall),
-    '.closeIcon': {
-      color: theme.colors['text-light'],
-    },
-    '&:focus-visible': {
-      ...theme.partials.focus.outline,
-    },
-    '&:not(:disabled)': {
-      '&:focus-visible, &:hover, [data-clickable=true]:hover > &': {
-        backgroundColor:
-          theme.mode === 'light' && $severity !== 'neutral'
-            ? lightBgHover
-            : theme.colors[
-                `fill-${
-                  $fillLevel === 3 ? 'three' : $fillLevel === 2 ? 'two' : 'one'
-                }-hover`
-              ],
-        '.closeIcon': {
-          color: theme.colors.text,
-        },
+}>(({ theme, $fillLevel }) => ({
+  ...theme.partials.reset.button,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: theme.borderRadiuses.medium,
+  padding: theme.spacing.xsmall - theme.spacing.xxsmall,
+  margin: -(theme.spacing.xsmall - theme.spacing.xxsmall),
+  '.closeIcon': {
+    color: theme.colors['text-light'],
+  },
+  '&:focus-visible': {
+    ...theme.partials.focus.outline,
+  },
+  '&:not(:disabled)': {
+    '&:focus-visible, &:hover, [data-clickable=true]:hover > &': {
+      backgroundColor:
+        theme.colors[
+          `fill-${
+            $fillLevel === 3 ? 'three' : $fillLevel === 2 ? 'two' : 'one'
+          }-hover`
+        ],
+      '.closeIcon': {
+        color: theme.colors.text,
       },
     },
-  }
-})
+  },
+}))
 
 function ChipRef(
   {

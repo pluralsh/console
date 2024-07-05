@@ -158,10 +158,10 @@ const Tr = styled.tr<{
   }) => ({
     display: 'contents',
     backgroundColor: selected
-      ? theme.colors['fill-one-selected']
+      ? theme.colors['fill-zero-hover']
       : raised || (selectable && !selected)
-      ? theme.colors['fill-one-hover']
-      : theme.colors['fill-one'],
+      ? theme.colors['fill-zero-selected']
+      : theme.colors['fill-zero'],
 
     ...(clickable && {
       cursor: 'pointer',
@@ -169,9 +169,9 @@ const Tr = styled.tr<{
       '&:hover': {
         backgroundColor: selectable
           ? selected
-            ? theme.colors['fill-one-selected']
-            : theme.colors['fill-one-hover']
-          : theme.colors['fill-one-selected'],
+            ? theme.colors['fill-zero-hover']
+            : theme.colors['fill-zero-selected']
+          : theme.colors['fill-zero-hover'],
       },
     }),
   })
@@ -196,9 +196,9 @@ const Th = styled.th<{
       alignItems: 'center',
       display: hideHeader ? 'none' : 'flex',
       position: 'relative',
-      backgroundColor: theme.colors['fill-two'],
+      backgroundColor: theme.colors['fill-one'],
       zIndex: 4,
-      borderBottom: theme.borders['fill-three'],
+      borderBottom: theme.borders.default,
       color: theme.colors.text,
       height: 48,
       minHeight: 48,
@@ -222,7 +222,7 @@ const Th = styled.th<{
         bottom: 0,
         width: 10000,
         backgroundColor: theme.colors['fill-two'],
-        borderBottom: hideHeader ? 'none' : theme.borders['fill-three'],
+        borderBottom: hideHeader ? 'none' : theme.borders.default,
       },
     },
     '&:first-child': {

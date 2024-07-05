@@ -1,9 +1,6 @@
 import chroma from 'chroma-js'
 import { type CSSProperties } from 'react'
 
-import { borderWidths } from './borders'
-
-import { semanticColorCssVars } from './colors'
 import { semanticColorsDark } from './colors-semantic-dark'
 import { semanticColorsLight } from './colors-semantic-light'
 
@@ -48,6 +45,4 @@ export const getBoxShadows = ({ mode }: { mode: 'dark' | 'light' }) =>
           ].join(','),
           modalPurple: `0px 10px 40px 0px ${shadowLPurple.alpha(0.25)}`,
         }),
-    // Deprecated in favor of focus outlines
-    focused: `0px 0px 0px ${borderWidths.focus}px ${semanticColorCssVars['border-outline-focused']}`,
   }) as const satisfies Record<string, CSSProperties['boxShadow']>

@@ -48,6 +48,8 @@ const SubTabBase = styled.div<{
     ? theme.colors[parentFillLevelToActiveBG[parentFillLevel]]
     : 'transparent',
   borderRadius: theme.borderRadiuses.medium,
+  outline: active ? theme.borders.default : undefined,
+  outlineOffset: '-1px', // inset outline instead of border so layout isn't affected
   focusVisible: {
     zIndex: theme.zIndexes.base + 1,
     ...theme.partials.focus.default,
@@ -62,8 +64,7 @@ const SubTabBase = styled.div<{
         ? theme.colors[parentFillLevelToHoverBG[parentFillLevel]]
         : undefined,
   },
-  transition:
-    'background-color 150ms ease, border-color 150ms ease, color 150ms ease',
+  transition: 'background-color 150ms ease, color 150ms ease',
   '.codeTabInner': {},
 }))
 
