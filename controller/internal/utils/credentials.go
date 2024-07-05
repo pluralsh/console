@@ -8,25 +8,24 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 const namespacedCredentialsAnnotation = "deployments.plural.sh/namespaced-credentials"
 
-func ListObjects[T client.ObjectList](ctx context.Context, c client.Client, list T) T {
-	_ = c.List(ctx, list)
-	return list
-}
-
-func RequestNamespacedCredentialsConsumersReconcile[T client.Object](items []T, credentials client.Object) []reconcile.Request {
-	requests := make([]reconcile.Request, 0, len(items))
-	for _, item := range items {
-		if HasNamespacedCredentialsAnnotation(item.GetAnnotations(), credentials.GetName()) {
-			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: item.GetName(), Namespace: item.GetNamespace()}})
+func HandleNamespaceCredentialsChanges[T client.ObjectList, V client.Object](c client.Client, objectList T, itemGetter func(T) []V) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, credentials client.Object) []reconcile.Request {
+		_ = c.List(ctx, objectList)
+		items := itemGetter(objectList)
+		requests := make([]reconcile.Request, 0, len(items))
+		for _, item := range items {
+			if HasNamespacedCredentialsAnnotation(item.GetAnnotations(), credentials.GetName()) {
+				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: item.GetName(), Namespace: item.GetNamespace()}})
+			}
 		}
-	}
-
-	return requests
+		return requests
+	})
 }
 
 func SyncNamespacedCredentialsAnnotation(obj client.Object, namespaceCredentials string) {

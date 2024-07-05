@@ -24,10 +24,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/yaml"
 )
 
@@ -551,11 +549,10 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		// Setting max concurrent reconciles is a hard requirement for current namespace credentials implementation.
 		// Following watch ensures that if namespaced credentials change, all objects that use them will be reconciled.
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		Watches(&v1alpha1.NamespaceCredentials{}, handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, credentials client.Object) []reconcile.Request {
-			list := utils.ListObjects[*v1alpha1.ServiceDeploymentList](ctx, r.Client, new(v1alpha1.ServiceDeploymentList))
-			return utils.RequestNamespacedCredentialsConsumersReconcile[*v1alpha1.ServiceDeployment](
-				algorithms.Map(list.Items, func(s v1alpha1.ServiceDeployment) *v1alpha1.ServiceDeployment { return &s }), credentials)
-		})).
+		Watches(&v1alpha1.NamespaceCredentials{}, utils.HandleNamespaceCredentialsChanges(r.Client, new(v1alpha1.ServiceDeploymentList),
+			func(list *v1alpha1.ServiceDeploymentList) []*v1alpha1.ServiceDeployment {
+				return algorithms.Map(list.Items, func(t v1alpha1.ServiceDeployment) *v1alpha1.ServiceDeployment { return &t })
+			})).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
