@@ -2,6 +2,7 @@ icon: https://github.com/pluralsh/plural-artifacts/blob/main/monitoring/plural/i
 git_url: https://github.com/prometheus-community/helm-charts
 release_url: https://github.com/prometheus-community/helm-charts/releases/tag/kube-prometheus-stack-{vsn}
 readme_url: https://raw.githubusercontent.com/prometheus-community/helm-charts/main/charts/kube-prometheus-stack/README.md
+helm_repository_url: https://prometheus-community.github.io/helm-charts
 versions:
 - version: 54.0.0
   kube: ['1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19']
