@@ -21,6 +21,7 @@ export const grey = {
   200: '#C5C9D3',
   100: '#DFE2E7',
   50: '#EBEFF0',
+  25: '#F9FAFA',
 } as const satisfies Record<number, CSSProperties['color']>
 
 export const purple = {
