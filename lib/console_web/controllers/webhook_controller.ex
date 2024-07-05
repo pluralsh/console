@@ -45,7 +45,7 @@ defmodule ConsoleWeb.WebhookController do
 
   defp verify(conn, %ScmWebhook{type: :github, hmac: hmac}) do
     with [signature] <- get_req_header(conn, "x-hub-signature-256"),
-         computed = :crypto.mac(:hmac, :sha256, hmac, conn.assigns.raw_body),
+         computed = :crypto.mac(:hmac, :sha256, hmac, Enum.reverse(conn.assigns.raw_body)),
          true <- Plug.Crypto.secure_compare(signature, "sha256=#{Base.encode16(computed, case: :lower)}") do
       :ok
     else

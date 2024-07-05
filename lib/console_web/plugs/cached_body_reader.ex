@@ -7,5 +7,5 @@ defmodule ConsoleWeb.CacheBodyReader do
     end
   end
 
-  defp append_body(conn, body), do: update_in(conn.assigns[:raw_body], &[body | (&1 || [])])
+  defp append_body(conn, body), do: update_in(conn.assigns[:raw_body], & [body | (&1 || [])])
 end
