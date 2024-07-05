@@ -552,28 +552,13 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		// Following watch ensures that if namespaced credentials change, all objects that use them will be reconciled.
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Watches(&v1alpha1.NamespaceCredentials{}, handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, credentials client.Object) []reconcile.Request {
-			list := List[*v1alpha1.ServiceDeploymentList](ctx, r.Client, new(v1alpha1.ServiceDeploymentList))
-			return Req[*v1alpha1.ServiceDeployment](algorithms.Map(list.Items, func(s v1alpha1.ServiceDeployment) *v1alpha1.ServiceDeployment { return &s }), credentials)
+			list := utils.ListObjects[*v1alpha1.ServiceDeploymentList](ctx, r.Client, new(v1alpha1.ServiceDeploymentList))
+			return utils.RequestNamespacedCredentialsConsumersReconcile[*v1alpha1.ServiceDeployment](
+				algorithms.Map(list.Items, func(s v1alpha1.ServiceDeployment) *v1alpha1.ServiceDeployment { return &s }), credentials)
 		})).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&v1alpha1.InfrastructureStack{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
-}
-
-func List[T client.ObjectList](ctx context.Context, c client.Client, list T) T {
-	_ = c.List(ctx, list)
-	return list
-}
-
-func Req[T client.Object](items []T, credentials client.Object) []reconcile.Request {
-	requests := make([]reconcile.Request, 0, len(items))
-	for _, item := range items {
-		if utils.HasNamespacedCredentialsAnnotation(item.GetAnnotations(), credentials.GetName()) {
-			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: item.GetName(), Namespace: item.GetNamespace()}})
-		}
-	}
-
-	return requests
 }

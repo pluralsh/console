@@ -1,16 +1,35 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 const namespacedCredentialsAnnotation = "deployments.plural.sh/namespaced-credentials"
 
-func SyncNamespacedCredentialsAnnotation(obj ctrlruntimeclient.Object, namespaceCredentials string) {
+func ListObjects[T client.ObjectList](ctx context.Context, c client.Client, list T) T {
+	_ = c.List(ctx, list)
+	return list
+}
+
+func RequestNamespacedCredentialsConsumersReconcile[T client.Object](items []T, credentials client.Object) []reconcile.Request {
+	requests := make([]reconcile.Request, 0, len(items))
+	for _, item := range items {
+		if HasNamespacedCredentialsAnnotation(item.GetAnnotations(), credentials.GetName()) {
+			requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: item.GetName(), Namespace: item.GetNamespace()}})
+		}
+	}
+
+	return requests
+}
+
+func SyncNamespacedCredentialsAnnotation(obj client.Object, namespaceCredentials string) {
 	annotations := obj.GetAnnotations()
 
 	if namespaceCredentials != "" {
