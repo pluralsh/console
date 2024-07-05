@@ -8,22 +8,22 @@ import (
 	ctrlruntimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-const NamespaacedCredentialsAnnotation = "deployments.plural.sh/namespaced-credentials"
+const namespacedCredentialsAnnotation = "deployments.plural.sh/namespaced-credentials"
 
 func SyncNamespacedCredentialsAnnotation(obj ctrlruntimeclient.Object, namespaceCredentials string) {
 	annotations := obj.GetAnnotations()
 
 	if namespaceCredentials != "" {
-		annotations[NamespaacedCredentialsAnnotation] = namespaceCredentials
+		annotations[namespacedCredentialsAnnotation] = namespaceCredentials
 	} else {
-		delete(annotations, NamespaacedCredentialsAnnotation)
+		delete(annotations, namespacedCredentialsAnnotation)
 	}
 
 	obj.SetAnnotations(annotations)
 }
 
 func HasNamespacedCredentialsAnnotation(annotations map[string]string, namespaceCredentials string) bool {
-	annotation, ok := annotations[NamespaacedCredentialsAnnotation]
+	annotation, ok := annotations[namespacedCredentialsAnnotation]
 	return ok && annotation == namespaceCredentials
 }
 
