@@ -548,7 +548,9 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
+		// Setting max concurrent reconciles is a hard requirement for current namespace credentials implementation.
+		// Following watch ensures that if namespaced credentials change, all objects that use them will be reconciled.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Watches(&v1alpha1.NamespaceCredentials{}, handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, nc client.Object) []reconcile.Request {
 			list := new(v1alpha1.ServiceDeploymentList)
 			if err := r.Client.List(context.Background(), list); err != nil {

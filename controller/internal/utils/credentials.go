@@ -20,7 +20,6 @@ func SyncNamespacedCredentialsAnnotation(obj ctrlruntimeclient.Object, namespace
 	}
 
 	obj.SetAnnotations(annotations)
-
 }
 
 func HasNamespacedCredentialsAnnotation(annotations map[string]string, namespaceCredentials string) bool {
