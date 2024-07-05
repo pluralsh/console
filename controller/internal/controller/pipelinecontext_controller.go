@@ -62,22 +62,22 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	pipline := &v1alpha1.Pipeline{}
-	if err := r.Get(ctx, client.ObjectKey{Name: pipelineContext.Spec.PipelineRef.Name, Namespace: pipelineContext.Spec.PipelineRef.Namespace}, pipline); err != nil {
+	pipeline := &v1alpha1.Pipeline{}
+	if err := r.Get(ctx, client.ObjectKey{Name: pipelineContext.Spec.PipelineRef.Name, Namespace: pipelineContext.Spec.PipelineRef.Namespace}, pipeline); err != nil {
 		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+		return ctrl.Result{}, err
 	}
 
-	if !pipline.DeletionTimestamp.IsZero() {
+	if !pipeline.DeletionTimestamp.IsZero() {
 		return ctrl.Result{}, nil
 	}
 
-	if !pipline.Status.HasID() {
-		logger.Info("pipeline is not ready yet", "name", pipline.Name, "namespace", pipline.Namespace)
-		return ctrl.Result{}, nil
+	if !pipeline.Status.HasID() {
+		logger.Info("pipeline is not ready yet", "name", pipeline.Name, "namespace", pipeline.Namespace)
+		return requeue, nil
 	}
 
-	if err := utils.TryAddControllerRef(ctx, r.Client, pipline, pipelineContext, r.Scheme); err != nil {
+	if err := utils.TryAddControllerRef(ctx, r.Client, pipeline, pipelineContext, r.Scheme); err != nil {
 		return ctrl.Result{}, err
 	}
 
@@ -118,7 +118,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return ctrl.Result{}, err
 	}
 	if !exists || !pipelineContext.Status.IsSHAEqual(sha) {
-		pc, err := r.ConsoleClient.CreatePipelineContext(ctx, pipline.Status.GetID(), console.PipelineContextAttributes{
+		pc, err := r.ConsoleClient.CreatePipelineContext(ctx, pipeline.Status.GetID(), console.PipelineContextAttributes{
 			Context: string(pipelineContext.Spec.Context.Raw),
 		})
 		if err != nil {

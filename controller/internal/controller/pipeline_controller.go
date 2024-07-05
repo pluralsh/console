@@ -116,7 +116,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	attrs, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
 	if err != nil {
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+		return requeue, nil
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
@@ -130,7 +130,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	apiPipeline, err := r.sync(ctx, pipeline, *attrs, sha)
 	if err != nil {
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+		return ctrl.Result{}, err
 	}
 
 	// Update resource status.
