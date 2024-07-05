@@ -12,7 +12,7 @@ const SubheaderSC = styled.div(({ theme }) => ({
   alignItems: 'center',
   backgroundColor:
     theme.mode === 'light' ? theme.colors['fill-one'] : theme.colors?.grey[950],
-  borderBottom: '1px solid border',
+  borderBottom: theme.borders.default,
   minHeight: 48,
   paddingLeft: theme.spacing.large,
   paddingRight: theme.spacing.large,

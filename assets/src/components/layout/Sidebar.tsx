@@ -318,12 +318,7 @@ export default function Sidebar() {
   const unreadNotifications = me.unreadNotifications || 0
 
   return (
-    <SidebarSC
-      variant="console"
-      css={{
-        zIndex: theme.zIndexes.selectPopover,
-      }}
-    >
+    <SidebarSC variant="console">
       <SidebarExpandWrapper pathname={pathname}>
         <SidebarSection
           grow={1}

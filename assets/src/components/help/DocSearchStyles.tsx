@@ -77,7 +77,7 @@ const GlobalStyles = createGlobalStyle(({ theme }) => ({
     },
 
   '.DocSearch-Form:focus-within': {
-    boxShadow: theme.boxShadows.focused,
+    ...theme.partials.focus.outline,
   },
   '.DocSearch-Hit-source': {
     ...theme.partials.text.subtitle2,

@@ -67,7 +67,7 @@ function ThemeProviders({ children }: { children: ReactNode }) {
               className="grommet-root"
               // @ts-ignore
               theme={mergedStyledTheme}
-              themeMode="dark"
+              themeMode={colorMode === 'light' ? 'light' : 'dark'}
             >
               {children}
             </Grommet>
