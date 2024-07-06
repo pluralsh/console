@@ -125,6 +125,7 @@ function PipelineSelector({
   const [isOpen, setIsOpen] = useState(false)
   const { data } = usePipelinesQuery({
     variables: { first: 20, q: throttledInputValue, projectId },
+    fetchPolicy: 'cache-and-network',
   })
   const navigate = useNavigate()
 

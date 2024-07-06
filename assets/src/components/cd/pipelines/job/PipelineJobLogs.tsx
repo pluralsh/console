@@ -53,6 +53,7 @@ export default function PipelineJobLogs() {
   )
   const { data: jobGateData } = useJobGateQuery({
     variables: { id },
+    fetchPolicy: 'cache-and-network',
   })
   const jobGateState = jobGateData?.pipelineGate?.state
 
@@ -66,6 +67,7 @@ export default function PipelineJobLogs() {
     refetch,
   } = useJobGateLogsQuery({
     variables: { id, container: containers?.[0]?.name || '', sinceSeconds },
+    fetchPolicy: 'cache-and-network',
     notifyOnNetworkStatusChange: true,
   })
   const data = currentData || previousData

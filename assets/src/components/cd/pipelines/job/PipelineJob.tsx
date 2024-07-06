@@ -108,6 +108,7 @@ export default function PipelineJob() {
 
   const { data, error, refetch } = useJobGateQuery({
     variables: { id: jobId },
+    fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 

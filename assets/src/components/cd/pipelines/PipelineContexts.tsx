@@ -124,6 +124,7 @@ export function PipelineContexts({
 
   const { data } = usePipelineContextsQuery({
     variables: { id: pipeline?.id || '', first: 100 },
+    fetchPolicy: 'cache-and-network',
     skip: !pipeline?.id,
   })
   const tableData = data?.pipeline?.contexts?.edges ?? []
