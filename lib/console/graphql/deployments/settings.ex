@@ -143,5 +143,12 @@ defmodule Console.GraphQl.Deployments.Settings do
 
       resolve &Deployments.update_project/2
     end
+
+    field :delete_project, :project do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+
+      resolve &Deployments.delete_project/2
+    end
   end
 end

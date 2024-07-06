@@ -2182,6 +2182,8 @@ export type InfrastructureStack = {
   /** A type for the stack, specifies the tool to use to apply it */
   type: StackType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Arbitrary variables to add to a stack run */
+  variables?: Maybe<Scalars['Json']['output']>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
@@ -4251,6 +4253,7 @@ export type RootMutationType = {
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
   deletePrAutomation?: Maybe<PrAutomation>;
+  deleteProject?: Maybe<Project>;
   deleteProviderCredential?: Maybe<ProviderCredential>;
   deletePullRequest?: Maybe<PullRequest>;
   deleteRole?: Maybe<Role>;
@@ -4699,6 +4702,11 @@ export type RootMutationTypeDeletePodArgs = {
 
 
 export type RootMutationTypeDeletePrAutomationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteProjectArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6714,6 +6722,8 @@ export type ServiceDeployment = {
   namespace: Scalars['String']['output'];
   /** whether this service is controlled by a global service */
   owner?: Maybe<GlobalService>;
+  /** the service that owns this service in a service-of-services setup */
+  parent?: Maybe<ServiceDeployment>;
   /** how you'd like to perform a canary promotion */
   promotion?: Maybe<ServicePromotion>;
   /** if true, deletion of this service is not allowed */
@@ -6774,6 +6784,7 @@ export type ServiceDeploymentAttributes = {
   kustomize?: InputMaybe<KustomizeAttributes>;
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+  parentId?: InputMaybe<Scalars['ID']['input']>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
@@ -6926,6 +6937,7 @@ export type ServiceUpdateAttributes = {
   helm?: InputMaybe<HelmConfigAttributes>;
   interval?: InputMaybe<Scalars['String']['input']>;
   kustomize?: InputMaybe<KustomizeAttributes>;
+  parentId?: InputMaybe<Scalars['ID']['input']>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   syncConfig?: InputMaybe<SyncConfigAttributes>;
@@ -7021,6 +7033,8 @@ export type StackAttributes = {
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   /** A type for the stack, specifies the tool to use to apply it */
   type: StackType;
+  /** arbitrary variables to pass into the stack */
+  variables?: InputMaybe<Scalars['Json']['input']>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -7202,6 +7216,8 @@ export type StackRun = {
   /** A type for the stack, specifies the tool to use to apply it */
   type: StackType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** Arbitrary variables to add to a stack run */
+  variables?: Maybe<Scalars['Json']['output']>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
 };

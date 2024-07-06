@@ -33,4 +33,21 @@ defmodule Console.GraphQl.Deployments.SettingsMutationsTest do
       assert update["name"] == "test"
     end
   end
+
+  describe "deleteProject" do
+    test "admins can delete a project" do
+      proj = insert(:project)
+      {:ok, %{data: %{"deleteProject" => deleted}}} = run_query("""
+        mutation delete($id: ID!) {
+          deleteProject(id: $id) {
+            id
+            name
+          }
+        }
+      """, %{"id" => proj.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == proj.id
+      assert deleted["name"] == proj.name
+    end
+  end
 end

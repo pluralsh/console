@@ -25,6 +25,7 @@ defmodule Console.Schema.StackRun do
     field :message,      :binary
     field :workdir,      :string
     field :manage_state, :boolean, default: false
+    field :variables,    :map
 
     field :cancellation_reason, :string
 
@@ -113,7 +114,7 @@ defmodule Console.Schema.StackRun do
     from(r in query, order_by: ^order)
   end
 
-  @valid ~w(type status workdir actor_id manage_state message approval dry_run repository_id pull_request_id cluster_id stack_id)a
+  @valid ~w(type status workdir actor_id variables manage_state message approval dry_run repository_id pull_request_id cluster_id stack_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
