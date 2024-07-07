@@ -8,8 +8,8 @@ from utils import (
     update_chart_versions,
 )
 
-app_name = "new-app"
-compatibility_url = "https://cert-manager.io/docs/releases/"
+app_name = "flux"
+compatibility_url = "https://fluxcd.io/flux/installation"
 
 
 def parse_page(content):
