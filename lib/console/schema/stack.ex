@@ -74,6 +74,7 @@ defmodule Console.Schema.Stack do
     field :workdir,         :string
     field :locked_at,       :utc_datetime_usec
     field :polled_sha,      :string
+    field :variables,       :map
 
     field :actor_changed, :boolean, virtual: true
 
@@ -151,7 +152,7 @@ defmodule Console.Schema.Stack do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name type paused actor_id definition_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
+  @valid ~w(name type paused actor_id variables definition_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
   @immutable ~w(project_id)a
 
 

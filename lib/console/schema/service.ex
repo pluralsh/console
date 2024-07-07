@@ -131,6 +131,7 @@ defmodule Console.Schema.Service do
     belongs_to :cluster,    Cluster
     belongs_to :repository, GitRepository
     belongs_to :owner,      GlobalService
+    belongs_to :parent,     __MODULE__
 
     has_one :reference_cluster,  Cluster
     has_one :provider,           ClusterProvider
@@ -268,7 +269,7 @@ defmodule Console.Schema.Service do
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 
-  @valid ~w(name protect interval docs_path component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
+  @valid ~w(name protect interval parent_id docs_path component_status templated dry_run interval status version sha cluster_id repository_id namespace owner_id message)a
   @immutable ~w(cluster_id)a
 
   def changeset(model, attrs \\ %{}) do

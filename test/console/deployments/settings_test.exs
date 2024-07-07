@@ -107,4 +107,25 @@ defmodule Console.Deployments.SettingsTest do
       {:error, _} = Settings.update_project(%{name: "test"}, proj.id, insert(:user))
     end
   end
+
+  describe "#delete_project/2" do
+    test "admins can delete a new project" do
+      proj = insert(:project)
+      {:ok, deleted} = Settings.delete_project(proj.id, admin_user())
+
+      assert deleted.id == proj.id
+      assert deleted.name == proj.name
+    end
+
+    test "you cannot delete a nonempty project" do
+      proj = insert(:project)
+      insert(:cluster, project: proj)
+      {:error, _} = Settings.delete_project(proj.id, admin_user())
+    end
+
+    test "nonadmins cannot delete projects" do
+      proj = insert(:project)
+      {:error, _} = Settings.delete_project(proj.id, insert(:user))
+    end
+  end
 end

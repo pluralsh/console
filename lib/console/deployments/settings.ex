@@ -136,6 +136,24 @@ defmodule Console.Deployments.Settings do
   end
 
   @doc """
+  It will delete a repository if it's not currently in use
+  """
+  @spec delete_project(binary, User.t) :: project_resp
+  def delete_project(id, %User{} = user) do
+    try do
+      get_project!(id)
+      |> Repo.preload([:read_bindings, :write_bindings])
+      |> Project.changeset()
+      |> allow(user, :write)
+      |> when_ok(:delete)
+      |> notify(:delete, user)
+    rescue
+      # foreign key constraint violated
+      _ -> {:error, "could not delete project"}
+    end
+  end
+
+  @doc """
   creates an instance of the deployment settings object, only used in init
   """
   @spec create(map) :: settings_resp

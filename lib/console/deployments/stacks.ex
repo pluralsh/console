@@ -565,9 +565,11 @@ defmodule Console.Deployments.Stacks do
     |> notify(:create)
   end
 
+  @run_attrs ~w(approval variables actor_id workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a
+
   defp stack_attrs(%Stack{} = stack, sha) do
     Repo.preload(stack, [:environment, :files])
-    |> Map.take(~w(approval actor_id workdir manage_state dry_run configuration type environment files job_spec repository_id cluster_id)a)
+    |> Map.take(@run_attrs)
     |> Map.put(:configuration, ensure_configuration(stack))
     |> Console.clean()
     |> Map.update(:environment, [], fn env -> Enum.map(env, &Map.delete(&1, :stack_id)) end)

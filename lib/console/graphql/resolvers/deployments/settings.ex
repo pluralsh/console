@@ -21,6 +21,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Settings do
   def update_project(%{attributes: attrs, id: id}, %{context: %{current_user: user}}),
     do: Settings.update_project(attrs, id, user)
 
+  def delete_project(%{id: id}, %{context: %{current_user: user}}),
+    do: Settings.delete_project(id, user)
+
   def settings(_, _), do: {:ok, Settings.fetch_consistent()}
 
   def enable(_, %{context: %{current_user: user}}), do: Settings.enable(user)
