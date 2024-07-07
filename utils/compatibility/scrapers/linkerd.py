@@ -8,8 +8,8 @@ from utils import (
     update_chart_versions,
 )
 
-app_name = "new-app"
-compatibility_url = "https://cert-manager.io/docs/releases/"
+app_name = "linkerd"
+compatibility_url = "https://linkerd.io/2.15/reference/k8s-versions"
 
 
 def parse_page(content):
@@ -44,4 +44,4 @@ def scrape():
     else:
         print_error("No compatibility information found.")
 
-    update_chart_versions(app_name)
+    update_chart_versions(app_name, app_name + "2")
