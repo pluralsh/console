@@ -24,6 +24,7 @@ export function PipelineContextDetails() {
   const contextId = useParams().contextId!
   const { data, error } = usePipelineContextQuery({
     variables: { id: contextId || '' },
+    fetchPolicy: 'cache-and-network',
     skip: !contextId,
   })
   const context = data?.pipelineContext
