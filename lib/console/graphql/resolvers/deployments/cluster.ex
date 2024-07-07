@@ -15,7 +15,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> allow(user, :view)
   end
   def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
-    Clusters.get_cluster(id)
+    Clusters.get_cluster!(id)
     |> allow(user, :view)
   end
   def resolve_cluster(_, _), do: {:error, "must provide either handle or id"}

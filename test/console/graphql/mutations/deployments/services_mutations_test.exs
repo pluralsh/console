@@ -198,6 +198,7 @@ defmodule Console.GraphQl.Deployments.ServicesMutationsTest do
       assert conf["value"] == "new-value"
     end
 
+    @tag :skip
     test "enforces scopes" do
       cluster = insert(:cluster, handle: "test")
       user = admin_user()

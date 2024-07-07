@@ -8,7 +8,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
 
   def resolve_service(%{cluster: _, name: _} = args, ctx) do
     fetch_service(args)
-    |> allow(actor(ctx), :name)
+    |> allow(actor(ctx), :read)
   end
   def resolve_service(%{id: id}, ctx) do
     Services.get_service!(id)

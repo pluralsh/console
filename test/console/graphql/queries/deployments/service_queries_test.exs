@@ -161,6 +161,36 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       assert Enum.all?(found["components"], & &1["state"] == "RUNNING")
     end
 
+    test "it can allow permissions to be propagated from projects" do
+      user = insert(:user, service_account: true)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      cluster = insert(:cluster, project: project)
+      repository = insert(:git_repository)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "value"}]
+      ])
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query Service($cluster: String!, $name: String!) {
+          serviceDeployment(cluster: $cluster, name: $name) {
+            name
+            namespace
+            git { ref folder }
+            repository { id }
+          }
+        }
+      """, %{"cluster" => service.cluster_id, "name" => service.name}, %{current_user: user})
+
+      assert found["name"] == "test"
+      assert found["namespace"] == "test"
+      assert found["git"]["ref"] == "master"
+      assert found["git"]["folder"] == "k8s"
+    end
+
     test "it can fetch a service by handle/name" do
       user = admin_user()
       cluster = insert(:cluster, handle: "test")
