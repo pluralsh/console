@@ -1,32 +1,40 @@
 icon: https://avatars.githubusercontent.com/u/68448710?s=48&v=4
 git_url: https://github.com/kyverno/kyverno
 release_url: https://github.com/kyverno/kyverno/releases/tag/v{vsn}
+helm_repository_url: https://kyverno.github.io/kyverno/
 versions:
 - version: 1.12.0
   kube: ['1.29', '1.28', '1.27', '1.26']
   requirements: []
   incompatibilities: []
+  chart_version: 3.2.0
 - version: 1.11.0
   kube: ['1.28', '1.27', '1.26', '1.25']
   requirements: []
   incompatibilities: []
+  chart_version: 3.1.0
 - version: 1.10.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  chart_version: 3.0.0
 - version: 1.9.0
   kube: ['1.26', '1.25', '1.24']
   requirements: []
   incompatibilities: []
+  chart_version: 2.7.0
 - version: 1.8.0
   kube: ['1.25', '1.24', '1.23']
   requirements: []
   incompatibilities: []
+  chart_version: 2.6.0
 - version: 1.7.0
   kube: ['1.23', '1.22', '1.21']
   requirements: []
   incompatibilities: []
+  chart_version: 2.4.0
 - version: 1.6.0
   kube: ['1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
   requirements: []
   incompatibilities: []
+  chart_version: 2.2.0
