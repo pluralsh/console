@@ -139,16 +139,16 @@ func (r *ServiceAccountReconciler) handleExistingServiceAccount(ctx context.Cont
 
 	sa.Status.ID = &apiServiceAccount.ID
 
-	utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	// utils.MarkCondition(sa.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	// utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }
 
 func (r *ServiceAccountReconciler) isAlreadyExists(ctx context.Context, sa *v1alpha1.ServiceAccount) (bool, error) {
-	if sa.Status.HasReadonlyCondition() {
-		return sa.Status.IsReadonly(), nil
-	}
+	// if sa.Status.HasReadonlyCondition() {
+	// 	return sa.Status.IsReadonly(), nil
+	// }
 
 	_, err := r.ConsoleClient.GetServiceAccount(ctx, sa.Spec.Email)
 	if errors.IsNotFound(err) {

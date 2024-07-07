@@ -55,6 +55,11 @@ func (c *client) UpdateProject(ctx context.Context, id string, attributes consol
 	return response.UpdateProject, nil
 }
 
+func (c *client) DeleteProject(ctx context.Context, id string) error {
+	_, err := c.consoleClient.DeleteProject(ctx, id)
+	return err
+}
+
 func (c *client) IsProjectExists(ctx context.Context, name string) (bool, error) {
 	scm, err := c.GetProject(ctx, nil, &name)
 	if errors.IsNotFound(err) {
