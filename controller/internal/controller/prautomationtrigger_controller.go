@@ -27,11 +27,9 @@ import (
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -134,24 +132,8 @@ func isAlreadyExists(trigger *v1alpha1.PrAutomationTrigger) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *PrAutomationTriggerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		// Setting max concurrent reconciles is a hard requirement for current namespace credentials implementation.
-		// Following watch ensures that if namespaced credentials change, all objects that use them will be reconciled.
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
-		Watches(&v1alpha1.NamespaceCredentials{}, handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, nc client.Object) []reconcile.Request {
-			list := new(v1alpha1.PrAutomationTriggerList)
-			if err := r.Client.List(context.Background(), list); err != nil {
-				return nil
-			}
-
-			requests := make([]reconcile.Request, 0, len(list.Items))
-			for _, item := range list.Items {
-				if utils.HasNamespacedCredentialsAnnotation(item.GetAnnotations(), nc.GetName()) {
-					requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: item.GetName(), Namespace: item.GetNamespace()}})
-				}
-			}
-
-			return requests
-		})).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                               // Requirement for current namespace credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, utils.HandleCredentialsChange(r.Client, new(v1alpha1.PrAutomationTriggerList))). // Reconcile objects if namespaced credentials change.
 		For(&v1alpha1.PrAutomationTrigger{}).
 		Complete(r)
 }
