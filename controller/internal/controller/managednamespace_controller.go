@@ -144,8 +144,8 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 // SetupWithManager sets up the controller with the Manager.
 func (r *ManagedNamespaceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                            // Requirement for current namespace credentials implementation.
-		Watches(&v1alpha1.NamespaceCredentials{}, utils.HandleCredentialsChange(r.Client, new(v1alpha1.ManagedNamespaceList))). // Reconcile objects if namespaced credentials change.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                        // Requirement for current namespace credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, utils.OnCredentialsChange(r.Client, new(v1alpha1.ManagedNamespaceList))). // Reconcile objects if namespaced credentials change.
 		For(&deploymentsv1alpha1.ManagedNamespace{}).
 		Complete(r)
 }

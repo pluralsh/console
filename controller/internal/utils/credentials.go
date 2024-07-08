@@ -18,7 +18,7 @@ const (
 	namespacedCredentialsAnnotation = "deployments.plural.sh/namespaced-credentials"
 )
 
-func HandleCredentialsChange[T client.ObjectList](c client.Client, list T) handler.EventHandler {
+func OnCredentialsChange[T client.ObjectList](c client.Client, list T) handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, creds client.Object) []reconcile.Request {
 		_ = c.List(ctx, list)
 		items, _ := meta.ExtractList(list)

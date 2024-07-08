@@ -131,8 +131,8 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 // SetupWithManager sets up the controller with the Manager.
 func (r *DeploymentSettingsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                              // Requirement for current namespace credentials implementation.
-		Watches(&v1alpha1.NamespaceCredentials{}, utils.HandleCredentialsChange(r.Client, new(v1alpha1.DeploymentSettingsList))). // Reconcile objects if namespaced credentials change.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                          // Requirement for current namespace credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, utils.OnCredentialsChange(r.Client, new(v1alpha1.DeploymentSettingsList))). // Reconcile objects if namespaced credentials change.
 		For(&v1alpha1.DeploymentSettings{}).
 		Complete(r)
 }
