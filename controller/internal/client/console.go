@@ -122,6 +122,7 @@ type ConsoleClient interface {
 	GetProject(ctx context.Context, id, name *string) (*console.ProjectFragment, error)
 	UpdateProject(ctx context.Context, id string, attributes console.ProjectAttributes) (*console.ProjectFragment, error)
 	IsProjectExists(ctx context.Context, name string) (bool, error)
+	DeleteProject(ctx context.Context, id string) error
 	UseCredentials(namespace string, credentialsCache credentials.NamespaceCredentialsCache) (string, error)
 }
 

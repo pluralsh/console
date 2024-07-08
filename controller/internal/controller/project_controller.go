@@ -72,7 +72,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Handle proper resource deletion via finalizer
-	result := in.addOrRemoveFinalizer(project)
+	result := in.addOrRemoveFinalizer(ctx, project)
 	if result != nil {
 		return *result, nil
 	}
@@ -116,7 +116,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	return requeue, nil
 }
 
-func (in *ProjectReconciler) addOrRemoveFinalizer(project *v1alpha1.Project) *ctrl.Result {
+func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *v1alpha1.Project) *ctrl.Result {
 	// If object is not being deleted and if it does not have our finalizer,
 	// then lets add the finalizer. This is equivalent to registering our finalizer.
 	if project.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(project, ProjectProtectionFinalizerName) {
@@ -127,6 +127,22 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(project *v1alpha1.Project) *ct
 	// currently to delete project from Console API, so we simply detach
 	// and only remove the CRD.
 	if !project.ObjectMeta.DeletionTimestamp.IsZero() {
+		exists, err := in.ConsoleClient.IsProjectExists(ctx, project.Spec.Name)
+		if err != nil {
+			return &requeue
+		}
+
+		// Remove Pipeline from Console API if it exists.
+		if exists {
+			if err := in.ConsoleClient.DeleteProject(ctx, project.Status.GetID()); err != nil {
+				// If it fails to delete the external dependency here, return with error
+				// so that it can be retried.
+				utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				return &ctrl.Result{}
+			}
+
+			// project deletion is synchronous so can just fall back to removing the finalizer and reconciling
+		}
 		// Stop reconciliation as the item is being deleted
 		controllerutil.RemoveFinalizer(project, ProjectProtectionFinalizerName)
 		return &ctrl.Result{}
@@ -136,10 +152,6 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(project *v1alpha1.Project) *ct
 }
 
 func (in *ProjectReconciler) isAlreadyExists(ctx context.Context, project *v1alpha1.Project) (bool, error) {
-	if project.Status.HasReadonlyCondition() {
-		return project.Status.IsReadonly(), nil
-	}
-
 	_, err := in.ConsoleClient.GetProject(ctx, nil, lo.ToPtr(project.ConsoleName()))
 	if errors.IsNotFound(err) {
 		return false, nil
@@ -177,7 +189,7 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	project.Status.ID = &apiProject.ID
 
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	// utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }

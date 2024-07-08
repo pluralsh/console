@@ -74,7 +74,7 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 	// Try to add namespace credentials to cache.
 	if err := r.CredentialsCache.AddNamespaceCredentials(nc); err != nil {
 		utils.MarkFalse(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
+		return requeue, nil
 	}
 
 	utils.MarkTrue(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")
