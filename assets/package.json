@@ -139,7 +139,7 @@
     "@graphql-codegen/typescript": "4.0.1",
     "@graphql-codegen/typescript-operations": "4.0.1",
     "@graphql-codegen/typescript-react-apollo": "4.1.0",
-    "@pluralsh/eslint-config-typescript": "2.5.150",
+    "@pluralsh/eslint-config-typescript": "2.5.191",
     "@pluralsh/stylelint-config": "2.0.10",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "14.0.0",
