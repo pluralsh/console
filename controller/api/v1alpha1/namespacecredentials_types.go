@@ -63,26 +63,6 @@ type NamespaceCredentialsStatus struct {
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type"`
 }
 
-func (p *NamespaceCredentialsStatus) GetTokenSHA() string {
-	if !p.HasTokenSHA() {
-		return ""
-	}
-
-	return *p.TokenSHA
-}
-
-func (p *NamespaceCredentialsStatus) HasTokenSHA() bool {
-	return p.TokenSHA != nil && len(*p.TokenSHA) > 0
-}
-
-func (p *NamespaceCredentialsStatus) IsTokenSHAEqual(sha string) bool {
-	if !p.HasTokenSHA() {
-		return false
-	}
-
-	return p.GetTokenSHA() == sha
-}
-
 func (p *NamespaceCredentialsStatus) IsStatusConditionTrue(condition ConditionType) bool {
 	return meta.IsStatusConditionTrue(p.Conditions, condition.String())
 }

@@ -23,7 +23,7 @@ type NamespaceCredentialsCache interface {
 	Init() error
 	Wipe()
 	Reset() error
-	AddNamespaceCredentials(nc *v1alpha1.NamespaceCredentials) error
+	AddNamespaceCredentials(nc *v1alpha1.NamespaceCredentials) (string, error)
 	RemoveNamespaceCredentials(nc *v1alpha1.NamespaceCredentials)
 	GetNamespaceCredentials(namespace string) NamespaceCredentials
 }
@@ -63,7 +63,7 @@ func (in *namespaceCredentialsCache) Init() error {
 
 	for _, nc := range list.Items {
 		// Ignore errors during init. These are used in the controller to add them to NamespaceCredentials conditions.
-		_ = in.AddNamespaceCredentials(&nc)
+		_, _ = in.AddNamespaceCredentials(&nc)
 	}
 
 	return nil
@@ -80,7 +80,7 @@ func (in *namespaceCredentialsCache) Reset() error {
 
 // AddNamespaceCredentials registers custom namespace credentials.
 // Even if errors occur while reading token, namespaces will be registered as ones using custom credentials.
-func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredentials *v1alpha1.NamespaceCredentials) error {
+func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredentials *v1alpha1.NamespaceCredentials) (string, error) {
 	token, err := in.getNamespaceCredentialsToken(namespaceCredentials)
 	for _, namespace := range namespaceCredentials.Spec.Namespaces {
 		nc, ok := in.cache.Get(namespace)
@@ -95,7 +95,7 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 			Err:                  err,
 		})
 	}
-	return err
+	return token, err
 }
 
 func (in *namespaceCredentialsCache) getNamespaceCredentialsToken(nc *v1alpha1.NamespaceCredentials) (string, error) {
