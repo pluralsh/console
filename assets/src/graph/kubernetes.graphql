@@ -1,5 +1,8 @@
 fragment KubernetesCluster on Cluster {
   ...ClusterTiny
+  project {
+    ...ProjectTiny
+  }
   pinnedCustomResources {
     ...PinnedCustomResource
   }
@@ -18,8 +21,8 @@ fragment PinnedCustomResource on PinnedCustomResource {
   namespaced
 }
 
-query KubernetesClusters {
-  clusters(first: 200) {
+query KubernetesClusters($projectId: ID) {
+  clusters(first: 200, projectId: $projectId) {
     edges {
       node {
         ...KubernetesCluster

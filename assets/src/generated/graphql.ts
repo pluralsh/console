@@ -8892,14 +8892,16 @@ export type UpgradeStatisticsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type UpgradeStatisticsQuery = { __typename?: 'RootQueryType', upgradeStatistics?: { __typename?: 'UpgradeStatistics', upgradeable?: number | null, count?: number | null, latest?: number | null, compliant?: number | null } | null };
 
-export type KubernetesClusterFragment = { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
+export type KubernetesClusterFragment = { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null };
 
 export type PinnedCustomResourceFragment = { __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
 
-export type KubernetesClustersQueryVariables = Exact<{ [key: string]: never; }>;
+export type KubernetesClustersQueryVariables = Exact<{
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+}>;
 
 
-export type KubernetesClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
+export type KubernetesClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, pinnedCustomResources?: Array<{ __typename?: 'PinnedCustomResource', id: string, name: string, kind: string, version: string, group: string, displayName: string, namespaced?: boolean | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null> | null } | null };
 
 export type PinCustomResourceMutationVariables = Exact<{
   attributes: PinnedCustomResourceAttributes;
@@ -10844,11 +10846,15 @@ export const PinnedCustomResourceFragmentDoc = gql`
 export const KubernetesClusterFragmentDoc = gql`
     fragment KubernetesCluster on Cluster {
   ...ClusterTiny
+  project {
+    ...ProjectTiny
+  }
   pinnedCustomResources {
     ...PinnedCustomResource
   }
 }
     ${ClusterTinyFragmentDoc}
+${ProjectTinyFragmentDoc}
 ${PinnedCustomResourceFragmentDoc}`;
 export const ArgoRolloutStatusFragmentDoc = gql`
     fragment ArgoRolloutStatus on ArgoRolloutStatus {
@@ -17048,8 +17054,8 @@ export type UpgradeStatisticsLazyQueryHookResult = ReturnType<typeof useUpgradeS
 export type UpgradeStatisticsSuspenseQueryHookResult = ReturnType<typeof useUpgradeStatisticsSuspenseQuery>;
 export type UpgradeStatisticsQueryResult = Apollo.QueryResult<UpgradeStatisticsQuery, UpgradeStatisticsQueryVariables>;
 export const KubernetesClustersDocument = gql`
-    query KubernetesClusters {
-  clusters(first: 200) {
+    query KubernetesClusters($projectId: ID) {
+  clusters(first: 200, projectId: $projectId) {
     edges {
       node {
         ...KubernetesCluster
@@ -17071,6 +17077,7 @@ export const KubernetesClustersDocument = gql`
  * @example
  * const { data, loading, error } = useKubernetesClustersQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
