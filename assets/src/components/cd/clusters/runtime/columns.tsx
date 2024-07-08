@@ -79,7 +79,7 @@ const colName = columnHelperRuntime.accessor((row) => row?.addon, {
   },
 })
 const colChartVersion = columnHelperRuntime.accessor(
-  (row) => row?.service?.helm?.version,
+  (row) => row?.addonVersion?.chartVersion,
   {
     id: 'chartVersion',
     header: 'Chart version',

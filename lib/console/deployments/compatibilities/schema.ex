@@ -10,7 +10,7 @@ defmodule Console.Deployments.Compatibilities.Version do
 
   @type t :: %__MODULE__{requirements: [%Reference{}], incompatibilities: [%Reference{}]}
 
-  defstruct [:version, :kube, :requirements, :incompatibilities]
+  defstruct [:version, :kube, :chart_version, :requirements, :incompatibilities]
 
   def blocking?(%__MODULE__{kube: kube_vsns}, kube_version, inc \\ 1) do
     with {:ok, %{major: maj, minor: min}} <- Version.parse(clean_version(kube_version)) do
