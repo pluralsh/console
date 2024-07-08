@@ -55,7 +55,7 @@ func syncCredentialsAnnotation(obj client.Object, creds string) {
 	obj.SetAnnotations(annotations)
 }
 
-func syncCredentialsCondition(set func(condition metav1.Condition), creds string, err error) {
+func syncCredentialsCondition(conditionSetter func(condition metav1.Condition), creds string, err error) {
 	condition := metav1.Condition{Type: v1alpha1.NamespacedCredentialsConditionType.String()}
 
 	if creds != credentials.DefaultCredentialsKey {
@@ -72,5 +72,5 @@ func syncCredentialsCondition(set func(condition metav1.Condition), creds string
 		condition.Message += fmt.Sprintf(", got error: %s", err.Error())
 	}
 
-	set(condition)
+	conditionSetter(condition)
 }
