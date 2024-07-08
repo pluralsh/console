@@ -138,8 +138,8 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 // SetupWithManager sets up the controller with the Manager.
 func (r *PipelineContextReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                       // Requirement for current namespace credentials implementation.
-		Watches(&v1alpha1.NamespaceCredentials{}, utils.OnCredentialsChange(r.Client, new(v1alpha1.PipelineContextList))). // Reconcile objects if namespaced credentials change.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                       // Requirement for credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, utils.OnCredentialsChange(r.Client, new(v1alpha1.PipelineContextList))). // Reconcile objects on credentials change.
 		For(&deploymentsv1alpha1.PipelineContext{}).
 		Complete(r)
 }

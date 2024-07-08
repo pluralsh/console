@@ -545,8 +545,8 @@ func isServiceReady(components []v1alpha1.ServiceComponent) bool {
 // SetupWithManager sets up the controller with the Manager.
 func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                         // Requirement for current namespace credentials implementation.
-		Watches(&v1alpha1.NamespaceCredentials{}, utils.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects if namespaced credentials change.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                         // Requirement for credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, utils.OnCredentialsChange(r.Client, new(v1alpha1.ServiceDeploymentList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
