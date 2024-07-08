@@ -16,6 +16,7 @@ import (
 
 const (
 	CredentialsSecretTokenKey = "token"
+	DefaultCredentialsKey     = ""
 )
 
 type NamespaceCredentialsCache interface {
@@ -122,7 +123,7 @@ func (in *namespaceCredentialsCache) GetNamespaceCredentials(namespace string) N
 		return nc
 	}
 
-	return NamespaceCredentials{Token: in.defaultConsoleToken}
+	return NamespaceCredentials{Token: in.defaultConsoleToken, NamespaceCredentials: DefaultCredentialsKey}
 }
 
 type NamespaceCredentials struct {

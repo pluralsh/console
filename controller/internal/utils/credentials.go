@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/credentials"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -13,38 +14,40 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-const namespacedCredentialsAnnotation = "deployments.plural.sh/namespaced-credentials"
+const (
+	namespacedCredentialsAnnotation = "deployments.plural.sh/namespaced-credentials"
+)
 
-func HandleCredentialsChange[T client.ObjectList](c client.Client, objectList T) handler.EventHandler {
-	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, credentials client.Object) []reconcile.Request {
-		_ = c.List(ctx, objectList)
-		items, _ := meta.ExtractList(objectList)
+func HandleCredentialsChange[T client.ObjectList](c client.Client, list T) handler.EventHandler {
+	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, creds client.Object) []reconcile.Request {
+		_ = c.List(ctx, list)
+		items, _ := meta.ExtractList(list)
 		requests := make([]reconcile.Request, 0, len(items))
 		for _, item := range items {
-			object := item.(client.Object)
-			if hasCredentialsAnnotation(object.GetAnnotations(), credentials.GetName()) {
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: object.GetName(), Namespace: object.GetNamespace()}})
+			o := item.(client.Object)
+			if hasCredentialsAnnotation(o.GetAnnotations(), creds.GetName()) {
+				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: o.GetName(), Namespace: o.GetNamespace()}})
 			}
 		}
 		return requests
 	})
 }
 
-func hasCredentialsAnnotation(annotations map[string]string, namespaceCredentials string) bool {
+func hasCredentialsAnnotation(annotations map[string]string, creds string) bool {
 	annotation, ok := annotations[namespacedCredentialsAnnotation]
-	return ok && annotation == namespaceCredentials
+	return ok && annotation == creds
 }
 
-func SyncCredentialsInfo(object client.Object, conditionSetter func(condition metav1.Condition), namespaceCredentials string, err error) {
-	syncCredentialsAnnotation(object, namespaceCredentials)
-	syncCredentialsCondition(conditionSetter, namespaceCredentials, err)
+func SyncCredentialsInfo(object client.Object, conditionSetter func(condition metav1.Condition), creds string, err error) {
+	syncCredentialsAnnotation(object, creds)
+	syncCredentialsCondition(conditionSetter, creds, err)
 }
 
-func syncCredentialsAnnotation(obj client.Object, namespaceCredentials string) {
+func syncCredentialsAnnotation(obj client.Object, creds string) {
 	annotations := obj.GetAnnotations()
 
-	if namespaceCredentials != "" {
-		annotations[namespacedCredentialsAnnotation] = namespaceCredentials
+	if creds != credentials.DefaultCredentialsKey {
+		annotations[namespacedCredentialsAnnotation] = creds
 	} else {
 		delete(annotations, namespacedCredentialsAnnotation)
 	}
@@ -52,17 +55,17 @@ func syncCredentialsAnnotation(obj client.Object, namespaceCredentials string) {
 	obj.SetAnnotations(annotations)
 }
 
-func syncCredentialsCondition(set func(condition metav1.Condition), namespacedCredentials string, err error) {
+func syncCredentialsCondition(set func(condition metav1.Condition), creds string, err error) {
 	condition := metav1.Condition{Type: v1alpha1.NamespacedCredentialsConditionType.String()}
 
-	if namespacedCredentials != "" {
+	if creds != credentials.DefaultCredentialsKey {
 		condition.Reason = v1alpha1.NamespacedCredentialsReason.String()
 		condition.Status = metav1.ConditionTrue
-		condition.Message = fmt.Sprintf("using %s credentials", namespacedCredentials)
+		condition.Message = fmt.Sprintf("Using %s credentials", creds)
 	} else {
 		condition.Reason = v1alpha1.NamespacedCredentialsReasonDefault.String()
 		condition.Status = metav1.ConditionFalse
-		condition.Message = "using default credentials"
+		condition.Message = v1alpha1.NamespacedCredentialsConditionMessage.String()
 	}
 
 	if err != nil {
