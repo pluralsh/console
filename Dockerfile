@@ -90,7 +90,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     chmod +x /usr/local/bin/terraform
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM erlang:24.3.4.6-alpine
+FROM erlang:24.3.4.17-alpine
 
 ARG CLOUD_SDK_VERSION=273.0.0
 ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
