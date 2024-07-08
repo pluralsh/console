@@ -26,7 +26,7 @@
     "analyze": "vite-bundle-visualizer -o stats.html"
   },
   "engines": {
-    "node": "18.16.0"
+    "node": "18.16.1"
   },
   "packageManager": "yarn@3.6.0",
   "dependencies": {
