@@ -364,6 +364,17 @@ defmodule Console.Services.Users do
     {:ok, user}
   end
 
+  @doc """
+  Determines if a service account can be assumed by the acting user
+  """
+  @spec impersonate_service_account(User.t | binary, User.t) :: user_resp
+  def impersonate_service_account(%User{} = sa, %User{} = user),
+    do: Console.Deployments.Policies.allow(sa, user, :assume)
+  def impersonate_service_account(email, %User{} = user) when is_binary(email) do
+    get_user_by_email!(email)
+    |> impersonate_service_account(user)
+  end
+
   @spec mark_read(User.t, :read | :build) :: user_resp
   def mark_read(%User{} = user, type \\ :read) do
     key = read_timestamp(type)

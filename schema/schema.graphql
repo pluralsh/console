@@ -410,6 +410,8 @@ type RootMutationType {
 
   deleteUser(id: ID!): User
 
+  impersonateServiceAccount(email: String!): User
+
   markRead(type: ReadType): User
 
   createGroup(attributes: GroupAttributes!): Group

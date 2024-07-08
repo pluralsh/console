@@ -12,13 +12,7 @@ defmodule Console.Schema.ManagedNamespace do
 
     def changeset(model, attrs \\ %{}) do
       model
-      |> cast(attrs, ~w(distro)a)
-      |> cast_embed(:tags, with: &tag_changeset/2)
-    end
-
-    defp tag_changeset(model, attrs) do
-      model
-      |> cast(attrs, ~w(name value)a)
+      |> cast(attrs, ~w(distro tags)a)
     end
   end
 

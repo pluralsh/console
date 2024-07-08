@@ -30,7 +30,8 @@ import (
 )
 
 const (
-	ServiceFinalizer = "deployments.plural.sh/service-protection"
+	ServiceFinalizer    = "deployments.plural.sh/service-protection"
+	InventoryAnnotation = "config.k8s.io/owning-inventory"
 )
 
 // ServiceReconciler reconciles a Service object
@@ -258,6 +259,10 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		Kustomize:       service.Spec.Kustomize.Attributes(),
 		Dependencies:    service.Spec.DependenciesAttribute(),
 		SyncConfig:      syncConfigAttributes,
+	}
+
+	if id, ok := service.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
+		attr.ParentID = lo.ToPtr(id)
 	}
 
 	if len(service.Spec.Imports) > 0 {
