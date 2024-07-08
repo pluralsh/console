@@ -13,25 +13,13 @@ import { GqlError } from 'components/utils/Alert'
 import { useOutletContext } from 'react-router-dom'
 import { ComponentProps, useMemo } from 'react'
 
-import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
+import { columns } from 'components/cd/services/Services'
 
-import {
-  ColDistribution,
-  ColLastActivity,
-  ColServiceName,
-  ColTags,
-} from '../GlobalServicesColumns'
+import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
 
 import { useSetPageScrollable } from '../../ContinuousDeployment'
 
 import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
-
-export const COLUMNS = [
-  ColServiceName,
-  ColDistribution,
-  ColTags,
-  ColLastActivity,
-]
 
 const GLOBAL_SERVICES_QUERY_PAGE_SIZE = 100
 
@@ -90,7 +78,7 @@ export function GlobalServiceServices() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        columns={COLUMNS}
+        columns={columns}
         css={{
           maxHeight: 'unset',
           height: '100%',
