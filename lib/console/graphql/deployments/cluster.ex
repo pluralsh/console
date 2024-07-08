@@ -489,6 +489,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :kube,              list_of(:string), description: "kubernetes versions this add-on works with"
     field :requirements,      list_of(:version_reference), description: "any other add-ons this might require"
     field :incompatibilities, list_of(:version_reference), description: "any add-ons this might break"
+    field :chart_version,     :string, description: "the version of the helm chart to install for this version"
 
     @desc "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
     field :release_url, :string do

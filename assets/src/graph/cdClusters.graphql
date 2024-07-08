@@ -103,6 +103,7 @@ fragment RuntimeService on RuntimeService {
 fragment AddonVersion on AddonVersion {
   version
   kube
+  chartVersion
   incompatibilities {
     version
     name

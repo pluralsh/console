@@ -3945,6 +3945,9 @@ type AddonVersion {
   "any add-ons this might break"
   incompatibilities: [VersionReference]
 
+  "the version of the helm chart to install for this version"
+  chartVersion: String
+
   "the release page for a runtime service at a version, this is a heavy operation not suitable for lists"
   releaseUrl(version: String!): String
 
