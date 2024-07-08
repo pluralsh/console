@@ -1,15 +1,18 @@
-package utils
+package credentials
 
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/credentials"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -46,7 +49,7 @@ func SyncCredentialsInfo(object client.Object, conditionSetter func(condition me
 func syncCredentialsAnnotation(obj client.Object, creds string) {
 	annotations := obj.GetAnnotations()
 
-	if creds != credentials.DefaultCredentialsKey {
+	if creds != DefaultCredentialsKey {
 		annotations[namespacedCredentialsAnnotation] = creds
 	} else {
 		delete(annotations, namespacedCredentialsAnnotation)
@@ -58,7 +61,7 @@ func syncCredentialsAnnotation(obj client.Object, creds string) {
 func syncCredentialsCondition(conditionSetter func(condition metav1.Condition), creds string, err error) {
 	condition := metav1.Condition{Type: v1alpha1.NamespacedCredentialsConditionType.String()}
 
-	if creds != credentials.DefaultCredentialsKey {
+	if creds != DefaultCredentialsKey {
 		condition.Reason = v1alpha1.NamespacedCredentialsReason.String()
 		condition.Status = metav1.ConditionTrue
 		condition.Message = fmt.Sprintf("Using %s credentials", creds)
@@ -73,4 +76,31 @@ func syncCredentialsCondition(conditionSetter func(condition metav1.Condition), 
 	}
 
 	conditionSetter(condition)
+}
+
+func tryAddOwnerRef(ctx context.Context, c client.Client, owner client.Object, object client.Object, scheme *runtime.Scheme) error {
+	key := client.ObjectKeyFromObject(object)
+
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		if err := c.Get(ctx, key, object); err != nil {
+			return err
+		}
+
+		if owner.GetDeletionTimestamp() != nil || object.GetDeletionTimestamp() != nil {
+			return nil
+		}
+
+		original := object.DeepCopyObject().(client.Object)
+
+		err := controllerutil.SetOwnerReference(owner, object, scheme)
+		if err != nil {
+			return err
+		}
+
+		if reflect.DeepEqual(original.GetOwnerReferences(), object.GetOwnerReferences()) {
+			return nil
+		}
+
+		return c.Patch(ctx, object, client.MergeFromWithOptions(original, client.MergeFromWithOptimisticLock{}))
+	})
 }

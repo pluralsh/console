@@ -38,6 +38,7 @@ func NewNamespaceCredentialsCache(defaultConsoleToken string, scheme *runtime.Sc
 		cache:               cmap.New[NamespaceCredentials](),
 		ctx:                 context.Background(),
 		client:              c,
+		scheme:              scheme,
 		defaultConsoleToken: defaultConsoleToken,
 	}
 
@@ -52,6 +53,7 @@ type namespaceCredentialsCache struct {
 	cache               cmap.ConcurrentMap[string, NamespaceCredentials]
 	ctx                 context.Context
 	client              client.Client
+	scheme              *runtime.Scheme
 	defaultConsoleToken string
 }
 
@@ -102,6 +104,10 @@ func (in *namespaceCredentialsCache) getNamespaceCredentialsToken(nc *v1alpha1.N
 	secret := &corev1.Secret{}
 	if err := in.client.Get(in.ctx, types.NamespacedName{Name: nc.Spec.SecretRef.Name, Namespace: nc.Spec.SecretRef.Namespace}, secret); err != nil {
 		return "", fmt.Errorf("failed to get secret: %s", err)
+	}
+
+	if err := tryAddOwnerRef(in.ctx, in.client, nc, secret, in.scheme); err != nil {
+		return "", err
 	}
 
 	token, ok := secret.Data[CredentialsSecretTokenKey]

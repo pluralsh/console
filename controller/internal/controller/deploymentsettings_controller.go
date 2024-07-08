@@ -86,7 +86,7 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
-	utils.SyncCredentialsInfo(settings, settings.SetCondition, nc, err)
+	credentials.SyncCredentialsInfo(settings, settings.SetCondition, nc, err)
 	if err != nil {
 		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
 		utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
@@ -131,8 +131,8 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 // SetupWithManager sets up the controller with the Manager.
 func (r *DeploymentSettingsReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                          // Requirement for credentials implementation.
-		Watches(&v1alpha1.NamespaceCredentials{}, utils.OnCredentialsChange(r.Client, new(v1alpha1.DeploymentSettingsList))). // Reconcile objects on credentials change.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                // Requirement for credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.DeploymentSettingsList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.DeploymentSettings{}).
 		Complete(r)
 }
