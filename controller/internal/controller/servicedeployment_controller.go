@@ -550,9 +550,7 @@ func (r *ServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		// Following watch ensures that if namespaced credentials change, all objects that use them will be reconciled.
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).
 		Watches(&v1alpha1.NamespaceCredentials{}, utils.HandleNamespaceCredentialsChanges(r.Client, new(v1alpha1.ServiceDeploymentList),
-			func(list *v1alpha1.ServiceDeploymentList) []*v1alpha1.ServiceDeployment {
-				return algorithms.Map(list.Items, func(t v1alpha1.ServiceDeployment) *v1alpha1.ServiceDeployment { return &t })
-			})).
+			func(l *v1alpha1.ServiceDeploymentList) []*v1alpha1.ServiceDeployment { return lo.ToSlicePtr(l.Items) })).
 		For(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
