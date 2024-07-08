@@ -27,7 +27,7 @@ require (
 	github.com/arttor/helmify v0.4.10
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/vektra/mockery/v2 v2.38.0
-	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20231215020716-1b80b9629af8
+	sigs.k8s.io/controller-runtime/tools/setup-envtest 3299760ea46c
 	sigs.k8s.io/controller-tools v0.14.0
 	sigs.k8s.io/kustomize/kustomize/v5 v5.3.0
 )
