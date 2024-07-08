@@ -18,6 +18,16 @@ def print_warning(message):
     print(Fore.YELLOW + "⚠️ Warning:" + Style.RESET_ALL + f" {message}")
 
 
+def fetch_page(url):
+    response = requests.get(url)
+    if response.status_code != 200:
+        print_error(
+            f"Failed to fetch the page. Status code: {response.status_code}"
+        )
+        return None
+    return response.content
+
+
 def read_yaml(file_path):
     try:
         with open(file_path, "r") as file:
@@ -32,14 +42,103 @@ def read_yaml(file_path):
     return None
 
 
-def fetch_page(url):
-    response = requests.get(url)
-    if response.status_code != 200:
+def write_yaml(file_path, data):
+    try:
+        with open(file_path, "w") as file:
+            yaml.dump(data, file, default_flow_style=False, sort_keys=False)
+            return True
+    except Exception as e:
+        print_error(f"Failed to write to {file_path}: {e}")
+    return False
+
+
+def update_chart_versions(app_name, chart_name=""):
+
+    if not chart_name:
+        chart_name = app_name
+
+    yaml_file_name = f"../../static/compatibilities/{app_name}.yaml"
+    compatibility_yaml = read_yaml(yaml_file_name)
+
+    if not compatibility_yaml or "versions" not in compatibility_yaml:
+        print_error(f"No versions found for {app_name}")
+        return
+
+    helm_repository_url = compatibility_yaml["helm_repository_url"]
+    chart_index = fetch_page(helm_repository_url + "/index.yaml")
+    if not chart_index:
         print_error(
-            f"Failed to fetch the page. Status code: {response.status_code}"
+            f"Failed to fetch the index.yaml from {helm_repository_url}"
         )
-        return None
-    return response.content
+        return
+
+    index_yaml = yaml.safe_load(chart_index)
+    if not index_yaml:
+        print_error(f"Failed to parse the index.yaml for {app_name}")
+        return
+
+    chart_versions = index_yaml["entries"][chart_name]
+    if not chart_versions:
+        print_error(f"No versions found for {chart_name}")
+        return
+
+    for chart_entry in chart_versions:
+        app_version = chart_entry["appVersion"]
+        app_version = app_version.lstrip("v")
+
+        chart_version = chart_entry["version"]
+        chart_version = chart_version.lstrip("v")
+
+        for row in compatibility_yaml["versions"]:
+            if row["version"] == app_version:
+                row["chart_version"] = chart_version
+
+    if write_yaml(yaml_file_name, compatibility_yaml):
+        print_success(
+            "Updated chart versions for" + Fore.CYAN + f" {app_name}"
+        )
+    else:
+        print_error(f"Failed to update chart versions for {app_name}")
+
+
+def sort_versions(versions):
+    return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
+
+
+def merge_versions(existing_versions, new_versions):
+    for new_version in new_versions:
+        version_num = new_version["version"]
+        if version_num not in existing_versions:
+            existing_versions[version_num] = new_version
+    return existing_versions
+
+
+def update_versions_data(data, new_versions):
+    existing_versions = {v["version"]: v for v in data.get("versions", [])}
+    merged_versions = merge_versions(existing_versions, new_versions)
+    data["versions"] = sort_versions(list(merged_versions.values()))
+
+
+def update_compatibility_info(filepath, new_versions):
+    for version in new_versions:
+        version["kube"] = sorted(
+            version["kube"], key=lambda v: Version(v), reverse=True
+        )
+    try:
+        data = read_yaml(filepath)
+        if data:
+            update_versions_data(data, new_versions)
+        else:
+            print_warning("No existing versions found. Writing new data.")
+            data = {"versions": sort_versions(new_versions)}
+        if write_yaml(filepath, data):
+            print_success(
+                f"Updated compatibility info table: {Fore.CYAN}{filepath}"
+            )
+        else:
+            print_error(f"Failed to update compatibility info for {filepath}")
+    except Exception as e:
+        print_error(f"Failed to update compatibility info: {e}")
 
 
 # Custom YAML representer for lists that contain only strings
@@ -66,46 +165,3 @@ def represent_ordereddict(dumper, data):
 
 # Add the custom representer to the yaml loader
 yaml.add_representer(OrderedDict, represent_ordereddict)
-
-
-def sort_versions(versions):
-    return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
-
-
-def update_compatibility_info(filepath, new_versions):
-    for version in new_versions:
-        version["kube"] = sorted(
-            version["kube"], key=lambda v: Version(v), reverse=True
-        )
-    try:
-        data = read_yaml(filepath)
-        if data and "versions" in data:
-            existing_versions = {v["version"]: v for v in data["versions"]}
-            for new_version in new_versions:
-                version_num = new_version["version"]
-                if version_num not in existing_versions:
-                    existing_versions[version_num] = new_version
-            data["versions"] = sort_versions(list(existing_versions.values()))
-            with open(filepath, "w") as file:
-                yaml.dump(
-                    data, file, default_flow_style=False, sort_keys=False
-                )
-            print_success(
-                "Updated compatibility info in" + Fore.CYAN + f" {filepath}"
-            )
-        else:
-            print_warning("No existing versions found. Writing new data.")
-            with open(filepath, "w") as file:
-                yaml.dump(
-                    {"versions": sort_versions(new_versions)},
-                    file,
-                    default_flow_style=False,
-                    sort_keys=False,
-                )
-            print_success(
-                "Written new compatibility info to "
-                + Fore.CYAN
-                + f" {filepath}"
-            )
-    except Exception as e:
-        print_error(f"Failed to update compatibility info: {e}")

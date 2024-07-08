@@ -2,7 +2,12 @@
 
 from bs4 import BeautifulSoup
 from collections import OrderedDict
-from utils import print_error, fetch_page, update_compatibility_info
+from utils import (
+    print_error,
+    fetch_page,
+    update_compatibility_info,
+    update_chart_versions,
+)
 
 
 def parse_page(content):
@@ -85,3 +90,4 @@ def scrape():
     update_compatibility_info(
         "../../static/compatibilities/cert-manager.yaml", rows
     )
+    update_chart_versions("cert-manager")
