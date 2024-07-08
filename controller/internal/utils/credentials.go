@@ -21,15 +21,26 @@ func HandleCredentialsChange[T client.ObjectList](c client.Client, objectList T)
 		items, _ := meta.ExtractList(objectList)
 		requests := make([]reconcile.Request, 0, len(items))
 		for _, item := range items {
-			if HasNamespacedCredentialsAnnotation(item.GetAnnotations(), credentials.GetName()) {
-				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: item.GetName(), Namespace: item.GetNamespace()}})
+			object := item.(client.Object)
+			if hasCredentialsAnnotation(object.GetAnnotations(), credentials.GetName()) {
+				requests = append(requests, reconcile.Request{NamespacedName: types.NamespacedName{Name: object.GetName(), Namespace: object.GetNamespace()}})
 			}
 		}
 		return requests
 	})
 }
 
-func SyncNamespacedCredentialsAnnotation(obj client.Object, namespaceCredentials string) {
+func hasCredentialsAnnotation(annotations map[string]string, namespaceCredentials string) bool {
+	annotation, ok := annotations[namespacedCredentialsAnnotation]
+	return ok && annotation == namespaceCredentials
+}
+
+func SyncCredentialsInfo(object client.Object, conditionSetter func(condition metav1.Condition), namespaceCredentials string, err error) {
+	syncCredentialsAnnotation(object, namespaceCredentials)
+	syncCredentialsCondition(conditionSetter, namespaceCredentials, err)
+}
+
+func syncCredentialsAnnotation(obj client.Object, namespaceCredentials string) {
 	annotations := obj.GetAnnotations()
 
 	if namespaceCredentials != "" {
@@ -41,12 +52,7 @@ func SyncNamespacedCredentialsAnnotation(obj client.Object, namespaceCredentials
 	obj.SetAnnotations(annotations)
 }
 
-func HasNamespacedCredentialsAnnotation(annotations map[string]string, namespaceCredentials string) bool {
-	annotation, ok := annotations[namespacedCredentialsAnnotation]
-	return ok && annotation == namespaceCredentials
-}
-
-func MarkCredentialsCondition(set func(condition metav1.Condition), namespacedCredentials string, err error) {
+func syncCredentialsCondition(set func(condition metav1.Condition), namespacedCredentials string, err error) {
 	condition := metav1.Condition{Type: v1alpha1.NamespacedCredentialsConditionType.String()}
 
 	if namespacedCredentials != "" {
