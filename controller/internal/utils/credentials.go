@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -14,10 +15,10 @@ import (
 
 const namespacedCredentialsAnnotation = "deployments.plural.sh/namespaced-credentials"
 
-func HandleNamespaceCredentialsChanges[T client.ObjectList, V client.Object](c client.Client, objectList T, itemGetter func(T) []V) handler.EventHandler {
+func HandleCredentialsChange[T client.ObjectList](c client.Client, objectList T) handler.EventHandler {
 	return handler.EnqueueRequestsFromMapFunc(func(ctx context.Context, credentials client.Object) []reconcile.Request {
 		_ = c.List(ctx, objectList)
-		items := itemGetter(objectList)
+		items, _ := meta.ExtractList(objectList)
 		requests := make([]reconcile.Request, 0, len(items))
 		for _, item := range items {
 			if HasNamespacedCredentialsAnnotation(item.GetAnnotations(), credentials.GetName()) {
