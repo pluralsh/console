@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "start": "vite",
-    "start:dev": "BASE_URL=console.cd-demo.onplural.sh yarn start",
+    "start:dev": "BASE_URL=console.plrl-dev-aws.onplural.sh yarn start",
     "start:cd": "BASE_URL=console.boot-aws.onplural.sh yarn start",
-    "start:prod": "yarn build && BASE_URL=console.cd-demo.onplural.sh vite preview",
+    "start:prod": "yarn build && BASE_URL=console.plrl-dev-aws.onplural.sh vite preview",
     "build": "tsc && vite build",
     "test": "vitest --run",
     "test:watch": "vitest",
