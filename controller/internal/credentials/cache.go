@@ -16,13 +16,14 @@ import (
 
 const (
 	CredentialsSecretTokenKey = "token"
+	DefaultCredentialsKey     = ""
 )
 
 type NamespaceCredentialsCache interface {
 	Init() error
 	Wipe()
 	Reset() error
-	AddNamespaceCredentials(nc *v1alpha1.NamespaceCredentials) error
+	AddNamespaceCredentials(nc *v1alpha1.NamespaceCredentials) (string, error)
 	RemoveNamespaceCredentials(nc *v1alpha1.NamespaceCredentials)
 	GetNamespaceCredentials(namespace string) NamespaceCredentials
 }
@@ -37,6 +38,7 @@ func NewNamespaceCredentialsCache(defaultConsoleToken string, scheme *runtime.Sc
 		cache:               cmap.New[NamespaceCredentials](),
 		ctx:                 context.Background(),
 		client:              c,
+		scheme:              scheme,
 		defaultConsoleToken: defaultConsoleToken,
 	}
 
@@ -51,6 +53,7 @@ type namespaceCredentialsCache struct {
 	cache               cmap.ConcurrentMap[string, NamespaceCredentials]
 	ctx                 context.Context
 	client              client.Client
+	scheme              *runtime.Scheme
 	defaultConsoleToken string
 }
 
@@ -62,7 +65,7 @@ func (in *namespaceCredentialsCache) Init() error {
 
 	for _, nc := range list.Items {
 		// Ignore errors during init. These are used in the controller to add them to NamespaceCredentials conditions.
-		_ = in.AddNamespaceCredentials(&nc)
+		_, _ = in.AddNamespaceCredentials(&nc)
 	}
 
 	return nil
@@ -79,7 +82,7 @@ func (in *namespaceCredentialsCache) Reset() error {
 
 // AddNamespaceCredentials registers custom namespace credentials.
 // Even if errors occur while reading token, namespaces will be registered as ones using custom credentials.
-func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredentials *v1alpha1.NamespaceCredentials) error {
+func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredentials *v1alpha1.NamespaceCredentials) (string, error) {
 	token, err := in.getNamespaceCredentialsToken(namespaceCredentials)
 	for _, namespace := range namespaceCredentials.Spec.Namespaces {
 		nc, ok := in.cache.Get(namespace)
@@ -94,13 +97,17 @@ func (in *namespaceCredentialsCache) AddNamespaceCredentials(namespaceCredential
 			Err:                  err,
 		})
 	}
-	return err
+	return token, err
 }
 
 func (in *namespaceCredentialsCache) getNamespaceCredentialsToken(nc *v1alpha1.NamespaceCredentials) (string, error) {
 	secret := &corev1.Secret{}
 	if err := in.client.Get(in.ctx, types.NamespacedName{Name: nc.Spec.SecretRef.Name, Namespace: nc.Spec.SecretRef.Namespace}, secret); err != nil {
 		return "", fmt.Errorf("failed to get secret: %s", err)
+	}
+
+	if err := tryAddOwnerRef(in.ctx, in.client, nc, secret, in.scheme); err != nil {
+		return "", err
 	}
 
 	token, ok := secret.Data[CredentialsSecretTokenKey]
@@ -122,7 +129,7 @@ func (in *namespaceCredentialsCache) GetNamespaceCredentials(namespace string) N
 		return nc
 	}
 
-	return NamespaceCredentials{Token: in.defaultConsoleToken}
+	return NamespaceCredentials{Token: in.defaultConsoleToken, NamespaceCredentials: DefaultCredentialsKey}
 }
 
 type NamespaceCredentials struct {

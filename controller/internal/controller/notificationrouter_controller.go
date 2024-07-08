@@ -79,7 +79,7 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
-	utils.MarkCredentialsCondition(notificationRouter.SetCondition, nc, err)
+	credentials.SyncCredentialsInfo(notificationRouter, notificationRouter.SetCondition, nc, err)
 	if err != nil {
 		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
 		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
@@ -237,7 +237,8 @@ func (r *NotificationRouterReconciler) getPipelineID(ctx context.Context, objRef
 // SetupWithManager sets up the controller with the Manager.
 func (r *NotificationRouterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                // Requirement for credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.NotificationRouterList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.NotificationRouter{}).
 		Complete(r)
 }

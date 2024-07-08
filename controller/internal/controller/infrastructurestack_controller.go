@@ -20,11 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/internal/cache"
 	"github.com/pluralsh/console/controller/internal/credentials"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-
-	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -34,6 +32,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
@@ -85,7 +84,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
-	utils.MarkCredentialsCondition(stack.SetCondition, nc, err)
+	credentials.SyncCredentialsInfo(stack, stack.SetCondition, nc, err)
 	if err != nil {
 		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
@@ -192,7 +191,8 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 // SetupWithManager sets up the controller with the Manager.
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.InfrastructureStack{}).
 		Complete(r)
 }

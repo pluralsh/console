@@ -50,6 +50,11 @@ type NamespaceCredentialsSpec struct {
 }
 
 type NamespaceCredentialsStatus struct {
+	// TokenSHA contains SHA of last token seen.
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Type:=string
+	TokenSHA *string `json:"tokenSHA,omitempty"`
+
 	// Conditions represent the observations of a NamespaceCredentials current state.
 	// +patchMergeKey=type
 	// +patchStrategy=merge

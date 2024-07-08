@@ -21,7 +21,11 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/credentials"
+	"github.com/pluralsh/console/controller/internal/errors"
+	"github.com/pluralsh/console/controller/internal/utils"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -32,11 +36,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/errors"
-	"github.com/pluralsh/console/controller/internal/utils"
 )
 
 const (
@@ -81,7 +80,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
 	nc, err := r.ConsoleClient.UseCredentials(req.Namespace, r.CredentialsCache)
-	utils.MarkCredentialsCondition(globalService.SetCondition, nc, err)
+	credentials.SyncCredentialsInfo(globalService, globalService.SetCondition, nc, err)
 	if err != nil {
 		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
@@ -275,7 +274,8 @@ func (r *GlobalServiceReconciler) handleDelete(ctx context.Context, service *v1a
 // SetupWithManager sets up the controller with the Manager.
 func (r *GlobalServiceReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Hard requirement for current namespace credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                           // Requirement for credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.GlobalServiceList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.GlobalService{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&v1alpha1.ServiceDeployment{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(r)

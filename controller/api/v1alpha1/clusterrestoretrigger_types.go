@@ -29,12 +29,6 @@ type ClusterRestoreTriggerSpec struct {
 	ClusterRestoreRef *corev1.ObjectReference `json:"clusterRestoreRef,omitempty"`
 }
 
-// ClusterRestoreTriggerStatus defines the observed state of ClusterRestoreTrigger
-type ClusterRestoreTriggerStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-}
-
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 

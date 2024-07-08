@@ -142,8 +142,9 @@ func (c ConditionMessage) String() string {
 }
 
 const (
-	ReadonlyTrueConditionMessage         ConditionMessage = "Running in read-only mode"
-	SynchronizedNotFoundConditionMessage ConditionMessage = "Could not find resource in Console API"
+	ReadonlyTrueConditionMessage          ConditionMessage = "Running in read-only mode"
+	SynchronizedNotFoundConditionMessage  ConditionMessage = "Could not find resource in Console API"
+	NamespacedCredentialsConditionMessage ConditionMessage = "Using default credentials"
 )
 
 // GitRef ...

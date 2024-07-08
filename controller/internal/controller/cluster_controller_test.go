@@ -176,7 +176,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-							Message: "using default credentials",
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
 							Type:   v1alpha1.ReadonlyConditionType.String(),
@@ -229,7 +229,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-							Message: "using default credentials",
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
 							Type:   v1alpha1.ReadonlyConditionType.String(),
@@ -283,7 +283,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-							Message: "using default credentials",
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
 							Type:   v1alpha1.ReadonlyConditionType.String(),
@@ -327,7 +327,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-							Message: "using default credentials",
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
@@ -384,7 +384,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-							Message: "using default credentials",
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
@@ -432,7 +432,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-							Message: "using default credentials",
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),
@@ -482,7 +482,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
-							Message: "using default credentials",
+							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 						},
 						{
 							Type:    v1alpha1.ReadonlyConditionType.String(),

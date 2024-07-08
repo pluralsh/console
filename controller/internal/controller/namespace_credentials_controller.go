@@ -5,6 +5,8 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/controller/internal/credentials"
+	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -72,7 +74,9 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 	}
 
 	// Try to add namespace credentials to cache.
-	if err := r.CredentialsCache.AddNamespaceCredentials(nc); err != nil {
+	token, err := r.CredentialsCache.AddNamespaceCredentials(nc)
+	nc.Status.TokenSHA = lo.ToPtr(utils.HashString(token))
+	if err != nil {
 		utils.MarkFalse(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, nil
 	}
@@ -87,5 +91,6 @@ func (r *NamespaceCredentialsReconciler) SetupWithManager(mgr ctrl.Manager) erro
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "namespacecredentials_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v1alpha1.NamespaceCredentials{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }

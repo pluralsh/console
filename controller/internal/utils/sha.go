@@ -6,11 +6,16 @@ import (
 	"encoding/json"
 )
 
-func HashObject(any interface{}) (string, error) {
-	out, err := json.Marshal(any)
+func HashObject(a any) (string, error) {
+	out, err := json.Marshal(a)
 	if err != nil {
 		return "", err
 	}
 	sha := sha256.Sum256(out)
 	return base32.StdEncoding.EncodeToString(sha[:]), nil
+}
+
+func HashString(s string) string {
+	sha := sha256.Sum256([]byte(s))
+	return base32.StdEncoding.EncodeToString(sha[:])
 }

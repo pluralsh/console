@@ -5,9 +5,8 @@ import (
 	"net/http"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/internal/credentials"
-
 	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/credentials"
 )
 
 type authedTransport struct {

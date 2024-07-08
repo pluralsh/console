@@ -89,8 +89,17 @@ func (r *ServiceAccountReconciler) Reconcile(ctx context.Context, req reconcile.
 		return ctrl.Result{}, err
 	}
 
-	// Mark token as not ready if found any changes in the resource
-	if changed {
+	// Check if secret with token exists
+	hasTokenSecret := false
+	if sa.Spec.TokenSecretRef != nil {
+		secret, _ := utils.GetSecret(ctx, r.Client, sa.Spec.TokenSecretRef)
+		if secret != nil {
+			_, hasTokenSecret = secret.Data[credentials.CredentialsSecretTokenKey]
+		}
+	}
+
+	// Mark token as not ready if found any changes in the resource or if secret doesn't exist
+	if changed || !hasTokenSecret {
 		utils.MarkCondition(sa.SetCondition, v1alpha1.ReadyTokenConditionType, v1.ConditionFalse, v1alpha1.ReadyTokenConditionReasonError, "token not synchronized yet")
 	}
 
