@@ -18,6 +18,7 @@ import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { GqlError } from '../utils/Alert'
+import { useProjectId } from '../contexts/ProjectsContext'
 
 type ClusterContextT = {
   clusters: KubernetesClusterFragment[]
@@ -84,6 +85,7 @@ export const useNamespaces = () => {
 
 export default function Cluster() {
   const theme = useTheme()
+  const projectId = useProjectId()
   const { clusterId } = useParams()
   const { search } = useLocation()
   const navigate = useNavigate()
@@ -91,6 +93,7 @@ export default function Cluster() {
   const { data, error, refetch, loading } = useKubernetesClustersQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
+    variables: { projectId },
   })
 
   const clusters = useMemo(
