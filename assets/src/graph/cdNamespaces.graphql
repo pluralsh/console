@@ -19,6 +19,9 @@ fragment ManagedNamespace on ManagedNamespace {
   project {
     ...ProjectTiny
   }
+  service {
+    ...ServiceTemplateWithoutConfiguration
+  }
 }
 
 fragment ServiceTemplate on ServiceTemplate {

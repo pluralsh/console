@@ -34,7 +34,7 @@ import { deepOmitKey } from '../../../../utils/deepOmitKey'
 
 import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
 
-function PropCard({
+export function PropCard({
   title,
   titleContent,
   children,
