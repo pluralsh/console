@@ -208,13 +208,16 @@ export default function ManagedNamespaceInfo() {
       <div
         css={{
           display: 'grid',
-          gridTemplateColumns: '1fr 2fr 1fr',
+          gridTemplateColumns: 'repeat(4, 1fr)',
           gridAutoRows: 'min-content',
           gridGap: theme.spacing.large,
         }}
       >
         <PropCard title="Namespace">{namespace?.name}</PropCard>
-        <PropCard title="Description">
+        <PropCard
+          title="Description"
+          css={{ gridColumn: 'span 2' }}
+        >
           {namespace?.description ?? 'No description found'}
         </PropCard>
         <PropCard title="Distribution">
@@ -243,6 +246,7 @@ export default function ManagedNamespaceInfo() {
             {namespace?.target?.distro || 'All distributions'}
           </div>
         </PropCard>
+
         <PropCard
           title="Tags"
           titleContent={
@@ -274,10 +278,30 @@ export default function ManagedNamespaceInfo() {
           </PropCard>
         )}
         {namespace?.project && (
-          <PropCard title="Cascade">
-            <PropCard title="Project">{namespace.project.name}</PropCard>
-          </PropCard>
+          <PropCard title="Project">{namespace.project.name}</PropCard>
         )}
+        <PropCard
+          title="Labels"
+          css={{ gridColumn: 'span 2' }}
+        >
+          <ChipList
+            limit={8}
+            values={Object.entries(namespace?.labels ?? {})}
+            transformValue={(label) => label.join(': ')}
+            emptyState={<div>No tags found</div>}
+          />
+        </PropCard>
+        <PropCard
+          title="Annotations"
+          css={{ gridColumn: 'span 2' }}
+        >
+          <ChipList
+            limit={8}
+            values={Object.entries(namespace?.annotations ?? {})}
+            transformValue={(label) => label.join(': ')}
+            emptyState={<div>No tags found</div>}
+          />
+        </PropCard>
       </div>
       {namespace?.template ? (
         <Code
