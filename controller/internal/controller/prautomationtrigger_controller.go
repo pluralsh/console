@@ -59,6 +59,7 @@ func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.
 	if err := r.Get(ctx, req.NamespacedName, trigger); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+	utils.MarkCondition(trigger.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	prAutomation := &v1alpha1.PrAutomation{}
 	if err := r.Get(ctx, client.ObjectKey{Name: trigger.Spec.PrAutomationRef.Name, Namespace: trigger.Spec.PrAutomationRef.Namespace}, prAutomation); err != nil {

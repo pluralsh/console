@@ -61,7 +61,7 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err := r.Get(ctx, req.NamespacedName, pipelineContext); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
+	utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	pipeline := &v1alpha1.Pipeline{}
 	if err := r.Get(ctx, client.ObjectKey{Name: pipelineContext.Spec.PipelineRef.Name, Namespace: pipelineContext.Spec.PipelineRef.Namespace}, pipeline); err != nil {
 		utils.MarkCondition(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -80,7 +80,6 @@ func (r *PipelineContextReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	if err := utils.TryAddControllerRef(ctx, r.Client, pipeline, pipelineContext, r.Scheme); err != nil {
 		return ctrl.Result{}, err
 	}
-
 	scope, err := NewPipelineContextScope(ctx, r.Client, pipelineContext)
 	if err != nil {
 		utils.MarkFalse(pipelineContext.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())

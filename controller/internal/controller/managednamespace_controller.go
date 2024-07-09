@@ -66,6 +66,8 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
+	utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	scope, err := NewManagedNamespaceScope(ctx, r.Client, managedNamespace)
 	if err != nil {
 		logger.Error(err, "failed to create scope")

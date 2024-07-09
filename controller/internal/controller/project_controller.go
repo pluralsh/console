@@ -53,6 +53,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	if err := in.Get(ctx, req.NamespacedName, project); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	scope, err := NewProjectScope(ctx, in.Client, project)
 	if err != nil {
@@ -189,7 +190,7 @@ func (in *ProjectReconciler) handleExistingProject(ctx context.Context, project 
 	project.Status.ID = &apiProject.ID
 
 	utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	// utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }

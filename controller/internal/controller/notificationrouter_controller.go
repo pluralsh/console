@@ -64,6 +64,8 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 	if err := r.Get(ctx, req.NamespacedName, notificationRouter); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
+	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewNotificationRouterScope(ctx, r.Client, notificationRouter)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
