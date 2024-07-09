@@ -1,7 +1,6 @@
 import { useTheme } from 'styled-components'
 import {
   AppIcon,
-  ArrowTopRightIcon,
   Button,
   Card,
   CardProps,
@@ -14,14 +13,13 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import React, { ComponentProps, ReactElement, useMemo, useState } from 'react'
-import { useNavigate, useOutletContext } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 
 import isEqual from 'lodash/isEqual'
 
 import { useSetPageScrollable } from '../../ContinuousDeployment'
 import { OverlineH1 } from '../../../utils/typography/Text'
 import { getDistroProviderIconUrl } from '../../../utils/ClusterDistro'
-import { getServiceDetailsPath } from '../../../../routes/cdRoutesConsts'
 
 import { useUpdateGlobalServiceMutation } from '../../../../generated/graphql'
 import { useUpdateState } from '../../../hooks/useUpdateState'
@@ -185,7 +183,6 @@ export function TagsModal(props: ComponentProps<typeof TagsModalInner>) {
 
 export default function ManagedNamespaceInfo() {
   const theme = useTheme()
-  const navigate = useNavigate()
   const { namespaceId, namespace } =
     useOutletContext<ManagedNamespaceContextT>()
   const [open, setOpen] = useState(false)
@@ -211,36 +208,41 @@ export default function ManagedNamespaceInfo() {
       <div
         css={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: '1fr 2fr 1fr',
           gridAutoRows: 'min-content',
           gridGap: theme.spacing.large,
         }}
       >
-        {namespace?.service && (
-          <PropCard
-            title="Root service"
-            titleContent={
-              <Button
-                small
-                secondary
-                endIcon={<ArrowTopRightIcon />}
-                onClick={() =>
-                  navigate(
-                    getServiceDetailsPath({
-                      serviceId: namespace.service?.id ?? '',
-                      clusterId: namespace.service?.cluster?.id ?? '',
-                    })
-                  )
-                }
-              >
-                Go to root service
-              </Button>
-            }
-            css={{ gridColumn: 'span 2' }}
+        <PropCard title="Namespace">{namespace?.name}</PropCard>
+        <PropCard title="Description">
+          {namespace?.description ?? 'No description found'}
+        </PropCard>
+        <PropCard title="Distribution">
+          <div
+            css={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: theme.spacing.small,
+            }}
           >
-            {namespace.service.name}
-          </PropCard>
-        )}
+            <AppIcon
+              spacing="padding"
+              size="xxsmall"
+              icon={
+                namespace?.target?.distro ? undefined : <GlobeIcon size={16} />
+              }
+              url={
+                namespace?.target?.distro
+                  ? getDistroProviderIconUrl({
+                      distro: namespace?.target?.distro,
+                      mode: theme.mode,
+                    })
+                  : undefined
+              }
+            />
+            {namespace?.target?.distro || 'All distributions'}
+          </div>
+        </PropCard>
         <PropCard
           title="Tags"
           titleContent={
@@ -265,43 +267,12 @@ export default function ManagedNamespaceInfo() {
           open={open}
           onClose={() => setOpen(false)}
         />
-        <PropCard title="Distribution">
-          <div
-            css={{
-              ...theme.partials.text.body2,
-              display: 'flex',
-              alignItems: 'center',
-              gap: theme.spacing.small,
-            }}
-          >
-            <AppIcon
-              spacing="padding"
-              size="xxsmall"
-              icon={namespace?.distro ? undefined : <GlobeIcon size={16} />}
-              url={
-                namespace?.distro
-                  ? getDistroProviderIconUrl({
-                      distro: namespace?.distro,
-                      provider: namespace?.provider?.cloud,
-                      mode: theme.mode,
-                    })
-                  : undefined
-              }
-            />
-            {namespace?.distro || 'All distribution'}
-          </div>
-        </PropCard>
         {namespace?.cascade && (
           <PropCard title="Cascade">
             {namespace.cascade.delete && <Chip>Delete</Chip>}
             {namespace.cascade.detach && <Chip>Detach</Chip>}
           </PropCard>
         )}
-        <PropCard title="Reparent">
-          <Chip severity={namespace?.reparent ? 'success' : 'danger'}>
-            {namespace?.reparent ? 'True' : 'False'}
-          </Chip>
-        </PropCard>
         {namespace?.project && (
           <PropCard title="Cascade">
             <PropCard title="Project">{namespace.project.name}</PropCard>

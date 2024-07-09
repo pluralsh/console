@@ -73,7 +73,7 @@ export function getDistroProviderIconUrl({
   mode,
 }: {
   distro: Nullable<ClusterDistro>
-  provider: Nullable<string>
+  provider?: Nullable<string>
   mode: typeof styledTheme.mode
 }) {
   return (
