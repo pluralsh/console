@@ -23,7 +23,6 @@ import {
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
-  GLOBAL_SETTINGS_ABS_PATH,
   getClusterDetailsPath,
 } from 'routes/cdRoutesConsts'
 
@@ -34,6 +33,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
 import { isEmpty } from 'lodash'
+
+import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 
 import {
   useSetPageHeaderContent,

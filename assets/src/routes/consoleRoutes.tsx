@@ -5,10 +5,6 @@ import Build from 'components/builds/build/Build'
 import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
 
-import Audits from 'components/account/audits/Audits'
-import AuditsList from 'components/account/audits/AuditsList'
-import AuditsMap from 'components/account/audits/AuditsMap'
-
 import MyProfile from 'components/profile/MyProfile'
 import { Profile } from 'components/profile/Profile'
 import { Security } from 'components/profile/Security'
@@ -16,18 +12,7 @@ import { Permissions } from 'components/profile/Permissions'
 import { AccessTokens } from 'components/profile/AccessTokens'
 import { ProfileVPN } from 'components/profile/VPN'
 
-import Account from 'components/account/Account'
-import { Groups } from 'components/account/groups/Groups'
-import Roles from 'components/account/roles/Roles'
-import { Webhooks } from 'components/account/webhooks/Webhooks'
-import Users from 'components/account/users/Users'
-import EmailSettings from 'components/account/email/EmailSettings'
-import AccountSettings from 'components/account/settings/AccountSettings'
-import { AccountVPN } from 'components/account/vpn/VPN'
-
 import Apps from 'components/apps/Apps'
-
-import { Personas } from 'components/account/personas/Personas'
 
 import Home from 'components/home/Home'
 
@@ -40,6 +25,7 @@ import { backupsRoutes } from './backupRoutes'
 import { kubernetesRoute } from './kubernetesRoute'
 import { policiesRoutes } from './policiesRoutes'
 import { stacksRoutes } from './stacksRoutes'
+import { settingsRoutes } from './settingsRoutes'
 
 const buildsRoutes = [
   <Route
@@ -107,78 +93,6 @@ const profileRoutes = [
   </Route>,
 ]
 
-const accountRoutes = [
-  <Route
-    path="account"
-    element={<Account />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to="users"
-        />
-      }
-    />
-    <Route
-      path="users"
-      element={<Users />}
-    />
-    <Route
-      path="groups"
-      element={<Groups />}
-    />
-    <Route
-      path="roles"
-      element={<Roles />}
-    />
-    <Route
-      path="personas"
-      element={<Personas />}
-    />
-    <Route
-      path="webhooks"
-      element={<Webhooks />}
-    />
-    <Route
-      path="vpn"
-      element={<AccountVPN />}
-    />
-    <Route
-      path="email"
-      element={<EmailSettings />}
-    />
-    <Route
-      path="settings"
-      element={<AccountSettings />}
-    />
-    <Route
-      path="audits"
-      element={<Audits />}
-    >
-      <Route
-        index
-        element={
-          <Navigate
-            replace
-            to="list"
-          />
-        }
-      />
-      <Route
-        path="list"
-        element={<AuditsList />}
-      />
-      <Route
-        path="map"
-        element={<AuditsMap />}
-      />
-    </Route>
-    ,
-  </Route>,
-]
-
 /*
 const incidentsRoutes = [
   <Route
@@ -221,14 +135,14 @@ export const consoleComponentRoutes = [
   /* BACKUPS */
   ...backupsRoutes,
 
-  /* ACCOUNT */
-  ...accountRoutes,
-
   /* PROFILE */
   ...profileRoutes,
 
   /* CONTINUOUS DEPLOYMENT */
   ...cdRoutes,
+
+  /* SETTINGS */
+  settingsRoutes,
 
   /* KUBERNETES */
   kubernetesRoute,
