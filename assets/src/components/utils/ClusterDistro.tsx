@@ -104,7 +104,7 @@ export function DistroProviderIcon({
   ...props
 }: {
   distro: Nullable<ClusterDistro>
-  provider: Nullable<string>
+  provider?: Nullable<string>
   size?: number
 } & ComponentProps<'img'>) {
   const src = useDistroProviderIconUrl({ distro, provider })
