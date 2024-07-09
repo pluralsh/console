@@ -64,6 +64,9 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	if err := r.Get(ctx, req.NamespacedName, notificationSink); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
+	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+
 	scope, err := NewNotificationSinkScope(ctx, r.Client, notificationSink)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
@@ -163,6 +166,7 @@ func (r *NotificationSinkReconciler) handleExisting(ctx context.Context, notific
 	}
 	notificationSink.Status.ID = &existing.ID
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }

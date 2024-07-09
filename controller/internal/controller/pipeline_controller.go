@@ -66,7 +66,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		logger.Error(err, "Unable to fetch pipeline")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
+	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	// Ensure that status updates will always be persisted when exiting this function.
 	scope, err := NewPipelineScope(ctx, r.Client, pipeline)
 	if err != nil {
@@ -137,7 +137,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	pipeline.Status.ID = &apiPipeline.ID
 	pipeline.Status.SHA = &sha
 	utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-
+	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return requeue, nil
 }
 

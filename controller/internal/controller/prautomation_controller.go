@@ -48,7 +48,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	if err := in.Get(ctx, req.NamespacedName, prAutomation); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
+	utils.MarkFalse(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewPrAutomationScope(ctx, in.Client, prAutomation)
 	if err != nil {
 		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -96,6 +96,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 
 	in.updateReadyCondition(prAutomation)
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
 
 	return requeue, nil
 }

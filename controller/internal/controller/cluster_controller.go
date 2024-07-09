@@ -61,7 +61,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		logger.Error(err, "Unable to fetch cluster")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	// Ensure that status updates will always be persisted when exiting this function.
 	scope, err := NewClusterScope(ctx, r.Client, cluster)
 	if err != nil {
@@ -144,7 +144,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 		}
 	}
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return requeue, nil
 }
 
@@ -205,7 +205,7 @@ func (r *ClusterReconciler) handleExisting(cluster *v1alpha1.Cluster) (ctrl.Resu
 		}
 	}
 	utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-
+	utils.MarkCondition(cluster.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return requeue, nil
 }
 

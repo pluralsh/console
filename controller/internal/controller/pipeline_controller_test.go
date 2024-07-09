@@ -254,6 +254,12 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 						Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
 					},
 					{
+						Type:    v1alpha1.ReadyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  v1alpha1.ReadyConditionReason.String(),
+						Message: "",
+					},
+					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),
 						Status: metav1.ConditionTrue,
 						Reason: v1alpha1.SynchronizedConditionReason.String(),
@@ -296,6 +302,12 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 						Status:  metav1.ConditionFalse,
 						Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
 						Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+					},
+					{
+						Type:    v1alpha1.ReadyConditionType.String(),
+						Status:  metav1.ConditionTrue,
+						Reason:  v1alpha1.ReadyConditionReason.String(),
+						Message: "",
 					},
 					{
 						Type:   v1alpha1.SynchronizedConditionType.String(),

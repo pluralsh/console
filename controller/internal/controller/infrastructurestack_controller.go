@@ -20,6 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	"sigs.k8s.io/controller-runtime/pkg/builder"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/console/controller/internal/cache"
 	"github.com/pluralsh/console/controller/internal/credentials"
@@ -68,7 +71,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	if err := r.Get(ctx, req.NamespacedName, stack); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-
+	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewInfrastructureStackScope(ctx, r.Client, stack)
 	if err != nil {
 		logger.Error(err, "failed to create stack")
@@ -194,6 +197,8 @@ func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.InfrastructureStack{}).
+		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
+		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
 
@@ -295,6 +300,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 		if err := r.Get(ctx, name, secret); err != nil {
 			return nil, err
 		}
+		if err := utils.TryAddControllerRef(ctx, r.Client, stack, secret, r.Scheme); err != nil {
+			return nil, err
+		}
 		for k, v := range secret.Data {
 			attr.Files = append(attr.Files, &console.StackFileAttributes{
 				Path:    fmt.Sprintf("%s/%s", file.MountPath, k),
@@ -315,6 +323,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 			if err := r.Get(ctx, name, secret); err != nil {
 				return nil, err
 			}
+			if err := utils.TryAddControllerRef(ctx, r.Client, stack, secret, r.Scheme); err != nil {
+				return nil, err
+			}
 			isSecret = lo.ToPtr(true)
 			rawData, ok := secret.Data[env.SecretKeyRef.Key]
 			if !ok {
@@ -325,6 +336,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(ctx context.Context, 
 			configMap := &corev1.ConfigMap{}
 			name := types.NamespacedName{Name: env.ConfigMapRef.Name, Namespace: stack.GetNamespace()}
 			if err := r.Get(ctx, name, configMap); err != nil {
+				return nil, err
+			}
+			if err := utils.TryAddControllerRef(ctx, r.Client, stack, configMap, r.Scheme); err != nil {
 				return nil, err
 			}
 			rawData, ok := configMap.Data[env.ConfigMapRef.Key]

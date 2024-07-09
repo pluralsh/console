@@ -54,6 +54,7 @@ func (r *ScmConnectionReconciler) Reconcile(ctx context.Context, req reconcile.R
 	if err := r.Get(ctx, req.NamespacedName, scm); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+	utils.MarkCondition(scm.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	scope, err := NewScmConnectionScope(ctx, r.Client, scm)
 	if err != nil {
