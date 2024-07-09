@@ -306,9 +306,7 @@ export default function GlobalServiceInfo() {
           </Chip>
         </PropCard>
         {globalService?.project && (
-          <PropCard title="Cascade">
-            <PropCard title="Project">{globalService.project.name}</PropCard>
-          </PropCard>
+          <PropCard title="Cascade">{globalService.project.name}</PropCard>
         )}
       </div>
       {globalService?.template ? (
