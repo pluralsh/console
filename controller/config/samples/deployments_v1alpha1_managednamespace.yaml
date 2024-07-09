@@ -51,5 +51,13 @@ spec:
     name: test
   annotations:
     name: test
-    app.kubernetes.io/created-by: controller
-
+    app.kubernetes.io/created-by: controller                                                                                                                                                         │
+  target:
+    clusterRefs:
+      - kind: Cluster
+        name: existing
+        namespace: default
+    distro: EKS
+    tags:
+      abc: "123"
+      ads: "234"
