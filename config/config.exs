@@ -55,7 +55,7 @@ config :console,
   local_cache: Console.LocalCache,
   version: Mix.Project.config[:version],
   kas_dns: "https://kas.example.com",
-  qps: 40,
+  qps: 1_000,
   jwt_pub_key: or_nil.(File.read("config/pubkey.pem"))
 
 config :logger, :console,

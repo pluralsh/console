@@ -513,6 +513,14 @@ defmodule Console.GraphQl.Users do
       safe_resolve &User.delete_user/2
     end
 
+    field :impersonate_service_account, :user do
+      middleware Authenticated
+      middleware AllowJwt
+      arg :email, non_null(:string)
+
+      safe_resolve &User.impersonate/2
+    end
+
     field :mark_read, :user do
       middleware Authenticated
       arg :type, :read_type

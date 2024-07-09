@@ -215,6 +215,11 @@ defmodule Console.GraphQl.Resolvers.User do
   def delete_group_member(%{group_id: group_id, user_id: user_id}, _),
     do: Users.delete_group_member(group_id, user_id)
 
+  def impersonate(%{email: email}, %{context: %{current_user: user}}) do
+    Users.impersonate_service_account(email, user)
+    |> with_jwt()
+  end
+
   def create_role(%{attributes: attrs}, _) do
     with_permissions(attrs)
     |> Users.create_role()

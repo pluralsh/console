@@ -537,6 +537,59 @@ defmodule Console.GraphQl.UserMutationsTest do
     end
   end
 
+  describe "impersonateServiceAccount" do
+    test "it can impersonate a service account if you're in the assume bindings" do
+      user = insert(:user)
+      sa = insert(:user, service_account: true, assume_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"impersonateServiceAccount" => impersonated}}} = run_query("""
+        mutation Impersonate($email: String!) {
+          impersonateServiceAccount(email: $email) {
+            id
+            email
+            jwt
+          }
+        }
+      """, %{"email" => sa.email}, %{current_user: user})
+
+      assert impersonated["id"] == sa.id
+      assert impersonated["jwt"]
+    end
+
+    test "it can impersonate a service account if you're in the assume bindings via a group" do
+      %{user: user, group: group} = insert(:group_member)
+      sa = insert(:user, service_account: true, assume_bindings: [%{group_id: group.id}])
+
+      {:ok, %{data: %{"impersonateServiceAccount" => impersonated}}} = run_query("""
+        mutation Impersonate($email: String!) {
+          impersonateServiceAccount(email: $email) {
+            id
+            email
+            jwt
+          }
+        }
+      """, %{"email" => sa.email}, %{current_user: Console.Services.Rbac.preload(user)})
+
+      assert impersonated["id"] == sa.id
+      assert impersonated["jwt"]
+    end
+
+    test "it cannot impersonate a service account if you're not in the assume bindings" do
+      user = insert(:user)
+      sa = insert(:user, service_account: true, assume_bindings: [%{user_id: user.id}])
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Impersonate($email: String!) {
+          impersonateServiceAccount(email: $email) {
+            id
+            email
+            jwt
+          }
+        }
+      """, %{"email" => sa.email}, %{current_user: insert(:user)})
+    end
+  end
+
   describe "deletePersona" do
     test "admins can delete a persona" do
       persona = insert(:persona)

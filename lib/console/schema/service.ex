@@ -266,6 +266,17 @@ defmodule Console.Schema.Service do
     )
   end
 
+  def tree(query \\ __MODULE__) do
+    recursion_query = from(s in __MODULE__, join: d in "descendants", on: d.id == s.parent_id)
+    cte_query = union_all(query, ^recursion_query)
+
+    __MODULE__
+    |> recursive_ctes(true)
+    |> with_cte("descendants", as: ^cte_query)
+    |> join(:inner, [s], d in "descendants", on: s.id == d.id)
+    |> distinct(true)
+  end
+
   def docs_path(%__MODULE__{docs_path: p}) when is_binary(p), do: p
   def docs_path(%__MODULE__{git: %{folder: p}}), do: Path.join(p, "docs")
 

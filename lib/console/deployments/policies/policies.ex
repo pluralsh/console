@@ -134,8 +134,10 @@ defmodule Console.Deployments.Policies do
   def can?(%User{} = user, %Stack{} = stack, :create) do
     %{cluster: %Cluster{} = cluster} = Repo.preload(stack, [:cluster])
 
-    rbac(user, stack, :write) && can?(user, cluster, :write)
+    rbac(stack, user, :write) && can?(user, cluster, :write)
   end
+
+  def can?(%User{} = user, %User{service_account: true} = sa, :assume), do: rbac(sa, user, :assume)
 
   def can?(%User{} = user, resource, action),
     do: rbac(resource, user, action)

@@ -30,6 +30,7 @@ defmodule Console.Factory do
   def user_factory do
     %Schema.User{
       name: "Some User",
+      assume_policy_id: Ecto.UUID.generate(),
       email: sequence(:user, &"user-#{&1}@example.com")
     }
   end

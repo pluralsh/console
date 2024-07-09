@@ -4277,6 +4277,7 @@ export type RootMutationType = {
   executeRunbook?: Maybe<RunbookActionResponse>;
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
+  impersonateServiceAccount?: Maybe<User>;
   installAddOn?: Maybe<ServiceDeployment>;
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;
@@ -4798,6 +4799,11 @@ export type RootMutationTypeExecuteRunbookArgs = {
 export type RootMutationTypeForceGateArgs = {
   id: Scalars['ID']['input'];
   state?: InputMaybe<GateState>;
+};
+
+
+export type RootMutationTypeImpersonateServiceAccountArgs = {
+  email: Scalars['String']['input'];
 };
 
 

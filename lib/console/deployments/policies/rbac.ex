@@ -23,7 +23,8 @@ defmodule Console.Deployments.Policies.Rbac do
     StackRun,
     CustomStackRun,
     RunStep,
-    Project
+    Project,
+    User
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -99,6 +100,7 @@ defmodule Console.Deployments.Policies.Rbac do
       _ -> Settings.fetch()
     end)
   end
+  def evaluate(%User{} = sa, %User{} = user, :assume), do: recurse(sa, user, :assume)
   def evaluate(_, _, _), do: false
 
   @bindings [:read_bindings, :write_bindings]
@@ -140,6 +142,7 @@ defmodule Console.Deployments.Policies.Rbac do
     do: Repo.preload(pcr, [stack: @stack_preloads])
   def preload(%RunStep{} = pcr),
     do: Repo.preload(pcr, run: [stack: @stack_preloads])
+  def preload(%User{} = user), do: Repo.preload(user, [:assume_bindings])
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)
@@ -177,5 +180,6 @@ defmodule Console.Deployments.Policies.Rbac do
   defp binding_key(:write), do: :write_bindings
   defp binding_key(:git), do: :git_bindings
   defp binding_key(:create), do: [:create_bindings, :write_bindings]
+  defp binding_key(:assume), do: :assume_bindings
   defp binding_key(_), do: []
 end
