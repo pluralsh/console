@@ -115,6 +115,29 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
     end
   end
 
+  describe "serviceTree" do
+    test "it can list services in the system" do
+      cluster = insert(:cluster)
+      services = insert_list(3, :service, cluster: cluster)
+      depth_1 = for s <- services, do: insert(:service, parent: s)
+      depth_2 = for s <- depth_1, do: insert(:service, parent: s)
+      insert_list(3, :service)
+
+      {:ok, %{data: %{"serviceTree" => found}}} = run_query("""
+        query Services($clusterId: ID!) {
+          serviceTree(clusterId: $clusterId, first: 20) {
+            edges { node { id name } }
+          }
+        }
+      """, %{"clusterId" => cluster.id}, %{current_user: admin_user()})
+
+      found = from_connection(found)
+
+      assert ids_equal(found, services ++ depth_1 ++ depth_2)
+      assert Enum.all?(found, & &1["name"])
+    end
+  end
+
 
   describe "serviceDeployment" do
     test "it can fetch a services configuration and revisions" do

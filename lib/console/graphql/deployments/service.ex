@@ -449,6 +449,18 @@ defmodule Console.GraphQl.Deployments.Service do
       safe_resolve &Deployments.list_services/2
     end
 
+    @desc "Renders a filtered list of services and all their descendents returned as a paginated connection"
+    connection field :service_tree, node_type: :service_deployment do
+      middleware Authenticated
+      arg :cluster_id, :id
+      arg :q,          :string
+      arg :status,     :service_deployment_status
+      arg :errored,    :boolean
+      arg :project_id, :id, description: "a project to filter services w/in"
+
+      safe_resolve &Deployments.service_tree/2
+    end
+
     field :service_statuses, list_of(:service_status_count) do
       middleware Authenticated
       arg :cluster_id, :id

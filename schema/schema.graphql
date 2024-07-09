@@ -268,6 +268,28 @@ type RootQueryType {
     cluster: String
   ): ServiceDeploymentConnection
 
+  "Renders a filtered list of services and all their descendents returned as a paginated connection"
+  serviceTree(
+    after: String
+
+    first: Int
+
+    before: String
+
+    last: Int
+
+    clusterId: ID
+
+    q: String
+
+    status: ServiceDeploymentStatus
+
+    errored: Boolean
+
+    "a project to filter services w\/in"
+    projectId: ID
+  ): ServiceDeploymentConnection
+
   serviceStatuses(clusterId: ID, q: String, status: ServiceDeploymentStatus, projectId: ID): [ServiceStatusCount]
 
   serviceContext(name: String!): ServiceContext
@@ -4161,6 +4183,8 @@ input PrAutomationAttributes {
 
   creates: PrAutomationCreateSpecAttributes
 
+  deletes: PrAutomationDeleteSpecAttributes
+
   "link to an add-on name if this can update it"
   addon: String
 
@@ -4225,6 +4249,12 @@ input PrAutomationUpdateSpecAttributes {
 input PrAutomationCreateSpecAttributes {
   git: GitRefAttributes
   templates: [PrAutomationTemplateAttributes]
+}
+
+"Operations to delete files within this pr"
+input PrAutomationDeleteSpecAttributes {
+  files: [String!]
+  folders: [String!]
 }
 
 "a fully specify regex\/replace flow"
@@ -4421,6 +4451,8 @@ type PrAutomation {
 
   creates: PrCreateSpec
 
+  deletes: PrDeleteSpec
+
   configuration: [PrConfiguration]
 
   "write policy for this pr automation, also propagates to the notifications list for any created PRs"
@@ -4465,6 +4497,12 @@ type PrCreateSpec {
   git: GitRef
 
   templates: [PrTemplateSpec]
+}
+
+"Files or folders you want to delete in this pr"
+type PrDeleteSpec {
+  files: [String!]
+  folders: [String!]
 }
 
 "the details of where to find and place a templated file"

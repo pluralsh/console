@@ -55,6 +55,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :branch,        :string
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
+    field :deletes,       :pr_automation_delete_spec_attributes
 
     field :addon,         :string, description: "link to an add-on name if this can update it"
     field :cluster_id,    :id, description: "link to a cluster if this is to perform an upgrade"
@@ -104,6 +105,12 @@ defmodule Console.GraphQl.Deployments.Git do
   input_object :pr_automation_create_spec_attributes do
     field :git,       :git_ref_attributes
     field :templates, list_of(:pr_automation_template_attributes)
+  end
+
+  @desc "Operations to delete files within this pr"
+  input_object :pr_automation_delete_spec_attributes do
+    field :files,     list_of(non_null(:string))
+    field :folders,   list_of(non_null(:string))
   end
 
   @desc "a fully specify regex/replace flow"
@@ -239,6 +246,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :message,       non_null(:string)
     field :updates,       :pr_update_spec
     field :creates,       :pr_create_spec
+    field :deletes,       :pr_delete_spec
 
     field :configuration, list_of(:pr_configuration)
 
@@ -281,6 +289,12 @@ defmodule Console.GraphQl.Deployments.Git do
   object :pr_create_spec do
     field :git, :git_ref, description: "pointer within an external git repository to source templates from"
     field :templates, list_of(:pr_template_spec)
+  end
+
+  @desc "Files or folders you want to delete in this pr"
+  object :pr_delete_spec do
+    field :files,     list_of(non_null(:string))
+    field :folders,   list_of(non_null(:string))
   end
 
   @desc "the details of where to find and place a templated file"

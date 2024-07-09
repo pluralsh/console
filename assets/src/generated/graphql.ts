@@ -3598,6 +3598,7 @@ export type PrAutomation = {
   /** users who can generate prs with this automation */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   creates?: Maybe<PrCreateSpec>;
+  deletes?: Maybe<PrDeleteSpec>;
   documentation?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
@@ -3632,6 +3633,7 @@ export type PrAutomationAttributes = {
   /** users who can create prs with this automation */
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   creates?: InputMaybe<PrAutomationCreateSpecAttributes>;
+  deletes?: InputMaybe<PrAutomationDeleteSpecAttributes>;
   documentation?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: InputMaybe<Scalars['String']['input']>;
@@ -3658,6 +3660,12 @@ export type PrAutomationConnection = {
 export type PrAutomationCreateSpecAttributes = {
   git?: InputMaybe<GitRefAttributes>;
   templates?: InputMaybe<Array<InputMaybe<PrAutomationTemplateAttributes>>>;
+};
+
+/** Operations to delete files within this pr */
+export type PrAutomationDeleteSpecAttributes = {
+  files?: InputMaybe<Array<Scalars['String']['input']>>;
+  folders?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type PrAutomationEdge = {
@@ -3729,6 +3737,13 @@ export type PrCreateSpec = {
   /** pointer within an external git repository to source templates from */
   git?: Maybe<GitRef>;
   templates?: Maybe<Array<Maybe<PrTemplateSpec>>>;
+};
+
+/** Files or folders you want to delete in this pr */
+export type PrDeleteSpec = {
+  __typename?: 'PrDeleteSpec';
+  files?: Maybe<Array<Scalars['String']['output']>>;
+  folders?: Maybe<Array<Scalars['String']['output']>>;
 };
 
 export enum PrRole {
@@ -5321,6 +5336,8 @@ export type RootQueryType = {
   serviceDeployment?: Maybe<ServiceDeployment>;
   serviceDeployments?: Maybe<ServiceDeploymentConnection>;
   serviceStatuses?: Maybe<Array<Maybe<ServiceStatusCount>>>;
+  /** Renders a filtered list of services and all their descendents returned as a paginated connection */
+  serviceTree?: Maybe<ServiceDeploymentConnection>;
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
   stackDefinition?: Maybe<StackDefinition>;
@@ -6137,6 +6154,19 @@ export type RootQueryTypeServiceDeploymentsArgs = {
 
 export type RootQueryTypeServiceStatusesArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<ServiceDeploymentStatus>;
+};
+
+
+export type RootQueryTypeServiceTreeArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  errored?: InputMaybe<Scalars['Boolean']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<ServiceDeploymentStatus>;
