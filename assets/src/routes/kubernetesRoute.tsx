@@ -27,6 +27,7 @@ import {
   Pod,
   PodContainers,
   PodEvents,
+  PodExec,
   PodInfo,
   PodLogs,
 } from '../components/kubernetes/workloads/Pod'
@@ -406,6 +407,10 @@ export const kubernetesRoute = (
       <Route
         path="logs"
         element={<PodLogs />}
+      />
+      <Route
+        path="exec"
+        element={<PodExec />}
       />
       <Route
         path="raw"

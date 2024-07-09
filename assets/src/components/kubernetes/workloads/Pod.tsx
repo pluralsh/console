@@ -1,5 +1,11 @@
-import { ReactElement, useMemo, useState } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { ReactElement, useMemo, useRef, useState } from 'react'
+import {
+  Outlet,
+  useNavigate,
+  useOutletContext,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   FormField,
   ListBoxItem,
@@ -58,6 +64,10 @@ import ImagePullSecrets from '../common/ImagePullSecrets'
 import { Kind } from '../common/types'
 import ResourceLink from '../common/ResourceLink'
 
+import { ShellContext, TerminalActions } from '../../terminal/Terminal'
+
+import { ShellWithContext } from '../../cluster/containers/ContainerShell'
+
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
 
@@ -66,6 +76,7 @@ const directory: Array<TabEntry> = [
   { path: 'containers', label: 'Containers' },
   { path: 'events', label: 'Events' },
   { path: 'logs', label: 'Logs' },
+  { path: 'exec', label: 'Exec' },
   { path: 'raw', label: 'Raw' },
 ] as const
 
@@ -337,5 +348,65 @@ export function PodEvents(): ReactElement {
       itemsKey="events"
       disableOnRowClick
     />
+  )
+}
+
+export function PodExec(): ReactElement {
+  const theme = useTheme()
+  const navigate = useNavigate()
+  const pod = useOutletContext() as PodT
+  const { clusterId, name = '', namespace = '' } = useParams()
+  const [searchParams] = useSearchParams()
+  const container = searchParams.get('container')
+  const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
+
+  const containers: Array<string> = useMemo(
+    () => [
+      ...(pod.initContainers?.map((c) => c!.name!) ?? []),
+      ...(pod.containers?.map((c) => c!.name!) ?? []),
+    ],
+    [pod]
+  )
+  const selected = container ?? containers.at(0) ?? ''
+
+  return (
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.medium,
+        height: '100%',
+      }}
+    >
+      <Select
+        selectedKey={selected}
+        onSelectionChange={(key) =>
+          navigate(
+            `${getResourceDetailsAbsPath(
+              clusterId,
+              Kind.Pod,
+              name,
+              namespace
+            )}/exec?container=${key}`
+          )
+        }
+        titleContent={<div>Container</div>}
+      >
+        {containers.map((c) => (
+          <ListBoxItem
+            key={c}
+            label={c}
+          />
+        ))}
+      </Select>
+      <ShellContext.Provider value={ref}>
+        <ShellWithContext
+          name={name}
+          namespace={namespace}
+          container={selected}
+          clusterId={clusterId}
+        />
+      </ShellContext.Provider>
+    </div>
   )
 }
