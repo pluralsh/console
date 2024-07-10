@@ -91,7 +91,11 @@ query GetManagedNamespace($namespaceId: ID!) {
   }
 }
 
-query GetManagedNamespaceServices($namespaceId: ID!, $first: Int, $after: String) {
+query GetManagedNamespaceServices(
+  $namespaceId: ID!
+  $first: Int
+  $after: String
+) {
   managedNamespace(id: $namespaceId) {
     services(first: $first, after: $after) {
       pageInfo {
@@ -105,4 +109,3 @@ query GetManagedNamespaceServices($namespaceId: ID!, $first: Int, $after: String
     }
   }
 }
-
