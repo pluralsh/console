@@ -6,8 +6,8 @@ import {
   Modal,
   ValidatedInput,
 } from '@pluralsh/design-system'
-import { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Flex, usePrevious } from 'honorable'
+import { Flex } from 'honorable'
+import { ComponentProps, ReactNode, useEffect, useState } from 'react'
 
 import { fetchUsers } from 'components/utils/BindingInput'
 
@@ -22,11 +22,33 @@ import {
   useUpdateGroupMutation,
 } from 'generated/graphql'
 
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
 import { GqlError } from '../../../utils/Alert'
 
 import GroupMembers from './GroupMembers'
 
 export function EditGroupMembers({
+  ...props
+}: ComponentProps<typeof EditGroupMembersModal>) {
+  return (
+    <ModalMountTransition open={props.open}>
+      <EditGroupMembersModal {...props} />
+    </ModalMountTransition>
+  )
+}
+
+export function EditGroupAttributes({
+  ...props
+}: ComponentProps<typeof EditGroupAttributesModal>) {
+  return (
+    <ModalMountTransition open={props.open}>
+      <EditGroupAttributesModal {...props} />
+    </ModalMountTransition>
+  )
+}
+
+function EditGroupMembersModal({
   group,
   open,
   onClose,
@@ -42,7 +64,6 @@ export function EditGroupMembers({
   )
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>()
-  const prevOpen = usePrevious(open)
 
   const [addMut, { loading, error }] = useCreateGroupMemberMutation({
     variables: { groupId: group.id } as any,
@@ -54,16 +75,6 @@ export function EditGroupMembers({
   useEffect(() => {
     fetchUsers(client, userFilter, setSuggestions)
   }, [client, userFilter])
-
-  const reset = useCallback(() => {
-    setErrorMsg(undefined)
-  }, [])
-
-  useEffect(() => {
-    if (open && open !== prevOpen) {
-      reset()
-    }
-  })
 
   useEffect(() => {
     if (
@@ -147,13 +158,11 @@ export function EditGroupMembers({
   )
 }
 
-export function EditGroupAttributes({ group, open, onClose }: any) {
-  const prevOpen = usePrevious(open)
+function EditGroupAttributesModal({ group, open, onClose }: any) {
   const [errorMsg, setErrorMsg] = useState<ReactNode>()
 
   const {
     state: formState,
-    reset: resetForm,
     update,
     hasUpdates,
   } = useUpdateState({
@@ -168,16 +177,6 @@ export function EditGroupAttributes({ group, open, onClose }: any) {
     onCompleted: onClose,
   })
 
-  const reset = useCallback(() => {
-    resetForm()
-    setErrorMsg(undefined)
-  }, [resetForm])
-
-  useEffect(() => {
-    if (open && open !== prevOpen) {
-      reset()
-    }
-  })
   useEffect(() => {
     setErrorMsg(
       error && (
