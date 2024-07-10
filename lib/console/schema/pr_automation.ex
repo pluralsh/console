@@ -42,6 +42,11 @@ defmodule Console.Schema.PrAutomation do
       end
     end
 
+    embeds_one :deletes, DeleteSpec, on_replace: :update do
+      field :files,   {:array, :string}
+      field :folders, {:array, :string}
+    end
+
     embeds_many :configuration, Configuration, on_replace: :delete
 
     belongs_to :cluster,    Cluster
@@ -73,6 +78,7 @@ defmodule Console.Schema.PrAutomation do
     |> cast(attrs, @valid)
     |> cast_embed(:updates, with: &update_changeset/2)
     |> cast_embed(:creates, with: &create_changeset/2)
+    |> cast_embed(:deletes, with: &delete_changeset/2)
     |> cast_embed(:configuration)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:create_bindings)
@@ -96,6 +102,11 @@ defmodule Console.Schema.PrAutomation do
     |> cast(attrs, [])
     |> cast_embed(:git)
     |> cast_embed(:templates, with: &template_changeset/2)
+  end
+
+  defp delete_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(files folders)a)
   end
 
   defp template_changeset(model, attrs) do

@@ -37,6 +37,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     |> paginate(args)
   end
 
+  def service_tree(args, %{context: %{current_user: user}}) do
+    Service.for_user(user)
+    |> service_filters(args)
+    |> Service.tree()
+    |> paginate(args)
+  end
+
   def services_for_owner(%{id: id}, args, %{context: %{current_user: user}}) do
     Service.for_user(user)
     |> Service.for_owner(id)
