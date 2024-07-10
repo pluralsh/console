@@ -89,8 +89,8 @@ export default function ManagedNamespaceInfo() {
         >
           <ChipList
             limit={8}
-            values={namespace?.target?.tags ?? []}
-            transformValue={(tag) => `${tag?.name}: ${tag?.value}`}
+            values={Object.entries(namespace?.target?.tags ?? {})}
+            transformValue={(tag) => tag.join(': ')}
             emptyState={<div>No tags found</div>}
           />
         </PropCard>
