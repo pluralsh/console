@@ -2511,6 +2511,8 @@ export type ManagedNamespace = {
   labels?: Maybe<Scalars['Map']['output']>;
   /** the name of this namespace once its placed on a cluster */
   name: Scalars['String']['output'];
+  /** override the name of the kubernetes namespace if `name` is not usable */
+  namespace?: Maybe<Scalars['String']['output']>;
   /** a project this global service is bound to */
   project?: Maybe<Project>;
   /** a list of pull secrets to attach to this namespace */
@@ -2543,8 +2545,10 @@ export type ManagedNamespaceAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
   /** labels for this namespace */
   labels?: InputMaybe<Scalars['Json']['input']>;
-  /** the name of this namespace once its placed on a cluster */
+  /** the name of this managed namespace (globally unique) */
   name: Scalars['String']['input'];
+  /** the name of the namespace if `name` doesn't align */
+  namespace?: InputMaybe<Scalars['String']['input']>;
   /** a project this managed namespace will sync across */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of pull secrets to attach to this namespace */

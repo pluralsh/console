@@ -1676,8 +1676,11 @@ input GlobalServiceAttributes {
 
 "Attributes for configuring a managed namespace"
 input ManagedNamespaceAttributes {
-  "the name of this namespace once its placed on a cluster"
+  "the name of this managed namespace (globally unique)"
   name: String!
+
+  "the name of the namespace if `name` doesn't align"
+  namespace: String
 
   "A short description of the purpose of this namespace"
   description: String
@@ -1797,6 +1800,9 @@ type ManagedNamespace {
 
   "the name of this namespace once its placed on a cluster"
   name: String!
+
+  "override the name of the kubernetes namespace if `name` is not usable"
+  namespace: String
 
   "A short description of the purpose of this namespace"
   description: String

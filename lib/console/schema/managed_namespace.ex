@@ -17,12 +17,13 @@ defmodule Console.Schema.ManagedNamespace do
   end
 
   schema "managed_namespaces" do
-    field :name,         :string
-    field :description,  :string
-    field :labels,       :map
-    field :annotations,  :map
-    field :pull_secrets, {:array, :string}
-    field :deleted_at,   :utc_datetime_usec
+    field :name,           :string
+    field :namespace,      :string
+    field :description,    :string
+    field :labels,         :map
+    field :annotations,    :map
+    field :pull_secrets,   {:array, :string}
+    field :deleted_at,     :utc_datetime_usec
 
     embeds_one :target,  Target, on_replace: :update
     embeds_one :cascade, GlobalService.Cascade, on_replace: :update
@@ -72,7 +73,7 @@ defmodule Console.Schema.ManagedNamespace do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name description project_id labels annotations pull_secrets)a
+  @valid ~w(name namespace description project_id labels annotations pull_secrets)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -81,6 +82,7 @@ defmodule Console.Schema.ManagedNamespace do
     |> cast_embed(:cascade, with: &GlobalService.cascade_changeset/2)
     |> cast_assoc(:service)
     |> cast_assoc(:clusters)
+    |> unique_constraint(:name)
     |> validate_required(~w(name)a)
   end
 end

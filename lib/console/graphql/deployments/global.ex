@@ -16,7 +16,8 @@ defmodule Console.GraphQl.Deployments.Global do
 
   @desc "Attributes for configuring a managed namespace"
   input_object :managed_namespace_attributes do
-    field :name,         non_null(:string), description: "the name of this namespace once its placed on a cluster"
+    field :name,         non_null(:string), description: "the name of this managed namespace (globally unique)"
+    field :namespace,    :string, description: "the name of the namespace if `name` doesn't align"
     field :description,  :string, description: "A short description of the purpose of this namespace"
     field :labels,       :json, description: "labels for this namespace"
     field :annotations,  :json, description: "annotations for this namespace"
@@ -80,15 +81,16 @@ defmodule Console.GraphQl.Deployments.Global do
 
   @desc "A representation of a managed namespace, which is k8s namespace configuration + a service spec to define a namespace runtime"
   object :managed_namespace do
-    field :id,           non_null(:id)
-    field :name,         non_null(:string), description: "the name of this namespace once its placed on a cluster"
-    field :description,  :string, description: "A short description of the purpose of this namespace"
-    field :labels,       :map, description: "labels for this namespace"
-    field :annotations,  :map, description: "annotations for this namespace"
-    field :pull_secrets, list_of(:string), description: "a list of pull secrets to attach to this namespace"
-    field :target,       :cluster_target, description: "The targeting criteria to select clusters this namespace is bound to"
-    field :deleted_at,   :datetime, description: "the timestamp this namespace was deleted at, indicating it's currently draining"
-    field :cascade,      :cascade, description: "behavior for all owned resources when this global service is deleted"
+    field :id,             non_null(:id)
+    field :name,           non_null(:string), description: "the name of this namespace once its placed on a cluster"
+    field :namespace,      :string, description: "override the name of the kubernetes namespace if `name` is not usable"
+    field :description,    :string, description: "A short description of the purpose of this namespace"
+    field :labels,         :map, description: "labels for this namespace"
+    field :annotations,    :map, description: "annotations for this namespace"
+    field :pull_secrets,   list_of(:string), description: "a list of pull secrets to attach to this namespace"
+    field :target,         :cluster_target, description: "The targeting criteria to select clusters this namespace is bound to"
+    field :deleted_at,     :datetime, description: "the timestamp this namespace was deleted at, indicating it's currently draining"
+    field :cascade,        :cascade, description: "behavior for all owned resources when this global service is deleted"
 
     field :project,      :project,
       description: "a project this global service is bound to",

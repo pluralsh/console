@@ -287,10 +287,13 @@ defmodule Console.Deployments.Global do
   defp create_namespace_instance(ns, _, _), do: Logger.info "Namespace #{ns.name}[#{ns.id}] does not specify a service"
 
   defp namespace_service_attrs(%ManagedNamespace{service: %{} = tpl} = ns, deps) do
-    ServiceTemplate.attributes(tpl, ns.name, "#{ns.name}-core")
+    ServiceTemplate.attributes(tpl, namespace_name(ns), "#{ns.name}-core")
     |> Map.put(:dependencies, svc_deps(tpl.dependencies, deps))
     |> Map.put(:sync_config, %{create_namespace: false})
   end
+
+  def namespace_name(%ManagedNamespace{namespace: n}) when is_binary(n), do: n
+  def namespace_name(%ManagedNamespace{name: n}), do: n
 
   @doc """
   Will either hard delete a managed namespace with no remaining instances or begin deleting its
