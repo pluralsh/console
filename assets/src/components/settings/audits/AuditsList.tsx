@@ -1,21 +1,22 @@
 import { AppIcon, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { Flex } from 'honorable'
-import { useCallback, useMemo } from 'react'
-import { extendConnection, mapExistingNodes } from 'utils/graphql'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { Link } from 'react-router-dom'
-import { useTheme } from 'styled-components'
 import { StackedText } from 'components/utils/table/StackedText'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import { useAuditsQuery } from 'generated/graphql'
+import { Flex } from 'honorable'
+import { useCallback, useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 import { formatLocation } from 'utils/geo'
+import { extendConnection, mapExistingNodes } from 'utils/graphql'
 
 import { AUDITS_ABS_PATH } from 'routes/settingsRoutesConst'
 
-import { BREADCRUMBS } from '../usermanagement/UserManagement'
+import { GridTableWrapper } from 'components/utils/layout/ResponsiveGridLayouts'
+
+import { AUDITS_BREADCRUMBS } from './Audits'
 
 const FETCH_MARGIN = 30
 
@@ -125,17 +126,13 @@ const columns = [
   }),
 ]
 
+const breadcrumbs = [
+  ...AUDITS_BREADCRUMBS,
+  { label: 'list', url: `${AUDITS_ABS_PATH}/list` },
+]
+
 export default function AuditsList() {
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...BREADCRUMBS,
-        { label: 'audits', url: AUDITS_ABS_PATH },
-        { label: 'list', url: `${AUDITS_ABS_PATH}/list` },
-      ],
-      []
-    )
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   const { data, loading, fetchMore } = useAuditsQuery({
     fetchPolicy: 'cache-and-network',
@@ -168,7 +165,7 @@ export default function AuditsList() {
   if (!data) return <LoadingIndicator />
 
   return (
-    <FullHeightTableWrap>
+    <GridTableWrapper>
       <Table
         data={audits || []}
         columns={columns}
@@ -177,6 +174,6 @@ export default function AuditsList() {
         }
         maxHeight="100%"
       />
-    </FullHeightTableWrap>
+    </GridTableWrapper>
   )
 }

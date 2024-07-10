@@ -30,6 +30,7 @@ export default function RolesList({ q }: any) {
         flexDirection: 'column',
         height: '100%',
         width: '100%',
+        background: theme.colors['fill-zero-selected'],
       }}
     >
       {edges?.length ? (
@@ -37,11 +38,8 @@ export default function RolesList({ q }: any) {
           listRef={listRef}
           setListRef={setListRef}
           items={edges}
-          mapper={({ node: role }, { next }) => (
-            <ListItem
-              key={role.id}
-              last={!next.node}
-            >
+          mapper={({ node: role }) => (
+            <ListItem key={role.id}>
               <Role
                 role={role}
                 q={q}

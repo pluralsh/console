@@ -1,27 +1,23 @@
 import { Card, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { byIso } from 'country-code-lookup'
 import { Chloropleth } from 'components/utils/Chloropleth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useMemo } from 'react'
+import { byIso } from 'country-code-lookup'
 import { useAuditMetricsQuery } from 'generated/graphql'
+import { useMemo } from 'react'
 
 import { AUDITS_ABS_PATH } from 'routes/settingsRoutesConst'
 
-import { BREADCRUMBS } from '../usermanagement/UserManagement'
+import { AUDITS_BREADCRUMBS } from './Audits'
+
+const breadcrumbs = [
+  ...AUDITS_BREADCRUMBS,
+  { label: 'map', url: `${AUDITS_ABS_PATH}/map` },
+]
 
 export default function AuditsMap() {
   const { data } = useAuditMetricsQuery({ fetchPolicy: 'cache-and-network' })
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...BREADCRUMBS,
-        { label: 'audits', url: AUDITS_ABS_PATH },
-        { label: 'map', url: `${AUDITS_ABS_PATH}/map` },
-      ],
-      []
-    )
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   const metrics = useMemo(
     () =>

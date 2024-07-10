@@ -4,24 +4,17 @@ import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useMemo } from 'react'
 
-import { BREADCRUMBS } from '../UserManagement'
+import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import EmailSettingsForm from './EmailSettingsForm'
+
+const breadcrumbs = getUserManagementBreadcrumbs('email-settings')
 
 export default function EmailSettings() {
   const { data } = useQuery(SMTP_Q)
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...BREADCRUMBS,
-        { label: 'email settings', url: '/account/email' },
-      ],
-      []
-    )
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ScrollablePage

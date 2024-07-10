@@ -21,8 +21,6 @@ import { LoginContext } from 'components/contexts'
 
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 
-import { CD_BASE_CRUMBS } from '../../cd/ContinuousDeployment'
-
 export const getGlobalSettingsBreadcrumbs = ({ page }: { page: string }) => [
   ...CD_BASE_CRUMBS,
   { label: 'global settings', url: `${GLOBAL_SETTINGS_ABS_PATH}` },
@@ -128,7 +126,7 @@ export function GlobalSettings() {
       <ResponsiveLayoutContentContainer role="main">
         {data && <Outlet context={outletContext} />}
       </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer />
+      {/* <ResponsiveLayoutSidecarContainer /> */}
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>
   )

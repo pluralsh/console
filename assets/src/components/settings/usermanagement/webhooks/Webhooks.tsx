@@ -3,20 +3,16 @@ import { Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useMemo } from 'react'
 
-import { BREADCRUMBS } from '../UserManagement'
+import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import WebhooksList from './WebhooksList'
 import WebhooksHeader from './WebhooksHeader'
 
+const breadcrumbs = getUserManagementBreadcrumbs('webhooks')
+
 export function Webhooks() {
-  useSetBreadcrumbs(
-    useMemo(
-      () => [...BREADCRUMBS, { label: 'webhooks', url: '/account/webhooks' }],
-      []
-    )
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ScrollablePage

@@ -1,30 +1,27 @@
-import { useContext, useMemo, useState } from 'react'
+import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
+import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
+import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Flex } from 'honorable'
-import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
-import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
-import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import { useContext, useState } from 'react'
 
 import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { List } from '../../../utils/List'
 
-import { BREADCRUMBS } from '../UserManagement'
+import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import RoleCreate from './RoleCreate'
 import RolesList from './RolesList'
+
+const breadcrumbs = getUserManagementBreadcrumbs('roles')
 
 export default function Roles() {
   const [q, setQ] = useState('')
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [...BREADCRUMBS, { label: 'roles', url: '/account/roles' }],
-      []
-    )
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ScrollablePage
@@ -44,7 +41,7 @@ export default function Roles() {
               placeholder="Search a role"
               startIcon={<SearchIcon color="text-light" />}
               onChange={({ target: { value } }) => setQ(value)}
-              backgroundColor="fill-one"
+              backgroundColor="fill-zero-hover"
               marginBottom="small"
             />
             <List height="100%">

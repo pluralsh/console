@@ -11,7 +11,9 @@ import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData
 
 import { GqlError } from 'components/utils/Alert'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { GridTableWrapper } from 'components/utils/layout/ResponsiveGridLayouts'
+
+import styled from 'styled-components'
 
 import UserInvite from './UserInvite'
 import { usersCols } from './UsersColumns'
@@ -39,19 +41,19 @@ export default function UsersList() {
   }
 
   return (
-    <>
+    <ListWrapperSC>
       <Input
         value={q}
         placeholder="Search a user"
         startIcon={<SearchIcon color="text-light" />}
         onChange={({ target: { value } }) => setQ(value)}
         backgroundColor="fill-one"
-        marginBottom="small"
       />
       {!isEmpty(users) ? (
-        <FullHeightTableWrap>
+        <GridTableWrapper>
           <Table
             virtualizeRows
+            rowBg="raised"
             data={users || []}
             columns={usersCols}
             hideHeader
@@ -65,7 +67,7 @@ export default function UsersList() {
               height: '100%',
             }}
           />
-        </FullHeightTableWrap>
+        </GridTableWrapper>
       ) : (
         <EmptyState
           message={
@@ -78,6 +80,13 @@ export default function UsersList() {
           {configuration && !configuration?.pluralLogin && <UserInvite />}
         </EmptyState>
       )}
-    </>
+    </ListWrapperSC>
   )
 }
+
+export const ListWrapperSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.small,
+  height: '100%',
+}))

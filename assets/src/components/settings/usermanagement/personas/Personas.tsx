@@ -1,54 +1,45 @@
-import { useContext, useMemo } from 'react'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
+import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import { useContext } from 'react'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { List } from '../../../utils/List'
+import {
+  SettingsPageHeader,
+  getUserManagementBreadcrumbs,
+} from '../UserManagement'
 
-import { BREADCRUMBS } from '../UserManagement'
+import { ListWrapperSC } from '../users/UsersList'
 
-import { PersonasList } from './PersonasList'
 import PersonaCreate from './PersonaCreate'
+import { PersonasList } from './PersonasList'
+
+const breadcrumbs = getUserManagementBreadcrumbs('personas')
 
 export function Personas() {
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [...BREADCRUMBS, { label: 'personas', url: '/account/personas' }],
-      []
-    )
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <ScrollablePage
-      scrollable={false}
-      heading="Personas"
-      headingContent={<PersonaCreate />}
-    >
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'column',
-          height: '100%',
-        }}
-      >
+    <>
+      <SettingsPageHeader heading="Personas">
+        <PersonaCreate />
+      </SettingsPageHeader>
+
+      <ListWrapperSC>
         <BillingLegacyUserBanner feature="personas" />
         {isAvailable ? (
-          <List height="100%">
-            <PersonasList />
-          </List>
+          <PersonasList />
         ) : (
           <BillingFeatureBlockBanner
             feature="personas"
             description="Assign personas to your users to limit which parts of the app they can access."
           />
         )}
-      </div>
-    </ScrollablePage>
+      </ListWrapperSC>
+    </>
   )
 }

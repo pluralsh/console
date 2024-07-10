@@ -1,33 +1,26 @@
-import {
-  type Breadcrumb,
-  Tab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { useRef } from 'react'
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { SubTab, TabList } from '@pluralsh/design-system'
+import { ReactNode, useRef } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { useLogin } from 'components/contexts'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { ConsoleConfiguration, User } from 'generated/graphql'
+import { USER_MANAGEMENT_ABS_PATH } from 'routes/settingsRoutesConst'
 import { useTheme } from 'styled-components'
-import {
-  ConsoleConfiguration,
-  PersonaConfigurationFragment,
-  User,
-} from 'generated/graphql'
+
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { LinkTabWrap } from 'components/utils/Tabs'
+
+import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
+
+import { SETTINGS_BREADCRUMBS } from '../Settings'
 
 const getDirectory = (
-  me: User,
-  configuration: Nullable<ConsoleConfiguration>,
-  personaConfiguration: Nullable<PersonaConfigurationFragment>
+  me: Nullable<User>,
+  configuration: Nullable<ConsoleConfiguration>
 ) => [
   { path: 'users', label: 'Users', enabled: true },
   { path: 'groups', label: 'Groups', enabled: true },
+  { path: 'service-accounts', label: 'Service Accounts', enabled: true },
   { path: 'roles', label: 'Roles', enabled: !configuration?.byok },
   { path: 'personas', label: 'Personas', enabled: true },
   { path: 'webhooks', label: 'Webhooks', enabled: !configuration?.byok },
@@ -41,70 +34,85 @@ const getDirectory = (
     label: 'Email settings',
     enabled: me?.roles?.admin && configuration?.gitStatus?.cloned,
   },
-  { path: 'settings', label: 'Account settings', enabled: true },
-  {
-    path: 'audits',
-    label: 'Audits',
-    enabled: !!(
-      personaConfiguration?.all || personaConfiguration?.sidebar?.audits
-    ),
-  },
 ]
 
-export const BREADCRUMBS: Breadcrumb[] = [{ label: 'account', url: '/account' }]
+export const getUserManagementBreadcrumbs = (page: string) => [
+  ...SETTINGS_BREADCRUMBS,
+  { label: 'user-management', url: USER_MANAGEMENT_ABS_PATH },
+  { label: page, url: `${USER_MANAGEMENT_ABS_PATH}/${page}` },
+]
 
 export default function UserManagement() {
-  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const { me, configuration, personaConfiguration } = useLogin()
+  const { me, configuration } = useLogin()
   const { pathname } = useLocation()
-  const pathPrefix = '/account'
 
-  useSetBreadcrumbs(BREADCRUMBS)
+  const directory = getDirectory(me, configuration).filter(
+    ({ enabled }) => enabled
+  )
+  const currentTab = directory.find(
+    (tab) => pathname?.startsWith(`${USER_MANAGEMENT_ABS_PATH}/${tab.path}`)
+  )
+
+  const headerContent = (
+    <TabList
+      scrollable
+      gap="xxsmall"
+      paddingBottom="large"
+      stateRef={tabStateRef}
+      stateProps={{
+        selectedKey: currentTab?.path,
+      }}
+    >
+      {directory.map(({ label, path }) => (
+        <LinkTabWrap
+          subTab
+          key={path}
+          textValue={label}
+          to={`${USER_MANAGEMENT_ABS_PATH}/${path}`}
+        >
+          <SubTab
+            key={path}
+            textValue={label}
+          >
+            {label}
+          </SubTab>
+        </LinkTabWrap>
+      ))}
+    </TabList>
+  )
+
+  useSetPageHeaderContent(headerContent)
 
   if (!me) return null
 
-  const directory = getDirectory(
-    me,
-    configuration,
-    personaConfiguration
-  ).filter(({ enabled }) => enabled)
-  const currentTab = directory.find(
-    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
-  )
+  return <Outlet />
+}
+
+export function SettingsPageHeader({
+  heading,
+  children,
+}: {
+  heading?: ReactNode
+  children: ReactNode
+}) {
+  const theme = useTheme()
 
   return (
-    <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer>
-        <TabList
-          marginTop={40 + theme.spacing.medium}
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'vertical',
-            selectedKey: currentTab?.path,
-          }}
-        >
-          {directory.map(({ label, path }) => (
-            <Tab
-              key={path}
-              as={Link}
-              to={path}
-              textDecoration="none"
-            >
-              {label}
-            </Tab>
-          ))}
-        </TabList>
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <TabPanel
-        as={<ResponsiveLayoutContentContainer />}
-        stateRef={tabStateRef}
+    <ConsolePageTitle
+      heading={heading}
+      headingProps={{ alignSelf: 'flex-start' }}
+    >
+      <div
+        css={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: theme.spacing.medium,
+          marginBottom: theme.spacing.medium,
+        }}
       >
-        <Outlet />
-      </TabPanel>
-      <ResponsiveLayoutSidecarContainer />
-      <ResponsiveLayoutSpacer />
-    </ResponsiveLayoutPage>
+        {children}
+      </div>
+    </ConsolePageTitle>
   )
 }

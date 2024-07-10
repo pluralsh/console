@@ -1,55 +1,48 @@
-import { useContext, useMemo, useState } from 'react'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
+import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
+import { useContext, useState } from 'react'
 
 import { Input, SearchIcon, useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { BREADCRUMBS } from '../UserManagement'
+import {
+  SettingsPageHeader,
+  getUserManagementBreadcrumbs,
+} from '../UserManagement'
 
-import { GroupsList } from './GroupsList'
+import { ListWrapperSC } from '../users/UsersList'
+
 import GroupCreate from './GroupCreate'
+import { GroupsList } from './GroupsList'
 
 export const GROUPS_QUERY_PAGE_SIZE = 100
+
+const breadcrumbs = getUserManagementBreadcrumbs('groups')
 
 export function Groups() {
   const [q, setQ] = useState('')
   const { availableFeatures } = useContext(SubscriptionContext)
   const isAvailable = !!availableFeatures?.userManagement
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [...BREADCRUMBS, { label: 'groups', url: '/account/groups' }],
-      []
-    )
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <ScrollablePage
-      scrollable={false}
-      heading="Groups"
-      headingContent={<GroupCreate q={q} />}
-    >
+    <>
+      <SettingsPageHeader heading="Groups">
+        <GroupCreate q={q} />
+      </SettingsPageHeader>
       <BillingLegacyUserBanner feature="groups" />
       {isAvailable ? (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-          }}
-        >
+        <ListWrapperSC>
           <Input
             value={q}
             placeholder="Search a group"
             startIcon={<SearchIcon color="text-light" />}
             onChange={({ target: { value } }) => setQ(value)}
             backgroundColor="fill-one"
-            marginBottom="small"
           />
           <GroupsList q={q} />
-        </div>
+        </ListWrapperSC>
       ) : (
         <BillingFeatureBlockBanner
           feature="groups"
@@ -57,6 +50,6 @@ export function Groups() {
           placeholderImageURL="/placeholder-groups.png"
         />
       )}
-    </ScrollablePage>
+    </>
   )
 }

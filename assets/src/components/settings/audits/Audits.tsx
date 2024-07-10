@@ -1,12 +1,20 @@
-import { Key, useRef, useState } from 'react'
-import { SubTab, TabList } from '@pluralsh/design-system'
+import { Breadcrumb, SubTab, TabList } from '@pluralsh/design-system'
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+import { useRef } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { AUDITS_ABS_PATH } from 'routes/settingsRoutesConst'
+
+import { SETTINGS_BREADCRUMBS } from '../Settings'
+import { SettingsPageHeader } from '../usermanagement/UserManagement'
 
 const DIRECTORY = [
   { path: 'list', label: 'List view' },
   { path: 'map', label: 'Map view' },
+]
+
+export const AUDITS_BREADCRUMBS: Breadcrumb[] = [
+  ...SETTINGS_BREADCRUMBS,
+  { label: 'audit-logs', url: AUDITS_ABS_PATH },
 ]
 
 export default function Audits() {
@@ -17,39 +25,32 @@ export default function Audits() {
     DIRECTORY.find(
       (tab) => pathname?.startsWith(`${AUDITS_ABS_PATH}/${tab.path}`)
     )?.path || DIRECTORY[0].path
-  const [view, setView] = useState<Key>(currentView)
 
-  return (
-    <ScrollablePage
-      scrollable={false}
-      heading="Audits"
-      headingContent={
-        <TabList
-          gap="xxsmall"
-          margin={1}
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            // @ts-ignore
-            selectedKey: view,
-            onSelectionChange: (view) => {
-              setView(view)
-              navigate(view as string)
-            },
-          }}
-        >
-          {DIRECTORY.map(({ path, label }) => (
-            <SubTab
-              key={path}
-              textValue={label}
-            >
-              {label}
-            </SubTab>
-          ))}
-        </TabList>
-      }
-    >
-      <Outlet />
-    </ScrollablePage>
+  useSetPageHeaderContent(
+    <SettingsPageHeader heading="Audits">
+      <TabList
+        gap="xxsmall"
+        margin={1}
+        stateRef={tabStateRef}
+        stateProps={{
+          orientation: 'horizontal',
+          selectedKey: currentView,
+          onSelectionChange: (view) => {
+            navigate(view as string)
+          },
+        }}
+      >
+        {DIRECTORY.map(({ path, label }) => (
+          <SubTab
+            key={path}
+            textValue={label}
+          >
+            {label}
+          </SubTab>
+        ))}
+      </TabList>
+    </SettingsPageHeader>
   )
+
+  return <Outlet />
 }

@@ -6,7 +6,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { usePersonasQuery } from 'generated/graphql'
 
 import { extendConnection } from '../../../../utils/graphql'
-import { ListItem } from '../../../utils/List'
+import { List, ListItem } from '../../../utils/List'
 import { StandardScroller } from '../../../utils/SmoothScroller'
 
 import PersonaCreate from './PersonaCreate'
@@ -21,23 +21,14 @@ export function PersonasList() {
   const { edges, pageInfo } = data.personas
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        flexGrow: 1,
-        maxHeight: 'max-content',
-      }}
-    >
+    <List background="fill-zero-selected">
       {!isEmpty(edges) ? (
         <StandardScroller
           listRef={listRef}
           setListRef={setListRef}
           items={edges}
-          mapper={({ node: persona }, { next }) => (
-            <ListItem
-              key={persona.id}
-              last={!next.node}
-            >
+          mapper={({ node: persona }) => (
+            <ListItem key={persona.id}>
               <Persona persona={persona} />
             </ListItem>
           )}
@@ -67,6 +58,6 @@ export function PersonasList() {
           <PersonaCreate />
         </EmptyState>
       )}
-    </div>
-  ) //
+    </List>
+  )
 }

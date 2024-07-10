@@ -8,9 +8,9 @@ import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData
 
 import { GqlError } from 'components/utils/Alert'
 
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-
 import { LoginContext } from 'components/contexts'
+
+import { GridTableWrapper } from 'components/utils/layout/ResponsiveGridLayouts'
 
 import { Permissions, hasRbac } from '../misc'
 
@@ -45,9 +45,10 @@ export function GroupsList({ q }: any) {
   }
 
   return !isEmpty(groups) ? (
-    <FullHeightTableWrap>
+    <GridTableWrapper>
       <Table
         virtualizeRows
+        rowBg="raised"
         data={groups || []}
         columns={editable ? groupsColsEditable : groupsColsView}
         hideHeader
@@ -61,7 +62,7 @@ export function GroupsList({ q }: any) {
           height: '100%',
         }}
       />
-    </FullHeightTableWrap>
+    </GridTableWrapper>
   ) : (
     <EmptyState
       message={

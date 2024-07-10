@@ -1,7 +1,7 @@
-import { Key, useCallback, useContext, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
-import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
 import BillingFeatureBlockBanner from 'components/billing/BillingFeatureBlockBanner'
+import BillingLegacyUserBanner from 'components/billing/BillingLegacyUserBanner'
+import { Key, useCallback, useContext, useMemo, useState } from 'react'
 
 import { Flex } from 'honorable'
 
@@ -13,6 +13,9 @@ import SubscriptionContext from 'components/contexts/SubscriptionContext'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
+import { RootQueryType, User } from '../../../../generated/graphql'
+import { SHORT_POLL_INTERVAL } from '../../../cluster/constants'
+import { ResponsivePageFullWidth } from '../../../utils/layout/ResponsivePageFullWidth'
 import VPNClientList from '../../../vpn/VPNClientList'
 import {
   ColumnActions,
@@ -23,19 +26,16 @@ import {
   ColumnUser,
   toVPNClientRow,
 } from '../../../vpn/columns'
-import { RootQueryType, User } from '../../../../generated/graphql'
 import { WireguardPeers } from '../../../vpn/graphql/queries'
-import { ResponsivePageFullWidth } from '../../../utils/layout/ResponsivePageFullWidth'
-import { SHORT_POLL_INTERVAL } from '../../../cluster/constants'
 
-import { BREADCRUMBS } from '../UserManagement'
+import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import { VPNHeaderActions } from './VPNHeaderActions'
 
+const breadcrumbs = getUserManagementBreadcrumbs('vpn')
+
 function VPN() {
-  useSetBreadcrumbs(
-    useMemo(() => [...BREADCRUMBS, { label: 'vpn', url: '/account/vpn' }], [])
-  )
+  useSetBreadcrumbs(breadcrumbs)
 
   const {
     data: { wireguardPeers } = {},

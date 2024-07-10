@@ -7,21 +7,22 @@ import { Navigate, Outlet, Route } from 'react-router-dom'
 
 import { GlobalSettingsPermissions } from 'components/settings/global/GlobalSettingsPermissions'
 
-import ObservabilityProviders from 'components/settings/global/observability/ObservabilityProviders'
 import ObservabilitySettings from 'components/settings/global/observability/ObservabilitySettings'
 
 import Audits from 'components/settings/audits/Audits'
 import AuditsList from 'components/settings/audits/AuditsList'
 import AuditsMap from 'components/settings/audits/AuditsMap'
 import UserManagement from 'components/settings/usermanagement/UserManagement'
-import EmailSettings from 'components/settings/usermanagement/email/EmailSettings'
 import { Groups } from 'components/settings/usermanagement/groups/Groups'
 import { Personas } from 'components/settings/usermanagement/personas/Personas'
-import AccountSettings from 'components/settings/usermanagement/settings/AccountSettings'
 import Users from 'components/settings/usermanagement/users/Users'
-import { AccountVPN } from 'components/settings/usermanagement/vpn/VPN'
+
+import Settings from 'components/settings/Settings'
+
+import Roles from 'components/settings/usermanagement/roles/Roles'
 import { Webhooks } from 'components/settings/usermanagement/webhooks/Webhooks'
-import Roles from 'components/kubernetes/rbac/Roles'
+import { AccountVPN } from 'components/settings/usermanagement/vpn/VPN'
+import EmailSettings from 'components/settings/usermanagement/email/EmailSettings'
 
 import {
   AUDITS_REL_PATH,
@@ -73,7 +74,7 @@ const userManagementRoutes = (
       path="personas"
       element={<Personas />}
     />
-    {/* <Route
+    <Route
       path="roles"
       element={<Roles />}
     />
@@ -86,9 +87,9 @@ const userManagementRoutes = (
       element={<AccountVPN />}
     />
     <Route
-      path="email"
+      path="email-settings"
       element={<EmailSettings />}
-    /> */}
+    />
   </Route>
 )
 const globalSettingsRoutes = (
@@ -162,7 +163,7 @@ const auditRoutes = (
 export const settingsRoutes = (
   <Route
     path={SETTINGS_REL_PATH}
-    element={<Placeholder />}
+    element={<Settings />}
   >
     <Route
       index
