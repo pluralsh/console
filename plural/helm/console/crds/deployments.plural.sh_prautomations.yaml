@@ -194,10 +194,10 @@ spec:
                   type: object
                 type: array
               creates:
-                description: Creates ...
+                description: Specs for files to be templated and created
                 properties:
                   git:
-                    description: Git ...
+                    description: Git Location to source external files from
                     properties:
                       files:
                         description: Optional files to add to the manifests for this
@@ -216,23 +216,38 @@ spec:
                     - ref
                     type: object
                   templates:
-                    description: Templates ...
+                    description: Template files to use to generate file content
                     items:
                       description: PrAutomationTemplate ...
                       properties:
                         destination:
-                          description: Destination ...
+                          description: The destination to write the file to
                           type: string
                         external:
-                          description: External ...
+                          description: Whether it is being sourced from an external
+                            git repository
                           type: boolean
                         source:
-                          description: Source ...
+                          description: The source file to use for templating
                           type: string
                       required:
                       - destination
                       - external
                       type: object
+                    type: array
+                type: object
+              deletes:
+                description: Spec for files and folders to be deleted
+                properties:
+                  files:
+                    description: Individual files to delete
+                    items:
+                      type: string
+                    type: array
+                  folders:
+                    description: Entire folders to delete
+                    items:
+                      type: string
                     type: array
                 type: object
               documentation:
@@ -392,18 +407,19 @@ spec:
                 description: Title...
                 type: string
               updates:
-                description: Updates ...
+                description: Spec for files to be updated, using regex replacement
                 properties:
                   files:
-                    description: Files ...
+                    description: Files to update
                     items:
                       type: string
                     type: array
                   matchStrategy:
-                    description: MatchStrategy ...
+                    description: MatchStrategy, see enum for behavior
                     type: string
                   regexReplacements:
-                    description: RegexReplacements ...
+                    description: Full regex + replacement structs in case there is
+                      different behavior per regex
                     items:
                       description: RegexReplacement ...
                       properties:
@@ -411,7 +427,7 @@ spec:
                           description: The file this replacement will work on
                           type: string
                         regex:
-                          description: Regex ...
+                          description: The regex to match a substring on
                           type: string
                         replacement:
                           description: Replacement to be substituted for the match
@@ -428,15 +444,15 @@ spec:
                       type: object
                     type: array
                   regexes:
-                    description: Regexes ...
+                    description: The regexes to apply on each file
                     items:
                       type: string
                     type: array
                   replaceTemplate:
-                    description: ReplaceTemplate ...
+                    description: The template to use when replacing a regex
                     type: string
                   yq:
-                    description: Yq ...
+                    description: (Unused so far)
                     type: string
                 type: object
             type: object

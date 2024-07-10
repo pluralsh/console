@@ -76,6 +76,7 @@ func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connect
 		Branch:        in.Spec.Branch,
 		Updates:       in.Spec.Updates.Attributes(),
 		Creates:       in.Spec.Creates.Attributes(),
+		Deletes:       in.Spec.Deletes.Attributes(),
 		Addon:         in.Spec.Addon,
 		ClusterID:     clusterID,
 		ServiceID:     serviceID,
@@ -167,22 +168,47 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Configuration []PrAutomationConfiguration `json:"configuration,omitempty"`
 
-	// Creates ...
+	// Specs for files to be templated and created
 	// +kubebuilder:validation:Optional
 	Creates *PrAutomationCreateConfiguration `json:"creates,omitempty"`
 
-	// Updates ...
+	// Spec for files to be updated, using regex replacement
 	// +kubebuilder:validation:Optional
 	Updates *PrAutomationUpdateConfiguration `json:"updates,omitempty"`
+
+	// Spec for files and folders to be deleted
+	// +kubebuilder:validation:Optional
+	Deletes *PrAutomationDeleteConfiguration `json:"deletes,omitempty"`
+}
+
+type PrAutomationDeleteConfiguration struct {
+	// Individual files to delete
+	// +kubebuilder:validation:Optional
+	Files []string `json:"files"`
+
+	// Entire folders to delete
+	// +kubebuilder:validation:Optional
+	Folders []string `json:"folders"`
+}
+
+func (in *PrAutomationDeleteConfiguration) Attributes() *console.PrAutomationDeleteSpecAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrAutomationDeleteSpecAttributes{
+		Files:   in.Files,
+		Folders: in.Folders,
+	}
 }
 
 // PrAutomationCreateConfiguration ...
 type PrAutomationCreateConfiguration struct {
-	// Git ...
+	// Git Location to source external files from
 	// +kubebuilder:validation:Optional
 	Git *GitRef `json:"git,omitempty"`
 
-	// Templates ...
+	// Template files to use to generate file content
 	// +kubebuilder:validation:Optional
 	Templates []PrAutomationTemplate `json:"templates,omitempty"`
 }
@@ -202,15 +228,15 @@ func (in *PrAutomationCreateConfiguration) Attributes() *console.PrAutomationCre
 
 // PrAutomationTemplate ...
 type PrAutomationTemplate struct {
-	// Destination ...
+	// The destination to write the file to
 	// +kubebuilder:validation:Required
 	Destination string `json:"destination"`
 
-	// External ...
+	// Whether it is being sourced from an external git repository
 	// +kubebuilder:validation:Required
 	External bool `json:"external"`
 
-	// Source ...
+	// The source file to use for templating
 	// +kubebuilder:validation:Optional
 	Source string `json:"source"`
 }
@@ -229,27 +255,27 @@ func (in *PrAutomationTemplate) Attributes() *console.PrAutomationTemplateAttrib
 
 // PrAutomationUpdateConfiguration ...
 type PrAutomationUpdateConfiguration struct {
-	// Files ...
+	// Files to update
 	// +kubebuilder:validation:Optional
 	Files []*string `json:"files,omitempty"`
 
-	// MatchStrategy ...
+	// MatchStrategy, see enum for behavior
 	// +kubebuilder:validation:Optional
 	MatchStrategy *console.MatchStrategy `json:"matchStrategy,omitempty"`
 
-	// RegexReplacements ...
+	// Full regex + replacement structs in case there is different behavior per regex
 	// +kubebuilder:validation:Optional
 	RegexReplacements []RegexReplacement `json:"regexReplacements,omitempty"`
 
-	// Regexes ...
+	// The regexes to apply on each file
 	// +kubebuilder:validation:Optional
 	Regexes []*string `json:"regexes,omitempty"`
 
-	// ReplaceTemplate ...
+	// The template to use when replacing a regex
 	// +kubebuilder:validation:Optional
 	ReplaceTemplate *string `json:"replaceTemplate,omitempty"`
 
-	// Yq ...
+	// (Unused so far)
 	// +kubebuilder:validation:Optional
 	Yq *string `json:"yq,omitempty"`
 }
@@ -273,7 +299,7 @@ func (in *PrAutomationUpdateConfiguration) Attributes() *console.PrAutomationUpd
 
 // RegexReplacement ...
 type RegexReplacement struct {
-	// Regex ...
+	// The regex to match a substring on
 	// +kubebuilder:validation:Required
 	Regex string `json:"regex"`
 
