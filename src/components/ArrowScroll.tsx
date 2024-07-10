@@ -47,6 +47,7 @@ const ArrowWrapperSC = styled.div<{
   },
   '&.hidden': {
     opacity: 0,
+    pointerEvents: 'none',
   },
 }))
 
