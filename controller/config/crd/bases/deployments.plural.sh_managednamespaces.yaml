@@ -498,8 +498,6 @@ spec:
                       type: string
                     description: Tags the cluster tags to target
                     type: object
-                required:
-                - clusterRefs
                 type: object
             type: object
           status:
