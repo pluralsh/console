@@ -62,8 +62,8 @@ type ClusterTarget struct {
 	// Distro kubernetes distribution to target
 	// +kubebuilder:validation:Optional
 	Distro *console.ClusterDistro `json:"distro,omitempty"`
-	// +kubebuilder:validation:Optional
-	ClusterRefs []corev1.ObjectReference `json:"clusterRefs,omitempty"`
+	//// +kubebuilder:validation:Optional
+	//ClusterRefs []corev1.ObjectReference `json:"clusterRefs,omitempty"`
 }
 
 // Attributes for configuring a service in something like a managed namespace

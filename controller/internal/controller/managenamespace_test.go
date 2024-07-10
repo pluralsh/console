@@ -9,7 +9,6 @@ import (
 	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -63,12 +62,12 @@ var _ = Describe("ManagedNamespace Service Controller", Ordered, func() {
 						Annotations: map[string]string{"b": "b"},
 						Target: &v1alpha1.ClusterTarget{
 							Distro: lo.ToPtr(gqlclient.ClusterDistroGeneric),
-							ClusterRefs: []corev1.ObjectReference{
-								{
-									Namespace: clusterName,
-									Name:      namespace,
-								},
-							},
+							//ClusterRefs: []corev1.ObjectReference{
+							//	{
+							//		Namespace: clusterName,
+							//		Name:      namespace,
+							//	},
+							//},
 						},
 					},
 				}
