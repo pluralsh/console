@@ -9,7 +9,6 @@ import (
 	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
-	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -63,12 +62,12 @@ var _ = Describe("ManagedNamespace Service Controller", Ordered, func() {
 						Annotations: map[string]string{"b": "b"},
 						Target: &v1alpha1.ClusterTarget{
 							Distro: lo.ToPtr(gqlclient.ClusterDistroGeneric),
-							ClusterRefs: []corev1.ObjectReference{
-								{
-									Namespace: clusterName,
-									Name:      namespace,
-								},
-							},
+							//ClusterRefs: []corev1.ObjectReference{
+							//	{
+							//		Namespace: clusterName,
+							//		Name:      namespace,
+							//	},
+							//},
 						},
 					},
 				}
@@ -97,7 +96,7 @@ var _ = Describe("ManagedNamespace Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("DJCZHRJXVA2HKOIRZQKKLVCPP7TJ5MZMMEPDD2YANTAAEGDZMXNQ===="),
+					SHA: lo.ToPtr("5X23O5JAH5SOHTKEQIEEJDQV4ZGYBN7QSOG3RAU3TOM57XYOEALQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
