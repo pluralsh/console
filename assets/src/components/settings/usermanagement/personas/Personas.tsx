@@ -5,10 +5,9 @@ import { useContext } from 'react'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import {
-  SettingsPageHeader,
-  getUserManagementBreadcrumbs,
-} from '../UserManagement'
+import { SettingsPageHeader } from 'components/settings/Settings'
+
+import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import { ListWrapperSC } from '../users/UsersList'
 

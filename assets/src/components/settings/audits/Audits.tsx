@@ -4,8 +4,7 @@ import { useRef } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { AUDITS_ABS_PATH } from 'routes/settingsRoutesConst'
 
-import { SETTINGS_BREADCRUMBS } from '../Settings'
-import { SettingsPageHeader } from '../usermanagement/UserManagement'
+import { SETTINGS_BREADCRUMBS, SettingsPageHeader } from '../Settings'
 
 const DIRECTORY = [
   { path: 'list', label: 'List view' },

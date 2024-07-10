@@ -3,28 +3,27 @@ import {
   useGitRepositoriesQuery,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
-import { FormEventHandler, useCallback, useMemo } from 'react'
+import { FormEventHandler, useCallback } from 'react'
 import { useTheme } from 'styled-components'
 import { mapExistingNodes } from 'utils/graphql'
 
+import { useUpdateState } from 'components/hooks/useUpdateState'
 import {
   getGlobalSettingsBreadcrumbs,
   useGlobalSettingsContext,
 } from 'components/settings/global/GlobalSettings'
+import { GqlError } from 'components/utils/Alert'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useUpdateState } from 'components/hooks/useUpdateState'
-import { GqlError } from 'components/utils/Alert'
 
 import { RepositorySelector } from '../../cd/services/deployModal/DeployServiceSettingsGit'
 
+const breadcrumbs = getGlobalSettingsBreadcrumbs('repositories')
+
 export function GlobalSettingsRepositories() {
+  useSetBreadcrumbs(breadcrumbs)
   const theme = useTheme()
   const { deploymentSettings, refetch } = useGlobalSettingsContext()
-
-  useSetBreadcrumbs(
-    useMemo(() => getGlobalSettingsBreadcrumbs({ page: 'repositories' }), [])
-  )
 
   const { artifactRepository, deployerRepository } = deploymentSettings
   const { data: reposData } = useGitRepositoriesQuery()

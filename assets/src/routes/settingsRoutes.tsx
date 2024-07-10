@@ -7,8 +7,6 @@ import { Navigate, Outlet, Route } from 'react-router-dom'
 
 import { GlobalSettingsPermissions } from 'components/settings/global/GlobalSettingsPermissions'
 
-import ObservabilitySettings from 'components/settings/global/observability/ObservabilitySettings'
-
 import Audits from 'components/settings/audits/Audits'
 import AuditsList from 'components/settings/audits/AuditsList'
 import AuditsMap from 'components/settings/audits/AuditsMap'
@@ -19,10 +17,12 @@ import Users from 'components/settings/usermanagement/users/Users'
 
 import Settings from 'components/settings/Settings'
 
-import Roles from 'components/settings/usermanagement/roles/Roles'
-import { Webhooks } from 'components/settings/usermanagement/webhooks/Webhooks'
-import { AccountVPN } from 'components/settings/usermanagement/vpn/VPN'
 import EmailSettings from 'components/settings/usermanagement/email/EmailSettings'
+import Roles from 'components/settings/usermanagement/roles/Roles'
+import { AccountVPN } from 'components/settings/usermanagement/vpn/VPN'
+import { Webhooks } from 'components/settings/usermanagement/webhooks/Webhooks'
+
+import Observability from 'components/settings/global/observability/Observability'
 
 import {
   AUDITS_REL_PATH,
@@ -120,7 +120,7 @@ const globalSettingsRoutes = (
     />
     <Route
       path="observability"
-      element={<ObservabilitySettings />}
+      element={<Observability />}
     />
     <Route
       path="auto-update"

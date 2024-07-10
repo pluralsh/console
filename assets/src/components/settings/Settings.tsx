@@ -9,6 +9,7 @@ import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
 import { useLogin } from 'components/contexts'
 import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
+import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 import {
   GridHeaderWithSideNav,
   GridLayoutWithSideNav,
@@ -24,7 +25,7 @@ import {
   SETTINGS_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from 'routes/settingsRoutesConst'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 const getDirectory = (
   personaConfiguration: Nullable<PersonaConfigurationFragment>
@@ -99,8 +100,34 @@ const MainHeaderContentSC = styled.div(({ theme }) => ({
 const MainColWrapperSC = styled.main({
   display: 'flex',
   flexDirection: 'column',
+  overflow: 'auto',
 })
 
 const SidecarColWrapperSC = styled(ResponsiveLayoutSidecarContainer)({
   margin: 0,
 })
+
+export function SettingsPageHeader({
+  heading,
+  children,
+}: {
+  heading?: ReactNode
+  children: ReactNode
+}) {
+  const theme = useTheme()
+
+  return (
+    <ConsolePageTitle
+      heading={heading}
+      headingProps={{ alignSelf: 'flex-start' }}
+      css={{
+        display: 'flex',
+        alignItems: 'flex-end',
+        gap: theme.spacing.medium,
+        marginBottom: theme.spacing.medium,
+      }}
+    >
+      {children}
+    </ConsolePageTitle>
+  )
+}

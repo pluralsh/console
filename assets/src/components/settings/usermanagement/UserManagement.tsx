@@ -1,16 +1,13 @@
 import { SubTab, TabList } from '@pluralsh/design-system'
-import { ReactNode, useRef } from 'react'
+import { useRef } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import { useLogin } from 'components/contexts'
 import { ConsoleConfiguration, User } from 'generated/graphql'
 import { USER_MANAGEMENT_ABS_PATH } from 'routes/settingsRoutesConst'
-import { useTheme } from 'styled-components'
 
 import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import { LinkTabWrap } from 'components/utils/Tabs'
-
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 
 import { SETTINGS_BREADCRUMBS } from '../Settings'
 
@@ -87,32 +84,4 @@ export default function UserManagement() {
   if (!me) return null
 
   return <Outlet />
-}
-
-export function SettingsPageHeader({
-  heading,
-  children,
-}: {
-  heading?: ReactNode
-  children: ReactNode
-}) {
-  const theme = useTheme()
-
-  return (
-    <ConsolePageTitle
-      heading={heading}
-      headingProps={{ alignSelf: 'flex-start' }}
-    >
-      <div
-        css={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          gap: theme.spacing.medium,
-          marginBottom: theme.spacing.medium,
-        }}
-      >
-        {children}
-      </div>
-    </ConsolePageTitle>
-  )
 }

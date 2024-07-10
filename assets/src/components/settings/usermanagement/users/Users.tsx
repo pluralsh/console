@@ -2,10 +2,9 @@ import { useLogin } from 'components/contexts'
 
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import {
-  SettingsPageHeader,
-  getUserManagementBreadcrumbs,
-} from '../UserManagement'
+import { SettingsPageHeader } from 'components/settings/Settings'
+
+import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import { OIDCInvite } from './OIDCInvite'
 import UserInvite from './UserInvite'
