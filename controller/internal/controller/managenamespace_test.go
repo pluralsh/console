@@ -96,7 +96,7 @@ var _ = Describe("ManagedNamespace Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("DJCZHRJXVA2HKOIRZQKKLVCPP7TJ5MZMMEPDD2YANTAAEGDZMXNQ===="),
+					SHA: lo.ToPtr("5X23O5JAH5SOHTKEQIEEJDQV4ZGYBN7QSOG3RAU3TOM57XYOEALQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
