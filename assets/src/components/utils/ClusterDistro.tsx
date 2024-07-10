@@ -73,7 +73,7 @@ export function getDistroProviderIconUrl({
   mode,
 }: {
   distro: Nullable<ClusterDistro>
-  provider: Nullable<string>
+  provider?: Nullable<string>
   mode: typeof styledTheme.mode
 }) {
   return (
@@ -104,7 +104,7 @@ export function DistroProviderIcon({
   ...props
 }: {
   distro: Nullable<ClusterDistro>
-  provider: Nullable<string>
+  provider?: Nullable<string>
   size?: number
 } & ComponentProps<'img'>) {
   const src = useDistroProviderIconUrl({ distro, provider })

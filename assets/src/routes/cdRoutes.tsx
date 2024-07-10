@@ -44,8 +44,6 @@ import GlobalServices from 'components/cd/globalServices/GlobalService'
 
 import Namespaces from 'components/cd/namespaces/Namespaces'
 
-import NamespacesDetailView from 'components/cd/namespaces/NamespacesDetailView'
-
 import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
 
 import ObservabilityProviders from 'components/cd/globalSettings/observability/ObservabilityProviders'
@@ -86,6 +84,12 @@ import { GlobalServiceServices } from '../components/cd/globalServices/details/G
 
 import GlobalService from '../components/cd/globalServices/details/GlobalService'
 
+import ManagedNamespaceInfo from '../components/cd/namespaces/details/ManagedNamespaceInfo'
+
+import { ManagedNamespaceServices } from '../components/cd/namespaces/details/ManagedNamespaceServices'
+
+import ManagedNamespace from '../components/cd/namespaces/details/ManagedNamespace'
+
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
@@ -104,6 +108,8 @@ import {
   GLOBAL_SETTINGS_REL_PATH,
   NAMESPACES_PARAM_ID,
   NAMESPACES_REL_PATH,
+  NAMESPACE_INFO_PATH,
+  NAMESPACE_SERVICES_PATH,
   NODE_REL_PATH,
   PIPELINES_REL_PATH,
   POD_REL_PATH,
@@ -244,9 +250,27 @@ const globalServiceRoutes = (
 
 const namespacesRoutes = (
   <Route
-    path={`${NAMESPACES_REL_PATH}/:${NAMESPACES_PARAM_ID}?`}
-    element={<NamespacesDetailView />}
-  />
+    path={`${NAMESPACES_REL_PATH}/:${NAMESPACES_PARAM_ID}`}
+    element={<ManagedNamespace />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={NAMESPACE_INFO_PATH}
+        />
+      }
+    />
+    <Route
+      path={NAMESPACE_INFO_PATH}
+      element={<ManagedNamespaceInfo />}
+    />
+    <Route
+      path={NAMESPACE_SERVICES_PATH}
+      element={<ManagedNamespaceServices />}
+    />
+  </Route>
 )
 
 const globalSettingsRoutes = (

@@ -1,24 +1,27 @@
 fragment ManagedNamespace on ManagedNamespace {
-  description
+  id
+  name
+  insertedAt
+  updatedAt
   deletedAt
+  description
+  labels
+  annotations
+  pullSecrets
   cascade {
     delete
     detach
   }
-  annotations
-  id
-  insertedAt
-  labels
-  name
-  project {
-    name
-  }
-  pullSecrets
   target {
     distro
     tags
   }
-  updatedAt
+  project {
+    ...ProjectTiny
+  }
+  service {
+    ...ServiceTemplateWithoutConfiguration
+  }
 }
 
 fragment ServiceTemplate on ServiceTemplate {
@@ -82,9 +85,18 @@ query GetManagedNamespaceName($namespaceId: ID!) {
   }
 }
 
-query GetManagedNamespace($namespaceId: ID!, $first: Int, $after: String) {
+query GetManagedNamespace($namespaceId: ID!) {
   managedNamespace(id: $namespaceId) {
     ...ManagedNamespace
+  }
+}
+
+query GetManagedNamespaceServices(
+  $namespaceId: ID!
+  $first: Int
+  $after: String
+) {
+  managedNamespace(id: $namespaceId) {
     services(first: $first, after: $after) {
       pageInfo {
         ...PageInfo
