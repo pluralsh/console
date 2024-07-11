@@ -5099,6 +5099,7 @@ export type RootMutationTypeUpdatePullRequestArgs = {
 export type RootMutationTypeUpdateRbacArgs = {
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   pipelineId?: InputMaybe<Scalars['ID']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   providerId?: InputMaybe<Scalars['ID']['input']>;
   rbac: RbacAttributes;
   serviceId?: InputMaybe<Scalars['ID']['input']>;

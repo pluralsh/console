@@ -154,6 +154,19 @@ defmodule Console.Deployments.Settings do
   end
 
   @doc """
+  modifies rbac settings for this project
+  """
+  @spec project_rbac(map, binary, User.t) :: project_resp
+  def project_rbac(attrs, project_id, %User{} = user) do
+    get_project!(project_id)
+    |> Repo.preload([:read_bindings, :write_bindings])
+    |> allow(user, :write)
+    |> when_ok(&Project.rbac_changeset(&1, attrs))
+    |> when_ok(:update)
+    |> notify(:update, user)
+  end
+
+  @doc """
   creates an instance of the deployment settings object, only used in init
   """
   @spec create(map) :: settings_resp
