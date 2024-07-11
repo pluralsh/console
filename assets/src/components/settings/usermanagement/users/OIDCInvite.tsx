@@ -52,8 +52,8 @@ export function OIDCInvite() {
     <>
       <div>
         <Button
+          floating
           startIcon={<PersonIcon />}
-          secondary
           onClick={() => setOpen(true)}
         >
           Manage users

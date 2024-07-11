@@ -24,6 +24,8 @@ import { Webhooks } from 'components/settings/usermanagement/webhooks/Webhooks'
 
 import Observability from 'components/settings/global/observability/Observability'
 
+import ProjectSettings from 'components/settings/projectsettings/ProjectSettings'
+
 import {
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
@@ -132,7 +134,7 @@ const globalSettingsRoutes = (
 const projectSettingsRoutes = (
   <Route
     path={PROJECT_SETTINGS_REL_PATH}
-    element={<Placeholder />}
+    element={<ProjectSettings />}
   />
 )
 const auditRoutes = (

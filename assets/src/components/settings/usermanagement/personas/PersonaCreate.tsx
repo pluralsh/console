@@ -105,7 +105,7 @@ export default function PersonaCreate() {
   return (
     <>
       <Button
-        secondary
+        floating
         onClick={() =>
           isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true)
         }

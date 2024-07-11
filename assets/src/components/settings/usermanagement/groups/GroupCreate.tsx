@@ -42,7 +42,7 @@ export default function GroupCreate({ q }: { q: string }) {
   return (
     <>
       <Button
-        secondary
+        floating
         onClick={() =>
           isAvailable ? setCreateModalVisible(true) : setBlockModalVisible(true)
         }

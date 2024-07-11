@@ -9316,7 +9316,7 @@ export type PolicyStatisticsQueryVariables = Exact<{
 
 export type PolicyStatisticsQuery = { __typename?: 'RootQueryType', policyStatistics?: Array<{ __typename?: 'PolicyStatistic', count?: number | null, aggregate?: string | null } | null> | null };
 
-export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type ProjectFragment = { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null };
 
 export type ProjectTinyFragment = { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null };
 
@@ -9329,7 +9329,7 @@ export type ProjectsQueryVariables = Exact<{
 }>;
 
 
-export type ProjectsQuery = { __typename?: 'RootQueryType', projects?: { __typename?: 'ProjectConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectEdge', node?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null } | null };
+export type ProjectsQuery = { __typename?: 'RootQueryType', projects?: { __typename?: 'ProjectConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ProjectEdge', node?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null } | null } | null> | null } | null };
 
 export type ProjectsTinyQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9348,14 +9348,23 @@ export type ProjectQueryVariables = Exact<{
 }>;
 
 
-export type ProjectQuery = { __typename?: 'RootQueryType', project?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type ProjectQuery = { __typename?: 'RootQueryType', project?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null } | null };
+
+export type ProjectBindingsFragment = { __typename?: 'Project', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
+export type ProjectBindingsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ProjectBindingsQuery = { __typename?: 'RootQueryType', project?: { __typename?: 'Project', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type CreateProjectMutationVariables = Exact<{
   attributes: ProjectAttributes;
 }>;
 
 
-export type CreateProjectMutation = { __typename?: 'RootMutationType', createProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type CreateProjectMutation = { __typename?: 'RootMutationType', createProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null } | null };
 
 export type UpdateProjectMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9363,7 +9372,14 @@ export type UpdateProjectMutationVariables = Exact<{
 }>;
 
 
-export type UpdateProjectMutation = { __typename?: 'RootMutationType', updateProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type UpdateProjectMutation = { __typename?: 'RootMutationType', updateProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null } | null };
+
+export type DeleteProjectMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteProjectMutation = { __typename?: 'RootMutationType', deleteProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null } | null };
 
 export type StackTinyFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string } | null };
 
@@ -11800,6 +11816,10 @@ export const ProjectFragmentDoc = gql`
   name
   default
   description
+}
+    `;
+export const ProjectBindingsFragmentDoc = gql`
+    fragment ProjectBindings on Project {
   readBindings {
     ...PolicyBinding
   }
@@ -18781,6 +18801,46 @@ export type ProjectQueryHookResult = ReturnType<typeof useProjectQuery>;
 export type ProjectLazyQueryHookResult = ReturnType<typeof useProjectLazyQuery>;
 export type ProjectSuspenseQueryHookResult = ReturnType<typeof useProjectSuspenseQuery>;
 export type ProjectQueryResult = Apollo.QueryResult<ProjectQuery, ProjectQueryVariables>;
+export const ProjectBindingsDocument = gql`
+    query ProjectBindings($id: ID!) {
+  project(id: $id) {
+    ...ProjectBindings
+  }
+}
+    ${ProjectBindingsFragmentDoc}`;
+
+/**
+ * __useProjectBindingsQuery__
+ *
+ * To run a query within a React component, call `useProjectBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useProjectBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useProjectBindingsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useProjectBindingsQuery(baseOptions: Apollo.QueryHookOptions<ProjectBindingsQuery, ProjectBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ProjectBindingsQuery, ProjectBindingsQueryVariables>(ProjectBindingsDocument, options);
+      }
+export function useProjectBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ProjectBindingsQuery, ProjectBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ProjectBindingsQuery, ProjectBindingsQueryVariables>(ProjectBindingsDocument, options);
+        }
+export function useProjectBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ProjectBindingsQuery, ProjectBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ProjectBindingsQuery, ProjectBindingsQueryVariables>(ProjectBindingsDocument, options);
+        }
+export type ProjectBindingsQueryHookResult = ReturnType<typeof useProjectBindingsQuery>;
+export type ProjectBindingsLazyQueryHookResult = ReturnType<typeof useProjectBindingsLazyQuery>;
+export type ProjectBindingsSuspenseQueryHookResult = ReturnType<typeof useProjectBindingsSuspenseQuery>;
+export type ProjectBindingsQueryResult = Apollo.QueryResult<ProjectBindingsQuery, ProjectBindingsQueryVariables>;
 export const CreateProjectDocument = gql`
     mutation CreateProject($attributes: ProjectAttributes!) {
   createProject(attributes: $attributes) {
@@ -18848,6 +18908,39 @@ export function useUpdateProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type UpdateProjectMutationHookResult = ReturnType<typeof useUpdateProjectMutation>;
 export type UpdateProjectMutationResult = Apollo.MutationResult<UpdateProjectMutation>;
 export type UpdateProjectMutationOptions = Apollo.BaseMutationOptions<UpdateProjectMutation, UpdateProjectMutationVariables>;
+export const DeleteProjectDocument = gql`
+    mutation DeleteProject($id: ID!) {
+  deleteProject(id: $id) {
+    ...Project
+  }
+}
+    ${ProjectFragmentDoc}`;
+export type DeleteProjectMutationFn = Apollo.MutationFunction<DeleteProjectMutation, DeleteProjectMutationVariables>;
+
+/**
+ * __useDeleteProjectMutation__
+ *
+ * To run a mutation, you first call `useDeleteProjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteProjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteProjectMutation, { data, loading, error }] = useDeleteProjectMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteProjectMutation(baseOptions?: Apollo.MutationHookOptions<DeleteProjectMutation, DeleteProjectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteProjectMutation, DeleteProjectMutationVariables>(DeleteProjectDocument, options);
+      }
+export type DeleteProjectMutationHookResult = ReturnType<typeof useDeleteProjectMutation>;
+export type DeleteProjectMutationResult = Apollo.MutationResult<DeleteProjectMutation>;
+export type DeleteProjectMutationOptions = Apollo.BaseMutationOptions<DeleteProjectMutation, DeleteProjectMutationVariables>;
 export const StackPrsDocument = gql`
     query StackPrs($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStack(id: $id) {
@@ -20367,6 +20460,7 @@ export const namedOperations = {
     Projects: 'Projects',
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
+    ProjectBindings: 'ProjectBindings',
     StackPrs: 'StackPrs',
     Stacks: 'Stacks',
     Stack: 'Stack',
@@ -20456,6 +20550,7 @@ export const namedOperations = {
     DeletePersona: 'DeletePersona',
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
+    DeleteProject: 'DeleteProject',
     CreateStack: 'CreateStack',
     CreateOnDemandRun: 'CreateOnDemandRun',
     UpdateStack: 'UpdateStack',
@@ -20595,6 +20690,7 @@ export const namedOperations = {
     PolicyConstraint: 'PolicyConstraint',
     Project: 'Project',
     ProjectTiny: 'ProjectTiny',
+    ProjectBindings: 'ProjectBindings',
     StackTiny: 'StackTiny',
     Stack: 'Stack',
     StackRun: 'StackRun',

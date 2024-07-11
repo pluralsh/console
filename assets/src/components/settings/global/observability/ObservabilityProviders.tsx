@@ -85,7 +85,7 @@ function AddProviderButton({ refetch }: { refetch: () => void }) {
   return (
     <>
       <Button
-        secondary
+        floating
         onClick={() => {
           setOpen(true)
         }}
