@@ -131,7 +131,7 @@ defmodule Console.GraphQl.Deployments.Global do
 
   @desc "A spec for targeting clusters"
   object :cluster_target do
-    field :tags,   :json, description: "the cluster tags to target"
+    field :tags,   :map, description: "the cluster tags to target"
     field :distro, :cluster_distro, description: "kubernetes distribution to target"
   end
 
@@ -153,7 +153,8 @@ defmodule Console.GraphQl.Deployments.Global do
 
     field :managed_namespace, :managed_namespace do
       middleware Authenticated, :cluster
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       resolve &Deployments.resolve_managed_namespace/2
     end

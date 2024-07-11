@@ -26,6 +26,8 @@ defmodule Console.Deployments.Global do
 
   def get_namespace!(id), do: Repo.get!(ManagedNamespace, id)
 
+  def get_namespace_by_name!(name), do: Repo.get_by!(ManagedNamespace, name: name)
+
   def get_service(%GlobalService{} = svc, cluster_id), do: Services.get_service_by_name(cluster_id, svc_name(svc))
 
   @doc """
