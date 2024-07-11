@@ -52,6 +52,57 @@ defmodule ConsoleWeb.GitControllerTest do
     end
   end
 
+  describe "#digest/2" do
+    test "it will return digests for valid deploy tokens", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/ext/v1/digests", %{id: svc.id})
+      |> response(200)
+    end
+
+    test "if fetching a bogus resource it will 402 and persist an error", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      svc = insert(:service, repository: git, git: %{ref: "doesnt-exist", folder: "bin"})
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/ext/v1/digests", %{id: svc.id})
+      |> response(402)
+
+      %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
+      assert error.source == "git"
+      assert error.message == "could not resolve ref doesnt-exist"
+    end
+
+    test "if fetching and dependencies are not satisfied, it will 402 and persist an error", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+      dep = insert(:service_dependency, service: svc)
+
+      conn
+      |> add_auth_headers(svc.cluster)
+      |> get("/ext/v1/digests", %{id: svc.id})
+      |> response(402)
+
+      %{errors: [error]} = refetch(svc) |> Console.Repo.preload([:errors])
+      assert error.source == "git"
+      assert error.message =~ "dependency #{dep.name} is not ready"
+    end
+
+    test "non-permitted tokens are 403'ed", %{conn: conn} do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+
+      conn
+      |> add_auth_headers(insert(:cluster))
+      |> get("/v1/digests", %{id: svc.id})
+      |> response(403)
+    end
+  end
+
   describe "#stack_tarball/2" do
     test "it will download stack git content for valid deploy tokens", %{conn: conn} do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")

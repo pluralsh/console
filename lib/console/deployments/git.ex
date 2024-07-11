@@ -28,6 +28,9 @@ defmodule Console.Deployments.Git do
   @type automation_resp :: {:ok, PrAutomation.t} | Console.error
   @type pull_request_resp :: {:ok, PullRequest.t} | Console.error
 
+  @decorate cacheable(cache: @cache, key: {:git_repo, id}, opts: [ttl: @ttl])
+  def cached!(id), do: Repo.get!(GitRepository, id)
+
   def get_repository(id), do: Repo.get(GitRepository, id)
 
   def get_repository!(id), do: Repo.get!(GitRepository, id)

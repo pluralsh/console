@@ -37,6 +37,23 @@ defmodule ConsoleWeb.GitController do
     end
   end
 
+  def digest(conn, %{"id" => service_id}) do
+    with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
+         {:ok, svc} <- Services.authorized(service_id, cluster),
+         svc <- Console.Repo.preload(svc, [:revision]),
+         {{:ok, svc}, _} <- {Services.dependencies_ready(svc), svc},
+         {{:ok, sha}, _} <- {Services.digest(svc), svc} do
+      send_resp(conn, 200, sha)
+    else
+      {{:error, err}, svc} ->
+        Services.add_errors(svc, [%{source: "git", message: err}])
+        send_resp(conn, 402, err)
+      err ->
+        Logger.warn "could not fetch manifests, err: #{inspect(err)}"
+        send_resp(conn, 403, "Forbidden")
+    end
+  end
+
   def tarball(conn, %{"id" => service_id}) do
     with %Cluster{} = cluster <- ConsoleWeb.Plugs.Token.get_cluster(conn),
          {:ok, svc} <- Services.authorized(service_id, cluster),

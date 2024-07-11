@@ -14,6 +14,8 @@ defmodule Console.Deployments.Helm.Agent do
 
   def fetch(pid, chart, vsn), do: GenServer.call(pid, {:fetch, chart, vsn})
 
+  def digest(pid, chart, vsn), do: GenServer.call(pid, {:digest, chart, vsn})
+
   def start(url) do
     GenServer.start(__MODULE__, url, name: via(url))
   end
@@ -31,6 +33,13 @@ defmodule Console.Deployments.Helm.Agent do
     :timer.send_interval(@poll, :move)
     send self(), :pull
     {:ok, %State{repo: repo, cache: AgentCache.new(repo)}}
+  end
+
+  def handle_call({:digest, c, v}, _, %State{cache: cache} = state) do
+    case AgentCache.fetch(cache, c, v) do
+      {:ok, l, cache} -> {:reply, {:ok, l.digest}, %{state | cache: cache}}
+      err -> {:reply, err, state}
+    end
   end
 
   def handle_call({:fetch, c, v}, _, %State{cache: cache} = state) do

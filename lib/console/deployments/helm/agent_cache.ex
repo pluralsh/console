@@ -55,6 +55,7 @@ defmodule Console.Deployments.Helm.AgentCache do
          {:ok, _} <- Client.download(url, File.stream!(tmp)),
          :ok <- Utils.clean_chart(tmp, path, chart),
          line <- Line.new(path, chart, vsn, digest),
+         :ok <- File.rm(tmp),
       do: {:ok, line, put_in(cache.cache[{chart, vsn}], line)}
   end
 

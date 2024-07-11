@@ -222,6 +222,20 @@ defmodule Console do
     |> Base.encode16(case: :lower)
   end
 
+  def all(items, res \\ [])
+  def all([{:error, _} = err | _], _), do: err
+  def all([{:ok, next} | rest], res), do: all(rest, [next | res])
+  def all([v | rest], res), do: all(rest, [v | res])
+  def all([], res), do: {:ok, res}
+
+  def probe(map, [k]), do: Map.get(map, k)
+  def probe(map, [k | rest]) do
+    case map do
+      %{^k => next} when is_map(next) -> probe(next, rest)
+      _ -> nil
+    end
+  end
+
   def put_path(map, [k], value), do: Map.put(map, k, value)
   def put_path(map, [k | rest], value) do
     case map do
