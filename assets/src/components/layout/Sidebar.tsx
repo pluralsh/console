@@ -16,7 +16,6 @@ import {
   KubernetesAltIcon,
   LightningIcon,
   LogoutIcon,
-  PeopleIcon,
   PersonIcon,
   PrOpenIcon,
   ScrollIcon,
@@ -37,13 +36,14 @@ import { updateCache } from 'utils/graphql'
 import styled, { useTheme } from 'styled-components'
 
 import { PersonaConfigurationFragment } from 'generated/graphql'
-import { CD_ABS_PATH } from 'routes/cdRoutesConsts'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
 import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
+
+import { SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 
 import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
@@ -185,20 +185,13 @@ function getMenuItems({
       enabled: isCDEnabled,
     },
     {
-      text: 'Deployment Settings',
+      text: 'Settings',
       expandedLabel: 'Settings',
       icon: <GearTrainIcon />,
-      path: `${CD_ABS_PATH}/settings`,
-      pathRegexp: /^\/cd\/settings.*$/,
+      path: SETTINGS_ABS_PATH,
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
-    },
-    {
-      text: 'Account',
-      expandedLabel: 'Account',
-      icon: <PeopleIcon />,
-      path: '/account',
     },
   ].filter((item) => item.enabled !== false && (!item.plural || !isByok))
 }

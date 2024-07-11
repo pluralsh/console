@@ -34,14 +34,13 @@ export default function StackRunSidecar({
   const pr = stackRun.pullRequest
 
   return (
-    <ResponsiveLayoutSidecarContainer
-      display="flex"
-      flexDirection="column"
-      gap="medium"
-    >
+    <ResponsiveLayoutSidecarContainer>
       {pr && (
         <Sidecar
-          css={{ paddingTop: theme.spacing.xsmall }}
+          css={{
+            paddingTop: theme.spacing.xsmall,
+            marginBottom: theme.spacing.medium,
+          }}
           heading={
             <div css={{ display: 'flex', alignItems: 'center' }}>
               <IconFrame

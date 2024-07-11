@@ -9,8 +9,8 @@ import {
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import RoleFormBindings from 'components/account/roles/RoleFormBindings'
-import { bindingToBindingAttributes } from 'components/account/roles/misc'
+import RoleFormBindings from 'components/settings/usermanagement/roles/RoleFormBindings'
+import { bindingToBindingAttributes } from 'components/settings/usermanagement/roles/misc'
 import { GqlError } from 'components/utils/Alert'
 
 import { StepBody } from '../../cd/ModalAlt'

@@ -1,4 +1,4 @@
-import { DeepOmit } from '../components/account/personas/DeepOmit'
+import { DeepOmit } from '../components/utils/DeepOmit'
 
 export function deepOmitKey<
   T extends Record<string, any> | null | undefined,

@@ -58,7 +58,7 @@ function Policy() {
 
   return (
     <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer paddingTop={57}>
+      <ResponsiveLayoutSidenavContainer css={{ paddingTop: '57px' }}>
         <TreeNav>
           <TreeNavEntry
             key={POLICIES_DETAILS_PATH}

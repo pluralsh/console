@@ -118,8 +118,8 @@ export default function ResourceDetails({
       </ResponsiveLayoutPage>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer
-        width={360}
         css={{
+          width: 360,
           height: '100%',
           overflow: 'hidden',
           paddingBottom: theme.spacing.large,

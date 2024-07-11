@@ -25,16 +25,7 @@ import ComponentRaw from 'components/component/ComponentRaw'
 import ComponentMetrics from 'components/component/ComponentMetrics'
 import ComponentTree from 'components/component/ComponentTree'
 
-import { GlobalSettings } from 'components/cd/globalSettings/GlobalSettings'
-import { GlobalSettingsPermissions } from 'components/cd/globalSettings/GlobalSettingsPermissions'
-import { GlobalSettingsRepositories } from 'components/cd/globalSettings/GlobalSettingsRepositories'
-import SelfManage from 'components/cd/globalSettings/SelfManage'
-
 import Pipelines from 'components/cd/pipelines/Pipelines'
-
-import ObservabilitySettings from 'components/cd/globalSettings/observability/ObservabilitySettings'
-
-import { GlobalSettingsAgents } from 'components/cd/globalSettings/GlobalSettingsAgents'
 
 import ServiceLogs from 'components/cd/services/service/ServiceLogs'
 
@@ -45,8 +36,6 @@ import GlobalServices from 'components/cd/globalServices/GlobalService'
 import Namespaces from 'components/cd/namespaces/Namespaces'
 
 import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
-
-import ObservabilityProviders from 'components/cd/globalSettings/observability/ObservabilityProviders'
 
 import ComponentMetadata from 'components/component/ComponentMetadata'
 
@@ -105,7 +94,6 @@ import {
   GLOBAL_SERVICE_INFO_PATH,
   GLOBAL_SERVICE_PARAM_ID,
   GLOBAL_SERVICE_SERVICES_PATH,
-  GLOBAL_SETTINGS_REL_PATH,
   NAMESPACES_PARAM_ID,
   NAMESPACES_REL_PATH,
   NAMESPACE_INFO_PATH,
@@ -269,59 +257,6 @@ const namespacesRoutes = (
     <Route
       path={NAMESPACE_SERVICES_PATH}
       element={<ManagedNamespaceServices />}
-    />
-  </Route>
-)
-
-const globalSettingsRoutes = (
-  <Route
-    path={GLOBAL_SETTINGS_REL_PATH}
-    element={<GlobalSettings />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to="permissions/read"
-        />
-      }
-    />
-    <Route
-      path="permissions/read"
-      element={<GlobalSettingsPermissions type="read" />}
-    />
-    <Route
-      path="permissions/write"
-      element={<GlobalSettingsPermissions type="write" />}
-    />
-    <Route
-      path="permissions/create"
-      element={<GlobalSettingsPermissions type="create" />}
-    />
-    <Route
-      path="permissions/git"
-      element={<GlobalSettingsPermissions type="git" />}
-    />
-    <Route
-      path="repositories"
-      element={<GlobalSettingsRepositories />}
-    />
-    <Route
-      path="agents"
-      element={<GlobalSettingsAgents />}
-    />
-    <Route
-      path="auto-update"
-      element={<SelfManage />}
-    />
-    <Route
-      path="observability/settings"
-      element={<ObservabilitySettings />}
-    />
-    <Route
-      path="observability/providers"
-      element={<ObservabilityProviders />}
     />
   </Route>
 )
@@ -547,7 +482,6 @@ export const cdRoutes = [
       element={<CDRootRedirect />}
     />
     {mainRoutes}
-    {globalSettingsRoutes}
     {clusterDetailsRoutes}
     {nodeDetailsRoutes}
     {podDetailsRoutes}

@@ -103,7 +103,9 @@ export default function Pod() {
 
   return (
     <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer paddingTop={40 + theme.spacing.medium}>
+      <ResponsiveLayoutSidenavContainer
+        css={{ paddingTop: 40 + theme.spacing.medium }}
+      >
         <TabList
           stateRef={tabStateRef}
           stateProps={{

@@ -1,13 +1,10 @@
-import { Div } from 'honorable'
+import styled from 'styled-components'
 
-export function ResponsiveLayoutSidecarContainer(props: any) {
-  return (
-    <Div
-      marginLeft="xlarge"
-      display-desktop-down="none"
-      width={200}
-      flexShrink={0}
-      {...props}
-    />
-  )
-}
+export const ResponsiveLayoutSidecarContainer = styled.div(({ theme }) => ({
+  marginLeft: theme.spacing.xlarge,
+  width: '200px',
+  flexShrink: 0,
+  [`@media (max-width: ${theme.breakpoints.desktop - 1}px)`]: {
+    display: 'none',
+  },
+}))

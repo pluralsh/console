@@ -3,11 +3,13 @@ import styled from 'styled-components'
 
 import { TRUNCATE } from '../truncate'
 
-const StackedTextSC = styled.div<{ $truncate?: boolean }>(({ $truncate }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  ...($truncate ? TRUNCATE : {}),
-}))
+export const StackedTextSC = styled.div<{ $truncate?: boolean }>(
+  ({ $truncate }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    ...($truncate ? TRUNCATE : {}),
+  })
+)
 const FirstSC = styled.div<{ $truncate?: boolean }>(({ theme, $truncate }) => ({
   ...theme.partials.text.body2LooseLineHeight,
   ...($truncate ? TRUNCATE : {}),

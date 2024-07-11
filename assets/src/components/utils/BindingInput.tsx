@@ -190,6 +190,8 @@ function TagInput({
                 clickable
                 onClick={() => onRemove(key)}
                 closeButton
+                hyphens="auto"
+                overflowWrap="anywhere"
               >
                 {key}
               </Chip>

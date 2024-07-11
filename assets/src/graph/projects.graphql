@@ -5,12 +5,6 @@ fragment Project on Project {
   name
   default
   description
-  readBindings {
-    ...PolicyBinding
-  }
-  writeBindings {
-    ...PolicyBinding
-  }
 }
 
 fragment ProjectTiny on Project {
@@ -64,6 +58,21 @@ query Project($id: ID, $name: String) {
   }
 }
 
+fragment ProjectBindings on Project {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
+query ProjectBindings($id: ID!) {
+  project(id: $id) {
+    ...ProjectBindings
+  }
+}
+
 mutation CreateProject($attributes: ProjectAttributes!) {
   createProject(attributes: $attributes) {
     ...Project
@@ -72,6 +81,12 @@ mutation CreateProject($attributes: ProjectAttributes!) {
 
 mutation UpdateProject($id: ID!, $attributes: ProjectAttributes!) {
   updateProject(id: $id, attributes: $attributes) {
+    ...Project
+  }
+}
+
+mutation DeleteProject($id: ID!) {
+  deleteProject(id: $id) {
     ...Project
   }
 }
