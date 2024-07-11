@@ -3,8 +3,13 @@ defmodule Console.GraphQl.Resolvers.Deployments.Global do
   alias Console.Deployments.Global
   alias Console.Schema.{GlobalService, ManagedNamespace}
 
-  def resolve_managed_namespace(%{id: id}, ctx) do
+  def resolve_managed_namespace(%{id: id}, ctx) when is_binary(id) do
     Global.get_namespace!(id)
+    |> allow(actor(ctx), :read)
+  end
+
+  def resolve_managed_namespace(%{name: name}, ctx) when is_binary(name) do
+    Global.get_namespace_by_name!(name)
     |> allow(actor(ctx), :read)
   end
 

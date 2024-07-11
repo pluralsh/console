@@ -376,7 +376,7 @@ type RootQueryType {
 
   clusterManagedNamespaces(after: String, first: Int, before: String, last: Int): ManagedNamespaceConnection
 
-  managedNamespace(id: ID!): ManagedNamespace
+  managedNamespace(id: ID, name: String): ManagedNamespace
 
   customStackRun(id: ID!): CustomStackRun
 
@@ -1877,7 +1877,7 @@ type ServiceTemplate {
 "A spec for targeting clusters"
 type ClusterTarget {
   "the cluster tags to target"
-  tags: Json
+  tags: Map
 
   "kubernetes distribution to target"
   distro: ClusterDistro

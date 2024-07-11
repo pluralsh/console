@@ -31,6 +31,18 @@ defmodule Console.GraphQl.Deployments.GlobalQueriesTest do
       assert found["id"] == ns.id
     end
 
+    test "it can fetch a managed namespace by name" do
+      ns = insert(:managed_namespace)
+
+      {:ok, %{data: %{"managedNamespace" => found}}} = run_query("""
+        query Get($name: String!) {
+          managedNamespace(name: $name) { id }
+        }
+      """, %{"name" => ns.name}, %{current_user: insert(:user)})
+
+      assert found["id"] == ns.id
+    end
+
     test "a bound cluster can query a namespace" do
       ns = insert(:managed_namespace, target: %{tags: %{"tag" => "value"}})
       cluster = insert(:cluster, tags: [%{name: "tag", value: "value"}])
