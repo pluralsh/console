@@ -20,8 +20,11 @@ export default function Users() {
   return (
     <>
       <SettingsPageHeader heading="Users">
-        {configuration && !configuration?.pluralLogin && <UserInvite />}
-        {configuration?.pluralLogin && <OIDCInvite />}
+        {configuration?.pluralLogin ? (
+          <OIDCInvite />
+        ) : (
+          !configuration?.externalOidc && <UserInvite />
+        )}
       </SettingsPageHeader>
 
       <UsersList />

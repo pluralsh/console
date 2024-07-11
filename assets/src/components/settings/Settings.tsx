@@ -46,7 +46,7 @@ export const SETTINGS_BREADCRUMBS: Breadcrumb[] = [
   { label: 'settings', url: SETTINGS_ABS_PATH },
 ]
 export default function Settings() {
-  const { personaConfiguration, me } = useLogin()
+  const { personaConfiguration, me, configuration } = useLogin()
   const { pathname } = useLocation()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
 
@@ -58,16 +58,18 @@ export default function Settings() {
         <div />
         <MainHeaderContentSC>{headerContent}</MainHeaderContentSC>
         <SidecarColWrapperSC>
-          <Button
-            secondary
-            as={Link}
-            to="https://app.plural.sh/account/edit"
-            target="_blank"
-            rel="noopener noreferrer"
-            endIcon={<ArrowTopRightIcon />}
-          >
-            Edit account
-          </Button>
+          {configuration?.pluralLogin && (
+            <Button
+              secondary
+              as={Link}
+              to="https://app.plural.sh/account/edit"
+              target="_blank"
+              rel="noopener noreferrer"
+              endIcon={<ArrowTopRightIcon />}
+            >
+              Edit account
+            </Button>
+          )}
         </SidecarColWrapperSC>
       </GridHeaderWithSideNav>
       <SideNavEntries
