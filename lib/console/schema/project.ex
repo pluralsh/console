@@ -55,4 +55,11 @@ defmodule Console.Schema.Project do
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> validate_required(~w(name)a)
   end
+
+  def rbac_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
+  end
 end
