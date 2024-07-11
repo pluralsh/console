@@ -8,7 +8,7 @@ import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import { OIDCInvite } from './OIDCInvite'
 import UserInvite from './UserInvite'
-import UserList from './UsersList'
+import UsersList from './UsersList'
 
 const breadcrumbs = getUserManagementBreadcrumbs('users')
 
@@ -24,7 +24,7 @@ export default function Users() {
         {configuration?.pluralLogin && <OIDCInvite />}
       </SettingsPageHeader>
 
-      <UserList />
+      <UsersList />
     </>
   )
 }

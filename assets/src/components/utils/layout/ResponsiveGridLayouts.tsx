@@ -26,7 +26,7 @@ export const GridLayoutWithSideNav = styled.div<{
   $hideSidecar?: boolean
 }>(({ theme, $hideSidecar = true }) => ({
   ...gridLayoutWithSideNavStyle(theme, $hideSidecar),
-  gridTemplateRows: 'auto 1fr',
+  gridTemplateRows: '64px 1fr',
   padding: theme.spacing.large,
   paddingLeft: theme.spacing.small,
   height: '100%',

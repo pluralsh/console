@@ -3,7 +3,7 @@ import { GlobalSettingsAgents } from 'components/settings/global/GlobalSettingsA
 
 import { GlobalSettingsRepositories } from 'components/settings/global/GlobalSettingsRepositories'
 import SelfManage from 'components/settings/global/SelfManage'
-import { Navigate, Outlet, Route } from 'react-router-dom'
+import { Navigate, Route } from 'react-router-dom'
 
 import { GlobalSettingsPermissions } from 'components/settings/global/GlobalSettingsPermissions'
 
@@ -26,6 +26,8 @@ import Observability from 'components/settings/global/observability/Observabilit
 
 import ProjectSettings from 'components/settings/projectsettings/ProjectSettings'
 
+import ServiceAccounts from 'components/settings/usermanagement/serviceaccounts/ServiceAccounts'
+
 import {
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
@@ -34,17 +36,6 @@ import {
   SETTINGS_REL_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
-
-function Placeholder() {
-  return (
-    <div>
-      <h1>Settings</h1>
-      <div>
-        <Outlet />
-      </div>
-    </div>
-  )
-}
 
 const userManagementRoutes = (
   <Route
@@ -70,7 +61,7 @@ const userManagementRoutes = (
     />
     <Route
       path="service-accounts"
-      element={<Placeholder />}
+      element={<ServiceAccounts />}
     />
     <Route
       path="personas"

@@ -9381,6 +9381,30 @@ export type DeleteProjectMutationVariables = Exact<{
 
 export type DeleteProjectMutation = { __typename?: 'RootMutationType', deleteProject?: { __typename?: 'Project', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, default?: boolean | null, description?: string | null } | null };
 
+export type ServiceAccountsQueryVariables = Exact<{
+  q?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ServiceAccountsQuery = { __typename?: 'RootQueryType', serviceAccounts?: { __typename?: 'UserConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'UserEdge', node?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null } | null> | null } | null };
+
+export type CreateServiceAccountMutationVariables = Exact<{
+  attributes: ServiceAccountAttributes;
+}>;
+
+
+export type CreateServiceAccountMutation = { __typename?: 'RootMutationType', createServiceAccount?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
+
+export type UpdateServiceAccountMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ServiceAccountAttributes;
+}>;
+
+
+export type UpdateServiceAccountMutation = { __typename?: 'RootMutationType', updateServiceAccount?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
+
 export type StackTinyFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string } | null };
 
 export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
@@ -18941,6 +18965,123 @@ export function useDeleteProjectMutation(baseOptions?: Apollo.MutationHookOption
 export type DeleteProjectMutationHookResult = ReturnType<typeof useDeleteProjectMutation>;
 export type DeleteProjectMutationResult = Apollo.MutationResult<DeleteProjectMutation>;
 export type DeleteProjectMutationOptions = Apollo.BaseMutationOptions<DeleteProjectMutation, DeleteProjectMutationVariables>;
+export const ServiceAccountsDocument = gql`
+    query ServiceAccounts($q: String, $first: Int = 100, $after: String) {
+  serviceAccounts(q: $q, first: $first, after: $after) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...User
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${UserFragmentDoc}`;
+
+/**
+ * __useServiceAccountsQuery__
+ *
+ * To run a query within a React component, call `useServiceAccountsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useServiceAccountsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useServiceAccountsQuery({
+ *   variables: {
+ *      q: // value for 'q'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useServiceAccountsQuery(baseOptions?: Apollo.QueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
+      }
+export function useServiceAccountsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
+        }
+export function useServiceAccountsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ServiceAccountsQuery, ServiceAccountsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ServiceAccountsQuery, ServiceAccountsQueryVariables>(ServiceAccountsDocument, options);
+        }
+export type ServiceAccountsQueryHookResult = ReturnType<typeof useServiceAccountsQuery>;
+export type ServiceAccountsLazyQueryHookResult = ReturnType<typeof useServiceAccountsLazyQuery>;
+export type ServiceAccountsSuspenseQueryHookResult = ReturnType<typeof useServiceAccountsSuspenseQuery>;
+export type ServiceAccountsQueryResult = Apollo.QueryResult<ServiceAccountsQuery, ServiceAccountsQueryVariables>;
+export const CreateServiceAccountDocument = gql`
+    mutation CreateServiceAccount($attributes: ServiceAccountAttributes!) {
+  createServiceAccount(attributes: $attributes) {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export type CreateServiceAccountMutationFn = Apollo.MutationFunction<CreateServiceAccountMutation, CreateServiceAccountMutationVariables>;
+
+/**
+ * __useCreateServiceAccountMutation__
+ *
+ * To run a mutation, you first call `useCreateServiceAccountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateServiceAccountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createServiceAccountMutation, { data, loading, error }] = useCreateServiceAccountMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateServiceAccountMutation(baseOptions?: Apollo.MutationHookOptions<CreateServiceAccountMutation, CreateServiceAccountMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateServiceAccountMutation, CreateServiceAccountMutationVariables>(CreateServiceAccountDocument, options);
+      }
+export type CreateServiceAccountMutationHookResult = ReturnType<typeof useCreateServiceAccountMutation>;
+export type CreateServiceAccountMutationResult = Apollo.MutationResult<CreateServiceAccountMutation>;
+export type CreateServiceAccountMutationOptions = Apollo.BaseMutationOptions<CreateServiceAccountMutation, CreateServiceAccountMutationVariables>;
+export const UpdateServiceAccountDocument = gql`
+    mutation UpdateServiceAccount($id: ID!, $attributes: ServiceAccountAttributes!) {
+  updateServiceAccount(id: $id, attributes: $attributes) {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+export type UpdateServiceAccountMutationFn = Apollo.MutationFunction<UpdateServiceAccountMutation, UpdateServiceAccountMutationVariables>;
+
+/**
+ * __useUpdateServiceAccountMutation__
+ *
+ * To run a mutation, you first call `useUpdateServiceAccountMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateServiceAccountMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateServiceAccountMutation, { data, loading, error }] = useUpdateServiceAccountMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateServiceAccountMutation(baseOptions?: Apollo.MutationHookOptions<UpdateServiceAccountMutation, UpdateServiceAccountMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateServiceAccountMutation, UpdateServiceAccountMutationVariables>(UpdateServiceAccountDocument, options);
+      }
+export type UpdateServiceAccountMutationHookResult = ReturnType<typeof useUpdateServiceAccountMutation>;
+export type UpdateServiceAccountMutationResult = Apollo.MutationResult<UpdateServiceAccountMutation>;
+export type UpdateServiceAccountMutationOptions = Apollo.BaseMutationOptions<UpdateServiceAccountMutation, UpdateServiceAccountMutationVariables>;
 export const StackPrsDocument = gql`
     query StackPrs($id: ID!, $after: String, $before: String, $first: Int = 100, $last: Int) {
   infrastructureStack(id: $id) {
@@ -20461,6 +20602,7 @@ export const namedOperations = {
     ProjectsTiny: 'ProjectsTiny',
     Project: 'Project',
     ProjectBindings: 'ProjectBindings',
+    ServiceAccounts: 'ServiceAccounts',
     StackPrs: 'StackPrs',
     Stacks: 'Stacks',
     Stack: 'Stack',
@@ -20551,6 +20693,8 @@ export const namedOperations = {
     CreateProject: 'CreateProject',
     UpdateProject: 'UpdateProject',
     DeleteProject: 'DeleteProject',
+    CreateServiceAccount: 'CreateServiceAccount',
+    UpdateServiceAccount: 'UpdateServiceAccount',
     CreateStack: 'CreateStack',
     CreateOnDemandRun: 'CreateOnDemandRun',
     UpdateStack: 'UpdateStack',

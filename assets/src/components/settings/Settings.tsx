@@ -119,7 +119,7 @@ export function SettingsPageHeader({
   return (
     <ConsolePageTitle
       heading={heading}
-      headingProps={{ alignSelf: 'flex-start' }}
+      headingProps={{ alignSelf: 'center' }}
       css={{
         display: 'flex',
         alignItems: 'flex-end',

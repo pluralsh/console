@@ -5,7 +5,7 @@ export default function UserInfo({
   user: { email, name, avatar },
   className,
 }: {
-  user: { email: string; name: string; avatar?: string | undefined }
+  user: { email?: string; name?: string; avatar?: string | undefined }
   className?: string
 }) {
   const theme = useTheme()

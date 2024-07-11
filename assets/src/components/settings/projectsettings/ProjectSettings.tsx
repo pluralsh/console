@@ -29,8 +29,13 @@ export default function ProjectSettings() {
       }}
     >
       <StackedTextSC>
-        <span css={{ ...theme.partials.text.h2, fontSize: 20 }}>Projects</span>
-        <span css={{ ...theme.partials.text.body2 }}>
+        <span css={{ ...theme.partials.text.subtitle1 }}>Projects</span>
+        <span
+          css={{
+            ...theme.partials.text.body2,
+            color: theme.colors['text-light'],
+          }}
+        >
           Manage clusters and permissions with projects
         </span>
       </StackedTextSC>
