@@ -1,0 +1,105 @@
+/*
+Copyright 2023.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package v1alpha1
+
+import (
+	console "github.com/pluralsh/console-client-go"
+	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+)
+
+func init() {
+	SchemeBuilder.Register(&StackDefinition{}, &StackDefinitionList{})
+}
+
+// StackDefinitionList contains a list of StackDefinition
+// +kubebuilder:object:root=true
+type StackDefinitionList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []StackDefinition `json:"items"`
+}
+
+// StackDefinition is the Schema for the StackDefinitions API
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Namespaced
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the StackDefinition in the Console API."
+type StackDefinition struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   StackDefinitionSpec `json:"spec,omitempty"`
+	Status Status              `json:"status,omitempty"`
+}
+
+func (p *StackDefinition) StackName() string {
+	if p.Spec.Name != nil && len(*p.Spec.Name) > 0 {
+		return *p.Spec.Name
+	}
+
+	return p.Name
+}
+
+func (p *StackDefinition) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&p.Status.Conditions, condition)
+}
+
+// StackDefinitionSpec defines the desired state of StackDefinition
+type StackDefinitionSpec struct {
+	// Name of this StackDefinition. If not provided StackDefinition's own name
+	// from StackDefinition.ObjectMeta will be used.
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty"`
+
+	// Description can be used to describe this StackDefinition.
+	// +kubebuilder:validation:Optional
+	Description *string `json:"description,omitempty"`
+
+	// Steps is a list of custom run steps that will be executed as
+	// part of the stack run.
+	// +kubebuilder:validation:Optional
+	Steps []CustomRunStep `json:"steps,omitempty"`
+
+	// Configuration allows modifying the StackDefinition environment
+	// and execution.
+	// +kubebuilder:validation:Required
+	Configuration StackConfiguration `json:"configuration"`
+}
+
+type CustomRunStep struct {
+	// Args allow you to provide any additional
+	// args that should be passed to the custom
+	// run step.
+	// +kubebuilder:validation:Optional
+	Args []string `json:"args,omitempty"`
+
+	// Cmd defines what command should be executed
+	// as part of your custom run step.
+	// +kubebuilder:validation:Required
+	Cmd string `json:"cmd"`
+
+	// RequireApproval controls whether this custom run step
+	// will require an approval to proceed.
+	// +kubebuilder:validation:Optional
+	RequireApproval *bool `json:"requireApproval,omitempty"`
+
+	// Stage controls at which stage should this custom run
+	// step be executed.
+	// +kubebuilder:validation:Required
+	Stage console.StepStage `json:"stage"`
+}

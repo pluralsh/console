@@ -30,7 +30,8 @@ type InfrastructureStackSpec struct {
 	Name *string `json:"name,omitempty"`
 
 	// Type specifies the tool to use to apply it
-	// +kubebuilder:validation:Enum=TERRAFORM;ANSIBLE
+	// +kubebuilder:validation:Enum=TERRAFORM;ANSIBLE;CUSTOM
+	// +kubebuilder:validation:Required
 	Type console.StackType `json:"type"`
 
 	// RepositoryRef to source IaC from
@@ -48,11 +49,11 @@ type InfrastructureStackSpec struct {
 	// Git reference w/in the repository where the IaC lives
 	Git GitRef `json:"git"`
 
-	// Whether you want Plural to manage the state of this stack
+	// ManageState - whether you want Plural to manage the state of this stack
 	// +kubebuilder:validation:Optional
 	ManageState *bool `json:"manageState,omitempty"`
 
-	// The working directory within the git spec you want to run commands in (useful for projects with external modules)
+	// Workdir - the working directory within the git spec you want to run commands in (useful for projects with external modules)
 	// +kubebuilder:validation:Optional
 	Workdir *string `json:"workdir,omitempty"`
 
@@ -82,22 +83,26 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Optional
 	Files []StackFile `json:"files,omitempty"`
 
-	// If true, detach the stack on CR deletion, leaving all cloud resources in-place.
+	// Detach if true, detach the stack on CR deletion, leaving all cloud resources in-place.
 	// +kubebuilder:validation:Optional
 	Detach bool `json:"detach,omitempty"`
 
-	// User email to use for default Plural authentication in this stack.
+	// Actor - user email to use for default Plural authentication in this stack.
 	// +kubebuilder:validation:Optional
 	Actor *string `json:"actor,omitempty"`
 
 	// +kubebuilder:validation:Optional
 	ScmConnectionRef *corev1.ObjectReference `json:"scmConnectionRef,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	StackDefinitionRef *corev1.ObjectReference `json:"stackDefinitionRef,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
 // InfrastructureStack is the Schema for the infrastructurestacks API
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Namespaced
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the InfrastructureStack in the Console API."
 type InfrastructureStack struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -106,9 +111,8 @@ type InfrastructureStack struct {
 	Status Status                  `json:"status,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-
 // InfrastructureStackList contains a list of InfrastructureStack
+// +kubebuilder:object:root=true
 type InfrastructureStackList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
@@ -129,10 +133,15 @@ type StackConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Image *string `json:"image,omitempty"`
 	// Version the semver of the tool you wish to use
+	// +kubebuilder:validation:Required
 	Version string `json:"version"`
 	// Hooks to run at various stages of the stack run
 	// +kubebuilder:validation:Optional
 	Hooks []*StackHook `json:"hooks,omitempty"`
+	// Tag is the docker image tag you wish to use
+	// if you're customizing the version
+	// +kubebuilder:validation:Optional
+	Tag *string `json:"tag,omitempty"`
 }
 
 type StackCron struct {
@@ -183,6 +192,18 @@ func (p *InfrastructureStack) ProjectName() string {
 
 func (p *InfrastructureStack) HasProjectRef() bool {
 	return p.Spec.ProjectRef != nil
+}
+
+func (p *InfrastructureStack) StackDefinitionName() string {
+	if p.Spec.StackDefinitionRef == nil {
+		return ""
+	}
+
+	return p.Spec.StackDefinitionRef.Name
+}
+
+func (p *InfrastructureStack) HasStackDefinitionRef() bool {
+	return p.Spec.StackDefinitionRef != nil
 }
 
 func (p *InfrastructureStack) SetCondition(condition metav1.Condition) {
