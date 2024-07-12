@@ -119,6 +119,20 @@ defmodule Kube.Utils do
     |> Kazan.run()
   end
 
+  @doc """
+  This is the same inflect logic kubernetes client-go uses
+  """
+  @spec inflect(binary) :: binary
+  def inflect(kind) do
+    kind = String.downcase(kind)
+    cond do
+      String.ends_with?(kind, "endpoints") -> kind
+      String.ends_with?(kind, "s") -> "#{kind}es"
+      String.ends_with?(kind, "y") -> "#{String.trim_trailing(kind, "y")}ies"
+      true -> "#{kind}s"
+    end
+  end
+
   def clean(%{metadata: metadata} = pg) do
     metadata = struct(MetaV1.ObjectMeta, Map.take(metadata, ~w(name namespace labels annotations)a))
     clear_status(%{pg | metadata: metadata})

@@ -74,6 +74,17 @@ defmodule Console.Deployments.Clusters do
     |> Repo.exists?()
   end
 
+
+  @doc """
+  Downloads the api discovery data for a cluster to be used in dynamic queries
+  """
+  @spec api_discovery(Cluster.t) :: %{{binary, binary, binary} => binary}
+  @decorate cacheable(cache: @local_adapter, key: {:discovery, cluster.id}, opts: [ttl: @node_ttl])
+  def api_discovery(%Cluster{} = cluster) do
+    control_plane(cluster)
+    |> Console.Deployments.Discovery.discovery()
+  end
+
   @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
   def control_plane(%Cluster{self: true}), do: Kazan.Server.in_cluster()
   def control_plane(%Cluster{kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
@@ -115,6 +126,8 @@ defmodule Console.Deployments.Clusters do
     with {:ok, metrics} <- fetch_node_metrics(cluster),
       do: @local_adapter.put({:node_metrics, id}, {:ok, metrics}, ttl: @node_ttl)
   end
+
+  def warm(:api_discovery, %Cluster{} = cluster), do: api_discovery(cluster)
 
   @doc """
   Fetches the nodes for a cluster, this query is heavily cached for performance

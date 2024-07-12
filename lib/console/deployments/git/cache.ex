@@ -14,10 +14,16 @@ defmodule Console.Deployments.Git.Cache do
 
   defmodule Line do
     @expiry [minutes: -10]
-    defstruct [:file, :sha, :touched, :message]
+    defstruct [:file, :sha, :digest, :touched, :message]
 
     def new(file, sha, message) do
-      %__MODULE__{file: file, sha: sha, message: message, touched: Timex.now()}
+      %__MODULE__{
+        file: file,
+        digest: Console.sha_file(file),
+        sha: sha,
+        message: message,
+        touched: Timex.now()
+      }
     end
 
     def touch(%__MODULE__{} = mod), do: %{mod | touched: Timex.now()}

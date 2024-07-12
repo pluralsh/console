@@ -8,7 +8,8 @@ defmodule Console.Middleware.CdAuthenticated do
          %Service{cluster: cluster} = svc <- Console.Repo.preload(svc, [cluster: :provider]),
          %Kazan.Server{} = server <- Clusters.control_plane(cluster) do
        Kube.Utils.save_kubeconfig(server)
-       put_in(res.context[:service], svc)
+       res = put_in(res.context[:service], svc)
+       put_in(res.context[:cluster], cluster)
     else
       :error -> Absinthe.Resolution.put_result(res, {:error, "could not fetch kubeconfig for cluster"})
       _ -> Absinthe.Resolution.put_result(res, {:error, "unauthenticated"})

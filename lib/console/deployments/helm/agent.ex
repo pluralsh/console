@@ -37,7 +37,7 @@ defmodule Console.Deployments.Helm.Agent do
 
   def handle_call({:digest, c, v}, _, %State{cache: cache} = state) do
     case AgentCache.fetch(cache, c, v) do
-      {:ok, l, cache} -> {:reply, {:ok, l.digest}, %{state | cache: cache}}
+      {:ok, l, cache} -> {:reply, {:ok, l.internal_digest}, %{state | cache: cache}}
       err -> {:reply, err, state}
     end
   end
