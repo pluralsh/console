@@ -20,12 +20,9 @@ rules:
   resources:
   - secrets
   verbs:
-  - create
-  - delete
   - get
   - list
   - patch
-  - update
   - watch
 - apiGroups:
   - deployments.plural.sh
@@ -283,32 +280,6 @@ rules:
   - deployments.plural.sh
   resources:
   - namespacecredentialss/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - deployments.plural.sh
-  resources:
-  - namespacecredentials
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - deployments.plural.sh
-  resources:
-  - namespacecredentials/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - deployments.plural.sh
-  resources:
-  - namespacecredentials/status
   verbs:
   - get
   - patch

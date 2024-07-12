@@ -2436,6 +2436,65 @@ func (_c *ConsoleClientMock_GetNamespace_Call) RunAndReturn(run func(context.Con
 	return _c
 }
 
+// GetNamespaceByName provides a mock function with given fields: ctx, name
+func (_m *ConsoleClientMock) GetNamespaceByName(ctx context.Context, name string) (*gqlclient.ManagedNamespaceFragment, error) {
+	ret := _m.Called(ctx, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNamespaceByName")
+	}
+
+	var r0 *gqlclient.ManagedNamespaceFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.ManagedNamespaceFragment, error)); ok {
+		return rf(ctx, name)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.ManagedNamespaceFragment); ok {
+		r0 = rf(ctx, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.ManagedNamespaceFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetNamespaceByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNamespaceByName'
+type ConsoleClientMock_GetNamespaceByName_Call struct {
+	*mock.Call
+}
+
+// GetNamespaceByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+func (_e *ConsoleClientMock_Expecter) GetNamespaceByName(ctx interface{}, name interface{}) *ConsoleClientMock_GetNamespaceByName_Call {
+	return &ConsoleClientMock_GetNamespaceByName_Call{Call: _e.mock.On("GetNamespaceByName", ctx, name)}
+}
+
+func (_c *ConsoleClientMock_GetNamespaceByName_Call) Run(run func(ctx context.Context, name string)) *ConsoleClientMock_GetNamespaceByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetNamespaceByName_Call) Return(_a0 *gqlclient.ManagedNamespaceFragment, _a1 error) *ConsoleClientMock_GetNamespaceByName_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetNamespaceByName_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.ManagedNamespaceFragment, error)) *ConsoleClientMock_GetNamespaceByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetNotificationRouter provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) GetNotificationRouter(ctx context.Context, id string) (*gqlclient.NotificationRouterFragment, error) {
 	ret := _m.Called(ctx, id)

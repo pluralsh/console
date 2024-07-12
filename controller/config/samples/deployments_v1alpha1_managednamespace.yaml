@@ -43,7 +43,7 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: managednamespace-sample
 spec:
-  name: test
+  name: test-sample
   service:
     name: k8saws
     namespace: default
@@ -51,12 +51,8 @@ spec:
     name: test
   annotations:
     name: test
-    app.kubernetes.io/created-by: controller                                                                                                                                                         │
+    app.kubernetes.io/created-by: controller
   target:
-    clusterRefs:
-      - kind: Cluster
-        name: existing
-        namespace: default
     distro: EKS
     tags:
       abc: "123"
