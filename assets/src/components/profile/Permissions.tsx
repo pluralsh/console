@@ -5,12 +5,15 @@ import {
   ContentCard,
   Modal,
   Tooltip,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { LoginContext } from 'components/contexts'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Flex, H3 } from 'honorable'
 import { useContext, useMemo, useState } from 'react'
 import { stringify } from 'yaml'
+
+import { PROFILE_BREADCRUMBS } from './MyProfile'
 
 function sanitize({ name, repositories, permissions, roleBindings }) {
   return {
@@ -26,7 +29,10 @@ function sanitizeBinding({ user, group }) {
   if (group) return { group: { name: group.name } }
 }
 
+const breadcrumbs = [...PROFILE_BREADCRUMBS, { label: 'permissions' }]
+
 export function Permissions() {
+  useSetBreadcrumbs(breadcrumbs)
   const { me } = useContext<any>(LoginContext)
   const [role, setRole] = useState<any>(undefined)
   const raw = useMemo(() => (role ? stringify(sanitize(role)) : ''), [role])

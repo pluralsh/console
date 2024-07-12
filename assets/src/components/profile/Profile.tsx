@@ -1,6 +1,11 @@
 import { Box } from 'grommet'
 import { Flex, P } from 'honorable'
-import { Button, ContentCard, ValidatedInput } from '@pluralsh/design-system'
+import {
+  Button,
+  ContentCard,
+  ValidatedInput,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 
 import { UPDATE_USER } from 'components/graphql/users'
@@ -12,7 +17,10 @@ import { ValidationResponse } from '@pluralsh/design-system/dist/components/Vali
 import { isValidEmail } from 'utils/email'
 import { isEmpty } from 'lodash'
 
+import { PROFILE_BREADCRUMBS } from './MyProfile'
+
 export function Profile() {
+  useSetBreadcrumbs(PROFILE_BREADCRUMBS)
   const { me } = useContext<any>(LoginContext)
   const [name, setName] = useState<string>(me.name)
   const [email, setEmail] = useState<string>(me.email)

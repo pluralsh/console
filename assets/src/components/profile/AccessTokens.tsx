@@ -1,6 +1,3 @@
-import { Button, Modal } from 'honorable'
-import moment from 'moment'
-import { Suspense, useMemo, useState } from 'react'
 import {
   CopyIcon,
   EmptyState,
@@ -10,9 +7,10 @@ import {
   Table,
   Toast,
   Tooltip,
+  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import CopyToClipboard from 'react-copy-to-clipboard'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   AccessTokenAudit,
   AccessTokenFragment,
@@ -21,18 +19,29 @@ import {
   useDeleteAccessTokenMutation,
   useTokenAuditsQuery,
 } from 'generated/graphql'
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+import { Button, Modal } from 'honorable'
 import isEmpty from 'lodash/isEmpty'
+import moment from 'moment'
+import { Suspense, useMemo, useState } from 'react'
+import CopyToClipboard from 'react-copy-to-clipboard'
 import { useTheme } from 'styled-components'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
+import { useLocation } from 'react-router-dom'
+
+import {
+  SETTINGS_BREADCRUMBS,
+  SettingsPageHeader,
+} from 'components/settings/Settings'
+
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
+
+import { formatLocation } from '../../utils/geo'
 import {
   Edge,
   mapExistingNodes,
   removeConnection,
   updateCache,
 } from '../../utils/graphql'
-import { formatLocation } from '../../utils/geo'
 import { Confirm } from '../utils/Confirm'
 import { DeleteIconButton } from '../utils/IconButtons'
 import LoadingIndicator from '../utils/LoadingIndicator'
@@ -40,9 +49,10 @@ import { DateTimeCol } from '../utils/table/DateTimeCol'
 
 import { ModalMountTransition } from '../utils/ModalMountTransition'
 
-import { ObscuredToken } from './ObscuredToken'
 import { AccessTokensCreateModal } from './AccessTokensCreateModal'
 import { AccessTokensScopes } from './AccessTokensScopes'
+import { PROFILE_BREADCRUMBS } from './MyProfile'
+import { ObscuredToken } from './ObscuredToken'
 
 const TOOLTIP =
   'Access tokens allow you to access the Plural API for automation and active Plural clusters.'
@@ -274,52 +284,72 @@ const tokenColumns = [
   }),
 ]
 
+const profileBreadcrumbs = [...PROFILE_BREADCRUMBS, { label: 'access-tokens' }]
+const settingsBreadcrumbs = [
+  ...SETTINGS_BREADCRUMBS,
+  { label: 'access-tokens' },
+]
+
 export function AccessTokens() {
+  const isInSettings = useLocation().pathname.includes('settings')
   const [open, setOpen] = useState(false)
   const [displayNewBanner, setDisplayNewBanner] = useState(false)
   const { data, loading } = useAccessTokensQuery()
+
+  useSetBreadcrumbs(isInSettings ? settingsBreadcrumbs : profileBreadcrumbs)
 
   const tokensList = useMemo(
     () => mapExistingNodes(data?.accessTokens),
     [data?.accessTokens]
   )
 
+  const headingContent = (
+    <SettingsPageHeader heading="Access tokens">
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexGrow: 1,
+        }}
+      >
+        <Tooltip
+          width={315}
+          label={TOOLTIP}
+        >
+          <InfoIcon />
+        </Tooltip>
+        {!isEmpty(tokensList) && (
+          <Button
+            secondary
+            onClick={() => setOpen(true)}
+          >
+            Create access token
+          </Button>
+        )}
+      </div>
+    </SettingsPageHeader>
+  )
+
+  // this will throw a warning from the profile route but that's fine
+  useSetPageHeaderContent(headingContent)
+
   if (loading) return <LoadingIndicator />
 
   return (
-    <ResponsivePageFullWidth
-      scrollable={false}
-      heading="Access tokens"
-      headingContent={
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexGrow: 1,
-          }}
-        >
-          <Tooltip
-            width={315}
-            label={TOOLTIP}
-          >
-            <InfoIcon />
-          </Tooltip>
-          {!isEmpty(tokensList) && (
-            <Button
-              secondary
-              onClick={() => setOpen(true)}
-            >
-              Create access token
-            </Button>
-          )}
-        </div>
-      }
+    <div
+      css={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+      }}
     >
+      {!isInSettings && headingContent}
       {!isEmpty(tokensList) ? (
         <FullHeightTableWrap>
           <Table
+            virtualizeRows
             data={tokensList}
             columns={tokenColumns}
             css={{
@@ -357,6 +387,6 @@ export function AccessTokens() {
           New access token created.
         </Toast>
       )}
-    </ResponsivePageFullWidth>
+    </div>
   )
 }
