@@ -28,6 +28,8 @@ import ProjectSettings from 'components/settings/projectsettings/ProjectSettings
 
 import ServiceAccounts from 'components/settings/usermanagement/serviceaccounts/ServiceAccounts'
 
+import { AccessTokens } from 'components/profile/AccessTokens'
+
 import {
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
@@ -171,5 +173,9 @@ export const settingsRoutes = (
     {globalSettingsRoutes}
     {projectSettingsRoutes}
     {auditRoutes}
+    <Route
+      path="access-tokens"
+      element={<AccessTokens />}
+    />
   </Route>
 )

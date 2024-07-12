@@ -1,10 +1,4 @@
-import {
-  PageCard,
-  Tab,
-  TabList,
-  TabPanel,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { PageCard, Tab, TabList, TabPanel } from '@pluralsh/design-system'
 
 import { useContext, useRef } from 'react'
 import { Link, Outlet, useLocation } from 'react-router-dom'
@@ -15,6 +9,7 @@ import { ResponsiveLayoutContentContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { LoginContext } from 'components/contexts'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { useTheme } from 'styled-components'
 
 const getDirectory = (me, configuration) => [
   { path: 'me', label: 'Profile', enabled: true },
@@ -28,9 +23,10 @@ const getDirectory = (me, configuration) => [
   },
 ]
 
-const breadcrumbs = [{ label: 'profile', url: '/profile' }]
+export const PROFILE_BREADCRUMBS = [{ label: 'profile', url: '/profile' }]
 
 export default function MyProfile() {
+  const theme = useTheme()
   const tabStateRef = useRef<any>(null)
   const { me, configuration } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
@@ -38,8 +34,6 @@ export default function MyProfile() {
   const directory = getDirectory(me, configuration).filter(
     ({ enabled }) => enabled
   )
-
-  useSetBreadcrumbs(breadcrumbs)
 
   if (!me) return null
 
@@ -77,7 +71,11 @@ export default function MyProfile() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <TabPanel
-        as={<ResponsiveLayoutContentContainer />}
+        as={
+          <ResponsiveLayoutContentContainer
+            css={{ paddingBottom: theme.spacing.xlarge }}
+          />
+        }
         stateRef={tabStateRef}
       >
         <Outlet />

@@ -40,6 +40,7 @@ const getDirectory = (
       personaConfiguration?.all || personaConfiguration?.sidebar?.audits
     ),
   },
+  { path: 'access-tokens', label: 'Access tokens' },
 ]
 
 export const SETTINGS_BREADCRUMBS: Breadcrumb[] = [
