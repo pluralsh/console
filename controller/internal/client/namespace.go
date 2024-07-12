@@ -25,6 +25,21 @@ func (c *client) GetNamespace(ctx context.Context, id string) (*console.ManagedN
 	return response.ManagedNamespace, err
 }
 
+func (c *client) GetNamespaceByName(ctx context.Context, name string) (*console.ManagedNamespaceFragment, error) {
+	response, err := c.consoleClient.GetNamespaceByName(ctx, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if err == nil && (response == nil || response.ManagedNamespace == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.ManagedNamespace, err
+}
+
 func (c *client) DeleteNamespace(ctx context.Context, id string) error {
 	_, err := c.consoleClient.DeleteNamespace(ctx, id)
 	if err != nil {

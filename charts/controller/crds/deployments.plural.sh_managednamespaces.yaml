@@ -14,7 +14,12 @@ spec:
     singular: managednamespace
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: ManagedNamespace ID
+      jsonPath: .status.id
+      name: Id
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: ManagedNamespace is the Schema for the managednamespaces API

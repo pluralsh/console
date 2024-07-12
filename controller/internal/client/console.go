@@ -102,6 +102,7 @@ type ConsoleClient interface {
 	GetNotificationRouter(ctx context.Context, id string) (*console.NotificationRouterFragment, error)
 	UpsertNotificationRouter(ctx context.Context, attr console.NotificationRouterAttributes) (*console.NotificationRouterFragment, error)
 	GetNamespace(ctx context.Context, id string) (*console.ManagedNamespaceFragment, error)
+	GetNamespaceByName(ctx context.Context, name string) (*console.ManagedNamespaceFragment, error)
 	DeleteNamespace(ctx context.Context, id string) error
 	CreateNamespace(ctx context.Context, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
 	UpdateNamespace(ctx context.Context, id string, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
