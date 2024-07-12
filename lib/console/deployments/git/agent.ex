@@ -25,6 +25,8 @@ defmodule Console.Deployments.Git.Agent do
   def fetch(pid, %Service{} = svc), do: GenServer.call(pid, {:fetch, svc}, 30_000)
   def fetch(pid, %Service.Git{} = ref), do: GenServer.call(pid, {:fetch, ref}, 30_000)
 
+  def digest(pid, %Service.Git{} = ref), do: GenServer.call(pid, {:digest, ref}, 30_000)
+
   def docs(pid, %Service{} = svc), do: GenServer.call(pid, {:docs, svc}, 30_000)
 
   def refs(pid), do: GenServer.call(pid, :refs, 30_000)
@@ -89,6 +91,14 @@ defmodule Console.Deployments.Git.Agent do
   def handle_call({:changes, sha1, sha2, folder}, _, %State{cache: cache} = state) do
     {cache, result} = Cache.cached_changes(cache, sha1, sha2, folder)
     {:reply, result, %{state | cache: cache}}
+  end
+
+  def handle_call({:digest, %Service.Git{folder: f, files: fs} = ref}, _, %State{cache: cache} = state) do
+    case Cache.fetch(cache, ref) do
+      {:ok, %Cache.Line{sha: sha}, cache} ->
+        {:reply, {:ok, Console.sha("#{sha}:#{Enum.join([f | (fs || [])], ".")}")}, %{state | cache: cache}}
+      err -> {:reply, err, state}
+    end
   end
 
   def handle_call({:fetch, %Service.Git{} = ref}, _, %State{cache: cache} = state) do

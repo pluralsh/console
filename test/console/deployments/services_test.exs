@@ -1202,4 +1202,68 @@ defmodule Console.Deployments.ServicesAsyncTest do
       assert content["values-podinfo.yaml"] =~ "tag: 6.0.0"
     end
   end
+
+  describe "#digest/1" do
+    test "it can fetch a chart for a helm service" do
+      svc = insert(:service,
+        helm: %{chart: "podinfo", version: "5.0", repository: %{name: "podinfo", namespace: "helm-charts"}}
+      )
+      name = Console.Deployments.Helm.Charts.chart_name("podinfo", "podinfo", "5.0")
+      expect(Kube.Client, :get_helm_chart, 2, fn "helm-charts", ^name -> {:ok, %Kube.HelmChart{
+        spec: %Kube.HelmChart.Spec{chart: "podinfo"},
+        status: %Kube.HelmChart.Status{
+          artifact: %Kube.HelmChart.Status.Artifact{digest: "sha", url: "https://stefanprodan.github.io/podinfo/podinfo-6.5.3.tgz"}
+        }
+      }} end)
+
+      {:ok, sha} = Services.digest(svc)
+      {:ok, ^sha} = Services.digest(svc)
+    end
+
+    test "it can fetch a chart for a helm service by url" do
+      svc = insert(:service,
+        helm: %{
+          url: "https://stefanprodan.github.io/podinfo",
+          chart: "podinfo",
+          version: "6.5.2"
+        }
+      )
+
+      {:ok, sha} = Services.digest(svc)
+      {:ok, ^sha} = Services.digest(svc)
+    end
+
+    test "it can splice in a new values.yaml.tpl" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service, helm: %{values: "value: test"}, repository: git, git: %{ref: "master", folder: "charts/console"})
+
+      {:ok, sha} = Services.digest(svc)
+      {:ok, ^sha} = Services.digest(svc)
+    end
+
+    test "it can support multiple sources" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      svc = insert(:service,
+        repository: git,
+        git: %{ref: "master", folder: "test-apps/helm-values"},
+        helm: %{
+          chart: "podinfo",
+          version: "5.0",
+          repository: %{name: "podinfo", namespace: "helm-charts"},
+          values_files: ["values-podinfo.yaml"]
+        }
+      )
+
+      name = Console.Deployments.Helm.Charts.chart_name("podinfo", "podinfo", "5.0")
+      expect(Kube.Client, :get_helm_chart, 2, fn "helm-charts", ^name -> {:ok, %Kube.HelmChart{
+        spec: %Kube.HelmChart.Spec{chart: "podinfo"},
+        status: %Kube.HelmChart.Status{
+          artifact: %Kube.HelmChart.Status.Artifact{digest: "sha", url: "https://stefanprodan.github.io/podinfo/podinfo-6.5.3.tgz"}
+        }
+      }} end)
+
+      {:ok, sha} = Services.digest(svc)
+      {:ok, ^sha} = Services.digest(svc)
+    end
+  end
 end

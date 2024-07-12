@@ -79,11 +79,11 @@ defmodule Console.Deployments.Helm.Cache do
     end
   end
 
-  defp reason(%HelmChart{status: %Status{conditions: [_ | _] = conditions}}) do
+  def reason(%HelmChart{status: %Status{conditions: [_ | _] = conditions}}) do
     case Enum.find(conditions, & &1.type == "Ready") do
       %Status.Conditions{message: msg} -> msg
       _ -> "downloading"
     end
   end
-  defp reason(_), do: "downloading"
+  def reason(_), do: "downloading"
 end

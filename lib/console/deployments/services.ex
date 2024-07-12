@@ -2,6 +2,7 @@ defmodule Console.Deployments.Services do
   use Console.Services.Base
   use Nebulex.Caching
   import Console.Deployments.Policies
+  import Console, only: [probe: 2]
   alias Console.PubSub
   alias Console.Schema.{Service, ServiceComponent, Revision, User, Cluster, ClusterProvider, ApiDeprecation, GitRepository, ServiceContext, ServiceDependency}
   alias Console.Deployments.{
@@ -81,6 +82,54 @@ defmodule Console.Deployments.Services do
       Console.Cache.get({:manifests, id})
       |> ok()
     end)
+  end
+
+  @doc """
+  Coalesces a single sha to represent if the tarball for a service has changed or not.  Since manifests can be sourced from many
+  locations, this can be relatively complex, and also must include details like manual helm values, values files,
+  and the specific git subfolder you're fetching from.
+  """
+  @spec digest(Service.t) :: {:ok, binary} | Console.error
+  def digest(%Service{} = svc) do
+    Enum.map([
+      {:repository, svc.repository_id, svc.git},
+      {:git_helm, probe(svc, [:helm, :repository_id]), probe(svc, [:helm, :git])},
+      {:flux, probe(svc, [:helm, :repository]), svc},
+      {:helm, probe(svc, [:helm, :url]), svc.helm}
+    ], &digest_filter(&1, svc))
+    |> Enum.map(fn
+      {_, id, %Service.Git{} = ref} when is_binary(id) ->
+        Git.cached!(id) |> Git.Discovery.digest(ref)
+      {:flux, _, svc} ->
+        Helm.Charts.digest(svc)
+      {:helm, _, %{chart: c, version: v, url: url}} when is_binary(c) and is_binary(v) and is_binary(url) ->
+        Helm.Discovery.digest(url, c, v)
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+    |> Console.all()
+    |> case do
+      {:ok, digests} -> {:ok, combined_sha([subdigests(svc) | digests])}
+      err -> err
+    end
+  end
+
+  defp digest_filter({_, nil, _}, _), do: false
+  defp digest_filter({:repository, _, _} = res, %Service{helm: %Service.Helm{values_files: [_ | _]}}), do: res
+  defp digest_filter({:repository, _, _}, %Service{helm: %Service.Helm{url: u}}) when is_binary(u),
+    do: false
+  defp digest_filter({:repository, _, _}, %Service{helm: %Service.Helm{repository: %{namespace: ns, name: n}}})
+    when is_binary(ns) and is_binary(n), do: false
+  defp digest_filter(ref, _), do: ref
+
+  defp subdigests(%Service{helm: %Service.Helm{values_files: f, values: v}}) do
+    combined_sha((f || []) ++ Enum.filter([v], & &1))
+  end
+  defp subdigests(_), do: ""
+
+  defp combined_sha(shas) when is_list(shas) do
+    Enum.join(shas, "::")
+    |> Console.sha()
   end
 
   @doc """

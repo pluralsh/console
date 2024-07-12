@@ -49,6 +49,7 @@ defmodule ConsoleWeb.Router do
         document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default]
 
       scope "/v1", ConsoleWeb do
+        get "/digests", GitController, :digest
         get "/git/tarballs", GitController, :tarball
         get "/git/stacks/tarballs", GitController, :stack_tarball
 
@@ -78,6 +79,7 @@ defmodule ConsoleWeb.Router do
 
     scope "/v1", ConsoleWeb do
       get "/logs/:repo/download", LogController, :download
+      get "/digests", GitController, :digest
       get "/git/tarballs", GitController, :tarball
       get "/git/stacks/tarballs", GitController, :stack_tarball
     end

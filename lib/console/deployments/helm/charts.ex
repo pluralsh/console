@@ -2,8 +2,21 @@ defmodule Console.Deployments.Helm.Charts do
   alias Kube.Client
   alias Kube.HelmChart
   alias Console.Schema.Service
-  alias Console.Deployments.Helm.Server
+  alias Console.Deployments.Helm.{Server, Cache}
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
+
+
+  @doc """
+  Fetch just the sha for a given chart if known
+  """
+  @spec digest(Service.t) :: {:ok, binary} | Console.error
+  def digest(%Service{} = svc) do
+    case get(svc) do
+      {:ok, %{status: %{artifact: %{digest: d}}}} when is_binary(d) -> {:ok, d}
+      {:ok, c} -> {:error, "Chart not yet loaded: #{Cache.reason(c)}"}
+      err -> err
+    end
+  end
 
   @doc """
   Downloads a chart artifact from the found chart crd of the given service

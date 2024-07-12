@@ -14,6 +14,11 @@ defmodule Console.Deployments.Helm.Discovery do
       do: Agent.fetch(pid, chart, vsn)
   end
 
+  def digest(url, chart, vsn) do
+    with {:ok, pid} <- agent(url),
+      do: Agent.digest(pid, chart, vsn)
+  end
+
   defp maybe_rpc(id, module, func, args) do
     me = node()
     case worker_node(id) do
