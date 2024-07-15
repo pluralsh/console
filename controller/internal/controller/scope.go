@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/samber/lo"
 	"sigs.k8s.io/cluster-api/util/patch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -25,7 +26,7 @@ func (in *DefaultScope[T]) PatchObject() error {
 }
 
 func NewDefaultScope[T client.Object](ctx context.Context, client client.Client, object T) (Scope[T], error) {
-	if object == nil {
+	if lo.IsNil(object) {
 		return nil, errors.New("object cannot be nil")
 	}
 

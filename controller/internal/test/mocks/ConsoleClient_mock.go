@@ -1092,6 +1092,65 @@ func (_c *ConsoleClientMock_CreateStack_Call) RunAndReturn(run func(context.Cont
 	return _c
 }
 
+// CreateStackDefinition provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) CreateStackDefinition(ctx context.Context, attributes gqlclient.StackDefinitionAttributes) (*gqlclient.StackDefinitionFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateStackDefinition")
+	}
+
+	var r0 *gqlclient.StackDefinitionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.StackDefinitionAttributes) (*gqlclient.StackDefinitionFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, gqlclient.StackDefinitionAttributes) *gqlclient.StackDefinitionFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.StackDefinitionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, gqlclient.StackDefinitionAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_CreateStackDefinition_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateStackDefinition'
+type ConsoleClientMock_CreateStackDefinition_Call struct {
+	*mock.Call
+}
+
+// CreateStackDefinition is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes gqlclient.StackDefinitionAttributes
+func (_e *ConsoleClientMock_Expecter) CreateStackDefinition(ctx interface{}, attributes interface{}) *ConsoleClientMock_CreateStackDefinition_Call {
+	return &ConsoleClientMock_CreateStackDefinition_Call{Call: _e.mock.On("CreateStackDefinition", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_CreateStackDefinition_Call) Run(run func(ctx context.Context, attributes gqlclient.StackDefinitionAttributes)) *ConsoleClientMock_CreateStackDefinition_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(gqlclient.StackDefinitionAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateStackDefinition_Call) Return(_a0 *gqlclient.StackDefinitionFragment, _a1 error) *ConsoleClientMock_CreateStackDefinition_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_CreateStackDefinition_Call) RunAndReturn(run func(context.Context, gqlclient.StackDefinitionAttributes) (*gqlclient.StackDefinitionFragment, error)) *ConsoleClientMock_CreateStackDefinition_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteCluster provides a mock function with given fields: id
 func (_m *ConsoleClientMock) DeleteCluster(id string) (*gqlclient.ClusterFragment, error) {
 	ret := _m.Called(id)
@@ -1812,6 +1871,53 @@ func (_c *ConsoleClientMock_DeleteStack_Call) Return(_a0 error) *ConsoleClientMo
 }
 
 func (_c *ConsoleClientMock_DeleteStack_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteStack_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteStackDefinition provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteStackDefinition(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteStackDefinition")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteStackDefinition_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteStackDefinition'
+type ConsoleClientMock_DeleteStackDefinition_Call struct {
+	*mock.Call
+}
+
+// DeleteStackDefinition is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteStackDefinition(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteStackDefinition_Call {
+	return &ConsoleClientMock_DeleteStackDefinition_Call{Call: _e.mock.On("DeleteStackDefinition", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteStackDefinition_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteStackDefinition_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteStackDefinition_Call) Return(_a0 error) *ConsoleClientMock_DeleteStackDefinition_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteStackDefinition_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteStackDefinition_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3612,6 +3718,65 @@ func (_c *ConsoleClientMock_GetStack_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// GetStackDefinition provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetStackDefinition(ctx context.Context, id string) (*gqlclient.StackDefinitionFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStackDefinition")
+	}
+
+	var r0 *gqlclient.StackDefinitionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*gqlclient.StackDefinitionFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *gqlclient.StackDefinitionFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.StackDefinitionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetStackDefinition_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetStackDefinition'
+type ConsoleClientMock_GetStackDefinition_Call struct {
+	*mock.Call
+}
+
+// GetStackDefinition is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetStackDefinition(ctx interface{}, id interface{}) *ConsoleClientMock_GetStackDefinition_Call {
+	return &ConsoleClientMock_GetStackDefinition_Call{Call: _e.mock.On("GetStackDefinition", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetStackDefinition_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetStackDefinition_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetStackDefinition_Call) Return(_a0 *gqlclient.StackDefinitionFragment, _a1 error) *ConsoleClientMock_GetStackDefinition_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetStackDefinition_Call) RunAndReturn(run func(context.Context, string) (*gqlclient.StackDefinitionFragment, error)) *ConsoleClientMock_GetStackDefinition_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetUser provides a mock function with given fields: email
 func (_m *ConsoleClientMock) GetUser(email string) (*gqlclient.UserFragment, error) {
 	ret := _m.Called(email)
@@ -4270,6 +4435,63 @@ func (_c *ConsoleClientMock_IsServiceAccountExists_Call) Return(_a0 bool, _a1 er
 }
 
 func (_c *ConsoleClientMock_IsServiceAccountExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsServiceAccountExists_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsStackDefinitionExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsStackDefinitionExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsStackDefinitionExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsStackDefinitionExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsStackDefinitionExists'
+type ConsoleClientMock_IsStackDefinitionExists_Call struct {
+	*mock.Call
+}
+
+// IsStackDefinitionExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsStackDefinitionExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsStackDefinitionExists_Call {
+	return &ConsoleClientMock_IsStackDefinitionExists_Call{Call: _e.mock.On("IsStackDefinitionExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsStackDefinitionExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsStackDefinitionExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsStackDefinitionExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsStackDefinitionExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsStackDefinitionExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsStackDefinitionExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5371,6 +5593,66 @@ func (_c *ConsoleClientMock_UpdateStack_Call) Return(_a0 *gqlclient.Infrastructu
 }
 
 func (_c *ConsoleClientMock_UpdateStack_Call) RunAndReturn(run func(context.Context, string, gqlclient.StackAttributes) (*gqlclient.InfrastructureStackFragment, error)) *ConsoleClientMock_UpdateStack_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateStackDefinition provides a mock function with given fields: ctx, id, attributes
+func (_m *ConsoleClientMock) UpdateStackDefinition(ctx context.Context, id string, attributes gqlclient.StackDefinitionAttributes) (*gqlclient.StackDefinitionFragment, error) {
+	ret := _m.Called(ctx, id, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateStackDefinition")
+	}
+
+	var r0 *gqlclient.StackDefinitionFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.StackDefinitionAttributes) (*gqlclient.StackDefinitionFragment, error)); ok {
+		return rf(ctx, id, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, gqlclient.StackDefinitionAttributes) *gqlclient.StackDefinitionFragment); ok {
+		r0 = rf(ctx, id, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*gqlclient.StackDefinitionFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, gqlclient.StackDefinitionAttributes) error); ok {
+		r1 = rf(ctx, id, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpdateStackDefinition_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateStackDefinition'
+type ConsoleClientMock_UpdateStackDefinition_Call struct {
+	*mock.Call
+}
+
+// UpdateStackDefinition is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+//   - attributes gqlclient.StackDefinitionAttributes
+func (_e *ConsoleClientMock_Expecter) UpdateStackDefinition(ctx interface{}, id interface{}, attributes interface{}) *ConsoleClientMock_UpdateStackDefinition_Call {
+	return &ConsoleClientMock_UpdateStackDefinition_Call{Call: _e.mock.On("UpdateStackDefinition", ctx, id, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpdateStackDefinition_Call) Run(run func(ctx context.Context, id string, attributes gqlclient.StackDefinitionAttributes)) *ConsoleClientMock_UpdateStackDefinition_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(gqlclient.StackDefinitionAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateStackDefinition_Call) Return(_a0 *gqlclient.StackDefinitionFragment, _a1 error) *ConsoleClientMock_UpdateStackDefinition_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpdateStackDefinition_Call) RunAndReturn(run func(context.Context, string, gqlclient.StackDefinitionAttributes) (*gqlclient.StackDefinitionFragment, error)) *ConsoleClientMock_UpdateStackDefinition_Call {
 	_c.Call.Return(run)
 	return _c
 }
