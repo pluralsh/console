@@ -18,12 +18,17 @@ defmodule Console.Schema.StackDefinition do
     timestamps()
   end
 
+  def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
+    from(d in query, order_by: ^order)
+  end
+
   @valid ~w(name description)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:configuration)
+    |> unique_constraint(:name)
     |> cast_embed(:steps, with: &step_changeset/2)
   end
 
