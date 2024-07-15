@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	console "github.com/pluralsh/console-client-go"
+
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/credentials"
 )
@@ -123,6 +124,11 @@ type ConsoleClient interface {
 	IsProjectExists(ctx context.Context, name string) (bool, error)
 	DeleteProject(ctx context.Context, id string) error
 	UseCredentials(namespace string, credentialsCache credentials.NamespaceCredentialsCache) (string, error)
+	CreateStackDefinition(ctx context.Context, attributes console.StackDefinitionAttributes) (*console.StackDefinitionFragment, error)
+	UpdateStackDefinition(ctx context.Context, id string, attributes console.StackDefinitionAttributes) (*console.StackDefinitionFragment, error)
+	DeleteStackDefinition(ctx context.Context, id string) error
+	GetStackDefinition(ctx context.Context, id string) (*console.StackDefinitionFragment, error)
+	IsStackDefinitionExists(ctx context.Context, id string) (bool, error)
 }
 
 func New(url, token string) ConsoleClient {

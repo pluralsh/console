@@ -20,9 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	"sigs.k8s.io/controller-runtime/pkg/builder"
-	"sigs.k8s.io/controller-runtime/pkg/predicate"
-
 	console "github.com/pluralsh/console-client-go"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -176,8 +173,6 @@ func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.InfrastructureStack{}).
-		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
-		Owns(&corev1.ConfigMap{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(r)
 }
 
@@ -445,6 +440,9 @@ func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, st
 	return project.Status.ID, nil, nil
 }
 
+// handleStackDefinitionRef checks is stack has a stack definition reference configured and waits for it
+// to be ready before allowing main reconcile loop to continue. In case stack definition reference is not
+// configured, it will return early and allow the reconcile process to continue.
 func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 	stackDefinition := &v1alpha1.StackDefinition{}

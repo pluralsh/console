@@ -18,6 +18,8 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console-client-go"
+	"github.com/pluralsh/polly/algorithms"
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -47,16 +49,51 @@ type StackDefinition struct {
 	Status Status              `json:"status,omitempty"`
 }
 
-func (p *StackDefinition) StackName() string {
-	if p.Spec.Name != nil && len(*p.Spec.Name) > 0 {
-		return *p.Spec.Name
+func (in *StackDefinition) StackName() string {
+	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
+		return *in.Spec.Name
 	}
 
-	return p.Name
+	return in.Name
 }
 
-func (p *StackDefinition) SetCondition(condition metav1.Condition) {
-	meta.SetStatusCondition(&p.Status.Conditions, condition)
+func (in *StackDefinition) SetCondition(condition metav1.Condition) {
+	meta.SetStatusCondition(&in.Status.Conditions, condition)
+}
+
+func (in *StackDefinition) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(in.Spec)
+	if err != nil {
+		return false, "", err
+	}
+
+	return !in.Status.IsSHAEqual(currentSha), currentSha, nil
+}
+
+func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
+	return console.StackDefinitionAttributes{
+		Description: in.Spec.Description,
+		Configuration: &console.StackConfigurationAttributes{
+			Image:   in.Spec.Configuration.Image,
+			Version: &in.Spec.Configuration.Version,
+			Tag:     in.Spec.Configuration.Tag,
+			Hooks: algorithms.Map(in.Spec.Configuration.Hooks, func(h *StackHook) *console.StackHookAttributes {
+				return &console.StackHookAttributes{
+					Cmd:        h.Cmd,
+					Args:       lo.ToSlicePtr(h.Args),
+					AfterStage: h.AfterStage,
+				}
+			}),
+		},
+		Steps: algorithms.Map(in.Spec.Steps, func(s CustomRunStep) *console.CustomStepAttributes {
+			return &console.CustomStepAttributes{
+				Stage:           &s.Stage,
+				Cmd:             s.Cmd,
+				Args:            lo.ToSlicePtr(s.Args),
+				RequireApproval: s.RequireApproval,
+			}
+		}),
+	}
 }
 
 // StackDefinitionSpec defines the desired state of StackDefinition
