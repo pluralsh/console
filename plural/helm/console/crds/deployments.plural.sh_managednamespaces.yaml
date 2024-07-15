@@ -421,6 +421,8 @@ spec:
                         type: object
                       createNamespace:
                         type: boolean
+                      enforceNamespace:
+                        type: boolean
                       labels:
                         additionalProperties:
                           type: string

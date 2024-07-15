@@ -3767,6 +3767,11 @@ func (in *SyncConfigAttributes) DeepCopyInto(out *SyncConfigAttributes) {
 		*out = new(bool)
 		**out = **in
 	}
+	if in.EnforceNamespace != nil {
+		in, out := &in.EnforceNamespace, &out.EnforceNamespace
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Labels != nil {
 		in, out := &in.Labels, &out.Labels
 		*out = make(map[string]string, len(*in))

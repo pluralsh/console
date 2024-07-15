@@ -83,11 +83,16 @@ func policyBindings(bindings []v1alpha1.Binding) []*console.PolicyBindingAttribu
 }
 
 func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace string, srv *v1alpha1.ServiceTemplate, repositoryID *string) (*console.ServiceTemplateAttributes, error) {
+	syncConf, err := srv.SyncConfig.Attributes()
+	if err != nil {
+		return nil, err
+	}
 	serviceTemplate := &console.ServiceTemplateAttributes{
 		Name:         srv.Name,
 		Namespace:    srv.Namespace,
 		Templated:    lo.ToPtr(true),
 		RepositoryID: repositoryID,
+		SyncConfig:   syncConf,
 	}
 	if len(srv.Dependencies) > 0 {
 		serviceTemplate.Dependencies = make([]*console.ServiceDependencyAttributes, 0)
@@ -148,38 +153,6 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			Path: srv.Kustomize.Path,
 		}
 	}
-	if srv.SyncConfig != nil {
-		createNamespace := true
-		var annotations *string
-		var labels *string
-		if srv.SyncConfig.CreateNamespace != nil {
-			createNamespace = *srv.SyncConfig.CreateNamespace
-		}
-		if srv.SyncConfig.Annotations != nil {
-			result, err := json.Marshal(srv.SyncConfig.Annotations)
-			if err != nil {
-				return nil, err
-			}
-			rawAnnotations := string(result)
-			annotations = &rawAnnotations
-		}
-		if srv.SyncConfig.Labels != nil {
-			result, err := json.Marshal(srv.SyncConfig.Labels)
-			if err != nil {
-				return nil, err
-			}
-			rawLabels := string(result)
-			labels = &rawLabels
-		}
-		serviceTemplate.SyncConfig = &console.SyncConfigAttributes{
-			CreateNamespace: lo.ToPtr(createNamespace),
-			NamespaceMetadata: &console.MetadataAttributes{
-				Labels:      labels,
-				Annotations: annotations,
-			},
-		}
-	}
-
 	return serviceTemplate, nil
 }
 

@@ -74,6 +74,9 @@ type SyncConfigAttributes struct {
 	CreateNamespace *bool `json:"createNamespace,omitempty"`
 
 	// +kubebuilder:validation:Optional
+	EnforceNamespace *bool `json:"enforceNamespace,omitempty"`
+
+	// +kubebuilder:validation:Optional
 	Labels map[string]string `json:"labels,omitempty"`
 
 	// +kubebuilder:validation:Optional
@@ -88,6 +91,10 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 	createNamespace := true
 	if sca.CreateNamespace != nil {
 		createNamespace = *sca.CreateNamespace
+	}
+	enforceNamespace := false
+	if sca.EnforceNamespace != nil {
+		enforceNamespace = *sca.EnforceNamespace
 	}
 
 	var annotations *string
@@ -109,7 +116,8 @@ func (sca *SyncConfigAttributes) Attributes() (*console.SyncConfigAttributes, er
 	}
 
 	return &console.SyncConfigAttributes{
-		CreateNamespace: &createNamespace,
+		CreateNamespace:  &createNamespace,
+		EnforceNamespace: &enforceNamespace,
 		NamespaceMetadata: &console.MetadataAttributes{
 			Labels:      labels,
 			Annotations: annotations,

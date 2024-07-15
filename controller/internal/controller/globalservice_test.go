@@ -141,7 +141,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr("123"),
-					SHA: lo.ToPtr("UGRGWOH2SGNMBJCLILLWETDKRMFIDDZ4NAVFMY7MW76QTW7QDTYQ===="),
+					SHA: lo.ToPtr("OHST6HGNHMS6XTVXTA6W5S7W54OTUWVUVUZ2OXSG7VXOIQOKKONQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
