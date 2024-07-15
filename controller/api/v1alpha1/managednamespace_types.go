@@ -98,9 +98,9 @@ type ServiceTemplate struct {
 	Dependencies []corev1.ObjectReference `json:"dependencies,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Id",type="string",JSONPath=".status.id",description="ManagedNamespace ID"
 // ManagedNamespace is the Schema for the managednamespaces API
 type ManagedNamespace struct {
 	metav1.TypeMeta   `json:",inline"`

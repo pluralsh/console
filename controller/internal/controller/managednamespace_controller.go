@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
@@ -32,6 +31,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/json"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -128,6 +128,14 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return requeue, err
 		}
+		if !managedNamespace.Status.HasID() {
+			existing, err := r.ConsoleClient.GetNamespaceByName(ctx, managedNamespace.NamespaceName())
+			if err != nil {
+				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				return requeue, err
+			}
+			managedNamespace.Status.ID = lo.ToPtr(existing.ID)
+		}
 		_, err = r.ConsoleClient.UpdateNamespace(ctx, managedNamespace.Status.GetID(), *attr)
 		if err != nil {
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -180,7 +188,7 @@ func (r *ManagedNamespaceReconciler) isAlreadyExists(ctx context.Context, namesp
 		return false, nil
 	}
 
-	_, err := r.ConsoleClient.GetNamespace(ctx, namespace.Status.GetID())
+	_, err := r.ConsoleClient.GetNamespaceByName(ctx, namespace.NamespaceName())
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil
@@ -195,9 +203,9 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 	logger := log.FromContext(ctx)
 	attr := &console.ManagedNamespaceAttributes{
 		Name:        ns.NamespaceName(),
+		Namespace:   ns.Spec.Name,
 		Description: ns.Spec.Description,
 	}
-
 	if ns.Spec.Cascade != nil {
 		attr.Cascade = &console.CascadeAttributes{
 			Delete: ns.Spec.Cascade.Delete,
