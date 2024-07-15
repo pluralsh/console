@@ -6,7 +6,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     StackRun,
     PullRequest,
     CustomStackRun,
-    DeploymentSettings
+    DeploymentSettings,
+    StackDefinition
   }
 
   def list_stacks(args, %{context: %{current_user: user}}) do
@@ -21,6 +22,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     StackRun.for_stack(stack.id)
     |> filters(args)
     |> StackRun.ordered()
+    |> paginate(args)
+  end
+
+  def list_stack_definitions(args, _) do
+    StackDefinition.ordered()
     |> paginate(args)
   end
 
