@@ -11,6 +11,7 @@ export { default as ArrowTopRightIcon } from './components/icons/ArrowTopRightIc
 export { default as AwsLogoIcon } from './components/icons/AwsLogoIcon'
 export { default as AzureLogoIcon } from './components/icons/AzureLogoIcon'
 export { default as BellIcon } from './components/icons/BellIcon'
+export { default as BitBucketIcon } from './components/icons/BitBucketIcon'
 export { default as BlockedIcon } from './components/icons/BlockedIcon'
 export { default as BookIcon } from './components/icons/BookIcon'
 export { default as BotIcon } from './components/icons/BotIcon'
