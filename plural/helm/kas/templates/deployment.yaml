@@ -87,7 +87,11 @@ spec:
           image: {{ .Values.agent.proxy.image.repository }}:{{ .Values.agent.proxy.image.tag }}
           imagePullPolicy: {{ .Values.agent.proxy.image.pullPolicy }}
           securityContext:
+          {{ if .Values.agent.proxy.podSecurityContext }}
+            {{- toYaml .Values.agent.proxy.podSecurityContext | nindent 12 }}
+          {{ else }}
             {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          {{ end }}
           ports:
           - containerPort: {{ .Values.agent.proxy.port }}
           volumeMounts:

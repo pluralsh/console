@@ -96,6 +96,9 @@ agent:
       pullPolicy: IfNotPresent
     port: 8180
 
+    podSecurityContext:
+      runAsUser: 65532
+
 ingress:
   enabled: true
   ingressClass: nginx
