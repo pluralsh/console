@@ -24,6 +24,7 @@ import (
 
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	operrors "github.com/pluralsh/console/controller/internal/errors"
 	"github.com/pluralsh/console/controller/internal/utils"
 )
 
@@ -128,6 +129,11 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 
 	// Sync resource with Console API.
 	apiCluster, err := r.sync(ctx, cluster, providerId, projectId, sha)
+	if err == operrors.ErrRetriable {
+		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return requeue, nil
+	}
+
 	if err != nil {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -355,17 +361,23 @@ func (r *ClusterReconciler) ensureCluster(cluster *v1alpha1.Cluster) error {
 		return nil
 	}
 
-	bindings, err := ensureBindings(cluster.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, req, err := ensureBindings(cluster.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
+
 	cluster.Spec.Bindings.Read = bindings
 
-	bindings, err = ensureBindings(cluster.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, req2, err := ensureBindings(cluster.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
+
 	cluster.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return operrors.ErrRetriable
+	}
 
 	return nil
 }
