@@ -177,16 +177,6 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
         ({ inline }: any) => inline && textPartials.inlineLink,
       ],
     },
-    Accordion: {
-      Root: [
-        ({ ghost }: any) =>
-          ghost && {
-            border: 'none',
-            elevation: 0,
-            backgroundColor: 'inherit',
-          },
-      ],
-    },
     Avatar: {
       Root: [
         {

@@ -1,266 +1,222 @@
+import * as RadixAccordion from '@radix-ui/react-accordion'
 import {
   type ComponentProps,
-  type HTMLAttributes,
   type ReactElement,
   type ReactNode,
+  type Ref,
+  createContext,
+  forwardRef,
   useCallback,
-  useEffect,
+  useContext,
   useMemo,
-  useRef,
   useState,
 } from 'react'
-import React from 'react'
-import { useSpring } from '@react-spring/web'
-import styled, { useTheme } from 'styled-components'
 
-import useResizeObserver from '../hooks/useResizeObserver'
-import { type UseDisclosureProps, useDisclosure } from '../hooks/useDisclosure'
+import styled, { css, keyframes } from 'styled-components'
+
 import { DropdownArrowIcon } from '../icons'
 
 import Card from './Card'
-import { AnimatedDiv } from './AnimatedDiv'
 
-const paddingTransition = '0.2s ease'
-
-function AccordionTriggerUnstyled({
-  children,
-  isOpen: _isOpen,
-  unstyled: _unstyled,
-  ...props
-}: { isOpen?: boolean; unstyled?: boolean } & ComponentProps<'div'>) {
-  return (
-    <div {...props}>
-      <div className="label">{children}</div>
-      <div className="icon">
-        <DropdownArrowIcon size={14} />
-      </div>
-    </div>
-  )
+export type AccordionProps = ComponentProps<typeof RadixAccordion.Root>
+type AccordionContextT = {
+  type: AccordionProps['type']
+  openItems: AccordionProps['value']
+  setOpenItems: (openItems: AccordionProps['value']) => void
 }
 
-const AccordionTrigger = styled(AccordionTriggerUnstyled)(({ theme }) => {
-  const focusInset = theme.spacing.xsmall
-  const padding = theme.spacing.medium
+const AccordionContext = createContext<AccordionContextT>(undefined)
+const useAccordionContext = () => {
+  const ctx = useContext(AccordionContext)
 
-  return {
-    display: 'flex',
-    gap: theme.spacing.medium,
-    padding,
-    ...theme.partials.text.body2Bold,
-    color: theme.colors.text,
-    '.label': {
-      flexGrow: 1,
-    },
-    '.icon > *:first-child': {
-      transform: 'scale(100%)',
-      transition: 'transform 0.4 ease',
-    },
-    '&:focus-visible': {
-      outline: 'none',
-      position: 'relative',
-      '&::after': {
-        ...theme.partials.focus.insetAbsolute,
-        borderRadius: theme.borderRadiuses.medium,
-        top: focusInset,
-        bottom: focusInset,
-        left: focusInset,
-        right: focusInset,
-      },
-    },
-    '&:hover': {
-      '.icon > *:first-child': {
-        transform: 'scale(115%)',
-      },
-    },
-    '.icon': {
-      display: 'flex',
-      alignItems: 'center',
-      position: 'relative',
-      marginLeft: theme.spacing.xsmall,
-      transformOrigin: '50% 50%',
-      transform: 'scaleY(100%)',
-      transition: 'transform 0.2s ease',
-    },
-    '&[aria-expanded="true"] .icon': {
-      transform: 'scaleY(-100%)',
-    },
-  }
-})
+  if (!ctx) throw Error('AccordionContext must be used inside an <Accordion/>')
 
-function AccordionContentUnstyled({
-  isOpen,
-  className,
-  children,
-  pad: _pad,
-  unstyled: _unstyled,
-  ...props
-}: {
-  isOpen?: boolean
-  pad?: boolean
-  unstyled?: boolean
-} & HTMLAttributes<HTMLDivElement>) {
-  const eltRef = useRef<HTMLDivElement>(null)
-  const [contentHeight, setContentHeight] = useState(0)
-  const onResize = useCallback(() => {
-    if (eltRef.current?.offsetHeight) {
-      setContentHeight(eltRef.current?.offsetHeight)
+  return ctx
+}
+
+export function useIsItemOpen(itemValue: string) {
+  const { openItems } = useAccordionContext()
+
+  if (!openItems) return false
+
+  return typeof openItems === 'string'
+    ? openItems === itemValue
+    : (openItems as string[]).includes(itemValue)
+}
+
+export function useCloseItem(itemValue: string) {
+  const { openItems, setOpenItems } = useAccordionContext()
+
+  return useCallback(() => {
+    if (typeof openItems === 'string' && openItems === itemValue) {
+      setOpenItems('')
+    } else {
+      setOpenItems((openItems as string[]).filter((v) => v !== itemValue))
     }
-  }, [])
-  const theme = useTheme()
+  }, [itemValue, openItems, setOpenItems])
+}
 
-  useEffect(() => {
-    onResize()
-  }, [onResize])
+function AccordionRef(
+  {
+    children,
+    onValueChange: valueChangePropFunc,
+    ...props
+  }: {
+    children?:
+      | ReactElement<typeof AccordionItem>
+      | ReactElement<typeof AccordionItem>[]
+    collapsible?: boolean
+  } & AccordionProps,
+  ref: Ref<HTMLDivElement>
+) {
+  const [openItems, setOpenItems] = useState<AccordionProps['value']>(
+    props.value
+  )
 
-  useResizeObserver(eltRef, onResize)
-  const springs = useSpring({
-    to: { height: isOpen ? contentHeight || 'auto' : 0 },
-    config: isOpen
-      ? {
-          clamp: true,
-          mass: 0.6,
-          tension: 280,
-          velocity: 0.02,
-        }
-      : {
-          clamp: true,
-          mass: 0.6,
-          tension: 400,
-          velocity: 0.02,
-        },
-  })
-  const mOffset = theme.spacing.medium - theme.spacing.small
+  // for both keeping track of current open items, and still allowing user-specified function
+  const onValueChange = useCallback(
+    (val: AccordionProps['value']) => {
+      setOpenItems(val)
+      valueChangePropFunc?.(val as string & string[])
+    },
+    [valueChangePropFunc]
+  )
+
+  const context = useMemo(
+    () => ({
+      type: props.type,
+      openItems,
+      setOpenItems,
+    }),
+    [openItems, props.type]
+  )
 
   return (
-    <AnimatedDiv
-      style={
-        {
-          overflow: 'hidden',
-          ...(!_unstyled
-            ? {
-                marginTop: -mOffset,
-                marginBottom: isOpen ? 0 : mOffset,
-              }
-            : {}),
-          ...springs,
-        } as any
-      }
-    >
-      <div
-        className={className}
-        ref={eltRef}
+    <AccordionContext.Provider value={context}>
+      <RadixAccordion.Root
+        ref={ref}
+        asChild
+        collapsible={props.collapsible ?? true}
+        value={openItems as string & string[]}
+        onValueChange={onValueChange}
+        css={{ overflow: 'hidden' }}
         {...props}
       >
-        {children}
-      </div>
-    </AnimatedDiv>
+        <Card>{children}</Card>
+      </RadixAccordion.Root>
+    </AccordionContext.Provider>
   )
 }
-const AccordionContent = styled(AccordionContentUnstyled)(
-  ({ theme, pad, unstyled }) =>
-    unstyled
-      ? {}
-      : {
-          transition: `marginTop ${paddingTransition}`,
-          ...(pad
-            ? {
-                paddingLeft: theme.spacing.medium,
-                paddingRight: theme.spacing.medium,
-                paddingBottom: theme.spacing.medium,
-              }
-            : {}),
-        }
-)
 
-type AccordionPropsBase = {
-  textValue?: string
-  padContent?: boolean
-  unstyled?: boolean
-  children?: ReactNode | ((props: { isOpen: boolean }) => ReactNode)
-} & UseDisclosureProps
-
-type AccordionPropsWithTrigger = AccordionPropsBase & {
-  triggerButton: ReactElement
-  label?: never
-}
-
-type AccordionPropsWithLabel = AccordionPropsBase & {
-  label: ReactNode
-  triggerButton?: never
-}
-
-export type AccordionProps = AccordionPropsWithTrigger | AccordionPropsWithLabel
-
-export default function Accordion({
-  textValue,
-  label,
-  triggerButton,
-  padContent = true,
-  unstyled = false,
-  children,
-  isOpen: isOpenProp,
-  onOpenChange,
-  defaultOpen,
-  id,
-  ...props
-}: AccordionProps) {
-  if (!textValue && typeof label === 'string') {
-    textValue = label
-  }
-
-  const { triggerProps, contentProps, isOpen } = useDisclosure({
-    defaultOpen,
-    isOpen: isOpenProp,
-    onOpenChange,
-    id,
-  })
-
-  useEffect(() => {}, [isOpen])
-
-  const kids = useMemo(
-    () =>
-      typeof children === 'function'
-        ? children({ isOpen: !!isOpen })
-        : children,
-    [children, isOpen]
-  )
-
-  const Wrapper = useMemo(() => {
-    if (unstyled) {
-      return function Div(props: ComponentProps<'div'>) {
-        return <div {...props} />
-      }
-    }
-
-    return Card
-  }, [unstyled])
-  const finalTriggerProps = {
-    isOpen,
-    ...triggerProps,
-  }
-
-  const trigger = triggerButton ? (
-    React.cloneElement(triggerButton, finalTriggerProps)
-  ) : (
-    <AccordionTrigger
-      unstyled={unstyled}
-      {...finalTriggerProps}
-    >
-      {label}
-    </AccordionTrigger>
-  )
-
+export const Accordion = forwardRef(AccordionRef)
+function AccordionItemRef(
+  {
+    hideDefaultIcon = false,
+    trigger,
+    children,
+    ...props
+  }: {
+    hideDefaultIcon?: boolean
+    trigger: ReactNode
+    children: ReactNode
+  } & ComponentProps<typeof RadixAccordion.Item>,
+  ref: Ref<HTMLDivElement>
+) {
   return (
-    <Wrapper {...props}>
-      {trigger}
-      <AccordionContent
-        isOpen={isOpen}
-        pad={padContent}
-        unstyled={unstyled}
-        {...contentProps}
-      >
-        {kids}
-      </AccordionContent>
-    </Wrapper>
+    <ItemSC
+      ref={ref}
+      {...props}
+    >
+      <RadixAccordion.Header asChild>
+        <TriggerSC>
+          {trigger}
+          {!hideDefaultIcon && (
+            <DropdownArrowIcon
+              className="icon"
+              size={14}
+            />
+          )}
+        </TriggerSC>
+      </RadixAccordion.Header>
+      <ContentSC>{children}</ContentSC>
+    </ItemSC>
   )
 }
+export const AccordionItem = forwardRef(AccordionItemRef)
+
+const ItemSC: typeof RadixAccordion.Item = styled(RadixAccordion.Item)((_) => ({
+  display: 'flex',
+  height: '100%',
+  width: '100%',
+  '&[data-orientation="vertical"]': {
+    flexDirection: 'column',
+  },
+  '&[data-orientation="horizontal"]': {
+    flexDirection: 'row',
+  },
+}))
+const TriggerSC = styled(RadixAccordion.Trigger)(({ theme }) => ({
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  cursor: 'pointer',
+  ...theme.partials.text.body2Bold,
+  color: theme.colors.text,
+  // reset default button styles
+  background: 'transparent',
+  border: 'none',
+  padding: 0,
+  '.icon': {
+    transform: 'scaleY(100%)',
+    transition: 'transform 0.3s ease',
+  },
+  '&:hover': {
+    '.icon': {
+      transform: 'scale(115%)',
+    },
+  },
+  '&[data-state="open"] .icon': {
+    transform: 'scaleY(-100%)',
+  },
+}))
+
+const slideAnimation = (
+  direction: 'in' | 'out',
+  orientation: 'height' | 'width'
+) => keyframes`
+  from {
+    ${orientation}: ${
+      direction === 'out'
+        ? '0'
+        : `var(--radix-accordion-content-${orientation})`
+    };
+  }
+  to {
+    ${orientation}: ${
+      direction === 'out'
+        ? `var(--radix-accordion-content-${orientation})`
+        : '0'
+    };
+  }
+`
+const ContentSC = styled(RadixAccordion.Content)`
+  overflow: hidden;
+  &[data-state='open'][data-orientation='vertical'] {
+    animation: ${css`
+        ${slideAnimation('out', 'height')}`} 300ms ease-out;
+  }
+  &[data-state='closed'][data-orientation='vertical'] {
+    animation: ${css`
+        ${slideAnimation('in', 'height')}`} 300ms ease-out;
+  }
+  &[data-state='open'][data-orientation='horizontal'] {
+    animation: ${css`
+        ${slideAnimation('out', 'width')}`} 300ms ease-out;
+  }
+  &[data-state='closed'][data-orientation='horizontal'] {
+    animation: ${css`
+        ${slideAnimation('in', 'width')}`} 300ms ease-out;
+  }
+`
+
+export default Accordion
