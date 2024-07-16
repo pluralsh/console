@@ -1,11 +1,12 @@
 import { ReactElement, useState } from 'react'
 import {
+  BitBucketIcon,
   GitHubLogoIcon,
   GitLabLogoIcon,
-  HelpIcon,
   IconFrame,
   ListBoxItem,
   PencilIcon,
+  PrOpenIcon,
   TrashCanIcon,
   WebhooksIcon,
 } from '@pluralsh/design-system'
@@ -69,13 +70,15 @@ const DynamicScmTypeIconSC = styled.div((_) => ({
 export const scmTypeToLabel = {
   [ScmType.Github]: 'GitHub',
   [ScmType.Gitlab]: 'GitLab',
+  [ScmType.Bitbucket]: 'BitBucket',
   '': 'Unknown',
 } as const satisfies Record<ScmType | '', string>
 
 export const scmTypeToIcon = {
   [ScmType.Github]: <GitHubLogoIcon fullColor />,
   [ScmType.Gitlab]: <GitLabLogoIcon fullColor />,
-  '': <HelpIcon />,
+  [ScmType.Bitbucket]: <BitBucketIcon fullColor />,
+  '': <PrOpenIcon />,
 } as const satisfies Record<ScmType | '', ReactElement>
 
 export function DynamicScmTypeIcon({ type }: { type: Nullable<ScmType> }) {

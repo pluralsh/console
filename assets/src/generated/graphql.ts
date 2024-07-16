@@ -6576,6 +6576,7 @@ export type ScmConnectionEdge = {
 };
 
 export enum ScmType {
+  Bitbucket = 'BITBUCKET',
   Github = 'GITHUB',
   Gitlab = 'GITLAB'
 }

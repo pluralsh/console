@@ -53,6 +53,7 @@ defmodule Console.Deployments.Pr.Git do
   defp url(%ScmConnection{base_url: base}) when is_binary(base), do: base
   defp url(%ScmConnection{type: :github}), do: "https://github.com"
   defp url(%ScmConnection{type: :gitlab}), do: "https://gitlab.com"
+  defp url(%ScmConnection{type: :bitbucket}), do: "https://bitbucket.org"
 
   defp opts(%ScmConnection{dir: dir} = conn), do: [env: env(conn), cd: dir, stderr_to_stdout: true]
 

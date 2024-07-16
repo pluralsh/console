@@ -4068,6 +4068,7 @@ enum GitHealth {
 enum ScmType {
   GITHUB
   GITLAB
+  BITBUCKET
 }
 
 enum MatchStrategy {
