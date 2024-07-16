@@ -1,0 +1,8 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: StackDefinition
+metadata:
+  name: floreks-stack-def
+spec:
+  description: test stack definition
+  configuration:
+    version: test

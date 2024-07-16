@@ -59,6 +59,7 @@ spec:
                           - PLAN
                           - VERIFY
                           - APPLY
+                          - DESTROY
                           type: string
                         args:
                           description: optional arguments to pass to the command
@@ -123,6 +124,12 @@ spec:
                       description: |-
                         Stage controls at which stage should this custom run
                         step be executed.
+                      enum:
+                      - PLAN
+                      - VERIFY
+                      - APPLY
+                      - INIT
+                      - DESTROY
                       type: string
                   required:
                   - cmd

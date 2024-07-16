@@ -455,9 +455,9 @@ func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Con
 		return nil, nil, fmt.Errorf("stack definition reference can only be used when stack type is set to custom, type: %s", stack.Spec.Type)
 	}
 
-	if err := r.Get(ctx, client.ObjectKey{Name: stack.StackDefinitionName()}, stackDefinition); err != nil {
+	if err := r.Get(ctx, stack.StackDefinitionObjectKey(), stackDefinition); err != nil {
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return nil, &requeue, err
+		return nil, nil, err
 	}
 
 	if stackDefinition.Status.ID == nil {

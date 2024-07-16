@@ -56,6 +56,7 @@ func (in *StackDefinition) Diff(hasher Hasher) (changed bool, sha string, err er
 
 func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
 	return console.StackDefinitionAttributes{
+		Name:        in.StackName(),
 		Description: in.Spec.Description,
 		Configuration: &console.StackConfigurationAttributes{
 			Image:   in.Spec.Configuration.Image,
@@ -106,7 +107,7 @@ type CustomRunStep struct {
 	// Args allow you to provide any additional
 	// args that should be passed to the custom
 	// run step.
-	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Required
 	Args []string `json:"args,omitempty"`
 
 	// Cmd defines what command should be executed
@@ -122,5 +123,6 @@ type CustomRunStep struct {
 	// Stage controls at which stage should this custom run
 	// step be executed.
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=PLAN;VERIFY;APPLY;INIT;DESTROY
 	Stage console.StepStage `json:"stage"`
 }

@@ -21,6 +21,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // InfrastructureStackSpec defines the desired state of InfrastructureStack
@@ -62,6 +63,7 @@ type InfrastructureStackSpec struct {
 	JobSpec *JobSpec `json:"jobSpec,omitempty"`
 
 	// Configuration version/image config for the tool you're using
+	// +kubebuilder:validation:Required
 	Configuration StackConfiguration `json:"configuration"`
 
 	// Configuration for cron generation of stack runs
@@ -154,17 +156,20 @@ type StackCron struct {
 
 type StackHook struct {
 	// the command this hook will execute
+	// +kubebuilder:validation:Required
 	Cmd string `json:"cmd"`
 
 	// optional arguments to pass to the command
 	// +kubebuilder:validation:Optional
 	Args []string `json:"args,omitempty"`
 
-	// +kubebuilder:validation:Enum=INIT;PLAN;VERIFY;APPLY
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=INIT;PLAN;VERIFY;APPLY;DESTROY
 	AfterStage console.StepStage `json:"afterStage"`
 }
 
 type StackEnvironment struct {
+	// +kubebuilder:validation:Required
 	Name string `json:"name"`
 	// +kubebuilder:validation:Optional
 	Value *string `json:"value,omitempty"`
@@ -194,12 +199,15 @@ func (p *InfrastructureStack) HasProjectRef() bool {
 	return p.Spec.ProjectRef != nil
 }
 
-func (p *InfrastructureStack) StackDefinitionName() string {
+func (p *InfrastructureStack) StackDefinitionObjectKey() client.ObjectKey {
 	if p.Spec.StackDefinitionRef == nil {
-		return ""
+		return client.ObjectKey{}
 	}
 
-	return p.Spec.StackDefinitionRef.Name
+	return client.ObjectKey{
+		Name:      p.Spec.StackDefinitionRef.Name,
+		Namespace: p.Spec.StackDefinitionRef.Namespace,
+	}
 }
 
 func (p *InfrastructureStack) HasStackDefinitionRef() bool {

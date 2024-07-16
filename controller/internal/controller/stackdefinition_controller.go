@@ -36,7 +36,7 @@ type StackDefinitionReconciler struct {
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the stack definition closer to the desired state.
-func (in *StackDefinitionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ret ctrl.Result, reterr error) {
+func (in *StackDefinitionReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
 	stack := &v1alpha1.StackDefinition{}
@@ -103,7 +103,7 @@ func (in *StackDefinitionReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return ret, reterr
+	return ctrl.Result{}, reterr
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -154,7 +154,7 @@ func (in *StackDefinitionReconciler) isAlreadyExists(ctx context.Context, stack 
 		return false, nil
 	}
 
-	_, err := in.ConsoleClient.GetStack(ctx, stack.Status.GetID())
+	_, err := in.ConsoleClient.GetStackDefinition(ctx, stack.Status.GetID())
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil

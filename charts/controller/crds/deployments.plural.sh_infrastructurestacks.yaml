@@ -165,6 +165,7 @@ spec:
                           - PLAN
                           - VERIFY
                           - APPLY
+                          - DESTROY
                           type: string
                         args:
                           description: optional arguments to pass to the command

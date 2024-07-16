@@ -6,6 +6,8 @@ import (
 	gqlclient "github.com/pluralsh/console-client-go"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	internalerror "github.com/pluralsh/console/controller/internal/errors"
 )
 
 func (c *client) CreateStackDefinition(ctx context.Context, attributes gqlclient.StackDefinitionAttributes) (*gqlclient.StackDefinitionFragment, error) {
@@ -34,6 +36,10 @@ func (c *client) DeleteStackDefinition(ctx context.Context, id string) error {
 
 func (c *client) GetStackDefinition(ctx context.Context, id string) (*gqlclient.StackDefinitionFragment, error) {
 	response, err := c.consoleClient.GetStackDefinition(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+
 	if err == nil && (response == nil || response.StackDefinition == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
