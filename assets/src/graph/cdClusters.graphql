@@ -443,8 +443,8 @@ query ClusterStatuses {
   }
 }
 
-query TagPairs($first: Int = 30, $q: String, $tag: String) {
-  tagPairs(first: $first, q: $q, tag: $tag) {
+query TagPairs($first: Int = 30, $q: String, $tag: String, $type: TagType) {
+  tagPairs(first: $first, q: $q, tag: $tag, type: $type) {
     edges {
       node {
         name

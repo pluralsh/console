@@ -1,17 +1,23 @@
-import React, {
+import {
   Dispatch,
   SetStateAction,
   createContext,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
 
 import { useTheme } from 'styled-components'
 
+import { FiltersIcon, SearchIcon } from '@pluralsh/design-system'
+
+import { ExpandedInput, IconExpander } from 'components/utils/IconExpander'
+
+import { useDebounce } from 'usehooks-ts'
+
 import { useNamespaces } from '../Cluster'
 
-import { NameFilter } from './NameFilter'
 import { NamespaceFilter } from './NamespaceFilter'
 
 export type DataSelectT = {
@@ -67,27 +73,44 @@ export function DataSelectInputs({
 }) {
   const theme = useTheme()
   const namespaces = useNamespaces()
-  const { namespaced, namespace, setNamespace, filter, setFilter } = dataSelect
+  const {
+    namespaced,
+    namespace,
+    setNamespace,
+    filter: contextFilter,
+    setFilter: setContextFilter,
+  } = dataSelect
+
+  const [filter, setFilter] = useState(contextFilter)
+  const debouncedFilter = useDebounce(filter, 200)
+
+  useEffect(
+    () => setContextFilter(debouncedFilter),
+    [debouncedFilter, setContextFilter]
+  )
 
   return (
     <div
       css={{
         display: 'flex',
-        flexGrow: 1,
         gap: theme.spacing.medium,
         justifyContent: 'flex-end',
       }}
     >
-      <NameFilter
-        value={filter}
-        onChange={setFilter}
-      />
-      {namespaced && (
-        <NamespaceFilter
-          namespaces={namespaces}
-          namespace={namespace}
-          onChange={setNamespace}
+      <IconExpander icon={<SearchIcon />}>
+        <ExpandedInput
+          inputValue={filter}
+          onChange={setFilter}
         />
+      </IconExpander>
+      {namespaced && (
+        <IconExpander icon={<FiltersIcon />}>
+          <NamespaceFilter
+            namespaces={namespaces}
+            namespace={namespace}
+            onChange={setNamespace}
+          />
+        </IconExpander>
       )}
     </div>
   )

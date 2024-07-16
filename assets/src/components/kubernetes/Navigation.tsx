@@ -114,8 +114,14 @@ export default function Navigation() {
           overflow: 'hidden',
         }}
       >
-        <div css={{ display: 'flex', gap: theme.spacing.small }}>
-          {headerContent}
+        <div
+          css={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: theme.spacing.small,
+          }}
+        >
+          <div css={{ flex: 1, overflow: 'hidden' }}>{headerContent}</div>
           <DataSelectInputs dataSelect={dataSelect} />
         </div>
         <PageHeaderContext.Provider value={pageHeaderContext}>

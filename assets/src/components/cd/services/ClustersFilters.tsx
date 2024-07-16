@@ -13,7 +13,7 @@ import isNil from 'lodash/isNil'
 import { useDebounce } from '@react-hooks-library/core'
 
 import { serviceStatusToSeverity } from './ServiceStatusChip'
-import { ClusterTagsFilter } from './ClusterTagsFilter'
+import { TagsFilter } from './ClusterTagsFilter'
 
 export type ClusterStatusTabKey = 'HEALTHY' | 'UNHEALTHY' | 'ALL'
 export const statusTabs = Object.entries({
@@ -51,12 +51,10 @@ export function ClustersFilters({
   setQueryString: (string) => void
   tabStateRef: MutableRefObject<any>
   statusCounts: Record<ClusterStatusTabKey, number | undefined>
-  selectedTagKeys: ComponentProps<typeof ClusterTagsFilter>['selectedTagKeys']
-  setSelectedTagKeys: ComponentProps<
-    typeof ClusterTagsFilter
-  >['setSelectedTagKeys']
-  tagOp: ComponentProps<typeof ClusterTagsFilter>['searchOp']
-  setTagOp: ComponentProps<typeof ClusterTagsFilter>['setSearchOp']
+  selectedTagKeys: ComponentProps<typeof TagsFilter>['selectedTagKeys']
+  setSelectedTagKeys: ComponentProps<typeof TagsFilter>['setSelectedTagKeys']
+  tagOp: ComponentProps<typeof TagsFilter>['searchOp']
+  setTagOp: ComponentProps<typeof TagsFilter>['setSearchOp']
 }) {
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 400)
@@ -74,7 +72,7 @@ export function ClustersFilters({
   return (
     <ClustersFiltersSC>
       <div css={{ flex: '1 1 50%' }}>
-        <ClusterTagsFilter
+        <TagsFilter
           selectedTagKeys={selectedTagKeys}
           setSelectedTagKeys={setSelectedTagKeys}
           searchOp={tagOp}

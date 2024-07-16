@@ -8,7 +8,6 @@ import { LinkTabWrap } from '../../utils/Tabs'
 import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWidth'
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutHeader } from '../../utils/layout/ResponsiveLayoutHeader'
 import { PageHeaderContext } from '../../cd/ContinuousDeployment'
 
 export interface TabEntry {
@@ -53,20 +52,16 @@ export default function ResourceDetails({
           },
         }}
       >
-        <ResponsiveLayoutHeader
+        <header
           css={{
-            paddingRight: theme.spacing.large,
-            overflow: 'hidden',
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: theme.spacing.small,
+            marginBottom: theme.spacing.medium,
+            paddingRight: theme.spacing.xlarge,
           }}
         >
-          <div
-            css={{
-              display: 'flex',
-              flexGrow: 1,
-              maxWidth: theme.breakpoints.desktopLarge,
-              height: 'fit-content',
-            }}
-          >
+          <div css={{ flex: 1, overflow: 'hidden' }}>
             <TabList
               scrollable
               gap="xxsmall"
@@ -75,9 +70,6 @@ export default function ResourceDetails({
                 orientation: 'horizontal',
                 selectedKey: currentTab?.path,
               }}
-              marginRight="medium"
-              paddingTop="xsmall"
-              paddingBottom="xxsmall"
             >
               {tabs.map(({ label, path }) => (
                 <LinkTabWrap
@@ -98,7 +90,7 @@ export default function ResourceDetails({
           </div>
           {headerContent}
           {additionalHeaderContent}
-        </ResponsiveLayoutHeader>
+        </header>
         <ResponsivePageFullWidth
           noPadding
           maxContentWidth={theme.breakpoints.desktopLarge}

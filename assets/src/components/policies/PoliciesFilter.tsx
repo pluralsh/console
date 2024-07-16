@@ -1,4 +1,8 @@
-import { Accordion, Checkbox, Chip } from '@pluralsh/design-system'
+import {
+  AccordionOLD as Accordion,
+  Checkbox,
+  Chip,
+} from '@pluralsh/design-system'
 import {
   ConstraintViolationField,
   useClustersQuery,

@@ -48,7 +48,7 @@ import {
   ClustersFilters,
 } from '../services/ClustersFilters'
 
-import { ClusterTagsFilter } from '../services/ClusterTagsFilter'
+import { TagsFilter } from '../services/ClusterTagsFilter'
 
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
@@ -225,9 +225,7 @@ export default function Clusters() {
             setSelectedTagKeys={setSelectedTagKeys}
             tagOp={tagOp}
             setTagOp={
-              setTagOp as ComponentProps<
-                typeof ClusterTagsFilter
-              >['setSearchOp']
+              setTagOp as ComponentProps<typeof TagsFilter>['setSearchOp']
             }
           />
           <TabPanel

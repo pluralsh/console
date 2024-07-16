@@ -1,31 +1,43 @@
-import { type ComponentProps, type Key, useMemo, useState } from 'react'
-import { TagMultiSelect } from '@pluralsh/design-system'
-import uniqWith from 'lodash/uniqWith'
-import isEqual from 'lodash/isEqual'
-import { Conjunction, useTagPairsQuery } from 'generated/graphql'
+import {
+  ListBoxFooterPlus,
+  ReloadIcon,
+  TagMultiSelect,
+} from '@pluralsh/design-system'
 import { useThrottle } from 'components/hooks/useThrottle'
+import { Conjunction, TagType, useTagPairsQuery } from 'generated/graphql'
+import isEqual from 'lodash/isEqual'
+import uniqWith from 'lodash/uniqWith'
+import { type ComponentProps, type Key, useMemo, useState } from 'react'
 import { tagToKey } from 'utils/clusterTags'
 
-export function ClusterTagsFilter({
+export function TagsFilter({
+  type,
+  innerChips,
   selectedTagKeys,
   setSelectedTagKeys,
   searchOp,
   setSearchOp,
+  comboBoxProps,
+  selectProps,
 }: {
+  type?: TagType
+  innerChips?: boolean
   selectedTagKeys: Set<Key>
   setSelectedTagKeys: (keys: Set<Key>) => void
   searchOp: Conjunction
   setSearchOp: ComponentProps<typeof TagMultiSelect>['onChangeMatchType']
+  comboBoxProps?: ComponentProps<typeof TagMultiSelect>['comboBoxProps']
+  selectProps?: ComponentProps<typeof TagMultiSelect>['selectProps']
 }) {
   const [inputValue, setInputValue] = useState('')
-  const throttledInputValue = useThrottle(inputValue, 100)
+  const throttledInputValue = useThrottle(inputValue, 150)
 
   const {
     data: currentData,
     previousData,
     loading,
   } = useTagPairsQuery({
-    variables: { q: throttledInputValue },
+    variables: { q: throttledInputValue, type },
   })
   const data = currentData || previousData
   const searchResults = useMemo(
@@ -47,8 +59,26 @@ export function ClusterTagsFilter({
 
   return (
     <TagMultiSelect
-      onSelectedTagsChange={setSelectedTagKeys}
-      onFilterChange={setInputValue}
+      innerChips={innerChips}
+      comboBoxProps={{
+        dropdownFooterFixed: (
+          <ListBoxFooterPlus
+            leftContent={<ReloadIcon />}
+            onClick={() => {
+              setSelectedTagKeys(new Set())
+              setInputValue('')
+            }}
+          >
+            Reset tags
+          </ListBoxFooterPlus>
+        ),
+        ...comboBoxProps,
+      }}
+      selectProps={selectProps}
+      selectedTagKeys={selectedTagKeys}
+      setSelectedTagKeys={setSelectedTagKeys}
+      inputValue={inputValue}
+      setInputValue={setInputValue}
       loading={loading}
       options={searchResults}
       selectedMatchType={searchOp}
