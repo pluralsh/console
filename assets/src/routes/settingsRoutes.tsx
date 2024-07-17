@@ -33,9 +33,9 @@ import { AccessTokens } from 'components/profile/AccessTokens'
 import {
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
-  PROJECT_SETTINGS_ABS_PATH,
   PROJECT_SETTINGS_REL_PATH,
   SETTINGS_REL_PATH,
+  USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
 
@@ -165,7 +165,7 @@ export const settingsRoutes = (
       element={
         <Navigate
           replace
-          to={PROJECT_SETTINGS_ABS_PATH}
+          to={USER_MANAGEMENT_ABS_PATH}
         />
       }
     />
