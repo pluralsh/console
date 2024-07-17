@@ -2,6 +2,7 @@ defmodule Console.Deployments.Helm.Charts do
   alias Kube.Client
   alias Kube.HelmChart
   alias Console.Schema.Service
+  alias Console.Cached.HelmChart, as: ChartCache
   alias Console.Deployments.Helm.{Server, Cache}
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
 
@@ -36,9 +37,12 @@ defmodule Console.Deployments.Helm.Charts do
   def get(%Service{helm: %Service.Helm{chart: chart, version: vsn, repository: %{namespace: ns, name: n}}})
     when is_binary(chart) and is_binary(vsn) do
     name = chart_name(n, chart, vsn)
-    case Client.get_helm_chart(ns, name) do
-      {:ok, chart} -> {:ok, chart}
-      _ -> jit_create(ns, name, n, chart, vsn)
+    with {:cache, nil} <- {:cache, ChartCache.get(ns, name)},
+         {:server, {:ok, chart}} <- {:server, Client.get_helm_chart(ns, name)} do
+      {:ok, chart}
+    else
+      {:cache, %HelmChart{} = chart} -> {:ok, chart}
+      {:server, _} -> jit_create(ns, name, n, chart, vsn)
     end
   end
   def get(_), do: {:error, "service does not reference a helm chart"}

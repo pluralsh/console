@@ -40,7 +40,6 @@ defmodule Console.Cached.Kubernetes do
     with {:ok, %{items: instances, metadata: %{resource_version: vsn}}} <- Kazan.run(request),
          {:ok, pid} <- Watcher.start_link(%{request | response_model: model}, send_to: self(), resource_vsn: vsn) do
       :timer.send_interval(5000, :watcher_ping)
-      Process.link(pid)
       table = Enum.reduce(instances, table, &KeyValueSet.put!(&2, key.(&1), &1))
       {:noreply, %{state | pid: pid, table: table}}
     else
