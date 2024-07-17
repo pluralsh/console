@@ -29,6 +29,7 @@ defmodule Console.Schema.ManagedNamespace do
     embeds_one :cascade, GlobalService.Cascade, on_replace: :update
 
     belongs_to :project, Project
+    belongs_to :parent,  Service
     belongs_to :service, ServiceTemplate, on_replace: :update
 
     has_many :clusters, NamespaceCluster,
@@ -73,7 +74,7 @@ defmodule Console.Schema.ManagedNamespace do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name namespace description project_id labels annotations pull_secrets)a
+  @valid ~w(name namespace description parent_id project_id labels annotations pull_secrets)a
 
   def changeset(model, attrs \\ %{}) do
     model

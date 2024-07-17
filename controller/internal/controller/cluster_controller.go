@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
@@ -129,7 +130,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req reconcile.Request
 
 	// Sync resource with Console API.
 	apiCluster, err := r.sync(ctx, cluster, providerId, projectId, sha)
-	if err == operrors.ErrRetriable {
+	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(cluster.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, nil
 	}

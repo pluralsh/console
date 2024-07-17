@@ -1900,6 +1900,8 @@ export type GlobalService = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a human readable name for this global service */
   name: Scalars['String']['output'];
+  /** the service which created this global service */
+  parent?: Maybe<ServiceDeployment>;
   /** a project this global service is bound to */
   project?: Maybe<Project>;
   /** whether to only apply to clusters with this provider */
@@ -1934,6 +1936,8 @@ export type GlobalServiceAttributes = {
   distro?: InputMaybe<ClusterDistro>;
   /** name for this global service */
   name: Scalars['String']['input'];
+  /** the id of the service creating this */
+  parentId?: InputMaybe<Scalars['ID']['input']>;
   /** a project this global service will sync across */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   /** cluster api provider to target */
@@ -2513,6 +2517,8 @@ export type ManagedNamespace = {
   name: Scalars['String']['output'];
   /** override the name of the kubernetes namespace if `name` is not usable */
   namespace?: Maybe<Scalars['String']['output']>;
+  /** the service which created this managed namespace */
+  parent?: Maybe<ServiceDeployment>;
   /** a project this global service is bound to */
   project?: Maybe<Project>;
   /** a list of pull secrets to attach to this namespace */
@@ -2549,6 +2555,8 @@ export type ManagedNamespaceAttributes = {
   name: Scalars['String']['input'];
   /** the name of the namespace if `name` doesn't align */
   namespace?: InputMaybe<Scalars['String']['input']>;
+  /** the id of the service creating this */
+  parentId?: InputMaybe<Scalars['ID']['input']>;
   /** a project this managed namespace will sync across */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of pull secrets to attach to this namespace */
@@ -5679,6 +5687,7 @@ export type RootQueryTypeInfrastructureStacksArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
+  tagQuery?: InputMaybe<TagQuery>;
 };
 
 

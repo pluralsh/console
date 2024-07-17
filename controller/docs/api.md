@@ -30,6 +30,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ScmConnection](#scmconnection)
 - [ServiceAccount](#serviceaccount)
 - [ServiceDeployment](#servicedeployment)
+- [StackDefinition](#stackdefinition)
 
 
 
@@ -344,8 +345,6 @@ _Appears in:_
 | `clusterRestoreRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRestoreRef pointing to source ClusterRestore. |  | Optional: {} <br /> |
 
 
-
-
 #### ClusterSpec
 
 
@@ -389,7 +388,6 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `tags` _object (keys:string, values:string)_ | Tags the cluster tags to target |  | Optional: {} <br /> |
 | `distro` _[ClusterDistro](#clusterdistro)_ | Distro kubernetes distribution to target |  | Optional: {} <br /> |
-| `clusterRefs` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ |  |  |  |
 
 
 #### CommandAttributes
@@ -464,6 +462,25 @@ _Appears in:_
 | `args` _string array_ |  |  | Optional: {} <br /> |
 | `env` _[Env](#env) array_ |  |  | Optional: {} <br /> |
 | `envFrom` _[EnvFrom](#envfrom) array_ |  |  | Optional: {} <br /> |
+
+
+#### CustomRunStep
+
+
+
+
+
+
+
+_Appears in:_
+- [StackDefinitionSpec](#stackdefinitionspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `args` _string array_ | Args allow you to provide any additional<br />args that should be passed to the custom<br />run step. |  | Required: {} <br /> |
+| `cmd` _string_ | Cmd defines what command should be executed<br />as part of your custom run step. |  | Required: {} <br /> |
+| `requireApproval` _boolean_ | RequireApproval controls whether this custom run step<br />will require an approval to proceed. |  | Optional: {} <br /> |
+| `stage` _[StepStage](#stepstage)_ | Stage controls at which stage should this custom run<br />step be executed. |  | Enum: [PLAN VERIFY APPLY INIT DESTROY] <br />Required: {} <br /> |
 
 
 #### CustomStackRun
@@ -768,23 +785,24 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name of this Stack. If not provided InfrastructureStack's own name from InfrastructureStack.ObjectMeta will be used. |  | Optional: {} <br /> |
-| `type` _[StackType](#stacktype)_ | Type specifies the tool to use to apply it |  | Enum: [TERRAFORM ANSIBLE] <br /> |
+| `type` _[StackType](#stacktype)_ | Type specifies the tool to use to apply it |  | Enum: [TERRAFORM ANSIBLE CUSTOM] <br />Required: {} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef to source IaC from |  | Required: {} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this stack belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
 | `git` _[GitRef](#gitref)_ | Git reference w/in the repository where the IaC lives |  |  |
-| `manageState` _boolean_ | Whether you want Plural to manage the state of this stack |  | Optional: {} <br /> |
-| `workdir` _string_ | The working directory within the git spec you want to run commands in (useful for projects with external modules) |  | Optional: {} <br /> |
+| `manageState` _boolean_ | ManageState - whether you want Plural to manage the state of this stack |  | Optional: {} <br /> |
+| `workdir` _string_ | Workdir - the working directory within the git spec you want to run commands in (useful for projects with external modules) |  | Optional: {} <br /> |
 | `jobSpec` _[JobSpec](#jobspec)_ | JobSpec optional k8s job configuration for the job that will apply this stack |  | Optional: {} <br /> |
-| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  |  |
+| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  | Required: {} <br /> |
 | `cron` _[StackCron](#stackcron)_ | Configuration for cron generation of stack runs |  | Optional: {} <br /> |
 | `approval` _boolean_ | Approval whether to require approval |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
 | `environment` _[StackEnvironment](#stackenvironment) array_ |  |  | Optional: {} <br /> |
 | `files` _[StackFile](#stackfile) array_ | Files reference to Secret with a key as a part of mount path and value as a content |  | Optional: {} <br /> |
-| `detach` _boolean_ | If true, detach the stack on CR deletion, leaving all cloud resources in-place. |  | Optional: {} <br /> |
-| `actor` _string_ | User email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
+| `detach` _boolean_ | Detach if true, detach the stack on CR deletion, leaving all cloud resources in-place. |  | Optional: {} <br /> |
+| `actor` _string_ | Actor - user email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `stackDefinitionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 
 
 #### JobSpec
@@ -1222,8 +1240,25 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `git` _[GitRef](#gitref)_ | Git ... |  | Optional: {} <br /> |
-| `templates` _[PrAutomationTemplate](#prautomationtemplate) array_ | Templates ... |  | Optional: {} <br /> |
+| `git` _[GitRef](#gitref)_ | Git Location to source external files from |  | Optional: {} <br /> |
+| `templates` _[PrAutomationTemplate](#prautomationtemplate) array_ | Template files to use to generate file content |  | Optional: {} <br /> |
+
+
+#### PrAutomationDeleteConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationSpec](#prautomationspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `files` _string array_ | Individual files to delete |  | Optional: {} <br /> |
+| `folders` _string array_ | Entire folders to delete |  | Optional: {} <br /> |
 
 
 #### PrAutomationSpec
@@ -1253,8 +1288,9 @@ _Appears in:_
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef ... |  | Optional: {} <br /> |
 | `bindings` _[PrAutomationBindings](#prautomationbindings)_ | Bindings contain read and write policies of pr automation |  | Optional: {} <br /> |
 | `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration ... |  | Optional: {} <br /> |
-| `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Creates ... |  | Optional: {} <br /> |
-| `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Updates ... |  | Optional: {} <br /> |
+| `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Specs for files to be templated and created |  | Optional: {} <br /> |
+| `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Spec for files to be updated, using regex replacement |  | Optional: {} <br /> |
+| `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Spec for files and folders to be deleted |  | Optional: {} <br /> |
 
 
 #### PrAutomationTemplate
@@ -1270,9 +1306,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `destination` _string_ | Destination ... |  | Required: {} <br /> |
-| `external` _boolean_ | External ... |  | Required: {} <br /> |
-| `source` _string_ | Source ... |  | Optional: {} <br /> |
+| `destination` _string_ | The destination to write the file to |  | Required: {} <br /> |
+| `external` _boolean_ | Whether it is being sourced from an external git repository |  | Required: {} <br /> |
+| `source` _string_ | The source file to use for templating |  | Optional: {} <br /> |
 
 
 #### PrAutomationTrigger
@@ -1323,12 +1359,12 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `files` _string array_ | Files ... |  | Optional: {} <br /> |
-| `matchStrategy` _[MatchStrategy](#matchstrategy)_ | MatchStrategy ... |  | Optional: {} <br /> |
-| `regexReplacements` _[RegexReplacement](#regexreplacement) array_ | RegexReplacements ... |  | Optional: {} <br /> |
-| `regexes` _string array_ | Regexes ... |  | Optional: {} <br /> |
-| `replaceTemplate` _string_ | ReplaceTemplate ... |  | Optional: {} <br /> |
-| `yq` _string_ | Yq ... |  | Optional: {} <br /> |
+| `files` _string array_ | Files to update |  | Optional: {} <br /> |
+| `matchStrategy` _[MatchStrategy](#matchstrategy)_ | MatchStrategy, see enum for behavior |  | Optional: {} <br /> |
+| `regexReplacements` _[RegexReplacement](#regexreplacement) array_ | Full regex + replacement structs in case there is different behavior per regex |  | Optional: {} <br /> |
+| `regexes` _string array_ | The regexes to apply on each file |  | Optional: {} <br /> |
+| `replaceTemplate` _string_ | The template to use when replacing a regex |  | Optional: {} <br /> |
+| `yq` _string_ | (Unused so far) |  | Optional: {} <br /> |
 
 
 #### Project
@@ -1419,7 +1455,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `regex` _string_ | Regex ... |  | Required: {} <br /> |
+| `regex` _string_ | The regex to match a substring on |  | Required: {} <br /> |
 | `file` _string_ | The file this replacement will work on |  | Required: {} <br /> |
 | `replacement` _string_ | Replacement to be substituted for the match in the regex |  | Required: {} <br /> |
 | `templated` _boolean_ | Whether you want to apply templating to the regex before compiling |  | Optional: {} <br /> |
@@ -1773,12 +1809,14 @@ _Appears in:_
 
 _Appears in:_
 - [InfrastructureStackSpec](#infrastructurestackspec)
+- [StackDefinitionSpec](#stackdefinitionspec)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `image` _string_ | Image optional custom image you might want to use |  | Optional: {} <br /> |
-| `version` _string_ | Version the semver of the tool you wish to use |  |  |
+| `version` _string_ | Version the semver of the tool you wish to use |  | Required: {} <br /> |
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run |  | Optional: {} <br /> |
+| `tag` _string_ | Tag is the docker image tag you wish to use<br />if you're customizing the version |  | Optional: {} <br /> |
 
 
 #### StackCron
@@ -1798,6 +1836,43 @@ _Appears in:_
 | `autoApprove` _boolean_ | Whether to automatically approve cron-spawned runs |  | Optional: {} <br /> |
 
 
+#### StackDefinition
+
+
+
+StackDefinition is the Schema for the StackDefinitions API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `StackDefinition` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[StackDefinitionSpec](#stackdefinitionspec)_ |  |  |  |
+
+
+#### StackDefinitionSpec
+
+
+
+StackDefinitionSpec defines the desired state of StackDefinition
+
+
+
+_Appears in:_
+- [StackDefinition](#stackdefinition)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of this StackDefinition. If not provided StackDefinition's own name<br />from StackDefinition.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `description` _string_ | Description can be used to describe this StackDefinition. |  | Optional: {} <br /> |
+| `steps` _[CustomRunStep](#customrunstep) array_ | Steps is a list of custom run steps that will be executed as<br />part of the stack run. |  | Optional: {} <br /> |
+| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration allows modifying the StackDefinition environment<br />and execution. |  | Required: {} <br /> |
+
+
 #### StackEnvironment
 
 
@@ -1811,7 +1886,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `name` _string_ |  |  |  |
+| `name` _string_ |  |  | Required: {} <br /> |
 | `value` _string_ |  |  | Optional: {} <br /> |
 | `secretKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 | `configMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
@@ -1847,9 +1922,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `cmd` _string_ | the command this hook will execute |  |  |
+| `cmd` _string_ | the command this hook will execute |  | Required: {} <br /> |
 | `args` _string array_ | optional arguments to pass to the command |  | Optional: {} <br /> |
-| `afterStage` _[StepStage](#stepstage)_ |  |  | Enum: [INIT PLAN VERIFY APPLY] <br /> |
+| `afterStage` _[StepStage](#stepstage)_ |  |  | Enum: [INIT PLAN VERIFY APPLY DESTROY] <br />Required: {} <br /> |
 
 
 #### StackSettings
@@ -1904,6 +1979,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `createNamespace` _boolean_ |  |  | Optional: {} <br /> |
+| `enforceNamespace` _boolean_ |  |  | Optional: {} <br /> |
 | `labels` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
 | `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
 

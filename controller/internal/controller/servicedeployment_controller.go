@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
 	"sort"
 
@@ -122,7 +123,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	err = r.ensureService(service)
-	if err == operrors.ErrRetriable {
+	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, nil
 	}
