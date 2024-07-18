@@ -24,7 +24,7 @@ import {
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { isNonNullable } from '../../../utils/isNonNullable'
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
-import { SMOOTH_EDGE_NAME, edgeTypes } from '../../utils/reactflow/edges'
+import { EdgeType, edgeTypes } from '../../utils/reactflow/edges'
 
 import { StackStateGraphNode } from './StackStateGraphNode'
 
@@ -46,7 +46,7 @@ function getNodesAndEdges(state: StackState) {
 
     edges.push(
       ...(ssr.links ?? []).filter(isNonNullable).map((link) => ({
-        type: SMOOTH_EDGE_NAME,
+        type: EdgeType.Smooth,
         updatable: false,
         id: `${ssr.identifier}${link}`,
         source: ssr.identifier,

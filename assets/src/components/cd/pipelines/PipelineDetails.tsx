@@ -8,7 +8,7 @@ import {
   TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { ReactFlowProvider } from 'reactflow'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
@@ -39,12 +39,6 @@ import { PipelineContexts } from './PipelineContexts'
 
 const POLL_INTERVAL = 10 * 1000
 
-export const PipelineHeadingSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.medium,
-  alignItems: 'center',
-  justifyContent: 'space-between',
-}))
 function PipelineHeading({
   pipeline,
 }: {

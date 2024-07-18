@@ -15,7 +15,7 @@ import chroma from 'chroma-js'
 import { useState } from 'react'
 import { useKeyDown } from '@react-hooks-library/core'
 
-import { EdgeMarkerDefs } from './edges'
+import { MarkerDefs } from './markers'
 
 const ReactFlowFullScreenWrapperSC = styled.div((_) => ({
   position: 'absolute',
@@ -88,7 +88,7 @@ export function ReactFlowGraph({
               size={1}
               color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
             />
-            <EdgeMarkerDefs />
+            <MarkerDefs />
           </ReactFlow>
           <ReactFlowActionWrapperSC>
             {allowFullscreen && (

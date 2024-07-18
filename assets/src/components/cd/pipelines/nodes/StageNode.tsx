@@ -113,15 +113,11 @@ export function ServiceCard({
 }
 
 export function getStageStatus(stage: PipelineStageFragment) {
-  if (
-    (stage.services || []).every(
-      (svc) => svc?.service?.status === ServiceDeploymentStatus.Healthy
-    )
-  ) {
-    return StageStatus.Complete
-  }
-
-  return StageStatus.Pending
+  return (stage.services || []).every(
+    (svc) => svc?.service?.status === ServiceDeploymentStatus.Healthy
+  )
+    ? StageStatus.Complete
+    : StageStatus.Pending
 }
 
 const StageNodeSC = styled(BaseNode)(() => ({
