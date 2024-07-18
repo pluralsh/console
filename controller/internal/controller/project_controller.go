@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
@@ -103,7 +104,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 	// Sync Project CRD with the Console API
 	apiProject, err := in.sync(ctx, project, changed)
-	if err == operrors.ErrRetriable {
+	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, nil
 	}

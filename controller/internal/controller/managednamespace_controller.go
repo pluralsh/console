@@ -206,6 +206,11 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		Namespace:   ns.Spec.Name,
 		Description: ns.Spec.Description,
 	}
+
+	if id, ok := ns.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
+		attr.ParentID = lo.ToPtr(id)
+	}
+
 	if ns.Spec.Cascade != nil {
 		attr.Cascade = &console.CascadeAttributes{
 			Delete: ns.Spec.Cascade.Delete,

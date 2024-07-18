@@ -1118,6 +1118,9 @@ input StackAttributes {
   "the project id this stack will belong to"
   projectId: ID
 
+  "the parent service this stack was created w\/in"
+  parentId: ID
+
   "id of an scm connection to use for pr callbacks"
   connectionId: ID
 
@@ -1358,6 +1361,9 @@ type InfrastructureStack {
 
   "a cron to spawn runs for this stack"
   cron: StackCron
+
+  "the service this stack was created w\/in"
+  parent: ServiceDeployment
 
   "the actor of this stack (defaults to root console user)"
   actor: User

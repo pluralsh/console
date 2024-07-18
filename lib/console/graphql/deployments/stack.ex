@@ -22,6 +22,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :workdir,        :string, description: "the subdirectory you want to run the stack's commands w/in"
     field :actor_id,       :id, description: "user id to use for default Plural authentication in this stack"
     field :project_id,     :id, description: "the project id this stack will belong to"
+    field :parent_id,      :id, description: "the parent service this stack was created w/in"
     field :connection_id,  :id, description: "id of an scm connection to use for pr callbacks"
     field :definition_id,  :id, description: "the id of a stack definition to use"
     field :cron,           :stack_cron_attributes, description: "a cron to spawn runs for this stack"
@@ -160,14 +161,15 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :observable_metrics, list_of(:observable_metric), resolve: dataloader(Deployments), description: "a list of metrics to poll to determine if a stack run should be cancelled"
 
     field :delete_run, :stack_run, resolve: dataloader(Deployments), description: "the run that physically destroys the stack"
-    field :output, list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
-    field :state,  :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
+    field :output,     list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
+    field :state,      :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
 
-    field :project,    :project, resolve: dataloader(Deployments), description: "The project this stack belongs to"
-    field :cluster,    :cluster, resolve: dataloader(Deployments), description: "the cluster this stack runs on"
-    field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
-    field :definition, :stack_definition, resolve: dataloader(Deployments), description: "the stack definition in-use by this stack"
-    field :cron,       :stack_cron, resolve: dataloader(Deployments), description: "a cron to spawn runs for this stack"
+    field :project,    :project,            resolve: dataloader(Deployments), description: "The project this stack belongs to"
+    field :cluster,    :cluster,            resolve: dataloader(Deployments), description: "the cluster this stack runs on"
+    field :repository, :git_repository,     resolve: dataloader(Deployments), description: "the git repository you're sourcing IaC from"
+    field :definition, :stack_definition,   resolve: dataloader(Deployments), description: "the stack definition in-use by this stack"
+    field :cron,       :stack_cron,         resolve: dataloader(Deployments), description: "a cron to spawn runs for this stack"
+    field :parent,     :service_deployment, resolve: dataloader(Deployments), description: "the service this stack was created w/in"
 
     field :actor, :user, resolve: dataloader(User), description: "the actor of this stack (defaults to root console user)"
 

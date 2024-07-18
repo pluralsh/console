@@ -42,6 +42,10 @@ defmodule Console.Schema.Tag do
     from(t in q, select: %{service_id: t.service_id, count: count(t.id)})
   end
 
+  defp do_select(q, :stack_id) do
+    from(t in q, select: %{stack_id: t.stack_id, count: count(t.id)})
+  end
+
   def search(query \\ __MODULE__, q) do
     sq = "%#{q}%"
     from(t in query, where: like(t.name, ^sq) or like(t.value, ^sq))

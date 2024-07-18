@@ -70,6 +70,29 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       assert from_connection(found)
              |> ids_equal([other | stacks])
     end
+
+    test "it can list stacks by a tag" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member, user: user)
+      stacks  = insert_list(3, :stack, write_bindings: [%{group_id: group.id}], tags: [%{name: "t", value: "v"}])
+      other = insert(:stack, read_bindings: [%{user_id: user.id}])
+      insert_list(3, :stack)
+
+      {:ok, %{data: %{"infrastructureStacks" => found}}} = run_query("""
+        query Stacks($tq: TagQuery!) {
+          infrastructureStacks(first: 5, tagQuery: $tq) {
+            edges {
+              node { id }
+            }
+          }
+        }
+      """, %{"tq" => %{"op" => "AND", "tags" => [
+        %{"name" => "t", "value" => "v"}
+      ]}}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(stacks)
+    end
   end
 
   describe "clusterStackRuns" do
