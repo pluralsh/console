@@ -182,7 +182,7 @@ export function ServiceInfo(): ReactElement {
             <ChipList
               size="small"
               limit={3}
-              values={Object.entries(service.selector)}
+              values={Object.entries(service.selector || {})}
               transformValue={(label) => label.join(': ')}
               emptyState={<div>-</div>}
             />
