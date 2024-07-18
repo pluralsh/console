@@ -31,7 +31,7 @@ import { reduceGateStates } from '../utils/reduceGateStatuses'
 
 export type CardStatus = 'ok' | 'closed' | 'pending' | 'running'
 
-const HANDLE_SIZE = 10
+const HANDLE_SIZE = 8
 
 export const gateStateToCardStatus = {
   [GateState.Open]: 'ok',

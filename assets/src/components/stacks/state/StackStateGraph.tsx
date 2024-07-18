@@ -14,7 +14,6 @@ import {
   useNodesState,
   useReactFlow,
 } from 'reactflow'
-
 import 'reactflow/dist/style.css'
 import { useTheme } from 'styled-components'
 
@@ -22,15 +21,12 @@ import {
   type DagreDirection,
   getLayoutedElements,
 } from '../../cd/pipelines/utils/nodeLayouter'
-
-import { edgeTypes } from '../../cd/pipelines/EdgeLine'
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { isNonNullable } from '../../../utils/isNonNullable'
-
 import { ReactFlowGraph } from '../../utils/ReactFlow'
+import { SMOOTH_STEP_EDGE_NAME, edgeTypes } from '../../utils/ReactFlowEdges'
 
 import { StackStateGraphNode } from './StackStateGraphNode'
-import { STACK_STATE_GRAPH_EDGE_NAME } from './StackStateGraphEdge'
 
 const nodeTypes = {
   [NodeType.Stage]: StackStateGraphNode,
@@ -50,7 +46,7 @@ export function getNodesAndEdges(state: StackState) {
 
     edges.push(
       ...(stage.links ?? []).filter(isNonNullable).map((link) => ({
-        type: STACK_STATE_GRAPH_EDGE_NAME,
+        type: SMOOTH_STEP_EDGE_NAME,
         updatable: false,
         id: `${stage.identifier}${link}`,
         source: stage.identifier,

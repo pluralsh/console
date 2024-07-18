@@ -21,9 +21,10 @@ import {
   type DagreDirection,
   getLayoutedElements,
 } from '../../cd/pipelines/utils/nodeLayouter'
-import { EdgeLineMarkerDefs, edgeTypes } from '../../cd/pipelines/EdgeLine'
 
 import { PipelineEditAreaSC } from '../../cd/pipelines/PipelineDetails'
+
+import { EdgeLineMarkerDefs, edgeTypes } from '../../utils/ReactFlowEdges'
 
 import { ComponentTreeNode } from './ComponentTreeNode'
 

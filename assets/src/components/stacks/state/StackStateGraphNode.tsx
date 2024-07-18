@@ -22,10 +22,7 @@ export function BaseNode({
   const { incomers, outgoers } = useNodeEdges(id)
 
   return (
-    <BaseNodeSC
-      {...props}
-      css={{ backgroundColor: theme.colors['fill-zero'] }}
-    >
+    <BaseNodeSC {...props}>
       <HandleSC
         type="target"
         isConnectable={false}
@@ -33,8 +30,8 @@ export function BaseNode({
         position={Position.Left}
         css={{
           '&&': {
-            backgroundColor: theme.colors['border-selected'],
-            borderColor: theme.colors['border-selected'],
+            backgroundColor: theme.colors.border,
+            borderColor: theme.colors.border,
           },
         }}
       />
@@ -46,8 +43,8 @@ export function BaseNode({
         position={Position.Right}
         css={{
           '&&': {
-            backgroundColor: theme.colors['border-selected'],
-            borderColor: theme.colors['border-selected'],
+            backgroundColor: theme.colors.border,
+            borderColor: theme.colors.border,
           },
         }}
       />
@@ -63,7 +60,10 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
   return (
     <BaseNode
       {...props}
-      css={{ '&&': { minWidth: 200 } }}
+      css={{
+        backgroundColor: theme.colors['fill-zero'],
+        '&&': { minWidth: 200 },
+      }}
     >
       <div
         css={{

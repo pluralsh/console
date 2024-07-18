@@ -4,7 +4,6 @@ import ReactFlow, {
   BackgroundVariant,
   ReactFlowProps,
 } from 'reactflow'
-
 import {
   CloseIcon,
   IconFrame,
@@ -12,7 +11,6 @@ import {
   ReloadIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
-
 import chroma from 'chroma-js'
 import { useState } from 'react'
 import { useKeyDown } from '@react-hooks-library/core'
