@@ -15,6 +15,8 @@ defmodule Console.Schema.Tag do
 
   def cluster(query \\ __MODULE__), do: from(t in query, where: not is_nil(t.cluster_id))
 
+  def stack(query \\ __MODULE__), do: from(t in query, where: not is_nil(t.stack_id))
+
   def for_name(query \\ __MODULE__, name), do: from(t in query, where: t.name == ^name)
 
   def for_query(query \\ __MODULE__, tq, column \\ :cluster_id)
