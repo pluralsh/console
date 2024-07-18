@@ -78,8 +78,14 @@ export function NodeBase({
         position={Position.Right}
         css={{
           '&&': {
-            backgroundColor: theme.colors.border,
-            borderColor: theme.colors.border,
+            backgroundColor:
+              theme.mode === 'light'
+                ? theme.colors['border-fill-two']
+                : theme.colors.border,
+            borderColor:
+              theme.mode === 'light'
+                ? theme.colors['border-fill-two']
+                : theme.colors.border,
           },
         }}
       />
