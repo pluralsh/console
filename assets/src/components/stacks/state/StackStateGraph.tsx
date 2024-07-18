@@ -5,7 +5,6 @@ import {
   ReloadIcon,
   WrapWithIf,
   usePrevious,
-  useThemeColorMode,
 } from '@pluralsh/design-system'
 import { StackState } from 'generated/graphql'
 import {
@@ -27,7 +26,7 @@ import ReactFlow, {
 import chroma from 'chroma-js'
 
 import 'reactflow/dist/style.css'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 
 import { useKeyDown } from '@react-hooks-library/core'
 
@@ -39,6 +38,11 @@ import {
 import { edgeTypes } from '../../cd/pipelines/EdgeLine'
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { isNonNullable } from '../../../utils/isNonNullable'
+
+import {
+  ReactFlowFullScreenWrapperSC,
+  ReactFlowWrapperSC,
+} from '../../utils/ReactFlow'
 
 import { StackStateGraphNode } from './StackStateGraphNode'
 import { STACK_STATE_GRAPH_EDGE_NAME } from './StackStateGraphEdge'
@@ -75,7 +79,6 @@ export function getNodesAndEdges(state: StackState) {
 
 export function StackStateGraph({ state }: { state: StackState }) {
   const theme = useTheme()
-  const mode = useThemeColorMode()
   const margin = theme.spacing.large
   const [isFullscreen, setIsFullscreen] = useState(false)
 
@@ -140,14 +143,14 @@ export function StackStateGraph({ state }: { state: StackState }) {
   return (
     <WrapWithIf
       condition={isFullscreen}
-      wrapper={<FullScreenWrapperSC />}
+      wrapper={<ReactFlowFullScreenWrapperSC />}
     >
       <div
         css={{
           backgroundColor:
-            mode === 'dark'
+            theme.mode === 'dark'
               ? theme.colors.grey[950]
-              : theme.colors['fill-zero'],
+              : theme.colors['fill-one'],
           border: theme.borders.default,
           width: '100%',
           height: '100%',
@@ -212,26 +215,3 @@ export function StackStateGraph({ state }: { state: StackState }) {
     </WrapWithIf>
   )
 }
-
-const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  '.react-flow__renderer': {
-    opacity: $hide ? 0 : 1,
-  },
-  '.react-flow__edge': {
-    pointerEvents: 'none',
-    cursor: 'unset',
-  },
-}))
-
-const FullScreenWrapperSC = styled.div((_) => ({
-  position: 'absolute',
-  top: 0,
-  bottom: 0,
-  left: 0,
-  right: 0,
-}))
