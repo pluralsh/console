@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/internal/credentials"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -18,6 +17,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	"github.com/pluralsh/console/controller/internal/credentials"
 
 	"github.com/pluralsh/console/controller/internal/cache"
 

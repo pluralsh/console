@@ -6,12 +6,6 @@ import (
 	"sort"
 
 	console "github.com/pluralsh/console-client-go"
-	"github.com/pluralsh/console/controller/api/v1alpha1"
-	"github.com/pluralsh/console/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/controller/internal/client"
-	"github.com/pluralsh/console/controller/internal/credentials"
-	"github.com/pluralsh/console/controller/internal/errors"
-	"github.com/pluralsh/console/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -27,6 +21,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/yaml"
+
+	"github.com/pluralsh/console/controller/api/v1alpha1"
+	"github.com/pluralsh/console/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	"github.com/pluralsh/console/controller/internal/credentials"
+	"github.com/pluralsh/console/controller/internal/errors"
+	"github.com/pluralsh/console/controller/internal/utils"
 )
 
 const (
@@ -186,16 +187,6 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 			return ctrl.Result{}, err
 		}
 	}
-
-	// we shouldn't set these as it'll hit cross-namespace ownership issues
-	// if err := controllerutil.SetOwnerReference(cluster, service, r.Scheme); err != nil {
-	// 	utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-	// 	return ctrl.Result{}, err
-	// }
-	// if err = controllerutil.SetOwnerReference(cluster, service, r.Scheme); err != nil {
-	// 	utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-	// 	return ctrl.Result{}, err
-	// }
 
 	updateStatus(service, existingService, sha)
 
