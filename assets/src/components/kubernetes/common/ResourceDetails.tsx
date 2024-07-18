@@ -64,6 +64,7 @@ export default function ResourceDetails({
               display: 'flex',
               flexGrow: 1,
               maxWidth: theme.breakpoints.desktopLarge,
+              height: 'fit-content',
             }}
           >
             <TabList
