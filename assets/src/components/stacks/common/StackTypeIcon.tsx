@@ -1,4 +1,4 @@
-import { AnsibleIcon, TerraformIcon } from '@pluralsh/design-system'
+import { AnsibleIcon, StackIcon, TerraformIcon } from '@pluralsh/design-system'
 import { StackType } from 'generated/graphql'
 
 export function StackTypeIcon({
@@ -21,6 +21,13 @@ export function StackTypeIcon({
     case StackType.Terraform:
       return (
         <TerraformIcon
+          size={size}
+          color={color}
+        />
+      )
+    default:
+      return (
+        <StackIcon
           size={size}
           color={color}
         />
