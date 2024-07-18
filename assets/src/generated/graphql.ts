@@ -2170,6 +2170,8 @@ export type InfrastructureStack = {
   observableMetrics?: Maybe<Array<Maybe<ObservableMetric>>>;
   /** the most recent output for this stack */
   output?: Maybe<Array<Maybe<StackOutput>>>;
+  /** the service this stack was created w/in */
+  parent?: Maybe<ServiceDeployment>;
   /** whether the stack is actively tracking changes in git */
   paused?: Maybe<Scalars['Boolean']['output']>;
   /** The project this stack belongs to */
@@ -7088,6 +7090,8 @@ export type StackAttributes = {
   /** the name of the stack */
   name: Scalars['String']['input'];
   observableMetrics?: InputMaybe<Array<InputMaybe<ObservableMetricAttributes>>>;
+  /** the parent service this stack was created w/in */
+  parentId?: InputMaybe<Scalars['ID']['input']>;
   /** the project id this stack will belong to */
   projectId?: InputMaybe<Scalars['ID']['input']>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;

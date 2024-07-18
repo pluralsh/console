@@ -26,6 +26,7 @@ import (
 	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/pluralsh/console/controller/internal/errors"
 	"github.com/pluralsh/console/controller/internal/utils"
+	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -116,6 +117,11 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 
 	attr := globalService.Attributes(provider.Status.ID, project.Status.ID)
+
+	if id, ok := globalService.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
+		attr.ParentID = lo.ToPtr(id)
+	}
+
 	if globalService.Spec.Template != nil {
 		repository, err := r.getRepository(ctx, globalService)
 		if err != nil {

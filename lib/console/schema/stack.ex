@@ -17,6 +17,7 @@ defmodule Console.Schema.Stack do
     ObservableMetric,
     ScmConnection,
     Tag,
+    Service,
     Project,
     StackDefinition
   }
@@ -91,6 +92,7 @@ defmodule Console.Schema.Stack do
     belongs_to :connection, ScmConnection
     belongs_to :actor,      User
     belongs_to :project,    Project
+    belongs_to :parent,     Service
     belongs_to :definition, StackDefinition
 
     has_one :state, StackState,
@@ -136,18 +138,18 @@ defmodule Console.Schema.Stack do
       from(s in query,
         left_join: b in PolicyBinding,
           on: b.policy_id == s.read_policy_id or b.policy_id == s.write_policy_id,
-        where: b.user_id == ^id or b.group_id in ^groups,
-        distinct: true
+        where: b.user_id == ^id or b.group_id in ^groups
       )
     end)
   end
 
+  def distinct(query \\ __MODULE__), do: from(s in query, distinct: true)
+
   def with_tag_query(query \\ __MODULE__, tq) do
-    tags = Tag.for_query(tq)
+    tags = Tag.for_query(Tag, tq, :stack_id)
     from(c in query,
       join: t in subquery(tags),
-        on: t.stack_id == c.id,
-      distinct: true
+        on: t.stack_id == c.id
     )
   end
 
@@ -161,7 +163,7 @@ defmodule Console.Schema.Stack do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
-  @valid ~w(name type paused actor_id variables definition_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
+  @valid ~w(name type paused actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
   @immutable ~w(project_id)a
 
 

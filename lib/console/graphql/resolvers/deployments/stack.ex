@@ -14,6 +14,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     Stack.for_user(user)
     |> stack_filters(args)
     |> maybe_search(Stack, args)
+    |> Stack.distinct()
     |> Stack.ordered()
     |> paginate(args)
   end
