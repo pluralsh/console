@@ -150,6 +150,7 @@ export default function GlobalService() {
             flexGrow: 1,
             width: '100%',
             justifyContent: 'space-between',
+            marginBottom: theme.spacing.xsmall,
           }}
         >
           <div css={{ display: 'flex', gap: theme.spacing.small }}>

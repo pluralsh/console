@@ -46,7 +46,7 @@ export default function ManagedNamespaceInfo() {
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           gridAutoRows: 'min-content',
-          gridGap: theme.spacing.large,
+          gridGap: theme.spacing.small,
         }}
       >
         <PropCard title="Namespace">{namespace?.name}</PropCard>
