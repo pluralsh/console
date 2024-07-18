@@ -3,7 +3,7 @@ defmodule Console.Schema.ScmConnection do
   alias Piazza.Ecto.EncryptedString
   import Console.Deployments.Git.Utils
 
-  defenum Type, github: 0, gitlab: 1
+  defenum Type, github: 0, gitlab: 1, bitbucket: 2
 
   schema "scm_connections" do
     field :name,     :string

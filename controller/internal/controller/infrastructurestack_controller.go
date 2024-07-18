@@ -69,6 +69,8 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	if err := r.Get(ctx, req.NamespacedName, stack); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
+	logger.Info("reconciling InfrastructureStack", "namespacename", req.NamespacedName)
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewInfrastructureStackScope(ctx, r.Client, stack)
 	if err != nil {
@@ -116,11 +118,6 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		return lo.FromPtr(result), err
 	}
 
-	sha, err := utils.HashObject(stack.Spec)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, stack)
 	if err != nil {
@@ -136,6 +133,11 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 			return ctrl.Result{}, err
 		}
 
+		sha, err := utils.HashObject(attr)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+
 		st, err := r.ConsoleClient.CreateStack(ctx, *attr)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -144,21 +146,28 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		stack.Status.ID = st.ID
 		stack.Status.SHA = lo.ToPtr(sha)
 		controllerutil.AddFinalizer(stack, InfrastructureStackFinalizer)
-	}
-	if exists && !stack.Status.IsSHAEqual(sha) {
+	} else {
 		logger.Info("update stack", "name", stack.StackName())
 		attr, err := r.getStackAttributes(ctx, stack, clusterID, repositoryID, projectID, stackDefinitionID)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
-		_, err = r.ConsoleClient.UpdateStack(ctx, stack.Status.GetID(), *attr)
+
+		sha, err := utils.HashObject(attr)
 		if err != nil {
-			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
 
-		stack.Status.SHA = lo.ToPtr(sha)
+		if !stack.Status.IsSHAEqual(sha) {
+			_, err = r.ConsoleClient.UpdateStack(ctx, stack.Status.GetID(), *attr)
+			if err != nil {
+				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+				return ctrl.Result{}, err
+			}
+
+			stack.Status.SHA = lo.ToPtr(sha)
+		}
 	}
 
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
@@ -280,9 +289,6 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		if err := r.Get(ctx, name, secret); err != nil {
 			return nil, err
 		}
-		if err := utils.TryAddControllerRef(ctx, r.Client, stack, secret, r.Scheme); err != nil {
-			return nil, err
-		}
 		for k, v := range secret.Data {
 			attr.Files = append(attr.Files, &console.StackFileAttributes{
 				Path:    fmt.Sprintf("%s/%s", file.MountPath, k),
@@ -303,9 +309,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			if err := r.Get(ctx, name, secret); err != nil {
 				return nil, err
 			}
-			if err := utils.TryAddControllerRef(ctx, r.Client, stack, secret, r.Scheme); err != nil {
-				return nil, err
-			}
+			// if err := utils.TryAddControllerRef(ctx, r.Client, stack, secret, r.Scheme); err != nil {
+			// 	return nil, err
+			// }
 			isSecret = lo.ToPtr(true)
 			rawData, ok := secret.Data[env.SecretKeyRef.Key]
 			if !ok {
@@ -318,9 +324,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 			if err := r.Get(ctx, name, configMap); err != nil {
 				return nil, err
 			}
-			if err := utils.TryAddControllerRef(ctx, r.Client, stack, configMap, r.Scheme); err != nil {
-				return nil, err
-			}
+			// if err := utils.TryAddControllerRef(ctx, r.Client, stack, configMap, r.Scheme); err != nil {
+			// 	return nil, err
+			// }
 			rawData, ok := configMap.Data[env.ConfigMapRef.Key]
 			if !ok {
 				return nil, fmt.Errorf("can not find secret data for the key %s", env.ConfigMapRef.Key)

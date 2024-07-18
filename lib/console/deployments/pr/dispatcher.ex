@@ -4,7 +4,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   alias Console.Repo
   alias Console.Deployments.{Pr.Config, Git.Discovery, Tar}
   alias Console.Commands.{Plural}
-  alias Console.Deployments.Pr.Impl.{Github, Gitlab}
+  alias Console.Deployments.Pr.Impl.{Github, Gitlab, BitBucket}
   alias Console.Schema.{PrAutomation, PullRequest, ScmConnection, ScmWebhook, GitRepository}
 
   @type pr_resp :: {:ok, binary, binary} | Console.error
@@ -72,4 +72,5 @@ defmodule Console.Deployments.Pr.Dispatcher do
 
   defp dispatcher(%{type: :github}), do: Github
   defp dispatcher(%{type: :gitlab}), do: Gitlab
+  defp dispatcher(%{type: :bitbucket}), do: BitBucket
 end

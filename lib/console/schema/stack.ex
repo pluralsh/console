@@ -142,6 +142,15 @@ defmodule Console.Schema.Stack do
     end)
   end
 
+  def with_tag_query(query \\ __MODULE__, tq) do
+    tags = Tag.for_query(tq)
+    from(c in query,
+      join: t in subquery(tags),
+        on: t.stack_id == c.id,
+      distinct: true
+    )
+  end
+
   def unpaused(query \\ __MODULE__) do
     from(s in query, where: not s.paused or is_nil(s.paused))
   end
@@ -168,6 +177,7 @@ defmodule Console.Schema.Stack do
     |> cast_assoc(:files)
     |> cast_assoc(:cron)
     |> cast_assoc(:observable_metrics)
+    |> cast_assoc(:tags)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:connection_id)

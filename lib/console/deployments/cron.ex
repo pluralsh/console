@@ -59,6 +59,7 @@ defmodule Console.Deployments.Cron do
       Logger.info "warming node caches for cluster"
       Clusters.warm(:nodes, cluster)
       Clusters.warm(:node_metrics, cluster)
+      Clusters.warm(:api_discovery, cluster)
     end)
     |> Stream.run()
   end

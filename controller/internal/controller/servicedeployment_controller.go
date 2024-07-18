@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
 	"sort"
 
@@ -27,6 +28,7 @@ import (
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
 	"github.com/pluralsh/console/controller/internal/credentials"
 	"github.com/pluralsh/console/controller/internal/errors"
+	operrors "github.com/pluralsh/console/controller/internal/errors"
 	"github.com/pluralsh/console/controller/internal/utils"
 )
 
@@ -121,6 +123,11 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	}
 
 	err = r.ensureService(service)
+	if goerrors.Is(err, operrors.ErrRetriable) {
+		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return requeue, nil
+	}
+
 	if err != nil {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -507,17 +514,21 @@ func (r *ServiceReconciler) ensureService(service *v1alpha1.ServiceDeployment) e
 		return nil
 	}
 
-	bindings, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
+	bindings, req, err := ensureBindings(service.Spec.Bindings.Read, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	service.Spec.Bindings.Read = bindings
 
-	bindings, err = ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
+	bindings, req2, err := ensureBindings(service.Spec.Bindings.Write, r.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	service.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return operrors.ErrRetriable
+	}
 
 	return nil
 }

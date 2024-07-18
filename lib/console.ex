@@ -207,6 +207,13 @@ defmodule Console do
 
   def workspace(), do: Path.join(conf(:workspace_root), conf(:repo_root))
 
+  def sha_file(f) do
+    File.stream!(f, [], 2048)
+    |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
+    |> :crypto.hash_final()
+    |> Base.encode16(case: :lower)
+  end
+
   def hmac(secret, payload) do
     :crypto.mac(:hmac, :sha1, secret, payload)
     |> Base.encode16(case: :lower)

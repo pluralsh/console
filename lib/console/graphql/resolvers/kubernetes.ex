@@ -5,6 +5,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   alias Kazan.Apis.Networking.V1, as: Networking
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
+  alias Console.Deployments.Clusters
 
   def list_applications(_, _) do
     case Client.list_applications() do
@@ -251,14 +252,23 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
     end
   end
 
-  def raw_resource(%{version: v, kind: k, name: n} = args, %{context: %{service: svc}}) do
-    kind = String.downcase(k) |> Inflex.pluralize()
+  def raw_resource(%{version: v, kind: k, name: n} = args, %{context: %{service: svc, cluster: cluster}}) do
+    kind = get_kind(cluster, args[:group], v, k)
     path = Kube.Client.Base.path(args[:group], v, kind, args[:namespace], n)
     with {:ok, res} <- Kube.Client.raw(path),
          {:ok, res} <- Console.Deployments.Services.accessible(svc, res),
       do: {:ok, %{raw: res, kind: k, version: v, group: args[:group], metadata: Kube.Utils.raw_meta(res)}}
   end
   def raw_resource(_, _), do: {:error, "forbidden"}
+
+  defp get_kind(cluster, g, v, k) do
+    Clusters.api_discovery(cluster)
+    |> Map.get({g, v, k})
+    |> case do
+      name when is_binary(name) -> name
+      _ -> Kube.Utils.inflect(k)
+    end
+  end
 
   defp maybe_filter_pods(pods, %{namespaces: [_ | _] = namespaces}) do
     namespaces = MapSet.new(namespaces)

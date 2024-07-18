@@ -93,10 +93,9 @@ defmodule Console.Deployments.Git.Agent do
     {:reply, result, %{state | cache: cache}}
   end
 
-  def handle_call({:digest, %Service.Git{folder: f, files: fs} = ref}, _, %State{cache: cache} = state) do
+  def handle_call({:digest, %Service.Git{} = ref}, _, %State{cache: cache} = state) do
     case Cache.fetch(cache, ref) do
-      {:ok, %Cache.Line{sha: sha}, cache} ->
-        {:reply, {:ok, Console.sha("#{sha}:#{Enum.join([f | (fs || [])], ".")}")}, %{state | cache: cache}}
+      {:ok, %Cache.Line{digest: sha}, cache} -> {:reply, {:ok, sha}, %{state | cache: cache}}
       err -> {:reply, err, state}
     end
   end

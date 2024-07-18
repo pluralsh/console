@@ -20,6 +20,7 @@ import (
 	"github.com/pluralsh/console/controller/api/v1alpha1"
 	"github.com/pluralsh/console/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/controller/internal/client"
+	operrors "github.com/pluralsh/console/controller/internal/errors"
 	"github.com/pluralsh/console/controller/internal/utils"
 )
 
@@ -102,6 +103,11 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 
 	// Sync Project CRD with the Console API
 	apiProject, err := in.sync(ctx, project, changed)
+	if err == operrors.ErrRetriable {
+		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return requeue, nil
+	}
+
 	if err != nil {
 		logger.Error(err, "unable to create or update project")
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -228,17 +234,21 @@ func (in *ProjectReconciler) ensure(project *v1alpha1.Project) error {
 		return nil
 	}
 
-	bindings, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
+	bindings, req, err := ensureBindings(project.Spec.Bindings.Read, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	project.Spec.Bindings.Read = bindings
 
-	bindings, err = ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
+	bindings, req2, err := ensureBindings(project.Spec.Bindings.Write, in.UserGroupCache)
 	if err != nil {
 		return err
 	}
 	project.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return operrors.ErrRetriable
+	}
 
 	return nil
 }

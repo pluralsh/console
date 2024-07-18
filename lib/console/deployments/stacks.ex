@@ -24,7 +24,7 @@ defmodule Console.Deployments.Stacks do
     StackCron
   }
 
-  @preloads [:environment, :files, :observable_metrics, :cron]
+  @preloads [:environment, :files, :observable_metrics, :cron, :tags]
 
   @type error :: Console.error
   @type stack_resp :: {:ok, Stack.t} | error

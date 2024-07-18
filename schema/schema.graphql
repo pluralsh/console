@@ -390,7 +390,9 @@ type RootQueryType {
 
   stackDefinitions(after: String, first: Int, before: String, last: Int): StackDefinitionConnection
 
-  infrastructureStacks(after: String, first: Int, before: String, last: Int, q: String, projectId: ID): InfrastructureStackConnection
+  infrastructureStacks(
+    after: String, first: Int, before: String, last: Int, q: String, projectId: ID, tagQuery: TagQuery
+  ): InfrastructureStackConnection
 
   observabilityProvider(id: ID!): ObservabilityProvider
 
@@ -1674,6 +1676,9 @@ input GlobalServiceAttributes {
   "a project this global service will sync across"
   projectId: ID
 
+  "the id of the service creating this"
+  parentId: ID
+
   "whether you want the global service to take ownership of existing plural services"
   reparent: Boolean
 
@@ -1705,6 +1710,9 @@ input ManagedNamespaceAttributes {
 
   "a project this managed namespace will sync across"
   projectId: ID
+
+  "the id of the service creating this"
+  parentId: ID
 
   service: ServiceTemplateAttributes
 
@@ -1784,6 +1792,9 @@ type GlobalService {
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
 
+  "the service which created this global service"
+  parent: ServiceDeployment
+
   "a project this global service is bound to"
   project: Project
 
@@ -1833,6 +1844,9 @@ type ManagedNamespace {
 
   "behavior for all owned resources when this global service is deleted"
   cascade: Cascade
+
+  "the service which created this managed namespace"
+  parent: ServiceDeployment
 
   "a project this global service is bound to"
   project: Project
@@ -4068,6 +4082,7 @@ enum GitHealth {
 enum ScmType {
   GITHUB
   GITLAB
+  BITBUCKET
 }
 
 enum MatchStrategy {

@@ -7,10 +7,17 @@ defmodule Console.Deployments.Helm.AgentCache do
 
   defmodule Line do
     @expiry [minutes: -10]
-    defstruct [:file, :chart, :vsn, :digest, :touched]
+    defstruct [:file, :chart, :vsn, :digest, :internal_digest, :touched]
 
     def new(file, chart, vsn, digest) do
-      %__MODULE__{file: file, chart: chart, vsn: vsn, digest: digest, touched: Timex.now()}
+      %__MODULE__{
+        file: file,
+        chart: chart,
+        internal_digest: Console.sha_file(file),
+        vsn: vsn,
+        digest: digest,
+        touched: Timex.now()
+      }
     end
 
     def touch(%__MODULE__{} = mod), do: %{mod | touched: Timex.now()}

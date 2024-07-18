@@ -23,7 +23,7 @@ function GitProviderSelect({
         label="Select provider type"
         onSelectionChange={(key) => updateSelectedKey(key as ScmType)}
       >
-        {[ScmType.Github, ScmType.Gitlab].map((type) => (
+        {[ScmType.Github, ScmType.Gitlab, ScmType.Bitbucket].map((type) => (
           <ListBoxItem
             key={type}
             leftContent={scmTypeToIcon[type]}

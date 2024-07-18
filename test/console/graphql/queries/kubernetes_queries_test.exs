@@ -654,6 +654,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       cluster = insert(:cluster, self: true)
       svc = insert(:service, cluster: cluster, read_bindings: [%{user_id: user.id}])
       insert(:service_component, group: nil, namespace: nil, service: svc, kind: "Namespace", name: "test", version: "v1")
+      expect(Clusters, :api_discovery, fn _ -> %{} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Utils, :run, fn
         %{path: "/api/v1/namespaces/test"} ->
@@ -675,6 +676,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       user = insert(:user)
       cluster = insert(:cluster, self: true)
       svc = insert(:service, cluster: cluster, read_bindings: [%{user_id: user.id}])
+      expect(Clusters, :api_discovery, fn _ -> %{} end)
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Utils, :run, fn %{path: "/api/v1/namespaces/test"} ->
         {:ok, %{"apiVersion" => "v1", "kind" => "Namespace", "metadata" => %{"name" => "test"}}}

@@ -33,6 +33,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
   defp stack_filters(query, args) do
     Enum.reduce(args, query, fn
       {:project_id, id}, q -> Stack.for_project(q, id)
+      {:tag_query, tq}, q -> Stack.with_tag_query(q, tq)
       _, q -> q
     end)
   end

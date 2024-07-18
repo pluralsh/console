@@ -167,7 +167,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("UQLLCV7K3LXSH6UVRSPKDH4DTVUK25I2N7SOLTPVZQ5ZM3ATT4UQ===="),
+					SHA: lo.ToPtr("LCVAFEP522SH5NZC4ZGHTLUK4EPKMCTMAGVH35UBWOAD6YBBOPFA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -221,7 +221,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("WGTHKPFBECQHAGULHCY2CV5V6HW2ONRNDOIRLJGM2V6ES7OSCBLQ===="),
+					SHA: lo.ToPtr("7M6L6CSTMKY5X7KRKEFKOW2RNYLCT6IX7BUAD2R3JTWC4HJ2PQJA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
