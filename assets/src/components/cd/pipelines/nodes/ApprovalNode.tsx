@@ -92,6 +92,7 @@ export function ApprovalNode(props: EdgeNode) {
         <h2 className="heading">Action</h2>
         {meta.state && (
           <Chip
+            fillLevel={0}
             size="small"
             severity={gateStateToSeverity[meta.state]}
           >
@@ -104,7 +105,10 @@ export function ApprovalNode(props: EdgeNode) {
         {gates?.map((gate) =>
           gate?.approver ? (
             <li key={gate.id}>
-              <ApproverCard gate={gate} />
+              <ApproverCard
+                gate={gate}
+                fillLevel={0}
+              />
             </li>
           ) : (
             gate && (

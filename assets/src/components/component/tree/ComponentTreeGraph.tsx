@@ -11,8 +11,6 @@ import {
   getLayoutedElements,
 } from '../../cd/pipelines/utils/nodeLayouter'
 
-import { edgeTypes } from '../../utils/reactflow/edges'
-
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
 
 import { ComponentTreeNode } from './ComponentTreeNode'

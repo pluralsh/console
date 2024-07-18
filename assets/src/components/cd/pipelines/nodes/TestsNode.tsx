@@ -30,6 +30,7 @@ export function TestsNode(props: EdgeNode) {
         <div className="headerArea">
           <h2 className="heading">Action</h2>
           <Chip
+            fillLevel={0}
             size="small"
             severity={gateStateToSeverity[meta.state]}
           >
@@ -50,6 +51,7 @@ export function TestsNode(props: EdgeNode) {
                   statusLabel={
                     gate.state ? gateStateToTestText[gate.state] : undefined
                   }
+                  fillLevel={0}
                 >
                   {gate.name}
                 </StatusCard>

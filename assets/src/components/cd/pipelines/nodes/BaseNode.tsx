@@ -15,20 +15,14 @@ import {
   cloneElement,
   useMemo,
 } from 'react'
-import {
-  Handle,
-  type Node,
-  type NodeProps,
-  Position,
-  useNodes,
-} from 'reactflow'
+import { type Node, type NodeProps, Position, useNodes } from 'reactflow'
 import styled, { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 
 import { reduceGateStates } from '../utils/reduceGateStatuses'
-import { NodeHandle } from '../../../utils/reactflow/handles'
+import { NodeBaseCard, NodeHandle } from '../../../utils/reactflow/nodes'
 
 export type CardStatus = 'ok' | 'closed' | 'pending' | 'running'
 
@@ -45,7 +39,7 @@ export const NodeCardList = styled.ul(({ theme }) => ({
   gap: theme.spacing.xsmall,
 }))
 
-export const BaseNodeSC = styled(Card)(({ theme }) => ({
+export const BaseNodeSC = styled(NodeBaseCard)(({ theme }) => ({
   '&&': {
     position: 'relative',
     padding: theme.spacing.small,

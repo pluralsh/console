@@ -191,6 +191,7 @@ function HeaderChip({ stage, isOpen, setIsOpen, status }) {
     return (
       <>
         <ServiceErrorsChip
+          fillLevel={0}
           clickable
           onClick={(e) => {
             setIsOpen(true)
@@ -210,6 +211,7 @@ function HeaderChip({ stage, isOpen, setIsOpen, status }) {
 
   return (
     <Chip
+      fillLevel={0}
       size="small"
       severity={stageStatusToSeverity[status]}
     >
@@ -275,6 +277,7 @@ export function StageNode(
               return (
                 <li key={serviceId}>
                   <ServiceCard
+                    fillLevel={0}
                     clickable
                     onClick={() => {
                       navigate(

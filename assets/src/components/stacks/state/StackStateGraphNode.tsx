@@ -1,5 +1,4 @@
-import { NodeProps, Position } from 'reactflow'
-import isEmpty from 'lodash/isEmpty'
+import { NodeProps } from 'reactflow'
 import {
   Code,
   IconFrame,
@@ -7,50 +6,10 @@ import {
   Modal,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { ComponentProps, ReactNode, useState } from 'react'
+import { useState } from 'react'
 
-import { BaseNodeSC, Handle } from '../../cd/pipelines/nodes/BaseNode'
 import { StackStateResource } from '../../../generated/graphql'
-import { useNodeEdges } from '../../hooks/reactFlowHooks'
-
-export function BaseNode({
-  id,
-  children,
-  ...props
-}: NodeProps & { children: ReactNode } & ComponentProps<typeof BaseNodeSC>) {
-  const theme = useTheme()
-  const { incomers, outgoers } = useNodeEdges(id)
-
-  return (
-    <BaseNodeSC {...props}>
-      <HandleSC
-        type="target"
-        isConnectable={false}
-        $isConnected={!isEmpty(incomers)}
-        position={Position.Left}
-        css={{
-          '&&': {
-            backgroundColor: theme.colors.border,
-            borderColor: theme.colors.border,
-          },
-        }}
-      />
-      {children}
-      <HandleSC
-        type="source"
-        isConnectable={false}
-        $isConnected={!isEmpty(outgoers)}
-        position={Position.Right}
-        css={{
-          '&&': {
-            backgroundColor: theme.colors.border,
-            borderColor: theme.colors.border,
-          },
-        }}
-      />
-    </BaseNodeSC>
-  )
-}
+import { NodeBase } from '../../utils/reactflow/nodes'
 
 export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
   const theme = useTheme()
@@ -58,13 +17,7 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
   const { data } = props
 
   return (
-    <BaseNode
-      {...props}
-      css={{
-        backgroundColor: theme.colors['fill-zero'],
-        '&&': { minWidth: 200 },
-      }}
-    >
+    <NodeBase {...props}>
       <div
         css={{
           display: 'flex',
@@ -116,6 +69,6 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
           {data.identifier}
         </div>
       </div>
-    </BaseNode>
+    </NodeBase>
   )
 }
