@@ -47,7 +47,6 @@ import {
   ServiceErrorsModal,
 } from 'components/cd/services/ServicesTableErrors'
 
-import { PIPELINE_GRID_GAP } from '../PipelineGraph'
 import { PipelinePullRequestsModal } from '../PipelinePullRequests'
 
 import { StopPropagation } from '../../../utils/StopPropagation'
@@ -125,8 +124,8 @@ export function getStageStatus(stage: PipelineStageFragment) {
   return StageStatus.Pending
 }
 
-const StageNodeSC = styled(BaseNode)((_) => ({
-  '&&': { minWidth: 10 * PIPELINE_GRID_GAP },
+const StageNodeSC = styled(BaseNode)(() => ({
+  '&&': { minWidth: 240 },
 }))
 
 const IconHeadingInnerSC = styled.div(({ theme }) => ({

@@ -39,15 +39,6 @@ import { PipelineContexts } from './PipelineContexts'
 
 const POLL_INTERVAL = 10 * 1000
 
-export const PipelineEditAreaSC = styled.div(({ theme }) => ({
-  border: theme.borders.default,
-  width: '100%',
-  height: '100%',
-  borderRadius: theme.borderRadiuses.large,
-  position: 'relative',
-  overflow: 'hidden',
-}))
-
 export const PipelineHeadingSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.medium,
@@ -218,15 +209,11 @@ function PipelineDetailsBase() {
     return <LoadingIndicator />
   }
 
-  const contentGraph = (
-    <PipelineEditAreaSC>
-      {pipeline && (
-        <Pipeline
-          pipeline={pipeline}
-          key={pipeline.id}
-        />
-      )}
-    </PipelineEditAreaSC>
+  const contentGraph = pipeline && (
+    <Pipeline
+      pipeline={pipeline}
+      key={pipeline.id}
+    />
   )
 
   const contentContexts = (
