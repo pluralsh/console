@@ -73,7 +73,6 @@ const ChipListUnstyled = forwardRef<HTMLDivElement, ChipListProps>(
 
 const ChipList = styled(ChipListUnstyled)(({ theme }) => ({
   display: 'flex',
-  flexDiretion: 'row',
   flexWrap: 'wrap',
   justifyContent: 'end',
   gap: theme.spacing.xxsmall,

@@ -56,7 +56,7 @@ const FlyoverHeaderWrapSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
   height: 56,
   borderBottom: `1px solid ${theme.colors.border}`,
-  backgroundColor: theme.colors.grey[950],
+  backgroundColor: theme.colors['fill-zero'],
   display: 'flex',
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
 }))

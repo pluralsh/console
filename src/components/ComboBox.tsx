@@ -57,6 +57,7 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
   onHeaderClick?: () => unknown
   onFooterClick?: () => unknown
   startIcon?: ReactNode
+  endIcon?: ReactNode
   placement?: Placement
   width?: string | number
   maxHeight?: string | number
@@ -241,6 +242,7 @@ function ComboBox({
   onFooterClick,
   showArrow,
   startIcon,
+  endIcon,
   placement,
   width,
   maxHeight,
@@ -537,6 +539,7 @@ function ComboBox({
         showClearButton={showClearButton}
         setIsOpen={setIsOpen}
         startIcon={startIcon}
+        endIcon={endIcon}
         outerInputProps={outerInputProps}
         loading={loading}
         hasChips={!!chips}
