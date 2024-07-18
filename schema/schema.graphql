@@ -222,6 +222,9 @@ type RootQueryType {
 
     last: Int
 
+    "the variant of tag you're querying"
+    type: TagType
+
     "only return tags with name==tag"
     tag: String
 
@@ -3345,6 +3348,11 @@ enum ClusterDistro {
 enum Conjunction {
   AND
   OR
+}
+
+enum TagType {
+  CLUSTER
+  STACK
 }
 
 input ClusterAttributes {

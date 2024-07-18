@@ -352,6 +352,10 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		attr.WriteBindings = policyBindings(stack.Spec.Bindings.Write)
 	}
 
+	if id, ok := stack.GetAnnotations()[InventoryAnnotation]; ok && id != "" {
+		attr.ParentID = lo.ToPtr(id)
+	}
+
 	return attr, nil
 }
 

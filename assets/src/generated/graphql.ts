@@ -6228,6 +6228,7 @@ export type RootQueryTypeTagPairsArgs = {
   last?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<TagType>;
 };
 
 
@@ -7536,6 +7537,11 @@ export type TagQuery = {
   op: Conjunction;
   tags?: InputMaybe<Array<InputMaybe<TagInput>>>;
 };
+
+export enum TagType {
+  Cluster = 'CLUSTER',
+  Stack = 'STACK'
+}
 
 /** a kubernetes node taint */
 export type Taint = {

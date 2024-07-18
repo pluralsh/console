@@ -140,11 +140,14 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   end
 
   def search_tags(args, _) do
-    Tag.cluster()
+    tag_scope(args)
     |> tag_search_filters(args)
     |> Tag.ordered([asc: :name, asc: :value])
     |> paginate(args)
   end
+
+  defp tag_scope(%{type: :stack}), do: Tag.stack()
+  defp tag_scope(_), do: Tag.cluster()
 
   defp tag_search_filters(query, args) do
     Enum.reduce(args, query, fn

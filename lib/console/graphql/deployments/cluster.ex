@@ -10,6 +10,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
     value :or
   end
 
+  enum :tag_type do
+    value :cluster
+    value :stack
+  end
+
   input_object :cluster_attributes do
     field :name,           non_null(:string)
     field :handle,         :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
@@ -636,8 +641,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     @desc "adds the ability to search/filter through all tag name/value pairs"
     connection field :tag_pairs, node_type: :tag do
       middleware Authenticated
-      arg :tag, :string, description: "only return tags with name==tag"
-      arg :q,   :string, description: "search for tags with q as a substring in name or value"
+      arg :type, :tag_type, description: "the variant of tag you're querying"
+      arg :tag,  :string, description: "only return tags with name==tag"
+      arg :q,    :string, description: "search for tags with q as a substring in name or value"
 
       resolve &Deployments.search_tags/2
     end
