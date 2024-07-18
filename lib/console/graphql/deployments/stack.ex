@@ -365,6 +365,7 @@ defmodule Console.GraphQl.Deployments.Stack do
   connection node_type: :infrastructure_stack
   connection node_type: :stack_run
   connection node_type: :custom_stack_run
+  connection node_type: :stack_definition
 
   delta :run_logs
 
@@ -437,6 +438,12 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_stack_definition/2
+    end
+
+    connection field :stack_definitions, node_type: :stack_definition do
+      middleware Authenticated
+
+      resolve &Deployments.list_stack_definitions/2
     end
 
     connection field :infrastructure_stacks, node_type: :infrastructure_stack do

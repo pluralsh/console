@@ -169,4 +169,21 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       assert found["id"] == run.id
     end
   end
+
+  describe "stackDefinitions" do
+    test "it can list stack definitions" do
+      defs = insert_list(3, :stack_definition)
+
+      {:ok, %{data: %{"stackDefinitions" => found}}} = run_query("""
+        query {
+          stackDefinitions(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(defs)
+    end
+  end
 end

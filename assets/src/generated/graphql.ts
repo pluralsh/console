@@ -5346,6 +5346,7 @@ export type RootQueryType = {
   smtp?: Maybe<Smtp>;
   stack?: Maybe<Stack>;
   stackDefinition?: Maybe<StackDefinition>;
+  stackDefinitions?: Maybe<StackDefinitionConnection>;
   stackRun?: Maybe<StackRun>;
   statefulSet?: Maybe<StatefulSet>;
   /** adds the ability to search/filter through all tag name/value pairs */
@@ -6186,6 +6187,14 @@ export type RootQueryTypeStackArgs = {
 
 export type RootQueryTypeStackDefinitionArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeStackDefinitionsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -7148,6 +7157,18 @@ export type StackDefinitionAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   steps?: InputMaybe<Array<InputMaybe<CustomStepAttributes>>>;
+};
+
+export type StackDefinitionConnection = {
+  __typename?: 'StackDefinitionConnection';
+  edges?: Maybe<Array<Maybe<StackDefinitionEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type StackDefinitionEdge = {
+  __typename?: 'StackDefinitionEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<StackDefinition>;
 };
 
 export type StackEnvironment = {

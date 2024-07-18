@@ -388,6 +388,8 @@ type RootQueryType {
 
   stackDefinition(id: ID!): StackDefinition
 
+  stackDefinitions(after: String, first: Int, before: String, last: Int): StackDefinitionConnection
+
   infrastructureStacks(after: String, first: Int, before: String, last: Int, q: String, projectId: ID): InfrastructureStackConnection
 
   observabilityProvider(id: ID!): ObservabilityProvider
@@ -1643,6 +1645,11 @@ type StackRunConnection {
 type CustomStackRunConnection {
   pageInfo: PageInfo!
   edges: [CustomStackRunEdge]
+}
+
+type StackDefinitionConnection {
+  pageInfo: PageInfo!
+  edges: [StackDefinitionEdge]
 }
 
 type RunLogsDelta {
@@ -6639,6 +6646,11 @@ type ManagedNamespaceEdge {
 
 type GlobalServiceEdge {
   node: GlobalService
+  cursor: String
+}
+
+type StackDefinitionEdge {
+  node: StackDefinition
   cursor: String
 }
 
