@@ -216,7 +216,7 @@ export default function GlobalServiceInfo() {
           display: 'grid',
           gridTemplateColumns: 'repeat(4, 1fr)',
           gridAutoRows: 'min-content',
-          gridGap: theme.spacing.large,
+          gridGap: theme.spacing.small,
         }}
       >
         {globalService?.service && (
