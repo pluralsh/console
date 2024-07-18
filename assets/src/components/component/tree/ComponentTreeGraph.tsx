@@ -1,34 +1,21 @@
-import {
-  IconFrame,
-  ReloadIcon,
-  styledTheme,
-  usePrevious,
-} from '@pluralsh/design-system'
+import { usePrevious } from '@pluralsh/design-system'
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
-import ReactFlow, {
-  Background,
-  BackgroundVariant,
-  useEdgesState,
-  useNodesState,
-  useReactFlow,
-} from 'reactflow'
-import chroma from 'chroma-js'
+import { useEdgesState, useNodesState, useReactFlow } from 'reactflow'
 
 import 'reactflow/dist/style.css'
-import styled, { useTheme } from 'styled-components'
+
+import { useTheme } from 'styled-components'
 
 import {
   type DagreDirection,
   getLayoutedElements,
 } from '../../cd/pipelines/utils/nodeLayouter'
 
-import { PipelineEditAreaSC } from '../../cd/pipelines/PipelineDetails'
+import { edgeTypes } from '../../utils/reactflow/edges'
 
-import { EdgeMarkerDefs, edgeTypes } from '../../utils/reactflow/edges'
+import { ReactFlowGraph } from '../../utils/reactflow/graph'
 
 import { ComponentTreeNode } from './ComponentTreeNode'
-
-export const COMPONENTTREE_GRID_GAP = styledTheme.spacing.large
 
 const nodeTypes = {
   component: ComponentTreeNode,
@@ -42,8 +29,6 @@ export function ComponentTreeGraph({
   edges: any[]
 }) {
   const theme = useTheme()
-  const margin = COMPONENTTREE_GRID_GAP * 1
-
   const { setViewport, getViewport, viewportInitialized } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(nodesProp)
   const [edges, setEdges, onEdgesChange] = useEdgesState(edgesProp)
@@ -61,15 +46,15 @@ export function ComponentTreeGraph({
       const layouted = getLayoutedElements(nodes, edges, {
         direction,
         zoom: getViewport().zoom,
-        gridGap: COMPONENTTREE_GRID_GAP,
-        margin,
+        gridGap: theme.spacing.large,
+        margin: theme.spacing.large,
       })
 
       setNodes([...layouted.nodes])
       setEdges([...layouted.edges])
       setNeedsLayout(false)
     },
-    [nodes, edges, getViewport, margin, setNodes, setEdges]
+    [nodes, edges, getViewport, theme.spacing.large, setNodes, setEdges]
   )
 
   useLayoutEffect(() => {
@@ -99,66 +84,19 @@ export function ComponentTreeGraph({
   }, [nodesProp, prevNodesProp, edgesProp, prevEdgesProp, setEdges, setNodes])
 
   return (
-    <PipelineEditAreaSC>
-      <ReactFlowWrapperSC>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          draggable
-          nodesDraggable={false}
-          edgesUpdatable={false}
-          edgesFocusable={false}
-          nodesConnectable={false}
-          edgeTypes={edgeTypes}
-        >
-          <Background
-            variant={BackgroundVariant.Dots}
-            gap={COMPONENTTREE_GRID_GAP}
-            size={1}
-            color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
-          />
-          <EdgeMarkerDefs />
-        </ReactFlow>
-        <div
-          css={{
-            position: 'absolute',
-            top: theme.spacing.xsmall,
-            right: theme.spacing.xsmall,
-            display: 'flex',
-            gap: theme.spacing.xsmall,
-          }}
-        >
-          <IconFrame
-            clickable
-            type="floating"
-            icon={<ReloadIcon />}
-            tooltip="Reset view"
-            onClick={() =>
-              setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })
-            }
-          >
-            Reset view
-          </IconFrame>
-        </div>
-      </ReactFlowWrapperSC>
-    </PipelineEditAreaSC>
+    <ReactFlowGraph
+      resetView={() => setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })}
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      nodeTypes={nodeTypes}
+      draggable
+      nodesDraggable={false}
+      edgesUpdatable={false}
+      edgesFocusable={false}
+      nodesConnectable={false}
+      edgeTypes={edgeTypes}
+    />
   )
 }
-
-const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  '.react-flow__renderer': {
-    opacity: $hide ? 0 : 1,
-  },
-  '.react-flow__edge': {
-    pointerEvents: 'none',
-    cursor: 'unset',
-  },
-}))
