@@ -24,7 +24,7 @@ import chroma from 'chroma-js'
 import 'reactflow/dist/style.css'
 import styled, { useTheme } from 'styled-components'
 
-import { EdgeLineMarkerDefs, edgeTypes } from '../../utils/ReactFlowEdges'
+import { EdgeMarkerDefs, edgeTypes } from '../../utils/reactflow/edges'
 
 import { TestsNode } from './nodes/TestsNode'
 import { StageNode } from './nodes/StageNode'
@@ -122,7 +122,7 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
           size={1}
           color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
         />
-        <EdgeLineMarkerDefs />
+        <EdgeMarkerDefs />
       </ReactFlow>
       <div
         css={{

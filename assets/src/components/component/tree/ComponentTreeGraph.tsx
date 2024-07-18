@@ -24,7 +24,7 @@ import {
 
 import { PipelineEditAreaSC } from '../../cd/pipelines/PipelineDetails'
 
-import { EdgeLineMarkerDefs, edgeTypes } from '../../utils/ReactFlowEdges'
+import { EdgeMarkerDefs, edgeTypes } from '../../utils/reactflow/edges'
 
 import { ComponentTreeNode } from './ComponentTreeNode'
 
@@ -120,7 +120,7 @@ export function ComponentTreeGraph({
             size={1}
             color={`${chroma(theme.colors['border-fill-three']).alpha(1)}`}
           />
-          <EdgeLineMarkerDefs />
+          <EdgeMarkerDefs />
         </ReactFlow>
         <div
           css={{

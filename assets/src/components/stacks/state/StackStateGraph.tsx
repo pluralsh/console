@@ -23,8 +23,8 @@ import {
 } from '../../cd/pipelines/utils/nodeLayouter'
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { isNonNullable } from '../../../utils/isNonNullable'
-import { ReactFlowGraph } from '../../utils/ReactFlow'
-import { SMOOTH_STEP_EDGE_NAME, edgeTypes } from '../../utils/ReactFlowEdges'
+import { ReactFlowGraph } from '../../utils/reactflow/graph'
+import { SMOOTH_EDGE_NAME, edgeTypes } from '../../utils/reactflow/edges'
 
 import { StackStateGraphNode } from './StackStateGraphNode'
 
@@ -32,24 +32,24 @@ const nodeTypes = {
   [NodeType.Stage]: StackStateGraphNode,
 }
 
-export function getNodesAndEdges(state: StackState) {
+function getNodesAndEdges(state: StackState) {
   const nodes: Node[] = []
   const edges: Edge[] = []
 
-  state?.state?.filter(isNonNullable).forEach((stage) => {
+  state?.state?.filter(isNonNullable).forEach((ssr) => {
     nodes.push({
-      id: stage.identifier,
+      id: ssr.identifier,
       position: { x: 0, y: 0 },
       type: NodeType.Stage,
-      data: { ...stage },
+      data: { ...ssr },
     })
 
     edges.push(
-      ...(stage.links ?? []).filter(isNonNullable).map((link) => ({
-        type: SMOOTH_STEP_EDGE_NAME,
+      ...(ssr.links ?? []).filter(isNonNullable).map((link) => ({
+        type: SMOOTH_EDGE_NAME,
         updatable: false,
-        id: `${stage.identifier}${link}`,
-        source: stage.identifier,
+        id: `${ssr.identifier}${link}`,
+        source: ssr.identifier,
         target: link,
       }))
     )

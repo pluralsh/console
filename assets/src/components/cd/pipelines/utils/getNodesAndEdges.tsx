@@ -15,7 +15,7 @@ import { Entries } from 'type-fest'
 
 import { StageStatus, getStageStatus } from '../nodes/StageNode'
 
-import { MARKED_STEP_EDGE_NAME } from '../../../utils/ReactFlowEdges'
+import { PIPELINE_EDGE_NAME } from '../../../utils/reactflow/edges'
 
 import { reduceGateStates } from './reduceGateStatuses'
 import { DEMO_GATES, PIPELINE_DEBUG_MODE } from './_demo_data'
@@ -28,7 +28,7 @@ export enum NodeType {
 }
 
 const baseEdgeProps = {
-  type: MARKED_STEP_EDGE_NAME,
+  type: PIPELINE_EDGE_NAME,
   updatable: false,
 }
 
