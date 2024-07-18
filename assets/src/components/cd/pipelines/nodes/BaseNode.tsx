@@ -28,10 +28,9 @@ import isEmpty from 'lodash/isEmpty'
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 
 import { reduceGateStates } from '../utils/reduceGateStatuses'
+import { NodeHandle } from '../../../utils/reactflow/handles'
 
 export type CardStatus = 'ok' | 'closed' | 'pending' | 'running'
-
-const HANDLE_SIZE = 8
 
 export const gateStateToCardStatus = {
   [GateState.Open]: 'ok',
@@ -84,28 +83,6 @@ export const BaseNodeSC = styled(Card)(({ theme }) => ({
   },
 }))
 
-export const HandleSC = styled(Handle)<{
-  $isConnected?: boolean
-  $isOpen?: boolean
-}>(({ theme, $isConnected, $isOpen = true }) => ({
-  '&&': {
-    visibility: $isConnected ? 'visible' : 'hidden',
-    width: HANDLE_SIZE,
-    height: HANDLE_SIZE,
-    borderColor: $isOpen
-      ? theme.colors['border-secondary']
-      : theme.colors.border,
-    borderWidth: theme.borderWidths.default,
-    backgroundColor: theme.colors['fill-zero'],
-    '&.react-flow__handle-left': {
-      left: -HANDLE_SIZE / 2,
-    },
-    '&.react-flow__handle-right': {
-      right: -HANDLE_SIZE / 2,
-    },
-  },
-}))
-
 export function BaseNode({
   id,
   data: { meta },
@@ -131,7 +108,7 @@ export function BaseNode({
 
   return (
     <BaseNodeSC {...props}>
-      <HandleSC
+      <NodeHandle
         type="target"
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
@@ -139,7 +116,7 @@ export function BaseNode({
         position={Position.Left}
       />
       {children}
-      <HandleSC
+      <NodeHandle
         type="source"
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}

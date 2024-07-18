@@ -9,7 +9,7 @@ import {
 import { useTheme } from 'styled-components'
 import { ComponentProps, ReactNode, useState } from 'react'
 
-import { BaseNodeSC, HandleSC } from '../../cd/pipelines/nodes/BaseNode'
+import { BaseNodeSC, Handle } from '../../cd/pipelines/nodes/BaseNode'
 import { StackStateResource } from '../../../generated/graphql'
 import { useNodeEdges } from '../../hooks/reactFlowHooks'
 

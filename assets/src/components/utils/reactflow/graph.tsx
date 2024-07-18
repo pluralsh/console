@@ -16,6 +16,7 @@ import { useState } from 'react'
 import { useKeyDown } from '@react-hooks-library/core'
 
 import { MarkerDefs } from './markers'
+import { edgeTypes } from './edges'
 
 const ReactFlowFullScreenWrapperSC = styled.div((_) => ({
   position: 'absolute',
@@ -81,7 +82,15 @@ export function ReactFlowGraph({
     >
       <ReactFlowAreaSC>
         <ReactFlowWrapperSC>
-          <ReactFlow {...props}>
+          <ReactFlow
+            edgeTypes={edgeTypes}
+            draggable
+            edgesFocusable={false}
+            edgesUpdatable={false}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            {...props}
+          >
             <Background
               variant={BackgroundVariant.Dots}
               gap={theme.spacing.large}

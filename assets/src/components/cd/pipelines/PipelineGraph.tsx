@@ -96,12 +96,6 @@ export function Pipeline({ pipeline }: { pipeline: PipelineFragment }) {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
-      draggable
-      nodesDraggable={false}
-      edgesUpdatable={false}
-      edgesFocusable={false}
-      nodesConnectable={false}
-      edgeTypes={edgeTypes}
     />
   )
 }
