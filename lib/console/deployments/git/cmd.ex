@@ -26,13 +26,14 @@ defmodule Console.Deployments.Git.Cmd do
 
   def fetch(%GitRepository{} = repo) do
     with {:ok, _} <- git(repo, "fetch", ["--all", "--force", "--prune"]),
-         :ok <- branches(repo),
       do: possibly_pull(repo)
   end
 
   def possibly_pull(repo) do
-    case git(repo, "symbolic-ref", ["--short", "HEAD"]) do
-      {:ok, _} -> git(repo, "pull", ["--all", "--rebase"])
+    with {:ok, _} <- git(repo, "reset", ["--hard"]),
+         {:ok, _} <- git(repo, "symbolic-ref", ["--short", "HEAD"]) do
+      git(repo, "pull", ["--all"])
+    else
       _ -> {:ok, :ignore}
     end
   end
@@ -69,16 +70,23 @@ defmodule Console.Deployments.Git.Cmd do
   end
 
   def heads(%GitRepository{} = repo) do
-    with {:ok, res} <- git(repo, "show-ref", ["--heads", "--tags"]) do
+    with {:ok, res} <- git(repo, "show-ref", []) do
       String.split(res, ~r/\R/)
       |> Enum.map(&String.split(&1, " "))
       |> Enum.filter(fn
         [_, _] -> true
         _ -> false
       end)
-      |> Map.new(fn [sha, head] -> {String.trim(head), sha} end)
+      |> Map.new(fn [sha, head] -> {coerce_head(head), sha} end)
     else
       _ -> %{}
+    end
+  end
+
+  defp coerce_head(head) do
+    case String.trim(head) do
+      "refs/remotes/origin/" <> head -> "refs/heads/#{head}"
+      head -> head
     end
   end
 

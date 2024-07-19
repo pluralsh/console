@@ -5,7 +5,7 @@ defmodule Console.Deployments.Git.AgentTest do
   describe "#fetch/2" do
     test "it can checkout and tarball a subfolder of a repo" do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
-      svc = insert(:service, repository: git, git: %{ref: "master", folder: "bin"})
+      svc = insert(:service, repository: git, git: %{ref: "branch-test", folder: "bin"})
 
       {:ok, pid} = Discovery.start(git)
 
