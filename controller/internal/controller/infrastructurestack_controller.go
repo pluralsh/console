@@ -356,6 +356,14 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		attr.ParentID = lo.ToPtr(id)
 	}
 
+	if stack.Spec.Tags != nil {
+		tags := make([]*console.TagAttributes, 0)
+		for name, value := range stack.Spec.Tags {
+			tags = append(tags, &console.TagAttributes{Name: name, Value: value})
+		}
+		attr.Tags = tags
+	}
+
 	return attr, nil
 }
 
