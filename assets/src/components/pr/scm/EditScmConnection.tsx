@@ -148,8 +148,8 @@ export function ScmConnectionForm({
   const toggleGhAppAuth = (isToggled: boolean) => {
     setGhAppAuth(isToggled)
     updateFormState({
-      token: DEFAULT_ATTRIBUTES.token,
-      github: DEFAULT_ATTRIBUTES.github,
+      token: !isToggled ? undefined : DEFAULT_ATTRIBUTES.token,
+      github: isToggled ? DEFAULT_ATTRIBUTES.github : undefined,
     })
   }
 
