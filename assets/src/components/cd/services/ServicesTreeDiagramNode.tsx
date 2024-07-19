@@ -20,28 +20,29 @@ export function ServicesTreeDiagramNode(
   return (
     <NodeBase
       {...props}
+      gap={0}
+      padding={0}
       width={336}
     >
-      <div css={{ backgroundColor: theme.colors['fill-zero'] }}>
+      <div
+        css={{
+          ...theme.partials.text.caption,
+          backgroundColor: theme.colors['fill-zero'],
+          color: theme.colors['text-xlight'],
+          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+        }}
+      >
         {data.repository?.url}
       </div>
       <div
         css={{
+          backgroundColor: theme.colors['fill-one'],
           display: 'flex',
           flexDirection: 'column',
+          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
-        <div
-          css={{
-            ...theme.partials.text.body2Bold,
-            alignItems: 'center',
-            display: 'flex',
-            justifyContent: 'space-between',
-            gap: theme.spacing.medium,
-          }}
-        >
-          <div>{data.name}</div>
-        </div>
+        <div>{data.name}</div>
         <div>{data.cluster?.name}</div>
       </div>
     </NodeBase>
