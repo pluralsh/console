@@ -43,6 +43,9 @@ function getNodesAndEdges(services: ServiceTreeNodeFragment[]) {
         source: service.id,
         target: service.parent?.id ?? '',
       })),
+    // TODO: Add invisible edges to position disconnected nodes.
+    // TODO: Switch edge type?
+    // TODO: Add global services.
   }
 }
 
