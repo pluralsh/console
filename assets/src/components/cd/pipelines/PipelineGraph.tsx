@@ -12,8 +12,6 @@ import { useEdgesState, useNodesState, useReactFlow } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { useTheme } from 'styled-components'
 
-import { edgeTypes } from '../../utils/reactflow/edges'
-
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
 
 import { TestsNode } from './nodes/TestsNode'

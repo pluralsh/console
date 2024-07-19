@@ -24,7 +24,7 @@ import {
 import { NodeType } from '../../cd/pipelines/utils/getNodesAndEdges'
 import { isNonNullable } from '../../../utils/isNonNullable'
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
-import { EdgeType, edgeTypes } from '../../utils/reactflow/edges'
+import { EdgeType } from '../../utils/reactflow/edges'
 
 import { StackStateGraphNode } from './StackStateGraphNode'
 
