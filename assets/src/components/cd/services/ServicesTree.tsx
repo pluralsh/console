@@ -6,14 +6,11 @@ import {
   ServiceDeploymentStatus,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
-
 import { ReactFlowProvider } from 'reactflow'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
-
 import { mapExistingNodes } from '../../../utils/graphql'
 
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
@@ -48,7 +45,7 @@ function ServicesTreeComponent({
 
   const services = useMemo(
     () => mapExistingNodes(data?.serviceDeployments),
-    [data?.serviceDeployments?.edges]
+    [data?.serviceDeployments]
   )
 
   const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
@@ -72,17 +69,11 @@ function ServicesTreeComponent({
     [data?.serviceStatuses]
   )
 
-  useEffect(() => {
-    setRefetch?.(() => refetch)
-  }, [refetch, setRefetch])
+  useEffect(() => setRefetch?.(() => refetch), [refetch, setRefetch])
 
-  if (error) {
-    return <GqlError error={error} />
-  }
+  if (error) return <GqlError error={error} />
 
-  if (!data) {
-    return <LoadingIndicator />
-  }
+  if (!data) return <LoadingIndicator />
 
   return (
     <div
