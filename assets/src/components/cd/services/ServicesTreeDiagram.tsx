@@ -26,12 +26,14 @@ import {
 
 function getNodesAndEdges(services: ServiceTreeNodeFragment[]) {
   return {
-    nodes: services.map((service) => ({
-      id: service.id,
-      position: { x: 0, y: 0 },
-      type: ServicesTreeDiagramNodeType,
-      data: { ...service },
-    })),
+    nodes: services
+      .filter((service) => service.name !== 'deploy-operator')
+      .map((service) => ({
+        id: service.id,
+        position: { x: 0, y: 0 },
+        type: ServicesTreeDiagramNodeType,
+        data: { ...service },
+      })),
     edges: services
       .filter((service) => service.parent?.id)
       .map((service) => ({
