@@ -75,9 +75,6 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     name
   }
   dryRun
-  parent {
-    id
-  }
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {
@@ -146,6 +143,15 @@ fragment ServiceDeploymentTiny on ServiceDeployment {
   }
 }
 
+fragment ServiceTreeNode on ServiceDeployment {
+  id
+  name
+  cluster {  name }
+  repository { url }
+  parent { id }
+  owner { id }
+}
+
 query ServiceDeployments(
   $first: Int = 100
   $after: String
@@ -188,6 +194,23 @@ query ServiceDeploymentsTiny($clusterId: ID, $projectId: ID) {
         ...ServiceDeploymentTiny
       }
     }
+  }
+}
+
+
+query ServiceTree($clusterId: ID, $projectId: ID) {
+  serviceTree(first: 100, clusterId: $clusterId, projectId: $projectId) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceTreeNode
+      }
+    }
+  }
+  serviceStatuses(clusterId: $clusterId) {
+    ...ServiceStatusCount
   }
 }
 
