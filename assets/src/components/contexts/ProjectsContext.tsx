@@ -48,6 +48,7 @@ export function ProjectsProvider({
 
   const { data, loading } = useProjectsTinyQuery({
     pollInterval: 60_000,
+    fetchPolicy: 'cache-and-network',
     onError: (error) => {
       setError(error)
       setTimeout(() => setError(undefined), 5000)
