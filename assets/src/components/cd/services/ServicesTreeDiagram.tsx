@@ -14,8 +14,10 @@ import { useTheme } from 'styled-components'
 import {
   type DagreDirection,
   getLayoutedElements,
-} from '../../cd/pipelines/utils/nodeLayouter'
+} from '../pipelines/utils/nodeLayouter'
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
+
+import { EdgeType } from '../../utils/reactflow/edges'
 
 import {
   ServicesTreeDiagramNodeType,
@@ -30,7 +32,15 @@ function getNodesAndEdges(services: ServiceDeploymentsRowFragment[]) {
       type: ServicesTreeDiagramNodeType,
       data: { ...service },
     })),
-    edges: [], // TODO
+    edges: services
+      .filter((service) => service.parent?.id)
+      .map((service) => ({
+        type: EdgeType.Smooth,
+        updatable: false,
+        id: `${service.id}${service.parent?.id}`,
+        source: service.id,
+        target: service.parent?.id ?? '',
+      })),
   }
 }
 
@@ -99,7 +109,6 @@ export function ServicesTreeDiagram({
 
   return (
     <ReactFlowGraph
-      allowFullscreen
       resetView={() => setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })}
       nodes={nodes}
       edges={edges}
