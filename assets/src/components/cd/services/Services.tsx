@@ -28,6 +28,7 @@ import {
 } from './ServicesColumns'
 import { DeployService } from './deployModal/DeployService'
 import { ServicesTable } from './ServicesTable'
+import { ServicesTree } from './ServicesTree'
 
 export const columns = [
   ColServiceDeployment,
@@ -121,7 +122,7 @@ export default function Services() {
   return useMemo(() => {
     switch (view) {
       case View.Tree:
-        return <div>tree</div>
+        return <ServicesTree setRefetch={setRefetch} />
       default:
         return <ServicesTable setRefetch={setRefetch} />
     }
