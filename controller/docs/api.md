@@ -803,6 +803,7 @@ _Appears in:_
 | `actor` _string_ | Actor - user email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `stackDefinitionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `tags` _object (keys:string, values:string)_ | Tags used to filter stacks. |  | Optional: {} <br /> |
 
 
 #### JobSpec
@@ -1279,15 +1280,15 @@ _Appears in:_
 | `branch` _string_ | The base branch this pr will be based on (defaults to the repo's main branch) |  | Optional: {} <br /> |
 | `documentation` _string_ | Documentation ... |  | Optional: {} <br /> |
 | `identifier` _string_ | Identifier is a string referencing the repository, i.e. for GitHub it would be "<organization>/<repositoryName>" |  | Optional: {} <br /> |
-| `message` _string_ | Message ... |  | Optional: {} <br /> |
-| `name` _string_ | Name ... |  | Optional: {} <br /> |
-| `title` _string_ | Title... |  | Optional: {} <br /> |
-| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef ... |  | Optional: {} <br /> |
-| `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef ... |  | Required: {} <br /> |
+| `message` _string_ | Message the commit message this pr will incorporate |  | Optional: {} <br /> |
+| `name` _string_ | Name name of the automation in the console api (defaults to metadata.name) |  | Optional: {} <br /> |
+| `title` _string_ | Title the title of the generated pr |  | Optional: {} <br /> |
+| `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef a cluster this pr works on |  | Optional: {} <br /> |
+| `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef the SCM connection to use for generating this PR |  | Required: {} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef ... |  | Optional: {} <br /> |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef ... |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef the service this PR acts on |  | Optional: {} <br /> |
 | `bindings` _[PrAutomationBindings](#prautomationbindings)_ | Bindings contain read and write policies of pr automation |  | Optional: {} <br /> |
-| `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration ... |  | Optional: {} <br /> |
+| `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration self-service configuration for the UI wizard generating this PR |  | Optional: {} <br /> |
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Specs for files to be templated and created |  | Optional: {} <br /> |
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Spec for files to be updated, using regex replacement |  | Optional: {} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Spec for files and folders to be deleted |  | Optional: {} <br /> |
@@ -1512,7 +1513,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name is a human-readable name of the ScmConnection. |  | Required: {} <br /> |
-| `type` _[ScmType](#scmtype)_ | Type is the name of the scm service for the ScmConnection.<br />One of (ScmType): [github, gitlab] |  | Enum: [GITHUB GITLAB] <br />Required: {} <br />Type: string <br /> |
+| `type` _[ScmType](#scmtype)_ | Type is the name of the scm service for the ScmConnection.<br />One of (ScmType): [github, gitlab] |  | Enum: [GITHUB GITLAB BITBUCKET] <br />Required: {} <br />Type: string <br /> |
 | `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Token ... |  | Optional: {} <br /> |
 | `username` _string_ | Username ... |  | Optional: {} <br /> |
 | `baseUrl` _string_ | BaseUrl is a base URL for Git clones for self-hosted versions. |  | Optional: {} <br /> |
