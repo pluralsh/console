@@ -132,23 +132,23 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Identifier *string `json:"identifier,omitempty"`
 
-	// Message ...
+	// Message the commit message this pr will incorporate
 	// +kubebuilder:validation:Optional
 	Message *string `json:"message,omitempty"`
 
-	// Name ...
+	// Name name of the automation in the console api (defaults to metadata.name)
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
-	// Title...
+	// Title the title of the generated pr
 	// +kubebuilder:validation:Optional
 	Title *string `json:"title,omitempty"`
 
-	// ClusterRef ...
+	// ClusterRef a cluster this pr works on
 	// +kubebuilder:validation:Optional
 	ClusterRef *corev1.ObjectReference `json:"clusterRef,omitempty"`
 
-	// ScmConnectionRef ...
+	// ScmConnectionRef the SCM connection to use for generating this PR
 	// +kubebuilder:validation:Required
 	ScmConnectionRef corev1.ObjectReference `json:"scmConnectionRef,omitempty"`
 
@@ -156,7 +156,7 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
-	// ServiceRef ...
+	// ServiceRef the service this PR acts on
 	// +kubebuilder:validation:Optional
 	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
 
@@ -164,7 +164,7 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Bindings *PrAutomationBindings `json:"bindings,omitempty"`
 
-	// Configuration ...
+	// Configuration self-service configuration for the UI wizard generating this PR
 	// +kubebuilder:validation:Optional
 	Configuration []PrAutomationConfiguration `json:"configuration,omitempty"`
 

@@ -24,7 +24,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
         summary: %{raw: body},
       })
       |> case do
-        {:ok, %{"links" => %{"html" => url}} = mr} ->
+        {:ok, %{"links" => %{"html" => %{"href" => url}}} = mr} ->
           {:ok, %{title: title, ref: branch, url: url, owner: owner(mr)}}
         err -> err
       end
@@ -33,7 +33,7 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
 
   def webhook(_, _), do: :ok
 
-  def pr(%{"pullrequest" => %{"links" => %{"html" => url}} = pr}) do
+  def pr(%{"pullrequest" => %{"links" => %{"html" => %{"href" => url}}} = pr}) do
     attrs = Map.merge(%{
       status: state(pr),
       ref: pr["source"]["branch"]["name"],
