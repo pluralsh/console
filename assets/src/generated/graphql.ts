@@ -8286,6 +8286,7 @@ export type TagPairsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<TagType>;
 }>;
 
 
@@ -9449,7 +9450,7 @@ export type UpdateServiceAccountMutation = { __typename?: 'RootMutationType', up
 
 export type StackTinyFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string } | null };
 
-export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null };
+export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null };
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null };
 
@@ -9489,6 +9490,7 @@ export type StacksQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  tagQuery?: InputMaybe<TagQuery>;
 }>;
 
 
@@ -9499,7 +9501,7 @@ export type StackQueryVariables = Exact<{
 }>;
 
 
-export type StackQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null } | null };
+export type StackQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version: string }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null } | null };
 
 export type StackTinyQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11959,6 +11961,10 @@ export const StackFragmentDoc = gql`
       }
     }
   }
+  tags {
+    name
+    value
+  }
 }
     ${ClusterTinyFragmentDoc}`;
 export const StackRunFragmentDoc = gql`
@@ -14049,8 +14055,8 @@ export type ClusterStatusesLazyQueryHookResult = ReturnType<typeof useClusterSta
 export type ClusterStatusesSuspenseQueryHookResult = ReturnType<typeof useClusterStatusesSuspenseQuery>;
 export type ClusterStatusesQueryResult = Apollo.QueryResult<ClusterStatusesQuery, ClusterStatusesQueryVariables>;
 export const TagPairsDocument = gql`
-    query TagPairs($first: Int = 30, $q: String, $tag: String) {
-  tagPairs(first: $first, q: $q, tag: $tag) {
+    query TagPairs($first: Int = 30, $q: String, $tag: String, $type: TagType) {
+  tagPairs(first: $first, q: $q, tag: $tag, type: $type) {
     edges {
       node {
         name
@@ -14077,6 +14083,7 @@ export const TagPairsDocument = gql`
  *      first: // value for 'first'
  *      q: // value for 'q'
  *      tag: // value for 'tag'
+ *      type: // value for 'type'
  *   },
  * });
  */
@@ -19182,7 +19189,7 @@ export type StackPrsLazyQueryHookResult = ReturnType<typeof useStackPrsLazyQuery
 export type StackPrsSuspenseQueryHookResult = ReturnType<typeof useStackPrsSuspenseQuery>;
 export type StackPrsQueryResult = Apollo.QueryResult<StackPrsQuery, StackPrsQueryVariables>;
 export const StacksDocument = gql`
-    query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int, $projectId: ID) {
+    query Stacks($q: String, $after: String, $before: String, $first: Int = 100, $last: Int, $projectId: ID, $tagQuery: TagQuery) {
   infrastructureStacks(
     q: $q
     after: $after
@@ -19190,6 +19197,7 @@ export const StacksDocument = gql`
     first: $first
     last: $last
     projectId: $projectId
+    tagQuery: $tagQuery
   ) {
     pageInfo {
       ...PageInfo
@@ -19222,6 +19230,7 @@ ${StackTinyFragmentDoc}`;
  *      first: // value for 'first'
  *      last: // value for 'last'
  *      projectId: // value for 'projectId'
+ *      tagQuery: // value for 'tagQuery'
  *   },
  * });
  */

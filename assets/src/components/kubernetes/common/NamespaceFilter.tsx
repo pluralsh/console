@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import Fuse from 'fuse.js'
 import { ComboBox, ListBoxItem } from '@pluralsh/design-system'
 
+import { useTheme } from 'styled-components'
+
 import { NamespaceListFooter } from '../../cluster/pods/Pods'
 
 export function NamespaceFilter({
@@ -13,6 +15,7 @@ export function NamespaceFilter({
   namespace: string
   onChange: (arg: any) => any
 }) {
+  const theme = useTheme()
   const [value, setValue] = useState('')
 
   useEffect(() => setValue(namespace), [namespace])
@@ -25,7 +28,15 @@ export function NamespaceFilter({
 
   return (
     <ComboBox
-      inputProps={{ placeholder: 'Filter by namespace' }}
+      startIcon={null}
+      showArrow={false}
+      inputProps={{
+        placeholder: 'Filter by namespace',
+        style: {
+          border: 'none',
+          background: theme.colors['fill-two'],
+        },
+      }}
       inputValue={value}
       onInputChange={setValue}
       selectedKey={namespace}

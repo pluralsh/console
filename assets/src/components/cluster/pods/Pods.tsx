@@ -48,7 +48,7 @@ export const NamespaceListFooter = forwardRef<
   Omit<ComponentProps<typeof ListBoxFooterPlusInner>, 'children'>
 >(({ leftContent, ...props }, ref) => {
   const theme = useTheme()
-  const label = 'View all'
+  const label = 'Clear selection'
 
   return (
     <ListBoxFooterPlusInner

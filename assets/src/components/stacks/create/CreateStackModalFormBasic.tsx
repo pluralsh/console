@@ -1,5 +1,5 @@
 import {
-  Accordion,
+  AccordionOLD as Accordion,
   FormField,
   Input,
   ListBoxItem,

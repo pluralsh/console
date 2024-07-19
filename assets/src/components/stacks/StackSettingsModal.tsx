@@ -1,48 +1,45 @@
-import {
-  Button,
-  FormField,
-  GearTrainIcon,
-  IconFrame,
-  Modal,
-  Switch,
-} from '@pluralsh/design-system'
-import { ComponentProps, useMemo, useState } from 'react'
+import { Button, FormField, Modal } from '@pluralsh/design-system'
 import isEqual from 'lodash/isEqual'
+import { ComponentProps, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 
-import {
-  ClusterFragment,
-  ClustersRowFragment,
-  useUpdateClusterMutation,
-} from 'generated/graphql'
+import { StackFragment, useUpdateStackMutation } from 'generated/graphql'
 
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import { tagsToNameValue } from 'components/cd/services/CreateGlobalService'
+import { TagSelection } from 'components/cd/services/TagSelection'
 import { useUpdateState } from 'components/hooks/useUpdateState'
+import { deepOmitKey } from 'utils/deepOmitKey'
 
-import { tagsToNameValue } from '../services/CreateGlobalService'
-import { TagSelection } from '../services/TagSelection'
+export function StackSettingsModal(
+  props: ComponentProps<typeof StackSettingsModalInner>
+) {
+  return (
+    <ModalMountTransition open={!!props.open}>
+      <StackSettingsModalInner {...props} />
+    </ModalMountTransition>
+  )
+}
 
-type Cluster = Pick<ClusterFragment, 'id' | 'name' | 'version'>
-
-function ClusterSettingsModalInner({
-  cluster,
+function StackSettingsModalInner({
+  stack,
   open,
   onClose,
   ...props
 }: ComponentProps<typeof Modal> & {
-  cluster: ClustersRowFragment
+  stack: StackFragment
 }) {
   const theme = useTheme()
   const initialTags: Record<string, string> = useMemo(
     () =>
       Object.fromEntries(
-        cluster?.tags
+        stack?.tags
           ?.map((tag) => [tag?.name, tag?.value || ''])
           .filter((t) => !!t[0]) || []
       ),
-    [cluster?.tags]
+    [stack?.tags]
   )
 
   const {
@@ -51,20 +48,19 @@ function ClusterSettingsModalInner({
     hasUpdates,
   } = useUpdateState(
     {
-      protect: !!cluster?.protect,
       tags: initialTags,
     },
     {
       tags: (a, b) => !isEqual(a, b),
     }
   )
-  const [mutation, { loading, error }] = useUpdateClusterMutation({
+  const [mutation, { loading, error }] = useUpdateStackMutation({
     onCompleted: () => {
       onClose?.()
     },
   })
 
-  if (!cluster) {
+  if (!stack) {
     return null
   }
   const allowSubmit = hasUpdates
@@ -76,16 +72,24 @@ function ClusterSettingsModalInner({
       size="large"
       open={open}
       onClose={onClose}
-      header={props.header || `Cluster settings – ${cluster.name}`}
+      header={props.header || `Stack settings - ${stack.name}`}
       formProps={{
         onSubmit: (e) => {
           e.preventDefault()
           if (allowSubmit) {
             mutation({
               variables: {
-                id: cluster.id,
+                id: stack.id ?? '',
                 attributes: {
-                  protect: state.protect,
+                  clusterId: stack.cluster?.id ?? '',
+                  name: stack.name,
+                  configuration: deepOmitKey(
+                    stack.configuration,
+                    '__typename' as const
+                  )!,
+                  git: deepOmitKey(stack.git, '__typename' as const)!,
+                  repositoryId: stack.repository?.id ?? '',
+                  type: stack.type,
                   tags: tagsToNameValue(state.tags),
                 },
               },
@@ -129,14 +133,6 @@ function ClusterSettingsModalInner({
           gap: theme.spacing.large,
         }}
       >
-        {!cluster.self && (
-          <Switch
-            checked={state.protect}
-            onChange={(checked) => updateState({ protect: checked })}
-          >
-            Protect from deletion
-          </Switch>
-        )}
         <FormField label="Tags">
           <TagSelection
             tags={state.tags}
@@ -146,37 +142,5 @@ function ClusterSettingsModalInner({
         {error && <GqlError error={error} />}
       </div>
     </Modal>
-  )
-}
-
-export function ClusterSettingsModal(
-  props: ComponentProps<typeof ClusterSettingsModalInner>
-) {
-  return (
-    <ModalMountTransition open={!!props.open}>
-      <ClusterSettingsModalInner {...props} />
-    </ModalMountTransition>
-  )
-}
-
-export default function ClusterSettings({ cluster }: { cluster: Cluster }) {
-  const [isOpen, setIsOpen] = useState(false)
-
-  return (
-    <>
-      <IconFrame
-        type="secondary"
-        size="large"
-        tooltip="Cluster settings"
-        clickable
-        icon={<GearTrainIcon />}
-        onClick={() => setIsOpen(true)}
-      />
-      <ClusterSettingsModal
-        cluster={cluster}
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-      />
-    </>
   )
 }

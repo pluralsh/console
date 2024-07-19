@@ -1,6 +1,9 @@
 import {
   Button,
+  CloseIcon,
   EmptyState,
+  FiltersIcon,
+  GearTrainIcon,
   IconFrame,
   Input,
   ListBoxItem,
@@ -15,12 +18,27 @@ import {
   TrashCanIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { isEmpty } from 'lodash'
-import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import { useDebounce } from '@react-hooks-library/core'
+import { isEmpty } from 'lodash'
+import { Key, useEffect, useMemo, useRef, useState } from 'react'
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
+import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
+
+import usePersistedState from 'components/hooks/usePersistedState'
+
+import { keyToTag } from 'utils/clusterTags'
+
+import {
+  Conjunction,
+  StackFragment,
+  StackType,
+  TagType,
+  useKickStackMutation,
+  useStackQuery,
+  useStacksQuery,
+} from '../../generated/graphql'
 import {
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
@@ -32,32 +50,26 @@ import {
   STACK_STATE_REL_PATH,
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
-import { GqlError } from '../utils/Alert'
 import { mapExistingNodes } from '../../utils/graphql'
-import {
-  StackFragment,
-  StackType,
-  useKickStackMutation,
-  useStackQuery,
-  useStacksQuery,
-} from '../../generated/graphql'
 import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
+import { GqlError } from '../utils/Alert'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
+import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { LinkTabWrap } from '../utils/Tabs'
-import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 
 import { MoreMenu } from '../utils/MoreMenu'
 
 import CreateStack from './create/CreateStack'
-import StackEntry from './StacksEntry'
-import StackDetachModal from './StackDetachModal'
-import StackDeleteModal from './StackDeleteModal'
-import StackPermissionsModal from './StackPermissionsModal'
 import StackCustomRun from './customrun/StackCustomRun'
+import StackDeleteModal from './StackDeleteModal'
+import StackDetachModal from './StackDetachModal'
+import StackPermissionsModal from './StackPermissionsModal'
+import StackEntry from './StacksEntry'
+import { StackSettingsModal } from './StackSettingsModal'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -72,6 +84,7 @@ export const getBreadcrumbs = (stackId: string) => [
 enum MenuItemKey {
   None = '',
   ManagePermissions = 'managePermissions',
+  Settings = 'settings',
   Detach = 'detach',
   Delete = 'delete',
 }
@@ -108,9 +121,21 @@ export default function Stacks() {
   const pathMatch = useMatch(`${getStacksAbsPath(stackId)}/:tab`)
   const tab = pathMatch?.params?.tab || ''
   const [listRef, setListRef] = useState<any>(null)
+  const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
+
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
-  const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
+  const [filterExpanded, setFilterExpanded] = useState(false)
+  const [selectedTagKeys, setSelectedTagKeys] = useState(new Set<Key>())
+  const [tagOp, setTagOp] = usePersistedState(
+    'tag-search-operator',
+    Conjunction.Or
+  )
+  const searchTags = useMemo(
+    () =>
+      Array.from(selectedTagKeys.values(), (tagKey) => keyToTag(`${tagKey}`)),
+    [selectedTagKeys]
+  )
 
   useSetBreadcrumbs(useMemo(() => [...getBreadcrumbs(stackId)], [stackId]))
 
@@ -124,6 +149,9 @@ export default function Stacks() {
       {
         q: debouncedSearchString,
         projectId,
+        ...(!isEmpty(searchTags)
+          ? { tagQuery: { op: tagOp, tags: searchTags } }
+          : {}),
       }
     )
 
@@ -161,7 +189,11 @@ export default function Stacks() {
     return <LoopingLogo />
   }
 
-  if (isEmpty(stacks) && isEmpty(debouncedSearchString)) {
+  if (
+    isEmpty(stacks) &&
+    isEmpty(debouncedSearchString) &&
+    isEmpty(searchTags)
+  ) {
     return (
       <EmptyState message="Looks like you don't have any infrastructure stacks yet.">
         <CreateStack refetch={refetch} />
@@ -173,8 +205,11 @@ export default function Stacks() {
     <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
       <div
         css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.small,
           marginRight: theme.spacing.xlarge,
-          paddingBottom: theme.spacing.xxxlarge,
+
           minWidth: 340,
           width: 340,
         }}
@@ -183,7 +218,6 @@ export default function Stacks() {
           css={{
             display: 'flex',
             gap: theme.spacing.small,
-            marginBottom: theme.spacing.large,
           }}
         >
           <Input
@@ -195,43 +229,80 @@ export default function Stacks() {
               setSearchString?.(e.currentTarget.value)
             }}
           />
+          {!filterExpanded && (
+            <Button
+              floating
+              onClick={() => setFilterExpanded(true)}
+              height={40}
+              width={40}
+            >
+              <FiltersIcon />
+            </Button>
+          )}
           <CreateStack
             buttonContent={<PlusIcon />}
-            buttonProps={{ secondary: true, height: 40, width: 40 }}
+            buttonProps={{ floating: true, height: 40, width: 40 }}
             refetch={refetch}
           />
         </div>
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          items={stacks}
-          loading={loading}
-          placeholder={() => (
-            <div css={{ height: 52, borderBottom: theme.borders.default }} />
-          )}
-          hasNextPage={pageInfo?.hasNextPage}
-          mapper={(stack, { prev }) => (
-            <StackEntry
-              stack={stack}
-              active={stack.id === stackId}
-              first={isEmpty(prev)}
-            />
-          )}
-          loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
-          refreshKey={undefined}
-          setLoader={undefined}
-          handleScroll={undefined}
-        />
-        {isEmpty(stacks) && !isEmpty(debouncedSearchString) && (
-          <EmptyState message="No stacks match your query.">
-            <Button
-              secondary
-              onClick={() => setSearchString('')}
-            >
-              Reset search
-            </Button>
-          </EmptyState>
+        {filterExpanded && (
+          <TagsFilter
+            type={TagType.Stack}
+            innerChips={false}
+            selectedTagKeys={selectedTagKeys}
+            setSelectedTagKeys={setSelectedTagKeys}
+            searchOp={tagOp}
+            setSearchOp={setTagOp as (value: 'AND' | 'OR') => void}
+            comboBoxProps={{
+              endIcon: (
+                <CloseIcon
+                  css={{
+                    color: theme.colors['text-light'],
+                    '&:hover': {
+                      cursor: 'pointer',
+                      color: theme.colors.text,
+                    },
+                  }}
+                  onClick={() => setFilterExpanded(false)}
+                />
+              ),
+            }}
+          />
         )}
+        <div css={{ marginTop: theme.spacing.medium, flex: 1 }}>
+          <StandardScroller
+            listRef={listRef}
+            setListRef={setListRef}
+            items={stacks}
+            loading={loading}
+            placeholder={() => (
+              <div css={{ height: 52, borderBottom: theme.borders.default }} />
+            )}
+            hasNextPage={pageInfo?.hasNextPage}
+            mapper={(stack, { prev }) => (
+              <StackEntry
+                stack={stack}
+                active={stack.id === stackId}
+                first={isEmpty(prev)}
+              />
+            )}
+            loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
+            refreshKey={undefined}
+            setLoader={undefined}
+            handleScroll={undefined}
+          />
+          {isEmpty(stacks) &&
+            !(isEmpty(debouncedSearchString) && isEmpty(searchTags)) && (
+              <EmptyState message="No stacks match your query.">
+                <Button
+                  secondary
+                  onClick={() => setSearchString('')}
+                >
+                  Reset search
+                </Button>
+              </EmptyState>
+            )}
+        </div>
       </div>
       {stack ? (
         <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
@@ -285,6 +356,12 @@ export default function Stacks() {
                 leftContent={<PeopleIcon />}
               />
               <ListBoxItem
+                key={MenuItemKey.Settings}
+                leftContent={<GearTrainIcon />}
+                label="Settings"
+                textValue="Settings"
+              />
+              <ListBoxItem
                 destructive
                 key={MenuItemKey.Detach}
                 label="Detach stack"
@@ -304,6 +381,11 @@ export default function Stacks() {
             <StackPermissionsModal
               stack={stack}
               open={menuKey === MenuItemKey.ManagePermissions}
+              onClose={() => setMenuKey(MenuItemKey.None)}
+            />
+            <StackSettingsModal
+              stack={stack}
+              open={menuKey === MenuItemKey.Settings}
               onClose={() => setMenuKey(MenuItemKey.None)}
             />
             <StackDetachModal

@@ -61,6 +61,10 @@ fragment Stack on InfrastructureStack {
       }
     }
   }
+  tags {
+    name
+    value
+  }
 }
 
 fragment StackRun on StackRun {
@@ -182,6 +186,7 @@ query Stacks(
   $first: Int = 100
   $last: Int
   $projectId: ID
+  $tagQuery: TagQuery
 ) {
   infrastructureStacks(
     q: $q
@@ -190,6 +195,7 @@ query Stacks(
     first: $first
     last: $last
     projectId: $projectId
+    tagQuery: $tagQuery
   ) {
     pageInfo {
       ...PageInfo
