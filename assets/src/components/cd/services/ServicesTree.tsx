@@ -79,7 +79,6 @@ function ServicesTreeComponent({
     >
       <ServicesFilters
         setQueryStatusFilter={setQueryStatusFilter}
-        setQueryString={() => {}}
         clusterId={clusterId}
         setClusterId={clusterIdProp ? undefined : setClusterId}
         tabStateRef={tabStateRef}

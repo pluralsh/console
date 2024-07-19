@@ -68,7 +68,7 @@ export function ServicesFilters({
   statusCounts,
 }: {
   setQueryStatusFilter: Dispatch<SetStateAction<StatusTabKey>>
-  setQueryString: (string) => void
+  setQueryString?: (string) => void
   clusterId?: string
   setClusterId?: Dispatch<SetStateAction<string>>
   tabStateRef: MutableRefObject<any>
@@ -80,7 +80,7 @@ export function ServicesFilters({
   const deferredStatusFilter = useDeferredValue(statusFilter)
 
   useEffect(() => {
-    setQueryString(debouncedSearchString)
+    setQueryString?.(debouncedSearchString)
   }, [searchString, debouncedSearchString, setQueryString])
 
   useEffect(() => {
@@ -105,15 +105,17 @@ export function ServicesFilters({
           />
         </div>
       )}
-      <Input
-        placeholder="Search"
-        startIcon={<SearchIcon />}
-        value={searchString}
-        onChange={(e) => {
-          setSearchString(e.currentTarget.value)
-        }}
-        css={{ flexGrow: 1 }}
-      />
+      <div css={{ flex: 1 }}>
+        {setQueryString && (
+          <Input
+            placeholder="Search"
+            startIcon={<SearchIcon />}
+            value={searchString}
+            onChange={(e) => setSearchString(e.currentTarget.value)}
+            css={{ flexGrow: 1 }}
+          />
+        )}
+      </div>
       <TabList
         stateRef={tabStateRef}
         stateProps={{
