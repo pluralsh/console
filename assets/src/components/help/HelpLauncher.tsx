@@ -6,7 +6,6 @@ import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 
 import { AnimatedDiv } from '@pluralsh/design-system'
 
-import Chatbot from './Chatbot'
 import { DocSearch } from './DocSearch'
 import { useHandleIntercom } from './useHandleIntercom'
 import { HelpLauncherBtn, HelpLauncherButtonsSC } from './HelpLauncherBtn'
@@ -50,7 +49,7 @@ export const BTN_OVERSHOOT = 20
 export enum HelpMenuState {
   menu = 'menu',
   docSearch = 'docSearch',
-  chatBot = 'chatBot',
+  // chatBot = 'chatBot',
   intercom = 'intercom',
   intercomMini = 'intercomMini',
 }
@@ -190,9 +189,9 @@ function HelpLauncher() {
     changeState(HelpMenuState.menu, HelpOpenState.closed)
   }, [changeState])
 
-  const minHelp = useCallback(() => {
-    changeState(undefined, HelpOpenState.min)
-  }, [changeState])
+  // const minHelp = useCallback(() => {
+  //   changeState(undefined, HelpOpenState.min)
+  // }, [changeState])
 
   useHandleIntercom({
     menuState,
@@ -213,12 +212,12 @@ function HelpLauncher() {
     />
   )
   const contentOpts = {
-    [HelpMenuState.chatBot]: (
-      <Chatbot
-        onClose={closeHelp}
-        onMin={minHelp}
-      />
-    ),
+    // [HelpMenuState.chatBot]: (
+    //   <Chatbot
+    //     onClose={closeHelp}
+    //     onMin={minHelp}
+    //   />
+    // ),
     [HelpMenuState.docSearch]: null,
     [HelpMenuState.intercom]: null,
     [HelpMenuState.intercomMini]: null,

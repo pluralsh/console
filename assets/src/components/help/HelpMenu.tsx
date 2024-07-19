@@ -4,7 +4,7 @@ import { ComponentProps } from 'react'
 import {
   Button,
   Card,
-  ChatIcon,
+  Chip,
   DocumentIcon,
   LifePreserverIcon,
 } from '@pluralsh/design-system'
@@ -68,7 +68,25 @@ export function HelpMenu({
       fillLevel={2}
       {...props}
     >
-      <h6 className="heading">Have a question?</h6>
+      <HelpMenuButton
+        startIcon={
+          <DocumentIcon
+            size={16}
+            color={theme.colors['icon-success']}
+          />
+        }
+        onClick={() => {
+          changeState(HelpMenuState.docSearch, HelpOpenState.closed)
+        }}
+      >
+        <span>Search docs</span>
+        <Chip
+          size="small"
+          marginLeft={theme.spacing.xsmall}
+        >
+          D
+        </Chip>
+      </HelpMenuButton>
       <HelpMenuButton
         startIcon={
           <LifePreserverIcon
@@ -81,9 +99,15 @@ export function HelpMenu({
         }}
         count={intercomProps.unreadCount}
       >
-        Contact support
+        <span>Contact support</span>
+        <Chip
+          size="small"
+          marginLeft={theme.spacing.xsmall}
+        >
+          S
+        </Chip>
       </HelpMenuButton>
-      <HelpMenuButton
+      {/* <HelpMenuButton
         startIcon={
           <ChatIcon
             size={16}
@@ -95,20 +119,7 @@ export function HelpMenu({
         }}
       >
         Ask Plural AI
-      </HelpMenuButton>
-      <HelpMenuButton
-        startIcon={
-          <DocumentIcon
-            size={16}
-            color={theme.colors['icon-success']}
-          />
-        }
-        onClick={() => {
-          changeState(HelpMenuState.docSearch, HelpOpenState.closed)
-        }}
-      >
-        Search docs
-      </HelpMenuButton>
+      </HelpMenuButton> */}
     </HelpMenuSC>
   )
 }

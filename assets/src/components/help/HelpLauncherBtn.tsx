@@ -38,14 +38,14 @@ export const HelpLauncherBtnSC = styled.button(({ theme }) => {
     height: helpSpacing.icon.height + BTN_OVERSHOOT,
     paddingBottom: BTN_OVERSHOOT,
     transform: `translateY(${BTN_OVERSHOOT}px)`,
-    background: theme.colors['action-primary'],
+    background: theme.colors['fill-three'],
     borderStyle: 'solid',
     borderWidth: `1px 1px 0px 1px`,
     borderTopLeftRadius: theme.borderRadiuses.medium,
     borderTopRightRadius: theme.borderRadiuses.medium,
     borderBottomRightRadius: 0,
     borderBottomLeftRadius: 0,
-    borderColor: theme.colors['border-primary'],
+    borderColor: theme.colors['fill-three'],
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -54,11 +54,11 @@ export const HelpLauncherBtnSC = styled.button(({ theme }) => {
     transition: 'transform 0.2s ease',
 
     '&:hover': {
-      background: theme.colors['action-primary-hover'],
+      background: theme.colors['fill-three-hover'],
       transform: `translateY(${BTN_OVERSHOOT - theme.spacing.xsmall / 4}px)`,
     },
     '&:focus-visible': {
-      background: theme.colors['action-primary-hover'],
+      background: theme.colors['fill-three-hover'],
       border: theme.borders['outline-focused'],
     },
   }
