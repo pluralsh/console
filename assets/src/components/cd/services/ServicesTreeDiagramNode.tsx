@@ -18,7 +18,13 @@ export function ServicesTreeDiagramNode(
   const { data } = props
 
   return (
-    <NodeBase {...props}>
+    <NodeBase
+      {...props}
+      width={336}
+    >
+      <div css={{ backgroundColor: theme.colors['fill-zero'] }}>
+        {data.repository?.url}
+      </div>
       <div
         css={{
           display: 'flex',
@@ -36,15 +42,7 @@ export function ServicesTreeDiagramNode(
         >
           <div>{data.name}</div>
         </div>
-
-        <div
-          css={{
-            ...theme.partials.text.caption,
-            color: theme.colors['text-light'],
-          }}
-        >
-          {data.id}
-        </div>
+        <div>{data.cluster?.name}</div>
       </div>
     </NodeBase>
   )

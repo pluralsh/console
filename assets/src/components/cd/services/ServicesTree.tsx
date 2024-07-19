@@ -2,10 +2,7 @@ import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
-import {
-  ServiceDeploymentStatus,
-  useServiceDeploymentsQuery,
-} from 'generated/graphql'
+import { ServiceDeploymentStatus, useServiceTreeQuery } from 'generated/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 import { ReactFlowProvider } from 'reactflow'
@@ -14,7 +11,6 @@ import { useProjectId } from '../../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../../utils/graphql'
 
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
-import { SERVICES_QUERY_PAGE_SIZE } from './Services'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
 
 function ServicesTreeComponent({
@@ -29,14 +25,11 @@ function ServicesTreeComponent({
   const [clusterIdInternal, setClusterId] = useState<string>('')
   const clusterId = clusterIdProp ?? clusterIdInternal
   const tabStateRef = useRef<any>(null)
-  const [queryString, setQueryString] = useState()
   const [queryStatusFilter, setQueryStatusFilter] =
     useState<StatusTabKey>('ALL')
 
-  const { data, error, refetch } = useServiceDeploymentsQuery({
+  const { data, error, refetch } = useServiceTreeQuery({
     variables: {
-      first: SERVICES_QUERY_PAGE_SIZE,
-      q: queryString,
       projectId,
       ...(clusterId ? { clusterId } : {}),
       ...(queryStatusFilter !== 'ALL' ? { status: queryStatusFilter } : {}),
@@ -44,8 +37,8 @@ function ServicesTreeComponent({
   })
 
   const services = useMemo(
-    () => mapExistingNodes(data?.serviceDeployments),
-    [data?.serviceDeployments]
+    () => mapExistingNodes(data?.serviceTree),
+    [data?.serviceTree]
   )
 
   const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
@@ -86,7 +79,7 @@ function ServicesTreeComponent({
     >
       <ServicesFilters
         setQueryStatusFilter={setQueryStatusFilter}
-        setQueryString={setQueryString}
+        setQueryString={() => {}}
         clusterId={clusterId}
         setClusterId={clusterIdProp ? undefined : setClusterId}
         tabStateRef={tabStateRef}
@@ -98,7 +91,7 @@ function ServicesTreeComponent({
       >
         {!data ? (
           <LoadingIndicator />
-        ) : !isEmpty(data?.serviceDeployments?.edges) ? (
+        ) : !isEmpty(data?.serviceTree?.edges) ? (
           <ReactFlowProvider>
             <ServicesTreeDiagram services={services} />
           </ReactFlowProvider>

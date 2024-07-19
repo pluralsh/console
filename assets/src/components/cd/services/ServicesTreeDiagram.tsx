@@ -1,5 +1,5 @@
 import { usePrevious } from '@pluralsh/design-system'
-import { ServiceDeploymentsRowFragment } from 'generated/graphql'
+import { ServiceTreeNodeFragment } from 'generated/graphql'
 import {
   useCallback,
   useEffect,
@@ -24,7 +24,7 @@ import {
   nodeTypes,
 } from './ServicesTreeDiagramNode'
 
-function getNodesAndEdges(services: ServiceDeploymentsRowFragment[]) {
+function getNodesAndEdges(services: ServiceTreeNodeFragment[]) {
   return {
     nodes: services.map((service) => ({
       id: service.id,
@@ -47,7 +47,7 @@ function getNodesAndEdges(services: ServiceDeploymentsRowFragment[]) {
 export function ServicesTreeDiagram({
   services,
 }: {
-  services: ServiceDeploymentsRowFragment[]
+  services: ServiceTreeNodeFragment[]
 }) {
   const theme = useTheme()
 
