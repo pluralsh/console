@@ -1,20 +1,13 @@
 import {
   ArrowTopRightIcon,
-  Card,
   IconFrame,
   Modal,
   Tooltip,
 } from '@pluralsh/design-system'
 import { PipelineStageEdgeFragment } from 'generated/graphql'
-import {
-  ComponentProps,
-  ReactElement,
-  ReactNode,
-  cloneElement,
-  useState,
-} from 'react'
-import { Handle, type NodeProps, Position } from 'reactflow'
-import styled, { useTheme } from 'styled-components'
+import { ComponentProps, useState } from 'react'
+import { type NodeProps, Position } from 'reactflow'
+import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
@@ -32,79 +25,14 @@ import {
 import { CLUSTER_PARAM_ID } from 'routes/cdRoutesConsts'
 
 import { RawYaml } from '../ComponentRaw'
-
-export type CardStatus = 'ok' | 'closed' | 'pending'
-
-const HANDLE_SIZE = 10
-
-export const NodeCardList = styled.ul(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-}))
-
-const ComponentTreeNodeSC = styled(Card)(({ theme }) => ({
-  '&&': {
-    display: 'flex',
-    alignItems: 'center',
-    overflow: 'hidden',
-    padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-    gap: theme.spacing.medium,
-    width: 240,
-  },
-  '.content': {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'baseline',
-    columnGap: theme.spacing.small,
-    rowGap: theme.spacing.xxxsmall,
-    flexShrink: 1,
-    flexGrow: 1,
-    overflow: 'hidden',
-    '.name': {
-      ...theme.partials.text.body2Bold,
-      maxWidth: '100%',
-      ...TRUNCATE,
-      flexShrink: 1,
-    },
-    '.kind': {
-      ...theme.partials.text.caption,
-      maxWidth: '100%',
-      ...TRUNCATE,
-      color: theme.colors['text-xlight'],
-      marginRight: theme.spacing.xsmall,
-      flexShrink: 1,
-      flexGrow: 1,
-    },
-  },
-}))
-
-const HandleSC = styled(Handle)<{ $isConnected?: boolean; $isOpen?: boolean }>(
-  ({ theme, $isConnected, $isOpen = true }) => ({
-    '&&': {
-      visibility: $isConnected ? 'visible' : 'hidden',
-      width: HANDLE_SIZE,
-      height: HANDLE_SIZE,
-      borderColor: $isOpen
-        ? theme.colors['border-secondary']
-        : theme.colors.border,
-      borderWidth: theme.borderWidths.default,
-      backgroundColor: theme.colors['fill-zero'],
-      '&.react-flow__handle-left': {
-        left: -HANDLE_SIZE / 2,
-      },
-      '&.react-flow__handle-right': {
-        right: -HANDLE_SIZE / 2,
-      },
-    },
-  })
-)
+import { NodeBaseCard, NodeHandle } from '../../utils/reactflow/nodes'
 
 export function ComponentTreeNode({
   id,
   data,
   ...props
-}: NodeProps<TreeNodeMeta> & ComponentProps<typeof ComponentTreeNodeSC>) {
+}: NodeProps<TreeNodeMeta> & ComponentProps<typeof NodeBaseCard>) {
+  const theme = useTheme()
   const clusterId = useParams()[CLUSTER_PARAM_ID]
   const [open, setOpen] = useState(false)
   const { incomers, outgoers } = useNodeEdges(id)
@@ -127,8 +55,21 @@ export function ComponentTreeNode({
       : getResourceDetailsAbsPath(clusterId, kind, name, namespace)
 
   return (
-    <ComponentTreeNodeSC
+    <NodeBaseCard
       {...props}
+      css={{
+        alignItems: 'center',
+        overflow: 'hidden',
+        padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
+        gap: theme.spacing.medium,
+        width: 240,
+        ':hover': {
+          backgroundColor:
+            theme.mode === 'light'
+              ? theme.colors['fill-two-hover']
+              : theme.colors['fill-zero-hover'],
+        },
+      }}
       clickable={clickable}
       onClick={
         !clickable
@@ -139,7 +80,7 @@ export function ComponentTreeNode({
             }
       }
     >
-      <HandleSC
+      <NodeHandle
         type="target"
         isConnectable={false}
         $isConnected={!isEmpty(incomers)}
@@ -150,9 +91,27 @@ export function ComponentTreeNode({
         kind={data.kind}
         size={16}
       />
-      <div className="content">
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'baseline',
+          columnGap: theme.spacing.small,
+          rowGap: theme.spacing.xxxsmall,
+          flexShrink: 1,
+          flexGrow: 1,
+          overflow: 'hidden',
+        }}
+      >
         {name && (
-          <p className="name">
+          <p
+            css={{
+              ...theme.partials.text.body2Bold,
+              ...TRUNCATE,
+              maxWidth: '100%',
+              flexShrink: 1,
+            }}
+          >
             <Tooltip
               label={name}
               placement="bottom"
@@ -162,7 +121,17 @@ export function ComponentTreeNode({
           </p>
         )}
         {kind && (
-          <p className="kind">
+          <p
+            css={{
+              ...theme.partials.text.caption,
+              maxWidth: '100%',
+              ...TRUNCATE,
+              color: theme.colors['text-xlight'],
+              marginRight: theme.spacing.xsmall,
+              flexShrink: 1,
+              flexGrow: 1,
+            }}
+          >
             <Tooltip label={kind}>
               <span>{kind}</span>
             </Tooltip>
@@ -180,7 +149,7 @@ export function ComponentTreeNode({
           placement: 'right',
         }}
       />
-      <HandleSC
+      <NodeHandle
         type="source"
         isConnectable={false}
         $isConnected={!isEmpty(outgoers)}
@@ -190,16 +159,9 @@ export function ComponentTreeNode({
       <ModalMountTransition open={open}>
         <DetailsModal {...{ open, data, onClose: () => setOpen(false) }} />
       </ModalMountTransition>
-    </ComponentTreeNodeSC>
+    </NodeBaseCard>
   )
 }
-
-const IconHeadingSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: theme.spacing.xsmall,
-  ...theme.partials.text.body2Bold,
-}))
 
 function DetailsModal({
   data,
@@ -218,27 +180,6 @@ function DetailsModal({
     >
       <RawYaml raw={data.raw} />
     </Modal>
-  )
-}
-
-export function IconHeading({
-  icon,
-  children,
-}: {
-  icon: ReactElement
-  children: ReactNode
-}) {
-  const theme = useTheme()
-  const clonedIcon = cloneElement(icon, {
-    size: 12,
-    color: theme.colors['icon-light'],
-  })
-
-  return (
-    <IconHeadingSC>
-      {clonedIcon}
-      {children}
-    </IconHeadingSC>
   )
 }
 

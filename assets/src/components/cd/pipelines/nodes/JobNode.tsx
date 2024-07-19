@@ -135,6 +135,7 @@ export function JobNode(props: EdgeNode) {
         <h2 className="heading">Action</h2>
         {meta.state && (
           <Chip
+            fillLevel={0}
             size="small"
             severity={gateStateToSeverity[meta.state]}
           >
@@ -164,6 +165,7 @@ export function JobNode(props: EdgeNode) {
           <ContainerCard
             container={containers?.[0]}
             gate={gate}
+            fillLevel={0}
           />
         </li>
       </NodeCardList>

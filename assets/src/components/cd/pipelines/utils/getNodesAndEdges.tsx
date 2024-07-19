@@ -14,7 +14,8 @@ import { groupBy } from 'lodash'
 import { Entries } from 'type-fest'
 
 import { StageStatus, getStageStatus } from '../nodes/StageNode'
-import { PIPELINE_EDGE_NAME } from '../EdgeLine'
+
+import { EdgeType } from '../../../utils/reactflow/edges'
 
 import { reduceGateStates } from './reduceGateStatuses'
 import { DEMO_GATES, PIPELINE_DEBUG_MODE } from './_demo_data'
@@ -27,7 +28,7 @@ export enum NodeType {
 }
 
 const baseEdgeProps = {
-  type: PIPELINE_EDGE_NAME,
+  type: EdgeType.Pipeline,
   updatable: false,
 }
 

@@ -47,7 +47,6 @@ import {
   ServiceErrorsModal,
 } from 'components/cd/services/ServicesTableErrors'
 
-import { PIPELINE_GRID_GAP } from '../PipelineGraph'
 import { PipelinePullRequestsModal } from '../PipelinePullRequests'
 
 import { StopPropagation } from '../../../utils/StopPropagation'
@@ -114,19 +113,15 @@ export function ServiceCard({
 }
 
 export function getStageStatus(stage: PipelineStageFragment) {
-  if (
-    (stage.services || []).every(
-      (svc) => svc?.service?.status === ServiceDeploymentStatus.Healthy
-    )
-  ) {
-    return StageStatus.Complete
-  }
-
-  return StageStatus.Pending
+  return (stage.services || []).every(
+    (svc) => svc?.service?.status === ServiceDeploymentStatus.Healthy
+  )
+    ? StageStatus.Complete
+    : StageStatus.Pending
 }
 
-const StageNodeSC = styled(BaseNode)((_) => ({
-  '&&': { minWidth: 10 * PIPELINE_GRID_GAP },
+const StageNodeSC = styled(BaseNode)(() => ({
+  '&&': { minWidth: 240 },
 }))
 
 const IconHeadingInnerSC = styled.div(({ theme }) => ({
@@ -196,6 +191,7 @@ function HeaderChip({ stage, isOpen, setIsOpen, status }) {
     return (
       <>
         <ServiceErrorsChip
+          fillLevel={0}
           clickable
           onClick={(e) => {
             setIsOpen(true)
@@ -215,6 +211,7 @@ function HeaderChip({ stage, isOpen, setIsOpen, status }) {
 
   return (
     <Chip
+      fillLevel={0}
       size="small"
       severity={stageStatusToSeverity[status]}
     >
@@ -280,6 +277,7 @@ export function StageNode(
               return (
                 <li key={serviceId}>
                   <ServiceCard
+                    fillLevel={0}
                     clickable
                     onClick={() => {
                       navigate(

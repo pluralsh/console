@@ -1,7 +1,8 @@
-import { BASIC_EDGE_NAME } from 'components/cd/pipelines/EdgeLine'
 import { ComponentTreeFragment, MetadataFragment } from 'generated/graphql'
 import { ConditionalKeys } from 'type-fest'
 import { isNonNullable } from 'utils/isNonNullable'
+
+import { EdgeType } from '../../utils/reactflow/edges'
 
 export type TreeNodeMeta = ReturnType<typeof flattenMetadata>[number]
 export type HasMetadata = { metadata?: MetadataFragment }
@@ -23,7 +24,7 @@ export const C_TYPES = [
 ] as const satisfies ComponentKindsKey[]
 
 export const baseEdgeProps = {
-  type: BASIC_EDGE_NAME,
+  type: EdgeType.Directed,
   updatable: false,
 }
 
