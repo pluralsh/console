@@ -75,7 +75,7 @@ defmodule Console.GraphQl.Deployments.StackQueriesTest do
       user = insert(:user)
       %{group: group} = insert(:group_member, user: user)
       stacks  = insert_list(3, :stack, write_bindings: [%{group_id: group.id}], tags: [%{name: "t", value: "v"}])
-      other = insert(:stack, read_bindings: [%{user_id: user.id}])
+      insert(:stack, read_bindings: [%{user_id: user.id}])
       insert_list(3, :stack)
 
       {:ok, %{data: %{"infrastructureStacks" => found}}} = run_query("""

@@ -126,10 +126,14 @@ defmodule Console.Deployments.Git.Cache do
   end
 
   defp find_head(heads, ref) do
-    case Enum.find_value([ref, "refs/heads/#{ref}", "refs/tags/#{ref}"], &Map.get(heads, &1)) do
+    case Enum.find_value(potential_refs(ref), &Map.get(heads, &1)) do
       sha when is_binary(sha) -> {:ok, sha}
       _ -> {:error, "could not resolve ref #{ref}"}
     end
+  end
+
+  defp potential_refs(ref) do
+    [ref, "refs/remotes/origin/#{ref}", "refs/heads/#{ref}", "refs/tags/#{ref}"]
   end
 
   defp tarball(%__MODULE__{git: git, dir: dir}, sha, path, filter) do
