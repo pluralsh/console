@@ -4,9 +4,9 @@ dependencies:
   version: 0.1.10
 - name: controller
   repository: file://../../../charts/controller
-  version: 0.0.62
+  version: 0.0.63
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard
   version: 7.5.0
-digest: sha256:82593297ade30bd015c4b9d7598689a083093ab45d61742053165dc85be28bb8
-generated: "2024-07-11T20:44:38.108139966Z"
+digest: sha256:ffd2e81297d2980952d1c81929e223043bb15b7527645a7765e63eaf8dc2fd9a
+generated: "2024-07-20T21:27:13.559064537Z"
