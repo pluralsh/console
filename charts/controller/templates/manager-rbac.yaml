@@ -45,6 +45,12 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - '*'
+  verbs:
+  - '*'
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - clusterrestores/status
   verbs:
   - get
