@@ -117,8 +117,8 @@ defmodule Console.Schema.Service do
     embeds_one :helm, Helm, on_replace: :update
 
     embeds_one :sync_config, SyncConfig, on_replace: :update do
-      embeds_many :diff_normalizers, DiffNormalizer
-      embeds_one :namespace_metadata, Metadata
+      embeds_many :diff_normalizers, DiffNormalizer, on_replace: :delete
+      embeds_one :namespace_metadata, Metadata, on_replace: :update
       field :enforce_namespace, :boolean, default: false
       field :create_namespace,  :boolean, default: true
     end
