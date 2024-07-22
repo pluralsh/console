@@ -8714,7 +8714,7 @@ export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployme
 
 export type ServiceDeploymentTinyFragment = { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null };
 
-export type ServiceTreeNodeFragment = { __typename?: 'ServiceDeployment', id: string, name: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string } } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null };
+export type ServiceTreeNodeFragment = { __typename?: 'ServiceDeployment', id: string, name: string, status: ServiceDeploymentStatus, componentStatus?: string | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string } } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null };
 
 export type ServiceDeploymentsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -8745,7 +8745,7 @@ export type ServiceTreeQueryVariables = Exact<{
 }>;
 
 
-export type ServiceTreeQuery = { __typename?: 'RootQueryType', serviceTree?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string } } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
+export type ServiceTreeQuery = { __typename?: 'RootQueryType', serviceTree?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, status: ServiceDeploymentStatus, componentStatus?: string | null, components?: Array<{ __typename?: 'ServiceComponent', id: string, name: string, group?: string | null, kind: string, namespace?: string | null, state?: ComponentState | null, synced: boolean, version?: string | null, apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', availableIn?: string | null, blocking?: boolean | null, deprecatedIn?: string | null, removedIn?: string | null, replacement?: string | null, component?: { __typename?: 'ServiceComponent', group?: string | null, version?: string | null, kind: string, name: string, namespace?: string | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null } | null } | null } | null> | null, content?: { __typename?: 'ComponentContent', desired?: string | null, live?: string | null } | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string } } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
 
 export type ServiceDeploymentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10849,12 +10849,60 @@ export const ServiceDeploymentTinyFragmentDoc = gql`
   }
 }
     `;
+export const ApiDeprecationFragmentDoc = gql`
+    fragment ApiDeprecation on ApiDeprecation {
+  availableIn
+  blocking
+  component {
+    group
+    version
+    kind
+    name
+    namespace
+    service {
+      git {
+        ref
+        folder
+      }
+      repository {
+        httpsPath
+        urlFormat
+      }
+    }
+  }
+  deprecatedIn
+  removedIn
+  replacement
+}
+    `;
+export const ServiceDeploymentComponentFragmentDoc = gql`
+    fragment ServiceDeploymentComponent on ServiceComponent {
+  id
+  name
+  group
+  kind
+  namespace
+  state
+  synced
+  version
+  apiDeprecations {
+    ...ApiDeprecation
+  }
+  content {
+    desired
+    live
+  }
+}
+    ${ApiDeprecationFragmentDoc}`;
 export const ServiceTreeNodeFragmentDoc = gql`
     fragment ServiceTreeNode on ServiceDeployment {
   id
   name
   status
   componentStatus
+  components {
+    ...ServiceDeploymentComponent
+  }
   cluster {
     id
     name
@@ -10880,7 +10928,7 @@ export const ServiceTreeNodeFragmentDoc = gql`
     message
   }
 }
-    `;
+    ${ServiceDeploymentComponentFragmentDoc}`;
 export const ServiceDeploymentBindingsFragmentDoc = gql`
     fragment ServiceDeploymentBindings on ServiceDeployment {
   readBindings {
@@ -11428,51 +11476,6 @@ export const ServiceDeploymentsRowFragmentDoc = gql`
   dryRun
 }
     `;
-export const ApiDeprecationFragmentDoc = gql`
-    fragment ApiDeprecation on ApiDeprecation {
-  availableIn
-  blocking
-  component {
-    group
-    version
-    kind
-    name
-    namespace
-    service {
-      git {
-        ref
-        folder
-      }
-      repository {
-        httpsPath
-        urlFormat
-      }
-    }
-  }
-  deprecatedIn
-  removedIn
-  replacement
-}
-    `;
-export const ServiceDeploymentComponentFragmentDoc = gql`
-    fragment ServiceDeploymentComponent on ServiceComponent {
-  id
-  name
-  group
-  kind
-  namespace
-  state
-  synced
-  version
-  apiDeprecations {
-    ...ApiDeprecation
-  }
-  content {
-    desired
-    live
-  }
-}
-    ${ApiDeprecationFragmentDoc}`;
 export const ServiceDeploymentDetailsFragmentDoc = gql`
     fragment ServiceDeploymentDetails on ServiceDeployment {
   ...ServiceDeploymentsRow

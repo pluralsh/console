@@ -13,11 +13,14 @@ import React from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
+import { isEmpty } from 'lodash'
+
 import {
+  ComponentState,
   GlobalServiceFragment,
   ServiceTreeNodeFragment,
 } from '../../../generated/graphql'
-import { NodeBase } from '../../utils/reactflow/nodes'
+import { NodeBase, NodeBaseCard } from '../../utils/reactflow/nodes'
 import {
   getGlobalServiceDetailsPath,
   getServiceDetailsPath,
@@ -25,6 +28,10 @@ import {
 import { TRUNCATE, TRUNCATE_LEFT } from '../../utils/truncate'
 
 import ProviderIcon from '../../utils/Provider'
+
+import { ComponentIcon } from '../../apps/app/components/misc'
+
+import { isNonNullable } from '../../../utils/isNonNullable'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
@@ -43,10 +50,62 @@ export function ServicesTreeDiagramServiceNode(
   const theme = useTheme()
   const navigate = useNavigate()
   const { data } = props
+  const componentsLimit = data.components?.length === 20 ? 20 : 19
+  const hiddenComponents = (data.components?.length ?? 0) - componentsLimit
 
   return (
     <NodeBase
       {...props}
+      additionalContent={
+        !isEmpty(data.components) ? (
+          <NodeBaseCard
+            css={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: theme.spacing.xxsmall,
+              marginTop: theme.spacing.xxsmall,
+              padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+              width: 336,
+            }}
+          >
+            {data.components
+              ?.filter(isNonNullable)
+              .slice(0, componentsLimit)
+              .map((component) => (
+                <IconFrame
+                  color={
+                    component.state === ComponentState.Failed
+                      ? 'icon-danger'
+                      : component.state === ComponentState.Pending
+                      ? 'icon-warning'
+                      : 'icon-light'
+                  }
+                  size="small"
+                  type="floating"
+                  icon={<ComponentIcon kind={component.kind} />}
+                />
+              ))}
+            {hiddenComponents > 0 && (
+              <div
+                css={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  backgroundColor: theme.colors['fill-two'],
+                  border: theme.borders['fill-two'],
+                  borderRadius: theme.borderRadiuses.medium,
+                  color: theme.colors['text-light'],
+                  height: 24,
+                  justifyContent: 'center',
+                  minWidth: 24,
+                  padding: theme.spacing.xxsmall,
+                }}
+              >
+                +{hiddenComponents}
+              </div>
+            )}
+          </NodeBaseCard>
+        ) : undefined
+      }
       backgroundColor="fill-one"
       gap={0}
       padding={0}

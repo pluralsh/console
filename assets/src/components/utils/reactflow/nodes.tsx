@@ -41,54 +41,61 @@ export const NodeBaseCard = styled(Card)(({ theme }) => ({
 
 export function NodeBase({
   id,
+  additionalContent,
   children,
   ...props
-}: NodeProps & { children: ReactNode } & ComponentProps<typeof NodeBaseCard>) {
+}: NodeProps & {
+  additionalContent?: ReactNode
+  children: ReactNode
+} & ComponentProps<typeof NodeBaseCard>) {
   const theme = useTheme()
   const { incomers, outgoers } = useNodeEdges(id)
 
   return (
-    <NodeBaseCard
-      {...props}
-      css={{
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        minWidth: 200,
-        position: 'relative',
-        padding: theme.spacing.small,
-      }}
-    >
-      <NodeHandle
-        type="target"
-        isConnectable={false}
-        $isConnected={!isEmpty(incomers)}
-        position={Position.Left}
+    <>
+      <NodeBaseCard
+        {...props}
         css={{
-          '&&': {
-            backgroundColor: theme.colors.border,
-            borderColor: theme.colors.border,
-          },
+          flexDirection: 'column',
+          gap: theme.spacing.small,
+          minWidth: 200,
+          position: 'relative',
+          padding: theme.spacing.small,
         }}
-      />
-      {children}
-      <NodeHandle
-        type="source"
-        isConnectable={false}
-        $isConnected={!isEmpty(outgoers)}
-        position={Position.Right}
-        css={{
-          '&&': {
-            backgroundColor:
-              theme.mode === 'light'
-                ? theme.colors['border-fill-two']
-                : theme.colors.border,
-            borderColor:
-              theme.mode === 'light'
-                ? theme.colors['border-fill-two']
-                : theme.colors.border,
-          },
-        }}
-      />
-    </NodeBaseCard>
+      >
+        <NodeHandle
+          type="target"
+          isConnectable={false}
+          $isConnected={!isEmpty(incomers)}
+          position={Position.Left}
+          css={{
+            '&&': {
+              backgroundColor: theme.colors.border,
+              borderColor: theme.colors.border,
+            },
+          }}
+        />
+        {children}
+        <NodeHandle
+          type="source"
+          isConnectable={false}
+          $isConnected={!isEmpty(outgoers)}
+          position={Position.Right}
+          css={{
+            '&&': {
+              backgroundColor:
+                theme.mode === 'light'
+                  ? theme.colors['border-fill-two']
+                  : theme.colors.border,
+              borderColor:
+                theme.mode === 'light'
+                  ? theme.colors['border-fill-two']
+                  : theme.colors.border,
+            },
+          }}
+        />
+      </NodeBaseCard>
+      {additionalContent}
+    </>
   )
 }
