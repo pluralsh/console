@@ -8,8 +8,9 @@ import {
   GlobeIcon,
   IconFrame,
   InfoOutlineIcon,
+  Modal,
 } from '@pluralsh/design-system'
-import React from 'react'
+import React, { Dispatch, SetStateAction, useState } from 'react'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -25,6 +26,8 @@ import {
 import { TRUNCATE, TRUNCATE_LEFT } from '../../utils/truncate'
 
 import ProviderIcon from '../../utils/Provider'
+
+import { ModalMountTransition } from '../../utils/ModalMountTransition'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
@@ -43,6 +46,7 @@ export function ServicesTreeDiagramServiceNode(
   const theme = useTheme()
   const navigate = useNavigate()
   const { data } = props
+  const [open, setOpen] = useState(false)
   // const componentsLimit = data.components?.length === 20 ? 20 : 19
   // const hiddenComponents = (data.components?.length ?? 0) - componentsLimit
 
@@ -188,6 +192,11 @@ export function ServicesTreeDiagramServiceNode(
                 icon={<InfoOutlineIcon />}
                 type="secondary"
               />
+              <ServicesTreeDiagramServiceNodeModal
+                service={data}
+                open={open}
+                setOpen={setOpen}
+              />
             </div>
           </div>
           <ServicesTableErrors
@@ -199,6 +208,31 @@ export function ServicesTreeDiagramServiceNode(
         </div>
       </div>
     </NodeBase>
+  )
+}
+
+// TODO
+function ServicesTreeDiagramServiceNodeModal({
+  service,
+  open,
+  setOpen,
+}: {
+  service: ServiceTreeNodeFragment
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+}) {
+  return (
+    <ModalMountTransition open={open}>
+      <Modal
+        portal
+        size="large"
+        header={service.name}
+        open={open}
+        onClose={() => setOpen(false)}
+      >
+        {service.name}
+      </Modal>
+    </ModalMountTransition>
   )
 }
 
