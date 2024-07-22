@@ -8714,7 +8714,7 @@ export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployme
 
 export type ServiceDeploymentTinyFragment = { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null };
 
-export type ServiceTreeNodeFragment = { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null };
+export type ServiceTreeNodeFragment = { __typename?: 'ServiceDeployment', id: string, name: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string } } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null };
 
 export type ServiceDeploymentsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -8739,12 +8739,13 @@ export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', servic
 
 export type ServiceTreeQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
+  status?: InputMaybe<ServiceDeploymentStatus>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type ServiceTreeQuery = { __typename?: 'RootQueryType', serviceTree?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
+export type ServiceTreeQuery = { __typename?: 'RootQueryType', serviceTree?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, helmRepository?: { __typename?: 'HelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string } } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
 
 export type ServiceDeploymentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10852,11 +10853,19 @@ export const ServiceTreeNodeFragmentDoc = gql`
     fragment ServiceTreeNode on ServiceDeployment {
   id
   name
+  status
+  componentStatus
   cluster {
+    id
     name
   }
   repository {
     url
+  }
+  helmRepository {
+    spec {
+      url
+    }
   }
   parent {
     id
@@ -16050,8 +16059,13 @@ export type ServiceDeploymentsTinyLazyQueryHookResult = ReturnType<typeof useSer
 export type ServiceDeploymentsTinySuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentsTinySuspenseQuery>;
 export type ServiceDeploymentsTinyQueryResult = Apollo.QueryResult<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>;
 export const ServiceTreeDocument = gql`
-    query ServiceTree($first: Int = 100, $clusterId: ID, $projectId: ID) {
-  serviceTree(first: $first, clusterId: $clusterId, projectId: $projectId) {
+    query ServiceTree($first: Int = 100, $status: ServiceDeploymentStatus, $clusterId: ID, $projectId: ID) {
+  serviceTree(
+    first: $first
+    status: $status
+    clusterId: $clusterId
+    projectId: $projectId
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -16082,6 +16096,7 @@ ${ServiceStatusCountFragmentDoc}`;
  * const { data, loading, error } = useServiceTreeQuery({
  *   variables: {
  *      first: // value for 'first'
+ *      status: // value for 'status'
  *      clusterId: // value for 'clusterId'
  *      projectId: // value for 'projectId'
  *   },

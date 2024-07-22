@@ -32,7 +32,7 @@ import {
   GlobalServiceNodeType,
   ServiceNodeType,
   nodeTypes,
-} from './ServicesTreeDiagramNode'
+} from './ServicesTreeDiagramNodes'
 
 const isNotDeploymentOperatorService = (service: ServiceTreeNodeFragment) =>
   service.name !== 'deploy-operator'

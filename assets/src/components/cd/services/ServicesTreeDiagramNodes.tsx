@@ -4,6 +4,7 @@ import {
   ArrowTopRightIcon,
   ChipList,
   FolderIcon,
+  GitHubLogoIcon,
   GlobeIcon,
   IconFrame,
 } from '@pluralsh/design-system'
@@ -16,7 +17,15 @@ import {
   ServiceTreeNodeFragment,
 } from '../../../generated/graphql'
 import { NodeBase } from '../../utils/reactflow/nodes'
-import { getGlobalServiceDetailsPath } from '../../../routes/cdRoutesConsts'
+import {
+  getGlobalServiceDetailsPath,
+  getServiceDetailsPath,
+} from '../../../routes/cdRoutesConsts'
+import { TRUNCATE_LEFT } from '../../utils/truncate'
+
+import ProviderIcon from '../../utils/Provider'
+
+import { ServiceStatusChip } from './ServiceStatusChip'
 
 export const ServiceNodeType = 'plural-services-tree-service-node'
 export const GlobalServiceNodeType = 'plural-services-tree-global-service-node'
@@ -30,6 +39,7 @@ export function ServicesTreeDiagramServiceNode(
   props: NodeProps<ServiceTreeNodeFragment>
 ) {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { data } = props
 
   return (
@@ -42,23 +52,77 @@ export function ServicesTreeDiagramServiceNode(
       <div
         css={{
           ...theme.partials.text.caption,
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          display: 'flex',
           backgroundColor: theme.colors['fill-zero'],
+          borderBottom: '1px solid',
+          borderColor:
+            theme.mode === 'light'
+              ? theme.colors['border-fill-two']
+              : theme.colors.border,
           color: theme.colors['text-xlight'],
+          gap: theme.spacing.medium,
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
-        {data.repository?.url}
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.xsmall,
+            minWidth: 50,
+          }}
+        >
+          {data.helmRepository ? (
+            <ProviderIcon
+              provider="byok"
+              width={16}
+            />
+          ) : (
+            <GitHubLogoIcon />
+          )}
+          <span css={{ ...TRUNCATE_LEFT }}>
+            {data.helmRepository?.spec.url ?? data.repository?.url}
+          </span>
+        </div>
+        <ServiceStatusChip
+          status={data?.status}
+          componentStatus={data?.componentStatus}
+          size="small"
+          css={{ whiteSpace: 'nowrap' }}
+        />
       </div>
       <div
         css={{
-          backgroundColor: theme.colors['fill-one'],
           display: 'flex',
-          flexDirection: 'column',
+          backgroundColor: theme.colors['fill-one'],
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
-        <div>{data.name}</div>
-        <div>{data.cluster?.name}</div>
+        <div css={{ flex: 1 }}>
+          <div css={{ ...theme.partials.text.body2Bold }}>{data.name}</div>
+          <div
+            css={{
+              ...theme.partials.text.caption,
+              color: theme.colors['text-xlight'],
+            }}
+          >
+            {data.cluster?.name}
+          </div>
+        </div>
+        <IconFrame
+          clickable
+          onClick={() =>
+            navigate(
+              getServiceDetailsPath({
+                serviceId: data.id,
+                clusterId: data.cluster?.id,
+              })
+            )
+          }
+          icon={<ArrowTopRightIcon />}
+          type="secondary"
+        />
       </div>
     </NodeBase>
   )
