@@ -25,8 +25,15 @@ defmodule Console.Deployments.Git.Cmd do
   def refresh_key(git), do: save_private_key(git)
 
   def fetch(%GitRepository{} = repo) do
-    with {:ok, _} <- git(repo, "fetch", ["--all", "--force", "--prune"]),
-      do: possibly_pull(repo)
+    with {:ok, _} <- git(repo, "fetch", ["--all", "--tags", "--force", "--prune", "--prune-tags"]),
+      do: reset(repo)
+  end
+
+  def reset(repo) do
+    case git(repo, "reset", ["--hard"]) do
+      {:ok, _} = res -> res
+      _ -> {:ok, :ignore}
+    end
   end
 
   def possibly_pull(repo) do
