@@ -1,0 +1,87 @@
+icon: https://github.com/traefik/traefik/raw/master/docs/content/assets/img/traefik.logo-dark.png
+git_url: https://github.com/traefik/traefik
+release_url: https://github.com/traefik/traefik/releases/tag/v{vsn}
+helm_repository_url: https://traefik.github.io/charts
+versions:
+- version: 3.1.0
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+- version: 3.0.4
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 29.0.0
+- version: 3.0.3
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+- version: 3.0.2
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 28.3.0
+- version: 3.0.1
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 28.2.0
+- version: 3.0.0
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 28.0.0
+- version: 2.11.6
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+- version: 2.11.5
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+- version: 2.11.4
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+- version: 2.11.3
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+- version: 2.11.2
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 27.0.2
+- version: 2.11.1
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 27.0.1
+- version: 2.11.0
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 26.1.0
+- version: 2.10.7
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+- version: 2.10.6
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 26.0.0
+- version: 2.10.5
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 25.0.0
+- version: 2.10.4
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 23.2.0
+- version: 2.10.3
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []

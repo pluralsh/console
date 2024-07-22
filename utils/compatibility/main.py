@@ -34,6 +34,10 @@ if "names" not in manifest:
     print_error("No names found in the manifest file.")
 
 for name in manifest["names"]:
+    scraper = os.getenv("SCRAPER")
+    if scraper and name not in scraper:
+        continue
+
     print(
         Fore.BLUE
         + "Calling scraper for"
