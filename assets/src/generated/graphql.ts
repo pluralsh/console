@@ -8738,6 +8738,7 @@ export type ServiceDeploymentsTinyQueryVariables = Exact<{
 export type ServiceDeploymentsTinyQuery = { __typename?: 'RootQueryType', serviceDeployments?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null } | null } | null> | null } | null };
 
 export type ServiceTreeQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
@@ -16049,8 +16050,8 @@ export type ServiceDeploymentsTinyLazyQueryHookResult = ReturnType<typeof useSer
 export type ServiceDeploymentsTinySuspenseQueryHookResult = ReturnType<typeof useServiceDeploymentsTinySuspenseQuery>;
 export type ServiceDeploymentsTinyQueryResult = Apollo.QueryResult<ServiceDeploymentsTinyQuery, ServiceDeploymentsTinyQueryVariables>;
 export const ServiceTreeDocument = gql`
-    query ServiceTree($clusterId: ID, $projectId: ID) {
-  serviceTree(first: 100, clusterId: $clusterId, projectId: $projectId) {
+    query ServiceTree($first: Int = 100, $clusterId: ID, $projectId: ID) {
+  serviceTree(first: $first, clusterId: $clusterId, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }
@@ -16080,6 +16081,7 @@ ${ServiceStatusCountFragmentDoc}`;
  * @example
  * const { data, loading, error } = useServiceTreeQuery({
  *   variables: {
+ *      first: // value for 'first'
  *      clusterId: // value for 'clusterId'
  *      projectId: // value for 'projectId'
  *   },

@@ -19,6 +19,8 @@ import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
 import { ServicesContextT } from './Services'
 
+const servicesLimit = 1000
+
 export default function ServicesTree() {
   const theme = useTheme()
   const projectId = useProjectId()
@@ -35,6 +37,7 @@ export default function ServicesTree() {
       projectId,
       ...(clusterId ? { clusterId } : {}),
       ...(queryStatusFilter !== 'ALL' ? { status: queryStatusFilter } : {}),
+      first: servicesLimit,
     },
   })
 
@@ -45,7 +48,7 @@ export default function ServicesTree() {
 
   const { data: globalServicesData, error: globalServicesError } =
     useGlobalServicesQuery({
-      variables: { projectId, first: 100 },
+      variables: { projectId, first: servicesLimit },
     })
 
   const globalServices = useMemo(
