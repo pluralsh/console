@@ -81,7 +81,7 @@ import ManagedNamespace from '../components/cd/namespaces/details/ManagedNamespa
 
 import ServicesTree from '../components/cd/services/ServicesTree'
 
-import { ServicesTable } from '../components/cd/services/ServicesTable'
+import ServicesTable from '../components/cd/services/ServicesTable'
 
 import {
   CD_REL_PATH,
