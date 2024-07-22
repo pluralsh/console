@@ -46,7 +46,7 @@ function getNodesAndEdges(state: StackState) {
 
     edges.push(
       ...(ssr.links ?? []).filter(isNonNullable).map((link) => ({
-        type: EdgeType.Smooth,
+        type: EdgeType.Bezier,
         updatable: false,
         id: `${ssr.identifier}${link}`,
         source: ssr.identifier,

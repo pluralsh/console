@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import { SmoothStepEdge, StepEdge } from 'reactflow'
+import { BezierEdge, SmoothStepEdge, StepEdge } from 'reactflow'
 import { ComponentProps } from 'react'
 
 import { GateState } from '../../../generated/graphql'
@@ -8,18 +8,35 @@ import { useEdgeNodes } from '../../hooks/reactFlowHooks'
 import { MarkerType } from './markers'
 
 export enum EdgeType {
+  Bezier = 'plural-bezier-edge',
   Smooth = 'plural-smooth-edge',
   Directed = 'plural-directed-edge',
   Pipeline = 'plural-pipeline-edge',
 }
 
 export const edgeTypes = {
-  [EdgeType.Smooth]: SmoothEdge,
-  [EdgeType.Directed]: DirectedEdge,
-  [EdgeType.Pipeline]: PipelineEdge,
+  [EdgeType.Bezier]: Bezier,
+  [EdgeType.Smooth]: Smooth,
+  [EdgeType.Directed]: Directed,
+  [EdgeType.Pipeline]: Pipeline,
 } as const
 
-function SmoothEdge({ style, ...props }: ComponentProps<typeof StepEdge>) {
+function Bezier({ style, ...props }: ComponentProps<typeof StepEdge>) {
+  const theme = useTheme()
+
+  return (
+    <BezierEdge
+      data-something="data-something"
+      {...props}
+      style={{
+        ...style,
+        stroke: theme.colors.border,
+      }}
+    />
+  )
+}
+
+function Smooth({ style, ...props }: ComponentProps<typeof StepEdge>) {
   const theme = useTheme()
 
   return (
@@ -35,7 +52,7 @@ function SmoothEdge({ style, ...props }: ComponentProps<typeof StepEdge>) {
   )
 }
 
-function DirectedEdge({ style, ...props }: ComponentProps<typeof StepEdge>) {
+function Directed({ style, ...props }: ComponentProps<typeof StepEdge>) {
   const theme = useTheme()
 
   return (
@@ -51,7 +68,7 @@ function DirectedEdge({ style, ...props }: ComponentProps<typeof StepEdge>) {
   )
 }
 
-function PipelineEdge({ style, ...props }: ComponentProps<typeof StepEdge>) {
+function Pipeline({ style, ...props }: ComponentProps<typeof StepEdge>) {
   const theme = useTheme()
   const { source } = useEdgeNodes({
     source: props.source,
