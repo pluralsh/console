@@ -7,6 +7,7 @@ import {
   GitHubLogoIcon,
   GlobeIcon,
   IconFrame,
+  InfoOutlineIcon,
 } from '@pluralsh/design-system'
 import React from 'react'
 
@@ -94,8 +95,9 @@ export function ServicesTreeDiagramServiceNode(
       </div>
       <div
         css={{
-          display: 'flex',
           backgroundColor: theme.colors['fill-one'],
+          display: 'flex',
+          gap: theme.spacing.xsmall,
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
@@ -121,6 +123,12 @@ export function ServicesTreeDiagramServiceNode(
             )
           }
           icon={<ArrowTopRightIcon />}
+          type="secondary"
+        />
+        <IconFrame
+          clickable
+          onClick={() => {}}
+          icon={<InfoOutlineIcon />}
           type="secondary"
         />
       </div>
