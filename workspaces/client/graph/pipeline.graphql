@@ -1,0 +1,63 @@
+fragment PipelineFragment on Pipeline {
+    id
+    name
+    stages { ...PipelineStageFragment }
+    edges { ...PipelineStageEdgeFragment }
+    project {...TinyProjectFragment }
+}
+
+fragment PipelineStageFragment on PipelineStage {
+    id
+    name
+    services {
+        service { ...ServiceDeploymentBaseFragment }
+        criteria {
+            source { ...ServiceDeploymentBaseFragment }
+            secrets
+        }
+    }
+}
+
+fragment PipelineStageEdgeFragment on PipelineStageEdge {
+    id
+    from { ...PipelineStageFragment }
+    to { ...PipelineStageFragment }
+}
+
+fragment PipelineEdgeFragment on PipelineEdge {
+    node { ...PipelineFragment }
+}
+
+mutation SavePipeline($name: String!, $attributes: PipelineAttributes!) {
+    savePipeline(name: $name, attributes: $attributes) {
+        ...PipelineFragment
+    }
+}
+
+mutation DeletePipeline($id: ID!) {
+    deletePipeline(id: $id) {
+        ...PipelineFragment
+    }
+}
+
+query GetPipeline($id: ID!) {
+    pipeline(id: $id) { ...PipelineFragment }
+}
+
+query GetPipelines($after: String) {
+    pipelines(first: 100, after: $after) {
+        edges { ...PipelineEdgeFragment }
+    }
+}
+
+mutation CreatePipelineContext($pipelineId: ID!, $attributes: PipelineContextAttributes!) {
+    createPipelineContext(pipelineId: $pipelineId, attributes: $attributes) {
+        ...PipelineContextFragment
+    }
+}
+
+query GetPipelineContext($id: ID!) {
+    pipelineContext(id: $id) {
+        ...PipelineContextFragment
+    }
+}

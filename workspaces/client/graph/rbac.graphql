@@ -1,0 +1,3 @@
+mutation UpdateRbac($rbac: RbacAttributes!, $serviceId: ID, $clusterId: ID, $providerId: ID) {
+    updateRbac(rbac: $rbac, serviceId: $serviceId, clusterId: $clusterId, providerId: $providerId)
+}

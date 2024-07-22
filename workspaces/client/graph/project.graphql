@@ -1,0 +1,53 @@
+fragment ProjectFragment on Project {
+    id
+    insertedAt
+    updatedAt
+    name
+    default
+    description
+    readBindings { ...PolicyBindingFragment }
+    writeBindings { ...PolicyBindingFragment }
+}
+
+fragment TinyProjectFragment on Project {
+    id
+    name
+    default
+}
+
+query ListProjects(
+    $after: String
+    $before: String
+    $first: Int
+    $last: Int
+    $q: String
+) {
+    projects(after: $after, before: $before, first: $first, last: $last, q: $q) {
+        pageInfo { ...PageInfoFragment }
+        edges { node { ...ProjectFragment }}
+    }
+}
+
+query GetProject($id: ID, $name: String) {
+    project(id: $id, name: $name) {
+        ...ProjectFragment
+    }
+}
+
+mutation CreateProject($attributes: ProjectAttributes!) {
+    createProject(attributes: $attributes) {
+        ...ProjectFragment
+    }
+}
+
+mutation UpdateProject($id: ID!, $attributes: ProjectAttributes!) {
+    updateProject(id: $id, attributes: $attributes) {
+        ...ProjectFragment
+    }
+}
+
+mutation DeleteProject($id: ID!) {
+    deleteProject(id: $id) {
+        ...ProjectFragment
+    }
+}

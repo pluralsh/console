@@ -1,0 +1,43 @@
+fragment ClusterBackupFragment on ClusterBackup {
+    id
+    name
+    cluster { id }
+    garbageCollected
+}
+
+fragment ClusterRestoreFragment on ClusterRestore {
+    id
+    status
+    backup { ... ClusterBackupFragment}
+}
+
+mutation CreateClusterBackup($attributes: BackupAttributes!) {
+    createClusterBackup(attributes: $attributes) {
+        ...ClusterBackupFragment
+    }
+}
+
+query GetClusterBackup($id: ID, $clusterId: ID, $namespace: String, $name: String) {
+    clusterBackup(id: $id, clusterId: $clusterId, namespace: $namespace, name: $name) {
+        ...ClusterBackupFragment
+    }
+}
+
+mutation UpdateClusterRestore($id: ID!, $attributes: RestoreAttributes!) {
+    updateClusterRestore(id: $id, attributes: $attributes) {
+        ...ClusterRestoreFragment
+    }
+}
+
+mutation CreateClusterRestore($backupId: ID!) {
+    createClusterRestore(backupId: $backupId) {
+        ...ClusterRestoreFragment
+    }
+}
+
+query GetClusterRestore($id: ID!) {
+    clusterRestore(id: $id) {
+        ...ClusterRestoreFragment
+    }
+}
+

@@ -1,0 +1,78 @@
+fragment ManagedNamespaceEdgeFragment on ManagedNamespaceEdge {
+    cursor
+    node { ...ManagedNamespaceMinimalFragment }
+}
+
+fragment ManagedNamespaceMinimalFragment on ManagedNamespace {
+    id
+    name
+    description
+}
+
+fragment ManagedNamespaceFragment on ManagedNamespace {
+    id
+    name
+    description
+    labels
+    annotations
+    pullSecrets
+    service { ...ServiceTemplateFragment}
+    target { ...ClusterTargetFragment}
+    deletedAt
+}
+
+fragment ServiceTemplateFragment on ServiceTemplate {
+    name
+    namespace
+    templated
+    repositoryId
+    contexts
+    git { ...GitRefFragment}
+    helm { ...HelmSpecFragment}
+    kustomize { ...KustomizeFragment}
+    syncConfig { ...SyncConfigFragment}
+}
+
+query ListNamespaces($after: String, $first: Int, $before: String, $last: Int) {
+    managedNamespaces(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment }
+        edges { ...ManagedNamespaceEdgeFragment }
+    }
+}
+
+query ListClusterNamespaces($after: String, $first: Int, $before: String, $last: Int) {
+    clusterManagedNamespaces(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment }
+        edges { ...ManagedNamespaceEdgeFragment }
+    }
+}
+
+query GetNamespace($id: ID!) {
+    managedNamespace(id: $id) {
+        ...ManagedNamespaceFragment
+    }
+}
+
+query GetNamespaceByName($name: String!) {
+    managedNamespace(name: $name) {
+        ...ManagedNamespaceFragment
+    }
+}
+
+mutation CreateNamespace($attributes: ManagedNamespaceAttributes!) {
+    createManagedNamespace(attributes: $attributes) {
+        ...ManagedNamespaceFragment
+    }
+}
+
+mutation UpdateNamespace($id: ID!, $attributes: ManagedNamespaceAttributes!) {
+    updateManagedNamespace(id: $id, attributes: $attributes) {
+        ...ManagedNamespaceFragment
+    }
+}
+
+mutation DeleteNamespace($id: ID!) {
+    deleteManagedNamespace(id: $id) {
+        id
+    }
+}

@@ -1,0 +1,57 @@
+mutation UpsertPolicyConstraints($constraints: [PolicyConstraintAttributes!]) {
+    upsertPolicyConstraints(constraints:$constraints)
+}
+
+query ListPolicyConstraints($after: String, $first: Int, $before: String, $last: Int, $namespace: String, $kind: String, $q: String) {
+    policyConstraints(after: $after, first: $first, before: $before, last: $last, namespace: $namespace, kind: $kind, q: $q) {
+        ...PolicyConstraintConnectionFragment
+    }
+}
+
+query ListViolationStatistics($field: ConstraintViolationField!) {
+    violationStatistics(field: $field) {
+        ...ViolationStatisticFragment
+    }
+}
+
+
+fragment PolicyConstraintConnectionFragment on PolicyConstraintConnection{
+    pageInfo { ...PageInfoFragment }
+    edges { ...PolicyConstraintEdgeFragment }
+}
+
+fragment PolicyConstraintEdgeFragment on PolicyConstraintEdge {
+    cursor
+    node { ...PolicyConstraintFragment }
+}
+
+fragment PolicyConstraintFragment on PolicyConstraint {
+    id
+    name
+    description
+    recommendation
+    violationCount
+    ref { ...ConstraintRefFragment }
+    violations {...ViolationFragment }
+}
+
+fragment ConstraintRefFragment on ConstraintRef {
+    kind
+    name
+}
+
+fragment ViolationFragment on Violation {
+    id
+    group
+    version
+    kind
+    namespace
+    name
+    message
+}
+
+fragment ViolationStatisticFragment on ViolationStatistic {
+    value
+    violations
+    count
+}
