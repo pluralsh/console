@@ -188,7 +188,7 @@ export function ServicesTreeDiagramServiceNode(
               />
               <IconFrame
                 clickable
-                onClick={() => {}}
+                onClick={() => setOpen(true)}
                 icon={<InfoOutlineIcon />}
                 type="secondary"
               />
