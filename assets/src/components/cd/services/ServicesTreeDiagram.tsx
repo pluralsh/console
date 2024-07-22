@@ -100,13 +100,14 @@ export function ServicesTreeDiagram({
 
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
     () => getNodesAndEdges(services, globalServices),
-    [services]
+    [globalServices, services]
   )
   const { setViewport, getViewport, viewportInitialized } = useReactFlow()
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [needsLayout, setNeedsLayout] = useState(true)
-  const prevState = usePrevious(services)
+  const prevServicesState = usePrevious(services)
+  const prevGlobalServicesState = usePrevious(globalServices)
   const prevNodes = usePrevious(nodes)
   const prevEdges = usePrevious(edges)
 
@@ -145,14 +146,24 @@ export function ServicesTreeDiagram({
 
   useEffect(() => {
     // Don't run for initial value, only for changes
-    if (prevState && prevState !== services) {
+    if (
+      (prevServicesState && prevServicesState !== services) ||
+      (prevGlobalServicesState && prevGlobalServicesState !== globalServices)
+    ) {
       const { nodes, edges } = getNodesAndEdges(services, globalServices)
 
       setNodes(nodes)
       setEdges(edges)
       setNeedsLayout(true)
     }
-  }, [services, prevState, setEdges, setNodes, globalServices])
+  }, [
+    services,
+    globalServices,
+    prevServicesState,
+    prevGlobalServicesState,
+    setEdges,
+    setNodes,
+  ])
 
   return (
     <ReactFlowGraph
