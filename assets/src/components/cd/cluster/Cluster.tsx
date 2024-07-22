@@ -89,7 +89,7 @@ export default function Cluster() {
   const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const { clusterId } = useParams<{ clusterId: string }>()
-  const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab`)?.params?.tab || ''
+  const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab/*`)?.params?.tab || ''
   const [refetchServices, setRefetchServices] = useState(() => () => {})
   const logs = useLogsEnabled()
 
