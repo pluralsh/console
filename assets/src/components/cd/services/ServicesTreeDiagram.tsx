@@ -1,6 +1,7 @@
 import { usePrevious } from '@pluralsh/design-system'
 import {
   GlobalServiceFragment,
+  ServiceDeployment,
   ServiceTreeNodeFragment,
 } from 'generated/graphql'
 import {
@@ -34,8 +35,9 @@ import {
   nodeTypes,
 } from './ServicesTreeDiagramNodes'
 
-const isNotDeploymentOperatorService = (service: ServiceTreeNodeFragment) =>
-  service.name !== 'deploy-operator'
+const isNotDeploymentOperatorService = (
+  service: Pick<ServiceDeployment, 'name'>
+) => service.name !== 'deploy-operator'
 
 function getNodesAndEdges(
   services: ServiceTreeNodeFragment[],
