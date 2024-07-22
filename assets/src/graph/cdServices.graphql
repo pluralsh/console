@@ -198,8 +198,8 @@ query ServiceDeploymentsTiny($clusterId: ID, $projectId: ID) {
 }
 
 
-query ServiceTree($clusterId: ID, $projectId: ID) {
-  serviceTree(first: 100, clusterId: $clusterId, projectId: $projectId) {
+query ServiceTree($first: Int = 100, $clusterId: ID, $projectId: ID) {
+  serviceTree(first: $first, clusterId: $clusterId, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }
