@@ -27,6 +27,7 @@ import { TRUNCATE, TRUNCATE_LEFT } from '../../utils/truncate'
 import ProviderIcon from '../../utils/Provider'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
+import { ServicesTableErrors } from './ServicesTableErrors'
 
 export const ServiceNodeType = 'plural-services-tree-service-node'
 export const GlobalServiceNodeType = 'plural-services-tree-global-service-node'
@@ -46,6 +47,7 @@ export function ServicesTreeDiagramServiceNode(
   return (
     <NodeBase
       {...props}
+      backgroundColor="fill-one"
       gap={0}
       padding={0}
       width={336}
@@ -95,45 +97,53 @@ export function ServicesTreeDiagramServiceNode(
       </div>
       <div
         css={{
-          backgroundColor: theme.colors['fill-one'],
-          display: 'flex',
-          gap: theme.spacing.xsmall,
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
-        <div css={{ flex: 1, minWidth: 50 }}>
-          <div css={{ ...TRUNCATE, ...theme.partials.text.body2Bold }}>
-            {data.name}
+        <div css={{ flex: 1 }}>
+          <div css={{ display: 'flex', gap: theme.spacing.small }}>
+            <div css={{ flex: 1, minWidth: 50 }}>
+              <div css={{ ...TRUNCATE, ...theme.partials.text.body2Bold }}>
+                {data.name}
+              </div>
+              <div
+                css={{
+                  ...TRUNCATE,
+                  ...theme.partials.text.caption,
+                  color: theme.colors['text-xlight'],
+                }}
+              >
+                {data.cluster?.name}
+              </div>
+            </div>
+            <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+              <IconFrame
+                clickable
+                onClick={() =>
+                  navigate(
+                    getServiceDetailsPath({
+                      serviceId: data.id,
+                      clusterId: data.cluster?.id,
+                    })
+                  )
+                }
+                icon={<ArrowTopRightIcon />}
+                type="secondary"
+              />
+              <IconFrame
+                clickable
+                onClick={() => {}}
+                icon={<InfoOutlineIcon />}
+                type="secondary"
+              />
+            </div>
           </div>
-          <div
-            css={{
-              ...TRUNCATE,
-              ...theme.partials.text.caption,
-              color: theme.colors['text-xlight'],
-            }}
-          >
-            {data.cluster?.name}
-          </div>
+          <ServicesTableErrors
+            service={data}
+            marginTop="small"
+            width="100%"
+          />
         </div>
-        <IconFrame
-          clickable
-          onClick={() =>
-            navigate(
-              getServiceDetailsPath({
-                serviceId: data.id,
-                clusterId: data.cluster?.id,
-              })
-            )
-          }
-          icon={<ArrowTopRightIcon />}
-          type="secondary"
-        />
-        <IconFrame
-          clickable
-          onClick={() => {}}
-          icon={<InfoOutlineIcon />}
-          type="secondary"
-        />
       </div>
     </NodeBase>
   )

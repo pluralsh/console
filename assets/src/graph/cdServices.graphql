@@ -153,6 +153,7 @@ fragment ServiceTreeNode on ServiceDeployment {
   helmRepository { spec { url } }
   parent { id name }
   owner { id name }
+  errors { source message }
 }
 
 query ServiceDeployments(
