@@ -1,5 +1,8 @@
 import { usePrevious } from '@pluralsh/design-system'
-import { ServiceTreeNodeFragment } from 'generated/graphql'
+import {
+  GlobalServiceFragment,
+  ServiceTreeNodeFragment,
+} from 'generated/graphql'
 import {
   useCallback,
   useEffect,
@@ -7,7 +10,13 @@ import {
   useMemo,
   useState,
 } from 'react'
-import { useEdgesState, useNodesState, useReactFlow } from 'reactflow'
+import {
+  Edge,
+  type Node,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
+} from 'reactflow'
 import 'reactflow/dist/style.css'
 import { useTheme } from 'styled-components'
 
@@ -20,44 +29,77 @@ import { ReactFlowGraph } from '../../utils/reactflow/graph'
 import { EdgeType } from '../../utils/reactflow/edges'
 
 import {
-  ServicesTreeDiagramNodeType,
+  GlobalServiceNodeType,
+  ServiceNodeType,
   nodeTypes,
 } from './ServicesTreeDiagramNode'
 
-function getNodesAndEdges(services: ServiceTreeNodeFragment[]) {
-  return {
-    nodes: services
-      .filter((service) => service.name !== 'deploy-operator')
-      .map((service) => ({
-        id: service.id,
-        position: { x: 0, y: 0 },
-        type: ServicesTreeDiagramNodeType,
-        data: { ...service },
-      })),
-    edges: services
-      .filter((service) => service.parent?.id)
-      .map((service) => ({
+const isNotDeploymentOperatorService = (service: ServiceTreeNodeFragment) =>
+  service.name !== 'deploy-operator'
+
+function getNodesAndEdges(
+  services: ServiceTreeNodeFragment[],
+  globalServices: GlobalServiceFragment[]
+) {
+  const nodes: Node[] = []
+  const edges: Edge[] = []
+
+  services.filter(isNotDeploymentOperatorService).forEach((service) => {
+    nodes.push({
+      id: service.id,
+      position: { x: 0, y: 0 },
+      type: ServiceNodeType,
+      data: { ...service },
+    })
+
+    if (service.parent?.id && isNotDeploymentOperatorService(service.parent)) {
+      edges.push({
         type: EdgeType.Smooth,
         updatable: false,
-        id: `${service.id}${service.parent?.id}`,
+        id: `${service.id}${service.parent.id}`,
         source: service.id,
-        target: service.parent?.id ?? '',
-      })),
+        target: service.parent.id,
+      })
+    }
+
+    if (service.owner?.id) {
+      edges.push({
+        type: EdgeType.Smooth,
+        updatable: false,
+        id: `${service.id}${service.owner.id}`,
+        source: service.id,
+        target: service.owner.id,
+      })
+    }
+  })
+
+  nodes.push(
+    ...globalServices.map((service) => ({
+      id: service.id,
+      position: { x: 0, y: 0 },
+      type: GlobalServiceNodeType,
+      data: { ...service },
+    }))
+  )
+
+  return {
+    nodes,
+    edges,
     // TODO: Add invisible edges to position disconnected nodes.
-    // TODO: Switch edge type?
-    // TODO: Add global services.
   }
 }
 
 export function ServicesTreeDiagram({
   services,
+  globalServices,
 }: {
   services: ServiceTreeNodeFragment[]
+  globalServices: GlobalServiceFragment[]
 }) {
   const theme = useTheme()
 
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
-    () => getNodesAndEdges(services),
+    () => getNodesAndEdges(services, globalServices),
     [services]
   )
   const { setViewport, getViewport, viewportInitialized } = useReactFlow()
@@ -104,13 +146,13 @@ export function ServicesTreeDiagram({
   useEffect(() => {
     // Don't run for initial value, only for changes
     if (prevState && prevState !== services) {
-      const { nodes, edges } = getNodesAndEdges(services)
+      const { nodes, edges } = getNodesAndEdges(services, globalServices)
 
       setNodes(nodes)
       setEdges(edges)
       setNeedsLayout(true)
     }
-  }, [services, prevState, setEdges, setNodes])
+  }, [services, prevState, setEdges, setNodes, globalServices])
 
   return (
     <ReactFlowGraph

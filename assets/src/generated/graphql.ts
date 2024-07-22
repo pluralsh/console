@@ -8714,7 +8714,7 @@ export type ServiceDeploymentRevisionsFragment = { __typename?: 'ServiceDeployme
 
 export type ServiceDeploymentTinyFragment = { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null } | null };
 
-export type ServiceTreeNodeFragment = { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, parent?: { __typename?: 'ServiceDeployment', id: string } | null, owner?: { __typename?: 'GlobalService', id: string } | null };
+export type ServiceTreeNodeFragment = { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null };
 
 export type ServiceDeploymentsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -8743,7 +8743,7 @@ export type ServiceTreeQueryVariables = Exact<{
 }>;
 
 
-export type ServiceTreeQuery = { __typename?: 'RootQueryType', serviceTree?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, parent?: { __typename?: 'ServiceDeployment', id: string } | null, owner?: { __typename?: 'GlobalService', id: string } | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
+export type ServiceTreeQuery = { __typename?: 'RootQueryType', serviceTree?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', name: string } | null, repository?: { __typename?: 'GitRepository', url: string } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, owner?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null, serviceStatuses?: Array<{ __typename?: 'ServiceStatusCount', count: number, status: ServiceDeploymentStatus } | null> | null };
 
 export type ServiceDeploymentQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10859,9 +10859,11 @@ export const ServiceTreeNodeFragmentDoc = gql`
   }
   parent {
     id
+    name
   }
   owner {
     id
+    name
   }
 }
     `;
