@@ -12,16 +12,14 @@ const HANDLE_SIZE = 8
 export const NodeHandle = styled(Handle)<{
   $isConnected?: boolean
   $isOpen?: boolean
-}>(({ theme, $isConnected, $isOpen = true }) => ({
+}>(({ theme, $isConnected }) => ({
   '&&': {
     visibility: $isConnected ? 'visible' : 'hidden',
     width: HANDLE_SIZE,
     height: HANDLE_SIZE,
-    borderColor: $isOpen
-      ? theme.colors['border-secondary']
-      : theme.colors.border,
+    borderColor: theme.colors['border-selected'],
     borderWidth: theme.borderWidths.default,
-    backgroundColor: theme.colors['fill-zero'],
+    backgroundColor: theme.colors['border-selected'],
     '&.react-flow__handle-left': {
       left: -HANDLE_SIZE / 2,
     },
@@ -68,12 +66,6 @@ export function NodeBase({
           isConnectable={false}
           $isConnected={!isEmpty(incomers)}
           position={Position.Left}
-          css={{
-            '&&': {
-              backgroundColor: theme.colors.border,
-              borderColor: theme.colors.border,
-            },
-          }}
         />
         {children}
         <NodeHandle
@@ -81,18 +73,6 @@ export function NodeBase({
           isConnectable={false}
           $isConnected={!isEmpty(outgoers)}
           position={Position.Right}
-          css={{
-            '&&': {
-              backgroundColor:
-                theme.mode === 'light'
-                  ? theme.colors['border-fill-two']
-                  : theme.colors.border,
-              borderColor:
-                theme.mode === 'light'
-                  ? theme.colors['border-fill-two']
-                  : theme.colors.border,
-            },
-          }}
         />
       </NodeBaseCard>
       {additionalContent}
