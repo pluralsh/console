@@ -1,9 +1,12 @@
 import { Chip, ErrorIcon, Modal, Tooltip } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useState } from 'react'
+import pluralize from 'pluralize'
 
 import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 import { ServiceErrorsTable } from './service/ServiceErrors'
 
@@ -24,7 +27,7 @@ export function ServiceErrorsChip({
         icon={<ErrorIcon />}
         {...props}
       >
-        {errors?.length} errors
+        {errors?.length} {pluralize('error', errors?.length ?? 0)}
       </Chip>
     </Tooltip>
   )
@@ -48,11 +51,10 @@ export function ServiceErrorsModal({ isOpen, setIsOpen, header, errors }) {
 
 export function ServicesTableErrors({
   service,
+  ...props
 }: {
-  service: Nullable<
-    Pick<ServiceDeploymentsRowFragment, 'name' | 'errors' | 'components'>
-  >
-}) {
+  service: Nullable<Pick<ServiceDeploymentsRowFragment, 'name' | 'errors'>>
+} & ChipProps) {
   const [isOpen, setIsOpen] = useState(false)
   const serviceErrors = service?.errors
 
@@ -73,12 +75,13 @@ export function ServicesTableErrors({
         }}
         clickable
         errors={serviceErrors}
+        {...props}
       />
       <ModalMountTransition open={isOpen}>
         <Modal
           portal
           size="large"
-          header={`Service errors${service?.name ? ` – ${service?.name}` : ''}`}
+          header={`${service?.name} service errors`}
           open={isOpen}
           onClose={() => setIsOpen(false)}
         >
