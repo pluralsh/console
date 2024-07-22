@@ -146,8 +146,11 @@ fragment ServiceDeploymentTiny on ServiceDeployment {
 fragment ServiceTreeNode on ServiceDeployment {
   id
   name
-  cluster {  name }
+  status
+  componentStatus
+  cluster { id name }
   repository { url }
+  helmRepository { spec { url } }
   parent { id name }
   owner { id name }
 }
@@ -198,8 +201,8 @@ query ServiceDeploymentsTiny($clusterId: ID, $projectId: ID) {
 }
 
 
-query ServiceTree($first: Int = 100, $clusterId: ID, $projectId: ID) {
-  serviceTree(first: $first, clusterId: $clusterId, projectId: $projectId) {
+query ServiceTree($first: Int = 100,  $status: ServiceDeploymentStatus, $clusterId: ID, $projectId: ID) {
+  serviceTree(first: $first, status: $status, clusterId: $clusterId, projectId: $projectId) {
     pageInfo {
       ...PageInfo
     }

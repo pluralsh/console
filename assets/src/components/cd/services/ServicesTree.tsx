@@ -56,6 +56,7 @@ export default function ServicesTree() {
     [globalServicesData?.globalServices]
   )
 
+  // TODO: Fix filtering.
   const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
     () => ({
       ALL: data?.serviceStatuses?.reduce(
