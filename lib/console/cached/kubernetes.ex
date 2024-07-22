@@ -18,6 +18,7 @@ defmodule Console.Cached.Kubernetes do
     if Console.conf(:initialize) do
       send self(), {:start, request}
     end
+    Process.send_after(self(), :seppuku, :timer.minutes(30) + jitter())
     {:ok, table} = KeyValueSet.new(name: name, read_concurrency: true, ordered: true)
     {:ok, %State{table: table, model: model, callback: callback, key: key}}
   end
@@ -35,12 +36,13 @@ defmodule Console.Cached.Kubernetes do
     end
   end
 
+  def handle_info(:seppuku, state), do: {:stop, {:shutdown, :restarting}, state}
+
   def handle_info({:start, request}, %State{table: table, model: model, key: key} = state) do
     Logger.info "starting #{model} watcher"
     with {:ok, %{items: instances, metadata: %{resource_version: vsn}}} <- Kazan.run(request),
          {:ok, pid} <- Watcher.start_link(%{request | response_model: model}, send_to: self(), resource_vsn: vsn) do
       :timer.send_interval(5000, :watcher_ping)
-      Process.link(pid)
       table = Enum.reduce(instances, table, &KeyValueSet.put!(&2, key.(&1), &1))
       {:noreply, %{state | pid: pid, table: table}}
     else
@@ -71,4 +73,6 @@ defmodule Console.Cached.Kubernetes do
 
   defp callback(event, %State{callback: back}) when is_function(back), do: back.(event)
   defp callback(_, _), do: :ok
+
+  defp jitter(), do: :rand.uniform(:timer.seconds(120)) - :timer.seconds(60)
 end

@@ -14,6 +14,7 @@ defmodule Console.Cached.Supervisor do
       Console.Cached.Node,
       Console.Cached.Cluster,
       Console.Cached.ClusterNodes,
+      Console.Cached.HelmChart,
       # Console.Cached.Secret,
     ]
 

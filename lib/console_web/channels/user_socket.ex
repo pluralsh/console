@@ -1,5 +1,5 @@
 defmodule ConsoleWeb.UserSocket do
-  use Phoenix.Socket
+  use Phoenix.Socket, log: false
   use Absinthe.Phoenix.Socket,
     schema: Console.GraphQl
 
