@@ -17,6 +17,7 @@ import { mapExistingNodes } from '../../../utils/graphql'
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
 
+// TODO: Keep view in URL.
 function ServicesTreeComponent({
   setRefetch,
   clusterId: clusterIdProp,
