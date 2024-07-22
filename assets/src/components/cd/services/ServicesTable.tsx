@@ -22,6 +22,8 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
+import { useOutletContext } from 'react-router-dom'
+
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
@@ -30,19 +32,16 @@ import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import {
   SERVICES_QUERY_PAGE_SIZE,
   SERVICES_REACT_VIRTUAL_OPTIONS,
+  ServicesContextT,
   columns,
 } from './Services'
 
-function ServicesTableComponent({
-  setRefetch,
-  clusterId: clusterIdProp,
-}: {
-  setRefetch?: (refetch: () => () => void) => void
-  clusterId?: string
-}) {
+function ServicesTableComponent() {
   const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
+  const { setRefetch, clusterId: clusterIdProp } =
+    useOutletContext<ServicesContextT>()
   const [clusterIdInternal, setClusterId] = useState<string>('')
   const clusterId = clusterIdProp ?? clusterIdInternal
   const tabStateRef = useRef<any>(null)
