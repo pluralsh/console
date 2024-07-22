@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
@@ -10,24 +10,24 @@ import {
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 import { ReactFlowProvider } from 'reactflow'
+import { useOutletContext } from 'react-router-dom'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../../utils/graphql'
 
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
+import { ServicesContextT } from './Services'
 
-// TODO: Keep view in URL.
-function ServicesTreeComponent({
-  setRefetch,
+export default function ServicesTree({
   clusterId: clusterIdProp,
 }: {
-  setRefetch?: (refetch: () => () => void) => void
   clusterId?: string
 }) {
   const theme = useTheme()
   const projectId = useProjectId()
   const [clusterIdInternal, setClusterId] = useState<string>('')
+  const { setRefetch } = useOutletContext<ServicesContextT>()
   const clusterId = clusterIdProp ?? clusterIdInternal
   const tabStateRef = useRef<any>(null)
   const [queryStatusFilter, setQueryStatusFilter] =
@@ -127,5 +127,3 @@ function ServicesTreeComponent({
     </div>
   )
 }
-
-export const ServicesTree = memo(ServicesTreeComponent)

@@ -1,4 +1,11 @@
-import { ComponentProps, ReactElement, useMemo, useRef, useState } from 'react'
+import {
+  ComponentProps,
+  Dispatch,
+  SetStateAction,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   ListIcon,
   NetworkInterfaceIcon,
@@ -9,12 +16,20 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { CD_REL_PATH, SERVICES_REL_PATH } from 'routes/cdRoutesConsts'
+import {
+  CD_ABS_PATH,
+  CD_REL_PATH,
+  SERVICES_REL_PATH,
+} from 'routes/cdRoutesConsts'
+
+import { Outlet, useMatch } from 'react-router-dom'
 
 import {
   CD_BASE_CRUMBS,
   useSetPageHeaderContent,
 } from '../ContinuousDeployment'
+
+import { LinkTabWrap } from '../../utils/Tabs'
 
 import {
   ColActions,
@@ -27,8 +42,6 @@ import {
   ColStatus,
 } from './ServicesColumns'
 import { DeployService } from './deployModal/DeployService'
-import { ServicesTable } from './ServicesTable'
-import { ServicesTree } from './ServicesTree'
 
 export const columns = [
   ColServiceDeployment,
@@ -49,20 +62,21 @@ export const SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 
 export const SERVICES_QUERY_PAGE_SIZE = 100
 
-enum View {
-  Table = 'table',
-  Tree = 'tree',
+export type ServicesContextT = {
+  setRefetch: Dispatch<SetStateAction<() => () => void>>
 }
 
-const viewIcons = {
-  [View.Table]: <ListIcon />,
-  [View.Tree]: <NetworkInterfaceIcon />,
-} as const satisfies Record<View, ReactElement>
+const directory = [
+  { path: '', label: 'Table', icon: <ListIcon /> },
+  { path: 'tree', label: 'Tree', icon: <NetworkInterfaceIcon /> },
+]
 
 export default function Services() {
   const theme = useTheme()
+  const pathMatch = useMatch(`${CD_ABS_PATH}/${SERVICES_REL_PATH}/:tab`)
+  const tab = pathMatch?.params?.tab || ''
+  const currentTab = directory.find(({ path }) => path === tab)
   const tabStateRef = useRef<any>(null)
-  const [view, setView] = useState(View.Table)
   const [refetch, setRefetch] = useState(() => () => {})
 
   useSetBreadcrumbs(
@@ -94,37 +108,36 @@ export default function Services() {
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',
-              selectedKey: view,
-              onSelectionChange: (view) => setView(view as View),
+              selectedKey: currentTab?.path,
             }}
           >
-            {Object.entries(View).map(([k, v]) => (
-              <SubTab
-                key={v}
-                textValue={k}
-                css={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  gap: theme.spacing.small,
-                }}
+            {directory.map(({ path, label, icon }) => (
+              <LinkTabWrap
+                subTab
+                key={path}
+                textValue={label}
+                to={`/${CD_REL_PATH}/${SERVICES_REL_PATH}/${path}`}
               >
-                {viewIcons[v]} {k}
-              </SubTab>
+                <SubTab
+                  key={path}
+                  textValue={label}
+                  css={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: theme.spacing.small,
+                  }}
+                >
+                  {icon} {label}
+                </SubTab>
+              </LinkTabWrap>
             ))}
           </TabList>
           <DeployService refetch={refetch} />
         </div>
       ),
-      [refetch, theme.spacing.small, view]
+      [currentTab?.path, refetch, theme.spacing.small]
     )
   )
 
-  return useMemo(() => {
-    switch (view) {
-      case View.Tree:
-        return <ServicesTree setRefetch={setRefetch} />
-      default:
-        return <ServicesTable setRefetch={setRefetch} />
-    }
-  }, [view])
+  return <Outlet context={{ setRefetch } as ServicesContextT} />
 }

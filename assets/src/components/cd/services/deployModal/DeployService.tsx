@@ -481,9 +481,7 @@ export function DeployService({
         name: `Deploy new service${cluster ? ` to ${cluster.name}` : ''}`,
         icon: <GitPullIcon />,
         shortcut: [],
-        perform: () => {
-          setIsOpen(true)
-        },
+        perform: () => setIsOpen(true),
       },
     ],
     [cluster]
@@ -495,9 +493,7 @@ export function DeployService({
     <>
       <Button
         primary
-        onClick={() => {
-          setIsOpen(true)
-        }}
+        onClick={() => setIsOpen(true)}
       >
         Deploy service
       </Button>
