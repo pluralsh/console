@@ -2,7 +2,11 @@ import React, { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
-import { ServiceDeploymentStatus, useServiceTreeQuery } from 'generated/graphql'
+import {
+  ServiceDeploymentStatus,
+  useGlobalServicesQuery,
+  useServiceTreeQuery,
+} from 'generated/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 import { ReactFlowProvider } from 'reactflow'
@@ -41,6 +45,16 @@ function ServicesTreeComponent({
     [data?.serviceTree]
   )
 
+  const { data: globalServicesData, error: globalServicesError } =
+    useGlobalServicesQuery({
+      variables: { projectId, first: 100 },
+    })
+
+  const globalServices = useMemo(
+    () => mapExistingNodes(globalServicesData?.globalServices),
+    [globalServicesData?.globalServices]
+  )
+
   const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
     () => ({
       ALL: data?.serviceStatuses?.reduce(
@@ -66,7 +80,9 @@ function ServicesTreeComponent({
 
   if (error) return <GqlError error={error} />
 
-  if (!data) return <LoadingIndicator />
+  if (globalServicesError) return <GqlError error={globalServicesError} />
+
+  if (!data || !globalServicesData) return <LoadingIndicator />
 
   return (
     <div
@@ -92,7 +108,10 @@ function ServicesTreeComponent({
           <LoadingIndicator />
         ) : !isEmpty(data?.serviceTree?.edges) ? (
           <ReactFlowProvider>
-            <ServicesTreeDiagram services={services} />
+            <ServicesTreeDiagram
+              services={services}
+              globalServices={globalServices}
+            />
           </ReactFlowProvider>
         ) : (
           <div css={{ height: '100%' }}>

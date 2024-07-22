@@ -148,8 +148,8 @@ fragment ServiceTreeNode on ServiceDeployment {
   name
   cluster {  name }
   repository { url }
-  parent { id }
-  owner { id }
+  parent { id name }
+  owner { id name }
 }
 
 query ServiceDeployments(

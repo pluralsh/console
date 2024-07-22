@@ -2,17 +2,22 @@ import { NodeProps } from 'reactflow'
 
 import { useTheme } from 'styled-components'
 
-import { ServiceDeploymentsRowFragment } from '../../../generated/graphql'
+import {
+  GlobalServiceFragment,
+  ServiceTreeNodeFragment,
+} from '../../../generated/graphql'
 import { NodeBase } from '../../utils/reactflow/nodes'
 
-export const ServicesTreeDiagramNodeType = 'plural-services-tree-node'
+export const ServiceNodeType = 'plural-services-tree-service-node'
+export const GlobalServiceNodeType = 'plural-services-tree-global-service-node'
 
 export const nodeTypes = {
-  [ServicesTreeDiagramNodeType]: ServicesTreeDiagramNode,
+  [ServiceNodeType]: ServicesTreeDiagramServiceNode,
+  [GlobalServiceNodeType]: ServicesTreeDiagramGlobalServiceNode,
 }
 
-export function ServicesTreeDiagramNode(
-  props: NodeProps<ServiceDeploymentsRowFragment>
+export function ServicesTreeDiagramServiceNode(
+  props: NodeProps<ServiceTreeNodeFragment>
 ) {
   const theme = useTheme()
   const { data } = props
@@ -44,6 +49,33 @@ export function ServicesTreeDiagramNode(
       >
         <div>{data.name}</div>
         <div>{data.cluster?.name}</div>
+      </div>
+    </NodeBase>
+  )
+}
+
+export function ServicesTreeDiagramGlobalServiceNode(
+  props: NodeProps<GlobalServiceFragment>
+) {
+  const theme = useTheme()
+  const { data } = props
+
+  return (
+    <NodeBase
+      {...props}
+      gap={0}
+      padding={0}
+      width={336}
+    >
+      <div
+        css={{
+          backgroundColor: theme.colors['fill-one'],
+          display: 'flex',
+          flexDirection: 'column',
+          padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
+        }}
+      >
+        <div>{data.name}</div>
       </div>
     </NodeBase>
   )
