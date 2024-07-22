@@ -36,7 +36,7 @@ import {
   columns,
 } from './Services'
 
-function ServicesTableComponent() {
+export default function ServicesTable() {
   const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
@@ -178,5 +178,3 @@ function ServicesTableComponent() {
     </div>
   )
 }
-
-export const ServicesTable = memo(ServicesTableComponent)

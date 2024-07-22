@@ -22,7 +22,7 @@ import {
   getGlobalServiceDetailsPath,
   getServiceDetailsPath,
 } from '../../../routes/cdRoutesConsts'
-import { TRUNCATE_LEFT } from '../../utils/truncate'
+import { TRUNCATE, TRUNCATE_LEFT } from '../../utils/truncate'
 
 import ProviderIcon from '../../utils/Provider'
 
@@ -101,10 +101,13 @@ export function ServicesTreeDiagramServiceNode(
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
-        <div css={{ flex: 1 }}>
-          <div css={{ ...theme.partials.text.body2Bold }}>{data.name}</div>
+        <div css={{ flex: 1, minWidth: 50 }}>
+          <div css={{ ...TRUNCATE, ...theme.partials.text.body2Bold }}>
+            {data.name}
+          </div>
           <div
             css={{
+              ...TRUNCATE,
               ...theme.partials.text.caption,
               color: theme.colors['text-xlight'],
             }}
@@ -136,7 +139,6 @@ export function ServicesTreeDiagramServiceNode(
   )
 }
 
-// TODO: Truncate.
 export function ServicesTreeDiagramGlobalServiceNode(
   props: NodeProps<GlobalServiceFragment>
 ) {
@@ -163,6 +165,7 @@ export function ServicesTreeDiagramGlobalServiceNode(
               ? theme.colors['border-fill-two']
               : theme.colors.border,
           color: theme.colors['text-xlight'],
+          gap: theme.spacing.medium,
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
@@ -170,6 +173,7 @@ export function ServicesTreeDiagramGlobalServiceNode(
           css={{
             display: 'flex',
             gap: theme.spacing.xsmall,
+            whiteSpace: 'nowrap',
           }}
         >
           <GlobeIcon />
@@ -180,10 +184,11 @@ export function ServicesTreeDiagramGlobalServiceNode(
             css={{
               display: 'flex',
               gap: theme.spacing.xsmall,
+              minWidth: 50,
             }}
           >
             <FolderIcon />
-            {data.project.name}
+            <span css={{ ...TRUNCATE }}>{data.project.name}</span>
           </div>
         )}
       </div>
@@ -194,8 +199,10 @@ export function ServicesTreeDiagramGlobalServiceNode(
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
-        <div css={{ flex: 1 }}>
-          <div css={{ ...theme.partials.text.body2Bold }}>{data.name}</div>
+        <div css={{ flex: 1, minWidth: 50 }}>
+          <div css={{ ...TRUNCATE, ...theme.partials.text.body2Bold }}>
+            {data.name}
+          </div>
           <div
             css={{
               ...theme.partials.text.caption,
