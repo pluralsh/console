@@ -63,7 +63,8 @@ export const SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 export const SERVICES_QUERY_PAGE_SIZE = 100
 
 export type ServicesContextT = {
-  setRefetch: Dispatch<SetStateAction<() => () => void>>
+  setRefetch?: Dispatch<SetStateAction<() => () => void>>
+  clusterId?: string
 }
 
 const directory = [

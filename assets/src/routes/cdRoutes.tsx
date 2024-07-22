@@ -293,7 +293,16 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_SERVICES_PATH}
       element={<ClusterServices />}
-    />
+    >
+      <Route
+        index
+        element={<ServicesTable />}
+      />
+      <Route
+        path={SERVICES_TREE_REL_PATH}
+        element={<ServicesTree />}
+      />
+    </Route>
     <Route
       path={CLUSTER_NODES_PATH}
       element={<ClusterNodes />}

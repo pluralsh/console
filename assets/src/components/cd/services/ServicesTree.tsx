@@ -19,15 +19,12 @@ import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
 import { ServicesContextT } from './Services'
 
-export default function ServicesTree({
-  clusterId: clusterIdProp,
-}: {
-  clusterId?: string
-}) {
+export default function ServicesTree() {
   const theme = useTheme()
   const projectId = useProjectId()
   const [clusterIdInternal, setClusterId] = useState<string>('')
-  const { setRefetch } = useOutletContext<ServicesContextT>()
+  const { setRefetch, clusterId: clusterIdProp } =
+    useOutletContext<ServicesContextT>()
   const clusterId = clusterIdProp ?? clusterIdInternal
   const tabStateRef = useRef<any>(null)
   const [queryStatusFilter, setQueryStatusFilter] =
