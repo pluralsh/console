@@ -148,6 +148,7 @@ fragment ServiceTreeNode on ServiceDeployment {
   name
   status
   componentStatus
+  components { ...ServiceDeploymentComponent }
   cluster { id name }
   repository { url }
   helmRepository { spec { url } }
