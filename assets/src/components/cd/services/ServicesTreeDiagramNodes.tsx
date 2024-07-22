@@ -140,6 +140,7 @@ export function ServicesTreeDiagramServiceNode(
           </div>
           <ServicesTableErrors
             service={data}
+            justifyContent="center"
             marginTop="small"
             width="100%"
           />
