@@ -249,9 +249,6 @@ query ServiceTree(
       }
     }
   }
-  serviceStatuses(clusterId: $clusterId) {
-    ...ServiceStatusCount
-  }
 }
 
 query ServiceDeployment($id: ID!) {
