@@ -11,6 +11,7 @@ import {
   InfoIcon,
   InfoOutlineIcon,
   Modal,
+  Table,
 } from '@pluralsh/design-system'
 import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -24,12 +25,14 @@ import { NodeBase } from '../../utils/reactflow/nodes'
 import {
   getClusterDetailsPath,
   getGlobalServiceDetailsPath,
+  getServiceComponentPath,
   getServiceDetailsPath,
 } from '../../../routes/cdRoutesConsts'
 import { TRUNCATE, TRUNCATE_LEFT } from '../../utils/truncate'
 import ProviderIcon from '../../utils/Provider'
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import { InlineLink } from '../../utils/typography/InlineLink'
+import { OverlineH1 } from '../../utils/typography/Text'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
@@ -213,7 +216,6 @@ export function ServicesTreeDiagramServiceNode(
   )
 }
 
-// TODO
 function ServicesTreeDiagramServiceNodeModal({
   service,
   open,
@@ -224,6 +226,7 @@ function ServicesTreeDiagramServiceNodeModal({
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
   const theme = useTheme()
+  const navigate = useNavigate()
 
   return (
     <ModalMountTransition open={open}>
@@ -293,11 +296,34 @@ function ServicesTreeDiagramServiceNodeModal({
           </ModalProp>
         </div>
         <Divider
-          backgroundColor="border-fill-three"
+          backgroundColor="border"
           marginTop="xlarge"
           marginBottom="xlarge"
         />
-        Containers
+        <div>
+          <OverlineH1 css={{ color: theme.colors['text-xlight'] }}>
+            Containers
+          </OverlineH1>
+          <Table
+            columns={[]}
+            data={service.components ?? []}
+            onRowClick={(e, { original }) =>
+              navigate(
+                getServiceComponentPath({
+                  componentId: original.id,
+                  serviceId: service.id,
+                  clusterId: service.cluster?.id,
+                })
+              )
+            }
+            emptyStateProps={{ message: 'No logs found to display' }}
+            css={{
+              maxHeight: 400,
+              height: '100%',
+            }}
+          />
+          {/* TODO */}
+        </div>
       </Modal>
     </ModalMountTransition>
   )
@@ -322,7 +348,7 @@ function ModalProp({
     >
       <div className="prop-title">{children}</div>
       <Divider
-        backgroundColor="border-fill-three"
+        backgroundColor="border"
         flexGrow={1}
       />
       <div
