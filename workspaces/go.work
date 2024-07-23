@@ -1,7 +1,0 @@
-go 1.22.0
-
-use (
-	./client // github.com/pluralsh/console/client
-	./controller // github.com/pluralsh/console/controller
-	./tools // github.com/pluralsh/console/tools
-)

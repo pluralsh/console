@@ -1,0 +1,7 @@
+go 1.22.0
+
+use (
+	./client // github.com/pluralsh/console/go/client
+	./controller // github.com/pluralsh/console/go/controller
+	./tools // github.com/pluralsh/console/go/tools
+)
