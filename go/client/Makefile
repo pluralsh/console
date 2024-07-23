@@ -25,5 +25,5 @@ release: ## create and push a tag with new client version
 	read -p "Version (without prefix): " tag ;\
 	git checkout master ;\
 	git pull --rebase ;\
-	git tag -a client/$${tag} -m "release client/$${tag}" ;\
-	git push origin client/$${tag}
+	git tag -a go/client/$${tag} -m "release go/client/$${tag}" ;\
+	git push origin go/client/$${tag}
