@@ -23,7 +23,7 @@ release: ## create and push a tag with new client version
   		echo Latest tag: $${LATEST_TAG} ;\
 	fi ;\
 	read -p "Version (without prefix): " tag ;\
-	git checkout main ;\
+	git checkout master ;\
 	git pull --rebase ;\
 	git tag -a client/$${tag} -m "release client/$${tag}" ;\
 	git push origin client/$${tag}
