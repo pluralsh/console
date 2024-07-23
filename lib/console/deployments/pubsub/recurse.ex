@@ -5,7 +5,7 @@ end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.ServiceComponentsUpdated do
   alias Console.Schema.{Service, ServiceComponent}
-  alias Console.Deployments.Services
+  alias Console.Deployments.{Services}
 
   def process(%{item: %Service{namespace: ns, deleted_at: del} = svc}) when not is_nil(del) do
     case Console.Repo.preload(svc, [:components]) do

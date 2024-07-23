@@ -14,10 +14,15 @@ defimpl Console.Deployments.PubSub.Pipelineable, for: Any do
 end
 
 defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.ServiceComponentsUpdated do
-  def pipe(%{item: %{status: :healthy} = svc}) do
-    case Console.Repo.preload(svc, [stage_services: :stage]) do
-      %{stage_services: [_ | _] = ss} -> Enum.map(ss, & &1.stage)
-      _ -> :ok
+  def pipe(%{item: %{status: :healthy, updated_at: uat} = svc}) do
+    recent = Timex.now()
+             |> Timex.shift(minutes: -2)
+             |> Timex.before?(uat)
+    if recent do
+      case Console.Repo.preload(svc, [stage_services: :stage]) do
+        %{stage_services: [_ | _] = ss} -> Enum.map(ss, & &1.stage)
+        _ -> :ok
+      end
     end
   end
   def pipe(_), do: :ok
