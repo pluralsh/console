@@ -47,7 +47,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: controller
+        working-directory: workspaces/controller
     needs: [ test ]
     permissions:
       contents: 'read'
@@ -93,7 +93,7 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v5.1.0
       with:
-        context: "./workspaces/controller"
+        context: "./workspaces"
         file: "./workspaces/controller/Dockerfile"
         push: true
         tags: ${{ steps.meta.outputs.tags }}
