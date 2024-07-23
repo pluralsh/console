@@ -5,6 +5,7 @@ import isEmpty from 'lodash/isEmpty'
 import {
   ServiceDeploymentStatus,
   useGlobalServicesQuery,
+  useServiceStatusesQuery,
   useServiceTreeQuery,
 } from 'generated/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -46,6 +47,11 @@ export default function ServicesTree() {
     [data?.serviceTree]
   )
 
+  const { data: serviceStatusesData, error: serviceStatusesError } =
+    useServiceStatusesQuery({
+      variables: { ...(clusterId ? { clusterId } : {}) },
+    })
+
   const { data: globalServicesData, error: globalServicesError } =
     useGlobalServicesQuery({
       variables: { projectId, first: servicesLimit },
@@ -56,35 +62,44 @@ export default function ServicesTree() {
     [globalServicesData?.globalServices]
   )
 
-  // TODO: Fix filtering.
   const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
     () => ({
-      ALL: data?.serviceStatuses?.reduce(
+      ALL: serviceStatusesData?.serviceStatuses?.reduce(
         (count, status) => count + (status?.count || 0),
         0
       ),
-      [ServiceDeploymentStatus.Healthy]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Synced]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Stale]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Paused]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Failed]: data?.serviceStatuses ? 0 : undefined,
+      [ServiceDeploymentStatus.Healthy]: serviceStatusesData?.serviceStatuses
+        ? 0
+        : undefined,
+      [ServiceDeploymentStatus.Synced]: serviceStatusesData?.serviceStatuses
+        ? 0
+        : undefined,
+      [ServiceDeploymentStatus.Stale]: serviceStatusesData?.serviceStatuses
+        ? 0
+        : undefined,
+      [ServiceDeploymentStatus.Paused]: serviceStatusesData?.serviceStatuses
+        ? 0
+        : undefined,
+      [ServiceDeploymentStatus.Failed]: serviceStatusesData?.serviceStatuses
+        ? 0
+        : undefined,
       ...Object.fromEntries(
-        data?.serviceStatuses?.map((status) => [
+        serviceStatusesData?.serviceStatuses?.map((status) => [
           status?.status,
           status?.count,
         ]) || []
       ),
     }),
-    [data?.serviceStatuses]
+    [serviceStatusesData?.serviceStatuses]
   )
 
   useEffect(() => setRefetch?.(() => refetch), [refetch, setRefetch])
 
   if (error) return <GqlError error={error} />
 
-  if (globalServicesError) return <GqlError error={globalServicesError} />
+  if (serviceStatusesError) return <GqlError error={serviceStatusesError} />
 
-  if (!data || !globalServicesData) return <LoadingIndicator />
+  if (globalServicesError) return <GqlError error={globalServicesError} />
 
   return (
     <div
@@ -106,9 +121,9 @@ export default function ServicesTree() {
         stateRef={tabStateRef}
         css={{ height: '100%', overflow: 'hidden' }}
       >
-        {!data ? (
+        {!data || !globalServicesData ? (
           <LoadingIndicator />
-        ) : !isEmpty(data?.serviceTree?.edges) ? (
+        ) : !isEmpty(services) ? (
           <ReactFlowProvider>
             <ServicesTreeDiagram
               services={services}
