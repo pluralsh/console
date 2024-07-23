@@ -15,8 +15,23 @@ generate: ## generate Go client from GraphQL schema
 generate-in-container: ## generate Go client from GraphQL schema (dockerized)
 	hack/gen-api-client.sh
 
-# TODO: fix this
-#release-vsn:
+release:
+	@LATEST_TAG=$$(git describe --tags `git rev-list --tags --max-count=1` --match="client/*" 2>/dev/null) ;\
+	if [ $$? -ne 0 ]; then \
+	  	echo Could not find latest tag ;\
+	else \
+  		echo Latest tag: $${LATEST_TAG} ;\
+	fi ;\
+	read -p "Version (without prefix): " tag ;\
+	git checkout main ;\
+	git pull --rebase ;\
+	git tag -a client/$${tag} -m "release client/$${tag}" ;\
+	git push origin client/$${tag}
+
+
+
+
+#	echo Latest tag $$(LATEST_TAG)
 #	@read -p "Version: " tag; \
 #	git checkout main; \
 #	git pull --rebase; \
