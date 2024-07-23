@@ -13,7 +13,7 @@ require (
 	github.com/golangci/golangci-lint v1.59.1
 	github.com/vektra/mockery/v2 v2.43.2
 	sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20240717190548-1ed345090869
-	sigs.k8s.io/controller-tools v0.15.0
+	sigs.k8s.io/controller-tools v0.14.0
 	sigs.k8s.io/kustomize/kustomize/v5 v5.4.3
 )
 
