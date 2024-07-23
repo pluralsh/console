@@ -3,16 +3,18 @@ import { useTheme } from 'styled-components'
 import {
   ArrowTopRightIcon,
   ChipList,
+  Divider,
   FolderIcon,
   GitHubLogoIcon,
   GlobeIcon,
   IconFrame,
+  InfoIcon,
   InfoOutlineIcon,
   Modal,
 } from '@pluralsh/design-system'
-import React, { Dispatch, SetStateAction, useState } from 'react'
-
-import { useNavigate } from 'react-router-dom'
+import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import moment from 'moment'
 
 import {
   GlobalServiceFragment,
@@ -20,14 +22,14 @@ import {
 } from '../../../generated/graphql'
 import { NodeBase } from '../../utils/reactflow/nodes'
 import {
+  getClusterDetailsPath,
   getGlobalServiceDetailsPath,
   getServiceDetailsPath,
 } from '../../../routes/cdRoutesConsts'
 import { TRUNCATE, TRUNCATE_LEFT } from '../../utils/truncate'
-
 import ProviderIcon from '../../utils/Provider'
-
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
+import { InlineLink } from '../../utils/typography/InlineLink'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
@@ -221,18 +223,122 @@ function ServicesTreeDiagramServiceNodeModal({
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
+  const theme = useTheme()
+
   return (
     <ModalMountTransition open={open}>
       <Modal
         portal
         size="large"
-        header={service.name}
+        header={
+          <div
+            css={{
+              alignItems: 'start',
+              display: 'flex',
+              gap: theme.spacing.xsmall,
+            }}
+          >
+            <InfoIcon
+              color="icon-info"
+              size={12}
+            />
+            {service.name}
+          </div>
+        }
         open={open}
         onClose={() => setOpen(false)}
       >
-        {service.name}
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.xxsmall,
+          }}
+        >
+          <ModalProp title="name">{service.name}</ModalProp>
+          <ModalProp title="repository">
+            {service.helmRepository?.spec.url ?? service.repository?.url}
+          </ModalProp>
+          {service.git && (
+            <>
+              <ModalProp title="reference">{service.git?.ref}</ModalProp>
+              <ModalProp title="folder">{service.git?.folder}</ModalProp>
+            </>
+          )}
+          <ModalProp title="cluster">
+            <Link
+              to={getClusterDetailsPath({ clusterId: service.cluster?.id })}
+            >
+              <InlineLink as="span">{service.cluster?.name}</InlineLink>
+            </Link>
+          </ModalProp>
+          <ModalProp title="health status">
+            <ServiceStatusChip
+              status={service.status}
+              componentStatus={service.componentStatus}
+              size="small"
+              css={{ whiteSpace: 'nowrap' }}
+            />
+          </ModalProp>
+          <ModalProp title="errors">
+            <ServicesTableErrors
+              service={service}
+              alwaysShow
+              size="small"
+            />
+          </ModalProp>
+          <ModalProp title="namespace">{service.namespace}</ModalProp>
+          <ModalProp title="last activity">
+            {moment(service.updatedAt).format('MMM D, YYYY h:mm a')}
+          </ModalProp>
+        </div>
+        <Divider
+          backgroundColor="border-fill-three"
+          marginTop="xlarge"
+          marginBottom="xlarge"
+        />
+        Containers
       </Modal>
     </ModalMountTransition>
+  )
+}
+
+function ModalProp({
+  title,
+  children,
+}: {
+  title: string
+  children: ReactNode
+}) {
+  const theme = useTheme()
+
+  return (
+    <div
+      css={{
+        alignItems: 'center',
+        display: 'flex',
+        gap: theme.spacing.small,
+      }}
+    >
+      <div className="prop-title">{children}</div>
+      <Divider
+        backgroundColor="border-fill-three"
+        flexGrow={1}
+      />
+      <div
+        css={{
+          ...theme.partials.text.caption,
+          backgroundColor: theme.colors['fill-two'],
+          border: theme.borders['fill-two'],
+          borderRadius: theme.borderRadiuses.medium,
+          color: theme.colors['text-light'],
+          display: 'flex',
+          padding: theme.spacing.xxxsmall,
+        }}
+      >
+        {title}
+      </div>
+    </div>
   )
 }
 

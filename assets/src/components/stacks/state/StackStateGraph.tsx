@@ -126,7 +126,6 @@ export function StackStateGraph({ state }: { state: StackState }) {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
-      nodesDraggable
     />
   )
 }

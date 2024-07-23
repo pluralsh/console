@@ -175,7 +175,6 @@ export function ServicesTreeDiagram({
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
-      nodesDraggable
     />
   )
 }

@@ -12,22 +12,27 @@ import { ServiceErrorsTable } from './service/ServiceErrors'
 
 export function ServiceErrorsChip({
   errors,
+  alwaysShow = false,
   ...props
 }: {
   errors: Nullable<Nullable<ServiceError>[]>
+  alwaysShow?: boolean
 } & ComponentProps<typeof Chip>) {
-  if (isEmpty(errors)) {
+  const hasErrors = !isEmpty(errors)
+
+  if (!alwaysShow && !hasErrors) {
     return null
   }
 
   return (
     <Tooltip label="View errors">
       <Chip
-        severity="danger"
-        icon={<ErrorIcon />}
+        severity={hasErrors ? 'danger' : 'neutral'}
+        icon={hasErrors ? <ErrorIcon /> : undefined}
         {...props}
       >
-        {errors?.length} {pluralize('error', errors?.length ?? 0)}
+        {errors?.length === 0 ? 'No' : errors?.length}
+        {pluralize(' error', errors?.length ?? 0)}
       </Chip>
     </Tooltip>
   )
@@ -51,14 +56,16 @@ export function ServiceErrorsModal({ isOpen, setIsOpen, header, errors }) {
 
 export function ServicesTableErrors({
   service,
+  alwaysShow = false,
   ...props
 }: {
   service: Nullable<Pick<ServiceDeploymentsRowFragment, 'name' | 'errors'>>
+  alwaysShow?: boolean
 } & ChipProps) {
   const [isOpen, setIsOpen] = useState(false)
   const serviceErrors = service?.errors
 
-  if (!serviceErrors || isEmpty(serviceErrors)) {
+  if (!alwaysShow && (!serviceErrors || isEmpty(serviceErrors))) {
     return null
   }
 
@@ -75,6 +82,7 @@ export function ServicesTableErrors({
         }}
         clickable
         errors={serviceErrors}
+        alwaysShow={alwaysShow}
         {...props}
       />
       <ModalMountTransition open={isOpen}>
