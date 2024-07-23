@@ -23,7 +23,7 @@ export const edgeTypes = {
   [EdgeType.Pipeline]: Pipeline,
 } as const
 
-export function isNotInvisible(edge: Edge): boolean {
+export function isVisible(edge: Edge): boolean {
   return edge.type !== EdgeType.Invisible
 }
 
