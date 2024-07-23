@@ -52,6 +52,88 @@ def write_yaml(file_path, data):
     return False
 
 
+def latest_kube_version():
+    url = (
+        "https://storage.googleapis.com/kubernetes-release/release/stable.txt"
+    )
+    response = requests.get(url)
+    if response.status_code == 200:
+        # remove leading whitespaces and the hotfix version e.g. v1.30.2 -> v1.30
+        latest = response.text.lstrip("v")
+        latest = latest.split(".")
+        latest = ".".join(latest[:2])
+        print(f"Latest kube version: {latest}")
+        return latest
+    else:
+        print_error(
+            f"Failed to fetch the latest kube version: {response.status_code}"
+        )
+        return None
+
+
+def current_kube_version():
+    # Read the current kube version from ../../KUBE_VERSION file
+    try:
+        with open("../../KUBE_VERSION", "r") as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        print_error("KUBE_VERSION file not found")
+        return None
+    except Exception as e:
+        print_error(f"Failed to read KUBE_VERSION file: {e}")
+        return None
+
+
+def expand_kube_versions(start, end):
+    start_major, start_minor = start.split(".")
+    end_major, end_minor = end.split(".")
+
+    expanded_versions = [start]
+    major = int(start_major)
+    minor = int(start_minor)
+
+    while (
+        (major < int(end_major))
+        or (major == int(end_major) and minor <= int(end_minor))
+        or (major == int(end_major) and minor == int(end_minor))
+    ):
+        minor += 1
+        expanded_versions.append(f"{major}.{minor}")
+        if major == int(end_major) and minor == int(end_minor):
+            break
+
+    return expanded_versions
+
+
+def get_github_releases(repo_owner, repo_name):
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        releases = []
+        releases_json = response.json()
+        for release in releases_json:
+            releases.append(release["tag_name"])
+        return releases
+    else:
+        raise Exception(
+            f"Failed to fetch latest releases: {response.status_code}"
+        )
+
+
+def get_latest_github_release(repo_owner, repo_name):
+    url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/releases/latest"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        latest_release = response.json()
+        return latest_release.get("tag_name")
+    else:
+        raise Exception(
+            f"Failed to fetch latest release: {response.status_code}"
+        )
+
+
 def update_chart_versions(app_name, chart_name=""):
 
     if not chart_name:
@@ -61,7 +143,9 @@ def update_chart_versions(app_name, chart_name=""):
     compatibility_yaml = read_yaml(yaml_file_name)
 
     if not compatibility_yaml or "versions" not in compatibility_yaml:
-        print_error(f"No versions found for {app_name}")
+        print_error(
+            f"No versions found for {app_name} in the compatibility yaml file"
+        )
         return
 
     helm_repository_url = compatibility_yaml["helm_repository_url"]
@@ -79,7 +163,7 @@ def update_chart_versions(app_name, chart_name=""):
 
     chart_versions = index_yaml["entries"][chart_name]
     if not chart_versions:
-        print_error(f"No versions found for {chart_name}")
+        print_error(f"No Chart versions found for {chart_name}")
         return
 
     for chart_entry in chart_versions:
@@ -119,18 +203,31 @@ def update_versions_data(data, new_versions):
     data["versions"] = sort_versions(list(merged_versions.values()))
 
 
-def update_compatibility_info(filepath, new_versions):
-    for version in new_versions:
+def ensure_keys(version):
+    if "kube" in version:
         version["kube"] = sorted(
             version["kube"], key=lambda v: Version(v), reverse=True
         )
+    if "requirements" not in version:
+        version["requirements"] = []
+    if "incompatibilities" not in version:
+        version["incompatibilities"] = []
+    return version
+
+
+def update_compatibility_info(filepath, new_versions):
     try:
         data = read_yaml(filepath)
         if data:
+            new_versions = [ensure_keys(v) for v in new_versions]
             update_versions_data(data, new_versions)
         else:
             print_warning("No existing versions found. Writing new data.")
-            data = {"versions": sort_versions(new_versions)}
+            data = {
+                "versions": sort_versions(
+                    [ensure_keys(v) for v in new_versions]
+                )
+            }
         if write_yaml(filepath, data):
             print_success(
                 f"Updated compatibility info table: {Fore.CYAN}{filepath}"
