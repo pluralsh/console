@@ -3,7 +3,6 @@ import { EmptyState, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 import {
-  ServiceDeploymentStatus,
   useGlobalServicesQuery,
   useServiceStatusesQuery,
   useServiceTreeQuery,
@@ -18,7 +17,7 @@ import { mapExistingNodes } from '../../../utils/graphql'
 
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import { ServicesTreeDiagram } from './ServicesTreeDiagram'
-import { ServicesContextT } from './Services'
+import { ServicesContextT, getServiceStatuses } from './Services'
 
 const servicesLimit = 1000
 
@@ -47,11 +46,6 @@ export default function ServicesTree() {
     [data?.serviceTree]
   )
 
-  const { data: serviceStatusesData, error: serviceStatusesError } =
-    useServiceStatusesQuery({
-      variables: { ...(clusterId ? { clusterId } : {}) },
-    })
-
   const { data: globalServicesData, error: globalServicesError } =
     useGlobalServicesQuery({
       variables: { projectId, first: servicesLimit },
@@ -62,34 +56,13 @@ export default function ServicesTree() {
     [globalServicesData?.globalServices]
   )
 
-  const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
-    () => ({
-      ALL: serviceStatusesData?.serviceStatuses?.reduce(
-        (count, status) => count + (status?.count || 0),
-        0
-      ),
-      [ServiceDeploymentStatus.Healthy]: serviceStatusesData?.serviceStatuses
-        ? 0
-        : undefined,
-      [ServiceDeploymentStatus.Synced]: serviceStatusesData?.serviceStatuses
-        ? 0
-        : undefined,
-      [ServiceDeploymentStatus.Stale]: serviceStatusesData?.serviceStatuses
-        ? 0
-        : undefined,
-      [ServiceDeploymentStatus.Paused]: serviceStatusesData?.serviceStatuses
-        ? 0
-        : undefined,
-      [ServiceDeploymentStatus.Failed]: serviceStatusesData?.serviceStatuses
-        ? 0
-        : undefined,
-      ...Object.fromEntries(
-        serviceStatusesData?.serviceStatuses?.map((status) => [
-          status?.status,
-          status?.count,
-        ]) || []
-      ),
-    }),
+  const { data: serviceStatusesData, error: serviceStatusesError } =
+    useServiceStatusesQuery({
+      variables: { ...(clusterId ? { clusterId } : {}) },
+    })
+
+  const statusCounts = useMemo(
+    () => getServiceStatuses(serviceStatusesData?.serviceStatuses),
     [serviceStatusesData?.serviceStatuses]
   )
 

@@ -5,7 +5,6 @@ import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import {
-  ServiceDeploymentStatus,
   type ServiceDeploymentsRowFragment,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
@@ -27,6 +26,7 @@ import {
   SERVICES_REACT_VIRTUAL_OPTIONS,
   ServicesContextT,
   columns,
+  getServiceStatuses,
 } from './Services'
 
 export default function ServicesTable() {
@@ -64,24 +64,8 @@ export default function ServicesTable() {
     }
   )
 
-  const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
-    () => ({
-      ALL: data?.serviceStatuses?.reduce(
-        (count, status) => count + (status?.count || 0),
-        0
-      ),
-      [ServiceDeploymentStatus.Healthy]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Synced]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Stale]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Paused]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Failed]: data?.serviceStatuses ? 0 : undefined,
-      ...Object.fromEntries(
-        data?.serviceStatuses?.map((status) => [
-          status?.status,
-          status?.count,
-        ]) || []
-      ),
-    }),
+  const statusCounts = useMemo(
+    () => getServiceStatuses(data?.serviceStatuses),
     [data?.serviceStatuses]
   )
 
