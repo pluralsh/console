@@ -307,8 +307,13 @@ function ServicesTreeDiagramServiceNodeModal({
           marginBottom="xlarge"
         />
         <div>
-          <OverlineH1 css={{ color: theme.colors['text-xlight'] }}>
-            Containers
+          <OverlineH1
+            css={{
+              color: theme.colors['text-xlight'],
+              marginBottom: theme.spacing.large,
+            }}
+          >
+            Components
           </OverlineH1>
           <Table
             columns={columns}
