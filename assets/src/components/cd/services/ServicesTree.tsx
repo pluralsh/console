@@ -133,9 +133,9 @@ export default function ServicesTree() {
         ) : (
           <div css={{ height: '100%' }}>
             {statusCounts.ALL || 0 > 0 ? (
-              <EmptyState message="No service deployments match your query." />
+              <EmptyState message="No services match your query." />
             ) : (
-              <EmptyState message="Looks like you don't have any service deployments yet." />
+              <EmptyState message="Looks like you don't have any services yet." />
             )}
           </div>
         )}
