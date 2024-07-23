@@ -7,7 +7,7 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useNodeEdges } from '../../hooks/reactFlowHooks'
 
-import { EdgeType, isNotInvisible } from './edges'
+import { isNotInvisible } from './edges'
 
 const HANDLE_SIZE = 8
 
