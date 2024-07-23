@@ -8,6 +8,7 @@ import { useEdgeNodes } from '../../hooks/reactFlowHooks'
 import { MarkerType } from './markers'
 
 export enum EdgeType {
+  Invisible = 'plural-invisible-edge',
   Bezier = 'plural-bezier-edge',
   Smooth = 'plural-smooth-edge',
   Directed = 'plural-directed-edge',
@@ -15,13 +16,24 @@ export enum EdgeType {
 }
 
 export const edgeTypes = {
+  [EdgeType.Invisible]: Invisible,
   [EdgeType.Bezier]: Bezier,
   [EdgeType.Smooth]: Smooth,
   [EdgeType.Directed]: Directed,
   [EdgeType.Pipeline]: Pipeline,
 } as const
 
-function Bezier({ style, ...props }: ComponentProps<typeof StepEdge>) {
+function Invisible({ ...props }: ComponentProps<typeof BezierEdge>) {
+  return (
+    <BezierEdge
+      data-something="data-something"
+      {...props}
+      style={{ display: 'none' }}
+    />
+  )
+}
+
+function Bezier({ style, ...props }: ComponentProps<typeof BezierEdge>) {
   const theme = useTheme()
 
   return (
@@ -36,7 +48,7 @@ function Bezier({ style, ...props }: ComponentProps<typeof StepEdge>) {
   )
 }
 
-function Smooth({ style, ...props }: ComponentProps<typeof StepEdge>) {
+function Smooth({ style, ...props }: ComponentProps<typeof SmoothStepEdge>) {
   const theme = useTheme()
 
   return (
