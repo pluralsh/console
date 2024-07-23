@@ -3,16 +3,17 @@
 import requests
 from collections import OrderedDict
 from packaging.version import Version
-from utils import print_error, update_compatibility_info, update_chart_versions
+from utils import (
+    print_error,
+    update_compatibility_info,
+    update_chart_versions,
+    current_kube_version,
+)
 
 GITHUB_REPO_URL = "https://github.com/kubernetes-sigs/external-dns"
 GITHUB_API_TAGS_URL = (
     "https://api.github.com/repos/kubernetes-sigs/external-dns/tags"
 )
-
-# Read the current kube version from ../../KUBE_VERSION file
-with open("../../KUBE_VERSION", "r") as file:
-    current_kube_version = file.read().strip()
 
 
 def fetch_github_tags():
@@ -44,7 +45,7 @@ def expand_kube_versions(start_version, end_version):
 
 compat_map = {
     "0.9.0": expand_kube_versions("1.10", "1.21"),
-    "0.10.0": expand_kube_versions("1.19", current_kube_version),
+    "0.10.0": expand_kube_versions("1.19", current_kube_version()),
 }
 
 
