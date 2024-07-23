@@ -2,6 +2,7 @@ import { NodeProps } from 'reactflow'
 import { useTheme } from 'styled-components'
 import {
   ArrowTopRightIcon,
+  CaretRightIcon,
   ChipList,
   Divider,
   FolderIcon,
@@ -17,8 +18,11 @@ import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import moment from 'moment'
 
+import { createColumnHelper } from '@tanstack/react-table'
+
 import {
   GlobalServiceFragment,
+  ServiceDeploymentComponentFragment,
   ServiceTreeNodeFragment,
 } from '../../../generated/graphql'
 import { NodeBase } from '../../utils/reactflow/nodes'
@@ -33,6 +37,8 @@ import ProviderIcon from '../../utils/Provider'
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { OverlineH1 } from '../../utils/typography/Text'
+import { ColWithIcon } from '../../utils/table/ColWithIcon'
+import { ComponentIcon } from '../../apps/app/components/misc'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
@@ -305,7 +311,7 @@ function ServicesTreeDiagramServiceNodeModal({
             Containers
           </OverlineH1>
           <Table
-            columns={[]}
+            columns={columns}
             data={service.components ?? []}
             onRowClick={(e, { original }) =>
               navigate(
@@ -316,18 +322,61 @@ function ServicesTreeDiagramServiceNodeModal({
                 })
               )
             }
-            emptyStateProps={{ message: 'No logs found to display' }}
+            emptyStateProps={{ message: 'No components found' }}
+            rowBg="raised"
+            loose
+            hideHeader
             css={{
               maxHeight: 400,
               height: '100%',
             }}
           />
-          {/* TODO */}
         </div>
       </Modal>
     </ModalMountTransition>
   )
 }
+
+const columnHelper = createColumnHelper<ServiceDeploymentComponentFragment>()
+
+export const columns = [
+  columnHelper.accessor((component) => component, {
+    id: 'component',
+
+    cell: function Cell({ getValue }) {
+      const theme = useTheme()
+      const component = getValue()
+
+      return (
+        <ColWithIcon
+          truncateLeft
+          iconSize="xsmall"
+          icon={
+            <ComponentIcon
+              kind={component.kind}
+              size={24}
+            />
+          }
+        >
+          <div
+            css={{
+              ...theme.partials.text.body2Bold,
+              color: theme.colors.text,
+            }}
+          >
+            {component.name}
+          </div>
+          <div css={{ ...theme.partials.text.body2 }}>{component.group}</div>
+        </ColWithIcon>
+      )
+    },
+  }),
+  columnHelper.accessor((component) => component, {
+    id: 'icon',
+    meta: { gridTemplate: `fit-content(100px)` },
+    cell: () => <IconFrame icon={<CaretRightIcon />} />,
+  }),
+]
 
 function ModalProp({
   title,
