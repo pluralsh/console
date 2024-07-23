@@ -146,11 +146,14 @@ fragment ServiceDeploymentTiny on ServiceDeployment {
 fragment ServiceTreeNode on ServiceDeployment {
   id
   name
+  namespace
+  updatedAt
   status
   componentStatus
   components { ...ServiceDeploymentComponent }
   cluster { id name }
   repository { url }
+  git { ref folder }
   helmRepository { spec { url } }
   parent { id name }
   owner { id name }
