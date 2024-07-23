@@ -32,6 +32,12 @@ import {
 import { LinkTabWrap } from '../../utils/Tabs'
 
 import {
+  Maybe,
+  ServiceDeploymentStatus,
+  ServiceStatusCountFragment,
+} from '../../../generated/graphql'
+
+import {
   ColActions,
   ColCluster,
   ColErrors,
@@ -42,6 +48,7 @@ import {
   ColStatus,
 } from './ServicesColumns'
 import { DeployService } from './deployModal/DeployService'
+import { StatusTabKey } from './ServicesFilters'
 
 export const columns = [
   ColServiceDeployment,
@@ -61,6 +68,25 @@ export const SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
 }
 
 export const SERVICES_QUERY_PAGE_SIZE = 100
+
+export function getServiceStatuses(
+  serviceStatuses?: Maybe<Maybe<ServiceStatusCountFragment>[]>
+): Record<StatusTabKey, number | undefined> {
+  return {
+    ALL: serviceStatuses?.reduce(
+      (count, status) => count + (status?.count || 0),
+      0
+    ),
+    [ServiceDeploymentStatus.Healthy]: serviceStatuses ? 0 : undefined,
+    [ServiceDeploymentStatus.Synced]: serviceStatuses ? 0 : undefined,
+    [ServiceDeploymentStatus.Stale]: serviceStatuses ? 0 : undefined,
+    [ServiceDeploymentStatus.Paused]: serviceStatuses ? 0 : undefined,
+    [ServiceDeploymentStatus.Failed]: serviceStatuses ? 0 : undefined,
+    ...Object.fromEntries(
+      serviceStatuses?.map((status) => [status?.status, status?.count]) || []
+    ),
+  }
+}
 
 export type ServicesContextT = {
   setRefetch?: Dispatch<SetStateAction<() => () => void>>
