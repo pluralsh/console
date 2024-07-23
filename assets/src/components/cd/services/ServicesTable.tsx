@@ -1,11 +1,4 @@
-import {
-  ComponentProps,
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
