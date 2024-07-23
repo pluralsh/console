@@ -20,6 +20,8 @@ import moment from 'moment'
 
 import { createColumnHelper } from '@tanstack/react-table'
 
+import { isEmpty } from 'lodash'
+
 import {
   GlobalServiceFragment,
   ServiceDeploymentComponentFragment,
@@ -494,12 +496,12 @@ export function ServicesTreeDiagramGlobalServiceNode(
           >
             {data?.distro ? `${data.distro} distribution` : 'All distributions'}
           </div>
-          {data.tags && (
+          {!isEmpty(data.tags) && (
             <div css={{ marginTop: theme.spacing.small }}>
               <ChipList
                 limit={6}
                 size="small"
-                values={data.tags}
+                values={data.tags ?? []}
                 transformValue={(tag) => `${tag?.name}: ${tag?.value}`}
                 emptyState={null}
               />
