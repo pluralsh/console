@@ -151,7 +151,7 @@ var _ = Describe("Global Service Controller", Ordered, func() {
 						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
-							Status: metav1.ConditionFalse,
+							Status: metav1.ConditionTrue,
 							Reason: v1alpha1.ReadyConditionReason.String(),
 						},
 						{
