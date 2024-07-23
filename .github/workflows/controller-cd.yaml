@@ -25,7 +25,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: controller
+        working-directory: workspaces/controller
     timeout-minutes: 5
     steps:
     - name: Checkout

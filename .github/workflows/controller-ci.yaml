@@ -24,7 +24,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: controller
+        working-directory: workspaces/controller
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
@@ -40,7 +40,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: controller
+        working-directory: workspaces/controller
     timeout-minutes: 5
     steps:
       - name: Checkout
@@ -68,4 +68,4 @@ jobs:
       - uses: golangci/golangci-lint-action@3a919529898de77ec3da873e3063ca4b10e7f5cc # v3.7.0
         with:
           version: v1.55.1
-          working-directory: controller
+          working-directory: workspaces/controller

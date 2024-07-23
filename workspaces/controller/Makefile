@@ -189,3 +189,7 @@ deploy-helm: manifests
 .PHONY: undeploy
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/default | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
+
+.PHONY: tools
+tools: ## Installs all required tools
+	@$(MAKE) --directory=$(TOOLS_DIR) --no-print-directory
