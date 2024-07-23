@@ -20,6 +20,7 @@ import {
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { useTheme } from 'styled-components'
+import { chunk } from 'lodash'
 
 import {
   type DagreDirection,
@@ -28,6 +29,8 @@ import {
 import { ReactFlowGraph } from '../../utils/reactflow/graph'
 
 import { EdgeType } from '../../utils/reactflow/edges'
+
+import { pairwise } from '../../../utils/array'
 
 import {
   GlobalServiceNodeType,
@@ -84,11 +87,32 @@ function getNodesAndEdges(
     }))
   )
 
-  return {
-    nodes,
-    edges,
-    // TODO: Add invisible edges to position disconnected nodes.
-  }
+  positionOrphanNodes(nodes, edges)
+
+  return { nodes, edges }
+}
+
+function positionOrphanNodes(nodes: Node[], edges: Edge[]) {
+  const connectedNodes = new Set<string>()
+
+  edges.forEach((edge) => {
+    connectedNodes.add(edge.source)
+    connectedNodes.add(edge.target)
+  })
+
+  const orphanNodes = nodes.filter((node) => !connectedNodes.has(node.id))
+
+  chunk(orphanNodes, 3).forEach((chunk) => {
+    for (const [source, target] of pairwise(chunk)) {
+      edges.push({
+        type: EdgeType.Invisible,
+        updatable: false,
+        id: `positioning${source.id}${target.id}`,
+        source: source.id,
+        target: target.id,
+      })
+    }
+  })
 }
 
 export function ServicesTreeDiagram({
