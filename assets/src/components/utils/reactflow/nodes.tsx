@@ -7,6 +7,8 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useNodeEdges } from '../../hooks/reactFlowHooks'
 
+import { EdgeType, isNotInvisible } from './edges'
+
 const HANDLE_SIZE = 8
 
 export const NodeHandle = styled(Handle)<{
@@ -64,14 +66,14 @@ export function NodeBase({
         <NodeHandle
           type="target"
           isConnectable={false}
-          $isConnected={!isEmpty(incomers)}
+          $isConnected={!isEmpty(incomers.filter(isNotInvisible))}
           position={Position.Left}
         />
         {children}
         <NodeHandle
           type="source"
           isConnectable={false}
-          $isConnected={!isEmpty(outgoers)}
+          $isConnected={!isEmpty(outgoers.filter(isNotInvisible))}
           position={Position.Right}
         />
       </NodeBaseCard>

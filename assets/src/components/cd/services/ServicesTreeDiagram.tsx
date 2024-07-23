@@ -87,12 +87,12 @@ function getNodesAndEdges(
     }))
   )
 
-  positionOrphanNodes(nodes, edges)
+  positionOrphanedNodes(nodes, edges)
 
   return { nodes, edges }
 }
 
-function positionOrphanNodes(nodes: Node[], edges: Edge[]) {
+function positionOrphanedNodes(nodes: Node[], edges: Edge[]) {
   const connectedNodes = new Set<string>()
 
   edges.forEach((edge) => {
@@ -100,9 +100,9 @@ function positionOrphanNodes(nodes: Node[], edges: Edge[]) {
     connectedNodes.add(edge.target)
   })
 
-  const orphanNodes = nodes.filter((node) => !connectedNodes.has(node.id))
+  const orphanedNodes = nodes.filter((node) => !connectedNodes.has(node.id))
 
-  chunk(orphanNodes, 3).forEach((chunk) => {
+  chunk(orphanedNodes, 3).forEach((chunk) => {
     for (const [source, target] of pairwise(chunk)) {
       edges.push({
         type: EdgeType.Invisible,
