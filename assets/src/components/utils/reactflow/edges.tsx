@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import { BezierEdge, SmoothStepEdge, StepEdge } from 'reactflow'
+import { BezierEdge, type Edge, SmoothStepEdge, StepEdge } from 'reactflow'
 import { ComponentProps } from 'react'
 
 import { GateState } from '../../../generated/graphql'
@@ -22,6 +22,10 @@ export const edgeTypes = {
   [EdgeType.Directed]: Directed,
   [EdgeType.Pipeline]: Pipeline,
 } as const
+
+export function isNotInvisible(edge: Edge): boolean {
+  return edge.type !== EdgeType.Invisible
+}
 
 function Invisible({ ...props }: ComponentProps<typeof BezierEdge>) {
   return (
