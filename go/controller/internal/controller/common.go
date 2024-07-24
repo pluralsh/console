@@ -23,12 +23,17 @@ import (
 
 const (
 	// requeueAfter is the time between scheduled reconciles if there are no changes to the CRD.
-	requeueAfter = 30 * time.Second
+	requeueAfter            = 30 * time.Second
+	requeueWaitForResources = 5 * time.Second
 )
 
 var (
 	requeue = ctrl.Result{RequeueAfter: requeueAfter}
 )
+
+func RequeueAfter(after time.Duration) ctrl.Result {
+	return ctrl.Result{RequeueAfter: after}
+}
 
 func ensureBindings(bindings []v1alpha1.Binding, userGroupCache cache.UserGroupCache) ([]v1alpha1.Binding, bool, error) {
 	requeue := false
