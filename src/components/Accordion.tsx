@@ -4,62 +4,27 @@ import {
   type ReactElement,
   type ReactNode,
   type Ref,
-  createContext,
   forwardRef,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
+  useId,
 } from 'react'
 
-import styled, { css, keyframes } from 'styled-components'
+import styled, {
+  type DefaultTheme,
+  css,
+  keyframes,
+  useTheme,
+} from 'styled-components'
 
 import { DropdownArrowIcon } from '../icons'
 
 import Card from './Card'
 
-export type AccordionProps = ComponentProps<typeof RadixAccordion.Root>
-type AccordionContextT = {
-  type: AccordionProps['type']
-  openItems: AccordionProps['value']
-  setOpenItems: (openItems: AccordionProps['value']) => void
-}
-
-const AccordionContext = createContext<AccordionContextT>(undefined)
-const useAccordionContext = () => {
-  const ctx = useContext(AccordionContext)
-
-  if (!ctx) throw Error('AccordionContext must be used inside an <Accordion/>')
-
-  return ctx
-}
-
-export function useIsItemOpen(itemValue: string) {
-  const { openItems } = useAccordionContext()
-
-  if (!openItems) return false
-
-  return typeof openItems === 'string'
-    ? openItems === itemValue
-    : (openItems as string[]).includes(itemValue)
-}
-
-export function useCloseItem(itemValue: string) {
-  const { openItems, setOpenItems } = useAccordionContext()
-
-  return useCallback(() => {
-    if (typeof openItems === 'string' && openItems === itemValue) {
-      setOpenItems('')
-    } else {
-      setOpenItems((openItems as string[]).filter((v) => v !== itemValue))
-    }
-  }, [itemValue, openItems, setOpenItems])
-}
+export type AccordionProps = ComponentProps<typeof RadixAccordion.Root> &
+  ComponentProps<typeof Card>
 
 function AccordionRef(
   {
     children,
-    onValueChange: valueChangePropFunc,
     ...props
   }: {
     children?:
@@ -69,68 +34,57 @@ function AccordionRef(
   } & AccordionProps,
   ref: Ref<HTMLDivElement>
 ) {
-  const [openItems, setOpenItems] = useState<AccordionProps['value']>(
-    props.value
-  )
-
-  // for both keeping track of current open items, and still allowing user-specified function
-  const onValueChange = useCallback(
-    (val: AccordionProps['value']) => {
-      setOpenItems(val)
-      valueChangePropFunc?.(val as string & string[])
-    },
-    [valueChangePropFunc]
-  )
-
-  const context = useMemo(
-    () => ({
-      type: props.type,
-      openItems,
-      setOpenItems,
-    }),
-    [openItems, props.type]
-  )
-
   return (
-    <AccordionContext.Provider value={context}>
-      <RadixAccordion.Root
-        ref={ref}
-        asChild
-        collapsible={props.collapsible ?? true}
-        value={openItems as string & string[]}
-        onValueChange={onValueChange}
-        css={{ overflow: 'hidden' }}
-        {...props}
-      >
-        <Card>{children}</Card>
-      </RadixAccordion.Root>
-    </AccordionContext.Provider>
+    <RadixAccordion.Root
+      ref={ref}
+      asChild
+      collapsible={props.collapsible ?? true}
+      css={{ overflow: 'hidden' }}
+      {...props}
+    >
+      <Card>{children}</Card>
+    </RadixAccordion.Root>
   )
 }
 
-export const Accordion = forwardRef(AccordionRef)
 function AccordionItemRef(
   {
-    hideDefaultIcon = false,
+    value,
+    padding = 'relaxed',
+    paddingArea = 'all',
+    caret = 'right',
     trigger,
     children,
     ...props
   }: {
-    hideDefaultIcon?: boolean
+    value?: string
+    padding?: 'none' | 'compact' | 'relaxed'
+    paddingArea?: 'trigger-only' | 'all'
+    caret?: 'none' | 'left' | 'right'
     trigger: ReactNode
     children: ReactNode
-  } & ComponentProps<typeof RadixAccordion.Item>,
+  } & Omit<ComponentProps<typeof RadixAccordion.Item>, 'value'>,
   ref: Ref<HTMLDivElement>
 ) {
+  const theme = useTheme()
+  const paddingSize = getPaddingSize(theme, padding)
+  // if value is not provided, use a random persisted id
+  const defaultValue = useId()
+
   return (
     <ItemSC
+      // @ts-ignore, this is the sorta thing React 19 will be nice for
       ref={ref}
+      value={value ?? defaultValue}
       {...props}
     >
       <RadixAccordion.Header asChild>
-        <TriggerSC>
+        <TriggerSC
+          $caret={caret}
+          $padding={paddingSize}
+        >
           {trigger}
-          {!hideDefaultIcon && (
+          {caret !== 'none' && (
             <DropdownArrowIcon
               className="icon"
               size={14}
@@ -138,35 +92,64 @@ function AccordionItemRef(
           )}
         </TriggerSC>
       </RadixAccordion.Header>
-      <ContentSC>{children}</ContentSC>
+      <ContentSC>
+        <div
+          style={
+            paddingArea === 'all'
+              ? {
+                  paddingRight: paddingSize,
+                  paddingBottom: paddingSize,
+                  paddingLeft: paddingSize,
+                }
+              : {}
+          }
+        >
+          {children}
+        </div>
+      </ContentSC>
     </ItemSC>
   )
 }
-export const AccordionItem = forwardRef(AccordionItemRef)
 
-const ItemSC: typeof RadixAccordion.Item = styled(RadixAccordion.Item)((_) => ({
+function getPaddingSize(
+  theme: DefaultTheme,
+  size: 'none' | 'compact' | 'relaxed'
+) {
+  switch (size) {
+    case 'relaxed':
+      return theme.spacing.medium
+    case 'compact':
+      return theme.spacing.small
+    default:
+      return 0
+  }
+}
+
+const ItemSC = styled(RadixAccordion.Item)({
   display: 'flex',
-  height: '100%',
-  width: '100%',
   '&[data-orientation="vertical"]': {
     flexDirection: 'column',
   },
   '&[data-orientation="horizontal"]': {
     flexDirection: 'row',
   },
-}))
-const TriggerSC = styled(RadixAccordion.Trigger)(({ theme }) => ({
+})
+
+const TriggerSC = styled(RadixAccordion.Trigger)<{
+  $caret: 'none' | 'left' | 'right'
+  $padding?: number
+}>(({ theme, $caret, $padding }) => ({
+  ...theme.partials.reset.button,
+  ...($padding ? { padding: $padding } : {}),
   display: 'flex',
+  flexDirection: $caret === 'left' ? 'row-reverse' : 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
   cursor: 'pointer',
   ...theme.partials.text.body2Bold,
   color: theme.colors.text,
-  // reset default button styles
-  background: 'transparent',
-  border: 'none',
-  padding: 0,
   '.icon': {
+    color: theme.colors['icon-xlight'],
     transform: 'scaleY(100%)',
     transition: 'transform 0.3s ease',
   },
@@ -174,6 +157,9 @@ const TriggerSC = styled(RadixAccordion.Trigger)(({ theme }) => ({
     '.icon': {
       transform: 'scale(115%)',
     },
+  },
+  '&:focus-visible': {
+    ...theme.partials.focus.default,
   },
   '&[data-state="open"] .icon': {
     transform: 'scaleY(-100%)',
@@ -201,6 +187,10 @@ const slideAnimation = (
 `
 const ContentSC = styled(RadixAccordion.Content)`
   overflow: hidden;
+  & > div {
+    height: 100%;
+    width: 100%;
+  }
   &[data-state='open'][data-orientation='vertical'] {
     animation: ${css`
         ${slideAnimation('out', 'height')}`} 300ms ease-out;
@@ -219,4 +209,8 @@ const ContentSC = styled(RadixAccordion.Content)`
   }
 `
 
+const Accordion = forwardRef(AccordionRef)
+const AccordionItem = forwardRef(AccordionItemRef)
+
 export default Accordion
+export { AccordionItem }

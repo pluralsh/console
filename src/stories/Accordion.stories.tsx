@@ -5,13 +5,26 @@ export default {
   title: 'Accordion',
   component: Accordion,
   argTypes: {
-    hideDefaultIcon: {
-      control: {
-        type: 'boolean',
-      },
-    },
     type: {
       options: ['single', 'multiple'],
+      control: {
+        type: 'select',
+      },
+    },
+    padding: {
+      options: ['none', 'compact', 'relaxed'],
+      control: {
+        type: 'select',
+      },
+    },
+    paddingArea: {
+      options: ['all', 'trigger-only'],
+      control: {
+        type: 'select',
+      },
+    },
+    caret: {
+      options: ['none', 'left', 'right'],
       control: {
         type: 'select',
       },
@@ -27,32 +40,47 @@ export default {
 
 export const Default = Template.bind({})
 Default.args = {
-  hideDefaultIcon: false,
   type: 'single',
+  padding: 'relaxed',
+  paddingArea: 'all',
+  caret: 'right',
   trigger: 'Title',
   children: 'Children',
 }
 
-function Template({ hideDefaultIcon, trigger, children, ...args }: any) {
+function Template({
+  padding,
+  paddingArea,
+  caret,
+  trigger,
+  children,
+  ...args
+}: any) {
   return (
     <Accordion {...args}>
       <AccordionItem
-        hideDefaultIcon={hideDefaultIcon}
         trigger={trigger}
+        caret={caret}
+        padding={padding}
+        paddingArea={paddingArea}
         value="one"
       >
         {children}
       </AccordionItem>
       <AccordionItem
-        hideDefaultIcon={hideDefaultIcon}
         trigger={trigger}
+        caret={caret}
+        padding={padding}
+        paddingArea={paddingArea}
         value="two"
       >
         {children}
       </AccordionItem>
       <AccordionItem
-        hideDefaultIcon={hideDefaultIcon}
         trigger={trigger}
+        caret={caret}
+        padding={padding}
+        paddingArea={paddingArea}
         value="three"
       >
         {children}
