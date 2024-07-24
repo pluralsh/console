@@ -1,0 +1,23 @@
+query GetGroup($name: String!) {
+    group(name: $name) {
+        ...GroupFragment
+    }
+}
+
+mutation CreateGroup($attributtes: GroupAttributes!) {
+    createGroup(attributes: $attributtes) {
+        ...GroupFragment
+    }
+}
+
+mutation UpdateGroup($groupId: ID!, $attributtes: GroupAttributes!) {
+    updateGroup(groupId: $groupId, attributes: $attributtes) {
+        ...GroupFragment
+    }
+}
+
+mutation DeleteGroup($groupId: ID!) {
+    deleteGroup(groupId: $groupId) {
+        ...GroupFragment
+    }
+}
