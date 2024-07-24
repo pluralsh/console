@@ -4,6 +4,22 @@ defimpl Console.PubSub.Rtc, for: [Console.PubSub.RunLogsCreated] do
   def deliver(%{item: item}), do: {item, :create}
 end
 
+defimpl Console.PubSub.Rtc, for: Console.PubSub.PipelineStageUpdated do
+  def deliver(%{item: stage}) do
+    %{pipeline: pipeline} = Console.Repo.preload(stage, [:pipeline])
+    {pipeline, :update}
+  end
+end
+
+defimpl Console.PubSub.Rtc, for: [Console.PubSub.PipelineGateUpdated, Console.PubSub.PipelineGateApproved] do
+  def deliver(%{item: edge}) do
+    case Console.Repo.preload(edge, [edge: [from: :pipeline]]) do
+      %{edge: %{from: %{pipeline: pipeline}}} -> {pipeline, :update}
+      _ -> :ok
+    end
+  end
+end
+
 # defimpl Console.PubSub.Rtc, for: [
 #   Console.PubSub.ServiceUpdated,
 #   Console.PubSub.ClusterUpdated,

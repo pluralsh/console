@@ -171,6 +171,7 @@ defmodule Console.Deployments.Pipelines do
       |> Repo.update()
     end)
     |> execute()
+    |> notify(:context)
   end
 
   defp build_pr_context(ctx, %StageService{service: svc}, %PipelineStage{} = stage) do
@@ -472,6 +473,14 @@ defmodule Console.Deployments.Pipelines do
     do: handle_notify(PubSub.PromotionCreated, promo)
   defp notify({:ok, %PipelineStage{} = stage}, :update),
     do: handle_notify(PubSub.PipelineStageUpdated, stage)
+  defp notify({:ok, %PipelineEdge{} = edge}, :update),
+    do: handle_notify(PubSub.PipelineEdgeUpdated, edge)
+  defp notify({:ok, %PipelineGate{} = edge}, :update),
+    do: handle_notify(PubSub.PipelineGateUpdated, edge)
+  defp notify({:ok, %{stg: %PipelineStage{} = stage}} = res, :context) do
+    handle_notify(PubSub.PipelineStageUpdated, stage)
+    res
+  end
   defp notify(pass, _), do: pass
 
   defp notify({:ok, %PipelineContext{} = ctx}, :create, user),

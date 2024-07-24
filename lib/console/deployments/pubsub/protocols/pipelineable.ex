@@ -14,7 +14,9 @@ defimpl Console.Deployments.PubSub.Pipelineable, for: Any do
 end
 
 defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.ServiceComponentsUpdated do
+  require Logger
   def pipe(%{item: %{status: :healthy, updated_at: uat} = svc}) do
+    Logger.info "Kicking any pipelines associated with #{svc.id}"
     recent = Timex.now()
              |> Timex.shift(minutes: -2)
              |> Timex.before?(uat)
