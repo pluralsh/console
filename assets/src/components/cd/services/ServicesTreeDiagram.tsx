@@ -78,14 +78,24 @@ function getNodesAndEdges(
     }
   })
 
-  nodes.push(
-    ...globalServices.map((service) => ({
+  globalServices.forEach((service) => {
+    nodes.push({
       id: service.id,
       position: { x: 0, y: 0 },
       type: GlobalServiceNodeType,
       data: { ...service },
-    }))
-  )
+    })
+
+    if (service.parent?.id && isNotDeploymentOperatorService(service.parent)) {
+      edges.push({
+        type: EdgeType.Smooth,
+        updatable: false,
+        id: `${service.id}${service.parent.id}`,
+        source: service.id,
+        target: service.parent.id,
+      })
+    }
+  })
 
   positionOrphanedNodes(nodes, edges)
 
