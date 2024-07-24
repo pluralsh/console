@@ -203,6 +203,7 @@ export function ServicesTreeDiagram({
 
   return (
     <ReactFlowGraph
+      allowFullscreen
       resetView={() => setViewport({ x: 0, y: 0, zoom: 1 }, { duration: 500 })}
       nodes={nodes}
       edges={edges}
