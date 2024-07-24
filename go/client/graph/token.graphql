@@ -1,0 +1,42 @@
+fragment AccessTokenFragment on AccessToken {
+    id
+    token
+}
+
+query ListAccessTokens($cursor: String, $before: String, $last: Int) {
+    accessTokens(after: $cursor, first: 100, before: $before, last: $last) {
+        edges { node { ...AccessTokenFragment }}
+    }
+}
+
+query GetAccessToken($id: ID!){
+    accessToken(id: $id) {
+        ...AccessTokenFragment
+    }
+}
+
+query TokenExchange($token: String!) {
+    tokenExchange(token: $token) {
+        ...UserFragment
+        groups {
+            id
+            name
+        }
+        boundRoles {
+            id
+            name
+        }
+    }
+}
+
+mutation CreateAccessToken {
+    createAccessToken {
+        ...AccessTokenFragment
+    }
+}
+
+mutation DeleteAccessToken($token: String!) {
+    deleteAccessToken(token: $token) {
+        ...AccessTokenFragment
+    }
+}

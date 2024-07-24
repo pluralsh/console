@@ -1,0 +1,29 @@
+query GetUser($email: String!) {
+    user(email: $email) {
+        ...UserFragment
+    }
+}
+
+query GetGroup($name: String!) {
+    group(name: $name) {
+        ...GroupFragment
+    }
+}
+
+mutation AddGroupMember($groupId: ID!, $userId: ID!) {
+    createGroupMember(groupId: $groupId, userId: $userId) {
+        ...GroupMemberFragment
+    }
+}
+
+mutation DeleteGroupMember($userId: ID!, $groupId: ID!) {
+    deleteGroupMember(userId: $userId, groupId: $groupId) {
+        ...GroupMemberFragment
+    }
+}
+
+mutation DeleteUser($id: ID!) {
+    deleteUser(id: $id) {
+        ...UserFragment
+    }
+}
