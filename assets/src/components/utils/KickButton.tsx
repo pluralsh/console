@@ -1,24 +1,31 @@
-import { Button, GraphQLToast, Tooltip } from '@pluralsh/design-system'
+import {
+  Button,
+  GraphQLToast,
+  IconFrame,
+  ReloadIcon,
+  Spinner,
+  Tooltip,
+} from '@pluralsh/design-system'
 import { useSyncCooldown } from 'components/hooks/useSyncCooldown'
 import { useState } from 'react'
-import { useTheme } from 'styled-components'
 import { ButtonProps } from 'honorable'
 
 export default function KickButton({
   pulledAt,
   kickMutationHook,
   message,
+  icon = false,
   tooltipMessage,
   variables,
   ...props
 }: {
   pulledAt?: string | null
   kickMutationHook: any
-  message: string
+  message?: string
+  icon?: boolean
   tooltipMessage: string
   variables: any
 } & ButtonProps) {
-  const theme = useTheme()
   const [mutation, { loading, error }] = kickMutationHook({ variables })
   const [buttonClicked, setButtonClicked] = useState(false)
 
@@ -29,13 +36,7 @@ export default function KickButton({
   const { disabled, secondsRemaining } = useSyncCooldown(lastPullPlus15)
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: theme.spacing.small,
-        flexDirection: 'column',
-      }}
-    >
+    <div>
       {error && disabled && (
         <GraphQLToast
           error={{ ...error }}
@@ -52,19 +53,42 @@ export default function KickButton({
           />
         }
       >
-        <Button
-          disabled={disabled && buttonClicked}
-          onClick={() => {
-            setButtonClicked(true)
-            mutation()
-          }}
-          loading={loading}
-          {...props}
-        >
-          {disabled && buttonClicked
-            ? `Resync cooldown ${secondsRemaining}`
-            : message}
-        </Button>
+        {icon ? (
+          <IconFrame
+            icon={
+              loading ? (
+                <Spinner />
+              ) : (
+                <ReloadIcon
+                  color={
+                    disabled && buttonClicked ? 'icon-disabled' : undefined
+                  }
+                />
+              )
+            }
+            type="secondary"
+            disabled={disabled && buttonClicked}
+            clickable
+            onClick={() => {
+              setButtonClicked(true)
+              mutation()
+            }}
+          />
+        ) : (
+          <Button
+            disabled={disabled && buttonClicked}
+            onClick={() => {
+              setButtonClicked(true)
+              mutation()
+            }}
+            loading={loading}
+            {...props}
+          >
+            {disabled && buttonClicked
+              ? `Resync cooldown ${secondsRemaining}`
+              : message}
+          </Button>
+        )}
       </Tooltip>
     </div>
   )

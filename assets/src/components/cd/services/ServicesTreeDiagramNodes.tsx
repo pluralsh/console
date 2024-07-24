@@ -13,6 +13,7 @@ import {
   InfoIcon,
   InfoOutlineIcon,
   Modal,
+  ReloadIcon,
   Table,
 } from '@pluralsh/design-system'
 import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
@@ -28,6 +29,8 @@ import {
   GlobalServiceFragment,
   ServiceDeploymentComponentFragment,
   ServiceTreeNodeFragment,
+  useKickServiceMutation,
+  useSyncGlobalServiceMutation,
 } from '../../../generated/graphql'
 import { NodeBase } from '../../utils/reactflow/nodes'
 import {
@@ -46,6 +49,8 @@ import {
   ComponentIcon,
   ComponentStateChip,
 } from '../../apps/app/components/misc'
+
+import KickButton from '../../utils/KickButton'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
@@ -191,6 +196,13 @@ export function ServicesTreeDiagramServiceNode(
               </div>
             </div>
             <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+              <KickButton
+                icon
+                pulledAt={data.repository?.pulledAt}
+                kickMutationHook={useKickServiceMutation}
+                tooltipMessage="Use this to sync this service now instead of at the next poll interval"
+                variables={{ id: data.id }}
+              />
               <IconFrame
                 clickable
                 onClick={() =>
@@ -551,18 +563,27 @@ export function ServicesTreeDiagramGlobalServiceNode(
             </div>
           )}
         </div>
-        <IconFrame
-          clickable
-          onClick={() =>
-            navigate(
-              getGlobalServiceDetailsPath({
-                serviceId: data.id,
-              })
-            )
-          }
-          icon={<ArrowTopRightIcon />}
-          type="secondary"
-        />
+        <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+          <KickButton
+            icon
+            kickMutationHook={useSyncGlobalServiceMutation}
+            message="Resync"
+            tooltipMessage="Sync this service now instead of at the next poll interval"
+            variables={{ id: data.id }}
+          />
+          <IconFrame
+            clickable
+            onClick={() =>
+              navigate(
+                getGlobalServiceDetailsPath({
+                  serviceId: data.id,
+                })
+              )
+            }
+            icon={<ArrowTopRightIcon />}
+            type="secondary"
+          />
+        </div>
       </div>
     </NodeBase>
   )

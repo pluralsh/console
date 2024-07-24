@@ -159,6 +159,7 @@ fragment ServiceTreeNode on ServiceDeployment {
   }
   repository {
     url
+    pulledAt
   }
   git {
     ref
