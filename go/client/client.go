@@ -156,10 +156,9 @@ type ConsoleClient interface {
 	CreateAccessToken(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*CreateAccessToken, error)
 	DeleteAccessToken(ctx context.Context, token string, interceptors ...clientv2.RequestInterceptor) (*DeleteAccessToken, error)
 	GetUser(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
-	GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error)
+	DeleteUser(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteUser, error)
 	AddGroupMember(ctx context.Context, groupID string, userID string, interceptors ...clientv2.RequestInterceptor) (*AddGroupMember, error)
 	DeleteGroupMember(ctx context.Context, userID string, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroupMember, error)
-	DeleteUser(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteUser, error)
 }
 
 type Client struct {
@@ -13165,15 +13164,15 @@ func (t *GetUser) GetUser() *UserFragment {
 	return t.User
 }
 
-type GetGroup struct {
-	Group *GroupFragment "json:\"group,omitempty\" graphql:\"group\""
+type DeleteUser struct {
+	DeleteUser *UserFragment "json:\"deleteUser,omitempty\" graphql:\"deleteUser\""
 }
 
-func (t *GetGroup) GetGroup() *GroupFragment {
+func (t *DeleteUser) GetDeleteUser() *UserFragment {
 	if t == nil {
-		t = &GetGroup{}
+		t = &DeleteUser{}
 	}
-	return t.Group
+	return t.DeleteUser
 }
 
 type AddGroupMember struct {
@@ -13196,17 +13195,6 @@ func (t *DeleteGroupMember) GetDeleteGroupMember() *GroupMemberFragment {
 		t = &DeleteGroupMember{}
 	}
 	return t.DeleteGroupMember
-}
-
-type DeleteUser struct {
-	DeleteUser *UserFragment "json:\"deleteUser,omitempty\" graphql:\"deleteUser\""
-}
-
-func (t *DeleteUser) GetDeleteUser() *UserFragment {
-	if t == nil {
-		t = &DeleteUser{}
-	}
-	return t.DeleteUser
 }
 
 const CreateClusterBackupDocument = `mutation CreateClusterBackup ($attributes: BackupAttributes!) {
@@ -25447,25 +25435,25 @@ func (c *Client) GetUser(ctx context.Context, email string, interceptors ...clie
 	return &res, nil
 }
 
-const GetGroupDocument = `query GetGroup ($name: String!) {
-	group(name: $name) {
-		... GroupFragment
+const DeleteUserDocument = `mutation DeleteUser ($id: ID!) {
+	deleteUser(id: $id) {
+		... UserFragment
 	}
 }
-fragment GroupFragment on Group {
-	id
+fragment UserFragment on User {
 	name
-	description
+	id
+	email
 }
 `
 
-func (c *Client) GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error) {
+func (c *Client) DeleteUser(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteUser, error) {
 	vars := map[string]any{
-		"name": name,
+		"id": id,
 	}
 
-	var res GetGroup
-	if err := c.Client.Post(ctx, "GetGroup", GetGroupDocument, &res, vars, interceptors...); err != nil {
+	var res DeleteUser
+	if err := c.Client.Post(ctx, "DeleteUser", DeleteUserDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -25534,35 +25522,6 @@ func (c *Client) DeleteGroupMember(ctx context.Context, userID string, groupID s
 
 	var res DeleteGroupMember
 	if err := c.Client.Post(ctx, "DeleteGroupMember", DeleteGroupMemberDocument, &res, vars, interceptors...); err != nil {
-		if c.Client.ParseDataWhenErrors {
-			return &res, err
-		}
-
-		return nil, err
-	}
-
-	return &res, nil
-}
-
-const DeleteUserDocument = `mutation DeleteUser ($id: ID!) {
-	deleteUser(id: $id) {
-		... UserFragment
-	}
-}
-fragment UserFragment on User {
-	name
-	id
-	email
-}
-`
-
-func (c *Client) DeleteUser(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteUser, error) {
-	vars := map[string]any{
-		"id": id,
-	}
-
-	var res DeleteUser
-	if err := c.Client.Post(ctx, "DeleteUser", DeleteUserDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -25720,8 +25679,7 @@ var DocumentOperationNames = map[string]string{
 	CreateAccessTokenDocument:                         "CreateAccessToken",
 	DeleteAccessTokenDocument:                         "DeleteAccessToken",
 	GetUserDocument:                                   "GetUser",
-	GetGroupDocument:                                  "GetGroup",
+	DeleteUserDocument:                                "DeleteUser",
 	AddGroupMemberDocument:                            "AddGroupMember",
 	DeleteGroupMemberDocument:                         "DeleteGroupMember",
-	DeleteUserDocument:                                "DeleteUser",
 }
