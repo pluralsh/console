@@ -18,12 +18,13 @@ import { useKeyDown } from '@react-hooks-library/core'
 import { MarkerDefs } from './markers'
 import { edgeTypes } from './edges'
 
-const ReactFlowFullScreenWrapperSC = styled.div((_) => ({
-  position: 'absolute',
+const ReactFlowFullScreenWrapperSC = styled.div(({ theme }) => ({
+  position: 'fixed',
   top: 0,
   bottom: 0,
   left: 0,
   right: 0,
+  zIndex: theme.zIndexes.modal,
 }))
 
 const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
@@ -43,16 +44,23 @@ const ReactFlowWrapperSC = styled.div<{ $hide?: boolean }>(({ $hide }) => ({
   },
 }))
 
-const ReactFlowAreaSC = styled.div(({ theme }) => ({
-  backgroundColor:
-    theme.mode === 'dark' ? theme.colors.grey[950] : theme.colors['fill-one'],
-  border: theme.borders.default,
-  width: '100%',
-  height: '100%',
-  borderRadius: theme.borderRadiuses.large,
-  position: 'relative',
-  overflow: 'hidden',
-}))
+const ReactFlowAreaSC = styled.div<{ $fullscreen?: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    backgroundColor:
+      theme.mode === 'dark' ? theme.colors.grey[950] : theme.colors['fill-one'],
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+    overflow: 'hidden',
+
+    ...($fullscreen
+      ? {}
+      : {
+          border: theme.borders.default,
+          borderRadius: theme.borderRadiuses.large,
+        }),
+  })
+)
 
 const ReactFlowActionWrapperSC = styled.div(({ theme }) => ({
   position: 'absolute',
@@ -80,7 +88,7 @@ export function ReactFlowGraph({
       condition={fullscreen}
       wrapper={<ReactFlowFullScreenWrapperSC />}
     >
-      <ReactFlowAreaSC>
+      <ReactFlowAreaSC $fullscreen={fullscreen}>
         <ReactFlowWrapperSC>
           <ReactFlow
             edgeTypes={edgeTypes}
