@@ -13,7 +13,6 @@ import {
   InfoIcon,
   InfoOutlineIcon,
   Modal,
-  ReloadIcon,
   Table,
 } from '@pluralsh/design-system'
 import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
@@ -28,6 +27,7 @@ import {
   ComponentState,
   GlobalServiceFragment,
   ServiceDeploymentComponentFragment,
+  ServiceDeploymentStatus,
   ServiceTreeNodeFragment,
   useKickServiceMutation,
   useSyncGlobalServiceMutation,
@@ -127,6 +127,13 @@ export function ServicesTreeDiagramServiceNode(
       //   ) : undefined
       // }
       backgroundColor="fill-two"
+      borderColor={
+        data.status === ServiceDeploymentStatus.Failed
+          ? theme.colors['border-danger']
+          : data.status === ServiceDeploymentStatus.Stale
+          ? theme.colors['border-warning']
+          : undefined
+      }
       gap={0}
       padding={0}
       width={336}
@@ -145,6 +152,8 @@ export function ServicesTreeDiagramServiceNode(
               : theme.colors.border,
           color: theme.colors['text-xlight'],
           gap: theme.spacing.medium,
+          borderTopLeftRadius: theme.borderRadiuses.large,
+          borderTopRightRadius: theme.borderRadiuses.large,
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
         }}
       >
@@ -504,6 +513,8 @@ export function ServicesTreeDiagramGlobalServiceNode(
             theme.mode === 'light'
               ? theme.colors['border-fill-two']
               : theme.colors.border,
+          borderTopLeftRadius: theme.borderRadiuses.large,
+          borderTopRightRadius: theme.borderRadiuses.large,
           color: theme.colors['text-xlight'],
           gap: theme.spacing.medium,
           padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
