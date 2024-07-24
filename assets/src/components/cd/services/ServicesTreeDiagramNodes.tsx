@@ -24,6 +24,7 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { isEmpty } from 'lodash'
 
 import {
+  ComponentState,
   GlobalServiceFragment,
   ServiceDeploymentComponentFragment,
   ServiceTreeNodeFragment,
@@ -41,7 +42,10 @@ import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { OverlineH1 } from '../../utils/typography/Text'
 import { ColWithIcon } from '../../utils/table/ColWithIcon'
-import { ComponentIcon } from '../../apps/app/components/misc'
+import {
+  ComponentIcon,
+  ComponentStateChip,
+} from '../../apps/app/components/misc'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
@@ -375,7 +379,6 @@ const columnHelper = createColumnHelper<ServiceDeploymentComponentFragment>()
 export const columns = [
   columnHelper.accessor((component) => component, {
     id: 'component',
-
     cell: function Cell({ getValue }) {
       const theme = useTheme()
       const component = getValue()
@@ -405,6 +408,20 @@ export const columns = [
     },
   }),
   columnHelper.accessor((component) => component, {
+    id: 'status',
+    meta: { gridTemplate: `fit-content(100px)` },
+    cell: ({
+      row: {
+        original: { state, synced },
+      },
+    }) => (
+      <ComponentStateChip
+        state={synced ? ComponentState.Running : state}
+        size="medium"
+      />
+    ),
+  }),
+  columnHelper.accessor(() => {}, {
     id: 'icon',
     meta: { gridTemplate: `fit-content(100px)` },
     cell: () => <IconFrame icon={<CaretRightIcon />} />,
