@@ -1,0 +1,227 @@
+fragment KustomizeFragment on Kustomize {
+    path
+}
+
+fragment ServiceDeploymentBaseFragment on ServiceDeployment {
+    id
+    name
+    namespace
+    version
+    kustomize {...KustomizeFragment}
+    git { ...GitRefFragment }
+    helm { ...HelmSpecFragment }
+    repository { ... GitRepositoryFragment }
+}
+
+fragment ServiceContextFragment on ServiceContext {
+    id
+    name
+    configuration
+}
+
+fragment ComponentContentFragment on ComponentContent {
+    id
+    live
+    desired
+}
+
+fragment ServiceDeploymentFragment on ServiceDeployment {
+    ...ServiceDeploymentBaseFragment
+    components {
+        id
+        name
+        group
+        kind
+        namespace
+        state
+        synced
+        version
+        content {... ComponentContentFragment}
+    }
+    protect
+    deletedAt
+    sha
+    tarball
+    dryRun
+    templated
+    configuration { name value }
+}
+
+fragment ServiceDeploymentExtended on ServiceDeployment {
+    cluster { ...BaseClusterFragment }
+    errors { ...ErrorFragment }
+    revision { ...RevisionFragment }
+    contexts { ...ServiceContextFragment }
+    ...ServiceDeploymentFragment
+}
+
+fragment ErrorFragment on ServiceError {
+    source
+    message
+}
+
+fragment RevisionFragment on Revision {
+    id
+    sha
+    git { ref folder }
+}
+
+fragment PolicyBindingFragment on PolicyBinding {
+    id
+    group { ...GroupFragment }
+    user { ...UserFragment }
+}
+
+fragment UserFragment on User {
+    name
+    id
+    email
+}
+
+fragment GroupFragment on Group {
+    id
+    name
+    description
+}
+
+fragment GroupMemberFragment on GroupMember {
+    id
+    user { id }
+    group { id }
+}
+
+fragment GitRefFragment on GitRef {
+    folder
+    ref
+}
+
+fragment HelmSpecFragment on HelmSpec {
+    valuesFiles
+}
+
+fragment TinyClusterFragment on Cluster {
+    id
+    name
+    handle
+    self
+    project {...TinyProjectFragment }
+}
+
+fragment BaseClusterFragment on Cluster {
+    id
+    name
+    handle
+    self
+    version
+    pingedAt
+    currentVersion
+    kasUrl
+    metadata
+    credential { ...ProviderCredentialFragment }
+    provider { ...BaseClusterProviderFragment }
+    nodePools { ...NodePoolFragment }
+    project {...TinyProjectFragment }
+}
+
+fragment BaseClusterProviderFragment on ClusterProvider {
+    id
+    name
+    namespace
+    cloud
+    editable
+    repository {
+        ...GitRepositoryFragment
+    }
+}
+
+fragment GitRepositoryEdgeFragment on GitRepositoryEdge {
+    node {
+        ...GitRepositoryFragment
+    }
+    cursor
+}
+
+fragment DeploymentSettingsFragment on DeploymentSettings {
+    id
+    name
+    agentHelmValues
+    agentVsn
+    writeBindings { ...PolicyBindingFragment }
+    readBindings { ...PolicyBindingFragment }
+    createBindings { ...PolicyBindingFragment }
+    artifactRepository { ...GitRepositoryFragment }
+    deployerRepository { ...GitRepositoryFragment }
+}
+
+fragment ClusterEdgeFragment on ClusterEdge {
+    node { ...ClusterFragment }
+}
+
+fragment ServiceDeploymentEdgeFragment on ServiceDeploymentEdge {
+    node { ...ServiceDeploymentBaseFragment }
+}
+
+fragment GlobalServiceFragment on GlobalService {
+    id
+    name
+    distro
+    provider { id }
+    service { id }
+    tags { ...ClusterTags }
+    project {...TinyProjectFragment }
+}
+
+fragment ScmConnectionFragment on ScmConnection {
+    id
+    name
+    apiUrl
+    baseUrl
+    type
+    username
+    insertedAt
+    updatedAt
+}
+
+fragment PrAutomationFragment on PrAutomation {
+    id
+    name
+    title
+    addon
+    message
+    identifier
+    insertedAt
+    updatedAt
+}
+
+fragment PageInfoFragment on PageInfo {
+    hasNextPage
+    endCursor
+}
+
+fragment PipelineContextFragment on PipelineContext {
+    id
+    context
+}
+
+fragment PullRequestFragment on PullRequest {
+    id
+    status
+    url
+    title
+    creator
+}
+
+fragment SyncConfigFragment on SyncConfig {
+    createNamespace
+    namespaceMetadata { ...NamespaceMetadataFragment}
+}
+
+fragment NamespaceMetadataFragment on NamespaceMetadata {
+    labels
+    annotations
+}
+
+fragment ClusterTargetFragment on ClusterTarget {
+    tags
+    distro
+}

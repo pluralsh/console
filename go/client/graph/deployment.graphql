@@ -1,0 +1,248 @@
+query GetGlobalServiceDeployment($id: ID!) {
+    globalService(id: $id) {
+        ...GlobalServiceFragment
+    }
+}
+
+mutation CreateGlobalServiceDeployment($serviceId: ID!, $attributes: GlobalServiceAttributes!) {
+    createGlobalService(serviceId: $serviceId, attributes: $attributes) {
+        ...GlobalServiceFragment
+    }
+}
+
+mutation CreateGlobalServiceDeploymentFromTemplate($attributes: GlobalServiceAttributes!) {
+    createGlobalService(attributes: $attributes) {
+        ...GlobalServiceFragment
+    }
+}
+
+mutation UpdateGlobalServiceDeployment($id: ID!, $attributes: GlobalServiceAttributes!) {
+    updateGlobalService(id: $id, attributes: $attributes) {
+        ...GlobalServiceFragment
+    }
+}
+
+mutation DeleteGlobalServiceDeployment($id: ID!) {
+    deleteGlobalService(id: $id) {
+        ...GlobalServiceFragment
+    }
+}
+
+mutation CreateServiceDeployment($clusterId: ID!, $attributes: ServiceDeploymentAttributes!) {
+    createServiceDeployment(clusterId: $clusterId, attributes: $attributes) {
+        ...ServiceDeploymentExtended
+    }
+}
+
+mutation CreateServiceDeploymentWithHandle($cluster: String!, $attributes: ServiceDeploymentAttributes!) {
+    createServiceDeployment(cluster: $cluster, attributes: $attributes) {
+        ...ServiceDeploymentExtended
+    }
+}
+
+mutation DeleteServiceDeployment($id: ID!) {
+    deleteServiceDeployment(id: $id) {
+        ...ServiceDeploymentFragment
+    }
+}
+
+mutation DetachServiceDeployment($id: ID!) {
+    detachServiceDeployment(id: $id) {
+        ...ServiceDeploymentFragment
+    }
+}
+
+mutation UpdateServiceDeployment($id: ID!, $attributes: ServiceUpdateAttributes!) {
+    updateServiceDeployment(id: $id, attributes: $attributes) {
+        ...ServiceDeploymentExtended
+    }
+}
+
+mutation UpdateServiceDeploymentWithHandle($cluster: String!, $name: String!, $attributes: ServiceUpdateAttributes!) {
+    updateServiceDeployment(cluster: $cluster,name: $name, attributes: $attributes) {
+        ...ServiceDeploymentExtended
+    }
+}
+
+mutation CloneServiceDeployment($clusterId: ID!, $id: ID!, $attributes: ServiceCloneAttributes!) {
+    cloneService(clusterId: $clusterId, serviceId: $id, attributes: $attributes) {
+        ...ServiceDeploymentFragment
+    }
+}
+
+mutation CloneServiceDeploymentWithHandle($clusterId: ID!, $cluster: String!, $name: String!, $attributes: ServiceCloneAttributes!) {
+    cloneService(clusterId: $clusterId, cluster: $cluster, name: $name, attributes: $attributes) {
+        ...ServiceDeploymentFragment
+    }
+}
+
+mutation RollbackService($id: ID!, $revisionId: ID!) {
+    rollbackService(id: $id, revisionId: $revisionId) {
+        ...ServiceDeploymentFragment
+    }
+}
+
+mutation updateServiceComponents($id: ID!, $components: [ComponentAttributes], $errors: [ServiceErrorAttributes]) {
+    updateServiceComponents(id: $id, components: $components, errors: $errors) {
+        ...ServiceDeploymentFragment
+    }
+}
+
+mutation AddServiceError($id: ID!, $errors: [ServiceErrorAttributes]) {
+    updateServiceComponents(id: $id, errors: $errors) {
+        ...ServiceDeploymentFragment
+    }
+}
+
+mutation UpdateDeploymentSettings($attributes: DeploymentSettingsAttributes!) {
+    updateDeploymentSettings(attributes: $attributes) {
+        ...DeploymentSettingsFragment
+    }
+}
+
+query GetDeploymentSettings {
+    deploymentSettings{
+        ...DeploymentSettingsFragment
+    }
+}
+
+query GetServiceDeployment($id: ID!) {
+    serviceDeployment(id: $id) {
+        ...ServiceDeploymentExtended
+    }
+}
+
+query GetServiceDeploymentForAgent($id: ID!) {
+    serviceDeployment(id: $id) {
+        id
+        name
+        namespace
+        version
+        tarball
+        deletedAt
+        dryRun
+        templated
+        cluster {
+            id
+            name
+            handle
+            self
+            version
+            pingedAt
+            metadata
+            currentVersion
+            kasUrl
+        }
+        kustomize {
+            path
+        }
+        helm {
+            release
+            valuesFiles
+        }
+        configuration {
+            name
+            value
+        }
+        contexts {
+            name
+            configuration
+        }
+        syncConfig {
+            createNamespace
+            enforceNamespace
+            namespaceMetadata {
+                labels
+                annotations
+            }
+        }
+        components {
+            id
+            namespace
+            name
+            group
+            version
+            kind
+            state
+        }
+    }
+}
+
+query GetServiceDeploymentByHandle($cluster: String!, $name: String!) {
+    serviceDeployment(cluster: $cluster, name: $name) {
+        ...ServiceDeploymentExtended
+    }
+}
+
+query ListServiceDeployment($after: String, $before: String, $last: Int, $clusterId: ID){
+    serviceDeployments(after: $after, first: 100, before: $before, last: $last, clusterId: $clusterId) {
+        edges {
+            ...ServiceDeploymentEdgeFragment
+        }
+    }
+}
+
+query PagedClusterServices($after: String, $first: Int, $before: String, $last: Int){
+    pagedClusterServices(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges {
+            ...ServiceDeploymentEdgeFragment
+        }
+    }
+}
+
+query ListServiceDeploymentByHandle($after: String, $before: String, $last: Int, $cluster: String){
+    serviceDeployments(after: $after, first: 100, before: $before, last: $last, cluster: $cluster) {
+        edges {
+            ...ServiceDeploymentEdgeFragment
+        }
+    }
+}
+
+query GetServiceContext($name: String!) {
+    serviceContext(name: $name) {
+        ...ServiceContextFragment
+    }
+}
+
+mutation SaveServiceContext($name: String!, $attributes: ServiceContextAttributes!) {
+    saveServiceContext(name: $name, attributes: $attributes) {
+        ...ServiceContextFragment
+    }
+}
+
+mutation DeleteServiceContext($id: ID!) {
+    deleteServiceContext(id: $id) {
+        ...ServiceContextFragment
+    }
+}
+
+mutation CreateGlobalService($attributes: GlobalServiceAttributes!) {
+    createGlobalService(attributes: $attributes) {
+        ...GlobalServiceFragment
+    }
+}
+
+mutation UpdateGlobalService($id: ID!, $attributes: GlobalServiceAttributes!) {
+    updateGlobalService(id: $id, attributes: $attributes) {
+        ...GlobalServiceFragment
+    }
+}
+
+mutation DeleteGlobalService($id: ID!) {
+    deleteGlobalService(id: $id) {
+        ...GlobalServiceFragment
+    }
+}
+
+mutation KickService($id: ID!) {
+    kickService(serviceId: $id) {
+        ...ServiceDeploymentExtended
+    }
+}
+
+mutation KickServiceByHandle($cluster: String!, $name: String!) {
+    kickService(cluster: $cluster, name: $name) {
+        ...ServiceDeploymentExtended
+    }
+}

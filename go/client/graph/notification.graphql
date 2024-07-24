@@ -1,0 +1,83 @@
+fragment NotificationRouterFragment on NotificationRouter {
+    id
+    name
+    sinks { ...NotificationSinkFragment }
+    events
+}
+
+fragment NotificationSinkEdgeFragment on NotificationSinkEdge {
+    cursor
+    node { ...NotificationSinkFragment }
+}
+
+fragment NotificationSinkFragment on NotificationSink {
+    id
+    name
+    type
+    configuration { ...SinkConfigurationFragment }
+}
+
+fragment SinkConfigurationFragment on SinkConfiguration {
+    id
+    slack {...UrlSinkConfigurationFragment}
+    teams {...UrlSinkConfigurationFragment}
+}
+
+fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
+    url
+}
+
+mutation UpsertNotificationSink($attributes: NotificationSinkAttributes!) {
+    upsertNotificationSink(attributes: $attributes) {
+        ...NotificationSinkFragment
+    }
+}
+
+mutation DeleteNotificationSink($id: ID!) {
+    deleteNotificationSink(id: $id) {
+        ...NotificationSinkFragment
+    }
+}
+
+query GetNotificationSink($id: ID!) {
+    notificationSink(id: $id) {
+        ...NotificationSinkFragment
+    }
+}
+
+query GetNotificationSinkByName($name: String) {
+    notificationSink(name: $name) {
+        ...NotificationSinkFragment
+    }
+}
+
+query ListNotificationSinks($after: String, $first: Int, $before: String, $last: Int) {
+    notificationSinks(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment }
+        edges { ...NotificationSinkEdgeFragment }
+    }
+}
+
+query GetNotificationRouter($id: ID!) {
+    notificationRouter(id: $id) {
+        ...NotificationRouterFragment
+    }
+}
+
+query GetNotificationRouterByName($name: String) {
+    notificationRouter(name: $name) {
+        ...NotificationRouterFragment
+    }
+}
+
+mutation DeleteNotificationRouter($id: ID!) {
+    deleteNotificationRouter(id: $id) {
+        ...NotificationRouterFragment
+    }
+}
+
+mutation UpsertNotificationRouter($attributes: NotificationRouterAttributes!) {
+    upsertNotificationRouter(attributes: $attributes) {
+        ...NotificationRouterFragment
+    }
+}

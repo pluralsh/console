@@ -1,0 +1,27 @@
+generate:
+  clientV2: true
+  clientInterfaceName: "ConsoleClient"
+  query: false
+  mutation: false
+  structFieldsAlwaysPointers: false
+model:
+  package: client
+  filename: ./models_gen.go # https://github.com/99designs/gqlgen/tree/master/plugin/modelgen
+client:
+  package: client
+  filename: ./client.go # Where should any generated client go?
+models:
+  Int:
+    model: github.com/99designs/gqlgen/graphql.Int64
+  Date:
+    model: github.com/99designs/gqlgen/graphql.Time
+  ID:
+    model: github.com/99designs/gqlgen/graphql.ID
+  String:
+    model: github.com/99designs/gqlgen/graphql.String
+  UploadOrUrl:
+    model: github.com/99designs/gqlgen/graphql.String
+schema:
+  - "../../schema/*.graphql"
+query:
+  - "graph/*.graphql" # Where are all the query files located?

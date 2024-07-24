@@ -72,6 +72,7 @@ update-schema:
 	MIX_ENV=test mix absinthe.schema.sdl --schema Console.GraphQl  schema/schema.graphql
 	cd assets && yarn graphql:codegen
 	cd assets && yarn fix
+	@$(MAKE) --directory go/client --no-print-directory generate
 
 
 k3s:  ## starts a k3d cluster for testing

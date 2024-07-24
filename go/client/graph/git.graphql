@@ -1,0 +1,128 @@
+fragment GitRepositoryFragment on GitRepository {
+    id
+    error
+    health
+    authMethod
+    url
+    decrypt
+}
+
+mutation CreateGitRepository($attributes: GitAttributes!) {
+    createGitRepository(attributes: $attributes) {
+        ...GitRepositoryFragment
+    }
+}
+
+mutation UpdateGitRepository($id: ID!, $attributes: GitAttributes!) {
+    updateGitRepository(id: $id, attributes: $attributes) {
+        ...GitRepositoryFragment
+    }
+}
+
+mutation DeleteGitRepository($id: ID!) {
+    deleteGitRepository(id: $id) {
+        ...GitRepositoryFragment
+    }
+}
+
+query ListGitRepositories($cursor: String, $before: String, $last: Int) {
+    gitRepositories(after: $cursor, first: 100, before: $before, last: $last) {
+        edges {
+            ...GitRepositoryEdgeFragment
+        }
+    }
+}
+
+query GetGitRepository($id: ID, $url: String) {
+    gitRepository(id: $id, url: $url) {
+        ...GitRepositoryFragment
+    }
+}
+
+query GetScmConnection($id: ID!) {
+    scmConnection(id: $id) {
+        ...ScmConnectionFragment
+    }
+}
+
+query GetScmConnectionByName($name: String!) {
+    scmConnection(name: $name) {
+        ...ScmConnectionFragment
+    }
+}
+
+query ListScmConnections($cursor: String, $before: String, $last: Int) {
+    scmConnections(after: $cursor, first: 100, before: $before, last: $last) {
+        edges {
+            node {
+                ...ScmConnectionFragment
+            }
+            cursor
+        }
+    }
+}
+
+mutation CreateScmConnection($attributes: ScmConnectionAttributes!) {
+    createScmConnection(attributes: $attributes) {
+        ...ScmConnectionFragment
+    }
+}
+
+mutation UpdateScmConnection($id: ID!, $attributes: ScmConnectionAttributes!) {
+    updateScmConnection(id: $id, attributes: $attributes) {
+        ...ScmConnectionFragment
+    }
+}
+
+mutation DeleteScmConnection($id: ID!) {
+    deleteScmConnection(id: $id) {
+        ...ScmConnectionFragment
+    }
+}
+
+query GetPrAutomation($id: ID!) {
+    prAutomation(id: $id) {
+        ...PrAutomationFragment
+    }
+}
+
+query GetPrAutomationByName($name: String!) {
+    prAutomation(name: $name) {
+        ...PrAutomationFragment
+    }
+}
+
+query ListPrAutomations($cursor: String, $before: String, $last: Int) {
+    prAutomations(after: $cursor, first: 100, before: $before, last: $last) {
+        edges {
+            node {
+                ...PrAutomationFragment
+            }
+            cursor
+        }
+    }
+}
+
+mutation CreatePrAutomation($attributes: PrAutomationAttributes!) {
+    createPrAutomation(attributes: $attributes) {
+        ...PrAutomationFragment
+    }
+}
+
+mutation UpdatePrAutomation($id: ID!, $attributes: PrAutomationAttributes!) {
+    updatePrAutomation(id: $id, attributes: $attributes) {
+        ...PrAutomationFragment
+    }
+}
+
+mutation DeletePrAutomation($id: ID!) {
+    deletePrAutomation(id: $id) {
+        ...PrAutomationFragment
+    }
+}
+
+mutation CreatePullRequest($id: ID!, $branch: String, $context: Json) {
+    createPullRequest(id: $id, branch: $branch, context: $context) {
+        ...PullRequestFragment
+    }
+}

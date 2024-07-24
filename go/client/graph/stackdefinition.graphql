@@ -1,0 +1,46 @@
+query GetStackDefinition($id: ID!) {
+    stackDefinition(id: $id) { ...StackDefinitionFragment }
+}
+
+query ListStackDefinitions($after: String, $first: Int, $before: String, $last: Int) {
+    stackDefinitions(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment }
+        edges { node { ...StackDefinitionFragment } }
+    }
+}
+
+mutation CreateStackDefinition($attributes: StackDefinitionAttributes!) {
+    createStackDefinition(attributes: $attributes) { ...StackDefinitionFragment }
+}
+
+mutation UpdateStackDefinition($id: ID!, $attributes: StackDefinitionAttributes!) {
+    updateStackDefinition(id: $id, attributes: $attributes) { ...StackDefinitionFragment }
+}
+
+mutation DeleteStackDefinition($id: ID!) {
+    deleteStackDefinition(id: $id) { ...StackDefinitionFragment }
+}
+
+fragment StackDefinitionFragment on StackDefinition {
+    id
+    name
+    description
+    insertedAt
+    updatedAt
+    configuration {
+        image
+        tag
+        version
+        hooks {
+            cmd
+            args
+            afterStage
+        }
+    }
+    steps {
+        cmd
+        args
+        stage
+        requireApproval
+    }
+}

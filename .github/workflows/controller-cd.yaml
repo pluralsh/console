@@ -5,7 +5,7 @@ on:
     branches:
       - "master"
     paths:
-      - "controller/**"
+      - "go/controller/**"
   push:
     tags:
     - 'v*.*.*'
@@ -25,7 +25,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: controller
+        working-directory: go/controller
     timeout-minutes: 5
     steps:
     - name: Checkout
@@ -33,12 +33,12 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4.1.0
       with:
-        go-version-file: controller/go.mod
+        go-version-file: go/controller/go.mod
         cache: true
     - name: Download dependencies
       run: go mod download
     - name: Download tools
-      run: PATH=$PATH:$GOPATH/bin make tools
+      run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
     - name: Test
       run: PATH=$PATH:$GOPATH/bin make test
   publish-docker:
@@ -47,7 +47,7 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: controller
+        working-directory: go/controller
     needs: [ test ]
     permissions:
       contents: 'read'
@@ -93,8 +93,8 @@ jobs:
     - name: Build and push
       uses: docker/build-push-action@v5.1.0
       with:
-        context: "./controller"
-        file: "./controller/Dockerfile"
+        context: "./go"
+        file: "./go/controller/Dockerfile"
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}

@@ -1,0 +1,73 @@
+query GetClusterGates {
+    clusterGates {
+        ...PipelineGateFragment
+    }
+}
+
+query PagedClusterGates($after: String, $first: Int, $before: String, $last: Int){
+    pagedClusterGates(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges {
+            ...PipelineGateEdgeFragment
+        }
+    }
+}
+
+fragment PipelineGateEdgeFragment on PipelineGateEdge {
+    node { ...PipelineGateFragment }
+}
+
+fragment PipelineGateFragment on PipelineGate {
+    id
+    name
+    type
+    state
+    updatedAt
+    spec { ...GateSpecFragment }
+    status { ...GateStatusFragment }
+}
+
+fragment GateSpecFragment on GateSpec {
+    job { ...JobSpecFragment }
+}
+
+fragment GateStatusFragment on GateStatus {
+    jobRef { ...JobReferenceFragment }
+}
+
+fragment JobSpecFragment on JobGateSpec {
+    namespace
+    raw
+    containers { ...ContainerSpecFragment }
+    labels
+    annotations
+    serviceAccount
+}
+
+fragment JobReferenceFragment on JobReference {
+    name
+    namespace
+}
+
+fragment ContainerSpecFragment on ContainerSpec {
+    image
+    args
+    env {
+        name
+        value
+    }
+    envFrom {
+        configMap
+        secret
+    }
+}
+
+mutation updateGate($id: ID!, $attributes: GateUpdateAttributes!) {
+    updateGate(id: $id, attributes: $attributes) {
+        ...PipelineGateFragment
+    }
+}
+
+query GetClusterGate($id: ID!) {
+    clusterGate(id: $id) { ...PipelineGateFragment }
+}
