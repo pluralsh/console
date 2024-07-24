@@ -33,6 +33,7 @@ export const NodeHandle = styled(Handle)<{
 
 export const NodeBaseCard = styled(Card)(({ theme }) => ({
   display: 'flex',
+  borderColor: theme.colors['border-fill-two'],
   backgroundColor:
     theme.mode === 'light'
       ? theme.colors['fill-two']

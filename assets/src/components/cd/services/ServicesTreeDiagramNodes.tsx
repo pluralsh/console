@@ -121,7 +121,7 @@ export function ServicesTreeDiagramServiceNode(
       //     </NodeBaseCard>
       //   ) : undefined
       // }
-      backgroundColor="fill-one"
+      backgroundColor="fill-two"
       gap={0}
       padding={0}
       width={336}
@@ -132,7 +132,7 @@ export function ServicesTreeDiagramServiceNode(
           alignItems: 'center',
           justifyContent: 'space-between',
           display: 'flex',
-          backgroundColor: theme.colors['fill-zero'],
+          backgroundColor: theme.colors['fill-one'],
           borderBottom: '1px solid',
           borderColor:
             theme.mode === 'light'
