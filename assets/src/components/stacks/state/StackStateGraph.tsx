@@ -46,7 +46,7 @@ function getNodesAndEdges(state: StackState) {
 
     edges.push(
       ...(ssr.links ?? []).filter(isNonNullable).map((link) => ({
-        type: EdgeType.Smooth,
+        type: EdgeType.Bezier,
         updatable: false,
         id: `${ssr.identifier}${link}`,
         source: ssr.identifier,
@@ -126,8 +126,6 @@ export function StackStateGraph({ state }: { state: StackState }) {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       nodeTypes={nodeTypes}
-      nodesDraggable
-      nodesConnectable={false}
     />
   )
 }

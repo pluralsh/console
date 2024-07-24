@@ -1,18 +1,10 @@
-import {
-  ComponentProps,
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { ComponentProps, useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import {
-  ServiceDeploymentStatus,
   type ServiceDeploymentsRowFragment,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
@@ -22,6 +14,8 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
+import { useOutletContext } from 'react-router-dom'
+
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
@@ -30,19 +24,17 @@ import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import {
   SERVICES_QUERY_PAGE_SIZE,
   SERVICES_REACT_VIRTUAL_OPTIONS,
+  ServicesContextT,
   columns,
+  getServiceStatuses,
 } from './Services'
 
-function ServicesTableComponent({
-  setRefetch,
-  clusterId: clusterIdProp,
-}: {
-  setRefetch?: (refetch: () => () => void) => void
-  clusterId?: string
-}) {
+export default function ServicesTable() {
   const theme = useTheme()
   const navigate = useNavigate()
   const projectId = useProjectId()
+  const { setRefetch, clusterId: clusterIdProp } =
+    useOutletContext<ServicesContextT>()
   const [clusterIdInternal, setClusterId] = useState<string>('')
   const clusterId = clusterIdProp ?? clusterIdInternal
   const tabStateRef = useRef<any>(null)
@@ -72,24 +64,8 @@ function ServicesTableComponent({
     }
   )
 
-  const statusCounts = useMemo<Record<StatusTabKey, number | undefined>>(
-    () => ({
-      ALL: data?.serviceStatuses?.reduce(
-        (count, status) => count + (status?.count || 0),
-        0
-      ),
-      [ServiceDeploymentStatus.Healthy]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Synced]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Stale]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Paused]: data?.serviceStatuses ? 0 : undefined,
-      [ServiceDeploymentStatus.Failed]: data?.serviceStatuses ? 0 : undefined,
-      ...Object.fromEntries(
-        data?.serviceStatuses?.map((status) => [
-          status?.status,
-          status?.count,
-        ]) || []
-      ),
-    }),
+  const statusCounts = useMemo(
+    () => getServiceStatuses(data?.serviceStatuses),
     [data?.serviceStatuses]
   )
 
@@ -179,5 +155,3 @@ function ServicesTableComponent({
     </div>
   )
 }
-
-export const ServicesTable = memo(ServicesTableComponent)

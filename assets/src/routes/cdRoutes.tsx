@@ -79,6 +79,10 @@ import { ManagedNamespaceServices } from '../components/cd/namespaces/details/Ma
 
 import ManagedNamespace from '../components/cd/namespaces/details/ManagedNamespace'
 
+import ServicesTree from '../components/cd/services/ServicesTree'
+
+import ServicesTable from '../components/cd/services/ServicesTable'
+
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
@@ -103,6 +107,7 @@ import {
   POD_REL_PATH,
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
+  SERVICES_TREE_REL_PATH,
   SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_PARAM_CLUSTER_ID,
@@ -182,7 +187,16 @@ const mainRoutes = (
     <Route
       path={`${SERVICES_REL_PATH}/:${SERVICE_PARAM_CLUSTER_ID}?`}
       element={<Services />}
-    />
+    >
+      <Route
+        index
+        element={<ServicesTable />}
+      />
+      <Route
+        path={SERVICES_TREE_REL_PATH}
+        element={<ServicesTree />}
+      />
+    </Route>
     <Route
       path={PIPELINES_REL_PATH}
       element={<Pipelines />}
@@ -279,7 +293,16 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_SERVICES_PATH}
       element={<ClusterServices />}
-    />
+    >
+      <Route
+        index
+        element={<ServicesTable />}
+      />
+      <Route
+        path={SERVICES_TREE_REL_PATH}
+        element={<ServicesTree />}
+      />
+    </Route>
     <Route
       path={CLUSTER_NODES_PATH}
       element={<ClusterNodes />}

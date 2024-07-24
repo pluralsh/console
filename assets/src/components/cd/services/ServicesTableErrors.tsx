@@ -1,30 +1,38 @@
 import { Chip, ErrorIcon, Modal, Tooltip } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useState } from 'react'
+import pluralize from 'pluralize'
 
 import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+
+import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 import { ServiceErrorsTable } from './service/ServiceErrors'
 
 export function ServiceErrorsChip({
   errors,
+  alwaysShow = false,
   ...props
 }: {
   errors: Nullable<Nullable<ServiceError>[]>
+  alwaysShow?: boolean
 } & ComponentProps<typeof Chip>) {
-  if (isEmpty(errors)) {
+  const hasErrors = !isEmpty(errors)
+
+  if (!alwaysShow && !hasErrors) {
     return null
   }
 
   return (
     <Tooltip label="View errors">
       <Chip
-        severity="danger"
-        icon={<ErrorIcon />}
+        severity={hasErrors ? 'danger' : 'neutral'}
+        icon={hasErrors ? <ErrorIcon /> : undefined}
         {...props}
       >
-        {errors?.length} errors
+        {errors?.length === 0 ? 'No' : errors?.length}
+        {pluralize(' error', errors?.length ?? 0)}
       </Chip>
     </Tooltip>
   )
@@ -48,15 +56,16 @@ export function ServiceErrorsModal({ isOpen, setIsOpen, header, errors }) {
 
 export function ServicesTableErrors({
   service,
+  alwaysShow = false,
+  ...props
 }: {
-  service: Nullable<
-    Pick<ServiceDeploymentsRowFragment, 'name' | 'errors' | 'components'>
-  >
-}) {
+  service: Nullable<Pick<ServiceDeploymentsRowFragment, 'name' | 'errors'>>
+  alwaysShow?: boolean
+} & ChipProps) {
   const [isOpen, setIsOpen] = useState(false)
   const serviceErrors = service?.errors
 
-  if (!serviceErrors || isEmpty(serviceErrors)) {
+  if (!alwaysShow && (!serviceErrors || isEmpty(serviceErrors))) {
     return null
   }
 
@@ -73,12 +82,14 @@ export function ServicesTableErrors({
         }}
         clickable
         errors={serviceErrors}
+        alwaysShow={alwaysShow}
+        {...props}
       />
       <ModalMountTransition open={isOpen}>
         <Modal
           portal
           size="large"
-          header={`Service errors${service?.name ? ` – ${service?.name}` : ''}`}
+          header={`${service?.name} service errors`}
           open={isOpen}
           onClose={() => setIsOpen(false)}
         >

@@ -13,6 +13,7 @@ import {
 } from '@pluralsh/design-system'
 import { ComponentState } from 'generated/graphql'
 import { ComponentProps } from 'react'
+import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 export const statusToBorder = {
   [Readiness.Ready]: '',
@@ -84,10 +85,11 @@ export function ComponentStatusChip({
 export function ComponentStateChip({
   state,
   className,
+  ...props
 }: {
   className?: string
   state?: ComponentState | null | undefined
-}) {
+} & ChipProps) {
   if (!state) {
     return null
   }
@@ -97,6 +99,7 @@ export function ComponentStateChip({
       <Chip
         size="small"
         severity={stateToSeverity[state]}
+        {...props}
       >
         {stateToDisplay[state]}
       </Chip>

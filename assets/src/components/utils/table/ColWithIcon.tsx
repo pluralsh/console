@@ -78,6 +78,7 @@ export function ColWithOptionalIcon({
 
 export function ColWithIcon({
   icon,
+  iconSize,
   children,
   truncateLeft = false,
   ...props
@@ -85,6 +86,7 @@ export function ColWithIcon({
   ComponentProps<typeof ColWithIconSC>,
   {
     icon: string | ComponentProps<typeof AppIcon>['icon']
+    iconSize?: ComponentProps<typeof AppIcon>['size']
     truncateLeft?: boolean
   }
 >) {
@@ -93,7 +95,7 @@ export function ColWithIcon({
       <div className="icon">
         <AppIcon
           spacing="padding"
-          size="xxsmall"
+          size={iconSize ?? 'xxsmall'}
           icon={typeof icon !== 'string' ? icon : undefined}
           url={typeof icon === 'string' ? icon : undefined}
         />

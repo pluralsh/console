@@ -30,6 +30,10 @@ fragment GlobalService on GlobalService {
   template {
     ...ServiceTemplateWithoutConfiguration
   }
+  parent {
+    id
+    name
+  }
   insertedAt
   updatedAt
 }

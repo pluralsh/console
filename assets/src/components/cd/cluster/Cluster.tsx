@@ -5,7 +5,7 @@ import {
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { Suspense, useMemo, useRef, useState } from 'react'
+import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import {
   Outlet,
@@ -32,10 +32,9 @@ import { useTheme } from 'styled-components'
 import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
 
 import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
-import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
+import { CD_BASE_CRUMBS, PageHeaderContext } from '../ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ClusterSelector from '../utils/ClusterSelector'
-import { DeployService } from '../services/deployModal/DeployService'
 
 import ClusterPermissions from './ClusterPermissions'
 import ClusterSettings from './ClusterSettings'
@@ -90,7 +89,7 @@ export default function Cluster() {
   const navigate = useNavigate()
   const tabStateRef = useRef<any>(null)
   const { clusterId } = useParams<{ clusterId: string }>()
-  const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab`)?.params?.tab || ''
+  const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab/*`)?.params?.tab || ''
   const [refetchServices, setRefetchServices] = useState(() => () => {})
   const logs = useLogsEnabled()
 
@@ -101,7 +100,17 @@ export default function Cluster() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
+
   const cluster = data?.cluster
+
+  const [headerContent, setHeaderContent] = useState<ReactNode>()
+
+  const pageHeaderContext = useMemo(
+    () => ({
+      setHeaderContent,
+    }),
+    []
+  )
 
   const crumbs: Breadcrumb[] = useMemo(
     () =>
@@ -178,12 +187,7 @@ export default function Cluster() {
               gap: theme.spacing.small,
             }}
           >
-            {tab === 'services' && (
-              <DeployService
-                refetch={refetchServices}
-                cluster={cluster}
-              />
-            )}
+            {headerContent}
             <ClusterPermissions cluster={cluster} />
             {!cluster.self && <ClusterSettings cluster={cluster} />}
           </div>
@@ -194,17 +198,20 @@ export default function Cluster() {
         css={{ height: '100%' }}
         stateRef={tabStateRef}
       >
-        <Suspense fallback={<LoadingIndicator />}>
-          <Outlet
-            context={
-              {
-                cluster,
-                refetch: refetchCluster,
-                setRefetchServices,
-              } satisfies ClusterContextType
-            }
-          />
-        </Suspense>
+        <PageHeaderContext.Provider value={pageHeaderContext}>
+          <Suspense fallback={<LoadingIndicator />}>
+            <Outlet
+              context={
+                {
+                  cluster,
+                  refetch: refetchCluster,
+                  refetchServices,
+                  setRefetchServices,
+                } satisfies ClusterContextType
+              }
+            />
+          </Suspense>
+        </PageHeaderContext.Provider>
       </TabPanel>
     </ResponsivePageFullWidth>
   )
@@ -213,6 +220,7 @@ export default function Cluster() {
 type ClusterContextType = {
   cluster: ClusterFragment
   refetch: () => void
+  refetchServices: () => void
   setRefetchServices: (refetch: () => () => void) => void
 }
 

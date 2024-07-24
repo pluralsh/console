@@ -143,6 +143,47 @@ fragment ServiceDeploymentTiny on ServiceDeployment {
   }
 }
 
+fragment ServiceTreeNode on ServiceDeployment {
+  id
+  name
+  namespace
+  updatedAt
+  status
+  componentStatus
+  components {
+    ...ServiceDeploymentComponent
+  }
+  cluster {
+    id
+    name
+  }
+  repository {
+    url
+    pulledAt
+  }
+  git {
+    ref
+    folder
+  }
+  helmRepository {
+    spec {
+      url
+    }
+  }
+  parent {
+    id
+    name
+  }
+  owner {
+    id
+    name
+  }
+  errors {
+    source
+    message
+  }
+}
+
 query ServiceDeployments(
   $first: Int = 100
   $after: String
@@ -183,6 +224,29 @@ query ServiceDeploymentsTiny($clusterId: ID, $projectId: ID) {
     edges {
       node {
         ...ServiceDeploymentTiny
+      }
+    }
+  }
+}
+
+query ServiceTree(
+  $first: Int = 100
+  $status: ServiceDeploymentStatus
+  $clusterId: ID
+  $projectId: ID
+) {
+  serviceTree(
+    first: $first
+    status: $status
+    clusterId: $clusterId
+    projectId: $projectId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ServiceTreeNode
       }
     }
   }
