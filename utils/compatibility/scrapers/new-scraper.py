@@ -1,6 +1,7 @@
-# scrapers/cert_manager.py
+# scrapers/new-scraper.py
 
 from bs4 import BeautifulSoup
+from collections import OrderedDict
 from utils import (
     print_error,
     fetch_page,

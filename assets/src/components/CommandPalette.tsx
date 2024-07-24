@@ -26,7 +26,6 @@ import { type Merge } from 'type-fest'
 
 import {
   ApiIcon,
-  ChatIcon,
   Chip,
   CloudIcon,
   ClusterIcon,
@@ -498,20 +497,20 @@ function Palette() {
 
   const { modKeyString, altKeyString, keyCombinerString, isMac } = usePlatform()
 
-  let aiChatCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}A`
+  // const aiChatCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}A`
   let searchDocsCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}D`
 
   if (isMac) {
-    aiChatCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}A`
+    // aiChatCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}A`
     searchDocsCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}D`
   }
 
-  aiChatCmd = 'A'
+  // aiChatCmd = 'A'
   searchDocsCmd = 'D'
 
   const footerContent = (
     <>
-      <LauncherButton
+      {/* <LauncherButton
         icon={<ChatIcon color={theme.colors['icon-primary']} />}
         cmd={aiChatCmd}
         onClick={() => {
@@ -521,7 +520,7 @@ function Palette() {
         tabIndex={0}
       >
         Ask Plural AI
-      </LauncherButton>
+      </LauncherButton> */}
       <LauncherButton
         icon={<DocumentIcon color={theme.colors['icon-success']} />}
         cmd={searchDocsCmd}
@@ -555,9 +554,9 @@ function Palette() {
 const launchDocSearch = () => {
   launchHelp(HelpMenuState.docSearch)
 }
-const launchAiChat = () => {
-  launchHelp(HelpMenuState.chatBot)
-}
+// const launchAiChat = () => {
+//   launchHelp(HelpMenuState.chatBot)
+// }
 const launchIntercom = () => {
   launchHelp(HelpMenuState.intercom)
 }
@@ -620,13 +619,13 @@ export function CommandPalette({ children }) {
       }),
       // End CD
 
-      createAction({
-        name: 'Ask Plural AI',
-        shortcut: ['A'],
-        icon: <ChatIcon />,
-        section: PaletteSection.Help,
-        perform: launchAiChat,
-      }),
+      // createAction({
+      //   name: 'Ask Plural AI',
+      //   shortcut: ['A'],
+      //   icon: <ChatIcon />,
+      //   section: PaletteSection.Help,
+      //   perform: launchAiChat,
+      // }),
       createAction({
         name: 'Search docs',
         shortcut: ['D'],
@@ -683,7 +682,7 @@ export const LauncherButtonSC = styled.button(({ theme }) => ({
   border: theme.borders.input,
   borderRadius: theme.borderRadiuses.medium,
   color: theme.colors['text-light'],
-
+  flex: 1,
   display: 'flex',
   alignItems: 'center',
   // justifyContent: "space-between",

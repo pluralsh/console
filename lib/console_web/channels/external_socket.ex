@@ -1,5 +1,5 @@
 defmodule ConsoleWeb.ExternalSocket do
-  use Phoenix.Socket
+  use Phoenix.Socket, log: false
   alias Console.Schema.Cluster
 
   channel "cluster:*", ConsoleWeb.ClusterChannel

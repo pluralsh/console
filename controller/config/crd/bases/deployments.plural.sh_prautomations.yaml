@@ -90,7 +90,7 @@ spec:
                   the repo's main branch)
                 type: string
               clusterRef:
-                description: ClusterRef ...
+                description: ClusterRef a cluster this pr works on
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -134,7 +134,8 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               configuration:
-                description: Configuration ...
+                description: Configuration self-service configuration for the UI wizard
+                  generating this PR
                 items:
                   description: PrAutomationConfiguration ...
                   properties:
@@ -258,10 +259,11 @@ spec:
                   for GitHub it would be "<organization>/<repositoryName>"
                 type: string
               message:
-                description: Message ...
+                description: Message the commit message this pr will incorporate
                 type: string
               name:
-                description: Name ...
+                description: Name name of the automation in the console api (defaults
+                  to metadata.name)
                 type: string
               repositoryRef:
                 description: RepositoryRef ...
@@ -316,7 +318,8 @@ spec:
                 - UPGRADE
                 type: string
               scmConnectionRef:
-                description: ScmConnectionRef ...
+                description: ScmConnectionRef the SCM connection to use for generating
+                  this PR
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -360,7 +363,7 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               serviceRef:
-                description: ServiceRef ...
+                description: ServiceRef the service this PR acts on
                 properties:
                   apiVersion:
                     description: API version of the referent.
@@ -404,7 +407,7 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               title:
-                description: Title...
+                description: Title the title of the generated pr
                 type: string
               updates:
                 description: Spec for files to be updated, using regex replacement

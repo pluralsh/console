@@ -109,6 +109,7 @@ spec:
                 enum:
                 - GITHUB
                 - GITLAB
+                - BITBUCKET
                 example: GITHUB
                 type: string
               username:

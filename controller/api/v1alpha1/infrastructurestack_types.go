@@ -98,6 +98,10 @@ type InfrastructureStackSpec struct {
 
 	// +kubebuilder:validation:Optional
 	StackDefinitionRef *corev1.ObjectReference `json:"stackDefinitionRef,omitempty"`
+
+	// Tags used to filter stacks.
+	// +kubebuilder:validation:Optional
+	Tags map[string]string `json:"tags,omitempty"`
 }
 
 // InfrastructureStack is the Schema for the infrastructurestacks API

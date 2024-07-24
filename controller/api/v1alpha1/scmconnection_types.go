@@ -102,7 +102,7 @@ type ScmConnectionSpec struct {
 	// +kubebuilder:example:=GITHUB
 	// +kubebuilder:validation:Required
 	// +kubebuilder:validation:Type:=string
-	// +kubebuilder:validation:Enum:=GITHUB;GITLAB
+	// +kubebuilder:validation:Enum:=GITHUB;GITLAB;BITBUCKET
 	Type console.ScmType `json:"type"`
 	// Token ...
 	// +kubebuilder:validation:Optional
