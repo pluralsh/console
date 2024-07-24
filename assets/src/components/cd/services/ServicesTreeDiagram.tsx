@@ -62,8 +62,8 @@ function getNodesAndEdges(
         type: EdgeType.Smooth,
         updatable: false,
         id: `${service.id}${service.parent.id}`,
-        source: service.id,
-        target: service.parent.id,
+        source: service.parent.id,
+        target: service.id,
       })
     }
 
@@ -72,8 +72,8 @@ function getNodesAndEdges(
         type: EdgeType.Smooth,
         updatable: false,
         id: `${service.id}${service.owner.id}`,
-        source: service.id,
-        target: service.owner.id,
+        source: service.owner.id,
+        target: service.id,
       })
     }
   })
@@ -91,8 +91,8 @@ function getNodesAndEdges(
         type: EdgeType.Smooth,
         updatable: false,
         id: `${service.id}${service.parent.id}`,
-        source: service.id,
-        target: service.parent.id,
+        source: service.parent.id,
+        target: service.id,
       })
     }
   })
