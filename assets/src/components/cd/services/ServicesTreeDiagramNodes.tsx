@@ -2,6 +2,7 @@ import { NodeProps } from 'reactflow'
 import { useTheme } from 'styled-components'
 import {
   ArrowTopRightIcon,
+  Button,
   CaretRightIcon,
   ChipList,
   Divider,
@@ -255,6 +256,31 @@ function ServicesTreeDiagramServiceNodeModal({
             />
             {service.name}
           </div>
+        }
+        actions={
+          <>
+            <Button
+              secondary
+              onClick={() => setOpen(false)}
+              flex={1}
+            >
+              Close
+            </Button>
+            <Button
+              onClick={() =>
+                navigate(
+                  getServiceDetailsPath({
+                    serviceId: service.id,
+                    clusterId: service.cluster?.id,
+                  })
+                )
+              }
+              marginLeft="medium"
+              flex={1}
+            >
+              Go to service
+            </Button>
+          </>
         }
         open={open}
         onClose={() => setOpen(false)}
