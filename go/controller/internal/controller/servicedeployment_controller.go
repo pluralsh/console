@@ -94,7 +94,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	if cluster.Status.ID == nil {
 		logger.Info("Cluster is not ready")
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return requeue, nil
+		return RequeueAfter(requeueWaitForResources), nil
 	}
 
 	repository := &v1alpha1.GitRepository{}
@@ -109,24 +109,24 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 				utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return ctrl.Result{}, err
 			}
-			return requeue, nil
+			return RequeueAfter(requeueWaitForResources), nil
 		}
 
 		if repository.Status.ID == nil {
 			logger.Info("Repository is not ready")
 			utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-			return requeue, nil
+			return RequeueAfter(requeueWaitForResources), nil
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			logger.Info("Repository is not healthy")
-			return requeue, nil
+			return RequeueAfter(requeueWaitForResources), nil
 		}
 	}
 
 	err = r.ensureService(service)
 	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
+		return RequeueAfter(requeueWaitForResources), nil
 	}
 
 	if err != nil {
@@ -199,11 +199,10 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 
 	updateStatus(service, existingService, sha)
 
-	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "The service components are not ready yet")
-	if isServiceReady(service.Status.Components) {
-		utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+	if !isServiceReady(service.Status.Components) {
+		return RequeueAfter(requeueWaitForResources), nil
 	}
-
+	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
