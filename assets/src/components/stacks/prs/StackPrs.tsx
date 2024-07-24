@@ -66,13 +66,8 @@ const ColAccordion = columnHelper.accessor((edge) => edge.node, {
     const isOpen = table?.options?.meta?.openRowIdx === row.index
 
     const toggleOpen = useCallback(
-      (open: boolean) => {
-        if (open) {
-          table?.options?.meta?.setOpenRowIdx(row.index)
-        } else {
-          table?.options?.meta?.setOpenRowIdx(-1)
-        }
-      },
+      (open: boolean) =>
+        table?.options?.meta?.setOpenRowIdx(open ? row.index : -1),
       [row.index, table?.options?.meta]
     )
 

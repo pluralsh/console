@@ -1,16 +1,18 @@
 import {
-  AccordionOLD as Accordion,
+  Accordion,
+  AccordionItem,
   Checkbox,
   Chip,
+  Flex,
 } from '@pluralsh/design-system'
 import {
   ConstraintViolationField,
   useClustersQuery,
   useViolationStatisticsQuery,
 } from 'generated/graphql'
-import { Flex } from 'honorable'
+
 import { Dispatch, SetStateAction } from 'react'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 
@@ -29,6 +31,7 @@ function PoliciesFilter({
   selectedClusters: (string | null)[]
   setSelectedClusters: Dispatch<SetStateAction<(string | null)[]>>
 }) {
+  const theme = useTheme()
   const projectId = useProjectId()
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: {
@@ -82,9 +85,9 @@ function PoliciesFilter({
   }
 
   return (
-    <PoliciesFiltersContainer>
-      <Accordion label={clusterLabel}>
-        <Flex direction="column">
+    <Accordion type="multiple">
+      <AccordionItem trigger={clusterLabel}>
+        <Flex flexDirection="column">
           <Checkbox
             name={clusterLabel}
             value={null}
@@ -114,9 +117,15 @@ function PoliciesFilter({
             )
           })}
         </Flex>
-      </Accordion>
-      <Accordion label={kindLabel}>
-        <Flex direction="column">
+      </AccordionItem>
+      <AccordionItem
+        trigger={kindLabel}
+        css={{
+          borderTop: theme.borders.default,
+          borderBottom: theme.borders.default,
+        }}
+      >
+        <Flex flexDirection="column">
           <Checkbox
             name={kindLabel}
             value={null}
@@ -128,7 +137,7 @@ function PoliciesFilter({
             No kind
           </Checkbox>
           {kinds?.map((kind) => (
-            <div className="checkboxWrapper">
+            <CheckboxWrapperSC>
               <Checkbox
                 key={kind.id}
                 name="kinds"
@@ -146,12 +155,12 @@ function PoliciesFilter({
               >
                 {kind.count ?? '-'}
               </Chip>
-            </div>
+            </CheckboxWrapperSC>
           ))}
         </Flex>
-      </Accordion>
-      <Accordion label={namespaceLabel}>
-        <Flex direction="column">
+      </AccordionItem>
+      <AccordionItem trigger={namespaceLabel}>
+        <Flex flexDirection="column">
           <Checkbox
             name={namespaceLabel}
             value={null}
@@ -163,7 +172,7 @@ function PoliciesFilter({
             No namespace
           </Checkbox>
           {namespaces?.map((namespace) => (
-            <div className="checkboxWrapper">
+            <CheckboxWrapperSC>
               <Checkbox
                 key={namespace.id}
                 name={namespaceLabel}
@@ -185,37 +194,18 @@ function PoliciesFilter({
               >
                 {namespace.count ?? '-'}
               </Chip>
-            </div>
+            </CheckboxWrapperSC>
           ))}
         </Flex>
-      </Accordion>
-    </PoliciesFiltersContainer>
+      </AccordionItem>
+    </Accordion>
   )
 }
 
 export default PoliciesFilter
 
-const PoliciesFiltersContainer = styled.div(({ theme }) => ({
-  width: 'fit-content',
+const CheckboxWrapperSC = styled.div({
   display: 'flex',
-  overflow: 'auto',
-  flexDirection: 'column',
-  '> div': {
-    borderRadius: 0,
-    borderBottom: 'none',
-  },
-  '>div:first-child': {
-    borderTopLeftRadius: theme.borderRadiuses.large,
-    borderTopRightRadius: theme.borderRadiuses.large,
-  },
-  '>div:last-child': {
-    borderBottomLeftRadius: theme.borderRadiuses.large,
-    borderBottomRightRadius: theme.borderRadiuses.large,
-    borderBottom: `1px solid ${theme.colors.border}`,
-  },
-  '.checkboxWrapper': {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-}))
+  justifyContent: 'space-between',
+  alignItems: 'center',
+})

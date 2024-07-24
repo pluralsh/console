@@ -115,7 +115,7 @@ const PoliciesContainer = styled.div(({ theme }) => ({
   overflowX: 'hidden',
   overflowY: 'auto',
   padding: theme.spacing.large,
-  gridTemplateColumns: 'auto max(230px)',
+  gridTemplateColumns: 'auto max(250px)',
   gridTemplateRows: 'auto 1fr',
   gap: '16px 16px',
   gridTemplateAreas: `
