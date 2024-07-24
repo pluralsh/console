@@ -7,7 +7,8 @@ import {
   useState,
 } from 'react'
 import {
-  AccordionOLD as Accordion,
+  Accordion,
+  AccordionItem,
   FormField,
   IconFrame,
   Input,
@@ -44,7 +45,6 @@ function NodeGroup({
     initialNodeGroup.nodeType
   )
   const [nodeGroup, setNodeGroup] = useState<NodeGroupType>(initialNodeGroup)
-  const [advancedOpen, setAdvancedOpen] = useState(false)
 
   const providerEl = useMemo(() => {
     switch (provider) {
@@ -162,27 +162,22 @@ function NodeGroup({
         </FormField>
       </div>
 
-      <Accordion
-        unstyled
-        label="Advanced"
-        isOpen={advancedOpen}
-        onOpenChange={(open) => setAdvancedOpen(open)}
-        css={{
-          '> div:first-child': {
-            ...theme.partials.text.overline,
-            color: theme.colors['text-xlight'],
-            padding: 0,
-            paddingTop: theme.spacing.xsmall,
-          },
-        }}
-      >
-        <div
-          css={{
-            paddingTop: advancedOpen ? theme.spacing.medium : 0,
-          }}
+      <Accordion type="single">
+        <AccordionItem
+          padding="compact"
+          trigger={
+            <span
+              css={{
+                ...theme.partials.text.overline,
+                color: theme.colors['text-xlight'],
+              }}
+            >
+              Advanced
+            </span>
+          }
         >
           {providerEl}
-        </div>
+        </AccordionItem>
       </Accordion>
     </div>
   )

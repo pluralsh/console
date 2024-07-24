@@ -4,8 +4,6 @@ import {
   CloseIcon,
   IconFrame,
   Input,
-  useCloseItem,
-  useIsItemOpen,
 } from '@pluralsh/design-system'
 
 import {
@@ -14,10 +12,9 @@ import {
   ReactNode,
   useEffect,
   useRef,
+  useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
-
-const ACCORDION_SINGLE_ITEM_VALUE = 'icon-expander'
 
 export function IconExpander({
   icon,
@@ -29,25 +26,31 @@ export function IconExpander({
   children: ReactNode
 }) {
   const theme = useTheme()
+  // will hold the items randomly assigned id if open, empty string if closed
+  const [openItem, setOpenItem] = useState('')
 
   return (
     <Accordion
       type="single"
+      value={openItem}
+      onValueChange={setOpenItem}
       orientation="horizontal"
-      css={{
-        border: theme.borders['fill-three'],
-        minWidth: 'fit-content',
-        height: '40px',
-      }}
+      css={{ border: theme.borders['fill-three'] }}
     >
       <AccordionItem
-        hideDefaultIcon
-        value={ACCORDION_SINGLE_ITEM_VALUE}
+        caret="none"
+        padding="none"
+        paddingArea="trigger-only"
+        css={{ height: '40px' }}
         trigger={<BlendedIconFrameSC icon={icon} />}
       >
         <div css={{ display: 'flex', height: '100%' }}>
           {children}
-          {!hideCloseIcon && <CloseExpanderIcon />}
+          {!hideCloseIcon && (
+            <EndIconButtonSC onClick={() => setOpenItem('')}>
+              <CloseIcon />
+            </EndIconButtonSC>
+          )}
         </div>
       </AccordionItem>
     </Accordion>
@@ -63,12 +66,11 @@ export function ExpandedInput({
   onChange: (value: string) => void
 } & ComponentProps<typeof Input>) {
   const inputRef = useRef<HTMLElement>()
-  const isOpen = useIsItemOpen(ACCORDION_SINGLE_ITEM_VALUE)
 
   useEffect(() => {
     // only using querySelector because honorable input refs point to the div wrapper around the input
-    if (isOpen) inputRef.current?.querySelector('input')?.focus()
-  }, [isOpen])
+    inputRef.current?.querySelector('input')?.focus()
+  }, [])
 
   return (
     <Input
@@ -84,24 +86,6 @@ export function ExpandedInput({
       onChange={(e) => onChange(e.currentTarget.value)}
       {...props}
     />
-  )
-}
-
-export function CloseExpanderIcon({
-  ...props
-}: ComponentProps<typeof EndIconButtonSC>) {
-  const close = useCloseItem(ACCORDION_SINGLE_ITEM_VALUE)
-
-  return (
-    <EndIconButtonSC
-      onClick={(e) => {
-        e.stopPropagation()
-        close()
-      }}
-      {...props}
-    >
-      <CloseIcon />
-    </EndIconButtonSC>
   )
 }
 

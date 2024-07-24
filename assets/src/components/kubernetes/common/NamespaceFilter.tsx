@@ -34,6 +34,7 @@ export function NamespaceFilter({
         placeholder: 'Filter by namespace',
         style: {
           border: 'none',
+          borderRadius: 0,
           background: theme.colors['fill-two'],
         },
       }}

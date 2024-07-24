@@ -1,5 +1,6 @@
 import {
-  AccordionOLD as Accordion,
+  Accordion,
+  AccordionItem,
   FormField,
   Input,
   ListBoxItem,
@@ -113,26 +114,33 @@ export function CreateStackModalFormBasic({
         Require approvals
       </Switch>
       <Accordion
-        label="Advanced configuration"
-        unstyled
-        css={{
-          '> div:first-child': {
-            ...theme.partials.text.overline,
-            color: theme.colors['text-xlight'],
-            cursor: 'pointer',
-            padding: 0,
-          },
-        }}
+        type="single"
+        css={{ border: 'none', borderRadius: 0 }}
       >
-        <FormField
-          label="Image"
-          paddingTop="medium"
+        <AccordionItem
+          padding="none"
+          trigger={
+            <span
+              css={{
+                ...theme.partials.text.overline,
+                color: theme.colors['text-xlight'],
+              }}
+            >
+              Advanced configuration
+            </span>
+          }
         >
-          <Input
-            value={image}
-            onChange={(e) => setImage(e.currentTarget.value)}
-          />
-        </FormField>
+          <FormField
+            label="Image"
+            paddingTop="medium"
+          >
+            <Input
+              background="transparent"
+              value={image}
+              onChange={(e) => setImage(e.currentTarget.value)}
+            />
+          </FormField>
+        </AccordionItem>
       </Accordion>
     </>
   )

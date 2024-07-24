@@ -41,7 +41,7 @@ export function PrCard() {
       <Title2H1>{headerText}</Title2H1>
       <PrTable
         data={data?.pullRequests?.edges}
-        emptyStateProps={{ message: 'All services healthy!' }}
+        emptyStateProps={{ message: 'No open PRs' }}
         refetch={refetch}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}

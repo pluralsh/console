@@ -1,5 +1,6 @@
 import {
-  AccordionOLD as Accordion,
+  Accordion,
+  AccordionItem,
   ArrowTopRightIcon,
   DropdownArrowIcon,
   EmptyState,
@@ -49,36 +50,43 @@ export function PrStackRunsAccordion({
 
   return (
     <Accordion
-      unstyled
-      isOpen={isOpen}
-      triggerButton={
-        <PrStackRunsAccordionTrigger
-          isOpen={isOpen}
-          toggleOpen={toggleOpen}
-          pr={pr}
-        />
-      }
-      css={{
-        width: '100%',
-      }}
+      fillLevel={1}
+      type="single"
+      value={isOpen ? 'item' : ''}
+      css={{ width: '100%', borderRadius: 0, border: 'none' }}
     >
-      {queryResult.data ? (
-        !isEmpty(queryResult.data.infrastructureStack?.runs) ? (
-          <ScrollerWrapperSC>
-            <StackRunsScroller
-              entryStyles={{
-                paddingLeft: `${theme.spacing.xxxlarge}px`,
-                background: theme.colors['fill-two'],
-                borderBottom: theme.borders['fill-two'],
-                '&:hover': { backgroundColor: theme.colors['fill-two-hover'] },
-              }}
-              queryResult={queryResult}
-            />
-          </ScrollerWrapperSC>
-        ) : (
-          <EmptyState message="No runs found." />
-        )
-      ) : null}
+      <AccordionItem
+        value="item"
+        caret="none"
+        padding="none"
+        trigger={
+          <PrStackRunsAccordionTrigger
+            isOpen={isOpen}
+            toggleOpen={toggleOpen}
+            pr={pr}
+          />
+        }
+      >
+        {queryResult.data ? (
+          !isEmpty(queryResult.data.infrastructureStack?.runs) ? (
+            <ScrollerWrapperSC>
+              <StackRunsScroller
+                entryStyles={{
+                  paddingLeft: `${theme.spacing.xxxlarge}px`,
+                  background: theme.colors['fill-two'],
+                  borderBottom: theme.borders['fill-two'],
+                  '&:hover': {
+                    backgroundColor: theme.colors['fill-two-hover'],
+                  },
+                }}
+                queryResult={queryResult}
+              />
+            </ScrollerWrapperSC>
+          ) : (
+            <EmptyState message="No runs found." />
+          )
+        ) : null}
+      </AccordionItem>
     </Accordion>
   )
 }
@@ -119,6 +127,9 @@ const EndLinkSC = styled(Link)(({ theme }) => ({
 
 const TriggerWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
+  width: '100%',
+  ...theme.partials.text.body2Bold,
+  color: theme.colors['text-light'],
   alignItems: 'center',
   gap: theme.spacing.large,
   padding: `${theme.spacing.medium}px`,

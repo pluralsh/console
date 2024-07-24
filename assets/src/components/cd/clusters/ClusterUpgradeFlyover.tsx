@@ -1,5 +1,7 @@
+import { ApolloError } from '@apollo/client'
 import {
-  AccordionOLD as Accordion,
+  Accordion,
+  AccordionItem,
   AppIcon,
   Button,
   ChecklistIcon,
@@ -13,9 +15,8 @@ import {
   Tooltip,
   WrapWithIf,
 } from '@pluralsh/design-system'
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import styled, { useTheme } from 'styled-components'
-import isEmpty from 'lodash/isEmpty'
+import { Confirm } from 'components/utils/Confirm'
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import {
   ApiDeprecation,
   ClustersRowFragment,
@@ -24,6 +25,10 @@ import {
   useRuntimeServicesQuery,
   useUpdateClusterMutation,
 } from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { coerce } from 'semver'
+import styled, { useTheme } from 'styled-components'
 import {
   isUpgrading,
   nextSupportedVersion,
@@ -31,22 +36,18 @@ import {
   toNiceVersion,
   toProviderSupportedVersion,
 } from 'utils/semver'
-import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { Confirm } from 'components/utils/Confirm'
-import { ApolloError } from '@apollo/client'
-import { coerce } from 'semver'
 
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 
-import { GqlError } from '../../utils/Alert'
 import { TabularNumbers } from '../../cluster/TableElements'
+import { GqlError } from '../../utils/Alert'
 
+import { deprecationsColumns } from './deprecationsColumns'
 import RuntimeServices, {
   getClusterKubeVersion,
 } from './runtime/RuntimeServices'
-import { deprecationsColumns } from './deprecationsColumns'
 
 const supportedVersions = (cluster: ClustersRowFragment | null) =>
   cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
@@ -319,63 +320,79 @@ function FlyoverContent({ open, cluster, refetch }) {
           meta: { refetch, setError, data },
         }}
       />
-      <FlyoverAccordionSC
-        padContent={isEmpty(apiDeprecations)}
-        label={
-          <ClusterUpgradeAccordionTrigger
-            checked={cluster?.upgradePlan?.deprecations || false}
-            icon={ChecklistIcon}
-            title="Check API deprecations"
-            subtitle="Ensure that all K8s YAML you're deploying is conformant with the next K8s version"
-          />
-        }
+      <Accordion
+        type="single"
+        fillLevel={1}
       >
-        {!isEmpty(apiDeprecations) ? (
-          <Table
-            flush
-            data={apiDeprecations || []}
-            columns={deprecationsColumns}
-            css={{
-              maxHeight: 181,
-              height: '100%',
-            }}
-          />
-        ) : (
-          <EmptyState description="No services with api deprecations discovered!" />
-        )}
-      </FlyoverAccordionSC>
-      <FlyoverAccordionSC
-        padContent={isEmpty(runtimeServices)}
-        label={
-          <ClusterUpgradeAccordionTrigger
-            checked={cluster?.upgradePlan?.compatibilities || false}
-            icon={ChecklistIcon}
-            title="Check add-on compatibilities"
-            subtitle="Ensure all known third-party add-ons are supported on the next K8s version"
-          />
-        }
+        <AccordionItem
+          paddingArea="trigger-only"
+          trigger={
+            <ClusterUpgradeAccordionTrigger
+              checked={cluster?.upgradePlan?.deprecations || false}
+              icon={ChecklistIcon}
+              title="Check API deprecations"
+              subtitle="Ensure that all K8s YAML you're deploying is conformant with the next K8s version"
+            />
+          }
+        >
+          {!isEmpty(apiDeprecations) ? (
+            <Table
+              flush
+              data={apiDeprecations || []}
+              columns={deprecationsColumns}
+              css={{
+                maxHeight: 181,
+                height: '100%',
+              }}
+            />
+          ) : (
+            <EmptyState description="No services with api deprecations discovered!" />
+          )}
+        </AccordionItem>
+      </Accordion>
+      <Accordion
+        type="single"
+        fillLevel={1}
       >
-        {!isEmpty(runtimeServices) ? (
-          <RuntimeServices
-            flush
-            data={data}
-          />
-        ) : (
-          <EmptyState description="No known add-ons found" />
-        )}
-      </FlyoverAccordionSC>
-      <FlyoverAccordionSC
-        label={
-          <ClusterUpgradeAccordionTrigger
-            checked={cluster?.upgradePlan?.incompatibilities || false}
-            icon={ChecklistIcon}
-            title="Check add-on mutual incompatibilities"
-            subtitle="Use suggested version for each add-on to resolve mutual incompatibilities"
-          />
-        }
+        <AccordionItem
+          paddingArea="trigger-only"
+          trigger={
+            <ClusterUpgradeAccordionTrigger
+              checked={cluster?.upgradePlan?.compatibilities || false}
+              icon={ChecklistIcon}
+              title="Check add-on compatibilities"
+              subtitle="Ensure all known third-party add-ons are supported on the next K8s version"
+            />
+          }
+        >
+          {!isEmpty(runtimeServices) ? (
+            <RuntimeServices
+              flush
+              data={data}
+            />
+          ) : (
+            <EmptyState description="No known add-ons found" />
+          )}
+        </AccordionItem>
+      </Accordion>
+      <Accordion
+        type="single"
+        fillLevel={1}
       >
-        <EmptyState description="No mutually incompatible add-ons detected!" />
-      </FlyoverAccordionSC>
+        <AccordionItem
+          paddingArea="trigger-only"
+          trigger={
+            <ClusterUpgradeAccordionTrigger
+              checked={cluster?.upgradePlan?.incompatibilities || false}
+              icon={ChecklistIcon}
+              title="Check add-on mutual incompatibilities"
+              subtitle="Use suggested version for each add-on to resolve mutual incompatibilities"
+            />
+          }
+        >
+          <EmptyState description="No mutually incompatible add-ons detected!" />
+        </AccordionItem>
+      </Accordion>
     </div>
   )
 }
@@ -426,8 +443,8 @@ function EmptyState({ description }) {
 
   return (
     <div
-      style={{
-        margin: theme.spacing.medium,
+      css={{
+        padding: theme.spacing.medium,
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -455,6 +472,8 @@ function ClusterUpgradeAccordionTrigger({
   subtitle?: string
   checked: boolean
 }) {
+  const theme = useTheme()
+
   return (
     <TriggerWrapperSC>
       <AppIcon
@@ -468,25 +487,26 @@ function ClusterUpgradeAccordionTrigger({
           )
         }
       />
-      <div
-        style={{ display: 'flex', flexDirection: 'column', lineHeight: '24px' }}
-      >
-        <h4 style={{ fontWeight: '500' }}>{title}</h4>
-        <h5 style={{ fontWeight: '400' }}>{subtitle}</h5>
+      <div css={{ display: 'flex', flexDirection: 'column' }}>
+        <span css={theme.partials.text.body1Bold}>{title}</span>
+        <span
+          css={{
+            ...theme.partials.text.body2,
+            color: theme.colors['text-light'],
+          }}
+        >
+          {subtitle}
+        </span>
       </div>
     </TriggerWrapperSC>
   )
 }
 
 const TriggerWrapperSC = styled.div(({ theme }) => ({
-  padding: theme.spacing.large - 16,
+  padding: theme.spacing.xsmall,
   gap: theme.spacing.large,
   cursor: 'pointer',
   fontSize: '18px',
   display: 'flex',
   alignItems: 'center',
-}))
-
-const FlyoverAccordionSC = styled(Accordion)(({ theme }) => ({
-  backgroundColor: theme.colors['fill-one'],
 }))
