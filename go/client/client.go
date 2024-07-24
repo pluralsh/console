@@ -88,6 +88,10 @@ type ConsoleClient interface {
 	UpdatePrAutomation(ctx context.Context, id string, attributes PrAutomationAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePrAutomation, error)
 	DeletePrAutomation(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrAutomation, error)
 	CreatePullRequest(ctx context.Context, id string, branch *string, context *string, interceptors ...clientv2.RequestInterceptor) (*CreatePullRequest, error)
+	GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error)
+	CreateGroup(ctx context.Context, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGroup, error)
+	UpdateGroup(ctx context.Context, groupID string, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGroup, error)
+	DeleteGroup(ctx context.Context, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroup, error)
 	ListNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListNamespaces, error)
 	ListClusterNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterNamespaces, error)
 	GetNamespace(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNamespace, error)
@@ -12416,6 +12420,50 @@ func (t *CreatePullRequest) GetCreatePullRequest() *PullRequestFragment {
 	return t.CreatePullRequest
 }
 
+type GetGroup struct {
+	Group *GroupFragment "json:\"group,omitempty\" graphql:\"group\""
+}
+
+func (t *GetGroup) GetGroup() *GroupFragment {
+	if t == nil {
+		t = &GetGroup{}
+	}
+	return t.Group
+}
+
+type CreateGroup struct {
+	CreateGroup *GroupFragment "json:\"createGroup,omitempty\" graphql:\"createGroup\""
+}
+
+func (t *CreateGroup) GetCreateGroup() *GroupFragment {
+	if t == nil {
+		t = &CreateGroup{}
+	}
+	return t.CreateGroup
+}
+
+type UpdateGroup struct {
+	UpdateGroup *GroupFragment "json:\"updateGroup,omitempty\" graphql:\"updateGroup\""
+}
+
+func (t *UpdateGroup) GetUpdateGroup() *GroupFragment {
+	if t == nil {
+		t = &UpdateGroup{}
+	}
+	return t.UpdateGroup
+}
+
+type DeleteGroup struct {
+	DeleteGroup *GroupFragment "json:\"deleteGroup,omitempty\" graphql:\"deleteGroup\""
+}
+
+func (t *DeleteGroup) GetDeleteGroup() *GroupFragment {
+	if t == nil {
+		t = &DeleteGroup{}
+	}
+	return t.DeleteGroup
+}
+
 type ListNamespaces struct {
 	ManagedNamespaces *ListNamespaces_ManagedNamespaces "json:\"managedNamespaces,omitempty\" graphql:\"managedNamespaces\""
 }
@@ -19718,6 +19766,123 @@ func (c *Client) CreatePullRequest(ctx context.Context, id string, branch *strin
 	return &res, nil
 }
 
+const GetGroupDocument = `query GetGroup ($name: String!) {
+	group(name: $name) {
+		... GroupFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+`
+
+func (c *Client) GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error) {
+	vars := map[string]any{
+		"name": name,
+	}
+
+	var res GetGroup
+	if err := c.Client.Post(ctx, "GetGroup", GetGroupDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const CreateGroupDocument = `mutation CreateGroup ($attributtes: GroupAttributes!) {
+	createGroup(attributes: $attributtes) {
+		... GroupFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+`
+
+func (c *Client) CreateGroup(ctx context.Context, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGroup, error) {
+	vars := map[string]any{
+		"attributtes": attributtes,
+	}
+
+	var res CreateGroup
+	if err := c.Client.Post(ctx, "CreateGroup", CreateGroupDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateGroupDocument = `mutation UpdateGroup ($groupId: ID!, $attributtes: GroupAttributes!) {
+	updateGroup(groupId: $groupId, attributes: $attributtes) {
+		... GroupFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+`
+
+func (c *Client) UpdateGroup(ctx context.Context, groupID string, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGroup, error) {
+	vars := map[string]any{
+		"groupId":     groupID,
+		"attributtes": attributtes,
+	}
+
+	var res UpdateGroup
+	if err := c.Client.Post(ctx, "UpdateGroup", UpdateGroupDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteGroupDocument = `mutation DeleteGroup ($groupId: ID!) {
+	deleteGroup(groupId: $groupId) {
+		... GroupFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+`
+
+func (c *Client) DeleteGroup(ctx context.Context, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroup, error) {
+	vars := map[string]any{
+		"groupId": groupID,
+	}
+
+	var res DeleteGroup
+	if err := c.Client.Post(ctx, "DeleteGroup", DeleteGroupDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListNamespacesDocument = `query ListNamespaces ($after: String, $first: Int, $before: String, $last: Int) {
 	managedNamespaces(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -25611,6 +25776,10 @@ var DocumentOperationNames = map[string]string{
 	UpdatePrAutomationDocument:                        "UpdatePrAutomation",
 	DeletePrAutomationDocument:                        "DeletePrAutomation",
 	CreatePullRequestDocument:                         "CreatePullRequest",
+	GetGroupDocument:                                  "GetGroup",
+	CreateGroupDocument:                               "CreateGroup",
+	UpdateGroupDocument:                               "UpdateGroup",
+	DeleteGroupDocument:                               "DeleteGroup",
 	ListNamespacesDocument:                            "ListNamespaces",
 	ListClusterNamespacesDocument:                     "ListClusterNamespaces",
 	GetNamespaceDocument:                              "GetNamespace",
