@@ -38,6 +38,8 @@ defmodule Console.PubSub.PipelineContextCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PipelineGateApproved, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.PipelineGateUpdated, do: use Piazza.PubSub.Event
 
+defmodule Console.PubSub.PipelineEdgeUpdated, do: use Piazza.PubSub.Event
+
 defmodule Console.PubSub.PromotionCreated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.ClusterRestoreCreated, do: use Piazza.PubSub.Event

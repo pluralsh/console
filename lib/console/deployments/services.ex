@@ -612,11 +612,11 @@ defmodule Console.Deployments.Services do
       unsynced = Enum.any?(components, & !&1.synced)
       num_healthy = Enum.count(components, & (&1.state == :running || is_nil(&1.state)) && &1.synced)
       component_status = "#{num_healthy} / #{length(components)}"
-      case {failed, paused, running, unsynced} do
-        {true, _, _, _} -> update_status(service, :failed, component_status)
-        {_, true, _, _} -> update_status(service, :paused, component_status)
-        {_, _, _, true} -> update_status(service, :stale, component_status)
-        {_, _, true, _} -> update_status(service, :healthy, component_status)
+      case {failed, paused, running, latest_vsn(service, attrs), unsynced} do
+        {true, _, _, _, _}       -> update_status(service, :failed, component_status)
+        {_, true, _, _, _}       -> update_status(service, :paused, component_status)
+        {_, _, _, _, true}       -> update_status(service, :stale, component_status)
+        {_, _, true, true, _}     -> update_status(service, :healthy, component_status)
         _ -> update_status(service, :stale, component_status)
       end
     end)
@@ -632,6 +632,14 @@ defmodule Console.Deployments.Services do
     with {:ok, svc} <- authorized(service_id, cluster),
       do: update_components(attrs, svc)
   end
+
+  defp latest_vsn(%Service{sha: sha, revision_id: rid}, %{sha: sha, revision_id: rid})
+    when is_binary(sha) and is_binary(rid), do: true
+  defp latest_vsn(%Service{sha: nil, revision_id: rid}, %{revision_id: rid}), do: true
+  defp latest_vsn(_, %{sha: sha, revision_id: rid}) when is_binary(sha) and is_binary(rid), do: false
+  defp latest_vsn(%Service{revision_id: rid}, %{revision_id: rid}), do: true
+  defp latest_vsn(_, %{revision_id: rid}) when is_binary(rid), do: false
+  defp latest_vsn(_, _), do: true
 
   def stabilize_deps(%{dependencies: deps} = attrs, %Service{dependencies: old_deps}) when is_list(old_deps) do
     by_name = Map.new(old_deps, & {&1.name, &1.status})

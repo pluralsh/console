@@ -838,6 +838,72 @@ defmodule Console.Deployments.ServicesTest do
       assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
     end
 
+    test "if a it is using an incorrect revision, it won't change service status" do
+      service = insert(:service, sha: "sasfda", status: :stale, revision: build(:revision))
+
+      {:ok, service} = Services.update_components(%{
+        revision_id: service.id, # should be service.revision_id
+        sha: service.sha,
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [:components])
+      assert component.state == :running
+      assert component.synced
+      assert component.group == "networking.k8s.io"
+      assert component.version == "v1"
+      assert component.kind == "Ingress"
+      assert component.namespace == "my-app"
+      assert component.name == "api"
+
+      svc = refetch(service)
+      assert svc.status == :stale
+      assert svc.component_status == "1 / 1"
+
+      assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
+    end
+
+    test "if a it is using an correct revision, it will change service status" do
+      service = insert(:service, sha: "sasfda", status: :stale, revision: build(:revision))
+
+      {:ok, service} = Services.update_components(%{
+        revision_id: service.revision_id,
+        sha: service.sha,
+        components: [%{
+          state: :running,
+          synced: true,
+          group: "networking.k8s.io",
+          version: "v1",
+          kind: "Ingress",
+          namespace: "my-app",
+          name: "api"
+        }]
+      }, service)
+
+      %{components: [component]} = Console.Repo.preload(service, [:components])
+      assert component.state == :running
+      assert component.synced
+      assert component.group == "networking.k8s.io"
+      assert component.version == "v1"
+      assert component.kind == "Ingress"
+      assert component.namespace == "my-app"
+      assert component.name == "api"
+
+      svc = refetch(service)
+      assert svc.status == :healthy
+      assert svc.component_status == "1 / 1"
+
+      assert_receive {:event, %PubSub.ServiceComponentsUpdated{item: ^service}}
+    end
+
     test "it can persist dry run data" do
       service = insert(:service)
 

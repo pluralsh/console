@@ -5145,6 +5145,8 @@ export type RootMutationTypeUpdateServiceComponentsArgs = {
   components?: InputMaybe<Array<InputMaybe<ComponentAttributes>>>;
   errors?: InputMaybe<Array<InputMaybe<ServiceErrorAttributes>>>;
   id: Scalars['ID']['input'];
+  revisionId?: InputMaybe<Scalars['ID']['input']>;
+  sha?: InputMaybe<Scalars['String']['input']>;
 };
 
 

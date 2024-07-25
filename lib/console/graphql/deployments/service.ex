@@ -419,9 +419,11 @@ defmodule Console.GraphQl.Deployments.Service do
     @desc "updates only the components of a given service, to be sent after deploy operator syncs"
     field :update_service_components, :service_deployment do
       middleware ClusterAuthenticated
-      arg :id, non_null(:id)
-      arg :components, list_of(:component_attributes)
-      arg :errors, list_of(:service_error_attributes)
+      arg :id,          non_null(:id)
+      arg :components,  list_of(:component_attributes)
+      arg :revision_id, :id
+      arg :sha,         :string
+      arg :errors,      list_of(:service_error_attributes)
 
       safe_resolve &Deployments.update_service_components/2
     end
