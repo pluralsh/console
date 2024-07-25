@@ -94,7 +94,9 @@ end
 defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
   alias Console.Deployments.Pipelines.Discovery
 
-  def process(%{item: stage}), do: Discovery.context(stage)
+  def process(%{item: stage}) do
+    Console.async_retry(fn -> Discovery.context(stage) end)
+  end
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.PullRequestCreated do

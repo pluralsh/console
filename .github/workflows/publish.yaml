@@ -209,3 +209,54 @@ jobs:
         branch: release-${{github.ref_name}}
         labels: release
         base: master
+  bump-rapid:
+    name: Bump Rapid Chart Version
+    runs-on: ubuntu-20.04
+    needs: [release]
+    permissions:
+      contents: write
+      discussions: write
+      pull-requests: write
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with: 
+        persist-credentials: false
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '^1.21.3'
+    - name: push byok chart
+      uses: pluralsh/chart-releaser@v0.1.3
+      with:
+        path: ./charts/console-rapid
+        release: ${{github.ref_name}}
+    - name: push controller chart
+      uses: pluralsh/chart-releaser@v0.1.3
+      with:
+        path: ./charts/controller
+        release: ${{github.ref_name}}
+    - name: controller version
+      id: controller_vsn
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq ".version" charts/controller/Chart.yaml
+    - name: update byok
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console/Chart.yaml
+    - name: update byok
+      uses: mikefarah/yq@master
+      with:
+        cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' plural/helm/console/Chart.yaml
+    - name: helm-dependencies
+      run: make helm-dependencies
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v5
+      with:
+        title: Release ${{github.ref_name}}
+        body: Automated Pull Request to release rapid channel for ${{github.ref_name}}
+        commit-message: Updated chart console-rapid to release ${{github.ref_name}}
+        branch: release-${{github.ref_name}}
+        labels: release
+        base: master

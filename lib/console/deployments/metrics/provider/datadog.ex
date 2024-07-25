@@ -37,6 +37,6 @@ defmodule Console.Deployments.Metrics.Provider.Datadog do
 
   defp handle_response({:ok, %HTTPoison.Response{status_code: code, body: body}})
     when code >= 200 and code < 300, do: Jason.decode(body)
-  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, "datadog api call failed: #{body}"}
-  defp handle_response(_), do: {:error, "unknown datadog error"}
+  defp handle_response({:ok, %HTTPoison.Response{body: body}}), do: {:error, {:client, "datadog api call failed: #{body}"}}
+  defp handle_response(_), do: {:error, {:client, "unknown datadog error"}}
 end

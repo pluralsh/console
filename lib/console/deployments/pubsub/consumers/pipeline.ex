@@ -10,12 +10,14 @@ defmodule Console.Deployments.PubSub.Pipeline do
   def handle_event(event) do
     case Pipelineable.pipe(event) do
       [_ | _] = items -> Enum.map(items, &act/1)
-      %PipelineStage{} = stage -> Discovery.stage(stage)
-      %PipelinePromotion{} = promo -> Discovery.promotion(promo)
+      %PipelineStage{} = stage -> act(stage)
+      %PipelinePromotion{} = promo -> act(promo)
       _ -> :ok
     end
   end
 
-  defp act(%PipelineStage{} = stage), do: Discovery.stage(stage)
-  defp act(%PipelinePromotion{} = promo), do: Discovery.promotion(promo)
+  def act(resource), do: Console.async_retry(fn -> act_inner(resource) end)
+
+  defp act_inner(%PipelineStage{} = stage), do: Discovery.stage(stage)
+  defp act_inner(%PipelinePromotion{} = promo), do: Discovery.promotion(promo)
 end

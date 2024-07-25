@@ -3,7 +3,7 @@ defmodule Console.Deployments.Metrics.Provider do
   alias Console.Schema.{ObservableMetric, ObservabilityProvider}
   alias Console.Deployments.Metrics.Provider.{Datadog, NewRelic}
 
-  @callback query(metric :: ObservableMetric.t) :: :ok | {:error, binary}
+  @callback query(metric :: ObservableMetric.t) :: :ok | {:error, binary} | {:error, {:client, binary}}
 
   def query(%ObservableMetric{} = metric) do
     metric = Repo.preload(metric, [:provider])
