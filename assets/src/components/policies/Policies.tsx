@@ -103,6 +103,11 @@ export function Policies() {
             fetchNextPage={fetchNextPage}
             loading={loading}
             setVirtualSlice={setVirtualSlice}
+            resetFilters={() => {
+              setSelectedKinds([])
+              setSelectedNamespaces([])
+              setSelectedClusters([])
+            }}
           />
         </FullHeightTableWrap>
       </div>
@@ -112,10 +117,10 @@ export function Policies() {
 
 const PoliciesContainer = styled.div(({ theme }) => ({
   display: 'grid',
-  overflowX: 'hidden',
+  height: '100%',
   overflowY: 'auto',
   padding: theme.spacing.large,
-  gridTemplateColumns: 'auto max(250px)',
+  gridTemplateColumns: 'auto 250px',
   gridTemplateRows: 'auto 1fr',
   gap: '16px 16px',
   gridTemplateAreas: `

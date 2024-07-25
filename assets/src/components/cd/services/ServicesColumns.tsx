@@ -259,7 +259,7 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
           css={{
             width: '100%',
             display: 'flex',
-            gap: theme.spacing.large,
+            gap: theme.spacing.small,
             alignItems: 'center',
             justifyContent: 'end',
           }}

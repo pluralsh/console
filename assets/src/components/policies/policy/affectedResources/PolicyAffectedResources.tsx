@@ -16,10 +16,10 @@ import {
   ColErrorMessage,
   ColKind,
   ColNamespace,
-  ColRessourceName,
+  ColResourceName,
 } from './ViolationsTableColumns'
 
-const columns = [ColRessourceName, ColNamespace, ColKind, ColErrorMessage]
+const columns = [ColResourceName, ColNamespace, ColKind, ColErrorMessage]
 
 export default function PolicyAffectedResources({
   policyName,

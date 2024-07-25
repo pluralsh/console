@@ -67,7 +67,6 @@ export function PipelineTabs() {
 
   return (
     <TabList
-      gap="xxsmall"
       stateRef={tabStateRef}
       stateProps={{
         orientation: 'horizontal',

@@ -201,7 +201,6 @@ export default function Apps() {
         <>
           <Flex grow={1} />
           <TabList
-            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',

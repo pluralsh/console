@@ -50,7 +50,6 @@ export default function Rbac() {
     () => (
       <TabList
         scrollable
-        gap="xxsmall"
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',

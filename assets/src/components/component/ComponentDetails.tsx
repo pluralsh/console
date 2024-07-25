@@ -197,7 +197,6 @@ export function ComponentDetails({
             }}
           >
             <TabList
-              gap="xxsmall"
               stateRef={tabStateRef}
               stateProps={{
                 orientation: 'horizontal',

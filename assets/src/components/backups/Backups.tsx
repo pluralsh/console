@@ -61,7 +61,6 @@ export default function Backups() {
           }}
         >
           <TabList
-            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',

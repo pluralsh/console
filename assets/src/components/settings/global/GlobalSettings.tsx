@@ -93,7 +93,6 @@ export function GlobalSettings() {
   const headerContent = (
     <TabList
       scrollable
-      gap="xxsmall"
       paddingBottom="large"
       stateRef={tabStateRef}
       stateProps={{

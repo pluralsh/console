@@ -86,7 +86,6 @@ export default function Changelog() {
       >
         <Flex>
           <TabList
-            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',

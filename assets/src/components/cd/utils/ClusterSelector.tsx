@@ -8,12 +8,14 @@ import {
 } from '@pluralsh/design-system'
 import { useCallback, useMemo, useState } from 'react'
 
-import { ClusterTinyFragment, useClusterSelectorQuery } from 'generated/graphql'
-import { ClusterProviderIcon } from 'components/utils/Provider'
-import { useTheme } from 'styled-components'
 import { useThrottle } from 'components/hooks/useThrottle'
+import { ClusterProviderIcon } from 'components/utils/Provider'
+import { ClusterTinyFragment, useClusterSelectorQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
+import { useTheme } from 'styled-components'
 import { extendConnection } from 'utils/graphql'
+
+import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -78,97 +80,98 @@ export default function ClusterSelector({
   )
 
   return (
-    <ComboBox
-      inputProps={{
-        placeholder: selectedCluster ? selectedCluster.name : placeholder,
-      }}
-      titleContent={
-        !hideTitleContent ? (
-          <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-            <ClusterIcon />
-            Cluster
-          </div>
-        ) : undefined
-      }
-      startIcon={
-        clusterSelectIsOpen || !selectedCluster ? (
-          <SearchIcon />
-        ) : (
-          <ClusterProviderIcon
-            cluster={selectedCluster}
-            size={16}
-          />
-        )
-      }
-      inputValue={inputValue}
-      onInputChange={setInputValue}
-      loading={clusterSelectIsOpen && data && loading}
-      isOpen={clusterSelectIsOpen}
-      onOpenChange={(isOpen) => {
-        setClusterSelectIsOpen(isOpen)
-      }}
-      dropdownFooter={
-        !data ? (
-          <ListBoxFooter>Loading</ListBoxFooter>
-        ) : isEmpty(clusters) ? (
-          <ListBoxFooter>No results</ListBoxFooter>
-        ) : data?.clusters?.pageInfo.hasNextPage ? (
-          <ListBoxFooterPlus>Show more</ListBoxFooterPlus>
-        ) : undefined
-      }
-      onFooterClick={() => {
-        if (data?.clusters?.pageInfo.hasNextPage) {
-          if (!pageInfo) {
-            return
-          }
-          fetchMore({
-            variables: { after: pageInfo.endCursor },
-            updateQuery: (prev, { fetchMoreResult: { clusters } }) =>
-              extendConnection(prev, clusters, 'clusters'),
-          })
-        } else {
-          setClusterSelectIsOpen(false)
+    <FillLevelDiv fillLevel={1}>
+      <ComboBox
+        inputProps={{
+          placeholder: selectedCluster ? selectedCluster.name : placeholder,
+        }}
+        titleContent={
+          !hideTitleContent ? (
+            <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
+              <ClusterIcon />
+            </div>
+          ) : undefined
         }
-      }}
-      {...(clusterId && allowDeselect
-        ? {
-            dropdownFooterFixed: (
-              <ListBoxFooter
-                onClick={() => {
-                  setInputValue('')
-                  setClusterSelectIsOpen(false)
-                  onClusterChange?.(null)
-                }}
-                leftContent={<ClusterIcon />}
-              >
-                Show all clusters
-              </ListBoxFooter>
-            ),
-          }
-        : {})}
-      selectedKey={clusterId || ''}
-      onSelectionChange={(key) => {
-        const newCluster = findCluster(key as string) ?? null
-
-        if (newCluster || allowDeselect) {
-          onClusterChange?.(newCluster)
-        }
-        setInputValue('')
-      }}
-    >
-      {clusters.map((cluster) => (
-        <ListBoxItem
-          key={cluster?.id}
-          label={cluster?.name}
-          textValue={cluster?.name}
-          leftContent={
+        startIcon={
+          clusterSelectIsOpen || !selectedCluster ? (
+            <SearchIcon />
+          ) : (
             <ClusterProviderIcon
-              cluster={cluster}
+              cluster={selectedCluster}
               size={16}
             />
+          )
+        }
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        loading={clusterSelectIsOpen && data && loading}
+        isOpen={clusterSelectIsOpen}
+        onOpenChange={(isOpen) => {
+          setClusterSelectIsOpen(isOpen)
+        }}
+        dropdownFooter={
+          !data ? (
+            <ListBoxFooter>Loading</ListBoxFooter>
+          ) : isEmpty(clusters) ? (
+            <ListBoxFooter>No results</ListBoxFooter>
+          ) : data?.clusters?.pageInfo.hasNextPage ? (
+            <ListBoxFooterPlus>Show more</ListBoxFooterPlus>
+          ) : undefined
+        }
+        onFooterClick={() => {
+          if (data?.clusters?.pageInfo.hasNextPage) {
+            if (!pageInfo) {
+              return
+            }
+            fetchMore({
+              variables: { after: pageInfo.endCursor },
+              updateQuery: (prev, { fetchMoreResult: { clusters } }) =>
+                extendConnection(prev, clusters, 'clusters'),
+            })
+          } else {
+            setClusterSelectIsOpen(false)
           }
-        />
-      ))}
-    </ComboBox>
+        }}
+        {...(clusterId && allowDeselect
+          ? {
+              dropdownFooterFixed: (
+                <ListBoxFooterPlus
+                  onClick={() => {
+                    setInputValue('')
+                    setClusterSelectIsOpen(false)
+                    onClusterChange?.(null)
+                  }}
+                  leftContent={<ClusterIcon />}
+                >
+                  Show all clusters
+                </ListBoxFooterPlus>
+              ),
+            }
+          : {})}
+        selectedKey={clusterId || ''}
+        onSelectionChange={(key) => {
+          const newCluster = findCluster(key as string) ?? null
+
+          if (newCluster || allowDeselect) {
+            onClusterChange?.(newCluster)
+          }
+          setInputValue('')
+        }}
+      >
+        {clusters.map((cluster) => (
+          <ListBoxItem
+            key={cluster?.id}
+            label={cluster?.name}
+            textValue={cluster?.name}
+            leftContent={
+              <ClusterProviderIcon
+                cluster={cluster}
+                size={16}
+              />
+            }
+          />
+        ))}
+      </ComboBox>
+    </FillLevelDiv>
   )
 }

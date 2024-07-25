@@ -1,5 +1,5 @@
 import { ComponentProps, useEffect, useMemo } from 'react'
-import { EmptyState, Table } from '@pluralsh/design-system'
+import { Button, EmptyState, Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
@@ -38,6 +38,7 @@ export function PoliciesTable({
   fetchNextPage,
   loading,
   setVirtualSlice,
+  resetFilters,
 }: {
   caret?: boolean
   setRefetch?: (refetch: () => () => void) => void
@@ -46,6 +47,7 @@ export function PoliciesTable({
   fetchNextPage: () => void
   loading: boolean
   setVirtualSlice: any
+  resetFilters?: () => void
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -103,7 +105,13 @@ export function PoliciesTable({
         </FullHeightTableWrap>
       ) : (
         <div css={{ height: '100%' }}>
-          <EmptyState message="Looks like you don't have any policies yet." />
+          <EmptyState message="No policies found" />
+          <Button
+            css={{ margin: 'auto' }}
+            onClick={resetFilters}
+          >
+            Reset Filters
+          </Button>
         </div>
       )}
     </div>

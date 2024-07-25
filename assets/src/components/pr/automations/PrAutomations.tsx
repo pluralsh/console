@@ -1,5 +1,6 @@
 import { ComponentProps, useMemo } from 'react'
 import {
+  ArrowTopRightIcon,
   Button,
   LoopingLogo,
   Table,
@@ -61,11 +62,12 @@ export default function AutomationPr() {
     useMemo(
       () => (
         <Button
-          primary
+          secondary
           as="a"
           href={DOCS_URL}
           target="_blank"
           rel="noopener noreferrer"
+          endIcon={<ArrowTopRightIcon />}
         >
           Create automation
         </Button>

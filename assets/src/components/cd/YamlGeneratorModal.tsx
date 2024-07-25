@@ -123,7 +123,7 @@ export function YamlGeneratorModal({
         {modalStep === 'configure' ? (
           <>
             <StepBody>
-              Generate a kubernetes CDR that can be placed in your GitOps repo
+              Generate a kubernetes CRD that can be placed in your GitOps repo
               whenever you prefer.{' '}
               <InlineLink
                 href="https://docs.plural.sh/" /* TODO: Add more specific link */
