@@ -54,7 +54,6 @@ export default function UserManagement() {
   const headerContent = (
     <TabList
       scrollable
-      gap="xxsmall"
       paddingBottom="large"
       stateRef={tabStateRef}
       stateProps={{

@@ -32,7 +32,6 @@ const DIRECTORY = [
 function HeadingTabList({ tabStateRef, currentTab }: any) {
   return (
     <TabList
-      gap="xxsmall"
       stateRef={tabStateRef}
       stateProps={{
         orientation: 'horizontal',

@@ -12,7 +12,12 @@ export default function StackCustomRun({ stack }: { stack: StackFragment }) {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>Create manual run</Button>
+      <Button
+        floating
+        onClick={() => setIsOpen(true)}
+      >
+        Custom run
+      </Button>
       <ModalMountTransition open={isOpen}>
         <StackCustomRunModal
           open={isOpen}

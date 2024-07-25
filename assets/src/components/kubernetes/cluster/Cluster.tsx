@@ -48,7 +48,6 @@ export default function Cluster() {
     () => (
       <TabList
         scrollable
-        gap="xxsmall"
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',

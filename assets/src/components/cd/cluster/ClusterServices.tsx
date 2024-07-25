@@ -55,7 +55,6 @@ export default function ClusterServices() {
           }}
         >
           <TabList
-            gap="xxsmall"
             margin={1}
             stateRef={tabStateRef}
             stateProps={{

@@ -51,7 +51,6 @@ export default function Storage() {
     () => (
       <TabList
         scrollable
-        gap="xxsmall"
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',

@@ -2,7 +2,6 @@ import {
   Accordion,
   AccordionItem,
   Checkbox,
-  Chip,
   Flex,
 } from '@pluralsh/design-system'
 import {
@@ -85,8 +84,15 @@ function PoliciesFilter({
   }
 
   return (
-    <Accordion type="multiple">
-      <AccordionItem trigger={clusterLabel}>
+    <Accordion
+      defaultValue={[clusterLabel, kindLabel, namespaceLabel]}
+      type="multiple"
+      css={{ overflow: 'auto' }}
+    >
+      <AccordionItem
+        trigger={clusterLabel}
+        value={clusterLabel}
+      >
         <Flex flexDirection="column">
           <Checkbox
             name={clusterLabel}
@@ -120,6 +126,7 @@ function PoliciesFilter({
       </AccordionItem>
       <AccordionItem
         trigger={kindLabel}
+        value={kindLabel}
         css={{
           borderTop: theme.borders.default,
           borderBottom: theme.borders.default,
@@ -148,18 +155,16 @@ function PoliciesFilter({
                 }
               >
                 {kind.id}
+                {` (${kind.count ?? '-'})`}
               </Checkbox>
-              <Chip
-                condensed
-                width={kind.count ? 'auto' : 'fit-content'}
-              >
-                {kind.count ?? '-'}
-              </Chip>
             </CheckboxWrapperSC>
           ))}
         </Flex>
       </AccordionItem>
-      <AccordionItem trigger={namespaceLabel}>
+      <AccordionItem
+        trigger={namespaceLabel}
+        value={namespaceLabel}
+      >
         <Flex flexDirection="column">
           <Checkbox
             name={namespaceLabel}
@@ -187,13 +192,8 @@ function PoliciesFilter({
                 }
               >
                 {namespace.id}
+                {` (${namespace.count ?? '-'})`}
               </Checkbox>
-              <Chip
-                condensed
-                width={namespace.count ? 'auto' : 'fit-content'}
-              >
-                {namespace.count ?? '-'}
-              </Chip>
             </CheckboxWrapperSC>
           ))}
         </Flex>

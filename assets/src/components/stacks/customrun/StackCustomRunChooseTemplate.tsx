@@ -11,7 +11,7 @@ import { useMemo } from 'react'
 
 import { mapExistingNodes } from 'utils/graphql'
 
-import { CaretRightIcon, DocumentIcon, Table } from '@pluralsh/design-system'
+import { CaretRightIcon, Table } from '@pluralsh/design-system'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -110,7 +110,6 @@ const ColPreBakedRun = columnHelper.accessor((run) => run, {
           truncate
         />
         <span css={{ display: 'flex', gap: theme.spacing.large }}>
-          <DocumentIcon />
           <CaretRightIcon />
         </span>
       </PreBakedOptionSC>

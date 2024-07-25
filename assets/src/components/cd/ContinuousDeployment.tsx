@@ -206,7 +206,6 @@ export default function ContinuousDeployment() {
           >
             <TabList
               scrollable
-              gap="xxsmall"
               stateRef={tabStateRef}
               stateProps={{
                 orientation: 'horizontal',

@@ -17,7 +17,6 @@ export default function RangePicker({ duration, setDuration }: any) {
 
   return (
     <TabList
-      gap="xxsmall"
       stateRef={tabStateRef}
       stateProps={{
         orientation: 'horizontal',

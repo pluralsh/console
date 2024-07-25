@@ -157,7 +157,6 @@ export default function Runbook() {
       }
       headingContent={
         <TabList
-          gap="xxsmall"
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'horizontal',

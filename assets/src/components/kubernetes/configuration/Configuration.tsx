@@ -46,7 +46,6 @@ export default function Configuration() {
     () => (
       <TabList
         scrollable
-        gap="xxsmall"
         stateRef={tabStateRef}
         stateProps={{
           orientation: 'horizontal',

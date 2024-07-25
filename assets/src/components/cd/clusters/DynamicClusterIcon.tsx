@@ -52,6 +52,7 @@ export function DynamicClusterIcon({
   return (
     <DynamicClusterIconSC>
       <IconFrame
+        background="fill-two"
         size="medium"
         type={type}
         tooltip={tooltip}

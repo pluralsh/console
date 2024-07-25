@@ -35,7 +35,7 @@ type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
 export default function OutstandingPrs() {
   const theme = useTheme()
   const [searchString, setSearchString] = useState('')
-  const debouncedSearchString = useThrottle(searchString, 100)
+  const debouncedSearchString = useThrottle(searchString, 200)
   const [_statusFilter, _setStatusFilter] = useState<PrStatusTabKey>('ALL')
 
   useSetBreadcrumbs(
@@ -92,6 +92,7 @@ export default function OutstandingPrs() {
     >
       <div css={{ display: 'flex', minWidth: 0, gap: theme.spacing.medium }}>
         <Input2
+          placeholder="Search PRs"
           startIcon={<SearchIcon />}
           showClearButton
           value={searchString}

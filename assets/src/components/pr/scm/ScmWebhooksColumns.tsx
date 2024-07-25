@@ -1,4 +1,4 @@
-import { Button } from '@pluralsh/design-system'
+import { ArrowTopRightIcon, Button } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
 
@@ -104,6 +104,7 @@ export const ColActions = columnHelper.display({
           href={url}
           target="_blank"
           rel="noopener noreferrer"
+          endIcon={<ArrowTopRightIcon />}
         >
           Manage{scmName && <> on {scmName}</>}
         </Button>
