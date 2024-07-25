@@ -39,7 +39,6 @@ function AccordionRef(
       ref={ref}
       asChild
       collapsible={props.collapsible ?? true}
-      css={{ overflow: 'hidden' }}
       {...props}
     >
       <Card>{children}</Card>

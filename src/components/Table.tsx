@@ -832,7 +832,9 @@ function TableRef(
         </T>
         {isEmpty(rows) && (
           <EmptyState
-            {...{ message: 'No results match your query', ...emptyStateProps }}
+            message="No results match your query"
+            style={{ background: theme.colors['fill-zero-hover'] }}
+            {...emptyStateProps}
           />
         )}
       </Div>

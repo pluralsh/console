@@ -475,6 +475,7 @@ function ComboBox({
             >
               {chips.map((chipProps) => (
                 <Chip
+                  fillLevel={2}
                   size="small"
                   condensed
                   truncateWidth={100}

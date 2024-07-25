@@ -139,14 +139,7 @@ const IconFrameSC = styled(Flex)<{
         },
       }
     : {}),
-  ...($type === 'floating'
-    ? {
-        boxShadow:
-          theme.mode === 'light'
-            ? theme.boxShadows.slight
-            : theme.boxShadows.moderate,
-      }
-    : {}),
+  ...($type === 'floating' ? { boxShadow: theme.boxShadows.slight } : {}),
 }))
 
 const IconFrame = forwardRef<

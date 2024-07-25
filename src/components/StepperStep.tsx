@@ -33,10 +33,7 @@ const StepperStepSC = styled.div<{
     marginLeft: $vertical || $compact ? 'none' : 'auto',
     marginRight: $vertical || $compact ? 'none' : 'auto',
     borderRadius: '100%',
-    backgroundColor:
-      theme.mode === 'light'
-        ? theme.colors['fill-zero']
-        : theme.colors['fill-one'],
+    backgroundColor: theme.colors['fill-two'],
     border: `1px solid ${
       $isActive ? theme.colors['border-selected'] : theme.colors.border
     }`,

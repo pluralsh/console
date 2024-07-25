@@ -102,38 +102,26 @@ function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
 export const TitleContent = styled.div<{
   $size: Size
   $parentFillLevel: FillLevel
-  $matchFill?: boolean
-}>(
-  ({
-    theme,
-    $size: size,
-    $parentFillLevel: parentFillLevel,
-    $matchFill: matchFill = false,
-  }) => {
-    const hPad = theme.spacing.small
-    const vPad = size === 'small' ? 5 : 9
+}>(({ theme, $size: size, $parentFillLevel: parentFillLevel }) => {
+  const hPad = theme.spacing.small
+  const vPad = size === 'small' ? 5 : 9
 
-    return {
-      ...theme.partials.text.caption,
-      alignItems: 'center',
-      backgroundColor: matchFill
-        ? theme.colors[parentFillLevelToBackground[parentFillLevel]]
-        : theme.colors[
-            parentFillLevel < 2 ? 'fill-three' : 'fill-three-selected'
-          ],
-      color: theme.colors.text,
-      display: 'flex',
-      flexDirection: 'row',
-      fontWeight: 600,
-      // Must specify individual padding to override Honorable styles on <Input>
-      paddingTop: vPad,
-      paddingBottom: vPad,
-      paddingLeft: hPad,
-      paddingRight: hPad,
-      borderRight: theme.borders.input,
-    }
+  return {
+    ...theme.partials.text.caption,
+    alignItems: 'center',
+    backgroundColor: theme.colors[parentFillLevelToBackground[parentFillLevel]],
+    color: theme.colors.text,
+    display: 'flex',
+    flexDirection: 'row',
+    fontWeight: 600,
+    // Must specify individual padding to override Honorable styles on <Input>
+    paddingTop: vPad,
+    paddingBottom: vPad,
+    paddingLeft: hPad,
+    paddingRight: hPad,
+    borderRight: theme.borders.input,
   }
-)
+})
 
 const SelectButtonInner = styled.div<{
   $isOpen: boolean
@@ -233,7 +221,6 @@ const SelectButton = forwardRef<
           <TitleContent
             $size={size}
             $parentFillLevel={parentFillLevel}
-            $matchFill={transparent}
           >
             {titleContent}
           </TitleContent>
