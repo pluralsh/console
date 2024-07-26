@@ -1444,6 +1444,53 @@ func (_c *ConsoleClientMock_DeleteNotificationSink_Call) RunAndReturn(run func(c
 	return _c
 }
 
+// DeleteObservabilityProvider provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) DeleteObservabilityProvider(ctx context.Context, id string) error {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteObservabilityProvider")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ConsoleClientMock_DeleteObservabilityProvider_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteObservabilityProvider'
+type ConsoleClientMock_DeleteObservabilityProvider_Call struct {
+	*mock.Call
+}
+
+// DeleteObservabilityProvider is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) DeleteObservabilityProvider(ctx interface{}, id interface{}) *ConsoleClientMock_DeleteObservabilityProvider_Call {
+	return &ConsoleClientMock_DeleteObservabilityProvider_Call{Call: _e.mock.On("DeleteObservabilityProvider", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_DeleteObservabilityProvider_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_DeleteObservabilityProvider_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteObservabilityProvider_Call) Return(_a0 error) *ConsoleClientMock_DeleteObservabilityProvider_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *ConsoleClientMock_DeleteObservabilityProvider_Call) RunAndReturn(run func(context.Context, string) error) *ConsoleClientMock_DeleteObservabilityProvider_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeletePipeline provides a mock function with given fields: id
 func (_m *ConsoleClientMock) DeletePipeline(id string) (*client.PipelineFragment, error) {
 	ret := _m.Called(id)
@@ -2838,6 +2885,65 @@ func (_c *ConsoleClientMock_GetNotificationSinkByName_Call) RunAndReturn(run fun
 	return _c
 }
 
+// GetObservabilityProvider provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetObservabilityProvider(ctx context.Context, id string) (*client.ObservabilityProviderFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetObservabilityProvider")
+	}
+
+	var r0 *client.ObservabilityProviderFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.ObservabilityProviderFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.ObservabilityProviderFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.ObservabilityProviderFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetObservabilityProvider_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetObservabilityProvider'
+type ConsoleClientMock_GetObservabilityProvider_Call struct {
+	*mock.Call
+}
+
+// GetObservabilityProvider is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetObservabilityProvider(ctx interface{}, id interface{}) *ConsoleClientMock_GetObservabilityProvider_Call {
+	return &ConsoleClientMock_GetObservabilityProvider_Call{Call: _e.mock.On("GetObservabilityProvider", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetObservabilityProvider_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetObservabilityProvider_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetObservabilityProvider_Call) Return(_a0 *client.ObservabilityProviderFragment, _a1 error) *ConsoleClientMock_GetObservabilityProvider_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetObservabilityProvider_Call) RunAndReturn(run func(context.Context, string) (*client.ObservabilityProviderFragment, error)) *ConsoleClientMock_GetObservabilityProvider_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetPipeline provides a mock function with given fields: id
 func (_m *ConsoleClientMock) GetPipeline(id string) (*client.PipelineFragment, error) {
 	ret := _m.Called(id)
@@ -3991,6 +4097,63 @@ func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) Return(_a0 bool, _a1 
 }
 
 func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsClusterRestoreExisting_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsObservabilityProviderExists provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) IsObservabilityProviderExists(ctx context.Context, id string) (bool, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsObservabilityProviderExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsObservabilityProviderExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsObservabilityProviderExists'
+type ConsoleClientMock_IsObservabilityProviderExists_Call struct {
+	*mock.Call
+}
+
+// IsObservabilityProviderExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) IsObservabilityProviderExists(ctx interface{}, id interface{}) *ConsoleClientMock_IsObservabilityProviderExists_Call {
+	return &ConsoleClientMock_IsObservabilityProviderExists_Call{Call: _e.mock.On("IsObservabilityProviderExists", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_IsObservabilityProviderExists_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_IsObservabilityProviderExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsObservabilityProviderExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsObservabilityProviderExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsObservabilityProviderExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsObservabilityProviderExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5724,6 +5887,65 @@ func (_c *ConsoleClientMock_UpsertNotificationSink_Call) Return(_a0 *client.Noti
 }
 
 func (_c *ConsoleClientMock_UpsertNotificationSink_Call) RunAndReturn(run func(context.Context, client.NotificationSinkAttributes) (*client.NotificationSinkFragment, error)) *ConsoleClientMock_UpsertNotificationSink_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertObservabilityProvider provides a mock function with given fields: ctx, attributes
+func (_m *ConsoleClientMock) UpsertObservabilityProvider(ctx context.Context, attributes client.ObservabilityProviderAttributes) (*client.ObservabilityProviderFragment, error) {
+	ret := _m.Called(ctx, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertObservabilityProvider")
+	}
+
+	var r0 *client.ObservabilityProviderFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, client.ObservabilityProviderAttributes) (*client.ObservabilityProviderFragment, error)); ok {
+		return rf(ctx, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, client.ObservabilityProviderAttributes) *client.ObservabilityProviderFragment); ok {
+		r0 = rf(ctx, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.ObservabilityProviderFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, client.ObservabilityProviderAttributes) error); ok {
+		r1 = rf(ctx, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertObservabilityProvider_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertObservabilityProvider'
+type ConsoleClientMock_UpsertObservabilityProvider_Call struct {
+	*mock.Call
+}
+
+// UpsertObservabilityProvider is a helper method to define mock.On call
+//   - ctx context.Context
+//   - attributes client.ObservabilityProviderAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertObservabilityProvider(ctx interface{}, attributes interface{}) *ConsoleClientMock_UpsertObservabilityProvider_Call {
+	return &ConsoleClientMock_UpsertObservabilityProvider_Call{Call: _e.mock.On("UpsertObservabilityProvider", ctx, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertObservabilityProvider_Call) Run(run func(ctx context.Context, attributes client.ObservabilityProviderAttributes)) *ConsoleClientMock_UpsertObservabilityProvider_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(client.ObservabilityProviderAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertObservabilityProvider_Call) Return(_a0 *client.ObservabilityProviderFragment, _a1 error) *ConsoleClientMock_UpsertObservabilityProvider_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertObservabilityProvider_Call) RunAndReturn(run func(context.Context, client.ObservabilityProviderAttributes) (*client.ObservabilityProviderFragment, error)) *ConsoleClientMock_UpsertObservabilityProvider_Call {
 	_c.Call.Return(run)
 	return _c
 }

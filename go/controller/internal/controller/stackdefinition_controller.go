@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -128,7 +127,13 @@ func (in *StackDefinitionReconciler) addOrRemoveFinalizer(ctx context.Context, s
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !stack.ObjectMeta.DeletionTimestamp.IsZero() {
-		if stack.Status.HasID() && !stack.Status.IsReadonly() {
+		// Remove StackDefinition from Console API if it exists
+		exists, err := in.isAlreadyExists(ctx, stack)
+		if err != nil {
+			return &ctrl.Result{}, err
+		}
+
+		if exists && !stack.Status.IsReadonly() {
 			logger.Info("deleting StackDefinition")
 			if err := in.ConsoleClient.DeleteStackDefinition(ctx, stack.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
@@ -155,16 +160,7 @@ func (in *StackDefinitionReconciler) isAlreadyExists(ctx context.Context, stack 
 		return false, nil
 	}
 
-	_, err := in.ConsoleClient.GetStackDefinition(ctx, stack.Status.GetID())
-	if err != nil {
-		if errors.IsNotFound(err) {
-			return false, nil
-		}
-
-		return false, err
-	}
-
-	return true, nil
+	return in.ConsoleClient.IsStackDefinitionExists(ctx, stack.Status.GetID())
 }
 
 func (in *StackDefinitionReconciler) sync(ctx context.Context, stack *v1alpha1.StackDefinition, changed bool) (*console.StackDefinitionFragment, error) {

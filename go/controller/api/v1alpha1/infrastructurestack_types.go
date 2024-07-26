@@ -17,12 +17,38 @@ limitations under the License.
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	console "github.com/pluralsh/console/go/client"
 )
+
+func init() {
+	SchemeBuilder.Register(&InfrastructureStack{}, &InfrastructureStackList{})
+}
+
+// InfrastructureStackList contains a list of InfrastructureStack
+// +kubebuilder:object:root=true
+type InfrastructureStackList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []InfrastructureStack `json:"items"`
+}
+
+// InfrastructureStack is the Schema for the infrastructurestacks API
+// +kubebuilder:object:root=true
+// +kubebuilder:resource:scope=Namespaced
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the InfrastructureStack in the Console API."
+type InfrastructureStack struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   InfrastructureStackSpec `json:"spec,omitempty"`
+	Status Status                  `json:"status,omitempty"`
+}
 
 // InfrastructureStackSpec defines the desired state of InfrastructureStack
 type InfrastructureStackSpec struct {
@@ -99,34 +125,12 @@ type InfrastructureStackSpec struct {
 	// +kubebuilder:validation:Optional
 	StackDefinitionRef *corev1.ObjectReference `json:"stackDefinitionRef,omitempty"`
 
+	// +kubebuilder:validation:Optional
+	ObservableMetrics []ObservableMetric `json:"observableMetrics,omitempty"`
+
 	// Tags used to filter stacks.
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
-}
-
-// InfrastructureStack is the Schema for the infrastructurestacks API
-// +kubebuilder:object:root=true
-// +kubebuilder:resource:scope=Namespaced
-// +kubebuilder:subresource:status
-// +kubebuilder:printcolumn:name="ID",type="string",JSONPath=".status.id",description="ID of the InfrastructureStack in the Console API."
-type InfrastructureStack struct {
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
-
-	Spec   InfrastructureStackSpec `json:"spec,omitempty"`
-	Status Status                  `json:"status,omitempty"`
-}
-
-// InfrastructureStackList contains a list of InfrastructureStack
-// +kubebuilder:object:root=true
-type InfrastructureStackList struct {
-	metav1.TypeMeta `json:",inline"`
-	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []InfrastructureStack `json:"items"`
-}
-
-func init() {
-	SchemeBuilder.Register(&InfrastructureStack{}, &InfrastructureStackList{})
 }
 
 type StackFile struct {
@@ -218,6 +222,18 @@ func (p *InfrastructureStack) HasStackDefinitionRef() bool {
 	return p.Spec.StackDefinitionRef != nil
 }
 
+func (p *InfrastructureStack) HasObservableMetrics() bool {
+	return len(p.Spec.ObservableMetrics) > 0
+}
+
 func (p *InfrastructureStack) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&p.Status.Conditions, condition)
+}
+
+type ObservableMetric struct {
+	// +kubebuilder:validation:Required
+	Identifier string `json:"identifier"`
+
+	// +kubebuilder:validation:Required
+	ObservabilityProviderRef corev1.ObjectReference `json:"observabilityProviderRef"`
 }

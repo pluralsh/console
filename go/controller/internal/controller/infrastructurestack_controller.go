@@ -119,6 +119,19 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		return lo.FromPtr(result), err
 	}
 
+	metrics, result, err := r.handleObservableMetrics(ctx, stack)
+	if result != nil || err != nil {
+		return lo.FromPtr(result), err
+	}
+
+	attributes := dynamicAttributes{
+		clusterID:         clusterID,
+		repositoryID:      repositoryID,
+		projectID:         projectID,
+		definitionID:      stackDefinitionID,
+		observableMetrics: metrics,
+	}
+
 	// Check if resource already exists in the API and only sync the ID
 	exists, err := r.isAlreadyExists(ctx, stack)
 	if err != nil {
@@ -127,8 +140,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	if !exists {
-		logger.Info("create stack", "name", stack.StackName())
-		attr, err := r.getStackAttributes(ctx, stack, clusterID, repositoryID, projectID, stackDefinitionID)
+		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -144,12 +156,13 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
+
+		logger.Info("created stack", "name", stack.StackName())
 		stack.Status.ID = st.ID
 		stack.Status.SHA = lo.ToPtr(sha)
 		controllerutil.AddFinalizer(stack, InfrastructureStackFinalizer)
 	} else {
-		logger.Info("update stack", "name", stack.StackName())
-		attr, err := r.getStackAttributes(ctx, stack, clusterID, repositoryID, projectID, stackDefinitionID)
+		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
@@ -167,6 +180,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 				return ctrl.Result{}, err
 			}
 
+			logger.Info("updated stack", "name", stack.StackName())
 			stack.Status.SHA = lo.ToPtr(sha)
 		}
 	}
@@ -237,21 +251,29 @@ func (r *InfrastructureStackReconciler) handleDelete(ctx context.Context, stack 
 	return ctrl.Result{}, nil
 }
 
+type dynamicAttributes struct {
+	clusterID         string
+	repositoryID      string
+	projectID         *string
+	definitionID      *string
+	observableMetrics []console.ObservableMetricAttributes
+}
+
 func (r *InfrastructureStackReconciler) getStackAttributes(
 	ctx context.Context,
 	stack *v1alpha1.InfrastructureStack,
-	clusterID, repositoryID string,
-	projectID, definitionID *string,
+	attributes dynamicAttributes,
 ) (*console.StackAttributes, error) {
 	attr := &console.StackAttributes{
-		Name:         stack.StackName(),
-		Type:         stack.Spec.Type,
-		RepositoryID: repositoryID,
-		ClusterID:    clusterID,
-		ProjectID:    projectID,
-		DefinitionID: definitionID,
-		ManageState:  stack.Spec.ManageState,
-		Workdir:      stack.Spec.Workdir,
+		Name:              stack.StackName(),
+		Type:              stack.Spec.Type,
+		RepositoryID:      attributes.repositoryID,
+		ClusterID:         attributes.clusterID,
+		ProjectID:         attributes.projectID,
+		DefinitionID:      attributes.definitionID,
+		ObservableMetrics: lo.ToSlicePtr(attributes.observableMetrics),
+		ManageState:       stack.Spec.ManageState,
+		Workdir:           stack.Spec.Workdir,
 		Git: console.GitRefAttributes{
 			Ref:    stack.Spec.Git.Ref,
 			Folder: stack.Spec.Git.Folder,
@@ -430,7 +452,7 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	return *repository.Status.ID, nil, nil
 }
 
-// handleProjectRef checks is stack has a project reference configured and waits for it to be ready before allowing
+// handleProjectRef checks if stack has a project reference configured and waits for it to be ready before allowing
 // main reconcile loop to continue. In case project reference is not configured, it will return early and allow the
 // reconcile process to continue.
 func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
@@ -459,7 +481,7 @@ func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, st
 	return project.Status.ID, nil, nil
 }
 
-// handleStackDefinitionRef checks is stack has a stack definition reference configured and waits for it
+// handleStackDefinitionRef checks if stack has a stack definition reference configured and waits for it
 // to be ready before allowing main reconcile loop to continue. In case stack definition reference is not
 // configured, it will return early and allow the reconcile process to continue.
 func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Context, stack *v1alpha1.InfrastructureStack) (*string, *ctrl.Result, error) {
@@ -486,4 +508,45 @@ func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Con
 	}
 
 	return stackDefinition.Status.ID, nil, nil
+}
+
+// handleObservableMetrics checks if stack has observable metrics configured and waits for observability providers
+// to be ready before allowing main reconcile loop to continue. In case observable metrics are not
+// configured, it will return early and allow the reconcile process to continue.
+func (r *InfrastructureStackReconciler) handleObservableMetrics(
+	ctx context.Context,
+	stack *v1alpha1.InfrastructureStack,
+) ([]console.ObservableMetricAttributes, *ctrl.Result, error) {
+	logger := log.FromContext(ctx)
+	metrics := make([]console.ObservableMetricAttributes, 0)
+
+	if !stack.HasObservableMetrics() {
+		return nil, nil, nil
+	}
+
+	for _, om := range stack.Spec.ObservableMetrics {
+		obsProvider := &v1alpha1.ObservabilityProvider{}
+		key := client.ObjectKey{
+			Namespace: om.ObservabilityProviderRef.Namespace,
+			Name:      om.ObservabilityProviderRef.Name,
+		}
+
+		if err := r.Get(ctx, key, obsProvider); err != nil {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return nil, nil, err
+		}
+
+		if obsProvider.Status.ID == nil {
+			logger.Info("ObservabilityProvider not ready", "provider", key)
+			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
+			return nil, &requeue, nil
+		}
+
+		metrics = append(metrics, console.ObservableMetricAttributes{
+			Identifier: om.Identifier,
+			ProviderID: *obsProvider.Status.ID,
+		})
+	}
+
+	return metrics, nil, nil
 }

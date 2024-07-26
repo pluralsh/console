@@ -21,6 +21,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [NamespaceCredentials](#namespacecredentials)
 - [NotificationRouter](#notificationrouter)
 - [NotificationSink](#notificationsink)
+- [ObservabilityProvider](#observabilityprovider)
 - [Pipeline](#pipeline)
 - [PipelineContext](#pipelinecontext)
 - [PrAutomation](#prautomation)
@@ -803,6 +804,7 @@ _Appears in:_
 | `actor` _string_ | Actor - user email to use for default Plural authentication in this stack. |  | Optional: {} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `stackDefinitionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `observableMetrics` _[ObservableMetric](#observablemetric) array_ |  |  | Optional: {} <br /> |
 | `tags` _object (keys:string, values:string)_ | Tags used to filter stacks. |  | Optional: {} <br /> |
 
 
@@ -1000,6 +1002,78 @@ _Appears in:_
 | `name` _string_ | Name the name of this service, if not provided NotificationSink's own name from NotificationSink.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `type` _[SinkType](#sinktype)_ | Type the channel type of this sink. |  | Enum: [SLACK TEAMS] <br />Optional: {} <br /> |
 | `configuration` _[SinkConfiguration](#sinkconfiguration)_ | Configuration for the specific type |  | Optional: {} <br /> |
+
+
+#### ObservabilityProvider
+
+
+
+ObservabilityProvider defines metrics provider used
+by i.e. InfrastructureStack to determine if a stack run
+should be cancelled.
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `ObservabilityProvider` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[ObservabilityProviderSpec](#observabilityproviderspec)_ |  |  | Required: {} <br /> |
+
+
+#### ObservabilityProviderCredentials
+
+
+
+
+
+
+
+_Appears in:_
+- [ObservabilityProviderSpec](#observabilityproviderspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `datadog` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Datadog is a reference to the secret with credentials used to access datadog.<br />It requires 2 keys to be provided in a secret:<br />- 'apiKey'<br />- 'appKey' |  | Optional: {} <br /> |
+| `newrelic` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Newrelic is a reference to the secret with credentials used to access newrelic.<br />It requires 1 key to be provided in a secret:<br />- 'apiKey' |  | Optional: {} <br /> |
+
+
+#### ObservabilityProviderSpec
+
+
+
+
+
+
+
+_Appears in:_
+- [ObservabilityProvider](#observabilityprovider)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | Name of the ObservabilityProvider in the Console API. |  | Required: {} <br /> |
+| `type` _[ObservabilityProviderType](#observabilityprovidertype)_ | Type of the ObservabilityProvider. |  | Enum: [DATADOG NEWRELIC] <br />Required: {} <br /> |
+| `credentials` _[ObservabilityProviderCredentials](#observabilityprovidercredentials)_ | Credentials to access the configured provider Type. |  | Required: {} <br /> |
+
+
+#### ObservableMetric
+
+
+
+
+
+
+
+_Appears in:_
+- [InfrastructureStackSpec](#infrastructurestackspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `identifier` _string_ |  |  | Required: {} <br /> |
+| `observabilityProviderRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
 
 
 #### Pipeline

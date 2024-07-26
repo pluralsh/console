@@ -1,0 +1,32 @@
+query ListObservabilityProviders($after: String, $first: Int, $before: String, $last: Int) {
+  observabilityProviders(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo { ...PageInfoFragment }
+    edges { node { ...ObservabilityProviderFragment } }
+  }
+}
+
+query GetObservabilityProvider($id: ID!) {
+  observabilityProvider(id: $id) {
+    ...ObservabilityProviderFragment
+  }
+}
+
+mutation UpsertObservabilityProvider($attributes: ObservabilityProviderAttributes!) {
+  upsertObservabilityProvider(attributes: $attributes) {
+    ...ObservabilityProviderFragment
+  }
+}
+
+mutation DeleteObservabilityProvider($id: ID!) {
+  deleteObservabilityProvider(id: $id) {
+    ...ObservabilityProviderFragment
+  }
+}
+
+fragment ObservabilityProviderFragment on ObservabilityProvider {
+  id
+  name
+  type
+  updatedAt
+  insertedAt
+}
