@@ -5009,54 +5009,6 @@ func (_c *ConsoleClientMock_UpdateClusterRestore_Call) RunAndReturn(run func(con
 	return _c
 }
 
-// UpdateComponents provides a mock function with given fields: id, components, errs
-func (_m *ConsoleClientMock) UpdateComponents(id string, components []*client.ComponentAttributes, errs []*client.ServiceErrorAttributes) error {
-	ret := _m.Called(id, components, errs)
-
-	if len(ret) == 0 {
-		panic("no return value specified for UpdateComponents")
-	}
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(string, []*client.ComponentAttributes, []*client.ServiceErrorAttributes) error); ok {
-		r0 = rf(id, components, errs)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// ConsoleClientMock_UpdateComponents_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateComponents'
-type ConsoleClientMock_UpdateComponents_Call struct {
-	*mock.Call
-}
-
-// UpdateComponents is a helper method to define mock.On call
-//   - id string
-//   - components []*client.ComponentAttributes
-//   - errs []*client.ServiceErrorAttributes
-func (_e *ConsoleClientMock_Expecter) UpdateComponents(id interface{}, components interface{}, errs interface{}) *ConsoleClientMock_UpdateComponents_Call {
-	return &ConsoleClientMock_UpdateComponents_Call{Call: _e.mock.On("UpdateComponents", id, components, errs)}
-}
-
-func (_c *ConsoleClientMock_UpdateComponents_Call) Run(run func(id string, components []*client.ComponentAttributes, errs []*client.ServiceErrorAttributes)) *ConsoleClientMock_UpdateComponents_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string), args[1].([]*client.ComponentAttributes), args[2].([]*client.ServiceErrorAttributes))
-	})
-	return _c
-}
-
-func (_c *ConsoleClientMock_UpdateComponents_Call) Return(_a0 error) *ConsoleClientMock_UpdateComponents_Call {
-	_c.Call.Return(_a0)
-	return _c
-}
-
-func (_c *ConsoleClientMock_UpdateComponents_Call) RunAndReturn(run func(string, []*client.ComponentAttributes, []*client.ServiceErrorAttributes) error) *ConsoleClientMock_UpdateComponents_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // UpdateCustomStackRun provides a mock function with given fields: ctx, id, attributes
 func (_m *ConsoleClientMock) UpdateCustomStackRun(ctx context.Context, id string, attributes client.CustomStackRunAttributes) (*client.CustomStackRunFragment, error) {
 	ret := _m.Called(ctx, id, attributes)
