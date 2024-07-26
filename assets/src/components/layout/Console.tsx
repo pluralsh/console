@@ -7,7 +7,6 @@ import ConsoleNavContextProvider from 'components/contexts/NavigationContext'
 import { A, Flex, Span } from 'honorable'
 import { Outlet } from 'react-router-dom'
 
-import { CommandPalette } from 'components/CommandPalette'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettingsContext'
@@ -37,17 +36,15 @@ export default function Console() {
             <ProjectsProvider>
               <InstallationsProvider>
                 <PluralProvider>
-                  <CommandPalette>
-                    <BillingSubscriptionProvider>
-                      <BreadcrumbsProvider>
-                        <TerminalThemeProvider>
-                          <DeploymentSettingsProvider>
-                            <ConsoleContent />
-                          </DeploymentSettingsProvider>
-                        </TerminalThemeProvider>
-                      </BreadcrumbsProvider>
-                    </BillingSubscriptionProvider>
-                  </CommandPalette>
+                  <BillingSubscriptionProvider>
+                    <BreadcrumbsProvider>
+                      <TerminalThemeProvider>
+                        <DeploymentSettingsProvider>
+                          <ConsoleContent />
+                        </DeploymentSettingsProvider>
+                      </TerminalThemeProvider>
+                    </BreadcrumbsProvider>
+                  </BillingSubscriptionProvider>
                 </PluralProvider>
               </InstallationsProvider>
             </ProjectsProvider>

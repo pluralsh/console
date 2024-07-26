@@ -29,16 +29,11 @@ import {
   Chip,
   CloudIcon,
   ClusterIcon,
-  ComponentsIcon,
-  DashboardIcon,
   DocumentIcon,
-  GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
   LifePreserverIcon,
-  LogsIcon,
   PipelineIcon,
-  RunBookIcon,
   ServersIcon,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
@@ -55,14 +50,10 @@ import {
 } from 'routes/cdRoutesConsts'
 import { Edges } from 'utils/graphql'
 
-import { toNiceVersion } from 'utils/semver'
-
-import { InstallationContext } from './Installations'
-import AppStatus from './apps/AppStatus'
-import { getIcon, hasIcons } from './apps/misc'
-import { HelpMenuState, launchHelp } from './help/HelpLauncher'
-import { usePlatform } from './hooks/usePlatform'
-import { useProjectId } from './contexts/ProjectsContext'
+import { InstallationContext } from '../Installations'
+import { HelpMenuState, launchHelp } from '../help/HelpLauncher'
+import { usePlatform } from '../hooks/usePlatform'
+import { useProjectId } from '../contexts/ProjectsContext'
 
 export enum PaletteSection {
   Actions = 'Actions',
@@ -73,85 +64,6 @@ export enum PaletteSection {
   Account = 'Account',
   Cd = 'Continuous Deployment (CD)',
   CdClusters = 'CD – Clusters',
-}
-
-function buildAppActions(applications, nav, theme) {
-  return applications
-    .map((app) => [
-      {
-        id: app.name,
-        name: app.name,
-        app,
-        icon: hasIcons(app) ? <AppIcon src={getIcon(app, theme.mode)} /> : null,
-        shortcut: [],
-        section: PaletteSection.Apps,
-      },
-      {
-        id: `${app.name}-launch`,
-        name: `launch ${app.name}`,
-        shortcut: [],
-        parent: app.name,
-        section: app.name,
-        perform: () => {
-          window.location.href = `https://${app.spec.descriptor.links[0].url}`
-        },
-      },
-      {
-        id: `${app.name}-logs`,
-        name: `${app.name} logs`,
-        icon: <LogsIcon />,
-        shortcut: [],
-        parent: app.name,
-        section: app.name,
-        perform: () => nav(`/apps/${app.name}/logs`),
-      },
-      {
-        id: `${app.name}-docs`,
-        name: `${app.name} docs`,
-        icon: <DocumentIcon />,
-        shortcut: [],
-        parent: app.name,
-        section: app.name,
-        perform: () => nav(`/apps/${app.name}/docs`),
-      },
-      {
-        id: `${app.name}-configuration`,
-        name: `${app.name} configuration`,
-        icon: <GearTrainIcon />,
-        shortcut: [],
-        parent: app.name,
-        section: app.name,
-        perform: () => nav(`/apps/${app.name}/config`),
-      },
-      {
-        id: `${app.name}-runbooks`,
-        name: `${app.name} runbooks`,
-        icon: <RunBookIcon />,
-        shortcut: [],
-        parent: app.name,
-        section: app.name,
-        perform: () => nav(`/apps/${app.name}/runbooks`),
-      },
-      {
-        id: `${app.name}-components`,
-        name: `${app.name} components`,
-        icon: <ComponentsIcon />,
-        shortcut: [],
-        parent: app.name,
-        section: app.name,
-        perform: () => nav(`/apps/${app.name}/components`),
-      },
-      {
-        id: `${app.name}-dashboards`,
-        name: `${app.name} dashboards`,
-        icon: <DashboardIcon />,
-        shortcut: [],
-        parent: app.name,
-        section: app.name,
-        perform: () => nav(`/apps/${app.name}/dashboards`),
-      },
-    ])
-    .flat()
 }
 
 const clusterDefaultProps = (
@@ -276,61 +188,6 @@ function ItemInner({ action, ancestors }) {
   )
 }
 
-const AppName = styled.div(({ theme }) => ({
-  ...theme.partials.text.body2,
-  marginLeft: 8,
-}))
-
-const AppVersion = styled.div(({ theme }) => ({
-  ...theme.partials.text.caption,
-  color: theme.colors['text-xlight'],
-  display: 'flex',
-  flexGrow: 1,
-  marginLeft: 8,
-}))
-
-const AppIcon = styled.img({
-  height: 26,
-  width: 26,
-})
-
-const ItemContentSC = styled.div((_) => ({
-  display: 'flex',
-  alignItems: 'center',
-}))
-
-const ItemContentTextSC = styled.div((_) => ({
-  display: 'flex',
-  alignItems: 'baseline',
-}))
-
-const ItemSC = styled.div((_) => ({
-  display: 'flex',
-  width: '100%',
-  justifyContent: 'space-between',
-}))
-
-function AppItem({ app }) {
-  const theme = useTheme()
-
-  return (
-    <ItemSC>
-      <ItemContentSC>
-        {hasIcons(app) && <AppIcon src={getIcon(app, theme.mode)} />}
-        <ItemContentTextSC>
-          <AppName>{app.name}</AppName>
-          {app.spec?.descriptor?.version && (
-            <AppVersion>
-              {toNiceVersion(app.spec.descriptor.version)}
-            </AppVersion>
-          )}
-        </ItemContentTextSC>
-      </ItemContentSC>
-      <AppStatus app={app} />
-    </ItemSC>
-  )
-}
-
 const ResultItem = forwardRef(
   (
     {
@@ -375,14 +232,10 @@ const ResultItem = forwardRef(
           cursor: 'pointer',
         }}
       >
-        {action.app ? (
-          <AppItem app={action.app} />
-        ) : (
-          <ItemInner
-            action={action}
-            ancestors={ancestors}
-          />
-        )}
+        <ItemInner
+          action={action}
+          ancestors={ancestors}
+        />
       </div>
     )
   }
@@ -422,10 +275,7 @@ function useActions() {
 
   const navigate = useNavigate()
   const actions = useMemo(
-    () => [
-      ...buildClusterActions(clusterEdges, navigate),
-      ...buildAppActions(applications, navigate, theme),
-    ],
+    () => buildClusterActions(clusterEdges, navigate),
     [clusterEdges, navigate, applications, theme]
   )
 
@@ -466,8 +316,6 @@ const CommandPaletteStyles = createGlobalStyle(({ theme }) => ({
       width: '100%',
       background: theme.colors['fill-two'],
       color: theme.colors['text-xlight'],
-      border: 'none',
-      borderBottom: theme.borders.input,
       outlineOffset: '-1px',
     },
     '.search:focus-visible': {
@@ -497,41 +345,25 @@ function Palette() {
 
   const { modKeyString, altKeyString, keyCombinerString, isMac } = usePlatform()
 
-  // const aiChatCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}A`
   let searchDocsCmd = `${modKeyString}${keyCombinerString}${altKeyString}${keyCombinerString}D`
 
   if (isMac) {
-    // aiChatCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}A`
     searchDocsCmd = `${altKeyString}${keyCombinerString}${modKeyString}${keyCombinerString}D`
   }
 
-  // aiChatCmd = 'A'
   searchDocsCmd = 'D'
 
   const footerContent = (
-    <>
-      {/* <LauncherButton
-        icon={<ChatIcon color={theme.colors['icon-primary']} />}
-        cmd={aiChatCmd}
-        onClick={() => {
-          closeKBar()
-          launchAiChat()
-        }}
-        tabIndex={0}
-      >
-        Ask Plural AI
-      </LauncherButton> */}
-      <LauncherButton
-        icon={<DocumentIcon color={theme.colors['icon-success']} />}
-        cmd={searchDocsCmd}
-        onClick={() => {
-          closeKBar()
-          launchDocSearch()
-        }}
-      >
-        Search docs
-      </LauncherButton>
-    </>
+    <LauncherButton
+      icon={<DocumentIcon color={theme.colors['icon-success']} />}
+      cmd={searchDocsCmd}
+      onClick={() => {
+        closeKBar()
+        launchDocSearch()
+      }}
+    >
+      Search docs
+    </LauncherButton>
   )
 
   return (
@@ -554,14 +386,11 @@ function Palette() {
 const launchDocSearch = () => {
   launchHelp(HelpMenuState.docSearch)
 }
-// const launchAiChat = () => {
-//   launchHelp(HelpMenuState.chatBot)
-// }
 const launchIntercom = () => {
   launchHelp(HelpMenuState.intercom)
 }
 
-export function CommandPalette({ children }) {
+export function Old({ children }) {
   const navigate = useNavigate()
 
   const baseActions = useMemo(
@@ -619,13 +448,6 @@ export function CommandPalette({ children }) {
       }),
       // End CD
 
-      // createAction({
-      //   name: 'Ask Plural AI',
-      //   shortcut: ['A'],
-      //   icon: <ChatIcon />,
-      //   section: PaletteSection.Help,
-      //   perform: launchAiChat,
-      // }),
       createAction({
         name: 'Search docs',
         shortcut: ['D'],
@@ -685,7 +507,6 @@ export const LauncherButtonSC = styled.button(({ theme }) => ({
   flex: 1,
   display: 'flex',
   alignItems: 'center',
-  // justifyContent: "space-between",
 
   gap: theme.spacing.xsmall,
   '.content': {

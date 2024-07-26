@@ -27,8 +27,6 @@ import {
 } from 'components/cd/utils/RepoKindSelector'
 import ModalAlt from 'components/cd/ModalAlt'
 
-import { PaletteSection } from 'components/CommandPalette'
-
 import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
 import { DeployServiceSettingsBasic } from './DeployServiceSettingsBasic'
 import {
@@ -472,22 +470,6 @@ export function DeployService({
   cluster?: ClusterTinyFragment
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const kbarActions = useMemo(
-    () => [
-      {
-        section: PaletteSection.Actions,
-        id: `deploy-service`,
-        priority: Priority.HIGH,
-        name: `Deploy new service${cluster ? ` to ${cluster.name}` : ''}`,
-        icon: <GitPullIcon />,
-        shortcut: [],
-        perform: () => setIsOpen(true),
-      },
-    ],
-    [cluster]
-  )
-
-  useRegisterActions(kbarActions, [kbarActions])
 
   return (
     <>

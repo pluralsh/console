@@ -30,8 +30,6 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
-import { PaletteSection } from 'components/CommandPalette'
-
 import ModalAlt from '../ModalAlt'
 import { ProviderTabSelector } from '../clusters/create/ProviderTabSelector'
 
@@ -276,24 +274,6 @@ export function CreateProvider({
   providers: Nullable<Nullable<ClusterProviderFragment>[]>
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const kbarActions = useMemo(
-    () => [
-      {
-        section: PaletteSection.Actions,
-        id: `create-provider`,
-        priority: Priority.HIGH,
-        name: `Create a provider`,
-        icon: <CloudIcon />,
-        shortcut: [],
-        perform: () => {
-          setIsOpen(true)
-        },
-      },
-    ],
-    []
-  )
-
-  useRegisterActions(kbarActions)
 
   return (
     <>
