@@ -257,6 +257,6 @@ jobs:
         title: Release ${{github.ref_name}}
         body: Automated Pull Request to release rapid channel for ${{github.ref_name}}
         commit-message: Updated chart console-rapid to release ${{github.ref_name}}
-        branch: release-${{github.ref_name}}
+        branch: release-rapid-${{github.ref_name}}
         labels: release
         base: master
