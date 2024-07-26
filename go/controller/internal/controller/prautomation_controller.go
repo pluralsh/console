@@ -3,6 +3,12 @@ package controller
 import (
 	"context"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -11,12 +17,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	console "github.com/pluralsh/console/go/client"
-
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 // PrAutomationReconciler reconciles a v1alpha1.PrAutomation object.
@@ -24,8 +24,9 @@ import (
 type PrAutomationReconciler struct {
 	client.Client
 
-	ConsoleClient consoleclient.ConsoleClient
-	Scheme        *runtime.Scheme
+	ConsoleClient  consoleclient.ConsoleClient
+	Scheme         *runtime.Scheme
+	UserGroupCache cache.UserGroupCache
 }
 
 const (
@@ -169,11 +170,40 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 	}
 
 	logger.Info("Creating PR automation")
+	if err := in.ensure(prAutomation); err != nil {
+		return nil, err
+	}
 	return in.ConsoleClient.CreatePrAutomation(ctx, *attributes)
 }
 
 func (in *PrAutomationReconciler) updateReadyCondition(prAutomation *v1alpha1.PrAutomation) {
 	utils.MarkTrue(prAutomation.SetCondition, v1alpha1.ReadyConditionType, v1alpha1.ReadyConditionReason, "")
+}
+
+// ensure makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (in *PrAutomationReconciler) ensure(prAutomation *v1alpha1.PrAutomation) error {
+	if prAutomation.Spec.Bindings == nil {
+		return nil
+	}
+
+	bindings, req, err := ensureBindings(prAutomation.Spec.Bindings.Create, in.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	prAutomation.Spec.Bindings.Create = bindings
+
+	bindings, req2, err := ensureBindings(prAutomation.Spec.Bindings.Write, in.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	prAutomation.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return operrors.ErrRetriable
+	}
+
+	return nil
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
