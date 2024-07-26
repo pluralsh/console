@@ -26,7 +26,7 @@ const ObservabilityProviderFinalizer = "deployments.plural.sh/observabilityprovi
 // ObservabilityProviderReconciler reconciles a [v1alpha1.ObservabilityProvider] object
 type ObservabilityProviderReconciler struct {
 	client.Client
-	
+
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
@@ -111,7 +111,7 @@ func (in *ObservabilityProviderReconciler) Reconcile(ctx context.Context, req ct
 // SetupWithManager sets up the controller with the Manager.
 func (in *ObservabilityProviderReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                    // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.ObservabilityProviderList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.ObservabilityProvider{}).
 		Complete(in)

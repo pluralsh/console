@@ -51,8 +51,10 @@ spec:
                 properties:
                   datadog:
                     description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
+                      Datadog is a reference to the secret with credentials used to access datadog.
+                      It requires 2 keys to be provided in a secret:
+                      - 'apiKey'
+                      - 'appKey'
                     properties:
                       name:
                         description: name is unique within a namespace to reference
@@ -66,8 +68,9 @@ spec:
                     x-kubernetes-map-type: atomic
                   newrelic:
                     description: |-
-                      SecretReference represents a Secret Reference. It has enough information to retrieve secret
-                      in any namespace
+                      Newrelic is a reference to the secret with credentials used to access newrelic.
+                      It requires 1 key to be provided in a secret:
+                      - 'apiKey'
                     properties:
                       name:
                         description: name is unique within a namespace to reference
