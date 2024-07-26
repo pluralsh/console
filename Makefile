@@ -28,6 +28,9 @@ build: ## Build the Docker image
 		-t gcr.io/$(GCP_PROJECT)/$(APP_NAME):$(APP_VSN) \
 		-t $(DKR_HOST)/console/$(APP_NAME):$(APP_VSN) .
 
+helm-dependencies-rapid:
+	cd charts/console-rapid && helm dependency update
+
 helm-dependencies:
 	cd charts/console && helm dependency update && \
 	cd ../../plural/helm/console && helm dependency update
