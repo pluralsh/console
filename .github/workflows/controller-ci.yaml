@@ -72,3 +72,4 @@ jobs:
         with:
           version: v1.59.1
           working-directory: go/controller
+          args: --timeout=30m
