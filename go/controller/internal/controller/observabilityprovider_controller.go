@@ -129,7 +129,13 @@ func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Cont
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !provider.ObjectMeta.DeletionTimestamp.IsZero() {
-		if provider.Status.HasID() && !provider.Status.IsReadonly() {
+		// Remove ObservabilityProvider from Console API if it exists
+		exists, err := in.isAlreadyExists(ctx, provider)
+		if err != nil {
+			return &ctrl.Result{}, err
+		}
+
+		if exists && !provider.Status.IsReadonly() {
 			logger.Info("deleting ObservabilityProvider")
 			if err := in.ConsoleClient.DeleteObservabilityProvider(ctx, provider.Status.GetID()); err != nil {
 				// if it fails to delete the external dependency here, return with error
