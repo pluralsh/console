@@ -8,6 +8,9 @@ fragment PipelineServiceDeployment on ServiceDeployment {
   }
   status
   componentStatus
+  revision {
+    id
+  }
 }
 
 fragment ContainerSpec on ContainerSpec {
