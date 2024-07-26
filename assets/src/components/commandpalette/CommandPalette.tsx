@@ -51,6 +51,13 @@ export const Wrapper = styled.div(({ theme }) => ({
           color: theme.colors.text,
         },
       },
+
+      '[cmdk-separator]': {
+        backgroundColor: theme.colors['border-input'],
+        height: 1,
+        margin: '12px -12px',
+        width: '100% + 24px', // TODO: Replace workaround.
+      },
     },
   },
 }))
@@ -90,12 +97,18 @@ export default function CommandPalette({ open, setOpen }) {
             <Command.Item>Settings</Command.Item>
           </Command.Group>
 
+          <Command.Separator />
+
           {/* TODO: Add one more nav group. */}
+
+          <Command.Separator />
 
           <Command.Group>
             <Command.Item>Open docs</Command.Item>
             <Command.Item>Help (contact support)</Command.Item>
           </Command.Group>
+
+          <Command.Separator />
 
           <Command.Group>
             <Command.Item>Copy page link</Command.Item>
