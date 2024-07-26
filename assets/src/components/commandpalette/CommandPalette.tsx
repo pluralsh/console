@@ -15,6 +15,7 @@ export const Wrapper = styled.div(({ theme }) => ({
   '[cmdk-root]': {
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.large,
+    boxShadow: theme.boxShadows.modal,
     width: 480,
 
     // TODO: Use dialog for positioning?
@@ -27,27 +28,30 @@ export const Wrapper = styled.div(({ theme }) => ({
     '[cmdk-input]': {
       ...theme.partials.reset.input,
       ...theme.partials.text.body2,
-      backgroundColor: theme.colors['fill-three'],
+      backgroundColor: theme.colors['fill-two'],
       border: 'none',
       borderBottom: theme.borders.input,
+      borderTopLeftRadius: theme.borderRadiuses.large,
+      borderTopRightRadius: theme.borderRadiuses.large,
       color: theme.colors.text,
       padding: '14px 16px',
       width: '100%',
     },
 
     '[cmdk-list]': {
-      backgroundColor: theme.colors['fill-two'],
+      backgroundColor: theme.colors['fill-one'],
+      borderBottomLeftRadius: theme.borderRadiuses.large,
+      borderBottomRightRadius: theme.borderRadiuses.large,
       padding: theme.spacing.small,
 
       '[cmdk-item]': {
-        backgroundColor: theme.colors['fill-two'],
         borderRadius: theme.borderRadiuses.large,
         color: theme.colors['text-light'],
         cursor: 'pointer',
         padding: '12px 16px',
 
         '&[data-selected="true"]': {
-          backgroundColor: theme.colors['fill-two-selected'],
+          backgroundColor: theme.colors['fill-one-selected'],
           color: theme.colors.text,
         },
       },
