@@ -193,18 +193,18 @@ export function StatusCard({
           <Tooltip label={statusLabel}>
             {status === 'ok' ? (
               <StatusOkIcon
-                size={12}
+                size={20}
                 color={theme.colors['icon-success']}
               />
             ) : status === 'closed' ? (
               <CloseRoundedIcon
-                size={12}
+                size={20}
                 color={theme.colors['icon-danger-critical']}
               />
             ) : (
               <div>
                 <Spinner
-                  size={12}
+                  size={20}
                   color={
                     status === 'running'
                       ? theme.colors['icon-info']

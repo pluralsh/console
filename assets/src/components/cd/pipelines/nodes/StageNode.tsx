@@ -9,6 +9,7 @@ import {
   IconFrame,
   Modal,
   PrOpenIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import {
   ComponentProps,
@@ -85,7 +86,7 @@ const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
   },
   '.contentArea': {
     display: 'flex',
-    gap: theme.spacing.small,
+    gap: theme.spacing.xxlarge,
     alignItems: 'center',
     justifyContent: 'space-between',
     width: '100%',
@@ -97,6 +98,8 @@ const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
   '.clusterName': {
     ...theme.partials.text.caption,
     color: theme.colors['text-xlight'],
+    display: 'flex',
+    gap: theme.spacing.small,
   },
 }))
 
@@ -162,7 +165,6 @@ function PrsButton({
       <div css={{ position: 'relative' }}>
         <PrCountBadgeSC count={numOpenPrs} />
         <IconFrame
-          type="secondary"
           clickable
           onClick={(e) => {
             setOpen(true)
@@ -297,16 +299,30 @@ export function StageNode(
                     <div>
                       <div className="serviceName">{service?.name}</div>
                       <div className="clusterName">
-                        {service?.cluster?.name}
+                        <span>{service?.cluster?.name}</span>
+                        <Tooltip
+                          placement="bottom"
+                          label={`Revision ID: ${service.revision?.id ?? ''}`}
+                        >
+                          <span>{service.revision?.id?.slice(-6)}</span>
+                        </Tooltip>
                       </div>
                     </div>
-                    {servicePullRequests[serviceId]?.length && (
-                      <StopPropagation>
-                        <PrsButton
-                          pullRequests={servicePullRequests[serviceId]}
-                        />
-                      </StopPropagation>
-                    )}
+                    <div
+                      css={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end',
+                      }}
+                    >
+                      {servicePullRequests[serviceId]?.length && (
+                        <StopPropagation>
+                          <PrsButton
+                            pullRequests={servicePullRequests[serviceId]}
+                          />
+                        </StopPropagation>
+                      )}
+                    </div>
                   </ServiceCard>
                 </li>
               )
