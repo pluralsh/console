@@ -337,6 +337,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - observabilityproviders
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - observabilityproviders/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - observabilityproviders/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - pipelinecontexts
   verbs:
   - create

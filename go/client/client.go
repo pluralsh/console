@@ -108,6 +108,10 @@ type ConsoleClient interface {
 	GetNotificationRouterByName(ctx context.Context, name *string, interceptors ...clientv2.RequestInterceptor) (*GetNotificationRouterByName, error)
 	DeleteNotificationRouter(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteNotificationRouter, error)
 	UpsertNotificationRouter(ctx context.Context, attributes NotificationRouterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertNotificationRouter, error)
+	ListObservabilityProviders(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListObservabilityProviders, error)
+	GetObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error)
+	UpsertObservabilityProvider(ctx context.Context, attributes ObservabilityProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityProvider, error)
+	DeleteObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityProvider, error)
 	UpsertPolicyConstraints(ctx context.Context, constraints []*PolicyConstraintAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPolicyConstraints, error)
 	ListPolicyConstraints(ctx context.Context, after *string, first *int64, before *string, last *int64, namespace *string, kind *string, q *string, interceptors ...clientv2.RequestInterceptor) (*ListPolicyConstraints, error)
 	ListViolationStatistics(ctx context.Context, field ConstraintViolationField, interceptors ...clientv2.RequestInterceptor) (*ListViolationStatistics, error)
@@ -2271,6 +2275,45 @@ func (t *URLSinkConfigurationFragment) GetURL() string {
 		t = &URLSinkConfigurationFragment{}
 	}
 	return t.URL
+}
+
+type ObservabilityProviderFragment struct {
+	ID         string                    "json:\"id\" graphql:\"id\""
+	Name       string                    "json:\"name\" graphql:\"name\""
+	Type       ObservabilityProviderType "json:\"type\" graphql:\"type\""
+	UpdatedAt  *string                   "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	InsertedAt *string                   "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+}
+
+func (t *ObservabilityProviderFragment) GetID() string {
+	if t == nil {
+		t = &ObservabilityProviderFragment{}
+	}
+	return t.ID
+}
+func (t *ObservabilityProviderFragment) GetName() string {
+	if t == nil {
+		t = &ObservabilityProviderFragment{}
+	}
+	return t.Name
+}
+func (t *ObservabilityProviderFragment) GetType() *ObservabilityProviderType {
+	if t == nil {
+		t = &ObservabilityProviderFragment{}
+	}
+	return &t.Type
+}
+func (t *ObservabilityProviderFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &ObservabilityProviderFragment{}
+	}
+	return t.UpdatedAt
+}
+func (t *ObservabilityProviderFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &ObservabilityProviderFragment{}
+	}
+	return t.InsertedAt
 }
 
 type PolicyConstraintConnectionFragment struct {
@@ -9110,6 +9153,35 @@ func (t *ListNotificationSinks_NotificationSinks) GetEdges() []*NotificationSink
 	return t.Edges
 }
 
+type ListObservabilityProviders_ObservabilityProviders_Edges struct {
+	Node *ObservabilityProviderFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListObservabilityProviders_ObservabilityProviders_Edges) GetNode() *ObservabilityProviderFragment {
+	if t == nil {
+		t = &ListObservabilityProviders_ObservabilityProviders_Edges{}
+	}
+	return t.Node
+}
+
+type ListObservabilityProviders_ObservabilityProviders struct {
+	PageInfo PageInfoFragment                                           "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*ListObservabilityProviders_ObservabilityProviders_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListObservabilityProviders_ObservabilityProviders) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListObservabilityProviders_ObservabilityProviders{}
+	}
+	return &t.PageInfo
+}
+func (t *ListObservabilityProviders_ObservabilityProviders) GetEdges() []*ListObservabilityProviders_ObservabilityProviders_Edges {
+	if t == nil {
+		t = &ListObservabilityProviders_ObservabilityProviders{}
+	}
+	return t.Edges
+}
+
 type SavePipeline_SavePipeline_PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
 	Source  *ServiceDeploymentBaseFragment "json:\"source,omitempty\" graphql:\"source\""
 	Secrets []*string                      "json:\"secrets,omitempty\" graphql:\"secrets\""
@@ -12638,6 +12710,50 @@ func (t *UpsertNotificationRouter) GetUpsertNotificationRouter() *NotificationRo
 		t = &UpsertNotificationRouter{}
 	}
 	return t.UpsertNotificationRouter
+}
+
+type ListObservabilityProviders struct {
+	ObservabilityProviders *ListObservabilityProviders_ObservabilityProviders "json:\"observabilityProviders,omitempty\" graphql:\"observabilityProviders\""
+}
+
+func (t *ListObservabilityProviders) GetObservabilityProviders() *ListObservabilityProviders_ObservabilityProviders {
+	if t == nil {
+		t = &ListObservabilityProviders{}
+	}
+	return t.ObservabilityProviders
+}
+
+type GetObservabilityProvider struct {
+	ObservabilityProvider *ObservabilityProviderFragment "json:\"observabilityProvider,omitempty\" graphql:\"observabilityProvider\""
+}
+
+func (t *GetObservabilityProvider) GetObservabilityProvider() *ObservabilityProviderFragment {
+	if t == nil {
+		t = &GetObservabilityProvider{}
+	}
+	return t.ObservabilityProvider
+}
+
+type UpsertObservabilityProvider struct {
+	UpsertObservabilityProvider *ObservabilityProviderFragment "json:\"upsertObservabilityProvider,omitempty\" graphql:\"upsertObservabilityProvider\""
+}
+
+func (t *UpsertObservabilityProvider) GetUpsertObservabilityProvider() *ObservabilityProviderFragment {
+	if t == nil {
+		t = &UpsertObservabilityProvider{}
+	}
+	return t.UpsertObservabilityProvider
+}
+
+type DeleteObservabilityProvider struct {
+	DeleteObservabilityProvider *ObservabilityProviderFragment "json:\"deleteObservabilityProvider,omitempty\" graphql:\"deleteObservabilityProvider\""
+}
+
+func (t *DeleteObservabilityProvider) GetDeleteObservabilityProvider() *ObservabilityProviderFragment {
+	if t == nil {
+		t = &DeleteObservabilityProvider{}
+	}
+	return t.DeleteObservabilityProvider
 }
 
 type UpsertPolicyConstraints struct {
@@ -20776,6 +20892,144 @@ func (c *Client) UpsertNotificationRouter(ctx context.Context, attributes Notifi
 	return &res, nil
 }
 
+const ListObservabilityProvidersDocument = `query ListObservabilityProviders ($after: String, $first: Int, $before: String, $last: Int) {
+	observabilityProviders(after: $after, first: $first, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			node {
+				... ObservabilityProviderFragment
+			}
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment ObservabilityProviderFragment on ObservabilityProvider {
+	id
+	name
+	type
+	updatedAt
+	insertedAt
+}
+`
+
+func (c *Client) ListObservabilityProviders(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListObservabilityProviders, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListObservabilityProviders
+	if err := c.Client.Post(ctx, "ListObservabilityProviders", ListObservabilityProvidersDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetObservabilityProviderDocument = `query GetObservabilityProvider ($id: ID!) {
+	observabilityProvider(id: $id) {
+		... ObservabilityProviderFragment
+	}
+}
+fragment ObservabilityProviderFragment on ObservabilityProvider {
+	id
+	name
+	type
+	updatedAt
+	insertedAt
+}
+`
+
+func (c *Client) GetObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetObservabilityProvider
+	if err := c.Client.Post(ctx, "GetObservabilityProvider", GetObservabilityProviderDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertObservabilityProviderDocument = `mutation UpsertObservabilityProvider ($attributes: ObservabilityProviderAttributes!) {
+	upsertObservabilityProvider(attributes: $attributes) {
+		... ObservabilityProviderFragment
+	}
+}
+fragment ObservabilityProviderFragment on ObservabilityProvider {
+	id
+	name
+	type
+	updatedAt
+	insertedAt
+}
+`
+
+func (c *Client) UpsertObservabilityProvider(ctx context.Context, attributes ObservabilityProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityProvider, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertObservabilityProvider
+	if err := c.Client.Post(ctx, "UpsertObservabilityProvider", UpsertObservabilityProviderDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteObservabilityProviderDocument = `mutation DeleteObservabilityProvider ($id: ID!) {
+	deleteObservabilityProvider(id: $id) {
+		... ObservabilityProviderFragment
+	}
+}
+fragment ObservabilityProviderFragment on ObservabilityProvider {
+	id
+	name
+	type
+	updatedAt
+	insertedAt
+}
+`
+
+func (c *Client) DeleteObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityProvider, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteObservabilityProvider
+	if err := c.Client.Post(ctx, "DeleteObservabilityProvider", DeleteObservabilityProviderDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const UpsertPolicyConstraintsDocument = `mutation UpsertPolicyConstraints ($constraints: [PolicyConstraintAttributes!]) {
 	upsertPolicyConstraints(constraints: $constraints)
 }
@@ -25796,6 +26050,10 @@ var DocumentOperationNames = map[string]string{
 	GetNotificationRouterByNameDocument:               "GetNotificationRouterByName",
 	DeleteNotificationRouterDocument:                  "DeleteNotificationRouter",
 	UpsertNotificationRouterDocument:                  "UpsertNotificationRouter",
+	ListObservabilityProvidersDocument:                "ListObservabilityProviders",
+	GetObservabilityProviderDocument:                  "GetObservabilityProvider",
+	UpsertObservabilityProviderDocument:               "UpsertObservabilityProvider",
+	DeleteObservabilityProviderDocument:               "DeleteObservabilityProvider",
 	UpsertPolicyConstraintsDocument:                   "UpsertPolicyConstraints",
 	ListPolicyConstraintsDocument:                     "ListPolicyConstraints",
 	ListViolationStatisticsDocument:                   "ListViolationStatistics",
