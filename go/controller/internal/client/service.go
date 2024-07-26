@@ -48,11 +48,6 @@ func (c *client) UpdateService(serviceId string, attributes console.ServiceUpdat
 	return nil
 }
 
-func (c *client) UpdateComponents(id string, components []*console.ComponentAttributes, errs []*console.ServiceErrorAttributes) error {
-	_, err := c.consoleClient.UpdateServiceComponents(c.ctx, id, components, errs)
-	return err
-}
-
 func (c *client) DeleteService(serviceId string) error {
 	_, err := c.consoleClient.DeleteServiceDeployment(c.ctx, serviceId)
 	if err != nil {
