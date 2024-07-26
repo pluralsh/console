@@ -140,7 +140,6 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 
 	if !exists {
-		logger.Info("create stack", "name", stack.StackName())
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -157,11 +156,12 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
+
+		logger.Info("created stack", "name", stack.StackName())
 		stack.Status.ID = st.ID
 		stack.Status.SHA = lo.ToPtr(sha)
 		controllerutil.AddFinalizer(stack, InfrastructureStackFinalizer)
 	} else {
-		logger.Info("update stack", "name", stack.StackName())
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -180,6 +180,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 				return ctrl.Result{}, err
 			}
 
+			logger.Info("updated stack", "name", stack.StackName())
 			stack.Status.SHA = lo.ToPtr(sha)
 		}
 	}
@@ -193,7 +194,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 // SetupWithManager sets up the controller with the Manager.
 func (r *InfrastructureStackReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                                 // Requirement for credentials implementation.
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}). // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(r.Client, new(v1alpha1.InfrastructureStackList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.InfrastructureStack{}).
 		Complete(r)
