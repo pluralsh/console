@@ -419,7 +419,7 @@ func (r *InfrastructureStackReconciler) handleClusterRef(ctx context.Context, st
 	if cluster.Status.ID == nil {
 		logger.Info("Cluster is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "cluster is not ready")
-		return "", &requeue, nil
+		return "", lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
 	}
 
 	return *cluster.Status.ID, nil, nil
@@ -440,12 +440,12 @@ func (r *InfrastructureStackReconciler) handleRepositoryRef(ctx context.Context,
 	if repository.Status.ID == nil {
 		logger.Info("Repository is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
-		return "", &requeue, nil
+		return "", lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
 	}
 
 	if repository.Status.Health == v1alpha1.GitHealthFailed {
 		logger.Info("Repository is not healthy")
-		return "", &requeue, nil
+		return "", lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
 	}
 
 	return *repository.Status.ID, nil, nil
@@ -470,7 +470,7 @@ func (r *InfrastructureStackReconciler) handleProjectRef(ctx context.Context, st
 	if project.Status.ID == nil {
 		logger.Info("Project is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
-		return nil, &requeue, nil
+		return nil, lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
 	}
 
 	if err := controllerutil.SetOwnerReference(project, stack, r.Scheme); err != nil {
@@ -503,7 +503,7 @@ func (r *InfrastructureStackReconciler) handleStackDefinitionRef(ctx context.Con
 	if stackDefinition.Status.ID == nil {
 		logger.Info("StackDefinition is not ready")
 		utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "stack definition is not ready")
-		return nil, &requeue, nil
+		return nil, lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
 	}
 
 	return stackDefinition.Status.ID, nil, nil

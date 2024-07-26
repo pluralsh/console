@@ -327,7 +327,6 @@ export default function Stacks() {
                 {stack.repository?.url}
               </div>
             </div>
-            <StackCustomRun stack={stack} />
             <KickButton
               pulledAt={stack.repository?.pulledAt}
               kickMutationHook={useKickStackMutation}
@@ -336,6 +335,7 @@ export default function Stacks() {
               variables={{ id: stack.id }}
               width="max-content"
             />
+            <StackCustomRun stack={stack} />
             <MoreMenu
               onSelectionChange={(newKey) => setMenuKey(newKey)}
               width={240}
@@ -402,7 +402,6 @@ export default function Stacks() {
             />
           </div>
           <TabList
-            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',

@@ -1,9 +1,9 @@
 import { ReactElement, useState } from 'react'
 import {
+  ArrowTopRightIcon,
   Chip,
   EditIcon,
   IconFrame,
-  LinkoutIcon,
   ListBoxItem,
   TrashCanIcon,
 } from '@pluralsh/design-system'
@@ -186,28 +186,11 @@ const ColInsertedAt = columnHelper.accessor(({ node }) => node?.insertedAt, {
   },
 })
 
-const ColLink = columnHelper.accessor(({ node }) => node?.url, {
-  id: 'link',
-  header: 'Link',
-  cell: function Cell({ getValue }) {
-    const theme = useTheme()
-
-    return (
-      <IconFrame
-        icon={<LinkoutIcon color={theme.colors['action-link-inline']} />}
-        as="a"
-        href={getValue()}
-        target="_blank"
-        rel="noopener noreferrer"
-      />
-    )
-  },
-})
-
 export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',
   header: '',
   cell: function Cell({ table, getValue }) {
+    const theme = useTheme()
     const pullReq = getValue()
     const refetch = table.options?.meta?.refetch || (() => {})
     const [menuKey, setMenuKey] = useState<MenuItemKey>(MenuItemKey.None)
@@ -221,6 +204,13 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         onClick={(e) => e.stopPropagation()}
         css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}
       >
+        <IconFrame
+          icon={<ArrowTopRightIcon color={theme.colors['icon-light']} />}
+          as="a"
+          href={pullReq.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        />
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Update}
@@ -256,7 +246,6 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
 
 export const prColumns = [
   ColTitle,
-  ColLink,
   ColStatus,
   ColCluster,
   ColService,

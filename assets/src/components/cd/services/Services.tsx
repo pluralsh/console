@@ -130,7 +130,6 @@ export default function Services() {
           }}
         >
           <TabList
-            gap="xxsmall"
             margin={1}
             stateRef={tabStateRef}
             stateProps={{

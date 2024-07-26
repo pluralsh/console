@@ -80,13 +80,23 @@ export enum StepName {
   Commands = 'commands',
 }
 
+const stepBase = {
+  circleSize: 32,
+  iconSize: 16,
+}
+
 export const steps: StepperSteps = [
-  { key: StepName.ChooseTemplate, IconComponent: DryRunIcon },
-  { key: StepName.Settings, IconComponent: RocketIcon },
+  {
+    key: StepName.ChooseTemplate,
+    IconComponent: DryRunIcon,
+    ...stepBase,
+  },
+  { key: StepName.Settings, IconComponent: RocketIcon, ...stepBase },
 ]
 
 const ModalHeaderSC = styled.header(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.medium,
+  marginBottom: -theme.spacing.xsmall,
 }))

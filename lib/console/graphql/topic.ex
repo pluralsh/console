@@ -31,3 +31,7 @@ end
 defimpl Console.GraphQl.Topic, for: Console.Schema.RunLog do
   def infer(%{step_id: id}, _), do: [run_logs_delta: "steps:#{id}"]
 end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.Pipeline do
+  def infer(%{id: id}, _), do: [pipeline_delta: "pipelines:#{id}"]
+end

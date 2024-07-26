@@ -28,7 +28,6 @@ export default function Audits() {
   useSetPageHeaderContent(
     <SettingsPageHeader heading="Audits">
       <TabList
-        gap="xxsmall"
         margin={1}
         stateRef={tabStateRef}
         stateProps={{

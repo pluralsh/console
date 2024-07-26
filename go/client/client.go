@@ -48,7 +48,7 @@ type ConsoleClient interface {
 	CloneServiceDeployment(ctx context.Context, clusterID string, id string, attributes ServiceCloneAttributes, interceptors ...clientv2.RequestInterceptor) (*CloneServiceDeployment, error)
 	CloneServiceDeploymentWithHandle(ctx context.Context, clusterID string, cluster string, name string, attributes ServiceCloneAttributes, interceptors ...clientv2.RequestInterceptor) (*CloneServiceDeploymentWithHandle, error)
 	RollbackService(ctx context.Context, id string, revisionID string, interceptors ...clientv2.RequestInterceptor) (*RollbackService, error)
-	UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error)
+	UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error)
 	AddServiceError(ctx context.Context, id string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*AddServiceError, error)
 	UpdateDeploymentSettings(ctx context.Context, attributes DeploymentSettingsAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateDeploymentSettings, error)
 	GetDeploymentSettings(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetDeploymentSettings, error)
@@ -8333,6 +8333,17 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_Components) GetState() *
 	return t.State
 }
 
+type GetServiceDeploymentForAgent_ServiceDeployment_Revision struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Revision) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Revision{}
+	}
+	return t.ID
+}
+
 type GetServiceDeploymentForAgent_ServiceDeployment struct {
 	ID            string                                                          "json:\"id\" graphql:\"id\""
 	Name          string                                                          "json:\"name\" graphql:\"name\""
@@ -8342,6 +8353,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment struct {
 	DeletedAt     *string                                                         "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
 	DryRun        *bool                                                           "json:\"dryRun,omitempty\" graphql:\"dryRun\""
 	Templated     *bool                                                           "json:\"templated,omitempty\" graphql:\"templated\""
+	Sha           *string                                                         "json:\"sha,omitempty\" graphql:\"sha\""
 	Cluster       *GetServiceDeploymentForAgent_ServiceDeployment_Cluster         "json:\"cluster,omitempty\" graphql:\"cluster\""
 	Kustomize     *GetServiceDeploymentForAgent_ServiceDeployment_Kustomize       "json:\"kustomize,omitempty\" graphql:\"kustomize\""
 	Helm          *GetServiceDeploymentForAgent_ServiceDeployment_Helm            "json:\"helm,omitempty\" graphql:\"helm\""
@@ -8349,6 +8361,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment struct {
 	Contexts      []*GetServiceDeploymentForAgent_ServiceDeployment_Contexts      "json:\"contexts,omitempty\" graphql:\"contexts\""
 	SyncConfig    *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
 	Components    []*GetServiceDeploymentForAgent_ServiceDeployment_Components    "json:\"components,omitempty\" graphql:\"components\""
+	Revision      *GetServiceDeploymentForAgent_ServiceDeployment_Revision        "json:\"revision,omitempty\" graphql:\"revision\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetID() string {
@@ -8399,6 +8412,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetTemplated() *bool {
 	}
 	return t.Templated
 }
+func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetSha() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
+	}
+	return t.Sha
+}
 func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetCluster() *GetServiceDeploymentForAgent_ServiceDeployment_Cluster {
 	if t == nil {
 		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
@@ -8440,6 +8459,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetComponents() []*GetS
 		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
 	}
 	return t.Components
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetRevision() *GetServiceDeploymentForAgent_ServiceDeployment_Revision {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
+	}
+	return t.Revision
 }
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -17354,8 +17379,8 @@ func (c *Client) RollbackService(ctx context.Context, id string, revisionID stri
 	return &res, nil
 }
 
-const UpdateServiceComponentsDocument = `mutation updateServiceComponents ($id: ID!, $components: [ComponentAttributes], $errors: [ServiceErrorAttributes]) {
-	updateServiceComponents(id: $id, components: $components, errors: $errors) {
+const UpdateServiceComponentsDocument = `mutation updateServiceComponents ($id: ID!, $components: [ComponentAttributes], $revisionId: ID!, $sha: String!, $errors: [ServiceErrorAttributes]) {
+	updateServiceComponents(id: $id, components: $components, revisionId: $revisionId, sha: $sha, errors: $errors) {
 		... ServiceDeploymentFragment
 	}
 }
@@ -17428,10 +17453,12 @@ fragment ComponentContentFragment on ComponentContent {
 }
 `
 
-func (c *Client) UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error) {
+func (c *Client) UpdateServiceComponents(ctx context.Context, id string, components []*ComponentAttributes, revisionID string, sha string, errors []*ServiceErrorAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceComponents, error) {
 	vars := map[string]any{
 		"id":         id,
 		"components": components,
+		"revisionId": revisionID,
+		"sha":        sha,
 		"errors":     errors,
 	}
 
@@ -17874,6 +17901,7 @@ const GetServiceDeploymentForAgentDocument = `query GetServiceDeploymentForAgent
 		deletedAt
 		dryRun
 		templated
+		sha
 		cluster {
 			id
 			name
@@ -17916,6 +17944,9 @@ const GetServiceDeploymentForAgentDocument = `query GetServiceDeploymentForAgent
 			version
 			kind
 			state
+		}
+		revision {
+			id
 		}
 	}
 }

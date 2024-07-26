@@ -310,6 +310,8 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   connection node_type: :pipeline_gate
   connection node_type: :pipeline_context
 
+  delta :pipeline
+
   object :public_pipeline_queries do
     field :cluster_gates, list_of(:pipeline_gate) do
       middleware ClusterAuthenticated
@@ -413,6 +415,17 @@ defmodule Console.GraphQl.Deployments.Pipeline do
       arg :state, :gate_state
 
       resolve &Deployments.force_gate/2
+    end
+  end
+
+  object :pipeline_subscriptions do
+    field :pipeline_delta, :pipeline_delta do
+      arg :id, non_null(:id)
+
+      config fn args, ctx ->
+        with {:ok, pipe} <- Deployments.resolve_pipeline(args, ctx),
+          do: {:ok, topic: "pipelines:#{pipe.id}"}
+      end
     end
   end
 end

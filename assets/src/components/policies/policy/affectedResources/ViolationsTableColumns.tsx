@@ -1,9 +1,10 @@
+import { Tooltip } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { Violation } from 'generated/graphql'
 
 const columnHelper = createColumnHelper<Violation>()
 
-export const ColRessourceName = columnHelper.accessor(
+export const ColResourceName = columnHelper.accessor(
   (violation) => violation.name,
   {
     id: 'name',
@@ -43,7 +44,11 @@ export const ColErrorMessage = columnHelper.accessor(
     header: 'Error Message',
     meta: { truncate: true, gridTemplate: 'minmax(180px,auto)' },
     cell: function Cell({ getValue }) {
-      return <div>{getValue()}</div>
+      return (
+        <Tooltip label={<div css={{ width: 250 }}>{getValue()}</div>}>
+          <div>{getValue()}</div>
+        </Tooltip>
+      )
     },
   }
 )

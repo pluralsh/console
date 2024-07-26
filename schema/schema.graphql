@@ -702,7 +702,9 @@ type RootMutationType {
   registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
 
   "updates only the components of a given service, to be sent after deploy operator syncs"
-  updateServiceComponents(id: ID!, components: [ComponentAttributes], errors: [ServiceErrorAttributes]): ServiceDeployment
+  updateServiceComponents(
+    id: ID!, components: [ComponentAttributes], revisionId: ID, sha: String, errors: [ServiceErrorAttributes]
+  ): ServiceDeployment
 
   "save the manifests in cache to be retrieved by the requesting user"
   saveManifests(id: ID!, manifests: [String]): Boolean

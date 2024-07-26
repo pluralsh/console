@@ -75,7 +75,7 @@ export function HelpLauncherBtn({
   const theme = useTheme()
   const iconProps = {
     size: 24,
-    color: theme.colors['icon-always-white'],
+    color: theme.colors['icon-light'],
   }
 
   return (

@@ -1,6 +1,7 @@
 import { type ComponentProps, useCallback, useState } from 'react'
 import {
-  AccordionOLD as Accordion,
+  Accordion,
+  AccordionItem,
   Button,
   FormField,
   Input,
@@ -231,42 +232,44 @@ export function ScmConnectionForm({
           Use GitHub App Auth
         </Switch>
       )}
-      <Accordion label="Advanced configuration">
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.medium,
-          }}
-        >
-          <FormField label="Base url">
-            <Input2
-              value={formState.baseUrl ?? ''}
-              onChange={(e) => updateFormState({ baseUrl: e.target.value })}
-            />
-          </FormField>
-          <FormField label="API url">
-            <Input2
-              value={formState.apiUrl ?? ''}
-              onChange={(e) => updateFormState({ apiUrl: e.target.value })}
-            />
-          </FormField>
-          <FormField label="User name">
-            <Input2
-              value={formState.username ?? ''}
-              onChange={(e) => updateFormState({ username: e.target.value })}
-            />
-          </FormField>
-          <FormField label="Signing private key">
-            <Input
-              value={formState.signingPrivateKey ?? ''}
-              onChange={(e) =>
-                updateFormState({ signingPrivateKey: e.target.value })
-              }
-              multiline
-            />
-          </FormField>
-        </div>
+      <Accordion type="single">
+        <AccordionItem trigger="Advanced configuration">
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.medium,
+            }}
+          >
+            <FormField label="Base url">
+              <Input2
+                value={formState.baseUrl ?? ''}
+                onChange={(e) => updateFormState({ baseUrl: e.target.value })}
+              />
+            </FormField>
+            <FormField label="API url">
+              <Input2
+                value={formState.apiUrl ?? ''}
+                onChange={(e) => updateFormState({ apiUrl: e.target.value })}
+              />
+            </FormField>
+            <FormField label="User name">
+              <Input2
+                value={formState.username ?? ''}
+                onChange={(e) => updateFormState({ username: e.target.value })}
+              />
+            </FormField>
+            <FormField label="Signing private key">
+              <Input
+                value={formState.signingPrivateKey ?? ''}
+                onChange={(e) =>
+                  updateFormState({ signingPrivateKey: e.target.value })
+                }
+                multiline
+              />
+            </FormField>
+          </div>
+        </AccordionItem>
       </Accordion>
       {error && <GqlError error={error} />}
     </div>

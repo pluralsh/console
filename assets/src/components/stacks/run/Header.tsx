@@ -252,7 +252,6 @@ function StackRunNav({ stackRun }: { stackRun: StackRun }): ReactNode {
   return (
     <TabList
       scrollable
-      gap="xxsmall"
       stateRef={tabStateRef}
       stateProps={{
         orientation: 'horizontal',

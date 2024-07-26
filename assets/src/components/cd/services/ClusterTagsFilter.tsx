@@ -37,6 +37,7 @@ export function TagsFilter({
     previousData,
     loading,
   } = useTagPairsQuery({
+    fetchPolicy: 'cache-and-network',
     variables: { q: throttledInputValue, type },
   })
   const data = currentData || previousData

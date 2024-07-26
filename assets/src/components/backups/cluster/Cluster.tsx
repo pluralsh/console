@@ -75,7 +75,6 @@ export default function Cluster() {
           }}
         >
           <TabList
-            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',

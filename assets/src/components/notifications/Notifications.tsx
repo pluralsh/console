@@ -62,7 +62,6 @@ export default function Pr() {
           }}
         >
           <TabList
-            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',

@@ -205,7 +205,6 @@ export default function GlobalService() {
             {headerContent}
           </div>
           <TabList
-            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',

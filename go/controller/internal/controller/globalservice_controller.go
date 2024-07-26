@@ -108,13 +108,13 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	provider, err := r.getProvider(ctx, globalService)
 	if err != nil {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+		return RequeueAfter(requeueWaitForResources), err
 	}
 
 	project, err := r.getProject(ctx, globalService)
 	if err != nil {
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-		return requeue, err
+		return RequeueAfter(requeueWaitForResources), err
 	}
 
 	attr := globalService.Attributes(provider.Status.ID, project.Status.ID)
@@ -193,12 +193,12 @@ func (r *GlobalServiceReconciler) getService(ctx context.Context, globalService 
 		if err := r.Delete(ctx, globalService); err != nil {
 			return nil, &ctrl.Result{}, err
 		}
-		return service, &requeue, nil
+		return service, lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
 	}
 
 	if service.Status.ID == nil {
 		logger.Info("service is not ready")
-		return service, &requeue, nil
+		return service, lo.ToPtr(RequeueAfter(requeueWaitForResources)), nil
 	}
 
 	return service, nil, nil

@@ -172,7 +172,6 @@ export default function ManagedNamespace() {
             {headerContent}
           </div>
           <TabList
-            gap="xxsmall"
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',

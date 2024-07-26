@@ -80,6 +80,8 @@ const HelpLauncherSC = styled.div(({ theme }) => {
     },
   }
 })
+
+// @ts-ignore, see https://github.com/pmndrs/react-spring/issues/1515
 const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
   const helpSpacing = getHelpSpacing(theme)
 
