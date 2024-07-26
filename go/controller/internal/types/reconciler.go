@@ -38,6 +38,7 @@ const (
 	DeploymentSettingsReconciler    Reconciler = "deploymentsettings"
 	ProjectReconciler               Reconciler = "project"
 	NamespaceCredentialsReconciler  Reconciler = "namespacecredentials"
+	ObservabilityProviderReconciler Reconciler = "observabilityprovider"
 )
 
 // ToReconciler maps reconciler string to a Reconciler type.
@@ -84,6 +85,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case ProjectReconciler:
 		fallthrough
 	case NamespaceCredentialsReconciler:
+		fallthrough
+	case ObservabilityProviderReconciler:
 		fallthrough
 	case ProviderReconciler:
 		return Reconciler(reconciler), nil
@@ -248,6 +251,13 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
 		}, nil
+	case ObservabilityProviderReconciler:
+		return &controller.ObservabilityProviderReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}, nil
 	default:
 		return nil, fmt.Errorf("reconciler %q is not supported", sc)
 	}
@@ -282,6 +292,7 @@ func Reconcilers() ReconcilerList {
 		CustomStackRunReconciler,
 		ClusterRestoreReconciler,
 		NamespaceCredentialsReconciler,
+		ObservabilityProviderReconciler,
 	}
 }
 
