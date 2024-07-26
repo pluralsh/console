@@ -54,15 +54,19 @@ defmodule Console.Deployments.Stacks.Worker do
   defp maybe_cancel_run(metrics, run, bot) do
     Enum.find_value(metrics, fn metric ->
       case Provider.query(metric) do
+        {:error, {:client, err}} ->
+          Logger.warn "failed to query metric #{metric}: #{err}"
+          nil
         {:error, _} = error -> error
         :ok -> nil
       end
     end)
     |> case do
-      {:error, reason} -> Stacks.complete_stack_run(%{
-        status: :cancelled,
-        cancellation_reason: reason
-      }, run.id, bot)
+      {:error, reason} ->
+        Stacks.complete_stack_run(%{
+          status: :cancelled,
+          cancellation_reason: reason
+        }, run.id, bot)
       _ -> :ok
     end
   end

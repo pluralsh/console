@@ -1,4 +1,6 @@
 defmodule Console do
+  require Logger
+
   @type error :: {:error, term}
 
   def coalesce(nil, val), do: val
@@ -212,6 +214,24 @@ defmodule Console do
     |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
     |> :crypto.hash_final()
     |> Base.encode16(case: :lower)
+  end
+
+  def async_retry(fun, tries \\ 0, res \\ :error)
+  def async_retry(_, 3, res), do: res
+  def async_retry(fun, tries, _) do
+    try do
+      Task.async(fun)
+      |> Task.await(65_000)
+      |> case do
+        {:error, _} = err -> async_retry(fun, tries + 1, err)
+        :error -> async_retry(fun, tries + 1, :error)
+        res -> res
+      end
+    rescue
+      err ->
+        Logger.error(Exception.format(:error, err, __STACKTRACE__))
+        async_retry(fun, tries + 1, {:error, :exception})
+    end
   end
 
   def hmac(secret, payload) do

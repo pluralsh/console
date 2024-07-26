@@ -14,15 +14,15 @@ defmodule Console.Deployments.Pipelines.PromotionWorker do
   end
 
   def dispatch(shard, %PipelinePromotion{} = promo),
-    do: GenServer.cast(name(shard), promo)
+    do: GenServer.call(name(shard), promo)
 
   def name(shard), do: {:via, Registry, {Supervisor.registry(), {:promotion, :shard, shard}}}
 
-  def handle_cast(%PipelinePromotion{} = promo, state) do
+  def handle_call(%PipelinePromotion{} = promo, _, state) do
     case Pipelines.apply_promotion(promo) do
       {:ok, _} -> Logger.info "promotion #{promo.id} applied successfully"
       {:error, err} -> Logger.info "failed to apply promotion #{promo.id} reason: #{inspect(err)}"
     end
-    {:noreply, state}
+    {:reply, :ok, state}
   end
 end

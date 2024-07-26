@@ -24,7 +24,7 @@ defmodule Console.Deployments.Metrics.Provider.NewRelic do
       {:ok, %{body: %{"data" => %{"actor" => %{"entity" => %{"workloadStatus" => %{"statusValue" => status}}}}}}} ->
         result(status, name)
       {:ok, %{body: body}} -> {:error, "failed to query newrelic: #{inspect(body)}"}
-      _ -> {:error, "newrelic request failed"}
+      _ -> {:error, {:client, "newrelic request failed"}}
     end
   end
 
