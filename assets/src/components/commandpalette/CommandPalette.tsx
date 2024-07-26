@@ -23,22 +23,35 @@ export const Wrapper = styled.div(({ theme }) => ({
     top: '50%',
     transform: 'translate(-50%, -50%)',
     zIndex: theme.zIndexes.modal,
-  },
 
-  '[cmdk-input]': {
-    ...theme.partials.reset.input,
-    ...theme.partials.text.body2,
-    backgroundColor: theme.colors['fill-three'],
-    border: 'none',
-    borderBottom: theme.borders.input,
-    color: theme.colors.text,
-    padding: '14px 16px',
-    width: '100%',
-  },
+    '[cmdk-input]': {
+      ...theme.partials.reset.input,
+      ...theme.partials.text.body2,
+      backgroundColor: theme.colors['fill-three'],
+      border: 'none',
+      borderBottom: theme.borders.input,
+      color: theme.colors.text,
+      padding: '14px 16px',
+      width: '100%',
+    },
 
-  '[cmdk-list]': {
-    backgroundColor: theme.colors['fill-two'],
-    padding: theme.spacing.small,
+    '[cmdk-list]': {
+      backgroundColor: theme.colors['fill-two'],
+      padding: theme.spacing.small,
+
+      '[cmdk-item]': {
+        backgroundColor: theme.colors['fill-two'],
+        borderRadius: theme.borderRadiuses.large,
+        color: theme.colors['text-light'],
+        cursor: 'pointer',
+        padding: '12px 16px',
+
+        '&[data-selected="true"]': {
+          backgroundColor: theme.colors['fill-two-selected'],
+          color: theme.colors.text,
+        },
+      },
+    },
   },
 }))
 
@@ -61,7 +74,12 @@ export default function CommandPalette({ open, setOpen }) {
           <Command.Empty>No results found.</Command.Empty>
 
           <Command.Group>
-            <Command.Item>Home</Command.Item>
+            <Command.Item
+              autoFocus
+              onSelect={() => console.log('home')}
+            >
+              Home
+            </Command.Item>
             <Command.Item>Continuous Deployment (CD)</Command.Item>
             <Command.Item>Stacks</Command.Item>
             <Command.Item>Kubernetes Dashboard</Command.Item>
