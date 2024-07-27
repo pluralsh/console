@@ -238,13 +238,15 @@ defmodule Console.Deployments.PipelinesTest do
 
       expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
 
-      {:ok, %{stg: stage}} = Pipelines.apply_pipeline_context(dev)
+      {:ok, %{stg: %{id: id} = stage}} = Pipelines.apply_pipeline_context(dev)
 
       assert stage.applied_context_id == ctx.id
       pipe_pr = Console.Repo.get_by(Console.Schema.PipelinePullRequest, context_id: ctx.id, service_id: svc.id)
       %{pull_request: pr} = Console.Repo.preload(pipe_pr, [:pull_request])
 
       assert pr.service_id == svc.id
+
+      assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^id}}}
     end
   end
 
@@ -486,6 +488,8 @@ defmodule Console.Deployments.PipelinesTest do
       assert updated.id == job.id
       assert updated.cluster_id == cluster.id
       assert updated.state == :open
+
+      assert_receive {:event, %PubSub.PipelineGateUpdated{item: ^updated}}
     end
 
     test "agents cannot update gates for other clusters" do
@@ -556,6 +560,51 @@ defmodule Console.Deployments.PipelinesTest do
       {:ok, secrets} = Services.configuration(prod_svc)
       assert secrets["name"] == "new-value"
       assert secrets["other"] == "other-value"
+    end
+
+    test "it can apply a pr based promotion to all adjacent pipeline stages" do
+      admin = admin_user()
+      cluster = insert(:cluster)
+      repository = insert(:git_repository)
+
+      pipe = insert(:pipeline)
+      ctx = insert(:pipeline_context, pipeline: pipe)
+      dev = insert(:pipeline_stage, pipeline: pipe, context: ctx)
+      %{id: prd_id} = prod = insert(:pipeline_stage, pipeline: pipe)
+      edge = insert(:pipeline_edge, pipeline: pipe, from: dev, to: prod)
+
+      {:ok, dev_svc} = create_service(cluster, admin, [
+        name: "dev",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        sha: "test-sha",
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "new-value"}]
+      ])
+      dev_svc = Console.Repo.preload(dev_svc, [:revision])
+
+      {:ok, prod_svc} = create_service(cluster, admin, [
+        name: "prod",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
+      ])
+
+      insert(:stage_service, stage: dev, service: dev_svc)
+      insert(:stage_service, stage: prod, service: prod_svc)
+      promo = insert(:pipeline_promotion, stage: dev, revised_at: Timex.now(), context: ctx)
+      insert(:promotion_service, promotion: promo, service: dev_svc, revision: dev_svc.revision)
+
+      {:ok, promod} = Pipelines.apply_promotion(promo)
+
+      assert promod.id == promo.id
+      assert promod.promoted_at
+      assert refetch(edge).promoted_at
+
+      assert refetch(prod).context_id == ctx.id
+
+      assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^prd_id}}}
     end
 
     test "it will block promotion if a gate is not open" do

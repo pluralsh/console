@@ -104,5 +104,6 @@
   object :deployment_subscriptions do
     import_fields :stack_subscriptions
     import_fields :pipeline_subscriptions
+    import_fields :service_subscriptions
   end
 end

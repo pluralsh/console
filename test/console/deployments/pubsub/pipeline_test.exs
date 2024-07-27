@@ -34,7 +34,7 @@ defmodule Console.Deployments.PubSub.PipelineTest do
 
   describe "PipelineGateApproved" do
     test "it will attempt to apply a promotion on approval" do
-      gate = insert(:pipeline_gate)
+      gate = insert(:pipeline_gate, state: :open)
       promo = insert(:pipeline_promotion, stage: gate.edge.from)
       expect(Console.Deployments.Pipelines.Discovery, :promotion, & {:ok, &1})
 

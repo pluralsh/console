@@ -6,7 +6,7 @@ defmodule Console.Deployments.Pipelines.Discovery do
   alias Console.Schema.{PipelinePromotion, PipelineStage}
   alias Console.Deployments.Pipelines.{PromotionWorker, StageWorker}
 
-  @shards 5
+  @shards 10
   @shard_ring HashRing.new() |> HashRing.add_nodes(Enum.to_list(0..@shards))
 
   def promotion(%PipelinePromotion{id: id} = promo),

@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Pipelines do
   use Console.Services.Base
+  require Logger
   use Nebulex.Caching
   import Console.Deployments.Policies
   import Console.Deployments.Pipelines.Stability
@@ -123,7 +124,8 @@ defmodule Console.Deployments.Pipelines do
       end)
       |> execute()
     end)
-    |> execute(extract: :ctx)
+    |> execute()
+    |> flush_context_events(fn %{link: links} -> Map.values(links) end, :ctx)
     |> notify(:create, user)
   end
 
@@ -132,7 +134,6 @@ defmodule Console.Deployments.Pipelines do
     stage
     |> PipelineStage.changeset(%{context_id: ctx_id})
     |> Repo.update()
-    |> notify(:update)
   end
 
   @doc """
@@ -145,8 +146,11 @@ defmodule Console.Deployments.Pipelines do
     |> Repo.update()
   end
 
-  def apply_pipeline_context(%PipelineStage{context_id: ctx_id, applied_context_id: ctx_id} = stage),
-    do: {:ok, stage}
+  def apply_pipeline_context(%PipelineStage{context_id: ctx_id, applied_context_id: ctx_id} = stage) do
+    Logger.info "ignoring applying existing context to stage #{stage.id}"
+    {:ok, stage}
+  end
+
   def apply_pipeline_context(%PipelineStage{} = stage) do
     bot = %{Users.get_bot!("console") | roles: %{admin: true}}
     %{context: ctx} = stage = Repo.preload(stage, [:pipeline, :context, :errors, services: [:service, criteria: :pr_automation]])
@@ -260,6 +264,7 @@ defmodule Console.Deployments.Pipelines do
     |> PipelineGate.update_changeset(attrs)
     |> allow(cluster, :update)
     |> when_ok(:update)
+    |> notify(:update)
   end
 
   @doc """
@@ -306,7 +311,7 @@ defmodule Console.Deployments.Pipelines do
   def build_promotion(%PipelineStage{id: id} = stage) do
     start_transaction()
     |> add_operation(:stage, fn _ ->
-      case Repo.preload(stage, [:from_edges, :context, promotion: [services: :revision], services: [service: :revision]]) do
+      case Repo.preload(stage, [:context, from_edges: :gates, promotion: [services: :revision], services: [service: :revision]]) do
         %{from_edges: [_ | _]} = stage -> {:ok, stage}
         _ -> {:error, "this stage has no successors"}
       end
@@ -322,29 +327,32 @@ defmodule Console.Deployments.Pipelines do
       old = extant(promo)
             |> Map.drop(Enum.map(svcs, fn {%{id: id}, _} -> id end))
             |> Map.values()
-            |> Console.mapify()
+            |> Console.mapify() # prior services to promote w/o a healthy revision yet
+      # services w/ a new healthy revision
       new = Enum.map(svcs, fn {%{id: id, sha: sha}, %{id: rid}} -> %{service_id: id, revision_id: rid, sha: sha} end)
       case promo do
         nil -> %PipelinePromotion{stage_id: id}
         %PipelinePromotion{} = promo -> promo
       end
-      |> PipelinePromotion.changeset(add_revised(%{services: old ++ new}, diff?(stage, svcs, promo)))
+      |> PipelinePromotion.changeset(add_revised(%{services: stabilize_promo(old ++ new, promo)}, legacy_diff?(stage, svcs, promo)))
       |> PipelinePromotion.changeset(%{context_id: stage.context_id})
       |> Repo.insert_or_update()
     end)
-    |> add_operation(:gates, fn %{stage: %{id: id}, build: promo} ->
-      case promo.revised do
-        true ->
-          PipelineGate.for_stage(id)
-          |> PipelineGate.selected()
-          |> Repo.update_all(set: [state: :pending, approver_id: nil])
-          |> elem(1)
-          |> send_updates()
-          |> ok()
-        _ -> {:ok, 0}
-      end
+    |> add_operation(:revised, fn %{build: promo, services: svcs, stage: stage} ->
+      PipelinePromotion.changeset(promo, add_revised(%{}, diff?(stage, svcs, promo)))
+      |> Repo.update()
     end)
-    |> execute(extract: :build)
+    |> add_operation(:gates, fn
+      %{stage: %{id: id}, revised: %{revised: true}} ->
+        PipelineGate.for_stage(id)
+        |> PipelineGate.selected()
+        |> Repo.update_all(set: [state: :pending, approver_id: nil, updated_at: Timex.now()])
+        |> elem(1)
+        |> send_updates()
+        |> ok()
+      _ -> {:ok, 0}
+    end)
+    |> execute(extract: :revised)
     |> notify(:create)
   end
 
@@ -381,7 +389,14 @@ defmodule Console.Deployments.Pipelines do
         _ -> {:ok, promo}
       end
     end)
-    |> execute(extract: :finish)
+    |> execute()
+    |> flush_context_events(fn %{resolve: resolve} ->
+      Enum.filter(resolve, fn
+        {{:ctx, _}, _} -> true
+        _ -> false
+      end)
+      |> Enum.map(fn {_, stage} -> stage end)
+    end, :finish)
   end
 
   defp entry_stages(%Pipeline{stages: stages, edges: edges}) when is_list(stages) and is_list(edges) do
@@ -447,11 +462,16 @@ defmodule Console.Deployments.Pipelines do
   defp diff?(%PipelineStage{context_id: id}, _, %PipelinePromotion{applied_context_id: id})
     when is_binary(id), do: false
 
-  defp diff?(%PipelineStage{context: %PipelineContext{inserted_at: at}}, _, %PipelinePromotion{} = next) do
-    Enum.all?(next.services, &Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at))
+  defp diff?(%PipelineStage{context: %PipelineContext{inserted_at: at}} = promos, _, %PipelinePromotion{} = next) do
+    Repo.preload(next, [services: :revision], force: true)
+    |> Map.get(:services)
+    |> Enum.all?(&Timex.after?(coalesce(&1.revision.updated_at, &1.revision.inserted_at), at)) && gates_stale?(promos)
   end
 
-  defp diff?(_, svcs, %PipelinePromotion{services: [_ | _]} = promo) do
+  defp diff?(_, _, _), do: false
+
+  defp legacy_diff?(_, [], _), do: false
+  defp legacy_diff?(_, svcs, %PipelinePromotion{services: [_ | _]} = promo) do
     by_id = extant(promo)
     Enum.any?(svcs, fn {%{sha: sha} = svc, %{id: r}} ->
       case by_id[svc.id] do
@@ -461,13 +481,28 @@ defmodule Console.Deployments.Pipelines do
       end
     end)
   end
+  defp legacy_diff?(_, _, _), do: true
 
-  defp diff?(_, _, _), do: true
+  defp gates_stale?(%PipelineStage{context: %{inserted_at: at}, from_edges: edges}) do
+    Enum.flat_map(edges, & &1.gates)
+    |> Enum.all?(&Timex.before?(coalesce(&1.updated_at, &1.inserted_at), at))
+  end
+  defp gates_stale?(_), do: true
 
   defp send_updates(gates) do
     Enum.each(gates, &handle_notify(PubSub.PipelineGateUpdated, &1))
     gates
   end
+
+  defp flush_context_events({:ok, result}, mapper, extract) do
+    case mapper.(result) do
+      [_ | _] = stages -> Enum.each(stages, &handle_notify(PubSub.PipelineStageUpdated, &1))
+      %PipelineStage{} = stage -> handle_notify(PubSub.PipelineStageUpdated, stage)
+      _ -> :ok
+    end
+    {:ok, result[extract]}
+  end
+  defp flush_context_events(err, _, _), do: err
 
   defp notify({:ok, %PipelinePromotion{} = promo}, :create),
     do: handle_notify(PubSub.PromotionCreated, promo)

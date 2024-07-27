@@ -165,8 +165,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
   def kick_service(%{service_id: id}, %{context: %{current_user: user}}),
     do: Services.kick(id, user)
 
-  def update_service_components(%{id: id} = args, %{context: %{cluster: cluster}}),
-    do: Services.update_components(Map.take(args, [:errors, :components]), id, cluster)
+  def update_service_components(%{id: id} = args, %{context: %{cluster: cluster}}) do
+    Map.take(args, ~w(errors components sha revision_id)a)
+    |> Services.update_components(id, cluster)
+  end
 
   def merge_service(%{id: id, configuration: config}, %{context: %{current_user: user}}),
     do: Services.merge_service(config, id, user)
