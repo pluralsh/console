@@ -20,26 +20,27 @@ defmodule Console.Deployments.Pipelines.StageWorker do
     do: GenServer.call(name(shard), stage)
 
   def context(shard, %PipelineStage{} = stage),
-    do: GenServer.call(name(shard), {:context, stage}, timeout: 60_000)
+    do: GenServer.call(name(shard), {:context, stage}, 60_000)
 
   def name(shard), do: {:via, Registry, {Supervisor.registry(), {:stage, :shard, shard}}}
 
-  def handle_call({:context, stage}, state) do
-    case Pipelines.apply_pipeline_context(stage) do
+  def handle_call({:context, stage}, _, state) do
+    Logger.info "starting to apply context for stage #{stage.id} (#{stage.name})"
+    case Pipelines.apply_pipeline_context(refetch(stage)) do
       {:ok, _} ->
         Logger.info "stage #{stage.id} context applied successfully"
         {:reply, :ok, state}
       {:error, err} ->
         Logger.info "failed to apply stage context #{stage.id} reason: #{inspect(err)}"
         Pipelines.add_stage_error(stage, "context", "Failed to apply stage context with error: #{format_error(err)}")
-        {:noreply, :error, state}
+        {:reply, :error, state}
     end
   end
 
   def handle_call(%PipelineStage{} = stage, _, state) do
     Logger.info "maybe building promotion for #{stage.id} [#{stage.name}]"
     case Pipelines.build_promotion(stage) do
-      {:ok, _} -> Logger.info "stage #{stage.id} applied successfully"
+      {:ok, _} = promo -> Logger.info "stage #{stage.id} applied successfully: #{inspect(promo)}"
       {:error, err} -> Logger.info "failed to apply stage #{stage.id} reason: #{inspect(err)}"
     end
     {:reply, :ok, state}
@@ -51,6 +52,8 @@ defmodule Console.Deployments.Pipelines.StageWorker do
   end
 
   def handle_info(_, state), do: {:noreply, state}
+
+  defp refetch(%PipelineStage{id: id}), do: Console.Repo.get(PipelineStage, id)
 
   defp format_error(err) when is_binary(err), do: "\n#{err}"
   defp format_error(err), do: inspect(err)

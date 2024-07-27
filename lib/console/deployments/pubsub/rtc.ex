@@ -20,14 +20,12 @@ defimpl Console.PubSub.Rtc, for: [Console.PubSub.PipelineGateUpdated, Console.Pu
   end
 end
 
-# defimpl Console.PubSub.Rtc, for: [
-#   Console.PubSub.ServiceUpdated,
-#   Console.PubSub.ClusterUpdated,
-#   Console.PubSub.ProviderUpdated,
-#   Console.PubSub.GitRepositoryUpdated,
-# ] do
-#   def deliver(%{item: item}), do: {item, :update}
-# end
+defimpl Console.PubSub.Rtc, for: [
+  Console.PubSub.ServiceUpdated,
+  Console.PubSub.ServiceComponentsUpdated,
+] do
+  def deliver(%{item: item}), do: {item, :update}
+end
 
 # defimpl Console.PubSub.Rtc, for: [
 #   Console.PubSub.ServiceCreated,

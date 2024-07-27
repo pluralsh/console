@@ -25,16 +25,20 @@ defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.ServiceComp
         %{stage_services: [_ | _] = ss} -> Enum.map(ss, & &1.stage)
         _ -> :ok
       end
+    else
+      Logger.info "Service #{svc.id} has no recent updates"
     end
   end
   def pipe(_), do: :ok
 end
 
-defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.PipelineGateApproved do
-  def pipe(%{item: gate}) do
+defimpl Console.Deployments.PubSub.Pipelineable, for: [Console.PubSub.PipelineGateApproved, Console.PubSub.PipelineGateUpdated] do
+  alias Console.Schema.{PipelineGate, PipelineEdge, PipelineStage}
+  def pipe(%{item: %PipelineGate{state: :open} = gate}) do
     case Console.Repo.preload(gate, [edge: [from: :promotion]]) do
-      %{edge: %{from: %{promotion: promo}}} -> promo
+      %PipelineGate{edge: %PipelineEdge{from: %PipelineStage{promotion: promo}}} -> promo
       _ -> :ok
     end
   end
+  def pipe(_), do: :ok
 end

@@ -35,3 +35,7 @@ end
 defimpl Console.GraphQl.Topic, for: Console.Schema.Pipeline do
   def infer(%{id: id}, _), do: [pipeline_delta: "pipelines:#{id}"]
 end
+
+defimpl Console.GraphQl.Topic, for: Console.Schema.Service do
+  def infer(%{id: id}, _), do: [service_deployment_delta: "services:#{id}"]
+end

@@ -1,5 +1,12 @@
 defmodule Console.Deployments.Pipelines.Stability do
   alias Console.Deployments.{Services, Clusters}
+  alias Console.Schema.PipelinePromotion
+
+  def stabilize_promo(svcs, %PipelinePromotion{services: [_ | _] = old}) do
+    by_svcs = Map.new(old, & {&1.service_id, &1.id})
+    Enum.map(svcs, &Map.put(&1, :id, by_svcs[&1.service_id]))
+  end
+  def stabilize_promo(svcs, _), do: svcs
 
   def stabilize(nil, attrs), do: Map.drop(attrs, [:edges])
   def stabilize(pipe, attrs) do

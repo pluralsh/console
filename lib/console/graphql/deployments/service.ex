@@ -618,4 +618,15 @@ defmodule Console.GraphQl.Deployments.Service do
       safe_resolve &Deployments.delete_service_context/2
     end
   end
+
+  object :service_subscriptions do
+    field :service_deployment_delta, :service_deployment_delta do
+      arg :id, non_null(:id)
+
+      config fn args, ctx ->
+        with {:ok, svc} <- Deployments.resolve_service(args, ctx),
+          do: {:ok, topic: "services:#{svc.id}"}
+      end
+    end
+  end
 end
