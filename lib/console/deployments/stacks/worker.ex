@@ -33,6 +33,7 @@ defmodule Console.Deployments.Stacks.Worker do
 
   def handle_info(:poll, %State{run: run, bot: bot} = state) do
     %{stack: %{observable_metrics: metrics}} = run = Repo.preload(run, [stack: :observable_metrics], force: true)
+    Logger.info "starting to watch metrics for run #{run.id}"
     case maybe_cancel_run(metrics, run, bot) do
       {:ok, run} -> {:stop, {:shutdown, :normal}, %{state | run: run}}
       {:error, err} ->
@@ -55,7 +56,7 @@ defmodule Console.Deployments.Stacks.Worker do
     Enum.find_value(metrics, fn metric ->
       case Provider.query(metric) do
         {:error, {:client, err}} ->
-          Logger.warn "failed to query metric #{metric}: #{err}"
+          Logger.warn "failed to query metric #{metric.identifier}: #{inspect(err)}"
           nil
         {:error, _} = error -> error
         :ok -> nil
