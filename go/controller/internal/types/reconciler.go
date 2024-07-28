@@ -294,6 +294,7 @@ func Reconcilers() ReconcilerList {
 		ClusterRestoreReconciler,
 		NamespaceCredentialsReconciler,
 		ObservabilityProviderReconciler,
+		StackDefinitionReconciler,
 	}
 }
 

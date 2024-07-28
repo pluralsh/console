@@ -2,6 +2,8 @@ defmodule Console.Deployments.Metrics.Provider.Datadog do
   @behaviour Console.Deployments.Metrics.Provider
   alias Console.Schema.{ObservableMetric, ObservabilityProvider}
 
+  require Logger
+
   defmodule Connection do
     alias Console.Schema.{ObservabilityProvider}
     defstruct [:api_key, :app_key, host: "https://api.datadoghq.com"]
@@ -12,13 +14,14 @@ defmodule Console.Deployments.Metrics.Provider.Datadog do
     def new(_), do: {:error, "invalid datadog api credentials"}
 
     def headers(%__MODULE__{api_key: api_key, app_key: app_key}) do
-      [{"DD-API-KEY", api_key}, {"DD-APP-KEY", app_key}, {"Content-Type", "application/json"}]
+      [{"DD-API-KEY", api_key}, {"DD-APPLICATION-KEY", app_key}, {"Accept", "application/json"}]
     end
   end
 
   def query(%ObservableMetric{identifier: name, provider: provider}) do
+    query = URI.encode_query(%{"name" => name})
     with {:ok, conn} <- Connection.new(provider),
-         {:ok, res} <- get(conn, "/api/v1/monitor?name=#{name}") do
+         {:ok, res} <- get(conn, "/api/v1/monitor?#{query}") do
       case Enum.find(listify(res), & &1["overall_state"] == "Alert") do
         nil -> :ok
         %{"message" => msg} -> {:error, msg}
