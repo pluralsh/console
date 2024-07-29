@@ -110,7 +110,7 @@ export default function CommandPalette({ open, setOpen }) {
   const theme = useTheme()
   const container = useRef(null)
   const [value, setValue] = useState('')
-  const commands = useCommands()
+  const commands = useCommands() // TODO: Reset.
 
   return (
     <Wrapper ref={container}>
@@ -151,7 +151,12 @@ export default function CommandPalette({ open, setOpen }) {
                     <command.icon marginRight="xsmall" />
                     <span className="fade">{command.prefix}</span>
                     <span>{command.label}</span>
-                    {command.rightIcon && <command.rightIcon size={12} />}
+                    {command.rightIcon && (
+                      <command.rightIcon
+                        size={12}
+                        marginLeft="xxsmall"
+                      />
+                    )}
                     <div css={{ flex: 1 }} />
                     <CommandPaletteShortcuts shortcuts={command.shortcuts} />
                   </Command.Item>
