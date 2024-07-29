@@ -54,6 +54,7 @@ type Command = {
   prefix?: string
   label: string
   icon: React.ComponentType<IconProps>
+  shortcuts?: string[]
   action: () => void
   disabled?: boolean
   autoFocus?: boolean
@@ -62,6 +63,11 @@ type Command = {
 type CommandGroup = {
   commands: Command[]
   title?: string
+}
+
+type Shortcut = {
+  hotkeys: string[]
+  action: () => void
 }
 
 export function useCommands(): CommandGroup[] {
@@ -94,47 +100,56 @@ export function useCommands(): CommandGroup[] {
             label: 'Home',
             icon: HomeIcon,
             action: () => navigate(HOME_ABS_PATH),
+            shortcuts: ['H', '1'],
             autoFocus: true,
           },
           {
             label: 'Continuous Deployment (CD)',
             icon: GitPullIcon,
             action: () => navigate(CD_ABS_PATH),
+            shortcuts: ['C', '2'],
           },
           {
             label: 'Stacks',
             icon: StackIcon,
             action: () => navigate(STACKS_ROOT_PATH),
+            shortcuts: ['S', '3'],
           },
           {
             label: 'Kubernetes Dashboard',
             icon: KubernetesAltIcon,
             action: () => navigate(KUBERNETES_ROOT_PATH),
+            shortcuts: ['K', '4'],
           },
           {
             label: 'Pull Requests (PR’s)',
             icon: PrOpenIcon,
             action: () => navigate(PR_ABS_PATH),
+            shortcuts: ['P', '5'],
           },
           {
             label: 'Policies',
             icon: WarningShieldIcon,
             action: () => navigate(POLICIES_ABS_PATH),
+            shortcuts: ['L', '6'],
           },
           {
             label: 'Backups',
             icon: HistoryIcon,
             action: () => navigate(BACKUPS_ABS_PATH),
+            shortcuts: ['B', '7'],
           },
           {
             label: 'Notifications',
             icon: BellIcon,
             action: () => navigate(NOTIFICATIONS_ABS_PATH),
+            shortcuts: ['N', '8'],
           },
           {
             label: 'Settings',
             icon: GearTrainIcon,
             action: () => navigate(SETTINGS_ABS_PATH),
+            shortcuts: ['9'],
           },
         ],
       },
@@ -145,11 +160,12 @@ export function useCommands(): CommandGroup[] {
             label: 'Clusters',
             icon: ClusterIcon,
             action: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`),
+            shortcuts: ['G then C'],
           },
           {
             prefix: 'CD > Clusters >',
             label: 'Pods',
-            icon: ClusterIcon, // TODO: Use new icon.
+            icon: ClusterIcon, // TODO: Use new icon and add shortcuts.
             action: () =>
               navigate(
                 `${getClusterDetailsPath({
@@ -157,24 +173,28 @@ export function useCommands(): CommandGroup[] {
                 })}/${CLUSTER_PODS_PATH}`
               ),
             disabled: !cluster?.id,
+            shortcuts: ['G then P'],
           },
           {
             prefix: 'CD >',
             label: 'Services',
             icon: ToolsIcon,
             action: () => navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`),
+            shortcuts: ['G then S'],
           },
           {
             prefix: 'PR’s >',
             label: 'PR automations',
             icon: PrQueueIcon,
             action: () => navigate(PR_AUTOMATIONS_ABS_PATH),
+            shortcuts: ['G then A'],
           },
           {
             prefix: 'Settings >',
             label: 'User management',
             icon: PeopleIcon,
             action: () => navigate(USER_MANAGEMENT_ABS_PATH),
+            shortcuts: ['G then U'],
           },
         ],
       },
@@ -184,11 +204,13 @@ export function useCommands(): CommandGroup[] {
             label: 'Open docs',
             icon: DocumentIcon,
             action: () => window.open('https://docs.plural.sh', '_blank'),
+            shortcuts: ['shift D'],
           },
           {
             label: 'Help (contact support)',
             icon: LifePreserverIcon,
             action: () => launchHelp(HelpMenuState.intercom),
+            shortcuts: ['shift H'],
           },
         ],
       },
@@ -199,15 +221,34 @@ export function useCommands(): CommandGroup[] {
             icon: LinksIcon,
             action: () =>
               window.navigator.clipboard.writeText(window.location.href),
+            shortcuts: ['shift L'],
           },
           {
             label: `Switch to ${targetThemeColorMode} mode`,
             icon: SprayIcon,
             action: () => setThemeColorMode(targetThemeColorMode),
+            shortcuts: ['shift T'],
           },
         ],
       },
     ],
     [cluster?.id, navigate, targetThemeColorMode]
+  )
+}
+
+export function useShortcuts() {
+  const commands = useCommands()
+
+  return useMemo(
+    () =>
+      commands
+        .map((group) => group.commands)
+        .flat()
+        .filter(({ shortcuts, disabled }) => !isEmpty(shortcuts) && !disabled)
+        .map(
+          ({ shortcuts, action }) =>
+            ({ hotkeys: shortcuts, action }) as Shortcut
+        ),
+    [commands]
   )
 }
