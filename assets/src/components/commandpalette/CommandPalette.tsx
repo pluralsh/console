@@ -2,7 +2,19 @@ import { Command } from 'cmdk'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { setThemeColorMode } from '@pluralsh/design-system'
+
+import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts'
+import { CD_ABS_PATH } from '../../routes/cdRoutesConsts'
+import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
+import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
+import { PR_ABS_PATH } from '../../routes/prRoutesConsts'
+import { POLICIES_ABS_PATH } from '../../routes/policiesRoutesConsts'
+import { BACKUPS_ABS_PATH } from '../../routes/backupRoutesConsts'
+import { NOTIFICATIONS_ABS_PATH } from '../../routes/notificationsRoutesConsts'
+import { SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst'
+import { HelpMenuState, launchHelp } from '../help/HelpLauncher'
 
 export const Wrapper = styled.div(({ theme }) => ({
   '[cmdk-overlay]': {
@@ -67,9 +79,10 @@ export const Wrapper = styled.div(({ theme }) => ({
 }))
 
 export default function CommandPalette({ open, setOpen }) {
-  const theme = useTheme()
-  const targetTheme = theme.mode === 'dark' ? 'light' : 'dark'
   const container = useRef()
+  const theme = useTheme()
+  const targetThemeColorMode = theme.mode === 'dark' ? 'light' : 'dark'
+  const navigate = useNavigate()
 
   return (
     // TODO: Fix.
@@ -81,24 +94,40 @@ export default function CommandPalette({ open, setOpen }) {
         label="Global Command Menu"
       >
         <Command.Input placeholder="Type a command or search..." />
-        <Command.List>
+        <Command.List onSelect={() => setOpen(false)}>
           <Command.Empty>No results found.</Command.Empty>
 
           <Command.Group>
             <Command.Item
               autoFocus
-              onSelect={() => console.log('home')}
+              onSelect={() => navigate(HOME_ABS_PATH)}
             >
               Home
             </Command.Item>
-            <Command.Item>Continuous Deployment (CD)</Command.Item>
-            <Command.Item>Stacks</Command.Item>
-            <Command.Item>Kubernetes Dashboard</Command.Item>
-            <Command.Item>Pull Requests</Command.Item>
-            <Command.Item>Policies</Command.Item>
-            <Command.Item>Backups</Command.Item>
-            <Command.Item>Notifications</Command.Item>
-            <Command.Item>Settings</Command.Item>
+            <Command.Item onSelect={() => navigate(CD_ABS_PATH)}>
+              Continuous Deployment (CD)
+            </Command.Item>
+            <Command.Item onSelect={() => navigate(STACKS_ROOT_PATH)}>
+              Stacks
+            </Command.Item>
+            <Command.Item onSelect={() => navigate(KUBERNETES_ROOT_PATH)}>
+              Kubernetes Dashboard
+            </Command.Item>
+            <Command.Item onSelect={() => navigate(PR_ABS_PATH)}>
+              Pull Requests
+            </Command.Item>
+            <Command.Item onSelect={() => navigate(POLICIES_ABS_PATH)}>
+              Policies
+            </Command.Item>
+            <Command.Item onSelect={() => navigate(BACKUPS_ABS_PATH)}>
+              Backups
+            </Command.Item>
+            <Command.Item onSelect={() => navigate(NOTIFICATIONS_ABS_PATH)}>
+              Notifications
+            </Command.Item>
+            <Command.Item onSelect={() => navigate(SETTINGS_ABS_PATH)}>
+              Settings
+            </Command.Item>
           </Command.Group>
 
           <Command.Separator />
@@ -108,16 +137,30 @@ export default function CommandPalette({ open, setOpen }) {
           <Command.Separator />
 
           <Command.Group>
-            <Command.Item>Open docs</Command.Item>
-            <Command.Item>Help (contact support)</Command.Item>
+            <Command.Item
+              onSelect={() => window.open('https://docs.plural.sh', '_blank')}
+            >
+              Open docs
+            </Command.Item>
+            <Command.Item onSelect={() => launchHelp(HelpMenuState.intercom)}>
+              Help (contact support)
+            </Command.Item>
           </Command.Group>
 
           <Command.Separator />
 
           <Command.Group>
-            <Command.Item>Copy page link</Command.Item>
-            <Command.Item onSelect={() => setThemeColorMode(targetTheme)}>
-              Switch to {targetTheme} mode
+            <Command.Item
+              onSelect={() =>
+                window.navigator.clipboard.writeText(window.location.href)
+              }
+            >
+              Copy page link
+            </Command.Item>
+            <Command.Item
+              onSelect={() => setThemeColorMode(targetThemeColorMode)}
+            >
+              Switch to {targetThemeColorMode} mode
             </Command.Item>
           </Command.Group>
         </Command.List>
