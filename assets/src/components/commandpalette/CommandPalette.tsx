@@ -72,6 +72,14 @@ export const Wrapper = styled.div(({ theme }) => ({
             color: theme.colors['text-light'],
           },
         },
+
+        '&[data-disabled="true"]': {
+          color: theme.colors['text-disabled'],
+
+          '.fade': {
+            color: theme.colors['text-disabled'],
+          },
+        },
       },
 
       '[cmdk-separator]': {
@@ -102,6 +110,7 @@ export default function CommandPalette({ open, setOpen }) {
               <Command.Group title={group.title}>
                 {group.commands.map((command) => (
                   <Command.Item
+                    disabled={command.disabled}
                     onSelect={() => {
                       command.action()
                       setOpen(false)

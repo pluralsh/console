@@ -55,6 +55,7 @@ type Command = {
   label: string
   icon: React.ComponentType<IconProps>
   action: () => void
+  disabled?: boolean
   autoFocus?: boolean
 }
 
@@ -155,6 +156,7 @@ export function useCommands(): CommandGroup[] {
                   clusterId: cluster?.id,
                 })}/${CLUSTER_PODS_PATH}`
               ),
+            disabled: !cluster?.id,
           },
           {
             prefix: 'CD >',
