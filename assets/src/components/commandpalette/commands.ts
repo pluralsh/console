@@ -17,7 +17,6 @@ import {
   setThemeColorMode,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 
 import { CD_ABS_PATH } from '../../routes/cdRoutesConsts'

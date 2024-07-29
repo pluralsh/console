@@ -85,7 +85,6 @@ export default function CommandPalette({ open, setOpen }) {
         <Command.Input placeholder="Type a command or search..." />
         <Command.List onSelect={() => setOpen(false)}>
           <Command.Empty>No results found.</Command.Empty>
-
           {commands.map((group, i) => (
             <>
               <Command.Group title={group.title}>
