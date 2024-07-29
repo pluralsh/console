@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { ComponentType, useMemo } from 'react'
+import { ComponentType, ReactNode, useMemo } from 'react'
 import {
+  ArrowTopRightIcon,
   BellIcon,
   ClusterIcon,
   DocumentIcon,
@@ -54,6 +55,7 @@ type Command = {
   prefix?: string
   label: string
   icon: ComponentType<IconProps>
+  rightIcon?: ComponentType<IconProps>
   shortcuts?: string[]
   action: () => void
   disabled?: boolean
@@ -144,7 +146,7 @@ export function useCommands(): CommandGroup[] {
             label: 'Settings',
             icon: GearTrainIcon,
             action: () => navigate(SETTINGS_ABS_PATH),
-            shortcuts: ['9'],
+            shortcuts: ['A', '9'],
           },
         ],
       },
@@ -198,12 +200,14 @@ export function useCommands(): CommandGroup[] {
           {
             label: 'Open docs',
             icon: DocumentIcon,
+            rightIcon: ArrowTopRightIcon,
             action: () => window.open('https://docs.plural.sh', '_blank'),
             shortcuts: ['shift D'],
           },
           {
             label: 'Help (contact support)',
             icon: LifePreserverIcon,
+            rightIcon: ArrowTopRightIcon,
             action: () => launchHelp(HelpMenuState.intercom),
             shortcuts: ['shift H'],
           },

@@ -2,10 +2,9 @@ import { Command } from 'cmdk'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { useRef, useState } from 'react'
-import { Chip, ReloadIcon } from '@pluralsh/design-system'
+import { ReloadIcon } from '@pluralsh/design-system'
 
 import { useCommands } from './commands'
-import CommandPaletteShortcut from './CommandPaletteShortcut'
 import CommandPaletteShortcuts from './CommandPaletteShortcuts'
 
 export const Wrapper = styled.div(({ theme }) => ({
@@ -151,7 +150,9 @@ export default function CommandPalette({ open, setOpen }) {
                   >
                     <command.icon marginRight="xsmall" />
                     <span className="fade">{command.prefix}</span>
-                    <span css={{ flex: 1 }}>{command.label}</span>
+                    <span>{command.label}</span>
+                    {command.rightIcon && <command.rightIcon size={12} />}
+                    <div css={{ flex: 1 }} />
                     <CommandPaletteShortcuts shortcuts={command.shortcuts} />
                   </Command.Item>
                 ))}
