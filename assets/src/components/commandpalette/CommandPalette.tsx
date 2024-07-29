@@ -1,7 +1,8 @@
 import { Command } from 'cmdk'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
+import { ReloadIcon } from '@pluralsh/design-system'
 
 import { useCommands } from './commands'
 
@@ -41,6 +42,19 @@ export const Wrapper = styled.div(({ theme }) => ({
 
       '::placeholder': {
         color: theme.colors['text-xlight'],
+      },
+    },
+
+    '[cmdk-empty]': {
+      alignItems: 'center',
+      borderRadius: theme.borderRadiuses.large,
+      cursor: 'pointer',
+      display: 'flex',
+      gap: theme.spacing.xsmall,
+      padding: `${theme.spacing.small}px 16px`,
+
+      '&:hover': {
+        backgroundColor: theme.colors['fill-one-hover'],
       },
     },
 
@@ -92,7 +106,9 @@ export const Wrapper = styled.div(({ theme }) => ({
 }))
 
 export default function CommandPalette({ open, setOpen }) {
+  const theme = useTheme()
   const container = useRef(null)
+  const [value, setValue] = useState('')
   const commands = useCommands()
 
   return (
@@ -102,9 +118,24 @@ export default function CommandPalette({ open, setOpen }) {
         onOpenChange={setOpen}
         container={container.current ?? undefined}
       >
-        <Command.Input placeholder="Type a command or search..." />
+        <Command.Input
+          placeholder="Type a command or search..."
+          value={value}
+          onValueChange={setValue}
+        />
         <Command.List onSelect={() => setOpen(false)}>
-          <Command.Empty>No results found.</Command.Empty>
+          <Command.Empty onClick={() => setValue('')}>
+            <ReloadIcon marginRight="xsmall" />
+            <span>Reset search</span>
+            <span
+              css={{
+                ...theme.partials.text.caption,
+                color: theme.colors['text-xlight'],
+              }}
+            >
+              (No results found)
+            </span>
+          </Command.Empty>
           {commands.map((group, i) => (
             <>
               <Command.Group title={group.title}>
