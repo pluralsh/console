@@ -17,13 +17,14 @@ export const Wrapper = styled.div(({ theme }) => ({
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.large,
     boxShadow: theme.boxShadows.modal,
-    width: 480,
-
-    // TODO: Use dialog for positioning?
+    display: 'flex',
+    flexDirection: 'column',
     left: '50%',
+    maxHeight: 480,
     position: 'fixed',
-    top: '50%',
-    transform: 'translate(-50%, -50%)',
+    top: 128,
+    transform: 'translate(-50%, 0)',
+    width: 480,
     zIndex: theme.zIndexes.modal,
 
     '[cmdk-input]': {
@@ -37,12 +38,17 @@ export const Wrapper = styled.div(({ theme }) => ({
       color: theme.colors.text,
       padding: '14px 16px',
       width: '100%',
+
+      '::placeholder': {
+        color: theme.colors['text-xlight'],
+      },
     },
 
     '[cmdk-list]': {
       backgroundColor: theme.colors['fill-one'],
       borderBottomLeftRadius: theme.borderRadiuses.large,
       borderBottomRightRadius: theme.borderRadiuses.large,
+      overflow: 'auto',
       padding: theme.spacing.small,
 
       '[cmdk-item]': {
@@ -88,7 +94,6 @@ export default function CommandPalette({ open, setOpen }) {
         open={open}
         onOpenChange={setOpen}
         container={container.current}
-        label="Command Palette"
       >
         <Command.Input placeholder="Type a command or search..." />
         <Command.List onSelect={() => setOpen(false)}>
