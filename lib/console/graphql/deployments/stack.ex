@@ -16,7 +16,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :cluster_id,     non_null(:id), description: "The cluster on which the terraform will be applied"
     field :git,            non_null(:git_ref_attributes), description: "reference w/in the repository where the IaC lives"
     field :job_spec,       :gate_job_attributes, description: "optional k8s job configuration for the job that will apply this stack"
-    field :configuration,  non_null(:stack_configuration_attributes), description: "version/image config for the tool you're using"
+    field :configuration,  :stack_configuration_attributes, description: "version/image config for the tool you're using"
     field :approval,       :boolean, description: "whether to require approval"
     field :manage_state,   :boolean, description: "whether you want Plural to manage your terraform state for this stack"
     field :workdir,        :string, description: "the subdirectory you want to run the stack's commands w/in"
