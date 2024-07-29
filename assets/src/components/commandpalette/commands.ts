@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useMemo } from 'react'
 import {
   BellIcon,
+  ClusterIcon,
   DocumentIcon,
   GearTrainIcon,
   GitPullIcon,
@@ -10,28 +11,42 @@ import {
   KubernetesAltIcon,
   LifePreserverIcon,
   LinksIcon,
+  PeopleIcon,
   PrOpenIcon,
+  PrQueueIcon,
   SprayIcon,
   StackIcon,
+  ToolsIcon,
   WarningShieldIcon,
   setThemeColorMode,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 
-import { CD_ABS_PATH } from '../../routes/cdRoutesConsts'
+import {
+  CD_ABS_PATH,
+  CLUSTERS_REL_PATH,
+  SERVICES_REL_PATH,
+} from '../../routes/cdRoutesConsts'
 import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
-import { PR_ABS_PATH } from '../../routes/prRoutesConsts'
+import {
+  PR_ABS_PATH,
+  PR_AUTOMATIONS_ABS_PATH,
+} from '../../routes/prRoutesConsts'
 import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts'
 import { POLICIES_ABS_PATH } from '../../routes/policiesRoutesConsts'
 import { BACKUPS_ABS_PATH } from '../../routes/backupRoutesConsts'
 import { NOTIFICATIONS_ABS_PATH } from '../../routes/notificationsRoutesConsts'
-import { SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst'
+import {
+  SETTINGS_ABS_PATH,
+  USER_MANAGEMENT_ABS_PATH,
+} from '../../routes/settingsRoutesConst'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { HelpMenuState, launchHelp } from '../help/HelpLauncher'
 
 type Command = {
-  name: string
+  prefix?: string
+  label: string
   icon: React.ComponentType<IconProps>
   action: () => void
   autoFocus?: boolean
@@ -52,63 +67,96 @@ export function useCommands(): CommandGroup[] {
       {
         commands: [
           {
-            name: 'Home',
+            label: 'Home',
             icon: HomeIcon,
             action: () => navigate(HOME_ABS_PATH),
             autoFocus: true,
           },
           {
-            name: 'Continuous Deployment (CD)',
+            label: 'Continuous Deployment (CD)',
             icon: GitPullIcon,
             action: () => navigate(CD_ABS_PATH),
           },
           {
-            name: 'Stacks',
+            label: 'Stacks',
             icon: StackIcon,
             action: () => navigate(STACKS_ROOT_PATH),
           },
           {
-            name: 'Kubernetes Dashboard',
+            label: 'Kubernetes Dashboard',
             icon: KubernetesAltIcon,
             action: () => navigate(KUBERNETES_ROOT_PATH),
           },
           {
-            name: 'Pull Requests',
+            label: 'Pull Requests (PR’s)',
             icon: PrOpenIcon,
             action: () => navigate(PR_ABS_PATH),
           },
           {
-            name: 'Policies',
+            label: 'Policies',
             icon: WarningShieldIcon,
             action: () => navigate(POLICIES_ABS_PATH),
           },
           {
-            name: 'Backups',
+            label: 'Backups',
             icon: HistoryIcon,
             action: () => navigate(BACKUPS_ABS_PATH),
           },
           {
-            name: 'Notifications',
+            label: 'Notifications',
             icon: BellIcon,
             action: () => navigate(NOTIFICATIONS_ABS_PATH),
           },
           {
-            name: 'Settings',
+            label: 'Settings',
             icon: GearTrainIcon,
             action: () => navigate(SETTINGS_ABS_PATH),
           },
         ],
       },
-      // TODO: Add one more nav group.
       {
         commands: [
           {
-            name: 'Open docs',
+            prefix: 'CD >',
+            label: 'Clusters',
+            icon: ClusterIcon,
+            action: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`),
+          },
+          {
+            prefix: 'CD > Clusters >',
+            label: 'Pods',
+            icon: ClusterIcon, // TODO: Use new icon.
+            action: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`), // TODO: Pick first available cluster.
+          },
+          {
+            prefix: 'CD >',
+            label: 'Services',
+            icon: ToolsIcon,
+            action: () => navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`),
+          },
+          {
+            prefix: 'PR’s >',
+            label: 'PR automations',
+            icon: PrQueueIcon,
+            action: () => navigate(PR_AUTOMATIONS_ABS_PATH),
+          },
+          {
+            prefix: 'Settings >',
+            label: 'User management',
+            icon: PeopleIcon,
+            action: () => navigate(USER_MANAGEMENT_ABS_PATH),
+          },
+        ],
+      },
+      {
+        commands: [
+          {
+            label: 'Open docs',
             icon: DocumentIcon,
             action: () => window.open('https://docs.plural.sh', '_blank'),
           },
           {
-            name: 'Help (contact support)',
+            label: 'Help (contact support)',
             icon: LifePreserverIcon,
             action: () => launchHelp(HelpMenuState.intercom),
           },
@@ -117,13 +165,13 @@ export function useCommands(): CommandGroup[] {
       {
         commands: [
           {
-            name: 'Copy page link',
+            label: 'Copy page link',
             icon: LinksIcon,
             action: () =>
               window.navigator.clipboard.writeText(window.location.href),
           },
           {
-            name: `Switch to ${targetThemeColorMode} mode`,
+            label: `Switch to ${targetThemeColorMode} mode`,
             icon: SprayIcon,
             action: () => setThemeColorMode(targetThemeColorMode),
           },

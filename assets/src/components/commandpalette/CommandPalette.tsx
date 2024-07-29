@@ -50,12 +50,20 @@ export const Wrapper = styled.div(({ theme }) => ({
         color: theme.colors['text-light'],
         cursor: 'pointer',
         display: 'flex',
-        gap: theme.spacing.small,
+        gap: theme.spacing.xxsmall,
         padding: '12px 16px',
+
+        '.fade': {
+          color: theme.colors['text-xlight'],
+        },
 
         '&[data-selected="true"]': {
           backgroundColor: theme.colors['fill-one-selected'],
           color: theme.colors.text,
+
+          '.fade': {
+            color: theme.colors['text-light'],
+          },
         },
       },
 
@@ -95,8 +103,9 @@ export default function CommandPalette({ open, setOpen }) {
                       setOpen(false)
                     }}
                   >
-                    <command.icon />
-                    {command.name}
+                    <command.icon marginRight="xsmall" />
+                    <span className="fade">{command.prefix}</span>
+                    <span>{command.label}</span>
                   </Command.Item>
                 ))}
               </Command.Group>
