@@ -221,7 +221,7 @@ export function useCommands(): CommandGroup[] {
           {
             label: `Switch to ${targetThemeColorMode} mode`,
             icon: SprayIcon,
-            action: () => setThemeColorMode(targetThemeColorMode),
+            action: () => setThemeColorMode(targetThemeColorMode), // TODO
             shortcuts: ['shift T'],
           },
         ],

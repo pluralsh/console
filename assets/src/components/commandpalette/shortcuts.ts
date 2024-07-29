@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
+import { useTheme } from 'styled-components'
 
 import { useCommands } from './commands'
 

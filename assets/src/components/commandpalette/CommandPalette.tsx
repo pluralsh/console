@@ -2,9 +2,11 @@ import { Command } from 'cmdk'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { useRef, useState } from 'react'
-import { ReloadIcon } from '@pluralsh/design-system'
+import { Chip, ReloadIcon } from '@pluralsh/design-system'
 
 import { useCommands } from './commands'
+import CommandPaletteShortcut from './CommandPaletteShortcut'
+import CommandPaletteShortcuts from './CommandPaletteShortcuts'
 
 export const Wrapper = styled.div(({ theme }) => ({
   '[cmdk-overlay]': {
@@ -149,7 +151,8 @@ export default function CommandPalette({ open, setOpen }) {
                   >
                     <command.icon marginRight="xsmall" />
                     <span className="fade">{command.prefix}</span>
-                    <span>{command.label}</span>
+                    <span css={{ flex: 1 }}>{command.label}</span>
+                    <CommandPaletteShortcuts shortcuts={command.shortcuts} />
                   </Command.Item>
                 ))}
               </Command.Group>
