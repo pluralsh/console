@@ -22,11 +22,14 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
+import { isEmpty } from 'lodash'
 
 import {
   CD_ABS_PATH,
   CLUSTERS_REL_PATH,
+  CLUSTER_PODS_PATH,
   SERVICES_REL_PATH,
+  getClusterDetailsPath,
 } from '../../routes/cdRoutesConsts'
 import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import {
@@ -43,6 +46,9 @@ import {
 } from '../../routes/settingsRoutesConst'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { HelpMenuState, launchHelp } from '../help/HelpLauncher'
+import { useClustersTinyQuery } from '../../generated/graphql'
+import { useProjectId } from '../contexts/ProjectsContext'
+import { mapExistingNodes } from '../../utils/graphql'
 
 type Command = {
   prefix?: string
@@ -61,6 +67,23 @@ export function useCommands(): CommandGroup[] {
   const navigate = useNavigate()
   const theme = useTheme()
   const targetThemeColorMode = theme.mode === 'dark' ? 'light' : 'dark'
+  const projectId = useProjectId()
+
+  const { data } = useClustersTinyQuery({
+    pollInterval: 120_000,
+    fetchPolicy: 'cache-and-network',
+    variables: { projectId },
+  })
+
+  const clusters = useMemo(
+    () => mapExistingNodes(data?.clusters),
+    [data?.clusters]
+  )
+
+  const cluster = useMemo(
+    () => (!isEmpty(clusters) ? clusters[0] : undefined),
+    [clusters]
+  )
 
   return useMemo(
     () => [
@@ -126,7 +149,12 @@ export function useCommands(): CommandGroup[] {
             prefix: 'CD > Clusters >',
             label: 'Pods',
             icon: ClusterIcon, // TODO: Use new icon.
-            action: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`), // TODO: Pick first available cluster.
+            action: () =>
+              navigate(
+                `${getClusterDetailsPath({
+                  clusterId: cluster?.id,
+                })}/${CLUSTER_PODS_PATH}`
+              ),
           },
           {
             prefix: 'CD >',
@@ -178,6 +206,6 @@ export function useCommands(): CommandGroup[] {
         ],
       },
     ],
-    [navigate, targetThemeColorMode]
+    [cluster?.id, navigate, targetThemeColorMode]
   )
 }
