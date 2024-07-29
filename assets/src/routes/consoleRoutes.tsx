@@ -26,7 +26,7 @@ import { kubernetesRoute } from './kubernetesRoute'
 import { policiesRoutes } from './policiesRoutes'
 import { stacksRoutes } from './stacksRoutes'
 import { settingsRoutes } from './settingsRoutes'
-import { HOME_ABS_PATH, HOME_REL_PATH } from './consoleRoutesConsts'
+import { HOME_REL_PATH } from './consoleRoutesConsts'
 
 const buildsRoutes = [
   <Route
