@@ -49,15 +49,17 @@ export const Wrapper = styled.div(({ theme }) => ({
       borderBottomLeftRadius: theme.borderRadiuses.large,
       borderBottomRightRadius: theme.borderRadiuses.large,
       overflow: 'auto',
-      padding: theme.spacing.small,
+      padding: `${theme.spacing.small}px 0`,
 
       '[cmdk-item]': {
+        alignItems: 'center',
         borderRadius: theme.borderRadiuses.large,
         color: theme.colors['text-light'],
         cursor: 'pointer',
         display: 'flex',
         gap: theme.spacing.xxsmall,
-        padding: '12px 16px',
+        margin: `0 ${theme.spacing.small}px`,
+        padding: `${theme.spacing.small}px 16px`,
 
         '.fade': {
           color: theme.colors['text-xlight'],
@@ -76,24 +78,22 @@ export const Wrapper = styled.div(({ theme }) => ({
       '[cmdk-separator]': {
         backgroundColor: theme.colors['border-input'],
         height: 1,
-        margin: '12px -12px',
-        width: '100% + 24px', // TODO: Replace workaround.
+        margin: `${theme.spacing.small}px 0`,
       },
     },
   },
 }))
 
 export default function CommandPalette({ open, setOpen }) {
-  const container = useRef()
+  const container = useRef(null)
   const commands = useCommands()
 
   return (
-    // TODO: Fix.
     <Wrapper ref={container}>
       <Command.Dialog
         open={open}
         onOpenChange={setOpen}
-        container={container.current}
+        container={container.current ?? undefined}
       >
         <Command.Input placeholder="Type a command or search..." />
         <Command.List onSelect={() => setOpen(false)}>
