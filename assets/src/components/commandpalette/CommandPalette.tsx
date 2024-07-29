@@ -49,7 +49,7 @@ export const Wrapper = styled.div(({ theme }) => ({
       borderBottomLeftRadius: theme.borderRadiuses.large,
       borderBottomRightRadius: theme.borderRadiuses.large,
       overflow: 'auto',
-      padding: `${theme.spacing.small}px 0`,
+      padding: theme.spacing.small,
 
       '[cmdk-item]': {
         alignItems: 'center',
@@ -58,7 +58,6 @@ export const Wrapper = styled.div(({ theme }) => ({
         cursor: 'pointer',
         display: 'flex',
         gap: theme.spacing.xxsmall,
-        margin: `0 ${theme.spacing.small}px`,
         padding: `${theme.spacing.small}px 16px`,
 
         '.fade': {
@@ -78,7 +77,7 @@ export const Wrapper = styled.div(({ theme }) => ({
       '[cmdk-separator]': {
         backgroundColor: theme.colors['border-input'],
         height: 1,
-        margin: `${theme.spacing.small}px 0`,
+        margin: `${theme.spacing.small}px -${theme.spacing.small}px`,
       },
     },
   },
