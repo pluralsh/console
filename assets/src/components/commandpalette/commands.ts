@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useMemo } from 'react'
+import { ComponentType, useMemo } from 'react'
 import {
   BellIcon,
   ClusterIcon,
@@ -53,7 +53,7 @@ import { mapExistingNodes } from '../../utils/graphql'
 type Command = {
   prefix?: string
   label: string
-  icon: React.ComponentType<IconProps>
+  icon: ComponentType<IconProps>
   shortcuts?: string[]
   action: () => void
   disabled?: boolean
@@ -63,11 +63,6 @@ type Command = {
 type CommandGroup = {
   commands: Command[]
   title?: string
-}
-
-type Shortcut = {
-  hotkeys: string[]
-  action: () => void
 }
 
 export function useCommands(): CommandGroup[] {
@@ -165,7 +160,7 @@ export function useCommands(): CommandGroup[] {
           {
             prefix: 'CD > Clusters >',
             label: 'Pods',
-            icon: ClusterIcon, // TODO: Use new icon and add shortcuts.
+            icon: ClusterIcon, // TODO
             action: () =>
               navigate(
                 `${getClusterDetailsPath({
@@ -233,22 +228,5 @@ export function useCommands(): CommandGroup[] {
       },
     ],
     [cluster?.id, navigate, targetThemeColorMode]
-  )
-}
-
-export function useShortcuts() {
-  const commands = useCommands()
-
-  return useMemo(
-    () =>
-      commands
-        .map((group) => group.commands)
-        .flat()
-        .filter(({ shortcuts, disabled }) => !isEmpty(shortcuts) && !disabled)
-        .map(
-          ({ shortcuts, action }) =>
-            ({ hotkeys: shortcuts, action }) as Shortcut
-        ),
-    [commands]
   )
 }

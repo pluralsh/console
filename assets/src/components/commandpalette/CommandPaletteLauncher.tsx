@@ -1,9 +1,11 @@
 import { Chip, SearchIcon } from '@pluralsh/design-system'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { usePlatform } from 'components/hooks/usePlatform'
 import styled, { useTheme } from 'styled-components'
 
 import CommandPalette from './CommandPalette'
+import CommandPaletteShortcut from './CommandPaletteShortcut'
+import { useShortcuts } from './shortcuts'
 
 export const CommandPaletteLauncherSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,
@@ -36,23 +38,14 @@ export const CommandPaletteLauncherSC = styled.button(({ theme }) => ({
 
 export default function CommandPaletteLauncher() {
   const [open, setOpen] = useState(false)
-
-  // Toggle the menu when ⌘K is pressed
-  useEffect(() => {
-    const down = (e) => {
-      if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setOpen((open) => !open)
-      }
-    }
-
-    document.addEventListener('keydown', down)
-
-    return () => document.removeEventListener('keydown', down)
-  }, [])
-
+  const openCommandPalette = useCallback(
+    () => setOpen((open) => !open),
+    [setOpen]
+  )
+  const shortcuts = useShortcuts([
+    { hotkeys: ['cmd K', 'ctrl K'], action: openCommandPalette },
+  ])
   const { modKeyString, keyCombinerString } = usePlatform()
-  const openCommandPalette = useCallback(() => setOpen(true), [setOpen])
   const theme = useTheme()
 
   return (
@@ -79,6 +72,9 @@ export default function CommandPaletteLauncher() {
         open={open}
         setOpen={setOpen}
       />
+      {shortcuts.map((shortcut) => (
+        <CommandPaletteShortcut shortcut={shortcut} />
+      ))}
     </>
   )
 }
