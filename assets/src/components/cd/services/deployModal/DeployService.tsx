@@ -2,12 +2,10 @@ import {
   Button,
   GearTrainIcon,
   GitHubIcon,
-  GitPullIcon,
   ListIcon,
   PadlockLockedIcon,
   Stepper,
 } from '@pluralsh/design-system'
-import { Priority, useRegisterActions } from 'kbar'
 
 import {
   ClusterTinyFragment,
@@ -16,7 +14,7 @@ import {
   useGitRepositoriesQuery,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
@@ -26,8 +24,6 @@ import {
   RepoKindSelector,
 } from 'components/cd/utils/RepoKindSelector'
 import ModalAlt from 'components/cd/ModalAlt'
-
-import { PaletteSection } from 'components/CommandPalette'
 
 import { DeployServiceSettingsGit } from './DeployServiceSettingsGit'
 import { DeployServiceSettingsBasic } from './DeployServiceSettingsBasic'
@@ -472,22 +468,6 @@ export function DeployService({
   cluster?: ClusterTinyFragment
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const kbarActions = useMemo(
-    () => [
-      {
-        section: PaletteSection.Actions,
-        id: `deploy-service`,
-        priority: Priority.HIGH,
-        name: `Deploy new service${cluster ? ` to ${cluster.name}` : ''}`,
-        icon: <GitPullIcon />,
-        shortcut: [],
-        perform: () => setIsOpen(true),
-      },
-    ],
-    [cluster]
-  )
-
-  useRegisterActions(kbarActions, [kbarActions])
 
   return (
     <>
