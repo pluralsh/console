@@ -104,7 +104,6 @@ export default function StackRunHeader({
         />
       </div>
       {stackRun.status === StackStatus.Cancelled && (
-        // TODO: Add severity and remove margin
         <Callout
           title="This run has been cancelled"
           severity="neutral"
