@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ComponentType, useCallback, useEffect, useMemo } from 'react'
+import { ComponentType, useCallback, useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   BellIcon,
