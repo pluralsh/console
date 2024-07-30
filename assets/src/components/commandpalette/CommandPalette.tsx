@@ -1,8 +1,10 @@
 import { Command } from 'cmdk'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
-import { useRef, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { ReloadIcon } from '@pluralsh/design-system'
+
+import { useEdgeNodes } from '../hooks/reactFlowHooks'
 
 import { useCommands } from './commands'
 import CommandPaletteShortcuts from './CommandPaletteShortcuts'
@@ -106,11 +108,19 @@ export const Wrapper = styled.div(({ theme }) => ({
   },
 }))
 
-export default function CommandPalette({ open, setOpen }) {
+export default function CommandPalette({
+  open,
+  setOpen,
+}: {
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+}) {
   const theme = useTheme()
   const container = useRef(null)
   const [value, setValue] = useState('')
-  const commands = useCommands() // TODO: Reset.
+  const commands = useCommands()
+
+  useEffect(() => setValue(''), [open])
 
   return (
     <Wrapper ref={container}>
@@ -124,7 +134,7 @@ export default function CommandPalette({ open, setOpen }) {
           value={value}
           onValueChange={setValue}
         />
-        <Command.List onSelect={() => setOpen(false)}>
+        <Command.List>
           <Command.Empty onClick={() => setValue('')}>
             <ReloadIcon marginRight="xsmall" />
             <span>Reset search</span>
