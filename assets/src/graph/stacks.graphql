@@ -308,8 +308,8 @@ query StackRun($id: ID!) {
     approver {
       ...User
     }
+    cancellationReason
     stack {
-      cancellationReason
       observableMetrics {
         provider {
           name

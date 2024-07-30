@@ -103,12 +103,12 @@ export default function StackRunHeader({
           refetch={refetch}
         />
       </div>
-      {stackRun.stack?.cancellationReason && (
+      {stackRun.cancellationReason && (
         <Callout
           title="This run has been cancelled"
           severity="neutral"
         >
-          {stackRun.stack.cancellationReason}
+          {stackRun.cancellationReason}
         </Callout>
       )}
       <StackRunNav stackRun={stackRun} />

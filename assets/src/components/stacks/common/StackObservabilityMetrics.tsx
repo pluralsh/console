@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { isEmpty } from 'lodash'
+
 import { Maybe, ObservableMetric } from '../../../generated/graphql'
 
 export default function StackObservabilityMetrics({
@@ -7,6 +9,8 @@ export default function StackObservabilityMetrics({
 }: {
   observableMetrics?: Maybe<Maybe<ObservableMetric>[]>
 }) {
+  if (isEmpty(observableMetrics)) return 'No metrics'
+
   return (
     <div>
       {observableMetrics?.map((metric) => <div>{metric?.identifier}</div>)}
