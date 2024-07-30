@@ -173,6 +173,10 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 	if err := in.ensure(prAutomation); err != nil {
 		return nil, err
 	}
+	attributes, err = in.attributes(ctx, prAutomation)
+	if err != nil {
+		return nil, err
+	}
 	return in.ConsoleClient.CreatePrAutomation(ctx, *attributes)
 }
 
