@@ -1,16 +1,9 @@
-import {
-  Button,
-  CloudIcon,
-  FormField,
-  Input,
-  Modal,
-} from '@pluralsh/design-system'
+import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { produce } from 'immer'
 import isEmpty from 'lodash/isEmpty'
 import merge from 'lodash/merge'
 import { PartialDeep } from 'type-fest'
-import { Priority, useRegisterActions } from 'kbar'
 
 import {
   CloudProviderSettingsAttributes,
@@ -22,7 +15,6 @@ import {
   ReactNode,
   useCallback,
   useEffect,
-  useMemo,
   useReducer,
   useRef,
   useState,

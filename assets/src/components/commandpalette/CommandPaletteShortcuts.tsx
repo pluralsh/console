@@ -1,11 +1,6 @@
-import { Command } from 'cmdk'
-import styled, { useTheme } from 'styled-components'
-import chroma from 'chroma-js'
-import { useRef, useState } from 'react'
-import { Chip, ReloadIcon, WrapWithIf } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
 
-import { useCommands } from './commands'
-import { Shortcut } from './shortcuts'
+import { WrapWithIf } from '@pluralsh/design-system'
 
 export default function CommandPaletteShortcuts({
   shortcuts,

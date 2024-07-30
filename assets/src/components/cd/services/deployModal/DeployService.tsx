@@ -2,12 +2,10 @@ import {
   Button,
   GearTrainIcon,
   GitHubIcon,
-  GitPullIcon,
   ListIcon,
   PadlockLockedIcon,
   Stepper,
 } from '@pluralsh/design-system'
-import { Priority, useRegisterActions } from 'kbar'
 
 import {
   ClusterTinyFragment,
@@ -16,7 +14,7 @@ import {
   useGitRepositoriesQuery,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
-import { FormEvent, useCallback, useMemo, useState } from 'react'
+import { FormEvent, useCallback, useState } from 'react'
 import { mapExistingNodes } from 'utils/graphql'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'

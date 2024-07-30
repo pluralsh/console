@@ -4,8 +4,6 @@ import chroma from 'chroma-js'
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 import { ReloadIcon } from '@pluralsh/design-system'
 
-import { useEdgeNodes } from '../hooks/reactFlowHooks'
-
 import { useCommands } from './commands'
 import CommandPaletteShortcuts from './CommandPaletteShortcuts'
 
