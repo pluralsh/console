@@ -121,8 +121,8 @@ mutation DeletePrAutomation($id: ID!) {
     }
 }
 
-mutation CreatePullRequest($id: ID!, $branch: String, $context: Json) {
-    createPullRequest(id: $id, branch: $branch, context: $context) {
+mutation CreatePullRequest($id: ID!,$identifier: String, $branch: String, $context: Json) {
+    createPullRequest(id: $id, identifier: $identifier, branch: $branch, context: $context) {
         ...PullRequestFragment
     }
 }

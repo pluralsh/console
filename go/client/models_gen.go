@@ -4192,7 +4192,7 @@ type StackAttributes struct {
 	// optional k8s job configuration for the job that will apply this stack
 	JobSpec *GateJobAttributes `json:"jobSpec,omitempty"`
 	// version/image config for the tool you're using
-	Configuration StackConfigurationAttributes `json:"configuration"`
+	Configuration *StackConfigurationAttributes `json:"configuration,omitempty"`
 	// whether to require approval
 	Approval *bool `json:"approval,omitempty"`
 	// whether you want Plural to manage your terraform state for this stack

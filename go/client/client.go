@@ -87,7 +87,7 @@ type ConsoleClient interface {
 	CreatePrAutomation(ctx context.Context, attributes PrAutomationAttributes, interceptors ...clientv2.RequestInterceptor) (*CreatePrAutomation, error)
 	UpdatePrAutomation(ctx context.Context, id string, attributes PrAutomationAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdatePrAutomation, error)
 	DeletePrAutomation(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeletePrAutomation, error)
-	CreatePullRequest(ctx context.Context, id string, branch *string, context *string, interceptors ...clientv2.RequestInterceptor) (*CreatePullRequest, error)
+	CreatePullRequest(ctx context.Context, id string, identifier *string, branch *string, context *string, interceptors ...clientv2.RequestInterceptor) (*CreatePullRequest, error)
 	GetGroup(ctx context.Context, name string, interceptors ...clientv2.RequestInterceptor) (*GetGroup, error)
 	CreateGroup(ctx context.Context, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGroup, error)
 	UpdateGroup(ctx context.Context, groupID string, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGroup, error)
@@ -19880,8 +19880,8 @@ func (c *Client) DeletePrAutomation(ctx context.Context, id string, interceptors
 	return &res, nil
 }
 
-const CreatePullRequestDocument = `mutation CreatePullRequest ($id: ID!, $branch: String, $context: Json) {
-	createPullRequest(id: $id, branch: $branch, context: $context) {
+const CreatePullRequestDocument = `mutation CreatePullRequest ($id: ID!, $identifier: String, $branch: String, $context: Json) {
+	createPullRequest(id: $id, identifier: $identifier, branch: $branch, context: $context) {
 		... PullRequestFragment
 	}
 }
@@ -19894,11 +19894,12 @@ fragment PullRequestFragment on PullRequest {
 }
 `
 
-func (c *Client) CreatePullRequest(ctx context.Context, id string, branch *string, context *string, interceptors ...clientv2.RequestInterceptor) (*CreatePullRequest, error) {
+func (c *Client) CreatePullRequest(ctx context.Context, id string, identifier *string, branch *string, context *string, interceptors ...clientv2.RequestInterceptor) (*CreatePullRequest, error) {
 	vars := map[string]any{
-		"id":      id,
-		"branch":  branch,
-		"context": context,
+		"id":         id,
+		"identifier": identifier,
+		"branch":     branch,
+		"context":    context,
 	}
 
 	var res CreatePullRequest

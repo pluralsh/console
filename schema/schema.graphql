@@ -1106,7 +1106,7 @@ input StackAttributes {
   jobSpec: GateJobAttributes
 
   "version\/image config for the tool you're using"
-  configuration: StackConfigurationAttributes!
+  configuration: StackConfigurationAttributes
 
   "whether to require approval"
   approval: Boolean
