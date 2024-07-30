@@ -52,8 +52,11 @@ export const Wrapper = styled.div(({ theme }) => ({
       display: 'flex',
       gap: theme.spacing.xsmall,
       padding: `${theme.spacing.small}px 16px`,
+
+      ':hover': {
+        backgroundColor: theme.colors['fill-one-hover'],
+      },
     },
-    // todo add hovers
 
     '[cmdk-list]': {
       backgroundColor: theme.colors['fill-one'],
@@ -102,6 +105,10 @@ export const Wrapper = styled.div(({ theme }) => ({
           '.fade': {
             color: theme.colors['text-disabled'],
           },
+        },
+
+        ':hover': {
+          backgroundColor: theme.colors['fill-one-hover'],
         },
       },
 
