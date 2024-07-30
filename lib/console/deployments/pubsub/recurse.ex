@@ -138,11 +138,12 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
 end
 
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
-  alias Console.Schema.Stack
+  alias Console.Schema.{Stack, PullRequest}
   alias Console.Deployments.Stacks
 
   def process(%{item: run}) do
-    case Console.Repo.preload(run, [:stack]) do
+    case Console.Repo.preload(run, [:stack, :pull_request]) do
+      %{pull_request: %PullRequest{} = pr} -> Stacks.dequeue(pr)
       %{stack: %Stack{} = stack} -> Stacks.dequeue(stack)
       _ -> :ok
     end
