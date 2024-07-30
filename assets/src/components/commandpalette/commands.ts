@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ComponentType, useMemo } from 'react'
+import { ComponentType, useCallback, useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   BellIcon,
@@ -68,10 +68,14 @@ type CommandGroup = {
 }
 
 export function useCommands(): CommandGroup[] {
-  const navigate = useNavigate()
   const theme = useTheme()
-  const targetThemeColorMode = theme.mode === 'dark' ? 'light' : 'dark'
+  const navigate = useNavigate()
   const projectId = useProjectId()
+
+  const toggleTheme = useCallback(
+    () => setThemeColorMode(theme.mode === 'dark' ? 'light' : 'dark'),
+    [theme.mode]
+  )
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -223,14 +227,14 @@ export function useCommands(): CommandGroup[] {
             shortcuts: ['shift L'],
           },
           {
-            label: `Switch to ${targetThemeColorMode} mode`,
+            label: `Switch to ${theme.mode === 'dark' ? 'light' : 'dark'} mode`,
             icon: SprayIcon,
-            action: () => setThemeColorMode(targetThemeColorMode), // TODO
+            action: toggleTheme,
             shortcuts: ['shift T'],
           },
         ],
       },
     ],
-    [cluster?.id, navigate, targetThemeColorMode]
+    [cluster?.id, navigate, theme.mode, toggleTheme]
   )
 }
