@@ -1482,6 +1482,9 @@ type StackRun {
   "Arbitrary variables to add to a stack run"
   variables: Json
 
+  "explanation for why this run was cancelled"
+  cancellationReason: String
+
   stateUrls: StateUrls
 
   "the kubernetes job for this run (useful for debugging if issues arise)"

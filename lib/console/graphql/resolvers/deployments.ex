@@ -58,7 +58,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ServiceImport,
     StackDefinition,
     StackCron,
-    ObservableMetrics
+    ObservableMetric
   }
 
   def query(Project, _), do: Project
