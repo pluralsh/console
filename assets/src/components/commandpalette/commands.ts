@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ComponentType, useCallback, useMemo } from 'react'
+import { ComponentType, useCallback, useEffect, useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   BellIcon,
@@ -72,9 +72,10 @@ export function useCommands(): CommandGroup[] {
   const navigate = useNavigate()
   const projectId = useProjectId()
 
-  const toggleThemeColorMode = useCallback(() => {
-    setThemeColorMode(themeColorMode === 'dark' ? 'light' : 'dark')
-  }, [themeColorMode])
+  const toggleThemeColorMode = useCallback(
+    () => setThemeColorMode(themeColorMode === 'dark' ? 'light' : 'dark'),
+    [themeColorMode]
+  )
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
