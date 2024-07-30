@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   AppIcon,
   Button,
+  Callout,
   GitCommitIcon,
   GraphQLToast,
   ReloadIcon,
@@ -102,6 +103,15 @@ export default function StackRunHeader({
           refetch={refetch}
         />
       </div>
+      {stackRun.status === StackStatus.Cancelled && (
+        // TODO: Add severity and remove margin
+        <Callout
+          title="This run has been cancelled"
+          severity="neutral"
+        >
+          {stackRun.stack?.cancellationReason}
+        </Callout>
+      )}
       <StackRunNav stackRun={stackRun} />
     </div>
   )
