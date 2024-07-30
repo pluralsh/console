@@ -20,8 +20,8 @@ import {
   ToolsIcon,
   WarningShieldIcon,
   setThemeColorMode,
+  useThemeColorMode,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { isEmpty } from 'lodash'
 
@@ -68,14 +68,13 @@ type CommandGroup = {
 }
 
 export function useCommands(): CommandGroup[] {
-  const theme = useTheme()
+  const themeColorMode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
 
-  const toggleTheme = useCallback(
-    () => setThemeColorMode(theme.mode === 'dark' ? 'light' : 'dark'),
-    [theme.mode]
-  )
+  const toggleThemeColorMode = useCallback(() => {
+    setThemeColorMode(themeColorMode === 'dark' ? 'light' : 'dark')
+  }, [themeColorMode])
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -227,14 +226,16 @@ export function useCommands(): CommandGroup[] {
             shortcuts: ['shift L'],
           },
           {
-            label: `Switch to ${theme.mode === 'dark' ? 'light' : 'dark'} mode`,
+            label: `Switch to ${
+              themeColorMode === 'dark' ? 'light' : 'dark'
+            } mode`,
             icon: SprayIcon,
-            action: toggleTheme,
+            action: toggleThemeColorMode,
             shortcuts: ['shift T'],
           },
         ],
       },
     ],
-    [cluster?.id, navigate, theme.mode, toggleTheme]
+    [cluster?.id, navigate, themeColorMode, toggleThemeColorMode]
   )
 }
