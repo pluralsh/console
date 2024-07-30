@@ -81,7 +81,7 @@ export const Wrapper = styled.div(({ theme }) => ({
           color: theme.colors['text-xlight'],
         },
 
-        '& > div div.kbd': {
+        '.kbd': {
           backgroundColor: theme.colors['fill-two'],
           border: theme.borders['fill-two'],
         },
@@ -94,7 +94,7 @@ export const Wrapper = styled.div(({ theme }) => ({
             color: theme.colors['text-light'],
           },
 
-          '& > div div.kbd': {
+          '.kbd': {
             backgroundColor: theme.colors['fill-three'],
             border: theme.borders['fill-three'],
           },
