@@ -18,6 +18,7 @@ import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
 import { TRUNCATE } from '../../utils/truncate'
 
 import StackStatusChip from '../common/StackStatusChip'
+import StackRunIcon from '../common/StackRunIcon'
 
 export default function StackRunsEntry({
   stackRun,
@@ -57,19 +58,7 @@ export default function StackRunsEntry({
       }}
       onClick={() => navigate(getStackRunsAbsPath(stackId, id))}
     >
-      <AppIcon
-        size="xxsmall"
-        icon={
-          stackRun.status === StackStatus.PendingApproval ? (
-            <WarningShieldIcon
-              width={32}
-              color="icon-warning"
-            />
-          ) : (
-            <CliIcon width={32} />
-          )
-        }
-      />
+      <StackRunIcon status={stackRun.status} />
       <div
         css={{
           display: 'flex',
