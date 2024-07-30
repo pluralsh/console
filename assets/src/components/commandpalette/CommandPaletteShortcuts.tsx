@@ -25,16 +25,15 @@ export default function CommandPaletteShortcuts({
         <WrapWithIf
           condition={!['or', 'then'].includes(chunk.toLowerCase())}
           wrapper={
-            <span
+            <div
               key={i}
+              className="kbd"
               style={{
                 ...theme.partials.text.caption,
                 alignItems: 'center',
                 display: 'flex',
                 justifyContent: 'center',
                 padding: theme.spacing.xxsmall,
-                backgroundColor: theme.colors['fill-two'], // TODO
-                border: theme.borders['fill-two'],
                 borderRadius: '4px',
                 height: 20,
                 minWidth: 20,

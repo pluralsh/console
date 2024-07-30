@@ -1,4 +1,4 @@
-import { Command } from 'cmdk'
+import { Command, useCommandState } from 'cmdk'
 import styled, { useTheme } from 'styled-components'
 import chroma from 'chroma-js'
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
@@ -81,12 +81,22 @@ export const Wrapper = styled.div(({ theme }) => ({
           color: theme.colors['text-xlight'],
         },
 
+        '& > div div.kbd': {
+          backgroundColor: theme.colors['fill-two'],
+          border: theme.borders['fill-two'],
+        },
+
         '&[data-selected="true"]': {
           backgroundColor: theme.colors['fill-one-selected'],
           color: theme.colors.text,
 
           '.fade': {
             color: theme.colors['text-light'],
+          },
+
+          '& > div div.kbd': {
+            backgroundColor: theme.colors['fill-three'],
+            border: theme.borders['fill-three'],
           },
         },
 
