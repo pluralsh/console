@@ -58,7 +58,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ServiceImport,
     StackDefinition,
     StackCron,
-    ObservableMetric
+    ObservableMetric,
+    ObservabilityProvider
   }
 
   def query(Project, _), do: Project
@@ -115,6 +116,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(StackDefinition, _), do: StackDefinition
   def query(StackCron, _), do: StackCron
   def query(ObservableMetric, _), do: ObservableMetric
+  def query(ObservabilityProvider, _), do: ObservabilityProvider
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
