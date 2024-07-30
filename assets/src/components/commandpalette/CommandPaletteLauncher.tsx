@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { usePlatform } from 'components/hooks/usePlatform'
 import styled, { useTheme } from 'styled-components'
 
-import CommandPalette from './CommandPalette'
+import CommandPaletteDialog from './CommandPaletteDialog'
 import CommandPaletteShortcut from './CommandPaletteShortcut'
 import { useShortcuts } from './shortcuts'
 
@@ -68,7 +68,7 @@ export default function CommandPaletteLauncher() {
           </Chip>
         </div>
       </CommandPaletteLauncherSC>
-      <CommandPalette
+      <CommandPaletteDialog
         open={open}
         setOpen={setOpen}
       />
