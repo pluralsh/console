@@ -13,6 +13,7 @@ import {
   LifePreserverIcon,
   LinksIcon,
   PeopleIcon,
+  PodContainerIcon,
   PrOpenIcon,
   PrQueueIcon,
   SprayIcon,
@@ -166,7 +167,7 @@ export function useCommands(): CommandGroup[] {
           {
             prefix: 'CD > Clusters >',
             label: 'Pods',
-            icon: ClusterIcon, // TODO
+            icon: PodContainerIcon,
             action: () =>
               navigate(
                 `${getClusterDetailsPath({
