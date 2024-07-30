@@ -63,8 +63,10 @@ export const Wrapper = styled.div(({ theme }) => ({
       backgroundColor: theme.colors['fill-one'],
       borderBottomLeftRadius: theme.borderRadiuses.large,
       borderBottomRightRadius: theme.borderRadiuses.large,
+      height: `calc(var(--cmdk-list-height) + ${theme.spacing.small * 2}px)`,
       overflow: 'auto',
       padding: theme.spacing.small,
+      transition: 'height 100ms ease',
 
       '[cmdk-item]': {
         alignItems: 'center',
