@@ -1,18 +1,15 @@
 import {
-  AppIcon,
   CaretRightIcon,
-  CliIcon,
   GitCommitIcon,
   IconFrame,
   Tooltip,
-  WarningShieldIcon,
 } from '@pluralsh/design-system'
 import moment from 'moment'
 import { CSSObject, useTheme } from 'styled-components'
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
 
-import { StackRunFragment, StackStatus } from '../../../generated/graphql'
+import { StackRunFragment } from '../../../generated/graphql'
 import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
 
 import { TRUNCATE } from '../../utils/truncate'
