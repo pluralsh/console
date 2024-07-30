@@ -7075,7 +7075,7 @@ export type StackAttributes = {
   /** The cluster on which the terraform will be applied */
   clusterId: Scalars['ID']['input'];
   /** version/image config for the tool you're using */
-  configuration: StackConfigurationAttributes;
+  configuration?: InputMaybe<StackConfigurationAttributes>;
   /** id of an scm connection to use for pr callbacks */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** a cron to spawn runs for this stack */
