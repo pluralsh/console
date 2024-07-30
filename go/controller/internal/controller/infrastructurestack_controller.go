@@ -390,8 +390,8 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	return attr, nil
 }
 
-func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf v1alpha1.StackConfiguration) console.StackConfigurationAttributes {
-	attrs := console.StackConfigurationAttributes{
+func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf v1alpha1.StackConfiguration) *console.StackConfigurationAttributes {
+	attrs := &console.StackConfigurationAttributes{
 		Version: lo.ToPtr(conf.Version),
 		Image:   conf.Image,
 	}

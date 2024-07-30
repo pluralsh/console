@@ -85,5 +85,5 @@ func (c *client) IsPrAutomationExistsByName(ctx context.Context, name string) (b
 }
 
 func (c *client) CreatePullRequest(ctx context.Context, prAutomationID string, branch *string, context *string) (*console.CreatePullRequest, error) {
-	return c.consoleClient.CreatePullRequest(ctx, prAutomationID, branch, context)
+	return c.consoleClient.CreatePullRequest(ctx, prAutomationID, nil, branch, context)
 }
