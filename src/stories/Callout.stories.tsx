@@ -33,6 +33,7 @@ export default {
 
 const styles: CalloutProps['severity'][] = [
   'info',
+  'neutral',
   'success',
   'warning',
   'danger',
@@ -61,7 +62,12 @@ function Template({
   title,
   fillLevel,
   onFillLevel,
-}: CalloutProps & { withButton: boolean; onFillLevel: FillLevel }) {
+  noContent,
+}: CalloutProps & {
+  withButton: boolean
+  noContent?: boolean
+  onFillLevel: FillLevel
+}) {
   let Wrapper = Div
   let wrapperProps = {}
 
@@ -93,7 +99,11 @@ function Template({
           buttonProps={withButton ? { children: 'Button text' } : undefined}
           expandable={expandable}
         >
-          {size === 'compact' ? compactContent : fullContent}
+          {noContent
+            ? undefined
+            : size === 'compact'
+            ? compactContent
+            : fullContent}
         </Callout>
       ))}
     </Wrapper>
@@ -188,6 +198,15 @@ export const WithTitle = Template.bind({})
 WithTitle.args = {
   title: 'Title text - How to write a dummy title',
   size: 'full',
+  withButton: false,
+  onFillLevel: 0,
+}
+
+export const OnlyTitle = Template.bind({})
+OnlyTitle.args = {
+  title: 'Title text - How to write a dummy title',
+  size: 'full',
+  noContent: true,
   withButton: false,
   onFillLevel: 0,
 }

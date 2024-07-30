@@ -7,7 +7,7 @@ import AnimateHeight from 'react-animate-height'
 
 import { type ColorKey, type SeverityExt, sanitizeSeverity } from '../types'
 
-import { CaretDownIcon, CloseIcon } from '../icons'
+import { CaretDownIcon, CloseIcon, InfoOutlineIcon } from '../icons'
 
 import { useDisclosure } from '../hooks/useDisclosure'
 
@@ -27,6 +27,7 @@ import IconFrame from './IconFrame'
 
 const CALLOUT_SEVERITIES = [
   'info',
+  'neutral',
   'danger',
   'warning',
   'success',
@@ -42,6 +43,7 @@ export type CalloutSize = 'compact' | 'full'
 
 const severityToIconColorKey: Record<CalloutSeverity, ColorKey> = {
   info: 'icon-info',
+  neutral: 'icon-light',
   success: 'icon-success',
   warning: 'icon-warning',
   danger: 'icon-danger',
@@ -49,6 +51,7 @@ const severityToIconColorKey: Record<CalloutSeverity, ColorKey> = {
 
 const severityToBorderColorKey: Record<CalloutSeverity, ColorKey> = {
   info: 'border-info',
+  neutral: 'border-selected',
   success: 'border-success',
   warning: 'border-warning',
   danger: 'border-danger',
@@ -56,6 +59,7 @@ const severityToBorderColorKey: Record<CalloutSeverity, ColorKey> = {
 
 const severityToText: Record<CalloutSeverity, string> = {
   info: 'Info',
+  neutral: 'Neutral',
   success: 'Success',
   warning: 'Warning',
   danger: 'Danger',
@@ -63,6 +67,7 @@ const severityToText: Record<CalloutSeverity, string> = {
 
 const severityToIcon: Record<CalloutSeverity, any> = {
   info: InfoIcon,
+  neutral: InfoOutlineIcon,
   success: StatusOkIcon,
   warning: WarningIcon,
   danger: ErrorIcon,
@@ -198,7 +203,9 @@ const Callout = forwardRef<HTMLDivElement, CalloutProps>(
               {title}
             </h6>
             <AnimateHeight
-              contentClassName={classNames('body', { bodyWithTitle: !!title })}
+              contentClassName={classNames('body', {
+                bodyWithTitle: !!title && !!children,
+              })}
               duration={300}
               height={
                 (expandable && expanded) || !expandable
