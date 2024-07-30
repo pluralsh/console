@@ -7254,6 +7254,8 @@ export type StackRun = {
   approvedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the approver of this job */
   approver?: Maybe<User>;
+  /** explanation for why this run was cancelled */
+  cancellationReason?: Maybe<Scalars['String']['output']>;
   /** the cluster this stack runs on */
   cluster?: Maybe<Cluster>;
   /** version/image config for the tool you're using */

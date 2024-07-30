@@ -243,10 +243,10 @@ defmodule Console.Deployments.Stacks do
       {%StackRun{
         id: id,
         stack_id: stack_id,
-        status: :pending_approval,
+        status: status,
         state: %StackState{plan: plan},
         pull_request: %PullRequest{} = pr
-      }, %ScmConnection{} = conn}  when is_binary(plan) ->
+      }, %ScmConnection{} = conn}  when is_binary(plan) and status in ~w(pending_approval successful)a ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
         Dispatcher.review(conn, pr, pr_blob("stack_summary", plan: plan, link: url))
       {%StackRun{
@@ -260,7 +260,7 @@ defmodule Console.Deployments.Stacks do
       {%StackRun{
         id: id,
         stack_id: stack_id,
-        status: :succeeded,
+        status: :successful,
         pull_request: %PullRequest{} = pr
       }, %ScmConnection{} = conn} ->
         url = Console.url("/stacks/#{stack_id}/runs/#{id}")
