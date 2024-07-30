@@ -26,6 +26,7 @@ import { kubernetesRoute } from './kubernetesRoute'
 import { policiesRoutes } from './policiesRoutes'
 import { stacksRoutes } from './stacksRoutes'
 import { settingsRoutes } from './settingsRoutes'
+import { HOME_REL_PATH } from './consoleRoutesConsts'
 
 const buildsRoutes = [
   <Route
@@ -161,7 +162,7 @@ export const consoleRoutes: RouteObject[] = [
 
   // HOME
   {
-    path: 'home',
+    path: HOME_REL_PATH,
     element: <Home />,
   },
 

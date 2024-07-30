@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 
 import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
-import CommandPaletteLauncher from 'components/CommandPaletteLauncher'
+import CommandPaletteLauncher from 'components/commandpalette/CommandPaletteLauncher'
 
 import DemoBanner from './DemoBanner'
 import ProjectSelect from './ProjectSelect'
