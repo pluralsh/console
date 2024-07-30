@@ -152,7 +152,9 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 	if exists && !prAutomation.Status.HasID() {
 		return nil, nil
 	}
-
+	if err := in.ensure(prAutomation); err != nil {
+		return nil, err
+	}
 	attributes, err := in.attributes(ctx, prAutomation)
 	if err != nil {
 		return nil, err
@@ -170,9 +172,6 @@ func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alph
 	}
 
 	logger.Info("Creating PR automation")
-	if err := in.ensure(prAutomation); err != nil {
-		return nil, err
-	}
 	return in.ConsoleClient.CreatePrAutomation(ctx, *attributes)
 }
 
