@@ -32,12 +32,18 @@ const Compatibility = memo(
         textValue={label}
         icon={
           isCompatible ? (
-            <CheckIcon color={theme.colors['icon-success']} />
+            <CheckIcon
+              color={theme.colors['icon-success']}
+              size={16}
+            />
           ) : (
-            <CloseIcon color={theme.colors['icon-disabled']} />
+            <CloseIcon
+              color={theme.colors['icon-disabled']}
+              size={16}
+            />
           )
         }
-        css={{ borderRadius: '50%' }}
+        css={{ borderRadius: '50%', height: 43, width: 43 }}
       />
     )
   }
@@ -78,10 +84,25 @@ const generateCompatCol = (kubeVersion: string) =>
     }
   )
 
-const colVersion = columnHelper.accessor((row) => row.version, {
+const colVersion = columnHelper.accessor((row) => row, {
   id: 'version',
   header: 'Version',
-  cell: ({ getValue }) => <TabularNumbers>{getValue()}</TabularNumbers>,
+  cell: function Cell({
+    row: {
+      original: { version, chartVersion },
+    },
+  }) {
+    const theme = useTheme()
+
+    return (
+      <TabularNumbers>
+        <div css={{ ...theme.partials.text.body2LooseLineHeight }}>
+          {version}
+        </div>
+        <div css={{ color: theme.colors['text-xlight'] }}>{chartVersion}</div>
+      </TabularNumbers>
+    )
+  },
 })
 
 export default function ClusterAddOnCompatibility() {
