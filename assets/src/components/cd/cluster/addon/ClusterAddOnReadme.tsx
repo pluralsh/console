@@ -6,7 +6,7 @@ import { useRuntimeServiceQuery } from 'generated/graphql'
 
 import MarkdocComponent from '../../../utils/MarkdocContent'
 
-import { useClusterAddOnContext } from './ClusterAddOnDetails'
+import { useClusterAddOnContext } from './ClusterAddOn'
 import { versionPlaceholder } from './ClusterAddOnReleases'
 
 export default function ClusterAddOnReadme() {

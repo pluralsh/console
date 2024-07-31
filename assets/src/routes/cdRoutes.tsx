@@ -44,7 +44,7 @@ import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
 import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
-import ClusterAddOnDetails from '../components/cd/cluster/addon/ClusterAddOnDetails'
+import ClusterAddOn from '../components/cd/cluster/addon/ClusterAddOn'
 import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
 import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
 import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnReleases'
@@ -327,7 +327,7 @@ const clusterDetailsRoutes = [
   <Route
     key="cluster-addon"
     path={`${CLUSTER_REL_PATH}/${CLUSTER_ADDONS_REL_PATH}/:${CLUSTER_ADDONS_PARAM_ID}`}
-    element={<ClusterAddOnDetails />}
+    element={<ClusterAddOn />}
   >
     <Route
       index

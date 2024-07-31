@@ -209,7 +209,6 @@ export default function Stacks() {
           flexDirection: 'column',
           gap: theme.spacing.small,
           marginRight: theme.spacing.xlarge,
-
           minWidth: 340,
           width: 340,
         }}

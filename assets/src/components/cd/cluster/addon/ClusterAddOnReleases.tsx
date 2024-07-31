@@ -11,7 +11,7 @@ import LoadingIndicator from '../../../utils/LoadingIndicator'
 import { GqlError } from '../../../utils/Alert'
 import { InlineLink } from '../../../utils/typography/InlineLink'
 
-import { useClusterAddOnContext } from './ClusterAddOnDetails'
+import { useClusterAddOnContext } from './ClusterAddOn'
 
 type Release = {
   version: string

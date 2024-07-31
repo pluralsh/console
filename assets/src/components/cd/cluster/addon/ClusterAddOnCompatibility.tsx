@@ -9,7 +9,7 @@ import { AddonVersion } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
-import { useClusterAddOnContext } from './ClusterAddOnDetails'
+import { useClusterAddOnContext } from './ClusterAddOn'
 
 const Compatibility = memo(
   ({

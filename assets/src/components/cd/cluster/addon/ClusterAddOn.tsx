@@ -8,7 +8,6 @@ import {
 import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import {
   RuntimeServiceFragment,
@@ -28,14 +27,21 @@ import { SideNavEntries } from 'components/layout/SideNavEntries'
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
-  ListBoxItem,
   LoopingLogo,
-  Select,
+  SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useEffect, useMemo, useState } from 'react'
 
-import ClusterAddOnDetailsSidecar from './ClusterAddOnDetailsSidecar'
+import { isNonNullable } from '../../../../utils/isNonNullable'
+
+import ClusterSelector from '../../utils/ClusterSelector'
+
+import { TabularNumbers } from '../../../cluster/TableElements'
+
+import { toNiceVersion } from '../../../../utils/semver'
+
+import ClusterAddOnEntry from './ClusterAddOnEntry'
 
 type ClusterAddOnContextType = {
   runtimeService: RuntimeServiceFragment
@@ -89,17 +95,19 @@ const directory = [
   },
 ]
 
-export default function ClusterAddOnDetails() {
+export default function ClusterAddOn() {
   const theme = useTheme()
   const navigate = useNavigate()
   const { pathname } = useLocation()
   const params = useParams()
   const addOnId = params[CLUSTER_ADDONS_PARAM_ID] as string
   const clusterId = params[CLUSTER_PARAM_ID] as string
+
   const pathPrefix = getClusterAddOnDetailsPath({
     clusterId,
     addOnId,
   })
+
   const [kubeVersionVar, setKubeVersionVar] = useState('')
 
   const { data, error, previousData } = useRuntimeServicesQuery({
@@ -113,7 +121,7 @@ export default function ClusterAddOnDetails() {
   })
   const rtsData = data || previousData
   const cluster = rtsData?.cluster
-  const runtimeServices = cluster?.runtimeServices
+  const runtimeServices = cluster?.runtimeServices?.filter(isNonNullable)
   const kubeVersion = cluster?.currentVersion || cluster?.version || ''
 
   useEffect(() => setKubeVersionVar(kubeVersion), [kubeVersion])
@@ -129,72 +137,68 @@ export default function ClusterAddOnDetails() {
       [addOnId, cluster, clusterId, rts]
     )
   )
-  if (!runtimeServices) {
-    return <LoopingLogo />
-  }
+  if (!runtimeServices) return <LoopingLogo />
 
   return (
     <ResponsiveLayoutPage>
-      <ResponsiveLayoutSidenavContainer>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.medium,
+          marginRight: theme.spacing.xlarge,
+          minWidth: 320,
+          width: 320,
+        }}
+      >
+        <ClusterSelector
+          clusterId={clusterId}
+          allowDeselect={false}
+          onClusterChange={(c) => {
+            if (c?.id) navigate(`#`) // nav to first available addon
+          }}
+        />
         <div
           css={{
-            display: 'flex',
-            flexDirection: 'column',
-            rowGap: theme.spacing.medium,
-            overflow: 'hidden',
-            maxHeight: '100%',
+            border: theme.borders.default,
+            marginBottom: theme.spacing.large,
+            overflowY: 'auto',
           }}
         >
-          <Select
-            selectedKey={rts?.id}
-            onSelectionChange={(id) => {
-              if (id) {
-                navigate(
-                  getClusterAddOnDetailsPath({
-                    clusterId: cluster?.id,
-                    addOnId: id as string,
-                  })
-                )
-              }
-            }}
-            leftContent={
-              rts?.addon?.icon ? (
-                <img
-                  src={rts?.addon?.icon}
-                  css={{ width: theme.spacing.medium }}
-                />
-              ) : undefined
-            }
-          >
-            {runtimeServices.map((r) => (
-              <ListBoxItem
-                key={r?.id}
-                label={r?.name}
-                textValue=""
-                leftContent={
-                  r?.addon?.icon ? (
-                    <img
-                      src={r?.addon?.icon}
-                      css={{ width: theme.spacing.medium }}
-                    />
-                  ) : undefined
-                }
-              />
-            ))}
-          </Select>
-          <div
-            css={{
-              overflowY: 'auto',
-              paddingBottom: theme.spacing.medium,
-            }}
-          >
-            <SideNavEntries
-              directory={directory}
-              pathname={pathname}
-              pathPrefix={pathPrefix}
+          {runtimeServices.map((addon, i) => (
+            <ClusterAddOnEntry
+              addon={addon}
+              active={addon.id === rts?.id}
+              last={runtimeServices.length - 1 === i}
             />
-          </div>
+          ))}
         </div>
+      </div>
+
+      <ResponsiveLayoutSidenavContainer>
+        <SideNavEntries
+          directory={directory}
+          pathname={pathname}
+          pathPrefix={pathPrefix}
+        />
+        {rts?.name && (
+          <SidecarItem heading="Add-on name"> {rts.name}</SidecarItem>
+        )}
+        <SidecarItem heading="Add-on version">
+          <TabularNumbers
+            css={{
+              ...theme.partials.text.body2,
+            }}
+          >
+            {toNiceVersion(rts?.addonVersion?.version)}
+          </TabularNumbers>
+          <br />
+        </SidecarItem>
+        {kubeVersion && (
+          <SidecarItem heading="Kubernetes version">
+            <TabularNumbers>{toNiceVersion(kubeVersion)}</TabularNumbers>
+          </SidecarItem>
+        )}
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer role="main">
@@ -213,12 +217,6 @@ export default function ClusterAddOnDetails() {
           <LoadingIndicator />
         )}
       </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSidecarContainer>
-        <ClusterAddOnDetailsSidecar
-          runtimeService={rts}
-          kubeVersion={kubeVersion}
-        />
-      </ResponsiveLayoutSidecarContainer>
       <ResponsiveLayoutSpacer />
     </ResponsiveLayoutPage>
   )
