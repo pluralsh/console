@@ -1,5 +1,3 @@
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 import { useRuntimeServiceQuery } from 'generated/graphql'
@@ -26,13 +24,11 @@ export default function ClusterAddOnReadme() {
     )
 
   return (
-    <ScrollablePage heading="Readme">
-      <MarkdocComponent
-        raw={
-          data?.runtimeService?.addon?.readme ||
-          'No readme available for this component'
-        }
-      />
-    </ScrollablePage>
+    <MarkdocComponent
+      raw={
+        data?.runtimeService?.addon?.readme ||
+        'No readme available for this component'
+      }
+    />
   )
 }

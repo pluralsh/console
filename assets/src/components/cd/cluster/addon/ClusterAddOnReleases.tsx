@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { useRuntimeServiceQuery } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
@@ -66,24 +65,19 @@ export default function ClusterAddOnReleases() {
       />
     )
 
+  if (isEmpty(releases)) return null
+
   return (
-    <ScrollablePage
-      heading="Releases"
-      scrollable={false}
-    >
-      {!isEmpty(releases) && (
-        <FullHeightTableWrap>
-          <Table
-            data={releases}
-            columns={columns}
-            reactTableOptions={{ getRowId: (row) => row.version }}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
-      )}
-    </ScrollablePage>
+    <FullHeightTableWrap>
+      <Table
+        data={releases}
+        columns={columns}
+        reactTableOptions={{ getRowId: (row) => row.version }}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </FullHeightTableWrap>
   )
 }

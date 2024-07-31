@@ -4,7 +4,6 @@ import { CheckIcon, CloseIcon, IconFrame, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { coerce, compare } from 'semver'
 
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { AddonVersion } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
@@ -114,31 +113,26 @@ export default function ClusterAddOnCompatibility() {
     [kubeVersions]
   )
 
+  if (!rts?.addon?.versions) return null
+
   return (
-    <ScrollablePage
-      heading="Compatibility"
-      scrollable={false}
-    >
-      {rts?.addon?.versions && (
-        <FullHeightTableWrap>
-          <Table
-            data={rts?.addon?.versions || []}
-            columns={columns}
-            stickyColumn
-            reactTableOptions={{
-              getRowId: (row) => row.version,
-              meta: {
-                kubeVersion,
-                version: rts?.addonVersion?.version,
-              },
-            }}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
-      )}
-    </ScrollablePage>
+    <FullHeightTableWrap>
+      <Table
+        data={rts?.addon?.versions || []}
+        columns={columns}
+        stickyColumn
+        reactTableOptions={{
+          getRowId: (row) => row.version,
+          meta: {
+            kubeVersion,
+            version: rts?.addonVersion?.version,
+          },
+        }}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </FullHeightTableWrap>
   )
 }

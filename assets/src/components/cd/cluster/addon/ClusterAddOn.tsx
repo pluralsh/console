@@ -1,13 +1,10 @@
 import {
   Outlet,
-  useLocation,
+  useMatch,
   useNavigate,
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import {
   RuntimeServiceFragment,
@@ -23,23 +20,21 @@ import {
   getClusterAddOnDetailsPath,
   getClusterDetailsPath,
 } from 'routes/cdRoutesConsts'
-import { SideNavEntries } from 'components/layout/SideNavEntries'
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
   LoopingLogo,
-  SidecarItem,
+  SubTab,
+  TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import { isNonNullable } from '../../../../utils/isNonNullable'
-
 import ClusterSelector from '../../utils/ClusterSelector'
-
-import { TabularNumbers } from '../../../cluster/TableElements'
-
 import { toNiceVersion } from '../../../../utils/semver'
+import { LinkTabWrap } from '../../../utils/Tabs'
+import { PropCard } from '../../globalServices/details/GlobalServiceInfo'
 
 import ClusterAddOnEntry from './ClusterAddOnEntry'
 
@@ -81,24 +76,20 @@ const directory = [
   {
     path: 'compatibility',
     label: 'Compatibility',
-    enabled: true,
   },
   {
     path: 'releases',
     label: 'Releases',
-    enabled: true,
   },
   {
     path: 'readme',
-    label: 'Readme',
-    enabled: true,
+    label: 'README',
   },
 ]
 
 export default function ClusterAddOn() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { pathname } = useLocation()
   const params = useParams()
   const addOnId = params[CLUSTER_ADDONS_PARAM_ID] as string
   const clusterId = params[CLUSTER_PARAM_ID] as string
@@ -107,6 +98,12 @@ export default function ClusterAddOn() {
     clusterId,
     addOnId,
   })
+  const tabStateRef = useRef<any>(null)
+  const pathMatch = useMatch(
+    `${getClusterAddOnDetailsPath({ clusterId, addOnId })}/:tab`
+  )
+  const tab = pathMatch?.params?.tab || ''
+  const currentTab = directory.find(({ path }) => path === tab)
 
   const [kubeVersionVar, setKubeVersionVar] = useState('')
 
@@ -174,34 +171,47 @@ export default function ClusterAddOn() {
           ))}
         </div>
       </div>
-
-      <ResponsiveLayoutSidenavContainer>
-        <SideNavEntries
-          directory={directory}
-          pathname={pathname}
-          pathPrefix={pathPrefix}
-        />
-        {rts?.name && (
-          <SidecarItem heading="Add-on name"> {rts.name}</SidecarItem>
-        )}
-        <SidecarItem heading="Add-on version">
-          <TabularNumbers
-            css={{
-              ...theme.partials.text.body2,
-            }}
-          >
-            {toNiceVersion(rts?.addonVersion?.version)}
-          </TabularNumbers>
-          <br />
-        </SidecarItem>
-        {kubeVersion && (
-          <SidecarItem heading="Kubernetes version">
-            <TabularNumbers>{toNiceVersion(kubeVersion)}</TabularNumbers>
-          </SidecarItem>
-        )}
-      </ResponsiveLayoutSidenavContainer>
-      <ResponsiveLayoutSpacer />
-      <ResponsiveLayoutContentContainer role="main">
+      <div>
+        <TabList
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            selectedKey: currentTab?.path,
+          }}
+          marginRight="medium"
+          paddingBottom="medium"
+          minHeight={56}
+        >
+          {directory.map(({ label, path }) => (
+            <LinkTabWrap
+              subTab
+              key={path}
+              textValue={label}
+              to={`${pathPrefix}/${path}`}
+            >
+              <SubTab
+                key={path}
+                textValue={label}
+              >
+                {label}
+              </SubTab>
+            </LinkTabWrap>
+          ))}
+        </TabList>
+        <div
+          css={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, 1fr)',
+            gridAutoRows: 'min-content',
+            gridGap: theme.spacing.small,
+          }}
+        >
+          <PropCard title="Add-on">{rts?.name}</PropCard>
+          <PropCard title="Add-on version">{rts?.name}</PropCard>
+          <PropCard title="Kubernetes version">
+            {toNiceVersion(kubeVersion)}
+          </PropCard>
+        </div>
         {error ? (
           <GqlError error={error} />
         ) : rts ? (
@@ -216,8 +226,7 @@ export default function ClusterAddOn() {
         ) : (
           <LoadingIndicator />
         )}
-      </ResponsiveLayoutContentContainer>
-      <ResponsiveLayoutSpacer />
+      </div>
     </ResponsiveLayoutPage>
   )
 }
