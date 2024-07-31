@@ -27,21 +27,17 @@ const Compatibility = memo(
 
     return (
       <IconFrame
-        size="small"
-        type={isCurrentVersion ? 'secondary' : 'tertiary'}
+        type={isCurrentVersion ? 'floating' : 'tertiary'}
         tooltip={label}
         textValue={label}
         icon={
           isCompatible ? (
             <CheckIcon color={theme.colors['icon-success']} />
           ) : (
-            // eslint-disable-next-line react/jsx-no-useless-fragment
-            <CloseIcon
-              color={theme.colors['icon-default']}
-              css={{ opacity: theme.mode === 'light' ? 0.2 : 0.1 }}
-            />
+            <CloseIcon color={theme.colors['icon-disabled']} />
           )
         }
+        css={{ borderRadius: '50%' }}
       />
     )
   }
@@ -123,10 +119,7 @@ export default function ClusterAddOnCompatibility() {
         stickyColumn
         reactTableOptions={{
           getRowId: (row) => row.version,
-          meta: {
-            kubeVersion,
-            version: rts?.addonVersion?.version,
-          },
+          meta: { kubeVersion, version: rts?.addonVersion?.version },
         }}
         css={{
           maxHeight: 'unset',
