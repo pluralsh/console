@@ -88,6 +88,15 @@ export default function ClusterAddOnEntry({
           <Chip
             size="small"
             severity="danger"
+            css={
+              active
+                ? undefined
+                : {
+                    '.children': {
+                      color: theme.colors['text-xlight'],
+                    },
+                  }
+            }
           >
             Blocking
           </Chip>

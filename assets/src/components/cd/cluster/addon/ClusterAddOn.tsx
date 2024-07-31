@@ -23,12 +23,13 @@ import {
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
 import {
+  Chip,
   LoopingLogo,
   SubTab,
   TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { isNonNullable } from '../../../../utils/isNonNullable'
 import ClusterSelector from '../../utils/ClusterSelector'
@@ -143,7 +144,7 @@ export default function ClusterAddOn() {
           display: 'flex',
           flexDirection: 'column',
           gap: theme.spacing.medium,
-          marginRight: theme.spacing.xlarge,
+          marginRight: theme.spacing.large,
           minWidth: 320,
           width: 320,
         }}
@@ -171,16 +172,20 @@ export default function ClusterAddOn() {
           ))}
         </div>
       </div>
-      <div>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          flexGrow: 1,
+          gap: theme.spacing.medium,
+        }}
+      >
         <TabList
           stateRef={tabStateRef}
           stateProps={{
             orientation: 'horizontal',
             selectedKey: currentTab?.path,
           }}
-          marginRight="medium"
-          paddingBottom="medium"
-          minHeight={56}
         >
           {directory.map(({ label, path }) => (
             <LinkTabWrap
@@ -204,10 +209,24 @@ export default function ClusterAddOn() {
             gridTemplateColumns: 'repeat(3, 1fr)',
             gridAutoRows: 'min-content',
             gridGap: theme.spacing.small,
+            marginBottom: theme.spacing.medium,
           }}
         >
           <PropCard title="Add-on">{rts?.name}</PropCard>
-          <PropCard title="Add-on version">{rts?.name}</PropCard>
+          <PropCard title="Add-on version">
+            <div
+              css={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+              }}
+            >
+              {toNiceVersion(rts?.addonVersion?.version)}
+              {rts?.addonVersion?.blocking === true && (
+                <Chip severity="danger">Blocking</Chip>
+              )}
+            </div>
+          </PropCard>
           <PropCard title="Kubernetes version">
             {toNiceVersion(kubeVersion)}
           </PropCard>
