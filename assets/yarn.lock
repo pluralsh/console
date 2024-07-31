@@ -9624,14 +9624,14 @@ __metadata:
   linkType: hard
 
 "@whatwg-node/node-fetch@npm:^0.5.16":
-  version: 0.5.19
-  resolution: "@whatwg-node/node-fetch@npm:0.5.19"
+  version: 0.5.20
+  resolution: "@whatwg-node/node-fetch@npm:0.5.20"
   dependencies:
     "@kamilkisiela/fast-url-parser": ^1.1.4
     busboy: ^1.6.0
     fast-querystring: ^1.1.1
     tslib: ^2.6.3
-  checksum: d02ea257c0b578048d5e2d6fd7905b42eb443a7fb51b36caeca5cfdcbfa4533ffd83b92f81247e91b226f551919696c9855b565b6d7db9f4329ab9b0bf01dd5d
+  checksum: b030ce2cc55d16f6434797d9d5e297c46bb17f40ef79c6818b1717a4b829f9b5b515e6a50e15fd2acec45e32aba27445e80d4060d0924d354f313249d1330a0a
   languageName: node
   linkType: hard
 
