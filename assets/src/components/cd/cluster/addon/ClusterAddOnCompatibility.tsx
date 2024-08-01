@@ -51,38 +51,36 @@ const Compatibility = memo(
 
 const columnHelper = createColumnHelper<AddonVersion>()
 
-const generateCompatCol = (kubeVersion: string) =>
-  columnHelper.accessor(
+const generateCompatCol = (kubeVersion: string, currentKubeVersion: string) => {
+  const semverColVersion = coerce(kubeVersion)
+  const semverCurrentVersion = coerce(currentKubeVersion)
+  const highlight =
+    semverCurrentVersion?.major === semverColVersion?.major &&
+    semverCurrentVersion?.minor === semverColVersion?.minor
+
+  return columnHelper.accessor(
     (row) => row?.kube?.some((k) => k?.trim() === kubeVersion),
     {
       id: `compat-${kubeVersion}`,
       header: kubeVersion,
+      meta: { highlight },
       cell: ({
         getValue,
         row: { original },
         table: {
           options: { meta },
         },
-      }) => {
-        const val = getValue()
-
-        const semverColVersion = coerce(kubeVersion)
-        const semverVersion = coerce((meta as any)?.kubeVersion)
-
-        const highlight =
-          original.version === (meta as any)?.version &&
-          semverVersion?.major === semverColVersion?.major &&
-          semverVersion?.minor === semverColVersion?.minor
-
-        return (
-          <Compatibility
-            isCompatible={!!val}
-            isCurrentVersion={highlight}
-          />
-        )
-      },
+      }) => (
+        <Compatibility
+          isCompatible={!!getValue()}
+          isCurrentVersion={
+            original.version === (meta as any)?.version && highlight
+          }
+        />
+      ),
     }
   )
+}
 
 const colVersion = columnHelper.accessor((row) => row, {
   id: 'version',
@@ -125,9 +123,11 @@ export default function ClusterAddOnCompatibility() {
   const columns = useMemo(
     () => [
       colVersion,
-      ...kubeVersions.map((kubeV) => generateCompatCol(kubeV)),
+      ...kubeVersions.map((kubeV) =>
+        generateCompatCol(kubeV, kubeVersion ?? '')
+      ),
     ],
-    [kubeVersions]
+    [kubeVersions, kubeVersion]
   )
 
   if (!rts?.addon?.versions) return null
@@ -138,6 +138,7 @@ export default function ClusterAddOnCompatibility() {
         data={rts?.addon?.versions || []}
         columns={columns}
         stickyColumn
+        highlightedRowId={rts.version}
         reactTableOptions={{
           getRowId: (row) => row.version,
           meta: { kubeVersion, version: rts?.addonVersion?.version },
