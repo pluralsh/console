@@ -149,32 +149,24 @@ export default function ClusterAddOns() {
     return <EmptyState message="This cluster doesn’t have any add-ons." />
 
   return (
-    <div css={{ display: 'flex' }}>
+    <div css={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       <div
         css={{
           display: 'flex',
           flexDirection: 'column',
-          gap: theme.spacing.medium,
+          flexShrink: 0,
           marginRight: theme.spacing.medium,
-          minWidth: 360,
-          width: 360,
+          overflowY: 'auto',
+          width: 320,
         }}
       >
-        <div
-          css={{
-            border: theme.borders.default,
-            marginBottom: theme.spacing.large,
-            overflowY: 'auto',
-          }}
-        >
-          {addOns.map((addon, i) => (
-            <ClusterAddOnsEntry
-              addon={addon}
-              active={addon.id === addOn?.id}
-              last={addOns.length - 1 === i}
-            />
-          ))}
-        </div>
+        {addOns.map((addon, i) => (
+          <ClusterAddOnsEntry
+            addon={addon}
+            active={addon.id === addOn?.id}
+            first={i === 0}
+          />
+        ))}
       </div>
       <div
         css={{

@@ -13,11 +13,11 @@ import {
 export default function ClusterAddOnsEntry({
   addon,
   active,
-  last,
+  first,
 }: {
   addon: RuntimeServiceFragment
   active: boolean
-  last: boolean
+  first: boolean
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -37,6 +37,10 @@ export default function ClusterAddOnsEntry({
       }}
       css={{
         padding: theme.spacing.medium,
+        borderLeft: theme.borders.default,
+        borderRight: theme.borders.default,
+        borderTop: first ? theme.borders.default : undefined,
+
         ...(active
           ? {
               backgroundColor: theme.colors['fill-zero-selected'],
@@ -44,7 +48,7 @@ export default function ClusterAddOnsEntry({
               cursor: 'default',
             }
           : {
-              borderBottom: last ? undefined : theme.borders.default,
+              borderBottom: theme.borders.default,
               cursor: 'pointer',
 
               '&:hover': {
