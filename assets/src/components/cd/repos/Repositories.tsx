@@ -7,13 +7,13 @@ import {
 } from '@pluralsh/design-system'
 import {
   AuthMethod,
+  FluxHelmRepositoriesQuery,
   GitRepositoriesDocument,
   GitRepositoriesQuery,
   type GitRepositoryFragment,
-  HelmRepositoriesQuery,
   useDeleteGitRepositoryMutation,
+  useFluxHelmRepositoriesQuery,
   useGitRepositoriesQuery,
-  useHelmRepositoriesQuery,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { Key, useMemo, useState } from 'react'
@@ -143,7 +143,7 @@ export default function Repositories() {
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-  const helmQueryResult = useHelmRepositoriesQuery({
+  const helmQueryResult = useFluxHelmRepositoriesQuery({
     skip: repoKind !== RepoKind.Helm,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
@@ -153,7 +153,7 @@ export default function Repositories() {
     repoKind === RepoKind.Helm ? helmQueryResult : gitQueryResult
   const list =
     repoKind === RepoKind.Helm
-      ? helmQueryResult?.data?.helmRepositories
+      ? helmQueryResult?.data?.fluxHelmRepositories
       : gitQueryResult?.data?.gitRepositories?.edges
   const statusCounts = useMemo(
     () =>
@@ -208,7 +208,7 @@ export default function Repositories() {
         <FullHeightTableWrap>
           {repoKind === RepoKind.Helm ? (
             <HelmRepositoriesTable
-              data={data as HelmRepositoriesQuery}
+              data={data as FluxHelmRepositoriesQuery}
               filterString={filterString}
               statusFilterKey={statusFilterKey}
               refetch={refetch}
@@ -246,7 +246,7 @@ function HelmRepositoriesTable({
   filterString,
   statusFilterKey,
 }: {
-  data: HelmRepositoriesQuery
+  data: FluxHelmRepositoriesQuery
   filterString: string
   statusFilterKey: Key
   refetch: () => void
@@ -273,7 +273,7 @@ function HelmRepositoriesTable({
 
   return (
     <Table
-      data={data?.helmRepositories || []}
+      data={data?.fluxHelmRepositories || []}
       columns={helmRepoColumns}
       css={{
         maxHeight: 'unset',

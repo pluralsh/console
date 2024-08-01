@@ -175,8 +175,8 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   describe "createClusterProvider" do
     test "it can create a new provider" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(create_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, %{data: %{"createClusterProvider" => created}}} = run_query("""
         mutation create($attrs: ClusterProviderAttributes!) {
@@ -194,8 +194,8 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   describe "updateClusterProvider" do
     test "it can update a cluster provider" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -217,8 +217,8 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   describe "deleteClusterProvider" do
     test "it can delete a given cluster provider" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -243,8 +243,8 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   describe "createProviderCredential" do
     test "it can create a new provider credential" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -269,8 +269,8 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   describe "deleteProviderCredential" do
     test "it can create a new provider credential" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
       cred = insert(:provider_credential)
 
       {:ok, %{data: %{"deleteProviderCredential" => del}}} = run_query("""

@@ -6,6 +6,8 @@ global:
   additionalVolumes: ~
   additionalVolumeMounts: ~
 
+cloud: false
+
 disableAdditionalVolumes: false
 
 replicaCount: 2

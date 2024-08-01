@@ -22,6 +22,25 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
     end
   end
 
+  describe "helmRepositories" do
+    test "it can list git repositories" do
+      repos = insert_list(3, :helm_repository)
+
+      {:ok, %{data: %{"helmRepositories" => found}}} = run_query("""
+        query {
+          helmRepositories(first: 5) {
+            edges { node { id url } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(repos)
+      assert from_connection(found)
+             |> Enum.all?(& &1["url"])
+    end
+  end
+
   describe "gitRepository" do
     test "it can fetch a git repository by id" do
       repo = insert(:git_repository)
@@ -59,6 +78,20 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
   end
 
   describe "helmRepository" do
+    test "it can fetch a helm repository by url" do
+      repo = insert(:helm_repository)
+
+      {:ok, %{data: %{"helmRepository" => found}}} = run_query("""
+        query Git($url: String!) {
+          helmRepository(url: $url) { id }
+        }
+      """, %{"url" => repo.url}, %{current_user: admin_user()})
+
+      assert found["id"] == repo.id
+    end
+  end
+
+  describe "fluxHelmRepository" do
     test "it can fetch the charts from a helm repository" do
       expect(Kube.Client, :get_helm_repository, fn "helm-charts", "console" ->
         {:ok, %HelmRepository{
@@ -68,9 +101,9 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
         }}
       end)
 
-      {:ok, %{data: %{"helmRepository" => repo}}} = run_query("""
+      {:ok, %{data: %{"fluxHelmRepository" => repo}}} = run_query("""
         query {
-          helmRepository(namespace: "helm-charts", name: "console") {
+          fluxHelmRepository(namespace: "helm-charts", name: "console") {
             charts {
               name
               versions { name version appVersion }

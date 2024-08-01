@@ -1,12 +1,13 @@
 defmodule Console.GraphQl.Deployments.Git do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
-  alias Console.Schema.{GitRepository, PullRequest, ScmConnection, ScmWebhook, PrAutomation, Configuration}
+  alias Console.Schema.{GitRepository, HelmRepository, PullRequest, ScmConnection, ScmWebhook, PrAutomation, Configuration}
 
   ecto_enum :auth_method, GitRepository.AuthMethod
   ecto_enum :git_health, GitRepository.Health
   ecto_enum :scm_type, ScmConnection.Type
   ecto_enum :match_strategy, PrAutomation.MatchStrategy
+  ecto_enum :helm_auth_provider, HelmRepository.Provider
   ecto_enum :pr_role, PrAutomation.Role
   ecto_enum :pr_status, PullRequest.Status
   ecto_enum :configuration_type, Configuration.Type
@@ -22,6 +23,45 @@ defmodule Console.GraphQl.Deployments.Git do
     field :url_format,    :string, description: "similar to https_path, a manually supplied url format for custom git.  Should be something like {url}/tree/{ref}/{folder}"
     field :connection_id, :id, description: "id of a scm connection to use for authentication"
     field :decrypt,       :boolean, description: "whether to run plural crypto on this repo"
+  end
+
+  input_object :helm_repository_attributes do
+    field :provider, :helm_auth_provider
+    field :auth,     :helm_auth_attributes
+  end
+
+  input_object :helm_auth_attributes do
+    field :basic,  :helm_basic_auth_attributes
+    field :bearer, :helm_bearer_auth_attributes
+    field :aws,    :helm_aws_auth_attributes
+    field :azure,  :helm_azure_auth_attributes
+    field :gcp,    :helm_gcp_auth_attributes
+  end
+
+  input_object :helm_basic_auth_attributes do
+    field :username, non_null(:string)
+    field :password, non_null(:string)
+  end
+
+  input_object :helm_bearer_auth_attributes do
+    field :token, non_null(:string)
+  end
+
+  input_object :helm_aws_auth_attributes do
+    field :access_key,        :string
+    field :secret_access_key, :string
+    field :assume_role_arn,   :string
+  end
+
+  input_object :helm_azure_auth_attributes do
+    field :client_id,       :string
+    field :client_secret,   :string
+    field :tenant_id,       :string
+    field :subscription_id, :string
+  end
+
+  input_object :helm_gcp_auth_attributes do
+    field :application_credentials, :string
   end
 
   @desc "an object representing a means to authenticate to a source control provider like Github"
@@ -183,8 +223,17 @@ defmodule Console.GraphQl.Deployments.Git do
     timestamps()
   end
 
-  @desc "a crd representation of a helm repository"
   object :helm_repository do
+    field :id,       non_null(:id)
+    field :url,      non_null(:string)
+    field :health,   :git_health
+    field :provider, :helm_auth_provider
+
+    timestamps()
+  end
+
+  @desc "a Flux crd representation of a helm repository"
+  object :flux_helm_repository do
     field :metadata, non_null(:metadata)
     field :spec,     non_null(:helm_repository_spec)
     field :charts,   list_of(:helm_chart_entry),
@@ -375,6 +424,7 @@ defmodule Console.GraphQl.Deployments.Git do
   end
 
   connection node_type: :git_repository
+  connection node_type: :helm_repository
   connection node_type: :scm_connection
   connection node_type: :pr_automation
   connection node_type: :pull_request
@@ -398,7 +448,7 @@ defmodule Console.GraphQl.Deployments.Git do
       resolve &Deployments.list_git_repositories/2
     end
 
-    field :helm_repositories, list_of(:helm_repository) do
+    connection field :helm_repositories, node_type: :helm_repository do
       middleware Authenticated
 
       resolve &Deployments.list_helm_repositories/2
@@ -406,10 +456,23 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :helm_repository, :helm_repository do
       middleware Authenticated
+      arg :url, non_null(:string)
+
+      resolve &Deployments.resolve_helm_repository/2
+    end
+
+    field :flux_helm_repositories, list_of(:flux_helm_repository) do
+      middleware Authenticated
+
+      resolve &Deployments.list_flux_helm_repositories/2
+    end
+
+    field :flux_helm_repository, :flux_helm_repository do
+      middleware Authenticated
       arg :name,      non_null(:string)
       arg :namespace, non_null(:string)
 
-      resolve &Deployments.get_helm_repository/2
+      resolve &Deployments.get_flux_helm_repository/2
     end
 
     connection field :scm_connections, node_type: :scm_connection do
@@ -597,6 +660,14 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       safe_resolve &Deployments.delete_pr/2
+    end
+
+    field :upsert_helm_repository, :helm_repository do
+      middleware Authenticated
+      arg :url,        non_null(:string)
+      arg :attributes, :helm_repository_attributes
+
+      safe_resolve &Deployments.upsert_helm_repository/2
     end
   end
 end

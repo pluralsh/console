@@ -3,7 +3,7 @@ defmodule Console.Deployments.Helm.AgentCache do
   alias Console.Deployments.Helm.Utils
   require Logger
 
-  defstruct [:repo, :index, :dir, cache: %{}]
+  defstruct [:repo, :client, :index, :dir, cache: %{}]
 
   defmodule Line do
     @expiry [minutes: -10]
@@ -33,12 +33,16 @@ defmodule Console.Deployments.Helm.AgentCache do
 
   def new(repo) do
     {:ok, dir} = Briefly.create(directory: true)
-    %__MODULE__{repo: repo, dir: dir, cache: %{}}
+    %__MODULE__{repo: repo, client: Client.client(repo), dir: dir, cache: %{}}
   end
 
-  def refresh(%__MODULE__{} = cache) do
-    case Client.index(cache.repo.url) do
-      {:ok, indx} -> {:ok, sweep(%{cache | index: indx})}
+  def new_client(cache, repo) do
+    %{cache | client: Client.client(repo)}
+  end
+
+  def refresh(%__MODULE__{client: client} = cache) do
+    case Client.index(client) do
+      {:ok, idx} -> {:ok, sweep(%{cache | index: idx})}
       _ -> {:error, "could not fetch index"}
     end
   end
@@ -55,15 +59,22 @@ defmodule Console.Deployments.Helm.AgentCache do
     end
   end
 
-  def write(%__MODULE__{} = cache, chart, vsn) do
+  def write(%__MODULE__{client: client} = cache, chart, vsn) do
     path = Path.join(cache.dir, "#{chart}.#{vsn}.tgz")
-    with {:ok, url, digest} <- Client.chart(cache.index, chart, vsn),
-         {:ok, tmp} <- Briefly.create(),
-         {:ok, _} <- Client.download(url, File.stream!(tmp)),
+    tmp = Briefly.create!()
+    with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
+         {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
+        #  _ <- File.read!(tmp) |> IO.puts(),
          :ok <- Utils.clean_chart(tmp, path, chart),
          line <- Line.new(path, chart, vsn, digest),
-         :ok <- File.rm(tmp),
-      do: {:ok, line, put_in(cache.cache[{chart, vsn}], line)}
+         :ok <- File.rm(tmp) do
+      cache = %{cache | client: client}
+      {:ok, line, put_in(cache.cache[{chart, vsn}], line)}
+    else
+      err ->
+        File.rm(tmp)
+        err
+    end
   end
 
   defp sweep(%__MODULE__{cache: lines} = cache) do

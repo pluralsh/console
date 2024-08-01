@@ -175,9 +175,13 @@ type RootQueryType {
 
   gitRepositories(after: String, first: Int, before: String, last: Int): GitRepositoryConnection
 
-  helmRepositories: [HelmRepository]
+  helmRepositories(after: String, first: Int, before: String, last: Int): HelmRepositoryConnection
 
-  helmRepository(name: String!, namespace: String!): HelmRepository
+  helmRepository(url: String!): HelmRepository
+
+  fluxHelmRepositories: [FluxHelmRepository]
+
+  fluxHelmRepository(name: String!, namespace: String!): FluxHelmRepository
 
   scmConnections(after: String, first: Int, before: String, last: Int): ScmConnectionConnection
 
@@ -560,6 +564,8 @@ type RootMutationType {
   updatePullRequest(id: ID!, attributes: PullRequestUpdateAttributes): PullRequest
 
   deletePullRequest(id: ID!): PullRequest
+
+  upsertHelmRepository(url: String!, attributes: HelmRepositoryAttributes): HelmRepository
 
   createCluster(attributes: ClusterAttributes!): Cluster
 
@@ -3024,7 +3030,7 @@ type ServiceDeployment {
   "the git repo of this service"
   repository: GitRepository
 
-  helmRepository: HelmRepository
+  helmRepository: FluxHelmRepository
 
   "Queries logs for a service out of loki"
   logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
@@ -4110,6 +4116,14 @@ enum MatchStrategy {
   RECURSIVE
 }
 
+enum HelmAuthProvider {
+  BASIC
+  BEARER
+  GCP
+  AZURE
+  AWS
+}
+
 enum PrRole {
   CLUSTER
   SERVICE
@@ -4174,6 +4188,45 @@ input GitAttributes {
 
   "whether to run plural crypto on this repo"
   decrypt: Boolean
+}
+
+input HelmRepositoryAttributes {
+  provider: HelmAuthProvider
+  auth: HelmAuthAttributes
+}
+
+input HelmAuthAttributes {
+  basic: HelmBasicAuthAttributes
+  bearer: HelmBearerAuthAttributes
+  aws: HelmAwsAuthAttributes
+  azure: HelmAzureAuthAttributes
+  gcp: HelmGcpAuthAttributes
+}
+
+input HelmBasicAuthAttributes {
+  username: String!
+  password: String!
+}
+
+input HelmBearerAuthAttributes {
+  token: String!
+}
+
+input HelmAwsAuthAttributes {
+  accessKey: String
+  secretAccessKey: String
+  assumeRoleArn: String
+}
+
+input HelmAzureAuthAttributes {
+  clientId: String
+  clientSecret: String
+  tenantId: String
+  subscriptionId: String
+}
+
+input HelmGcpAuthAttributes {
+  applicationCredentials: String
 }
 
 "an object representing a means to authenticate to a source control provider like Github"
@@ -4404,8 +4457,17 @@ type GitRepository {
   updatedAt: DateTime
 }
 
-"a crd representation of a helm repository"
 type HelmRepository {
+  id: ID!
+  url: String!
+  health: GitHealth
+  provider: HelmAuthProvider
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"a Flux crd representation of a helm repository"
+type FluxHelmRepository {
   metadata: Metadata!
 
   spec: HelmRepositorySpec!
@@ -4655,6 +4717,11 @@ type DependencyManagementService {
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
+}
+
+type HelmRepositoryConnection {
+  pageInfo: PageInfo!
+  edges: [HelmRepositoryEdge]
 }
 
 type ScmConnectionConnection {
@@ -6332,6 +6399,8 @@ type ConsoleConfiguration {
   isSandbox: Boolean
   pluralLogin: Boolean
   vpnEnabled: Boolean
+  installed: Boolean
+  cloud: Boolean
   byok: Boolean
   externalOidc: Boolean
   oidcName: String
@@ -6590,6 +6659,11 @@ type PrAutomationEdge {
 
 type ScmConnectionEdge {
   node: ScmConnection
+  cursor: String
+}
+
+type HelmRepositoryEdge {
+  node: HelmRepository
   cursor: String
 }
 

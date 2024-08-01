@@ -633,6 +633,12 @@ defmodule Console.Factory do
     }
   end
 
+  def helm_repository_factory do
+    %Schema.HelmRepository{
+      url: sequence(:helm, &"https://helm-#{&1}.repository.io")
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

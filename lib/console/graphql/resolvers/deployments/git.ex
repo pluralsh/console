@@ -8,6 +8,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     ScmConnection,
     PullRequest,
     ScmWebhook,
+    HelmRepository,
     DependencyManagementService
   }
 
@@ -27,8 +28,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     |> allow(user, :read)
   end
 
+  def resolve_helm_repository(%{url: url}, _), do: {:ok, Git.get_helm_repository(url)}
+
   def list_git_repositories(args, _) do
     GitRepository.ordered()
+    |> paginate(args)
+  end
+
+  def list_helm_repositories(args, _) do
+    HelmRepository.ordered()
     |> paginate(args)
   end
 
@@ -59,9 +67,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     |> paginate(args)
   end
 
-  def get_helm_repository(%{name: name, namespace: ns}, _), do: Kube.Client.get_helm_repository(ns, name)
+  def get_flux_helm_repository(%{name: name, namespace: ns}, _), do: Kube.Client.get_helm_repository(ns, name)
 
-  def list_helm_repositories(_, _), do: Git.list_helm_repositories()
+  def list_flux_helm_repositories(_, _), do: Git.list_helm_repositories()
 
   def helm_charts(helm, _, _), do: Repository.charts(helm)
 
@@ -119,6 +127,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def reconfigure_renovate(%{repos: repos, service_id: svc_id}, %{context: %{current_user: user}}),
     do: Git.reconfigure_renovate(%{repositories: repos}, svc_id, user)
+
+  def upsert_helm_repository(%{attributes: attrs, url: url}, %{context: %{current_user: user}}),
+    do: Git.upsert_helm_repository(attrs, url, user)
 
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn

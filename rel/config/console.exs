@@ -97,6 +97,7 @@ config :console,
   provider: provider,
   build_id: get_env("CONSOLE_BUILD_ID"),
   kas_dns: get_env("KAS_DNS"),
+  cloud: get_env("CONSOLE_CLOUD") == "true",
   byok: get_env("CONSOLE_BYOK") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
   oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME")

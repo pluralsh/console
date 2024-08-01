@@ -10,8 +10,8 @@ import { Key, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '@react-hooks-library/core'
 import {
   GitHealth,
+  useFluxHelmRepositoriesQuery,
   useGitRepositoriesQuery,
-  useHelmRepositoriesQuery,
 } from 'generated/graphql'
 
 import { gitHealthToLabel, gitHealthToSeverity } from './GitHealthChip'
@@ -51,13 +51,13 @@ export function countsFromGitRepos(
 }
 
 export function countsFromHelmRepos(
-  data: ReturnType<typeof useHelmRepositoriesQuery>['data']
+  data: ReturnType<typeof useFluxHelmRepositoriesQuery>['data']
 ) {
   const c: Record<string, number | undefined> = {
-    ALL: data?.helmRepositories?.length,
+    ALL: data?.fluxHelmRepositories?.length,
   }
 
-  data?.helmRepositories?.forEach((repo) => {
+  data?.fluxHelmRepositories?.forEach((repo) => {
     if (repo?.status?.ready) {
       c[GitHealth.Pullable] = (c[GitHealth.Pullable] ?? 0) + 1
     } else {

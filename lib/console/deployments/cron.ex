@@ -66,15 +66,19 @@ defmodule Console.Deployments.Cron do
 
   def install_clusters() do
     Logger.info "attempting to install operator on dangling clusters"
-    Cluster.uninstalled()
-    |> Cluster.stream()
-    |> Cluster.preloaded()
-    |> Repo.stream(method: :keyset)
-    |> Stream.each(fn cluster ->
-      Logger.info "installing operator on #{cluster.id}, name=#{cluster.name}, handle=#{cluster.handle}"
-      Clusters.install(cluster)
-    end)
-    |> Stream.run()
+    if !Console.cloud?() do
+      Cluster.uninstalled()
+      |> Cluster.stream()
+      |> Cluster.preloaded()
+      |> Repo.stream(method: :keyset)
+      |> Stream.each(fn cluster ->
+        Logger.info "installing operator on #{cluster.id}, name=#{cluster.name}, handle=#{cluster.handle}"
+        Clusters.install(cluster)
+      end)
+      |> Stream.run()
+    else
+      Logger.info "not installing on cloud consoles"
+    end
   end
 
   def migrate_kas() do

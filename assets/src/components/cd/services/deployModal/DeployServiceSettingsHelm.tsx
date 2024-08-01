@@ -5,8 +5,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { InlineLink } from 'components/utils/typography/InlineLink'
 import {
   NamespacedName,
-  useHelmRepositoriesQuery,
-  useHelmRepositoryQuery,
+  useFluxHelmRepositoriesQuery,
+  useFluxHelmRepositoryQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { useLayoutEffect, useState } from 'react'
@@ -156,12 +156,12 @@ export default function DeployServiceSettingsHelm({
   version: string
   setVersion: (version: string) => void
 }) {
-  const { data, loading } = useHelmRepositoriesQuery({
+  const { data, loading } = useFluxHelmRepositoriesQuery({
     fetchPolicy: 'cache-and-network',
   })
   const [selectIsOpen, setSelectIsOpen] = useState(false)
 
-  const { data: charts } = useHelmRepositoryQuery({
+  const { data: charts } = useFluxHelmRepositoryQuery({
     variables: {
       name: repository?.name || '',
       namespace: repository?.namespace || '',
@@ -177,9 +177,9 @@ export default function DeployServiceSettingsHelm({
     }
   })
 
-  if (!data?.helmRepositories) return <EmptyState loading={loading} />
+  if (!data?.fluxHelmRepositories) return <EmptyState loading={loading} />
 
-  const repositories = data?.helmRepositories
+  const repositories = data?.fluxHelmRepositories
   const selectedRepository = repositories.find(
     (r) =>
       r?.metadata.name === repository?.name &&
@@ -252,7 +252,7 @@ export default function DeployServiceSettingsHelm({
       </FormField>
       {selectedRepository && (
         <ChartForm
-          charts={charts?.helmRepository?.charts || []}
+          charts={charts?.fluxHelmRepository?.charts || []}
           chart={chart}
           setChart={setChart}
           version={version}

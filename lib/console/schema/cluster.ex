@@ -259,6 +259,10 @@ defmodule Console.Schema.Cluster do
     )
   end
 
+  def pinged(query \\ __MODULE__) do
+    from(c in query, where: not is_nil(c.pinged_at))
+  end
+
   def health(query \\ __MODULE__, health)
   def health(query, true) do
     expired = health_threshold()

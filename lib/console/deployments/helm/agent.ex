@@ -7,7 +7,7 @@ defmodule Console.Deployments.Helm.Agent do
 
   defmodule State, do: defstruct [:repo, :cache]
 
-  @poll :timer.minutes(2)
+  @poll :timer.minutes(5)
   @jitter 15
 
   def registry(), do: __MODULE__
@@ -52,9 +52,10 @@ defmodule Console.Deployments.Helm.Agent do
   end
 
   def handle_info(:pull, %State{repo: repo, cache: cache} = state) do
-    with {:ok, repo} <- Git.upsert_helm_repository(repo.url),
+    with {:ok, repo}  <- Git.upsert_helm_repository(repo.url),
+         cache        <- AgentCache.new_client(cache, repo),
          {:ok, cache} <- AgentCache.refresh(cache),
-         {:ok, repo} <- refresh(repo) do
+         {:ok, repo}  <- refresh(repo) do
       schedule_pull()
       {:noreply, %{state | cache: cache, repo: repo}}
     else

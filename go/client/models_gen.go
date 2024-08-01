@@ -1013,6 +1013,8 @@ type ConsoleConfiguration struct {
 	IsSandbox     *bool              `json:"isSandbox,omitempty"`
 	PluralLogin   *bool              `json:"pluralLogin,omitempty"`
 	VpnEnabled    *bool              `json:"vpnEnabled,omitempty"`
+	Installed     *bool              `json:"installed,omitempty"`
+	Cloud         *bool              `json:"cloud,omitempty"`
 	Byok          *bool              `json:"byok,omitempty"`
 	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
 	OidcName      *string            `json:"oidcName,omitempty"`
@@ -1383,6 +1385,16 @@ type FileContent struct {
 	Content *string `json:"content,omitempty"`
 }
 
+// a Flux crd representation of a helm repository
+type FluxHelmRepository struct {
+	Metadata Metadata           `json:"metadata"`
+	Spec     HelmRepositorySpec `json:"spec"`
+	// the charts found in this repository (heavy operation, don't do in list endpoints)
+	Charts []*HelmChartEntry `json:"charts,omitempty"`
+	// can fetch the status of a given helm repository
+	Status *HelmRepositoryStatus `json:"status,omitempty"`
+}
+
 // spec for a job gate
 type GateJobAttributes struct {
 	Namespace string `json:"namespace"`
@@ -1644,6 +1656,36 @@ type GroupMemberEdge struct {
 	Cursor *string      `json:"cursor,omitempty"`
 }
 
+type HelmAuthAttributes struct {
+	Basic  *HelmBasicAuthAttributes  `json:"basic,omitempty"`
+	Bearer *HelmBearerAuthAttributes `json:"bearer,omitempty"`
+	Aws    *HelmAwsAuthAttributes    `json:"aws,omitempty"`
+	Azure  *HelmAzureAuthAttributes  `json:"azure,omitempty"`
+	Gcp    *HelmGcpAuthAttributes    `json:"gcp,omitempty"`
+}
+
+type HelmAwsAuthAttributes struct {
+	AccessKey       *string `json:"accessKey,omitempty"`
+	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+	AssumeRoleArn   *string `json:"assumeRoleArn,omitempty"`
+}
+
+type HelmAzureAuthAttributes struct {
+	ClientID       *string `json:"clientId,omitempty"`
+	ClientSecret   *string `json:"clientSecret,omitempty"`
+	TenantID       *string `json:"tenantId,omitempty"`
+	SubscriptionID *string `json:"subscriptionId,omitempty"`
+}
+
+type HelmBasicAuthAttributes struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type HelmBearerAuthAttributes struct {
+	Token string `json:"token"`
+}
+
 // a chart manifest entry, including all versions
 type HelmChartEntry struct {
 	// the name of the chart
@@ -1679,14 +1721,32 @@ type HelmConfigAttributes struct {
 	RepositoryID *string `json:"repositoryId,omitempty"`
 }
 
-// a crd representation of a helm repository
+type HelmGcpAuthAttributes struct {
+	ApplicationCredentials *string `json:"applicationCredentials,omitempty"`
+}
+
 type HelmRepository struct {
-	Metadata Metadata           `json:"metadata"`
-	Spec     HelmRepositorySpec `json:"spec"`
-	// the charts found in this repository (heavy operation, don't do in list endpoints)
-	Charts []*HelmChartEntry `json:"charts,omitempty"`
-	// can fetch the status of a given helm repository
-	Status *HelmRepositoryStatus `json:"status,omitempty"`
+	ID         string            `json:"id"`
+	URL        string            `json:"url"`
+	Health     *GitHealth        `json:"health,omitempty"`
+	Provider   *HelmAuthProvider `json:"provider,omitempty"`
+	InsertedAt *string           `json:"insertedAt,omitempty"`
+	UpdatedAt  *string           `json:"updatedAt,omitempty"`
+}
+
+type HelmRepositoryAttributes struct {
+	Provider *HelmAuthProvider   `json:"provider,omitempty"`
+	Auth     *HelmAuthAttributes `json:"auth,omitempty"`
+}
+
+type HelmRepositoryConnection struct {
+	PageInfo PageInfo              `json:"pageInfo"`
+	Edges    []*HelmRepositoryEdge `json:"edges,omitempty"`
+}
+
+type HelmRepositoryEdge struct {
+	Node   *HelmRepository `json:"node,omitempty"`
+	Cursor *string         `json:"cursor,omitempty"`
 }
 
 // a specification of how a helm repository is fetched
@@ -3951,8 +4011,8 @@ type ServiceDeployment struct {
 	// fetches the /docs directory within this services git tree.  This is a heavy operation and should NOT be used in list queries
 	Docs []*GitFile `json:"docs,omitempty"`
 	// the git repo of this service
-	Repository     *GitRepository  `json:"repository,omitempty"`
-	HelmRepository *HelmRepository `json:"helmRepository,omitempty"`
+	Repository     *GitRepository      `json:"repository,omitempty"`
+	HelmRepository *FluxHelmRepository `json:"helmRepository,omitempty"`
 	// Queries logs for a service out of loki
 	Logs []*LogStream `json:"logs,omitempty"`
 	// read policy for this service
@@ -5547,6 +5607,53 @@ func (e *GitHealth) UnmarshalGQL(v interface{}) error {
 }
 
 func (e GitHealth) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type HelmAuthProvider string
+
+const (
+	HelmAuthProviderBasic  HelmAuthProvider = "BASIC"
+	HelmAuthProviderBearer HelmAuthProvider = "BEARER"
+	HelmAuthProviderGcp    HelmAuthProvider = "GCP"
+	HelmAuthProviderAzure  HelmAuthProvider = "AZURE"
+	HelmAuthProviderAws    HelmAuthProvider = "AWS"
+)
+
+var AllHelmAuthProvider = []HelmAuthProvider{
+	HelmAuthProviderBasic,
+	HelmAuthProviderBearer,
+	HelmAuthProviderGcp,
+	HelmAuthProviderAzure,
+	HelmAuthProviderAws,
+}
+
+func (e HelmAuthProvider) IsValid() bool {
+	switch e {
+	case HelmAuthProviderBasic, HelmAuthProviderBearer, HelmAuthProviderGcp, HelmAuthProviderAzure, HelmAuthProviderAws:
+		return true
+	}
+	return false
+}
+
+func (e HelmAuthProvider) String() string {
+	return string(e)
+}
+
+func (e *HelmAuthProvider) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = HelmAuthProvider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid HelmAuthProvider", str)
+	}
+	return nil
+}
+
+func (e HelmAuthProvider) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
