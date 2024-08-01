@@ -69,8 +69,12 @@ export default function ClusterAddOnsEntry({
             url={addon?.addon.icon}
             size="xxsmall"
             css={{
-              backgroundColor: theme.colors['fill-two'],
-              border: theme.borders['fill-two'],
+              backgroundColor: active
+                ? theme.colors['fill-three']
+                : theme.colors['fill-two'],
+              border: active
+                ? theme.borders['fill-three']
+                : theme.borders['fill-two'],
               img: { objectFit: 'contain' },
             }}
           />

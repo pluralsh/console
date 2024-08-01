@@ -135,7 +135,7 @@ export default function Cluster() {
       }
       headingContent={
         <>
-          <div css={{ width: 360, height: '100%' }}>
+          <div css={{ width: 320, height: '100%' }}>
             <ClusterSelector
               clusterId={clusterId}
               allowDeselect={false}
