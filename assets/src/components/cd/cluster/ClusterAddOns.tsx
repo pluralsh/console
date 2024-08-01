@@ -149,7 +149,14 @@ export default function ClusterAddOns() {
     return <EmptyState message="This cluster doesn’t have any add-ons." />
 
   return (
-    <div css={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+    <div
+      css={{
+        display: 'flex',
+        height: '100%',
+        overflow: 'hidden',
+        width: '100%',
+      }}
+    >
       <div
         css={{
           flexShrink: 0,
@@ -170,8 +177,9 @@ export default function ClusterAddOns() {
         css={{
           display: 'flex',
           flexDirection: 'column',
-          flexGrow: 1,
           gap: theme.spacing.medium,
+          overflow: 'hidden',
+          width: '100%',
         }}
       >
         <div
