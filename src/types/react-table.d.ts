@@ -6,5 +6,7 @@ declare module '@tanstack/table-core' {
     truncate?: boolean
     gridTemplate?: string
     center?: boolean
+    tooltip?: string
+    highlight?: boolean
   }
 }

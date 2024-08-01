@@ -16,8 +16,6 @@ import {
   AppIcon,
   ArrowRightLeftIcon,
   CollapseIcon,
-  IconFrame,
-  InfoIcon,
   LogsIcon,
   Table,
   Tooltip,
@@ -145,6 +143,7 @@ const columns = [
   columnHelper.accessor((row) => row.description, {
     id: 'description',
     enableGlobalFilter: true,
+    meta: { tooltip: 'Tooltip message' },
     cell: (info: any) => <span>{info.getValue()}</span>,
     header: () => (
       <Flex
@@ -152,13 +151,7 @@ const columns = [
         alignItems="center"
         justifyContent="space-between"
       >
-        Description{' '}
-        <IconFrame
-          clickable
-          textValue="Book"
-          icon={<InfoIcon />}
-          size="small"
-        />
+        Description
       </Flex>
     ),
   }),
@@ -365,12 +358,40 @@ const extremeLengthData = Array(200)
   .map((item, i) => ({ ...item, id: `id-${i}` }))
 
 export const Default = Template.bind({})
-
 Default.args = {
   width: '900px',
   height: '400px',
   data: repeatedData,
   columns,
+}
+
+export const Highlighted = Template.bind({})
+Highlighted.args = {
+  width: '900px',
+  height: '400px',
+  data: repeatedData,
+  columns: (() => {
+    const c = [...columns]
+
+    c.splice(
+      2,
+      0,
+      columnHelper.accessor((row) => row.id, {
+        id: 'h',
+        cell: ({ getValue }) => getValue(),
+        header: 'Highlight',
+        meta: {
+          highlight: true,
+          truncate: true,
+          gridTemplate: 'minmax(150px, 1fr)',
+        },
+      })
+    )
+
+    return c
+  })(),
+  reactTableOptions: { getRowId: (_: any, index: any) => index },
+  highlightedRowId: 1,
 }
 
 export const VirtualizedRows = Template.bind({})
