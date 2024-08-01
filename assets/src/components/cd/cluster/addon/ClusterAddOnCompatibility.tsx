@@ -140,7 +140,7 @@ export default function ClusterAddOnCompatibility() {
         data={addOn?.addon?.versions || []}
         columns={columns}
         stickyColumn
-        highlightedRowId={addOn.version}
+        highlightedRowId={addOn.addonVersion?.version ?? ''}
         reactTableOptions={{
           getRowId: (row) => row.version,
           meta: { kubeVersion, version: addOn?.addonVersion?.version },
