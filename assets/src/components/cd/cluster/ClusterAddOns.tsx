@@ -9,7 +9,7 @@ import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
 
-import { POLL_INTERVAL } from '../ContinuousDeployment'
+import { POLL_INTERVAL, useSetPageHeaderContent } from '../ContinuousDeployment'
 import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { PropCard } from '../globalServices/details/GlobalServiceInfo'
@@ -81,6 +81,45 @@ export default function ClusterAddOns() {
   //   )
   // )
 
+  useSetPageHeaderContent(
+    useMemo(
+      () => (
+        <div
+          css={{
+            display: 'flex',
+            justifyContent: 'end',
+            gap: theme.spacing.small,
+          }}
+        >
+          <TabList
+            stateRef={tabStateRef}
+            stateProps={{
+              orientation: 'horizontal',
+              selectedKey: currentTab?.path,
+            }}
+          >
+            {directory.map(({ label, path }) => (
+              <LinkTabWrap
+                subTab
+                key={path}
+                textValue={label}
+                to={`${pathPrefix}/${path}`}
+              >
+                <SubTab
+                  key={path}
+                  textValue={label}
+                >
+                  {label}
+                </SubTab>
+              </LinkTabWrap>
+            ))}
+          </TabList>
+        </div>
+      ),
+      [currentTab?.path, pathPrefix, theme.spacing.small]
+    )
+  )
+
   if (!data) return <LoadingIndicator />
 
   if (all.length <= 0)
@@ -122,29 +161,6 @@ export default function ClusterAddOns() {
           gap: theme.spacing.medium,
         }}
       >
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: currentTab?.path,
-          }}
-        >
-          {directory.map(({ label, path }) => (
-            <LinkTabWrap
-              subTab
-              key={path}
-              textValue={label}
-              to={`${pathPrefix}/${path}`}
-            >
-              <SubTab
-                key={path}
-                textValue={label}
-              >
-                {label}
-              </SubTab>
-            </LinkTabWrap>
-          ))}
-        </TabList>
         <div
           css={{
             display: 'grid',
