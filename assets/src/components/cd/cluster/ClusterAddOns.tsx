@@ -71,12 +71,12 @@ export default function ClusterAddOns() {
     pollInterval: POLL_INTERVAL,
   })
 
-  const all = useMemo(
+  const addOns = useMemo(
     () => data?.cluster?.runtimeServices?.filter(isNonNullable) || [],
     [data?.cluster?.runtimeServices]
   )
 
-  const rts = all?.find((rts) => rts?.id === addOnId)
+  const addOn = addOns?.find((a) => a?.id === addOnId)
 
   // useSetBreadcrumbs(
   //   useMemo(
@@ -90,9 +90,9 @@ export default function ClusterAddOns() {
   // )
 
   useEffect(() => {
-    if (!isEmpty(all) && !addOnId)
-      navigate(getClusterAddOnDetailsPath({ clusterId, addOnId: all[0].id }))
-  }, [all, addOnId, navigate, clusterId])
+    if (!isEmpty(addOns) && !addOnId)
+      navigate(getClusterAddOnDetailsPath({ clusterId, addOnId: addOns[0].id }))
+  }, [addOns, addOnId, navigate, clusterId])
 
   useSetPageHeaderContent(
     useMemo(
@@ -136,7 +136,7 @@ export default function ClusterAddOns() {
 
   if (!data) return <LoadingIndicator />
 
-  if (all.length <= 0)
+  if (addOns.length <= 0)
     return <EmptyState message="This cluster doesn’t have any add-ons." />
 
   return (
@@ -158,11 +158,11 @@ export default function ClusterAddOns() {
             overflowY: 'auto',
           }}
         >
-          {all.map((addon, i) => (
+          {addOns.map((addon, i) => (
             <ClusterAddOnEntry
               addon={addon}
-              active={addon.id === rts?.id}
-              last={all.length - 1 === i}
+              active={addon.id === addOn?.id}
+              last={addOns.length - 1 === i}
             />
           ))}
         </div>
@@ -184,7 +184,7 @@ export default function ClusterAddOns() {
             marginBottom: theme.spacing.medium,
           }}
         >
-          <PropCard title="Add-on">{rts?.name}</PropCard>
+          <PropCard title="Add-on">{addOn?.name}</PropCard>
           <PropCard title="Add-on version">
             <div
               css={{
@@ -193,8 +193,8 @@ export default function ClusterAddOns() {
                 justifyContent: 'space-between',
               }}
             >
-              {toNiceVersion(rts?.addonVersion?.version)}
-              {rts?.addonVersion?.blocking === true && (
+              {toNiceVersion(addOn?.addonVersion?.version)}
+              {addOn?.addonVersion?.blocking === true && (
                 <Chip severity="danger">Blocking</Chip>
               )}
             </div>
@@ -205,11 +205,11 @@ export default function ClusterAddOns() {
         </div>
         {error ? (
           <GqlError error={error} />
-        ) : rts ? (
+        ) : addOn ? (
           <Outlet
             context={
               {
-                runtimeService: rts,
+                runtimeService: addOn,
                 kubeVersion,
               } satisfies ClusterAddOnContextType
             }
