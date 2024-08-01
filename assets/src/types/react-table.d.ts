@@ -8,6 +8,7 @@ declare module '@tanstack/table-core' {
     gridTemplate?: string
     center?: boolean
     highlight?: boolean
+    tooltip?: string
   }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface TableMeta<TData extends RowData> {

@@ -85,6 +85,7 @@ const generateCompatCol = (kubeVersion: string, currentKubeVersion: string) => {
 const colVersion = columnHelper.accessor((row) => row, {
   id: 'version',
   header: 'Version',
+  meta: { tooltip: 'App version shown on top, chart version shown on bottom' },
   cell: function Cell({
     row: {
       original: { version, chartVersion },
