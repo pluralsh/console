@@ -1,6 +1,12 @@
 import { Chip, EmptyState, SubTab, TabList } from '@pluralsh/design-system'
-import React, { useMemo, useRef } from 'react'
-import { Outlet, useMatch, useOutletContext, useParams } from 'react-router-dom'
+import React, { useEffect, useMemo, useRef } from 'react'
+import {
+  Outlet,
+  useMatch,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from 'react-router-dom'
 import {
   RuntimeServiceFragment,
   useRuntimeServicesQuery,
@@ -8,6 +14,8 @@ import {
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
+
+import { isEmpty } from 'lodash'
 
 import { POLL_INTERVAL, useSetPageHeaderContent } from '../ContinuousDeployment'
 import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
@@ -35,7 +43,7 @@ const directory = [
 
 export default function ClusterAddOns() {
   const theme = useTheme()
-  // const navigate = useNavigate()
+  const navigate = useNavigate()
   const { cluster } = useClusterContext()
   const kubeVersion = getClusterKubeVersion(cluster)
   const tabStateRef = useRef<any>(null)
@@ -81,42 +89,48 @@ export default function ClusterAddOns() {
   //   )
   // )
 
+  useEffect(() => {
+    if (!isEmpty(all) && !addOnId)
+      navigate(getClusterAddOnDetailsPath({ clusterId, addOnId: all[0].id }))
+  }, [all, addOnId, navigate, clusterId])
+
   useSetPageHeaderContent(
     useMemo(
-      () => (
-        <div
-          css={{
-            display: 'flex',
-            justifyContent: 'end',
-            gap: theme.spacing.small,
-          }}
-        >
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
+      () =>
+        addOnId ? (
+          <div
+            css={{
+              display: 'flex',
+              justifyContent: 'end',
+              gap: theme.spacing.small,
             }}
           >
-            {directory.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`${pathPrefix}/${path}`}
-              >
-                <SubTab
+            <TabList
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: currentTab?.path,
+              }}
+            >
+              {directory.map(({ label, path }) => (
+                <LinkTabWrap
+                  subTab
                   key={path}
                   textValue={label}
+                  to={`${pathPrefix}/${path}`}
                 >
-                  {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
-        </div>
-      ),
-      [currentTab?.path, pathPrefix, theme.spacing.small]
+                  <SubTab
+                    key={path}
+                    textValue={label}
+                  >
+                    {label}
+                  </SubTab>
+                </LinkTabWrap>
+              ))}
+            </TabList>
+          </div>
+        ) : undefined,
+      [addOnId, currentTab?.path, pathPrefix, theme.spacing.small]
     )
   )
 
@@ -216,9 +230,6 @@ type ClusterAddOnContextType = {
 export function useClusterAddOnContext() {
   return useOutletContext<ClusterAddOnContextType>()
 }
-
-export const useServiceContext = () =>
-  useOutletContext<ClusterAddOnContextType>()
 
 export const getAddOnDetailsBreadcrumbs = ({
   cluster,
