@@ -6,10 +6,12 @@ import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import isEmpty from 'lodash/isEmpty'
 
+import { useOutletContext } from 'react-router-dom'
+
 import LoadingIndicator from '../../../utils/LoadingIndicator'
 import { GqlError } from '../../../utils/Alert'
 import { InlineLink } from '../../../utils/typography/InlineLink'
-import { useClusterAddOnContext } from '../ClusterAddOns'
+import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
 
 type Release = {
   version: string
@@ -35,12 +37,12 @@ const colRelease = columnHelper.accessor((row) => row.url, {
 })
 
 export default function ClusterAddOnReleases() {
-  const { runtimeService: rts } = useClusterAddOnContext()
+  const { addOn } = useOutletContext<ClusterAddOnOutletContextT>()
 
   const columns = useMemo(() => [colVersion, colRelease], [])
 
   const { data, loading, error } = useRuntimeServiceQuery({
-    variables: { id: rts?.id, version: versionPlaceholder },
+    variables: { id: addOn?.id ?? '', version: versionPlaceholder },
   })
 
   const releases: Release[] = useMemo(() => {
@@ -48,11 +50,11 @@ export default function ClusterAddOnReleases() {
 
     if (!template) return []
 
-    return (rts?.addon?.versions || []).map((addonVersion) => ({
+    return (addOn?.addon?.versions || []).map((addonVersion) => ({
       version: addonVersion?.version ?? '',
       url: template.replace(versionPlaceholder, addonVersion?.version ?? ''),
     }))
-  }, [data, rts])
+  }, [data, addOn])
 
   if (loading) return <LoadingIndicator />
 

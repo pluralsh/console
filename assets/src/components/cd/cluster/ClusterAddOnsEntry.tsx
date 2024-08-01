@@ -3,14 +3,14 @@ import React from 'react'
 import { useTheme } from 'styled-components'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { TRUNCATE } from '../../../utils/truncate'
-import { RuntimeServiceFragment } from '../../../../generated/graphql'
+import { TRUNCATE } from '../../utils/truncate'
+import { RuntimeServiceFragment } from '../../../generated/graphql'
 import {
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
-} from '../../../../routes/cdRoutesConsts'
+} from '../../../routes/cdRoutesConsts'
 
-export default function ClusterAddOnEntry({
+export default function ClusterAddOnsEntry({
   addon,
   active,
   last,

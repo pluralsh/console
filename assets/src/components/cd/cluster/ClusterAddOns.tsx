@@ -1,12 +1,6 @@
 import { Chip, EmptyState, SubTab, TabList } from '@pluralsh/design-system'
 import React, { useEffect, useMemo, useRef } from 'react'
-import {
-  Outlet,
-  useMatch,
-  useNavigate,
-  useOutletContext,
-  useParams,
-} from 'react-router-dom'
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import {
   RuntimeServiceFragment,
   useRuntimeServicesQuery,
@@ -14,7 +8,6 @@ import {
 import { isNonNullable } from 'utils/isNonNullable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'
-
 import { isEmpty } from 'lodash'
 
 import { POLL_INTERVAL, useSetPageHeaderContent } from '../ContinuousDeployment'
@@ -23,7 +16,6 @@ import { LinkTabWrap } from '../../utils/Tabs'
 import { PropCard } from '../globalServices/details/GlobalServiceInfo'
 import { toNiceVersion } from '../../../utils/semver'
 import { GqlError } from '../../utils/Alert'
-
 import {
   CLUSTER_ADDONS_PARAM_ID,
   CLUSTER_ADDONS_REL_PATH,
@@ -32,8 +24,13 @@ import {
   getClusterDetailsPath,
 } from '../../../routes/cdRoutesConsts'
 
-import ClusterAddOnEntry from './addon/ClusterAddOnEntry'
+import ClusterAddOnsEntry from './ClusterAddOnsEntry'
 import { getClusterBreadcrumbs, useClusterContext } from './Cluster'
+
+export type ClusterAddOnOutletContextT = {
+  addOn: Nullable<RuntimeServiceFragment>
+  kubeVersion: Nullable<string>
+}
 
 const directory = [
   { path: 'compatibility', label: 'Compatibility' },
@@ -62,11 +59,7 @@ export default function ClusterAddOns() {
   const currentTab = directory.find(({ path }) => path === tab)
 
   const { data, error } = useRuntimeServicesQuery({
-    variables: {
-      kubeVersion,
-      hasKubeVersion: !!kubeVersion,
-      id: cluster?.id ?? '',
-    },
+    variables: { kubeVersion, hasKubeVersion: !!kubeVersion, id: clusterId },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
@@ -76,7 +69,21 @@ export default function ClusterAddOns() {
     [data?.cluster?.runtimeServices]
   )
 
-  const addOn = addOns?.find((a) => a?.id === addOnId)
+  const hasAddons = !isEmpty(addOns)
+
+  const addOn = useMemo(
+    () => addOns?.find((a) => a?.id === addOnId),
+    [addOnId, addOns]
+  )
+
+  const context = useMemo(
+    () =>
+      ({
+        addOn,
+        kubeVersion,
+      }) satisfies ClusterAddOnOutletContextT,
+    [addOn, kubeVersion]
+  )
 
   // useSetBreadcrumbs(
   //   useMemo(
@@ -90,9 +97,9 @@ export default function ClusterAddOns() {
   // )
 
   useEffect(() => {
-    if (!isEmpty(addOns) && !addOnId)
+    if (hasAddons && !addOnId)
       navigate(getClusterAddOnDetailsPath({ clusterId, addOnId: addOns[0].id }))
-  }, [addOns, addOnId, navigate, clusterId])
+  }, [addOns, addOnId, navigate, clusterId, hasAddons])
 
   useSetPageHeaderContent(
     useMemo(
@@ -134,9 +141,11 @@ export default function ClusterAddOns() {
     )
   )
 
+  if (error) return <GqlError error={error} />
+
   if (!data) return <LoadingIndicator />
 
-  if (addOns.length <= 0)
+  if (!hasAddons)
     return <EmptyState message="This cluster doesn’t have any add-ons." />
 
   return (
@@ -146,9 +155,9 @@ export default function ClusterAddOns() {
           display: 'flex',
           flexDirection: 'column',
           gap: theme.spacing.medium,
-          marginRight: theme.spacing.large,
-          minWidth: 320,
-          width: 320,
+          marginRight: theme.spacing.medium,
+          minWidth: 360,
+          width: 360,
         }}
       >
         <div
@@ -159,7 +168,7 @@ export default function ClusterAddOns() {
           }}
         >
           {addOns.map((addon, i) => (
-            <ClusterAddOnEntry
+            <ClusterAddOnsEntry
               addon={addon}
               active={addon.id === addOn?.id}
               last={addOns.length - 1 === i}
@@ -181,7 +190,6 @@ export default function ClusterAddOns() {
             gridTemplateColumns: 'repeat(3, 1fr)',
             gridAutoRows: 'min-content',
             gridGap: theme.spacing.small,
-            marginBottom: theme.spacing.medium,
           }}
         >
           <PropCard title="Add-on">{addOn?.name}</PropCard>
@@ -203,32 +211,10 @@ export default function ClusterAddOns() {
             {toNiceVersion(kubeVersion)}
           </PropCard>
         </div>
-        {error ? (
-          <GqlError error={error} />
-        ) : addOn ? (
-          <Outlet
-            context={
-              {
-                runtimeService: addOn,
-                kubeVersion,
-              } satisfies ClusterAddOnContextType
-            }
-          />
-        ) : (
-          <LoadingIndicator />
-        )}
+        {addOn ? <Outlet context={context} /> : <LoadingIndicator />}
       </div>
     </div>
   )
-}
-
-type ClusterAddOnContextType = {
-  runtimeService: RuntimeServiceFragment
-  kubeVersion: Nullable<string>
-}
-
-export function useClusterAddOnContext() {
-  return useOutletContext<ClusterAddOnContextType>()
 }
 
 export const getAddOnDetailsBreadcrumbs = ({

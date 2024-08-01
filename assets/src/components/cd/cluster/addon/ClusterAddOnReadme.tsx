@@ -2,18 +2,20 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 import { useRuntimeServiceQuery } from 'generated/graphql'
 
+import { useOutletContext } from 'react-router-dom'
+
 import MarkdocComponent from '../../../utils/MarkdocContent'
 
 import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
 
-import { useClusterAddOnContext } from '../ClusterAddOns'
+import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
 
 import { versionPlaceholder } from './ClusterAddOnReleases'
 
 export default function ClusterAddOnReadme() {
-  const { runtimeService: rts } = useClusterAddOnContext()
+  const { addOn } = useOutletContext<ClusterAddOnOutletContextT>()
   const { data, loading, error } = useRuntimeServiceQuery({
-    variables: { id: rts?.id, version: versionPlaceholder },
+    variables: { id: addOn?.id ?? '', version: versionPlaceholder },
   })
 
   if (loading) return <LoadingIndicator />

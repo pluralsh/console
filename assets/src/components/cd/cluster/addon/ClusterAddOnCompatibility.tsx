@@ -7,8 +7,9 @@ import { coerce, compare } from 'semver'
 import { AddonVersion } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { useOutletContext } from 'react-router-dom'
 
-import { useClusterAddOnContext } from '../ClusterAddOns'
+import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
 
 const Compatibility = memo(
   ({
@@ -105,12 +106,12 @@ const colVersion = columnHelper.accessor((row) => row, {
 })
 
 export default function ClusterAddOnCompatibility() {
-  const { runtimeService: rts, kubeVersion } = useClusterAddOnContext()
+  const { addOn, kubeVersion } = useOutletContext<ClusterAddOnOutletContextT>()
 
   const kubeVersions = useMemo(() => {
     const kubeVs = new Set<string>()
 
-    rts.addon?.versions?.forEach((v) => {
+    addOn?.addon?.versions?.forEach((v) => {
       v?.kube?.forEach((k) => {
         if (k) kubeVs.add(k.trim())
       })
@@ -119,7 +120,7 @@ export default function ClusterAddOnCompatibility() {
     return [...kubeVs].sort(
       (a, b) => -compare(coerce(a) || '', coerce(b) || '')
     )
-  }, [rts.addon?.versions])
+  }, [addOn?.addon?.versions])
 
   const columns = useMemo(
     () => [
@@ -131,18 +132,18 @@ export default function ClusterAddOnCompatibility() {
     [kubeVersions, kubeVersion]
   )
 
-  if (!rts?.addon?.versions) return null
+  if (!addOn?.addon?.versions) return null
 
   return (
     <FullHeightTableWrap>
       <Table
-        data={rts?.addon?.versions || []}
+        data={addOn?.addon?.versions || []}
         columns={columns}
         stickyColumn
-        highlightedRowId={rts.version}
+        highlightedRowId={addOn.version}
         reactTableOptions={{
           getRowId: (row) => row.version,
-          meta: { kubeVersion, version: rts?.addonVersion?.version },
+          meta: { kubeVersion, version: addOn?.addonVersion?.version },
         }}
         css={{
           maxHeight: 'unset',
