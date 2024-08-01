@@ -222,9 +222,7 @@ const upgradeColumns = [
         )
       }
 
-      if (isEmpty(upgrades) || original.self) {
-        return <div>Cluster must be upgraded externally</div>
-      }
+      if (isEmpty(upgrades) || original.self) return null
 
       return (
         <div
