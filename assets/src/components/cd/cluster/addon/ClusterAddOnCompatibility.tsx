@@ -44,7 +44,12 @@ const Compatibility = memo(
             />
           )
         }
-        css={{ borderRadius: '50%', height: 43, width: 43 }}
+        css={{
+          alignSelf: 'center',
+          borderRadius: '50%',
+          height: 43,
+          width: 43,
+        }}
       />
     )
   }
@@ -63,7 +68,19 @@ const generateCompatCol = (kubeVersion: string, currentKubeVersion: string) => {
     (row) => row?.kube?.some((k) => k?.trim() === kubeVersion),
     {
       id: `compat-${kubeVersion}`,
-      header: kubeVersion,
+      header: () => (
+        <div
+          css={{
+            alignItems: 'center',
+            display: 'flex',
+            inset: 0,
+            justifyContent: 'center',
+            position: 'absolute',
+          }}
+        >
+          {kubeVersion}
+        </div>
+      ),
       meta: { highlight },
       cell: ({
         getValue,
