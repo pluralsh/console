@@ -8143,6 +8143,8 @@ export type ApiDeprecationFragment = { __typename?: 'ApiDeprecation', availableI
 
 export type RuntimeServiceFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, service?: { __typename?: 'ServiceDeployment', git?: { __typename?: 'GitRef', ref: string, folder: string } | null, repository?: { __typename?: 'GitRepository', httpsPath?: string | null, urlFormat?: string | null } | null, helm?: { __typename?: 'HelmSpec', version?: string | null } | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
 
+export type RuntimeServiceDetailsFragment = { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, releaseUrl?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null };
+
 export type AddonVersionFragment = { __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null };
 
 export type AddonVersionBlockingFragment = { __typename?: 'AddonVersion', blocking?: boolean | null };
@@ -8237,10 +8239,12 @@ export type RuntimeServicesQuery = { __typename?: 'RootQueryType', cluster?: { _
 export type RuntimeServiceQueryVariables = Exact<{
   id: Scalars['ID']['input'];
   version: Scalars['String']['input'];
+  kubeVersion: Scalars['String']['input'];
+  hasKubeVersion: Scalars['Boolean']['input'];
 }>;
 
 
-export type RuntimeServiceQuery = { __typename?: 'RootQueryType', runtimeService?: { __typename?: 'RuntimeService', id: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, releaseUrl?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null } | null };
+export type RuntimeServiceQuery = { __typename?: 'RootQueryType', runtimeService?: { __typename?: 'RuntimeService', id: string, name: string, version: string, addon?: { __typename?: 'RuntimeAddon', icon?: string | null, releaseUrl?: string | null, readme?: string | null, versions?: Array<{ __typename?: 'AddonVersion', version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null> | null } | null, addonVersion?: { __typename?: 'AddonVersion', blocking?: boolean | null, version?: string | null, kube?: Array<string | null> | null, chartVersion?: string | null, incompatibilities?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null, requirements?: Array<{ __typename?: 'VersionReference', version: string, name: string } | null> | null } | null } | null };
 
 export type UpdateClusterBindingsMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10099,6 +10103,26 @@ export const RuntimeServiceFragmentDoc = gql`
     helm {
       version
     }
+  }
+  addonVersion {
+    ...AddonVersionBlocking @include(if: $hasKubeVersion)
+    ...AddonVersion
+  }
+}
+    ${AddonVersionFragmentDoc}
+${AddonVersionBlockingFragmentDoc}`;
+export const RuntimeServiceDetailsFragmentDoc = gql`
+    fragment RuntimeServiceDetails on RuntimeService {
+  id
+  name
+  version
+  addon {
+    icon
+    versions {
+      ...AddonVersion
+    }
+    releaseUrl(version: $version)
+    readme
   }
   addonVersion {
     ...AddonVersionBlocking @include(if: $hasKubeVersion)
@@ -13866,20 +13890,12 @@ export type RuntimeServicesLazyQueryHookResult = ReturnType<typeof useRuntimeSer
 export type RuntimeServicesSuspenseQueryHookResult = ReturnType<typeof useRuntimeServicesSuspenseQuery>;
 export type RuntimeServicesQueryResult = Apollo.QueryResult<RuntimeServicesQuery, RuntimeServicesQueryVariables>;
 export const RuntimeServiceDocument = gql`
-    query RuntimeService($id: ID!, $version: String!) {
+    query RuntimeService($id: ID!, $version: String!, $kubeVersion: String!, $hasKubeVersion: Boolean!) {
   runtimeService(id: $id) {
-    id
-    addon {
-      icon
-      versions {
-        ...AddonVersion
-      }
-      releaseUrl(version: $version)
-      readme
-    }
+    ...RuntimeServiceDetails
   }
 }
-    ${AddonVersionFragmentDoc}`;
+    ${RuntimeServiceDetailsFragmentDoc}`;
 
 /**
  * __useRuntimeServiceQuery__
@@ -13895,6 +13911,8 @@ export const RuntimeServiceDocument = gql`
  *   variables: {
  *      id: // value for 'id'
  *      version: // value for 'version'
+ *      kubeVersion: // value for 'kubeVersion'
+ *      hasKubeVersion: // value for 'hasKubeVersion'
  *   },
  * });
  */
@@ -20911,6 +20929,7 @@ export const namedOperations = {
     NodePool: 'NodePool',
     ApiDeprecation: 'ApiDeprecation',
     RuntimeService: 'RuntimeService',
+    RuntimeServiceDetails: 'RuntimeServiceDetails',
     AddonVersion: 'AddonVersion',
     AddonVersionBlocking: 'AddonVersionBlocking',
     ClustersRow: 'ClustersRow',

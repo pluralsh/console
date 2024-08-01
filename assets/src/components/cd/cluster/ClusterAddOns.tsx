@@ -2,7 +2,8 @@ import { Chip, EmptyState, SubTab, TabList } from '@pluralsh/design-system'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
 import {
-  RuntimeServiceFragment,
+  RuntimeServiceDetailsFragment,
+  useRuntimeServiceQuery,
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import { isNonNullable } from 'utils/isNonNullable'
@@ -18,17 +19,17 @@ import { toNiceVersion } from '../../../utils/semver'
 import { GqlError } from '../../utils/Alert'
 import {
   CLUSTER_ADDONS_PARAM_ID,
-  CLUSTER_ADDONS_REL_PATH,
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
-  getClusterDetailsPath,
 } from '../../../routes/cdRoutesConsts'
 
 import ClusterAddOnsEntry from './ClusterAddOnsEntry'
-import { getClusterBreadcrumbs, useClusterContext } from './Cluster'
+import { useClusterContext } from './Cluster'
+
+export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 
 export type ClusterAddOnOutletContextT = {
-  addOn: Nullable<RuntimeServiceFragment>
+  addOn: Nullable<RuntimeServiceDetailsFragment>
   kubeVersion: Nullable<string>
 }
 
@@ -71,9 +72,19 @@ export default function ClusterAddOns() {
 
   const hasAddons = !isEmpty(addOns)
 
+  const { data: addOnData, error: addOnError } = useRuntimeServiceQuery({
+    skip: !addOnId,
+    variables: {
+      id: addOnId,
+      version: versionPlaceholder,
+      kubeVersion,
+      hasKubeVersion: !!kubeVersion,
+    },
+  })
+
   const addOn = useMemo(
-    () => addOns?.find((a) => a?.id === addOnId),
-    [addOnId, addOns]
+    () => addOnData?.runtimeService,
+    [addOnData?.runtimeService]
   )
 
   const context = useMemo(
@@ -84,17 +95,6 @@ export default function ClusterAddOns() {
       }) satisfies ClusterAddOnOutletContextT,
     [addOn, kubeVersion]
   )
-
-  // useSetBreadcrumbs(
-  //   useMemo(
-  //     () =>
-  //       getAddOnDetailsBreadcrumbs({
-  //         cluster: cluster ?? { id: clusterId },
-  //         addOn: rts || { name: '', id: addOnId },
-  //       }),
-  //     [addOnId, cluster, clusterId, rts]
-  //   )
-  // )
 
   useEffect(() => {
     if (hasAddons && !addOnId)
@@ -143,6 +143,8 @@ export default function ClusterAddOns() {
 
   if (error) return <GqlError error={error} />
 
+  if (addOnError) return <GqlError error={addOnError} />
+
   if (!data) return <LoadingIndicator />
 
   if (!hasAddons)
@@ -182,61 +184,41 @@ export default function ClusterAddOns() {
           width: '100%',
         }}
       >
-        <div
-          css={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gridAutoRows: 'min-content',
-            gridGap: theme.spacing.small,
-          }}
-        >
-          <PropCard title="Add-on">{addOn?.name}</PropCard>
-          <PropCard title="Add-on version">
+        {addOn ? (
+          <>
             <div
               css={{
-                alignItems: 'center',
-                display: 'flex',
-                justifyContent: 'space-between',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gridAutoRows: 'min-content',
+                gridGap: theme.spacing.small,
               }}
             >
-              {toNiceVersion(addOn?.addonVersion?.version)}
-              {addOn?.addonVersion?.blocking === true && (
-                <Chip severity="danger">Blocking</Chip>
-              )}
+              <PropCard title="Add-on">{addOn?.name}</PropCard>
+              <PropCard title="Add-on version">
+                <div
+                  css={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  {toNiceVersion(addOn?.addonVersion?.version)}
+                  {addOn?.addonVersion?.blocking === true && (
+                    <Chip severity="danger">Blocking</Chip>
+                  )}
+                </div>
+              </PropCard>
+              <PropCard title="Kubernetes version">
+                {toNiceVersion(kubeVersion)}
+              </PropCard>
             </div>
-          </PropCard>
-          <PropCard title="Kubernetes version">
-            {toNiceVersion(kubeVersion)}
-          </PropCard>
-        </div>
-        {addOn ? <Outlet context={context} /> : <LoadingIndicator />}
+            <Outlet context={context} />
+          </>
+        ) : (
+          <LoadingIndicator />
+        )}
       </div>
     </div>
   )
 }
-
-export const getAddOnDetailsBreadcrumbs = ({
-  cluster,
-  addOn,
-}: Parameters<typeof getClusterBreadcrumbs>[0] & {
-  addOn: Pick<RuntimeServiceFragment, 'name' | 'id'>
-}) => [
-  ...getClusterBreadcrumbs({ cluster }),
-  {
-    label: CLUSTER_ADDONS_REL_PATH,
-    url: `${getClusterDetailsPath({
-      clusterId: cluster.id,
-    })}/${CLUSTER_ADDONS_REL_PATH}`,
-  },
-  ...(addOn.name && cluster.name
-    ? [
-        {
-          label: addOn?.name || addOn?.id,
-          url: getClusterAddOnDetailsPath({
-            clusterId: cluster.id,
-            addOnId: addOn.id,
-          }),
-        },
-      ]
-    : []),
-]

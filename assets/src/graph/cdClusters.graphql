@@ -100,6 +100,24 @@ fragment RuntimeService on RuntimeService {
   }
 }
 
+fragment RuntimeServiceDetails on RuntimeService {
+  id
+  name
+  version
+  addon {
+    icon
+    versions {
+      ...AddonVersion
+    }
+    releaseUrl(version: $version)
+    readme
+  }
+  addonVersion {
+    ...AddonVersionBlocking @include(if: $hasKubeVersion)
+    ...AddonVersion
+  }
+}
+
 fragment AddonVersion on AddonVersion {
   version
   kube
@@ -389,17 +407,9 @@ query RuntimeServices(
   }
 }
 
-query RuntimeService($id: ID!, $version: String!) {
+query RuntimeService($id: ID!, $version: String!,   $kubeVersion: String! ,$hasKubeVersion: Boolean!) {
   runtimeService(id: $id) {
-    id
-    addon {
-      icon
-      versions {
-        ...AddonVersion
-      }
-      releaseUrl(version: $version)
-      readme
-    }
+    ...RuntimeServiceDetails
   }
 }
 

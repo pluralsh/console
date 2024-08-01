@@ -1,24 +1,22 @@
 import React, { useMemo } from 'react'
 import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { useRuntimeServiceQuery } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import isEmpty from 'lodash/isEmpty'
 
 import { useOutletContext } from 'react-router-dom'
 
-import LoadingIndicator from '../../../utils/LoadingIndicator'
-import { GqlError } from '../../../utils/Alert'
 import { InlineLink } from '../../../utils/typography/InlineLink'
-import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
+import {
+  ClusterAddOnOutletContextT,
+  versionPlaceholder,
+} from '../ClusterAddOns'
 
 type Release = {
   version: string
   url: string
 }
-
-export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 
 const columnHelper = createColumnHelper<Release>()
 
@@ -40,12 +38,8 @@ const columns = [
 export default function ClusterAddOnReleases() {
   const { addOn } = useOutletContext<ClusterAddOnOutletContextT>()
 
-  const { data, loading, error } = useRuntimeServiceQuery({
-    variables: { id: addOn?.id ?? '', version: versionPlaceholder },
-  })
-
   const releases: Release[] = useMemo(() => {
-    const template = data?.runtimeService?.addon?.releaseUrl
+    const template = addOn?.addon?.releaseUrl
 
     if (!template) return []
 
@@ -53,17 +47,7 @@ export default function ClusterAddOnReleases() {
       version: addonVersion?.version ?? '',
       url: template.replace(versionPlaceholder, addonVersion?.version ?? ''),
     }))
-  }, [data, addOn])
-
-  if (loading) return <LoadingIndicator />
-
-  if (error)
-    return (
-      <GqlError
-        header="Could not fetch release URL"
-        error={error}
-      />
-    )
+  }, [addOn])
 
   if (isEmpty(releases)) return <EmptyState message="No releases found." />
 
