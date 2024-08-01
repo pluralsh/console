@@ -6,7 +6,8 @@ import MarkdocComponent from '../../../utils/MarkdocContent'
 
 import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
 
-import { useClusterAddOnContext } from './ClusterAddOn'
+import { useClusterAddOnContext } from '../ClusterAddOns'
+
 import { versionPlaceholder } from './ClusterAddOnReleases'
 
 export default function ClusterAddOnReadme() {

@@ -9,8 +9,7 @@ import isEmpty from 'lodash/isEmpty'
 import LoadingIndicator from '../../../utils/LoadingIndicator'
 import { GqlError } from '../../../utils/Alert'
 import { InlineLink } from '../../../utils/typography/InlineLink'
-
-import { useClusterAddOnContext } from './ClusterAddOn'
+import { useClusterAddOnContext } from '../ClusterAddOns'
 
 type Release = {
   version: string
