@@ -183,7 +183,7 @@ const upgradeColumns = [
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
-    header: 'Upgrade version',
+    header: '',
     meta: {
       gridTemplate: 'fit-content(500px)',
     },
