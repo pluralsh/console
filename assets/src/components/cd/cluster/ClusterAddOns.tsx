@@ -152,8 +152,6 @@ export default function ClusterAddOns() {
     <div css={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       <div
         css={{
-          display: 'flex',
-          flexDirection: 'column',
           flexShrink: 0,
           marginRight: theme.spacing.medium,
           overflowY: 'auto',
