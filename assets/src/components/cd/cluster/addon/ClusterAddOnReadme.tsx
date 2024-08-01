@@ -31,10 +31,7 @@ export default function ClusterAddOnReadme() {
   return (
     <ScrollablePage>
       <MarkdocComponent
-        raw={
-          data?.runtimeService?.addon?.readme ||
-          'No readme available for this component'
-        }
+        raw={data?.runtimeService?.addon?.readme || 'No readme found'}
       />
     </ScrollablePage>
   )

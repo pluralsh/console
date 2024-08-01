@@ -1,5 +1,5 @@
-import { useMemo } from 'react'
-import { Table } from '@pluralsh/design-system'
+import React, { useMemo } from 'react'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { useRuntimeServiceQuery } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
@@ -22,24 +22,23 @@ export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 
 const columnHelper = createColumnHelper<Release>()
 
-const colVersion = columnHelper.accessor((row) => row.version, {
-  id: 'version',
-  header: 'Version',
-  cell: ({ getValue }) => <TabularNumbers>{getValue()}</TabularNumbers>,
-})
-
-const colRelease = columnHelper.accessor((row) => row.url, {
-  id: 'url',
-  header: 'URL',
-  cell: ({ getValue }) => (
-    <InlineLink href={getValue()}>{getValue()}</InlineLink>
-  ),
-})
+const columns = [
+  columnHelper.accessor((row) => row.version, {
+    id: 'version',
+    header: 'Version',
+    cell: ({ getValue }) => <TabularNumbers>{getValue()}</TabularNumbers>,
+  }),
+  columnHelper.accessor((row) => row.url, {
+    id: 'url',
+    header: 'URL',
+    cell: ({ getValue }) => (
+      <InlineLink href={getValue()}>{getValue()}</InlineLink>
+    ),
+  }),
+]
 
 export default function ClusterAddOnReleases() {
   const { addOn } = useOutletContext<ClusterAddOnOutletContextT>()
-
-  const columns = useMemo(() => [colVersion, colRelease], [])
 
   const { data, loading, error } = useRuntimeServiceQuery({
     variables: { id: addOn?.id ?? '', version: versionPlaceholder },
@@ -66,7 +65,7 @@ export default function ClusterAddOnReleases() {
       />
     )
 
-  if (isEmpty(releases)) return null
+  if (isEmpty(releases)) return <EmptyState message="No releases found." />
 
   return (
     <FullHeightTableWrap>

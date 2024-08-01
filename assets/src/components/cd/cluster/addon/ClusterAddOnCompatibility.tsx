@@ -1,6 +1,12 @@
-import { memo, useMemo } from 'react'
+import React, { memo, useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { CheckIcon, CloseIcon, IconFrame, Table } from '@pluralsh/design-system'
+import {
+  CheckIcon,
+  CloseIcon,
+  EmptyState,
+  IconFrame,
+  Table,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { coerce, compare } from 'semver'
 
@@ -149,7 +155,8 @@ export default function ClusterAddOnCompatibility() {
     [kubeVersions, kubeVersion]
   )
 
-  if (!addOn?.addon?.versions) return null
+  if (!addOn?.addon?.versions)
+    return <EmptyState message="No version info found." />
 
   return (
     <FullHeightTableWrap>
