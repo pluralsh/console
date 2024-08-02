@@ -1,4 +1,4 @@
-import { useHotkeys } from '@saas-ui/react'
+import { useHotkeys } from '@saas-ui/use-hotkeys'
 
 import { CommandWithHotkeys } from './commands'
 

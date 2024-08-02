@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { usePlatform } from 'components/hooks/usePlatform'
 import styled, { useTheme } from 'styled-components'
 
-import { useHotkeys } from '@saas-ui/react'
+import { useHotkeys } from '@saas-ui/use-hotkeys'
 
 import CommandPaletteDialog from './CommandPaletteDialog'
 import { useCommandsWithHotkeys } from './commands'
