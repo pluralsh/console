@@ -25,8 +25,7 @@ import {
 } from '@pluralsh/design-system'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { isEmpty } from 'lodash'
-
-import { UseHotkeysOptions } from '@saas-ui/react'
+import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 
 import {
   CD_ABS_PATH,
