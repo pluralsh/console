@@ -215,6 +215,7 @@ export function useCommands(): CommandGroup[] {
             prefix: 'CD > Clusters >',
             label: 'Pods',
             icon: PodContainerIcon,
+            // FIXME: Fix issue with callback.
             callback: () => {
               if (cluster?.id)
                 navigate(
