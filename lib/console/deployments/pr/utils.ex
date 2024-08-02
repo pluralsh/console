@@ -5,9 +5,9 @@ defmodule Console.Deployments.Pr.Utils do
 
   @ttl :timer.hours(1)
 
-  @stack_regex [~r/plrl\/stack\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stack:([[:alnum:]_\-]*)\)/, ~r/Plural Stack: ([[:alnum:]_\-]+)/]
-  @svc_regex [~r/plrl\/svc\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(service:([[:alnum:]_\-\/]*)\)/, ~r/Plural Service: ([[:alnum:]_\/\-]+)/]
-  @cluster_regex [~r/plrl\/cluster\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(cluster:([[:alnum:]_\-]*)\)/, ~r/Plural Cluster: ([[:alnum:]_\-]+)/]
+  @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural Stacks?: ([[:alnum:]_\-]+)/]
+  @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/Plural Services?: ([[:alnum:]_\/\-]+)/]
+  @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/Plural Clusters?: ([[:alnum:]_\-]+)/]
 
   def pr_associations(content) do
     Enum.reduce(~w(stack service cluster)a, %{}, &maybe_add(&2, :"#{&1}_id", scrape(&1, content)))

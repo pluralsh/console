@@ -165,5 +165,10 @@ export default function Services() {
     )
   )
 
-  return <Outlet context={{ setRefetch } as ServicesContextT} />
+  const context = useMemo(
+    () => ({ setRefetch }) as ServicesContextT,
+    [setRefetch]
+  )
+
+  return <Outlet context={context} />
 }

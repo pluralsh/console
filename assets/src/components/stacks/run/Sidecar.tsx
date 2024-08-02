@@ -22,6 +22,7 @@ import { InlineLink } from '../../utils/typography/InlineLink'
 import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts'
 import { StackedText } from '../../utils/table/StackedText'
 import StackStatusChip from '../common/StackStatusChip'
+import StackObservabilityMetrics from '../common/StackObservabilityMetrics'
 
 interface StackRunSidecarProps {
   stackRun: StackRun
@@ -95,6 +96,11 @@ export default function StackRunSidecar({
             />
           </SidecarItem>
         )}
+        <SidecarItem heading="Observability metrics">
+          <StackObservabilityMetrics
+            observableMetrics={stackRun.stack?.observableMetrics}
+          />
+        </SidecarItem>
         <SidecarItem heading="Cluster">
           <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
             <ClusterProviderIcon

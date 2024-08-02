@@ -94,6 +94,10 @@ export default function ClusterServices() {
       [cluster, clusterId, currentTab?.path, refetch, theme.spacing.small]
     )
   )
+  const context = useMemo(
+    () => ({ setRefetch, clusterId }) as ServicesContextT,
+    [setRefetch, clusterId]
+  )
 
-  return <Outlet context={{ setRefetch, clusterId } as ServicesContextT} />
+  return <Outlet context={context} />
 }
