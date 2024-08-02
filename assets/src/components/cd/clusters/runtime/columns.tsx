@@ -2,27 +2,15 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { RuntimeServicesQuery } from 'generated/graphql'
 
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { TableCaretLink, TableText } from 'components/cluster/TableElements'
+import { TableText } from 'components/cluster/TableElements'
 import {
-  ArrowTopRightIcon,
   BlockedIcon,
   CaretRightIcon,
   Chip,
   IconFrame,
 } from '@pluralsh/design-system'
 
-import styled, { useTheme } from 'styled-components'
-
-import { Link } from 'react-router-dom'
-
-import {
-  getClusterAddOnDetailsPath,
-  getClusterDetailsPath,
-} from 'routes/cdRoutesConsts'
-
-import { ChevronRightIcon } from '@saas-ui/react'
-
-import { GitPointer } from '../deprecationsColumns'
+import { useTheme } from 'styled-components'
 
 type RuntimeServiceCluster = NonNullable<RuntimeServicesQuery['cluster']>
 export type RuntimeService = NonNullable<
