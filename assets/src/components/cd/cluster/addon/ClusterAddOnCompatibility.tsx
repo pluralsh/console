@@ -1,15 +1,21 @@
-import { memo, useMemo } from 'react'
+import React, { memo, useMemo } from 'react'
 import { useTheme } from 'styled-components'
-import { CheckIcon, CloseIcon, IconFrame, Table } from '@pluralsh/design-system'
+import {
+  CheckIcon,
+  CloseIcon,
+  EmptyState,
+  IconFrame,
+  Table,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { coerce, compare } from 'semver'
 
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { AddonVersion } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { useOutletContext } from 'react-router-dom'
 
-import { useClusterAddOnContext } from './ClusterAddOnDetails'
+import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
 
 const Compatibility = memo(
   ({
@@ -28,21 +34,28 @@ const Compatibility = memo(
 
     return (
       <IconFrame
-        size="small"
-        type={isCurrentVersion ? 'secondary' : 'tertiary'}
+        type={isCurrentVersion ? 'floating' : 'tertiary'}
         tooltip={label}
         textValue={label}
         icon={
           isCompatible ? (
-            <CheckIcon color={theme.colors['icon-success']} />
+            <CheckIcon
+              color={theme.colors['icon-success']}
+              size={16}
+            />
           ) : (
-            // eslint-disable-next-line react/jsx-no-useless-fragment
             <CloseIcon
-              color={theme.colors['icon-default']}
-              css={{ opacity: theme.mode === 'light' ? 0.2 : 0.1 }}
+              color={theme.colors['icon-disabled']}
+              size={16}
             />
           )
         }
+        css={{
+          alignSelf: 'center',
+          borderRadius: '50%',
+          height: 43,
+          width: 43,
+        }}
       />
     )
   }
@@ -50,52 +63,78 @@ const Compatibility = memo(
 
 const columnHelper = createColumnHelper<AddonVersion>()
 
-const generateCompatCol = (kubeVersion: string) =>
-  columnHelper.accessor(
+const generateCompatCol = (kubeVersion: string, currentKubeVersion: string) => {
+  const semverColVersion = coerce(kubeVersion)
+  const semverCurrentVersion = coerce(currentKubeVersion)
+  const highlight =
+    semverCurrentVersion?.major === semverColVersion?.major &&
+    semverCurrentVersion?.minor === semverColVersion?.minor
+
+  return columnHelper.accessor(
     (row) => row?.kube?.some((k) => k?.trim() === kubeVersion),
     {
       id: `compat-${kubeVersion}`,
-      header: kubeVersion,
+      header: () => (
+        <div
+          css={{
+            alignItems: 'center',
+            display: 'flex',
+            inset: 0,
+            justifyContent: 'center',
+            position: 'absolute',
+          }}
+        >
+          {kubeVersion}
+        </div>
+      ),
+      meta: { highlight },
       cell: ({
         getValue,
         row: { original },
         table: {
           options: { meta },
         },
-      }) => {
-        const val = getValue()
-
-        const semverColVersion = coerce(kubeVersion)
-        const semverVersion = coerce((meta as any)?.kubeVersion)
-
-        const highlight =
-          original.version === (meta as any)?.version &&
-          semverVersion?.major === semverColVersion?.major &&
-          semverVersion?.minor === semverColVersion?.minor
-
-        return (
-          <Compatibility
-            isCompatible={!!val}
-            isCurrentVersion={highlight}
-          />
-        )
-      },
+      }) => (
+        <Compatibility
+          isCompatible={!!getValue()}
+          isCurrentVersion={
+            original.version === (meta as any)?.version && highlight
+          }
+        />
+      ),
     }
   )
+}
 
-const colVersion = columnHelper.accessor((row) => row.version, {
+const colVersion = columnHelper.accessor((row) => row, {
   id: 'version',
   header: 'Version',
-  cell: ({ getValue }) => <TabularNumbers>{getValue()}</TabularNumbers>,
+  meta: { tooltip: 'App version shown on top, chart version shown on bottom' },
+  cell: function Cell({
+    row: {
+      original: { version, chartVersion },
+    },
+  }) {
+    const theme = useTheme()
+
+    return (
+      <TabularNumbers>
+        <div css={{ ...theme.partials.text.body2LooseLineHeight }}>
+          {version}
+        </div>
+        <div css={{ color: theme.colors['text-xlight'] }}>{chartVersion}</div>
+      </TabularNumbers>
+    )
+  },
 })
 
 export default function ClusterAddOnCompatibility() {
-  const { runtimeService: rts, kubeVersion } = useClusterAddOnContext()
+  const { addOn, kubeVersion } = useOutletContext<ClusterAddOnOutletContextT>()
 
   const kubeVersions = useMemo(() => {
     const kubeVs = new Set<string>()
 
-    rts.addon?.versions?.forEach((v) => {
+    addOn?.addon?.versions?.forEach((v) => {
       v?.kube?.forEach((k) => {
         if (k) kubeVs.add(k.trim())
       })
@@ -104,41 +143,37 @@ export default function ClusterAddOnCompatibility() {
     return [...kubeVs].sort(
       (a, b) => -compare(coerce(a) || '', coerce(b) || '')
     )
-  }, [rts.addon?.versions])
+  }, [addOn?.addon?.versions])
 
   const columns = useMemo(
     () => [
       colVersion,
-      ...kubeVersions.map((kubeV) => generateCompatCol(kubeV)),
+      ...kubeVersions.map((kubeV) =>
+        generateCompatCol(kubeV, kubeVersion ?? '')
+      ),
     ],
-    [kubeVersions]
+    [kubeVersions, kubeVersion]
   )
 
+  if (!addOn?.addon?.versions)
+    return <EmptyState message="No version info found." />
+
   return (
-    <ScrollablePage
-      heading="Compatibility"
-      scrollable={false}
-    >
-      {rts?.addon?.versions && (
-        <FullHeightTableWrap>
-          <Table
-            data={rts?.addon?.versions || []}
-            columns={columns}
-            stickyColumn
-            reactTableOptions={{
-              getRowId: (row) => row.version,
-              meta: {
-                kubeVersion,
-                version: rts?.addonVersion?.version,
-              },
-            }}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
-      )}
-    </ScrollablePage>
+    <FullHeightTableWrap>
+      <Table
+        data={addOn?.addon?.versions || []}
+        columns={columns}
+        stickyColumn
+        highlightedRowId={addOn.addonVersion?.version ?? ''}
+        reactTableOptions={{
+          getRowId: (row) => row.version,
+          meta: { kubeVersion, version: addOn?.addonVersion?.version },
+        }}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </FullHeightTableWrap>
   )
 }

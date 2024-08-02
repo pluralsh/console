@@ -1,89 +1,67 @@
-import { useMemo } from 'react'
-import { Table } from '@pluralsh/design-system'
+import React, { useMemo } from 'react'
+import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { useRuntimeServiceQuery } from 'generated/graphql'
 import { TabularNumbers } from 'components/cluster/TableElements'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import isEmpty from 'lodash/isEmpty'
 
-import LoadingIndicator from '../../../utils/LoadingIndicator'
-import { GqlError } from '../../../utils/Alert'
-import { InlineLink } from '../../../utils/typography/InlineLink'
+import { useOutletContext } from 'react-router-dom'
 
-import { useClusterAddOnContext } from './ClusterAddOnDetails'
+import { InlineLink } from '../../../utils/typography/InlineLink'
+import {
+  ClusterAddOnOutletContextT,
+  versionPlaceholder,
+} from '../ClusterAddOns'
 
 type Release = {
   version: string
   url: string
 }
 
-export const versionPlaceholder = '_VSN_PLACEHOLDER_'
-
 const columnHelper = createColumnHelper<Release>()
 
-const colVersion = columnHelper.accessor((row) => row.version, {
-  id: 'version',
-  header: 'Version',
-  cell: ({ getValue }) => <TabularNumbers>{getValue()}</TabularNumbers>,
-})
-
-const colRelease = columnHelper.accessor((row) => row.url, {
-  id: 'url',
-  header: 'URL',
-  cell: ({ getValue }) => (
-    <InlineLink href={getValue()}>{getValue()}</InlineLink>
-  ),
-})
+const columns = [
+  columnHelper.accessor((row) => row.version, {
+    id: 'version',
+    header: 'Version',
+    cell: ({ getValue }) => <TabularNumbers>{getValue()}</TabularNumbers>,
+  }),
+  columnHelper.accessor((row) => row.url, {
+    id: 'url',
+    header: 'URL',
+    cell: ({ getValue }) => (
+      <InlineLink href={getValue()}>{getValue()}</InlineLink>
+    ),
+  }),
+]
 
 export default function ClusterAddOnReleases() {
-  const { runtimeService: rts } = useClusterAddOnContext()
-
-  const columns = useMemo(() => [colVersion, colRelease], [])
-
-  const { data, loading, error } = useRuntimeServiceQuery({
-    variables: { id: rts?.id, version: versionPlaceholder },
-  })
+  const { addOn } = useOutletContext<ClusterAddOnOutletContextT>()
 
   const releases: Release[] = useMemo(() => {
-    const template = data?.runtimeService?.addon?.releaseUrl
+    const template = addOn?.addon?.releaseUrl
 
     if (!template) return []
 
-    return (rts?.addon?.versions || []).map((addonVersion) => ({
+    return (addOn?.addon?.versions || []).map((addonVersion) => ({
       version: addonVersion?.version ?? '',
       url: template.replace(versionPlaceholder, addonVersion?.version ?? ''),
     }))
-  }, [data, rts])
+  }, [addOn])
 
-  if (loading) return <LoadingIndicator />
-
-  if (error)
-    return (
-      <GqlError
-        header="Could not fetch release URL"
-        error={error}
-      />
-    )
+  if (isEmpty(releases)) return <EmptyState message="No releases found." />
 
   return (
-    <ScrollablePage
-      heading="Releases"
-      scrollable={false}
-    >
-      {!isEmpty(releases) && (
-        <FullHeightTableWrap>
-          <Table
-            data={releases}
-            columns={columns}
-            reactTableOptions={{ getRowId: (row) => row.version }}
-            css={{
-              maxHeight: 'unset',
-              height: '100%',
-            }}
-          />
-        </FullHeightTableWrap>
-      )}
-    </ScrollablePage>
+    <FullHeightTableWrap>
+      <Table
+        data={releases}
+        columns={columns}
+        reactTableOptions={{ getRowId: (row) => row.version }}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </FullHeightTableWrap>
   )
 }

@@ -135,10 +135,11 @@ export default function Cluster() {
       }
       headingContent={
         <>
-          <div css={{ width: 360, height: '100%' }}>
+          <div css={{ width: 320, height: '100%' }}>
             <ClusterSelector
               clusterId={clusterId}
               allowDeselect={false}
+              showUpgrades={tab === 'addons'}
               onClusterChange={(c) => {
                 if (c?.id) {
                   navigate(`/cd/clusters/${c.id}/${tab}`)
@@ -157,9 +158,7 @@ export default function Cluster() {
               .filter((t) => tabEnabled(t, logs))
               .map(({ label, path }) => (
                 <LinkTabWrap
-                  css={{
-                    minWidth: 'fit-content',
-                  }}
+                  css={{ minWidth: 'fit-content' }}
                   subTab
                   key={path}
                   textValue={label}

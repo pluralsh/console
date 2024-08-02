@@ -1,38 +1,15 @@
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { GqlError } from 'components/utils/Alert'
-import { useRuntimeServiceQuery } from 'generated/graphql'
+import { useOutletContext } from 'react-router-dom'
 
 import MarkdocComponent from '../../../utils/MarkdocContent'
-
-import { useClusterAddOnContext } from './ClusterAddOnDetails'
-import { versionPlaceholder } from './ClusterAddOnReleases'
+import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
+import { ClusterAddOnOutletContextT } from '../ClusterAddOns'
 
 export default function ClusterAddOnReadme() {
-  const { runtimeService: rts } = useClusterAddOnContext()
-  const { data, loading, error } = useRuntimeServiceQuery({
-    variables: { id: rts?.id, version: versionPlaceholder },
-  })
-
-  if (loading) return <LoadingIndicator />
-
-  if (error)
-    return (
-      <GqlError
-        header="Could not fetch readme"
-        error={error}
-      />
-    )
+  const { addOn } = useOutletContext<ClusterAddOnOutletContextT>()
 
   return (
-    <ScrollablePage heading="Readme">
-      <MarkdocComponent
-        raw={
-          data?.runtimeService?.addon?.readme ||
-          'No readme available for this component'
-        }
-      />
+    <ScrollablePage>
+      <MarkdocComponent raw={addOn?.addon?.readme || 'No readme found'} />
     </ScrollablePage>
   )
 }

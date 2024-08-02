@@ -1,11 +1,12 @@
 import {
   Button,
+  Chip,
   ErrorIcon,
   InfoIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
 import { useCallback, useState } from 'react'
-import { ClustersRowFragment } from 'generated/graphql'
+import { ClusterTinyFragment, ClustersRowFragment } from 'generated/graphql'
 
 import { ClusterUpgradeFlyover } from './ClusterUpgradeFlyover'
 
@@ -65,5 +66,27 @@ export default function ClusterUpgrade({
         refetch={refetch}
       />
     </>
+  )
+}
+
+export function ClusterUpgradeChip({
+  cluster,
+}: {
+  cluster?: ClusterTinyFragment | null | undefined
+}) {
+  const numUpgradePlans = 3
+  let numUpgrades = numUpgradePlans
+
+  if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
+  if (!cluster?.upgradePlan?.deprecations) --numUpgrades
+  if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
+
+  return (
+    <Chip
+      size="small"
+      severity={
+        numUpgrades < 2 ? 'danger' : numUpgrades === 2 ? 'warning' : 'neutral'
+      }
+    >{`Upgrades ${numUpgrades}/${numUpgradePlans}`}</Chip>
   )
 }

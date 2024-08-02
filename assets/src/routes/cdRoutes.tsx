@@ -44,7 +44,6 @@ import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
 import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
-import ClusterAddOnDetails from '../components/cd/cluster/addon/ClusterAddOnDetails'
 import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
 import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
 import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnReleases'
@@ -86,7 +85,6 @@ import ServicesTable from '../components/cd/services/ServicesTable'
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
-  CLUSTER_ADDONS_PARAM_ID,
   CLUSTER_ADDONS_REL_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
@@ -320,36 +318,31 @@ const clusterDetailsRoutes = [
       element={<ClusterLogs />}
     />
     <Route
-      path={CLUSTER_ADDONS_REL_PATH}
+      path={`${CLUSTER_ADDONS_REL_PATH}/:addOnId?`}
       element={<ClusterAddOns />}
-    />
-  </Route>,
-  <Route
-    key="cluster-addon"
-    path={`${CLUSTER_REL_PATH}/${CLUSTER_ADDONS_REL_PATH}/:${CLUSTER_ADDONS_PARAM_ID}`}
-    element={<ClusterAddOnDetails />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to="compatibility"
-        />
-      }
-    />
-    <Route
-      path="compatibility"
-      element={<ClusterAddOnCompatibility />}
-    />
-    <Route
-      path="readme"
-      element={<ClusterAddOnReadme />}
-    />
-    <Route
-      path="releases"
-      element={<ClusterAddOnReleases />}
-    />
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to="compatibility"
+          />
+        }
+      />
+      <Route
+        path="compatibility"
+        element={<ClusterAddOnCompatibility />}
+      />
+      <Route
+        path="readme"
+        element={<ClusterAddOnReadme />}
+      />
+      <Route
+        path="releases"
+        element={<ClusterAddOnReleases />}
+      />
+    </Route>
   </Route>,
 ]
 

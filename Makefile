@@ -47,10 +47,10 @@ deploy: ## deploy artifacts to plural
 	cd plural && plural apply
 
 testup: ## sets up dependent services for test
-	docker-compose up -d
+	docker compose up -d
 
 testdown: ## tear down test dependencies
-	docker-compose down
+	docker compose down
 
 migration:
 	MIX_ENV=test mix ecto.gen.migration $(name)

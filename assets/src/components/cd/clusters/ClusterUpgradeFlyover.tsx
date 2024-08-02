@@ -183,7 +183,7 @@ const upgradeColumns = [
   }),
   columnHelperUpgrade.accessor((cluster) => cluster, {
     id: 'actions',
-    header: 'Upgrade version',
+    header: '',
     meta: {
       gridTemplate: 'fit-content(500px)',
     },
@@ -222,9 +222,7 @@ const upgradeColumns = [
         )
       }
 
-      if (isEmpty(upgrades) || original.self) {
-        return <div>Cluster must be upgraded externally</div>
-      }
+      if (isEmpty(upgrades) || original.self) return null
 
       return (
         <div
