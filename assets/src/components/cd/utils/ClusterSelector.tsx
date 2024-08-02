@@ -18,18 +18,21 @@ import { extendConnection } from 'utils/graphql'
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
+import { ClusterUpgradeChip } from '../clusters/ClusterUpgrade'
 
 export default function ClusterSelector({
   onClusterChange,
   clusterId,
   allowDeselect,
   hideTitleContent = false,
+  showUpgrades = false,
   placeholder = 'Filter by cluster',
 }: {
   onClusterChange: (cluster: ClusterTinyFragment | null) => void
   clusterId: Nullable<string>
   allowDeselect: boolean
   hideTitleContent?: boolean
+  showUpgrades?: boolean
   placeholder?: string
 }) {
   const theme = useTheme()
@@ -102,6 +105,11 @@ export default function ClusterSelector({
             />
           )
         }
+        endIcon={
+          showUpgrades ? (
+            <ClusterUpgradeChip cluster={selectedCluster} />
+          ) : undefined
+        }
         inputValue={inputValue}
         onInputChange={setInputValue}
         loading={clusterSelectIsOpen && data && loading}
@@ -168,6 +176,11 @@ export default function ClusterSelector({
                 cluster={cluster}
                 size={16}
               />
+            }
+            rightContent={
+              showUpgrades && cluster.id !== selectedCluster?.id ? (
+                <ClusterUpgradeChip cluster={cluster} />
+              ) : undefined
             }
           />
         ))}

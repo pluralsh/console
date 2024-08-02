@@ -284,6 +284,11 @@ fragment ClusterTiny on Cluster {
     cloud
   }
   distro
+  upgradePlan {
+    compatibilities
+    deprecations
+    incompatibilities
+  }
 }
 
 fragment ClusterBasic on Cluster {

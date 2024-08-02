@@ -139,6 +139,7 @@ export default function Cluster() {
             <ClusterSelector
               clusterId={clusterId}
               allowDeselect={false}
+              showUpgrades={tab === 'addons'}
               onClusterChange={(c) => {
                 if (c?.id) {
                   navigate(`/cd/clusters/${c.id}/${tab}`)
