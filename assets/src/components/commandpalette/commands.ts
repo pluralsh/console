@@ -169,7 +169,7 @@ export function useCommands(): CommandGroup[] {
             icon: PrOpenIcon,
             callback: () => navigate(PR_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['P', '5'],
+            hotkeys: ['R', '5'],
           },
           {
             label: 'Policies',
