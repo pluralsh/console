@@ -54,6 +54,11 @@ import { useClustersTinyQuery } from '../../generated/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../utils/graphql'
 
+type CommandGroup = {
+  commands: Command[]
+  title?: string
+}
+
 export type Command = {
   // Command label.
   label: string
@@ -88,9 +93,22 @@ export type Command = {
   options?: UseHotkeysOptions
 }
 
-type CommandGroup = {
-  commands: Command[]
-  title?: string
+export type CommandWithHotkeys = Command & { hotkeys: string[] }
+
+export const hasHotkeys = (command): command is CommandWithHotkeys =>
+  !isEmpty(command.hotkeys) && !command.disabled
+
+export function useCommandsWithHotkeys() {
+  const commands = useCommands()
+
+  return useMemo(
+    () =>
+      commands
+        .map((group) => group.commands)
+        .flat()
+        .filter(hasHotkeys),
+    [commands]
+  )
 }
 
 export function useCommands(): CommandGroup[] {
