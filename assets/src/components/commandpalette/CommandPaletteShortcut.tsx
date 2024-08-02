@@ -7,7 +7,7 @@ export default function CommandPaletteShortcut({
 }: {
   shortcut: Shortcut
 }) {
-  useHotkeys(shortcut.hotkeys, shortcut.action)
+  useHotkeys(shortcut.hotkeys, shortcut.action, { preventDefault: true })
 
   return undefined
 }
