@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ComponentType, useCallback, useMemo } from 'react'
+import { ComponentType, useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   BellIcon,
@@ -25,6 +25,8 @@ import {
 } from '@pluralsh/design-system'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { isEmpty } from 'lodash'
+
+import { UseHotkeysOptions } from '@saas-ui/react'
 
 import {
   CD_ABS_PATH,
@@ -52,15 +54,38 @@ import { useClustersTinyQuery } from '../../generated/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../utils/graphql'
 
-type Command = {
-  prefix?: string
+export type Command = {
+  // Command label.
   label: string
+
+  // Command label prefix.
+  prefix?: string
+
+  // Icon to display next to the label in the command palette.
   icon: ComponentType<IconProps>
+
+  // Additional icon that will be displayed on the right side of the label.
   rightIcon?: ComponentType<IconProps>
-  shortcuts?: string[]
-  action: () => void
+
+  // Whether this command should be enabled or not.
+  // Useful when i.e., waiting for the data to be fetched.
   disabled?: boolean
+
+  // Whether this command should be autofocused when the command palette opens.
+  // There should be only one command that uses this option.
   autoFocus?: boolean
+
+  // Callback function to execute when the command or assigned hotkeys are used.
+  callback: () => void
+
+  // Dependencies of the callback function.
+  deps?: any[]
+
+  // Hotkeys that will trigger this command.
+  hotkeys?: string[]
+
+  // Hotkeys options.
+  options?: UseHotkeysOptions
 }
 
 type CommandGroup = {
@@ -72,11 +97,6 @@ export function useCommands(): CommandGroup[] {
   const themeColorMode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
-
-  const toggleThemeColorMode = useCallback(
-    () => setThemeColorMode(themeColorMode === 'dark' ? 'light' : 'dark'),
-    [themeColorMode]
-  )
 
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
@@ -101,57 +121,57 @@ export function useCommands(): CommandGroup[] {
           {
             label: 'Home',
             icon: HomeIcon,
-            action: () => navigate(HOME_ABS_PATH),
-            shortcuts: ['H', '1'],
+            callback: () => navigate(HOME_ABS_PATH),
+            hotkeys: ['H', '1'],
             autoFocus: true,
           },
           {
             label: 'Continuous Deployment (CD)',
             icon: GitPullIcon,
-            action: () => navigate(CD_ABS_PATH),
-            shortcuts: ['C', '2'],
+            callback: () => navigate(CD_ABS_PATH),
+            hotkeys: ['C', '2'],
           },
           {
             label: 'Stacks',
             icon: StackIcon,
-            action: () => navigate(STACKS_ROOT_PATH),
-            shortcuts: ['S', '3'],
+            callback: () => navigate(STACKS_ROOT_PATH),
+            hotkeys: ['S', '3'],
           },
           {
             label: 'Kubernetes Dashboard',
             icon: KubernetesAltIcon,
-            action: () => navigate(KUBERNETES_ROOT_PATH),
-            shortcuts: ['K', '4'],
+            callback: () => navigate(KUBERNETES_ROOT_PATH),
+            hotkeys: ['K', '4'],
           },
           {
             label: 'Pull Requests (PR’s)',
             icon: PrOpenIcon,
-            action: () => navigate(PR_ABS_PATH),
-            shortcuts: ['P', '5'],
+            callback: () => navigate(PR_ABS_PATH),
+            hotkeys: ['P', '5'],
           },
           {
             label: 'Policies',
             icon: WarningShieldIcon,
-            action: () => navigate(POLICIES_ABS_PATH),
-            shortcuts: ['L', '6'],
+            callback: () => navigate(POLICIES_ABS_PATH),
+            hotkeys: ['L', '6'],
           },
           {
             label: 'Backups',
             icon: HistoryIcon,
-            action: () => navigate(BACKUPS_ABS_PATH),
-            shortcuts: ['B', '7'],
+            callback: () => navigate(BACKUPS_ABS_PATH),
+            hotkeys: ['B', '7'],
           },
           {
             label: 'Notifications',
             icon: BellIcon,
-            action: () => navigate(NOTIFICATIONS_ABS_PATH),
-            shortcuts: ['N', '8'],
+            callback: () => navigate(NOTIFICATIONS_ABS_PATH),
+            hotkeys: ['N', '8'],
           },
           {
             label: 'Settings',
             icon: GearTrainIcon,
-            action: () => navigate(SETTINGS_ABS_PATH),
-            shortcuts: ['A', '9'],
+            callback: () => navigate(SETTINGS_ABS_PATH),
+            hotkeys: ['A', '9'],
           },
         ],
       },
@@ -161,42 +181,42 @@ export function useCommands(): CommandGroup[] {
             prefix: 'CD >',
             label: 'Clusters',
             icon: ClusterIcon,
-            action: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`),
-            shortcuts: ['G then C'],
+            callback: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`),
+            hotkeys: ['G then C'],
           },
           {
             prefix: 'CD > Clusters >',
             label: 'Pods',
             icon: PodContainerIcon,
-            action: () =>
+            callback: () =>
               navigate(
                 `${getClusterDetailsPath({
                   clusterId: cluster?.id,
                 })}/${CLUSTER_PODS_PATH}`
               ),
             disabled: !cluster?.id,
-            shortcuts: ['G then P'],
+            hotkeys: ['G then P'],
           },
           {
             prefix: 'CD >',
             label: 'Services',
             icon: ToolsIcon,
-            action: () => navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`),
-            shortcuts: ['G then S'],
+            callback: () => navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`),
+            hotkeys: ['G then S'],
           },
           {
             prefix: 'PR’s >',
             label: 'PR automations',
             icon: PrQueueIcon,
-            action: () => navigate(PR_AUTOMATIONS_ABS_PATH),
-            shortcuts: ['G then A'],
+            callback: () => navigate(PR_AUTOMATIONS_ABS_PATH),
+            hotkeys: ['G then A'],
           },
           {
             prefix: 'Settings >',
             label: 'User management',
             icon: PeopleIcon,
-            action: () => navigate(USER_MANAGEMENT_ABS_PATH),
-            shortcuts: ['G then U'],
+            callback: () => navigate(USER_MANAGEMENT_ABS_PATH),
+            hotkeys: ['G then U'],
           },
         ],
       },
@@ -206,15 +226,15 @@ export function useCommands(): CommandGroup[] {
             label: 'Open docs',
             icon: DocumentIcon,
             rightIcon: ArrowTopRightIcon,
-            action: () => window.open('https://docs.plural.sh', '_blank'),
-            shortcuts: ['shift D'],
+            callback: () => window.open('https://docs.plural.sh', '_blank'),
+            hotkeys: ['shift D'],
           },
           {
             label: 'Help (contact support)',
             icon: LifePreserverIcon,
             rightIcon: ArrowTopRightIcon,
-            action: () => launchHelp(HelpMenuState.intercom),
-            shortcuts: ['shift H'],
+            callback: () => launchHelp(HelpMenuState.intercom),
+            hotkeys: ['shift H'],
           },
         ],
       },
@@ -223,21 +243,26 @@ export function useCommands(): CommandGroup[] {
           {
             label: 'Copy page link',
             icon: LinksIcon,
-            action: () =>
+            callback: () =>
               window.navigator.clipboard.writeText(window.location.href),
-            shortcuts: ['shift L'],
+            hotkeys: ['shift L'],
           },
           {
             label: `Switch to ${
               themeColorMode === 'dark' ? 'light' : 'dark'
             } mode`,
             icon: SprayIcon,
-            action: toggleThemeColorMode,
-            shortcuts: ['shift T'],
+            callback: () =>
+              setThemeColorMode(themeColorMode === 'dark' ? 'light' : 'dark'),
+            deps: [themeColorMode],
+            options: {
+              preventDefault: true,
+            },
+            hotkeys: ['shift T'],
           },
         ],
       },
     ],
-    [cluster?.id, navigate, themeColorMode, toggleThemeColorMode]
+    [cluster?.id, navigate, themeColorMode]
   )
 }

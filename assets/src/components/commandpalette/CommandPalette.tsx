@@ -50,7 +50,7 @@ export default function CommandPalette({
                 <Command.Item
                   disabled={command.disabled}
                   onSelect={() => {
-                    command.action()
+                    command.callback()
                     close()
                   }}
                 >
@@ -64,7 +64,7 @@ export default function CommandPalette({
                     />
                   )}
                   <div css={{ flex: 1 }} />
-                  <CommandPaletteShortcuts shortcuts={command.shortcuts} />
+                  <CommandPaletteShortcuts shortcuts={command.hotkeys} />
                 </Command.Item>
               ))}
             </Command.Group>
