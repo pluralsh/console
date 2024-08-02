@@ -94,37 +94,11 @@ const VersionSC = styled.div(({ theme }) => ({
   justifyContent: 'space-between',
   width: '100%',
 }))
-const VersionArrowLinkSC = styled(IconFrame)(({ theme }) => ({
-  ...theme.partials.text.inlineLink,
-}))
 
-function ChartVersion({
-  clusterId,
-  runtimeService,
-  showLinkOut = false,
-}: {
-  clusterId?: Nullable<string>
-  runtimeService: RuntimeService
-  showLinkOut?: boolean
-}) {
+function ChartVersion({ runtimeService }: { runtimeService: RuntimeService }) {
   return (
     <VersionSC>
       <TableText>{runtimeService?.version}</TableText>
-      {showLinkOut && clusterId && (
-        <VersionArrowLinkSC
-          clickable
-          forwardedAs={Link}
-          to={`${getClusterAddOnDetailsPath({
-            clusterId,
-            addOnId: runtimeService?.id,
-          })}/compatibility`}
-          icon={<ArrowTopRightIcon />}
-          tooltip="View compatibility matrix"
-          tooltipProps={{
-            placement: 'right',
-          }}
-        />
-      )}
     </VersionSC>
   )
 }
@@ -133,24 +107,6 @@ const colVersion = columnHelperRuntime.accessor((row) => row?.version, {
   header: 'Version',
   cell({ row: { original } }) {
     return <ChartVersion runtimeService={original} />
-  },
-})
-const colVersionWithLink = columnHelperRuntime.accessor((row) => row?.version, {
-  id: 'version-with-link',
-  header: 'Version',
-  cell({
-    row: { original },
-    table: {
-      options: { meta },
-    },
-  }) {
-    return (
-      <ChartVersion
-        runtimeService={original}
-        showLinkOut
-        clusterId={(meta as any)?.clusterId}
-      />
-    )
   },
 })
 
@@ -186,25 +142,11 @@ const colBlocking = columnHelperRuntime.accessor((row) => row?.addonVersion, {
     )
   },
 })
-const colGit = columnHelperRuntime.accessor((row) => row?.service, {
-  id: 'git',
-  header: 'Repository',
-  cell: ({ getValue }) => <GitPointer service={getValue()} />,
-})
 
 export const runtimeColumns = [
-  colName,
-  colVersionWithLink,
-  colChartVersion,
-  colKubVersion,
-  colBlocking,
-]
-
-export const clusterAddonsColumns = [
   colName,
   colVersion,
   colChartVersion,
   colKubVersion,
   colBlocking,
-  colGit,
 ]
