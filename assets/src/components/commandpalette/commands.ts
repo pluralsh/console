@@ -73,7 +73,6 @@ export type Command = {
   rightIcon?: ComponentType<IconProps>
 
   // Whether this command should be enabled or not.
-  // Useful when i.e., waiting for the data to be fetched.
   disabled?: boolean
 
   // Whether this command should be autofocused when the command palette opens.
@@ -96,7 +95,7 @@ export type Command = {
 export type CommandWithHotkeys = Command & { hotkeys: string[] }
 
 export const hasHotkeys = (command): command is CommandWithHotkeys =>
-  !isEmpty(command.hotkeys) && !command.disabled
+  !isEmpty(command.hotkeys)
 
 export function useCommandsWithHotkeys() {
   const commands = useCommands()
@@ -112,7 +111,7 @@ export function useCommandsWithHotkeys() {
 }
 
 export function useCommands(): CommandGroup[] {
-  const themeColorMode = useThemeColorMode()
+  const mode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
 
@@ -140,6 +139,7 @@ export function useCommands(): CommandGroup[] {
             label: 'Home',
             icon: HomeIcon,
             callback: () => navigate(HOME_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['H', '1'],
             autoFocus: true,
           },
@@ -147,48 +147,56 @@ export function useCommands(): CommandGroup[] {
             label: 'Continuous Deployment (CD)',
             icon: GitPullIcon,
             callback: () => navigate(CD_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['C', '2'],
           },
           {
             label: 'Stacks',
             icon: StackIcon,
             callback: () => navigate(STACKS_ROOT_PATH),
+            deps: [navigate],
             hotkeys: ['S', '3'],
           },
           {
             label: 'Kubernetes Dashboard',
             icon: KubernetesAltIcon,
             callback: () => navigate(KUBERNETES_ROOT_PATH),
+            deps: [navigate],
             hotkeys: ['K', '4'],
           },
           {
             label: 'Pull Requests (PR’s)',
             icon: PrOpenIcon,
             callback: () => navigate(PR_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['P', '5'],
           },
           {
             label: 'Policies',
             icon: WarningShieldIcon,
             callback: () => navigate(POLICIES_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['L', '6'],
           },
           {
             label: 'Backups',
             icon: HistoryIcon,
             callback: () => navigate(BACKUPS_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['B', '7'],
           },
           {
             label: 'Notifications',
             icon: BellIcon,
             callback: () => navigate(NOTIFICATIONS_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['N', '8'],
           },
           {
             label: 'Settings',
             icon: GearTrainIcon,
             callback: () => navigate(SETTINGS_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['A', '9'],
           },
         ],
@@ -200,18 +208,22 @@ export function useCommands(): CommandGroup[] {
             label: 'Clusters',
             icon: ClusterIcon,
             callback: () => navigate(`${CD_ABS_PATH}/${CLUSTERS_REL_PATH}`),
+            deps: [navigate],
             hotkeys: ['G then C'],
           },
           {
             prefix: 'CD > Clusters >',
             label: 'Pods',
             icon: PodContainerIcon,
-            callback: () =>
-              navigate(
-                `${getClusterDetailsPath({
-                  clusterId: cluster?.id,
-                })}/${CLUSTER_PODS_PATH}`
-              ),
+            callback: () => {
+              if (cluster?.id)
+                navigate(
+                  `${getClusterDetailsPath({
+                    clusterId: cluster?.id,
+                  })}/${CLUSTER_PODS_PATH}`
+                )
+            },
+            deps: [navigate, cluster?.id],
             disabled: !cluster?.id,
             hotkeys: ['G then P'],
           },
@@ -220,6 +232,7 @@ export function useCommands(): CommandGroup[] {
             label: 'Services',
             icon: ToolsIcon,
             callback: () => navigate(`${CD_ABS_PATH}/${SERVICES_REL_PATH}`),
+            deps: [navigate],
             hotkeys: ['G then S'],
           },
           {
@@ -227,6 +240,7 @@ export function useCommands(): CommandGroup[] {
             label: 'PR automations',
             icon: PrQueueIcon,
             callback: () => navigate(PR_AUTOMATIONS_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['G then A'],
           },
           {
@@ -234,6 +248,7 @@ export function useCommands(): CommandGroup[] {
             label: 'User management',
             icon: PeopleIcon,
             callback: () => navigate(USER_MANAGEMENT_ABS_PATH),
+            deps: [navigate],
             hotkeys: ['G then U'],
           },
         ],
@@ -266,21 +281,17 @@ export function useCommands(): CommandGroup[] {
             hotkeys: ['shift L'],
           },
           {
-            label: `Switch to ${
-              themeColorMode === 'dark' ? 'light' : 'dark'
-            } mode`,
+            label: `Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`,
             icon: SprayIcon,
             callback: () =>
-              setThemeColorMode(themeColorMode === 'dark' ? 'light' : 'dark'),
-            deps: [themeColorMode],
-            options: {
-              preventDefault: true,
-            },
+              setThemeColorMode(mode === 'dark' ? 'light' : 'dark'),
+            deps: [mode],
+            options: { preventDefault: true },
             hotkeys: ['shift T'],
           },
         ],
       },
     ],
-    [cluster?.id, navigate, themeColorMode]
+    [navigate, cluster, mode]
   )
 }
