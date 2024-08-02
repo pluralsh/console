@@ -3,9 +3,11 @@ import { useCallback, useState } from 'react'
 import { usePlatform } from 'components/hooks/usePlatform'
 import styled, { useTheme } from 'styled-components'
 
+import { useHotkeys } from '@saas-ui/use-hotkeys'
+
 import CommandPaletteDialog from './CommandPaletteDialog'
-import CommandPaletteShortcut from './CommandPaletteShortcut'
-import { useShortcuts } from './shortcuts'
+import { useCommandsWithHotkeys } from './commands'
+import CommandHotkeys from './CommandHotkeys'
 
 export const CommandPaletteLauncherSC = styled.button(({ theme }) => ({
   ...theme.partials.reset.button,
@@ -37,16 +39,16 @@ export const CommandPaletteLauncherSC = styled.button(({ theme }) => ({
 }))
 
 export default function CommandPaletteLauncher() {
+  const theme = useTheme()
+  const { modKeyString, keyCombinerString } = usePlatform()
+  const commands = useCommandsWithHotkeys()
   const [open, setOpen] = useState(false)
   const openCommandPalette = useCallback(
     () => setOpen((open) => !open),
     [setOpen]
   )
-  const shortcuts = useShortcuts([
-    { hotkeys: ['cmd K', 'ctrl K'], action: openCommandPalette },
-  ])
-  const { modKeyString, keyCombinerString } = usePlatform()
-  const theme = useTheme()
+
+  useHotkeys(['cmd K', 'ctrl K'], openCommandPalette)
 
   return (
     <>
@@ -72,8 +74,8 @@ export default function CommandPaletteLauncher() {
         open={open}
         setOpen={setOpen}
       />
-      {shortcuts.map((shortcut) => (
-        <CommandPaletteShortcut shortcut={shortcut} />
+      {commands.map((command) => (
+        <CommandHotkeys command={command} />
       ))}
     </>
   )
