@@ -412,7 +412,12 @@ query RuntimeServices(
   }
 }
 
-query RuntimeService($id: ID!, $version: String!,   $kubeVersion: String! ,$hasKubeVersion: Boolean!) {
+query RuntimeService(
+  $id: ID!
+  $version: String!
+  $kubeVersion: String!
+  $hasKubeVersion: Boolean!
+) {
   runtimeService(id: $id) {
     ...RuntimeServiceDetails
   }
