@@ -1702,7 +1702,7 @@ export type FileContent = {
   path?: Maybe<Scalars['String']['output']>;
 };
 
-/** a Flux crd representation of a helm repository */
+/** a Flux crd representation of a Helm repository */
 export type FluxHelmRepository = {
   __typename?: 'FluxHelmRepository';
   /** the charts found in this repository (heavy operation, don't do in list endpoints) */
@@ -2100,8 +2100,10 @@ export type HelmGcpAuthAttributes = {
   applicationCredentials?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A direct Plural representation of a Helm repository */
 export type HelmRepository = {
   __typename?: 'HelmRepository';
+  error?: Maybe<Scalars['String']['output']>;
   health?: Maybe<GitHealth>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;

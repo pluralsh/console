@@ -1385,7 +1385,7 @@ type FileContent struct {
 	Content *string `json:"content,omitempty"`
 }
 
-// a Flux crd representation of a helm repository
+// a Flux crd representation of a Helm repository
 type FluxHelmRepository struct {
 	Metadata Metadata           `json:"metadata"`
 	Spec     HelmRepositorySpec `json:"spec"`
@@ -1725,10 +1725,12 @@ type HelmGcpAuthAttributes struct {
 	ApplicationCredentials *string `json:"applicationCredentials,omitempty"`
 }
 
+// A direct Plural representation of a Helm repository
 type HelmRepository struct {
 	ID         string            `json:"id"`
 	URL        string            `json:"url"`
 	Health     *GitHealth        `json:"health,omitempty"`
+	Error      *string           `json:"error,omitempty"`
 	Provider   *HelmAuthProvider `json:"provider,omitempty"`
 	InsertedAt *string           `json:"insertedAt,omitempty"`
 	UpdatedAt  *string           `json:"updatedAt,omitempty"`

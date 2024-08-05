@@ -1,5 +1,6 @@
 defmodule Console.Deployments.Helm.Agent do
   use GenServer, restart: :transient
+  alias Console.Repo
   alias Console.Deployments.Git
   alias Console.Deployments.Helm.{AgentCache, Discovery}
   alias Console.Schema.HelmRepository
@@ -38,7 +39,7 @@ defmodule Console.Deployments.Helm.Agent do
   def handle_call({:digest, c, v}, _, %State{cache: cache} = state) do
     case AgentCache.fetch(cache, c, v) do
       {:ok, l, cache} -> {:reply, {:ok, l.internal_digest}, %{state | cache: cache}}
-      err -> {:reply, err, state}
+      err -> handle_error(err, state)
     end
   end
 
@@ -47,18 +48,23 @@ defmodule Console.Deployments.Helm.Agent do
          {:ok, f} <- File.open(l.file) do
       {:reply, {:ok, f, l.digest}, %{state | cache: cache}}
     else
-      err -> {:reply, err, state}
+      err -> handle_error(err, state)
     end
   end
 
   def handle_info(:pull, %State{repo: repo, cache: cache} = state) do
     with {:ok, repo}  <- Git.upsert_helm_repository(repo.url),
          cache        <- AgentCache.new_client(cache, repo),
-         {:ok, cache} <- AgentCache.refresh(cache),
+         {:refresh, {:ok, cache}, repo} <- {:refresh, AgentCache.refresh(cache), repo},
          {:ok, repo}  <- refresh(repo) do
       schedule_pull()
       {:noreply, %{state | cache: cache, repo: repo}}
     else
+      {:refresh, {:error, err}, repo} ->
+        schedule_pull()
+        Logger.error "Failed to resync helm repo: #{inspect(err)}"
+        {:ok, repo} = persist_error(err, repo)
+        {:noreply, %{state | repo: repo}}
       err ->
         schedule_pull()
         Logger.error "Failed to resync helm repo: #{inspect(err)}"
@@ -84,8 +90,26 @@ defmodule Console.Deployments.Helm.Agent do
 
   defp refresh(%HelmRepository{} = repo) do
     HelmRepository.changeset(repo, %{pulled_at: Timex.now(), health: :pullable})
-    |> Console.Repo.update()
+    |> Repo.update()
   end
+
+  defp persist_error(error, repo) when is_binary(error) do
+    HelmRepository.changeset(repo, %{health: :failed, error: error})
+    |> Repo.update()
+    |> case do
+      {:ok, repo} -> {:ok, repo}
+      err ->
+        Logger.warn "failed to update helm repository: #{inspect(err)}"
+        {:ok, repo}
+    end
+  end
+  defp persist_error(_, repo), do: {:ok, repo}
+
+  defp handle_error({:error, {:auth, err}}, %State{repo: repo} = state) do
+    {:ok, repo} = persist_error(err, repo)
+    {:reply, {:error, err}, %{state | repo: repo}}
+  end
+  defp handle_error(err, state), do: {:reply, err, state}
 
   defp schedule_pull(), do: Process.send_after(self(), :pull, @poll + jitter())
 
