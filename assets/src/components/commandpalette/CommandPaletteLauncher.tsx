@@ -1,5 +1,5 @@
 import { Chip, SearchIcon } from '@pluralsh/design-system'
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { usePlatform } from 'components/hooks/usePlatform'
 import styled, { useTheme } from 'styled-components'
 
@@ -48,6 +48,8 @@ export default function CommandPaletteLauncher() {
     [setOpen]
   )
 
+  useHotkeys('q', commands?.[10]?.callback, {}, commands?.[10]?.deps)
+
   useHotkeys(['cmd K', 'ctrl K'], openCommandPalette)
 
   return (
@@ -74,8 +76,11 @@ export default function CommandPaletteLauncher() {
         open={open}
         setOpen={setOpen}
       />
-      {commands.map((command) => (
-        <CommandHotkeys command={command} />
+      {commands.map((command, i) => (
+        <CommandHotkeys
+          key={i}
+          command={command}
+        />
       ))}
     </>
   )

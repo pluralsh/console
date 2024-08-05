@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ComponentType, DependencyList, useMemo } from 'react'
+import { ComponentType, useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   BellIcon,
@@ -82,7 +82,7 @@ export type Command = {
   callback: () => void
 
   // Dependencies of the callback function.
-  deps?: DependencyList
+  deps?: any[]
 
   // Hotkeys that will trigger this command.
   hotkeys?: string[]
@@ -214,7 +214,6 @@ export function useCommands(): CommandGroup[] {
             prefix: 'CD > Clusters >',
             label: 'Pods',
             icon: PodContainerIcon,
-            // FIXME: Fix issue with callback.
             callback: () => {
               if (cluster?.id)
                 navigate(
