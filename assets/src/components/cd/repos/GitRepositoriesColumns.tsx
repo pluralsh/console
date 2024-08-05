@@ -1,16 +1,25 @@
+import { Chip, GitHubLogoIcon } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { GitHubLogoIcon } from '@pluralsh/design-system'
-import { type GitRepositoryFragment } from 'generated/graphql'
-import { Edge } from 'utils/graphql'
-import { useTheme } from 'styled-components'
-import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import {
+  type GitRepositoryFragment,
+  HelmRepositoryFragment,
+} from 'generated/graphql'
+import { useTheme } from 'styled-components'
+import { Edge } from 'utils/graphql'
 
-import { AuthMethodChip, DeleteGitRepository } from './Repositories'
+import { CHART_ICON_DARK } from 'components/utils/Provider'
+
 import { GitHealthChip, gitHealthToLabel } from './GitHealthChip'
 import { UpdateGitRepository } from './GitRepositoriesUpdateGit'
+import { AuthMethodChip, DeleteGitRepository } from './Repositories'
 
-const columnHelper = createColumnHelper<Edge<GitRepositoryFragment>>()
+const columnHelper =
+  createColumnHelper<Edge<GitRepositoryFragment | HelmRepositoryFragment>>()
+
+type GitNode = Edge<GitRepositoryFragment>['node']
+type HelmNode = Edge<HelmRepositoryFragment>['node']
 
 export const ColRepo = columnHelper.accessor(({ node }) => node?.url, {
   id: 'repository',
@@ -18,18 +27,37 @@ export const ColRepo = columnHelper.accessor(({ node }) => node?.url, {
   enableSorting: true,
   enableGlobalFilter: true,
   meta: { truncate: true },
-  cell: ({ getValue }) => (
-    <ColWithIcon
-      truncateLeft
-      icon={<GitHubLogoIcon />}
-    >
-      {getValue()}
-    </ColWithIcon>
-  ),
+  cell: ({ getValue, row }) => {
+    const icon =
+      row.original.node?.__typename === 'GitRepository' ? (
+        <GitHubLogoIcon />
+      ) : (
+        CHART_ICON_DARK
+      )
+
+    return (
+      <ColWithIcon
+        truncateLeft
+        icon={icon}
+      >
+        {getValue()}
+      </ColWithIcon>
+    )
+  },
 })
 
+export const ColProvider = columnHelper.accessor(
+  ({ node }) => (node as HelmNode)?.provider,
+  {
+    id: 'provider',
+    header: 'Provider',
+    enableSorting: true,
+    cell: ({ getValue }) => <Chip severity="neutral">{getValue()}</Chip>,
+  }
+)
+
 export const ColAuthMethod = columnHelper.accessor(
-  ({ node }) => node?.authMethod,
+  ({ node }) => (node as GitNode)?.authMethod,
   {
     id: 'authMethod',
     header: 'Auth method',
@@ -52,7 +80,7 @@ export const ColStatus = columnHelper.accessor(
     }) => (
       <GitHealthChip
         health={node?.health}
-        error={node?.error}
+        error={(node as GitNode)?.error}
       />
     ),
   }
@@ -117,17 +145,16 @@ export const ColOwner = columnHelper.accessor(
 export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
   id: 'actions',
   header: '',
-  cell: ({
+  cell: function Cell({
     table,
     row: {
       original: { node },
     },
-  }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+  }) {
     const theme = useTheme()
     const { refetch } = table.options.meta as { refetch?: () => void }
 
-    if (!node?.editable) {
+    if (!(node as GitNode)?.editable) {
       return null
     }
 
@@ -141,11 +168,11 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
           }}
         >
           <UpdateGitRepository
-            repo={node}
+            repo={node as GitRepositoryFragment}
             refetch={refetch}
           />
           <DeleteGitRepository
-            repo={node}
+            repo={node as GitRepositoryFragment}
             refetch={refetch}
           />
         </div>

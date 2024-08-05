@@ -9,9 +9,10 @@ import styled from 'styled-components'
 import { Key, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '@react-hooks-library/core'
 import {
+  FluxHelmRepositoriesQuery,
   GitHealth,
-  useFluxHelmRepositoriesQuery,
-  useGitRepositoriesQuery,
+  GitRepositoriesQuery,
+  HelmRepositoriesQuery,
 } from 'generated/graphql'
 
 import { gitHealthToLabel, gitHealthToSeverity } from './GitHealthChip'
@@ -34,9 +35,7 @@ const GitRepositoryFiltersSC = styled.div(({ theme }) => ({
   },
 }))
 
-export function countsFromGitRepos(
-  data: ReturnType<typeof useGitRepositoriesQuery>['data']
-) {
+export function countsFromGitRepos(data: GitRepositoriesQuery | undefined) {
   const c: Record<string, number | undefined> = {
     ALL: data?.gitRepositories?.edges?.length,
   }
@@ -50,8 +49,22 @@ export function countsFromGitRepos(
   return c
 }
 
-export function countsFromHelmRepos(
-  data: ReturnType<typeof useFluxHelmRepositoriesQuery>['data']
+export function countsFromHelmRepos(data: HelmRepositoriesQuery | undefined) {
+  const c: Record<string, number | undefined> = {
+    ALL: data?.helmRepositories?.edges?.length,
+  }
+
+  data?.helmRepositories?.edges?.forEach((edge) => {
+    if (edge?.node?.health) {
+      c[edge?.node?.health] = (c[edge?.node?.health] ?? 0) + 1
+    }
+  })
+
+  return c
+}
+
+export function countsFromFluxHelmRepos(
+  data: FluxHelmRepositoriesQuery | undefined
 ) {
   const c: Record<string, number | undefined> = {
     ALL: data?.fluxHelmRepositories?.length,
