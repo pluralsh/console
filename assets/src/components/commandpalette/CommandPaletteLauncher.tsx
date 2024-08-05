@@ -1,8 +1,7 @@
 import { Chip, SearchIcon } from '@pluralsh/design-system'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { usePlatform } from 'components/hooks/usePlatform'
 import styled, { useTheme } from 'styled-components'
-
 import { useHotkeys } from '@saas-ui/use-hotkeys'
 
 import CommandPaletteDialog from './CommandPaletteDialog'
@@ -76,10 +75,13 @@ export default function CommandPaletteLauncher() {
         open={open}
         setOpen={setOpen}
       />
-      {commands.map((command, i) => (
+      {commands.map(({ hotkeys, callback, options, deps }, i) => (
         <CommandHotkeys
           key={i}
-          command={command}
+          hotkeys={hotkeys}
+          callback={callback}
+          options={options}
+          deps={deps}
         />
       ))}
     </>

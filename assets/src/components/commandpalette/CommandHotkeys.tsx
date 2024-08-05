@@ -1,13 +1,18 @@
-import { useHotkeys } from '@saas-ui/use-hotkeys'
-
-import { CommandWithHotkeys } from './commands'
+import { UseHotkeysOptions, useHotkeys } from '@saas-ui/use-hotkeys'
+import merge from 'lodash/merge'
 
 export default function CommandHotkeys({
-  command,
+  hotkeys,
+  callback,
+  options,
+  deps,
 }: {
-  command: CommandWithHotkeys
+  hotkeys: string[] | string
+  callback: () => void
+  options?: UseHotkeysOptions
+  deps?: any[]
 }) {
-  useHotkeys(command.hotkeys, command.callback, command.options, command.deps)
+  useHotkeys(hotkeys, callback, merge({ targetElement: window }, options), deps)
 
   return undefined
 }
