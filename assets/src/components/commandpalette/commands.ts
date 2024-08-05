@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ComponentType, useMemo } from 'react'
+import { ComponentType, DependencyList, useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   BellIcon,
@@ -82,7 +82,7 @@ export type Command = {
   callback: () => void
 
   // Dependencies of the callback function.
-  deps?: any[]
+  deps?: DependencyList
 
   // Hotkeys that will trigger this command.
   hotkeys?: string[]
