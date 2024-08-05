@@ -92,6 +92,9 @@ type ConsoleClient interface {
 	CreateGroup(ctx context.Context, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGroup, error)
 	UpdateGroup(ctx context.Context, groupID string, attributtes GroupAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateGroup, error)
 	DeleteGroup(ctx context.Context, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroup, error)
+	ListHelmRepositories(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListHelmRepositories, error)
+	GetHelmRepository(ctx context.Context, url string, interceptors ...clientv2.RequestInterceptor) (*GetHelmRepository, error)
+	UpsertHelmRepository(ctx context.Context, url string, attributes *HelmRepositoryAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertHelmRepository, error)
 	ListNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListNamespaces, error)
 	ListClusterNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterNamespaces, error)
 	GetNamespace(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNamespace, error)
@@ -838,6 +841,52 @@ func (t *GitRepositoryFragment) GetDecrypt() *bool {
 		t = &GitRepositoryFragment{}
 	}
 	return t.Decrypt
+}
+
+type HelmRepositoryFragment struct {
+	ID         string            "json:\"id\" graphql:\"id\""
+	InsertedAt *string           "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string           "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+	URL        string            "json:\"url\" graphql:\"url\""
+	Provider   *HelmAuthProvider "json:\"provider,omitempty\" graphql:\"provider\""
+	Health     *GitHealth        "json:\"health,omitempty\" graphql:\"health\""
+}
+
+func (t *HelmRepositoryFragment) GetID() string {
+	if t == nil {
+		t = &HelmRepositoryFragment{}
+	}
+	return t.ID
+}
+func (t *HelmRepositoryFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &HelmRepositoryFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *HelmRepositoryFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &HelmRepositoryFragment{}
+	}
+	return t.UpdatedAt
+}
+func (t *HelmRepositoryFragment) GetURL() string {
+	if t == nil {
+		t = &HelmRepositoryFragment{}
+	}
+	return t.URL
+}
+func (t *HelmRepositoryFragment) GetProvider() *HelmAuthProvider {
+	if t == nil {
+		t = &HelmRepositoryFragment{}
+	}
+	return t.Provider
+}
+func (t *HelmRepositoryFragment) GetHealth() *GitHealth {
+	if t == nil {
+		t = &HelmRepositoryFragment{}
+	}
+	return t.Health
 }
 
 type KustomizeFragment struct {
@@ -9113,6 +9162,35 @@ func (t *ListPrAutomations_PrAutomations) GetEdges() []*ListPrAutomations_PrAuto
 	return t.Edges
 }
 
+type ListHelmRepositories_HelmRepositories_Edges struct {
+	Node *HelmRepositoryFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *ListHelmRepositories_HelmRepositories_Edges) GetNode() *HelmRepositoryFragment {
+	if t == nil {
+		t = &ListHelmRepositories_HelmRepositories_Edges{}
+	}
+	return t.Node
+}
+
+type ListHelmRepositories_HelmRepositories struct {
+	PageInfo PageInfoFragment                               "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*ListHelmRepositories_HelmRepositories_Edges "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListHelmRepositories_HelmRepositories) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListHelmRepositories_HelmRepositories{}
+	}
+	return &t.PageInfo
+}
+func (t *ListHelmRepositories_HelmRepositories) GetEdges() []*ListHelmRepositories_HelmRepositories_Edges {
+	if t == nil {
+		t = &ListHelmRepositories_HelmRepositories{}
+	}
+	return t.Edges
+}
+
 type ListNamespaces_ManagedNamespaces struct {
 	PageInfo PageInfoFragment                "json:\"pageInfo\" graphql:\"pageInfo\""
 	Edges    []*ManagedNamespaceEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
@@ -12559,6 +12637,39 @@ func (t *DeleteGroup) GetDeleteGroup() *GroupFragment {
 		t = &DeleteGroup{}
 	}
 	return t.DeleteGroup
+}
+
+type ListHelmRepositories struct {
+	HelmRepositories *ListHelmRepositories_HelmRepositories "json:\"helmRepositories,omitempty\" graphql:\"helmRepositories\""
+}
+
+func (t *ListHelmRepositories) GetHelmRepositories() *ListHelmRepositories_HelmRepositories {
+	if t == nil {
+		t = &ListHelmRepositories{}
+	}
+	return t.HelmRepositories
+}
+
+type GetHelmRepository struct {
+	HelmRepository *HelmRepositoryFragment "json:\"helmRepository,omitempty\" graphql:\"helmRepository\""
+}
+
+func (t *GetHelmRepository) GetHelmRepository() *HelmRepositoryFragment {
+	if t == nil {
+		t = &GetHelmRepository{}
+	}
+	return t.HelmRepository
+}
+
+type UpsertHelmRepository struct {
+	UpsertHelmRepository *HelmRepositoryFragment "json:\"upsertHelmRepository,omitempty\" graphql:\"upsertHelmRepository\""
+}
+
+func (t *UpsertHelmRepository) GetUpsertHelmRepository() *HelmRepositoryFragment {
+	if t == nil {
+		t = &UpsertHelmRepository{}
+	}
+	return t.UpsertHelmRepository
 }
 
 type ListNamespaces struct {
@@ -20031,6 +20142,117 @@ func (c *Client) DeleteGroup(ctx context.Context, groupID string, interceptors .
 	return &res, nil
 }
 
+const ListHelmRepositoriesDocument = `query ListHelmRepositories ($after: String, $first: Int, $before: String, $last: Int) {
+	helmRepositories(after: $after, first: $first, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			node {
+				... HelmRepositoryFragment
+			}
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment HelmRepositoryFragment on HelmRepository {
+	id
+	insertedAt
+	updatedAt
+	url
+	provider
+	health
+}
+`
+
+func (c *Client) ListHelmRepositories(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListHelmRepositories, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListHelmRepositories
+	if err := c.Client.Post(ctx, "ListHelmRepositories", ListHelmRepositoriesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetHelmRepositoryDocument = `query GetHelmRepository ($url: String!) {
+	helmRepository(url: $url) {
+		... HelmRepositoryFragment
+	}
+}
+fragment HelmRepositoryFragment on HelmRepository {
+	id
+	insertedAt
+	updatedAt
+	url
+	provider
+	health
+}
+`
+
+func (c *Client) GetHelmRepository(ctx context.Context, url string, interceptors ...clientv2.RequestInterceptor) (*GetHelmRepository, error) {
+	vars := map[string]any{
+		"url": url,
+	}
+
+	var res GetHelmRepository
+	if err := c.Client.Post(ctx, "GetHelmRepository", GetHelmRepositoryDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertHelmRepositoryDocument = `mutation UpsertHelmRepository ($url: String!, $attributes: HelmRepositoryAttributes) {
+	upsertHelmRepository(url: $url, attributes: $attributes) {
+		... HelmRepositoryFragment
+	}
+}
+fragment HelmRepositoryFragment on HelmRepository {
+	id
+	insertedAt
+	updatedAt
+	url
+	provider
+	health
+}
+`
+
+func (c *Client) UpsertHelmRepository(ctx context.Context, url string, attributes *HelmRepositoryAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertHelmRepository, error) {
+	vars := map[string]any{
+		"url":        url,
+		"attributes": attributes,
+	}
+
+	var res UpsertHelmRepository
+	if err := c.Client.Post(ctx, "UpsertHelmRepository", UpsertHelmRepositoryDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListNamespacesDocument = `query ListNamespaces ($after: String, $first: Int, $before: String, $last: Int) {
 	managedNamespaces(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -26066,6 +26288,9 @@ var DocumentOperationNames = map[string]string{
 	CreateGroupDocument:                               "CreateGroup",
 	UpdateGroupDocument:                               "UpdateGroup",
 	DeleteGroupDocument:                               "DeleteGroup",
+	ListHelmRepositoriesDocument:                      "ListHelmRepositories",
+	GetHelmRepositoryDocument:                         "GetHelmRepository",
+	UpsertHelmRepositoryDocument:                      "UpsertHelmRepository",
 	ListNamespacesDocument:                            "ListNamespaces",
 	ListClusterNamespacesDocument:                     "ListClusterNamespaces",
 	GetNamespaceDocument:                              "GetNamespace",
