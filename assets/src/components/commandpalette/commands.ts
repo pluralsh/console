@@ -258,7 +258,8 @@ export function useCommands(): CommandGroup[] {
             label: 'Open docs',
             icon: DocumentIcon,
             rightIcon: ArrowTopRightIcon,
-            callback: () => window.open('https://docs.plural.sh', '_blank'),
+            callback: () =>
+              window.open('https://docs.plural.sh', '_blank', 'noopener'),
             hotkeys: ['shift D'],
           },
           {
