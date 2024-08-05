@@ -1,3 +1,56 @@
+defmodule Console.Schema.OCIAuth do
+  use Piazza.Ecto.Schema
+  alias Piazza.Ecto.EncryptedString
+
+  embedded_schema do
+    embeds_one :basic, Basic, on_replace: :update do
+      field :username,     :string
+      field :password, EncryptedString
+    end
+
+    embeds_one :bearer, Bearer, on_replace: :update do
+      field :token, EncryptedString
+    end
+
+    embeds_one :aws, AWS, on_replace: :update do
+      field :access_key,        :string
+      field :secret_access_key, EncryptedString
+      field :assume_role_arn,   :string
+    end
+
+    embeds_one :gcp, GCP, on_replace: :update do
+      field :application_credentials, EncryptedString
+    end
+
+    embeds_one :azure, Azure, on_replace: :update do
+      field :client_id,       :string
+      field :client_secret,   EncryptedString
+      field :tenant_id,       :string
+      field :subscription_id, :string
+    end
+  end
+
+  def changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:aws, with: &aws_changeset/2)
+    |> cast_embed(:azure, with: &azure_changeset/2)
+    |> cast_embed(:gcp, with: &gcp_changeset/2)
+    |> cast_embed(:basic, with: &basic_changeset/2)
+    |> cast_embed(:bearer, with: &bearer_changeset/2)
+  end
+
+  defp aws_changeset(model, attrs), do: cast(model, attrs, ~w(assume_role_arn access_key secret_access_key)a)
+
+  defp azure_changeset(model, attrs), do: cast(model, attrs, ~w(client_id client_secret tenant_id subscription_id)a)
+
+  defp gcp_changeset(model, attrs), do: cast(model, attrs, ~w(application_credentials)a)
+
+  defp basic_changeset(model, attrs), do: cast(model, attrs, ~w(username password)a)
+
+  defp bearer_changeset(model, attrs), do: cast(model, attrs, ~w(token)a)
+end
+
 defmodule Console.Schema.DiffNormalizer do
   use Piazza.Ecto.Schema
 

@@ -54,6 +54,27 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
     end
   end
 
+  describe "upsertHelmRepository" do
+    test "it can upsert a helm repository" do
+      {:ok, %{data: %{"upsertHelmRepository" => helm}}} = run_query("""
+        mutation Upsert($url: String!, $attributes: HelmRepositoryAttributes!) {
+          upsertHelmRepository(url: $url, attributes: $attributes) {
+            id
+            url
+          }
+        }
+      """, %{
+        "url" => "https://example.helm.sh",
+        "attributes" => %{
+          "provider" => "BEARER",
+          "auth" => %{"bearer" => %{"token" => "example"}}
+        }
+      }, %{current_user: admin_user()})
+
+      assert helm["url"] == "https://example.helm.sh"
+    end
+  end
+
   describe "createScmConnection" do
     test "it will create a new scm connection" do
       expect(Tentacat.Organizations.Hooks, :create, fn _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)

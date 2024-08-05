@@ -7,6 +7,7 @@ defmodule Console.Deployments.Policies.Rbac do
     Service,
     DeploymentSettings,
     GitRepository,
+    HelmRepository,
     User,
     GlobalService,
     ProviderCredential,
@@ -69,6 +70,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%PrAutomation{} = pr, %User{} = user, action),
     do: recurse(pr, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%GitRepository{}, %User{} = user, action),
+    do: recurse(Settings.fetch(), user, action)
+  def evaluate(%HelmRepository{}, %User{} = user, action),
     do: recurse(Settings.fetch(), user, action)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn

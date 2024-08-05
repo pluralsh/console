@@ -36,6 +36,16 @@ defmodule Console.Deployments.Clusters do
   @type runtime_service_resp :: {:ok, RuntimeService.t} | Console.error
   @type pinned_resp :: {:ok, PinnedCustomResource.t} | Console.error
 
+  @doc """
+  True if there's been one cluster that's successfully pinged in the fleet
+  """
+  @spec installed?() :: boolean
+  @decorate cacheable(cache: @cache_adapter, key: :installed, opts: [ttl: @readme_ttl])
+  def installed?() do
+    Cluster.pinged()
+    |> Repo.exists?()
+  end
+
   def find!(identifier) do
     case Uniq.UUID.parse(identifier) do
       {:ok, _} -> get_cluster!(identifier)
@@ -86,7 +96,12 @@ defmodule Console.Deployments.Clusters do
   end
 
   @spec control_plane(Cluster.t) :: Kazan.Server.t | {:error, term}
-  def control_plane(%Cluster{self: true}), do: Kazan.Server.in_cluster()
+  def control_plane(%Cluster{self: true} = cluster) do
+    case Console.cloud?() do
+      true -> control_plane(%{cluster | self: false})
+      _ -> Kazan.Server.in_cluster()
+    end
+  end
   def control_plane(%Cluster{kubeconfig: %{raw: raw}}), do: Kazan.Server.from_kubeconfig_raw(raw)
   def control_plane(%Cluster{} = cluster), do: control_plane(cluster, Users.console(), %{"cached" => true})
 
@@ -297,6 +312,7 @@ defmodule Console.Deployments.Clusters do
   @spec create_cluster(map, User.t) :: cluster_resp
   def create_cluster(attrs, %User{} = user) do
     start_transaction()
+    |> add_operation(:cloud, fn _ -> {:ok, Console.cloud?()} end)
     |> add_operation(:cluster, fn _ ->
       %Cluster{}
       |> Cluster.changeset(Settings.add_project_id(attrs))
@@ -305,6 +321,11 @@ defmodule Console.Deployments.Clusters do
     end)
     |> add_revision()
     |> validate_version()
+    |> add_operation(:controller, fn
+      %{cluster: %Cluster{self: true} = cluster, cloud: true} ->
+        controller_service(cluster)
+      _ -> {:ok, %{}}
+    end)
     |> add_operation(:service, fn %{cluster: cluster} ->
       Services.operator_service(cluster, tmp_admin(user))
     end)
@@ -816,6 +837,33 @@ defmodule Console.Deployments.Clusters do
     |> URI.parse()
     |> Map.put(:path, "/k8s-proxy")
     |> URI.to_string()
+  end
+
+  def controller_service(%Cluster{self: true, id: cluster_id}) do
+    user = Users.get_bot!("console") |> tmp_admin()
+    start_transaction()
+    |> add_operation(:token, fn _ ->
+      Users.create_access_token(user)
+    end)
+    |> add_operation(:svc, fn %{token: token} ->
+      Services.create_service(%{
+        name: "console-controller",
+        namespace: "plrl-console",
+        helm: %{
+          url: "https://pluralsh.github.io/console",
+          chart: "controller",
+          version: "x.x.x",
+          values: Jason.encode!(%{
+            consoleUrl: Console.url("/gql"),
+            tokenSecretRef: %{
+              create: true,
+              token: token.token,
+            },
+          })
+        }
+      }, cluster_id, user)
+    end)
+    |> execute()
   end
 
   defp kas_dns() do

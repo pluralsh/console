@@ -12,7 +12,7 @@ fragment GitRepository on GitRepository {
   httpsPath
 }
 
-fragment HelmRepository on HelmRepository {
+fragment FluxHelmRepository on FluxHelmRepository {
   metadata {
     namespace
     name
@@ -48,15 +48,15 @@ query GitRepositories {
   }
 }
 
-query HelmRepositories {
-  helmRepositories {
-    ...HelmRepository
+query FluxHelmRepositories {
+  fluxHelmRepositories {
+    ...FluxHelmRepository
   }
 }
 
-query HelmRepository($namespace: String!, $name: String!) {
-  helmRepository(namespace: $namespace, name: $name) {
-    ...HelmRepository
+query FluxHelmRepository($namespace: String!, $name: String!) {
+  fluxHelmRepository(namespace: $namespace, name: $name) {
+    ...FluxHelmRepository
     charts {
       name
       versions {

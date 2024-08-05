@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { GitHealth, type HelmRepositoryFragment } from 'generated/graphql'
+import { type FluxHelmRepositoryFragment, GitHealth } from 'generated/graphql'
 import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { CHART_ICON_DARK, CHART_ICON_LIGHT } from 'components/utils/Provider'
 
@@ -8,7 +8,7 @@ import { useTheme } from 'styled-components'
 
 import { HelmHealthChip } from './HelmHealthChip'
 
-const columnHelper = createColumnHelper<HelmRepositoryFragment>()
+const columnHelper = createColumnHelper<FluxHelmRepositoryFragment>()
 
 export const ColName = columnHelper.accessor((repo) => repo?.metadata.name, {
   id: 'name',

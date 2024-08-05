@@ -171,7 +171,7 @@ defmodule Console.GraphQl.Deployments.Service do
 
     field :repository, :git_repository, resolve: dataloader(Deployments), description: "the git repo of this service"
 
-    field :helm_repository, :helm_repository, resolve: fn
+    field :helm_repository, :flux_helm_repository, resolve: fn
       svc, _, %{context: %{loader: loader}} ->
         manual_dataloader(loader, Console.GraphQl.Resolvers.HelmRepositoryLoader, :helm, svc)
     end

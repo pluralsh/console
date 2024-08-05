@@ -2,7 +2,7 @@ import { Button, Switch } from '@pluralsh/design-system'
 import {
   ServiceDeploymentsRowFragment,
   ServiceUpdateAttributes,
-  useHelmRepositoryQuery,
+  useFluxHelmRepositoryQuery,
   useUpdateServiceDeploymentMutation,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
@@ -45,7 +45,7 @@ export function ServiceSettings({
 }
 
 export function ChartUpdate({ repo, state, updateState }) {
-  const { data } = useHelmRepositoryQuery({
+  const { data } = useFluxHelmRepositoryQuery({
     variables: {
       name: repo?.name || '',
       namespace: repo?.namespace || '',
@@ -55,7 +55,7 @@ export function ChartUpdate({ repo, state, updateState }) {
 
   return (
     <ChartForm
-      charts={data?.helmRepository?.charts || []}
+      charts={data?.fluxHelmRepository?.charts || []}
       chart={state.helmChart}
       setChart={(chart) => updateState({ helmChart: chart })}
       version={state.helmVersion}

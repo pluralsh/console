@@ -4,7 +4,7 @@ defmodule Console.Deployments.Init do
   """
   use Console.Services.Base
   alias Console.Services.Users
-  alias Console.Schema.AccessToken
+  alias Console.Schema.{AccessToken, Cluster}
   alias Kube.Utils
   alias Console.Deployments.{Clusters, Git, Settings}
 
@@ -30,6 +30,7 @@ defmodule Console.Deployments.Init do
     |> add_operation(:provider, fn _ ->
       case Console.byok?() do
         true -> {:ok, %{id: nil}}
+
         _ ->
           Clusters.create_provider(%{
             name: "#{Console.conf(:provider)}",
@@ -39,9 +40,11 @@ defmodule Console.Deployments.Init do
           }, bot)
       end
     end)
-    |> add_operation(:rebind, fn %{provider: provider, cluster: cluster} ->
-      Ecto.Changeset.change(cluster, %{provider_id: provider.id})
-      |> Repo.update()
+    |> add_operation(:rebind, fn
+      %{provider: provider, cluster: %Cluster{} = cluster} ->
+        Ecto.Changeset.change(cluster, %{provider_id: provider.id})
+        |> Repo.update()
+      %{provider: provider} -> {:ok, provider}
     end)
     |> add_operation(:settings, fn %{deploy_repo: drepo, artifacts_repo: arepo} ->
       Settings.create(%{
@@ -54,9 +57,10 @@ defmodule Console.Deployments.Init do
     |> execute()
   end
 
-  def ensure_secret() do
-    case Utils.get_secret(namespace(), @secret_name) do
-      {:ok, _} = res -> res
+  def ensure_secret(ignore \\ true) do
+    case {ignore && Console.cloud?(), Utils.get_secret(namespace(), @secret_name)} do
+      {true, _} -> {:ok, %{}}
+      {_, {:ok, _} = res} -> res
       _ -> create_auth_secret()
     end
   end

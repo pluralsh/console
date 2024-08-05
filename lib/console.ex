@@ -12,6 +12,8 @@ defmodule Console do
 
   def github_raw_url(url), do: "#{Console.conf(:github_raw_url)}#{url}"
 
+  def cloud?(), do: !!Console.conf(:cloud)
+
   def byok?() do
     case {provider(), Console.conf(:byok)} do
       {_, true} -> true

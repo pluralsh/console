@@ -374,6 +374,22 @@ defmodule Console.Deployments.Git do
   end
 
   @doc """
+  Upserts a helm repository record, optionally recording auth information where needed.
+
+  Requires an admin user, or user w/ git write perms
+  """
+  @spec upsert_helm_repository(map, binary, User.t) :: helm_resp
+  def upsert_helm_repository(attrs, url, %User{} = user) do
+    case Console.Repo.get_by(HelmRepository, url: url) do
+      %HelmRepository{} = repo -> repo
+      nil -> %HelmRepository{url: url}
+    end
+    |> HelmRepository.changeset(attrs)
+    |> allow(user, :git)
+    |> when_ok(&Console.Repo.insert_or_update/1)
+  end
+
+  @doc """
   Sets up a service to run the renovate cron given an scm connection and target repositories
   """
   @spec setup_renovate(binary, [binary], User.t) :: Services.service_resp

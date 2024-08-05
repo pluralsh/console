@@ -73,6 +73,35 @@ defmodule Console.Deployments.ClustersTest do
       assert length(revision.node_pools) == length(cluster.node_pools)
     end
 
+    test "creating a new management cluster when cloud is enabled installs a controller service" do
+      user = admin_user()
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
+      expect(Console, :cloud?, fn -> true end)
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "mgmt",
+        self: true
+      }, user)
+
+      assert cluster.name == "mgmt"
+      assert cluster.deploy_token
+
+      assert_receive {:event, %PubSub.ClusterCreated{item: ^cluster}}
+
+      %{"console-controller" => svc} = Clusters.services(cluster) |> Map.new(& {&1.name, &1})
+
+      assert svc.helm.url == "https://pluralsh.github.io/console"
+      assert svc.helm.chart == "controller"
+      assert svc.helm.version == "x.x.x"
+
+      vals = Jason.decode!(svc.helm.values)
+      assert vals["consoleUrl"]
+      assert vals["tokenSecretRef"]["create"]
+      assert vals["tokenSecretRef"]["token"]
+    end
+
     test "it can create a new byok cluster record" do
       user = admin_user()
       git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
@@ -572,8 +601,8 @@ defmodule Console.Deployments.ClustersTest do
   describe "#create_provider/2" do
     test "it will create a new capi provider deployment" do
       user = insert(:user)
-      self = insert(:cluster, self: true)
       settings = deployment_settings(write_bindings: [%{user_id: user.id}])
+      self = insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -609,8 +638,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it will properly create a gcp provider" do
       user = insert(:user)
-      self = insert(:cluster, self: true)
       settings = deployment_settings(write_bindings: [%{user_id: user.id}])
+      self = insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "gcp",
@@ -638,8 +667,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it will properly create an azure provider" do
       user = insert(:user)
-      self = insert(:cluster, self: true)
       settings = deployment_settings(write_bindings: [%{user_id: user.id}])
+      self = insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "azure",
@@ -669,8 +698,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it will not create an azure provider on gcp management clusters" do
       user = insert(:user)
-      insert(:cluster, self: true, provider: build(:cluster_provider, cloud: "gcp"))
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true, provider: build(:cluster_provider, cloud: "gcp"))
 
       {:error, _} = Clusters.create_provider(%{
         name: "azure",
@@ -710,8 +739,8 @@ defmodule Console.Deployments.ClustersTest do
   describe "#update_provider/3" do
     test "it can update a cluster provider" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -736,8 +765,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it can update the underlying provider service if desired" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -759,8 +788,8 @@ defmodule Console.Deployments.ClustersTest do
   describe "#delete_provider/2" do
     test "it can delete a given cluster provider" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -780,8 +809,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "users w/o write permissions cannot delete" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -793,8 +822,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "it cannot delete if there are any attached clusters" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -828,8 +857,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "you cannot create credentials for a cluster provider if you do not have write access" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings()
+      insert(:cluster, self: true)
 
       {:ok, provider} = Clusters.create_provider(%{
         name: "aws-sandbox",
@@ -843,9 +872,9 @@ defmodule Console.Deployments.ClustersTest do
   describe "#delete_provider_credential/2" do
     test "you can create credentials for a cluster provider if you have write access" do
       user = insert(:user)
-      insert(:cluster, self: true)
       deployment_settings(write_bindings: [%{user_id: user.id}])
       cred = insert(:provider_credential)
+      insert(:cluster, self: true)
 
       {:ok, deleted} = Clusters.delete_provider_credential(cred.id, user)
 
@@ -857,8 +886,8 @@ defmodule Console.Deployments.ClustersTest do
 
     test "you cannot create credentials for a cluster provider if you do not have write access" do
       user = insert(:user)
-      insert(:cluster, self: true)
       cred = insert(:provider_credential)
+      insert(:cluster, self: true)
 
       {:error, _} = Clusters.delete_provider_credential(cred.id, user)
     end
