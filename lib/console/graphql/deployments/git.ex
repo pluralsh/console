@@ -223,16 +223,18 @@ defmodule Console.GraphQl.Deployments.Git do
     timestamps()
   end
 
+  @desc "A direct Plural representation of a Helm repository"
   object :helm_repository do
     field :id,       non_null(:id)
     field :url,      non_null(:string)
     field :health,   :git_health
+    field :error,    :string
     field :provider, :helm_auth_provider
 
     timestamps()
   end
 
-  @desc "a Flux crd representation of a helm repository"
+  @desc "a Flux crd representation of a Helm repository"
   object :flux_helm_repository do
     field :metadata, non_null(:metadata)
     field :spec,     non_null(:helm_repository_spec)

@@ -8,6 +8,7 @@ defmodule Console.Schema.HelmRepository do
     field :url,         :string
     field :provider,    Provider
     field :health,      GitRepository.Health
+    field :error,       :string
     field :pulled_at,   :utc_datetime_usec
 
     embeds_one :auth, Console.Schema.OCIAuth, on_replace: :update
@@ -21,7 +22,7 @@ defmodule Console.Schema.HelmRepository do
     from(h in query, order_by: ^order)
   end
 
-  @valid ~w(url provider health pulled_at)a
+  @valid ~w(url provider health error pulled_at)a
 
   def changeset(model, attrs \\ %{}) do
     model
