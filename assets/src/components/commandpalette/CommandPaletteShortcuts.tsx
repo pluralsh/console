@@ -23,6 +23,7 @@ export default function CommandPaletteShortcuts({
     >
       {chunks.map((chunk, i) => (
         <WrapWithIf
+          key={i}
           condition={!['or', 'then'].includes(chunk.toLowerCase())}
           wrapper={
             <div

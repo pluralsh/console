@@ -44,10 +44,11 @@ export default function CommandPalette({
           </span>
         </Command.Empty>
         {commands.map((group, i) => (
-          <>
+          <div key={i}>
             <Command.Group title={group.title}>
               {group.commands.map((command) => (
                 <Command.Item
+                  key={`${command.prefix}${command.label}`}
                   disabled={command.disabled}
                   onSelect={() => {
                     command.callback()
@@ -69,7 +70,7 @@ export default function CommandPalette({
               ))}
             </Command.Group>
             {i < commands.length - 1 && <Command.Separator />}
-          </>
+          </div>
         ))}
       </Command.List>
     </>
