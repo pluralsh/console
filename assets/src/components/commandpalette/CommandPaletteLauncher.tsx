@@ -47,8 +47,6 @@ export default function CommandPaletteLauncher() {
     [setOpen]
   )
 
-  useHotkeys('q', commands?.[10]?.callback, {}, commands?.[10]?.deps)
-
   useHotkeys(['cmd K', 'ctrl K'], openCommandPalette)
 
   return (
