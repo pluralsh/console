@@ -225,11 +225,12 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A direct Plural representation of a Helm repository"
   object :helm_repository do
-    field :id,       non_null(:id)
-    field :url,      non_null(:string)
-    field :health,   :git_health
-    field :error,    :string
-    field :provider, :helm_auth_provider
+    field :id,        non_null(:id)
+    field :url,       non_null(:string)
+    field :health,    :git_health
+    field :error,     :string
+    field :provider,  :helm_auth_provider
+    field :pulled_at, :datetime
 
     timestamps()
   end

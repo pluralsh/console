@@ -21,6 +21,7 @@ defmodule Console.Schema.User do
     field :assume_policy_id, :binary_id
     field :scopes,           :map, virtual: true
     field :api,              :string, virtual: true
+    field :roles_updated,    :boolean, virtual: true, default: false
 
     field :signing_private_key, Piazza.Ecto.EncryptedString
 
@@ -77,6 +78,7 @@ defmodule Console.Schema.User do
     |> validate_format(:email, @email_re)
     |> validate_required([:email, :name])
     |> put_new_change(:assume_policy_id, &Ecto.UUID.generate/0)
+    |> change_markers(roles: :roles_updated)
     |> hash_password()
   end
 

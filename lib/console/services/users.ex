@@ -1,5 +1,6 @@
 defmodule Console.Services.Users do
   use Console.Services.Base
+  import Console.Policies.Users, only: [allow: 3]
   use Nebulex.Caching
 
   alias Console.PubSub
@@ -102,12 +103,16 @@ defmodule Console.Services.Users do
   def update_user(attrs, %User{} = user) do
     user
     |> User.changeset(attrs)
-    |> Repo.update()
+    |> allow(user, :update)
+    |> when_ok(:update)
   end
 
-  def update_user(attrs, user_id, %User{roles: %User.Roles{admin: true}}),
-    do: update_user(attrs, get_user!(user_id))
-  def update_user(_, _, _), do: {:error, :forbidden}
+  def update_user(attrs, user_id, %User{} = user) do
+    get_user!(user_id)
+    |> User.changeset(attrs)
+    |> allow(user, :update)
+    |> when_ok(:update)
+  end
 
   @spec create_user(map) :: user_resp
   def create_user(attrs) do

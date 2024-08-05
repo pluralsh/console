@@ -2108,6 +2108,7 @@ export type HelmRepository = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   provider?: Maybe<HelmAuthProvider>;
+  pulledAt?: Maybe<Scalars['DateTime']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   url: Scalars['String']['output'];
 };

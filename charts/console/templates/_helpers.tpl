@@ -73,6 +73,10 @@ spec: {{ .Values.secrets.config | toYaml | nindent 2 }}
   valueFrom:
     fieldRef:
       fieldPath: status.podIP
+{{ if .Values.cloud.pgRootCert }}
+- name: PGSSLROOTCERT
+  value: '/opt/app/certs/ca.cert'
+{{ end }}
 - name: REPLICAS
   value: {{ .Values.replicaCount | quote }}
 - name: POD_NAME
