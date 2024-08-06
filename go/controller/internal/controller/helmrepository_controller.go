@@ -5,12 +5,14 @@ import (
 	goerrors "errors"
 	"fmt"
 
+	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -28,10 +30,10 @@ import (
 // Implements reconcile.Reconciler and types.Controller.
 type HelmRepositoryReconciler struct {
 	client.Client
-
-	ConsoleClient  consoleclient.ConsoleClient
-	Scheme         *runtime.Scheme
-	UserGroupCache cache.UserGroupCache
+	ConsoleClient    consoleclient.ConsoleClient
+	Scheme           *runtime.Scheme
+	UserGroupCache   cache.UserGroupCache
+	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
 const (
@@ -69,6 +71,15 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 			retErr = err
 		}
 	}()
+
+	// Switch to namespace credentials if configured. This has to be done before sending any request to the console.
+	nc, err := in.ConsoleClient.UseCredentials(req.Namespace, in.CredentialsCache)
+	credentials.SyncCredentialsInfo(helmRepository, helmRepository.SetCondition, nc, err)
+	if err != nil {
+		logger.Error(err, "failed to use namespace credentials", "namespaceCredentials", nc, "namespacedName", req.NamespacedName)
+		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to use %s namespace credentials: %s", nc, err.Error()))
+		return ctrl.Result{}, err
+	}
 
 	// Mark resource as not ready. This will be overridden in the end.
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
@@ -184,11 +195,12 @@ func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1
 func (in *HelmRepositoryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "helmRepository_reconciler")
 	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                             // Requirement for credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.HelmRepositoryList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.HelmRepository{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Complete(in)
 }
 
-// todo namespaced credentials
 // todo attributes
 // todo annotations
 // todo samples
