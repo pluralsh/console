@@ -66,6 +66,10 @@ spec:
         volumeMounts:
         - name: temp-dir
           mountPath: /tmp
+        {{ if .Values.cloud.pgRootCert }}
+        - mountPath: /opt/app/certs
+          name: pg-cert
+        {{ end }}
         {{ if .Values.cliContainer.enabled }}
         - name: cli-override
           mountPath: /usr/local/bin/plural
@@ -111,6 +115,11 @@ spec:
       volumes:
       - name: temp-dir
         emptyDir: {}
+      {{ if .Values.cloud.pgRootCert }}
+      - name: pg-cert
+        secret:
+          secretName: pg-root-cert
+      {{ end }}
       {{ if .Values.cliContainer.enabled }}
       - name: cli-override
         emptyDir: {}

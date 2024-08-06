@@ -38,6 +38,10 @@ spec:
           name: scratch
         - mountPath: /tmp
           name: temp-dir
+        {{ if .Values.cloud.pgRootCert }}
+        - mountPath: /opt/app/certs
+          name: pg-cert
+        {{ end }}
       restartPolicy: Never
       {{ with .Values.migrator.nodeSelector}}
       nodeSelector:
@@ -52,4 +56,9 @@ spec:
         emptyDir: {}
       - name: temp-dir
         emptyDir: {}
+      {{ if .Values.cloud.pgRootCert }}
+      - name: pg-cert
+        secret:
+          secretName: pg-root-cert
+      {{ end }}
   backoffLimit: 5

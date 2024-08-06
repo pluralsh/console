@@ -53,11 +53,15 @@ if provider != :gcp do
   config :goth, disabled: true
 end
 
+ssl = case {String.to_existing_atom(get_env("DBSSL") || "true"), get_env("PGROOTSSLCERT")} do
+  {_, cert} when is_binary(cert) and byte_size(cert) > 0 -> [cacertfile: cert]
+  {ssl, _} -> ssl
+end
 
 if get_env("POSTGRES_URL") do
   config :console, Console.Repo,
     url: get_env("POSTGRES_URL"),
-    ssl: String.to_existing_atom(get_env("DBSSL") || "true"),
+    ssl: ssl,
     pool_size: 10
 else
   config :console, Console.Repo,

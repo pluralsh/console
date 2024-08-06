@@ -161,6 +161,12 @@ defmodule Console.Services.UsersTest do
       assert updated.id == user.id
     end
 
+    test "users cannot make themselves admins" do
+      user = insert(:user)
+
+      {:error, _} = Users.update_user(%{roles: %{admin: true}}, user.id, user)
+    end
+
     test "nonadmins cannot update other users" do
       actor = insert(:user)
       user  = insert(:user)

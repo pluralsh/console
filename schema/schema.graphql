@@ -4464,6 +4464,7 @@ type HelmRepository {
   health: GitHealth
   error: String
   provider: HelmAuthProvider
+  pulledAt: DateTime
   insertedAt: DateTime
   updatedAt: DateTime
 }

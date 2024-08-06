@@ -1732,6 +1732,7 @@ type HelmRepository struct {
 	Health     *GitHealth        `json:"health,omitempty"`
 	Error      *string           `json:"error,omitempty"`
 	Provider   *HelmAuthProvider `json:"provider,omitempty"`
+	PulledAt   *string           `json:"pulledAt,omitempty"`
 	InsertedAt *string           `json:"insertedAt,omitempty"`
 	UpdatedAt  *string           `json:"updatedAt,omitempty"`
 }

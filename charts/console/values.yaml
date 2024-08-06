@@ -6,7 +6,8 @@ global:
   additionalVolumes: ~
   additionalVolumeMounts: ~
 
-cloud: false
+cloud: 
+  enabled: false
 
 disableAdditionalVolumes: false
 
@@ -197,6 +198,9 @@ dashboard:
             key: KAS_HOST
 
 provider: custom
+
+controller:
+  enabled: true
 
 flux2:
   enabled: false
