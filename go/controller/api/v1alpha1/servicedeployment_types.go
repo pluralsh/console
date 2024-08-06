@@ -36,6 +36,8 @@ func (sk *ServiceKustomize) Attributes() *console.KustomizeAttributes {
 }
 
 type ServiceHelm struct {
+	// +kubebuilder:validation:Optional
+	URL *string `json:"url,omitempty"`
 	// Fetches the helm values from a secret in this cluster, will consider any key with yaml data a values file and merge them iteratively
 	// +kubebuilder:validation:Optional
 	ValuesFrom *corev1.SecretReference `json:"valuesFrom,omitempty"`
