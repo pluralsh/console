@@ -57,3 +57,5 @@ export type SeverityExt = (typeof SEVERITIES)[number]
 export type ColorKey = keyof DefaultTheme['colors']
 
 export { type CSSObject } from 'styled-components'
+
+export type Nullable<T> = T | null | undefined

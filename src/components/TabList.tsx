@@ -22,6 +22,8 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 
+import { type Nullable } from '../types'
+
 import { useItemWrappedChildren } from './ListBox'
 import ArrowScroll from './ArrowScroll'
 import WrapWithIf from './WrapWithIf'
@@ -55,7 +57,9 @@ export type TabStateRef = MutableRefObject<{
   updateTabPanel: () => any
 }>
 
-type ChildrenType = ReactElement<TabBaseProps> | ReactElement<TabBaseProps>[]
+type ChildrenType =
+  | Nullable<ReactElement<TabBaseProps>>
+  | Nullable<ReactElement<TabBaseProps>>[]
 
 type TabListProps = {
   stateRef: TabStateRef
