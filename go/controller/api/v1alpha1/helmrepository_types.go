@@ -53,16 +53,21 @@ func (in *HelmRepository) ConsoleName() string {
 	return in.Spec.URL
 }
 
-func (in *HelmRepository) Attributes(ctx context.Context, authAttributesGetter AuthAttributesGetter) (console.HelmRepositoryAttributes, error) {
+func (in *HelmRepository) Attributes(ctx context.Context, authAttributesGetter AuthAttributesGetter) (*console.HelmRepositoryAttributes, error) {
 	authAttributes, err := authAttributesGetter(ctx, *in)
-	return console.HelmRepositoryAttributes{
+	return &console.HelmRepositoryAttributes{
 		Provider: in.Spec.Provider,
 		Auth:     authAttributes,
 	}, err
 }
 
-func (in *HelmRepository) Diff(hasher Hasher) (changed bool, sha string, err error) {
-	currentSha, err := hasher(in.Spec)
+func (in *HelmRepository) Diff(ctx context.Context, getter AuthAttributesGetter, hasher Hasher) (changed bool, sha string, err error) {
+	cloudSettings, err := getter(ctx, *in)
+	if err != nil {
+		return false, "", err
+	}
+
+	currentSha, err := hasher(cloudSettings)
 	if err != nil {
 		return false, "", err
 	}
