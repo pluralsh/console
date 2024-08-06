@@ -14,9 +14,8 @@ import (
 type HelmRepositoryScope struct {
 	Client         client.Client
 	HelmRepository *v1alpha1.HelmRepository
-
-	ctx         context.Context
-	patchHelper *patch.Helper
+	ctx            context.Context
+	patchHelper    *patch.Helper
 }
 
 func (p *HelmRepositoryScope) PatchObject() error {
