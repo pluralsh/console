@@ -48,12 +48,10 @@ func (in *HelmRepository) ConsoleName() string {
 }
 
 func (in *HelmRepository) Attributes() console.HelmRepositoryAttributes {
-	attrs := console.HelmRepositoryAttributes{
-		Provider: nil,
+	return console.HelmRepositoryAttributes{
+		Provider: in.Spec.Provider,
 		Auth:     nil,
 	}
-
-	return attrs
 }
 
 func (in *HelmRepository) Diff(hasher Hasher) (changed bool, sha string, err error) {
@@ -76,6 +74,8 @@ type HelmRepositorySpec struct {
 	// +kubebuilder:validation:Enum:=BASIC;BEARER;GCP;AZURE;AWS
 	Provider *console.HelmAuthProvider `json:"provider,omitempty"`
 
+	// Auth contains authentication credentials for the Helm repository.
+	// +kubebuilder:validation:Optional
 	Auth *HelmRepositoryAuth `json:"auth,omitempty"`
 }
 
@@ -101,12 +101,12 @@ type HelmRepositoryAuthBasic struct {
 	Username string `json:"username"`
 
 	// +kubebuilder:validation:Required
-	Password string `json:"password"`
+	PasswordSecretRef string `json:"passwordSecretRef"`
 }
 
 type HelmRepositoryAuthBearer struct {
 	// +kubebuilder:validation:Required
-	Token string `json:"token"`
+	TokenSecretRef corev1.SecretReference `json:"tokenSecretRef"`
 }
 
 type HelmRepositoryAuthAWS struct {
