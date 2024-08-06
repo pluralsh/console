@@ -5,7 +5,13 @@ import (
 	goerrors "errors"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,14 +23,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	console "github.com/pluralsh/console/go/client"
-
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 // HelmRepositoryReconciler reconciles a v1alpha1.HelmRepository object.
@@ -207,6 +205,3 @@ func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1
 	}
 	return in.ConsoleClient.UpsertHelmRepository(ctx, helmRepository.ConsoleName(), attributes)
 }
-
-// todo samples
-// todo tests
