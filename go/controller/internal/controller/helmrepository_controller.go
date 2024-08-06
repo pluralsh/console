@@ -42,6 +42,16 @@ const (
 	HelmRepositoryProtectionFinalizerName = "helmRepositorys.deployments.plural.sh/helmRepository-protection"
 )
 
+// SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
+func (in *HelmRepositoryReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	mgr.GetLogger().Info("Starting reconciler", "reconciler", "helmrepository_reconciler")
+	return ctrl.NewControllerManagedBy(mgr).
+		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                             // Requirement for credentials implementation.
+		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.HelmRepositoryList))). // Reconcile objects on credentials change.
+		For(&v1alpha1.HelmRepository{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Complete(in)
+}
+
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmRepositorys,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmRepositorys/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmRepositorys/finalizers,verbs=update
@@ -101,9 +111,9 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
 	// Get HelmRepository SHA that can be saved back in the status to check for changes
-	changed, sha, err := helmRepository.Diff(utils.HashObject)
+	changed, sha, err := helmRepository.Diff(ctx, in.authAttributes, utils.HashObject)
 	if err != nil {
-		logger.Error(err, "unable to calculate helmRepository SHA")
+		logger.Error(err, "unable to calculate Helm repository SHA")
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -116,7 +126,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	}
 
 	if err != nil {
-		logger.Error(err, "unable to create or update helmRepository")
+		logger.Error(err, "unable to create or update Helm repository")
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -141,7 +151,7 @@ func (in *HelmRepositoryReconciler) isAlreadyExists(ctx context.Context, helmRep
 	}
 
 	if !helmRepository.Status.HasID() {
-		log.FromContext(ctx).Info("HelmRepository already exists in the API, running in read-only mode")
+		log.FromContext(ctx).Info("Helm repository already exists in the API, running in read-only mode")
 		return true, nil
 	}
 
@@ -187,18 +197,12 @@ func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1
 	}
 
 	// Upsert HelmRepository if it does not exist or has changed
-	logger.Info(fmt.Sprintf("upserting helmRepository %s", helmRepository.ConsoleName()))
-	return in.ConsoleClient.UpsertHelmRepository(ctx, helmRepository.ConsoleName(), helmRepository.Attributes())
-}
-
-// SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
-func (in *HelmRepositoryReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	mgr.GetLogger().Info("Starting reconciler", "reconciler", "helmRepository_reconciler")
-	return ctrl.NewControllerManagedBy(mgr).
-		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                             // Requirement for credentials implementation.
-		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.HelmRepositoryList))). // Reconcile objects on credentials change.
-		For(&v1alpha1.HelmRepository{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
-		Complete(in)
+	logger.Info(fmt.Sprintf("upserting Helm repository %s", helmRepository.ConsoleName()))
+	attributes, err := helmRepository.Attributes(ctx, in.authAttributes)
+	if err != nil {
+		return nil, err
+	}
+	return in.ConsoleClient.UpsertHelmRepository(ctx, helmRepository.ConsoleName(), attributes)
 }
 
 // todo attributes
