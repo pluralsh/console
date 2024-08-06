@@ -207,7 +207,7 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
-  - helmRepositorys
+  - helmrepositories
   verbs:
   - create
   - delete
@@ -219,13 +219,13 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
-  - helmRepositorys/finalizers
+  - helmrepositories/finalizers
   verbs:
   - update
 - apiGroups:
   - deployments.plural.sh
   resources:
-  - helmRepositorys/status
+  - helmrepositories/status
   verbs:
   - get
   - patch

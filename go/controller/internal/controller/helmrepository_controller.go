@@ -48,9 +48,9 @@ func (in *HelmRepositoryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(in)
 }
 
-// +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmRepositorys,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmRepositorys/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmRepositorys/finalizers,verbs=update
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmrepositories,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmrepositories/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=deployments.plural.sh,resources=helmrepositories/finalizers,verbs=update
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the v1alpha1.HelmRepository closer to the desired state
@@ -208,6 +208,5 @@ func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1
 	return in.ConsoleClient.UpsertHelmRepository(ctx, helmRepository.ConsoleName(), attributes)
 }
 
-// todo annotations
 // todo samples
 // todo tests
