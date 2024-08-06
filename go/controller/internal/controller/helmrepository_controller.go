@@ -205,7 +205,7 @@ func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1
 	return in.ConsoleClient.UpsertHelmRepository(ctx, helmRepository.ConsoleName(), attributes)
 }
 
-// todo attributes
+// todo controller refs
 // todo annotations
 // todo samples
 // todo tests

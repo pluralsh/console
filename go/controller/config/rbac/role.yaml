@@ -207,6 +207,32 @@ rules:
 - apiGroups:
   - deployments.plural.sh
   resources:
+  - helmRepositorys
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - helmRepositorys/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
+  - helmRepositorys/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - deployments.plural.sh
+  resources:
   - infrastructurestacks
   verbs:
   - create

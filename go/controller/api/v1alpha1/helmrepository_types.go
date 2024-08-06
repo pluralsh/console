@@ -117,7 +117,7 @@ type HelmRepositoryAuthBasic struct {
 	Username string `json:"username"`
 
 	// +kubebuilder:validation:Required
-	PasswordSecretRef string `json:"passwordSecretRef"`
+	PasswordSecretRef corev1.SecretReference `json:"passwordSecretRef"`
 }
 
 type HelmRepositoryAuthBearer struct {
