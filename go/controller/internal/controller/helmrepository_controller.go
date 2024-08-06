@@ -37,12 +37,6 @@ type HelmRepositoryReconciler struct {
 	CredentialsCache credentials.NamespaceCredentialsCache
 }
 
-const (
-	// HelmRepositoryProtectionFinalizerName defines name for the main finalizer that synchronizes
-	// resource deletion from the Console API prior to removing the CRD.
-	HelmRepositoryProtectionFinalizerName = "helmRepositorys.deployments.plural.sh/helmRepository-protection"
-)
-
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
 func (in *HelmRepositoryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	mgr.GetLogger().Info("Starting reconciler", "reconciler", "helmrepository_reconciler")
