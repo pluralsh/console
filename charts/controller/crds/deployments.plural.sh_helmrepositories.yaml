@@ -44,6 +44,8 @@ spec:
             description: Spec reflects a Console API Helm repository spec.
             properties:
               auth:
+                description: Auth contains authentication credentials for the Helm
+                  repository.
                 properties:
                   aws:
                     properties:
@@ -91,20 +93,33 @@ spec:
                     type: object
                   basic:
                     properties:
-                      password:
+                      passwordSecretRef:
                         type: string
                       username:
                         type: string
                     required:
-                    - password
+                    - passwordSecretRef
                     - username
                     type: object
                   bearer:
                     properties:
-                      token:
-                        type: string
+                      tokenSecretRef:
+                        description: |-
+                          SecretReference represents a Secret Reference. It has enough information to retrieve secret
+                          in any namespace
+                        properties:
+                          name:
+                            description: name is unique within a namespace to reference
+                              a secret resource.
+                            type: string
+                          namespace:
+                            description: namespace defines the space within which
+                              the secret name must be unique.
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                     required:
-                    - token
+                    - tokenSecretRef
                     type: object
                   gcp:
                     properties:
