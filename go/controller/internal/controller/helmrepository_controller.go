@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -49,6 +50,7 @@ func (in *HelmRepositoryReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		WithOptions(controller.Options{MaxConcurrentReconciles: 1}).                                                             // Requirement for credentials implementation.
 		Watches(&v1alpha1.NamespaceCredentials{}, credentials.OnCredentialsChange(in.Client, new(v1alpha1.HelmRepositoryList))). // Reconcile objects on credentials change.
 		For(&v1alpha1.HelmRepository{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
+		Owns(&corev1.Secret{}, builder.WithPredicates(predicate.ResourceVersionChangedPredicate{})).
 		Complete(in)
 }
 
@@ -96,7 +98,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 
 	// TODO: Handle proper resource deletion via finalizer once it will be possible.
 
-	// Check if resource already exists in the API and only sync the ID
+	// Check if resource already exists in the API and only sync the ID.
 	exists, err := in.isAlreadyExists(ctx, helmRepository)
 	if err != nil {
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -110,7 +112,14 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	// Get HelmRepository SHA that can be saved back in the status to check for changes
+	// Add controller refs to secrets that this resource uses.
+	err = in.tryAddControllerRef(ctx, helmRepository)
+	if err != nil {
+		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	// Get HelmRepository SHA that can be saved back in the status to check for changes.
 	changed, sha, err := helmRepository.Diff(ctx, in.authAttributes, utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate Helm repository SHA")
@@ -118,7 +127,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 		return ctrl.Result{}, err
 	}
 
-	// Sync HelmRepository CRD with the Console API
+	// Sync HelmRepository CRD with the Console API.
 	apiHelmRepository, err := in.sync(ctx, helmRepository, changed)
 	if goerrors.Is(err, operrors.ErrRetriable) {
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -191,12 +200,12 @@ func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1
 		return nil, err
 	}
 
-	// Read the HelmRepository from Console API if it already exists and was not changed
+	// Read the HelmRepository from Console API if it already exists and was not changed.
 	if exists && !changed {
 		return in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
 	}
 
-	// Upsert HelmRepository if it does not exist or has changed
+	// Upsert HelmRepository if it does not exist or has changed.
 	logger.Info(fmt.Sprintf("upserting Helm repository %s", helmRepository.ConsoleName()))
 	attributes, err := helmRepository.Attributes(ctx, in.authAttributes)
 	if err != nil {
@@ -205,7 +214,6 @@ func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1
 	return in.ConsoleClient.UpsertHelmRepository(ctx, helmRepository.ConsoleName(), attributes)
 }
 
-// todo controller refs
 // todo annotations
 // todo samples
 // todo tests

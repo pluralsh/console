@@ -8,6 +8,7 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
+	corev1 "k8s.io/api/core/v1"
 )
 
 const (
@@ -17,6 +18,50 @@ const (
 	clientSecretKeyName           = "clientSecret"
 	applicationCredentialsKeyName = "applicationCredentials"
 )
+
+func (in *HelmRepositoryReconciler) getAuthSecretRef(helmRepository *v1alpha1.HelmRepository) *corev1.SecretReference {
+	if helmRepository.Spec.Provider == nil || helmRepository.Spec.Auth == nil {
+		return nil
+	}
+	switch *helmRepository.Spec.Provider {
+	case console.HelmAuthProviderBasic:
+		if helmRepository.Spec.Auth.Basic != nil {
+			return &helmRepository.Spec.Auth.Basic.PasswordSecretRef
+		}
+	case console.HelmAuthProviderBearer:
+		if helmRepository.Spec.Auth.Bearer != nil {
+			return &helmRepository.Spec.Auth.Bearer.TokenSecretRef
+		}
+	case console.HelmAuthProviderAws:
+		if helmRepository.Spec.Auth.Aws != nil {
+			return helmRepository.Spec.Auth.Aws.SecretAccessKeySecretRef
+		}
+	case console.HelmAuthProviderAzure:
+		if helmRepository.Spec.Auth.Azure != nil {
+			return helmRepository.Spec.Auth.Azure.ClientSecretSecretRef
+		}
+	case console.HelmAuthProviderGcp:
+		if helmRepository.Spec.Auth.Gcp != nil {
+			return helmRepository.Spec.Auth.Gcp.ApplicationCredentialsSecretRef
+		}
+	}
+
+	return nil
+}
+
+func (in *HelmRepositoryReconciler) tryAddControllerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {
+	secretRef := in.getAuthSecretRef(helmRepository)
+	if secretRef == nil {
+		return fmt.Errorf("could not find secret ref configuration for %q provider", helmRepository.Spec.Provider)
+	}
+
+	secret, err := utils.GetSecret(ctx, in.Client, secretRef)
+	if err != nil {
+		return err
+	}
+
+	return utils.TryAddControllerRef(ctx, in.Client, helmRepository, secret, in.Scheme)
+}
 
 func (in *HelmRepositoryReconciler) missingCredentialKeyError(key string) error {
 	return fmt.Errorf("%q key does not exist in referenced credential secret", key)
