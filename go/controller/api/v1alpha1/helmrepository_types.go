@@ -50,7 +50,7 @@ func (in *HelmRepository) ConsoleID() *string {
 
 // ConsoleName returns a name used in Console API.
 func (in *HelmRepository) ConsoleName() string {
-	return in.Name
+	return in.Spec.URL
 }
 
 func (in *HelmRepository) Attributes(ctx context.Context, authAttributesGetter AuthAttributesGetter) (console.HelmRepositoryAttributes, error) {
@@ -75,6 +75,10 @@ func (in *HelmRepository) SetCondition(condition metav1.Condition) {
 }
 
 type HelmRepositorySpec struct {
+	// URL of the Helm repository.
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+
 	// Provider is the name of the Helm auth provider.
 	// +kubebuilder:example:=AWS
 	// +kubebuilder:validation:Type:=string
