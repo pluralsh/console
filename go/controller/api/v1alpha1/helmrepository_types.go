@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"context"
+
 	console "github.com/pluralsh/console/go/client"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -10,6 +12,10 @@ import (
 func init() {
 	SchemeBuilder.Register(&HelmRepository{}, &HelmRepositoryList{})
 }
+
+// AuthAttributesGetter is just a helper function that can be implemented to properly build Console API attributes.
+// +kubebuilder:object:generate:=false
+type AuthAttributesGetter func(context.Context, HelmRepository) (*console.HelmAuthAttributes, error)
 
 // HelmRepositoryList is a list of Helm repositories.
 // +kubebuilder:object:root=true
@@ -47,11 +53,12 @@ func (in *HelmRepository) ConsoleName() string {
 	return in.Name
 }
 
-func (in *HelmRepository) Attributes() console.HelmRepositoryAttributes {
+func (in *HelmRepository) Attributes(ctx context.Context, authAttributesGetter AuthAttributesGetter) (console.HelmRepositoryAttributes, error) {
+	authAttributes, err := authAttributesGetter(ctx, *in)
 	return console.HelmRepositoryAttributes{
 		Provider: in.Spec.Provider,
-		Auth:     nil,
-	}
+		Auth:     authAttributes,
+	}, err
 }
 
 func (in *HelmRepository) Diff(hasher Hasher) (changed bool, sha string, err error) {
