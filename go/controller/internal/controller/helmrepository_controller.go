@@ -127,7 +127,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	}
 
 	if err != nil {
-		logger.Error(err, "unable to create or update Helm repository")
+		logger.Error(err, "unable to sync Helm repository")
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
