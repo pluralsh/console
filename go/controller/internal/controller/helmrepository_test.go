@@ -46,7 +46,7 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 					Namespace: namespace,
 				},
 				Data: map[string][]byte{
-					"secret": []byte("secret"),
+					"token": []byte("secret"),
 				},
 			}, nil)).To(Succeed())
 
@@ -93,13 +93,19 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("HQOM6JFXYFND7G7CYINDOXMSLWQSMBMJFLE3GK4AVDNPDBCU6COQ===="),
+					SHA: lo.ToPtr("B7YGLLWIRQDICWPPOGFZBH2DUGVN6B2J3YKF7NLFPDZABUDJZALA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
 							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadonlyConditionType.String(),
+							Message: "",
 						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
@@ -121,8 +127,8 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("GetHelmRepository", mock.Anything, mock.Anything).Return(nil, nil)
-			fakeConsoleClient.On("IsHelmRepositoryExists", mock.Anything, mock.Anything).Return(false, nil).Once()
-			fakeConsoleClient.On("UpsertHelmRepository", mock.Anything, mock.Anything).Return(test.returnedFragment, nil)
+			fakeConsoleClient.On("IsHelmRepositoryExists", mock.Anything, mock.Anything).Return(false, nil)
+			fakeConsoleClient.On("UpsertHelmRepository", mock.Anything, mock.Anything, mock.Anything).Return(test.returnedFragment, nil)
 			reconciler := &controller.HelmRepositoryReconciler{
 				Client:           k8sClient,
 				Scheme:           k8sClient.Scheme(),
@@ -147,13 +153,19 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("22DSNVGBN5ZUDLAIPTN7WE74JXC5X4BXNHRQUN4BQ6EW47CYCJNA===="),
+					SHA: lo.ToPtr("HQX7M3MVLIY33UQTRC747CLQX5U424VCAPF4QJ3CNW4I7LWGJAOQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
 							Status:  metav1.ConditionFalse,
 							Reason:  v1alpha1.NamespacedCredentialsReasonDefault.String(),
 							Message: v1alpha1.NamespacedCredentialsConditionMessage.String(),
+						},
+						{
+							Type:    v1alpha1.ReadonlyConditionType.String(),
+							Status:  metav1.ConditionFalse,
+							Reason:  v1alpha1.ReadonlyConditionType.String(),
+							Message: "",
 						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
@@ -172,15 +184,18 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 				},
 			}
 
-			Expect(common.MaybePatchObject(k8sClient, &v1alpha1.HelmRepository{
-				ObjectMeta: metav1.ObjectMeta{Name: helmRepositoryName, Namespace: namespace},
-			}, func(stack *v1alpha1.HelmRepository) {
-				stack.Spec.URL = updatedUrl
+			Expect(common.MaybePatchObject(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{Name: secretName, Namespace: namespace},
+			}, func(secret *corev1.Secret) {
+				secret.Data = map[string][]byte{
+					"token": []byte("updated"),
+				}
 			})).To(Succeed())
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetHelmRepository", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("IsHelmRepositoryExists", mock.Anything, mock.Anything).Return(true, nil)
+			fakeConsoleClient.On("GetHelmRepository", mock.Anything, mock.Anything).Return(test.returnedFragment, nil)
 			fakeConsoleClient.On("UpsertHelmRepository", mock.Anything, mock.Anything, mock.Anything).Return(test.returnedFragment, nil)
 
 			reconciler := &controller.HelmRepositoryReconciler{

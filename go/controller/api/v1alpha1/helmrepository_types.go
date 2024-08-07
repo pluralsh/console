@@ -82,6 +82,7 @@ func (in *HelmRepository) SetCondition(condition metav1.Condition) {
 type HelmRepositorySpec struct {
 	// URL of the Helm repository.
 	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:XValidation:rule="self == oldSelf",message="URL is immutable"
 	URL string `json:"url"`
 
 	// Provider is the name of the Helm auth provider.

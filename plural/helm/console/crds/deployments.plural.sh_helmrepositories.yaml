@@ -165,6 +165,9 @@ spec:
               url:
                 description: URL of the Helm repository.
                 type: string
+                x-kubernetes-validations:
+                - message: URL is immutable
+                  rule: self == oldSelf
             required:
             - url
             type: object

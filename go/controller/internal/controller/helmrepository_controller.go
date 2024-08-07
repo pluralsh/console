@@ -143,8 +143,8 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 }
 
 func (in *HelmRepositoryReconciler) isAlreadyExists(ctx context.Context, helmRepository *v1alpha1.HelmRepository) (bool, error) {
-	_, err := in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
-	if errors.IsNotFound(err) {
+	apiHelmRepository, err := in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
+	if errors.IsNotFound(err) || (err == nil && apiHelmRepository == nil) {
 		return false, nil
 	}
 
@@ -153,7 +153,6 @@ func (in *HelmRepositoryReconciler) isAlreadyExists(ctx context.Context, helmRep
 	}
 
 	return !helmRepository.Status.HasID(), nil
-
 }
 
 func (in *HelmRepositoryReconciler) handleExistingHelmRepository(ctx context.Context, helmRepository *v1alpha1.HelmRepository) (ctrl.Result, error) {
