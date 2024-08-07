@@ -783,7 +783,7 @@ function TableRef(
                     key={key}
                     onClick={(e) => onRowClick?.(e, row)}
                     $raised={raised}
-                    $highlighted={row.id === highlightedRowId}
+                    $highlighted={row?.id === highlightedRowId}
                     $selectable={row?.getCanSelect() ?? false}
                     $selected={row?.getIsSelected() ?? false}
                     $clickable={!!onRowClick}
