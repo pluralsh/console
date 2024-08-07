@@ -362,12 +362,15 @@ defmodule Console.Deployments.Clusters do
   @spec update_cluster(map, binary, User.t) :: cluster_resp
   def update_cluster(attrs, id, %User{} = user) do
     start_transaction()
-    |> add_operation(:cluster, fn _ ->
+    |> add_operation(:auth, fn _ ->
       get_cluster!(id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:cluster, fn %{auth: auth} ->
+      auth
       |> Console.Repo.preload([:node_pools, :service, :tags])
       |> Cluster.changeset(attrs)
-      |> allow(user, :write)
-      |> when_ok(:update)
+      |> Repo.update()
     end)
     |> add_revision()
     |> validate_version()

@@ -121,9 +121,11 @@ defmodule Console.Deployments.Stacks do
   def update_stack(attrs, id, %User{} = user) do
     get_stack!(id)
     |> preloaded()
-    |> Stack.changeset(attrs)
-    |> Stack.update_changeset()
     |> allow(user, :write)
+    |> when_ok(fn s ->
+      Stack.changeset(s, attrs)
+      |> Stack.update_changeset()
+    end)
     |> when_ok(:update)
     |> notify(:update, user)
   end
@@ -168,10 +170,18 @@ defmodule Console.Deployments.Stacks do
   """
   @spec update_stack_definition(map, binary, User.t) :: def_resp
   def update_stack_definition(attrs, id, %User{} = user) do
-    get_definition!(id)
-    |> StackDefinition.changeset(attrs)
-    |> allow(user, :write)
-    |> when_ok(:update)
+    start_transaction()
+    |> add_operation(:auth, fn _ ->
+      get_definition!(id)
+      |> allow(user, :write)
+    end)
+    |> add_operation(:update, fn %{auth: auth} ->
+      auth
+      |> StackDefinition.changeset(attrs)
+      |> allow(user, :write)
+      |> when_ok(:update)
+    end)
+    |> execute(extract: :update)
   end
 
   @doc """

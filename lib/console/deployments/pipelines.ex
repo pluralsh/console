@@ -71,8 +71,8 @@ defmodule Console.Deployments.Pipelines do
       attrs = stabilize(pipeline, Map.put(attrs, :name, name))
               |> Map.drop([:edges])
       pipeline
-      |> Pipeline.changeset(attrs)
       |> allow(user, (if pipe, do: :write, else: :create))
+      |> when_ok(&Pipeline.changeset(&1, attrs))
       |> when_ok(&Repo.insert_or_update/1)
     end)
     |> add_operation(:edges, fn %{base: base} ->

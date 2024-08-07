@@ -401,7 +401,7 @@ type RootQueryType {
     after: String, first: Int, before: String, last: Int, q: String, projectId: ID, tagQuery: TagQuery
   ): InfrastructureStackConnection
 
-  observabilityProvider(id: ID!): ObservabilityProvider
+  observabilityProvider(id: ID, name: String): ObservabilityProvider
 
   observabilityProviders(after: String, first: Int, before: String, last: Int): ObservabilityProviderConnection
 

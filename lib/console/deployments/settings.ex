@@ -130,8 +130,8 @@ defmodule Console.Deployments.Settings do
   def update_project(attrs, id, %User{} = user) do
     get_project!(id)
     |> Repo.preload([:read_bindings, :write_bindings])
-    |> Project.changeset(attrs)
     |> allow(user, :write)
+    |> when_ok(&Project.changeset(&1, attrs))
     |> when_ok(:update)
   end
 
@@ -183,12 +183,15 @@ defmodule Console.Deployments.Settings do
   @decorate cache_evict(cache: @cache_adapter, key: :deployment_settings)
   def update(attrs, %User{} = user) do
     start_transaction()
-    |> add_operation(:update, fn _ ->
+    |> add_operation(:auth, fn _ ->
       fetch_consistent()
+      |> allow(user, :write)
+    end)
+    |> add_operation(:update, fn %{auth: auth} ->
+      auth
       |> Repo.preload(@preloads)
       |> DeploymentSettings.changeset(attrs)
-      |> allow(user, :write)
-      |> when_ok(:update)
+      |> Repo.update()
     end)
     |> add_operation(:migrations, fn
       %{update: %{helm_changed: h, version_changed: v} = settings} when h == true or v == true ->

@@ -29,9 +29,8 @@ defmodule Console.Deployments.Policies do
   def can?(user, %Ecto.Changeset{} = cs, action),
     do: can?(user, apply_changes(cs), action)
 
-  def can?(user, %{read_bindings: r, write_bindings: w} = resource, :create)
-        when (is_list(r) and length(r) > 0) or (is_list(w) and length(w) > 0),
-    do: can?(user, Map.merge(resource, %{read_bindings: [], write_bindings: []}), :create)
+  def can?(user, %{read_bindings: r, write_bindings: w} = resource, :create) when r != [] and w != [],
+      do: can?(user, Map.merge(resource, %{read_bindings: [], write_bindings: []}), :create)
 
   def can?(%Cluster{id: id}, %ClusterRestore{} = restore, :read) do
     case Repo.preload(restore, [:backup]) do

@@ -331,13 +331,15 @@ defmodule Console.Deployments.ServicesTest do
         configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
       }, service.id, user)
 
+      rando = insert(:user)
       {:error, _} = Services.update_service(%{
         git: %{
           ref: "master",
           folder: "k8s"
         },
+        write_bindings: [%{user_id: rando.id}],
         configuration: [%{name: "name", value: "other-value"}, %{name: "name2", value: "value"}]
-      }, service.id, insert(:user))
+      }, service.id, rando)
     end
   end
 

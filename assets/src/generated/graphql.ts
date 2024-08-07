@@ -5930,7 +5930,8 @@ export type RootQueryTypeObjectStoresArgs = {
 
 
 export type RootQueryTypeObservabilityProviderArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 

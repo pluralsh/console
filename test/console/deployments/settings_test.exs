@@ -29,6 +29,13 @@ defmodule Console.Deployments.SettingsTest do
       assert binding.user_id == user.id
     end
 
+    test "it cannot write escalate" do
+      user = insert(:user)
+      insert(:deployment_settings)
+
+      {:error, _} = Settings.update(%{write_bindings: [%{user_id: user.id}]}, user)
+    end
+
     test "it can create a migration if helm values were modified" do
       admin = admin_user()
       insert(:deployment_settings)
@@ -89,12 +96,16 @@ defmodule Console.Deployments.SettingsTest do
     end
 
     test "nonadmins cannot create projects" do
-      {:error, _} = Settings.create_project(%{name: "test"}, insert(:user))
+      user = insert(:user)
+      {:error, _} = Settings.create_project(%{
+        name: "test",
+        write_bindings: [%{user_id: user.id}]
+      }, user)
     end
   end
 
   describe "#update_project/3" do
-    test "admins can create a new project" do
+    test "admins can update a new project" do
       proj = insert(:project)
       {:ok, updated} = Settings.update_project(%{name: "test"}, proj.id, admin_user())
 
@@ -102,9 +113,13 @@ defmodule Console.Deployments.SettingsTest do
       assert updated.name == "test"
     end
 
-    test "nonadmins cannot create projects" do
+    test "nonadmins cannot update projects" do
       proj = insert(:project)
-      {:error, _} = Settings.update_project(%{name: "test"}, proj.id, insert(:user))
+      user = insert(:user)
+      {:error, _} = Settings.update_project(%{
+        name: "test",
+        write_bindings: [%{user_id: user.id}]
+      }, proj.id, user)
     end
   end
 
