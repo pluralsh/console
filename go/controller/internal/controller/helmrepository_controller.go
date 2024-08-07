@@ -104,7 +104,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
 	// Add controller refs to secrets that this resource uses.
-	err = in.tryAddControllerRef(ctx, helmRepository)
+	err = in.tryAddOwnerRef(ctx, helmRepository)
 	if err != nil {
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -136,11 +136,14 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 }
 
 func (in *HelmRepositoryReconciler) isAlreadyExists(ctx context.Context, helmRepository *v1alpha1.HelmRepository) (bool, error) {
+	if helmRepository.Status.HasReadonlyCondition() {
+		return helmRepository.Status.IsReadonly(), nil
+	}
+
 	_, err := in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
-
 	if err != nil {
 		return false, err
 	}

@@ -49,7 +49,7 @@ func (in *HelmRepositoryReconciler) getAuthSecretRef(helmRepository *v1alpha1.He
 	return nil
 }
 
-func (in *HelmRepositoryReconciler) tryAddControllerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {
+func (in *HelmRepositoryReconciler) tryAddOwnerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {
 	secretRef := in.getAuthSecretRef(helmRepository)
 	if secretRef == nil {
 		return nil

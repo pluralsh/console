@@ -49,3 +49,17 @@ spec:
       applicationCredentialsSecretRef:
         name: gcp-secret
         namespace: default
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: HelmRepository
+metadata:
+  name: test
+  namespace: default
+spec:
+  url: https://github.com/test/test.git
+  provider: GCP
+  auth:
+    gcp:
+      applicationCredentialsSecretRef:
+        name: gcp-secret
+        namespace: default
