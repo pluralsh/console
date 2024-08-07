@@ -30,8 +30,8 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.OCI do
          {:pull, {:ok, digest}} <- {:pull, get_digest(client, chart.version)} do
       {:ok, oci, {chart.name, digest}, digest}
     else
-      {:auth, {:error, err}} -> {:error, "failed to authenticate to oci: #{inspect(err)}"}
-      {:charts, {:error, err}} -> {:error, "error fetching chart #{chart}: #{err}"}
+      {:auth, {:error, err}} -> {:error, {:auth, "failed to authenticate to oci: #{inspect(err)}"}}
+      {:charts, {:error, err}} -> {:error, {:auth, "error fetching chart #{chart}: #{err}"}}
       {:charts, _} -> {:error, "could not find chart #{chart}"}
       {:version, _} -> {:error, "could not find version #{vsn}"}
       {:pull, {:error, err}} -> {:error, "error pulling chart content: #{err}"}

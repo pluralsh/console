@@ -1,30 +1,29 @@
+import { Chip, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Confirm } from 'components/utils/Confirm'
+import { DeleteIconButton } from 'components/utils/IconButtons'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import {
-  Chip,
-  EmptyState,
-  Table,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
 import {
   AuthMethod,
   FluxHelmRepositoriesQuery,
   GitRepositoriesDocument,
   GitRepositoriesQuery,
   type GitRepositoryFragment,
+  HelmRepositoriesQuery,
   useDeleteGitRepositoryMutation,
   useFluxHelmRepositoriesQuery,
   useGitRepositoriesQuery,
+  useHelmRepositoriesQuery,
 } from 'generated/graphql'
-import { useTheme } from 'styled-components'
 import { Key, useMemo, useState } from 'react'
-import { isEmpty } from 'lodash'
-import { Confirm } from 'components/utils/Confirm'
-import { DeleteIconButton } from 'components/utils/IconButtons'
-import { createMapperWithFallback } from 'utils/mapping'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useTheme } from 'styled-components'
 import { removeConnection, updateCache } from 'utils/graphql'
+import { createMapperWithFallback } from 'utils/mapping'
 
 import { CD_REL_PATH, REPOS_REL_PATH } from 'routes/cdRoutesConsts'
+
+import { GqlError } from 'components/utils/Alert'
+
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import {
   CD_BASE_CRUMBS,
@@ -32,27 +31,18 @@ import {
   useSetPageHeaderContent,
 } from '../ContinuousDeployment'
 
-import {
-  RepoKind,
-  RepoKindSelector,
-  repoKindToLabel,
-} from '../utils/RepoKindSelector'
+import { RepoKind, RepoKindSelector } from '../utils/RepoKindSelector'
 
-import {
-  ColName,
-  ColNamespace,
-  ColProvider,
-  ColStatus,
-  ColType,
-  ColUrl,
-} from './HelmRepositoriesColumns'
+import { FluxHelmRepositoriesTable } from './FluxHelmRepositoriesTable'
 import { ImportGit } from './GitRepositoriesImportGit'
+import { GitRepositoriesTable } from './GitRepositoriesTable'
 import {
   RepositoriesFilters,
+  countsFromFluxHelmRepos,
   countsFromGitRepos,
   countsFromHelmRepos,
 } from './RepositoriesFilters'
-import { GitRepositoriesTable } from './GitRepositoriesTable'
+import { HelmRepositoriesTable } from './HelmRepositoriesTable'
 
 const crumbs = [
   ...CD_BASE_CRUMBS,
@@ -133,125 +123,51 @@ export function AuthMethodChip({
 
 export default function Repositories() {
   const [repoKind, setRepoKind] = useState(RepoKind.Git)
-  const kindLabel = repoKindToLabel(repoKind)
   const theme = useTheme()
   const [statusFilterKey, setStatusFilterKey] = useState<Key>('ALL')
   const [filterString, setFilterString] = useState('')
+
+  useSetBreadcrumbs(crumbs)
 
   const gitQueryResult = useGitRepositoriesQuery({
     skip: repoKind !== RepoKind.Git,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
-  const helmQueryResult = useFluxHelmRepositoriesQuery({
+  const helmQueryResult = useHelmRepositoriesQuery({
     skip: repoKind !== RepoKind.Helm,
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
   })
 
+  const fluxQueryResult = useFluxHelmRepositoriesQuery({
+    skip: repoKind !== RepoKind.Flux,
+    fetchPolicy: 'cache-and-network',
+    pollInterval: POLL_INTERVAL,
+  })
+
   const { data, error, refetch } =
-    repoKind === RepoKind.Helm ? helmQueryResult : gitQueryResult
-  const list =
     repoKind === RepoKind.Helm
-      ? helmQueryResult?.data?.fluxHelmRepositories
-      : gitQueryResult?.data?.gitRepositories?.edges
+      ? helmQueryResult
+      : repoKind === RepoKind.Flux
+      ? fluxQueryResult
+      : gitQueryResult
+
   const statusCounts = useMemo(
     () =>
       repoKind === RepoKind.Git
         ? countsFromGitRepos(gitQueryResult?.data)
-        : countsFromHelmRepos(helmQueryResult?.data),
-    [gitQueryResult?.data, helmQueryResult?.data, repoKind]
+        : repoKind === RepoKind.Helm
+        ? countsFromHelmRepos(helmQueryResult?.data)
+        : countsFromFluxHelmRepos(fluxQueryResult?.data),
+    [
+      gitQueryResult?.data,
+      helmQueryResult?.data,
+      fluxQueryResult?.data,
+      repoKind,
+    ]
   )
-
-  useSetBreadcrumbs(crumbs)
-
-  useSetPageHeaderContent(
-    useMemo(() => <ImportGit refetch={refetch} />, [refetch])
-  )
-
-  if (error) {
-    return (
-      <EmptyState
-        message={`Looks like you don’t have any ${kindLabel} repositories yet.`}
-      />
-    )
-  }
-
-  if (!list) {
-    return <LoadingIndicator />
-  }
-
-  return (
-    <div
-      css={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing.small,
-        height: '100%',
-      }}
-    >
-      <div css={{ display: 'flex', gap: theme.spacing.medium }}>
-        <div>
-          <RepoKindSelector
-            onKindChange={setRepoKind}
-            selectedKind={repoKind}
-          />
-        </div>
-        <RepositoriesFilters
-          statusCounts={statusCounts}
-          statusFilterKey={statusFilterKey}
-          setStatusFilterKey={setStatusFilterKey}
-          setFilterString={setFilterString}
-        />
-      </div>
-      {!isEmpty(list) ? (
-        <FullHeightTableWrap>
-          {repoKind === RepoKind.Helm ? (
-            <HelmRepositoriesTable
-              data={data as FluxHelmRepositoriesQuery}
-              filterString={filterString}
-              statusFilterKey={statusFilterKey}
-              refetch={refetch}
-            />
-          ) : (
-            <GitRepositoriesTable
-              data={data as GitRepositoriesQuery}
-              filterString={filterString}
-              statusFilterKey={statusFilterKey}
-              refetch={refetch}
-            />
-          )}
-        </FullHeightTableWrap>
-      ) : (
-        <EmptyState
-          message={`Looks like you don’t have any ${kindLabel} repositories yet.`}
-        />
-      )}
-    </div>
-  )
-}
-
-const helmRepoColumns = [
-  ColName,
-  ColStatus,
-  ColNamespace,
-  ColProvider,
-  ColType,
-  ColUrl,
-]
-
-function HelmRepositoriesTable({
-  data,
-  refetch,
-  filterString,
-  statusFilterKey,
-}: {
-  data: FluxHelmRepositoriesQuery
-  filterString: string
-  statusFilterKey: Key
-  refetch: () => void
-}) {
-  const reactTableOptions = useMemo(
+  const tableOptions = useMemo(
     () => ({
       state: {
         globalFilter: filterString,
@@ -271,15 +187,60 @@ function HelmRepositoriesTable({
     [filterString, refetch, statusFilterKey]
   )
 
+  useSetPageHeaderContent(
+    useMemo(() => <ImportGit refetch={refetch} />, [refetch])
+  )
+
+  if (error) {
+    return <GqlError error={error} />
+  }
+
+  if (!data) {
+    return <LoadingIndicator />
+  }
+
   return (
-    <Table
-      data={data?.fluxHelmRepositories || []}
-      columns={helmRepoColumns}
+    <div
       css={{
-        maxHeight: 'unset',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.small,
         height: '100%',
       }}
-      reactTableOptions={reactTableOptions}
-    />
+    >
+      <div css={{ display: 'flex', gap: theme.spacing.medium }}>
+        <div>
+          <RepoKindSelector
+            enableFlux
+            onKindChange={setRepoKind}
+            selectedKind={repoKind}
+          />
+        </div>
+        <RepositoriesFilters
+          statusCounts={statusCounts}
+          statusFilterKey={statusFilterKey}
+          setStatusFilterKey={setStatusFilterKey}
+          setFilterString={setFilterString}
+        />
+      </div>
+      <FullHeightTableWrap>
+        {repoKind === RepoKind.Git ? (
+          <GitRepositoriesTable
+            data={data as GitRepositoriesQuery}
+            reactTableOptions={tableOptions}
+          />
+        ) : repoKind === RepoKind.Helm ? (
+          <HelmRepositoriesTable
+            data={data as HelmRepositoriesQuery}
+            reactTableOptions={tableOptions}
+          />
+        ) : (
+          <FluxHelmRepositoriesTable
+            data={data as FluxHelmRepositoriesQuery}
+            reactTableOptions={tableOptions}
+          />
+        )}
+      </FullHeightTableWrap>
+    </div>
   )
 }

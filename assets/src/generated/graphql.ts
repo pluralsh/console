@@ -1702,7 +1702,7 @@ export type FileContent = {
   path?: Maybe<Scalars['String']['output']>;
 };
 
-/** a Flux crd representation of a helm repository */
+/** a Flux crd representation of a Helm repository */
 export type FluxHelmRepository = {
   __typename?: 'FluxHelmRepository';
   /** the charts found in this repository (heavy operation, don't do in list endpoints) */
@@ -2100,12 +2100,15 @@ export type HelmGcpAuthAttributes = {
   applicationCredentials?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A direct Plural representation of a Helm repository */
 export type HelmRepository = {
   __typename?: 'HelmRepository';
+  error?: Maybe<Scalars['String']['output']>;
   health?: Maybe<GitHealth>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   provider?: Maybe<HelmAuthProvider>;
+  pulledAt?: Maybe<Scalars['DateTime']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   url: Scalars['String']['output'];
 };
@@ -8423,6 +8426,8 @@ export type UsageQuery = { __typename?: 'RootQueryType', cpu?: Array<{ __typenam
 
 export type GitRepositoryFragment = { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null };
 
+export type HelmRepositoryFragment = { __typename?: 'HelmRepository', id: string, url: string, health?: GitHealth | null, provider?: HelmAuthProvider | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null };
+
 export type FluxHelmRepositoryFragment = { __typename?: 'FluxHelmRepository', metadata: { __typename?: 'Metadata', namespace?: string | null, name: string }, spec: { __typename?: 'HelmRepositorySpec', url: string, type?: string | null, provider?: string | null }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null };
 
 export type HelmChartVersionFragment = { __typename?: 'HelmChartVersion', name?: string | null, appVersion?: string | null, version?: string | null, digest?: string | null };
@@ -8431,6 +8436,11 @@ export type GitRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GitRepositoriesQuery = { __typename?: 'RootQueryType', gitRepositories?: { __typename?: 'GitRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GitRepositoryEdge', node?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null } | null> | null } | null };
+
+export type HelmRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HelmRepositoriesQuery = { __typename?: 'RootQueryType', helmRepositories?: { __typename?: 'HelmRepositoryConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'HelmRepositoryEdge', node?: { __typename?: 'HelmRepository', id: string, url: string, health?: GitHealth | null, provider?: HelmAuthProvider | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
 export type FluxHelmRepositoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -10261,6 +10271,17 @@ export const MetricResponseFragmentDoc = gql`
     timestamp
     value
   }
+}
+    `;
+export const HelmRepositoryFragmentDoc = gql`
+    fragment HelmRepository on HelmRepository {
+  id
+  url
+  health
+  provider
+  insertedAt
+  pulledAt
+  updatedAt
 }
     `;
 export const FluxHelmRepositoryFragmentDoc = gql`
@@ -14442,6 +14463,53 @@ export type GitRepositoriesQueryHookResult = ReturnType<typeof useGitRepositorie
 export type GitRepositoriesLazyQueryHookResult = ReturnType<typeof useGitRepositoriesLazyQuery>;
 export type GitRepositoriesSuspenseQueryHookResult = ReturnType<typeof useGitRepositoriesSuspenseQuery>;
 export type GitRepositoriesQueryResult = Apollo.QueryResult<GitRepositoriesQuery, GitRepositoriesQueryVariables>;
+export const HelmRepositoriesDocument = gql`
+    query HelmRepositories {
+  helmRepositories(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...HelmRepository
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${HelmRepositoryFragmentDoc}`;
+
+/**
+ * __useHelmRepositoriesQuery__
+ *
+ * To run a query within a React component, call `useHelmRepositoriesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHelmRepositoriesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHelmRepositoriesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useHelmRepositoriesQuery(baseOptions?: Apollo.QueryHookOptions<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>(HelmRepositoriesDocument, options);
+      }
+export function useHelmRepositoriesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>(HelmRepositoriesDocument, options);
+        }
+export function useHelmRepositoriesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>(HelmRepositoriesDocument, options);
+        }
+export type HelmRepositoriesQueryHookResult = ReturnType<typeof useHelmRepositoriesQuery>;
+export type HelmRepositoriesLazyQueryHookResult = ReturnType<typeof useHelmRepositoriesLazyQuery>;
+export type HelmRepositoriesSuspenseQueryHookResult = ReturnType<typeof useHelmRepositoriesSuspenseQuery>;
+export type HelmRepositoriesQueryResult = Apollo.QueryResult<HelmRepositoriesQuery, HelmRepositoriesQueryVariables>;
 export const FluxHelmRepositoriesDocument = gql`
     query FluxHelmRepositories {
   fluxHelmRepositories {
@@ -20836,6 +20904,7 @@ export const namedOperations = {
     ClusterLogs: 'ClusterLogs',
     Usage: 'Usage',
     GitRepositories: 'GitRepositories',
+    HelmRepositories: 'HelmRepositories',
     FluxHelmRepositories: 'FluxHelmRepositories',
     FluxHelmRepository: 'FluxHelmRepository',
     GitRepository: 'GitRepository',
@@ -21050,6 +21119,7 @@ export const namedOperations = {
     LogStream: 'LogStream',
     MetricResponse: 'MetricResponse',
     GitRepository: 'GitRepository',
+    HelmRepository: 'HelmRepository',
     FluxHelmRepository: 'FluxHelmRepository',
     HelmChartVersion: 'HelmChartVersion',
     GlobalService: 'GlobalService',

@@ -10,6 +10,7 @@ dependencies:
   - name: controller
     version: 0.0.68
     repository: file://../controller
+    condition: controller.enabled
   - name: kubernetes-dashboard
     version: 7.5.0
     alias: dashboard

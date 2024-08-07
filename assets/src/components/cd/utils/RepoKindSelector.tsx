@@ -1,6 +1,7 @@
 import { MutableRefObject, ReactNode, useRef } from 'react'
 import {
   CheckOutlineIcon,
+  FluxIcon,
   GitHubLogoIcon,
   SubTab,
   TabList,
@@ -14,10 +15,7 @@ import { Provider } from 'generated/graphql-plural'
 export enum RepoKind {
   Git = 'Git',
   Helm = 'Helm',
-}
-
-export function repoKindToLabel(repoKind: RepoKind) {
-  return repoKind === RepoKind.Helm ? 'Helm' : 'Git'
+  Flux = 'Flux',
 }
 
 export function RepoKindSelector({
@@ -25,11 +23,13 @@ export function RepoKindSelector({
   selectedKind,
   children,
   validKinds,
+  enableFlux = false,
 }: {
   onKindChange: any
   selectedKind: Nullable<string>
   children?: ReactNode
   validKinds?: Record<string, boolean>
+  enableFlux?: boolean
 }) {
   const theme = useTheme()
   const tabStateRef: MutableRefObject<any> = useRef()
@@ -72,10 +72,10 @@ export function RepoKindSelector({
             gap: theme.spacing.xsmall,
           }}
           key={RepoKind.Git}
-          textValue={repoKindToLabel(RepoKind.Git)}
+          textValue={RepoKind.Git}
         >
           <GitHubLogoIcon color={theme.colors['icon-default']} />
-          {repoKindToLabel(RepoKind.Git)}
+          {RepoKind.Git}
           {validKinds?.[RepoKind.Git] && (
             <CheckOutlineIcon
               size={16}
@@ -89,7 +89,7 @@ export function RepoKindSelector({
             gap: theme.spacing.xsmall,
           }}
           key={RepoKind.Helm}
-          textValue={repoKindToLabel(RepoKind.Helm)}
+          textValue={RepoKind.Helm}
         >
           <div css={{ display: 'flex', alignItems: 'center' }}>
             <ProviderIcon
@@ -97,7 +97,7 @@ export function RepoKindSelector({
               width={16}
             />
           </div>
-          {repoKindToLabel(RepoKind.Helm)}
+          {RepoKind.Helm}
           {validKinds?.[RepoKind.Helm] && (
             <CheckOutlineIcon
               size={16}
@@ -105,6 +105,25 @@ export function RepoKindSelector({
             />
           )}
         </SubTab>
+        {enableFlux ? (
+          <SubTab
+            css={{
+              display: 'flex',
+              gap: theme.spacing.xsmall,
+            }}
+            key={RepoKind.Flux}
+            textValue={RepoKind.Flux}
+          >
+            <FluxIcon fullColor />
+            {RepoKind.Flux}
+            {validKinds?.[RepoKind.Flux] && (
+              <CheckOutlineIcon
+                size={16}
+                color={theme.colors['icon-success']}
+              />
+            )}
+          </SubTab>
+        ) : null}
       </TabList>
       <TabPanel
         stateRef={tabStateRef}

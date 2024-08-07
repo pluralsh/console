@@ -4457,16 +4457,19 @@ type GitRepository {
   updatedAt: DateTime
 }
 
+"A direct Plural representation of a Helm repository"
 type HelmRepository {
   id: ID!
   url: String!
   health: GitHealth
+  error: String
   provider: HelmAuthProvider
+  pulledAt: DateTime
   insertedAt: DateTime
   updatedAt: DateTime
 }
 
-"a Flux crd representation of a helm repository"
+"a Flux crd representation of a Helm repository"
 type FluxHelmRepository {
   metadata: Metadata!
 

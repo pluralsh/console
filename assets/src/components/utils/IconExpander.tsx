@@ -26,7 +26,7 @@ export function IconExpander({
   children: ReactNode
 }) {
   const theme = useTheme()
-  // will hold the items randomly assigned id if open, empty string if closed
+  // will hold the item's randomly assigned id if open, empty string if closed
   const [openItem, setOpenItem] = useState('')
 
   return (
@@ -35,7 +35,7 @@ export function IconExpander({
       value={openItem}
       onValueChange={setOpenItem}
       orientation="horizontal"
-      css={{ border: theme.borders['fill-three'] }}
+      css={{ border: theme.borders['fill-three'], overflow: 'hidden' }}
     >
       <AccordionItem
         caret="none"

@@ -12,6 +12,16 @@ fragment GitRepository on GitRepository {
   httpsPath
 }
 
+fragment HelmRepository on HelmRepository {
+  id
+  url
+  health
+  provider
+  insertedAt
+  pulledAt
+  updatedAt
+}
+
 fragment FluxHelmRepository on FluxHelmRepository {
   metadata {
     namespace
@@ -43,6 +53,19 @@ query GitRepositories {
     edges {
       node {
         ...GitRepository
+      }
+    }
+  }
+}
+
+query HelmRepositories {
+  helmRepositories(first: 100) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...HelmRepository
       }
     }
   }
