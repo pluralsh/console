@@ -52,7 +52,7 @@ func (in *HelmRepositoryReconciler) getAuthSecretRef(helmRepository *v1alpha1.He
 func (in *HelmRepositoryReconciler) tryAddControllerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {
 	secretRef := in.getAuthSecretRef(helmRepository)
 	if secretRef == nil {
-		return fmt.Errorf("could not find secret ref configuration for %q provider", helmRepository.Spec.Provider)
+		return nil
 	}
 
 	secret, err := utils.GetSecret(ctx, in.Client, secretRef)
