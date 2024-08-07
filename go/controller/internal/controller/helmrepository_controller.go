@@ -97,6 +97,7 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 		return ctrl.Result{}, err
 	}
 	if exists {
+		logger.Info("Helm repository already exists in the API, running in read-only mode")
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
 		return in.handleExistingHelmRepository(ctx, helmRepository)
 	}
@@ -151,12 +152,8 @@ func (in *HelmRepositoryReconciler) isAlreadyExists(ctx context.Context, helmRep
 		return false, err
 	}
 
-	if !helmRepository.Status.HasID() {
-		log.FromContext(ctx).Info("Helm repository already exists in the API, running in read-only mode")
-		return true, nil
-	}
+	return !helmRepository.Status.HasID(), nil
 
-	return false, nil
 }
 
 func (in *HelmRepositoryReconciler) handleExistingHelmRepository(ctx context.Context, helmRepository *v1alpha1.HelmRepository) (ctrl.Result, error) {
