@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	goerrors "errors"
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
@@ -10,7 +9,6 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/cache"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -122,11 +120,6 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 
 	// Sync HelmRepository CRD with the Console API.
 	apiHelmRepository, err := in.sync(ctx, helmRepository, changed)
-	if goerrors.Is(err, operrors.ErrRetriable) {
-		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
-	}
-
 	if err != nil {
 		logger.Error(err, "unable to sync Helm repository")
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -143,8 +136,8 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 }
 
 func (in *HelmRepositoryReconciler) isAlreadyExists(ctx context.Context, helmRepository *v1alpha1.HelmRepository) (bool, error) {
-	apiHelmRepository, err := in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
-	if errors.IsNotFound(err) || (err == nil && apiHelmRepository == nil) {
+	_, err := in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
+	if errors.IsNotFound(err) {
 		return false, nil
 	}
 

@@ -5,19 +5,20 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/samber/lo"
-	"github.com/stretchr/testify/mock"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
 	gqlclient "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/controller"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	common "github.com/pluralsh/console/go/controller/internal/test/common"
 	"github.com/pluralsh/console/go/controller/internal/test/mocks"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/mock"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 var _ = Describe("Helm Repository Controller", Ordered, func() {
@@ -28,7 +29,6 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 			namespace          = "default"
 			id                 = "123"
 			url                = "https://github.com/test"
-			updatedUrl         = "https://github.com/updated"
 		)
 
 		ctx := context.Background()
@@ -126,7 +126,7 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetHelmRepository", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("GetHelmRepository", mock.Anything, mock.Anything).Return(nil, errors.NewNotFound(schema.GroupResource{}, helmRepositoryName))
 			fakeConsoleClient.On("IsHelmRepositoryExists", mock.Anything, mock.Anything).Return(false, nil)
 			fakeConsoleClient.On("UpsertHelmRepository", mock.Anything, mock.Anything, mock.Anything).Return(test.returnedFragment, nil)
 			reconciler := &controller.HelmRepositoryReconciler{
@@ -213,7 +213,6 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(common.SanitizeStatusConditions(resource.Status)).To(Equal(common.SanitizeStatusConditions(test.expectedStatus)))
-
 		})
 	})
 })
