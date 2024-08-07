@@ -34,7 +34,7 @@ metadata:
   name: gcp-secret
   namespace: default
 data:
-  token: dGVzdA==
+  applicationCredentials: dGVzdA==
 ---
 apiVersion: deployments.plural.sh/v1alpha1
 kind: HelmRepository
