@@ -9,6 +9,7 @@ names:
 - cilium
 - contour
 - coredns
+- cri-o
 - external-dns
 - flux
 - ingress-nginx

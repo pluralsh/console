@@ -1,0 +1,20 @@
+icon: https://avatars.githubusercontent.com/u/29074118?s=200&v=4
+git_url: https://github.com/cri-o/cri-o
+release_url: https://github.com/cri-o/cri-o/releases/tag/v{vsn}
+versions:
+- version: 1.31
+  kube: ['1.31']
+  requirements: []
+  incompatibilities: []
+- version: 1.30
+  kube: ['1.30']
+  requirements: []
+  incompatibilities: []
+- version: 1.29
+  kube: ['1.29']
+  requirements: []
+  incompatibilities: []
+- version: 1.28
+  kube: ['1.28']
+  requirements: []
+  incompatibilities: []
