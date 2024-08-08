@@ -55,6 +55,12 @@ mix deps.get
 mix test
 ```
 
+### Git Hooks
+Custom Git hooks are stored in `.githooks` directory. They ensure that when controller or client files are changed, automated code generation targets are executed. In order to enable git hooks for this repo run:
+```sh
+make install-git-hooks
+```
+
 ### Troubleshooting
 #### Installing Erlang 
 If `asdf install` fails with `cannot find required auxiliary files: install-sh config.guess config.sub` then run:
