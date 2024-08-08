@@ -3,7 +3,7 @@ name: CD / Console
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 jobs:
   test:
     runs-on: ubuntu-20.04
@@ -30,7 +30,7 @@ jobs:
           key: ${{ runner.os }}-mix-1-${{ hashFiles('**/mix.lock') }}
           restore-keys: ${{ runner.os }}-mix-1-
       # - name: download jwt verification key
-      #   run: | 
+      #   run: |
       #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
       #   env:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
@@ -48,88 +48,89 @@ jobs:
     runs-on: ubuntu-20.04
     needs: test
     permissions:
-      contents: 'read'
-      id-token: 'write'
-      packages: 'write'
+      contents: "read"
+      id-token: "write"
+      packages: "write"
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Docker meta
-      id: meta
-      uses: docker/metadata-action@v4
-      with:
-        # list of Docker images to use as base name for tags
-        images: |
-          dkr.plural.sh/console/console
-          gcr.io/pluralsh/console
-          ghcr.io/pluralsh/console
-          docker.io/pluralsh/console
-        # generate Docker tags based on the following events/attributes
-        tags: |
-          type=semver,pattern={{version}}
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v2
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v2
-    - uses: google-github-actions/auth@v1
-      with:
-        workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
-        service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
-        token_format: 'access_token'
-        create_credentials_file: true
-    - uses: google-github-actions/setup-gcloud@v1.0.1
-    - name: Login to gcr
-      run: gcloud auth configure-docker -q
-    - name: installing plural
-      id: plrl
-      uses: pluralsh/setup-plural@v0.1.9
-      with:
-        email: gh-actions@plural.sh
-    - name: Login to plural registry
-      uses: docker/login-action@v2
-      with:
-        registry: dkr.plural.sh
-        username: gh-actions@plural.sh
-        password: ${{ steps.plrl.outputs.token }}
-    - name: Login to GHCR
-      uses: docker/login-action@v2
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Login to Docker
-      uses: docker/login-action@v3
-      with:
-        username: mjgpluralsh
-        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-    # - name: download jwt verification key
-    #   run: | 
-    #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
-    #   env:
-    #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
-    - name: Build and push
-      uses: docker/build-push-action@v3
-      with:
-        context: "."
-        file: "./Dockerfile"
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        platforms: linux/amd64
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        build-args: |
-          GIT_COMMIT=${{ github.sha }}
-    - name: slack webhook
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        fields: workflow,job,repo,message,commit,author
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
-      if: always()
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          # list of Docker images to use as base name for tags
+          images: |
+            dkr.plural.sh/console/console
+            gcr.io/pluralsh/console
+            ghcr.io/pluralsh/console
+            docker.io/pluralsh/console
+          # generate Docker tags based on the following events/attributes
+          tags: |
+            type=semver,pattern={{version}}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: "projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github"
+          service_account: "terraform@pluralsh.iam.gserviceaccount.com"
+          token_format: "access_token"
+          create_credentials_file: true
+      - uses: google-github-actions/setup-gcloud@v1.0.1
+      - name: Login to gcr
+        run: gcloud auth configure-docker -q
+      - name: installing plural
+        id: plrl
+        uses: pluralsh/setup-plural@v0.1.9
+        with:
+          email: gh-actions@plural.sh
+      - name: Login to plural registry
+        uses: docker/login-action@v2
+        with:
+          registry: dkr.plural.sh
+          username: gh-actions@plural.sh
+          password: ${{ steps.plrl.outputs.token }}
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to Docker
+        uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      # - name: download jwt verification key
+      #   run: |
+      #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
+      #   env:
+      #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: "."
+          file: "./Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
+      - name: slack webhook
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: workflow,job,repo,message,commit,author
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }} # required
+        if: always()
   release:
     name: Create GitHub release
     runs-on: ubuntu-20.04
@@ -138,13 +139,13 @@ jobs:
       contents: write
       discussions: write
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      with:
-        generate_release_notes: true
-        draft: false
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+          draft: false
   bump:
     name: Bump Chart Version
     runs-on: ubuntu-20.04
@@ -154,61 +155,61 @@ jobs:
       discussions: write
       pull-requests: write
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with: 
-        persist-credentials: false
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
-    - uses: actions/setup-go@v5
-      with:
-        go-version: '^1.21.3'
-    # - name: update controller crds
-    #   working-directory: controller
-    #   run: make chart-crds
-    # - name: update controller rbac
-    #   working-directory: controller
-    #   run: make chart-rbac
-    - name: push chart
-      uses: pluralsh/chart-releaser@v0.1.3
-      with:
-        path: ./plural/helm/console
-        release: ${{github.ref_name}}
-    - name: push byok chart
-      uses: pluralsh/chart-releaser@v0.1.3
-      with:
-        path: ./charts/console
-        release: ${{github.ref_name}}
-    - name: push controller chart
-      uses: pluralsh/chart-releaser@v0.1.3
-      with:
-        path: ./charts/controller
-        release: ${{github.ref_name}}
-    - name: controller version
-      id: controller_vsn
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq ".version" charts/controller/Chart.yaml
-    - name: update byok
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console/Chart.yaml
-    - name: update byok
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' plural/helm/console/Chart.yaml
-    - name: helm-dependencies
-      run: make helm-dependencies
-    - name: copy crds to plural chart
-      run: cp -a charts/controller/crds plural/helm/console
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      with:
-        title: Release ${{github.ref_name}}
-        body: Automated Pull Request to release ${{github.ref_name}}
-        commit-message: Updated chart to release ${{github.ref_name}}
-        branch: release-${{github.ref_name}}
-        labels: release
-        base: master
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "^1.21.3"
+      # - name: update controller crds
+      #   working-directory: controller
+      #   run: make chart-crds
+      # - name: update controller rbac
+      #   working-directory: controller
+      #   run: make chart-rbac
+      - name: push chart
+        uses: pluralsh/chart-releaser@v0.1.3
+        with:
+          path: ./plural/helm/console
+          release: ${{github.ref_name}}
+      - name: push byok chart
+        uses: pluralsh/chart-releaser@v0.1.3
+        with:
+          path: ./charts/console
+          release: ${{github.ref_name}}
+      - name: push controller chart
+        uses: pluralsh/chart-releaser@v0.1.3
+        with:
+          path: ./charts/controller
+          release: ${{github.ref_name}}
+      - name: controller version
+        id: controller_vsn
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq ".version" charts/controller/Chart.yaml
+      - name: update byok
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console/Chart.yaml
+      - name: update byok
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' plural/helm/console/Chart.yaml
+      - name: helm-dependencies
+        run: make helm-dependencies
+      - name: copy crds to plural chart
+        run: cp -a charts/controller/crds plural/helm/console
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: Release ${{github.ref_name}}
+          body: Automated Pull Request to release ${{github.ref_name}}
+          commit-message: Updated chart to release ${{github.ref_name}}
+          branch: release-${{github.ref_name}}
+          labels: release
+          base: master
   bump-rapid:
     name: Bump Rapid Chart Version
     runs-on: ubuntu-20.04
@@ -218,41 +219,41 @@ jobs:
       discussions: write
       pull-requests: write
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with: 
-        persist-credentials: false
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
-    - uses: actions/setup-go@v5
-      with:
-        go-version: '^1.21.3'
-    - name: push byok chart
-      uses: pluralsh/chart-releaser@v0.1.3
-      with:
-        path: ./charts/console-rapid
-        release: ${{github.ref_name}}
-    - name: push controller chart
-      uses: pluralsh/chart-releaser@v0.1.3
-      with:
-        path: ./charts/controller
-        release: ${{github.ref_name}}
-    - name: controller version
-      id: controller_vsn
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq ".version" charts/controller/Chart.yaml
-    - name: update byok
-      uses: mikefarah/yq@master
-      with:
-        cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console-rapid/Chart.yaml
-    - name: helm-dependencies
-      run: make helm-dependencies-rapid
-    - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v5
-      with:
-        title: Release ${{github.ref_name}}
-        body: Automated Pull Request to release rapid channel for ${{github.ref_name}}
-        commit-message: Updated chart console-rapid to release ${{github.ref_name}}
-        branch: release-rapid-${{github.ref_name}}
-        labels: release
-        base: master
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "^1.21.3"
+      - name: push byok chart
+        uses: pluralsh/chart-releaser@v0.1.3
+        with:
+          path: ./charts/console-rapid
+          release: ${{github.ref_name}}
+      - name: push controller chart
+        uses: pluralsh/chart-releaser@v0.1.3
+        with:
+          path: ./charts/controller
+          release: ${{github.ref_name}}
+      - name: controller version
+        id: controller_vsn
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq ".version" charts/controller/Chart.yaml
+      - name: update byok
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq -i '.dependencies[] |= select(.name == "controller").version="${{ steps.controller_vsn.outputs.result }}"' charts/console-rapid/Chart.yaml
+      - name: helm-dependencies
+        run: make helm-dependencies-rapid
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          title: Release ${{github.ref_name}}
+          body: Automated Pull Request to release rapid channel for ${{github.ref_name}}
+          commit-message: Updated chart console-rapid to release ${{github.ref_name}}
+          branch: release-rapid-${{github.ref_name}}
+          labels: release
+          base: master
