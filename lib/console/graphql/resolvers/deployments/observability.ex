@@ -7,7 +7,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   @default_offset 30 * 60
   @nano 1_000_000_000
 
-  def get_observability_provider(%{id: id}, _), do: {:ok, Observability.get_provider!(id)}
+  def get_observability_provider(%{id: id}, _) when is_binary(id), do: {:ok, Observability.get_provider!(id)}
+  def get_observability_provider(%{name: n}, _) when is_binary(n), do: {:ok, Observability.get_provider_by_name!(n)}
 
   def list_observability_providers(args, _) do
     ObservabilityProvider.ordered()

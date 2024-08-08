@@ -51,7 +51,8 @@ defmodule Console.GraphQl.Deployments.Observability do
   object :observability_provider_queries do
     field :observability_provider, :observability_provider do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       resolve &Deployments.get_observability_provider/2
     end

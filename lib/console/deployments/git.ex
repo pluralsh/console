@@ -250,8 +250,8 @@ defmodule Console.Deployments.Git do
   def update_pr_automation(attrs, id, %User{} = user) do
     get_pr_automation!(id)
     |> Repo.preload([:write_bindings, :create_bindings])
-    |> PrAutomation.changeset(attrs)
     |> allow(user, :write)
+    |> when_ok(&PrAutomation.changeset(&1, attrs))
     |> when_ok(:update)
   end
 
@@ -384,8 +384,8 @@ defmodule Console.Deployments.Git do
       %HelmRepository{} = repo -> repo
       nil -> %HelmRepository{url: url}
     end
-    |> HelmRepository.changeset(attrs)
     |> allow(user, :git)
+    |> when_ok(&HelmRepository.changeset(&1, attrs))
     |> when_ok(&Console.Repo.insert_or_update/1)
   end
 

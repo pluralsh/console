@@ -500,6 +500,15 @@ defmodule Console.Deployments.ClustersTest do
 
       assert svc.repository_id == new_git.id
     end
+
+    test "nonwriters cannot update" do
+      cluster = insert(:cluster)
+      user = insert(:user)
+
+      {:error, _} = Clusters.update_cluster(%{
+        write_bindings: [%{user_id: user.id}]
+      }, cluster.id, user)
+    end
   end
 
   describe "#rotate_deploy_token/1" do

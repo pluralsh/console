@@ -6,7 +6,7 @@ defmodule Console.Schema.HelmRepository do
 
   schema "helm_repositories" do
     field :url,         :string
-    field :provider,    Provider
+    field :provider,    Provider, default: :basic
     field :health,      GitRepository.Health
     field :error,       :string
     field :pulled_at,   :utc_datetime_usec

@@ -109,6 +109,7 @@ defmodule Console.Deployments.StacksTest do
     test "random users cannot create" do
       cluster = insert(:cluster)
       repo = insert(:git_repository)
+      user = insert(:user)
 
       {:error, _} = Stacks.create_stack(%{
         name: "my-stack",
@@ -116,8 +117,9 @@ defmodule Console.Deployments.StacksTest do
         approval: true,
         repository_id: repo.id,
         cluster_id: cluster.id,
+        write_bindings: [%{user_id: user.id}],
         git: %{ref: "main", folder: "terraform"},
-      }, insert(:user))
+      }, user)
     end
   end
 
@@ -144,13 +146,15 @@ defmodule Console.Deployments.StacksTest do
 
     test "random users cannot update" do
       stack = insert(:stack)
+      user = insert(:user)
 
       {:error, _} = Stacks.update_stack(%{
         name: "my-stack",
         type: :terraform,
         approval: true,
-        git: %{ref: "main", folder: "terraform"},
-      }, stack.id, insert(:user))
+        write_bindings: [%{user_id: user.id}],
+        git: %{ref: "main", folder: "terraform"}
+      }, stack.id, user)
     end
   end
 

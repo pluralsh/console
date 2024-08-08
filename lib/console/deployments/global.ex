@@ -125,7 +125,7 @@ defmodule Console.Deployments.Global do
     |> add_operation(:ns, fn _ ->
       %ManagedNamespace{}
       |> ManagedNamespace.changeset(attrs)
-      |> allow(user, :write)
+      |> allow(user, :create)
       |> when_ok(:insert)
     end)
     |> add_operation(:rev, fn %{ns: ns} ->
@@ -147,8 +147,8 @@ defmodule Console.Deployments.Global do
     |> add_operation(:ns, fn _ ->
       get_namespace!(namespace_id)
       |> Repo.preload([service: :dependencies])
-      |> ManagedNamespace.changeset(attrs)
       |> allow(user, :write)
+      |> when_ok(&ManagedNamespace.changeset(&1, attrs))
       |> when_ok(:update)
     end)
     |> add_operation(:rev, fn %{ns: ns} ->
