@@ -1,0 +1,25 @@
+icon: https://avatars.githubusercontent.com/u/74165798?s=2008&v=4
+git_url: https://github.com/karmada-io/karmada
+release_url: https://github.com/karmada-io/karmada/releases/tag/v{vsn}
+helm_repository_url: https://github.com/karmada-io/karmada/tree/master/charts/karmada
+versions:
+- version: 1.9.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.9.0
+- version: 1.8.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.8.0
+- version: 1.7.1
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.7.1
+- version: 1.7.0
+  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20', '1.19', '1.18', '1.17', '1.16']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.7.0
