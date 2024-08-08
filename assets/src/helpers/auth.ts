@@ -1,18 +1,26 @@
 import Cookies from 'js-cookie'
 
+import { EncryptStorage } from 'encrypt-storage'
+
 export const AUTH_TOKEN = 'auth-token'
 export const REFRESH_TOKEN = 'refresh-token'
 
+const { MODE, VITE_DEV_SECRET_KEY, VITE_PROD_SECRET_KEY } = import.meta.env
+const secretKey =
+  MODE === 'development' ? VITE_DEV_SECRET_KEY : VITE_PROD_SECRET_KEY
+
+const encryptStorage = new EncryptStorage(secretKey)
+
 export function wipeToken() {
-  localStorage.removeItem(AUTH_TOKEN)
+  encryptStorage.removeItem(AUTH_TOKEN)
 }
 
 export function fetchToken() {
-  return localStorage.getItem(AUTH_TOKEN)
+  return encryptStorage.getItem(AUTH_TOKEN)
 }
 
 export function setToken(token: string | null | undefined) {
-  localStorage.setItem(AUTH_TOKEN, token || '')
+  encryptStorage.setItem(AUTH_TOKEN, token || '')
 }
 
 export function setRefreshToken(token: string | null | undefined) {
