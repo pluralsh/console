@@ -43,7 +43,7 @@ build: manifests generate fmt vet ## build manager binary
 	go build -o bin/manager cmd/main.go
 
 .PHONY: run
-run: manifests generate codegen-chart-rbac fmt vet ## run a controller from your host
+run: manifests generate fmt vet ## run a controller from your host
 	go run ./cmd/main.go \
 		--console-url=${PLURAL_CONSOLE_URL}/gql
 
@@ -79,6 +79,9 @@ e2e: ## run e2e tests
 
 ##@ Codegen
 
+.PHONY: codegen
+codegen: manifests generate genmock codegen-helm codegen-crd-docs ## runs all codegen-related targets
+
 .PHONY: manifests
 manifests: ## generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd:generateEmbeddedObjectMeta=true webhook paths="./..." output:crd:artifacts:config=config/crd/bases
@@ -102,10 +105,6 @@ codegen-helm: manifests ## generate controller helm chart with kustomize
 codegen-chart-crds: ## copy CRDs to the controller helm chart
 	@cp -a config/crd/bases/. $(CONTROLLER_CHART_DIR)/crds
 	@cp -a $(CONTROLLER_CHART_DIR)/crds/. $(PLURAL_CONSOLE_CHART_DIR)/crds
-
-.PHONY: codegen-chart-rbac
-codegen-chart-rbac: codegen-helm ## update controller rbac in the controller helm chart
-	@cp -a tmp/charts/controller/templates/manager-rbac.yaml $(CONTROLLER_CHART_DIR)/templates
 
 .PHONY: codegen-crd-docs
 codegen-crd-docs: ## generate docs from the CRDs
