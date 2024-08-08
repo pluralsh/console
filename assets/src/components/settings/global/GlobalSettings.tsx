@@ -5,9 +5,7 @@ import {
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
 
-import { useContext, useMemo, useRef } from 'react'
-
-import { LoginContext } from 'components/contexts'
+import { useMemo, useRef } from 'react'
 
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 
@@ -23,11 +21,7 @@ export const getGlobalSettingsBreadcrumbs = (page: string) => [
   { label: page, url: `${GLOBAL_SETTINGS_ABS_PATH}/${page}` },
 ]
 
-const getDirectory = ({
-  autoUpdateEnabled,
-}: {
-  autoUpdateEnabled: boolean
-}) => [
+const directory = [
   {
     path: 'permissions',
     label: 'Permissions',
@@ -44,11 +38,6 @@ const getDirectory = ({
     path: 'observability',
     label: 'Observability',
   },
-  {
-    path: 'auto-update',
-    label: 'Auto Update',
-    enabled: autoUpdateEnabled,
-  },
 ]
 
 type GlobalSettingsContextType = {
@@ -64,7 +53,6 @@ export const useGlobalSettingsContext = () =>
 export function GlobalSettings() {
   const tabStateRef = useRef<any>(null)
   const { pathname } = useLocation()
-  const { configuration } = useContext<any>(LoginContext)
   const { data, refetch } = useDeploymentSettingsQuery({})
 
   const outletContext = useMemo(
@@ -77,15 +65,6 @@ export function GlobalSettings() {
     [data, refetch]
   )
 
-  const directory = useMemo(
-    () =>
-      getDirectory({
-        autoUpdateEnabled:
-          configuration?.byok && !data?.deploymentSettings?.selfManaged,
-      }),
-    [configuration, data]
-  )
-
   const currentTab = directory.find(
     (tab) => pathname?.startsWith(`${GLOBAL_SETTINGS_ABS_PATH}/${tab.path}`)
   )
@@ -95,9 +74,7 @@ export function GlobalSettings() {
       scrollable
       paddingBottom="large"
       stateRef={tabStateRef}
-      stateProps={{
-        selectedKey: currentTab?.path,
-      }}
+      stateProps={{ selectedKey: currentTab?.path }}
     >
       {directory.map(({ label, path }) => (
         <LinkTabWrap
