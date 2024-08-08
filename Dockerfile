@@ -12,6 +12,9 @@ RUN yarn install
 
 COPY assets/ ./
 
+ARG VITE_PROD_SECRET_KEY
+ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY}
+
 RUN yarn run build
 
 FROM bitwalker/alpine-elixir:1.13.4 AS builder
@@ -121,14 +124,12 @@ RUN apk add --no-cache --update --virtual=build gcc musl-dev python3-dev libffi-
 # The name of your application/release (required)
 ARG APP_NAME=console
 ARG GIT_COMMIT
-ARG VITE_PROD_SECRET_KEY
 
 ENV REPLACE_OS_VARS=true \
     APP_NAME=${APP_NAME} \
     GIT_ASKPASS=/opt/app/bin/.git-askpass \
     SSH_ASKPASS=/opt/app/bin/.ssh-askpass \
-    GIT_COMMIT=${GIT_COMMIT} \
-    VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY}
+    GIT_COMMIT=${GIT_COMMIT}
 
 WORKDIR /opt/app
 
