@@ -2,7 +2,6 @@ import { GlobalSettings } from 'components/settings/global/GlobalSettings'
 import { GlobalSettingsAgents } from 'components/settings/global/GlobalSettingsAgents'
 
 import { GlobalSettingsRepositories } from 'components/settings/global/GlobalSettingsRepositories'
-import SelfManage from 'components/settings/global/SelfManage'
 import { Navigate, Route } from 'react-router-dom'
 
 import { GlobalSettingsPermissions } from 'components/settings/global/GlobalSettingsPermissions'
@@ -116,10 +115,6 @@ const globalSettingsRoutes = (
     <Route
       path="observability"
       element={<Observability />}
-    />
-    <Route
-      path="auto-update"
-      element={<SelfManage />}
     />
   </Route>
 )
