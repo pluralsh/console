@@ -7,8 +7,11 @@ export const REFRESH_TOKEN = 'refresh-token'
 
 const { MODE, VITE_DEV_SECRET_KEY, VITE_PROD_SECRET_KEY } = import.meta.env
 const secretKey =
-  MODE === 'development' ? VITE_DEV_SECRET_KEY : VITE_PROD_SECRET_KEY
-
+  MODE === 'production'
+    ? VITE_PROD_SECRET_KEY
+    : MODE === 'test'
+    ? '1234567890'
+    : VITE_DEV_SECRET_KEY
 const encryptStorage = new EncryptStorage(secretKey)
 
 export function wipeToken() {

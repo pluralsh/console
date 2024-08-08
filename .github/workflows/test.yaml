@@ -2,9 +2,9 @@ name: CI / Console
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ '*' ]
+    branches: ["*"]
 jobs:
   build:
     name: Test Build Docker image
@@ -43,7 +43,7 @@ jobs:
           username: mjgpluralsh
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
       # - name: download jwt verification key
-      #   run: | 
+      #   run: |
       #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
       #   env:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
@@ -58,7 +58,10 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          build-args: GIT_COMMIT=${{ github.sha }}
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            VITE_PROD_SECRET_KEY=${{ secrets.VITE_PROD_SECRET_KEY }}
+
   test:
     name: Test
     runs-on: ubuntu-20.04
@@ -73,7 +76,7 @@ jobs:
           version: latest
       - run: make testup
       # - name: download jwt verification key
-      #   run: | 
+      #   run: |
       #     echo $JWT_PUBLIC_KEY > config/pubkey.pem
       #   env:
       #     JWT_PUBLIC_KEY: ${{ secrets.JWT_PUBLIC_KEY }}
