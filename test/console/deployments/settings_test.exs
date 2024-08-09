@@ -107,7 +107,10 @@ defmodule Console.Deployments.SettingsTest do
   describe "#update_project/3" do
     test "admins can update a new project" do
       proj = insert(:project)
-      {:ok, updated} = Settings.update_project(%{name: "test"}, proj.id, admin_user())
+      {:ok, updated} = Settings.update_project(%{
+        name: "test",
+        write_bindings: [%{user_id: insert(:user).id}]
+      }, proj.id, admin_user())
 
       assert updated.id == proj.id
       assert updated.name == "test"
