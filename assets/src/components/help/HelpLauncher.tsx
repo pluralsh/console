@@ -68,7 +68,7 @@ const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
     display: 'flex',
     position: 'absolute',
     left: 0,
-    top: helpSpacing.icon.height + theme.spacing.small,
+    top: helpSpacing.icon.height + theme.spacing.xsmall,
 
     minWidth: 240,
     pointerEvents: 'none',
