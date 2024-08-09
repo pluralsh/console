@@ -11,6 +11,7 @@ GIT_COMMIT ?= abd123
 TARGETARCH ?= amd64
 ERLANG_VERSION ?= `grep erlang .tool-versions | cut -d' ' -f2`
 REPO_ROOT ?= `pwd`
+GIT_HOOKS_PATH = .githooks
 
 help:
 	@perl -nle'print $& if m{^[a-zA-Z_-]+:.*?## .*$$}' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -77,7 +78,6 @@ update-schema:
 	cd assets && yarn fix
 	@$(MAKE) --directory go/client --no-print-directory generate
 
-
 k3s:  ## starts a k3d cluster for testing
 	@read -p "cluster name: " name; \
 	k3d cluster create $$name --image docker.io/rancher/k3s:v1.26.11-k3s2
@@ -86,3 +86,7 @@ delete-tag:  ## deletes a tag from git locally and upstream
 	@read -p "Version: " tag; \
 	git tag -d $$tag; \
 	git push origin :$$tag
+
+install-git-hooks: ## enforces usage of git hooks stored under '.githooks' dir
+	@git config --local core.hooksPath ${GIT_HOOKS_PATH}/
+	@echo Successfully configured git hooks, \'core.hooksPath\' now points to \'${GIT_HOOKS_PATH}\'.

@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+ROOT_DIR=${SCRIPT_DIR%/*}
+CONTROLLER_DIR=go/controller
+CLIENT_DIR=go/client
+CLIENT_GRAPH_DIR=${CLIENT_DIR}/graph
+WARNING_UNSTAGED_MSG="[Warning] Check for any unstaged files and commit them before push"
+
+# Keep track of executed checks to not run them multiple times
+CONTROLLER_CODEGEN=false
+CLIENT_GENERATE=false
+
+function get::commit {
+  if git rev-parse --verify HEAD >/dev/null 2>&1; then
+    echo HEAD
+  else
+    # Initial commit: diff against an empty tree object
+    git hash-object -t tree /dev/null
+  fi
+}
+
+function check {
+    against=$1
+
+    # Get a list of files that are about to be commited
+    changed=$(git diff --cached --name-only "${against}")
+
+    # Loop over the files and run configured checks
+    for path in ${changed}; do
+      check::path "${path}"
+    done
+}
+
+function check::path {
+  path=$1
+  changed=false
+
+  if [[ "${path}" == ${CONTROLLER_DIR}/* ]] && [ "${CONTROLLER_CODEGEN}" == false ] ; then
+    echo Controller files changed
+    ensure::controller
+    changed=true
+    CONTROLLER_CODEGEN=true
+  fi
+
+  if [[ "${path}" == ${CLIENT_GRAPH_DIR}/* ]] && [ "${CLIENT_GENERATE}" == false ]; then
+    echo Client files changed
+    ensure::client
+    changed=true
+    CLIENT_GENERATE=true
+  fi
+
+  if [[ "${changed}" == true ]]; then
+    echo "${WARNING_UNSTAGED_MSG}"
+  fi
+}
+
+function ensure::controller {
+  echo Running codegen...
+  make --no-print-directory --directory="${ROOT_DIR}"/${CONTROLLER_DIR} codegen
+}
+
+function ensure::client {
+  echo Running generate...
+  make --no-print-directory --directory="${ROOT_DIR}"/${CLIENT_DIR} generate
+}
+
+echo Executing pre-commit hook
+check "$(get::commit)"
