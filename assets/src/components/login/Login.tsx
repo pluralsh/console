@@ -167,10 +167,7 @@ function useIntercomAttributes(
   return {
     hideDefaultLauncher: true,
     horizontalPadding: helpSpacing.padding.right,
-    verticalPadding:
-      helpSpacing.padding.bottom +
-      helpSpacing.icon.height +
-      helpSpacing.gap.vertical,
+    verticalPadding: helpSpacing.padding.bottom,
     ...intercomUser,
   }
 }

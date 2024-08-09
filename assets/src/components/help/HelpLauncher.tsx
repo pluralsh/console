@@ -8,29 +8,24 @@ import { AnimatedDiv } from '@pluralsh/design-system'
 
 import { DocSearch } from './DocSearch'
 import { useHandleIntercom } from './useHandleIntercom'
-import { HelpLauncherBtn, HelpLauncherButtonsSC } from './HelpLauncherBtn'
+import { HelpLauncherBtn } from './HelpLauncherBtn'
 import { HelpMenu } from './HelpMenu'
-import { HelpMaximizeBtn } from './HelpMaximizeBtn'
 import { useIntercomUpdateUnread } from './IntercomUpdateUnread'
 import { useCustomEventListener } from './useCustomEventListener'
 import { useIntercomMini as useIntercomMiniChat } from './useIntercomMini'
 
 export const getHelpSpacing = (theme: DefaultTheme) => ({
-  gap: {
-    vertical: theme.spacing.xsmall,
-    horizontal: theme.spacing.xsmall,
-  },
   // Intercom has a hard-minimum horizontal padding of 20px
   // So padding.right must be 20px or larger
   padding: {
-    right: theme.spacing.large + theme.spacing.medium,
-    left: theme.spacing.large,
-    top: theme.spacing.large,
-    bottom: 0,
+    right: theme.spacing.xxlarge,
+    left: theme.spacing.xxlarge,
+    top: theme.spacing.xxlarge,
+    bottom: theme.spacing.xxlarge,
   },
   icon: {
-    width: theme.spacing.xxlarge,
-    height: theme.spacing.xxlarge - theme.spacing.xxsmall,
+    width: theme.spacing.xlarge,
+    height: theme.spacing.xlarge,
   },
 })
 
@@ -39,12 +34,6 @@ export function useHelpSpacing() {
 
   return getHelpSpacing(theme)
 }
-
-export const HELP_RIGHT_PAD = 32
-
-export const HELP_BOTTOM_PAD = 32
-
-export const BTN_OVERSHOOT = 20
 
 export enum HelpMenuState {
   menu = 'menu',
@@ -57,29 +46,19 @@ export enum HelpMenuState {
 export enum HelpOpenState {
   open = 'open',
   closed = 'closed',
-  min = 'min',
 }
 
-const HelpLauncherSC = styled.div(({ theme }) => {
-  const helpSpacing = getHelpSpacing(theme)
-
-  return {
-    position: 'fixed',
-    // Must be greater than 2147483000 to appear above Intercom iframe
-    zIndex: 2147483000 + 100,
-    display: 'flex',
-    alignItems: 'end',
-    justifyContent: 'end',
-    right: helpSpacing.padding.right,
-    bottom: helpSpacing.padding.bottom,
-    top: helpSpacing.padding.top,
-    left: helpSpacing.padding.left,
-    pointerEvents: 'none',
-    '& > *': {
-      pointerEvents: 'auto',
-    },
-  }
-})
+const HelpLauncherSC = styled.div(({ theme }) => ({
+  display: 'flex',
+  position: 'relative',
+  alignItems: 'end',
+  justifyContent: 'end',
+  pointerEvents: 'none',
+  '& > *': {
+    pointerEvents: 'auto',
+  },
+  zIndex: theme.zIndexes.modal,
+}))
 
 // @ts-ignore, see https://github.com/pmndrs/react-spring/issues/1515
 const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
@@ -88,16 +67,12 @@ const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
   return {
     display: 'flex',
     position: 'absolute',
-    right: 0,
     left: 0,
-    top: 0,
-    bottom: helpSpacing.icon.height + helpSpacing.gap.vertical,
-    alignItems: 'end',
-    justifyContent: 'end',
+    top: helpSpacing.icon.height + theme.spacing.small,
+
+    minWidth: 240,
     pointerEvents: 'none',
-    '& > *': {
-      pointerEvents: 'auto',
-    },
+    '& > *': { pointerEvents: 'auto' },
   }
 })
 
@@ -234,14 +209,6 @@ function HelpLauncher() {
     }
   }, [changeState, menuState, openState])
 
-  const onMaximizeClick = useCallback(() => {
-    if (openState === 'closed' || openState === 'min') {
-      changeState(undefined, HelpOpenState.open)
-    } else {
-      changeState(undefined, HelpOpenState.min)
-    }
-  }, [changeState, openState])
-
   const isOpen = openState === HelpOpenState.open
   const transitionProps = useMemo(() => getTransitionProps(isOpen), [isOpen])
   const transitions = useTransition(isOpen ? [menuState] : [], transitionProps)
@@ -249,7 +216,7 @@ function HelpLauncher() {
   const content = transitions((styles, menuState) => (
     <HelpLauncherContentSC
       style={{
-        transformOrigin: 'bottom right',
+        transformOrigin: 'top left',
         ...styles,
       }}
     >
@@ -265,20 +232,15 @@ function HelpLauncher() {
 
   return (
     <HelpLauncherSC ref={ref}>
-      <HelpLauncherButtonsSC>
-        {openState === HelpOpenState.min && (
-          <HelpMaximizeBtn onClick={onMaximizeClick} />
-        )}
-        <HelpLauncherBtn
-          variant={
-            menuState === HelpMenuState.menu && openState === HelpOpenState.open
-              ? 'minimize'
-              : 'help'
-          }
-          onClick={onLauncherClick}
-          count={intercomUnreadCount + chatbotUnreadCount}
-        />
-      </HelpLauncherButtonsSC>
+      <HelpLauncherBtn
+        variant={
+          menuState === HelpMenuState.menu && openState === HelpOpenState.open
+            ? 'minimize'
+            : 'help'
+        }
+        onClick={onLauncherClick}
+        count={intercomUnreadCount + chatbotUnreadCount}
+      />
       {content}
       <DocSearch
         isOpen={menuState === HelpMenuState.docSearch}
