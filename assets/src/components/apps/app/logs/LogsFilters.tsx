@@ -17,13 +17,7 @@ function selectedFilter(labels, search, spec) {
   return true
 }
 
-export default function LogsFilters({
-  labels,
-  search,
-  setSearch,
-  setLabels,
-  fullscreen = false,
-}) {
+export default function LogsFilters({ labels, search, setSearch, setLabels }) {
   const { appName } = useParams()
   const [open, setOpen] = useState<boolean>(false)
   const { data } = useQuery(LOG_FILTER_Q, { variables: { namespace: appName } })
@@ -68,7 +62,6 @@ export default function LogsFilters({
           title="Filters"
           subtitle="Select an attribute below to apply a filter."
           onClose={() => setOpen(false)}
-          marginTop={fullscreen ? '0' : '104px'}
         >
           {logFilters.map(({ metadata: { name }, spec }) => {
             const selected = selectedFilter(labels, search, spec)

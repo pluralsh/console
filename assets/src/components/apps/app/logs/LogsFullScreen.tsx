@@ -90,7 +90,6 @@ export default function LogsFullScreen({
               setSearch={setSearch}
               labels={labels}
               setLabels={setLabels}
-              fullscreen
             />
           </div>
           <LogsLabels

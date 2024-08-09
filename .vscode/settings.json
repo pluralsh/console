@@ -1,0 +1,8 @@
+{
+  "eslint.workingDirectories": [
+    { "directory": "./assets", "changeProcessCWD": true }
+  ],
+  "files.associations": {
+    "**/src/archive/**/*": "plaintext"
+  }
+}

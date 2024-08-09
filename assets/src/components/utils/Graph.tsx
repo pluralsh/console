@@ -1,13 +1,12 @@
-import { Key, useContext, useMemo, useState } from 'react'
 import { ResponsiveLine } from '@nivo/line'
-import moment from 'moment'
-import { last } from 'lodash'
-import { Box, Text, ThemeContext } from 'grommet'
 import { Card } from '@pluralsh/design-system'
-import { useColorMap } from 'utils/color'
 import { Flex, Span } from 'honorable'
-import { DEFAULT_THEME } from 'theme'
+import { last } from 'lodash'
+import moment from 'moment'
+import { Key, useMemo, useState } from 'react'
 import { DefaultTheme, useTheme } from 'styled-components'
+import { DEFAULT_THEME } from 'theme'
+import { COLORS } from 'utils/color'
 
 export function dateFormat(date) {
   return moment(date).format('MM/DD h:mm:ss a')
@@ -36,23 +35,6 @@ const graphTheme = (theme: DefaultTheme) => ({
     },
   },
 })
-
-export function GraphHeader({ text }) {
-  return (
-    <Box
-      direction="row"
-      align="center"
-      justify="center"
-    >
-      <Text
-        size="small"
-        weight="bold"
-      >
-        {text}
-      </Text>
-    </Box>
-  )
-}
 
 function SliceTooltip({ point: { serieColor, serieId, data } }) {
   return (
@@ -89,9 +71,7 @@ export function Graph({
   yFormat: any
   tickRotation?: number
 }) {
-  const styledTheme = useTheme()
-  const theme = useContext(ThemeContext)
-  const colors = useColorMap(theme)
+  const theme = useTheme()
   const [selected, setSelected] = useState<Key | null>(null)
   const graph = useMemo(() => {
     if (data.find(({ id }) => id === selected)) {
@@ -101,7 +81,8 @@ export function Graph({
     return data
   }, [data, selected])
 
-  if (graph.length === 0) return <Text size="small">no data</Text>
+  if (graph.length === 0)
+    return <span css={theme.partials.text.caption}>no data</span>
 
   const hasData = !!graph[0].data[0]
 
@@ -128,7 +109,7 @@ export function Graph({
         stacked: true,
         reverse: false,
       }}
-      colors={colors}
+      colors={COLORS}
       yFormat={yFormat}
       xFormat={dateFormat}
       tooltip={SliceTooltip}
@@ -169,19 +150,19 @@ export function Graph({
           itemHeight: 20,
           symbolSize: 12,
           symbolShape: 'circle',
-          itemTextColor: styledTheme.colors['text-xlight'],
+          itemTextColor: theme.colors['text-xlight'],
           effects: [
             {
               on: 'hover',
               style: {
                 itemBackground: 'rgba(0, 0, 0, .03)',
-                itemTextColor: styledTheme.colors['text-light'],
+                itemTextColor: theme.colors['text-light'],
               },
             },
           ],
         },
       ]}
-      theme={graphTheme(styledTheme)}
+      theme={graphTheme(theme)}
     />
   )
 }

@@ -1,4 +1,3 @@
-import { normalizeColor } from 'grommet/utils'
 import { Div } from 'honorable'
 
 import { recurse } from './misc'
@@ -14,7 +13,7 @@ export function DisplayAttachment({ children, attributes, theme }) {
     >
       <Div
         borderLeft={`2px solid ${
-          accent ? normalizeColor(accent, theme) : 'rgba(35, 137, 215, 0.5)'
+          accent ? theme.colors[accent] : 'rgba(35, 137, 215, 0.5)'
         }`}
         {...rest}
       >

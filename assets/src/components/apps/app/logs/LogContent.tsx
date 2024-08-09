@@ -2,15 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 
 import TinyQueue from 'tinyqueue'
 
-import LegacyScroller from 'components/utils/LegacyScroller'
-
 import { last } from 'lodash'
 
 import { Div } from 'honorable'
 
+import { StandardScroller } from 'components/utils/SmoothScroller'
+
+import LogInfo from './LogInfo'
 import LogLine from './LogLine'
 import { Level } from './misc'
-import LogInfo from './LogInfo'
 
 export function determineLevel(line) {
   if (/fatal/i.test(line)) return Level.FATAL
@@ -83,7 +83,6 @@ export default function LogContent({
   setLoader,
   addLabel,
   updateFunc,
-  fullscreen = false,
 }) {
   const [open, setOpen] = useState<any>(null)
   const [timestamp, setTimestamp] = useState<any>()
@@ -104,7 +103,7 @@ export default function LogContent({
 
   return (
     <>
-      <LegacyScroller
+      <StandardScroller
         listRef={listRef}
         setListRef={setListRef}
         setLoader={setLoader}
@@ -141,7 +140,6 @@ export default function LogContent({
           stream={stream}
           addLabel={addLabel}
           onClose={() => setOpen(null)}
-          marginTop={fullscreen ? '0' : '104px'}
         />
       )}
     </>

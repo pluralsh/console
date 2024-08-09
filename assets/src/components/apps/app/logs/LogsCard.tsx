@@ -11,13 +11,7 @@ import LogsScrollIndicator from './LogsScrollIndicator'
 const POLL_INTERVAL = 10 * 1000
 const LIMIT = 1000
 
-export function LogsCard({
-  namespace,
-  query,
-  addLabel,
-  fullscreen = false,
-  height = 800,
-}: any) {
+export function LogsCard({ namespace, query, addLabel, height = 800 }: any) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
   const [loader, setLoader] = useState<any>(null)
@@ -60,7 +54,6 @@ export function LogsCard({
             updateFunc={null}
             onScroll={(arg) => setLive(!arg)}
             addLabel={addLabel}
-            fullscreen={fullscreen}
           />
         ) : (
           <LoadingIndicator />

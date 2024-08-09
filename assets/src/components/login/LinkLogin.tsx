@@ -1,9 +1,10 @@
-import { Box, Text } from 'grommet'
 import { useEffect } from 'react'
 import { useMutation } from '@apollo/client'
 import { useParams } from 'react-router'
-import { LoopingLogo } from '@pluralsh/design-system'
+import { Flex, LoopingLogo } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
+
+import { useTheme } from 'styled-components'
 
 import { setRefreshToken, setToken } from '../../helpers/auth'
 import { LOGIN_LINK } from '../graphql/users'
@@ -11,6 +12,7 @@ import { LOGIN_LINK } from '../graphql/users'
 import { LoginPortal } from './LoginPortal'
 
 export function LinkLogin() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const { key } = useParams()
   const [mutation, { error }] = useMutation(LOGIN_LINK, {
@@ -31,15 +33,14 @@ export function LinkLogin() {
 
   if (error) {
     return (
-      <Box
-        fill
-        align="center"
-        justify="center"
+      <Flex
+        alignItems="center"
+        justifyContent="center"
       >
-        <Box>
-          <Text>This login link is invalid</Text>
-        </Box>
-      </Box>
+        <Flex>
+          <h3 css={theme.partials.text.title2}>This login link is invalid</h3>
+        </Flex>
+      </Flex>
     )
   }
 

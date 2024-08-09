@@ -1,5 +1,11 @@
-import { extract, query } from 'components/runbooks/utils'
 import { useContext } from 'react'
+
+import jp from 'jsonpath'
+import { cpuFormat } from 'utils/kubernetes'
+
+import { filesize } from 'filesize'
+
+import { deepFetch } from 'utils/graphql'
 
 import { DisplayContext } from '../RunbookDisplay'
 
@@ -76,4 +82,19 @@ export function parse(struct, index, theme) {
     default:
       return null
   }
+}
+
+export const query = (object, path) => jp.query(object, `$.${path}`)[0]
+
+export const ValueFormats = {
+  cpu: cpuFormat,
+  memory: filesize,
+}
+
+export function extract(data, doc) {
+  if (!doc) return data
+
+  const raw = deepFetch(data, doc)
+
+  return JSON.parse(raw)
 }
