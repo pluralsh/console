@@ -125,6 +125,7 @@ defmodule Console.Deployments.PipelinesTest do
 
     test "it will respect rbac" do
       user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
       [svc, svc2] = insert_list(2, :service)
       pipe = insert(:pipeline, name: "my-pipeline", write_bindings: [%{user_id: user.id}])
       dev = insert(:pipeline_stage, pipeline: pipe, name: "dev")
@@ -164,6 +165,24 @@ defmodule Console.Deployments.PipelinesTest do
 
 
       [svc, svc2] = insert_list(2, :service)
+      {:ok, pipe} = Pipelines.upsert(%{
+        project_id: project.id,
+        stages: [
+          %{name: "dev", services: [%{name: svc.name, handle: svc.cluster.handle}]},
+          %{name: "prod", services: [
+            %{name: svc2.name, handle: svc2.cluster.handle, criteria: %{
+                name: svc.name,
+                handle: svc.cluster.handle,
+                secrets: ["test-secret"]
+            }},
+          ]}
+        ],
+        edges: [%{from: "dev", to: "prod"}]
+      }, "new-pipeline", user)
+
+      assert pipe.project_id == project.id
+
+      [svc, svc2] = insert_list(2, :service)
       user = insert(:user)
       {:error, _} = Pipelines.upsert(%{
         write_bindings: [%{user_id: user.id}],
@@ -178,7 +197,7 @@ defmodule Console.Deployments.PipelinesTest do
           ]}
         ],
         edges: [%{from: "dev", to: "prod"}]
-      }, "new-pipeline", user)
+      }, "new-pipeline-2", user)
     end
   end
 

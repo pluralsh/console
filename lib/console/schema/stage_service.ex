@@ -18,6 +18,7 @@ defmodule Console.Schema.StageService do
     |> foreign_key_constraint(:stage_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:criteria_id)
+    |> unique_constraint(:service_id)
     |> unique_constraint([:stage_id, :service_id])
   end
 end

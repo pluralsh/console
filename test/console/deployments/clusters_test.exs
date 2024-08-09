@@ -297,6 +297,20 @@ defmodule Console.Deployments.ClustersTest do
       assert svc.helm.values == "bogus: values"
     end
 
+    test "it will respect project rbac" do
+      user = insert(:user)
+      proj = insert(:project, write_bindings: [%{user_id: user.id}])
+      deployment_settings(read_bindings: [%{user_id: user.id}])
+
+      {:ok, cluster} = Clusters.create_cluster(%{
+        name: "test",
+        project_id: proj.id
+      }, user)
+
+      assert cluster.name == "test"
+      assert cluster.project_id == proj.id
+    end
+
     test "it will respect rbac" do
       user = insert(:user)
       deployment_settings(create_bindings: [%{user_id: user.id}])
