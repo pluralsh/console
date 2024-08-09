@@ -19,6 +19,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
@@ -43,7 +44,10 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
-const InfrastructureStackFinalizer = "deployments.plural.sh/stack-protection"
+const (
+	InfrastructureStackFinalizer    = "deployments.plural.sh/stack-protection"
+	requeueAfterInfrastructureStack = 2 * time.Minute
+)
 
 // InfrastructureStackReconciler reconciles a InfrastructureStack object
 type InfrastructureStackReconciler struct {
@@ -188,7 +192,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return RequeueAfter(requeueAfterInfrastructureStack), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
