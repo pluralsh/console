@@ -3,39 +3,28 @@ import createIcon from './createIcon'
 export default createIcon(({ size, color }) => (
   <svg
     width={size}
-    viewBox="0 0 16 17"
+    height={size}
+    viewBox="0 0 16 16"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <g clipPath="url(#clip0_5968_142)">
-      <path
-        d="M7.29903 1.69507H5.91846V8.09155H7.29903V1.69507Z"
-        fill={color}
-      />
-      <path
-        d="M10.0815 1.69507H8.70093V8.09155H10.0815V1.69507Z"
-        fill={color}
-      />
-    </g>
     <path
-      d="M2 8.39331L7.89923 11.8345C7.9615 11.8709 8.0385 11.8709 8.10077 11.8345L14 8.39331"
+      d="M7.29903 1.30176H5.91846V7.69824H7.29903V1.30176Z"
+      fill={color}
+    />
+    <path
+      d="M10.0815 1.30176H8.70093V7.69824H10.0815V1.30176Z"
+      fill={color}
+    />
+    <path
+      d="M2 8L7.89923 11.4412C7.9615 11.4775 8.0385 11.4775 8.10077 11.4412L14 8"
       stroke={color}
       strokeLinecap="round"
     />
     <path
-      d="M2 11.8933L7.89923 15.3345C7.9615 15.3709 8.0385 15.3709 8.10077 15.3345L14 11.8933"
+      d="M2 11.5L7.89923 14.9412C7.9615 14.9775 8.0385 14.9775 8.10077 14.9412L14 11.5"
       stroke={color}
       strokeLinecap="round"
     />
-    <defs>
-      <clipPath id="clip0_5968_142">
-        <rect
-          width="7"
-          height="7"
-          fill={color}
-          transform="translate(4.5 1.39331)"
-        />
-      </clipPath>
-    </defs>
   </svg>
 ))
