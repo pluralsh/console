@@ -17,8 +17,6 @@ import { EnsureLogin } from '../login/Login'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from '../utils/CursorPosition'
 
-import HelpLauncher from '../help/HelpLauncher'
-
 import { ProjectsProvider } from '../contexts/ProjectsContext'
 
 import Header from './Header'
