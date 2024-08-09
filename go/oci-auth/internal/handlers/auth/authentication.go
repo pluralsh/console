@@ -1,12 +1,9 @@
 package auth
 
 import (
+	"fmt"
 	"time"
 
-	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/fluxcd/pkg/oci/auth/aws"
-	"github.com/fluxcd/pkg/oci/auth/azure"
-	"github.com/fluxcd/pkg/oci/auth/gcp"
 	"github.com/google/go-containerregistry/pkg/authn"
 )
 
@@ -16,6 +13,7 @@ const (
 	AWS   Provider = "AWS"
 	Azure Provider = "AZURE"
 	GCP   Provider = "GCP"
+	Basic Provider = "BASIC"
 )
 
 type AuthenticationRequest struct {
@@ -23,7 +21,8 @@ type AuthenticationRequest struct {
 	Provider Provider          `json:"provider"`
 	AWS      *AWSCredentials   `json:"aws,omitempty"`
 	Azure    *AzureCredentials `json:"azure,omitempty"`
-	GCP      *AWSCredentials   `json:"gcp,omitempty"`
+	GCP      *GCPCredentials   `json:"gcp,omitempty"`
+	Basic    *BasicCredentials `json:"basic,omitempty"`
 }
 
 type AWSCredentials struct {
@@ -43,16 +42,31 @@ type GCPCredentials struct {
 	ApplicationCredentials *string `json:"applicationCredentials,omitempty"`
 }
 
+type BasicCredentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 type AuthenticationResponse struct {
 	authn.AuthConfig
 	Expiry *time.Time `json:"expiry,omitempty"`
 }
 
 func authenticate(request *AuthenticationRequest) (*AuthenticationResponse, error) {
-	aws.NewClient().WithConfig(nil)
-	azure.NewClient().WithTokenCredential(nil)
-	gcp.NewClient().WithTokenURL("")
-	_, _ = azidentity.NewManagedIdentityCredential(nil)
+	if request == nil {
+		return nil, fmt.Errorf("request cannot be nil")
+	}
+
+	switch request.Provider {
+	case AWS:
+		return authenticateAWS(request.AWS)
+	case Azure:
+		return authenticateAzure(request.Azure)
+	case GCP:
+		return authenticateGCP(request.GCP)
+	case Basic:
+		return authenticateBasic(request.Basic)
+	}
 
 	return nil, nil
 }
