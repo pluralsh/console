@@ -17,6 +17,7 @@ type Reconciler string
 
 const (
 	GitRepositoryReconciler         Reconciler = "gitrepository"
+	HelmRepositoryReconciler        Reconciler = "helmrepository"
 	ServiceDeploymentReconciler     Reconciler = "servicedeployment"
 	ClusterReconciler               Reconciler = "cluster"
 	ClusterRestoreReconciler        Reconciler = "clusterrestore"
@@ -45,6 +46,8 @@ const (
 func ToReconciler(reconciler string) (Reconciler, error) {
 	switch Reconciler(reconciler) {
 	case GitRepositoryReconciler:
+		fallthrough
+	case HelmRepositoryReconciler:
 		fallthrough
 	case ServiceDeploymentReconciler:
 		fallthrough
@@ -104,6 +107,14 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			Client:        mgr.GetClient(),
 			ConsoleClient: consoleClient,
 			Scheme:        mgr.GetScheme(),
+		}, nil
+	case HelmRepositoryReconciler:
+		return &controller.HelmRepositoryReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			UserGroupCache:   userGroupCache,
+			CredentialsCache: credentialsCache,
 		}, nil
 	case ServiceDeploymentReconciler:
 		return &controller.ServiceReconciler{
@@ -273,6 +284,7 @@ type ReconcilerList []Reconciler
 func Reconcilers() ReconcilerList {
 	return []Reconciler{
 		GitRepositoryReconciler,
+		HelmRepositoryReconciler,
 		ProviderReconciler,
 		ClusterReconciler,
 		ServiceDeploymentReconciler,

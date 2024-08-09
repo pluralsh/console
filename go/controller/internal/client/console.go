@@ -122,6 +122,9 @@ type ConsoleClient interface {
 	GetProject(ctx context.Context, id, name *string) (*console.ProjectFragment, error)
 	UpdateProject(ctx context.Context, id string, attributes console.ProjectAttributes) (*console.ProjectFragment, error)
 	IsProjectExists(ctx context.Context, name string) (bool, error)
+	UpsertHelmRepository(ctx context.Context, url string, attributes *console.HelmRepositoryAttributes) (*console.HelmRepositoryFragment, error)
+	GetHelmRepository(ctx context.Context, url string) (*console.HelmRepositoryFragment, error)
+	IsHelmRepositoryExists(ctx context.Context, url string) (bool, error)
 	DeleteProject(ctx context.Context, id string) error
 	UseCredentials(namespace string, credentialsCache credentials.NamespaceCredentialsCache) (string, error)
 	CreateStackDefinition(ctx context.Context, attributes console.StackDefinitionAttributes) (*console.StackDefinitionFragment, error)

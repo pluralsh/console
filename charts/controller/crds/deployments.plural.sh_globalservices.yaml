@@ -369,6 +369,8 @@ spec:
                             type: string
                         type: object
                         x-kubernetes-map-type: atomic
+                      url:
+                        type: string
                       values:
                         description: arbitrary yaml values to overlay
                         type: object

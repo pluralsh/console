@@ -351,9 +351,8 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			attr.Helm.Values = values
 		}
 
-		if service.Spec.Helm.Chart != nil {
-			attr.Helm.Chart = service.Spec.Helm.Chart
-		}
+		attr.Helm.Chart = service.Spec.Helm.Chart
+		attr.Helm.URL = service.Spec.Helm.URL
 	}
 
 	return attr, nil
