@@ -3,6 +3,34 @@ entries:
   console:
   - apiVersion: v2
     appVersion: 0.10.19
+    created: "2024-08-09T02:39:35.290663008Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.1.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.70
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.5.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.11.1
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 0af3c6efaedf6687ef5e129b52355bcd3b656177406c3b5956fe28dc2c5eb9b9
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.44/console-0.3.44.tgz
+    version: 0.3.44
+  - apiVersion: v2
+    appVersion: 0.10.19
     created: "2024-08-08T22:44:51.584277409Z"
     dependencies:
     - name: kas
@@ -1977,6 +2005,33 @@ entries:
   console-rapid:
   - apiVersion: v2
     appVersion: 0.10.19
+    created: "2024-08-09T02:39:35.456882471Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.1.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.70
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.5.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.11.1
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 1eabf720fb627df5b539251f8fe32c25f6a592731652835f15a03e00eeb6536d
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.44/console-rapid-0.3.44.tgz
+    version: 0.3.44
+  - apiVersion: v2
+    appVersion: 0.10.19
     created: "2024-08-08T21:13:52.734356877Z"
     dependencies:
     - name: kas
@@ -2815,4 +2870,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-09T02:20:10.813446038Z"
+generated: "2024-08-09T02:39:35.457219363Z"
