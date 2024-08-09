@@ -12,5 +12,16 @@ func init() {
 }
 
 func handleAuth(c *gin.Context) {
-	c.JSON(http.StatusOK, "TODO")
+	request := new(AuthenticationRequest)
+	if err := c.Bind(request); err != nil {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
+
+	response, err := authenticate(request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, err)
+	}
+
+	c.JSON(http.StatusOK, response)
 }

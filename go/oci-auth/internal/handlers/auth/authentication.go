@@ -1,5 +1,15 @@
 package auth
 
+import (
+	"time"
+
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/fluxcd/pkg/oci/auth/aws"
+	"github.com/fluxcd/pkg/oci/auth/azure"
+	"github.com/fluxcd/pkg/oci/auth/gcp"
+	"github.com/google/go-containerregistry/pkg/authn"
+)
+
 type Provider string
 
 const (
@@ -31,4 +41,18 @@ type AzureCredentials struct {
 
 type GCPCredentials struct {
 	ApplicationCredentials *string `json:"applicationCredentials,omitempty"`
+}
+
+type AuthenticationResponse struct {
+	authn.AuthConfig
+	Expiry *time.Time `json:"expiry,omitempty"`
+}
+
+func authenticate(request *AuthenticationRequest) (*AuthenticationResponse, error) {
+	aws.NewClient().WithConfig(nil)
+	azure.NewClient().WithTokenCredential(nil)
+	gcp.NewClient().WithTokenURL("")
+	_, _ = azidentity.NewManagedIdentityCredential(nil)
+
+	return nil, nil
 }
