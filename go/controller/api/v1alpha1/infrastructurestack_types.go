@@ -89,8 +89,8 @@ type InfrastructureStackSpec struct {
 	JobSpec *JobSpec `json:"jobSpec,omitempty"`
 
 	// Configuration version/image config for the tool you're using
-	// +kubebuilder:validation:Required
-	Configuration StackConfiguration `json:"configuration"`
+	// +kubebuilder:validation:Optional
+	Configuration *StackConfiguration `json:"configuration,omitempty"`
 
 	// Configuration for cron generation of stack runs
 	// +kubebuilder:validation:Optional
@@ -143,8 +143,8 @@ type StackConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Image *string `json:"image,omitempty"`
 	// Version the semver of the tool you wish to use
-	// +kubebuilder:validation:Required
-	Version string `json:"version"`
+	// +kubebuilder:validation:Optional
+	Version *string `json:"version,omitempty"`
 	// Hooks to run at various stages of the stack run
 	// +kubebuilder:validation:Optional
 	Hooks []*StackHook `json:"hooks,omitempty"`

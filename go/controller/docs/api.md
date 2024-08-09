@@ -794,7 +794,7 @@ _Appears in:_
 | `manageState` _boolean_ | ManageState - whether you want Plural to manage the state of this stack |  | Optional: {} <br /> |
 | `workdir` _string_ | Workdir - the working directory within the git spec you want to run commands in (useful for projects with external modules) |  | Optional: {} <br /> |
 | `jobSpec` _[JobSpec](#jobspec)_ | JobSpec optional k8s job configuration for the job that will apply this stack |  | Optional: {} <br /> |
-| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  | Required: {} <br /> |
+| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration version/image config for the tool you're using |  | Optional: {} <br /> |
 | `cron` _[StackCron](#stackcron)_ | Configuration for cron generation of stack runs |  | Optional: {} <br /> |
 | `approval` _boolean_ | Approval whether to require approval |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
@@ -1889,7 +1889,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `image` _string_ | Image optional custom image you might want to use |  | Optional: {} <br /> |
-| `version` _string_ | Version the semver of the tool you wish to use |  | Required: {} <br /> |
+| `version` _string_ | Version the semver of the tool you wish to use |  | Optional: {} <br /> |
 | `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run |  | Optional: {} <br /> |
 | `tag` _string_ | Tag is the docker image tag you wish to use<br />if you're customizing the version |  | Optional: {} <br /> |
 
@@ -1945,7 +1945,7 @@ _Appears in:_
 | `name` _string_ | Name of this StackDefinition. If not provided StackDefinition's own name<br />from StackDefinition.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `description` _string_ | Description can be used to describe this StackDefinition. |  | Optional: {} <br /> |
 | `steps` _[CustomRunStep](#customrunstep) array_ | Steps is a list of custom run steps that will be executed as<br />part of the stack run. |  | Optional: {} <br /> |
-| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration allows modifying the StackDefinition environment<br />and execution. |  | Required: {} <br /> |
+| `configuration` _[StackConfiguration](#stackconfiguration)_ | Configuration allows modifying the StackDefinition environment<br />and execution. |  | Optional: {} <br /> |
 
 
 #### StackEnvironment

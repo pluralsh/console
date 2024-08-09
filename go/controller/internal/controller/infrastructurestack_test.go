@@ -88,8 +88,8 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 						Ref:    "main",
 						Folder: "terraform",
 					},
-					Configuration: v1alpha1.StackConfiguration{
-						Version: "v0.0.1",
+					Configuration: &v1alpha1.StackConfiguration{
+						Version: lo.ToPtr("v0.0.1"),
 					},
 					Environment: []v1alpha1.StackEnvironment{
 						{

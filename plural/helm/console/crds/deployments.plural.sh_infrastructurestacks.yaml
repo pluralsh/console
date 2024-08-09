@@ -191,8 +191,6 @@ spec:
                   version:
                     description: Version the semver of the tool you wish to use
                     type: string
-                required:
-                - version
                 type: object
               cron:
                 description: Configuration for cron generation of stack runs
@@ -8685,7 +8683,6 @@ spec:
                 type: string
             required:
             - clusterRef
-            - configuration
             - git
             - repositoryRef
             - type
