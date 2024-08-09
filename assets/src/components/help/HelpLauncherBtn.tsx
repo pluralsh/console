@@ -1,8 +1,11 @@
 import { Merge } from 'type-fest'
-import styled, { useTheme } from 'styled-components'
-import { useVisuallyHidden } from 'react-aria'
-import { ComponentProps } from 'react'
-import { CaretDownIcon, HelpIcon } from '@pluralsh/design-system'
+import styled from 'styled-components'
+import {
+  CaretDownIcon,
+  HelpIcon,
+  IconFrame,
+  IconFrameProps,
+} from '@pluralsh/design-system'
 
 import { BTN_OVERSHOOT, getHelpSpacing } from './HelpLauncher'
 import { CountBadge } from './CountBadge'
@@ -11,22 +14,9 @@ export const HelpLauncherButtonsSC = styled.div(({ theme }) => ({
   zIndex: 1,
   display: 'flex',
   gap: theme.spacing.small,
-  '&&': {
-    pointerEvents: 'none',
-  },
-  '& > *': {
-    pointerEvents: 'auto',
-  },
+  '&&': { pointerEvents: 'none' },
+  '& > *': { pointerEvents: 'auto' },
 }))
-const HelpLauncherBtnCount = styled(CountBadge)(({ count = 0 }) => {
-  const translate = count > 10 ? -6 : -5
-
-  return {
-    position: 'absolute',
-    top: translate,
-    left: translate,
-  }
-})
 
 export const HelpLauncherBtnSC = styled.button(({ theme }) => {
   const helpSpacing = getHelpSpacing(theme)
@@ -68,30 +58,30 @@ export function HelpLauncherBtn({
   count = 0,
   ...props
 }: Merge<
-  ComponentProps<typeof HelpLauncherBtnSC>,
+  Omit<IconFrameProps, 'icon'>,
   { variant: 'help' | 'minimize'; count?: number }
 >) {
-  const { visuallyHiddenProps } = useVisuallyHidden()
-  const theme = useTheme()
-  const iconProps = {
-    size: 24,
-    color: theme.colors['icon-light'],
-  }
+  const translate = count > 10 ? -7 : -6
 
   return (
-    <HelpLauncherBtnSC {...props}>
-      {variant === 'minimize' ? (
-        <CaretDownIcon {...iconProps} />
-      ) : (
-        <HelpIcon {...iconProps} />
-      )}
-      <span {...visuallyHiddenProps}>Help</span>
+    <div css={{ position: 'relative' }}>
+      <IconFrame
+        type="secondary"
+        icon={variant === 'minimize' ? <CaretDownIcon /> : <HelpIcon />}
+        tooltip="Help"
+        {...props}
+      />
       {count > 0 && variant === 'help' && (
-        <HelpLauncherBtnCount
+        <CountBadge
           size="medium"
           count={count}
+          css={{
+            position: 'absolute',
+            top: translate,
+            right: translate,
+          }}
         />
       )}
-    </HelpLauncherBtnSC>
+    </div>
   )
 }
