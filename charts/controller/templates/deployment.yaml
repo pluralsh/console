@@ -54,7 +54,9 @@ spec:
         env:
         - name: CONSOLE_TOKEN
           valueFrom:
-            secretKeyRef: {{- toYaml .Values.tokenSecretRef | nindent 14 }}
+            secretKeyRef:
+              name: {{ .Values.tokenSecretRef.name }}
+              key: {{ .Values.tokenSecretRef.key }}
         - name: KUBERNETES_CLUSTER_DOMAIN
           value: {{ quote .Values.kubernetesClusterDomain }}
         image: {{ .Values.controllerManager.manager.image.repository }}:{{ .Values.controllerManager.manager.image.tag | default (printf "v%s" .Chart.AppVersion) }}
