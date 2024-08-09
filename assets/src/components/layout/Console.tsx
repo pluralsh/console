@@ -110,7 +110,6 @@ function ConsoleContent() {
           </Suspense>
         </Flex>
       </Flex>
-      <HelpLauncher />
     </Flex>
   )
 }
