@@ -1,10 +1,12 @@
 package auth
 
 import (
+	"context"
 	"fmt"
 	"time"
 
 	"github.com/google/go-containerregistry/pkg/authn"
+	"github.com/google/go-containerregistry/pkg/name"
 )
 
 type Provider string
@@ -52,18 +54,23 @@ type AuthenticationResponse struct {
 	Expiry *time.Time `json:"expiry,omitempty"`
 }
 
-func authenticate(request *AuthenticationRequest) (*AuthenticationResponse, error) {
+func authenticate(ctx context.Context, request *AuthenticationRequest) (*AuthenticationResponse, error) {
 	if request == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
 
+	ref, err := name.ParseReference(request.URL)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse reference from %s url: %w", request.URL, err)
+	}
+
 	switch request.Provider {
 	case AWS:
-		return authenticateAWS(request.AWS)
+		return authenticateAWS(ctx, request.AWS)
 	case Azure:
-		return authenticateAzure(request.Azure)
+		return authenticateAzure(ctx, request.Azure)
 	case GCP:
-		return authenticateGCP(request.GCP)
+		return authenticateGCP(ctx, request.URL, ref, request.GCP)
 	case Basic:
 		return authenticateBasic(request.Basic)
 	}
