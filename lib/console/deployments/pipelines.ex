@@ -63,7 +63,7 @@ defmodule Console.Deployments.Pipelines do
     |> add_operation(:pipe, fn _ ->
       case pipe do
         %Pipeline{} = pipe -> pipe
-        nil -> %Pipeline{project_id: Settings.default_project!().id}
+        nil -> %Pipeline{project_id: attrs[:project_id] || Settings.default_project!().id}
       end
       |> ok()
     end)
