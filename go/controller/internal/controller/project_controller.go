@@ -147,7 +147,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return &ctrl.Result{}
+				return &requeue
 			}
 
 			// project deletion is synchronous so can just fall back to removing the finalizer and reconciling
