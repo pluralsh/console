@@ -3,6 +3,6 @@ go 1.22.5
 use (
 	./client // github.com/pluralsh/console/go/client
 	./controller // github.com/pluralsh/console/go/controller
-	./tools
-	oci-auth // github.com/pluralsh/console/go/tools
+	./oci-auth // github.com/pluralsh/console/go/oci-auth
+	./tools // github.com/pluralsh/console/go/tools
 )
