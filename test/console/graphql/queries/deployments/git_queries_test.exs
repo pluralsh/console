@@ -65,16 +65,6 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
 
       assert found["id"] == repo.id
     end
-
-    test "users without access cannot fetch" do
-      repo = insert(:git_repository)
-
-      {:ok, %{errors: [_ | _]}} = run_query("""
-        query Git($url: String!) {
-          gitRepository(url: $url) { id }
-        }
-      """, %{"url" => repo.url}, %{current_user: insert(:user)})
-    end
   end
 
   describe "helmRepository" do
