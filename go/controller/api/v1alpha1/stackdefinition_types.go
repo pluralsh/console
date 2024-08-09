@@ -1,11 +1,12 @@
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -55,21 +56,9 @@ func (in *StackDefinition) Diff(hasher Hasher) (changed bool, sha string, err er
 }
 
 func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
-	return console.StackDefinitionAttributes{
+	result := console.StackDefinitionAttributes{
 		Name:        in.StackName(),
 		Description: in.Spec.Description,
-		Configuration: &console.StackConfigurationAttributes{
-			Image:   in.Spec.Configuration.Image,
-			Version: &in.Spec.Configuration.Version,
-			Tag:     in.Spec.Configuration.Tag,
-			Hooks: algorithms.Map(in.Spec.Configuration.Hooks, func(h *StackHook) *console.StackHookAttributes {
-				return &console.StackHookAttributes{
-					Cmd:        h.Cmd,
-					Args:       lo.ToSlicePtr(h.Args),
-					AfterStage: h.AfterStage,
-				}
-			}),
-		},
 		Steps: algorithms.Map(in.Spec.Steps, func(s CustomRunStep) *console.CustomStepAttributes {
 			return &console.CustomStepAttributes{
 				Stage:           &s.Stage,
@@ -79,6 +68,23 @@ func (in *StackDefinition) Attributes() console.StackDefinitionAttributes {
 			}
 		}),
 	}
+
+	if in.Spec.Configuration != nil {
+		result.Configuration = &console.StackConfigurationAttributes{
+			Image:   in.Spec.Configuration.Image,
+			Version: in.Spec.Configuration.Version,
+			Tag:     in.Spec.Configuration.Tag,
+			Hooks: algorithms.Map(in.Spec.Configuration.Hooks, func(h *StackHook) *console.StackHookAttributes {
+				return &console.StackHookAttributes{
+					Cmd:        h.Cmd,
+					Args:       lo.ToSlicePtr(h.Args),
+					AfterStage: h.AfterStage,
+				}
+			}),
+		}
+	}
+
+	return result
 }
 
 // StackDefinitionSpec defines the desired state of StackDefinition
@@ -99,8 +105,8 @@ type StackDefinitionSpec struct {
 
 	// Configuration allows modifying the StackDefinition environment
 	// and execution.
-	// +kubebuilder:validation:Required
-	Configuration StackConfiguration `json:"configuration"`
+	// +kubebuilder:validation:Optional
+	Configuration *StackConfiguration `json:"configuration,omitempty"`
 }
 
 type CustomRunStep struct {
