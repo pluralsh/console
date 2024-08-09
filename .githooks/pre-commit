@@ -7,6 +7,10 @@ CLIENT_DIR=go/client
 CLIENT_GRAPH_DIR=${CLIENT_DIR}/graph
 WARNING_UNSTAGED_MSG="[Warning] Check for any unstaged files and commit them before push"
 
+# Keep track of executed checks to not run them multiple times
+CONTROLLER_CODEGEN=false
+CLIENT_GENERATE=false
+
 function get::commit {
   if git rev-parse --verify HEAD >/dev/null 2>&1; then
     echo HEAD
@@ -32,16 +36,18 @@ function check::path {
   path=$1
   changed=false
 
-  if [[ "${path}" == ${CONTROLLER_DIR}/* ]]; then
+  if [[ "${path}" == ${CONTROLLER_DIR}/* ]] && [ "${CONTROLLER_CODEGEN}" == false ] ; then
     echo Controller files changed
     ensure::controller
     changed=true
+    CONTROLLER_CODEGEN=true
   fi
 
-  if [[ "${path}" == ${CLIENT_GRAPH_DIR}/* ]]; then
+  if [[ "${path}" == ${CLIENT_GRAPH_DIR}/* ]] && [ "${CLIENT_GENERATE}" == false ]; then
     echo Client files changed
     ensure::client
     changed=true
+    CLIENT_GENERATE=true
   fi
 
   if [[ "${changed}" == true ]]; then
