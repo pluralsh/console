@@ -7,6 +7,8 @@ import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
 import CommandPaletteLauncher from 'components/commandpalette/CommandPaletteLauncher'
 
+import HelpLauncher from '../help/HelpLauncher'
+
 import DemoBanner from './DemoBanner'
 import ProjectSelect from './ProjectSelect'
 
@@ -51,6 +53,7 @@ export default function Header() {
         <Flex grow={1} />
         <BillingLegacyUserMessage />
         <BillingSubscriptionChip />
+        <HelpLauncher />
         <CommandPaletteLauncher />
         <LightDarkSwitch
           checked={theme.mode === 'dark'}
