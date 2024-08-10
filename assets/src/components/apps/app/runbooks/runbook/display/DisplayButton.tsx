@@ -1,6 +1,5 @@
 import { Banner, Button } from '@pluralsh/design-system'
 import { ApolloError } from 'apollo-boost'
-import { EXECUTE_RUNBOOK } from 'components/runbooks/queries'
 import { useContext, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -10,6 +9,7 @@ import { legacyUrl } from 'helpers/url'
 import { ActionPortal } from '../Runbook'
 
 import { DisplayContext } from '../RunbookDisplay'
+import { EXECUTE_RUNBOOK } from '../../queries'
 
 function getButton({ primary, key, ...props }: any) {
   return (

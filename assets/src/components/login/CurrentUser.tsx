@@ -3,8 +3,6 @@ import React from 'react'
 import gql from 'graphql-tag'
 import { useQuery } from '@apollo/client'
 
-import { useNotificationSubscription } from '../incidents/Notifications'
-
 const ME_Q = gql`
   query {
     me {
@@ -29,8 +27,6 @@ export const CurrentUserContext = React.createContext({})
 
 export default function CurrentUser({ children }) {
   const { loading, error, data } = useQuery(ME_Q)
-
-  useNotificationSubscription()
 
   if (loading) return null
 

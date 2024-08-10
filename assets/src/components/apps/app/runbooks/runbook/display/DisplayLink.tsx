@@ -1,18 +1,19 @@
-import { Anchor, Text } from 'grommet'
+import { useTheme } from 'styled-components'
 
 import { recurse } from './misc'
 
 export function DisplayLink({ value, attributes, children }) {
+  const theme = useTheme()
   const val = value || attributes.value
 
   return (
-    <Anchor {...attributes}>
-      <Text
-        size="small"
+    <a {...attributes}>
+      <span
+        css={theme.partials.text.caption}
         {...attributes}
       >
         {val || recurse(children)}
-      </Text>
-    </Anchor>
+      </span>
+    </a>
   )
 }

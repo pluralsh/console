@@ -1,4 +1,3 @@
-import { Box } from 'grommet'
 import { Flex, P } from 'honorable'
 import {
   Button,
@@ -36,7 +35,10 @@ export function Profile() {
         maxHeight="100%"
         overflowY="auto"
       >
-        <Box gap="small">
+        <Flex
+          direction="column"
+          gap="small"
+        >
           <ValidatedInput
             label="Full name"
             width="100%"
@@ -54,7 +56,7 @@ export function Profile() {
                 : { error: true, message: 'Invalid email address' }
             }
           />
-        </Box>
+        </Flex>
         <Flex
           align="center"
           gap="medium"

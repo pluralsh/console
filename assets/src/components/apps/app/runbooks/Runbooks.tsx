@@ -5,8 +5,6 @@ import {
 } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { POLL_INTERVAL } from 'components/runbooks/constants'
-import { RUNBOOKS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
 import { A, Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
@@ -16,6 +14,9 @@ import { ListItem } from '../misc'
 
 import { getBorderColor } from './misc'
 import RunbookStatus from './runbook/RunbookStatus'
+import { RUNBOOKS_Q } from './queries'
+
+export const POLL_INTERVAL = 30 * 1000
 
 export default function Runbooks() {
   const navigate = useNavigate()

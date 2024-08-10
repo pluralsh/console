@@ -25,13 +25,7 @@ function doUpdate(prev, result) {
   }
 }
 
-export function LogsCard({
-  serviceId,
-  clusterId,
-  query,
-  addLabel,
-  fullscreen = false,
-}: any) {
+export function LogsCard({ serviceId, clusterId, query, addLabel }: any) {
   const [listRef, setListRef] = useState<any>(null)
   const [live, setLive] = useState(true)
   const [loader, setLoader] = useState<any>(null)
@@ -96,7 +90,6 @@ export function LogsCard({
             }
             onScroll={(arg) => setLive(!arg)}
             addLabel={addLabel}
-            fullscreen={fullscreen}
           />
         ) : (
           <LoadingIndicator />

@@ -1,12 +1,10 @@
 import { useEffect, useRef } from 'react'
 import gql from 'graphql-tag'
-import { Box } from 'grommet'
-import { Alert, AlertStatus } from 'forge-core'
 import { useLocation } from 'react-router'
 import qs from 'query-string'
 import { useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '@pluralsh/design-system'
+import { Button, Callout } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import { GqlError } from 'components/utils/Alert'
@@ -33,21 +31,13 @@ const CALLBACK = gql`
 function OAuthError({ error: { error, error_description: description } }: any) {
   return (
     <LoginPortal>
-      <Box gap="medium">
-        <Box
-          gap="xsmall"
-          align="center"
-        >
-          <Alert
-            status={AlertStatus.ERROR}
-            header={error}
-            description={
-              description ||
-              'You cannot log into this console instance, make sure your Plural user was added to its OIDC provider'
-            }
-          />
-        </Box>
-      </Box>
+      <Callout
+        severity="danger"
+        title={error}
+      >
+        {description ||
+          'You cannot log into this console instance, make sure your Plural user was added to its OIDC provider'}{' '}
+      </Callout>
     </LoginPortal>
   )
 }

@@ -5,7 +5,6 @@ import { useTransition } from 'react-spring'
 
 import styled from 'styled-components'
 
-import { useContentOverlay } from './Overlay'
 import { NotificationsPanel } from './NotificationsPanel'
 
 const PANEL_WIDTH = 480
@@ -59,8 +58,6 @@ export function NotificationsPanelOverlay({
 }) {
   const notificationsPanelRef = useRef<any>()
   const [all, setAll] = useState<boolean>(false)
-
-  useContentOverlay(isOpen)
 
   useOutsideClick(notificationsPanelRef, () => {
     setIsOpen(false)

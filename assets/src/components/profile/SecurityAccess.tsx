@@ -1,6 +1,5 @@
-import { Box } from 'grommet'
 import { A, Button, Div, P } from 'honorable'
-import { Code, ContentCard } from '@pluralsh/design-system'
+import { Code, ContentCard, Flex } from '@pluralsh/design-system'
 import { localized } from 'helpers/hostname'
 import { useLazyQuery } from '@apollo/client'
 import { TEMP_TOKEN_Q } from 'components/graphql/users'
@@ -12,9 +11,9 @@ export default function SecurityAccess() {
 
   return (
     <ContentCard overflowY="auto">
-      <Box
-        gap="medium"
-        fill
+      <Flex
+        flexDirection="column"
+        gap="large"
       >
         {error && (
           <GqlError
@@ -45,7 +44,7 @@ export default function SecurityAccess() {
           <Code showLineNumbers={false}>{data.temporaryToken}</Code>
         )}
         <P color="text-light">
-          <span>2. Have the recipent enter the code into&nbsp;</span>
+          <span>2. Have the recipient enter the code into&nbsp;</span>
           <A
             inline
             href={url}
@@ -55,7 +54,7 @@ export default function SecurityAccess() {
           </A>
           <span>.</span>
         </P>
-      </Box>
+      </Flex>
     </ContentCard>
   )
 }

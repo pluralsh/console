@@ -8,7 +8,7 @@ import {
   TabListStateProps,
   TabPanel,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import ProviderIcon from 'components/utils/Provider'
 import { Provider } from 'generated/graphql-plural'
 
@@ -50,27 +50,13 @@ export function RepoKindSelector({
         stateProps={tabListStateProps}
         css={{
           width: 'fit-content',
-          position: 'relative',
           borderRadius: theme.borderRadiuses.medium,
-          '&::after': {
-            pointerEvents: 'none',
-            content: '""',
-            outline: theme.borders.default,
-            position: 'absolute',
-            top: 0,
-            right: 0,
-            bottom: 0,
-            left: 0,
-            outlineOffset: -1,
-            borderRadius: theme.borderRadiuses.medium,
-          },
+          outline: theme.borders.default,
+          outlineOffset: -1,
         }}
       >
-        <SubTab
-          css={{
-            display: 'flex',
-            gap: theme.spacing.xsmall,
-          }}
+        <SelectorSubtabSC
+          $active={selectedKind === RepoKind.Git}
           key={RepoKind.Git}
           textValue={RepoKind.Git}
         >
@@ -82,12 +68,9 @@ export function RepoKindSelector({
               color={theme.colors['icon-success']}
             />
           )}
-        </SubTab>
-        <SubTab
-          css={{
-            display: 'flex',
-            gap: theme.spacing.xsmall,
-          }}
+        </SelectorSubtabSC>
+        <SelectorSubtabSC
+          $active={selectedKind === RepoKind.Helm}
           key={RepoKind.Helm}
           textValue={RepoKind.Helm}
         >
@@ -104,13 +87,10 @@ export function RepoKindSelector({
               color={theme.colors['icon-success']}
             />
           )}
-        </SubTab>
+        </SelectorSubtabSC>
         {enableFlux ? (
-          <SubTab
-            css={{
-              display: 'flex',
-              gap: theme.spacing.xsmall,
-            }}
+          <SelectorSubtabSC
+            $active={selectedKind === RepoKind.Flux}
             key={RepoKind.Flux}
             textValue={RepoKind.Flux}
           >
@@ -122,7 +102,7 @@ export function RepoKindSelector({
                 color={theme.colors['icon-success']}
               />
             )}
-          </SubTab>
+          </SelectorSubtabSC>
         ) : null}
       </TabList>
       <TabPanel
@@ -141,3 +121,13 @@ export function RepoKindSelector({
     </>
   )
 }
+
+const SelectorSubtabSC = styled(SubTab)<{ $active?: boolean }>(
+  ({ theme, $active }) => ({
+    display: 'flex',
+    gap: theme.spacing.xsmall,
+    outline: $active ? theme.borders.input : undefined,
+    outlineOffset: -1,
+    '&:focus': { outline: theme.borders.input },
+  })
+)

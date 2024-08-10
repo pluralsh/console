@@ -12,8 +12,7 @@ body {
   overflow: auto hidden;
 }
 
-#root,
-.grommet-root {
+#root {
   align-items: stretch;
   display: flex;
   flex-direction: column;

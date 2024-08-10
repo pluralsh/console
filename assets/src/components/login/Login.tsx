@@ -1,8 +1,7 @@
-import { RefObject, useEffect, useMemo, useRef, useState } from 'react'
+import { RefObject, useEffect, useRef, useState } from 'react'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
 import { Div, Flex, Form, P } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
-import { Box } from 'grommet'
 import { v4 as uuidv4 } from 'uuid'
 import gql from 'graphql-tag'
 import { IntercomProps, useIntercom } from 'react-use-intercom'
@@ -11,6 +10,8 @@ import { WelcomeHeader } from 'components/utils/WelcomeHeader'
 import { isValidEmail } from 'utils/email'
 import { User, useMeQuery } from 'generated/graphql'
 import { useHelpSpacing } from 'components/help/HelpLauncher'
+
+import { useTheme } from 'styled-components'
 
 import { GqlError } from '../utils/Alert'
 import {
@@ -21,7 +22,6 @@ import {
 } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
 import { ME_Q, SIGNIN } from '../graphql/users'
-import { IncidentContext } from '../incidents/context'
 import { LabelledInput } from '../utils/LabelledInput'
 import { LoginContextProvider } from '../contexts'
 import { LoginPortal } from '../login/LoginPortal'
@@ -195,12 +195,6 @@ export function EnsureLogin({ children }) {
 
   const loginContextValue = data
 
-  const incidentContextValue = useMemo(() => {
-    const { __typename: _, ...clusterInformation } = data?.clusterInfo || {}
-
-    return { clusterInformation }
-  }, [data?.clusterInfo])
-
   if (error || (!loading && !data?.clusterInfo)) {
     return <LoginError error={error} />
   }
@@ -208,11 +202,9 @@ export function EnsureLogin({ children }) {
   if (!data?.clusterInfo) return null
 
   return (
-    <IncidentContext.Provider value={incidentContextValue}>
-      <LoginContextProvider value={loginContextValue}>
-        {children}
-      </LoginContextProvider>
-    </IncidentContext.Provider>
+    <LoginContextProvider value={loginContextValue}>
+      {children}
+    </LoginContextProvider>
   )
 }
 
@@ -252,6 +244,7 @@ function OIDCLogin({ oidcUri, external, oidcName }) {
 }
 
 export default function Login() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '' })
   const emailRef = useRef<any>()
@@ -306,9 +299,13 @@ export default function Login() {
     <LoginPortal>
       <WelcomeHeader marginBottom="xlarge" />
       <Form onSubmit={onSubmit}>
-        <Box
-          margin={{ bottom: '10px' }}
-          gap="xsmall"
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            marginBottom: 10,
+            gap: theme.spacing.xsmall,
+          }}
         >
           {loginMError && (
             <Div marginBottom="large">
@@ -350,7 +347,7 @@ export default function Login() {
           >
             Log in
           </Button>
-        </Box>
+        </div>
       </Form>
     </LoginPortal>
   )

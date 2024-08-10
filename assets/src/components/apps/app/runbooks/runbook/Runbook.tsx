@@ -20,8 +20,6 @@ import { Div, Flex, H3 } from 'honorable'
 
 import { DURATIONS, SECOND_TO_MILLISECONDS } from 'utils/time'
 
-import { RUNBOOKS_Q, RUNBOOK_Q } from 'components/runbooks/queries'
-
 import { RunbookDisplay } from 'components/apps/app/runbooks/runbook/RunbookDisplay'
 
 import { RunbookExecutions } from 'components/apps/app/runbooks/runbook/RunbookExecutions'
@@ -36,6 +34,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import RangePicker from '../../../../utils/RangePicker'
 import { PageTitleSelectButton } from '../../../../utils/PageTitleSelectButton'
+
+import { RUNBOOKS_Q, RUNBOOK_Q } from '../queries'
 
 import { RunbookAlerts } from './RunbookAlerts'
 

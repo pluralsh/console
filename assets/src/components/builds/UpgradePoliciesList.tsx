@@ -1,5 +1,5 @@
 import { useQuery } from '@apollo/client'
-import { ArrowLeftIcon, Button, Card } from '@pluralsh/design-system'
+import { Accordion, ArrowLeftIcon, Button } from '@pluralsh/design-system'
 import { UPGRADE_POLICIES } from 'components/graphql/builds'
 import { Flex } from 'honorable'
 import { isEmpty } from 'lodash'
@@ -23,10 +23,12 @@ export default function UpgradePoliciesList() {
   return (
     <>
       {!isEmpty(upgradePolicies) ? (
-        <Card
-          fillLevel={2}
-          maxHeight={300}
-          overflowY="auto"
+        <Accordion
+          type="multiple"
+          css={{
+            maxHeight: 300,
+            overflowY: 'auto',
+          }}
         >
           {upgradePolicies.map((policy, i) => (
             <UpgradePolicy
@@ -35,7 +37,7 @@ export default function UpgradePoliciesList() {
               last={i === upgradePolicies.length - 1}
             />
           ))}
-        </Card>
+        </Accordion>
       ) : (
         'No upgrade policies available.'
       )}

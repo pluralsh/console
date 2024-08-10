@@ -1,12 +1,12 @@
 import {
+  Accordion,
+  AccordionItem,
   AppIcon,
   Card,
   CardProps,
   Chip,
-  CollapseIcon,
   WarningIcon,
 } from '@pluralsh/design-system'
-import { Collapsible } from 'grommet'
 import capitalize from 'lodash/capitalize'
 import moment from 'moment'
 import { ComponentProps, PropsWithChildren, useState } from 'react'
@@ -87,7 +87,6 @@ const RunbookAlertWrapper = styled.div<{ $isOpen: boolean }>(
       align: 'center',
       color: 'inherit',
       cursor: 'pointer',
-      padding: theme.spacing.medium,
       textDecoration: 'none',
       width: '100%',
       ':hover': { backgroundColor: theme.colors['fill-one-hover'] },
@@ -154,81 +153,68 @@ export default function RunbookAlert({ alert }: { alert: RunbookAlertStatus }) {
 
   return (
     <RunbookAlertWrapper $isOpen={isOpen}>
-      <div
-        className="trigger"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <AppIcon
-          icon={
-            <WarningIcon
-              size={16}
-              color="icon-warning"
-            />
-          }
-          size="xxsmall"
-        />
-        <div className="info">
-          <div className="nameDate">
-            <h5 className="name">{name}</h5>
-            <p className="date">
-              {moment(startsAt).format('MMM D, YYYY h:mm')}
-            </p>
-          </div>
-          <div className="summary" />
-        </div>
-        {severity && (
-          <AlertSeverity
-            className="severity"
-            severity={severity as any}
-          />
-        )}
-        <CollapseIcon
-          marginLeft="8px"
-          size={8}
-          style={
-            isOpen
-              ? {
-                  transform: 'rotate(270deg)',
-                  transitionDuration: '.2s',
-                  transitionProperty: 'transform',
+      <Accordion type="single">
+        <AccordionItem
+          trigger={
+            <div
+              className="trigger"
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <AppIcon
+                icon={
+                  <WarningIcon
+                    size={16}
+                    color="icon-warning"
+                  />
                 }
-              : {
-                  transform: 'rotate(180deg)',
-                  transitionDuration: '.2s',
-                  transitionProperty: 'transform',
-                }
+                size="xxsmall"
+              />
+              <div className="info">
+                <div className="nameDate">
+                  <h5 className="name">{name}</h5>
+                  <p className="date">
+                    {moment(startsAt).format('MMM D, YYYY h:mm')}
+                  </p>
+                </div>
+                <div className="summary" />
+              </div>
+              {severity && (
+                <AlertSeverity
+                  className="severity"
+                  severity={severity as any}
+                />
+              )}
+            </div>
           }
-        />
-      </div>
-      <Collapsible
-        open={isOpen}
-        direction="vertical"
-      >
-        <div className="collapsible">
-          {name && <ExpandedItem heading="name">{name}</ExpandedItem>}
-          {annotations?.summary && (
-            <ExpandedItem heading="summary">{annotations.summary}</ExpandedItem>
-          )}
-          {annotations?.description && (
-            <ExpandedItem heading="description">
-              {annotations.description}
-            </ExpandedItem>
-          )}
+        >
+          <div className="collapsible">
+            {name && <ExpandedItem heading="name">{name}</ExpandedItem>}
+            {annotations?.summary && (
+              <ExpandedItem heading="summary">
+                {annotations.summary}
+              </ExpandedItem>
+            )}
+            {annotations?.description && (
+              <ExpandedItem heading="description">
+                {annotations.description}
+              </ExpandedItem>
+            )}
 
-          {labels && (
-            <ExpandedItem heading="labels">
-              <ChipList>
-                {Object.entries(labels).map(([key, val]) => (
-                  <Chip>{`${key}: ${val}`}</Chip>
-                ))}
-              </ChipList>
-            </ExpandedItem>
-          )}
-          {true && (
-            <ExpandedItem heading="fingerprint">{fingerprint}</ExpandedItem>
-          )}
-        </div>
-      </Collapsible>
+            {labels && (
+              <ExpandedItem heading="labels">
+                <ChipList>
+                  {Object.entries(labels).map(([key, val]) => (
+                    <Chip>{`${key}: ${val}`}</Chip>
+                  ))}
+                </ChipList>
+              </ExpandedItem>
+            )}
+            {true && (
+              <ExpandedItem heading="fingerprint">{fingerprint}</ExpandedItem>
+            )}
+          </div>
+        </AccordionItem>
+      </Accordion>
     </RunbookAlertWrapper>
   )
 }

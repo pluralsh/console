@@ -3,7 +3,6 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { Flex } from 'honorable'
 import { useCallback, useMemo } from 'react'
 import update from 'lodash/update'
-import { RUNBOOK_EXECUTIONS_Q } from 'components/runbooks/queries'
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
 import { isEmpty } from 'lodash'
@@ -12,6 +11,7 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { FullHeightTableWrap } from '../../../../utils/layout/FullHeightTableWrap'
+import { RUNBOOK_EXECUTIONS_Q } from '../queries'
 
 const columnHelper = createColumnHelper<any>()
 
