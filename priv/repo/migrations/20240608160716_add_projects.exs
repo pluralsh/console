@@ -1,6 +1,8 @@
 defmodule Console.Repo.Migrations.AddProjects do
-  use Ecto.Migration
+  use Console.Migration
   alias Console.Deployments.Settings
+
+  @disable_ddl_transaction true
 
   def change do
     create table(:projects, primary_key: false) do

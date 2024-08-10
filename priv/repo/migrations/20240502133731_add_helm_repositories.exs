@@ -1,5 +1,7 @@
 defmodule Console.Repo.Migrations.AddHelmRepositories do
-  use Ecto.Migration
+  use Console.Migration
+
+  @disable_ddl_transaction true
 
   def change do
     create table(:helm_repositories, primary_key: false) do
@@ -20,19 +22,19 @@ defmodule Console.Repo.Migrations.AddHelmRepositories do
       add :enforcement, :integer
     end
 
+    drop_if_exists constraint(:service_templates, :service_templates_repository_id_fkey)
     alter table(:service_templates) do
-      modify :repository_id, references(:git_repositories, type: :uuid, on_delete: :delete_all),
-        from: references(:git_repositories, type: :uuid)
+      modify :repository_id, references(:git_repositories, type: :uuid, on_delete: :delete_all)
     end
 
+    drop_if_exists constraint(:global_services, :global_services_template_id_fkey)
     alter table(:global_services) do
-      modify :template_id, references(:service_templates, type: :uuid),
-        from: references(:service_templates, type: :uuid, on_delete: :delete_all)
+      modify :template_id, references(:service_templates, type: :uuid)
     end
 
+    drop_if_exists constraint(:managed_namespaces, :managed_namespaces_service_id_fkey)
     alter table(:managed_namespaces) do
-      modify :service_id, references(:service_templates, type: :uuid),
-        from: references(:service_templates, type: :uuid, on_delete: :delete_all)
+      modify :service_id, references(:service_templates, type: :uuid)
     end
   end
 end

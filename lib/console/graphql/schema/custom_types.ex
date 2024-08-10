@@ -34,6 +34,19 @@ defmodule Console.GraphQl.CustomTypes do
     end
   end
 
+  scalar :intish, name: "Intish" do
+    serialize fn
+      %Decimal{} = d -> Decimal.to_integer(d)
+      v when is_integer(v) -> v
+      _ -> :error
+    end
+
+    parse fn
+      %Blueprint.Input.Integer{value: v} -> {:ok, v}
+      _ -> :error
+    end
+  end
+
   defp mapish(m) when is_map(m), do: m
   defp mapish(m) when is_binary(m), do: Jason.decode!(m)
   defp mapish(_), do: :error

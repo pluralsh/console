@@ -1,4 +1,5 @@
 import Config
+import System, only: [get_env: 1]
 
 config :console, Console.Repo,
   username: "postgres",
@@ -6,6 +7,18 @@ config :console, Console.Repo,
   database: "watchman_test",
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
+
+if get_env("USE_COCKROACH") do
+  config :console, Console.Repo,
+    url: "postgresql://plrl:plural@localhost:26257/plural",
+    ssl: true,
+    ssl_opts: [cacertfile: "../plural/test-certs/client.root.crt"],
+    pool: Ecto.Adapters.SQL.Sandbox,
+    migration_lock: false
+
+  config :console,
+    cockroached: true
+end
 
 config :console, ConsoleWeb.Endpoint,
   http: [port: 4002],

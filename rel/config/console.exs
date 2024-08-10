@@ -74,6 +74,11 @@ else
     pool_size: 10
 end
 
+if get_env("MIGRATION_LOCK") == "false" do
+  config :console, Console.Repo,
+    migration_lock: false
+end
+
 git_url = get_env("GIT_URL")
 
 add_https = fn
@@ -105,7 +110,8 @@ config :console,
   cloud: get_env("CONSOLE_CLOUD") == "true",
   byok: get_env("CONSOLE_BYOK") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
-  oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME")
+  oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME"),
+  cockroached: get_env("MIGRATION_LOCK") == "false"
 
 if git_url && String.starts_with?(git_url, "https") do
   config :console,

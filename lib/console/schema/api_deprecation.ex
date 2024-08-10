@@ -32,7 +32,7 @@ defmodule Console.Schema.ApiDeprecation do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
-    |> unique_constraint(:component_id)
+    |> unique_constraint(:component_id, match: :prefix)
     |> validate_required([:component_id])
   end
 end
