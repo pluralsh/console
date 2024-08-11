@@ -285,11 +285,11 @@ defmodule Console.Deployments.Git do
     end
   end
 
-  defp prep(pr, %User{} = user, identifier) when is_binary(identifier) do
+  defp prep(pr, %User{} = user, identifier) when is_binary(identifier) and byte_size(identifier) > 0 do
     prep(pr, user, nil)
     |> Map.put(:identifier, identifier)
   end
-  defp prep(pr, %User{} = user, nil), do: put_in(pr.connection.author, user)
+  defp prep(pr, %User{} = user, _), do: put_in(pr.connection.author, user)
 
   @doc """
   Create a pull request record if a user has permissions

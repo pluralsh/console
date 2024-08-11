@@ -24,7 +24,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: console-kas-service
+            name: {{ .Release.Name }}-kas-service
             port:
               number: 8180
       {{ if .Values.dashboard.enabled }}
