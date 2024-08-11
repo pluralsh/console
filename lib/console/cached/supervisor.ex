@@ -18,6 +18,10 @@ defmodule Console.Cached.Supervisor do
       # Console.Cached.Secret,
     ]
 
-    Supervisor.init(children, strategy: :one_for_one, max_restarts: 15)
+    filter(children, Console.conf(:nowatchers))
+    |> Supervisor.init(strategy: :one_for_one, max_restarts: 15)
   end
+
+  defp filter(_, true), do: [Console.Cached.ClusterNodes]
+  defp filter(children, _), do: children
 end
