@@ -105,6 +105,7 @@ config :console,
   cloud: get_env("CONSOLE_CLOUD") == "true",
   byok: get_env("CONSOLE_BYOK") == "true",
   airgap: get_env("CONSOLE_AIRGAP") == "true",
+  nowatchers: get_env("CONSOLE_NOWATCHERS") == "true",
   oidc_name: get_env("CONSOLE_OIDC_LOGIN_NAME")
 
 if git_url && String.starts_with?(git_url, "https") do
