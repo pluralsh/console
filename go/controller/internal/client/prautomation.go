@@ -3,9 +3,10 @@ package client
 import (
 	"context"
 
-	console "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func (c *client) CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes) (*console.PrAutomationFragment, error) {
@@ -84,6 +85,6 @@ func (c *client) IsPrAutomationExistsByName(ctx context.Context, name string) (b
 	return automation != nil, err
 }
 
-func (c *client) CreatePullRequest(ctx context.Context, prAutomationID string, branch *string, context *string) (*console.CreatePullRequest, error) {
-	return c.consoleClient.CreatePullRequest(ctx, prAutomationID, nil, branch, context)
+func (c *client) CreatePullRequest(ctx context.Context, prAutomationID string, identifier, branch, context *string) (*console.CreatePullRequest, error) {
+	return c.consoleClient.CreatePullRequest(ctx, prAutomationID, identifier, branch, context)
 }

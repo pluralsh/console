@@ -92,7 +92,7 @@ type ConsoleClient interface {
 	GetServiceContext(name string) (*console.ServiceContextFragment, error)
 	GetPipelineContext(ctx context.Context, id string) (*console.PipelineContextFragment, error)
 	CreatePipelineContext(ctx context.Context, pipelineID string, attributes console.PipelineContextAttributes) (*console.CreatePipelineContext, error)
-	CreatePullRequest(ctx context.Context, prAutomationID string, branch *string, context *string) (*console.CreatePullRequest, error)
+	CreatePullRequest(ctx context.Context, prAutomationID string, identifier, branch, context *string) (*console.CreatePullRequest, error)
 	GetNotificationSink(ctx context.Context, id string) (*console.NotificationSinkFragment, error)
 	DeleteNotificationSink(ctx context.Context, id string) error
 	UpsertNotificationSink(ctx context.Context, attr console.NotificationSinkAttributes) (*console.NotificationSinkFragment, error)
