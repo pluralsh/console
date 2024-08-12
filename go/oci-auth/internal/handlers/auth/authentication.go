@@ -34,10 +34,9 @@ type AWSCredentials struct {
 }
 
 type AzureCredentials struct {
-	SubscriptionID *string `json:"subscriptionID,omitempty"`
-	TenantID       *string `json:"tenantID,omitempty"`
-	ClientID       *string `json:"clientID,omitempty"`
-	ClientSecret   *string `json:"clientSecret,omitempty"`
+	TenantID     string `json:"tenantID"`
+	ClientID     string `json:"clientID"`
+	ClientSecret string `json:"clientSecret"`
 }
 
 type GCPCredentials struct {
@@ -68,7 +67,7 @@ func authenticate(ctx context.Context, request *AuthenticationRequest) (*Authent
 	case AWS:
 		return authenticateAWS(ctx, request.AWS)
 	case Azure:
-		return authenticateAzure(ctx, request.Azure)
+		return authenticateAzure(ctx, request.URL, request.Azure)
 	case GCP:
 		return authenticateGCP(ctx, request.URL, ref, request.GCP)
 	case Basic:
