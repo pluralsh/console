@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	router.RootGroup().GET("/auth", handleAuth)
+	router.RootGroup().POST("/auth", handleAuth)
 }
 
 func handleAuth(c *gin.Context) {
