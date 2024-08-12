@@ -97,13 +97,12 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
   id: 'repository',
   header: 'Repository',
   meta: { truncate: true, gridTemplate: 'minmax(180px,0.65fr)' },
-  cell: ({ getValue }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+  cell: function Cell({ getValue }) {
     const theme = useTheme()
     const svc = getValue()
     const git = svc?.repository
-    const helm = svc?.helmRepository
-    const url = helm?.spec?.url || git?.url || ''
+    const helmUrl = svc?.helm?.url || svc?.helmRepository?.spec?.url
+    const url = helmUrl || git?.url || ''
 
     return (
       <Tooltip
@@ -114,7 +113,11 @@ export const ColRepo = columnHelper.accessor(({ node }) => node, {
           <ColWithIcon
             truncateLeft
             icon={
-              helm ? getProviderIconUrl('byok', theme.mode) : <GitHubLogoIcon />
+              helmUrl ? (
+                getProviderIconUrl('byok', theme.mode)
+              ) : (
+                <GitHubLogoIcon />
+              )
             }
           >
             <span>{url}</span>
