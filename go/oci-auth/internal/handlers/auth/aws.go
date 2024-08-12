@@ -52,8 +52,8 @@ func getConfig(ctx context.Context, credentials *AWSCredentials) (*awssdk.Config
 		return nil, err
 	}
 
-	if credentials.AccessKeyID != nil && credentials.SecretAccessKey != nil {
-		config.Credentials = awscreds.NewStaticCredentialsProvider(*credentials.AccessKeyID, *credentials.SecretAccessKey, "")
+	if credentials.AccessKeyID != nil && credentials.SecretAccessKey != nil && credentials.SessionToken != nil {
+		config.Credentials = awscreds.NewStaticCredentialsProvider(*credentials.AccessKeyID, *credentials.SecretAccessKey, *credentials.SessionToken)
 	}
 
 	if credentials.AssumeRoleARN != nil {

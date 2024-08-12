@@ -29,6 +29,7 @@ type AuthenticationRequest struct {
 type AWSCredentials struct {
 	AccessKeyID     *string `json:"accessKeyID,omitempty"`
 	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+	SessionToken    *string `json:"sessionToken,omitempty"`
 	AssumeRoleARN   *string `json:"assumeRoleARN,omitempty"`
 }
 
