@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/google/go-containerregistry/pkg/authn"
-	"github.com/google/go-containerregistry/pkg/name"
 )
 
 type Provider string
@@ -40,7 +39,7 @@ type AzureCredentials struct {
 }
 
 type GCPCredentials struct {
-	ApplicationCredentials *string `json:"applicationCredentials,omitempty"`
+	ApplicationCredentials string `json:"applicationCredentials"`
 }
 
 type BasicCredentials struct {
@@ -58,18 +57,13 @@ func authenticate(ctx context.Context, request *AuthenticationRequest) (*Authent
 		return nil, fmt.Errorf("request cannot be nil")
 	}
 
-	ref, err := name.ParseReference(request.URL)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse reference from %s url: %w", request.URL, err)
-	}
-
 	switch request.Provider {
 	case AWS:
 		return authenticateAWS(ctx, request.AWS)
 	case Azure:
 		return authenticateAzure(ctx, request.URL, request.Azure)
 	case GCP:
-		return authenticateGCP(ctx, request.URL, ref, request.GCP)
+		return authenticateGCP(ctx, request.URL, request.GCP)
 	case Basic:
 		return authenticateBasic(request.Basic)
 	}

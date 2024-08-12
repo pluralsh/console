@@ -2,35 +2,62 @@ package auth
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 
 	"github.com/fluxcd/pkg/oci/auth/gcp"
+	"github.com/google/go-containerregistry/pkg/authn"
 	"github.com/google/go-containerregistry/pkg/name"
 )
 
-func authenticateGCP(ctx context.Context, url string, ref name.Reference, credentials *GCPCredentials) (*AuthenticationResponse, error) {
-	// Use default credentials if no credentials found in the request.
-	if credentials == nil {
-		auth, expiry, err := gcp.NewClient().LoginWithExpiry(ctx, true, url, ref)
-		if err != nil {
-			return nil, err
-		}
+const (
+	jsonKeyUsername        = "_json_key"
+	jsonKeyEncodedUsername = "_json_key_base64"
+)
 
-		cfg, err := auth.Authorization()
-		if err != nil {
-			return nil, err
-		}
-		if cfg == nil {
-			return nil, fmt.Errorf("no authorization configuration found")
-		}
-
+func authenticateGCP(ctx context.Context, url string, credentials *GCPCredentials) (*AuthenticationResponse, error) {
+	// If credentials are provided in the request, then use them.
+	if credentials != nil {
 		return &AuthenticationResponse{
-			AuthConfig: *cfg,
-			Expiry:     &expiry,
+			AuthConfig: authn.AuthConfig{
+				Username: GetUsername(credentials.ApplicationCredentials),
+				Password: credentials.ApplicationCredentials,
+			},
+			Expiry: nil,
 		}, nil
 	}
 
-	// TODO: Use service account as password: https://cloud.google.com/artifact-registry/docs/docker/authentication#json-key.
+	// Otherwise use default credentials.
+	ref, err := name.ParseReference(url)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse reference from %s url: %w", url, err)
+	}
 
-	return nil, nil
+	auth, expiry, err := gcp.NewClient().LoginWithExpiry(ctx, true, url, ref)
+	if err != nil {
+		return nil, err
+	}
+
+	cfg, err := auth.Authorization()
+	if err != nil {
+		return nil, err
+	}
+	if cfg == nil {
+		return nil, fmt.Errorf("no authorization configuration found")
+	}
+
+	return &AuthenticationResponse{
+		AuthConfig: *cfg,
+		Expiry:     &expiry,
+	}, nil
+}
+
+// See: https://cloud.google.com/artifact-registry/docs/docker/authentication#json-key
+func GetUsername(applicationCredentials string) string {
+	_, err := base64.StdEncoding.DecodeString(applicationCredentials)
+	if err == nil {
+		return jsonKeyEncodedUsername
+	}
+
+	return jsonKeyUsername
 }
