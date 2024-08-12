@@ -18,8 +18,16 @@ package controller
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -29,12 +37,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/yaml"
-
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -48,6 +50,7 @@ type DeploymentSettingsReconciler struct {
 	Scheme           *runtime.Scheme
 	ConsoleClient    consoleclient.ConsoleClient
 	CredentialsCache credentials.NamespaceCredentialsCache
+	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=deploymentsettings,verbs=get;list;watch;create;update;patch;delete
@@ -113,6 +116,9 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 		attr, err := r.genDeploymentSettingsAttr(ctx, settings)
 		if err != nil {
 			utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			if goerrors.Is(err, operrors.ErrRetriable) {
+				return requeue, nil
+			}
 			return ctrl.Result{}, err
 		}
 		_, err = r.ConsoleClient.UpdateDeploymentSettings(ctx, *attr)
@@ -179,10 +185,51 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		}
 	}
 	if settings.Spec.Bindings != nil {
+		if err := r.ensure(settings); err != nil {
+			return nil, err
+		}
 		attr.ReadBindings = policyBindings(settings.Spec.Bindings.Read)
 		attr.WriteBindings = policyBindings(settings.Spec.Bindings.Write)
 		attr.CreateBindings = policyBindings(settings.Spec.Bindings.Create)
 		attr.GitBindings = policyBindings(settings.Spec.Bindings.Git)
 	}
 	return attr, nil
+}
+
+// ensure makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (r *DeploymentSettingsReconciler) ensure(settings *v1alpha1.DeploymentSettings) error {
+	if settings.Spec.Bindings == nil {
+		return nil
+	}
+
+	bindings, req, err := ensureBindings(settings.Spec.Bindings.Read, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	settings.Spec.Bindings.Read = bindings
+
+	bindings, req2, err := ensureBindings(settings.Spec.Bindings.Write, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	settings.Spec.Bindings.Write = bindings
+
+	bindings, req3, err := ensureBindings(settings.Spec.Bindings.Create, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	settings.Spec.Bindings.Create = bindings
+
+	bindings, req4, err := ensureBindings(settings.Spec.Bindings.Git, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	settings.Spec.Bindings.Git = bindings
+
+	if req || req2 || req3 || req4 {
+		return operrors.ErrRetriable
+	}
+
+	return nil
 }
