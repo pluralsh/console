@@ -21,6 +21,7 @@ func handleAuth(c *gin.Context) {
 	response, err := authenticate(c.Request.Context(), request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, response)
