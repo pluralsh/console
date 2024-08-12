@@ -111,7 +111,7 @@ func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.
 	}
 	// Check if resource already exists in the API and only sync the ID
 	if !isAlreadyExists(trigger) || !trigger.Status.IsSHAEqual(sha) {
-		pr, err := r.ConsoleClient.CreatePullRequest(ctx, prAutomation.Status.GetID(), prAutomation.Spec.Identifier, prAutomation.Spec.Branch, lo.ToPtr(string(trigger.Spec.Context.Raw)))
+		pr, err := r.ConsoleClient.CreatePullRequest(ctx, prAutomation.Status.GetID(), prAutomation.Spec.Identifier, lo.ToPtr(trigger.Spec.Branch), lo.ToPtr(string(trigger.Spec.Context.Raw)))
 		if err != nil {
 			utils.MarkCondition(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
