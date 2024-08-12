@@ -20,7 +20,7 @@ func handleAuth(c *gin.Context) {
 
 	response, err := authenticate(c.Request.Context(), request)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, err)
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 
