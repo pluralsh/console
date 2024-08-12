@@ -33,7 +33,9 @@ import (
 	"path"
 )
 
-// ExchangeACRAccessToken exchanges an ARM access token to an ACR access token.
+const defaultCacheExpirationInSeconds = 600
+
+// ExchangeACRAccessToken exchanges an ARM access token to an ACR access token
 func ExchangeACRAccessToken(endpoint, accessToken string) (string, error) {
 	exchangeURL, err := url.Parse(endpoint)
 	if err != nil {
