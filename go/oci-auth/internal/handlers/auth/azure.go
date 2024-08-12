@@ -8,7 +8,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/msi-acrpull/pkg/authorizer/types"
 )
 
 func authenticateAzure(ctx context.Context, url string, credentials *AzureCredentials) (*AuthenticationResponse, error) {
@@ -17,7 +16,7 @@ func authenticateAzure(ctx context.Context, url string, credentials *AzureCreden
 		return nil, err
 	}
 
-	_, _ = NewTokenExchanger().ExchangeACRAccessToken(types.AccessToken(accessToken.Token), "") // TODO
+	_, _ = ExchangeACRAccessToken(url, accessToken.Token)
 
 	return nil, nil
 }
