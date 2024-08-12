@@ -59,7 +59,7 @@ func authenticate(ctx context.Context, request *AuthenticationRequest) (*Authent
 
 	switch request.Provider {
 	case AWS:
-		return authenticateAWS(ctx, request.AWS)
+		return authenticateAWS(ctx, request.URL, request.AWS)
 	case Azure:
 		return authenticateAzure(ctx, request.URL, request.Azure)
 	case GCP:
