@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
@@ -14,12 +15,18 @@ import (
 )
 
 func authenticateAzure(ctx context.Context, url string, credentials *AzureCredentials) (*AuthenticationResponse, error) {
-	accessToken, err := getAccessToken(ctx, url, credentials)
+	split := strings.SplitN(url, "/", 2)
+	if len(split) < 1 {
+		return nil, fmt.Errorf("invalid URL: %s", url)
+	}
+	endpoint := fmt.Sprintf("https://%s", split[0])
+
+	accessToken, err := getAccessToken(ctx, endpoint, credentials)
 	if err != nil {
 		return nil, err
 	}
 
-	acrAccessToken, err := ExchangeACRAccessToken(url, accessToken.Token)
+	acrAccessToken, err := ExchangeACRAccessToken(endpoint, accessToken.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -34,8 +41,8 @@ func authenticateAzure(ctx context.Context, url string, credentials *AzureCreden
 	}, nil
 }
 
-func getAccessToken(ctx context.Context, url string, credentials *AzureCredentials) (azcore.AccessToken, error) {
-	cloudCfg := getCloudConfiuration(url)
+func getAccessToken(ctx context.Context, endpoint string, credentials *AzureCredentials) (azcore.AccessToken, error) {
+	cloudCfg := getCloudConfiuration(endpoint)
 	options := policy.TokenRequestOptions{
 		Scopes: []string{cloudCfg.Services[cloud.ResourceManager].Endpoint + "/" + ".default"},
 	}
@@ -59,12 +66,12 @@ func getAccessToken(ctx context.Context, url string, credentials *AzureCredentia
 	return cred.GetToken(ctx, options)
 }
 
-func getCloudConfiuration(url string) cloud.Configuration {
-	if strings.HasSuffix(url, ".azurecr.cn") {
+func getCloudConfiuration(endpoint string) cloud.Configuration {
+	if strings.HasSuffix(endpoint, ".azurecr.cn") {
 		return cloud.AzureChina
 	}
 
-	if strings.HasSuffix(url, ".azurecr.us") {
+	if strings.HasSuffix(endpoint, ".azurecr.us") {
 		return cloud.AzureGovernment
 	}
 
