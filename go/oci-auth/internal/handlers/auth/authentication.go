@@ -66,7 +66,7 @@ func authenticate(ctx context.Context, request *AuthenticationRequest) (*Authent
 		return authenticateGCP(ctx, request.URL, request.GCP)
 	case Basic:
 		return authenticateBasic(request.Basic)
+	default:
+		return nil, fmt.Errorf("unknown auth provider: %q", request.Provider)
 	}
-
-	return nil, nil
 }
