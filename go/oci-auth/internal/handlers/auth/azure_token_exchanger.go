@@ -33,21 +33,7 @@ import (
 	"path"
 )
 
-type tokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token"`
-	Resource     string `json:"resource"`
-	TokenType    string `json:"token_type"`
-}
-
-func closeResponse(resp *http.Response) {
-	if resp == nil {
-		return
-	}
-	resp.Body.Close()
-}
-
-// ExchangeACRAccessToken exchanges an ARM access token to an ACR access token
+// ExchangeACRAccessToken exchanges an ARM access token to an ACR access token.
 func ExchangeACRAccessToken(endpoint, accessToken string) (string, error) {
 	exchangeURL, err := url.Parse(endpoint)
 	if err != nil {
@@ -60,26 +46,31 @@ func ExchangeACRAccessToken(endpoint, accessToken string) (string, error) {
 	parameters.Add("service", exchangeURL.Hostname())
 	parameters.Add("access_token", accessToken)
 
-	resp, err := http.PostForm(exchangeURL.String(), parameters)
+	response, err := http.PostForm(exchangeURL.String(), parameters)
 	if err != nil {
 		return "", fmt.Errorf("failed to send token exchange request: %w", err)
 	}
-	defer closeResponse(resp)
+	defer response.Body.Close()
 
-	responseBytes, err := io.ReadAll(resp.Body)
+	responseBody, err := io.ReadAll(response.Body)
 	if err != nil {
 		return "", fmt.Errorf("failed to read request body: %w", err)
 	}
 
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("ACR token exchange endpoint returned error status: %d. body: %s", resp.StatusCode, string(responseBytes))
+	if response.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("ACR token exchange endpoint returned error status: %d, response: %s", response.StatusCode, string(responseBody))
 	}
 
-	var tokenResp tokenResponse
-	err = json.Unmarshal(responseBytes, &tokenResp)
+	var tokenResponse struct {
+		AccessToken  string `json:"access_token"`
+		RefreshToken string `json:"refresh_token"`
+		Resource     string `json:"resource"`
+		TokenType    string `json:"token_type"`
+	}
+	err = json.Unmarshal(responseBody, &tokenResponse)
 	if err != nil {
-		return "", fmt.Errorf("failed to read token exchange response: %w. response: %s", err, string(responseBytes))
+		return "", fmt.Errorf("failed to read token exchange response: %w, response: %s", err, string(responseBody))
 	}
 
-	return tokenResp.RefreshToken, nil
+	return tokenResponse.RefreshToken, nil
 }
