@@ -1417,8 +1417,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to source PrAutomation. |  | Optional: {} <br /> |
-| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a PrAutomation context |  |  |
+| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef pointing to source [PrAutomation] |  | Optional: {} <br /> |
+| `branch` _string_ | Branch that should be created against [PrAutomation] base branch |  | Required: {} <br /> |
+| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a [PrAutomation] configuration context |  | Optional: {} <br /> |
 
 
 #### PrAutomationUpdateConfiguration
