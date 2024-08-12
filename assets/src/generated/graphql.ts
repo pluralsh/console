@@ -4387,6 +4387,8 @@ export type RootMutationType = {
   kickService?: Maybe<ServiceDeployment>;
   /** refresh the source repo of this stack, and potentially create a fresh run */
   kickStack?: Maybe<StackRun>;
+  /** refresh the source repo of this stack, and potentially create a fresh run for this pr */
+  kickStackPullRequest?: Maybe<StackRun>;
   loginLink?: Maybe<User>;
   logout?: Maybe<User>;
   markRead?: Maybe<User>;
@@ -4941,6 +4943,11 @@ export type RootMutationTypeKickServiceArgs = {
 
 
 export type RootMutationTypeKickStackArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeKickStackPullRequestArgs = {
   id: Scalars['ID']['input'];
 };
 

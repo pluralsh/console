@@ -33,7 +33,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   Fully creates a pr against the working dispatcher implementation
   """
   @spec create(PrAutomation.t, binary, map) :: pr_resp
-  def create(%PrAutomation{} = pr, branch, ctx) do
+  def create(%PrAutomation{} = pr, branch, ctx) when is_binary(branch) do
     %PrAutomation{connection: conn} = pr = Repo.preload(pr, [:connection, :repository])
     impl = dispatcher(conn)
     with {:ok, conn} <- setup(%{conn | branch: pr.branch}, pr.identifier, branch),
@@ -45,6 +45,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
          {:ok, _} <- push(conn, branch),
       do: impl.create(%{pr | branch: conn.branch}, branch, ctx)
   end
+  def create(_, _, _), do: {:error, "no branch specified for this pr"}
 
   def webhook(%ScmConnection{} = conn, %ScmWebhook{} = hook) do
     impl = dispatcher(conn)
