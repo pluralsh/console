@@ -3414,6 +3414,7 @@ func (t *RunStepFragment) GetIndex() int64 {
 type StackConfigurationFragment struct {
 	Image   *string              "json:\"image,omitempty\" graphql:\"image\""
 	Version string               "json:\"version\" graphql:\"version\""
+	Tag     *string              "json:\"tag,omitempty\" graphql:\"tag\""
 	Hooks   []*StackHookFragment "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
@@ -3428,6 +3429,12 @@ func (t *StackConfigurationFragment) GetVersion() string {
 		t = &StackConfigurationFragment{}
 	}
 	return t.Version
+}
+func (t *StackConfigurationFragment) GetTag() *string {
+	if t == nil {
+		t = &StackConfigurationFragment{}
+	}
+	return t.Tag
 }
 func (t *StackConfigurationFragment) GetHooks() []*StackHookFragment {
 	if t == nil {
@@ -22595,6 +22602,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -22797,6 +22805,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -23044,6 +23053,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -23291,6 +23301,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -23538,6 +23549,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -23786,6 +23798,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -23971,6 +23984,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -24147,6 +24161,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -24324,6 +24339,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -24500,6 +24516,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -24676,6 +24693,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -24914,6 +24932,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -25482,6 +25501,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
@@ -25733,6 +25753,7 @@ fragment ContainerSpecFragment on ContainerSpec {
 fragment StackConfigurationFragment on StackConfiguration {
 	image
 	version
+	tag
 	hooks {
 		... StackHookFragment
 	}
