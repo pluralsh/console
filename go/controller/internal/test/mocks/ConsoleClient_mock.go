@@ -674,9 +674,9 @@ func (_c *ConsoleClientMock_CreateProvider_Call) RunAndReturn(run func(context.C
 	return _c
 }
 
-// CreatePullRequest provides a mock function with given fields: ctx, prAutomationID, branch, _a3
-func (_m *ConsoleClientMock) CreatePullRequest(ctx context.Context, prAutomationID string, branch *string, _a3 *string) (*client.CreatePullRequest, error) {
-	ret := _m.Called(ctx, prAutomationID, branch, _a3)
+// CreatePullRequest provides a mock function with given fields: ctx, prAutomationID, identifier, branch, _a4
+func (_m *ConsoleClientMock) CreatePullRequest(ctx context.Context, prAutomationID string, identifier *string, branch *string, _a4 *string) (*client.CreatePullRequest, error) {
+	ret := _m.Called(ctx, prAutomationID, identifier, branch, _a4)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreatePullRequest")
@@ -684,19 +684,19 @@ func (_m *ConsoleClientMock) CreatePullRequest(ctx context.Context, prAutomation
 
 	var r0 *client.CreatePullRequest
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, *string, *string) (*client.CreatePullRequest, error)); ok {
-		return rf(ctx, prAutomationID, branch, _a3)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *string, *string, *string) (*client.CreatePullRequest, error)); ok {
+		return rf(ctx, prAutomationID, identifier, branch, _a4)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string, *string, *string) *client.CreatePullRequest); ok {
-		r0 = rf(ctx, prAutomationID, branch, _a3)
+	if rf, ok := ret.Get(0).(func(context.Context, string, *string, *string, *string) *client.CreatePullRequest); ok {
+		r0 = rf(ctx, prAutomationID, identifier, branch, _a4)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*client.CreatePullRequest)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, string, *string, *string) error); ok {
-		r1 = rf(ctx, prAutomationID, branch, _a3)
+	if rf, ok := ret.Get(1).(func(context.Context, string, *string, *string, *string) error); ok {
+		r1 = rf(ctx, prAutomationID, identifier, branch, _a4)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -712,15 +712,16 @@ type ConsoleClientMock_CreatePullRequest_Call struct {
 // CreatePullRequest is a helper method to define mock.On call
 //   - ctx context.Context
 //   - prAutomationID string
+//   - identifier *string
 //   - branch *string
-//   - _a3 *string
-func (_e *ConsoleClientMock_Expecter) CreatePullRequest(ctx interface{}, prAutomationID interface{}, branch interface{}, _a3 interface{}) *ConsoleClientMock_CreatePullRequest_Call {
-	return &ConsoleClientMock_CreatePullRequest_Call{Call: _e.mock.On("CreatePullRequest", ctx, prAutomationID, branch, _a3)}
+//   - _a4 *string
+func (_e *ConsoleClientMock_Expecter) CreatePullRequest(ctx interface{}, prAutomationID interface{}, identifier interface{}, branch interface{}, _a4 interface{}) *ConsoleClientMock_CreatePullRequest_Call {
+	return &ConsoleClientMock_CreatePullRequest_Call{Call: _e.mock.On("CreatePullRequest", ctx, prAutomationID, identifier, branch, _a4)}
 }
 
-func (_c *ConsoleClientMock_CreatePullRequest_Call) Run(run func(ctx context.Context, prAutomationID string, branch *string, _a3 *string)) *ConsoleClientMock_CreatePullRequest_Call {
+func (_c *ConsoleClientMock_CreatePullRequest_Call) Run(run func(ctx context.Context, prAutomationID string, identifier *string, branch *string, _a4 *string)) *ConsoleClientMock_CreatePullRequest_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string))
+		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string), args[4].(*string))
 	})
 	return _c
 }
@@ -730,7 +731,7 @@ func (_c *ConsoleClientMock_CreatePullRequest_Call) Return(_a0 *client.CreatePul
 	return _c
 }
 
-func (_c *ConsoleClientMock_CreatePullRequest_Call) RunAndReturn(run func(context.Context, string, *string, *string) (*client.CreatePullRequest, error)) *ConsoleClientMock_CreatePullRequest_Call {
+func (_c *ConsoleClientMock_CreatePullRequest_Call) RunAndReturn(run func(context.Context, string, *string, *string, *string) (*client.CreatePullRequest, error)) *ConsoleClientMock_CreatePullRequest_Call {
 	_c.Call.Return(run)
 	return _c
 }
