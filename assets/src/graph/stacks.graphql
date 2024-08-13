@@ -442,8 +442,8 @@ mutation KickStack($id: ID!) {
   }
 }
 
-mutation KickStack($id: ID!) {
-  kickStack(id: $id) {
+mutation kickStackPullRequest($id: ID!) {
+  kickStackPullRequest(id: $id) {
     ...StackRun
   }
 }

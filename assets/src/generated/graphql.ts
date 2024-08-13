@@ -9760,6 +9760,13 @@ export type KickStackMutationVariables = Exact<{
 
 export type KickStackMutation = { __typename?: 'RootMutationType', kickStack?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
 
+export type KickStackPullRequestMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type KickStackPullRequestMutation = { __typename?: 'RootMutationType', kickStackPullRequest?: { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null } | null };
+
 export type UpdateStackRunMutationVariables = Exact<{
   id: Scalars['ID']['input'];
   attributes: StackRunAttributes;
@@ -20339,6 +20346,39 @@ export function useKickStackMutation(baseOptions?: Apollo.MutationHookOptions<Ki
 export type KickStackMutationHookResult = ReturnType<typeof useKickStackMutation>;
 export type KickStackMutationResult = Apollo.MutationResult<KickStackMutation>;
 export type KickStackMutationOptions = Apollo.BaseMutationOptions<KickStackMutation, KickStackMutationVariables>;
+export const KickStackPullRequestDocument = gql`
+    mutation kickStackPullRequest($id: ID!) {
+  kickStackPullRequest(id: $id) {
+    ...StackRun
+  }
+}
+    ${StackRunFragmentDoc}`;
+export type KickStackPullRequestMutationFn = Apollo.MutationFunction<KickStackPullRequestMutation, KickStackPullRequestMutationVariables>;
+
+/**
+ * __useKickStackPullRequestMutation__
+ *
+ * To run a mutation, you first call `useKickStackPullRequestMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useKickStackPullRequestMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [kickStackPullRequestMutation, { data, loading, error }] = useKickStackPullRequestMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useKickStackPullRequestMutation(baseOptions?: Apollo.MutationHookOptions<KickStackPullRequestMutation, KickStackPullRequestMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<KickStackPullRequestMutation, KickStackPullRequestMutationVariables>(KickStackPullRequestDocument, options);
+      }
+export type KickStackPullRequestMutationHookResult = ReturnType<typeof useKickStackPullRequestMutation>;
+export type KickStackPullRequestMutationResult = Apollo.MutationResult<KickStackPullRequestMutation>;
+export type KickStackPullRequestMutationOptions = Apollo.BaseMutationOptions<KickStackPullRequestMutation, KickStackPullRequestMutationVariables>;
 export const UpdateStackRunDocument = gql`
     mutation UpdateStackRun($id: ID!, $attributes: StackRunAttributes!) {
   updateStackRun(id: $id, attributes: $attributes) {
@@ -21080,6 +21120,7 @@ export const namedOperations = {
     DetachStack: 'DetachStack',
     DeleteStack: 'DeleteStack',
     KickStack: 'KickStack',
+    kickStackPullRequest: 'kickStackPullRequest',
     UpdateStackRun: 'UpdateStackRun',
     ApproveStackRun: 'ApproveStackRun',
     RestartStackRun: 'RestartStackRun',
