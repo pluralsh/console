@@ -65,7 +65,7 @@ export default function ServiceComponents() {
   )
 
   useSetBreadcrumbs(breadcrumbs)
-  const { kindSelector, selectedKinds } = useComponentKindSelect(
+  const { kindSelector, selectedKinds, allKinds } = useComponentKindSelect(
     data?.serviceDeployment?.components,
     { width: 320 }
   )
@@ -133,7 +133,7 @@ export default function ServiceComponents() {
               : undefined
           }
           components={components}
-          selectedKinds={selectedKinds}
+          selectedKinds={selectedKinds.size > 0 ? selectedKinds : allKinds}
         />
       </div>
     </ScrollablePage>
