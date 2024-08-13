@@ -1435,7 +1435,7 @@ type StackConfiguration {
   image: String
 
   "the semver of the tool you wish to use"
-  version: String!
+  version: String
 
   "the docker image tag you wish to use if you're customizing the version"
   tag: String

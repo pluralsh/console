@@ -210,7 +210,7 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   object :stack_configuration do
     field :image,   :string, description: "optional custom image you might want to use"
-    field :version, non_null(:string), description: "the semver of the tool you wish to use"
+    field :version, :string, description: "the semver of the tool you wish to use"
     field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
     field :hooks,   list_of(:stack_hook), description: "the hooks to customize execution for this stack"
   end

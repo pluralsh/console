@@ -4297,7 +4297,7 @@ type StackConfiguration struct {
 	// optional custom image you might want to use
 	Image *string `json:"image,omitempty"`
 	// the semver of the tool you wish to use
-	Version string `json:"version"`
+	Version *string `json:"version,omitempty"`
 	// the docker image tag you wish to use if you're customizing the version
 	Tag *string `json:"tag,omitempty"`
 	// the hooks to customize execution for this stack
