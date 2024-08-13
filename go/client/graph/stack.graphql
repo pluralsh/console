@@ -288,3 +288,9 @@ query ListStackRuns($id: ID!, $after: String, $before: String, $first: Int, $las
         }
     }
 }
+
+mutation TriggerRun($id: ID!) {
+    triggerRun(id: $id) {
+        ...StackRunBaseFragment
+    }
+}

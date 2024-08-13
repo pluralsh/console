@@ -153,6 +153,7 @@ type ConsoleClient interface {
 	DeleteCustomStackRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCustomStackRun, error)
 	GetCustomStackRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetCustomStackRun, error)
 	ListStackRuns(ctx context.Context, id string, after *string, before *string, first *int64, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListStackRuns, error)
+	TriggerRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*TriggerRun, error)
 	GetStackDefinition(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackDefinition, error)
 	ListStackDefinitions(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListStackDefinitions, error)
 	CreateStackDefinition(ctx context.Context, attributes StackDefinitionAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateStackDefinition, error)
@@ -11044,6 +11045,132 @@ func (t *ListStackRuns_InfrastructureStack) GetRuns() *ListStackRuns_Infrastruct
 	return t.Runs
 }
 
+type TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform struct {
+	Address *string "json:\"address,omitempty\" graphql:\"address\""
+	Lock    *string "json:\"lock,omitempty\" graphql:\"lock\""
+	Unlock  *string "json:\"unlock,omitempty\" graphql:\"unlock\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform) GetAddress() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform{}
+	}
+	return t.Address
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform) GetLock() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform{}
+	}
+	return t.Lock
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform) GetUnlock() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform{}
+	}
+	return t.Unlock
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls struct {
+	Terraform *TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform "json:\"terraform,omitempty\" graphql:\"terraform\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls) GetTerraform() *TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls_Terraform {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_StateUrls{}
+	}
+	return t.Terraform
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds struct {
+	URL   *string "json:\"url,omitempty\" graphql:\"url\""
+	Token *string "json:\"token,omitempty\" graphql:\"token\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds) GetURL() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.URL
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds) GetToken() *string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_PluralCreds{}
+	}
+	return t.Token
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_Stack_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &TriggerRun_TriggerRun_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
+}
+
 type GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks struct {
 	Cmd        string    "json:\"cmd\" graphql:\"cmd\""
 	Args       []*string "json:\"args,omitempty\" graphql:\"args\""
@@ -13230,6 +13357,17 @@ func (t *ListStackRuns) GetInfrastructureStack() *ListStackRuns_InfrastructureSt
 		t = &ListStackRuns{}
 	}
 	return t.InfrastructureStack
+}
+
+type TriggerRun struct {
+	TriggerRun *StackRunBaseFragment "json:\"triggerRun,omitempty\" graphql:\"triggerRun\""
+}
+
+func (t *TriggerRun) GetTriggerRun() *StackRunBaseFragment {
+	if t == nil {
+		t = &TriggerRun{}
+	}
+	return t.TriggerRun
 }
 
 type GetStackDefinition struct {
@@ -25454,6 +25592,253 @@ func (c *Client) ListStackRuns(ctx context.Context, id string, after *string, be
 	return &res, nil
 }
 
+const TriggerRunDocument = `mutation TriggerRun ($id: ID!) {
+	triggerRun(id: $id) {
+		... StackRunBaseFragment
+	}
+}
+fragment StackRunBaseFragment on StackRun {
+	id
+	type
+	status
+	approval
+	approvedAt
+	tarball
+	workdir
+	manageState
+	stateUrls {
+		terraform {
+			address
+			lock
+			unlock
+		}
+	}
+	pluralCreds {
+		url
+		token
+	}
+	actor {
+		... UserFragment
+	}
+	stack {
+		... InfrastructureStackFragment
+	}
+	state {
+		... StackStateFragment
+	}
+	steps {
+		... RunStepFragment
+	}
+	files {
+		... StackFileFragment
+	}
+	git {
+		... GitRefFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	jobSpec {
+		... JobSpecFragment
+	}
+	configuration {
+		... StackConfigurationFragment
+	}
+	environment {
+		... StackEnvironmentFragment
+	}
+	output {
+		... StackOutputFragment
+	}
+	errors {
+		... ServiceErrorFragment
+	}
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment InfrastructureStackFragment on InfrastructureStack {
+	id
+	name
+	type
+	git {
+		... GitRefFragment
+	}
+	jobSpec {
+		... JobSpecFragment
+	}
+	configuration {
+		... StackConfigurationFragment
+	}
+	cluster {
+		... TinyClusterFragment
+	}
+	project {
+		... TinyProjectFragment
+	}
+	approval
+	workdir
+	manageState
+	deletedAt
+	files {
+		... StackFileFragment
+	}
+	environment {
+		... StackEnvironmentFragment
+	}
+	output {
+		... StackOutputFragment
+	}
+	state {
+		... StackStateFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment JobSpecFragment on JobGateSpec {
+	namespace
+	raw
+	containers {
+		... ContainerSpecFragment
+	}
+	labels
+	annotations
+	serviceAccount
+}
+fragment ContainerSpecFragment on ContainerSpec {
+	image
+	args
+	env {
+		name
+		value
+	}
+	envFrom {
+		configMap
+		secret
+	}
+}
+fragment StackConfigurationFragment on StackConfiguration {
+	image
+	version
+	hooks {
+		... StackHookFragment
+	}
+}
+fragment StackHookFragment on StackHook {
+	cmd
+	args
+	afterStage
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+fragment StackFileFragment on StackFile {
+	path
+	content
+}
+fragment StackEnvironmentFragment on StackEnvironment {
+	name
+	value
+	secret
+}
+fragment StackOutputFragment on StackOutput {
+	name
+	value
+	secret
+}
+fragment StackStateFragment on StackState {
+	id
+	plan
+	state {
+		... StackStateResourceFragment
+	}
+}
+fragment StackStateResourceFragment on StackStateResource {
+	identifier
+	resource
+	name
+	configuration
+	links
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment RunStepFragment on RunStep {
+	id
+	status
+	stage
+	name
+	cmd
+	args
+	requireApproval
+	index
+}
+fragment ServiceErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) TriggerRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*TriggerRun, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res TriggerRun
+	if err := c.Client.Post(ctx, "TriggerRun", TriggerRunDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetStackDefinitionDocument = `query GetStackDefinition ($id: ID!) {
 	stackDefinition(id: $id) {
 		... StackDefinitionFragment
@@ -26127,6 +26512,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteCustomStackRunDocument:                      "DeleteCustomStackRun",
 	GetCustomStackRunDocument:                         "GetCustomStackRun",
 	ListStackRunsDocument:                             "ListStackRuns",
+	TriggerRunDocument:                                "TriggerRun",
 	GetStackDefinitionDocument:                        "GetStackDefinition",
 	ListStackDefinitionsDocument:                      "ListStackDefinitions",
 	CreateStackDefinitionDocument:                     "CreateStackDefinition",
