@@ -2,6 +2,34 @@ apiVersion: v1
 entries:
   console:
   - apiVersion: v2
+    appVersion: 0.10.21
+    created: "2024-08-13T22:32:45.254373197Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.1.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.73
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.5.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.11.1
+    description: deploys the plural console and additional dependencies, for use in
+      bring-your-own-kube setups
+    digest: 37aaa670d2a259662c706f94b752cb0948e77333293970d71f7e837cf48cc2e0
+    name: console
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-chart-v0.3.48/console-0.3.48.tgz
+    version: 0.3.48
+  - apiVersion: v2
     appVersion: 0.10.20
     created: "2024-08-10T12:55:31.452370603Z"
     dependencies:
@@ -2303,6 +2331,16 @@ entries:
   controller:
   - apiVersion: v2
     appVersion: 0.10.21
+    created: "2024-08-13T22:32:45.679143055Z"
+    description: deploys the deployment operator for plural cd
+    digest: d08c3d040bca778389a2892cbec0cb204174848d567ccf35f4c1744d504da078
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.73/controller-0.0.73.tgz
+    version: 0.0.73
+  - apiVersion: v2
+    appVersion: 0.10.21
     created: "2024-08-13T21:04:37.511861614Z"
     description: deploys the deployment operator for plural cd
     digest: fa96a6e4e0750b7cb3f9b826c58ef8a6fda46b3f252666bdac67b079c3907981
@@ -3055,4 +3093,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-13T21:04:37.512243996Z"
+generated: "2024-08-13T22:32:45.679629003Z"
