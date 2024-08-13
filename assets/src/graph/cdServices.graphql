@@ -28,6 +28,7 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
   helm {
     chart
     version
+    url
     repository {
       namespace
       name
