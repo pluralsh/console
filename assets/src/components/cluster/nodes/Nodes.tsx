@@ -12,6 +12,8 @@ import { ColumnDef } from '@tanstack/react-table'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
+import { useTheme } from 'styled-components'
+
 import { SHORT_POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
 
@@ -39,6 +41,7 @@ const breadcrumbs = [{ label: 'nodes', url: '/nodes' }]
 
 export default function Nodes() {
   useSetBreadcrumbs(breadcrumbs)
+  const theme = useTheme()
   const { prometheusConnection } = useDeploymentSettings()
 
   const { data, refetch } = useQuery<{
@@ -91,7 +94,7 @@ export default function Nodes() {
           gap="xlarge"
         >
           {!!prometheusConnection && (
-            <Card padding="xlarge">
+            <Card css={{ padding: theme.spacing.xlarge }}>
               <ClusterMetrics
                 nodes={data.nodes}
                 usage={usage}

@@ -30,7 +30,7 @@ export function RunbookDisplay({
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <DisplayContext.Provider value={{ datasources, context, setContext }}>
       <Card
-        padding="large"
+        css={{ padding: theme.spacing.large }}
         {...props}
       >
         <Flex

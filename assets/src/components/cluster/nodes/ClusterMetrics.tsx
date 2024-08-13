@@ -5,6 +5,8 @@ import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsCon
 
 import { Card } from '@pluralsh/design-system'
 
+import { useTheme } from 'styled-components'
+
 import { ClusterMetrics as Metrics } from '../constants'
 
 import { ClusterGauges } from './ClusterGauges'
@@ -26,12 +28,13 @@ export function ClusterMetrics({
   usage: ResourceUsage
   cluster?: ClusterFragment
 }) {
+  const theme = useTheme()
   const { prometheusConnection } = useDeploymentSettings()
 
   if (!prometheusConnection) return null
 
   return (
-    <Card padding="xlarge">
+    <Card css={{ padding: theme.spacing.xlarge }}>
       <Flex
         flex={false}
         direction="column"

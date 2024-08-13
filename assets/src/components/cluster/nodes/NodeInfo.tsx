@@ -63,7 +63,7 @@ export default function NodeInfo() {
     >
       <section>
         <SubTitle>Overview</SubTitle>
-        <Card padding="medium">
+        <Card css={{ padding: theme.spacing.medium }}>
           <NodeGraphs
             status={node.status}
             pods={node.pods}

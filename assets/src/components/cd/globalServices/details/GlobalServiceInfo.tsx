@@ -44,9 +44,8 @@ export function PropCard({
 
   return (
     <Card
-      padding="medium"
       {...props}
-      css={{ ...theme.partials.text.body2Bold }}
+      css={{ ...theme.partials.text.body2Bold, padding: theme.spacing.medium }}
     >
       <div
         css={{

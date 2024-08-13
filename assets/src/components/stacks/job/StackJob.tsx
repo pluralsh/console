@@ -27,7 +27,7 @@ export default function StackJob() {
   if (!stack.jobSpec) return <EmptyState message="No job spec found." />
 
   return (
-    <Card padding="medium">
+    <Card css={{ padding: theme.spacing.medium }}>
       <div css={{ display: 'flex', flexWrap: 'wrap' }}>
         <Prop title="Namespace">{stack.jobSpec.namespace}</Prop>
 
