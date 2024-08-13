@@ -11,6 +11,7 @@ import (
 var (
 	argAddress = pflag.IP("address", net.IPv4(0, 0, 0, 0), "address on which to serve the port")
 	argPort    = pflag.Int("port", 8000, "port to listen to for incoming requests")
+	argToken   = pflag.String("token", "", "auth token")
 )
 
 func init() {
@@ -27,4 +28,8 @@ func Port() int {
 
 func Address() net.IP {
 	return *argAddress
+}
+
+func Token() string {
+	return *argToken
 }
