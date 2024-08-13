@@ -31,6 +31,7 @@ type AWSCredentials struct {
 	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
 	SessionToken    *string `json:"sessionToken,omitempty"`
 	AssumeRoleARN   *string `json:"assumeRoleARN,omitempty"`
+	Region          *string `json:"region,omitempty"`
 }
 
 type AzureCredentials struct {
