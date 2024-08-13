@@ -141,7 +141,7 @@ function NodeGroupContainer({ provider }): ReactElement {
             <Card
               key={ng.id}
               fillLevel={2}
-              padding="medium"
+              css={{ padding: theme.spacing.medium }}
             >
               <NodeGroupComponent
                 provider={provider}

@@ -7,6 +7,8 @@ import { Pod } from 'generated/graphql'
 import { LabelPairsSection } from 'components/utils/LabelPairsSection'
 import { Readiness, podStatusToReadiness } from 'utils/status'
 
+import { useTheme } from 'styled-components'
+
 import { getPodContainersStats as getContainersStats } from '../containers/getPodContainersStats'
 import { ContainerStatuses } from '../ContainerStatuses'
 
@@ -27,12 +29,13 @@ function phaseToReadiness(phase?: string | null) {
 }
 
 export default function Metadata({ pod }: { pod: Pod }) {
+  const theme = useTheme()
   const { labels, annotations } = pod.metadata
   const containerStats = getContainersStats(pod.status)
 
   return (
     <Flex direction="column">
-      <Card padding="large">
+      <Card css={{ padding: theme.spacing.large }}>
         <Flex
           direction="column"
           gap="large"

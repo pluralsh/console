@@ -1,5 +1,5 @@
 import { Button, Card } from '@pluralsh/design-system'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 type BillingFeatureBlockBannerPropsType = {
   feature: string
@@ -44,10 +44,12 @@ export default function BillingFeatureBlockBanner({
   description,
   placeholderImageURL,
 }: BillingFeatureBlockBannerPropsType) {
+  const theme = useTheme()
+
   return (
     <Wrapper backgroundImage={placeholderImageURL}>
       <Card
-        padding="large"
+        css={{ padding: theme.spacing.large }}
         fillLevel={2}
         width="100%"
       >

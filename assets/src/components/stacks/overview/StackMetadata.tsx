@@ -19,7 +19,7 @@ export default function StackMetadata() {
   const { stack } = useOutletContext() as StackOutletContextT
 
   return (
-    <Card padding="large">
+    <Card css={{ padding: theme.spacing.large }}>
       <OverlineH1
         as="h3"
         css={{

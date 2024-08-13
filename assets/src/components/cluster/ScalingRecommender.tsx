@@ -133,6 +133,7 @@ function ContainerRecommendations({
   uncappedTarget,
   setIsModifying,
 }: ContainerRecommendation & { setIsModifying: (arg: boolean) => void }) {
+  const theme = useTheme()
   const recos = [
     ...(lowerBound ? [{ label: 'Lower bound', ...lowerBound }] : []),
     ...(upperBound ? [{ label: 'Upper bound', ...upperBound }] : []),
@@ -147,12 +148,14 @@ function ContainerRecommendations({
         application.
       </P>
       <Card
-        display="grid"
-        gridTemplateColumns="1fr 1fr 1fr"
-        backgroundColor="fill-one"
-        color="text-light"
-        body2LooseLineHeight
-        {...{ ':nth-child(2n) > *': { backgroundColor: 'fill-two' } }}
+        css={{
+          ...theme.partials.text.body2LooseLineHeight,
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr',
+          backgroundColor: theme.colors['fill-one'],
+          color: theme.colors['fill-one'],
+          '&:nth-child(2n) > *': { backgroundColor: theme.colors['fill-two'] },
+        }}
       >
         {recos.map((r) => (
           <RecommendationComp {...r} />
