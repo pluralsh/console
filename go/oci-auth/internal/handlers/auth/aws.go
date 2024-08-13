@@ -57,8 +57,7 @@ func getConfig(ctx context.Context, credentials *AWSCredentials) (*awssdk.Config
 	}
 
 	if credentials.AssumeRoleARN != nil {
-		stsclient := sts.NewFromConfig(config)
-		config.Credentials = stscreds.NewAssumeRoleProvider(stsclient, *credentials.AssumeRoleARN)
+		config.Credentials = stscreds.NewAssumeRoleProvider(sts.NewFromConfig(config), *credentials.AssumeRoleARN)
 	}
 
 	return &config, nil
