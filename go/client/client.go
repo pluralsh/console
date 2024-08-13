@@ -3413,7 +3413,7 @@ func (t *RunStepFragment) GetIndex() int64 {
 
 type StackConfigurationFragment struct {
 	Image   *string              "json:\"image,omitempty\" graphql:\"image\""
-	Version string               "json:\"version\" graphql:\"version\""
+	Version *string              "json:\"version,omitempty\" graphql:\"version\""
 	Tag     *string              "json:\"tag,omitempty\" graphql:\"tag\""
 	Hooks   []*StackHookFragment "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
@@ -3424,7 +3424,7 @@ func (t *StackConfigurationFragment) GetImage() *string {
 	}
 	return t.Image
 }
-func (t *StackConfigurationFragment) GetVersion() string {
+func (t *StackConfigurationFragment) GetVersion() *string {
 	if t == nil {
 		t = &StackConfigurationFragment{}
 	}
@@ -5215,7 +5215,7 @@ func (t *StackDefinitionFragment_Configuration_Hooks) GetAfterStage() *StepStage
 type StackDefinitionFragment_Configuration struct {
 	Image   *string                                        "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                        "json:\"tag,omitempty\" graphql:\"tag\""
-	Version string                                         "json:\"version\" graphql:\"version\""
+	Version *string                                        "json:\"version,omitempty\" graphql:\"version\""
 	Hooks   []*StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
@@ -5231,7 +5231,7 @@ func (t *StackDefinitionFragment_Configuration) GetTag() *string {
 	}
 	return t.Tag
 }
-func (t *StackDefinitionFragment_Configuration) GetVersion() string {
+func (t *StackDefinitionFragment_Configuration) GetVersion() *string {
 	if t == nil {
 		t = &StackDefinitionFragment_Configuration{}
 	}
@@ -11206,7 +11206,7 @@ func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuratio
 type GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration struct {
 	Image   *string                                                                           "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                           "json:\"tag,omitempty\" graphql:\"tag\""
-	Version string                                                                            "json:\"version\" graphql:\"version\""
+	Version *string                                                                           "json:\"version,omitempty\" graphql:\"version\""
 	Hooks   []*GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
@@ -11222,7 +11222,7 @@ func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuratio
 	}
 	return t.Tag
 }
-func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration) GetVersion() string {
+func (t *GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration) GetVersion() *string {
 	if t == nil {
 		t = &GetStackDefinition_StackDefinition_StackDefinitionFragment_Configuration{}
 	}
@@ -11295,7 +11295,7 @@ func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragmen
 type ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration struct {
 	Image   *string                                                                                         "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                                         "json:\"tag,omitempty\" graphql:\"tag\""
-	Version string                                                                                          "json:\"version\" graphql:\"version\""
+	Version *string                                                                                         "json:\"version,omitempty\" graphql:\"version\""
 	Hooks   []*ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
@@ -11311,7 +11311,7 @@ func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragmen
 	}
 	return t.Tag
 }
-func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration) GetVersion() string {
+func (t *ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration) GetVersion() *string {
 	if t == nil {
 		t = &ListStackDefinitions_StackDefinitions_Edges_Node_StackDefinitionFragment_Configuration{}
 	}
@@ -11413,7 +11413,7 @@ func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Con
 type CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration struct {
 	Image   *string                                                                                    "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                                    "json:\"tag,omitempty\" graphql:\"tag\""
-	Version string                                                                                     "json:\"version\" graphql:\"version\""
+	Version *string                                                                                    "json:\"version,omitempty\" graphql:\"version\""
 	Hooks   []*CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
@@ -11429,7 +11429,7 @@ func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Tag
 }
-func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration) GetVersion() string {
+func (t *CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration) GetVersion() *string {
 	if t == nil {
 		t = &CreateStackDefinition_CreateStackDefinition_StackDefinitionFragment_Configuration{}
 	}
@@ -11502,7 +11502,7 @@ func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Con
 type UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration struct {
 	Image   *string                                                                                    "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                                    "json:\"tag,omitempty\" graphql:\"tag\""
-	Version string                                                                                     "json:\"version\" graphql:\"version\""
+	Version *string                                                                                    "json:\"version,omitempty\" graphql:\"version\""
 	Hooks   []*UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
@@ -11518,7 +11518,7 @@ func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Tag
 }
-func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration) GetVersion() string {
+func (t *UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration) GetVersion() *string {
 	if t == nil {
 		t = &UpdateStackDefinition_UpdateStackDefinition_StackDefinitionFragment_Configuration{}
 	}
@@ -11591,7 +11591,7 @@ func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Con
 type DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration struct {
 	Image   *string                                                                                    "json:\"image,omitempty\" graphql:\"image\""
 	Tag     *string                                                                                    "json:\"tag,omitempty\" graphql:\"tag\""
-	Version string                                                                                     "json:\"version\" graphql:\"version\""
+	Version *string                                                                                    "json:\"version,omitempty\" graphql:\"version\""
 	Hooks   []*DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration_Hooks "json:\"hooks,omitempty\" graphql:\"hooks\""
 }
 
@@ -11607,7 +11607,7 @@ func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Con
 	}
 	return t.Tag
 }
-func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration) GetVersion() string {
+func (t *DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration) GetVersion() *string {
 	if t == nil {
 		t = &DeleteStackDefinition_DeleteStackDefinition_StackDefinitionFragment_Configuration{}
 	}
