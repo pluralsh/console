@@ -3,6 +3,7 @@ package args
 import (
 	"flag"
 	"net"
+	"os"
 
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
@@ -11,7 +12,7 @@ import (
 var (
 	argAddress = pflag.IP("address", net.IPv4(0, 0, 0, 0), "address on which to serve the port")
 	argPort    = pflag.Int("port", 8000, "port to listen to for incoming requests")
-	argToken   = pflag.String("token", "", "auth token")
+	argToken   = pflag.String("token", os.Getenv("TOKEN"), "auth token")
 )
 
 func init() {
