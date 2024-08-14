@@ -94,7 +94,6 @@ spec:
                 type: string
             required:
             - credentials
-            - name
             - type
             type: object
           status:

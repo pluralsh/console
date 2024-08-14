@@ -1054,7 +1054,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `name` _string_ | Name of the ObservabilityProvider in the Console API. |  | Required: {} <br /> |
+| `name` _string_ | Name of the ObservabilityProvider in the Console API. |  | Optional: {} <br /> |
 | `type` _[ObservabilityProviderType](#observabilityprovidertype)_ | Type of the ObservabilityProvider. |  | Enum: [DATADOG NEWRELIC] <br />Required: {} <br /> |
 | `credentials` _[ObservabilityProviderCredentials](#observabilityprovidercredentials)_ | Credentials to access the configured provider Type. |  | Required: {} <br /> |
 
@@ -1891,8 +1891,8 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `image` _string_ | Image optional custom image you might want to use |  | Optional: {} <br /> |
 | `version` _string_ | Version the semver of the tool you wish to use |  | Optional: {} <br /> |
-| `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run |  | Optional: {} <br /> |
 | `tag` _string_ | Tag is the docker image tag you wish to use<br />if you're customizing the version |  | Optional: {} <br /> |
+| `hooks` _[StackHook](#stackhook) array_ | Hooks to run at various stages of the stack run |  | Optional: {} <br /> |
 
 
 #### StackCron
