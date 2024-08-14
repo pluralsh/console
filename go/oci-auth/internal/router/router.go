@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/pluralsh/console/go/oci-auth/internal/args"
+	"github.com/pluralsh/console/go/oci-auth/internal/environment"
 	"k8s.io/klog/v2"
 )
 
@@ -16,6 +17,10 @@ var (
 )
 
 func init() {
+	if !environment.IsDev() {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router = gin.Default()
 	_ = router.SetTrustedProxies(nil)
 	router.Use(authMiddleware())
