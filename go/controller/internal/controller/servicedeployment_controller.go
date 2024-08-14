@@ -313,6 +313,8 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			Release:     service.Spec.Helm.Release,
 			ValuesFiles: service.Spec.Helm.ValuesFiles,
 			Version:     service.Spec.Helm.Version,
+			Chart:       service.Spec.Helm.Chart,
+			URL:         service.Spec.Helm.URL,
 		}
 		if service.Spec.Helm.Repository != nil {
 			attr.Helm.Repository = &console.NamespacedName{
@@ -350,9 +352,6 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			}
 			attr.Helm.Values = values
 		}
-
-		attr.Helm.Chart = service.Spec.Helm.Chart
-		attr.Helm.URL = service.Spec.Helm.URL
 	}
 
 	return attr, nil
