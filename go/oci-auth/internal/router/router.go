@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -23,27 +24,35 @@ func init() {
 }
 
 func authMiddleware() gin.HandlerFunc {
-	if args.Token() == "" {
-		klog.Fatal("Auth token value is missing")
+	if args.TokenFile() == "" {
+		klog.Fatal("Auth token file is not specified")
 	}
 
 	return func(c *gin.Context) {
-		tokenHeader := c.GetHeader("Authorization")
-		splitToken := strings.Split(tokenHeader, "Token")
-		if len(splitToken) != 2 {
+		requestHeaderToken := c.GetHeader("Authorization")
+		splitRequestHeaderToken := strings.Split(requestHeaderToken, "Token")
+		if len(splitRequestHeaderToken) != 2 {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization header format"})
 			c.Abort()
 			return
 		}
 
-		token := strings.TrimSpace(splitToken[1])
-		if token == "" {
+		requestToken := strings.TrimSpace(splitRequestHeaderToken[1])
+		if requestToken == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Missing token"})
 			c.Abort()
 			return
 		}
 
-		if token != args.Token() {
+		token, err := os.ReadFile(args.TokenFile())
+		if err != nil {
+			klog.Error("Could not read token file, got error:", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not read token file"})
+			c.Abort()
+			return
+		}
+
+		if requestToken != string(token) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			c.Abort()
 			return
@@ -51,7 +60,6 @@ func authMiddleware() gin.HandlerFunc {
 
 		c.Next()
 	}
-
 }
 
 func Router() *gin.Engine {

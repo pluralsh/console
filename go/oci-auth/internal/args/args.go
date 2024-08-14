@@ -3,16 +3,15 @@ package args
 import (
 	"flag"
 	"net"
-	"os"
 
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 )
 
 var (
-	argAddress = pflag.IP("address", net.IPv4(0, 0, 0, 0), "address on which to serve the port")
-	argPort    = pflag.Int("port", 8000, "port to listen to for incoming requests")
-	argToken   = pflag.String("token", os.Getenv("TOKEN"), "auth token")
+	argAddress   = pflag.IP("address", net.IPv4(0, 0, 0, 0), "address on which to serve the port")
+	argPort      = pflag.Int("port", 8000, "port to listen to for incoming requests")
+	argTokenFile = pflag.String("token-file", "/token", "path to auth token file")
 )
 
 func init() {
@@ -31,6 +30,6 @@ func Address() net.IP {
 	return *argAddress
 }
 
-func Token() string {
-	return *argToken
+func TokenFile() string {
+	return *argTokenFile
 }
