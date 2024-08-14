@@ -4,6 +4,7 @@ import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import {
   type GitRepositoryFragment,
+  HelmAuthProvider,
   HelmRepositoryFragment,
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
@@ -47,7 +48,7 @@ export const ColRepo = columnHelper.accessor(({ node }) => node?.url, {
 })
 
 export const ColProvider = columnHelper.accessor(
-  ({ node }) => (node as HelmNode)?.provider,
+  ({ node }) => (node as HelmNode)?.provider ?? HelmAuthProvider.Basic,
   {
     id: 'provider',
     header: 'Provider',

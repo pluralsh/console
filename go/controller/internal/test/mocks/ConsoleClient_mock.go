@@ -2532,6 +2532,65 @@ func (_c *ConsoleClientMock_GetGroup_Call) RunAndReturn(run func(string) (*clien
 	return _c
 }
 
+// GetHelmRepository provides a mock function with given fields: ctx, url
+func (_m *ConsoleClientMock) GetHelmRepository(ctx context.Context, url string) (*client.HelmRepositoryFragment, error) {
+	ret := _m.Called(ctx, url)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetHelmRepository")
+	}
+
+	var r0 *client.HelmRepositoryFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.HelmRepositoryFragment, error)); ok {
+		return rf(ctx, url)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.HelmRepositoryFragment); ok {
+		r0 = rf(ctx, url)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.HelmRepositoryFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, url)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetHelmRepository_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetHelmRepository'
+type ConsoleClientMock_GetHelmRepository_Call struct {
+	*mock.Call
+}
+
+// GetHelmRepository is a helper method to define mock.On call
+//   - ctx context.Context
+//   - url string
+func (_e *ConsoleClientMock_Expecter) GetHelmRepository(ctx interface{}, url interface{}) *ConsoleClientMock_GetHelmRepository_Call {
+	return &ConsoleClientMock_GetHelmRepository_Call{Call: _e.mock.On("GetHelmRepository", ctx, url)}
+}
+
+func (_c *ConsoleClientMock_GetHelmRepository_Call) Run(run func(ctx context.Context, url string)) *ConsoleClientMock_GetHelmRepository_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetHelmRepository_Call) Return(_a0 *client.HelmRepositoryFragment, _a1 error) *ConsoleClientMock_GetHelmRepository_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetHelmRepository_Call) RunAndReturn(run func(context.Context, string) (*client.HelmRepositoryFragment, error)) *ConsoleClientMock_GetHelmRepository_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetNamespace provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) GetNamespace(ctx context.Context, id string) (*client.ManagedNamespaceFragment, error) {
 	ret := _m.Called(ctx, id)
@@ -4099,6 +4158,63 @@ func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) Return(_a0 bool, _a1 
 }
 
 func (_c *ConsoleClientMock_IsClusterRestoreExisting_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsClusterRestoreExisting_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// IsHelmRepositoryExists provides a mock function with given fields: ctx, url
+func (_m *ConsoleClientMock) IsHelmRepositoryExists(ctx context.Context, url string) (bool, error) {
+	ret := _m.Called(ctx, url)
+
+	if len(ret) == 0 {
+		panic("no return value specified for IsHelmRepositoryExists")
+	}
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (bool, error)); ok {
+		return rf(ctx, url)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, url)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, url)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_IsHelmRepositoryExists_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'IsHelmRepositoryExists'
+type ConsoleClientMock_IsHelmRepositoryExists_Call struct {
+	*mock.Call
+}
+
+// IsHelmRepositoryExists is a helper method to define mock.On call
+//   - ctx context.Context
+//   - url string
+func (_e *ConsoleClientMock_Expecter) IsHelmRepositoryExists(ctx interface{}, url interface{}) *ConsoleClientMock_IsHelmRepositoryExists_Call {
+	return &ConsoleClientMock_IsHelmRepositoryExists_Call{Call: _e.mock.On("IsHelmRepositoryExists", ctx, url)}
+}
+
+func (_c *ConsoleClientMock_IsHelmRepositoryExists_Call) Run(run func(ctx context.Context, url string)) *ConsoleClientMock_IsHelmRepositoryExists_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsHelmRepositoryExists_Call) Return(_a0 bool, _a1 error) *ConsoleClientMock_IsHelmRepositoryExists_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_IsHelmRepositoryExists_Call) RunAndReturn(run func(context.Context, string) (bool, error)) *ConsoleClientMock_IsHelmRepositoryExists_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -5771,6 +5887,66 @@ func (_c *ConsoleClientMock_UpdateStackDefinition_Call) Return(_a0 *client.Stack
 }
 
 func (_c *ConsoleClientMock_UpdateStackDefinition_Call) RunAndReturn(run func(context.Context, string, client.StackDefinitionAttributes) (*client.StackDefinitionFragment, error)) *ConsoleClientMock_UpdateStackDefinition_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpsertHelmRepository provides a mock function with given fields: ctx, url, attributes
+func (_m *ConsoleClientMock) UpsertHelmRepository(ctx context.Context, url string, attributes *client.HelmRepositoryAttributes) (*client.HelmRepositoryFragment, error) {
+	ret := _m.Called(ctx, url, attributes)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpsertHelmRepository")
+	}
+
+	var r0 *client.HelmRepositoryFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *client.HelmRepositoryAttributes) (*client.HelmRepositoryFragment, error)); ok {
+		return rf(ctx, url, attributes)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, *client.HelmRepositoryAttributes) *client.HelmRepositoryFragment); ok {
+		r0 = rf(ctx, url, attributes)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.HelmRepositoryFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string, *client.HelmRepositoryAttributes) error); ok {
+		r1 = rf(ctx, url, attributes)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_UpsertHelmRepository_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertHelmRepository'
+type ConsoleClientMock_UpsertHelmRepository_Call struct {
+	*mock.Call
+}
+
+// UpsertHelmRepository is a helper method to define mock.On call
+//   - ctx context.Context
+//   - url string
+//   - attributes *client.HelmRepositoryAttributes
+func (_e *ConsoleClientMock_Expecter) UpsertHelmRepository(ctx interface{}, url interface{}, attributes interface{}) *ConsoleClientMock_UpsertHelmRepository_Call {
+	return &ConsoleClientMock_UpsertHelmRepository_Call{Call: _e.mock.On("UpsertHelmRepository", ctx, url, attributes)}
+}
+
+func (_c *ConsoleClientMock_UpsertHelmRepository_Call) Run(run func(ctx context.Context, url string, attributes *client.HelmRepositoryAttributes)) *ConsoleClientMock_UpsertHelmRepository_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string), args[2].(*client.HelmRepositoryAttributes))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertHelmRepository_Call) Return(_a0 *client.HelmRepositoryFragment, _a1 error) *ConsoleClientMock_UpsertHelmRepository_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_UpsertHelmRepository_Call) RunAndReturn(run func(context.Context, string, *client.HelmRepositoryAttributes) (*client.HelmRepositoryFragment, error)) *ConsoleClientMock_UpsertHelmRepository_Call {
 	_c.Call.Return(run)
 	return _c
 }
