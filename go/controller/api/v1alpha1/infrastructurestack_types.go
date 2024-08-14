@@ -145,13 +145,13 @@ type StackConfiguration struct {
 	// Version the semver of the tool you wish to use
 	// +kubebuilder:validation:Optional
 	Version *string `json:"version,omitempty"`
-	// Hooks to run at various stages of the stack run
-	// +kubebuilder:validation:Optional
-	Hooks []*StackHook `json:"hooks,omitempty"`
 	// Tag is the docker image tag you wish to use
 	// if you're customizing the version
 	// +kubebuilder:validation:Optional
 	Tag *string `json:"tag,omitempty"`
+	// Hooks to run at various stages of the stack run
+	// +kubebuilder:validation:Optional
+	Hooks []*StackHook `json:"hooks,omitempty"`
 }
 
 type StackCron struct {

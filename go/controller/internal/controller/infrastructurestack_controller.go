@@ -22,13 +22,6 @@ import (
 	"fmt"
 	"time"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -41,6 +34,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -410,6 +411,7 @@ func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alp
 	attrs := &console.StackConfigurationAttributes{
 		Version: conf.Version,
 		Image:   conf.Image,
+		Tag:     conf.Tag,
 	}
 
 	if conf.Hooks != nil {
