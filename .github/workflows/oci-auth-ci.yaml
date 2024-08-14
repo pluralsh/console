@@ -1,0 +1,67 @@
+name: CI / OCI Authentication Sidecar
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/oci-auth-ci.yaml"
+      - "go/oci-auth/**"
+  pull_request:
+    branches:
+      - "**"
+    paths:
+      - ".github/workflows/oci-auth-ci.yaml"
+      - "go/oci-auth/**"
+permissions:
+  contents: read
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/oci-auth
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        with:
+          go-version-file: go/oci-auth/go.mod
+          cache: true
+      - run: go mod download
+      - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
+      - run: PATH=$PATH:$GOPATH/bin make build
+  unit-test:
+    name: Unit tests
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/oci-auth
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        with:
+          go-version-file: go/oci-auth/go.mod
+          cache: true
+      - run: go mod download
+      - run: PATH=$PATH:$GOPATH/bin make test
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+        with:
+          go-version-file: go/oci-auth/go.mod
+          check-latest: true
+      - uses: golangci/golangci-lint-action@a4f60bb28d35aeee14e6880718e0c85ff1882e64 # v6.0.1
+        with:
+          version: v1.59
+          working-directory: go/oci-auth
+          args: --timeout=30m
