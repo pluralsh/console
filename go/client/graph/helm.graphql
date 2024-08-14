@@ -1,0 +1,34 @@
+fragment HelmRepositoryFragment on HelmRepository {
+    id
+    insertedAt
+    updatedAt
+    url
+    provider
+    health
+}
+
+query ListHelmRepositories($after: String, $first: Int, $before: String, $last: Int) {
+    helmRepositories(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo {
+            ...PageInfoFragment
+        }
+        edges {
+            node {
+                ...HelmRepositoryFragment
+            }
+        }
+    }
+}
+
+query GetHelmRepository($url: String!) {
+    helmRepository(url: $url) {
+        ...HelmRepositoryFragment
+    }
+}
+
+mutation UpsertHelmRepository($url: String!, $attributes: HelmRepositoryAttributes) {
+    upsertHelmRepository(url: $url, attributes: $attributes) {
+        ...HelmRepositoryFragment
+    }
+}
+
