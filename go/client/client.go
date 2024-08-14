@@ -109,7 +109,7 @@ type ConsoleClient interface {
 	DeleteNotificationRouter(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteNotificationRouter, error)
 	UpsertNotificationRouter(ctx context.Context, attributes NotificationRouterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertNotificationRouter, error)
 	ListObservabilityProviders(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListObservabilityProviders, error)
-	GetObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error)
+	GetObservabilityProvider(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error)
 	UpsertObservabilityProvider(ctx context.Context, attributes ObservabilityProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityProvider, error)
 	DeleteObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityProvider, error)
 	UpsertPolicyConstraints(ctx context.Context, constraints []*PolicyConstraintAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPolicyConstraints, error)
@@ -21114,8 +21114,8 @@ func (c *Client) ListObservabilityProviders(ctx context.Context, after *string, 
 	return &res, nil
 }
 
-const GetObservabilityProviderDocument = `query GetObservabilityProvider ($id: ID!) {
-	observabilityProvider(id: $id) {
+const GetObservabilityProviderDocument = `query GetObservabilityProvider ($id: ID, $name: String) {
+	observabilityProvider(id: $id, name: $name) {
 		... ObservabilityProviderFragment
 	}
 }
@@ -21128,9 +21128,10 @@ fragment ObservabilityProviderFragment on ObservabilityProvider {
 }
 `
 
-func (c *Client) GetObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error) {
+func (c *Client) GetObservabilityProvider(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error) {
 	vars := map[string]any{
-		"id": id,
+		"id":   id,
+		"name": name,
 	}
 
 	var res GetObservabilityProvider

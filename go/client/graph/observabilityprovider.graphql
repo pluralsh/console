@@ -5,8 +5,8 @@ query ListObservabilityProviders($after: String, $first: Int, $before: String, $
   }
 }
 
-query GetObservabilityProvider($id: ID!) {
-  observabilityProvider(id: $id) {
+query GetObservabilityProvider($id: ID, $name: String) {
+  observabilityProvider(id: $id, name: $name) {
     ...ObservabilityProviderFragment
   }
 }
