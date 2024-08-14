@@ -97,14 +97,20 @@ export function DataSelectInputs({
         justifyContent: 'flex-end',
       }}
     >
-      <IconExpander icon={<SearchIcon />}>
+      <IconExpander
+        icon={<SearchIcon />}
+        {...(filter && { borderColor: theme.colors['border-primary'] })}
+      >
         <ExpandedInput
           inputValue={filter}
           onChange={setFilter}
         />
       </IconExpander>
       {namespaced && (
-        <IconExpander icon={<FiltersIcon />}>
+        <IconExpander
+          icon={<FiltersIcon />}
+          {...(namespace && { borderColor: theme.colors['border-primary'] })}
+        >
           <NamespaceFilter
             namespaces={namespaces}
             namespace={namespace}
