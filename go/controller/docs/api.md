@@ -16,6 +16,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [DeploymentSettings](#deploymentsettings)
 - [GitRepository](#gitrepository)
 - [GlobalService](#globalservice)
+- [HelmRepository](#helmrepository)
 - [InfrastructureStack](#infrastructurestack)
 - [ManagedNamespace](#managednamespace)
 - [NamespaceCredentials](#namespacecredentials)
@@ -32,6 +33,8 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ServiceAccount](#serviceaccount)
 - [ServiceDeployment](#servicedeployment)
 - [StackDefinition](#stackdefinition)
+
+
 
 
 
@@ -752,6 +755,148 @@ _Appears in:_
 | `password` _string_ | password to connect w/ for basic auth |  |  |
 
 
+
+
+#### HelmRepository
+
+
+
+
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `HelmRepository` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[HelmRepositorySpec](#helmrepositoryspec)_ | Spec reflects a Console API Helm repository spec. |  | Required: {} <br /> |
+
+
+#### HelmRepositoryAuth
+
+
+
+
+
+
+
+_Appears in:_
+- [HelmRepositorySpec](#helmrepositoryspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `basic` _[HelmRepositoryAuthBasic](#helmrepositoryauthbasic)_ |  |  | Optional: {} <br /> |
+| `bearer` _[HelmRepositoryAuthBearer](#helmrepositoryauthbearer)_ |  |  | Optional: {} <br /> |
+| `aws` _[HelmRepositoryAuthAWS](#helmrepositoryauthaws)_ |  |  | Optional: {} <br /> |
+| `azure` _[HelmRepositoryAuthAzure](#helmrepositoryauthazure)_ |  |  | Optional: {} <br /> |
+| `gcp` _[HelmRepositoryAuthGCP](#helmrepositoryauthgcp)_ |  |  | Optional: {} <br /> |
+
+
+#### HelmRepositoryAuthAWS
+
+
+
+
+
+
+
+_Appears in:_
+- [HelmRepositoryAuth](#helmrepositoryauth)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `accessKey` _string_ |  |  | Optional: {} <br /> |
+| `secretAccessKeySecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | SecretAccessKeySecretRef is a secret reference that should contain secret access key. |  | Optional: {} <br /> |
+| `assumeRoleArn` _string_ |  |  | Optional: {} <br /> |
+
+
+#### HelmRepositoryAuthAzure
+
+
+
+
+
+
+
+_Appears in:_
+- [HelmRepositoryAuth](#helmrepositoryauth)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `clientId` _string_ |  |  | Optional: {} <br /> |
+| `clientSecretSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ClientSecretSecretRef is a secret reference that should contain client secret. |  | Optional: {} <br /> |
+| `tenantId` _string_ |  |  | Optional: {} <br /> |
+| `subscriptionId` _string_ |  |  | Optional: {} <br /> |
+
+
+#### HelmRepositoryAuthBasic
+
+
+
+
+
+
+
+_Appears in:_
+- [HelmRepositoryAuth](#helmrepositoryauth)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `username` _string_ |  |  | Required: {} <br /> |
+| `passwordSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Required: {} <br /> |
+
+
+#### HelmRepositoryAuthBearer
+
+
+
+
+
+
+
+_Appears in:_
+- [HelmRepositoryAuth](#helmrepositoryauth)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `tokenSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ |  |  | Required: {} <br /> |
+
+
+#### HelmRepositoryAuthGCP
+
+
+
+
+
+
+
+_Appears in:_
+- [HelmRepositoryAuth](#helmrepositoryauth)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `applicationCredentialsSecretRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ApplicationCredentialsSecretRef is a secret reference that should contain application credentials. |  | Optional: {} <br /> |
+
+
+#### HelmRepositorySpec
+
+
+
+
+
+
+
+_Appears in:_
+- [HelmRepository](#helmrepository)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL of the Helm repository. |  | Required: {} <br /> |
+| `provider` _[HelmAuthProvider](#helmauthprovider)_ | Provider is the name of the Helm auth provider. |  | Enum: [BASIC BEARER GCP AZURE AWS] <br />Type: string <br /> |
+| `auth` _[HelmRepositoryAuth](#helmrepositoryauth)_ | Auth contains authentication credentials for the Helm repository. |  | Optional: {} <br /> |
 
 
 #### InfrastructureStack
@@ -1737,6 +1882,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
+| `url` _string_ |  |  | Optional: {} <br /> |
 | `valuesFrom` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | Fetches the helm values from a secret in this cluster, will consider any key with yaml data a values file and merge them iteratively |  | Optional: {} <br /> |
 | `valuesConfigMapRef` _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#configmapkeyselector-v1-core)_ |  |  | Optional: {} <br /> |
 | `release` _string_ | name of the helm release to use when applying |  | Optional: {} <br /> |
