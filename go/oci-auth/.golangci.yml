@@ -31,4 +31,3 @@ linters:
     - unconvert
     - unparam
     - unused
-    - vet
