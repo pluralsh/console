@@ -5,8 +5,10 @@ import { BuildType, useCreateBuildMutation } from 'generated/graphql'
 import { Flex, P } from 'honorable'
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 export default function Uninstall() {
+  const theme = useTheme()
   const navigate = useNavigate()
   const { appName } = useParams()
   const [confirm, setConfirm] = useState('')
@@ -27,7 +29,7 @@ export default function Uninstall() {
       heading="Uninstall"
     >
       <Card
-        padding="large"
+        css={{ padding: theme.spacing.large }}
         overflowY="auto"
         maxHeight="100%"
       >
@@ -51,7 +53,7 @@ export default function Uninstall() {
             body2
             color="text-light"
           >
-            To uninstall the application, type the application’s name {appName}{' '}
+            To uninstall the application, type the application's name {appName}{' '}
             to confirm. This is action is <b>destructive</b> and can result in
             underlying data from the application being deleted.
           </P>

@@ -1,6 +1,5 @@
 import { ReactNode } from 'react'
 import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-import { Grommet } from 'grommet'
 import { IntercomProvider } from 'react-use-intercom'
 import { ApolloProvider } from '@apollo/client'
 import { mergeDeep } from '@apollo/client/utilities'
@@ -62,16 +61,7 @@ function ThemeProviders({ children }: { children: ReactNode }) {
           <CssBaseline />
           <GlobalStyle />
           <DocSearchStyles />
-          <PluralErrorBoundary>
-            <Grommet
-              className="grommet-root"
-              // @ts-ignore
-              theme={mergedStyledTheme}
-              themeMode={colorMode === 'light' ? 'light' : 'dark'}
-            >
-              {children}
-            </Grommet>
-          </PluralErrorBoundary>
+          <PluralErrorBoundary>{children}</PluralErrorBoundary>
         </OverlayContextProvider>
       </StyledThemeProvider>
     </ThemeProvider>

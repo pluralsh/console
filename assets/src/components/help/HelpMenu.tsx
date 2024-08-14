@@ -4,7 +4,6 @@ import { ComponentProps } from 'react'
 import {
   Button,
   Card,
-  Chip,
   DocumentIcon,
   LifePreserverIcon,
 } from '@pluralsh/design-system'
@@ -75,17 +74,11 @@ export function HelpMenu({
             color={theme.colors['icon-success']}
           />
         }
-        onClick={() => {
+        onClick={() =>
           changeState(HelpMenuState.docSearch, HelpOpenState.closed)
-        }}
+        }
       >
-        <span>Search docs</span>
-        <Chip
-          size="small"
-          marginLeft={theme.spacing.xsmall}
-        >
-          D
-        </Chip>
+        Search docs
       </HelpMenuButton>
       <HelpMenuButton
         startIcon={
@@ -94,18 +87,10 @@ export function HelpMenu({
             color={theme.colors['icon-info']}
           />
         }
-        onClick={() => {
-          changeState(HelpMenuState.intercom)
-        }}
+        onClick={() => changeState(HelpMenuState.intercom)}
         count={intercomProps.unreadCount}
       >
-        <span>Contact support</span>
-        <Chip
-          size="small"
-          marginLeft={theme.spacing.xsmall}
-        >
-          S
-        </Chip>
+        Contact support
       </HelpMenuButton>
       {/* <HelpMenuButton
         startIcon={

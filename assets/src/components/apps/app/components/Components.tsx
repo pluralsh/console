@@ -5,7 +5,7 @@ import {
   Select,
   SelectButton,
 } from '@pluralsh/design-system'
-import { ReactElement, useEffect, useMemo, useState } from 'react'
+import { ReactElement, useMemo, useState } from 'react'
 
 import styled, { useTheme } from 'styled-components'
 
@@ -98,20 +98,18 @@ export function useComponentKindSelect(
   config?: { width?: number }
 ): {
   selectedKinds: Set<string>
+  allKinds: Set<string>
   kindSelector: ReactElement
 } {
   const kinds = useMemo(() => getUniqueKinds(components || []), [components])
   const [selectedKinds, setSelectedKinds] = useState<Set<string>>(
-    new Set<string>(kinds)
+    new Set<string>()
   )
-
-  useEffect(() => {
-    setSelectedKinds(new Set(kinds))
-  }, [kinds])
 
   return useMemo(
     () => ({
       selectedKinds,
+      allKinds: new Set(kinds),
       kindSelector: (
         <ComponentKindSelect
           {...config}

@@ -210,7 +210,7 @@ defmodule Console.GraphQl.Deployments.Stack do
 
   object :stack_configuration do
     field :image,   :string, description: "optional custom image you might want to use"
-    field :version, non_null(:string), description: "the semver of the tool you wish to use"
+    field :version, :string, description: "the semver of the tool you wish to use"
     field :tag,     :string, description: "the docker image tag you wish to use if you're customizing the version"
     field :hooks,   list_of(:stack_hook), description: "the hooks to customize execution for this stack"
   end
@@ -495,6 +495,14 @@ defmodule Console.GraphQl.Deployments.Stack do
       arg :id, non_null(:id)
 
       resolve &Deployments.kick_stack/2
+    end
+
+    @desc "refresh the source repo of this stack, and potentially create a fresh run for this pr"
+    field :kick_stack_pull_request, :stack_run do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.kick_stack_pr/2
     end
 
     field :approve_stack_run, :stack_run do

@@ -25,11 +25,16 @@ import (
 
 // PrAutomationTriggerSpec defines the desired state of PrAutomationTrigger
 type PrAutomationTriggerSpec struct {
-	// PrAutomationRef pointing to source PrAutomation.
+	// PrAutomationRef pointing to source [PrAutomation]
 	// +kubebuilder:validation:Optional
 	PrAutomationRef *corev1.ObjectReference `json:"prAutomationRef,omitempty"`
 
-	// Context is a PrAutomation context
+	// Branch that should be created against [PrAutomation] base branch
+	// +kubebuilder:validation:Required
+	Branch string `json:"branch,omitempty"`
+
+	// Context is a [PrAutomation] configuration context
+	// +kubebuilder:validation:Optional
 	Context runtime.RawExtension `json:"context,omitempty"`
 }
 

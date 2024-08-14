@@ -1,9 +1,10 @@
-import { ValueFormats } from 'components/runbooks/utils'
 import { Graph } from 'components/utils/Graph'
 import { Div } from 'honorable'
 import { useContext, useMemo } from 'react'
 
 import { DisplayContext } from '../RunbookDisplay'
+
+import { ValueFormats } from './misc'
 
 const convertVals = (v) =>
   v.map(({ timestamp, value }) => ({

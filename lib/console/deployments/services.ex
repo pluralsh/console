@@ -175,7 +175,7 @@ defmodule Console.Deployments.Services do
   defp tarfile(%Service{} = svc), do: Git.Discovery.fetch(svc)
 
   defp maybe_values(files, %Service.Helm{values: vals}) when is_binary(vals),
-    do: Map.merge(files, %{"values.yaml.liquid" => vals, "values.yaml.static" => vals})
+    do: Map.merge(files, %{"values.yaml.static" => vals})
   defp maybe_values(files, _), do: files
 
   def referenced?(id) do

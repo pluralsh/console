@@ -170,6 +170,7 @@ function Metric({
   cluster,
   ...props
 }) {
+  const theme = useTheme()
   const clusterInfix = cluster ? `cluster="${cluster?.handle}",` : ''
   const { data } = useUsageQuery({
     variables: {
@@ -216,9 +217,11 @@ function Metric({
 
   return (
     <Card
-      overflow="auto"
-      padding="medium"
-      gap="small"
+      css={{
+        padding: theme.spacing.medium,
+        overflow: 'auto',
+        gap: theme.spacing.small,
+      }}
       {...props}
     >
       {content}

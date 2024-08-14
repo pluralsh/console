@@ -57,6 +57,7 @@ config :console,
   version: Mix.Project.config[:version],
   kas_dns: "https://kas.example.com",
   qps: 1_000,
+  nowatchers: false,
   jwt_pub_key: or_nil.(File.read("config/pubkey.pem"))
 
 config :logger, :console,
@@ -91,6 +92,7 @@ config :console,
   optional_watchers: [
     Console.Watchers.Application,
     Console.Watchers.Postgres,
+    Console.Watchers.Pod
   ]
 
 config :porcelain, driver: Porcelain.Driver.Basic

@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react'
 import Anser from 'anser'
 import { escapeCarriageReturn } from 'escape-carriage'
-import { Box } from 'grommet'
 
 export function textStyle({ bg, fg, decoration }): any {
   return {
@@ -39,13 +38,14 @@ export const AnsiText = React.memo(({ text }: any) => {
   if (!text) return null
 
   return text.split(/\r?\n/).map((line, ind) => (
-    <Box
+    <div
       key={`${ind}`}
-      flex={false}
-      height="20px"
-      direction="row"
+      css={{
+        height: '20px',
+        width: 'fit-content',
+      }}
     >
       <AnsiLine line={line} />
-    </Box>
+    </div>
   ))
 })

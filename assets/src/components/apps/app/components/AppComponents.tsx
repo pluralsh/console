@@ -23,7 +23,7 @@ export default function AppComponents() {
 
   useSetBreadcrumbs(breadcrumbs)
 
-  const { kindSelector, selectedKinds } = useComponentKindSelect(
+  const { kindSelector, selectedKinds, allKinds } = useComponentKindSelect(
     currentApp?.status?.components
   )
 
@@ -40,7 +40,7 @@ export default function AppComponents() {
             : undefined
         }
         components={currentApp?.status?.components}
-        selectedKinds={selectedKinds}
+        selectedKinds={selectedKinds.size > 0 ? selectedKinds : allKinds}
       />
     </ScrollablePage>
   )

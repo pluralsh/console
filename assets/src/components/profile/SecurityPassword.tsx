@@ -1,6 +1,5 @@
-import { Box } from 'grommet'
 import { Button, Div } from 'honorable'
-import { ContentCard, ValidatedInput } from '@pluralsh/design-system'
+import { ContentCard, Flex, ValidatedInput } from '@pluralsh/design-system'
 import { useContext, useState } from 'react'
 import { UPDATE_USER } from 'components/graphql/users'
 import { useMutation } from '@apollo/client'
@@ -20,7 +19,10 @@ function UpdatePassword({ cancel }: any) {
   })
 
   return (
-    <Box gap="small">
+    <Flex
+      flexDirection="column"
+      gap="small"
+    >
       <ValidatedInput
         width="100%"
         label="Current password"
@@ -53,10 +55,9 @@ function UpdatePassword({ cancel }: any) {
             : { error: false, message: 'passwords match!' }
         }
       />
-      <Box
-        direction="row"
-        align="center"
-        justify="end"
+      <Flex
+        alignItems="center"
+        justifyContent="flex-end"
         gap="small"
       >
         <Button
@@ -74,8 +75,8 @@ function UpdatePassword({ cancel }: any) {
         >
           Update password
         </Button>
-      </Box>
-    </Box>
+      </Flex>
+    </Flex>
   )
 }
 
@@ -87,9 +88,9 @@ export default function SecurityPassword() {
 
   return (
     <ContentCard overflowY="auto">
-      <Box
-        gap="medium"
-        fill
+      <Flex
+        flexDirection="column"
+        gap="large"
       >
         <Div
           body1
@@ -109,7 +110,7 @@ export default function SecurityPassword() {
           )}
           {pass && <UpdatePassword cancel={() => setPass(false)} />}
         </div>
-      </Box>
+      </Flex>
     </ContentCard>
   )
 }

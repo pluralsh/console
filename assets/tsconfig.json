@@ -20,4 +20,5 @@
     "types": ["vite/client", "vitest/globals"]
   },
   "include": ["src"],
+  "exclude": ["src/archive"]
 }

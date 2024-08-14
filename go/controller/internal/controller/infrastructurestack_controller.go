@@ -18,8 +18,17 @@ package controller
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
+	"time"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -32,18 +41,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	console "github.com/pluralsh/console/go/client"
-
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
-const InfrastructureStackFinalizer = "deployments.plural.sh/stack-protection"
+const (
+	InfrastructureStackFinalizer    = "deployments.plural.sh/stack-protection"
+	requeueAfterInfrastructureStack = 2 * time.Minute
+)
 
 // InfrastructureStackReconciler reconciles a InfrastructureStack object
 type InfrastructureStackReconciler struct {
@@ -143,6 +146,9 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			if goerrors.Is(err, operrors.ErrRetriable) {
+				return requeue, nil
+			}
 			return ctrl.Result{}, err
 		}
 
@@ -165,6 +171,9 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		attr, err := r.getStackAttributes(ctx, stack, attributes)
 		if err != nil {
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			if goerrors.Is(err, operrors.ErrRetriable) {
+				return requeue, nil
+			}
 			return ctrl.Result{}, err
 		}
 
@@ -188,7 +197,7 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
-	return requeue, nil
+	return RequeueAfter(requeueAfterInfrastructureStack), nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -371,6 +380,9 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 	attr.JobSpec = jobSpec
 
 	if stack.Spec.Bindings != nil {
+		if err := r.ensure(stack); err != nil {
+			return nil, err
+		}
 		attr.ReadBindings = policyBindings(stack.Spec.Bindings.Read)
 		attr.WriteBindings = policyBindings(stack.Spec.Bindings.Write)
 	}
@@ -553,4 +565,30 @@ func (r *InfrastructureStackReconciler) handleObservableMetrics(
 	}
 
 	return metrics, nil, nil
+}
+
+// ensure makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (r *InfrastructureStackReconciler) ensure(stack *v1alpha1.InfrastructureStack) error {
+	if stack.Spec.Bindings == nil {
+		return nil
+	}
+
+	bindings, req, err := ensureBindings(stack.Spec.Bindings.Read, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	stack.Spec.Bindings.Read = bindings
+
+	bindings, req2, err := ensureBindings(stack.Spec.Bindings.Write, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	stack.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return operrors.ErrRetriable
+	}
+
+	return nil
 }

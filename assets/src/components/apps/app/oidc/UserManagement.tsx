@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@apollo/client'
 import { Flex, P } from 'honorable'
-import { GqlError } from 'forge-core'
 import sortBy from 'lodash/sortBy'
 import uniqBy from 'lodash/uniqBy'
 
@@ -13,6 +12,8 @@ import { useNavBlocker } from 'components/hooks/useNavBlocker'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import { GqlError } from 'components/utils/Alert'
 
 import {
   BindingInput,

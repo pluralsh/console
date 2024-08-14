@@ -1,6 +1,3 @@
-import { normalizeColor } from 'grommet/utils'
-import { useMemo } from 'react'
-
 export const COLORS = [
   '#99DAFF',
   '#D596F4',
@@ -50,11 +47,4 @@ export function shadeColor(color, percent) {
   return `#${(0x1000000 + coerce(R) * 0x10000 + coerce(B) * 0x100 + coerce(G))
     .toString(16)
     .slice(1)}`
-}
-
-export function useColorMap(theme, colors = COLORS) {
-  return useMemo(
-    () => colors.map((c) => normalizeColor(c, theme)),
-    [theme, colors]
-  )
 }

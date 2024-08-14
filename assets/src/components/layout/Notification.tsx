@@ -1,10 +1,14 @@
-import { AppIcon, Button, CollapseIcon } from '@pluralsh/design-system'
+import {
+  Accordion,
+  AccordionItem,
+  AppIcon,
+  Button,
+} from '@pluralsh/design-system'
 import { getIcon, hasIcons } from 'components/apps/misc'
 import { InstallationContext } from 'components/Installations'
-import { Collapsible } from 'grommet'
 import { Flex, P } from 'honorable'
 import moment from 'moment'
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -13,7 +17,6 @@ import NotificationSeverity from './NotificationSeverity'
 export default function Notification({ notification, closePanel }: any) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const [open, setOpen] = useState<boolean>(false)
   const { applications } = useContext<any>(InstallationContext)
   const app = useMemo(
     () => applications.find(({ name }) => name === notification.repository),
@@ -22,64 +25,45 @@ export default function Notification({ notification, closePanel }: any) {
   const { title, description, severity, seenAt } = notification
 
   return (
-    <>
-      <Flex
-        align="center"
-        borderBottom="1px solid border"
-        color="inherit"
-        cursor="pointer"
-        gap="small"
-        onClick={() => setOpen(!open)}
-        padding="medium"
-        textDecoration="none"
-        width="100%"
-        _hover={{ backgroundColor: 'fill-one-hover' }}
-      >
-        {hasIcons(app) && (
-          <AppIcon
-            url={getIcon(app, theme.mode)}
-            hue="lighter"
-            size="xxsmall"
-          />
-        )}
-        <div>
-          <P
-            body2
-            fontWeight={600}
+    <Accordion type="single">
+      <AccordionItem
+        css={{ borderTop: theme.borders.default }}
+        paddingArea="trigger-only"
+        trigger={
+          <Flex
+            align="center"
+            color="inherit"
+            cursor="pointer"
+            gap="small"
+            width="100%"
+            marginRight={theme.spacing.small}
           >
-            {title}
-          </P>
-          <P
-            caption
-            color="text-xlight"
-            whiteSpace="nowrap"
-          >
-            {moment(seenAt).format('MMM D, h:mm')}
-          </P>
-        </div>
-        <Flex grow={1} />
-        <NotificationSeverity severity={severity} />
-        <CollapseIcon
-          marginLeft="8px"
-          size={8}
-          style={
-            open
-              ? {
-                  transform: 'rotate(270deg)',
-                  transitionDuration: '.2s',
-                  transitionProperty: 'transform',
-                }
-              : {
-                  transform: 'rotate(180deg)',
-                  transitionDuration: '.2s',
-                  transitionProperty: 'transform',
-                }
-          }
-        />
-      </Flex>
-      <Collapsible
-        open={open}
-        direction="vertical"
+            {hasIcons(app) && (
+              <AppIcon
+                url={getIcon(app, theme.mode)}
+                hue="lighter"
+                size="xxsmall"
+              />
+            )}
+            <div>
+              <P
+                body2
+                fontWeight={600}
+              >
+                {title}
+              </P>
+              <P
+                caption
+                color="text-xlight"
+                whiteSpace="nowrap"
+              >
+                {moment(seenAt).format('MMM D, h:mm')}
+              </P>
+            </div>
+            <Flex grow={1} />
+            <NotificationSeverity severity={severity} />
+          </Flex>
+        }
       >
         <Flex
           backgroundColor="fill-zero"
@@ -108,7 +92,7 @@ export default function Notification({ notification, closePanel }: any) {
             </Button>
           </div>
         </Flex>
-      </Collapsible>
-    </>
+      </AccordionItem>
+    </Accordion>
   )
 }

@@ -1,9 +1,10 @@
-import { createContext, useContext, useMemo, useState } from 'react'
-import { ThemeContext } from 'grommet'
+import { createContext, useMemo, useState } from 'react'
 
 import { Card } from '@pluralsh/design-system'
 
 import { Flex } from 'honorable'
+
+import { useTheme } from 'styled-components'
 
 import { recurse } from './display/misc'
 
@@ -14,7 +15,8 @@ export function RunbookDisplay({
   root: { children, attributes },
   ...props
 }) {
-  const theme = useContext(ThemeContext)
+  const theme = useTheme()
+
   const datasources = useMemo(
     () =>
       data
@@ -28,7 +30,7 @@ export function RunbookDisplay({
     // eslint-disable-next-line react/jsx-no-constructed-context-values
     <DisplayContext.Provider value={{ datasources, context, setContext }}>
       <Card
-        padding="large"
+        css={{ padding: theme.spacing.large }}
         {...props}
       >
         <Flex

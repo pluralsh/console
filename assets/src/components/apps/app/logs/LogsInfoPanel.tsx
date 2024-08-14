@@ -1,5 +1,4 @@
-import { Card, CloseIcon } from '@pluralsh/design-system'
-import { Layer } from 'grommet'
+import { CloseIcon, Modal } from '@pluralsh/design-system'
 import { Div, Flex, Span } from 'honorable'
 
 export function LogsInfoPanel({
@@ -8,53 +7,44 @@ export function LogsInfoPanel({
   onClose = (_) => {},
   contentHeight = 300,
   children,
-  marginTop = '0',
 }) {
   return (
-    <Layer
-      plain
-      onClickOutside={onClose}
-      position="top-right"
-      margin={{ top: marginTop }}
+    <Modal
+      open
+      size="medium"
+      onClose={onClose}
     >
-      <Card
-        fillLevel={2}
-        width={420}
-        overflow="hidden"
-        margin="large"
+      <Div
+        height={80}
+        padding="medium"
+        borderBottom="1px solid border-fill-two"
       >
-        <Div
-          height={80}
-          padding="medium"
-          borderBottom="1px solid border-fill-two"
-        >
-          <Flex justify="space-between">
-            <Span
-              fontSize={18}
-              fontWeight={500}
-              lineHeight="24px"
-            >
-              {title}
-            </Span>
-            <CloseIcon
-              cursor="pointer"
-              onClick={(e) => onClose(e)}
-            />
-          </Flex>
-          <Div
-            body2
-            color="text-xlight"
+        <Flex justify="space-between">
+          <Span
+            fontSize={18}
+            fontWeight={500}
+            lineHeight="24px"
           >
-            {subtitle}
-          </Div>
-        </Div>
+            {title}
+          </Span>
+          <CloseIcon
+            cursor="pointer"
+            onClick={(e) => onClose(e)}
+          />
+        </Flex>
         <Div
-          overflowY="auto"
-          height={contentHeight}
+          body2
+          color="text-xlight"
         >
-          {children}
+          {subtitle}
         </Div>
-      </Card>
-    </Layer>
+      </Div>
+      <Div
+        overflowY="auto"
+        height={contentHeight}
+      >
+        {children}
+      </Div>
+    </Modal>
   )
 }

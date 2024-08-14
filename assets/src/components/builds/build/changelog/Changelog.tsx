@@ -107,7 +107,7 @@ export default function Changelog() {
         {currentTool && (
           <Card
             marginVertical="medium"
-            padding="small"
+            css={{ padding: theme.spacing.small }}
             flexGrow={1}
             flexShrink={1}
             overflowY="auto"

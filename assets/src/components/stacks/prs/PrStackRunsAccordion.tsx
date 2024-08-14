@@ -5,9 +5,15 @@ import {
   DropdownArrowIcon,
   EmptyState,
   IconFrame,
+  ReloadIcon,
+  Toast,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { PullRequestFragment, useStackRunsQuery } from 'generated/graphql'
+import {
+  PullRequestFragment,
+  useKickStackPullRequestMutation,
+  useStackRunsQuery,
+} from 'generated/graphql'
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
@@ -109,6 +115,7 @@ function PrStackRunsAccordionTrigger({
       <span>{pr.title}</span>
       <PrStatusChip status={pr.status} />
       {pr.creator && <span>created by {pr.creator}</span>}
+      <ResyncStackPr id={pr.id} />
       <IconFrame
         icon={<ArrowTopRightIcon />}
         as={EndLinkSC}
@@ -118,8 +125,41 @@ function PrStackRunsAccordionTrigger({
   )
 }
 
+function ResyncStackPr({ id }: { id: string }) {
+  const [mutation, { loading, error }] = useKickStackPullRequestMutation({
+    variables: { id },
+  })
+
+  return (
+    <>
+      <IconFrame
+        css={{ marginLeft: 'auto' }}
+        disabled={loading}
+        clickable
+        type="floating"
+        tooltip="Resync"
+        icon={<ReloadIcon />}
+        onClick={(e) => {
+          e.stopPropagation()
+          mutation()
+        }}
+      />
+      {error && (
+        <Toast
+          heading="Resync error"
+          severity="danger"
+          closeTimeout={4500}
+          margin="large"
+          marginRight="xxxxlarge"
+        >
+          {error.message}
+        </Toast>
+      )}
+    </>
+  )
+}
+
 const EndLinkSC = styled(Link)(({ theme }) => ({
-  marginLeft: 'auto',
   '&:hover': {
     background: theme.colors['fill-two-hover'],
   },

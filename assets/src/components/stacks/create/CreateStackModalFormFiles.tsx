@@ -113,9 +113,9 @@ export function CreateStackModalFormFiles({
           {items.map(({ file, errors }, i) => (
             <Card
               fillLevel={2}
-              padding="medium"
               key={i}
               css={{
+                padding: theme.spacing.medium,
                 display: 'flex',
                 flexDirection: 'column',
                 gap: theme.spacing.small,

@@ -774,6 +774,9 @@ type RootMutationType {
   "refresh the source repo of this stack, and potentially create a fresh run"
   kickStack(id: ID!): StackRun
 
+  "refresh the source repo of this stack, and potentially create a fresh run for this pr"
+  kickStackPullRequest(id: ID!): StackRun
+
   approveStackRun(id: ID!): StackRun
 
   restartStackRun(id: ID!): StackRun
@@ -1432,7 +1435,7 @@ type StackConfiguration {
   image: String
 
   "the semver of the tool you wish to use"
-  version: String!
+  version: String
 
   "the docker image tag you wish to use if you're customizing the version"
   tag: String

@@ -1,10 +1,11 @@
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-import { query } from 'components/runbooks/utils'
 import { get } from 'lodash'
 import { useContext, useMemo } from 'react'
 
 import { DisplayContext } from '../RunbookDisplay'
+
+import { query } from './misc'
 
 const columnHelper = createColumnHelper<any>()
 

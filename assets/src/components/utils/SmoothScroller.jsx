@@ -12,7 +12,8 @@ import {
 } from 'react-window'
 import Autosizer from 'react-virtualized-auto-sizer'
 import memoize from 'memoize-one'
-import { CellMeasurer } from 'forge-core'
+
+import { CellMeasurer } from './CellMeasurer'
 
 class SmartLoader extends PureComponent {
   _listRef = null

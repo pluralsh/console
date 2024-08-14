@@ -147,7 +147,7 @@ func (in *ProjectReconciler) addOrRemoveFinalizer(ctx context.Context, project *
 				// If it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-				return &ctrl.Result{}
+				return &requeue
 			}
 
 			// project deletion is synchronous so can just fall back to removing the finalizer and reconciling
@@ -210,6 +210,10 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 		return nil, err
 	}
 
+	if err := in.ensure(project); err != nil {
+		return nil, err
+	}
+
 	// Update only if Project has changed
 	if changed && exists {
 		logger.Info(fmt.Sprintf("updating project %s", project.ConsoleName()))
@@ -222,10 +226,6 @@ func (in *ProjectReconciler) sync(ctx context.Context, project *v1alpha1.Project
 	}
 
 	logger.Info(fmt.Sprintf("%s project does not exist, creating it", project.ConsoleName()))
-	if err := in.ensure(project); err != nil {
-		return nil, err
-	}
-
 	return in.ConsoleClient.CreateProject(ctx, project.Attributes())
 }
 
