@@ -1,13 +1,18 @@
 import {
   Breadcrumb,
+  Card,
   EmptyState,
+  Flex,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import {
+  ServiceDeploymentRevisionFragment,
+  useServiceDeploymentRevisionsQuery,
+} from 'generated/graphql'
+import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import isEmpty from 'lodash/isEmpty'
-import { useServiceDeploymentRevisionsQuery } from 'generated/graphql'
 
 import {
   CD_REL_PATH,
@@ -19,7 +24,14 @@ import { mapExistingNodes } from 'utils/graphql'
 import { GqlError } from 'components/utils/Alert'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
+
+import { useTheme } from 'styled-components'
+
+import moment from 'moment'
+
+import { CaptionText } from 'components/cluster/TableElements'
 
 import { columns } from '../ServiceRevisionColumns'
 
@@ -29,6 +41,7 @@ import {
 } from './ServiceDetails'
 
 export default function ServiceRevisions() {
+  const theme = useTheme()
   const { serviceId, clusterId } = useParams<{
     [SERVICE_PARAM_ID]: string
     [SERVICE_PARAM_CLUSTER_ID]: string
@@ -64,11 +77,18 @@ export default function ServiceRevisions() {
     return <LoadingIndicator />
   }
 
+  const currentRevision = data.serviceDeployment.revision
+
   return (
-    <ScrollablePage
-      scrollable={false}
-      heading="Revisions"
+    <Flex
+      flexDirection="column"
+      overflow="hidden"
+      gap="small"
+      marginBottom={theme.spacing.large}
     >
+      <ConsolePageTitle heading="Revisions" />
+      {currentRevision && <CurrentRevision revision={currentRevision} />}
+      <h3 css={theme.partials.text.subtitle2}>All revisions</h3>
       {isEmpty(revisions) ? (
         <EmptyState message="No revisions" />
       ) : (
@@ -77,18 +97,70 @@ export default function ServiceRevisions() {
             data={revisions}
             columns={columns}
             css={{
-              maxHeight: 'unset',
               height: '100%',
             }}
             reactTableOptions={{
               meta: {
                 refetch,
-                currentRevision: data.serviceDeployment.revision,
+                currentRevision,
               },
             }}
           />
         </FullHeightTableWrap>
       )}
-    </ScrollablePage>
+    </Flex>
+  )
+}
+
+function CurrentRevision({
+  revision,
+}: {
+  revision: ServiceDeploymentRevisionFragment
+}) {
+  const theme = useTheme()
+  const ref = revision.helm?.chart
+    ? `${revision.helm.chart}@${revision.helm.version}`
+    : revision.git?.ref
+
+  return (
+    <Flex
+      flexDirection="column"
+      gap="small"
+      marginBottom={theme.spacing.medium}
+    >
+      <Flex
+        justify="space-between"
+        align="center"
+      >
+        <h3 css={theme.partials.text.subtitle2}>Current revision</h3>
+        <CaptionText>
+          {moment(revision.insertedAt).format('ll h:mma')}
+        </CaptionText>
+      </Flex>
+      <Card
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.xsmall,
+          padding: theme.spacing.medium,
+        }}
+      >
+        <Flex
+          gap="xsmall"
+          align="center"
+        >
+          <span css={theme.partials.text.body1Bold}>{ref}</span>
+          <CaptionText>{`sha: ${revision.sha}`}</CaptionText>
+        </Flex>
+        <span
+          css={{
+            ...theme.partials.text.body2,
+            color: theme.colors['text-light'],
+          }}
+        >
+          {revision.message}
+        </span>
+      </Card>
+    </Flex>
   )
 }
