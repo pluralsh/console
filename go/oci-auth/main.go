@@ -8,7 +8,7 @@ import (
 	"github.com/pluralsh/console/go/oci-auth/internal/router"
 	"k8s.io/klog/v2"
 
-	// Importing route packages forces route registration
+	// Importing route packages forces route registration.
 	_ "github.com/pluralsh/console/go/oci-auth/internal/handlers/auth"
 )
 

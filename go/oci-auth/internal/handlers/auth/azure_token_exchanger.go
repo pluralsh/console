@@ -35,7 +35,7 @@ import (
 
 const defaultCacheExpirationInSeconds = 600
 
-// ExchangeACRAccessToken exchanges an ARM access token to an ACR access token
+// ExchangeACRAccessToken exchanges an ARM access token to an ACR access token.
 func ExchangeACRAccessToken(endpoint, accessToken string) (string, error) {
 	exchangeURL, err := url.Parse(endpoint)
 	if err != nil {
@@ -60,7 +60,8 @@ func ExchangeACRAccessToken(endpoint, accessToken string) (string, error) {
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("ACR token exchange endpoint returned error status: %d, response: %s", response.StatusCode, string(responseBody))
+		return "", fmt.Errorf("ACR token exchange endpoint returned error status: %d, response: %s",
+			response.StatusCode, string(responseBody))
 	}
 
 	var tokenResponse struct {

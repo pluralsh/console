@@ -14,7 +14,8 @@ import (
 	"github.com/samber/lo"
 )
 
-func authenticateAzure(ctx context.Context, url string, credentials *AzureCredentials) (*AuthenticationResponse, error) {
+func authenticateAzure(ctx context.Context, url string, credentials *AzureCredentials) (
+	*AuthenticationResponse, error) {
 	split := strings.SplitN(url, "/", 2)
 	if len(split) < 1 {
 		return nil, fmt.Errorf("invalid URL: %s", url)
@@ -33,6 +34,7 @@ func authenticateAzure(ctx context.Context, url string, credentials *AzureCreden
 
 	return &AuthenticationResponse{
 		AuthConfig: authn.AuthConfig{
+			// nolint:lll
 			// See: https://learn.microsoft.com/en-us/azure/container-registry/container-registry-authentication?tabs=azure-cli#az-acr-login-with---expose-token
 			Username: "00000000-0000-0000-0000-000000000000",
 			Password: acrAccessToken,
@@ -49,7 +51,8 @@ func getAccessToken(ctx context.Context, endpoint string, credentials *AzureCred
 
 	// If credentials are provided in the request, then use them.
 	if credentials != nil {
-		cred, err := azidentity.NewClientSecretCredential(credentials.TenantID, credentials.ClientID, credentials.ClientSecret, nil)
+		cred, err := azidentity.NewClientSecretCredential(
+			credentials.TenantID, credentials.ClientID, credentials.ClientSecret, nil)
 		if err != nil {
 			return azcore.AccessToken{}, err
 		}
