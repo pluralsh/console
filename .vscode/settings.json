@@ -2,6 +2,9 @@
   "eslint.workingDirectories": [
     { "directory": "./assets", "changeProcessCWD": true }
   ],
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
   "files.associations": {
     "**/src/archive/**/*": "plaintext"
   }
