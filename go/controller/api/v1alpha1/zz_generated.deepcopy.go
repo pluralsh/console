@@ -3760,6 +3760,11 @@ func (in *StackConfiguration) DeepCopyInto(out *StackConfiguration) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Tag != nil {
+		in, out := &in.Tag, &out.Tag
+		*out = new(string)
+		**out = **in
+	}
 	if in.Hooks != nil {
 		in, out := &in.Hooks, &out.Hooks
 		*out = make([]*StackHook, len(*in))
@@ -3770,11 +3775,6 @@ func (in *StackConfiguration) DeepCopyInto(out *StackConfiguration) {
 				(*in).DeepCopyInto(*out)
 			}
 		}
-	}
-	if in.Tag != nil {
-		in, out := &in.Tag, &out.Tag
-		*out = new(string)
-		**out = **in
 	}
 }
 

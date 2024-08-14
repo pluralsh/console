@@ -2,7 +2,9 @@ package client
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -26,14 +28,23 @@ func (c *client) DeleteObservabilityProvider(ctx context.Context, id string) err
 	return err
 }
 
-func (c *client) GetObservabilityProvider(ctx context.Context, id string) (*console.ObservabilityProviderFragment, error) {
-	response, err := c.consoleClient.GetObservabilityProvider(ctx, id)
+func (c *client) GetObservabilityProvider(ctx context.Context, id, name *string) (*console.ObservabilityProviderFragment, error) {
+	if id != nil && name != nil {
+		return nil, fmt.Errorf("cannot specify both id and name")
+	}
+
+	if id == nil && name == nil {
+		return nil, fmt.Errorf("no id or name specified")
+	}
+
+	resourceName := lo.If(id != nil, id).Else(name)
+	response, err := c.consoleClient.GetObservabilityProvider(ctx, id, name)
 	if internalerror.IsNotFound(err) {
-		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
 	}
 
 	if err == nil && (response == nil || response.ObservabilityProvider == nil) {
-		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+		return nil, errors.NewNotFound(schema.GroupResource{}, *resourceName)
 	}
 
 	if response == nil {
@@ -43,8 +54,8 @@ func (c *client) GetObservabilityProvider(ctx context.Context, id string) (*cons
 	return response.ObservabilityProvider, err
 }
 
-func (c *client) IsObservabilityProviderExists(ctx context.Context, id string) (bool, error) {
-	provider, err := c.GetObservabilityProvider(ctx, id)
+func (c *client) IsObservabilityProviderExists(ctx context.Context, name string) (bool, error) {
+	provider, err := c.GetObservabilityProvider(ctx, nil, &name)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/samber/lo"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -80,6 +81,17 @@ func (in *ObservabilityProviderReconciler) Reconcile(ctx context.Context, req ct
 		return *result, err
 	}
 
+	// Check if resource already exists in the API and only sync the ID
+	exists, err := in.isAlreadyExists(ctx, provider)
+	if err != nil {
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+	if exists {
+		utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionTrue, v1alpha1.ReadonlyConditionReason, v1alpha1.ReadonlyTrueConditionMessage.String())
+		return in.handleExistingProvider(ctx, provider)
+	}
+
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
@@ -130,7 +142,7 @@ func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Cont
 	// If object is being deleted cleanup and remove the finalizer.
 	if !provider.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Remove ObservabilityProvider from Console API if it exists
-		exists, err := in.isAlreadyExists(ctx, provider)
+		exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
 		if err != nil {
 			return &ctrl.Result{}, err
 		}
@@ -158,11 +170,16 @@ func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Cont
 }
 
 func (in *ObservabilityProviderReconciler) isAlreadyExists(ctx context.Context, provider *v1alpha1.ObservabilityProvider) (bool, error) {
-	if !provider.Status.HasID() {
+	exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
+	if err != nil {
+		return false, err
+	}
+
+	if !exists {
 		return false, nil
 	}
 
-	return in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.Status.GetID())
+	return provider.Status.HasID(), nil
 }
 
 func (in *ObservabilityProviderReconciler) sync(
@@ -172,14 +189,14 @@ func (in *ObservabilityProviderReconciler) sync(
 ) (*console.ObservabilityProviderFragment, error) {
 	logger := log.FromContext(ctx)
 
-	exists, err := in.isAlreadyExists(ctx, provider)
+	exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
 	if err != nil {
 		return nil, err
 	}
 
 	// Read the ObservabilityProvider from Console API if it already exists and has not changed
 	if exists && !changed {
-		return in.ConsoleClient.GetObservabilityProvider(ctx, provider.Status.GetID())
+		return in.ConsoleClient.GetObservabilityProvider(ctx, nil, lo.ToPtr(provider.ConsoleName()))
 	}
 
 	// Create/Update the ObservabilityProvider in Console API if it doesn't exist
@@ -190,6 +207,32 @@ func (in *ObservabilityProviderReconciler) sync(
 
 	logger.Info("upsert ObservabilityProvider")
 	return in.ConsoleClient.UpsertObservabilityProvider(ctx, provider.Attributes(c))
+}
+
+func (in *ObservabilityProviderReconciler) handleExistingProvider(ctx context.Context, provider *v1alpha1.ObservabilityProvider) (ctrl.Result, error) {
+	exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	if !exists {
+		provider.Status.ID = nil
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonNotFound, v1alpha1.SynchronizedNotFoundConditionMessage.String())
+		return ctrl.Result{}, nil
+	}
+
+	apiProvider, err := in.ConsoleClient.GetObservabilityProvider(ctx, nil, lo.ToPtr(provider.ConsoleName()))
+	if err != nil {
+		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	provider.Status.ID = &apiProvider.ID
+
+	utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
+	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, metav1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+
+	return requeue, nil
 }
 
 func (in *ObservabilityProviderReconciler) credentials(
