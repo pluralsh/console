@@ -8,14 +8,21 @@ defmodule Console.Deployments.Git.Cmd do
          :ok <- File.chmod(path, 0o400),
       do: {:ok, %{git | private_key_file: path}}
   end
+
   def save_private_key(%GitRepository{connection: %ScmConnection{token: t}} = git) when is_binary(t),
     do: {:ok, %{git | password: t}}
+
   def save_private_key(%GitRepository{
-    connection: %ScmConnection{base_url: url, api_url: api_url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}}
+    connection: %ScmConnection{
+      base_url: url,
+      api_url: api_url,
+      github: %{app_id: app_id, installation_id: inst_id, private_key: pk}
+    }
   } = git) do
     with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk),
       do: {:ok, %{git | password: token}}
   end
+
   def save_private_key(git), do: {:ok, git}
 
   def refresh_key(%GitRepository{private_key_file: f} = git) when is_binary(f) do

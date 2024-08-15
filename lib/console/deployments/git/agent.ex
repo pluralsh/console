@@ -124,7 +124,8 @@ defmodule Console.Deployments.Git.Agent do
          {{:ok, %GitRepository{health: :pullable} = git}, cache} <- {save_status(resp, git), cache} do
       {:noreply, %{state | git: git, cache: cache}}
     else
-      {:git, nil} -> {:stop, {:shutdown, :normal}, state}
+      {:git, nil} ->
+        {:stop, {:shutdown, :normal}, state}
       {{:ok, %GitRepository{url: url, health: :failed} = git}, cache} ->
         Logger.info "failed to clone #{url}, retrying in 30 seconds"
         Process.send_after(self(), :clone, :timer.seconds(30))
