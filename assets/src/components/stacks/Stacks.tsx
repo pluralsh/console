@@ -55,7 +55,6 @@ import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
 import { GqlError } from '../utils/Alert'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
-import { LoadingIndicatorWrap } from '../utils/LoadingIndicator'
 import { StandardScroller } from '../utils/SmoothScroller'
 import { LinkTabWrap } from '../utils/Tabs'
 
@@ -65,6 +64,7 @@ import { MoreMenu } from '../utils/MoreMenu'
 
 import CreateStack from './create/CreateStack'
 import StackCustomRun from './customrun/StackCustomRun'
+import { StackDeletedEmptyState } from './StackDeletedEmptyState'
 import StackDeleteModal from './StackDeleteModal'
 import StackDetachModal from './StackDetachModal'
 import StackPermissionsModal from './StackPermissionsModal'
@@ -160,7 +160,11 @@ export default function Stacks() {
     [data?.infrastructureStacks]
   )
 
-  const { data: stackData } = useStackQuery({
+  const {
+    data: stackData,
+    loading: stackLoading,
+    error: stackError,
+  } = useStackQuery({
     variables: { id: stackId },
     fetchPolicy: 'cache-and-network',
     pollInterval,
@@ -185,7 +189,7 @@ export default function Stacks() {
       </div>
     )
 
-  if (!data) {
+  if (!data || stackLoading) {
     return <LoopingLogo />
   }
 
@@ -303,7 +307,7 @@ export default function Stacks() {
             )}
         </div>
       </div>
-      {stack ? (
+      {stack && !stackError ? (
         <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <div
             css={{
@@ -431,9 +435,7 @@ export default function Stacks() {
           <Outlet context={{ stack, refetch } as StackOutletContextT} />
         </div>
       ) : (
-        <LoadingIndicatorWrap>
-          <LoopingLogo />
-        </LoadingIndicatorWrap>
+        <StackDeletedEmptyState />
       )}
     </ResponsiveLayoutPage>
   )
