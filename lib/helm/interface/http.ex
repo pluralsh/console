@@ -47,8 +47,10 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
     end
   end
 
-  def download(%{client: client}, url, to) do
+  def download(%{client: client}, "https://" <> _ = url, to) do
     Req.Request.delete_option(client, :base_url)
     |> Req.get(url: url, into: to)
   end
+
+  def download(%{client: client}, url, to), do: Req.get(client, url: url, into: to)
 end
