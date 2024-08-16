@@ -7,6 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 )
@@ -27,7 +28,7 @@ func (c *client) DeleteObservabilityProvider(ctx context.Context, id string) err
 }
 
 func (c *client) GetObservabilityProvider(ctx context.Context, id string) (*console.ObservabilityProviderFragment, error) {
-	response, err := c.consoleClient.GetObservabilityProvider(ctx, id)
+	response, err := c.consoleClient.GetObservabilityProvider(ctx, lo.ToPtr(id), nil)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
