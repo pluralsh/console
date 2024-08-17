@@ -357,6 +357,49 @@ defmodule Console.Deployments.Clusters do
   end
 
   @doc """
+  Either creates or updates a virtual cluster parented by another cluster.  This will inherit:
+  * the project of the cluster
+  * bindings of the cluster
+  """
+  @spec upsert_virtual_cluster(map, binary, User.t) :: cluster_resp
+  def upsert_virtual_cluster(attrs, parent_id, %User{} = user) do
+    start_transaction()
+    |> add_operation(:parent, fn _ ->
+      get_cluster!(parent_id)
+      |> Repo.preload([:read_bindings, :write_bindings])
+      |> allow(user, :write)
+    end)
+    |> add_operation(:prior, fn _ ->
+      infer_handle(attrs)
+      |> get_cluster_by_handle()
+      |> ok()
+    end)
+    |> add_operation(:cluster, fn
+      %{
+        prior: %Cluster{parent_cluster_id: id, virtual: true} = prior,
+        parent: %Cluster{id: id}
+      } ->
+        Cluster.changeset(prior, attrs)
+        |> Repo.update()
+      %{prior: nil, parent: %Cluster{project_id: proj_id} = parent} ->
+        %Cluster{project_id: proj_id, virtual: true, parent_cluster_id: parent_id}
+        |> Cluster.changeset(merge_bindings(attrs, parent, ~w(read_bindings write_bindings)a))
+        |> Repo.insert()
+      %{prior: %{handle: handle}} ->
+        {:error, "cluster #{handle} already exists, and is not a virtual cluster within this parent cluster"}
+    end)
+    |> execute()
+    |> case do
+      {:ok, %{prior: %{}, cluster: cluster}} -> notify({:ok, cluster}, :update, user)
+      {:ok, %{prior: nil, cluster: cluster}} -> notify({:ok, cluster}, :create, user)
+      err -> err
+    end
+  end
+
+  defp infer_handle(%{handle: handle}) when is_binary(handle), do: handle
+  defp infer_handle(%{name: name}), do: name
+
+  @doc """
   It will update cluster settings
   """
   @spec update_cluster(map, binary, User.t) :: cluster_resp
@@ -368,7 +411,7 @@ defmodule Console.Deployments.Clusters do
     end)
     |> add_operation(:cluster, fn %{auth: auth} ->
       auth
-      |> Console.Repo.preload([:node_pools, :service, :tags])
+      |> Console.Repo.preload([:node_pools, :service, :tags, :read_bindings, :write_bindings])
       |> Cluster.changeset(attrs)
       |> Repo.update()
     end)
@@ -494,6 +537,20 @@ defmodule Console.Deployments.Clusters do
       |> ok()
     end)
     |> execute(extract: :cluster)
+    |> notify(:delete, user)
+  end
+
+  @doc """
+  Only deletes a virtual clusters
+  """
+  @spec delete_virtual_cluster(binary, User.t) :: cluster_resp
+  def delete_virtual_cluster(id, %User{} = user) when is_binary(id) do
+    case get_cluster!(id) do
+      %Cluster{virtual: true} = cluster -> {:ok, cluster}
+      _ -> {:error, "not a virtual cluster"}
+    end
+    |> when_ok(&allow(&1, user, :write))
+    |> when_ok(:delete)
     |> notify(:delete, user)
   end
 

@@ -82,6 +82,10 @@ k3s:  ## starts a k3d cluster for testing
 	@read -p "cluster name: " name; \
 	k3d cluster create $$name --image docker.io/rancher/k3s:v1.26.11-k3s2
 
+kind:  ## starts a kind cluster for testing
+	@read -p "cluster name: " name; \
+	kind create cluster --name $$name --image kindest/node:v1.23.4
+
 delete-tag:  ## deletes a tag from git locally and upstream
 	@read -p "Version: " tag; \
 	git tag -d $$tag; \
