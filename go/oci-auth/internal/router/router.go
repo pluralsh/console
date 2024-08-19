@@ -23,9 +23,9 @@ func init() {
 
 	router = gin.Default()
 	_ = router.SetTrustedProxies(nil)
-	router.Use(authMiddleware())
 
 	rootGroup = router.Group("/")
+	rootGroup.Use(authMiddleware())
 }
 
 func authMiddleware() gin.HandlerFunc {

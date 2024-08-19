@@ -10,6 +10,7 @@ import (
 
 	// Importing route packages forces route registration.
 	_ "github.com/pluralsh/console/go/oci-auth/internal/handlers/auth"
+	_ "github.com/pluralsh/console/go/oci-auth/internal/handlers/health"
 )
 
 func main() {
