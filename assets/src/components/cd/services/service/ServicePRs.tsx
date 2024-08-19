@@ -66,7 +66,7 @@ export default function ServicePRs() {
           service: service || { id: serviceId || '' },
         }),
         {
-          label: 'prs',
+          label: 'pull requests',
           url: `${CD_REL_PATH}/services/${serviceId}/${SERVICE_PRS_PATH}`,
         },
       ],
