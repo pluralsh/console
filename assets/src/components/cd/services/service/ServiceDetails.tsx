@@ -30,8 +30,10 @@ import {
 } from 'components/contexts/DocPageContext'
 import { getDocsData } from 'components/apps/app/App'
 import {
+  SERVICE_COMPONENTS_PATH,
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
+  SERVICE_PRS_PATH,
   getClusterDetailsPath,
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
@@ -123,7 +125,7 @@ export const getDirectory = ({
 
   return [
     {
-      path: 'components',
+      path: SERVICE_COMPONENTS_PATH,
       label: (
         <FractionalChip
           label="Components"
@@ -143,6 +145,7 @@ export const getDirectory = ({
     { path: 'helm', label: 'Helm values', enabled: isAdmin },
     { path: 'dryrun', label: 'Dry run', enabled: !!dryRun },
     { path: 'revisions', label: 'Revisions', enabled: true },
+    { path: SERVICE_PRS_PATH, label: 'Pull requests', enabled: true },
     {
       path: 'docs',
       label: name ? `${capitalize(name)} docs` : 'Docs',

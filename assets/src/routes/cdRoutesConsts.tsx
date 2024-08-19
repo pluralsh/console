@@ -88,6 +88,7 @@ export const SERVICE_ABS_PATH = getServiceDetailsPath({
   serviceId: `:${SERVICE_PARAM_ID}`,
 })
 export const SERVICE_COMPONENTS_PATH = 'components'
+export const SERVICE_PRS_PATH = 'prs'
 
 export const COMPONENT_PARAM_ID = `componentId` as const
 export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({

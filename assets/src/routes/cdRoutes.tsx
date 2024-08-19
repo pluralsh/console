@@ -84,6 +84,8 @@ import ServicesTable from '../components/cd/services/ServicesTable'
 
 import ClusterPRs from '../components/cd/cluster/ClusterPRs'
 
+import ServicePRs from '../components/cd/services/service/ServicePRs'
+
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
@@ -113,6 +115,7 @@ import {
   SERVICE_COMPONENT_PATH_MATCHER_REL,
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_POD_REL_PATH,
+  SERVICE_PRS_PATH,
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
@@ -454,6 +457,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceErrors />}
       path="errors"
+    />
+    <Route
+      element={<ServicePRs />}
+      path={SERVICE_PRS_PATH}
     />
     <Route
       element={<ServiceSecrets />}
