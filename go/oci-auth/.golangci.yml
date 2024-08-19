@@ -1,0 +1,33 @@
+run:
+  allow-parallel-runners: true
+issues:
+  max-same-issues: 0
+linters:
+  disable-all: true
+  enable:
+    - dupl
+    - durationcheck
+    - errcheck
+    - exportloopref
+    - forcetypeassert
+    - goconst
+    - gocyclo
+    - godot
+    - gofmt
+    - goimports
+    - gosimple
+    - govet
+    - ineffassign
+    - lll
+    - makezero
+    - misspell
+    - nakedret
+    - nilerr
+    - prealloc
+    - predeclared
+    - staticcheck
+    - tenv
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
