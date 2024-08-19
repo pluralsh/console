@@ -50,6 +50,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :cluster_update_attributes do
+    field :name,         :string
     field :version,      :string
     field :handle,       :string, description: "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
     field :service,      :cluster_service_attributes, description: "if you optionally want to reconfigure the git repository for the cluster service"
@@ -60,6 +61,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :metadata,     :json
     field :node_pools,   list_of(:node_pool_attributes)
     field :tags,         list_of(:tag_attributes)
+    field :read_bindings,  list_of(:policy_binding_attributes)
+    field :write_bindings, list_of(:policy_binding_attributes)
   end
 
   input_object :cluster_service_attributes do
@@ -227,6 +230,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :self,            :boolean, description: "whether this is the management cluster itself"
     field :name,            non_null(:string), description: "human readable name of this cluster, will also translate to cloud k8s name"
     field :protect,         :boolean, description: "if true, this cluster cannot be deleted"
+    field :virtual,         :boolean, description: "whether this is actually a virtual cluster"
     field :version,         :string, description: "desired k8s version for the cluster"
     field :distro,          :cluster_distro, description: "the distribution of kubernetes this cluster is running"
     field :metadata,        :map, description: "arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons)"
@@ -267,6 +271,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :pr_automations,   list_of(:pr_automation), resolve: dataloader(Deployments), description: "pr automations that are relevant to managing this cluster"
     field :restore,          :cluster_restore, resolve: dataloader(Deployments), description: "the active restore for this cluster"
     field :object_store,     :object_store, resolve: dataloader(Deployments), description: "the object store connection bound to this cluster for backup/restore"
+    field :parent_cluster,   :cluster, resolve: dataloader(Deployments), description: "the parent of this virtual cluster"
 
     field :nodes, list_of(:node), description: "list cached nodes for a cluster, this can be stale up to 5m",
       resolve: &Deployments.list_nodes/3
@@ -578,6 +583,21 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
       resolve &Deployments.create_runtime_services/2
     end
+
+    field :upsert_virtual_cluster, :cluster do
+      middleware Authenticated
+      arg :attributes, non_null(:cluster_attributes)
+      arg :parent_id,  non_null(:id)
+
+      resolve &Deployments.upsert_virtual_cluster/2
+    end
+
+    field :delete_virtual_cluster, :cluster do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_virtual_cluster/2
+    end
   end
 
   object :public_cluster_queries do
@@ -606,6 +626,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :tag_query,  :tag_query
       arg :backups,    :boolean
       arg :project_id, :id
+      arg :parent_id,  :id
 
       resolve &Deployments.list_clusters/2
     end

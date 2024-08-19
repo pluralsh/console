@@ -9,6 +9,19 @@ defmodule Console.Services.Base do
     end
   end
 
+  def merge_bindings(attrs, resource, types) do
+    Enum.reduce(types, attrs, fn type, attrs ->
+      attr_bindings = Map.get(attrs, type) || []
+      resource_bindings = Map.get(resource, type) || []
+
+      merged = Enum.uniq_by(
+        attr_bindings ++ resource_bindings,
+        & "#{Map.get(&1, :user_id)}:#{Map.get(&1, :group_id)}"
+      )
+      Map.put(attrs, type, merged)
+    end)
+  end
+
   def ok(val), do: {:ok, val}
 
   def should_cache?({:error, _}), do: false

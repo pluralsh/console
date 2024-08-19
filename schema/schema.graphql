@@ -204,7 +204,7 @@ type RootQueryType {
 
   "a relay connection of all clusters visible to the current user"
   clusters(
-    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean, projectId: ID
+    after: String, first: Int, before: String, last: Int, q: String, healthy: Boolean, tag: TagInput, tagQuery: TagQuery, backups: Boolean, projectId: ID, parentId: ID
   ): ClusterConnection
 
   "gets summary information for all healthy\/unhealthy clusters in your fleet"
@@ -706,6 +706,10 @@ type RootMutationType {
 
   "registers a list of runtime services discovered for the current cluster"
   registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
+
+  upsertVirtualCluster(attributes: ClusterAttributes!, parentId: ID!): Cluster
+
+  deleteVirtualCluster(id: ID!): Cluster
 
   "updates only the components of a given service, to be sent after deploy operator syncs"
   updateServiceComponents(
@@ -3423,6 +3427,8 @@ input ClusterPing {
 }
 
 input ClusterUpdateAttributes {
+  name: String
+
   version: String
 
   "a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name"
@@ -3446,6 +3452,10 @@ input ClusterUpdateAttributes {
   nodePools: [NodePoolAttributes]
 
   tags: [TagAttributes]
+
+  readBindings: [PolicyBindingAttributes]
+
+  writeBindings: [PolicyBindingAttributes]
 }
 
 input ClusterServiceAttributes {
@@ -3650,6 +3660,9 @@ type Cluster {
   "if true, this cluster cannot be deleted"
   protect: Boolean
 
+  "whether this is actually a virtual cluster"
+  virtual: Boolean
+
   "desired k8s version for the cluster"
   version: String
 
@@ -3733,6 +3746,9 @@ type Cluster {
 
   "the object store connection bound to this cluster for backup\/restore"
   objectStore: ObjectStore
+
+  "the parent of this virtual cluster"
+  parentCluster: Cluster
 
   "list cached nodes for a cluster, this can be stale up to 5m"
   nodes: [Node]

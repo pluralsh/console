@@ -522,6 +522,62 @@ defmodule Console.Deployments.ClustersTest do
       {:error, _} = Clusters.update_cluster(%{
         write_bindings: [%{user_id: user.id}]
       }, cluster.id, user)
+
+      admin = admin_user()
+
+      {:ok, cluster} = Clusters.update_cluster(%{
+        write_bindings: [%{user_id: admin.id}]
+      }, cluster.id, admin)
+
+      assert Enum.find(cluster.write_bindings, & &1.user_id == admin.id)
+    end
+  end
+
+  describe "#upsert_virtual_cluster/3" do
+    test "it can create a new virtual cluster under a parent" do
+      cluster = insert(:cluster)
+
+      {:ok, virt} = Clusters.upsert_virtual_cluster(%{
+        name: "new-cluster",
+      }, cluster.id, admin_user())
+
+      assert virt.parent_cluster_id == cluster.id
+      assert virt.virtual
+      assert virt.name == "new-cluster"
+      assert virt.handle == "new-cluster"
+
+      assert_receive {:event, %PubSub.ClusterCreated{item: ^virt}}
+    end
+
+    test "it can update a virtual cluster" do
+      cluster = insert(:cluster)
+      virt = insert(:cluster, virtual: true, parent_cluster: cluster, handle: "new-cluster")
+
+      {:ok, updated} = Clusters.upsert_virtual_cluster(%{
+        name: "new-cluster",
+      }, cluster.id, admin_user())
+
+      assert updated.id == virt.id
+      assert updated.parent_cluster_id == cluster.id
+
+      assert_receive {:event, %PubSub.ClusterUpdated{item: ^updated}}
+    end
+
+    test "it will error if no permissions" do
+      cluster = insert(:cluster)
+
+      {:error, _} = Clusters.upsert_virtual_cluster(%{
+        name: "new-cluster",
+      }, cluster.id, insert(:user))
+    end
+
+    test "it will not upsert existing non-virtual clusters" do
+      cluster = insert(:cluster)
+      insert(:cluster, handle: "new-cluster")
+
+      {:error, _} = Clusters.upsert_virtual_cluster(%{
+        name: "new-cluster",
+      }, cluster.id, admin_user())
     end
   end
 

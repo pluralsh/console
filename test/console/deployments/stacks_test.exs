@@ -144,6 +144,29 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackUpdated{item: ^stack}}
     end
 
+    test "you can update bindings" do
+      user = admin_user()
+      stack = insert(:stack)
+
+      {:ok, stack} = Stacks.update_stack(%{
+        name: "my-stack",
+        type: :terraform,
+        approval: true,
+        git: %{ref: "main", folder: "terraform"},
+        write_bindings: [%{user_id: user.id}]
+      }, stack.id, user)
+
+      assert stack.name == "my-stack"
+      assert stack.type == :terraform
+      assert stack.approval
+      assert stack.git.ref == "main"
+      assert stack.git.folder == "terraform"
+
+      assert Enum.find(stack.write_bindings, & &1.user_id == user.id)
+
+      assert_receive {:event, %PubSub.StackUpdated{item: ^stack}}
+    end
+
     test "random users cannot update" do
       stack = insert(:stack)
       user = insert(:user)
