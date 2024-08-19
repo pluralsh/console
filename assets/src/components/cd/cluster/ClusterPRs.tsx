@@ -1,5 +1,4 @@
 import { useTheme } from 'styled-components'
-import Input2 from '@pluralsh/design-system/dist/components/Input2'
 import { Input, LoopingLogo, SearchIcon, Table } from '@pluralsh/design-system'
 import { ComponentProps, useState } from 'react'
 
