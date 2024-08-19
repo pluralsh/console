@@ -25,6 +25,7 @@ import {
   CLUSTER_NODES_PATH,
   CLUSTER_PARAM_ID,
   CLUSTER_PODS_PATH,
+  CLUSTER_PRS_REL_PATH,
   CLUSTER_SERVICES_PATH,
 } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
@@ -46,6 +47,7 @@ const directory = [
   { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
   { path: CLUSTER_LOGS_PATH, label: 'Logs', logs: true },
   { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
+  { path: CLUSTER_PRS_REL_PATH, label: 'PRs' },
 ] as const
 
 const POLL_INTERVAL = 10 * 1000
@@ -130,6 +132,7 @@ export default function Cluster() {
       scrollable={
         tab !== 'services' &&
         tab !== 'pods' &&
+        tab !== CLUSTER_PRS_REL_PATH &&
         tab !== 'addons' &&
         tab !== 'logs'
       }

@@ -26,6 +26,7 @@ export const CLUSTER_PODS_PATH = 'pods' as const
 export const CLUSTER_METADATA_PATH = 'metadata' as const
 export const CLUSTER_ADDONS_REL_PATH = 'addons' as const
 export const CLUSTER_ADDONS_PARAM_ID = 'addOnId' as const
+export const CLUSTER_PRS_REL_PATH = 'prs' as const
 export const CLUSTER_LOGS_PATH = 'logs' as const
 
 export const NODE_PARAM_NAME = 'name' as const
@@ -87,6 +88,7 @@ export const SERVICE_ABS_PATH = getServiceDetailsPath({
   serviceId: `:${SERVICE_PARAM_ID}`,
 })
 export const SERVICE_COMPONENTS_PATH = 'components'
+export const SERVICE_PRS_PATH = 'prs'
 
 export const COMPONENT_PARAM_ID = `componentId` as const
 export const SERVICE_COMPONENT_PATH_MATCHER_REL = getServiceComponentPath({
