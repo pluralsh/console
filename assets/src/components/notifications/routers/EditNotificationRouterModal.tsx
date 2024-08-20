@@ -1,4 +1,10 @@
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import {
+  ComponentProps,
+  FormEvent,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react'
 import {
   Button,
   ComboBox,
@@ -111,7 +117,7 @@ function EditNotificationRouterModalBase({
   const allowSubmit = hasUpdates
 
   const onSubmit = useCallback(
-    (e: SubmitEvent) => {
+    (e: FormEvent) => {
       e.preventDefault()
 
       if (!allowSubmit) {
@@ -135,9 +141,8 @@ function EditNotificationRouterModalBase({
 
   return (
     <ModalAlt
-      portal
       asForm
-      onSubmit={onSubmit}
+      formProps={{ onSubmit }}
       open={open}
       onClose={onClose || undefined}
       header={`Edit notification router${

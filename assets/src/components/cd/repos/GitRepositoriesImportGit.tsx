@@ -122,7 +122,6 @@ export function ImportGitModal({
     <ModalAlt
       header="Import Git"
       open={open}
-      portal
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}

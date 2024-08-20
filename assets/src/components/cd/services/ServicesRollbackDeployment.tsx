@@ -69,6 +69,7 @@ export function ServicesRollbackDeployment({
 }
 
 const ModalSC = styled(Modal)((_) => ({
+  width: 960,
   '&&, && > *, && > * > *': {
     display: 'flex',
     height: '100%',
@@ -167,14 +168,11 @@ export function ModalForm({
   return (
     <ModalSC
       header="Roll back service deployment"
+      size="custom"
       open={open}
-      portal
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}
-      width={960}
-      maxWidth={900}
-      minWidth={100}
     >
       {!data ? (
         error ? (

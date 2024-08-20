@@ -22,7 +22,6 @@ export function LabelsModal({
 }) {
   return (
     <Modal
-      portal
       header={`${poolName ? `${poolName} labels` : 'Labels'}`}
       open={open}
       onClose={onClose}

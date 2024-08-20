@@ -21,7 +21,6 @@ export function ServiceDeprecationsModal({
       size="large"
       maxWidth={1024}
       width={1024}
-      portal
       {...props}
     >
       {isEmpty(deprecations) ? (

@@ -5,12 +5,6 @@ import styled from 'styled-components'
 const ModalAltSC = styled(Modal)(({ theme, actions }) => ({
   padding: 0,
   '&&': {
-    '> :is(div,form) > div:first-child, > div > div:first-child': {
-      // Fixes z-index issue with gql error border
-      // TODO: Fix this in design system modal
-      position: 'relative',
-      zIndex: 0,
-    },
     '& > div > div:first-child, & > form > div:first-child': {
       display: 'flex',
       flexDirection: 'column',
@@ -62,14 +56,12 @@ export default function ModalAlt({
   asForm = false,
   formProps = {},
   ...props
-}: ComponentProps<typeof ModalAltSC> & {
+}: ComponentProps<typeof Modal> & {
   headerContent?: ReactNode
 }) {
   return (
     <ModalAltSC
       size={size}
-      padding={0}
-      fade
       asForm={asForm}
       formProps={formProps}
       actions={actions ? <div className="actions">{actions}</div> : undefined}

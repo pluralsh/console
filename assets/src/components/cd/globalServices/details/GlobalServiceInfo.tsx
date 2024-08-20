@@ -106,7 +106,6 @@ function TagsModalInner({
   return (
     <Modal
       asForm
-      portal
       open={open}
       onClose={onClose}
       header="Edit tags"

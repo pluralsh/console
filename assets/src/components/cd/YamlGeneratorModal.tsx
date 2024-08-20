@@ -76,7 +76,6 @@ export function YamlGeneratorModal({
     <ModalAlt
       header={header}
       open={open}
-      portal
       onClose={() => {
         onClose?.()
         refetch?.()

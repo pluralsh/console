@@ -176,7 +176,6 @@ export function CreateProviderModal({
   if (noMoreClouds) {
     return (
       <Modal
-        portal
         open={open}
         onClose={onClose}
       >
@@ -189,7 +188,6 @@ export function CreateProviderModal({
     <ModalAlt
       header="Create provider"
       open={open}
-      portal
       onClose={closeModal}
       asForm
       formProps={{ onSubmit }}

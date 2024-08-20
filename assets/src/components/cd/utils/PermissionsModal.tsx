@@ -151,7 +151,6 @@ export function PermissionsModal({
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}
-      portal
       size="large"
       maxWidth={1024}
       width={1024}

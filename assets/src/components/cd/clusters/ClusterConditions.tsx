@@ -119,7 +119,6 @@ export function ClusterConditions({
       <ClusterConditionsButton onClick={() => setIsOpen(true)} />
       <ModalMountTransition open={isOpen}>
         <Modal
-          portal
           size="large"
           open={isOpen}
           header={`Cluster conditions${

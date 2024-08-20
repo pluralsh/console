@@ -147,7 +147,6 @@ export function ModalForm({
     <ModalAlt
       header="Update service"
       open={open}
-      portal
       onClose={closeModal}
       asForm
       formProps={{ onSubmit }}

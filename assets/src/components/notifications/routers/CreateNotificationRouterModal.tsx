@@ -12,7 +12,6 @@ export function CreateNotificationRouterModal({
 }) {
   return (
     <Modal
-      portal
       asForm
       onSubmit={(e) => {
         e.preventDefault()

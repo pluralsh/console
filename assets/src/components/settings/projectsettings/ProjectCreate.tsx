@@ -72,7 +72,6 @@ function ProjectCreateModalInner({
   return (
     <Modal
       header="Create project"
-      portal
       open={open}
       onClose={onClose}
       actions={

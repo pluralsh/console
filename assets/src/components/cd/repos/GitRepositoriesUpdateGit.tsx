@@ -122,7 +122,6 @@ export function ModalForm({
     <ModalAlt
       header="Update Git repository"
       open={open}
-      portal
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}

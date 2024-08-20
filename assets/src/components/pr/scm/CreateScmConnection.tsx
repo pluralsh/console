@@ -94,7 +94,6 @@ export function CreateScmConnectionModal({
 
   return (
     <Modal
-      portal
       open={open}
       onClose={onClose || undefined}
       asForm

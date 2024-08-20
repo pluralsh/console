@@ -43,7 +43,6 @@ export default function RoleEdit({ role, open, setOpen }: any) {
   return (
     <Modal
       header="Edit role"
-      portal
       open={open}
       size="large"
       onClose={() => setOpen(false)}

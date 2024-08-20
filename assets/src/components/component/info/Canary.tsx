@@ -7,7 +7,6 @@ import { Chip, Modal, Table } from '@pluralsh/design-system'
 import { Canary, Deployment, Ingress } from 'generated/graphql'
 
 import { InlineLink } from 'components/utils/typography/InlineLink'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { MetadataBase } from '../ComponentMetadata'
 
@@ -44,29 +43,26 @@ const ColDepName = deploymentHelper.accessor((row) => row.metadata?.name, {
         >
           {getValue()}
         </InlineLink>
-        <ModalMountTransition open={isOpen}>
-          <Modal
-            portal
-            open={isOpen}
-            onClose={() => setIsOpen(false)}
-            header={`Deployment – ${original.metadata.name}`}
-            size="large"
+        <Modal
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          header={`Deployment – ${original.metadata.name}`}
+          size="large"
+        >
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.large,
+            }}
           >
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.large,
-              }}
-            >
-              <DeploymentBase deployment={original} />
-              <MetadataBase
-                component={original}
-                metadata={original.metadata}
-              />
-            </div>
-          </Modal>
-        </ModalMountTransition>
+            <DeploymentBase deployment={original} />
+            <MetadataBase
+              component={original}
+              metadata={original.metadata}
+            />
+          </div>
+        </Modal>
       </>
     )
   },
@@ -122,29 +118,26 @@ const ColIngName = ingressHelper.accessor((row) => row.metadata?.name, {
         >
           {getValue()}
         </InlineLink>
-        <ModalMountTransition open={isOpen}>
-          <Modal
-            portal
-            open={isOpen}
-            onClose={() => setIsOpen(false)}
-            header={`Ingress – ${original.metadata.name}`}
-            size="large"
+        <Modal
+          open={isOpen}
+          onClose={() => setIsOpen(false)}
+          header={`Ingress – ${original.metadata.name}`}
+          size="large"
+        >
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.large,
+            }}
           >
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.large,
-              }}
-            >
-              <IngressBase ingress={original} />
-              <MetadataBase
-                component={original}
-                metadata={original.metadata}
-              />
-            </div>
-          </Modal>
-        </ModalMountTransition>
+            <IngressBase ingress={original} />
+            <MetadataBase
+              component={original}
+              metadata={original.metadata}
+            />
+          </div>
+        </Modal>
       </>
     )
   },

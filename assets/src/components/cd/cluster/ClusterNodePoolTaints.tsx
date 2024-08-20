@@ -44,7 +44,6 @@ export function TaintsModal({
 
   return (
     <Modal
-      portal
       header={`${poolName ? `${poolName} taints` : 'Taints'}`}
       open={open}
       onClose={onClose}

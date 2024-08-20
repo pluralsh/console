@@ -61,7 +61,6 @@ function PrSettingsModalInner({
   return (
     <Modal
       asForm
-      portal
       open={open}
       onClose={onClose}
       error={error}
