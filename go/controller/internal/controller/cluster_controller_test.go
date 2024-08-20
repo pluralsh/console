@@ -172,7 +172,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 			Expect(sanitizeClusterStatus(cluster.Status)).To(Equal(sanitizeClusterStatus(v1alpha1.ClusterStatus{
 				Status: v1alpha1.Status{
 					ID:  lo.ToPtr(awsClusterConsoleID),
-					SHA: lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
+					SHA: lo.ToPtr("V4CSBG6ZI7G3HQQD2HXZODXSHVB7YJ4MNF3UW5LXAEZV6TMU5PHA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -230,7 +230,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				CurrentVersion: lo.ToPtr("1.25.6"),
 				Status: v1alpha1.Status{
 					ID:  lo.ToPtr(awsClusterConsoleID),
-					SHA: lo.ToPtr("J7CMSICIXLWV7MCWNPBZUA6FEOI3HGTQMNVLYD6VZXX6Y66S6ETQ===="),
+					SHA: lo.ToPtr("V4CSBG6ZI7G3HQQD2HXZODXSHVB7YJ4MNF3UW5LXAEZV6TMU5PHA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -289,7 +289,7 @@ var _ = Describe("Cluster Controller", Ordered, func() {
 				CurrentVersion: lo.ToPtr("1.25.6"),
 				Status: v1alpha1.Status{
 					ID:  lo.ToPtr(awsClusterConsoleID),
-					SHA: lo.ToPtr("IO7U7VEWAH4NIU5U2647LKOD4DZU2V3YLLRSAPXXBHXZA55KANEA===="),
+					SHA: lo.ToPtr("P3LOSP3TFWSC6JPNBUENRB4PIG3N2WN6RSJ5TLSRZRQFPV6AL54Q===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
