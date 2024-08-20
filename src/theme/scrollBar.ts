@@ -7,14 +7,11 @@ import { type FillLevel } from '../components/contexts/FillLevelContext'
 import { semanticColorCssVars } from './colors'
 
 export const scrollBar = ({ fillLevel }: { fillLevel: FillLevel }) => {
-  const trackColor =
-    fillLevel >= 2
-      ? semanticColorCssVars['fill-three']
-      : semanticColorCssVars['fill-two']
+  const trackColor = 'transparent'
   const barColor =
     fillLevel >= 2
       ? semanticColorCssVars['text-xlight']
-      : semanticColorCssVars['fill-three']
+      : semanticColorCssVars['fill-three-hover']
   const barWidth = 6
   const barRadius = barWidth / 2
 

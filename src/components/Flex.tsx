@@ -1,8 +1,8 @@
-// drop-in replacement for anywhere 'honorable' Flex is used. Moving forward a regular div or a styled component should just be used instead
+// drop-in replacement for anywhere 'honorable' Flex is used
 
 import {
   type CSSProperties,
-  type ComponentProps,
+  type ReactNode,
   type Ref,
   forwardRef,
   memo,
@@ -46,9 +46,11 @@ type FlexBaseProps = {
     | 'space-evenly'
 
   gap?: string
+
+  children?: ReactNode
 }
 
-type FlexProps = CSSProperties & ComponentProps<'div'> & FlexBaseProps
+type FlexProps = Omit<CSSProperties, keyof FlexBaseProps> & FlexBaseProps
 
 function FlexRef(props: FlexProps, ref: Ref<any>) {
   const {

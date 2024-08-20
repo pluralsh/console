@@ -1,3 +1,4 @@
+import { ButtonBase, Flex } from 'honorable'
 import {
   type ComponentProps,
   type ReactElement,
@@ -5,10 +6,11 @@ import {
   cloneElement,
   forwardRef,
 } from 'react'
-import { ButtonBase, Flex, type FlexProps } from 'honorable'
 import styled from 'styled-components'
 
 import { type styledTheme } from '../theme'
+
+import { type SemanticColorKey } from '../theme/colors'
 
 import Tooltip, { type TooltipProps } from './Tooltip'
 
@@ -85,7 +87,7 @@ const sizeToFrameSize: Record<Size, number> = {
   xlarge: 48,
 }
 
-type IconFrameProps = Omit<FlexProps, 'size'> & {
+type IconFrameProps = {
   clickable?: boolean
   disabled?: boolean
   textValue?: string
@@ -95,6 +97,7 @@ type IconFrameProps = Omit<FlexProps, 'size'> & {
   tooltipProps?: Partial<TooltipProps>
   type?: Type
   selected?: boolean
+  background?: SemanticColorKey
 }
 
 const IconFrameSC = styled(Flex)<{
@@ -102,14 +105,17 @@ const IconFrameSC = styled(Flex)<{
   $clickable: boolean
   $selected: boolean
   $size: Size
-}>(({ theme, $type, $clickable, $selected, $size }) => ({
+  $background?: SemanticColorKey
+}>(({ theme, $type, $clickable, $selected, $size, $background }) => ({
   display: 'flex',
   alignItems: 'center',
   alignContent: 'center',
   justifyContent: 'center',
   width: sizeToFrameSize[$size],
   height: sizeToFrameSize[$size],
-  backgroundColor: $selected
+  backgroundColor: $background
+    ? theme.colors[$background]
+    : $selected
     ? typeToSelectedBG(theme)[$type]
     : typeToBG(theme)[$type],
   border: typeToBorder(theme)[$type],
@@ -157,6 +163,7 @@ const IconFrame = forwardRef<
       tooltip,
       tooltipProps,
       type = 'tertiary',
+      background,
       as,
       ...props
     },
@@ -174,6 +181,7 @@ const IconFrame = forwardRef<
         $selected={selected}
         $type={type}
         $size={size}
+        $background={background}
         ref={ref}
         aria-label={textValue}
         disabled={(clickable && disabled) || undefined}
