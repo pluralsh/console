@@ -62,10 +62,17 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
 
   def resolve_stack_definition(%{id: id}, _), do: {:ok, Stacks.get_definition!(id)}
 
-  def resolve_stack(%{id: id}, ctx) do
+  def resolve_stack(%{id: id}, ctx) when is_binary(id) do
     Stacks.get_stack!(id)
     |> allow(actor(ctx), :read)
   end
+
+  def resolve_stack(%{name: name}, ctx) when is_binary(name) do
+    Stacks.get_stack_by_name!(name)
+    |> allow(actor(ctx), :read)
+  end
+
+  def resolve_stack(_, _), do: {:error, "you must specify either an id or name"}
 
   def resolve_stack_run(%{id: id}, ctx) do
     Stacks.get_run!(id)

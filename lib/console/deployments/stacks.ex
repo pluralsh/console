@@ -40,6 +40,9 @@ defmodule Console.Deployments.Stacks do
   @spec get_stack_by_name(binary) :: Stack.t | nil
   def get_stack_by_name(name), do: Repo.get_by(Stack, name: name)
 
+  @spec get_stack_by_name!(binary) :: Stack.t | nil
+  def get_stack_by_name!(name), do: Repo.get_by!(Stack, name: name)
+
   @spec get_run!(binary) :: StackRun.t
   def get_run!(id), do: Repo.get!(StackRun, id)
 

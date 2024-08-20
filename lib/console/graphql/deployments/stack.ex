@@ -431,7 +431,8 @@ defmodule Console.GraphQl.Deployments.Stack do
   object :stack_queries do
     field :infrastructure_stack, :infrastructure_stack do
       middleware Authenticated
-      arg :id, non_null(:id)
+      arg :id,   :id
+      arg :name, :string
 
       resolve &Deployments.resolve_stack/2
     end
