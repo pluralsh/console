@@ -16,12 +16,13 @@ require (
 	go.uber.org/zap v1.27.0
 	k8s.io/api v0.30.0
 	k8s.io/apimachinery v0.31.0-beta.0
-	k8s.io/client-go v0.30.0
 	k8s.io/klog v1.0.0
 	sigs.k8s.io/cluster-api v1.7.4
 	sigs.k8s.io/controller-runtime v0.17.5
 	sigs.k8s.io/yaml v1.4.0
 )
+
+require k8s.io/client-go v0.30.0
 
 require (
 	github.com/99designs/gqlgen v0.17.49 // indirect
@@ -98,4 +99,5 @@ replace (
 	k8s.io/api => k8s.io/api v0.29.3
 	k8s.io/apimachinery => k8s.io/apimachinery v0.29.3
 	k8s.io/client-go => k8s.io/client-go v0.29.3
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.17.5
 )

@@ -94,7 +94,8 @@ func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 	nodePools := algorithms.Map(c.Spec.NodePools, func(np ClusterNodePool) *console.NodePoolAttributes { return np.Attributes() })
 	slices.SortFunc(nodePools, func(a, b *console.NodePoolAttributes) int { return strings.Compare(a.Name, b.Name) })
 	tagAttr := c.TagUpdateAttributes()
-	return console.ClusterUpdateAttributes{
+	attr := console.ClusterUpdateAttributes{
+		Name:      lo.ToPtr(c.ConsoleName()),
 		Handle:    c.Spec.Handle,
 		Version:   c.Spec.Version,
 		Protect:   c.Spec.Protect,
@@ -102,6 +103,11 @@ func (c *Cluster) UpdateAttributes() console.ClusterUpdateAttributes {
 		Tags:      tagAttr.Tags,
 		Metadata:  tagAttr.Metadata,
 	}
+	if c.Spec.Bindings != nil {
+		attr.ReadBindings = PolicyBindings(c.Spec.Bindings.Read)
+		attr.WriteBindings = PolicyBindings(c.Spec.Bindings.Write)
+	}
+	return attr
 }
 
 func (c *Cluster) TagUpdateAttributes() console.ClusterUpdateAttributes {
