@@ -391,7 +391,7 @@ type RootQueryType {
 
   stackRun(id: ID!): StackRun
 
-  infrastructureStack(id: ID!): InfrastructureStack
+  infrastructureStack(id: ID, name: String): InfrastructureStack
 
   stackDefinition(id: ID!): StackDefinition
 

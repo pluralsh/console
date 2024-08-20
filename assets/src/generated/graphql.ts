@@ -5804,7 +5804,8 @@ export type RootQueryTypeHelmRepositoryArgs = {
 
 
 export type RootQueryTypeInfrastructureStackArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 
