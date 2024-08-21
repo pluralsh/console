@@ -1,31 +1,24 @@
 import { Command } from 'cmdk'
-import styled from 'styled-components'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import styled, { useTheme } from 'styled-components'
+
+import { ModalWrapper } from '@pluralsh/design-system'
+
 import chroma from 'chroma-js'
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react'
 
 import CommandPalette from './CommandPalette'
 
-export const Wrapper = styled.div(({ theme }) => ({
-  '[cmdk-overlay]': {
-    backgroundColor: `${chroma(theme.colors.grey[900]).alpha(0.3)}`,
-    inset: 0,
-    position: 'fixed',
-    zIndex: theme.zIndexes.modal,
-  },
-
+export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
+  position: 'relative',
+  top: '-96px',
   '[cmdk-root]': {
     border: theme.borders.input,
     borderRadius: theme.borderRadiuses.large,
     boxShadow: theme.boxShadows.modal,
     display: 'flex',
     flexDirection: 'column',
-    left: '50%',
-    maxHeight: 480,
-    position: 'fixed',
-    top: 128,
-    transform: 'translate(-50%, 0)',
     width: 480,
-    zIndex: theme.zIndexes.modal,
+    maxHeight: 480,
 
     '[cmdk-input]': {
       ...theme.partials.reset.input,
@@ -128,24 +121,26 @@ export default function CommandPaletteDialog({
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
 }) {
-  const container = useRef(null)
+  const theme = useTheme()
   const [value, setValue] = useState('')
 
   useEffect(() => setValue(''), [open])
 
   return (
-    <Wrapper ref={container}>
-      <Command.Dialog
-        open={open}
-        onOpenChange={setOpen}
-        container={container.current ?? undefined}
-      >
+    <Wrapper
+      overlayStyles={{
+        background: `${chroma(theme.colors.grey[900]).alpha(0.3)}`,
+      }}
+      open={open}
+      onOpenChange={setOpen}
+    >
+      <Command>
         <CommandPalette
           value={value}
           setValue={setValue}
           close={() => setOpen(false)}
         />
-      </Command.Dialog>
+      </Command>
     </Wrapper>
   )
 }
