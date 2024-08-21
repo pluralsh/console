@@ -8,6 +8,7 @@ import { StackFile, useStackFilesQuery } from '../../../generated/graphql'
 import OutputValue from '../run/output/Value'
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 const columnHelper = createColumnHelper<StackFile>()
 
@@ -54,11 +55,16 @@ export default function StackFiles() {
   const files = data?.infrastructureStack?.files
 
   return (
-    <Table
-      data={files ?? []}
-      columns={columns}
-      maxHeight="100%"
-      emptyStateProps={{ message: 'No files found.' }}
-    />
+    <FullHeightTableWrap>
+      <Table
+        data={files ?? []}
+        columns={columns}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+        emptyStateProps={{ message: 'No files found.' }}
+      />
+    </FullHeightTableWrap>
   )
 }
