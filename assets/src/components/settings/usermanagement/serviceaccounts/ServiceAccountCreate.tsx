@@ -64,7 +64,6 @@ function ServiceAccountCreateModal({
 
   return (
     <Modal
-      portal
       header="Create service account"
       open={open}
       onClose={() => onClose()}

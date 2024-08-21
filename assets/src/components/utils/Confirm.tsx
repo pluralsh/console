@@ -45,8 +45,6 @@ export function Confirm({
         header={title}
         open={open}
         onClose={close || undefined}
-        width="512px"
-        portal
         actions={
           <>
             <Button

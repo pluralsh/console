@@ -72,7 +72,6 @@ function ClusterSettingsModalInner({
   return (
     <Modal
       asForm
-      portal
       size="large"
       open={open}
       onClose={onClose}

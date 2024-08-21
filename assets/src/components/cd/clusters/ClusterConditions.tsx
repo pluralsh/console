@@ -7,7 +7,6 @@ import {
   Table,
 } from '@pluralsh/design-system'
 import { ClusterCondition, ClustersRowFragment } from 'generated/graphql'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
 import { toDateOrUndef } from 'utils/date'
@@ -117,21 +116,20 @@ export function ClusterConditions({
   return (
     <div onClick={(e) => e.stopPropagation()}>
       <ClusterConditionsButton onClick={() => setIsOpen(true)} />
-      <ModalMountTransition open={isOpen}>
-        <Modal
-          portal
-          size="large"
-          open={isOpen}
-          header={`Cluster conditions${
-            cluster?.name ? ` – ${cluster?.name}` : ''
-          }`}
-          width={1024}
-          maxWidth={1024}
-          onClose={() => setIsOpen(false)}
-        >
-          <ClusterConditionsTable cluster={cluster} />
-        </Modal>
-      </ModalMountTransition>
+      <Modal
+        size="custom"
+        open={isOpen}
+        header={`Cluster conditions${
+          cluster?.name ? ` - ${cluster?.name}` : ''
+        }`}
+        css={{
+          width: 1024,
+          maxWidth: 1024,
+        }}
+        onClose={() => setIsOpen(false)}
+      >
+        <ClusterConditionsTable cluster={cluster} />
+      </Modal>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { ComponentProps, useCallback, useMemo } from 'react'
+import { ComponentProps, FormEvent, useCallback, useMemo } from 'react'
 import { Button, FormField, Input2, Modal } from '@pluralsh/design-system'
 
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
@@ -84,7 +84,7 @@ function UpsertNotificationSinkModal({
   const allowSubmit = hookType && state.name && state.hookUrl && hasUpdates
 
   const onSubmit = useCallback(
-    (e: SubmitEvent) => {
+    (e: FormEvent) => {
       e.preventDefault()
 
       if (!allowSubmit) {
@@ -109,9 +109,8 @@ function UpsertNotificationSinkModal({
 
   return (
     <Modal
-      portal
       asForm
-      onSubmit={onSubmit}
+      formProps={{ onSubmit }}
       open={open}
       onClose={onClose || undefined}
       header={mode === 'edit' ? `Edit sink – ${sink?.name}` : 'New sink'}

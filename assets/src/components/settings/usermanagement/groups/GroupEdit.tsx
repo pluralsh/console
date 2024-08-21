@@ -98,7 +98,6 @@ function EditGroupMembersModal({
   return (
     <Modal
       header={<>Edit members of ‘{group.name}’</>}
-      portal
       open={open}
       size="large"
       onClose={onClose}
@@ -191,7 +190,6 @@ function EditGroupAttributesModal({ group, open, onClose }: any) {
   return (
     <Modal
       header={<>Edit attributes of ‘{group.name}’</>}
-      portal
       open={open}
       size="large"
       onClose={onClose}

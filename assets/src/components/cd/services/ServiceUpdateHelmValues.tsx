@@ -165,7 +165,6 @@ export function ModalFormInner({
     <ModalAlt
       header="Update Helm values"
       open={open}
-      portal
       onClose={closeModal}
       asForm
       formProps={{ onSubmit }}

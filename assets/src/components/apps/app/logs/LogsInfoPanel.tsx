@@ -4,7 +4,7 @@ import { Div, Flex, Span } from 'honorable'
 export function LogsInfoPanel({
   title,
   subtitle,
-  onClose = (_) => {},
+  onClose,
   contentHeight = 300,
   children,
 }) {
@@ -29,7 +29,7 @@ export function LogsInfoPanel({
           </Span>
           <CloseIcon
             cursor="pointer"
-            onClick={(e) => onClose(e)}
+            onClick={onClose}
           />
         </Flex>
         <Div

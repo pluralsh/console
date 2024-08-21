@@ -2,7 +2,7 @@ import { Dispatch, ReactElement, useEffect } from 'react'
 import { useQuery } from '@apollo/client'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { Modal } from '@pluralsh/design-system'
+import { ModalWrapper } from '@pluralsh/design-system'
 
 import { WireguardPeer } from '../graphql/queries'
 import {
@@ -32,12 +32,12 @@ function DownloadConfig({ name, onClose }: DownloadConfigProps): ReactElement {
   }, [name, wireguardPeer?.config, onClose])
 
   return (
-    <Modal
+    <ModalWrapper
       open
-      background="transparent"
+      css={{ overflow: 'hidden' }}
     >
       <LoadingIndicator />
-    </Modal>
+    </ModalWrapper>
   )
 }
 

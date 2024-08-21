@@ -125,7 +125,6 @@ export function CreateGlobalServiceModal({
     <ModalAlt
       header="Create global service"
       open={open}
-      portal
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}

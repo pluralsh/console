@@ -177,7 +177,6 @@ export function PersonaCreateModal({
 
   return (
     <Modal
-      portal
       header="Create persona"
       open={open}
       asForm

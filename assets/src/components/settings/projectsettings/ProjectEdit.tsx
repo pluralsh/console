@@ -46,7 +46,6 @@ function ProjectEditModalInner({
   return (
     <Modal
       header={<>Edit ‘{project.name}’</>}
-      portal
       open={open}
       size="large"
       onClose={onClose}

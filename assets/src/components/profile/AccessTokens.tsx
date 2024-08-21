@@ -199,7 +199,6 @@ function AuditsButton({ token }: { token: AccessTokenFragment }) {
       <Modal
         header="Audit logs"
         open={audits}
-        portal
         onClose={() => setAudits(false)}
       >
         <TokenAudits tokenId={token.id} />

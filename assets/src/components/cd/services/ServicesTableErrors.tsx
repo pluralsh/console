@@ -4,7 +4,6 @@ import { ComponentProps, useState } from 'react'
 import pluralize from 'pluralize'
 
 import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
@@ -40,17 +39,14 @@ export function ServiceErrorsChip({
 
 export function ServiceErrorsModal({ isOpen, setIsOpen, header, errors }) {
   return (
-    <ModalMountTransition open={isOpen}>
-      <Modal
-        portal
-        size="large"
-        header={header}
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-      >
-        <ServiceErrorsTable errors={errors} />
-      </Modal>
-    </ModalMountTransition>
+    <Modal
+      size="large"
+      header={header}
+      open={isOpen}
+      onClose={() => setIsOpen(false)}
+    >
+      <ServiceErrorsTable errors={errors} />
+    </Modal>
   )
 }
 
@@ -85,17 +81,12 @@ export function ServicesTableErrors({
         alwaysShow={alwaysShow}
         {...props}
       />
-      <ModalMountTransition open={isOpen}>
-        <Modal
-          portal
-          size="large"
-          header={`${service?.name} service errors`}
-          open={isOpen}
-          onClose={() => setIsOpen(false)}
-        >
-          <ServiceErrorsTable errors={serviceErrors} />
-        </Modal>
-      </ModalMountTransition>
+      <ServiceErrorsModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        header={`${service?.name} service errors`}
+        errors={serviceErrors}
+      />
     </div>
   )
 }

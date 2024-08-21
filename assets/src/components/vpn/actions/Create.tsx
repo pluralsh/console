@@ -36,7 +36,6 @@ interface CreateClientProps {
 function CreateClient({ onClose, refetch }: CreateClientProps): ReactElement {
   return (
     <Modal
-      BackdropProps={{ zIndex: 20 }}
       header="create vpn client"
       open
       onClose={() => onClose()}

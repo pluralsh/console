@@ -48,7 +48,6 @@ export function StackStateGraphNode(props: NodeProps<StackStateResource>) {
             size="large"
             onClose={() => setOpen(false)}
             open={open}
-            portal
           >
             <Code
               language="JSON"

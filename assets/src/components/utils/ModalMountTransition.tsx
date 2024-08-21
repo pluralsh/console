@@ -1,11 +1,11 @@
+// DEPRECATED, DO NOT USE
+// this is all handled by ModalWrapper now, which is built into the design system modal
+
 /*
 Use to ensure Modal exit animations happen but
 modal is mounted/unmounted every time 'open' prop changes
 to save memory and make sure modal state is reset every
 time it opens/closes.
-
-Investigate incorporating this into new Modal component in
-the future
  */
 
 import { usePrevious } from '@pluralsh/design-system'

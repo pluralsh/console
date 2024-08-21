@@ -150,7 +150,6 @@ export function UpdateProviderModal({
     <ModalAlt
       header={`Update ${getProviderName(cloud)} provider: ${provider.name}`}
       open={open}
-      portal
       onClose={closeModal}
       asForm
       formProps={{ onSubmit }}

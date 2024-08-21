@@ -96,7 +96,6 @@ export function AccessTokensCreateModal({
     <Modal
       header="Create access token"
       open={open}
-      portal
       onClose={close}
       size="large"
       asForm

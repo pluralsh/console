@@ -80,7 +80,6 @@ export function AccessTokensScopes({ token }: { token: AccessTokenFragment }) {
       />
       <Modal
         header="Access token scopes"
-        portal
         open={open}
         size="large"
         onClose={() => setOpen(false)}

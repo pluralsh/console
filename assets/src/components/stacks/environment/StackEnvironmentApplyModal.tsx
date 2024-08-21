@@ -79,7 +79,6 @@ export default function StackEnvironmentApplyModal({
           : 'Add environment variable'
       }
       open={open}
-      portal
       onClose={onClose}
       asForm
       formProps={{

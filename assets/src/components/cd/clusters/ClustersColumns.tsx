@@ -256,6 +256,7 @@ export const ColMemory = columnHelper.accessor(({ node }) => node, {
 
 const ColStatusSC = styled.div(({ theme }) => ({
   display: 'flex',
+  width: 'max-content',
   gap: theme.spacing.small,
 }))
 

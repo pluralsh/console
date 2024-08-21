@@ -473,12 +473,6 @@ export function ScalingRecommenderModal({
     <ScalingContext.Provider value={contextVal}>
       <ScalingButton onClick={() => setIsOpen(true)} />
       <Modal
-        paddingTop={0}
-        paddingBottom={0}
-        paddingRight={0}
-        paddingLeft={0}
-        margin={0}
-        minWidth={300}
         open={isOpen}
         onClose={() => {
           closeModal()

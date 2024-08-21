@@ -437,7 +437,6 @@ function AddContextModal({
 
   return (
     <Modal
-      portal
       asForm
       formProps={{ onSubmit }}
       header="Add context"

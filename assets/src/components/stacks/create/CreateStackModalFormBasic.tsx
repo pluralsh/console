@@ -113,12 +113,9 @@ export function CreateStackModalFormBasic({
       >
         Require approvals
       </Switch>
-      <Accordion
-        type="single"
-        css={{ border: 'none', borderRadius: 0 }}
-      >
+      <Accordion type="single">
         <AccordionItem
-          padding="none"
+          padding="compact"
           trigger={
             <span
               css={{

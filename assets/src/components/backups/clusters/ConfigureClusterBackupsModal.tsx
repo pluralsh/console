@@ -79,7 +79,6 @@ export default function ConfigureClusterBackupsModal({
       header="Configure cluster backup"
       size="large"
       open={open}
-      portal
       onClose={closeModal}
       asForm
       formProps={{ onSubmit }}

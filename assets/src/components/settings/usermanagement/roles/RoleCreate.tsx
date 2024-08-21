@@ -67,7 +67,6 @@ export default function RoleCreate({ q }: any) {
       <Modal
         open={createModalVisible}
         onClose={() => resetAndClose()}
-        marginVertical={16}
         size="large"
       >
         <RoleForm

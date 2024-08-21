@@ -265,7 +265,6 @@ function ServicesTreeDiagramServiceNodeModal({
   return (
     <ModalMountTransition open={open}>
       <Modal
-        portal
         size="large"
         header={
           <div

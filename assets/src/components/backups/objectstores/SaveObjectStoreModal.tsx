@@ -188,7 +188,6 @@ export default function SaveObjectStoreModal({
       header={editMode ? 'Update object store' : 'Add object store'}
       size="large"
       open={open}
-      portal
       onClose={closeModal}
       asForm
       formProps={{ onSubmit }}

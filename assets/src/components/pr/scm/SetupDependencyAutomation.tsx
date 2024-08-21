@@ -294,7 +294,6 @@ function SetupDependencyAutomationModal({
 
   return (
     <Modal
-      portal
       open={open}
       onClose={onClose}
       asForm

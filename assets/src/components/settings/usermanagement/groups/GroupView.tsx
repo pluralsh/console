@@ -8,7 +8,6 @@ export default function GroupView({ group, open, onClose }: any) {
       header="View group"
       open={open}
       onClose={onClose}
-      portal
     >
       <GroupMembers
         group={group}
