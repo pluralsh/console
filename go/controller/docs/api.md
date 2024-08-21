@@ -1201,7 +1201,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `name` _string_ | Name of the ObservabilityProvider in the Console API. |  | Optional: {} <br /> |
 | `type` _[ObservabilityProviderType](#observabilityprovidertype)_ | Type of the ObservabilityProvider. |  | Enum: [DATADOG NEWRELIC] <br />Required: {} <br /> |
-| `credentials` _[ObservabilityProviderCredentials](#observabilityprovidercredentials)_ | Credentials to access the configured provider Type. |  | Required: {} <br /> |
+| `credentials` _[ObservabilityProviderCredentials](#observabilityprovidercredentials)_ | Credentials to access the configured provider Type. |  | Optional: {} <br /> |
 
 
 #### ObservableMetric
