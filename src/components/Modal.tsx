@@ -8,7 +8,10 @@ import {
   useEffect,
 } from 'react'
 
-import styled, { type StyledComponentPropsWithRef } from 'styled-components'
+import styled, {
+  type StyledComponentPropsWithRef,
+  useTheme,
+} from 'styled-components'
 
 import { type ColorKey, type Nullable, type SeverityExt } from '../types'
 
@@ -28,7 +31,7 @@ export const SEVERITIES = [
   'success',
   'danger',
 ] as const satisfies Readonly<SeverityExt[]>
-const SIZES = ['medium', 'large', 'custom'] as const
+const SIZES = ['medium', 'large', 'custom', 'auto'] as const
 
 type ModalSeverity = Extract<SeverityExt, (typeof SEVERITIES)[number]>
 
@@ -37,6 +40,7 @@ type ModalSize = (typeof SIZES)[number]
 type ModalPropsType = ModalWrapperProps & {
   onClose?: Nullable<() => void>
   form?: boolean
+  scrollable?: boolean
   size?: ModalSize
   header?: ReactNode
   actions?: ReactNode
@@ -68,24 +72,32 @@ const severityToIcon = {
 const sizeToWidth = {
   medium: 480,
   large: 608,
+  auto: 'auto',
   custom: undefined as undefined,
-} as const satisfies Record<ModalSize, number | undefined>
+} as const satisfies Partial<Record<ModalSize, number | string | undefined>>
 
 const ModalSC = styled(Card)<{
   $width: number
   $maxWidth: number
 }>(({ theme, $width, $maxWidth }) => ({
   position: 'relative',
+  display: 'flex',
+  flexDirection: 'column',
+  height: '100%',
   width: $width,
   maxWidth: $maxWidth,
   backgroundColor: theme.colors['fill-one'],
 }))
 
 const ModalContentSC = styled.div<{
+  $scrollable: boolean
   $hasActions: boolean
-}>(({ theme, $hasActions }) => ({
+}>(({ theme, $scrollable, $hasActions }) => ({
   position: 'relative',
   zIndex: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  overflow: $scrollable ? 'auto' : 'hidden',
   margin: theme.spacing.large,
   marginBottom: $hasActions ? 0 : theme.spacing.large,
   ...theme.partials.text.body1,
@@ -144,6 +156,7 @@ function ModalRef(
   }: ModalPropsType,
   ref: Ref<any>
 ) {
+  const theme = useTheme()
   const HeaderIcon = severityToIcon[severity ?? 'default']
   const iconColorKey = severityToIconColorKey[severity ?? 'default']
 
@@ -160,21 +173,28 @@ function ModalRef(
     [onClose]
   )
 
+  const maxWidth =
+    size === 'auto'
+      ? `min(1000px, 100vw - ${theme.spacing.xlarge * 2}px)`
+      : sizeToWidth[size]
+
   return (
     <ModalWrapper
       ref={ref}
       open={open}
       onOpenChange={triggerClose}
-      scrollable={scrollable}
       {...props}
     >
       <ModalSC
         forwardedAs={asForm ? 'form' : undefined}
         $width={sizeToWidth[size]}
-        $maxWidth={sizeToWidth[size]}
+        $maxWidth={maxWidth}
         {...(asForm ? formProps : {})}
       >
-        <ModalContentSC $hasActions={!!actions}>
+        <ModalContentSC
+          $scrollable={scrollable}
+          $hasActions={!!actions}
+        >
           {!!header && (
             <ModalHeaderWrapSC ref={ref}>
               {HeaderIcon && (

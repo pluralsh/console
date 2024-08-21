@@ -98,7 +98,7 @@ type IconFrameProps = {
   type?: Type
   selected?: boolean
   background?: SemanticColorKey
-}
+} & Omit<ComponentProps<typeof IconFrameSC>, 'size'>
 
 const IconFrameSC = styled(Flex)<{
   $type: Type
@@ -148,10 +148,7 @@ const IconFrameSC = styled(Flex)<{
   ...($type === 'floating' ? { boxShadow: theme.boxShadows.slight } : {}),
 }))
 
-const IconFrame = forwardRef<
-  HTMLDivElement,
-  IconFrameProps & ComponentProps<typeof IconFrameSC>
->(
+const IconFrame = forwardRef(
   (
     {
       icon,
@@ -166,7 +163,7 @@ const IconFrame = forwardRef<
       background,
       as,
       ...props
-    },
+    }: IconFrameProps,
     ref
   ) => {
     icon = cloneElement(icon, { size: sizeToIconSize[size] })
