@@ -134,7 +134,7 @@ export default function StackEnvironment() {
   )
 
   return (
-    <>
+    <div css={{ overflow: 'hidden' }}>
       <ModalMountTransition open={createOpen}>
         <StackEnvironmentApplyModal
           open={createOpen}
@@ -185,6 +185,6 @@ export default function StackEnvironment() {
           />
         </FullHeightTableWrap>
       </div>
-    </>
+    </div>
   )
 }
