@@ -2810,6 +2810,7 @@ type InfrastructureStackFragment struct {
 	Repository    *GitRepositoryFragment      "json:\"repository,omitempty\" graphql:\"repository\""
 	WriteBindings []*PolicyBindingFragment    "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 	ReadBindings  []*PolicyBindingFragment    "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	Variables     *string                     "json:\"variables,omitempty\" graphql:\"variables\""
 }
 
 func (t *InfrastructureStackFragment) GetID() *string {
@@ -2926,6 +2927,12 @@ func (t *InfrastructureStackFragment) GetReadBindings() []*PolicyBindingFragment
 	}
 	return t.ReadBindings
 }
+func (t *InfrastructureStackFragment) GetVariables() *string {
+	if t == nil {
+		t = &InfrastructureStackFragment{}
+	}
+	return t.Variables
+}
 
 type StackRunFragment struct {
 	ID            string                                             "json:\"id\" graphql:\"id\""
@@ -2950,6 +2957,7 @@ type StackRunFragment struct {
 	Environment   []*StackEnvironmentFragment                        "json:\"environment,omitempty\" graphql:\"environment\""
 	Output        []*StackOutputFragment                             "json:\"output,omitempty\" graphql:\"output\""
 	Errors        []*ServiceErrorFragment                            "json:\"errors,omitempty\" graphql:\"errors\""
+	Variables     *string                                            "json:\"variables,omitempty\" graphql:\"variables\""
 	Approver      *UserFragment                                      "json:\"approver,omitempty\" graphql:\"approver\""
 }
 
@@ -3085,6 +3093,12 @@ func (t *StackRunFragment) GetErrors() []*ServiceErrorFragment {
 	}
 	return t.Errors
 }
+func (t *StackRunFragment) GetVariables() *string {
+	if t == nil {
+		t = &StackRunFragment{}
+	}
+	return t.Variables
+}
 func (t *StackRunFragment) GetApprover() *UserFragment {
 	if t == nil {
 		t = &StackRunFragment{}
@@ -3115,6 +3129,7 @@ type StackRunBaseFragment struct {
 	Environment   []*StackEnvironmentFragment       "json:\"environment,omitempty\" graphql:\"environment\""
 	Output        []*StackOutputFragment            "json:\"output,omitempty\" graphql:\"output\""
 	Errors        []*ServiceErrorFragment           "json:\"errors,omitempty\" graphql:\"errors\""
+	Variables     *string                           "json:\"variables,omitempty\" graphql:\"variables\""
 }
 
 func (t *StackRunBaseFragment) GetID() string {
@@ -3248,6 +3263,12 @@ func (t *StackRunBaseFragment) GetErrors() []*ServiceErrorFragment {
 		t = &StackRunBaseFragment{}
 	}
 	return t.Errors
+}
+func (t *StackRunBaseFragment) GetVariables() *string {
+	if t == nil {
+		t = &StackRunBaseFragment{}
+	}
+	return t.Variables
 }
 
 type ServiceErrorFragment struct {
@@ -22745,6 +22766,7 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
+	variables
 }
 fragment UserFragment on User {
 	name
@@ -22795,6 +22817,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -22998,6 +23021,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -23196,6 +23220,7 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
+	variables
 }
 fragment UserFragment on User {
 	name
@@ -23246,6 +23271,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -23444,6 +23470,7 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
+	variables
 }
 fragment UserFragment on User {
 	name
@@ -23494,6 +23521,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -23692,6 +23720,7 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
+	variables
 }
 fragment UserFragment on User {
 	name
@@ -23742,6 +23771,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -23941,6 +23971,7 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
+	variables
 }
 fragment UserFragment on User {
 	name
@@ -23991,6 +24022,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -24177,6 +24209,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -24354,6 +24387,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -24532,6 +24566,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -24709,6 +24744,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -24886,6 +24922,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -25076,6 +25113,7 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
+	variables
 }
 fragment UserFragment on User {
 	name
@@ -25126,6 +25164,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -25645,6 +25684,7 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
+	variables
 }
 fragment UserFragment on User {
 	name
@@ -25695,6 +25735,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
@@ -25897,6 +25938,7 @@ fragment StackRunBaseFragment on StackRun {
 	errors {
 		... ServiceErrorFragment
 	}
+	variables
 }
 fragment UserFragment on User {
 	name
@@ -25947,6 +25989,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
 	readBindings {
 		... PolicyBindingFragment
 	}
+	variables
 }
 fragment GitRefFragment on GitRef {
 	folder
