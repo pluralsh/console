@@ -164,7 +164,6 @@ function SecretEditModal({
     <ModalAlt
       header={mode === 'edit' ? 'Edit Secret' : 'Add Secret'}
       open={open}
-      portal
       onClose={onClose}
       asForm
       formProps={{

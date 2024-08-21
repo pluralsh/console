@@ -46,7 +46,6 @@ export default function PersonaView({
       header={`View ‘${persona.name}’ persona`}
       open={open}
       onClose={onClose}
-      portal
       actions={
         <Button
           primary

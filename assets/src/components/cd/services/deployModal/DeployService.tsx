@@ -256,7 +256,6 @@ export function DeployServiceModal({
       css={{ '&& .form': { gap: 0 } }}
       header={`Deploy service${clusterProp ? ` to ${clusterProp.name}` : ''}`}
       open={open}
-      portal
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}

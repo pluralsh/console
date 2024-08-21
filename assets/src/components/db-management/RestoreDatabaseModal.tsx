@@ -116,7 +116,6 @@ export function RestoreDatabaseModal({
       open={isOpen}
       onClose={onClose}
       size="medium"
-      portal
       actions={
         <>
           <Button

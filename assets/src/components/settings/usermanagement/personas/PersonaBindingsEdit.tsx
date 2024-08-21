@@ -101,7 +101,6 @@ export function EditPersonaBindingsModal({
   return (
     <Modal
       header={<>Edit members of ‘{persona.name}’</>}
-      portal
       open={open}
       size="large"
       asForm

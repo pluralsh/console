@@ -47,7 +47,6 @@ export default function UserInvite() {
         header="Invite users"
         open={open}
         onClose={() => resetAndClose()}
-        width="100%"
         actions={
           invite ? (
             <Button onClick={() => resetAndClose()}>Done</Button>

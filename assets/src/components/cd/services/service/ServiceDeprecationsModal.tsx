@@ -18,9 +18,8 @@ export function ServiceDeprecationsModal({
   return (
     <Modal
       header="Deprecated Resources"
-      size="large"
-      maxWidth={1024}
-      width={1024}
+      size="custom"
+      css={{ maxWidth: 1024, width: 1024 }}
       {...props}
     >
       {isEmpty(deprecations) ? (

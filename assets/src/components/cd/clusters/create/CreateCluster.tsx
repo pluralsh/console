@@ -204,7 +204,6 @@ export const useCreateClusterContext = () => {
 //       size="large"
 //       style={{ padding: 0, position: 'absolute' }}
 //       open={open}
-//       portal
 //       onClose={() => {
 //         onClose?.()
 //       }}
@@ -277,7 +276,6 @@ function CreateClusterModal({
       size="large"
       style={{ padding: 0, position: 'absolute' }}
       open={open}
-      portal
       onClose={() => {
         onClose?.()
       }}

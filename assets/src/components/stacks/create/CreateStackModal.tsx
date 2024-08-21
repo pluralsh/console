@@ -194,9 +194,8 @@ export default function CreateStackModal({
   return (
     <ModalAlt
       header="Create infrastracture stack"
-      portal
-      width={640}
-      maxWidth={640}
+      css={{ width: 640 }}
+      size="custom"
       open={open}
       onClose={onClose}
       actions={

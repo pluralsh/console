@@ -1,5 +1,6 @@
 import { Button, ListBoxItem, Modal, Select } from '@pluralsh/design-system'
 import { useUpdateState } from 'components/hooks/useUpdateState'
+import { GqlError } from 'components/utils/Alert'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { Body1BoldP } from 'components/utils/typography/Text'
 import {
@@ -63,7 +64,6 @@ function PrSettingsModalInner({
       asForm
       open={open}
       onClose={onClose}
-      error={error}
       header={`Update PR - '${pr.title}'`}
       formProps={{ onSubmit }}
       actions={
@@ -114,6 +114,7 @@ function PrSettingsModalInner({
           </ListBoxItem>
         ))}
       </Select>
+      {error && <GqlError error={error} />}
     </Modal>
   )
 }

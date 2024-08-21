@@ -14,7 +14,6 @@ import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { TreeNodeMeta } from 'components/component/tree/getTreeNodesAndEdges'
 import { ComponentIcon } from 'components/apps/app/components/misc'
 import { TRUNCATE } from 'components/utils/truncate'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { Link, useParams } from 'react-router-dom'
 
@@ -156,9 +155,7 @@ export function ComponentTreeNode({
         $isOpen
         position={Position.Right}
       />
-      <ModalMountTransition open={open}>
-        <DetailsModal {...{ open, data, onClose: () => setOpen(false) }} />
-      </ModalMountTransition>
+      <DetailsModal {...{ open, data, onClose: () => setOpen(false) }} />
     </NodeBaseCard>
   )
 }
@@ -167,15 +164,11 @@ function DetailsModal({
   data,
   ...props
 }: ComponentProps<typeof Modal> & { data: TreeNodeMeta }) {
-  const theme = useTheme()
-
   return (
     <Modal
       header={`${data?.metadata?.name} - Raw`}
-      portal
       scrollable={false}
-      width="auto"
-      maxWidth={`min(1000px, 100vw - ${theme.spacing.xlarge * 2}px)`}
+      size="auto"
       {...props}
     >
       <RawYaml raw={data.raw} />

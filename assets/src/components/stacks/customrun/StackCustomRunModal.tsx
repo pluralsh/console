@@ -45,7 +45,6 @@ export default function StackCustomRunModal({
       }
       open={open}
       onClose={onClose}
-      portal
     >
       {step === StepName.ChooseTemplate && (
         <StackCustomRunChooseTemplate

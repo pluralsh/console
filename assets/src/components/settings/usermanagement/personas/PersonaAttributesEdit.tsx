@@ -207,7 +207,6 @@ export function EditPersonaAttributesModal({
   return (
     <Modal
       header={<>Edit attributes of ‘{persona.name}’</>}
-      portal
       open={open}
       size="large"
       asForm

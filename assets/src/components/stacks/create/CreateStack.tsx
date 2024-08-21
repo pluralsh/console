@@ -2,8 +2,6 @@ import { Button, Tooltip } from '@pluralsh/design-system'
 import { ReactNode, useState } from 'react'
 import { ButtonProps } from 'honorable'
 
-import { ModalMountTransition } from '../../utils/ModalMountTransition'
-
 import CreateStackModal from './CreateStackModal'
 
 export default function CreateStack({
@@ -27,13 +25,11 @@ export default function CreateStack({
           {buttonContent}
         </Button>
       </Tooltip>
-      <ModalMountTransition open={open}>
-        <CreateStackModal
-          open={open}
-          onClose={() => setOpen(false)}
-          refetch={refetch}
-        />
-      </ModalMountTransition>
+      <CreateStackModal
+        open={open}
+        onClose={() => setOpen(false)}
+        refetch={refetch}
+      />
     </>
   )
 }

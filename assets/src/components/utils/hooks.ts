@@ -1,13 +1,4 @@
-import { useEffect, useMemo } from 'react'
-import { withReact } from 'slate-react'
-import { withHistory } from 'slate-history'
-import { createEditor } from 'slate'
-
-import { withMentions } from './TypeaheadEditor'
-
-export function useEditor() {
-  return useMemo(() => withMentions(withReact(withHistory(createEditor()))), [])
-}
+import { useEffect } from 'react'
 
 // useful helper for debugging things like modals
 // will label a component and log when it mounts and unmounts

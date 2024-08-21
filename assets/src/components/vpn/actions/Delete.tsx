@@ -35,7 +35,6 @@ function DeleteClientUnstyled({
   return (
     <div {...props}>
       <Modal
-        BackdropProps={{ zIndex: 20 }}
         header="delete vpn client"
         open
         onClose={() => onClose()}

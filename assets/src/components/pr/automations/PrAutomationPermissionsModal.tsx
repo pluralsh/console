@@ -93,9 +93,8 @@ export function PrAutomationPermissionsModal({
       onClose={onClose}
       asForm
       formProps={{ onSubmit }}
-      size="large"
-      maxWidth={1024}
-      width={1024}
+      css={{ width: 1024, maxWidth: 1024 }}
+      size="custom"
       actions={
         <div
           css={{
