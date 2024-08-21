@@ -2,18 +2,19 @@
 import * as Dialog from '@radix-ui/react-dialog'
 
 import { type ReactNode, forwardRef } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled, { type CSSObject, useTheme } from 'styled-components'
 
 const ANIMATION_SPEED = '150ms'
 
 export type ModalWrapperProps = {
   open: boolean
   onOpenChange?: (open: boolean) => void
+  overlayStyles?: CSSObject
   children?: ReactNode
 } & Dialog.DialogContentProps
 
 function ModalWrapperRef(
-  { open, onOpenChange, children, ...props }: ModalWrapperProps,
+  { open, onOpenChange, overlayStyles, children, ...props }: ModalWrapperProps,
   ref: any
 ) {
   const theme = useTheme()
@@ -25,7 +26,10 @@ function ModalWrapperRef(
       onOpenChange={onOpenChange}
     >
       <Dialog.Portal container={portalElement}>
-        <OverlaySC onClick={(e) => e.stopPropagation()}>
+        <OverlaySC
+          onClick={(e) => e.stopPropagation()}
+          style={overlayStyles}
+        >
           <ContentSC
             ref={ref}
             {...props}
