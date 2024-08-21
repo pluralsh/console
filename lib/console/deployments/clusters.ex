@@ -153,9 +153,10 @@ defmodule Console.Deployments.Clusters do
 
   defp fetch_nodes(%Cluster{pinged_at: nil, self: false}), do: {:ok, []}
   defp fetch_nodes(%Cluster{} = cluster) do
+    query = Core.list_node!(limit: 100)
     with %Kazan.Server{} = server <- control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
-         {:ok, %{items: items}} <- Core.list_node!() |> Kube.Utils.run() do
+         {:ok, %{items: items}} <- Kube.Utils.run(query) do
       {:ok, items}
     else
       _ -> {:ok, []}
@@ -174,7 +175,7 @@ defmodule Console.Deployments.Clusters do
   defp fetch_node_metrics(%Cluster{} = cluster) do
     with %Kazan.Server{} = server <- control_plane(cluster),
          _ <- Kube.Utils.save_kubeconfig(server),
-         {:ok, %{items: items}} <- Kube.Client.list_metrics() do
+         {:ok, %{items: items}} <- Kube.Client.list_metrics(%{"limit" => "100"}) do
       {:ok, items}
     else
       _ -> {:ok, []}
