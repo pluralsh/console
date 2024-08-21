@@ -1,18 +1,26 @@
-import { type ReactNode, type Ref, forwardRef, useEffect } from 'react'
+// this is just styling, actual modal logic is in ModalWrapper
+
+import {
+  type ReactNode,
+  type Ref,
+  forwardRef,
+  useCallback,
+  useEffect,
+} from 'react'
 
 import styled, { type StyledComponentPropsWithRef } from 'styled-components'
 
-import { type ColorKey, type SeverityExt } from '../types'
+import { type ColorKey, type Nullable, type SeverityExt } from '../types'
 
 import useLockedBody from '../hooks/useLockedBody'
-
-import { HonorableModal, type ModalProps } from './HonorableModal'
 
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import type createIcon from './icons/createIcon'
 import ErrorIcon from './icons/ErrorIcon'
-import WarningIcon from './icons/WarningIcon'
 import InfoIcon from './icons/InfoIcon'
+import WarningIcon from './icons/WarningIcon'
+import { ModalWrapper, type ModalWrapperProps } from './ModalWrapper'
+import Card from './Card'
 
 export const SEVERITIES = [
   'info',
@@ -20,13 +28,14 @@ export const SEVERITIES = [
   'success',
   'danger',
 ] as const satisfies Readonly<SeverityExt[]>
-const SIZES = ['medium', 'large'] as const
+const SIZES = ['medium', 'large', 'custom'] as const
 
 type ModalSeverity = Extract<SeverityExt, (typeof SEVERITIES)[number]>
 
 type ModalSize = (typeof SIZES)[number]
 
-type ModalPropsType = Omit<ModalProps, 'size'> & {
+type ModalPropsType = ModalWrapperProps & {
+  onClose?: Nullable<() => void>
   form?: boolean
   size?: ModalSize
   header?: ReactNode
@@ -35,8 +44,6 @@ type ModalPropsType = Omit<ModalProps, 'size'> & {
   lockBody?: boolean
   asForm?: boolean
   formProps?: StyledComponentPropsWithRef<'form'>
-  scrollable?: boolean
-  [x: string]: unknown
 }
 
 const severityToIconColorKey = {
@@ -61,35 +68,27 @@ const severityToIcon = {
 const sizeToWidth = {
   medium: 480,
   large: 608,
-} as const satisfies Record<ModalSize, number>
+  custom: undefined as undefined,
+} as const satisfies Record<ModalSize, number | undefined>
 
-const ModalSC = styled.div<{ $scrollable: boolean }>(({ $scrollable }) => ({
+const ModalSC = styled(Card)<{
+  $width: number
+  $maxWidth: number
+}>(({ theme, $width, $maxWidth }) => ({
   position: 'relative',
-  ...($scrollable
-    ? {}
-    : {
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-      }),
+  width: $width,
+  maxWidth: $maxWidth,
+  backgroundColor: theme.colors['fill-one'],
 }))
 
 const ModalContentSC = styled.div<{
-  $scrollable: boolean
   $hasActions: boolean
-}>(({ theme, $scrollable, $hasActions }) => ({
+}>(({ theme, $hasActions }) => ({
   position: 'relative',
   zIndex: 0,
   margin: theme.spacing.large,
   marginBottom: $hasActions ? 0 : theme.spacing.large,
   ...theme.partials.text.body1,
-  ...($scrollable
-    ? {}
-    : {
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-      }),
 }))
 
 const ModalActionsSC = styled.div((_) => ({
@@ -154,25 +153,28 @@ function ModalRef(
     setBodyLocked(lockBody && open)
   }, [lockBody, open, setBodyLocked])
 
+  const triggerClose = useCallback(
+    (open: boolean) => {
+      if (!open) onClose?.()
+    },
+    [onClose]
+  )
+
   return (
-    <HonorableModal
-      open={open}
-      onClose={onClose}
+    <ModalWrapper
       ref={ref}
-      width={sizeToWidth[size]}
-      maxWidth={sizeToWidth[size]}
+      open={open}
+      onOpenChange={triggerClose}
       scrollable={scrollable}
       {...props}
     >
       <ModalSC
-        as={asForm ? 'form' : undefined}
-        $scrollable={scrollable}
+        forwardedAs={asForm ? 'form' : undefined}
+        $width={sizeToWidth[size]}
+        $maxWidth={sizeToWidth[size]}
         {...(asForm ? formProps : {})}
       >
-        <ModalContentSC
-          $scrollable={scrollable}
-          $hasActions={!!actions}
-        >
+        <ModalContentSC $hasActions={!!actions}>
           {!!header && (
             <ModalHeaderWrapSC ref={ref}>
               {HeaderIcon && (
@@ -193,7 +195,7 @@ function ModalRef(
           </ModalActionsSC>
         )}
       </ModalSC>
-    </HonorableModal>
+    </ModalWrapper>
   )
 }
 

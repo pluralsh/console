@@ -40,7 +40,6 @@ function ModalExample({
 }) {
   return (
     <Modal
-      portal
       onClose={onClose}
       header="Hover the below buttons"
       actions={

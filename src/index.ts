@@ -80,7 +80,7 @@ export {
 export { default as SidebarItem } from './components/SidebarItem'
 export { default as Modal } from './components/Modal'
 export { default as Flyover } from './components/Flyover'
-export { HonorableModal } from './components/HonorableModal'
+export { ModalWrapper } from './components/ModalWrapper'
 export type {
   ChecklistProps,
   ChecklistStateProps,
