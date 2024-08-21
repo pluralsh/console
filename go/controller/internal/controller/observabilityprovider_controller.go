@@ -170,6 +170,10 @@ func (in *ObservabilityProviderReconciler) addOrRemoveFinalizer(ctx context.Cont
 }
 
 func (in *ObservabilityProviderReconciler) isAlreadyExists(ctx context.Context, provider *v1alpha1.ObservabilityProvider) (bool, error) {
+	if provider.Status.HasReadonlyCondition() {
+		return provider.Status.IsReadonly(), nil
+	}
+
 	exists, err := in.ConsoleClient.IsObservabilityProviderExists(ctx, provider.ConsoleName())
 	if err != nil {
 		return false, err
@@ -179,7 +183,7 @@ func (in *ObservabilityProviderReconciler) isAlreadyExists(ctx context.Context, 
 		return false, nil
 	}
 
-	return provider.Status.HasID(), nil
+	return !provider.Status.HasID(), nil
 }
 
 func (in *ObservabilityProviderReconciler) sync(
@@ -241,6 +245,10 @@ func (in *ObservabilityProviderReconciler) credentials(
 ) (_ console.ObservabilityProviderCredentialsAttributes, err error) {
 	var datadog *console.DatadogCredentialsAttributes
 	var newrelic *console.NewRelicCredentialsAttributes
+
+	if provider.Spec.Credentials == nil {
+		return console.ObservabilityProviderCredentialsAttributes{}, fmt.Errorf("no credentials provided")
+	}
 
 	switch provider.Spec.Type {
 	case console.ObservabilityProviderTypeDatadog:

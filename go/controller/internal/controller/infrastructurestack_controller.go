@@ -405,7 +405,7 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 
 func (r *InfrastructureStackReconciler) stackConfigurationAttributes(conf *v1alpha1.StackConfiguration) *console.StackConfigurationAttributes {
 	if conf == nil {
-		return nil
+		return &console.StackConfigurationAttributes{}
 	}
 
 	attrs := &console.StackConfigurationAttributes{

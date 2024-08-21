@@ -79,8 +79,8 @@ type ObservabilityProviderSpec struct {
 	Type client.ObservabilityProviderType `json:"type"`
 
 	// Credentials to access the configured provider Type.
-	// +kubebuilder:validation:Required
-	Credentials ObservabilityProviderCredentials `json:"credentials"`
+	// +kubebuilder:validation:Optional
+	Credentials *ObservabilityProviderCredentials `json:"credentials,omitempty"`
 }
 
 type ObservabilityProviderCredentials struct {
