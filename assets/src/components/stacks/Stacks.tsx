@@ -33,6 +33,7 @@ import { keyToTag } from 'utils/clusterTags'
 import {
   Conjunction,
   StackFragment,
+  StackTinyFragment,
   StackType,
   TagType,
   useKickStackMutation,
@@ -160,6 +161,11 @@ export default function Stacks() {
     [data?.infrastructureStacks]
   )
 
+  const tinyStack: Nullable<StackTinyFragment> = useMemo(
+    () => stacks.find((stk) => stk.id === stackId),
+    [stackId, stacks]
+  )
+
   const {
     data: stackData,
     loading: stackLoading,
@@ -170,10 +176,15 @@ export default function Stacks() {
     pollInterval,
   })
 
-  const stack = useMemo(() => stackData?.infrastructureStack, [stackData])
-  const directory = useMemo(() => getDirectory(stack?.type), [stack?.type])
+  const fullStack = useMemo(() => stackData?.infrastructureStack, [stackData])
+  const directory = useMemo(
+    () => getDirectory(fullStack?.type),
+    [fullStack?.type]
+  )
   const currentTab = directory.find(({ path }) => path === tab)
-  const deleteLabel = stack?.deletedAt ? 'Retry stack delete' : 'Delete  stack'
+  const deleteLabel = fullStack?.deletedAt
+    ? 'Retry stack delete'
+    : 'Delete  stack'
 
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
@@ -189,14 +200,15 @@ export default function Stacks() {
       </div>
     )
 
-  if (!data || stackLoading) {
+  if (!tinyStack && stackLoading) {
     return <LoopingLogo />
   }
 
   if (
     isEmpty(stacks) &&
     isEmpty(debouncedSearchString) &&
-    isEmpty(searchTags)
+    isEmpty(searchTags) &&
+    !loading
   ) {
     return (
       <EmptyState message="Looks like you don't have any infrastructure stacks yet.">
@@ -307,7 +319,9 @@ export default function Stacks() {
             )}
         </div>
       </div>
-      {stack && !stackError ? (
+      {stackError ? (
+        <StackDeletedEmptyState />
+      ) : (
         <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           <div
             css={{
@@ -320,26 +334,29 @@ export default function Stacks() {
             }}
           >
             <div css={{ flexGrow: 1 }}>
-              <div css={{ ...theme.partials.text.subtitle1 }}>{stack.name}</div>
+              <div css={{ ...theme.partials.text.subtitle1 }}>
+                {tinyStack?.name}
+              </div>
               <div
                 css={{
                   ...theme.partials.text.body1,
                   color: theme.colors['text-xlight'],
                 }}
               >
-                {stack.repository?.url}
+                {tinyStack?.repository?.url}
               </div>
             </div>
             <KickButton
-              pulledAt={stack.repository?.pulledAt}
+              pulledAt={tinyStack?.repository?.pulledAt}
               kickMutationHook={useKickStackMutation}
               message="Resync"
               tooltipMessage="Use this to sync this stack now instead of at the next poll interval"
-              variables={{ id: stack.id }}
+              variables={{ id: tinyStack?.id }}
               width="max-content"
             />
-            <StackCustomRun stack={stack} />
+            <StackCustomRun stackId={tinyStack?.id ?? ''} />
             <MoreMenu
+              disabled={!fullStack}
               onSelectionChange={(newKey) => setMenuKey(newKey)}
               width={240}
               triggerButton={
@@ -347,7 +364,14 @@ export default function Stacks() {
                   textValue="Menu"
                   clickable
                   size="large"
-                  icon={<MoreIcon width={16} />}
+                  icon={
+                    <MoreIcon
+                      width={16}
+                      color={
+                        !fullStack ? theme.colors['icon-disabled'] : undefined
+                      }
+                    />
+                  }
                   type="floating"
                 />
               }
@@ -381,28 +405,32 @@ export default function Stacks() {
                 }
               />
             </MoreMenu>
-            <StackPermissionsModal
-              stack={stack}
-              open={menuKey === MenuItemKey.ManagePermissions}
-              onClose={() => setMenuKey(MenuItemKey.None)}
-            />
-            <StackSettingsModal
-              stack={stack}
-              open={menuKey === MenuItemKey.Settings}
-              onClose={() => setMenuKey(MenuItemKey.None)}
-            />
-            <StackDetachModal
-              stack={stack}
-              refetch={refetch}
-              open={menuKey === MenuItemKey.Detach}
-              onClose={() => setMenuKey(MenuItemKey.None)}
-            />
-            <StackDeleteModal
-              stack={stack}
-              refetch={refetch}
-              open={menuKey === MenuItemKey.Delete}
-              onClose={() => setMenuKey(MenuItemKey.None)}
-            />
+            {fullStack && (
+              <>
+                <StackPermissionsModal
+                  stack={fullStack}
+                  open={menuKey === MenuItemKey.ManagePermissions}
+                  onClose={() => setMenuKey(MenuItemKey.None)}
+                />
+                <StackSettingsModal
+                  stack={fullStack}
+                  open={menuKey === MenuItemKey.Settings}
+                  onClose={() => setMenuKey(MenuItemKey.None)}
+                />
+                <StackDetachModal
+                  stack={fullStack}
+                  refetch={refetch}
+                  open={menuKey === MenuItemKey.Detach}
+                  onClose={() => setMenuKey(MenuItemKey.None)}
+                />
+                <StackDeleteModal
+                  stack={fullStack}
+                  refetch={refetch}
+                  open={menuKey === MenuItemKey.Delete}
+                  onClose={() => setMenuKey(MenuItemKey.None)}
+                />
+              </>
+            )}
           </div>
           <TabList
             stateRef={tabStateRef}
@@ -432,10 +460,14 @@ export default function Stacks() {
                 </LinkTabWrap>
               ))}
           </TabList>
-          <Outlet context={{ stack, refetch } as StackOutletContextT} />
+          {stackLoading ? (
+            <LoopingLogo css={{ flex: 1 }} />
+          ) : (
+            <Outlet
+              context={{ stack: fullStack, refetch } as StackOutletContextT}
+            />
+          )}
         </div>
-      ) : (
-        <StackDeletedEmptyState />
       )}
     </ResponsiveLayoutPage>
   )
