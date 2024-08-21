@@ -26,6 +26,7 @@ fragment InfrastructureStackFragment on InfrastructureStack {
     repository { ...GitRepositoryFragment}
     writeBindings { ...PolicyBindingFragment }
     readBindings { ...PolicyBindingFragment }
+    variables
 }
 
 fragment StackRunFragment on StackRun {
@@ -65,6 +66,7 @@ fragment StackRunBaseFragment on StackRun {
     environment { ...StackEnvironmentFragment}
     output { ...StackOutputFragment}
     errors { ...ServiceErrorFragment}
+    variables
 }
 
 fragment ServiceErrorFragment on ServiceError {
