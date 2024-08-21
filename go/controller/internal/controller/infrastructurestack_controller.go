@@ -400,6 +400,10 @@ func (r *InfrastructureStackReconciler) getStackAttributes(
 		attr.Tags = tags
 	}
 
+	if stack.Spec.Variables != nil {
+		attr.Variables = lo.ToPtr(string(stack.Spec.Variables.Raw))
+	}
+
 	return attr, nil
 }
 
