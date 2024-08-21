@@ -17,6 +17,34 @@ defmodule Console.Deployments.Helm.AgentTest do
       Process.exit(pid, :kill)
     end
 
+    test "it can handle shitty azure helm repos" do
+      repo = "https://raw.githubusercontent.com/Azure/azure-service-operator/main/v2/charts"
+      {:ok, pid} = Agent.start(repo)
+
+      {:ok, f, _} = Agent.fetch(pid, "azure-service-operator", "x.x.x")
+
+      files = stream_and_untar(f)
+      assert files["Chart.yaml"]
+
+      assert Console.Deployments.Git.get_helm_repository(repo).health == :pullable
+
+      Process.exit(pid, :kill)
+    end
+
+    test "it can handle https chart museum helm repos" do
+      repo = "https://app.plural.sh/cm/rabbitmq"
+      {:ok, pid} = Agent.start(repo)
+
+      {:ok, f, _} = Agent.fetch(pid, "cluster-operator", "x.x.x")
+
+      files = stream_and_untar(f)
+      assert files["Chart.yaml"]
+
+      assert Console.Deployments.Git.get_helm_repository(repo).health == :pullable
+
+      Process.exit(pid, :kill)
+    end
+
     test "it can fetch a chart from an oci registry" do
       repo = "oci://ghcr.io/stefanprodan/charts"
       {:ok, pid} = Agent.start(repo)

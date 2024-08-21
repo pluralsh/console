@@ -7,7 +7,9 @@ import {
   ChecklistIcon,
   ClusterIcon,
   ConfettiIcon,
+  Flex,
   Flyover,
+  IconFrame,
   ListBoxItem,
   Select,
   SuccessIcon,
@@ -16,7 +18,6 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 import { Confirm } from 'components/utils/Confirm'
-import { ColWithIcon } from 'components/utils/table/ColWithIcon'
 import {
   ApiDeprecation,
   ClustersRowFragment,
@@ -171,9 +172,16 @@ const upgradeColumns = [
     id: 'cluster',
     header: 'Cluster',
     cell: ({ getValue }) => (
-      <ColWithIcon icon={<ClusterIcon width={16} />}>
-        <div css={{ whiteSpace: 'nowrap' }}>{getValue()}</div>
-      </ColWithIcon>
+      <Flex
+        gap="xsmall"
+        alignItems="center"
+      >
+        <IconFrame
+          type="floating"
+          icon={<ClusterIcon />}
+        />
+        <span css={{ whiteSpace: 'nowrap' }}>{getValue()}</span>
+      </Flex>
     ),
   }),
   columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {

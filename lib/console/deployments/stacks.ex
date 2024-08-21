@@ -24,7 +24,7 @@ defmodule Console.Deployments.Stacks do
     StackCron
   }
 
-  @preloads [:environment, :files, :observable_metrics, :cron, :tags]
+  @preloads [:environment, :files, :observable_metrics, :cron, :tags, :read_bindings, :write_bindings]
 
   @type error :: Console.error
   @type stack_resp :: {:ok, Stack.t} | error
@@ -39,6 +39,9 @@ defmodule Console.Deployments.Stacks do
 
   @spec get_stack_by_name(binary) :: Stack.t | nil
   def get_stack_by_name(name), do: Repo.get_by(Stack, name: name)
+
+  @spec get_stack_by_name!(binary) :: Stack.t | nil
+  def get_stack_by_name!(name), do: Repo.get_by!(Stack, name: name)
 
   @spec get_run!(binary) :: StackRun.t
   def get_run!(id), do: Repo.get!(StackRun, id)

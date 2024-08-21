@@ -78,7 +78,7 @@ function ColServiceContent({
 
 export const columnHelper = createColumnHelper<Edge<PullRequestFragment>>()
 
-const ColTitle = columnHelper.accessor(({ node }) => node?.title, {
+export const ColTitle = columnHelper.accessor(({ node }) => node?.title, {
   id: 'title',
   header: 'PR Title',
   meta: { truncate: true },
@@ -107,7 +107,7 @@ export function PrStatusChip({ status }: { status?: PrStatus | null }) {
   return <Chip severity={severity}>{capitalize(status)}</Chip>
 }
 
-const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
+export const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   id: 'status',
   header: 'Status',
   cell: function Cell({ getValue }) {
@@ -115,7 +115,7 @@ const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
   },
 })
 
-const ColCreator = columnHelper.accessor(({ node }) => node?.creator, {
+export const ColCreator = columnHelper.accessor(({ node }) => node?.creator, {
   id: 'creator',
   header: 'Creator',
   cell: function Cell({ getValue }) {
@@ -123,12 +123,12 @@ const ColCreator = columnHelper.accessor(({ node }) => node?.creator, {
   },
 })
 
-const ColLabelsSC = styled.div(({ theme }) => ({
+export const ColLabelsSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.xsmall,
   flexWrap: 'wrap',
 }))
-const ColLabels = columnHelper.accessor(
+export const ColLabels = columnHelper.accessor(
   ({ node }) => node?.labels?.join(', ') || '',
   {
     id: 'labels',
@@ -157,15 +157,18 @@ const ColLabels = columnHelper.accessor(
   }
 )
 
-const ColCluster = columnHelper.accessor(({ node }) => node?.cluster?.name, {
-  id: 'cluster',
-  header: 'Cluster',
-  cell: function Cell({ row }) {
-    return <ColClusterContent cluster={row.original?.node?.cluster} />
-  },
-})
+export const ColCluster = columnHelper.accessor(
+  ({ node }) => node?.cluster?.name,
+  {
+    id: 'cluster',
+    header: 'Cluster',
+    cell: function Cell({ row }) {
+      return <ColClusterContent cluster={row.original?.node?.cluster} />
+    },
+  }
+)
 
-const ColService = columnHelper.accessor(({ node }) => node, {
+export const ColService = columnHelper.accessor(({ node }) => node, {
   id: 'service',
   header: 'Service',
   cell: function Cell({ row }) {
@@ -178,13 +181,16 @@ const ColService = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-const ColInsertedAt = columnHelper.accessor(({ node }) => node?.insertedAt, {
-  id: 'insertedAt',
-  header: 'Created',
-  cell: function Cell({ getValue }) {
-    return <DateTimeCol date={getValue()} />
-  },
-})
+export const ColInsertedAt = columnHelper.accessor(
+  ({ node }) => node?.insertedAt,
+  {
+    id: 'insertedAt',
+    header: 'Created',
+    cell: function Cell({ getValue }) {
+      return <DateTimeCol date={getValue()} />
+    },
+  }
+)
 
 export const ColActions = columnHelper.accessor(({ node }) => node, {
   id: 'actions',

@@ -28,13 +28,17 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
   alias Console.Helm.{Index, Chart}
 
   def index(%{client: client}) do
-    with {:ok, %Req.Response{status: 200, body: body}} <- Req.get(client, url: "/index.yaml"),
-         {:ok, yaml} <- YamlElixir.read_from_string(body) do
+    with {:ok, %Req.Response{status: 200} = resp} <- Req.get(client, url: "/index.yaml"),
+         {:ok, yaml} <- handle_body(resp) do
       {:ok, Index.transform(%Index{entries: yaml["entries"]})}
     else
       _ -> {:error, "fould not fetch helm index"}
     end
   end
+
+  defp handle_body(%Req.Response{status: 200, body: %{} = body}), do: {:ok, body}
+  defp handle_body(%Req.Response{status: 200, body: body}) when is_binary(body),
+    do: YamlElixir.read_from_string(body)
 
   def chart(client, %Index{entries: entries}, chart, vsn) do
     entries = Map.new(entries, & {&1.name, &1.versions})
@@ -47,8 +51,10 @@ defimpl Console.Helm.Interface, for: Console.Helm.Interface.HTTP do
     end
   end
 
-  def download(%{client: client}, url, to) do
+  def download(%{client: client}, "https://" <> _ = url, to) do
     Req.Request.delete_option(client, :base_url)
     |> Req.get(url: url, into: to)
   end
+
+  def download(%{client: client}, url, to), do: Req.get(client, url: url, into: to)
 end

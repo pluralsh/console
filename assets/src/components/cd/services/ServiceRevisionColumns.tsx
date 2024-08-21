@@ -1,12 +1,17 @@
 import {
+  CheckRoundedIcon,
+  HistoryIcon,
+  IconFrame,
+  Tooltip,
+} from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import {
   ServiceDeploymentRevisionFragment,
   useRollbackServiceMutation,
 } from 'generated/graphql'
-import { createColumnHelper } from '@tanstack/react-table'
-import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { toDateOrUndef } from 'utils/date'
-import { HistoryIcon, IconFrame, Tooltip } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
+import { toDateOrUndef } from 'utils/date'
 
 import { useState } from 'react'
 
@@ -137,7 +142,7 @@ const ColActions = columnHelper.accessor((row) => row, {
                 justifyContent: 'center',
               }}
             >
-              <SelectedIcon />
+              <CheckRoundedIcon color="icon-success" />
             </div>
           </Tooltip>
         ) : (

@@ -172,6 +172,63 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
     end
   end
 
+  describe "upsertVirtualCluster" do
+    test "it can upsert a new virtual cluster" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"upsertVirtualCluster" => virt}}} = run_query("""
+        mutation Upsert($attrs: ClusterAttributes!, $parentId: ID!) {
+          upsertVirtualCluster(parentId: $parentId, attributes: $attrs) {
+            id
+            handle
+            virtual
+            deployToken
+            parentCluster { id }
+          }
+        }
+      """, %{"attrs" => %{"name" => "new-cluster"}, "parentId" => cluster.id}, %{current_user: admin_user()})
+
+      assert virt["handle"] == "new-cluster"
+      assert virt["virtual"]
+      assert virt["deployToken"]
+      assert virt["parentCluster"]["id"] == cluster.id
+    end
+  end
+
+  describe "deleteVirtualCluster" do
+    test "it can delete a virtual cluster" do
+      cluster = insert(:cluster, virtual: true)
+
+      {:ok, %{data: %{"deleteVirtualCluster" => virt}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteVirtualCluster(id: $id) {
+            id
+            handle
+            virtual
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert virt["id"] == cluster.id
+
+      refute refetch(cluster)
+    end
+
+    test "it cannot delete non-virtual clusters" do
+      cluster = insert(:cluster)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteVirtualCluster(id: $id) {
+            id
+            handle
+            virtual
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+    end
+  end
+
   describe "createClusterProvider" do
     test "it can create a new provider" do
       user = insert(:user)

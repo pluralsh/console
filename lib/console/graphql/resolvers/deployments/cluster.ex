@@ -11,7 +11,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
   def resolve_cluster(%{handle: handle}, %{context: %{current_user: user}}) when is_binary(handle) do
-    Clusters.find!(handle)
+    case Clusters.get_cluster_by_handle(handle) do
+      %Cluster{} = cluster -> cluster
+      _ -> Clusters.find!(handle)
+    end
     |> allow(user, :view)
   end
   def resolve_cluster(%{id: id}, %{context: %{current_user: user}}) when is_binary(id) do
@@ -129,6 +132,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def detach_cluster(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.detach_cluster(id, user)
 
+  def upsert_virtual_cluster(%{attributes: attrs, parent_id: id}, %{context: %{current_user: user}}),
+    do: Clusters.upsert_virtual_cluster(attrs, id, user)
+
+  def delete_virtual_cluster(%{id: id}, %{context: %{current_user: user}}),
+    do: Clusters.delete_virtual_cluster(id, user)
+
   def create_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_provider(attrs, user)
 
@@ -166,6 +175,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
       {:healthy, h}, q -> Cluster.health(q, h)
       {:backups, e}, q -> Cluster.with_backups(q, !!e)
       {:project_id, id}, q -> Cluster.for_project(q, id)
+      {:parent_id, id}, q -> Cluster.for_parent(q, id)
       _, q -> q
     end)
   end

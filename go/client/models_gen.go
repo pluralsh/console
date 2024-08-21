@@ -535,6 +535,8 @@ type Cluster struct {
 	Name string `json:"name"`
 	// if true, this cluster cannot be deleted
 	Protect *bool `json:"protect,omitempty"`
+	// whether this is actually a virtual cluster
+	Virtual *bool `json:"virtual,omitempty"`
 	// desired k8s version for the cluster
 	Version *string `json:"version,omitempty"`
 	// the distribution of kubernetes this cluster is running
@@ -591,6 +593,8 @@ type Cluster struct {
 	Restore *ClusterRestore `json:"restore,omitempty"`
 	// the object store connection bound to this cluster for backup/restore
 	ObjectStore *ObjectStore `json:"objectStore,omitempty"`
+	// the parent of this virtual cluster
+	ParentCluster *Cluster `json:"parentCluster,omitempty"`
 	// list cached nodes for a cluster, this can be stale up to 5m
 	Nodes []*Node `json:"nodes,omitempty"`
 	// list the cached node metrics for a cluster, can also be stale up to 5m
@@ -834,6 +838,7 @@ type ClusterTargetAttributes struct {
 }
 
 type ClusterUpdateAttributes struct {
+	Name    *string `json:"name,omitempty"`
 	Version *string `json:"version,omitempty"`
 	// a short, unique human readable name used to identify this cluster and does not necessarily map to the cloud resource name
 	Handle *string `json:"handle,omitempty"`
@@ -842,12 +847,14 @@ type ClusterUpdateAttributes struct {
 	// pass a kubeconfig for this cluster (DEPRECATED)
 	Kubeconfig *KubeconfigAttributes `json:"kubeconfig,omitempty"`
 	// status of the upgrade plan for this cluster
-	UpgradePlan *UpgradePlanAttributes `json:"upgradePlan,omitempty"`
-	Protect     *bool                  `json:"protect,omitempty"`
-	Distro      *ClusterDistro         `json:"distro,omitempty"`
-	Metadata    *string                `json:"metadata,omitempty"`
-	NodePools   []*NodePoolAttributes  `json:"nodePools,omitempty"`
-	Tags        []*TagAttributes       `json:"tags,omitempty"`
+	UpgradePlan   *UpgradePlanAttributes     `json:"upgradePlan,omitempty"`
+	Protect       *bool                      `json:"protect,omitempty"`
+	Distro        *ClusterDistro             `json:"distro,omitempty"`
+	Metadata      *string                    `json:"metadata,omitempty"`
+	NodePools     []*NodePoolAttributes      `json:"nodePools,omitempty"`
+	Tags          []*TagAttributes           `json:"tags,omitempty"`
+	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 }
 
 // A consolidated checklist of tasks that need to be completed to upgrade this cluster

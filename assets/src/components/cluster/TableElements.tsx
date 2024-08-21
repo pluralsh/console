@@ -51,7 +51,7 @@ export const TableText = styled.div(({ theme }) => ({
   color: theme.colors['text-light'],
 }))
 
-export const CaptionText = styled.div(({ theme }) => ({
+export const CaptionText = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
 }))

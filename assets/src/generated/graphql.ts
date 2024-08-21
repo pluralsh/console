@@ -719,6 +719,8 @@ export type Cluster = {
   nodes?: Maybe<Array<Maybe<Node>>>;
   /** the object store connection bound to this cluster for backup/restore */
   objectStore?: Maybe<ObjectStore>;
+  /** the parent of this virtual cluster */
+  parentCluster?: Maybe<Cluster>;
   /** last time the deploy operator pinged this cluster */
   pingedAt?: Maybe<Scalars['DateTime']['output']>;
   /** custom resources with dedicated views for this cluster */
@@ -762,6 +764,8 @@ export type Cluster = {
   version?: Maybe<Scalars['String']['output']>;
   /** Computes a list of statistics for OPA constraint violations w/in this cluster */
   violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
+  /** whether this is actually a virtual cluster */
+  virtual?: Maybe<Scalars['Boolean']['output']>;
   /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -1064,14 +1068,17 @@ export type ClusterUpdateAttributes = {
   /** pass a kubeconfig for this cluster (DEPRECATED) */
   kubeconfig?: InputMaybe<KubeconfigAttributes>;
   metadata?: InputMaybe<Scalars['Json']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
   nodePools?: InputMaybe<Array<InputMaybe<NodePoolAttributes>>>;
   protect?: InputMaybe<Scalars['Boolean']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** if you optionally want to reconfigure the git repository for the cluster service */
   service?: InputMaybe<ClusterServiceAttributes>;
   tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
   /** status of the upgrade plan for this cluster */
   upgradePlan?: InputMaybe<UpgradePlanAttributes>;
   version?: InputMaybe<Scalars['String']['input']>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
 };
 
 /** A consolidated checklist of tasks that need to be completed to upgrade this cluster */
@@ -4369,6 +4376,7 @@ export type RootMutationType = {
   deleteStackDefinition?: Maybe<StackDefinition>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
+  deleteVirtualCluster?: Maybe<Cluster>;
   deleteWebhook?: Maybe<Webhook>;
   delinkBackups?: Maybe<Cluster>;
   /** soft deletes a cluster, by deregistering it in our system but not disturbing any kubernetes objects */
@@ -4459,6 +4467,7 @@ export type RootMutationType = {
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertObservabilityProvider?: Maybe<ObservabilityProvider>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
+  upsertVirtualCluster?: Maybe<Cluster>;
 };
 
 
@@ -4866,6 +4875,11 @@ export type RootMutationTypeDeleteUpgradePolicyArgs = {
 
 
 export type RootMutationTypeDeleteUserArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteVirtualClusterArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5294,6 +5308,12 @@ export type RootMutationTypeUpsertPolicyConstraintsArgs = {
   constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
 };
 
+
+export type RootMutationTypeUpsertVirtualClusterArgs = {
+  attributes: ClusterAttributes;
+  parentId: Scalars['ID']['input'];
+};
+
 export type RootQueryType = {
   __typename?: 'RootQueryType';
   accessToken?: Maybe<AccessToken>;
@@ -5630,6 +5650,7 @@ export type RootQueryTypeClustersArgs = {
   first?: InputMaybe<Scalars['Int']['input']>;
   healthy?: InputMaybe<Scalars['Boolean']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  parentId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
@@ -5783,7 +5804,8 @@ export type RootQueryTypeHelmRepositoryArgs = {
 
 
 export type RootQueryTypeInfrastructureStackArgs = {
-  id: Scalars['ID']['input'];
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 

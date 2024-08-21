@@ -14,46 +14,53 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled, { useTheme } from 'styled-components'
+import styled, { CSSProperties, useTheme } from 'styled-components'
 
 export function IconExpander({
   icon,
   hideCloseIcon = false,
   children,
+  ...cssProps
 }: {
   icon: ReactElement
   hideCloseIcon?: boolean
   children: ReactNode
-}) {
+} & CSSProperties) {
   const theme = useTheme()
   // will hold the item's randomly assigned id if open, empty string if closed
   const [openItem, setOpenItem] = useState('')
 
   return (
-    <Accordion
-      type="single"
-      value={openItem}
-      onValueChange={setOpenItem}
-      orientation="horizontal"
-      css={{ border: theme.borders['fill-three'], overflow: 'hidden' }}
-    >
-      <AccordionItem
-        caret="none"
-        padding="none"
-        paddingArea="trigger-only"
-        css={{ height: '40px' }}
-        trigger={<BlendedIconFrameSC icon={icon} />}
+    <div css={{ position: 'relative' }}>
+      <Accordion
+        type="single"
+        value={openItem}
+        onValueChange={setOpenItem}
+        orientation="horizontal"
+        css={{
+          border: theme.borders['fill-three'],
+          overflow: 'hidden',
+          ...cssProps,
+        }}
       >
-        <div css={{ display: 'flex', height: '100%' }}>
-          {children}
-          {!hideCloseIcon && (
-            <EndIconButtonSC onClick={() => setOpenItem('')}>
-              <CloseIcon />
-            </EndIconButtonSC>
-          )}
-        </div>
-      </AccordionItem>
-    </Accordion>
+        <AccordionItem
+          caret="none"
+          padding="none"
+          paddingArea="trigger-only"
+          css={{ height: '40px' }}
+          trigger={<BlendedIconFrameSC icon={icon} />}
+        >
+          <div css={{ display: 'flex', height: '100%' }}>
+            {children}
+            {!hideCloseIcon && (
+              <EndIconButtonSC onClick={() => setOpenItem('')}>
+                <CloseIcon />
+              </EndIconButtonSC>
+            )}
+          </div>
+        </AccordionItem>
+      </Accordion>
+    </div>
   )
 }
 

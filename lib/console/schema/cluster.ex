@@ -87,6 +87,7 @@ defmodule Console.Schema.Cluster do
     field :self,            :boolean, default: false
     field :installed,       :boolean, default: false
     field :protect,         :boolean, default: false
+    field :virtual,         :boolean, default: false
     field :distro,          Distro, default: :generic
     field :metadata,        :map
 
@@ -110,12 +111,13 @@ defmodule Console.Schema.Cluster do
     embeds_one :kubeconfig,     Kubeconfig, on_replace: :update
     embeds_one :cloud_settings, CloudSettings, on_replace: :update
 
-    belongs_to :provider,     ClusterProvider
-    belongs_to :service,      Service
-    belongs_to :credential,   ProviderCredential
-    belongs_to :object_store, ObjectStore
-    belongs_to :restore,      ClusterRestore
-    belongs_to :project,      Project
+    belongs_to :provider,       ClusterProvider
+    belongs_to :service,        Service
+    belongs_to :credential,     ProviderCredential
+    belongs_to :object_store,   ObjectStore
+    belongs_to :restore,        ClusterRestore
+    belongs_to :project,        Project
+    belongs_to :parent_cluster, __MODULE__
 
     has_many :node_pools, ClusterNodePool, on_replace: :delete
     has_many :service_errors, ServiceError, on_replace: :delete
@@ -224,6 +226,10 @@ defmodule Console.Schema.Cluster do
 
   def for_distro(query \\ __MODULE__, distro) do
     from(c in query, where: c.distro == ^distro)
+  end
+
+  def for_parent(query \\ __MODULE__, parent_id) do
+    from(c in query, where: c.parent_cluster_id == ^parent_id)
   end
 
   def statistics(query \\ __MODULE__) do

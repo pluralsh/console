@@ -9,6 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 )
