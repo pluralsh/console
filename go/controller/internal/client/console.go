@@ -132,10 +132,10 @@ type ConsoleClient interface {
 	DeleteStackDefinition(ctx context.Context, id string) error
 	GetStackDefinition(ctx context.Context, id string) (*console.StackDefinitionFragment, error)
 	IsStackDefinitionExists(ctx context.Context, id string) (bool, error)
-	GetObservabilityProvider(ctx context.Context, id string) (*console.ObservabilityProviderFragment, error)
+	GetObservabilityProvider(ctx context.Context, id, name *string) (*console.ObservabilityProviderFragment, error)
 	UpsertObservabilityProvider(ctx context.Context, attributes console.ObservabilityProviderAttributes) (*console.ObservabilityProviderFragment, error)
 	DeleteObservabilityProvider(ctx context.Context, id string) error
-	IsObservabilityProviderExists(ctx context.Context, id string) (bool, error)
+	IsObservabilityProviderExists(ctx context.Context, name string) (bool, error)
 }
 
 func New(url, token string) ConsoleClient {

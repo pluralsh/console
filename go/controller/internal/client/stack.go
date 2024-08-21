@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -12,7 +13,7 @@ import (
 )
 
 func (c *client) GetStack(ctx context.Context, id string) (*console.InfrastructureStackFragment, error) {
-	response, err := c.consoleClient.GetInfrastructureStack(ctx, id)
+	response, err := c.consoleClient.GetInfrastructureStack(ctx, lo.ToPtr(id), nil)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}

@@ -85,8 +85,6 @@ spec:
                   version:
                     description: Version the semver of the tool you wish to use
                     type: string
-                required:
-                - version
                 type: object
               description:
                 description: Description can be used to describe this StackDefinition.
@@ -136,8 +134,6 @@ spec:
                   - stage
                   type: object
                 type: array
-            required:
-            - configuration
             type: object
           status:
             properties:

@@ -39,6 +39,14 @@ type ObservabilityProvider struct {
 	Status Status `json:"status,omitempty"`
 }
 
+func (in *ObservabilityProvider) ConsoleName() string {
+	if in.Spec.Name != nil && len(*in.Spec.Name) > 0 {
+		return *in.Spec.Name
+	}
+
+	return in.Name
+}
+
 func (in *ObservabilityProvider) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
 }
@@ -54,7 +62,7 @@ func (in *ObservabilityProvider) Diff(hasher Hasher) (changed bool, sha string, 
 
 func (in *ObservabilityProvider) Attributes(credentials client.ObservabilityProviderCredentialsAttributes) client.ObservabilityProviderAttributes {
 	return client.ObservabilityProviderAttributes{
-		Name:        in.Spec.Name,
+		Name:        in.ConsoleName(),
 		Type:        in.Spec.Type,
 		Credentials: credentials,
 	}
@@ -62,8 +70,8 @@ func (in *ObservabilityProvider) Attributes(credentials client.ObservabilityProv
 
 type ObservabilityProviderSpec struct {
 	// Name of the ObservabilityProvider in the Console API.
-	// +kubebuilder:validation:Required
-	Name string `json:"name"`
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name,omitempty"`
 
 	// Type of the ObservabilityProvider.
 	// +kubebuilder:validation:Required
@@ -71,8 +79,8 @@ type ObservabilityProviderSpec struct {
 	Type client.ObservabilityProviderType `json:"type"`
 
 	// Credentials to access the configured provider Type.
-	// +kubebuilder:validation:Required
-	Credentials ObservabilityProviderCredentials `json:"credentials"`
+	// +kubebuilder:validation:Optional
+	Credentials *ObservabilityProviderCredentials `json:"credentials,omitempty"`
 }
 
 type ObservabilityProviderCredentials struct {

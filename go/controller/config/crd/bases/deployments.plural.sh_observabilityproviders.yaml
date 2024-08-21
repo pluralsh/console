@@ -93,8 +93,6 @@ spec:
                 - NEWRELIC
                 type: string
             required:
-            - credentials
-            - name
             - type
             type: object
           status:
