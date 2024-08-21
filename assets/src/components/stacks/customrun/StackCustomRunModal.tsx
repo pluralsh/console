@@ -5,7 +5,7 @@ import {
   Stepper,
   StepperSteps,
 } from '@pluralsh/design-system'
-import { CustomStackRunFragment, StackFragment } from 'generated/graphql'
+import { CustomStackRunFragment } from 'generated/graphql'
 import { useState } from 'react'
 import styled from 'styled-components'
 
@@ -16,11 +16,11 @@ import { StackCustomRunSettings } from './StackCustomRunSettings'
 export default function StackCustomRunModal({
   open,
   onClose,
-  stack,
+  stackId,
 }: {
   open: boolean
   onClose: () => void
-  stack: StackFragment
+  stackId: string
 }) {
   const [step, setStep] = useState<StepName>(StepName.ChooseTemplate)
   const [type, setType] = useState<'manual' | 'prebaked'>('manual')
@@ -48,7 +48,7 @@ export default function StackCustomRunModal({
     >
       {step === StepName.ChooseTemplate && (
         <StackCustomRunChooseTemplate
-          stackId={stack.id ?? ''}
+          stackId={stackId}
           setType={setType}
           setStep={setStep}
           setSelectedCustomRun={setSelectedCustomRun}
@@ -57,14 +57,14 @@ export default function StackCustomRunModal({
       {step === StepName.Settings &&
         (type === 'manual' ? (
           <StackCustomRunCommands
-            stackId={stack.id ?? ''}
+            stackId={stackId}
             setStep={setStep}
             onClose={onClose}
           />
         ) : type === 'prebaked' && selectedCustomRun ? (
           <StackCustomRunSettings
             customRun={selectedCustomRun}
-            stackId={stack.id ?? ''}
+            stackId={stackId}
             setStep={setStep}
             onClose={onClose}
           />
