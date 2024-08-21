@@ -147,7 +147,7 @@ type ConsoleClient interface {
 	UpdateStack(ctx context.Context, id string, attributes StackAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateStack, error)
 	DetachStack(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DetachStack, error)
 	DeleteStack(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteStack, error)
-	GetInfrastructureStack(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStack, error)
+	GetInfrastructureStack(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStack, error)
 	CompletesStackRun(ctx context.Context, id string, attributes StackRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CompletesStackRun, error)
 	AddStackRunLogs(ctx context.Context, id string, attributes RunLogAttributes, interceptors ...clientv2.RequestInterceptor) (*AddStackRunLogs, error)
 	UpdateStackRunStep(ctx context.Context, id string, attributes RunStepAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateStackRunStep, error)
@@ -24837,8 +24837,8 @@ func (c *Client) DeleteStack(ctx context.Context, id string, interceptors ...cli
 	return &res, nil
 }
 
-const GetInfrastructureStackDocument = `query GetInfrastructureStack ($id: ID!) {
-	infrastructureStack(id: $id) {
+const GetInfrastructureStackDocument = `query GetInfrastructureStack ($id: ID, $name: String) {
+	infrastructureStack(id: $id, name: $name) {
 		... InfrastructureStackFragment
 	}
 }
@@ -24997,9 +24997,10 @@ fragment UserFragment on User {
 }
 `
 
-func (c *Client) GetInfrastructureStack(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStack, error) {
+func (c *Client) GetInfrastructureStack(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStack, error) {
 	vars := map[string]any{
-		"id": id,
+		"id":   id,
+		"name": name,
 	}
 
 	var res GetInfrastructureStack
