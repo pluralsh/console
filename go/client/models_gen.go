@@ -1855,7 +1855,7 @@ type InfrastructureStack struct {
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
 	// Arbitrary variables to add to a stack run
-	Variables    *string                `json:"variables,omitempty"`
+	Variables    map[string]interface{} `json:"variables,omitempty"`
 	Runs         *StackRunConnection    `json:"runs,omitempty"`
 	PullRequests *PullRequestConnection `json:"pullRequests,omitempty"`
 	// files bound to a run of this stack

@@ -76,9 +76,9 @@ defmodule Kube.Client.Base do
 
   defmacro list_all_request(name, model) do
     quote do
-      def unquote(name)() do
+      def unquote(name)(params \\ %{}) do
         {g, v, k} = unquote(model).item_model().gvk()
-        make_request("/apis/#{g}/#{v}/#{k}", "get", unquote(model))
+        make_request("/apis/#{g}/#{v}/#{k}", "get", unquote(model), "", params)
       end
     end
   end

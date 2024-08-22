@@ -1341,7 +1341,7 @@ type InfrastructureStack {
   manageState: Boolean
 
   "Arbitrary variables to add to a stack run"
-  variables: Json
+  variables: Map
 
   runs(after: String, first: Int, before: String, last: Int, pullRequestId: ID): StackRunConnection
 
