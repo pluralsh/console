@@ -8677,6 +8677,13 @@ spec:
                 - ANSIBLE
                 - CUSTOM
                 type: string
+              variables:
+                description: |-
+                  Variables represents a file with variables in the stack run environment.
+                  It will be automatically passed to the specific tool depending on the
+                  stack Type (except [console.StackTypeCustom]).
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
               workdir:
                 description: Workdir - the working directory within the git spec you
                   want to run commands in (useful for projects with external modules)

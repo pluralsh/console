@@ -3,12 +3,6 @@ package controller
 import (
 	"context"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -17,6 +11,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 // PrAutomationReconciler reconciles a v1alpha1.PrAutomation object.
@@ -86,7 +87,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	if err != nil {
 		logger.Error(err, "unable to create or update prAutomation")
 		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, err
+		return ctrl.Result{}, err
 	}
 	if apiPrAutomation == nil {
 		logger.Info("PR automation already exists in the Console API. Won't reconcile again.")

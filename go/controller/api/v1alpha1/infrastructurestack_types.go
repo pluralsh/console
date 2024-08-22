@@ -20,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	console "github.com/pluralsh/console/go/client"
@@ -131,6 +132,12 @@ type InfrastructureStackSpec struct {
 	// Tags used to filter stacks.
 	// +kubebuilder:validation:Optional
 	Tags map[string]string `json:"tags,omitempty"`
+
+	// Variables represents a file with variables in the stack run environment.
+	// It will be automatically passed to the specific tool depending on the
+	// stack Type (except [console.StackTypeCustom]).
+	// +kubebuilder:validation:Optional
+	Variables *runtime.RawExtension `json:"variables,omitempty"`
 }
 
 type StackFile struct {

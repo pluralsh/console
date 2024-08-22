@@ -951,6 +951,7 @@ _Appears in:_
 | `stackDefinitionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `observableMetrics` _[ObservableMetric](#observablemetric) array_ |  |  | Optional: {} <br /> |
 | `tags` _object (keys:string, values:string)_ | Tags used to filter stacks. |  | Optional: {} <br /> |
+| `variables` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Variables represents a file with variables in the stack run environment.<br />It will be automatically passed to the specific tool depending on the<br />stack Type (except [console.StackTypeCustom]). |  | Optional: {} <br /> |
 
 
 #### JobSpec

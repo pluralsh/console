@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -144,18 +143,13 @@ func (r *GitRepositoryReconciler) handleDelete(ctx context.Context, repo *v1alph
 	logger := log.FromContext(ctx)
 	if controllerutil.ContainsFinalizer(repo, RepoFinalizer) {
 		logger.Info("delete git repository")
-		if repo.Status.ID == nil {
-			idError := fmt.Errorf("the repoository ID can not be nil")
-			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, idError.Error())
-			return ctrl.Result{}, idError
-		}
 		existingRepo, err := r.getRepository(repo.Spec.Url)
 		if err != nil && !errors.IsNotFound(err) {
 			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
 
-		if existingRepo != nil && !repo.Status.IsReadonly() {
+		if existingRepo != nil && !repo.Status.IsReadonly() && repo.Status.HasID() {
 			if err := r.ConsoleClient.DeleteRepository(*repo.Status.ID); err != nil {
 				if !errors.IsDeleteRepository(err) {
 					utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
