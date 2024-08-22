@@ -2272,7 +2272,7 @@ export type InfrastructureStack = {
   type: StackType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** Arbitrary variables to add to a stack run */
-  variables?: Maybe<Scalars['Json']['output']>;
+  variables?: Maybe<Scalars['Map']['output']>;
   /** the subdirectory you want to run the stack's commands w/in */
   workdir?: Maybe<Scalars['String']['output']>;
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
