@@ -4438,7 +4438,7 @@ type StackRun struct {
 	// whether you want Plural to manage the state of this stack
 	ManageState *bool `json:"manageState,omitempty"`
 	// Arbitrary variables to add to a stack run
-	Variables *string `json:"variables,omitempty"`
+	Variables map[string]interface{} `json:"variables,omitempty"`
 	// explanation for why this run was cancelled
 	CancellationReason *string    `json:"cancellationReason,omitempty"`
 	StateUrls          *StateUrls `json:"stateUrls,omitempty"`

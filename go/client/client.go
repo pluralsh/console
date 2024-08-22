@@ -2810,7 +2810,7 @@ type InfrastructureStackFragment struct {
 	Repository    *GitRepositoryFragment      "json:\"repository,omitempty\" graphql:\"repository\""
 	WriteBindings []*PolicyBindingFragment    "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
 	ReadBindings  []*PolicyBindingFragment    "json:\"readBindings,omitempty\" graphql:\"readBindings\""
-	Variables     *string                     "json:\"variables,omitempty\" graphql:\"variables\""
+	Variables     map[string]interface{}      "json:\"variables,omitempty\" graphql:\"variables\""
 }
 
 func (t *InfrastructureStackFragment) GetID() *string {
@@ -2927,7 +2927,7 @@ func (t *InfrastructureStackFragment) GetReadBindings() []*PolicyBindingFragment
 	}
 	return t.ReadBindings
 }
-func (t *InfrastructureStackFragment) GetVariables() *string {
+func (t *InfrastructureStackFragment) GetVariables() map[string]interface{} {
 	if t == nil {
 		t = &InfrastructureStackFragment{}
 	}
@@ -2957,7 +2957,7 @@ type StackRunFragment struct {
 	Environment   []*StackEnvironmentFragment                        "json:\"environment,omitempty\" graphql:\"environment\""
 	Output        []*StackOutputFragment                             "json:\"output,omitempty\" graphql:\"output\""
 	Errors        []*ServiceErrorFragment                            "json:\"errors,omitempty\" graphql:\"errors\""
-	Variables     *string                                            "json:\"variables,omitempty\" graphql:\"variables\""
+	Variables     map[string]interface{}                             "json:\"variables,omitempty\" graphql:\"variables\""
 	Approver      *UserFragment                                      "json:\"approver,omitempty\" graphql:\"approver\""
 }
 
@@ -3093,7 +3093,7 @@ func (t *StackRunFragment) GetErrors() []*ServiceErrorFragment {
 	}
 	return t.Errors
 }
-func (t *StackRunFragment) GetVariables() *string {
+func (t *StackRunFragment) GetVariables() map[string]interface{} {
 	if t == nil {
 		t = &StackRunFragment{}
 	}
@@ -3129,7 +3129,7 @@ type StackRunBaseFragment struct {
 	Environment   []*StackEnvironmentFragment       "json:\"environment,omitempty\" graphql:\"environment\""
 	Output        []*StackOutputFragment            "json:\"output,omitempty\" graphql:\"output\""
 	Errors        []*ServiceErrorFragment           "json:\"errors,omitempty\" graphql:\"errors\""
-	Variables     *string                           "json:\"variables,omitempty\" graphql:\"variables\""
+	Variables     map[string]interface{}            "json:\"variables,omitempty\" graphql:\"variables\""
 }
 
 func (t *StackRunBaseFragment) GetID() string {
@@ -3264,7 +3264,7 @@ func (t *StackRunBaseFragment) GetErrors() []*ServiceErrorFragment {
 	}
 	return t.Errors
 }
-func (t *StackRunBaseFragment) GetVariables() *string {
+func (t *StackRunBaseFragment) GetVariables() map[string]interface{} {
 	if t == nil {
 		t = &StackRunBaseFragment{}
 	}
