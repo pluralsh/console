@@ -1493,7 +1493,7 @@ type StackRun {
   manageState: Boolean
 
   "Arbitrary variables to add to a stack run"
-  variables: Json
+  variables: Map
 
   "explanation for why this run was cancelled"
   cancellationReason: String

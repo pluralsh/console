@@ -235,7 +235,7 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :approved_at,         :datetime, description: "when this run was approved"
     field :workdir,             :string, description: "the subdirectory you want to run the stack's commands w/in"
     field :manage_state,        :boolean, description: "whether you want Plural to manage the state of this stack"
-    field :variables,           :json, description: "Arbitrary variables to add to a stack run"
+    field :variables,           :map, description: "Arbitrary variables to add to a stack run"
     field :cancellation_reason, :string, description: "explanation for why this run was cancelled"
 
     field :state_urls, :state_urls, resolve: fn
