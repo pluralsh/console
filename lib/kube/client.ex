@@ -10,7 +10,6 @@ defmodule Kube.Client do
   list_request :list_vertical_pod_autoscalers, Kube.VerticalPodAutoscaler.List
   list_request :list_wireguard_peers, Kube.WireguardPeer.List
   list_request :list_certificate, Kube.Certificate.List
-  list_request :list_postgresqls, Kube.Postgresql.List
   list_request :list_clusters, Kube.Cluster.List
   list_request :list_canaries, Kube.Canary.List
   list_request :list_rollouts, Kube.Rollout.List
