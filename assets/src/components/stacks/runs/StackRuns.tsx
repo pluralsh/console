@@ -1,23 +1,25 @@
 import { Card, EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
-import { useOutletContext, useParams } from 'react-router-dom'
+import { useOutletContext } from 'react-router-dom'
 
 import { StackFragment, useStackRunsQuery } from '../../../generated/graphql'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
-import { getBreadcrumbs } from '../Stacks'
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
 import { StackRunsScroller } from './StackRunsScroller'
 
 const pollInterval = 5 * 1000
 
 export default function StackRuns() {
-  const { stackId = '' } = useParams()
-  const { stack } = useOutletContext() as { stack?: Nullable<StackFragment> }
+  const { stack } = useOutletContext() as StackOutletContextT
 
   useSetBreadcrumbs(
-    useMemo(() => [...getBreadcrumbs(stackId), { label: 'runs' }], [stackId])
+    useMemo(
+      () => [...getBreadcrumbs(stack.name), { label: 'runs' }],
+      [stack.name]
+    )
   )
 
   const queryResult = useStackRunsQuery({

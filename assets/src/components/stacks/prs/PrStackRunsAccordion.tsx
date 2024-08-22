@@ -7,14 +7,12 @@ import {
   IconFrame,
   ReloadIcon,
   Toast,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import {
   PullRequestFragment,
   useKickStackPullRequestMutation,
   useStackRunsQuery,
 } from 'generated/graphql'
-import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { isEmpty } from 'lodash'
@@ -24,7 +22,6 @@ import styled, { useTheme } from 'styled-components'
 import { PrStatusChip } from 'components/pr/queue/PrQueueColumns'
 
 import { StackRunsScroller } from '../runs/StackRunsScroller'
-import { getBreadcrumbs } from '../Stacks'
 
 const pollInterval = 5 * 1000
 
@@ -42,10 +39,6 @@ export function PrStackRunsAccordion({
 }) {
   const theme = useTheme()
   const { stackId = '' } = useParams()
-
-  useSetBreadcrumbs(
-    useMemo(() => [...getBreadcrumbs(stackId), { label: 'prs' }], [stackId])
-  )
 
   const queryResult = useStackRunsQuery({
     variables: { id: stackId, pullRequestId: pr.id },

@@ -1,7 +1,7 @@
-import { Table } from '@pluralsh/design-system'
+import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { PullRequestEdge, useStackPrsQuery } from 'generated/graphql'
-import { useParams } from 'react-router-dom'
+import { useOutletContext, useParams } from 'react-router-dom'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
@@ -10,17 +10,28 @@ import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+
+import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
 
 import { PrStackRunsAccordion } from './PrStackRunsAccordion'
 
 export function StackPrs() {
   const { stackId } = useParams()
+  const { stack } = useOutletContext() as StackOutletContextT
+
   const [openRowIdx, setOpenRowIdx] = useState(-1)
 
   const reactTableOptions = {
     meta: { openRowIdx, setOpenRowIdx },
   }
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...getBreadcrumbs(stack.name), { label: 'prs' }],
+      [stack.name]
+    )
+  )
 
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(

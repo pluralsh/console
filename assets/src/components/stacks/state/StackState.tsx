@@ -15,8 +15,8 @@ export default function StackState() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stack.id ?? ''), { label: 'state' }],
-      [stack.id]
+      () => [...getBreadcrumbs(stack.name ?? ''), { label: 'state' }],
+      [stack.name]
     )
   )
 
