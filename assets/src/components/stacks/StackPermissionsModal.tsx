@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { StackFragment, useStackBindingsQuery } from '../../generated/graphql'
 import {
   PermissionsIdType,

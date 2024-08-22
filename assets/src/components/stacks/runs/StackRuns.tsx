@@ -1,9 +1,4 @@
-import {
-  Card,
-  EmptyState,
-  LoopingLogo,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
+import { Card, EmptyState, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import { useOutletContext, useParams } from 'react-router-dom'
@@ -32,7 +27,7 @@ export default function StackRuns() {
   })
 
   if (!queryResult.data) {
-    return <LoopingLogo />
+    return null
   }
 
   if (isEmpty(queryResult.data.infrastructureStack?.runs))

@@ -1,13 +1,9 @@
 import { Button } from '@pluralsh/design-system'
 import { useState } from 'react'
 
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
-import { StackFragment } from '../../../generated/graphql'
-
 import StackCustomRunModal from './StackCustomRunModal'
 
-export default function StackCustomRun({ stack }: { stack: StackFragment }) {
+export default function StackCustomRun({ stackId }: { stackId: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -18,13 +14,11 @@ export default function StackCustomRun({ stack }: { stack: StackFragment }) {
       >
         Custom run
       </Button>
-      <ModalMountTransition open={isOpen}>
-        <StackCustomRunModal
-          open={isOpen}
-          onClose={() => setIsOpen(false)}
-          stack={stack}
-        />
-      </ModalMountTransition>
+      <StackCustomRunModal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        stackId={stackId}
+      />
     </>
   )
 }
