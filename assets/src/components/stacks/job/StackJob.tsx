@@ -19,8 +19,8 @@ export default function StackJob() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stack.name ?? ''), { label: 'job' }],
-      [stack.name]
+      () => [...getBreadcrumbs(stack.id, stack.name), { label: 'job' }],
+      [stack]
     )
   )
 

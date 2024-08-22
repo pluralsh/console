@@ -3,7 +3,7 @@ import { useMemo } from 'react'
 import { isEmpty } from 'lodash'
 import { useOutletContext } from 'react-router-dom'
 
-import { StackFragment, useStackRunsQuery } from '../../../generated/graphql'
+import { useStackRunsQuery } from '../../../generated/graphql'
 import { ScrollablePage } from '../../utils/layout/ScrollablePage'
 
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
@@ -17,8 +17,8 @@ export default function StackRuns() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stack.name), { label: 'runs' }],
-      [stack.name]
+      () => [...getBreadcrumbs(stack.id, stack.name), { label: 'runs' }],
+      [stack]
     )
   )
 

@@ -32,6 +32,7 @@ import { keyToTag } from 'utils/clusterTags'
 
 import {
   Conjunction,
+  Maybe,
   StackFragment,
   StackTinyFragment,
   StackType,
@@ -77,9 +78,14 @@ export type StackOutletContextT = {
   refetch?: Nullable<() => void>
 }
 
-export const getBreadcrumbs = (stack?: string) => [
+export const getBreadcrumbs = (
+  stackId: Nullable<string>,
+  stackName: Nullable<string>
+) => [
   { label: 'stacks', url: getStacksAbsPath('') },
-  ...(stack ? [{ label: stack, url: getStacksAbsPath(stack) }] : []),
+  ...(stackId
+    ? [{ label: stackName || stackId, url: getStacksAbsPath(stackId) }]
+    : []),
 ]
 
 enum MenuItemKey {
@@ -189,7 +195,10 @@ export default function Stacks() {
   }, [stacks, stackId, navigate])
 
   useSetBreadcrumbs(
-    useMemo(() => [...getBreadcrumbs(fullStack?.name)], [fullStack?.name])
+    useMemo(
+      () => [...getBreadcrumbs(fullStack?.id, fullStack?.name)],
+      [fullStack]
+    )
   )
 
   if (error)

@@ -39,8 +39,8 @@ export default function StackFiles() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stack.name ?? ''), { label: 'files' }],
-      [stack.name]
+      () => [...getBreadcrumbs(stack.id, stack.name), { label: 'files' }],
+      [stack]
     )
   )
 

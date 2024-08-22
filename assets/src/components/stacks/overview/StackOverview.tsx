@@ -17,8 +17,8 @@ export default function StackOverview() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stack.name ?? ''), { label: 'overview' }],
-      [stack.name]
+      () => [...getBreadcrumbs(stack.id, stack.name), { label: 'overview' }],
+      [stack]
     )
   )
 

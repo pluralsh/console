@@ -28,8 +28,8 @@ export function StackPrs() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stack.name), { label: 'prs' }],
-      [stack.name]
+      () => [...getBreadcrumbs(stack.id, stack.name), { label: 'prs' }],
+      [stack]
     )
   )
 
