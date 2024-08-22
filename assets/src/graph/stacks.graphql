@@ -311,6 +311,7 @@ query StackRun($id: ID!) {
     }
     cancellationReason
     stack {
+      name
       observableMetrics {
         provider {
           name

@@ -107,8 +107,8 @@ export default function StackOutput() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stack.id ?? ''), { label: 'output' }],
-      [stack.id]
+      () => [...getBreadcrumbs(stack.id, stack.name), { label: 'output' }],
+      [stack]
     )
   )
 

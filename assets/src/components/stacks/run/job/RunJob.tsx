@@ -3,13 +3,11 @@ import {
   BriefcaseIcon,
   LoopingLogo,
   Tooltip,
-  useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { createContext, useContext, useMemo } from 'react'
 import {
   Outlet,
   useLocation,
-  useMatch,
   useOutletContext,
   useParams,
 } from 'react-router-dom'
@@ -29,7 +27,6 @@ import { Subtitle2H1 } from 'components/utils/typography/Text'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
 
-import { getRunBreadcrumbs } from '../Route'
 import { TRUNCATE } from '../../../utils/truncate'
 
 const DIRECTORY = [
@@ -37,20 +34,6 @@ const DIRECTORY = [
   { path: 'pods', label: 'Pods' },
   { path: 'status', label: 'Status' },
   { path: 'specs', label: 'Specs' },
-]
-
-const getStackRunJobCrumbs = ({
-  stackId,
-  runId,
-  tab,
-}: {
-  stackId: string
-  runId: string
-  tab: string
-}) => [
-  ...getRunBreadcrumbs(stackId, runId),
-  { label: 'job' },
-  { label: tab, url: `${getStackRunsAbsPath(stackId, runId)}/${tab}` },
 ]
 
 const PodsContext =
@@ -85,24 +68,12 @@ export default function RunJob() {
   const { pathname } = useLocation()
 
   const pathPrefix = `${getStackRunsAbsPath(stackId, runId)}/job`
-  const tab = useMatch(`${pathPrefix}/:tab/*`)?.params?.tab || ''
 
   const { data, error, refetch } = useStackRunJobQuery({
     variables: { id: runId || '' },
     pollInterval: POLL_INTERVAL,
   })
 
-  useSetBreadcrumbs(
-    useMemo(
-      () =>
-        getStackRunJobCrumbs({
-          runId: runId || '',
-          stackId: stackId || '',
-          tab: tab || '',
-        }),
-      [runId, stackId, tab]
-    )
-  )
   const outletContext: OutletContextT = useMemo(
     () => ({
       refetch,

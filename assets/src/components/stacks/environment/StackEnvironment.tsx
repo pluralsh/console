@@ -128,8 +128,8 @@ export default function StackEnvironment() {
 
   useSetBreadcrumbs(
     useMemo(
-      () => [...getBreadcrumbs(stack.id ?? ''), { label: 'environment' }],
-      [stack.id]
+      () => [...getBreadcrumbs(stack.id, stack.name), { label: 'environment' }],
+      [stack]
     )
   )
 
