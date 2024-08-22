@@ -32,7 +32,6 @@ import { keyToTag } from 'utils/clusterTags'
 
 import {
   Conjunction,
-  Maybe,
   StackFragment,
   StackTinyFragment,
   StackType,
