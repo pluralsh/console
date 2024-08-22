@@ -21,9 +21,13 @@ import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveL
 import StackRunHeader from './Header'
 import StackRunSidecar from './Sidecar'
 
-export function getRunBreadcrumbs(stackId: string, runId: string) {
+export function getRunBreadcrumbs(
+  stackName: Nullable<string>,
+  stackId: string,
+  runId: string
+) {
   return [
-    ...getBreadcrumbs(stackId ?? ''),
+    ...getBreadcrumbs(stackId, stackName),
     {
       label: 'runs',
       url: `${getStacksAbsPath(stackId)}/${STACK_RUNS_REL_PATH}`,
@@ -51,14 +55,15 @@ export default function StackRunDetail(): ReactNode {
     pollInterval: 5_000,
   })
 
+  const stackRun: StackRun = stackRunQuery?.stackRun as StackRun
+
   useSetBreadcrumbs(
     useMemo(
-      () => getRunBreadcrumbs(stackId || '', runId || ''),
-      [runId, stackId]
+      () =>
+        getRunBreadcrumbs(stackRun?.stack?.name, stackId || '', runId || ''),
+      [runId, stackId, stackRun?.stack?.name]
     )
   )
-
-  const stackRun: StackRun = stackRunQuery?.stackRun as StackRun
 
   if (loadingStackRun) {
     return <LoadingIndicator />

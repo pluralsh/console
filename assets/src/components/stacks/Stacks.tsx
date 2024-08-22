@@ -77,9 +77,14 @@ export type StackOutletContextT = {
   refetch?: Nullable<() => void>
 }
 
-export const getBreadcrumbs = (stackId: string) => [
+export const getBreadcrumbs = (
+  stackId: Nullable<string>,
+  stackName: Nullable<string>
+) => [
   { label: 'stacks', url: getStacksAbsPath('') },
-  ...(stackId ? [{ label: stackId, url: getStacksAbsPath(stackId) }] : []),
+  ...(stackId
+    ? [{ label: stackName || stackId, url: getStacksAbsPath(stackId) }]
+    : []),
 ]
 
 enum MenuItemKey {
@@ -138,8 +143,6 @@ export default function Stacks() {
     [selectedTagKeys]
   )
 
-  useSetBreadcrumbs(useMemo(() => [...getBreadcrumbs(stackId)], [stackId]))
-
   const { data, loading, error, refetch, pageInfo, fetchNextPage } =
     useFetchPaginatedData(
       {
@@ -189,6 +192,13 @@ export default function Stacks() {
   useEffect(() => {
     if (!isEmpty(stacks) && !stackId) navigate(getStacksAbsPath(stacks[0].id))
   }, [stacks, stackId, navigate])
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [...getBreadcrumbs(fullStack?.id, fullStack?.name)],
+      [fullStack]
+    )
+  )
 
   if (error)
     return (
