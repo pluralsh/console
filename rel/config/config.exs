@@ -28,6 +28,9 @@ if get_env("OIDC_CLIENT_ID") do
   config :console,
     plural_login: true,
     oidc_login: true
+
+  config :openid_connect, refresh: 2 * 60 * 1000
+
   config :console, :oidc_providers,
     plural: [
       discovery_document_uri: get_env("OIDC_DISCOVERY_URL"),
