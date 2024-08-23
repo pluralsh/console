@@ -6,7 +6,6 @@ import { GraphQLError } from 'graphql'
 import { GraphQLErrors } from '@apollo/client/errors'
 
 import { GqlError } from './Alert'
-import { ModalMountTransition } from './ModalMountTransition'
 
 type ConfirmProps = {
   open: boolean
@@ -40,57 +39,55 @@ export function Confirm({
   const theme = useTheme()
 
   return (
-    <ModalMountTransition open={open}>
-      <Modal
-        header={title}
-        open={open}
-        onClose={close || undefined}
-        actions={
-          <>
-            <Button
-              type="button"
-              secondary
-              onClick={close}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              destructive={destructive}
-              onClick={submit}
-              loading={loading}
-              marginLeft="medium"
-            >
-              {label || 'Confirm'}
-            </Button>
-          </>
-        }
-      >
-        {error && (
-          <div
-            css={{
-              marginBottom: theme.spacing.large,
-            }}
+    <Modal
+      header={title}
+      open={open}
+      onClose={close || undefined}
+      actions={
+        <>
+          <Button
+            type="button"
+            secondary
+            onClick={close}
           >
-            <GqlError
-              error={
-                errorMessage
-                  ? ({
-                      graphQLErrors: [
-                        { message: errorMessage } as GraphQLError,
-                      ] as GraphQLErrors,
-                    } as ApolloError)
-                  : error
-              }
-              header={errorHeader}
-            />
-          </div>
-        )}
-        <div css={{ ...theme.partials.text.body1, color: theme.colors.text }}>
-          {text}
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            destructive={destructive}
+            onClick={submit}
+            loading={loading}
+            marginLeft="medium"
+          >
+            {label || 'Confirm'}
+          </Button>
+        </>
+      }
+    >
+      {error && (
+        <div
+          css={{
+            marginBottom: theme.spacing.large,
+          }}
+        >
+          <GqlError
+            error={
+              errorMessage
+                ? ({
+                    graphQLErrors: [
+                      { message: errorMessage } as GraphQLError,
+                    ] as GraphQLErrors,
+                  } as ApolloError)
+                : error
+            }
+            header={errorHeader}
+          />
         </div>
-        {extraContent}
-      </Modal>
-    </ModalMountTransition>
+      )}
+      <div css={{ ...theme.partials.text.body1, color: theme.colors.text }}>
+        {text}
+      </div>
+      {extraContent}
+    </Modal>
   )
 }
