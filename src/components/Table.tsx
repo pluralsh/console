@@ -172,7 +172,8 @@ const Tr = styled.tr<{
     ...(clickable && {
       cursor: 'pointer',
 
-      '&:hover': {
+      // highlight when hovered, but don't highlight if a child button is hovered
+      '&:not(:has(button:hover)):hover': {
         backgroundColor: selectable
           ? selected
             ? theme.colors['fill-zero-hover']

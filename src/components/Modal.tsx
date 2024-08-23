@@ -79,14 +79,13 @@ const sizeToWidth = {
 const ModalSC = styled(Card)<{
   $width: number
   $maxWidth: number
-}>(({ theme, $width, $maxWidth }) => ({
+}>(({ $width, $maxWidth }) => ({
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',
   height: '100%',
   width: $width,
   maxWidth: $maxWidth,
-  backgroundColor: theme.colors['fill-one'],
 }))
 
 const ModalContentSC = styled.div<{
@@ -186,6 +185,7 @@ function ModalRef(
       {...props}
     >
       <ModalSC
+        fillLevel={1}
         forwardedAs={asForm ? 'form' : undefined}
         $width={sizeToWidth[size]}
         $maxWidth={maxWidth}
