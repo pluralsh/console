@@ -20,6 +20,7 @@ export function HelpLauncherBtn({
   return (
     <div css={{ position: 'relative' }}>
       <IconFrame
+        clickable
         type="secondary"
         icon={variant === 'minimize' ? <CaretDownIcon /> : <span>?</span>}
         tooltip={variant === 'minimize' ? undefined : 'Help'}
