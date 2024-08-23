@@ -207,7 +207,7 @@ defmodule Console.Deployments.Git do
   def create_scm_webhook(attrs, %User{} = user) do
     %ScmWebhook{}
     |> ScmWebhook.changeset(attrs)
-    |> allow(user, :edit)
+    |> allow(user, :write)
     |> when_ok(:insert)
   end
 
@@ -218,7 +218,7 @@ defmodule Console.Deployments.Git do
   def update_scm_webhook(attrs, id, %User{} = user) do
     get_scm_webhook!(id)
     |> ScmWebhook.changeset(attrs)
-    |> allow(user, :edit)
+    |> allow(user, :write)
     |> when_ok(:update)
   end
 
@@ -228,7 +228,7 @@ defmodule Console.Deployments.Git do
   @spec delete_scm_webhook(binary, User.t) :: webhook_resp
   def delete_scm_webhook(id, %User{} = user) do
     get_scm_webhook!(id)
-    |> allow(user, :edit)
+    |> allow(user, :write)
     |> when_ok(:delete)
   end
 

@@ -313,4 +313,34 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       }, %{current_user: insert(:user)})
     end
   end
+
+  describe "deleteScmWebhook" do
+    test "admins can delete scm webhooks" do
+      admin = admin_user()
+      hook = insert(:scm_webhook)
+
+      {:ok, %{data: %{"deleteScmWebhook" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteScmWebhook(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => hook.id}, %{current_user: admin})
+
+      assert deleted["id"] == hook.id
+      refute refetch(hook)
+    end
+
+    test "non-admins cannot delete" do
+      hook = insert(:scm_webhook)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteScmWebhook(id: $id) {
+            id
+          }
+        }
+      """, %{"id" => hook.id}, %{current_user: insert(:user)})
+    end
+  end
 end
