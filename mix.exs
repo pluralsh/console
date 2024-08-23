@@ -79,7 +79,7 @@ defmodule Console.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:phoenix, "~> 1.5"},
       {:phoenix_view, "~> 2.0"},
-      {:openid_connect, "~> 0.2.2", git: "https://github.com/pluralsh/openid_connect", commit: "c3b2701b9adbe01fd89bbd09816ffa6c9e4a825e"},
+      {:openid_connect, "~> 0.2.2", git: "https://github.com/pluralsh/openid_connect", commit: "58bda539debd81dc1a253139ae9b5cbbd65c8047q"},
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~>4.0"},
       {:ecto_sql, "~> 3.9.0"},
