@@ -282,6 +282,7 @@ export function PodLogs(): ReactElement {
         flexDirection: 'column',
         gap: theme.spacing.medium,
         height: '100%',
+        overflow: 'hidden',
       }}
     >
       <div
