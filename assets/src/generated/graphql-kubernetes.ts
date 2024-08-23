@@ -11040,7 +11040,7 @@ export const PodLogsDocument = gql`
     container: $container
     itemsPerPage: $itemsPerPage
     page: $page
-  ) @rest(path: "log/{args.namespace}/{args.pod}?container={args.container}&itemsPerPage={args.itemsPerPage}&page={args.page}") {
+  ) @rest(path: "log/{args.namespace}/{args.pod}/{args.container}?itemsPerPage={args.itemsPerPage}&page={args.page}") {
     ...LogDetails
   }
 }

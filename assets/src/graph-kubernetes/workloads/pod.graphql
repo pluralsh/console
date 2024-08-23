@@ -99,7 +99,7 @@ query PodLogs(
     page: $page
   )
     @rest(
-      path: "log/{args.namespace}/{args.pod}?container={args.container}&itemsPerPage={args.itemsPerPage}&page={args.page}"
+      path: "log/{args.namespace}/{args.pod}/{args.container}?itemsPerPage={args.itemsPerPage}&page={args.page}"
     ) {
     ...LogDetails
   }
