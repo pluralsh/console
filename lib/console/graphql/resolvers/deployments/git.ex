@@ -115,6 +115,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def create_webhook(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Git.create_webhook(attrs, user)
 
+  def delete_scm_webhook(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.delete_scm_webhook(id, user)
+
   def setup_renovate(%{connection_id: id, repos: repos} = args, %{context: %{current_user: user}}),
     do: Git.setup_renovate(args, id, repos, user)
 

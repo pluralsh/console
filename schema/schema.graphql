@@ -523,6 +523,8 @@ type RootMutationType {
 
   createScmWebhook(connectionId: ID!, owner: String!): ScmWebhook
 
+  deleteScmWebhook(id: ID!): ScmWebhook
+
   "creates a webhook reference in our system but doesn't attempt to create it in your upstream provider"
   createScmWebhookPointer(attributes: ScmWebhookAttributes!): ScmWebhook
 

@@ -4370,6 +4370,7 @@ export type RootMutationType = {
   deletePullRequest?: Maybe<PullRequest>;
   deleteRole?: Maybe<Role>;
   deleteScmConnection?: Maybe<ScmConnection>;
+  deleteScmWebhook?: Maybe<ScmWebhook>;
   deleteServiceContext?: Maybe<ServiceContext>;
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteStack?: Maybe<InfrastructureStack>;
@@ -4845,6 +4846,11 @@ export type RootMutationTypeDeleteRoleArgs = {
 
 
 export type RootMutationTypeDeleteScmConnectionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteScmWebhookArgs = {
   id: Scalars['ID']['input'];
 };
 

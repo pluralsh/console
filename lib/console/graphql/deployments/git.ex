@@ -582,6 +582,13 @@ defmodule Console.GraphQl.Deployments.Git do
       safe_resolve &Deployments.create_webhook_for_connection/2
     end
 
+    field :delete_scm_webhook, :scm_webhook do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      safe_resolve &Deployments.delete_scm_webhook/2
+    end
+
     @desc "creates a webhook reference in our system but doesn't attempt to create it in your upstream provider"
     field :create_scm_webhook_pointer, :scm_webhook do
       middleware Authenticated
