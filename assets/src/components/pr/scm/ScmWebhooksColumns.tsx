@@ -1,16 +1,32 @@
-import { ArrowTopRightIcon, Button } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  CopyIcon,
+  ListBoxItem,
+  TrashCanIcon,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
 
-import { ScmType, ScmWebhookFragment } from 'generated/graphql'
-import { Edge } from 'utils/graphql'
+import {
+  ScmType,
+  ScmWebhookFragment,
+  ScmWebhooksDocument,
+  useDeleteScmWebhookMutation,
+} from 'generated/graphql'
+import { Edge, removeConnection, updateCache } from 'utils/graphql'
 
-import { StopPropagation } from 'components/utils/StopPropagation'
-import { TruncateStart } from 'components/utils/table/TruncateStart'
-import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import CopyButton from 'components/utils/CopyButton'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import { TruncateStart } from 'components/utils/table/TruncateStart'
+
+import { MoreMenu } from 'components/utils/MoreMenu'
+
+import { useState } from 'react'
+
+import { Confirm } from 'components/utils/Confirm'
 
 import { ScmTypeCell, scmTypeToLabel } from './PrScmConnectionsColumns'
+import { SCM_WEBHOOKS_Q_VARS } from './ScmWebhooks'
 
 export const columnHelper = createColumnHelper<Edge<ScmWebhookFragment>>()
 
@@ -84,31 +100,120 @@ function getWebhookUrl(scmWebhook: Nullable<ScmWebhookFragment>) {
   return undefined
 }
 
+function DeleteScmWebhookModal({
+  scmWebhook,
+  open,
+  onClose,
+}: {
+  scmWebhook: ScmWebhookFragment
+  open: boolean
+  onClose: Nullable<() => void>
+}) {
+  const theme = useTheme()
+  const [mutation, { loading, error }] = useDeleteScmWebhookMutation({
+    variables: { id: scmWebhook.id },
+    update: (cache, { data }) =>
+      updateCache(cache, {
+        variables: SCM_WEBHOOKS_Q_VARS,
+        query: ScmWebhooksDocument,
+        update: (prev) =>
+          removeConnection(prev, data?.deleteScmWebhook, 'scmWebhooks'),
+      }),
+    onCompleted: () => {
+      onClose?.()
+    },
+  })
+
+  return (
+    <Confirm
+      close={() => onClose?.()}
+      destructive
+      label="Delete"
+      loading={loading}
+      error={error}
+      open={open}
+      submit={() => mutation()}
+      title="Delete SCM connection"
+      text={
+        <>
+          Are you sure you want to delete the{' '}
+          <span css={{ color: theme.colors['text-danger'] }}>
+            “{scmWebhook.name}”
+          </span>{' '}
+          webhook?
+        </>
+      }
+    />
+  )
+}
+
+enum MenuItemKey {
+  Manage = 'manage',
+  Copy = 'copy',
+  Delete = 'delete',
+}
+
 export const ColActions = columnHelper.display({
   id: 'actions',
   header: '',
   cell: function Cell({ row }) {
+    const theme = useTheme()
+    const [menuKey, setMenuKey] = useState<MenuItemKey | ''>()
     const scmWebhook = row.original.node
-    const url = getWebhookUrl(scmWebhook)
+    const url = scmWebhook?.url
     const scmName = scmWebhook?.type ? scmTypeToLabel[scmWebhook?.type] : ''
 
-    if (!url) {
+    if (!scmWebhook) {
       return null
     }
 
+    if (menuKey === MenuItemKey.Manage) {
+      window.open(getWebhookUrl(scmWebhook), '_blank', 'noopener,noreferrer')
+      setMenuKey('')
+    }
+
+    if (menuKey === MenuItemKey.Copy) {
+      if (url) {
+        navigator.clipboard.writeText(url)
+      }
+      setMenuKey('')
+    }
+
     return (
-      <StopPropagation>
-        <Button
-          secondary
-          as="a"
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          endIcon={<ArrowTopRightIcon />}
-        >
-          Manage{scmName && <> on {scmName}</>}
-        </Button>
-      </StopPropagation>
+      <>
+        <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
+          <ListBoxItem
+            key={MenuItemKey.Manage}
+            leftContent={<ArrowTopRightIcon color="icon-default" />}
+            label={
+              <a css={{ textDecoration: 'none', color: 'inherit' }}>
+                {`Manage${scmName ? ` on ${scmName}` : ''}`}
+              </a>
+            }
+            textValue="Manage"
+          />
+          <ListBoxItem
+            key={MenuItemKey.Copy}
+            leftContent={<CopyIcon color={theme.colors['icon-default']} />}
+            label="Copy webhook URL"
+            textValue="Copy webhook URL"
+          />
+          <ListBoxItem
+            key={MenuItemKey.Delete}
+            leftContent={
+              <TrashCanIcon color={theme.colors['icon-danger-critical']} />
+            }
+            label="Delete webhook"
+            textValue="Delete webhook"
+          />
+        </MoreMenu>
+        {/* Modals */}
+        <DeleteScmWebhookModal
+          scmWebhook={scmWebhook}
+          open={menuKey === MenuItemKey.Delete}
+          onClose={() => setMenuKey('')}
+        />
+      </>
     )
   },
 })

@@ -8137,6 +8137,13 @@ export type CreateScmWebhookMutationVariables = Exact<{
 
 export type CreateScmWebhookMutation = { __typename?: 'RootMutationType', createScmWebhook?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type DeleteScmWebhookMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteScmWebhookMutation = { __typename?: 'RootMutationType', deleteScmWebhook?: { __typename?: 'ScmWebhook', id: string, name: string, owner: string, type: ScmType, url: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type CreateScmWebhookPointerMutationVariables = Exact<{
   attributes: ScmWebhookAttributes;
 }>;
@@ -13046,6 +13053,39 @@ export function useCreateScmWebhookMutation(baseOptions?: Apollo.MutationHookOpt
 export type CreateScmWebhookMutationHookResult = ReturnType<typeof useCreateScmWebhookMutation>;
 export type CreateScmWebhookMutationResult = Apollo.MutationResult<CreateScmWebhookMutation>;
 export type CreateScmWebhookMutationOptions = Apollo.BaseMutationOptions<CreateScmWebhookMutation, CreateScmWebhookMutationVariables>;
+export const DeleteScmWebhookDocument = gql`
+    mutation DeleteScmWebhook($id: ID!) {
+  deleteScmWebhook(id: $id) {
+    ...ScmWebhook
+  }
+}
+    ${ScmWebhookFragmentDoc}`;
+export type DeleteScmWebhookMutationFn = Apollo.MutationFunction<DeleteScmWebhookMutation, DeleteScmWebhookMutationVariables>;
+
+/**
+ * __useDeleteScmWebhookMutation__
+ *
+ * To run a mutation, you first call `useDeleteScmWebhookMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteScmWebhookMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteScmWebhookMutation, { data, loading, error }] = useDeleteScmWebhookMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteScmWebhookMutation(baseOptions?: Apollo.MutationHookOptions<DeleteScmWebhookMutation, DeleteScmWebhookMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteScmWebhookMutation, DeleteScmWebhookMutationVariables>(DeleteScmWebhookDocument, options);
+      }
+export type DeleteScmWebhookMutationHookResult = ReturnType<typeof useDeleteScmWebhookMutation>;
+export type DeleteScmWebhookMutationResult = Apollo.MutationResult<DeleteScmWebhookMutation>;
+export type DeleteScmWebhookMutationOptions = Apollo.BaseMutationOptions<DeleteScmWebhookMutation, DeleteScmWebhookMutationVariables>;
 export const CreateScmWebhookPointerDocument = gql`
     mutation CreateScmWebhookPointer($attributes: ScmWebhookAttributes!) {
   createScmWebhookPointer(attributes: $attributes) {
@@ -21081,6 +21121,7 @@ export const namedOperations = {
     DeleteScmConnection: 'DeleteScmConnection',
     SetupRenovate: 'SetupRenovate',
     CreateScmWebhook: 'CreateScmWebhook',
+    DeleteScmWebhook: 'DeleteScmWebhook',
     CreateScmWebhookPointer: 'CreateScmWebhookPointer',
     CreateObjectStore: 'CreateObjectStore',
     UpdateObjectStore: 'UpdateObjectStore',
