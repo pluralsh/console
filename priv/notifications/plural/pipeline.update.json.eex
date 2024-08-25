@@ -1,0 +1,3 @@
+🚰 Pipeline <%= @pipe.name %> has pending changes
+
+View details here: <%= Console.url("/cd/pipelines/#{@pipe.id}") %>

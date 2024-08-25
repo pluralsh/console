@@ -192,6 +192,28 @@ export type ApiDeprecation = {
   replacement?: Maybe<Scalars['String']['output']>;
 };
 
+export type AppNotification = {
+  __typename?: 'AppNotification';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  priority?: Maybe<NotificationPriority>;
+  readAt?: Maybe<Scalars['DateTime']['output']>;
+  text?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type AppNotificationConnection = {
+  __typename?: 'AppNotificationConnection';
+  edges?: Maybe<Array<Maybe<AppNotificationEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AppNotificationEdge = {
+  __typename?: 'AppNotificationEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AppNotification>;
+};
+
 export type Application = {
   __typename?: 'Application';
   configuration?: Maybe<Configuration>;
@@ -2869,6 +2891,12 @@ export type NotificationFilter = {
   service?: Maybe<ServiceDeployment>;
 };
 
+export enum NotificationPriority {
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM'
+}
+
 export type NotificationRouter = {
   __typename?: 'NotificationRouter';
   /** events this router subscribes to, use * for all */
@@ -2915,6 +2943,8 @@ export type NotificationSink = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the name of the sink */
   name: Scalars['String']['output'];
+  /** the users/groups an in-app notification can be delivered to */
+  notificationBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the channel type of the sink, eg slack or teams */
   type: SinkType;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -2925,6 +2955,8 @@ export type NotificationSinkAttributes = {
   configuration: SinkConfigurationAttributes;
   /** the name of this sink */
   name: Scalars['String']['input'];
+  /** the users/groups you want this sink to deliver to if it's PLURAL type */
+  notificationBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   /** the channel type of this sink */
   type: SinkType;
 };
@@ -3495,6 +3527,10 @@ export type PluralServiceDeployment = {
   raw: Scalars['String']['output'];
   reference?: Maybe<ServiceDeployment>;
   status: PluralObjectStatus;
+};
+
+export type PluralSinkAttributes = {
+  priority: NotificationPriority;
 };
 
 export type PluralSubscription = {
@@ -4304,6 +4340,8 @@ export type RootMutationType = {
   cloneService?: Maybe<ServiceDeployment>;
   completeStackRun?: Maybe<StackRun>;
   configureBackups?: Maybe<Cluster>;
+  /** Reads and deletes a given shared secret */
+  consumeSecret?: Maybe<SharedSecret>;
   createAccessToken?: Maybe<AccessToken>;
   createAgentMigration?: Maybe<AgentMigration>;
   createBuild?: Maybe<Build>;
@@ -4411,6 +4449,7 @@ export type RootMutationType = {
   pingCluster?: Maybe<Cluster>;
   /** marks a service as being able to proceed to the next stage of a canary rollout */
   proceed?: Maybe<ServiceDeployment>;
+  readAppNotifications?: Maybe<Scalars['Int']['output']>;
   readNotifications?: Maybe<User>;
   reconfigureRenovate?: Maybe<ServiceDeployment>;
   /** registers a list of runtime services discovered for the current cluster */
@@ -4428,6 +4467,8 @@ export type RootMutationType = {
   selfManage?: Maybe<ServiceDeployment>;
   /** creates the service to enable self-hosted renovate in one pass */
   setupRenovate?: Maybe<ServiceDeployment>;
+  /** Shares a one-time-viewable secret to a list of eligible users */
+  shareSecret?: Maybe<SharedSecret>;
   signIn?: Maybe<User>;
   signup?: Maybe<User>;
   syncGlobalService?: Maybe<GlobalService>;
@@ -4516,6 +4557,11 @@ export type RootMutationTypeCompleteStackRunArgs = {
 export type RootMutationTypeConfigureBackupsArgs = {
   clusterId: Scalars['ID']['input'];
   storeId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeConsumeSecretArgs = {
+  handle: Scalars['String']['input'];
 };
 
 
@@ -5089,6 +5135,11 @@ export type RootMutationTypeSetupRenovateArgs = {
 };
 
 
+export type RootMutationTypeShareSecretArgs = {
+  attributes: SharedSecretAttributes;
+};
+
+
 export type RootMutationTypeSignInArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -5326,6 +5377,7 @@ export type RootQueryType = {
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   ai?: Maybe<Scalars['String']['output']>;
+  appNotifications?: Maybe<AppNotificationConnection>;
   application?: Maybe<Application>;
   applications?: Maybe<Array<Maybe<Application>>>;
   argoRollout?: Maybe<ArgoRollout>;
@@ -5484,6 +5536,7 @@ export type RootQueryType = {
   temporaryToken?: Maybe<Scalars['String']['output']>;
   /** exchanges a kubeconfig token for user info */
   tokenExchange?: Maybe<User>;
+  unreadAppNotifications?: Maybe<Scalars['Int']['output']>;
   unstructuredResource?: Maybe<KubernetesUnstructured>;
   upgradePlan?: Maybe<UpgradePlan>;
   upgradePolicies?: Maybe<Array<Maybe<UpgradePolicy>>>;
@@ -5513,6 +5566,14 @@ export type RootQueryTypeAccessTokensArgs = {
 
 export type RootQueryTypeAiArgs = {
   prompt: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeAppNotificationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -7155,6 +7216,20 @@ export enum Severity {
   None = 'NONE'
 }
 
+export type SharedSecret = {
+  __typename?: 'SharedSecret';
+  handle: Scalars['String']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  secret: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type SharedSecretAttributes = {
+  /** the users/groups you want this secret to be delivered to */
+  notificationBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  secret: Scalars['String']['input'];
+};
+
 export type SinkConfiguration = {
   __typename?: 'SinkConfiguration';
   id: Scalars['ID']['output'];
@@ -7163,11 +7238,13 @@ export type SinkConfiguration = {
 };
 
 export type SinkConfigurationAttributes = {
+  plural?: InputMaybe<PluralSinkAttributes>;
   slack?: InputMaybe<UrlSinkAttributes>;
   teams?: InputMaybe<UrlSinkAttributes>;
 };
 
 export enum SinkType {
+  Plural = 'PLURAL',
   Slack = 'SLACK',
   Teams = 'TEAMS'
 }

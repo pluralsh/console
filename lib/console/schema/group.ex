@@ -1,12 +1,13 @@
 defmodule Console.Schema.Group do
   use Piazza.Ecto.Schema
-  alias Console.Schema.RoleBinding
+  alias Console.Schema.{RoleBinding, GroupMember}
 
   schema "groups" do
     field :name,        :string
     field :description, :string
     field :global,      :boolean
 
+    has_many :members, GroupMember
     has_many :role_bindings, RoleBinding
 
     timestamps()

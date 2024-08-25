@@ -639,6 +639,21 @@ defmodule Console.Factory do
     }
   end
 
+  def app_notification_factory do
+    %Schema.AppNotification{
+      user: build(:user),
+      text: "some random notification",
+      priority: :low
+    }
+  end
+
+  def shared_secret_factory do
+    %Schema.SharedSecret{
+      handle: sequence(:shared_secret, & "shared-#{&1}"),
+      secret: "super secret"
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

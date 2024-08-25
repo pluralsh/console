@@ -143,6 +143,25 @@ type APIDeprecation struct {
 	Component *ServiceComponent `json:"component,omitempty"`
 }
 
+type AppNotification struct {
+	ID         string                `json:"id"`
+	Priority   *NotificationPriority `json:"priority,omitempty"`
+	Text       *string               `json:"text,omitempty"`
+	ReadAt     *string               `json:"readAt,omitempty"`
+	InsertedAt *string               `json:"insertedAt,omitempty"`
+	UpdatedAt  *string               `json:"updatedAt,omitempty"`
+}
+
+type AppNotificationConnection struct {
+	PageInfo PageInfo               `json:"pageInfo"`
+	Edges    []*AppNotificationEdge `json:"edges,omitempty"`
+}
+
+type AppNotificationEdge struct {
+	Node   *AppNotification `json:"node,omitempty"`
+	Cursor *string          `json:"cursor,omitempty"`
+}
+
 type Application struct {
 	Name          string            `json:"name"`
 	Spec          ApplicationSpec   `json:"spec"`
@@ -2418,6 +2437,8 @@ type NotificationSink struct {
 	Name string `json:"name"`
 	// the channel type of the sink, eg slack or teams
 	Type SinkType `json:"type"`
+	// the users/groups an in-app notification can be delivered to
+	NotificationBindings []*PolicyBinding `json:"notificationBindings,omitempty"`
 	// type specific sink configuration
 	Configuration SinkConfiguration `json:"configuration"`
 	InsertedAt    *string           `json:"insertedAt,omitempty"`
@@ -2431,6 +2452,8 @@ type NotificationSinkAttributes struct {
 	Type SinkType `json:"type"`
 	// configuration for the specific type
 	Configuration SinkConfigurationAttributes `json:"configuration"`
+	// the users/groups you want this sink to deliver to if it's PLURAL type
+	NotificationBindings []*PolicyBindingAttributes `json:"notificationBindings,omitempty"`
 }
 
 type NotificationSinkConnection struct {
@@ -2918,6 +2941,10 @@ type PluralServiceDeployment struct {
 	Reference *ServiceDeployment `json:"reference,omitempty"`
 	Raw       string             `json:"raw"`
 	Events    []*Event           `json:"events,omitempty"`
+}
+
+type PluralSinkAttributes struct {
+	Priority NotificationPriority `json:"priority"`
 }
 
 type PluralSubscription struct {
@@ -4212,6 +4239,19 @@ type ServiceUpdateAttributes struct {
 	ContextBindings []*ContextBindingAttributes    `json:"contextBindings,omitempty"`
 }
 
+type SharedSecret struct {
+	Handle     string  `json:"handle"`
+	Secret     string  `json:"secret"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type SharedSecretAttributes struct {
+	Secret string `json:"secret"`
+	// the users/groups you want this secret to be delivered to
+	NotificationBindings []*PolicyBindingAttributes `json:"notificationBindings,omitempty"`
+}
+
 type SinkConfiguration struct {
 	ID    string                `json:"id"`
 	Slack *URLSinkConfiguration `json:"slack,omitempty"`
@@ -4219,8 +4259,9 @@ type SinkConfiguration struct {
 }
 
 type SinkConfigurationAttributes struct {
-	Slack *URLSinkAttributes `json:"slack,omitempty"`
-	Teams *URLSinkAttributes `json:"teams,omitempty"`
+	Slack  *URLSinkAttributes    `json:"slack,omitempty"`
+	Teams  *URLSinkAttributes    `json:"teams,omitempty"`
+	Plural *PluralSinkAttributes `json:"plural,omitempty"`
 }
 
 type SMTP struct {
@@ -5710,6 +5751,49 @@ func (e MatchStrategy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type NotificationPriority string
+
+const (
+	NotificationPriorityLow    NotificationPriority = "LOW"
+	NotificationPriorityMedium NotificationPriority = "MEDIUM"
+	NotificationPriorityHigh   NotificationPriority = "HIGH"
+)
+
+var AllNotificationPriority = []NotificationPriority{
+	NotificationPriorityLow,
+	NotificationPriorityMedium,
+	NotificationPriorityHigh,
+}
+
+func (e NotificationPriority) IsValid() bool {
+	switch e {
+	case NotificationPriorityLow, NotificationPriorityMedium, NotificationPriorityHigh:
+		return true
+	}
+	return false
+}
+
+func (e NotificationPriority) String() string {
+	return string(e)
+}
+
+func (e *NotificationPriority) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NotificationPriority(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NotificationPriority", str)
+	}
+	return nil
+}
+
+func (e NotificationPriority) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type NotificationStatus string
 
 const (
@@ -6292,18 +6376,20 @@ func (e Severity) MarshalGQL(w io.Writer) {
 type SinkType string
 
 const (
-	SinkTypeSLACk SinkType = "SLACK"
-	SinkTypeTeams SinkType = "TEAMS"
+	SinkTypeSLACk  SinkType = "SLACK"
+	SinkTypeTeams  SinkType = "TEAMS"
+	SinkTypePlural SinkType = "PLURAL"
 )
 
 var AllSinkType = []SinkType{
 	SinkTypeSLACk,
 	SinkTypeTeams,
+	SinkTypePlural,
 }
 
 func (e SinkType) IsValid() bool {
 	switch e {
-	case SinkTypeSLACk, SinkTypeTeams:
+	case SinkTypeSLACk, SinkTypeTeams, SinkTypePlural:
 		return true
 	}
 	return false

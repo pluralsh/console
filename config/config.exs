@@ -122,5 +122,6 @@ config :libring,
     cluster: [monitor_nodes: true, node_type: :visible]
   ]
 
+config :tzdata, :autoupdate, :disabled
 
 import_config "#{Mix.env()}.exs"

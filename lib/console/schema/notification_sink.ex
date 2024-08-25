@@ -1,7 +1,8 @@
 defmodule Console.Schema.NotificationSink do
   use Piazza.Ecto.Schema
+  alias Console.Schema.{AppNotification, PolicyBinding}
 
-  defenum Type, slack: 0, teams: 1
+  defenum Type, slack: 0, teams: 1, plural: 2
 
   schema "notification_sinks" do
     field :name, :string
@@ -15,7 +16,16 @@ defmodule Console.Schema.NotificationSink do
       embeds_one :teams, TeamsConfiguration, on_replace: :update do
         field :url, :string
       end
+
+      embeds_one :plural, PluralConfiguration, on_replace: :update do
+        field :priority, AppNotification.Priority
+      end
     end
+
+    has_many :notification_bindings, PolicyBinding,
+      on_replace: :delete,
+      foreign_key: :policy_id,
+      references: :id
 
     timestamps()
   end
@@ -37,6 +47,7 @@ defmodule Console.Schema.NotificationSink do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_assoc(:notification_bindings)
     |> cast_embed(:configuration, with: &config_changeset/2)
     |> validate_required(@valid)
   end
