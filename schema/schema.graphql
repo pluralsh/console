@@ -2164,6 +2164,8 @@ input RouterSinkAttributes {
 }
 
 input SharedSecretAttributes {
+  name: String!
+
   secret: String!
 
   "the users\/groups you want this secret to be delivered to"
@@ -2220,6 +2222,7 @@ type AppNotification {
 }
 
 type SharedSecret {
+  name: String!
   handle: String!
   secret: String!
   insertedAt: DateTime

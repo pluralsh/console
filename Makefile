@@ -47,7 +47,11 @@ reshim: ## reshims erlang into asdf
 deploy: ## deploy artifacts to plural
 	cd plural && plural apply
 
-testup: ## sets up dependent services for test
+secrets: ## dir to manage random secret
+	mkdir secrets
+
+
+testup: secrets ## sets up dependent services for test
 	docker compose up -d
 
 testdown: ## tear down test dependencies

@@ -649,6 +649,7 @@ defmodule Console.Factory do
 
   def shared_secret_factory do
     %Schema.SharedSecret{
+      name: "shared secret",
       handle: sequence(:shared_secret, & "shared-#{&1}"),
       secret: "super secret"
     }

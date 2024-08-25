@@ -153,10 +153,12 @@ defmodule Console.Deployments.NotificationsTest do
       target = insert(:user)
 
       {:ok, share} = Notifications.share_secret(%{
+        name: "my secret",
         secret: "something",
         notification_bindings: [%{user_id: target.id}]
       }, user)
 
+      assert share.name == "my secret"
       assert share.handle
       assert share.secret == "something"
 

@@ -104,14 +104,17 @@ defmodule Console.GraphQl.Deployments.NotificationMutationsTest do
       {:ok, %{data: %{"shareSecret" => share}}} = run_query("""
         mutation Share($attributes: SharedSecretAttributes!) {
           shareSecret(attributes: $attributes) {
+            name
             secret
           }
         }
       """, %{"attributes" => %{
+        "name" => "my secret",
         "secret" => "something",
         "notificationBindings" => [%{"userId" => user.id}]
       }}, %{current_user: insert(:user)})
 
+      assert share["name"] == "my secret"
       assert share["secret"] == "something"
     end
   end

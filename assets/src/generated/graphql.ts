@@ -7220,11 +7220,13 @@ export type SharedSecret = {
   __typename?: 'SharedSecret';
   handle: Scalars['String']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
   secret: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type SharedSecretAttributes = {
+  name: Scalars['String']['input'];
   /** the users/groups you want this secret to be delivered to */
   notificationBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   secret: Scalars['String']['input'];

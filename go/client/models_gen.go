@@ -4240,6 +4240,7 @@ type ServiceUpdateAttributes struct {
 }
 
 type SharedSecret struct {
+	Name       string  `json:"name"`
 	Handle     string  `json:"handle"`
 	Secret     string  `json:"secret"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
@@ -4247,6 +4248,7 @@ type SharedSecret struct {
 }
 
 type SharedSecretAttributes struct {
+	Name   string `json:"name"`
 	Secret string `json:"secret"`
 	// the users/groups you want this secret to be delivered to
 	NotificationBindings []*PolicyBindingAttributes `json:"notificationBindings,omitempty"`

@@ -48,6 +48,7 @@ defmodule Console.GraphQl.Deployments.Notification do
   end
 
   input_object :shared_secret_attributes do
+    field :name,   non_null(:string)
     field :secret, non_null(:string)
     field :notification_bindings, list_of(:policy_binding_attributes),
       description: "the users/groups you want this secret to be delivered to"
@@ -86,12 +87,12 @@ defmodule Console.GraphQl.Deployments.Notification do
   end
 
   object :shared_secret do
+    field :name,   non_null(:string)
     field :handle, non_null(:string)
     field :secret, non_null(:string)
 
     timestamps()
   end
-
 
   object :notification_filter do
     field :id,       non_null(:id)

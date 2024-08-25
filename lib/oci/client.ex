@@ -4,12 +4,13 @@ defmodule Console.OCI.Client do
 
   @manifest_types ~w(application/vnd.oci.image.manifest.v1+json application/vnd.docker.container.image.v1+json)
 
-  defstruct [:client, :auth_client]
+  defstruct [:client, :auth_client, :url]
 
   def new(url) do
     {h, repo} = parse_uri(url)
     repo = String.trim_leading(repo, "/")
     %__MODULE__{
+      url: url,
       client: dkr_client(h, repo),
       auth_client: :empty
     }
