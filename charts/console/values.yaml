@@ -38,7 +38,7 @@ image:
 
 ociAuth:
   repository: oci-auth
-  tag: ~
+  tag: v0.10.23
   imagePullPolicy: IfNotPresent
 
 initContainer:
