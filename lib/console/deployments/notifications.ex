@@ -1,11 +1,20 @@
 defmodule Console.Deployments.Notifications do
   use Console.Services.Base
   import Console.Deployments.Policies
-  alias Console.Schema.{NotificationSink, NotificationRouter, User}
+  alias Console.Schema.{
+    NotificationSink,
+    NotificationRouter,
+    User,
+    AppNotification,
+    SharedSecret,
+    Group,
+    PolicyBinding
+  }
 
   @type error :: Console.error
   @type router_resp :: {:ok, NotificationRouter.t} | error
   @type sink_resp :: {:ok, NotificationSink.t} | error
+  @type secret_resp :: {:ok, SharedSecret.t} | error
 
   def get_router!(id), do: Repo.get!(NotificationRouter, id)
 
@@ -24,6 +33,60 @@ defmodule Console.Deployments.Notifications do
   end
 
   @doc """
+  Bulk creates notifications from given data, to be used internally in notification router code
+  """
+  @spec create_notifications([map]) :: {:ok, [AppNotification.t]} | error
+  def create_notifications(notifs) do
+    notifs = Enum.map(notifs, &timestamped/1)
+    Repo.insert_all(AppNotification, notifs, returning: true)
+    |> elem(1)
+    |> ok()
+  end
+
+  @doc """
+  Marks any unread notifications as read
+  """
+  @spec read_notifications(User.t) :: {:ok, integer} | error
+  def read_notifications(%User{id: uid}) do
+    AppNotification.for_user(uid)
+    |> AppNotification.unread()
+    |> Repo.update_all(set: [read_at: Timex.now()])
+    |> elem(0)
+    |> ok()
+  end
+
+
+  @doc """
+  It can create a one-time-download shared secret
+  """
+  @spec share_secret(map, User.t) :: secret_resp
+  def share_secret(attrs, %User{} = user) do
+    start_transaction()
+    |> add_operation(:secret, fn _ ->
+      %SharedSecret{}
+      |> SharedSecret.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> add_operation(:notifs, fn %{secret: %{notification_bindings: bindings} = share} ->
+      splat_userids(bindings)
+      |> Enum.map(& %{priority: :high, user_id: &1, text: secret_blob(user, share)})
+      |> create_notifications()
+    end)
+    |> execute(extract: :secret)
+  end
+
+  @doc """
+  Read and consume a shared secret
+  """
+  @spec consume_secret(binary, User.t) :: secret_resp
+  def consume_secret(handle, %User{} = user) do
+    Repo.get_by!(SharedSecret, handle: handle)
+    |> Repo.preload([:notification_bindings])
+    |> allow(user, :consume)
+    |> when_ok(:delete)
+  end
+
+  @doc """
   Create or update a notification sink
   """
   @spec upsert_sink(map, User.t) :: sink_resp
@@ -32,6 +95,7 @@ defmodule Console.Deployments.Notifications do
       %NotificationSink{} = sink -> sink
       _ -> %NotificationSink{}
     end
+    |> Repo.preload([:notification_bindings])
     |> NotificationSink.changeset(attrs)
     |> allow(user, :write)
     |> when_ok(&Repo.insert_or_update/1)
@@ -86,6 +150,13 @@ defmodule Console.Deployments.Notifications do
   defp deliver(body, %NotificationSink{type: :teams, configuration: %{teams: %{url: url}}}),
     do: url_deliver(url, body)
 
+  defp deliver(body, %NotificationSink{type: :plural} = sink) do
+    %{notification_bindings: bindings} = Repo.preload(sink, [notification_bindings: [group: :members]])
+    splat_userids(bindings)
+    |> Enum.map(& %{text: body, user_id: &1, priority: priority(sink)})
+    |> create_notifications()
+  end
+
   defp url_deliver(url, body) do
     HTTPoison.post(url, body, [
       {"content-type", "application/json"},
@@ -97,4 +168,22 @@ defmodule Console.Deployments.Notifications do
     Path.join([:code.priv_dir(:console), "notifications", "#{type}", "#{event}.json.eex"])
     |> EEx.eval_file(assigns: Map.to_list(map))
   end
+
+  defp secret_blob(user, share) do
+    Path.join([:code.priv_dir(:console), "notifications", "secret.txt.eex"])
+    |> EEx.eval_file(assigns: [user: user, handle: share.handle])
+  end
+
+  defp splat_userids(bindings) do
+    Enum.flat_map(bindings, fn
+      %PolicyBinding{user_id: id} when is_binary(id) -> [id]
+      %PolicyBinding{group: %Group{members: [_ | _] = members}} ->
+        Enum.map(members, & &1.user_id)
+      _ -> []
+    end)
+  end
+
+  defp priority(%NotificationSink{configuration: %{plural: %{priority: priority}}}) when not is_nil(priority),
+    do: priority
+  defp priority(_), do: :low
 end

@@ -363,6 +363,10 @@ type RootQueryType {
 
   notificationRouters(after: String, first: Int, before: String, last: Int, q: String): NotificationRouterConnection
 
+  appNotifications(after: String, first: Int, before: String, last: Int): AppNotificationConnection
+
+  unreadAppNotifications: Int
+
   policyConstraints(
     after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], clusters: [ID], q: String
   ): PolicyConstraintConnection
@@ -735,6 +739,17 @@ type RootMutationType {
   upsertNotificationRouter(attributes: NotificationRouterAttributes!): NotificationRouter
 
   deleteNotificationRouter(id: ID!): NotificationRouter
+
+  readAppNotifications: Int
+
+  "Shares a one-time-viewable secret to a list of eligible users"
+  shareSecret(attributes: SharedSecretAttributes!): SharedSecret
+
+  "Reads and deletes a given shared secret"
+  consumeSecret(
+    "The high-entropy handle of this secret"
+    handle: String!
+  ): SharedSecret
 
   upsertPolicyConstraints(constraints: [PolicyConstraintAttributes]): Int
 
@@ -2079,6 +2094,13 @@ type PolicyConstraintConnection {
 enum SinkType {
   SLACK
   TEAMS
+  PLURAL
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 input NotificationSinkAttributes {
@@ -2090,15 +2112,23 @@ input NotificationSinkAttributes {
 
   "configuration for the specific type"
   configuration: SinkConfigurationAttributes!
+
+  "the users\/groups you want this sink to deliver to if it's PLURAL type"
+  notificationBindings: [PolicyBindingAttributes]
 }
 
 input SinkConfigurationAttributes {
   slack: UrlSinkAttributes
   teams: UrlSinkAttributes
+  plural: PluralSinkAttributes
 }
 
 input UrlSinkAttributes {
   url: String!
+}
+
+input PluralSinkAttributes {
+  priority: NotificationPriority!
 }
 
 input NotificationRouterAttributes {
@@ -2133,6 +2163,15 @@ input RouterSinkAttributes {
   sinkId: ID!
 }
 
+input SharedSecretAttributes {
+  name: String!
+
+  secret: String!
+
+  "the users\/groups you want this secret to be delivered to"
+  notificationBindings: [PolicyBindingAttributes]
+}
+
 type NotificationSink {
   id: ID!
 
@@ -2141,6 +2180,9 @@ type NotificationSink {
 
   "the channel type of the sink, eg slack or teams"
   type: SinkType!
+
+  "the users\/groups an in-app notification can be delivered to"
+  notificationBindings: [PolicyBinding]
 
   "type specific sink configuration"
   configuration: SinkConfiguration!
@@ -2167,6 +2209,23 @@ type NotificationRouter {
 
   insertedAt: DateTime
 
+  updatedAt: DateTime
+}
+
+type AppNotification {
+  id: ID!
+  priority: NotificationPriority
+  text: String
+  readAt: DateTime
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type SharedSecret {
+  name: String!
+  handle: String!
+  secret: String!
+  insertedAt: DateTime
   updatedAt: DateTime
 }
 
@@ -2198,6 +2257,11 @@ type NotificationSinkConnection {
 type NotificationRouterConnection {
   pageInfo: PageInfo!
   edges: [NotificationRouterEdge]
+}
+
+type AppNotificationConnection {
+  pageInfo: PageInfo!
+  edges: [AppNotificationEdge]
 }
 
 enum RestoreStatus {
@@ -6753,6 +6817,11 @@ type ClusterBackupEdge {
 
 type ObjectStoreEdge {
   node: ObjectStore
+  cursor: String
+}
+
+type AppNotificationEdge {
+  node: AppNotification
   cursor: String
 }
 

@@ -18,6 +18,8 @@ defmodule Console.Bootstrapper do
       send self(), :migrate
     end
 
+    write_token_file!()
+
     if Console.conf(:initialize) && !Console.byok?() do
       send self(), :init
     end
@@ -71,5 +73,10 @@ defmodule Console.Bootstrapper do
 
   defp flush(table, state) do
     Enum.reduce(state, table, fn {k, v}, t -> KeyValueSet.put!(t, k, v) end)
+  end
+
+  defp write_token_file!() do
+    Path.join(Console.conf(:sidecar_token_path), "token")
+    |> File.write!(Console.conf(:sidecar_token))
   end
 end

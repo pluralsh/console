@@ -1,0 +1,3 @@
+🆕 Cluster <%= @cluster.name %> has been added to your fleet
+
+You can view it here: <%= Console.url("/cd/clusters/#{@cluster.id}/services") %>

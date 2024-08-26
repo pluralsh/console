@@ -1,0 +1,6 @@
+🚀 Service <%= @service.name %> for cluster <%= @service.cluster.name %> has a new Revision
+
+Revision: <%= @service.sha %>
+Source: <%= @source.url %>@<%= @source.ref %>
+
+View full details: <%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>

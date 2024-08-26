@@ -98,6 +98,7 @@ const ColUrl = columnHelper.accessor(
 export const sinkTypeToIcon = {
   [SinkType.Slack]: <SlackLogoIcon />,
   [SinkType.Teams]: <MsTeamsLogoIcon />,
+  [SinkType.Plural]: null,
   '': null,
 } as const satisfies Record<SinkType | '', ReactElement | null>
 

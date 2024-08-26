@@ -40,4 +40,6 @@ yalc.lock
 **/__pycache__
 **/venv
 
+secrets/
+
 # config/pubkey.pem

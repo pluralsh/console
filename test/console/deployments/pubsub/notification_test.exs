@@ -17,6 +17,16 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       event = %PubSub.ServiceUpdated{item: svc}
       :ok = Notifications.handle_event(event)
     end
+
+    test "it can deliver to filterless sinks" do
+      svc = insert(:service)
+      router = insert(:notification_router, events: ["service.update"])
+      insert(:router_sink, router: router)
+      expect(HTTPoison, :post, fn _, _, _ -> {:ok, %HTTPoison.Response{}} end)
+
+      event = %PubSub.ServiceUpdated{item: svc}
+      :ok = Notifications.handle_event(event)
+    end
   end
 
   describe "PullRequestCreated" do

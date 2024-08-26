@@ -52,6 +52,8 @@ config :console,
   audit_expiry: 30,
   admin_emails: [],
   cloud: false,
+  sidecar_token: "example",
+  sidecar_token_path: "./secrets",
   cache_adapter: Console.Cache,
   local_cache: Console.LocalCache,
   version: Mix.Project.config[:version],
@@ -122,5 +124,6 @@ config :libring,
     cluster: [monitor_nodes: true, node_type: :visible]
   ]
 
+config :tzdata, :autoupdate, :disabled
 
 import_config "#{Mix.env()}.exs"

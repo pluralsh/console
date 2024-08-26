@@ -19,6 +19,25 @@ defmodule Console.Schema.NotificationRouter do
     timestamps()
   end
 
+  def for_filters(query \\ __MODULE__, filters) do
+    query = from(nr in query, left_join: f in assoc(nr, :filters), as: :filters)
+
+    dyno = Enum.reduce(filters, dynamic(true), fn
+      {:regex, r}, q ->
+        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.regex) and fragment("? ~ ?", f.regex, ^r)) or ^q)
+      {:cluster_id, id}, q ->
+        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.cluster_id) and f.cluster_id == ^id) or ^q)
+      {:service_id, id}, q ->
+        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.service_id) and f.service_id == ^id) or ^q)
+      {:pipeline_id, id}, q ->
+        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.pipeline_id) and f.pipeline_id == ^id) or ^q)
+      {:stack_id, id}, q ->
+        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.stack_id) and f.stack_id == ^id) or ^q)
+    end)
+
+    from(query, where:  ^dyno)
+  end
+
   def for_event(query \\ __MODULE__, event) do
     from(nr in query, where: ^event in nr.events or "*" in nr.events)
   end

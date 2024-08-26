@@ -126,5 +126,65 @@ defmodule Console.Deployments.NotificationsTest do
       )
       {:ok, _} = Jason.decode(res)
     end
+
+    test "it can deliver to a plural sink" do
+      user = insert(:user)
+      %{group: group, user: user2} = insert(:group_member)
+      service = insert(:service)
+      sink = insert(:notification_sink, type: :plural, notification_bindings: [
+        %{user_id: user.id},
+        %{group_id: group.id}
+      ])
+
+      {:ok, res} = Notifications.deliver(
+        "service.update",
+        %{service: service, source: %{url: service.repository.url, ref: "main"}},
+        sink
+      )
+
+      assert Enum.find(res, & &1.user_id == user.id)
+      assert Enum.find(res, & &1.user_id == user2.id)
+    end
+  end
+
+  describe "#share_secret/2" do
+    test "a user can share a secret with a set of users" do
+      user = insert(:user)
+      target = insert(:user)
+
+      {:ok, share} = Notifications.share_secret(%{
+        name: "my secret",
+        secret: "something",
+        notification_bindings: [%{user_id: target.id}]
+      }, user)
+
+      assert share.name == "my secret"
+      assert share.handle
+      assert share.secret == "something"
+
+      [notif] = Console.Repo.all(Console.Schema.AppNotification)
+
+      assert notif.user_id == target.id
+    end
+  end
+
+  describe "#consume_secret/1" do
+    test "it will fetch and consume the secret if you're in the notification list" do
+      user = insert(:user)
+      secret = insert(:shared_secret, notification_bindings: [%{user_id: user.id}])
+
+      {:ok, read} = Notifications.consume_secret(secret.handle, user)
+
+      assert read.id == secret.id
+
+      refute refetch(read)
+    end
+
+    test "it will fail if you're not in the notification list" do
+      user = insert(:user)
+      secret = insert(:shared_secret)
+
+      {:error, _} = Notifications.consume_secret(secret.handle, user)
+    end
   end
 end

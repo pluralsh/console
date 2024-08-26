@@ -80,4 +80,60 @@ defmodule Console.GraphQl.Deployments.NotificationMutationsTest do
       refute refetch(router)
     end
   end
+
+  describe "readAppNotifications" do
+    test "it will mark a users notifs as read" do
+      user = insert(:user)
+      notifs = insert_list(3, :app_notification, user: user)
+
+      {:ok, %{data: %{"readAppNotifications" => 3}}} = run_query("""
+        mutation {
+          readAppNotifications
+        }
+      """, %{}, %{current_user: user})
+
+      for n <- notifs,
+        do: assert refetch(n).read_at
+    end
+  end
+
+  describe "shareSecret" do
+    test "it can share a secret" do
+      user = insert(:user)
+
+      {:ok, %{data: %{"shareSecret" => share}}} = run_query("""
+        mutation Share($attributes: SharedSecretAttributes!) {
+          shareSecret(attributes: $attributes) {
+            name
+            secret
+          }
+        }
+      """, %{"attributes" => %{
+        "name" => "my secret",
+        "secret" => "something",
+        "notificationBindings" => [%{"userId" => user.id}]
+      }}, %{current_user: insert(:user)})
+
+      assert share["name"] == "my secret"
+      assert share["secret"] == "something"
+    end
+  end
+
+  describe "consumeSecret" do
+    test "it can read and consume a given shared secret" do
+      user = insert(:user)
+      secret = insert(:shared_secret, notification_bindings: [%{user_id: user.id}])
+
+      {:ok, %{data: %{"consumeSecret" => consume}}} = run_query("""
+        mutation Consume($handle: String!) {
+          consumeSecret(handle: $handle) {
+            secret
+          }
+        }
+      """, %{"handle" => secret.handle}, %{current_user: user})
+
+      assert consume["secret"] == secret.secret
+      refute refetch(secret)
+    end
+  end
 end

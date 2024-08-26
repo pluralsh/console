@@ -1,23 +1,32 @@
 defmodule Console.GraphQl.Deployments.Notification do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.{Deployments}
-  alias Console.Schema.NotificationSink
+  alias Console.Schema.{NotificationSink, AppNotification}
 
   ecto_enum :sink_type, NotificationSink.Type
+  ecto_enum :notification_priority, AppNotification.Priority
 
   input_object :notification_sink_attributes do
     field :name,          non_null(:string), description: "the name of this sink"
     field :type,          non_null(:sink_type), description: "the channel type of this sink"
     field :configuration, non_null(:sink_configuration_attributes), description: "configuration for the specific type"
+
+    field :notification_bindings, list_of(:policy_binding_attributes),
+      description: "the users/groups you want this sink to deliver to if it's PLURAL type"
   end
 
   input_object :sink_configuration_attributes do
-    field :slack, :url_sink_attributes
-    field :teams, :url_sink_attributes
+    field :slack,  :url_sink_attributes
+    field :teams,  :url_sink_attributes
+    field :plural, :plural_sink_attributes
   end
 
   input_object :url_sink_attributes do
     field :url, non_null(:string)
+  end
+
+  input_object :plural_sink_attributes do
+    field :priority, non_null(:notification_priority)
   end
 
   input_object :notification_router_attributes do
@@ -38,12 +47,22 @@ defmodule Console.GraphQl.Deployments.Notification do
     field :sink_id, non_null(:id)
   end
 
+  input_object :shared_secret_attributes do
+    field :name,   non_null(:string)
+    field :secret, non_null(:string)
+    field :notification_bindings, list_of(:policy_binding_attributes),
+      description: "the users/groups you want this secret to be delivered to"
+  end
+
   object :notification_sink do
     field :id,   non_null(:id)
     field :name, non_null(:string), description: "the name of the sink"
     field :type, non_null(:sink_type), description: "the channel type of the sink, eg slack or teams"
 
-    field :configuration, non_null(:sink_configuration), description: "type specific sink configuration"
+    field :notification_bindings, list_of(:policy_binding),
+      description: "the users/groups an in-app notification can be delivered to"
+    field :configuration, non_null(:sink_configuration),
+      description: "type specific sink configuration"
 
     timestamps()
   end
@@ -54,6 +73,23 @@ defmodule Console.GraphQl.Deployments.Notification do
     field :events,  list_of(non_null(:string)), description: "events this router subscribes to, use * for all"
     field :filters, list_of(:notification_filter), resolve: dataloader(Deployments), description: "resource-based filters to select events for services, clusters, pipelines"
     field :sinks,   list_of(:notification_sink), resolve: dataloader(Deployments), description: "sinks to deliver notifications to"
+
+    timestamps()
+  end
+
+  object :app_notification do
+    field :id,       non_null(:id)
+    field :priority, :notification_priority
+    field :text,     :string
+    field :read_at,  :datetime
+
+    timestamps()
+  end
+
+  object :shared_secret do
+    field :name,   non_null(:string)
+    field :handle, non_null(:string)
+    field :secret, non_null(:string)
 
     timestamps()
   end
@@ -79,6 +115,7 @@ defmodule Console.GraphQl.Deployments.Notification do
 
   connection node_type: :notification_sink
   connection node_type: :notification_router
+  connection node_type: :app_notification
 
   object :notification_queries do
     field :notification_sink, :notification_sink do
@@ -110,6 +147,18 @@ defmodule Console.GraphQl.Deployments.Notification do
 
       resolve &Deployments.list_routers/2
     end
+
+    connection field :app_notifications, node_type: :app_notification do
+      middleware Authenticated
+
+      resolve &Deployments.list_notifications/2
+    end
+
+    field :unread_app_notifications, :integer do
+      middleware Authenticated
+
+      resolve &Deployments.unread_notifications/2
+    end
   end
 
   object :notification_mutations do
@@ -139,6 +188,30 @@ defmodule Console.GraphQl.Deployments.Notification do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_router/2
+    end
+
+    field :read_app_notifications, :integer do
+      middleware Authenticated
+
+      resolve &Deployments.read_notifications/2
+    end
+
+    @desc """
+    Shares a one-time-viewable secret to a list of eligible users
+    """
+    field :share_secret, :shared_secret do
+      middleware Authenticated
+      arg :attributes, non_null(:shared_secret_attributes)
+
+      resolve &Deployments.share_secret/2
+    end
+
+    @desc "Reads and deletes a given shared secret"
+    field :consume_secret, :shared_secret do
+      middleware Authenticated
+      arg :handle, non_null(:string), description: "The high-entropy handle of this secret"
+
+      resolve &Deployments.consume_secret/2
     end
   end
 end

@@ -1,0 +1,5 @@
+🖥️ New pull request created
+
+<%= @pr.title %>
+
+View full pull request here: <%= @pr.url %>

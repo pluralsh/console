@@ -48,12 +48,28 @@ spec:
             mountPath: /shared
       {{- end }}
       containers:
+      - name: auth
+        {{ if .Values.console.containerSecurityContext }}
+        securityContext:
+        {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
+        {{ end }}
+        image: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default .Chart.AppVersion }}"
+        imagePullPolicy: {{ .Values.ociAuth.imagePullPolicy }}
+        cmd:
+        - --token-file /shared/token
+        volumeMounts:
+        - name: conf-dir
+          mountPath: /shared
+        ports:
+        - name: http
+          containerPort: 3000
+          protocol: TCP
       - name: console
         {{ if .Values.console.containerSecurityContext }}
         securityContext:
         {{- toYaml .Values.console.containerSecurityContext | nindent 10 }}
         {{ end }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.imagePullPolicy }}
         envFrom:
         - secretRef:
@@ -66,6 +82,8 @@ spec:
         volumeMounts:
         - name: temp-dir
           mountPath: /tmp
+        - name: conf-dir
+          mountPath: /shared
         {{ if .Values.cloud.pgRootCert }}
         - mountPath: /opt/app/certs
           name: pg-cert
@@ -114,6 +132,8 @@ spec:
       {{- end }}
       volumes:
       - name: temp-dir
+        emptyDir: {}
+      - name: conf-dir
         emptyDir: {}
       {{ if .Values.cloud.pgRootCert }}
       - name: pg-cert

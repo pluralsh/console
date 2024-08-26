@@ -5,6 +5,7 @@
 global:
   additionalVolumes: ~
   additionalVolumeMounts: ~
+  registry: ghcr.io/pluralsh
 
 cloud: 
   enabled: false
@@ -31,7 +32,12 @@ secrets:
   admin_password: REPLACEME
 
 image:
-  repository: dkr.plural.sh/console/console
+  repository: console
+  tag: ~
+  imagePullPolicy: IfNotPresent
+
+ociAuth:
+  repository: oci-auth
   tag: ~
   imagePullPolicy: IfNotPresent
 
