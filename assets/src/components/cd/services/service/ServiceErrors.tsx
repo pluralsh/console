@@ -1,22 +1,24 @@
 import {
-  Code,
+  Card,
   EmptyState,
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
-import isEmpty from 'lodash/isEmpty'
-import { createColumnHelper } from '@tanstack/react-table'
 
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
 import {
   CD_REL_PATH,
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_PARAM_ID,
 } from 'routes/cdRoutesConsts'
-import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
+
+import { useTheme } from 'styled-components'
 
 import {
   getServiceDetailsBreadcrumbs,
@@ -38,14 +40,22 @@ export const ColMessage = columnHelper.accessor((row) => row?.message, {
   header: 'Message',
   enableSorting: true,
   meta: { gridTemplate: '6fr' },
-  cell: ({ getValue }) => (
-    <Code
-      maxHeight="300px"
-      width="100%"
-    >
-      {getValue()}
-    </Code>
-  ),
+  cell: function Cell({ getValue }) {
+    const theme = useTheme()
+
+    return (
+      <Card css={{ padding: theme.spacing.small, width: '100%' }}>
+        <pre
+          css={{
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          {getValue()}
+        </pre>
+      </Card>
+    )
+  },
 })
 
 const columns = [ColSource, ColMessage]

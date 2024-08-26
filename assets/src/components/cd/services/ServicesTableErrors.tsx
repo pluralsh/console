@@ -40,7 +40,7 @@ export function ServiceErrorsChip({
 export function ServiceErrorsModal({ isOpen, setIsOpen, header, errors }) {
   return (
     <Modal
-      size="large"
+      size="custom"
       header={header}
       open={isOpen}
       onClose={() => setIsOpen(false)}
