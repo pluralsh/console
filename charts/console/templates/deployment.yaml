@@ -56,12 +56,12 @@ spec:
         image: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.ociAuth.imagePullPolicy }}
         args:
-        - --token-file /shared/token
+        - --token-file=/shared/token
         volumeMounts:
         - name: conf-dir
           mountPath: /shared
         ports:
-        - name: http
+        - name: sidecar
           containerPort: 3000
           protocol: TCP
       - name: console
