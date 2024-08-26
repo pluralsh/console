@@ -34,6 +34,7 @@ type ConsoleClient interface {
 	ListClusterServices(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListClusterServices, error)
 	ListServiceDeployments(ctx context.Context, cursor *string, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListServiceDeployments, error)
 	MyCluster(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*MyCluster, error)
+	UpsertVirtualCluster(ctx context.Context, parentID string, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertVirtualCluster, error)
 	GetGlobalServiceDeployment(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetGlobalServiceDeployment, error)
 	CreateGlobalServiceDeployment(ctx context.Context, serviceID string, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGlobalServiceDeployment, error)
 	CreateGlobalServiceDeploymentFromTemplate(ctx context.Context, attributes GlobalServiceAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateGlobalServiceDeploymentFromTemplate, error)
@@ -12156,6 +12157,17 @@ func (t *MyCluster) GetMyCluster() *MyCluster_MyCluster_ {
 	return t.MyCluster
 }
 
+type UpsertVirtualCluster struct {
+	UpsertVirtualCluster *TinyClusterFragment "json:\"upsertVirtualCluster,omitempty\" graphql:\"upsertVirtualCluster\""
+}
+
+func (t *UpsertVirtualCluster) GetUpsertVirtualCluster() *TinyClusterFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster{}
+	}
+	return t.UpsertVirtualCluster
+}
+
 type GetGlobalServiceDeployment struct {
 	GlobalService *GlobalServiceFragment "json:\"globalService,omitempty\" graphql:\"globalService\""
 }
@@ -16196,6 +16208,45 @@ func (c *Client) MyCluster(ctx context.Context, interceptors ...clientv2.Request
 
 	var res MyCluster
 	if err := c.Client.Post(ctx, "MyCluster", MyClusterDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertVirtualClusterDocument = `mutation UpsertVirtualCluster ($parentID: ID!, $attributes: ClusterAttributes!) {
+	upsertVirtualCluster(parentId: $parentID, attributes: $attributes) {
+		... TinyClusterFragment
+	}
+}
+fragment TinyClusterFragment on Cluster {
+	id
+	name
+	handle
+	self
+	project {
+		... TinyProjectFragment
+	}
+}
+fragment TinyProjectFragment on Project {
+	id
+	name
+	default
+}
+`
+
+func (c *Client) UpsertVirtualCluster(ctx context.Context, parentID string, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertVirtualCluster, error) {
+	vars := map[string]any{
+		"parentID":   parentID,
+		"attributes": attributes,
+	}
+
+	var res UpsertVirtualCluster
+	if err := c.Client.Post(ctx, "UpsertVirtualCluster", UpsertVirtualClusterDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -26681,6 +26732,7 @@ var DocumentOperationNames = map[string]string{
 	ListClusterServicesDocument:                       "ListClusterServices",
 	ListServiceDeploymentsDocument:                    "ListServiceDeployments",
 	MyClusterDocument:                                 "MyCluster",
+	UpsertVirtualClusterDocument:                      "UpsertVirtualCluster",
 	GetGlobalServiceDeploymentDocument:                "GetGlobalServiceDeployment",
 	CreateGlobalServiceDeploymentDocument:             "CreateGlobalServiceDeployment",
 	CreateGlobalServiceDeploymentFromTemplateDocument: "CreateGlobalServiceDeploymentFromTemplate",
