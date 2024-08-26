@@ -2173,6 +2173,33 @@ entries:
   console-rapid:
   - apiVersion: v2
     appVersion: 0.10.23
+    created: "2024-08-26T21:11:13.24940257Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.1.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.75
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.5.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.11.1
+    description: rapid channel chart for the plural console (used for testing)
+    digest: c185a703add34007ddd4cc23231535425323e1b0f0769b9bd21c3f589402089c
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.53/console-rapid-0.3.53.tgz
+    version: 0.3.53
+  - apiVersion: v2
+    appVersion: 0.10.23
     created: "2024-08-26T20:48:43.166712411Z"
     dependencies:
     - name: kas
@@ -3304,4 +3331,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-08-26T20:48:43.167041235Z"
+generated: "2024-08-26T21:11:13.249806105Z"
