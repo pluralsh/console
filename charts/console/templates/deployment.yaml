@@ -55,7 +55,7 @@ spec:
         {{ end }}
         image: "{{ .Values.global.registry }}/{{ .Values.ociAuth.repository }}:{{ .Values.ociAuth.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.ociAuth.imagePullPolicy }}
-        cmd:
+        args:
         - --token-file /shared/token
         volumeMounts:
         - name: conf-dir
