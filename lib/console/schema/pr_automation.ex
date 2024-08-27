@@ -1,6 +1,14 @@
 defmodule Console.Schema.PrAutomation do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service, ScmConnection, PolicyBinding, Configuration, GitRepository}
+  alias Console.Schema.{
+    Cluster,
+    Service,
+    ScmConnection,
+    PolicyBinding,
+    Configuration,
+    Project,
+    GitRepository
+  }
 
   defenum MatchStrategy, any: 0, all: 1, recursive: 2
   defenum Role, cluster: 0, service: 1, pipeline: 2, update: 3, upgrade: 4
@@ -53,6 +61,7 @@ defmodule Console.Schema.PrAutomation do
     belongs_to :service,    Service
     belongs_to :connection, ScmConnection
     belongs_to :repository, GitRepository
+    belongs_to :project,    Project
 
     has_many :write_bindings, PolicyBinding,
       on_replace: :delete,
@@ -67,11 +76,15 @@ defmodule Console.Schema.PrAutomation do
     timestamps()
   end
 
+  def for_project(query \\ __MODULE__, proj_id) do
+    from(p in query, where: p.project_id == ^proj_id)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name role identifier message title branch documentation addon repository_id cluster_id service_id connection_id)a
+  @valid ~w(name project_id role identifier message title branch documentation addon repository_id cluster_id service_id connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -89,6 +102,7 @@ defmodule Console.Schema.PrAutomation do
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:connection_id)
+    |> foreign_key_constraint(:project_id)
   end
 
   defp update_changeset(model, attrs) do

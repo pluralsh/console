@@ -26,7 +26,8 @@ defmodule Console.Deployments.Policies.Rbac do
     RunStep,
     Project,
     User,
-    SharedSecret
+    SharedSecret,
+    Observer
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -69,7 +70,9 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%ProviderCredential{} = cred, %User{} = user, action),
     do: recurse(cred, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%PrAutomation{} = pr, %User{} = user, action),
-    do: recurse(pr, user, action, fn _ -> Settings.fetch() end)
+    do: recurse(pr, user, action, & &1.project)
+  def evaluate(%Observer{} = obs, %User{} = user, action),
+    do: recurse(obs, user, action, & &1.project)
   def evaluate(%GitRepository{}, %User{} = user, action),
     do: recurse(Settings.fetch(), user, action)
   def evaluate(%HelmRepository{}, %User{} = user, action),
@@ -130,7 +133,9 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(%DeploymentSettings{} = settings),
     do: Repo.preload(settings, [:read_bindings, :write_bindings, :git_bindings, :create_bindings])
   def preload(%PrAutomation{} = pr),
-    do: Repo.preload(pr, [:write_bindings, :create_bindings])
+    do: Repo.preload(pr, [:write_bindings, :create_bindings, project: @bindings])
+  def preload(%Observer{} = obs),
+    do: Repo.preload(obs, [project: @bindings])
   def preload(%PolicyConstraint{} = pr),
     do: Repo.preload(pr, [cluster: @top_preloads])
   def preload(%PinnedCustomResource{} = pcr),

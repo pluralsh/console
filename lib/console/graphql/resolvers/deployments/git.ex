@@ -9,6 +9,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     PullRequest,
     ScmWebhook,
     HelmRepository,
+    Observer,
     DependencyManagementService
   }
 
@@ -22,6 +23,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def resolve_git(%{url: url}, _), do: {:ok, Git.get_by_url(url)}
 
   def resolve_helm_repository(%{url: url}, _), do: {:ok, Git.get_helm_repository(url)}
+
+  def resolve_observer(%{id: id}, _) when is_binary(id), do: {:ok, Git.get_observer!(id)}
+  def resolve_observer(%{name: name}, _), do: {:ok, Git.get_observer_by_name(name)}
 
   def list_git_repositories(args, _) do
     GitRepository.ordered()
@@ -47,6 +51,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     PullRequest.ordered()
     |> maybe_search(PullRequest, args)
     |> pr_filters(args)
+    |> filter_proj(PullRequest, args)
     |> paginate(args)
   end
 
@@ -57,6 +62,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def list_dependency_management_services(args, _) do
     DependencyManagementService.ordered()
+    |> paginate(args)
+  end
+
+  def list_observers(args, _) do
+    Observer.ordered()
+    |> filter_proj(Observer, args)
     |> paginate(args)
   end
 
@@ -127,6 +138,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def upsert_helm_repository(%{attributes: attrs, url: url}, %{context: %{current_user: user}}),
     do: Git.upsert_helm_repository(attrs, url, user)
 
+  def upsert_observer(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.upsert_observer(attrs, user)
+
+  def delete_observer(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.delete_observer(id, user)
+
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn
       {:cluster_id, cid}, q -> PullRequest.for_cluster(q, cid)
@@ -136,4 +153,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
       _, q -> q
     end)
   end
+
+  defp filter_proj(query, mod, %{project_id: id}) when is_binary(id),
+    do: mod.for_project(query, id)
+  defp filter_proj(query, _, _), do: query
 end
