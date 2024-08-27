@@ -196,6 +196,7 @@ query MyCluster {
 
 mutation UpsertVirtualCluster($parentID: ID!, $attributes: ClusterAttributes!) {
     upsertVirtualCluster(parentId: $parentID, attributes: $attributes) {
-        ...TinyClusterFragment
+        deployToken
+        ...ClusterFragment
     }
 }
