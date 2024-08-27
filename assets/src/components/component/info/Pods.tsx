@@ -1,6 +1,7 @@
 import {
   ColContainers,
   ColCpuReservation,
+  ColCreation,
   ColDelete,
   ColImages,
   ColMemoryReservation,
@@ -32,6 +33,7 @@ const columns = [
   ColRestarts,
   ColContainers,
   ColImages,
+  ColCreation,
   ColDelete,
 ]
 

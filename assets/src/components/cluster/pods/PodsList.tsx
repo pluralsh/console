@@ -6,7 +6,7 @@ import {
 } from '@pluralsh/design-system'
 import { Link, useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
-import {
+import React, {
   ComponentProps,
   createContext,
   memo,
@@ -41,6 +41,8 @@ import { DELETE_POD } from '../queries'
 import { getPodContainersStats } from '../containers/getPodContainersStats'
 
 import { ContainerStatuses } from '../ContainerStatuses'
+
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
 import { getPodResources } from './getPodResources'
 
@@ -99,6 +101,7 @@ type PodTableRow = {
   nodeName?: string
   namespace?: string
   namespaceIcon?: string
+  creationTimestamp?: string
   memory: {
     requests?: number
     limits?: any
@@ -144,6 +147,17 @@ export const ColNamespace = columnHelper.accessor((row) => row.namespace, {
   ),
   header: 'Namespace',
 })
+
+export const ColCreation = columnHelper.accessor(
+  (row) => row?.creationTimestamp,
+  {
+    id: 'creation',
+    header: 'Creation',
+    enableGlobalFilter: true,
+    enableSorting: true,
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+  }
+)
 
 export const ColNodeName = columnHelper.accessor((pod) => pod.nodeName, {
   id: 'nodeName',
@@ -392,6 +406,7 @@ export const PodsList = memo(
               restarts: getRestarts(pod.status),
               containers: getPodContainersStats(pod.status),
               images: getPodImages(pod.spec),
+              creationTimestamp: pod?.metadata?.creationTimestamp || undefined,
             }
           }),
       [applications, pods]

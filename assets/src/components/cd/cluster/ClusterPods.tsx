@@ -18,6 +18,7 @@ import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import {
   ColContainers,
   ColCpuReservation,
+  ColCreation,
   ColImages,
   ColMemoryReservation,
   ColName,
@@ -89,6 +90,7 @@ const columns = [
   ColRestarts,
   ColContainers,
   ColImages,
+  ColCreation,
   ColActions,
 ]
 
