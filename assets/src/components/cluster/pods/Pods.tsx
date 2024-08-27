@@ -30,6 +30,7 @@ import {
   ColActions,
   ColContainers,
   ColCpuReservation,
+  ColCreation,
   ColImages,
   ColMemoryReservation,
   ColName,
@@ -85,6 +86,7 @@ const columns = [
   ColRestarts,
   ColContainers,
   ColImages,
+  ColCreation,
   ColActions,
 ]
 
