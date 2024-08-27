@@ -6964,6 +6964,228 @@ func (t *MyCluster_MyCluster_) GetRestore() *ClusterRestoreFragment {
 	return t.Restore
 }
 
+type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
+	ID        string                    "json:\"id\" graphql:\"id\""
+	Name      string                    "json:\"name\" graphql:\"name\""
+	Group     *string                   "json:\"group,omitempty\" graphql:\"group\""
+	Kind      string                    "json:\"kind\" graphql:\"kind\""
+	Namespace *string                   "json:\"namespace,omitempty\" graphql:\"namespace\""
+	State     *ComponentState           "json:\"state,omitempty\" graphql:\"state\""
+	Synced    bool                      "json:\"synced\" graphql:\"synced\""
+	Version   *string                   "json:\"version,omitempty\" graphql:\"version\""
+	Content   *ComponentContentFragment "json:\"content,omitempty\" graphql:\"content\""
+}
+
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetID() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.ID
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetName() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Name
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetGroup() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Group
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetKind() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Kind
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetNamespace() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Namespace
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetState() *ComponentState {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.State
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetSynced() bool {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Synced
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetVersion() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Version
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components) GetContent() *ComponentContentFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components{}
+	}
+	return t.Content
+}
+
+type UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration) GetName() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration{}
+	}
+	return t.Name
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration) GetValue() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Configuration{}
+	}
+	return t.Value
+}
+
+type UpsertVirtualCluster_UpsertVirtualCluster struct {
+	DeployToken    *string                     "json:\"deployToken,omitempty\" graphql:\"deployToken\""
+	ID             string                      "json:\"id\" graphql:\"id\""
+	Name           string                      "json:\"name\" graphql:\"name\""
+	Handle         *string                     "json:\"handle,omitempty\" graphql:\"handle\""
+	Self           *bool                       "json:\"self,omitempty\" graphql:\"self\""
+	Version        *string                     "json:\"version,omitempty\" graphql:\"version\""
+	InsertedAt     *string                     "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	PingedAt       *string                     "json:\"pingedAt,omitempty\" graphql:\"pingedAt\""
+	Protect        *bool                       "json:\"protect,omitempty\" graphql:\"protect\""
+	CurrentVersion *string                     "json:\"currentVersion,omitempty\" graphql:\"currentVersion\""
+	KasURL         *string                     "json:\"kasUrl,omitempty\" graphql:\"kasUrl\""
+	DeletedAt      *string                     "json:\"deletedAt,omitempty\" graphql:\"deletedAt\""
+	Metadata       map[string]interface{}      "json:\"metadata,omitempty\" graphql:\"metadata\""
+	Tags           []*ClusterTags              "json:\"tags,omitempty\" graphql:\"tags\""
+	Credential     *ProviderCredentialFragment "json:\"credential,omitempty\" graphql:\"credential\""
+	Provider       *ClusterProviderFragment    "json:\"provider,omitempty\" graphql:\"provider\""
+	NodePools      []*NodePoolFragment         "json:\"nodePools,omitempty\" graphql:\"nodePools\""
+	Status         *ClusterStatusFragment      "json:\"status,omitempty\" graphql:\"status\""
+	Project        *TinyProjectFragment        "json:\"project,omitempty\" graphql:\"project\""
+}
+
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeployToken() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.DeployToken
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetID() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.ID
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetName() string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Name
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetHandle() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Handle
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetSelf() *bool {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Self
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetVersion() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Version
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetInsertedAt() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.InsertedAt
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetPingedAt() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.PingedAt
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProtect() *bool {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Protect
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetCurrentVersion() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.CurrentVersion
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetKasURL() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.KasURL
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetDeletedAt() *string {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.DeletedAt
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetMetadata() map[string]interface{} {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Metadata
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetTags() []*ClusterTags {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Tags
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetCredential() *ProviderCredentialFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Credential
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProvider() *ClusterProviderFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Provider
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetNodePools() []*NodePoolFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.NodePools
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetStatus() *ClusterStatusFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Status
+}
+func (t *UpsertVirtualCluster_UpsertVirtualCluster) GetProject() *TinyProjectFragment {
+	if t == nil {
+		t = &UpsertVirtualCluster_UpsertVirtualCluster{}
+	}
+	return t.Project
+}
+
 type GetGlobalServiceDeployment_GlobalService_GlobalServiceFragment_Provider struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -12158,10 +12380,10 @@ func (t *MyCluster) GetMyCluster() *MyCluster_MyCluster_ {
 }
 
 type UpsertVirtualCluster struct {
-	UpsertVirtualCluster *TinyClusterFragment "json:\"upsertVirtualCluster,omitempty\" graphql:\"upsertVirtualCluster\""
+	UpsertVirtualCluster *UpsertVirtualCluster_UpsertVirtualCluster "json:\"upsertVirtualCluster,omitempty\" graphql:\"upsertVirtualCluster\""
 }
 
-func (t *UpsertVirtualCluster) GetUpsertVirtualCluster() *TinyClusterFragment {
+func (t *UpsertVirtualCluster) GetUpsertVirtualCluster() *UpsertVirtualCluster_UpsertVirtualCluster {
 	if t == nil {
 		t = &UpsertVirtualCluster{}
 	}
@@ -16220,17 +16442,168 @@ func (c *Client) MyCluster(ctx context.Context, interceptors ...clientv2.Request
 
 const UpsertVirtualClusterDocument = `mutation UpsertVirtualCluster ($parentID: ID!, $attributes: ClusterAttributes!) {
 	upsertVirtualCluster(parentId: $parentID, attributes: $attributes) {
-		... TinyClusterFragment
+		deployToken
+		... ClusterFragment
 	}
 }
-fragment TinyClusterFragment on Cluster {
+fragment ClusterFragment on Cluster {
 	id
 	name
 	handle
 	self
+	version
+	insertedAt
+	pingedAt
+	protect
+	currentVersion
+	kasUrl
+	deletedAt
+	metadata
+	tags {
+		... ClusterTags
+	}
+	credential {
+		... ProviderCredentialFragment
+	}
+	provider {
+		... ClusterProviderFragment
+	}
+	nodePools {
+		... NodePoolFragment
+	}
+	status {
+		... ClusterStatusFragment
+	}
 	project {
 		... TinyProjectFragment
 	}
+}
+fragment ClusterTags on Tag {
+	name
+	value
+}
+fragment ProviderCredentialFragment on ProviderCredential {
+	id
+	name
+	namespace
+	kind
+}
+fragment ClusterProviderFragment on ClusterProvider {
+	id
+	name
+	namespace
+	cloud
+	editable
+	deletedAt
+	repository {
+		... GitRepositoryFragment
+	}
+	service {
+		... ServiceDeploymentFragment
+	}
+	credentials {
+		... ProviderCredentialFragment
+	}
+}
+fragment GitRepositoryFragment on GitRepository {
+	id
+	error
+	health
+	authMethod
+	url
+	decrypt
+}
+fragment ServiceDeploymentFragment on ServiceDeployment {
+	... ServiceDeploymentBaseFragment
+	components {
+		id
+		name
+		group
+		kind
+		namespace
+		state
+		synced
+		version
+		content {
+			... ComponentContentFragment
+		}
+	}
+	protect
+	deletedAt
+	sha
+	tarball
+	dryRun
+	templated
+	configuration {
+		name
+		value
+	}
+}
+fragment ServiceDeploymentBaseFragment on ServiceDeployment {
+	id
+	name
+	namespace
+	version
+	kustomize {
+		... KustomizeFragment
+	}
+	git {
+		... GitRefFragment
+	}
+	helm {
+		... HelmSpecFragment
+	}
+	repository {
+		... GitRepositoryFragment
+	}
+}
+fragment KustomizeFragment on Kustomize {
+	path
+}
+fragment GitRefFragment on GitRef {
+	folder
+	ref
+}
+fragment HelmSpecFragment on HelmSpec {
+	valuesFiles
+}
+fragment ComponentContentFragment on ComponentContent {
+	id
+	live
+	desired
+}
+fragment NodePoolFragment on NodePool {
+	id
+	name
+	minSize
+	maxSize
+	instanceType
+	labels
+	taints {
+		... NodePoolTaintFragment
+	}
+}
+fragment NodePoolTaintFragment on Taint {
+	key
+	value
+	effect
+}
+fragment ClusterStatusFragment on ClusterStatus {
+	conditions {
+		... ClusterConditionFragment
+	}
+	controlPlaneReady
+	failureMessage
+	failureReason
+	phase
+}
+fragment ClusterConditionFragment on ClusterCondition {
+	lastTransitionTime
+	status
+	type
+	message
+	reason
+	severity
 }
 fragment TinyProjectFragment on Project {
 	id
