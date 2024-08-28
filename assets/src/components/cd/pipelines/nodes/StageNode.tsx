@@ -41,7 +41,6 @@ import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
-import { CountBadge } from 'components/help/CountBadge'
 
 import {
   ServiceErrorsChip,
@@ -51,6 +50,8 @@ import {
 import { PipelinePullRequestsModal } from '../PipelinePullRequests'
 
 import { StopPropagation } from '../../../utils/StopPropagation'
+
+import { CountBadge } from '../../../utils/CountBadge'
 
 import {
   BaseNode,

@@ -16,7 +16,7 @@ const CountBadgeSC = styled.div<{
 
   return {
     ...theme.partials.text.badgeLabel,
-    color: theme.colors.text,
+    color: theme.colors.grey[25],
     letterSpacing: 0,
     fontSize,
     width,
@@ -24,7 +24,7 @@ const CountBadgeSC = styled.div<{
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors['icon-danger-critical'],
+    backgroundColor: theme.colors.red[500],
     borderRadius: '50%',
   }
 })

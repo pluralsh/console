@@ -1,54 +1,17 @@
-import styled, { DefaultTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { useTransition } from 'react-spring'
 import { useCallback, useMemo, useRef, useState } from 'react'
-
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
-
 import { AnimatedDiv } from '@pluralsh/design-system'
 
 import { NotificationsLauncherButton } from './NotificationsLauncherButton'
-import { HelpMenu } from './HelpMenu'
+import { NotificationsPanel } from './NotificationsPanel'
 
-export const getHelpSpacing = (theme: DefaultTheme) => ({
-  icon: {
-    width: theme.spacing.xlarge,
-    height: theme.spacing.xlarge,
-  },
-})
-
-const HelpLauncherSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  position: 'relative',
-  alignItems: 'end',
-  justifyContent: 'end',
-  pointerEvents: 'none',
-  '& > *': {
-    pointerEvents: 'auto',
-  },
-  zIndex: theme.zIndexes.modal,
-}))
-
-// @ts-ignore, see https://github.com/pmndrs/react-spring/issues/1515
-const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
-  const helpSpacing = getHelpSpacing(theme)
-
-  return {
-    display: 'flex',
-    position: 'absolute',
-    left: 0,
-    top: helpSpacing.icon.height + theme.spacing.xsmall,
-
-    minWidth: 240,
-    pointerEvents: 'none',
-    '& > *': { pointerEvents: 'auto' },
-  }
-})
-
-const getTransitionProps = (isOpen: boolean) => ({
+const getTransitionProps = (open: boolean) => ({
   from: { opacity: 0, scale: `65%` },
   enter: { opacity: 1, scale: '100%' },
   leave: { opacity: 0, scale: `65%` },
-  config: isOpen
+  config: open
     ? {
         mass: 0.6,
         tension: 280,
@@ -63,6 +26,7 @@ const getTransitionProps = (isOpen: boolean) => ({
 })
 
 export default function NotificationsLauncher() {
+  const theme = useTheme()
   const [open, setOpen] = useState<boolean>(false)
   const toggle = useCallback(() => setOpen(!open), [open, setOpen])
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
@@ -71,14 +35,26 @@ export default function NotificationsLauncher() {
   const unreadCount = 10 // TODO
 
   const content = transitions((styles) => (
-    <HelpLauncherContentSC
+    <AnimatedDiv
+      css={{
+        display: 'flex',
+        maxHeight: 640,
+        minHeight: 240,
+        pointerEvents: 'none',
+        position: 'absolute',
+        right: 0,
+        top: 32 + theme.spacing.xsmall,
+        width: 480,
+
+        '& > *': { pointerEvents: 'auto' },
+      }}
       style={{
-        transformOrigin: 'top left',
+        transformOrigin: 'top right',
         ...styles,
       }}
     >
-      <HelpMenu intercomProps={{ unreadCount }} />
-    </HelpLauncherContentSC>
+      <NotificationsPanel />
+    </AnimatedDiv>
   ))
 
   // Close affordances
@@ -88,13 +64,26 @@ export default function NotificationsLauncher() {
   useClickOutside(ref, () => setOpen(false))
 
   return (
-    <HelpLauncherSC ref={ref}>
+    <div
+      ref={ref}
+      css={{
+        display: 'flex',
+        position: 'relative',
+        alignItems: 'end',
+        justifyContent: 'end',
+        pointerEvents: 'none',
+        '& > *': {
+          pointerEvents: 'auto',
+        },
+        zIndex: theme.zIndexes.modal,
+      }}
+    >
       <NotificationsLauncherButton
         open={open}
         onClick={toggle}
         count={unreadCount}
       />
       {content}
-    </HelpLauncherSC>
+    </div>
   )
 }

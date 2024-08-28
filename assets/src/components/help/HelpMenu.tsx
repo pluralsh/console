@@ -8,7 +8,8 @@ import {
   LifePreserverIcon,
 } from '@pluralsh/design-system'
 
-import { CountBadge } from './CountBadge'
+import { CountBadge } from '../utils/CountBadge'
+
 import { HelpMenuState, HelpOpenState } from './HelpLauncher'
 
 const HelpMenuButtonSC = styled(Button)(({ theme }) => ({

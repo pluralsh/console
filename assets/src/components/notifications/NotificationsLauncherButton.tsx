@@ -22,7 +22,7 @@ export function NotificationsLauncherButton({
         tooltip={open ? undefined : `You have ${count} notifications`}
         {...props}
       />
-      {count > 0 && !open && (
+      {count > 0 && (
         <CountBadge
           size="medium"
           count={count}
