@@ -7,8 +7,6 @@ import BillingSubscriptionChip from 'components/billing/BillingSubscriptionChip'
 import BillingLegacyUserMessage from 'components/billing/BillingLegacyUserMessage'
 import CommandPaletteLauncher from 'components/commandpalette/CommandPaletteLauncher'
 
-import HelpLauncher from '../help/HelpLauncher'
-
 import DemoBanner from './DemoBanner'
 import ProjectSelect from './ProjectSelect'
 

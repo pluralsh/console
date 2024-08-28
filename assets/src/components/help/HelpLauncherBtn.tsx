@@ -5,6 +5,10 @@ import {
   IconFrameProps,
 } from '@pluralsh/design-system'
 
+import { useSidebar } from '@pluralsh/design-system/dist/components/Sidebar'
+
+import { useTheme } from 'styled-components'
+
 import { CountBadge } from './CountBadge'
 
 export function HelpLauncherBtn({
@@ -15,10 +19,20 @@ export function HelpLauncherBtn({
   Omit<IconFrameProps, 'icon'>,
   { variant: 'help' | 'minimize'; count?: number }
 >) {
+  const theme = useTheme()
+  const { isExpanded } = useSidebar()
+
   const translate = count > 10 ? -7 : -6
 
   return (
-    <div css={{ position: 'relative' }}>
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.spacing.xsmall,
+        position: 'relative',
+      }}
+    >
       <IconFrame
         clickable
         type="secondary"
@@ -37,6 +51,7 @@ export function HelpLauncherBtn({
           }}
         />
       )}
+      {isExpanded && 'Help'}
     </div>
   )
 }

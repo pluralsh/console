@@ -50,9 +50,10 @@ export enum HelpOpenState {
 
 const HelpLauncherSC = styled.div(({ theme }) => ({
   display: 'flex',
+  width: '100%',
   position: 'relative',
   alignItems: 'end',
-  justifyContent: 'end',
+  paddingLeft: theme.spacing.xxsmall,
   pointerEvents: 'none',
   '& > *': {
     pointerEvents: 'auto',
@@ -201,13 +202,20 @@ function HelpLauncher() {
     [HelpMenuState.menu]: helpMenu,
   }
 
-  const onLauncherClick = useCallback(() => {
-    if (openState === HelpOpenState.open && menuState === HelpMenuState.menu) {
-      changeState(undefined, HelpOpenState.closed)
-    } else {
-      changeState(HelpMenuState.menu, HelpOpenState.open)
-    }
-  }, [changeState, menuState, openState])
+  const onLauncherClick = useCallback(
+    (event) => {
+      event.stopPropagation()
+      if (
+        openState === HelpOpenState.open &&
+        menuState === HelpMenuState.menu
+      ) {
+        changeState(undefined, HelpOpenState.closed)
+      } else {
+        changeState(HelpMenuState.menu, HelpOpenState.open)
+      }
+    },
+    [changeState, menuState, openState]
+  )
 
   const isOpen = openState === HelpOpenState.open
   const transitionProps = useMemo(() => getTransitionProps(isOpen), [isOpen])
