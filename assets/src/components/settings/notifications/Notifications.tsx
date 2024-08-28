@@ -11,10 +11,12 @@ import {
 import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { Directory } from 'components/layout/SideNavEntries'
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { PageHeaderContext } from 'components/cd/ContinuousDeployment'
+import {
+  PageHeaderContext,
+  useSetPageHeaderContent,
+} from 'components/cd/ContinuousDeployment'
 
 const directory = [
   {
@@ -46,60 +48,57 @@ export default function Notifications() {
   const tab = pathMatch?.params?.tab || ''
   const currentTab = directory.find(({ path }) => path === tab)
 
+  useSetPageHeaderContent(
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.large,
+        flexGrow: 1,
+        width: '100%',
+        justifyContent: 'space-between',
+      }}
+    >
+      <TabList
+        stateRef={tabStateRef}
+        stateProps={{
+          orientation: 'horizontal',
+          selectedKey: currentTab?.path,
+        }}
+      >
+        {directory.map(({ label, path }) => (
+          <LinkTabWrap
+            subTab
+            key={path}
+            textValue={label}
+            to={`${NOTIFICATIONS_ABS_PATH}/${path}`}
+          >
+            <SubTab
+              key={path}
+              textValue={label}
+            >
+              {label}
+            </SubTab>
+          </LinkTabWrap>
+        ))}
+      </TabList>
+      {headerContent}
+    </div>
+  )
+
   if (!cdEnabled) return null
 
   return (
-    <ResponsivePageFullWidth
-      scrollable={false}
-      headingContent={
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.large,
-            flexGrow: 1,
-            width: '100%',
-            justifyContent: 'space-between',
-          }}
-        >
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
-          >
-            {directory.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`${NOTIFICATIONS_ABS_PATH}/${path}`}
-              >
-                <SubTab
-                  key={path}
-                  textValue={label}
-                >
-                  {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
-          {headerContent}
-        </div>
-      }
-    >
-      <PluralErrorBoundary>
-        <TabPanel
-          css={{ height: '100%' }}
-          stateRef={tabStateRef}
-        >
-          <PageHeaderContext.Provider value={pageHeaderContext}>
-            <Suspense fallback={<LoadingIndicator />}>
-              <Outlet />
-            </Suspense>
-          </PageHeaderContext.Provider>
-        </TabPanel>
-      </PluralErrorBoundary>
-    </ResponsivePageFullWidth>
+    <PluralErrorBoundary>
+      <TabPanel
+        css={{ height: '100%' }}
+        stateRef={tabStateRef}
+      >
+        <PageHeaderContext.Provider value={pageHeaderContext}>
+          <Suspense fallback={<LoadingIndicator />}>
+            <Outlet />
+          </Suspense>
+        </PageHeaderContext.Provider>
+      </TabPanel>
+    </PluralErrorBoundary>
   )
 }
