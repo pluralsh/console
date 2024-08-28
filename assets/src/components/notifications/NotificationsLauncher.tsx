@@ -27,7 +27,7 @@ const getTransitionProps = (open: boolean) => ({
 
 export default function NotificationsLauncher() {
   const theme = useTheme()
-  const [open, setOpen] = useState<boolean>(false)
+  const [open, setOpen] = useState<boolean>(true) // TODO
   const toggle = useCallback(() => setOpen(!open), [open, setOpen])
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
@@ -53,7 +53,7 @@ export default function NotificationsLauncher() {
         ...styles,
       }}
     >
-      <NotificationsPanel />
+      <NotificationsPanel onClose={() => setOpen(false)} />
     </AnimatedDiv>
   ))
 
