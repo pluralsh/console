@@ -389,10 +389,15 @@ defmodule Console.Deployments.Clusters do
       %{prior: %{handle: handle}} ->
         {:error, "cluster #{handle} already exists, and is not a virtual cluster within this parent cluster"}
     end)
+    |> add_operation(:agent, fn
+      %{prior: nil, cluster: cluster} ->
+        Services.operator_service(cluster, tmp_admin(user))
+      _ -> {:ok, nil}
+    end)
     |> execute()
     |> case do
-      {:ok, %{prior: %{}, cluster: cluster}} -> notify({:ok, cluster}, :update, user)
-      {:ok, %{prior: nil, cluster: cluster}} -> notify({:ok, cluster}, :create, user)
+      {:ok, %{prior: %{}, cluster: cluster}} -> notify({:ok, %{cluster | token_readable: true}}, :update, user)
+      {:ok, %{prior: nil, cluster: cluster}} -> notify({:ok, %{cluster | token_readable: true}}, :create, user)
       err -> err
     end
   end

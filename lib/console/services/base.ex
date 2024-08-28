@@ -18,7 +18,7 @@ defmodule Console.Services.Base do
         attr_bindings ++ resource_bindings,
         & "#{Map.get(&1, :user_id)}:#{Map.get(&1, :group_id)}"
       )
-      Map.put(attrs, type, merged)
+      Map.put(attrs, type, Console.mapify(merged))
     end)
   end
 

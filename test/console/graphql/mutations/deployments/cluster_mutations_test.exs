@@ -175,6 +175,8 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
   describe "upsertVirtualCluster" do
     test "it can upsert a new virtual cluster" do
       cluster = insert(:cluster)
+      insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+
 
       {:ok, %{data: %{"upsertVirtualCluster" => virt}}} = run_query("""
         mutation Upsert($attrs: ClusterAttributes!, $parentId: ID!) {
@@ -186,7 +188,12 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
             parentCluster { id }
           }
         }
-      """, %{"attrs" => %{"name" => "new-cluster"}, "parentId" => cluster.id}, %{current_user: admin_user()})
+      """, %{
+        "attrs" => %{
+          "name" => "new-cluster"
+        },
+        "parentId" => cluster.id
+      }, %{current_user: admin_user()})
 
       assert virt["handle"] == "new-cluster"
       assert virt["virtual"]
