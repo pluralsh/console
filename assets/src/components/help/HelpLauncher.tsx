@@ -23,10 +23,6 @@ export const getHelpSpacing = (theme: DefaultTheme) => ({
     top: theme.spacing.xxlarge,
     bottom: theme.spacing.xxlarge,
   },
-  icon: {
-    width: theme.spacing.xlarge,
-    height: theme.spacing.xlarge,
-  },
 })
 
 export function useHelpSpacing() {
@@ -62,20 +58,15 @@ const HelpLauncherSC = styled.div(({ theme }) => ({
 }))
 
 // @ts-ignore, see https://github.com/pmndrs/react-spring/issues/1515
-const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
-  const helpSpacing = getHelpSpacing(theme)
-
-  return {
-    display: 'flex',
-    position: 'absolute',
-    left: helpSpacing.icon.width + theme.spacing.large,
-    bottom: 0,
-
-    minWidth: 240,
-    pointerEvents: 'none',
-    '& > *': { pointerEvents: 'auto' },
-  }
-})
+const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => ({
+  display: 'flex',
+  position: 'absolute',
+  right: -240 - theme.spacing.large,
+  bottom: 0,
+  width: 240,
+  pointerEvents: 'none',
+  '& > *': { pointerEvents: 'auto' },
+}))
 
 const getTransitionProps = (isOpen: boolean) => ({
   from: { opacity: 0, scale: `65%` },
