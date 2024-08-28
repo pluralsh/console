@@ -34,6 +34,7 @@ defmodule Console.Watchers.Upgrade do
       git: Console.conf(:git_url),
       domain: Console.conf(:url),
       name: Console.conf(:cluster_name),
+      legacy: !Console.byok?() && !Console.cloud?(),
       provider: to_provider(Console.conf(:provider))
     })
     |> case do
