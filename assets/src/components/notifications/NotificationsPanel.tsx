@@ -7,6 +7,7 @@ import {
   CloseIcon,
   GearTrainIcon,
   IconFrame,
+  Toast,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import { ApolloError } from 'apollo-boost'
@@ -20,14 +21,8 @@ export function NotificationsPanel({
 }: ComponentProps<typeof Card> & { onClose: () => void }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const [error, setError] = useState<ApolloError>()
 
-  const [mutation, { loading }] = useReadAppNotificationsMutation({
-    onError: (error) => {
-      setError(error)
-      setTimeout(() => setError(undefined), 3000)
-    },
-  })
+  const [mutation, { loading, error }] = useReadAppNotificationsMutation()
 
   return (
     <>
@@ -84,17 +79,14 @@ export function NotificationsPanel({
         content
       </Card>
       {error && (
-        <Banner
+        <Toast
           heading="Failed to mark notifications as read"
-          severity="error"
-          position="fixed"
-          bottom={24}
-          right={100}
-          zIndex={theme.zIndexes.modal}
-          onClose={() => setError(undefined)}
+          severity="danger"
+          margin="medium"
+          closeTimeout={3000}
         >
           {error.message}
-        </Banner>
+        </Toast>
       )}
     </>
   )
