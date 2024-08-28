@@ -1,7 +1,6 @@
 import { useTheme } from 'styled-components'
-import { ComponentProps, useState } from 'react'
+import { ComponentProps } from 'react'
 import {
-  Banner,
   Button,
   Card,
   CloseIcon,
@@ -10,19 +9,24 @@ import {
   Toast,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
-import { ApolloError } from 'apollo-boost'
 
 import { NOTIFICATIONS_ABS_PATH } from '../../routes/settingsRoutesConst'
 import { useReadAppNotificationsMutation } from '../../generated/graphql'
 
 export function NotificationsPanel({
   onClose,
+  refetchUnreadNotificationsCount,
   ...props
-}: ComponentProps<typeof Card> & { onClose: () => void }) {
+}: ComponentProps<typeof Card> & {
+  onClose: () => void
+  refetchUnreadNotificationsCount: () => void
+}) {
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const [mutation, { loading, error }] = useReadAppNotificationsMutation()
+  const [mutation, { loading, error }] = useReadAppNotificationsMutation({
+    onCompleted: () => refetchUnreadNotificationsCount(),
+  })
 
   return (
     <>

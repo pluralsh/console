@@ -4,8 +4,15 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { AnimatedDiv } from '@pluralsh/design-system'
 
+import {
+  useClusterNamespacesQuery,
+  useUnreadAppNotificationsQuery,
+} from '../../generated/graphql'
+
 import { NotificationsLauncherButton } from './NotificationsLauncherButton'
 import { NotificationsPanel } from './NotificationsPanel'
+
+const POLL_INTERVAL = 5 * 1000
 
 const getTransitionProps = (open: boolean) => ({
   from: { opacity: 0, scale: `65%` },
@@ -28,7 +35,7 @@ const getTransitionProps = (open: boolean) => ({
 export default function NotificationsLauncher() {
   const theme = useTheme()
   const ref = useRef<HTMLDivElement>(null)
-  const [open, setOpen] = useState<boolean>(true) // TODO
+  const [open, setOpen] = useState<boolean>(false)
   const toggle = useCallback(() => setOpen(!open), [open, setOpen])
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
@@ -36,7 +43,9 @@ export default function NotificationsLauncher() {
   useKeyDown(['Escape'], () => setOpen(false))
   useClickOutside(ref, () => setOpen(false))
 
-  const unreadCount = 10 // TODO
+  const { data, refetch } = useUnreadAppNotificationsQuery({
+    pollInterval: POLL_INTERVAL,
+  })
 
   const content = transitions((styles) => (
     <AnimatedDiv
@@ -57,7 +66,10 @@ export default function NotificationsLauncher() {
         ...styles,
       }}
     >
-      <NotificationsPanel onClose={() => setOpen(false)} />
+      <NotificationsPanel
+        onClose={() => setOpen(false)}
+        refetchUnreadNotificationsCount={refetch}
+      />
     </AnimatedDiv>
   ))
 
@@ -79,7 +91,7 @@ export default function NotificationsLauncher() {
       <NotificationsLauncherButton
         open={open}
         onClick={toggle}
-        count={unreadCount}
+        count={data?.unreadAppNotifications || 0}
       />
       {content}
     </div>
