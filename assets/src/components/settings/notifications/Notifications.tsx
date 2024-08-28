@@ -7,7 +7,7 @@ import {
   NOTIFICATIONS_ABS_PATH,
   NOTIFICATIONS_ROUTERS_REL_PATH,
   NOTIFICATIONS_SINKS_REL_PATH,
-} from 'routes/notificationsRoutesConsts'
+} from 'routes/settingsRoutesConst'
 import { PluralErrorBoundary } from 'components/cd/PluralErrorBoundary'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { Directory } from 'components/layout/SideNavEntries'
@@ -27,7 +27,7 @@ const directory = [
   },
 ] as const satisfies Directory
 
-export default function Pr() {
+export default function Notifications() {
   const theme = useTheme()
   const [headerContent, setHeaderContent] = useState<ReactNode>()
 

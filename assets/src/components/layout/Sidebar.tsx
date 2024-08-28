@@ -14,7 +14,6 @@ import {
   HistoryIcon,
   HomeIcon,
   KubernetesAltIcon,
-  LightningIcon,
   LogoutIcon,
   PersonIcon,
   PrOpenIcon,
@@ -176,13 +175,6 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.backups),
-    },
-    {
-      text: 'Notifications',
-      expandedLabel: 'Notifications',
-      icon: <LightningIcon />,
-      path: '/notifications',
-      enabled: isCDEnabled,
     },
     {
       text: 'Settings',

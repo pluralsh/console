@@ -18,7 +18,7 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   NOTIFICATIONS_BASE_CRUMBS,
   NOTIFICATIONS_ROUTERS_ABS_PATH,
-} from 'routes/notificationsRoutesConsts'
+} from 'routes/settingsRoutesConst'
 
 import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 

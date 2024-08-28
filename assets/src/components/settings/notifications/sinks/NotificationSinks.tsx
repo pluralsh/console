@@ -18,7 +18,7 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import {
   NOTIFICATIONS_BASE_CRUMBS,
   NOTIFICATIONS_SINKS_ABS_PATH,
-} from 'routes/notificationsRoutesConsts'
+} from 'routes/settingsRoutesConst'
 
 import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
@@ -40,7 +40,7 @@ const crumbs = [
   },
 ]
 
-export default function AutomationPr() {
+export default function NotificationSinks() {
   const theme = useTheme()
 
   useSetBreadcrumbs(crumbs)

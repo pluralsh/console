@@ -37,13 +37,13 @@ import {
 } from '../../routes/cdRoutesConsts'
 import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
-import { NOTIFICATIONS_ABS_PATH } from '../../routes/notificationsRoutesConsts'
 import { POLICIES_ABS_PATH } from '../../routes/policiesRoutesConsts'
 import {
   PR_ABS_PATH,
   PR_AUTOMATIONS_ABS_PATH,
 } from '../../routes/prRoutesConsts'
 import {
+  NOTIFICATIONS_ABS_PATH,
   SETTINGS_ABS_PATH,
   USER_MANAGEMENT_ABS_PATH,
 } from '../../routes/settingsRoutesConst'
