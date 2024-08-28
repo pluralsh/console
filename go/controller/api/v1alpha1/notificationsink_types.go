@@ -36,6 +36,9 @@ type NotificationSinkSpec struct {
 	// Configuration for the specific type
 	// +kubebuilder:validation:Optional
 	Configuration SinkConfiguration `json:"configuration"`
+
+	// +kubebuilder:validation:Optional
+	Bindings []Binding `json:"bindings,omitempty"`
 }
 
 type SinkConfiguration struct {

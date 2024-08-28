@@ -2261,10 +2261,11 @@ func (t *NotificationSinkEdgeFragment) GetNode() *NotificationSinkFragment {
 }
 
 type NotificationSinkFragment struct {
-	ID            string                    "json:\"id\" graphql:\"id\""
-	Name          string                    "json:\"name\" graphql:\"name\""
-	Type          SinkType                  "json:\"type\" graphql:\"type\""
-	Configuration SinkConfigurationFragment "json:\"configuration\" graphql:\"configuration\""
+	ID                   string                    "json:\"id\" graphql:\"id\""
+	Name                 string                    "json:\"name\" graphql:\"name\""
+	Type                 SinkType                  "json:\"type\" graphql:\"type\""
+	Configuration        SinkConfigurationFragment "json:\"configuration\" graphql:\"configuration\""
+	NotificationBindings []*PolicyBindingFragment  "json:\"notificationBindings,omitempty\" graphql:\"notificationBindings\""
 }
 
 func (t *NotificationSinkFragment) GetID() string {
@@ -2290,6 +2291,12 @@ func (t *NotificationSinkFragment) GetConfiguration() *SinkConfigurationFragment
 		t = &NotificationSinkFragment{}
 	}
 	return &t.Configuration
+}
+func (t *NotificationSinkFragment) GetNotificationBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &NotificationSinkFragment{}
+	}
+	return t.NotificationBindings
 }
 
 type SinkConfigurationFragment struct {
@@ -21302,6 +21309,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21314,6 +21324,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -21346,6 +21375,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21358,6 +21390,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -21390,6 +21441,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21402,6 +21456,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -21434,6 +21507,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21446,6 +21522,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -21493,6 +21588,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21505,6 +21603,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -21548,6 +21665,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21560,6 +21680,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -21600,6 +21739,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21612,6 +21754,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -21652,6 +21813,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21664,6 +21828,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
@@ -21704,6 +21887,9 @@ fragment NotificationSinkFragment on NotificationSink {
 	configuration {
 		... SinkConfigurationFragment
 	}
+	notificationBindings {
+		... PolicyBindingFragment
+	}
 }
 fragment SinkConfigurationFragment on SinkConfiguration {
 	id
@@ -21716,6 +21902,25 @@ fragment SinkConfigurationFragment on SinkConfiguration {
 }
 fragment UrlSinkConfigurationFragment on UrlSinkConfiguration {
 	url
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
 }
 `
 
