@@ -16,6 +16,7 @@ defmodule Console.Helm.Utils do
     end
   end
 
+  def compare_versions(_, nil), do: :gt
   def compare_versions(vsn1, vsn2) do
     with {:left, {:ok, vsn1}} <- {:left, Version.parse(clean_vsn(vsn1))},
          {:right, {:ok, vsn2}} <- {:right, Version.parse(clean_vsn(vsn2))} do

@@ -1,0 +1,104 @@
+defmodule Console.Deployments.Observer.RunnerTest do
+  use Console.DataCase, async: true
+  use Mimic
+  alias Console.PubSub
+  alias Console.Commands.Plural
+  alias Console.Deployments.Observer.Runner
+
+  describe "#run/0" do
+    test "it can poll a helm repo and add a pipeline context" do
+      bot("console")
+      pipeline = insert(:pipeline)
+      observer = insert(:observer,
+        name: "observer",
+        target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        actions: [
+          %{type: :pipeline, configuration: %{
+            pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
+          }
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      [context] = Console.Repo.all(Console.Schema.PipelineContext)
+      assert context.pipeline_id == pipeline.id
+      assert is_binary(context.context["some"])
+      assert context.context["some"] != "$value"
+
+      assert obs.id == observer.id
+      assert obs.last_value == context.context["some"]
+    end
+
+    test "it can poll an oci repository and add a pipeline context" do
+      bot("console")
+      pipeline = insert(:pipeline)
+      observer = insert(:observer,
+        name: "observer",
+        target: %{oci: %{url: "oci://ghcr.io/pluralsh/console"}},
+        actions: [
+          %{type: :pipeline, configuration: %{
+            pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
+          }
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      [context] = Console.Repo.all(Console.Schema.PipelineContext)
+      assert context.pipeline_id == pipeline.id
+      assert is_binary(context.context["some"])
+      assert context.context["some"] != "$value"
+
+      assert obs.id == observer.id
+      assert obs.last_value == context.context["some"]
+    end
+
+    test "it can poll a helm repo and execute a pr automation" do
+      user = bot("console")
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
+        write_bindings: [%{user_id: user.id}],
+        create_bindings: [%{user_id: user.id}]
+      )
+
+      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: _, body: "pr message"} ->
+        {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
+      end)
+      expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", _ -> {:ok, conn} end)
+      expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
+      expect(Console.Deployments.Pr.Git, :push, fn _, _ -> {:ok, ""} end)
+
+      observer = insert(:observer,
+        name: "observer",
+        target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        actions: [
+          %{type: :pr, configuration: %{
+            pr: %{automation_id: pra.id, context: %{"some" => "$value"}}}
+          }
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      assert obs.id == observer.id
+      assert obs.last_value
+
+      [pr] = Console.Repo.all(Console.Schema.PullRequest)
+
+      assert pr.cluster_id == pra.cluster_id
+      assert pr.url == "https://github.com/pr/url"
+      assert pr.title == pra.title
+
+      assert_receive {:event, %PubSub.PullRequestCreated{}}
+    end
+  end
+end

@@ -143,4 +143,56 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
              |> ids_equal(prs)
     end
   end
+
+  describe "observer" do
+    test "it can fetch an observer by name" do
+      observer = insert(:observer)
+
+      {:ok, %{data: %{"observer" => found}}} = run_query("""
+        query Observer($name: String!) {
+          observer(name: $name) {
+            id
+            name
+          }
+        }
+      """, %{"name" => observer.name}, %{current_user: insert(:user)})
+
+      assert found["id"] == observer.id
+      assert found["name"] == observer.name
+    end
+  end
+
+  describe "observers" do
+    test "it can fetch paginated observers" do
+      observers = insert_list(3, :observer)
+
+      {:ok, %{data: %{"observers" => found}}} = run_query("""
+        query {
+          observers(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(observers)
+    end
+
+    test "it can filter by project" do
+      project = insert(:project)
+      observers = insert_list(3, :observer, project: project)
+      insert_list(3, :observer)
+
+      {:ok, %{data: %{"observers" => found}}} = run_query("""
+        query Observers($id: ID!) {
+          observers(projectId: $id, first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{"id" => project.id}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(observers)
+    end
+  end
 end

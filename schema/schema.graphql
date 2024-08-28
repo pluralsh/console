@@ -199,6 +199,10 @@ type RootQueryType {
 
   dependencyManagementServices(after: String, first: Int, before: String, last: Int): DependencyManagementServiceConnection
 
+  observer(id: ID, name: String): Observer
+
+  observers(after: String, first: Int, before: String, last: Int, projectId: ID): ObserverConnection
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -572,6 +576,10 @@ type RootMutationType {
   deletePullRequest(id: ID!): PullRequest
 
   upsertHelmRepository(url: String!, attributes: HelmRepositoryAttributes): HelmRepository
+
+  upsertObserver(attributes: ObserverAttributes): Observer
+
+  deleteObserver(id: ID!): Observer
 
   createCluster(attributes: ClusterAttributes!): Cluster
 
@@ -4246,6 +4254,16 @@ enum Operation {
   SUFFIX
 }
 
+enum ObserverActionType {
+  PIPELINE
+  PR
+}
+
+enum ObserverStatus {
+  HEALTHY
+  FAILED
+}
+
 input GitAttributes {
   "the url of this repository"
   url: String!
@@ -4384,6 +4402,9 @@ input PrAutomationAttributes {
   "the scm connection to use for pr generation"
   connectionId: ID
 
+  "the project this automation lives in"
+  projectId: ID
+
   "a git repository to use for create mode prs"
   repositoryId: ID
 
@@ -4500,6 +4521,69 @@ input ScmWebhookAttributes {
 
   "the owner for this webhook in your SCM, eg a github org or gitlab group"
   owner: String!
+}
+
+"An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response"
+input ObserverAttributes {
+  name: String!
+  crontab: String!
+  target: ObserverTargetAttributes!
+  actions: [ObserverActionAttributes]
+  projectId: ID
+}
+
+"A spec for a target to poll"
+input ObserverTargetAttributes {
+  helm: ObserverHelmAttributes
+  oci: ObserverOciAttributes
+}
+
+"A spec of an action that can be taken in response to an observed entity"
+input ObserverActionAttributes {
+  type: ObserverActionType!
+  configuration: ObserverActionConfigurationAttributes!
+}
+
+"a spec for querying a helm repository in an observer"
+input ObserverHelmAttributes {
+  url: String!
+  chart: String!
+  provider: HelmAuthProvider
+  auth: HelmAuthAttributes
+}
+
+"a spec for querying a helm repository in an observer"
+input ObserverOciAttributes {
+  url: String!
+  provider: HelmAuthProvider
+  auth: HelmAuthAttributes
+}
+
+"configuration for an observer action"
+input ObserverActionConfigurationAttributes {
+  pr: ObserverPrActionAttributes
+  pipeline: ObserverPipelineActionAttributes
+}
+
+"Configuration for sending a pr in response to an observer"
+input ObserverPrActionAttributes {
+  automationId: ID!
+
+  repository: String
+
+  "a template to use for the created branch, use $value to interject the observed value"
+  branchTemplate: String
+
+  "the context to apply, use $value to interject the observed value"
+  context: Json!
+}
+
+"Configuration for setting a pipeline context in an observer"
+input ObserverPipelineActionAttributes {
+  pipelineId: ID!
+
+  "the context to apply, use $value to interject the observed value"
+  context: Map!
 }
 
 "a git repository available for deployments"
@@ -4666,6 +4750,9 @@ type PrAutomation {
   "the git repository to use for sourcing external templates"
   repository: GitRepository
 
+  "the project this automation lives w\/in"
+  project: Project
+
   "link to a cluster if this is to perform an upgrade"
   cluster: Cluster
 
@@ -4802,6 +4889,74 @@ type DependencyManagementService {
   updatedAt: DateTime
 }
 
+"An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response"
+type Observer {
+  id: ID!
+  name: String!
+  status: ObserverStatus!
+  crontab: String!
+  lastRunAt: DateTime!
+  nextRunAt: DateTime!
+  target: ObserverTarget!
+  actions: [ObserverAction]
+  project: Project
+  errors: [ServiceError]
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"A spec for a target to poll"
+type ObserverTarget {
+  helm: ObserverHelmRepo
+  oci: ObserverOciRepo
+}
+
+"A spec of an action that can be taken in response to an observed entity"
+type ObserverAction {
+  type: ObserverActionType!
+  configuration: ObserverActionConfiguration!
+}
+
+"a spec for querying a helm in an observer"
+type ObserverHelmRepo {
+  url: String!
+  chart: String!
+  provider: HelmAuthProvider
+}
+
+"a spec for querying a oci repository in an observer"
+type ObserverOciRepo {
+  url: String!
+  provider: HelmAuthProvider
+}
+
+"configuration for an observer action"
+type ObserverActionConfiguration {
+  pr: ObserverPrAction
+  pipeline: ObserverPipelineAction
+}
+
+"Configuration for sending a pr in response to an observer"
+type ObserverPrAction {
+  automationId: ID!
+
+  repository: String
+
+  "a template to use for the created branch, use $value to interject the observed value"
+  branchTemplate: String
+
+  "the context to apply, use $value to interject the observed value"
+  context: Json!
+}
+
+"Configuration for setting a pipeline context in an observer"
+type ObserverPipelineAction {
+  pipelineId: ID!
+
+  "the context to apply, use $value to interject the observed value"
+  context: Map!
+}
+
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
@@ -4835,6 +4990,11 @@ type ScmWebhookConnection {
 type DependencyManagementServiceConnection {
   pageInfo: PageInfo!
   edges: [DependencyManagementServiceEdge]
+}
+
+type ObserverConnection {
+  pageInfo: PageInfo!
+  edges: [ObserverEdge]
 }
 
 input CloneAttributes {
@@ -6722,6 +6882,11 @@ type RunbookExecutionEdge {
 
 type WebhookEdge {
   node: Webhook
+  cursor: String
+}
+
+type ObserverEdge {
+  node: Observer
   cursor: String
 }
 

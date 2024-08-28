@@ -15,7 +15,8 @@ defmodule Console.Deployments.Git do
     PrAutomation,
     PullRequest,
     DependencyManagementService,
-    HelmRepository
+    HelmRepository,
+    Observer
   }
 
   @cache Console.conf(:cache_adapter)
@@ -27,6 +28,7 @@ defmodule Console.Deployments.Git do
   @type webhook_resp :: {:ok, ScmWebhook.t} | Console.error
   @type automation_resp :: {:ok, PrAutomation.t} | Console.error
   @type pull_request_resp :: {:ok, PullRequest.t} | Console.error
+  @type observer_resp :: {:ok, Observer.t} | Console.error
 
   @decorate cacheable(cache: @cache, key: {:git_repo, id}, opts: [ttl: @ttl])
   def cached!(id), do: Repo.get!(GitRepository, id)
@@ -55,6 +57,12 @@ defmodule Console.Deployments.Git do
 
   def get_pr_automation(id), do: Repo.get(PrAutomation, id)
   def get_pr_automation!(id), do: Repo.get!(PrAutomation, id)
+
+  def get_observer_by_name(name), do: Repo.get_by(Observer, name: name)
+
+  def get_observer_by_name!(name), do: Repo.get_by!(Observer, name: name)
+
+  def get_observer!(id), do: Repo.get!(Observer, id)
 
   def get_pr_automation_by_name(name), do: Repo.get_by(PrAutomation, name: name)
 
@@ -238,7 +246,7 @@ defmodule Console.Deployments.Git do
   @spec create_pr_automation(map, User.t) :: automation_resp
   def create_pr_automation(attrs, %User{} = user) do
     %PrAutomation{}
-    |> PrAutomation.changeset(attrs)
+    |> PrAutomation.changeset(Settings.add_project_id(attrs))
     |> allow(user, :create)
     |> when_ok(:insert)
   end
@@ -252,6 +260,7 @@ defmodule Console.Deployments.Git do
     |> Repo.preload([:write_bindings, :create_bindings])
     |> allow(user, :write)
     |> when_ok(&PrAutomation.changeset(&1, attrs))
+    |> when_ok(&allow(&1, user, :write))
     |> when_ok(:update)
   end
 
@@ -386,7 +395,32 @@ defmodule Console.Deployments.Git do
     end
     |> allow(user, :git)
     |> when_ok(&HelmRepository.changeset(&1, attrs))
-    |> when_ok(&Console.Repo.insert_or_update/1)
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Upserts a new observer which can poll external registries and perform configurable actions
+  as a result.
+  """
+  @spec upsert_observer(map, User.t) :: observer_resp
+  def upsert_observer(%{name: name} = attrs, %User{} = user) do
+    case get_observer_by_name(name) do
+      %Observer{} = o -> Repo.preload(o, [:errors])
+      nil -> %Observer{project_id: attrs[:project_id] || Settings.default_project!().id}
+    end
+    |> allow(user, :write)
+    |> when_ok(&Observer.changeset(&1, attrs))
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Deletes an observer record
+  """
+  @spec delete_observer(binary, User.t) :: observer_resp
+  def delete_observer(id, %User{} = user) do
+    get_observer!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @doc """

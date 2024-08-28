@@ -2540,6 +2540,139 @@ type ObservableMetricAttributes struct {
 	ProviderID string `json:"providerId"`
 }
 
+// An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response
+type Observer struct {
+	ID         string            `json:"id"`
+	Name       string            `json:"name"`
+	Status     ObserverStatus    `json:"status"`
+	Crontab    string            `json:"crontab"`
+	LastRunAt  string            `json:"lastRunAt"`
+	NextRunAt  string            `json:"nextRunAt"`
+	Target     ObserverTarget    `json:"target"`
+	Actions    []*ObserverAction `json:"actions,omitempty"`
+	Project    *Project          `json:"project,omitempty"`
+	Errors     []*ServiceError   `json:"errors,omitempty"`
+	InsertedAt *string           `json:"insertedAt,omitempty"`
+	UpdatedAt  *string           `json:"updatedAt,omitempty"`
+}
+
+// A spec of an action that can be taken in response to an observed entity
+type ObserverAction struct {
+	Type          ObserverActionType          `json:"type"`
+	Configuration ObserverActionConfiguration `json:"configuration"`
+}
+
+// A spec of an action that can be taken in response to an observed entity
+type ObserverActionAttributes struct {
+	Type          ObserverActionType                    `json:"type"`
+	Configuration ObserverActionConfigurationAttributes `json:"configuration"`
+}
+
+// configuration for an observer action
+type ObserverActionConfiguration struct {
+	Pr       *ObserverPrAction       `json:"pr,omitempty"`
+	Pipeline *ObserverPipelineAction `json:"pipeline,omitempty"`
+}
+
+// configuration for an observer action
+type ObserverActionConfigurationAttributes struct {
+	Pr       *ObserverPrActionAttributes       `json:"pr,omitempty"`
+	Pipeline *ObserverPipelineActionAttributes `json:"pipeline,omitempty"`
+}
+
+// An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response
+type ObserverAttributes struct {
+	Name      string                      `json:"name"`
+	Crontab   string                      `json:"crontab"`
+	Target    ObserverTargetAttributes    `json:"target"`
+	Actions   []*ObserverActionAttributes `json:"actions,omitempty"`
+	ProjectID *string                     `json:"projectId,omitempty"`
+}
+
+type ObserverConnection struct {
+	PageInfo PageInfo        `json:"pageInfo"`
+	Edges    []*ObserverEdge `json:"edges,omitempty"`
+}
+
+type ObserverEdge struct {
+	Node   *Observer `json:"node,omitempty"`
+	Cursor *string   `json:"cursor,omitempty"`
+}
+
+// a spec for querying a helm repository in an observer
+type ObserverHelmAttributes struct {
+	URL      string              `json:"url"`
+	Chart    string              `json:"chart"`
+	Provider *HelmAuthProvider   `json:"provider,omitempty"`
+	Auth     *HelmAuthAttributes `json:"auth,omitempty"`
+}
+
+// a spec for querying a helm in an observer
+type ObserverHelmRepo struct {
+	URL      string            `json:"url"`
+	Chart    string            `json:"chart"`
+	Provider *HelmAuthProvider `json:"provider,omitempty"`
+}
+
+// a spec for querying a helm repository in an observer
+type ObserverOciAttributes struct {
+	URL      string              `json:"url"`
+	Provider *HelmAuthProvider   `json:"provider,omitempty"`
+	Auth     *HelmAuthAttributes `json:"auth,omitempty"`
+}
+
+// a spec for querying a oci repository in an observer
+type ObserverOciRepo struct {
+	URL      string            `json:"url"`
+	Provider *HelmAuthProvider `json:"provider,omitempty"`
+}
+
+// Configuration for setting a pipeline context in an observer
+type ObserverPipelineAction struct {
+	PipelineID string `json:"pipelineId"`
+	// the context to apply, use $value to interject the observed value
+	Context map[string]interface{} `json:"context"`
+}
+
+// Configuration for setting a pipeline context in an observer
+type ObserverPipelineActionAttributes struct {
+	PipelineID string `json:"pipelineId"`
+	// the context to apply, use $value to interject the observed value
+	Context map[string]interface{} `json:"context"`
+}
+
+// Configuration for sending a pr in response to an observer
+type ObserverPrAction struct {
+	AutomationID string  `json:"automationId"`
+	Repository   *string `json:"repository,omitempty"`
+	// a template to use for the created branch, use $value to interject the observed value
+	BranchTemplate *string `json:"branchTemplate,omitempty"`
+	// the context to apply, use $value to interject the observed value
+	Context string `json:"context"`
+}
+
+// Configuration for sending a pr in response to an observer
+type ObserverPrActionAttributes struct {
+	AutomationID string  `json:"automationId"`
+	Repository   *string `json:"repository,omitempty"`
+	// a template to use for the created branch, use $value to interject the observed value
+	BranchTemplate *string `json:"branchTemplate,omitempty"`
+	// the context to apply, use $value to interject the observed value
+	Context string `json:"context"`
+}
+
+// A spec for a target to poll
+type ObserverTarget struct {
+	Helm *ObserverHelmRepo `json:"helm,omitempty"`
+	Oci  *ObserverOciRepo  `json:"oci,omitempty"`
+}
+
+// A spec for a target to poll
+type ObserverTargetAttributes struct {
+	Helm *ObserverHelmAttributes `json:"helm,omitempty"`
+	Oci  *ObserverOciAttributes  `json:"oci,omitempty"`
+}
+
 type OverlayUpdate struct {
 	Path []*string `json:"path,omitempty"`
 }
@@ -3123,6 +3256,8 @@ type PrAutomation struct {
 	Addon *string `json:"addon,omitempty"`
 	// the git repository to use for sourcing external templates
 	Repository *GitRepository `json:"repository,omitempty"`
+	// the project this automation lives w/in
+	Project *Project `json:"project,omitempty"`
 	// link to a cluster if this is to perform an upgrade
 	Cluster *Cluster `json:"cluster,omitempty"`
 	// link to a service if this can update its configuration
@@ -3154,6 +3289,8 @@ type PrAutomationAttributes struct {
 	ServiceID *string `json:"serviceId,omitempty"`
 	// the scm connection to use for pr generation
 	ConnectionID *string `json:"connectionId,omitempty"`
+	// the project this automation lives in
+	ProjectID *string `json:"projectId,omitempty"`
 	// a git repository to use for create mode prs
 	RepositoryID  *string                      `json:"repositoryId,omitempty"`
 	Configuration []*PrConfigurationAttributes `json:"configuration,omitempty"`
@@ -5875,6 +6012,88 @@ func (e *ObservabilityProviderType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ObservabilityProviderType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ObserverActionType string
+
+const (
+	ObserverActionTypePipeline ObserverActionType = "PIPELINE"
+	ObserverActionTypePr       ObserverActionType = "PR"
+)
+
+var AllObserverActionType = []ObserverActionType{
+	ObserverActionTypePipeline,
+	ObserverActionTypePr,
+}
+
+func (e ObserverActionType) IsValid() bool {
+	switch e {
+	case ObserverActionTypePipeline, ObserverActionTypePr:
+		return true
+	}
+	return false
+}
+
+func (e ObserverActionType) String() string {
+	return string(e)
+}
+
+func (e *ObserverActionType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ObserverActionType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ObserverActionType", str)
+	}
+	return nil
+}
+
+func (e ObserverActionType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ObserverStatus string
+
+const (
+	ObserverStatusHealthy ObserverStatus = "HEALTHY"
+	ObserverStatusFailed  ObserverStatus = "FAILED"
+)
+
+var AllObserverStatus = []ObserverStatus{
+	ObserverStatusHealthy,
+	ObserverStatusFailed,
+}
+
+func (e ObserverStatus) IsValid() bool {
+	switch e {
+	case ObserverStatusHealthy, ObserverStatusFailed:
+		return true
+	}
+	return false
+}
+
+func (e ObserverStatus) String() string {
+	return string(e)
+}
+
+func (e *ObserverStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ObserverStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ObserverStatus", str)
+	}
+	return nil
+}
+
+func (e ObserverStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

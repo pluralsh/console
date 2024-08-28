@@ -15,7 +15,9 @@ defmodule Console.Deployments.Cron do
     StackRun,
     StackCron,
     PullRequest,
-    RunLog
+    RunLog,
+    AppNotification,
+    Observer
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -281,6 +283,20 @@ defmodule Console.Deployments.Cron do
       Stacks.spawn_cron(cron)
     end)
     |> Stream.run()
+  end
+
+  def prune_notifications() do
+    AppNotification.expired()
+    |> Repo.delete_all()
+  end
+
+  def run_observers() do
+    Observer.runnable()
+    |> Observer.ordered(asc: :id)
+    |> Console.throttle()
+    |> Flow.from_enumerable()
+    |> Flow.map(&Console.Deployments.Observer.Runner.run/1)
+    |> Flow.run()
   end
 
   defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"

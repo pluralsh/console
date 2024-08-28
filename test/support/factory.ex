@@ -370,6 +370,7 @@ defmodule Console.Factory do
       title: "pr title",
       identifier: "some/repo",
       message: "pr message",
+      project: Settings.default_project!(),
       write_policy_id: Ecto.UUID.generate(),
       create_policy_id: Ecto.UUID.generate(),
       connection: build(:scm_connection)
@@ -652,6 +653,16 @@ defmodule Console.Factory do
       name: "shared secret",
       handle: sequence(:shared_secret, & "shared-#{&1}"),
       secret: "super secret"
+    }
+  end
+
+  def observer_factory do
+    %Schema.Observer{
+      name: sequence(:observer, & "obs-#{&1}"),
+      status: :healthy,
+      crontab: "*/5 * * * *",
+      last_run_at: Timex.now(),
+      next_run_at: Timex.now()
     }
   end
 

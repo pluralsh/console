@@ -3065,6 +3065,159 @@ export type ObservableMetricAttributes = {
   providerId: Scalars['ID']['input'];
 };
 
+/** An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response */
+export type Observer = {
+  __typename?: 'Observer';
+  actions?: Maybe<Array<Maybe<ObserverAction>>>;
+  crontab: Scalars['String']['output'];
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastRunAt: Scalars['DateTime']['output'];
+  name: Scalars['String']['output'];
+  nextRunAt: Scalars['DateTime']['output'];
+  project?: Maybe<Project>;
+  status: ObserverStatus;
+  target: ObserverTarget;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A spec of an action that can be taken in response to an observed entity */
+export type ObserverAction = {
+  __typename?: 'ObserverAction';
+  configuration: ObserverActionConfiguration;
+  type: ObserverActionType;
+};
+
+/** A spec of an action that can be taken in response to an observed entity */
+export type ObserverActionAttributes = {
+  configuration: ObserverActionConfigurationAttributes;
+  type: ObserverActionType;
+};
+
+/** configuration for an observer action */
+export type ObserverActionConfiguration = {
+  __typename?: 'ObserverActionConfiguration';
+  pipeline?: Maybe<ObserverPipelineAction>;
+  pr?: Maybe<ObserverPrAction>;
+};
+
+/** configuration for an observer action */
+export type ObserverActionConfigurationAttributes = {
+  pipeline?: InputMaybe<ObserverPipelineActionAttributes>;
+  pr?: InputMaybe<ObserverPrActionAttributes>;
+};
+
+export enum ObserverActionType {
+  Pipeline = 'PIPELINE',
+  Pr = 'PR'
+}
+
+/** An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response */
+export type ObserverAttributes = {
+  actions?: InputMaybe<Array<InputMaybe<ObserverActionAttributes>>>;
+  crontab: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  target: ObserverTargetAttributes;
+};
+
+export type ObserverConnection = {
+  __typename?: 'ObserverConnection';
+  edges?: Maybe<Array<Maybe<ObserverEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ObserverEdge = {
+  __typename?: 'ObserverEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Observer>;
+};
+
+/** a spec for querying a helm repository in an observer */
+export type ObserverHelmAttributes = {
+  auth?: InputMaybe<HelmAuthAttributes>;
+  chart: Scalars['String']['input'];
+  provider?: InputMaybe<HelmAuthProvider>;
+  url: Scalars['String']['input'];
+};
+
+/** a spec for querying a helm in an observer */
+export type ObserverHelmRepo = {
+  __typename?: 'ObserverHelmRepo';
+  chart: Scalars['String']['output'];
+  provider?: Maybe<HelmAuthProvider>;
+  url: Scalars['String']['output'];
+};
+
+/** a spec for querying a helm repository in an observer */
+export type ObserverOciAttributes = {
+  auth?: InputMaybe<HelmAuthAttributes>;
+  provider?: InputMaybe<HelmAuthProvider>;
+  url: Scalars['String']['input'];
+};
+
+/** a spec for querying a oci repository in an observer */
+export type ObserverOciRepo = {
+  __typename?: 'ObserverOciRepo';
+  provider?: Maybe<HelmAuthProvider>;
+  url: Scalars['String']['output'];
+};
+
+/** Configuration for setting a pipeline context in an observer */
+export type ObserverPipelineAction = {
+  __typename?: 'ObserverPipelineAction';
+  /** the context to apply, use $value to interject the observed value */
+  context: Scalars['Map']['output'];
+  pipelineId: Scalars['ID']['output'];
+};
+
+/** Configuration for setting a pipeline context in an observer */
+export type ObserverPipelineActionAttributes = {
+  /** the context to apply, use $value to interject the observed value */
+  context: Scalars['Map']['input'];
+  pipelineId: Scalars['ID']['input'];
+};
+
+/** Configuration for sending a pr in response to an observer */
+export type ObserverPrAction = {
+  __typename?: 'ObserverPrAction';
+  automationId: Scalars['ID']['output'];
+  /** a template to use for the created branch, use $value to interject the observed value */
+  branchTemplate?: Maybe<Scalars['String']['output']>;
+  /** the context to apply, use $value to interject the observed value */
+  context: Scalars['Json']['output'];
+  repository?: Maybe<Scalars['String']['output']>;
+};
+
+/** Configuration for sending a pr in response to an observer */
+export type ObserverPrActionAttributes = {
+  automationId: Scalars['ID']['input'];
+  /** a template to use for the created branch, use $value to interject the observed value */
+  branchTemplate?: InputMaybe<Scalars['String']['input']>;
+  /** the context to apply, use $value to interject the observed value */
+  context: Scalars['Json']['input'];
+  repository?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum ObserverStatus {
+  Failed = 'FAILED',
+  Healthy = 'HEALTHY'
+}
+
+/** A spec for a target to poll */
+export type ObserverTarget = {
+  __typename?: 'ObserverTarget';
+  helm?: Maybe<ObserverHelmRepo>;
+  oci?: Maybe<ObserverOciRepo>;
+};
+
+/** A spec for a target to poll */
+export type ObserverTargetAttributes = {
+  helm?: InputMaybe<ObserverHelmAttributes>;
+  oci?: InputMaybe<ObserverOciAttributes>;
+};
+
 export enum Operation {
   Eq = 'EQ',
   Gt = 'GT',
@@ -3738,6 +3891,8 @@ export type PrAutomation = {
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
+  /** the project this automation lives w/in */
+  project?: Maybe<Project>;
   /** the git repository to use for sourcing external templates */
   repository?: Maybe<GitRepository>;
   /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
@@ -3770,6 +3925,8 @@ export type PrAutomationAttributes = {
   identifier?: InputMaybe<Scalars['String']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** the project this automation lives in */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;
@@ -4397,6 +4554,7 @@ export type RootMutationType = {
   deleteNotificationSink?: Maybe<NotificationSink>;
   deleteObjectStore?: Maybe<ObjectStore>;
   deleteObservabilityProvider?: Maybe<ObservabilityProvider>;
+  deleteObserver?: Maybe<Observer>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
   deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
@@ -4508,6 +4666,7 @@ export type RootMutationType = {
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertObservabilityProvider?: Maybe<ObservabilityProvider>;
+  upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
   upsertVirtualCluster?: Maybe<Cluster>;
 };
@@ -4835,6 +4994,11 @@ export type RootMutationTypeDeleteObjectStoreArgs = {
 
 
 export type RootMutationTypeDeleteObservabilityProviderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteObserverArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5361,6 +5525,11 @@ export type RootMutationTypeUpsertObservabilityProviderArgs = {
 };
 
 
+export type RootMutationTypeUpsertObserverArgs = {
+  attributes?: InputMaybe<ObserverAttributes>;
+};
+
+
 export type RootMutationTypeUpsertPolicyConstraintsArgs = {
   constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
 };
@@ -5470,6 +5639,8 @@ export type RootQueryType = {
   objectStores?: Maybe<ObjectStoreConnection>;
   observabilityProvider?: Maybe<ObservabilityProvider>;
   observabilityProviders?: Maybe<ObservabilityProviderConnection>;
+  observer?: Maybe<Observer>;
+  observers?: Maybe<ObserverConnection>;
   pagedClusterGates?: Maybe<PipelineGateConnection>;
   pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
   persona?: Maybe<Persona>;
@@ -6036,6 +6207,21 @@ export type RootQueryTypeObservabilityProvidersArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeObserverArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeObserversArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
