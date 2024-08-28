@@ -33,7 +33,7 @@ export function NotificationsPanel({
   const { data } = useFetchPaginatedData({
     queryHook: useAppNotificationsQuery,
     pageSize: NOTIFICATIONS_QUERY_PAGE_SIZE,
-    keyPath: ['serviceDeployments'],
+    keyPath: ['appNotifications'],
   })
 
   const notifications = data?.appNotifications
