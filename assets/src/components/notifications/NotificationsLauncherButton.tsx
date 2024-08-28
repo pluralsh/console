@@ -5,7 +5,7 @@ import {
   LightningIcon,
 } from '@pluralsh/design-system'
 
-import { CountBadge } from './CountBadge'
+import { CountBadge } from '../utils/CountBadge'
 
 export function NotificationsLauncherButton({
   open,

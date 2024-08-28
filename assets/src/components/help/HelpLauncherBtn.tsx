@@ -9,7 +9,7 @@ import { useSidebar } from '@pluralsh/design-system/dist/components/Sidebar'
 
 import { useTheme } from 'styled-components'
 
-import { CountBadge } from './CountBadge'
+import { CountBadge } from '../utils/CountBadge'
 
 export function HelpLauncherBtn({
   variant,
