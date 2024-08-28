@@ -9481,6 +9481,8 @@ export type NotificationFilterFragment = { __typename?: 'NotificationFilter', id
 
 export type NotificationRouterFragment = { __typename?: 'NotificationRouter', id: string, name: string, events?: Array<string> | null, insertedAt?: string | null, updatedAt?: string | null, sinks?: Array<{ __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null> | null, filters?: Array<{ __typename?: 'NotificationFilter', id: string, regex?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, pipeline?: { __typename?: 'Pipeline', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null> | null };
 
+export type NotificationFragment = { __typename?: 'Notification', id: string, insertedAt?: string | null, seenAt?: string | null, severity?: Severity | null, status?: NotificationStatus | null, title: string, description?: string | null };
+
 export type UpsertNotificationRouterMutationVariables = Exact<{
   attributes: NotificationRouterAttributes;
 }>;
@@ -9525,6 +9527,22 @@ export type NotificationSinksQueryVariables = Exact<{
 
 
 export type NotificationSinksQuery = { __typename?: 'RootQueryType', notificationSinks?: { __typename?: 'NotificationSinkConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'NotificationSinkEdge', node?: { __typename?: 'NotificationSink', id: string, name: string, type: SinkType, insertedAt?: string | null, updatedAt?: string | null, configuration: { __typename?: 'SinkConfiguration', id: string, slack?: { __typename?: 'UrlSinkConfiguration', url: string } | null, teams?: { __typename?: 'UrlSinkConfiguration', url: string } | null } } | null } | null> | null } | null };
+
+export type UnreadNotificationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type UnreadNotificationsQuery = { __typename?: 'RootQueryType', unreadAppNotifications?: number | null };
+
+export type NotificationsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  all?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type NotificationsQuery = { __typename?: 'RootQueryType', notifications?: { __typename?: 'NotificationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'NotificationEdge', node?: { __typename?: 'Notification', id: string, insertedAt?: string | null, seenAt?: string | null, severity?: Severity | null, status?: NotificationStatus | null, title: string, description?: string | null } | null } | null> | null } | null };
 
 export type PersonaConfigurationFragment = { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null };
 
@@ -11949,6 +11967,17 @@ export const NotificationRouterFragmentDoc = gql`
 }
     ${NotificationSinkFragmentDoc}
 ${NotificationFilterFragmentDoc}`;
+export const NotificationFragmentDoc = gql`
+    fragment Notification on Notification {
+  id
+  insertedAt
+  seenAt
+  severity
+  status
+  title
+  description
+}
+    `;
 export const ScmConnectionFragmentDoc = gql`
     fragment ScmConnection on ScmConnection {
   id
@@ -18831,6 +18860,101 @@ export type NotificationSinksQueryHookResult = ReturnType<typeof useNotification
 export type NotificationSinksLazyQueryHookResult = ReturnType<typeof useNotificationSinksLazyQuery>;
 export type NotificationSinksSuspenseQueryHookResult = ReturnType<typeof useNotificationSinksSuspenseQuery>;
 export type NotificationSinksQueryResult = Apollo.QueryResult<NotificationSinksQuery, NotificationSinksQueryVariables>;
+export const UnreadNotificationsDocument = gql`
+    query UnreadNotifications {
+  unreadAppNotifications
+}
+    `;
+
+/**
+ * __useUnreadNotificationsQuery__
+ *
+ * To run a query within a React component, call `useUnreadNotificationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useUnreadNotificationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useUnreadNotificationsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useUnreadNotificationsQuery(baseOptions?: Apollo.QueryHookOptions<UnreadNotificationsQuery, UnreadNotificationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<UnreadNotificationsQuery, UnreadNotificationsQueryVariables>(UnreadNotificationsDocument, options);
+      }
+export function useUnreadNotificationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<UnreadNotificationsQuery, UnreadNotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<UnreadNotificationsQuery, UnreadNotificationsQueryVariables>(UnreadNotificationsDocument, options);
+        }
+export function useUnreadNotificationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<UnreadNotificationsQuery, UnreadNotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<UnreadNotificationsQuery, UnreadNotificationsQueryVariables>(UnreadNotificationsDocument, options);
+        }
+export type UnreadNotificationsQueryHookResult = ReturnType<typeof useUnreadNotificationsQuery>;
+export type UnreadNotificationsLazyQueryHookResult = ReturnType<typeof useUnreadNotificationsLazyQuery>;
+export type UnreadNotificationsSuspenseQueryHookResult = ReturnType<typeof useUnreadNotificationsSuspenseQuery>;
+export type UnreadNotificationsQueryResult = Apollo.QueryResult<UnreadNotificationsQuery, UnreadNotificationsQueryVariables>;
+export const NotificationsDocument = gql`
+    query Notifications($after: String, $first: Int, $before: String, $last: Int, $all: Boolean) {
+  notifications(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    all: $all
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Notification
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${NotificationFragmentDoc}`;
+
+/**
+ * __useNotificationsQuery__
+ *
+ * To run a query within a React component, call `useNotificationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useNotificationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useNotificationsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *      all: // value for 'all'
+ *   },
+ * });
+ */
+export function useNotificationsQuery(baseOptions?: Apollo.QueryHookOptions<NotificationsQuery, NotificationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<NotificationsQuery, NotificationsQueryVariables>(NotificationsDocument, options);
+      }
+export function useNotificationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<NotificationsQuery, NotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<NotificationsQuery, NotificationsQueryVariables>(NotificationsDocument, options);
+        }
+export function useNotificationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<NotificationsQuery, NotificationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<NotificationsQuery, NotificationsQueryVariables>(NotificationsDocument, options);
+        }
+export type NotificationsQueryHookResult = ReturnType<typeof useNotificationsQuery>;
+export type NotificationsLazyQueryHookResult = ReturnType<typeof useNotificationsLazyQuery>;
+export type NotificationsSuspenseQueryHookResult = ReturnType<typeof useNotificationsSuspenseQuery>;
+export type NotificationsQueryResult = Apollo.QueryResult<NotificationsQuery, NotificationsQueryVariables>;
 export const PersonasDocument = gql`
     query Personas($cursor: String) {
   personas(first: 3, after: $cursor) {
@@ -21162,6 +21286,8 @@ export const namedOperations = {
     UnstructuredResource: 'UnstructuredResource',
     NotificationRouters: 'NotificationRouters',
     NotificationSinks: 'NotificationSinks',
+    UnreadNotifications: 'UnreadNotifications',
+    Notifications: 'Notifications',
     Personas: 'Personas',
     PolicyConstraints: 'PolicyConstraints',
     PolicyConstraint: 'PolicyConstraint',
@@ -21403,6 +21529,7 @@ export const namedOperations = {
     NotificationSink: 'NotificationSink',
     NotificationFilter: 'NotificationFilter',
     NotificationRouter: 'NotificationRouter',
+    Notification: 'Notification',
     PersonaConfiguration: 'PersonaConfiguration',
     Persona: 'Persona',
     PolicyConstraint: 'PolicyConstraint',

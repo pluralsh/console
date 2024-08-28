@@ -4,12 +4,8 @@ fragment UrlSinkConfiguration on UrlSinkConfiguration {
 
 fragment SinkConfiguration on SinkConfiguration {
   id
-  slack {
-    ...UrlSinkConfiguration
-  }
-  teams {
-    ...UrlSinkConfiguration
-  }
+  slack { ...UrlSinkConfiguration }
+  teams { ...UrlSinkConfiguration }
 }
 
 fragment NotificationSink on NotificationSink {
@@ -18,9 +14,7 @@ fragment NotificationSink on NotificationSink {
   type
   insertedAt
   updatedAt
-  configuration {
-    ...SinkConfiguration
-  }
+  configuration { ...SinkConfiguration }
 }
 
 fragment NotificationFilter on NotificationFilter {
@@ -43,15 +37,21 @@ fragment NotificationFilter on NotificationFilter {
 fragment NotificationRouter on NotificationRouter {
   id
   name
-  sinks {
-    ...NotificationSink
-  }
+  sinks { ...NotificationSink }
   events
-  filters {
-    ...NotificationFilter
-  }
+  filters { ...NotificationFilter }
   insertedAt
   updatedAt
+}
+
+fragment Notification on Notification {
+  id
+  insertedAt
+  seenAt
+  severity
+  status
+  title
+  description
 }
 
 mutation UpsertNotificationRouter($attributes: NotificationRouterAttributes!) {
@@ -103,3 +103,21 @@ query NotificationSinks($q: String, $first: Int = 100, $after: String) {
     }
   }
 }
+
+query UnreadNotifications {
+  unreadAppNotifications
+}
+
+query Notifications($after: String, $first: Int, $before: String, $last: Int, $all: Boolean) {
+  notifications(after: $after, first: $first, before: $before, last: $last, all: $all) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Notification
+      }
+    }
+  }
+}
+
