@@ -11,7 +11,13 @@ import {
 import { useNavigate } from 'react-router-dom'
 
 import { NOTIFICATIONS_ABS_PATH } from '../../routes/settingsRoutesConst'
-import { useReadAppNotificationsMutation } from '../../generated/graphql'
+import {
+  useAppNotificationsQuery,
+  useReadAppNotificationsMutation,
+} from '../../generated/graphql'
+import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
+
+const NOTIFICATIONS_QUERY_PAGE_SIZE = 100
 
 export function NotificationsPanel({
   onClose,
@@ -23,6 +29,16 @@ export function NotificationsPanel({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
+
+  const { data } = useFetchPaginatedData({
+    queryHook: useAppNotificationsQuery,
+    pageSize: NOTIFICATIONS_QUERY_PAGE_SIZE,
+    keyPath: ['serviceDeployments'],
+  })
+
+  const notifications = data?.appNotifications
+
+  console.log(notifications)
 
   const [mutation, { loading, error }] = useReadAppNotificationsMutation({
     onCompleted: () => refetchUnreadNotificationsCount(),
