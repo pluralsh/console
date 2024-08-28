@@ -4,10 +4,7 @@ import { useCallback, useMemo, useRef, useState } from 'react'
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 import { AnimatedDiv } from '@pluralsh/design-system'
 
-import {
-  useClusterNamespacesQuery,
-  useUnreadAppNotificationsQuery,
-} from '../../generated/graphql'
+import { useUnreadAppNotificationsQuery } from '../../generated/graphql'
 
 import { NotificationsLauncherButton } from './NotificationsLauncherButton'
 import { NotificationsPanel } from './NotificationsPanel'
