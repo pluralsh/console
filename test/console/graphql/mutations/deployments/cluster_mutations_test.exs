@@ -394,4 +394,33 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       refute refetch(pcr)
     end
   end
+
+  describe "saveUpgradeInsights" do
+    test "it can persist upgrade insights for a cluster" do
+      cluster = insert(:cluster)
+
+      {:ok, %{data: %{"saveUpgradeInsights" => [_ | _]}}} = run_query("""
+        mutation Insights($insights: [UpgradeInsightAttributes]) {
+          saveUpgradeInsights(insights: $insights) { id }
+        }
+      """, %{
+        "insights" => [%{
+          "name" => "some deprecated api",
+          "status" => "PASSING",
+          "description" => "blah",
+          "version" => "1.29",
+          "details" => [%{
+            "status" => "PASSING",
+            "used" => "/apis/networking.k8s.io/v1beta1/ingress",
+            "replacement" => "/apis/networking.k8s.io/v1/ingress",
+            "replacedIn" => "1.25",
+            "removedIn" => "1.28"
+          }]
+        }]
+      }, %{cluster: cluster})
+
+      %{upgrade_insights: [%{details: [_]}]} =
+        Console.Repo.preload(cluster, [upgrade_insights: :details], force: true)
+    end
+  end
 end

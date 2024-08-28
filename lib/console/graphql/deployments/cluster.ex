@@ -5,6 +5,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
   alias Console.GraphQl.Resolvers.{Deployments}
 
   ecto_enum :cluster_distro, Cluster.Distro
+  ecto_enum :upgrade_insight_status, Console.Schema.UpgradeInsight.Status
+
   enum :conjunction do
     value :and
     value :or
@@ -195,6 +197,26 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :tags, list_of(:tag_input)
   end
 
+  input_object :upgrade_insight_attributes do
+    field :name,            non_null(:string)
+    field :version,         :string, description: "the k8s version this insight applies to"
+    field :description,     :string, description: "longform description of this insight"
+    field :status,          :upgrade_insight_status
+    field :refreshed_at,    :datetime
+    field :transitioned_at, :datetime
+
+    field :details, list_of(:upgrade_insight_detail_attributes)
+  end
+
+  input_object :upgrade_insight_detail_attributes do
+    field :status,      :upgrade_insight_status
+    field :used,        :string, description: "a possibly deprecated API"
+    field :replacement, :string, description: "the replacement for this API"
+
+    field :replaced_in, :string
+    field :removed_in,  :string
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -279,6 +301,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve: &Deployments.list_node_metrics/3
     field :pinned_custom_resources, list_of(:pinned_custom_resource), description: "custom resources with dedicated views for this cluster",
       resolve: &Deployments.list_pinned_custom_resources/3
+    field :upgrade_insights, list_of(:upgrade_insight),
+      resolve: dataloader(Deployments),
+      description: "any upgrade insights provided by your cloud provider that have been discovered by our agent"
 
     field :status, :cluster_status,
       description: "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null",
@@ -558,6 +583,32 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :cluster,      :cluster, resolve: dataloader(Deployments)
   end
 
+  object :upgrade_insight do
+    field :id,              non_null(:id)
+    field :name,            non_null(:string)
+    field :version,         :string, description: "the k8s version this insight applies to"
+    field :description,     :string, description: "longform description of this insight"
+    field :status,          :upgrade_insight_status
+    field :refreshed_at,    :datetime
+    field :transitioned_at, :datetime
+
+    field :details, list_of(:upgrade_insight_detail), resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  object :upgrade_insight_detail do
+    field :id,          non_null(:id)
+    field :status,      :upgrade_insight_status
+    field :used,        :string, description: "a possibly deprecated API"
+    field :replacement, :string, description: "the replacement for this API"
+
+    field :replaced_in, :string
+    field :removed_in,  :string
+
+    timestamps()
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
@@ -582,6 +633,14 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :service_id, :id
 
       resolve &Deployments.create_runtime_services/2
+    end
+
+    @desc "agent api to persist upgrade insights for its cluster"
+    field :save_upgrade_insights, list_of(:upgrade_insight) do
+      middleware ClusterAuthenticated
+      arg :insights, list_of(:upgrade_insight_attributes)
+
+      resolve &Deployments.save_upgrade_insights/2
     end
 
     field :upsert_virtual_cluster, :cluster do
