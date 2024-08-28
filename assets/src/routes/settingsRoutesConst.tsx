@@ -25,13 +25,17 @@ export const NOTIFICATIONS_SINKS_REL_PATH = 'sinks' as const
 export const NOTIFICATIONS_SINKS_ABS_PATH =
   `${NOTIFICATIONS_ABS_PATH}/${NOTIFICATIONS_SINKS_REL_PATH}` as const
 
-export const NOTIFICATIONS_BASE_CRUMBS = [
-  {
-    label: 'Notifications',
-    url: NOTIFICATIONS_ABS_PATH,
-  },
-] as const satisfies readonly Breadcrumb[]
-
 export const AUDITS_REL_PATH = 'audits' as const
 export const AUDITS_ABS_PATH =
   `${SETTINGS_ABS_PATH}/${AUDITS_REL_PATH}` as const
+
+export const NOTIFICATIONS_BASE_CRUMBS = [
+  {
+    label: 'settings',
+    url: SETTINGS_ABS_PATH,
+  },
+  {
+    label: 'notifications',
+    url: NOTIFICATIONS_ABS_PATH,
+  },
+] as const satisfies readonly Breadcrumb[]
