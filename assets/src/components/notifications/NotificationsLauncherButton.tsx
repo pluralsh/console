@@ -1,13 +1,13 @@
 import { Merge } from 'type-fest'
 import {
-  CaretDownIcon,
   IconFrame,
   IconFrameProps,
+  LightningIcon,
 } from '@pluralsh/design-system'
 
 import { CountBadge } from './CountBadge'
 
-export function HelpLauncherBtn({
+export function NotificationsLauncherButton({
   open,
   count = 0,
   ...props
@@ -18,9 +18,8 @@ export function HelpLauncherBtn({
     <div css={{ position: 'relative' }}>
       <IconFrame
         clickable
-        type="secondary"
-        icon={open ? <CaretDownIcon /> : <span>?</span>}
-        tooltip={open ? undefined : 'Help'}
+        icon={<LightningIcon />}
+        tooltip={open ? undefined : `You have ${count} notifications`}
         {...props}
       />
       {count > 0 && !open && (

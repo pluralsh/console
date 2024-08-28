@@ -6,7 +6,7 @@ import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 
 import { AnimatedDiv } from '@pluralsh/design-system'
 
-import { HelpLauncherBtn } from './HelpLauncherBtn'
+import { NotificationsLauncherButton } from './NotificationsLauncherButton'
 import { HelpMenu } from './HelpMenu'
 
 export const getHelpSpacing = (theme: DefaultTheme) => ({
@@ -89,7 +89,7 @@ export default function NotificationsLauncher() {
 
   return (
     <HelpLauncherSC ref={ref}>
-      <HelpLauncherBtn
+      <NotificationsLauncherButton
         open={open}
         onClick={toggle}
         count={unreadCount}
