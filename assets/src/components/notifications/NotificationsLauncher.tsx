@@ -27,10 +27,14 @@ const getTransitionProps = (open: boolean) => ({
 
 export default function NotificationsLauncher() {
   const theme = useTheme()
+  const ref = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState<boolean>(true) // TODO
   const toggle = useCallback(() => setOpen(!open), [open, setOpen])
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
+
+  useKeyDown(['Escape'], () => setOpen(false))
+  useClickOutside(ref, () => setOpen(false))
 
   const unreadCount = 10 // TODO
 
@@ -56,12 +60,6 @@ export default function NotificationsLauncher() {
       <NotificationsPanel onClose={() => setOpen(false)} />
     </AnimatedDiv>
   ))
-
-  // Close affordances
-  const ref = useRef<HTMLDivElement>(null)
-
-  useKeyDown(['Escape'], () => setOpen(false))
-  useClickOutside(ref, () => setOpen(false))
 
   return (
     <div

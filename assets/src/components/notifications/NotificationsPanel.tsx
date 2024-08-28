@@ -7,12 +7,16 @@ import {
   GearTrainIcon,
   IconFrame,
 } from '@pluralsh/design-system'
+import { useNavigate } from 'react-router-dom'
+
+import { NOTIFICATIONS_ABS_PATH } from '../../routes/settingsRoutesConst'
 
 export function NotificationsPanel({
   onClose,
   ...props
-}: ComponentProps<typeof Card> & { onClose?: () => void }) {
+}: ComponentProps<typeof Card> & { onClose: () => void }) {
   const theme = useTheme()
+  const navigate = useNavigate()
 
   return (
     <Card
@@ -43,7 +47,11 @@ export function NotificationsPanel({
         <IconFrame
           clickable
           icon={<GearTrainIcon />}
-          onClick={onClose}
+          onClick={() => {
+            navigate(NOTIFICATIONS_ABS_PATH)
+            onClose()
+          }}
+          tooltip="Go to notifications settings"
           type="secondary"
         />
         <Button
@@ -56,6 +64,7 @@ export function NotificationsPanel({
           clickable
           icon={<CloseIcon />}
           onClick={onClose}
+          tooltip="Close"
         />
       </div>
       content
