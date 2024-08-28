@@ -1,6 +1,6 @@
 import { Merge } from 'type-fest'
 import {
-  CaretDownIcon,
+  CaretLeftIcon,
   IconFrame,
   IconFrameProps,
 } from '@pluralsh/design-system'
@@ -22,7 +22,7 @@ export function HelpLauncherBtn({
       <IconFrame
         clickable
         type="secondary"
-        icon={variant === 'minimize' ? <CaretDownIcon /> : <span>?</span>}
+        icon={variant === 'minimize' ? <CaretLeftIcon /> : <span>?</span>}
         tooltip={variant === 'minimize' ? undefined : 'Help'}
         {...props}
       />

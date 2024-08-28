@@ -48,6 +48,8 @@ import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
 
+import HelpLauncher from '../help/HelpLauncher'
+
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 
@@ -363,6 +365,7 @@ export default function Sidebar() {
               )}
             </SidebarItem>
           )}
+          <HelpLauncher />
           <SidebarItem
             ref={menuItemRef}
             className="sidebar-menu"

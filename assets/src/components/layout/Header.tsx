@@ -53,7 +53,7 @@ export default function Header() {
         <Flex grow={1} />
         <BillingLegacyUserMessage />
         <BillingSubscriptionChip />
-        <HelpLauncher />
+
         <CommandPaletteLauncher />
         <LightDarkSwitch
           checked={theme.mode === 'dark'}

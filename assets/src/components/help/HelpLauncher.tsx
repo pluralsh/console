@@ -67,8 +67,8 @@ const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
   return {
     display: 'flex',
     position: 'absolute',
-    left: 0,
-    top: helpSpacing.icon.height + theme.spacing.xsmall,
+    left: helpSpacing.icon.width + theme.spacing.large,
+    bottom: 0,
 
     minWidth: 240,
     pointerEvents: 'none',
@@ -216,7 +216,7 @@ function HelpLauncher() {
   const content = transitions((styles, menuState) => (
     <HelpLauncherContentSC
       style={{
-        transformOrigin: 'top left',
+        transformOrigin: 'bottom left',
         ...styles,
       }}
     >
