@@ -345,6 +345,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:service_errors)
     |> cast_assoc(:tags)
+    |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
     |> foreign_key_constraint(:id, name: :global_services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")

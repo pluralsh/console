@@ -535,16 +535,25 @@ defmodule Console.Deployments.ClustersTest do
 
   describe "#upsert_virtual_cluster/3" do
     test "it can create a new virtual cluster under a parent" do
-      cluster = insert(:cluster)
+      cluster = insert(:cluster, write_bindings: [%{user_id: insert(:user).id}])
+      git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
 
       {:ok, virt} = Clusters.upsert_virtual_cluster(%{
         name: "new-cluster",
+        write_bindings: [%{user_id: insert(:user).id}]
       }, cluster.id, admin_user())
 
       assert virt.parent_cluster_id == cluster.id
       assert virt.virtual
       assert virt.name == "new-cluster"
       assert virt.handle == "new-cluster"
+
+      [svc] = Clusters.services(virt)
+
+      assert svc.repository_id == git.id
+      assert svc.git.ref == Console.Deployments.Settings.agent_ref()
+      assert svc.git.folder == "charts/deployment-operator"
+      assert svc.templated
 
       assert_receive {:event, %PubSub.ClusterCreated{item: ^virt}}
     end
