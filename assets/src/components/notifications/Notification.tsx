@@ -1,7 +1,7 @@
 import { useTheme } from 'styled-components'
 import React from 'react'
-
 import { Button } from '@pluralsh/design-system'
+import moment from 'moment/moment'
 
 import { AppNotificationFragment } from '../../generated/graphql'
 
@@ -21,11 +21,19 @@ export default function Notification({
           : theme.colors['fill-two'],
         display: 'flex',
         flexDirection: 'column',
-        gap: theme.spacing.large,
+        gap: theme.spacing.small,
         padding: `${theme.spacing.large}px ${theme.spacing.medium}px `,
         width: '100%',
       }}
     >
+      <div
+        css={{
+          ...theme.partials.text.caption,
+          color: theme.colors['text-xlight'],
+        }}
+      >
+        {moment(notification.insertedAt).format('MMM D, YYYY h:mm a')}
+      </div>
       <div
         css={{
           ...(expand
@@ -42,6 +50,7 @@ export default function Notification({
       </div>
       <Button
         onClick={() => setExpand(!expand)}
+        marginTop="small"
         small
         secondary
         width="fit-content"

@@ -61,46 +61,54 @@ export function NotificationsPanel({
   const notifications: AppNotificationFragment[] = [
     {
       id: '0',
+      insertedAt: '2024-08-29T00:00:45Z',
       text: 'Short message',
       priority: NotificationPriority.Medium,
     },
     {
       id: '0',
+      insertedAt: '2024-08-29T00:00:45Z',
       text: 'Short message',
       priority: NotificationPriority.High,
     },
     {
       id: '0',
+      insertedAt: '2024-08-29T00:00:45Z',
       text: 'Short message',
       priority: NotificationPriority.Low,
     },
     {
       id: '0',
+      insertedAt: '2024-08-29T00:00:45Z',
       text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
       priority: NotificationPriority.Low,
     },
     {
       id: '0',
+      insertedAt: '2024-08-29T00:00:45Z',
       text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
       priority: NotificationPriority.Medium,
     },
     {
       id: '0',
+      insertedAt: '2024-08-29T00:00:45Z',
       text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
       priority: NotificationPriority.High,
-      readAt: Date.now().toString(),
+      readAt: '2024-08-29T00:00:45Z',
     },
     {
       id: '0',
+      insertedAt: '2024-08-29T00:00:45Z',
       text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
       priority: NotificationPriority.High,
-      readAt: Date.now().toString(),
+      readAt: '2024-08-29T00:00:45Z',
     },
     {
       id: '0',
+      insertedAt: '2024-08-29T00:00:45Z',
       text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
       priority: NotificationPriority.Medium,
-      readAt: Date.now().toString(),
+      readAt: '2024-08-29T00:00:45Z',
     },
   ]
 
