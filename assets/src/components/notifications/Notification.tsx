@@ -19,6 +19,9 @@ export default function Notification({
         backgroundColor: notification.readAt
           ? theme.colors['fill-one']
           : theme.colors['fill-two'],
+        display: 'flex',
+        flexDirection: 'column',
+        gap: theme.spacing.large,
         padding: `${theme.spacing.large}px ${theme.spacing.medium}px `,
         width: '100%',
       }}
@@ -41,6 +44,7 @@ export default function Notification({
         onClick={() => setExpand(!expand)}
         small
         secondary
+        width="fit-content"
       >
         Read more
       </Button>
