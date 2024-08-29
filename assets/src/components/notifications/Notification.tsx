@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button } from '@pluralsh/design-system'
 import moment from 'moment/moment'
 
@@ -11,7 +11,25 @@ export default function Notification({
   notification: AppNotificationFragment
 }) {
   const theme = useTheme()
-  const [expand, setExpand] = React.useState<boolean>(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [expand, setExpand] = useState<boolean>(false)
+  const [clamped, setClamped] = useState<boolean>(false)
+
+  useEffect(() => {
+    function handleResize() {
+      if (contentRef && contentRef.current) {
+        setClamped(
+          contentRef.current.scrollHeight > contentRef.current.clientHeight
+        )
+      }
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    handleResize()
+
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
     <div
@@ -35,6 +53,7 @@ export default function Notification({
         {moment(notification.insertedAt).format('MMM D, YYYY h:mm a')}
       </div>
       <div
+        ref={contentRef}
         css={{
           ...(expand
             ? {}
@@ -48,15 +67,17 @@ export default function Notification({
       >
         {notification.text}
       </div>
-      <Button
-        onClick={() => setExpand(!expand)}
-        marginTop="small"
-        small
-        secondary
-        width="fit-content"
-      >
-        Read more
-      </Button>
+      {clamped && (
+        <Button
+          onClick={() => setExpand(!expand)}
+          marginTop="small"
+          small
+          secondary
+          width="fit-content"
+        >
+          Read more
+        </Button>
+      )}
     </div>
   )
 }
