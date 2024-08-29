@@ -5,6 +5,8 @@ import moment from 'moment/moment'
 
 import { AppNotificationFragment } from '../../generated/graphql'
 
+import NotificationPriorityChip from './NotificationPriorityChip'
+
 export default function Notification({
   notification,
 }: {
@@ -47,10 +49,14 @@ export default function Notification({
       <div
         css={{
           ...theme.partials.text.caption,
+          alignItems: 'center',
           color: theme.colors['text-xlight'],
+          display: 'flex',
+          justifyContent: 'space-between',
         }}
       >
         {moment(notification.insertedAt).format('MMM D, YYYY h:mm a')}
+        <NotificationPriorityChip priority={notification.priority} />
       </div>
       <div
         ref={contentRef}
