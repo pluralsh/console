@@ -12,6 +12,8 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
 
+import { isEmpty } from 'lodash'
+
 import { NOTIFICATIONS_ABS_PATH } from '../../routes/settingsRoutesConst'
 import {
   AppNotificationFragment,
@@ -132,19 +134,29 @@ export function NotificationsPanel({
             tooltip="Close"
           />
         </div>
-        <Table
-          columns={columns}
-          data={notifications}
-          emptyStateProps={{ message: 'No components found' }}
-          rowBg="raised"
-          loose
-          hideHeader
-          css={{
-            border: 'none',
-            borderRadius: 0,
-            height: '100%',
-          }}
-        />
+        {isEmpty(notifications) ? (
+          <div
+            css={{
+              color: theme.colors['text-light'],
+              padding: theme.spacing.medium,
+            }}
+          >
+            You do not have any notifications yet.
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            data={notifications}
+            rowBg="raised"
+            loose
+            hideHeader
+            css={{
+              border: 'none',
+              borderRadius: 0,
+              height: '100%',
+            }}
+          />
+        )}
       </Card>
       {error && (
         <Toast
