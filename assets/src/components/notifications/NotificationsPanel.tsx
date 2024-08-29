@@ -23,6 +23,8 @@ import {
 } from '../../generated/graphql'
 import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
 
+import Notification from './Notification'
+
 const NOTIFICATIONS_QUERY_PAGE_SIZE = 100
 
 const columnHelper = createColumnHelper<AppNotificationFragment>()
@@ -30,25 +32,7 @@ const columnHelper = createColumnHelper<AppNotificationFragment>()
 const columns = [
   columnHelper.accessor((notification) => notification, {
     id: 'notification',
-    cell: function Cell({ getValue }) {
-      const theme = useTheme()
-      const notification = getValue()
-
-      return (
-        <div
-          css={{
-            backgroundColor: notification.readAt
-              ? theme.colors['fill-one']
-              : theme.colors['fill-two'],
-            height: '100%',
-            padding: `${theme.spacing.large}px ${theme.spacing.medium}px `,
-            width: '100%',
-          }}
-        >
-          {notification.text}
-        </div>
-      )
-    },
+    cell: ({ getValue }) => <Notification notification={getValue()} />,
   }),
 ]
 
