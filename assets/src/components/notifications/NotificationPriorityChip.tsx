@@ -32,8 +32,9 @@ export default function NotificationPriorityChip({
 
   return (
     <Chip
-      severity={priorityToSeverity[priority]}
+      fillLevel={3}
       icon={priorityToIcon[priority]}
+      severity={priorityToSeverity[priority]}
       {...props}
     >
       {capitalize(priority)}
