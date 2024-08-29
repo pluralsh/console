@@ -75,7 +75,7 @@ export default function Notification({
           secondary
           width="fit-content"
         >
-          Read more
+          Read {expand ? 'less' : 'more'}
         </Button>
       )}
     </div>
