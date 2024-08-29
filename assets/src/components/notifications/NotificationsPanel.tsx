@@ -77,49 +77,44 @@ export function NotificationsPanel({
   const notifications: AppNotificationFragment[] = [
     {
       id: '0',
-      text: 'Example notification',
+      text: 'Short message',
       priority: NotificationPriority.Medium,
     },
     {
       id: '0',
-      text: 'Example notification',
+      text: 'Short message',
+      priority: NotificationPriority.High,
+    },
+    {
+      id: '0',
+      text: 'Short message',
+      priority: NotificationPriority.Low,
+    },
+    {
+      id: '0',
+      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
+      priority: NotificationPriority.Low,
+    },
+    {
+      id: '0',
+      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
       priority: NotificationPriority.Medium,
     },
     {
       id: '0',
-      text: 'Example notification',
-      priority: NotificationPriority.Medium,
-    },
-    {
-      id: '0',
-      text: 'Example notification',
-      priority: NotificationPriority.Medium,
-    },
-    {
-      id: '0',
-      text: 'Example notification',
-      priority: NotificationPriority.Medium,
-    },
-    {
-      id: '0',
-      text: 'Example notification',
-      priority: NotificationPriority.Medium,
-    },
-    {
-      id: '0',
-      text: 'Example notification',
-      priority: NotificationPriority.Medium,
+      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
+      priority: NotificationPriority.High,
       readAt: Date.now().toString(),
     },
     {
       id: '0',
-      text: 'Example notification',
-      priority: NotificationPriority.Medium,
+      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
+      priority: NotificationPriority.High,
       readAt: Date.now().toString(),
     },
     {
       id: '0',
-      text: 'Example notification',
+      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
       priority: NotificationPriority.Medium,
       readAt: Date.now().toString(),
     },
