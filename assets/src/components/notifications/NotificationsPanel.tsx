@@ -1,23 +1,40 @@
 import { useTheme } from 'styled-components'
-import { ComponentProps } from 'react'
+import React, { ComponentProps } from 'react'
 import {
   Button,
   Card,
   CloseIcon,
   GearTrainIcon,
   IconFrame,
+  Table,
   Toast,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
+import { createColumnHelper } from '@tanstack/react-table'
 
 import { NOTIFICATIONS_ABS_PATH } from '../../routes/settingsRoutesConst'
 import {
+  AppNotificationFragment,
+  NotificationPriority,
   useAppNotificationsQuery,
   useReadAppNotificationsMutation,
 } from '../../generated/graphql'
 import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
 
 const NOTIFICATIONS_QUERY_PAGE_SIZE = 100
+
+const columnHelper = createColumnHelper<AppNotificationFragment>()
+
+const columns = [
+  columnHelper.accessor((notification) => notification, {
+    id: 'notification',
+    cell: function Cell({ getValue }) {
+      const notification = getValue()
+
+      return notification.text
+    },
+  }),
+]
 
 export function NotificationsPanel({
   onClose,
@@ -30,15 +47,34 @@ export function NotificationsPanel({
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const { data } = useFetchPaginatedData({
+  const { data: _ } = useFetchPaginatedData({
     queryHook: useAppNotificationsQuery,
     pageSize: NOTIFICATIONS_QUERY_PAGE_SIZE,
     keyPath: ['appNotifications'],
   })
 
-  const notifications = data?.appNotifications
+  // const notifications = useMemo(
+  //   () => mapExistingNodes(data?.appNotifications),
+  //   [data?.appNotifications]
+  // )
 
-  console.log(notifications)
+  const notifications: AppNotificationFragment[] = [
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
+  ]
 
   const [mutation, { loading, error }] = useReadAppNotificationsMutation({
     onCompleted: () => refetchUnreadNotificationsCount(),
@@ -96,7 +132,19 @@ export function NotificationsPanel({
             tooltip="Close"
           />
         </div>
-        content
+        <Table
+          columns={columns}
+          data={notifications}
+          emptyStateProps={{ message: 'No components found' }}
+          rowBg="raised"
+          loose
+          hideHeader
+          css={{
+            border: 'none',
+            borderRadius: 0,
+            height: '100%',
+          }}
+        />
       </Card>
       {error && (
         <Toast
