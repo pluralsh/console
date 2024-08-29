@@ -31,9 +31,23 @@ const columns = [
   columnHelper.accessor((notification) => notification, {
     id: 'notification',
     cell: function Cell({ getValue }) {
+      const theme = useTheme()
       const notification = getValue()
 
-      return notification.text
+      return (
+        <div
+          css={{
+            backgroundColor: notification.readAt
+              ? theme.colors['fill-one']
+              : theme.colors['fill-two'],
+            height: '100%',
+            padding: `${theme.spacing.large}px ${theme.spacing.medium}px `,
+            width: '100%',
+          }}
+        >
+          {notification.text}
+        </div>
+      )
     },
   }),
 ]
@@ -95,16 +109,19 @@ export function NotificationsPanel({
       id: '0',
       text: 'Example notification',
       priority: NotificationPriority.Medium,
+      readAt: Date.now().toString(),
     },
     {
       id: '0',
       text: 'Example notification',
       priority: NotificationPriority.Medium,
+      readAt: Date.now().toString(),
     },
     {
       id: '0',
       text: 'Example notification',
       priority: NotificationPriority.Medium,
+      readAt: Date.now().toString(),
     },
   ]
 
@@ -177,14 +194,14 @@ export function NotificationsPanel({
           <Table
             columns={columns}
             data={notifications}
-            rowBg="raised"
-            loose
             hideHeader
             css={{
               border: 'none',
               borderRadius: 0,
               height: '100%',
               maxHeight: 574,
+              td: { padding: 0 },
+              'tr:not(:first-child) td': { borderTop: theme.borders.input },
             }}
           />
         )}
