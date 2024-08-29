@@ -1,6 +1,6 @@
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
-import { Chip } from '@pluralsh/design-system'
-import { ComponentProps } from 'react'
+import { Chip, ErrorIcon, WarningIcon } from '@pluralsh/design-system'
+import { ComponentProps, ReactElement } from 'react'
 import capitalize from 'lodash/capitalize'
 
 import { Maybe, NotificationPriority } from '../../generated/graphql'
@@ -13,6 +13,12 @@ const priorityToSeverity = {
   NotificationPriority,
   ComponentProps<typeof Chip>['severity']
 >
+
+const priorityToIcon = {
+  [NotificationPriority.Low]: undefined,
+  [NotificationPriority.Medium]: <WarningIcon />,
+  [NotificationPriority.High]: <ErrorIcon />,
+} as const satisfies Record<NotificationPriority, ReactElement | undefined>
 
 export default function NotificationPriorityChip({
   priority,
@@ -27,6 +33,7 @@ export default function NotificationPriorityChip({
   return (
     <Chip
       severity={priorityToSeverity[priority]}
+      icon={priorityToIcon[priority]}
       {...props}
     >
       {capitalize(priority)}
