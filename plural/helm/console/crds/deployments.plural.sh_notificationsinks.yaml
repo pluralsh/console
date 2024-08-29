@@ -39,6 +39,24 @@ spec:
           spec:
             description: NotificationSinkSpec defines the desired state of NotificationSink
             properties:
+              bindings:
+                description: Bindings to determine users/groups to be notified for
+                  PLURAL sync types
+                items:
+                  description: Binding ...
+                  properties:
+                    UserID:
+                      type: string
+                    groupID:
+                      type: string
+                    groupName:
+                      type: string
+                    id:
+                      type: string
+                    userEmail:
+                      type: string
+                  type: object
+                type: array
               configuration:
                 description: Configuration for the specific type
                 properties:

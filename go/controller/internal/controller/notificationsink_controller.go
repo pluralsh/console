@@ -18,7 +18,11 @@ package controller
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
+
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -47,6 +51,7 @@ type NotificationSinkReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
+	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=notificationsinks,verbs=get;list;watch;create;update;patch;delete
@@ -107,6 +112,16 @@ func (r *NotificationSinkReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.handleExisting(ctx, notificationSink)
 	}
 
+	err = r.ensureNotificationSink(notificationSink)
+	if goerrors.Is(err, operrors.ErrRetriable) {
+		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return RequeueAfter(requeueWaitForResources), nil
+	}
+	if err != nil {
+		utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
@@ -164,6 +179,19 @@ func (r *NotificationSinkReconciler) handleExisting(ctx context.Context, notific
 		}
 	}
 	notificationSink.Status.ID = &existing.ID
+	if existing.NotificationBindings != nil {
+		notificationSink.Spec.Bindings = make([]v1alpha1.Binding, 0)
+	}
+	for _, b := range existing.NotificationBindings {
+		binding := v1alpha1.Binding{}
+		if user := b.User; user != nil {
+			binding.UserEmail = lo.ToPtr(user.Email)
+		}
+		if group := b.Group; group != nil {
+			binding.GroupName = lo.ToPtr(group.Name)
+		}
+		notificationSink.Spec.Bindings = append(notificationSink.Spec.Bindings, binding)
+	}
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	utils.MarkCondition(notificationSink.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
@@ -257,5 +285,27 @@ func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) consol
 			URL: notificationSink.Spec.Configuration.Teams.URL,
 		}
 	}
+	if notificationSink.Spec.Type == console.SinkTypePlural {
+		attr.NotificationBindings = policyBindings(notificationSink.Spec.Bindings)
+	}
 	return attr
+}
+
+// ensureNotificationSink makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (r *NotificationSinkReconciler) ensureNotificationSink(notificationSink *v1alpha1.NotificationSink) error {
+	if notificationSink.Spec.Bindings == nil {
+		return nil
+	}
+	bindings, req, err := ensureBindings(notificationSink.Spec.Bindings, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	notificationSink.Spec.Bindings = bindings
+
+	if req {
+		return operrors.ErrRetriable
+	}
+
+	return nil
 }
