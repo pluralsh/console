@@ -116,7 +116,7 @@ export function NotificationsPanel({
     <>
       <Card
         fillLevel={1}
-        css={{ border: theme.borders.input, flexGrow: 1 }}
+        css={{ border: theme.borders.input, flexGrow: 1, overflow: 'hidden' }}
         {...props}
       >
         <div
