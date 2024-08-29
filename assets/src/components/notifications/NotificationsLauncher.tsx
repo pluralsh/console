@@ -48,7 +48,6 @@ export default function NotificationsLauncher() {
     <AnimatedDiv
       css={{
         display: 'flex',
-        maxHeight: 640,
         minHeight: 240,
         pointerEvents: 'none',
         position: 'absolute',

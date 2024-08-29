@@ -76,6 +76,36 @@ export function NotificationsPanel({
       text: 'Example notification',
       priority: NotificationPriority.Medium,
     },
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
+    {
+      id: '0',
+      text: 'Example notification',
+      priority: NotificationPriority.Medium,
+    },
   ]
 
   const [mutation, { loading, error }] = useReadAppNotificationsMutation({
@@ -154,6 +184,7 @@ export function NotificationsPanel({
               border: 'none',
               borderRadius: 0,
               height: '100%',
+              maxHeight: 574,
             }}
           />
         )}
