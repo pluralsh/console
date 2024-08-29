@@ -40,6 +40,8 @@ spec:
             description: NotificationSinkSpec defines the desired state of NotificationSink
             properties:
               bindings:
+                description: Bindings to determine users/groups to be notified for
+                  PLURAL sync types
                 items:
                   description: Binding ...
                   properties:
