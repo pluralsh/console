@@ -293,6 +293,7 @@ defmodule Console.Deployments.Cron do
   def run_observers() do
     Observer.runnable()
     |> Observer.ordered(asc: :id)
+    |> Repo.stream(method: :keyset)
     |> Console.throttle()
     |> Flow.from_enumerable()
     |> Flow.map(&Console.Deployments.Observer.Runner.run/1)
