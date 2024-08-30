@@ -721,6 +721,9 @@ type RootMutationType {
   "registers a list of runtime services discovered for the current cluster"
   registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
 
+  "agent api to persist upgrade insights for its cluster"
+  saveUpgradeInsights(insights: [UpgradeInsightAttributes]): [UpgradeInsight]
+
   upsertVirtualCluster(attributes: ClusterAttributes!, parentId: ID!): Cluster
 
   deleteVirtualCluster(id: ID!): Cluster
@@ -3437,6 +3440,12 @@ enum ClusterDistro {
   K3S
 }
 
+enum UpgradeInsightStatus {
+  PASSING
+  FAILED
+  UNKNOWN
+}
+
 enum Conjunction {
   AND
   OR
@@ -3669,6 +3678,38 @@ input TagQuery {
   tags: [TagInput]
 }
 
+input UpgradeInsightAttributes {
+  name: String!
+
+  "the k8s version this insight applies to"
+  version: String
+
+  "longform description of this insight"
+  description: String
+
+  status: UpgradeInsightStatus
+
+  refreshedAt: DateTime
+
+  transitionedAt: DateTime
+
+  details: [UpgradeInsightDetailAttributes]
+}
+
+input UpgradeInsightDetailAttributes {
+  status: UpgradeInsightStatus
+
+  "a possibly deprecated API"
+  used: String
+
+  "the replacement for this API"
+  replacement: String
+
+  replacedIn: String
+
+  removedIn: String
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -3832,6 +3873,9 @@ type Cluster {
 
   "custom resources with dedicated views for this cluster"
   pinnedCustomResources: [PinnedCustomResource]
+
+  "any upgrade insights provided by your cloud provider that have been discovered by our agent"
+  upgradeInsights: [UpgradeInsight]
 
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
@@ -4165,6 +4209,50 @@ type PinnedCustomResource {
   kind: String!
   namespaced: Boolean
   cluster: Cluster
+}
+
+type UpgradeInsight {
+  id: ID!
+
+  name: String!
+
+  "the k8s version this insight applies to"
+  version: String
+
+  "longform description of this insight"
+  description: String
+
+  status: UpgradeInsightStatus
+
+  refreshedAt: DateTime
+
+  transitionedAt: DateTime
+
+  details: [UpgradeInsightDetail]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type UpgradeInsightDetail {
+  id: ID!
+
+  status: UpgradeInsightStatus
+
+  "a possibly deprecated API"
+  used: String
+
+  "the replacement for this API"
+  replacement: String
+
+  replacedIn: String
+
+  removedIn: String
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 type ClusterConnection {
@@ -6643,17 +6731,30 @@ type AvailableFeatures {
 
 type ConsoleConfiguration {
   gitCommit: String
+
   isDemoProject: Boolean
+
   isSandbox: Boolean
+
   pluralLogin: Boolean
+
   vpnEnabled: Boolean
+
+  "whether at least one cluster has been installed, false if a user hasn't fully onboarded"
   installed: Boolean
+
   cloud: Boolean
+
   byok: Boolean
+
   externalOidc: Boolean
+
   oidcName: String
+
   features: AvailableFeatures
+
   manifest: PluralManifest
+
   gitStatus: GitStatus
 }
 

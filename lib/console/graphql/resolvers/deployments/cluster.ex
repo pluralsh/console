@@ -49,12 +49,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   def token_exchange(%{token: "plrl:" <> token}, _) do
     with [id, token] <- String.split(token, ":"),
          {:ok, _} <- Uniq.UUID.parse(id),
-         %Cluster{} = cluster <- Clusters.get_cluster(id),
-         {:token, %User{} = user} <- {:token, Console.authed_user(token)},
-         {:ok, _} <- allow(cluster, user, :read) do
+         %Cluster{} <- Clusters.get_cluster(id),
+         {:token, %User{} = user} <- {:token, Console.authed_user(token)} do
       {:ok, user}
     else
-      nil -> {:error, "does not exist"}
+      nil -> {:error, "cluster does not exist"}
       {:token, _} -> {:error, "unauthenticated"}
       _ -> {:error, "invalid token"}
     end
@@ -164,6 +163,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
 
   def delete_pinned_custom_resource(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.delete_pinned_custom_resource(id, user)
+
+  def save_upgrade_insights(%{insights: insights}, %{context: %{cluster: cluster}}),
+    do: Clusters.save_upgrade_insights(insights, cluster)
 
   def ping(%{attributes: attrs}, %{context: %{cluster: cluster}}),
     do: Clusters.ping(attrs, cluster)

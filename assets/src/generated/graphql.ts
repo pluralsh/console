@@ -780,6 +780,8 @@ export type Cluster = {
   /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** any upgrade insights provided by your cloud provider that have been discovered by our agent */
+  upgradeInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
   /** Checklist of tasks to complete to safely upgrade this cluster */
   upgradePlan?: Maybe<ClusterUpgradePlan>;
   /** desired k8s version for the cluster */
@@ -1308,6 +1310,7 @@ export type ConsoleConfiguration = {
   features?: Maybe<AvailableFeatures>;
   gitCommit?: Maybe<Scalars['String']['output']>;
   gitStatus?: Maybe<GitStatus>;
+  /** whether at least one cluster has been installed, false if a user hasn't fully onboarded */
   installed?: Maybe<Scalars['Boolean']['output']>;
   isDemoProject?: Maybe<Scalars['Boolean']['output']>;
   isSandbox?: Maybe<Scalars['Boolean']['output']>;
@@ -4622,6 +4625,8 @@ export type RootMutationType = {
   /** upserts a pipeline with a given name */
   savePipeline?: Maybe<Pipeline>;
   saveServiceContext?: Maybe<ServiceContext>;
+  /** agent api to persist upgrade insights for its cluster */
+  saveUpgradeInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
   selfManage?: Maybe<ServiceDeployment>;
   /** creates the service to enable self-hosted renovate in one pass */
   setupRenovate?: Maybe<ServiceDeployment>;
@@ -5283,6 +5288,11 @@ export type RootMutationTypeSavePipelineArgs = {
 export type RootMutationTypeSaveServiceContextArgs = {
   attributes: ServiceContextAttributes;
   name: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeSaveUpgradeInsightsArgs = {
+  insights?: InputMaybe<Array<InputMaybe<UpgradeInsightAttributes>>>;
 };
 
 
@@ -7988,6 +7998,64 @@ export type TerraformStateUrls = {
 export enum Tool {
   Helm = 'HELM',
   Terraform = 'TERRAFORM'
+}
+
+export type UpgradeInsight = {
+  __typename?: 'UpgradeInsight';
+  /** longform description of this insight */
+  description?: Maybe<Scalars['String']['output']>;
+  details?: Maybe<Array<Maybe<UpgradeInsightDetail>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  refreshedAt?: Maybe<Scalars['DateTime']['output']>;
+  status?: Maybe<UpgradeInsightStatus>;
+  transitionedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the k8s version this insight applies to */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type UpgradeInsightAttributes = {
+  /** longform description of this insight */
+  description?: InputMaybe<Scalars['String']['input']>;
+  details?: InputMaybe<Array<InputMaybe<UpgradeInsightDetailAttributes>>>;
+  name: Scalars['String']['input'];
+  refreshedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  status?: InputMaybe<UpgradeInsightStatus>;
+  transitionedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /** the k8s version this insight applies to */
+  version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpgradeInsightDetail = {
+  __typename?: 'UpgradeInsightDetail';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  removedIn?: Maybe<Scalars['String']['output']>;
+  replacedIn?: Maybe<Scalars['String']['output']>;
+  /** the replacement for this API */
+  replacement?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<UpgradeInsightStatus>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a possibly deprecated API */
+  used?: Maybe<Scalars['String']['output']>;
+};
+
+export type UpgradeInsightDetailAttributes = {
+  removedIn?: InputMaybe<Scalars['String']['input']>;
+  replacedIn?: InputMaybe<Scalars['String']['input']>;
+  /** the replacement for this API */
+  replacement?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<UpgradeInsightStatus>;
+  /** a possibly deprecated API */
+  used?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum UpgradeInsightStatus {
+  Failed = 'FAILED',
+  Passing = 'PASSING',
+  Unknown = 'UNKNOWN'
 }
 
 export type UpgradePlan = {

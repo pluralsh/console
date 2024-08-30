@@ -620,6 +620,8 @@ type Cluster struct {
 	NodeMetrics []*NodeMetric `json:"nodeMetrics,omitempty"`
 	// custom resources with dedicated views for this cluster
 	PinnedCustomResources []*PinnedCustomResource `json:"pinnedCustomResources,omitempty"`
+	// any upgrade insights provided by your cloud provider that have been discovered by our agent
+	UpgradeInsights []*UpgradeInsight `json:"upgradeInsights,omitempty"`
 	// the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null
 	Status *ClusterStatus `json:"status,omitempty"`
 	// a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit
@@ -1034,19 +1036,20 @@ type ConfigurationValidation struct {
 }
 
 type ConsoleConfiguration struct {
-	GitCommit     *string            `json:"gitCommit,omitempty"`
-	IsDemoProject *bool              `json:"isDemoProject,omitempty"`
-	IsSandbox     *bool              `json:"isSandbox,omitempty"`
-	PluralLogin   *bool              `json:"pluralLogin,omitempty"`
-	VpnEnabled    *bool              `json:"vpnEnabled,omitempty"`
-	Installed     *bool              `json:"installed,omitempty"`
-	Cloud         *bool              `json:"cloud,omitempty"`
-	Byok          *bool              `json:"byok,omitempty"`
-	ExternalOidc  *bool              `json:"externalOidc,omitempty"`
-	OidcName      *string            `json:"oidcName,omitempty"`
-	Features      *AvailableFeatures `json:"features,omitempty"`
-	Manifest      *PluralManifest    `json:"manifest,omitempty"`
-	GitStatus     *GitStatus         `json:"gitStatus,omitempty"`
+	GitCommit     *string `json:"gitCommit,omitempty"`
+	IsDemoProject *bool   `json:"isDemoProject,omitempty"`
+	IsSandbox     *bool   `json:"isSandbox,omitempty"`
+	PluralLogin   *bool   `json:"pluralLogin,omitempty"`
+	VpnEnabled    *bool   `json:"vpnEnabled,omitempty"`
+	// whether at least one cluster has been installed, false if a user hasn't fully onboarded
+	Installed    *bool              `json:"installed,omitempty"`
+	Cloud        *bool              `json:"cloud,omitempty"`
+	Byok         *bool              `json:"byok,omitempty"`
+	ExternalOidc *bool              `json:"externalOidc,omitempty"`
+	OidcName     *string            `json:"oidcName,omitempty"`
+	Features     *AvailableFeatures `json:"features,omitempty"`
+	Manifest     *PluralManifest    `json:"manifest,omitempty"`
+	GitStatus    *GitStatus         `json:"gitStatus,omitempty"`
 }
 
 type ConstraintRef struct {
@@ -4875,6 +4878,56 @@ type TerraformStateUrls struct {
 	Unlock *string `json:"unlock,omitempty"`
 }
 
+type UpgradeInsight struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// the k8s version this insight applies to
+	Version *string `json:"version,omitempty"`
+	// longform description of this insight
+	Description    *string                 `json:"description,omitempty"`
+	Status         *UpgradeInsightStatus   `json:"status,omitempty"`
+	RefreshedAt    *string                 `json:"refreshedAt,omitempty"`
+	TransitionedAt *string                 `json:"transitionedAt,omitempty"`
+	Details        []*UpgradeInsightDetail `json:"details,omitempty"`
+	InsertedAt     *string                 `json:"insertedAt,omitempty"`
+	UpdatedAt      *string                 `json:"updatedAt,omitempty"`
+}
+
+type UpgradeInsightAttributes struct {
+	Name string `json:"name"`
+	// the k8s version this insight applies to
+	Version *string `json:"version,omitempty"`
+	// longform description of this insight
+	Description    *string                           `json:"description,omitempty"`
+	Status         *UpgradeInsightStatus             `json:"status,omitempty"`
+	RefreshedAt    *string                           `json:"refreshedAt,omitempty"`
+	TransitionedAt *string                           `json:"transitionedAt,omitempty"`
+	Details        []*UpgradeInsightDetailAttributes `json:"details,omitempty"`
+}
+
+type UpgradeInsightDetail struct {
+	ID     string                `json:"id"`
+	Status *UpgradeInsightStatus `json:"status,omitempty"`
+	// a possibly deprecated API
+	Used *string `json:"used,omitempty"`
+	// the replacement for this API
+	Replacement *string `json:"replacement,omitempty"`
+	ReplacedIn  *string `json:"replacedIn,omitempty"`
+	RemovedIn   *string `json:"removedIn,omitempty"`
+	InsertedAt  *string `json:"insertedAt,omitempty"`
+	UpdatedAt   *string `json:"updatedAt,omitempty"`
+}
+
+type UpgradeInsightDetailAttributes struct {
+	Status *UpgradeInsightStatus `json:"status,omitempty"`
+	// a possibly deprecated API
+	Used *string `json:"used,omitempty"`
+	// the replacement for this API
+	Replacement *string `json:"replacement,omitempty"`
+	ReplacedIn  *string `json:"replacedIn,omitempty"`
+	RemovedIn   *string `json:"removedIn,omitempty"`
+}
+
 type UpgradePlan struct {
 	Metadata Metadata          `json:"metadata"`
 	Status   UpgradePlanStatus `json:"status"`
@@ -6951,6 +7004,49 @@ func (e *Tool) UnmarshalGQL(v interface{}) error {
 }
 
 func (e Tool) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type UpgradeInsightStatus string
+
+const (
+	UpgradeInsightStatusPassing UpgradeInsightStatus = "PASSING"
+	UpgradeInsightStatusFailed  UpgradeInsightStatus = "FAILED"
+	UpgradeInsightStatusUnknown UpgradeInsightStatus = "UNKNOWN"
+)
+
+var AllUpgradeInsightStatus = []UpgradeInsightStatus{
+	UpgradeInsightStatusPassing,
+	UpgradeInsightStatusFailed,
+	UpgradeInsightStatusUnknown,
+}
+
+func (e UpgradeInsightStatus) IsValid() bool {
+	switch e {
+	case UpgradeInsightStatusPassing, UpgradeInsightStatusFailed, UpgradeInsightStatusUnknown:
+		return true
+	}
+	return false
+}
+
+func (e UpgradeInsightStatus) String() string {
+	return string(e)
+}
+
+func (e *UpgradeInsightStatus) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = UpgradeInsightStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid UpgradeInsightStatus", str)
+	}
+	return nil
+}
+
+func (e UpgradeInsightStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

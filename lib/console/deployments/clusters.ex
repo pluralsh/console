@@ -20,7 +20,8 @@ defmodule Console.Deployments.Clusters do
     ProviderCredential,
     RuntimeService,
     AgentMigration,
-    PinnedCustomResource
+    PinnedCustomResource,
+    UpgradeInsight
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -443,13 +444,16 @@ defmodule Console.Deployments.Clusters do
   """
   @spec update_upgrade_plan(Cluster.t) :: cluster_resp
   def update_upgrade_plan(%Cluster{} = cluster) do
-    %{api_deprecations: deps} = cluster = Repo.preload(cluster, [:api_deprecations])
+    %{api_deprecations: deps, upgrade_insights: insights} = cluster =
+      Repo.preload(cluster, [:api_deprecations, :upgrade_insights])
+
     addons = runtime_services(cluster)
     Cluster.changeset(cluster, %{
       upgrade_plan: %{
-        deprecations: length(deps) == 0,
+        deprecations: length(deps) == 0 && Enum.all?(insights, & &1.status == :passing),
         compatibilities: !Enum.any?(addons, fn
-          %{addon_version: %Version{} = vsn} -> Version.blocking?(vsn, cluster.current_version)
+          %{addon_version: %Version{} = vsn} ->
+            Version.blocking?(vsn, cluster.current_version)
           _ -> false
         end),
         incompatibilities: true
@@ -889,6 +893,35 @@ defmodule Console.Deployments.Clusters do
     Repo.get!(PinnedCustomResource, id)
     |> allow(user, :write)
     |> when_ok(:delete)
+  end
+
+  @doc """
+  Saves upgrade insights for a cluster
+  """
+  @spec save_upgrade_insights([map], Cluster.t) :: {:ok, [UpgradeInsight.t]} | Console.error
+  def save_upgrade_insights(insights, %Cluster{id: id}) do
+    xact = add_operation(start_transaction(), :prune, fn _ ->
+      UpgradeInsight.for_cluster(id)
+      |> Repo.delete_all()
+      |> ok()
+    end)
+
+    Enum.with_index(insights)
+    |> Enum.reduce(xact, fn {insight, ind}, xact ->
+      add_operation(xact, {:insight, ind}, fn _ ->
+        %UpgradeInsight{cluster_id: id}
+        |> UpgradeInsight.changeset(insight)
+        |> Repo.insert()
+      end)
+    end)
+    |> execute()
+    |> when_ok(fn res ->
+      Enum.filter(res, fn
+        {{:insight, _}, _} -> true
+        _ -> false
+      end)
+      |> Enum.map(fn {_, v} -> v end)
+    end)
   end
 
   def kas_url() do
