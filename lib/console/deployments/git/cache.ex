@@ -74,6 +74,14 @@ defmodule Console.Deployments.Git.Cache do
     %{c | heads: heads(git), cache: Map.new(keep), changes: Map.new(keep_changes)}
   end
 
+  def tags(%__MODULE__{heads: heads}) do
+    Enum.map(heads, fn
+      {"refs/tags/" <> tag, _} -> tag
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+  end
+
   defp find_commit(%__MODULE__{git: g, cache: cache} = c, sha, path, filter) do
     cache_key = cache_key(sha, path, filter)
     case Map.get(cache, cache_key) do

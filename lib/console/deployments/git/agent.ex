@@ -17,23 +17,26 @@ defmodule Console.Deployments.Git.Agent do
 
   @poll :timer.seconds(120)
   @jitter 15
+  @timeout 30_000
 
   defmodule State, do: defstruct [:git, :cache]
 
   def registry(), do: __MODULE__
 
-  def fetch(pid, %Service{} = svc), do: GenServer.call(pid, {:fetch, svc}, 30_000)
-  def fetch(pid, %Service.Git{} = ref), do: GenServer.call(pid, {:fetch, ref}, 30_000)
+  def fetch(pid, %Service{} = svc), do: GenServer.call(pid, {:fetch, svc}, @timeout)
+  def fetch(pid, %Service.Git{} = ref), do: GenServer.call(pid, {:fetch, ref}, @timeout)
 
-  def digest(pid, %Service.Git{} = ref), do: GenServer.call(pid, {:digest, ref}, 30_000)
+  def digest(pid, %Service.Git{} = ref), do: GenServer.call(pid, {:digest, ref}, @timeout)
 
-  def docs(pid, %Service{} = svc), do: GenServer.call(pid, {:docs, svc}, 30_000)
+  def docs(pid, %Service{} = svc), do: GenServer.call(pid, {:docs, svc}, @timeout)
 
-  def refs(pid), do: GenServer.call(pid, :refs, 30_000)
+  def refs(pid), do: GenServer.call(pid, :refs, @timeout)
 
-  def addons(pid), do: GenServer.call(pid, :addons, 30_000)
+  def addons(pid), do: GenServer.call(pid, :addons, @timeout)
 
-  def sha(pid, ref), do: GenServer.call(pid, {:sha, ref}, 30_000)
+  def sha(pid, ref), do: GenServer.call(pid, {:sha, ref}, @timeout)
+
+  def tags(pid), do: GenServer.call(pid, :tags, @timeout)
 
   def changes(pid, sha1, sha2, folder), do: GenServer.call(pid, {:changes, sha1, sha2, folder}, 30_000)
 
@@ -116,6 +119,9 @@ defmodule Console.Deployments.Git.Agent do
       err -> {:reply, err, state}
     end
   end
+
+  def handle_call(:tags, _, %State{cache: cache} = state),
+    do: {:reply, Cache.tags(cache), state}
 
   def handle_info(:clone, %State{git: git, cache: cache} = state) do
     with {:git, %GitRepository{} = git} <- {:git, refresh(git)},

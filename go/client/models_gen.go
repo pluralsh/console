@@ -2602,6 +2602,18 @@ type ObserverEdge struct {
 	Cursor *string   `json:"cursor,omitempty"`
 }
 
+type ObserverGitAttributes struct {
+	RepositoryID string                `json:"repositoryId"`
+	Type         ObserverGitTargetType `json:"type"`
+}
+
+// a spec for polling a git repository for recent updates
+type ObserverGitRepo struct {
+	RepositoryID string `json:"repositoryId"`
+	// the resource within the git repository you want to poll
+	Type ObserverGitTargetType `json:"type"`
+}
+
 // a spec for querying a helm repository in an observer
 type ObserverHelmAttributes struct {
 	URL      string              `json:"url"`
@@ -2666,14 +2678,25 @@ type ObserverPrActionAttributes struct {
 
 // A spec for a target to poll
 type ObserverTarget struct {
-	Helm *ObserverHelmRepo `json:"helm,omitempty"`
-	Oci  *ObserverOciRepo  `json:"oci,omitempty"`
+	Target ObserverTargetType `json:"target"`
+	// a regex for extracting the target value, useful in cases where a semver is nested
+	// in a larger release string.  The first capture group is the substring that is used for the value.
+	Format *string `json:"format,omitempty"`
+	// the order in which polled results are applied, defaults to SEMVER
+	Order ObserverTargetOrder `json:"order"`
+	Helm  *ObserverHelmRepo   `json:"helm,omitempty"`
+	Oci   *ObserverOciRepo    `json:"oci,omitempty"`
+	Git   *ObserverGitRepo    `json:"git,omitempty"`
 }
 
 // A spec for a target to poll
 type ObserverTargetAttributes struct {
-	Helm *ObserverHelmAttributes `json:"helm,omitempty"`
-	Oci  *ObserverOciAttributes  `json:"oci,omitempty"`
+	Target ObserverTargetType      `json:"target"`
+	Format *string                 `json:"format,omitempty"`
+	Order  ObserverTargetOrder     `json:"order"`
+	Helm   *ObserverHelmAttributes `json:"helm,omitempty"`
+	Oci    *ObserverOciAttributes  `json:"oci,omitempty"`
+	Git    *ObserverGitAttributes  `json:"git,omitempty"`
 }
 
 type OverlayUpdate struct {
@@ -6109,6 +6132,45 @@ func (e ObserverActionType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type ObserverGitTargetType string
+
+const (
+	ObserverGitTargetTypeTags ObserverGitTargetType = "TAGS"
+)
+
+var AllObserverGitTargetType = []ObserverGitTargetType{
+	ObserverGitTargetTypeTags,
+}
+
+func (e ObserverGitTargetType) IsValid() bool {
+	switch e {
+	case ObserverGitTargetTypeTags:
+		return true
+	}
+	return false
+}
+
+func (e ObserverGitTargetType) String() string {
+	return string(e)
+}
+
+func (e *ObserverGitTargetType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ObserverGitTargetType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ObserverGitTargetType", str)
+	}
+	return nil
+}
+
+func (e ObserverGitTargetType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type ObserverStatus string
 
 const (
@@ -6147,6 +6209,90 @@ func (e *ObserverStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ObserverStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ObserverTargetOrder string
+
+const (
+	ObserverTargetOrderSemver ObserverTargetOrder = "SEMVER"
+	ObserverTargetOrderLatest ObserverTargetOrder = "LATEST"
+)
+
+var AllObserverTargetOrder = []ObserverTargetOrder{
+	ObserverTargetOrderSemver,
+	ObserverTargetOrderLatest,
+}
+
+func (e ObserverTargetOrder) IsValid() bool {
+	switch e {
+	case ObserverTargetOrderSemver, ObserverTargetOrderLatest:
+		return true
+	}
+	return false
+}
+
+func (e ObserverTargetOrder) String() string {
+	return string(e)
+}
+
+func (e *ObserverTargetOrder) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ObserverTargetOrder(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ObserverTargetOrder", str)
+	}
+	return nil
+}
+
+func (e ObserverTargetOrder) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ObserverTargetType string
+
+const (
+	ObserverTargetTypeOci  ObserverTargetType = "OCI"
+	ObserverTargetTypeHelm ObserverTargetType = "HELM"
+	ObserverTargetTypeGit  ObserverTargetType = "GIT"
+)
+
+var AllObserverTargetType = []ObserverTargetType{
+	ObserverTargetTypeOci,
+	ObserverTargetTypeHelm,
+	ObserverTargetTypeGit,
+}
+
+func (e ObserverTargetType) IsValid() bool {
+	switch e {
+	case ObserverTargetTypeOci, ObserverTargetTypeHelm, ObserverTargetTypeGit:
+		return true
+	}
+	return false
+}
+
+func (e ObserverTargetType) String() string {
+	return string(e)
+}
+
+func (e *ObserverTargetType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ObserverTargetType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ObserverTargetType", str)
+	}
+	return nil
+}
+
+func (e ObserverTargetType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -3137,6 +3137,23 @@ export type ObserverEdge = {
   node?: Maybe<Observer>;
 };
 
+export type ObserverGitAttributes = {
+  repositoryId: Scalars['ID']['input'];
+  type: ObserverGitTargetType;
+};
+
+/** a spec for polling a git repository for recent updates */
+export type ObserverGitRepo = {
+  __typename?: 'ObserverGitRepo';
+  repositoryId: Scalars['ID']['output'];
+  /** the resource within the git repository you want to poll */
+  type: ObserverGitTargetType;
+};
+
+export enum ObserverGitTargetType {
+  Tags = 'TAGS'
+}
+
 /** a spec for querying a helm repository in an observer */
 export type ObserverHelmAttributes = {
   auth?: InputMaybe<HelmAuthAttributes>;
@@ -3211,15 +3228,39 @@ export enum ObserverStatus {
 /** A spec for a target to poll */
 export type ObserverTarget = {
   __typename?: 'ObserverTarget';
+  /**
+   * a regex for extracting the target value, useful in cases where a semver is nested
+   * in a larger release string.  The first capture group is the substring that is used for the value.
+   */
+  format?: Maybe<Scalars['String']['output']>;
+  git?: Maybe<ObserverGitRepo>;
   helm?: Maybe<ObserverHelmRepo>;
   oci?: Maybe<ObserverOciRepo>;
+  /** the order in which polled results are applied, defaults to SEMVER */
+  order: ObserverTargetOrder;
+  target: ObserverTargetType;
 };
 
 /** A spec for a target to poll */
 export type ObserverTargetAttributes = {
+  format?: InputMaybe<Scalars['String']['input']>;
+  git?: InputMaybe<ObserverGitAttributes>;
   helm?: InputMaybe<ObserverHelmAttributes>;
   oci?: InputMaybe<ObserverOciAttributes>;
+  order: ObserverTargetOrder;
+  target: ObserverTargetType;
 };
+
+export enum ObserverTargetOrder {
+  Latest = 'LATEST',
+  Semver = 'SEMVER'
+}
+
+export enum ObserverTargetType {
+  Git = 'GIT',
+  Helm = 'HELM',
+  Oci = 'OCI'
+}
 
 export enum Operation {
   Eq = 'EQ',
