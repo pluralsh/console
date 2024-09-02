@@ -100,7 +100,7 @@ defmodule Console.MixProject do
       {:porcelain, "~> 2.0"},
       {:absinthe, "~> 1.7.5"},
       {:absinthe_relay, "~> 1.5.2"},
-      {:absinthe_plug, "~> 1.5"},
+      {:absinthe_plug, "~> 1.5", git: "https://github.com/absinthe-graphql/absinthe_plug.git", commit: "3a984cc341ebb32c79e7ae58b4ebd116d5c62f9e", override: true},
       {:absinthe_phoenix, "~> 2.0"},
       {:dataloader, "~> 1.0.6"},
       {:cors_plug, "~> 2.0"},

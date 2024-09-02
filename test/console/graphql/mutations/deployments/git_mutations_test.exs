@@ -359,7 +359,11 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
         "attrs" => %{
           "name" => "observer",
           "crontab" => "*/5 * * * *",
-          "target" => %{"helm" => %{"url" => "https://pluralsh.github.io/console", "chart" => "console"}},
+          "target" => %{
+            "target" => "HELM",
+            "order" => "SEMVER",
+            "helm" => %{"url" => "https://pluralsh.github.io/console", "chart" => "console"}
+          },
           "actions" => [
             %{"type" => "PR", "configuration" => %{
               "pr" => %{"automation_id" => pra.id, "context" => Jason.encode!(%{"some" => "$value"})}

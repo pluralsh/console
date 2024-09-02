@@ -22,6 +22,9 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :configuration_type, Configuration.Type
   ecto_enum :operation, Configuration.Condition.Operation
   ecto_enum :observer_action_type, Observer.Action
+  ecto_enum :observer_target_type, Observer.TargetType
+  ecto_enum :observer_git_target_type, Observer.GitTargetType
+  ecto_enum :observer_target_order, Observer.TargetOrder
   ecto_enum :observer_status, Observer.Status
 
   input_object :git_attributes do
@@ -224,8 +227,12 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A spec for a target to poll"
   input_object :observer_target_attributes do
-    field :helm, :observer_helm_attributes
-    field :oci,  :observer_oci_attributes
+    field :target, non_null(:observer_target_type)
+    field :format, :string
+    field :order,  non_null(:observer_target_order)
+    field :helm,   :observer_helm_attributes
+    field :oci,    :observer_oci_attributes
+    field :git,    :observer_git_attributes
   end
 
   @desc "A spec of an action that can be taken in response to an observed entity"
@@ -247,6 +254,11 @@ defmodule Console.GraphQl.Deployments.Git do
     field :url,      non_null(:string)
     field :provider, :helm_auth_provider
     field :auth,     :helm_auth_attributes
+  end
+
+  input_object :observer_git_attributes do
+    field :repository_id, non_null(:id)
+    field :type,          non_null(:observer_git_target_type)
   end
 
   @desc "configuration for an observer action"
@@ -517,8 +529,18 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A spec for a target to poll"
   object :observer_target do
-    field :helm, :observer_helm_repo
-    field :oci,  :observer_oci_repo
+    field :target, non_null(:observer_target_type)
+
+    @desc """
+    a regex for extracting the target value, useful in cases where a semver is nested
+    in a larger release string.  The first capture group is the substring that is used for the value.
+    """
+    field :format, :string
+    field :order,  non_null(:observer_target_order), description: "the order in which polled results are applied, defaults to SEMVER"
+
+    field :helm,   :observer_helm_repo
+    field :oci,    :observer_oci_repo
+    field :git,    :observer_git_repo
   end
 
   @desc "A spec of an action that can be taken in response to an observed entity"
@@ -538,6 +560,13 @@ defmodule Console.GraphQl.Deployments.Git do
   object :observer_oci_repo do
     field :url,      non_null(:string)
     field :provider, :helm_auth_provider
+  end
+
+  @desc "a spec for polling a git repository for recent updates"
+  object :observer_git_repo do
+    field :repository_id, non_null(:id)
+    field :type,          non_null(:observer_git_target_type),
+      description: "the resource within the git repository you want to poll"
   end
 
   @desc "configuration for an observer action"
