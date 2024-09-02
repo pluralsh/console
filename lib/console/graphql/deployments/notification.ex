@@ -60,7 +60,8 @@ defmodule Console.GraphQl.Deployments.Notification do
     field :type, non_null(:sink_type), description: "the channel type of the sink, eg slack or teams"
 
     field :notification_bindings, list_of(:policy_binding),
-      description: "the users/groups an in-app notification can be delivered to"
+      description: "the users/groups an in-app notification can be delivered to",
+      resolve: dataloader(Deployments)
     field :configuration, non_null(:sink_configuration),
       description: "type specific sink configuration"
 
