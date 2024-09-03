@@ -4,7 +4,9 @@ defmodule Console.Schema.Observer do
 
   defenum Action, pipeline: 0, pr: 1
   defenum Status, healthy: 0, failed: 1
-  defenum TargetType, oci: 0, helm: 1
+  defenum TargetType, oci: 0, helm: 1, git: 2
+  defenum GitTargetType, tags: 0
+  defenum TargetOrder, semver: 0, latest: 1
 
   schema "observers" do
     field :name,           :string
@@ -16,6 +18,14 @@ defmodule Console.Schema.Observer do
 
     embeds_one :target, Target, on_replace: :update do
       field :target, TargetType, default: :oci
+      field :format, :string
+      field :order,  TargetOrder, default: :semver
+
+      embeds_one :git, GitTarget, on_replace: :update do
+        field :type,          GitTargetType, default: :tags
+        field :repository_id, :binary_id
+      end
+
       embeds_one :oci, OCITarget, on_replace: :update do
         field :url,       :string
         field :provider,  HelmRepository.Provider
@@ -82,10 +92,11 @@ defmodule Console.Schema.Observer do
 
   defp target_changeset(model, attrs) do
     model
-    |> cast(attrs, [:target])
+    |> cast(attrs, [:target, :format, :order])
     |> cast_embed(:oci, with: &oci_changeset/2)
     |> cast_embed(:helm, with: &helm_changeset/2)
-    |> validate_required([:target])
+    |> cast_embed(:git, with: &git_changeset/2)
+    |> validate_required([:target, :order])
   end
 
   defp action_changeset(model, attrs) do
@@ -106,6 +117,12 @@ defmodule Console.Schema.Observer do
     |> cast(attrs, ~w(url chart provider)a)
     |> cast_embed(:auth)
     |> validate_required([:url, :chart])
+  end
+
+  defp git_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(type repository_id)a)
+    |> validate_required(~w(type repository_id)a)
   end
 
   defp config_changeset(model, attrs) do

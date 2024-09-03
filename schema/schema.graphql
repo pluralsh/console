@@ -4347,6 +4347,21 @@ enum ObserverActionType {
   PR
 }
 
+enum ObserverTargetType {
+  OCI
+  HELM
+  GIT
+}
+
+enum ObserverGitTargetType {
+  TAGS
+}
+
+enum ObserverTargetOrder {
+  SEMVER
+  LATEST
+}
+
 enum ObserverStatus {
   HEALTHY
   FAILED
@@ -4622,8 +4637,12 @@ input ObserverAttributes {
 
 "A spec for a target to poll"
 input ObserverTargetAttributes {
+  target: ObserverTargetType!
+  format: String
+  order: ObserverTargetOrder!
   helm: ObserverHelmAttributes
   oci: ObserverOciAttributes
+  git: ObserverGitAttributes
 }
 
 "A spec of an action that can be taken in response to an observed entity"
@@ -4645,6 +4664,11 @@ input ObserverOciAttributes {
   url: String!
   provider: HelmAuthProvider
   auth: HelmAuthAttributes
+}
+
+input ObserverGitAttributes {
+  repositoryId: ID!
+  type: ObserverGitTargetType!
 }
 
 "configuration for an observer action"
@@ -4995,8 +5019,22 @@ type Observer {
 
 "A spec for a target to poll"
 type ObserverTarget {
+  target: ObserverTargetType!
+
+  """
+  a regex for extracting the target value, useful in cases where a semver is nested
+  in a larger release string.  The first capture group is the substring that is used for the value.
+  """
+  format: String
+
+  "the order in which polled results are applied, defaults to SEMVER"
+  order: ObserverTargetOrder!
+
   helm: ObserverHelmRepo
+
   oci: ObserverOciRepo
+
+  git: ObserverGitRepo
 }
 
 "A spec of an action that can be taken in response to an observed entity"
@@ -5016,6 +5054,14 @@ type ObserverHelmRepo {
 type ObserverOciRepo {
   url: String!
   provider: HelmAuthProvider
+}
+
+"a spec for polling a git repository for recent updates"
+type ObserverGitRepo {
+  repositoryId: ID!
+
+  "the resource within the git repository you want to poll"
+  type: ObserverGitTargetType!
 }
 
 "configuration for an observer action"

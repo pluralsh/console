@@ -11,7 +11,32 @@ defmodule Console.Deployments.Observer.RunnerTest do
       pipeline = insert(:pipeline)
       observer = insert(:observer,
         name: "observer",
-        target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        target: %{type: :helm, helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        actions: [
+          %{type: :pipeline, configuration: %{
+            pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
+          }
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      [context] = Console.Repo.all(Console.Schema.PipelineContext)
+      assert context.pipeline_id == pipeline.id
+      assert is_binary(context.context["some"])
+      assert context.context["some"] != "$value"
+
+      assert obs.id == observer.id
+      assert obs.last_value == context.context["some"]
+    end
+
+    test "it can poll an oci helm repo and add a pipeline context" do
+      bot("console")
+      pipeline = insert(:pipeline)
+      observer = insert(:observer,
+        name: "observer",
+        target: %{type: :helm, helm: %{url: "oci://ghcr.io/stefanprodan/charts", chart: "podinfo"}},
         actions: [
           %{type: :pipeline, configuration: %{
             pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
@@ -36,7 +61,7 @@ defmodule Console.Deployments.Observer.RunnerTest do
       pipeline = insert(:pipeline)
       observer = insert(:observer,
         name: "observer",
-        target: %{oci: %{url: "oci://ghcr.io/pluralsh/console"}},
+        target: %{type: :oci, oci: %{url: "oci://ghcr.io/pluralsh/console"}},
         actions: [
           %{type: :pipeline, configuration: %{
             pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
@@ -78,7 +103,7 @@ defmodule Console.Deployments.Observer.RunnerTest do
 
       observer = insert(:observer,
         name: "observer",
-        target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        target: %{type: :helm, helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
         actions: [
           %{type: :pr, configuration: %{
             pr: %{automation_id: pra.id, context: %{"some" => "$value"}}}
@@ -99,6 +124,41 @@ defmodule Console.Deployments.Observer.RunnerTest do
       assert pr.title == pra.title
 
       assert_receive {:event, %PubSub.PullRequestCreated{}}
+    end
+  end
+end
+
+defmodule Console.Deployments.Observer.AsyncRunnerTest do
+  use Console.DataCase, async: false
+  alias Console.Deployments.Observer.Runner
+
+  describe "#run/0" do
+    test "it can poll a git repo and add a pipeline context" do
+      bot("console")
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      pipeline = insert(:pipeline)
+      observer = insert(:observer,
+        name: "observer",
+        target: %{type: :git, git: %{repository_id: git.id}},
+        actions: [
+          %{type: :pipeline, configuration: %{
+            pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
+          }
+        ],
+        crontab: "*/5 * * *"
+      )
+
+      {:ok, obs} = Runner.run(observer)
+
+      assert Console.Helm.Utils.compare_versions(obs.last_value, "v0.10.24") != :lt
+
+      [context] = Console.Repo.all(Console.Schema.PipelineContext)
+      assert context.pipeline_id == pipeline.id
+      assert is_binary(context.context["some"])
+      assert context.context["some"] != "$value"
+
+      assert obs.id == observer.id
+      assert obs.last_value == context.context["some"]
     end
   end
 end
