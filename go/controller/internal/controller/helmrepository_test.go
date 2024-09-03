@@ -134,6 +134,10 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+				HelmRepositoryAuth: &controller.HelmRepositoryAuth{
+					Client: k8sClient,
+					Scheme: k8sClient.Scheme(),
+				},
 			}
 
 			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
@@ -203,6 +207,10 @@ var _ = Describe("Helm Repository Controller", Ordered, func() {
 				Scheme:           k8sClient.Scheme(),
 				ConsoleClient:    fakeConsoleClient,
 				CredentialsCache: credentials.FakeNamespaceCredentialsCache(k8sClient),
+				HelmRepositoryAuth: &controller.HelmRepositoryAuth{
+					Client: k8sClient,
+					Scheme: k8sClient.Scheme(),
+				},
 			}
 
 			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: typeNamespacedName})
