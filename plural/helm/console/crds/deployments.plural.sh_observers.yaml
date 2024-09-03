@@ -98,6 +98,8 @@ spec:
                                   type: string
                               type: object
                               x-kubernetes-map-type: atomic
+                          required:
+                          - pipelineRef
                           type: object
                         pr:
                           properties:
@@ -156,6 +158,8 @@ spec:
                               x-kubernetes-map-type: atomic
                             repository:
                               type: string
+                          required:
+                          - prAutomationRef
                           type: object
                       type: object
                     type:
@@ -222,6 +226,62 @@ spec:
                 x-kubernetes-map-type: atomic
               target:
                 properties:
+                  format:
+                    type: string
+                  git:
+                    properties:
+                      gitRepositoryRef:
+                        description: GitRepositoryRef references to Git repository.
+                        properties:
+                          apiVersion:
+                            description: API version of the referent.
+                            type: string
+                          fieldPath:
+                            description: |-
+                              If referring to a piece of an object instead of an entire object, this string
+                              should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].
+                              For example, if the object reference is to a container within a pod, this would take on a value like:
+                              "spec.containers{name}" (where "name" refers to the name of the container that triggered
+                              the event) or if no container name is specified "spec.containers[2]" (container with
+                              index 2 in this pod). This syntax is chosen only to have some well-defined way of
+                              referencing a part of an object.
+                              TODO: this design is not final and this field is subject to change in the future.
+                            type: string
+                          kind:
+                            description: |-
+                              Kind of the referent.
+                              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          namespace:
+                            description: |-
+                              Namespace of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+                            type: string
+                          resourceVersion:
+                            description: |-
+                              Specific resourceVersion to which this reference is made, if any.
+                              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+                            type: string
+                          uid:
+                            description: |-
+                              UID of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      type:
+                        enum:
+                        - TAGS
+                        type: string
+                    required:
+                    - gitRepositoryRef
+                    - type
+                    type: object
                   helm:
                     properties:
                       auth:
@@ -488,6 +548,20 @@ spec:
                     required:
                     - url
                     type: object
+                  order:
+                    enum:
+                    - SEMVER
+                    - LATEST
+                    type: string
+                  target:
+                    enum:
+                    - OCI
+                    - HELM
+                    - GIT
+                    type: string
+                required:
+                - order
+                - target
                 type: object
             required:
             - crontab

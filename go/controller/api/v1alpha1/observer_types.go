@@ -41,9 +41,8 @@ type ObserverConfiguration struct {
 
 type ObserverPrAction struct {
 	// PrAutomationRef references to PR automation.
+	PrAutomationRef v1.ObjectReference `json:"prAutomationRef"`
 	// +kubebuilder:validation:Optional
-	PrAutomationRef *v1.ObjectReference `json:"prAutomationRef,omitempty"`
-
 	Repository *string `json:"repository,omitempty"`
 	// BranchTemplate a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
@@ -54,17 +53,38 @@ type ObserverPrAction struct {
 
 type ObserverPipelineAction struct {
 	// PipelineRef references to Pipeline.
-	// +kubebuilder:validation:Optional
-	PipelineRef *v1.ObjectReference `json:"pipelineRef,omitempty"`
+	PipelineRef v1.ObjectReference `json:"pipelineRef"`
 
 	Context runtime.RawExtension `json:"context,omitempty"`
 }
 
 type ObserverTarget struct {
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:Enum:=OCI;HELM;GIT
+	Target console.ObserverTargetType `json:"target"`
+
 	// +kubebuilder:validation:Optional
-	Helm *ObserverHelm `json:"helm"`
+	Format *string `json:"format,omitempty"`
+
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:Enum:=SEMVER;LATEST
+	Order console.ObserverTargetOrder `json:"order"`
+
 	// +kubebuilder:validation:Optional
-	OCI *ObserverOci `json:"oci"`
+	Helm *ObserverHelm `json:"helm,omitempty"`
+	// +kubebuilder:validation:Optional
+	OCI *ObserverOci `json:"oci,omitempty"`
+	// +kubebuilder:validation:Optional
+	Git *ObserverGit `json:"git,omitempty"`
+}
+
+type ObserverGit struct {
+
+	// GitRepositoryRef references to Git repository.
+	GitRepositoryRef v1.ObjectReference `json:"gitRepositoryRef"`
+	// +kubebuilder:validation:Type:=string
+	// +kubebuilder:validation:Enum:=TAGS
+	Type console.ObserverGitTargetType `json:"type"`
 }
 
 type ObserverHelm struct {
@@ -131,6 +151,15 @@ func (o *Observer) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&o.Status.Conditions, condition)
 }
 
+func (o *Observer) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(o.Spec)
+	if err != nil {
+		return false, "", err
+	}
+
+	return !o.Status.IsSHAEqual(currentSha), currentSha, nil
+}
+
 // ObserverName implements NamespacedPluralResource interface
 func (o *Observer) ObserverName() string {
 	if o.Spec.Name != nil && len(*o.Spec.Name) > 0 {
@@ -138,6 +167,17 @@ func (o *Observer) ObserverName() string {
 	}
 
 	return o.Name
+}
+
+func (o *Observer) Attributes(target console.ObserverTargetAttributes, actions []*console.ObserverActionAttributes, projectID *string) console.ObserverAttributes {
+	attributes := console.ObserverAttributes{
+		Name:      o.ObserverName(),
+		Crontab:   o.Spec.Crontab,
+		Target:    target,
+		Actions:   actions,
+		ProjectID: projectID,
+	}
+	return attributes
 }
 
 func init() {

@@ -118,6 +118,7 @@ type ConsoleClient interface {
 	DeleteObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityProvider, error)
 	UpsertObserver(ctx context.Context, attributes ObserverAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObserver, error)
 	DeleteObserver(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObserver, error)
+	GetObserver(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObserver, error)
 	UpsertPolicyConstraints(ctx context.Context, constraints []*PolicyConstraintAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPolicyConstraints, error)
 	ListPolicyConstraints(ctx context.Context, after *string, first *int64, before *string, last *int64, namespace *string, kind *string, q *string, interceptors ...clientv2.RequestInterceptor) (*ListPolicyConstraints, error)
 	ListViolationStatistics(ctx context.Context, field ConstraintViolationField, interceptors ...clientv2.RequestInterceptor) (*ListViolationStatistics, error)
@@ -13533,6 +13534,17 @@ func (t *DeleteObserver) GetDeleteObserver() *ObserverFragment {
 	return t.DeleteObserver
 }
 
+type GetObserver struct {
+	Observer *ObserverFragment "json:\"observer,omitempty\" graphql:\"observer\""
+}
+
+func (t *GetObserver) GetObserver() *ObserverFragment {
+	if t == nil {
+		t = &GetObserver{}
+	}
+	return t.Observer
+}
+
 type UpsertPolicyConstraints struct {
 	UpsertPolicyConstraints *int64 "json:\"upsertPolicyConstraints,omitempty\" graphql:\"upsertPolicyConstraints\""
 }
@@ -22569,6 +22581,129 @@ func (c *Client) DeleteObserver(ctx context.Context, id string, interceptors ...
 	return &res, nil
 }
 
+const GetObserverDocument = `query GetObserver ($id: ID, $name: String) {
+	observer(id: $id, name: $name) {
+		... ObserverFragment
+	}
+}
+fragment ObserverFragment on Observer {
+	id
+	name
+	status
+	crontab
+	target {
+		... ObserverTargetFragment
+	}
+	actions {
+		... ObserverActionFragment
+	}
+	project {
+		... ProjectFragment
+	}
+	errors {
+		... ErrorFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment ObserverTargetFragment on ObserverTarget {
+	helm {
+		... ObserverHelmRepoFragment
+	}
+	oci {
+		... ObserverOciRepoFragment
+	}
+}
+fragment ObserverHelmRepoFragment on ObserverHelmRepo {
+	url
+	chart
+	provider
+}
+fragment ObserverOciRepoFragment on ObserverOciRepo {
+	url
+	provider
+}
+fragment ObserverActionFragment on ObserverAction {
+	type
+	configuration {
+		... ObserverActionConfigurationFragment
+	}
+}
+fragment ObserverActionConfigurationFragment on ObserverActionConfiguration {
+	pr {
+		... ObserverPrActionFragment
+	}
+	pipeline {
+		... ObserverPipelineActionFragment
+	}
+}
+fragment ObserverPrActionFragment on ObserverPrAction {
+	automationId
+	repository
+	branchTemplate
+	context
+}
+fragment ObserverPipelineActionFragment on ObserverPipelineAction {
+	pipelineId
+	context
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) GetObserver(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObserver, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetObserver
+	if err := c.Client.Post(ctx, "GetObserver", GetObserverDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const UpsertPolicyConstraintsDocument = `mutation UpsertPolicyConstraints ($constraints: [PolicyConstraintAttributes!]) {
 	upsertPolicyConstraints(constraints: $constraints)
 }
@@ -27883,6 +28018,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteObservabilityProviderDocument:               "DeleteObservabilityProvider",
 	UpsertObserverDocument:                            "UpsertObserver",
 	DeleteObserverDocument:                            "DeleteObserver",
+	GetObserverDocument:                               "GetObserver",
 	UpsertPolicyConstraintsDocument:                   "UpsertPolicyConstraints",
 	ListPolicyConstraintsDocument:                     "ListPolicyConstraints",
 	ListViolationStatisticsDocument:                   "ListViolationStatistics",

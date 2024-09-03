@@ -115,6 +115,10 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			Scheme:           mgr.GetScheme(),
 			UserGroupCache:   userGroupCache,
 			CredentialsCache: credentialsCache,
+			HelmRepositoryAuth: &controller.HelmRepositoryAuth{
+				Client: mgr.GetClient(),
+				Scheme: mgr.GetScheme(),
+			},
 		}, nil
 	case ServiceDeploymentReconciler:
 		return &controller.ServiceReconciler{

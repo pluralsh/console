@@ -10,6 +10,12 @@ mutation DeleteObserver($id: ID!) {
     }
 }
 
+query GetObserver($id: ID, $name: String) {
+    observer(id: $id, name: $name) {
+        ...ObserverFragment
+    }
+}
+
 fragment ObserverFragment on Observer {
     id
     name
