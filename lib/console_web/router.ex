@@ -48,7 +48,7 @@ defmodule ConsoleWeb.Router do
         schema: Console.ExternalGraphQl,
         document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default],
         analyze_complexity: true,
-        max_complexity: 500,
+        max_complexity: 650,
         token_limit: 5_000
 
       scope "/v1", ConsoleWeb do
@@ -91,7 +91,7 @@ defmodule ConsoleWeb.Router do
       schema: Console.GraphQl,
       document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default],
       analyze_complexity: true,
-      max_complexity: 500,
+      max_complexity: 650,
       token_limit: 5_000
   end
 
