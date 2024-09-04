@@ -138,6 +138,7 @@ type ConsoleClient interface {
 	CreateServiceAccount(ctx context.Context, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccount, error)
 	UpdateServiceAccount(ctx context.Context, id string, attributes ServiceAccountAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateServiceAccount, error)
 	CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error)
+	ShareSecret(ctx context.Context, attributes SharedSecretAttributes, interceptors ...clientv2.RequestInterceptor) (*ShareSecret, error)
 	ListClusterStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStacks, error)
 	ListInfrastructureStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListInfrastructureStacks, error)
 	GetStackRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRun, error)
@@ -10152,6 +10153,45 @@ func (t *ServiceAccounts_ServiceAccounts) GetEdges() []*ServiceAccounts_ServiceA
 	return t.Edges
 }
 
+type ShareSecret_ShareSecret struct {
+	Name       string  "json:\"name\" graphql:\"name\""
+	Handle     string  "json:\"handle\" graphql:\"handle\""
+	Secret     string  "json:\"secret\" graphql:\"secret\""
+	InsertedAt *string "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+}
+
+func (t *ShareSecret_ShareSecret) GetName() string {
+	if t == nil {
+		t = &ShareSecret_ShareSecret{}
+	}
+	return t.Name
+}
+func (t *ShareSecret_ShareSecret) GetHandle() string {
+	if t == nil {
+		t = &ShareSecret_ShareSecret{}
+	}
+	return t.Handle
+}
+func (t *ShareSecret_ShareSecret) GetSecret() string {
+	if t == nil {
+		t = &ShareSecret_ShareSecret{}
+	}
+	return t.Secret
+}
+func (t *ShareSecret_ShareSecret) GetInsertedAt() *string {
+	if t == nil {
+		t = &ShareSecret_ShareSecret{}
+	}
+	return t.InsertedAt
+}
+func (t *ShareSecret_ShareSecret) GetUpdatedAt() *string {
+	if t == nil {
+		t = &ShareSecret_ShareSecret{}
+	}
+	return t.UpdatedAt
+}
+
 type ListClusterStacks_ClusterStackRuns_Edges_StackRunEdgeFragment_Node_StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
 	Address *string "json:\"address,omitempty\" graphql:\"address\""
 	Lock    *string "json:\"lock,omitempty\" graphql:\"lock\""
@@ -13528,6 +13568,17 @@ func (t *CreateServiceAccountToken) GetCreateServiceAccountToken() *AccessTokenF
 		t = &CreateServiceAccountToken{}
 	}
 	return t.CreateServiceAccountToken
+}
+
+type ShareSecret struct {
+	ShareSecret *ShareSecret_ShareSecret "json:\"shareSecret,omitempty\" graphql:\"shareSecret\""
+}
+
+func (t *ShareSecret) GetShareSecret() *ShareSecret_ShareSecret {
+	if t == nil {
+		t = &ShareSecret{}
+	}
+	return t.ShareSecret
 }
 
 type ListClusterStacks struct {
@@ -23314,6 +23365,34 @@ func (c *Client) CreateServiceAccountToken(ctx context.Context, id string, scope
 	return &res, nil
 }
 
+const ShareSecretDocument = `mutation ShareSecret ($attributes: SharedSecretAttributes!) {
+	shareSecret(attributes: $attributes) {
+		name
+		handle
+		secret
+		insertedAt
+		updatedAt
+	}
+}
+`
+
+func (c *Client) ShareSecret(ctx context.Context, attributes SharedSecretAttributes, interceptors ...clientv2.RequestInterceptor) (*ShareSecret, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res ShareSecret
+	if err := c.Client.Post(ctx, "ShareSecret", ShareSecretDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListClusterStacksDocument = `query ListClusterStacks ($after: String, $first: Int, $before: String, $last: Int) {
 	clusterStackRuns(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -27414,6 +27493,7 @@ var DocumentOperationNames = map[string]string{
 	CreateServiceAccountDocument:                      "CreateServiceAccount",
 	UpdateServiceAccountDocument:                      "UpdateServiceAccount",
 	CreateServiceAccountTokenDocument:                 "CreateServiceAccountToken",
+	ShareSecretDocument:                               "ShareSecret",
 	ListClusterStacksDocument:                         "ListClusterStacks",
 	ListInfrastructureStacksDocument:                  "ListInfrastructureStacks",
 	GetStackRunDocument:                               "GetStackRun",
