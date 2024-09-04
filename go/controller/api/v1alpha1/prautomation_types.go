@@ -1,12 +1,13 @@
 package v1alpha1
 
 import (
-	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	console "github.com/pluralsh/console/go/client"
 )
 
 func init() {
@@ -65,7 +66,7 @@ func (in *PrAutomation) ConsoleName() string {
 	return in.Name
 }
 
-func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connectionID *string, repositoryID *string) *console.PrAutomationAttributes {
+func (in *PrAutomation) Attributes(clusterID, serviceID, connectionID, repositoryID, projectID *string) *console.PrAutomationAttributes {
 	attrs := console.PrAutomationAttributes{
 		Name:          lo.ToPtr(in.ConsoleName()),
 		Role:          in.Spec.Role,
@@ -82,6 +83,7 @@ func (in *PrAutomation) Attributes(clusterID *string, serviceID *string, connect
 		ServiceID:     serviceID,
 		ConnectionID:  connectionID,
 		RepositoryID:  repositoryID,
+		ProjectID:     projectID,
 		Configuration: algorithms.Map(in.Spec.Configuration, func(c PrAutomationConfiguration) *console.PrConfigurationAttributes {
 			return c.Attributes()
 		}),
@@ -150,15 +152,19 @@ type PrAutomationSpec struct {
 
 	// ScmConnectionRef the SCM connection to use for generating this PR
 	// +kubebuilder:validation:Required
-	ScmConnectionRef corev1.ObjectReference `json:"scmConnectionRef,omitempty"`
+	ScmConnectionRef corev1.ObjectReference `json:"scmConnectionRef"`
 
-	// RepositoryRef ...
+	// RepositoryRef the repository this automation uses.
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef,omitempty"`
 
-	// ServiceRef the service this PR acts on
+	// ServiceRef the service this PR acts on.
 	// +kubebuilder:validation:Optional
 	ServiceRef *corev1.ObjectReference `json:"serviceRef,omitempty"`
+
+	// ProjectRef the project this automation belongs to.
+	// +kubebuilder:validation:Optional
+	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
 	// Bindings contain read and write policies of pr automation
 	// +kubebuilder:validation:Optional
