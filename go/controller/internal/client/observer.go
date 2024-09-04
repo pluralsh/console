@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"fmt"
+
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"

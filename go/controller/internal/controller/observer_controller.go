@@ -219,7 +219,9 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					AutomationID:   prAutomation.Status.GetID(),
 					Repository:     pr.Repository,
 					BranchTemplate: pr.BranchTemplate,
-					Context:        string(pr.Context.Raw),
+				}
+				if pr.Context.Raw != nil {
+					a.Configuration.Pr.Context = string(pr.Context.Raw)
 				}
 			}
 			if p := action.Configuration.Pipeline; p != nil {
@@ -234,8 +236,10 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 				a.Configuration.Pipeline = &console.ObserverPipelineActionAttributes{
 					PipelineID: pipeline.Status.GetID(),
 				}
-				if err = json.Unmarshal(p.Context.Raw, &a.Configuration.Pipeline.Context); err != nil {
-					return
+				if p.Context.Raw != nil {
+					if err = json.Unmarshal(p.Context.Raw, &a.Configuration.Pipeline.Context); err != nil {
+						return
+					}
 				}
 			}
 			actions[i] = a
