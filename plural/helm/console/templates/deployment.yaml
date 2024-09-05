@@ -57,6 +57,8 @@ spec:
         {{- toYaml .Values.extraEnv | nindent 8 }}
         {{- end }}
         volumeMounts:
+        - name: conf-dir
+          mountPath: /shared
         {{ if .Values.secrets.id_rsa }}
         - name: console-ssh
           mountPath: "{{ .Values.homeDir }}/.ssh"
@@ -97,6 +99,8 @@ spec:
         {{- toYaml . | nindent 8 }}
     {{- end }}
       volumes:
+      - name: conf-dir
+        emptyDir: {}
       {{ if .Values.secrets.id_rsa }}
       - name: console-ssh
         secret:

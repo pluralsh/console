@@ -56,9 +56,11 @@ type ServiceReconciler struct {
 func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ ctrl.Result, reterr error) {
 	logger := log.FromContext(ctx)
 	service := &v1alpha1.ServiceDeployment{}
+	logger.Info("reconciling service deployment", "namespacedName", req.NamespacedName)
 	if err := r.Get(ctx, req.NamespacedName, service); err != nil {
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
+
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	scope, err := NewDefaultScope(ctx, r.Client, service)
 	if err != nil {
@@ -197,13 +199,13 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		}
 	}
 
+	utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 	updateStatus(service, existingService, sha)
 
 	if !isServiceReady(service.Status.Components) {
 		return RequeueAfter(requeueWaitForResources), nil
 	}
 	utils.MarkCondition(service.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
-	utils.MarkCondition(service.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
 }

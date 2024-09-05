@@ -28,7 +28,8 @@ defmodule Console.Deployments.Pr.Git do
   def branch(conn), do: git(conn, "rev-parse", ["--abbrev-ref", "HEAD"])
 
   @spec push(ScmConnection.t, binary) :: git_resp
-  def push(%ScmConnection{} = conn, branch), do: git(conn, "push", ["--set-upstream", "origin", branch])
+  def push(%ScmConnection{} = conn, branch),
+    do: git(conn, "push", ["--set-upstream", "origin", branch])
 
   def git(%ScmConnection{} = conn, cmd, args) when is_list(args) do
     case System.cmd("git", [cmd | args], opts(conn)) do
