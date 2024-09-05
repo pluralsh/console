@@ -206,9 +206,25 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.list_revisions/3
     end
 
+    field :component_metrics, :service_component_metrics do
+      arg :component_id, non_null(:id)
+      arg :start,        :datetime
+      arg :stop,         :datetime
+      arg :step,         :string
+
+      resolve &Deployments.metrics/3
+    end
+
     field :editable, :boolean, resolve: &Deployments.editable/3, description: "whether this service is editable"
 
     timestamps()
+  end
+
+  object :service_component_metrics do
+    field :cpu, list_of(:metric_response)
+    field :mem, list_of(:metric_response)
+    field :pod_cpu, list_of(:metric_response)
+    field :pod_mem, list_of(:metric_response)
   end
 
   @desc "a representation of a past revision of a service"

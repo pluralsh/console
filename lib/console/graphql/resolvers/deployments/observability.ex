@@ -1,7 +1,8 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   use Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Schema.{DeploymentSettings, ObservabilityProvider}
-  alias Console.Deployments.{Settings, Observability}
+  import Console.GraphQl.Resolvers.Observability, only: [prom_args: 1]
+  alias Console.Schema.{DeploymentSettings, ObservabilityProvider, Cluster, Service, ServiceComponent}
+  alias Console.Deployments.{Settings, Observability, Services}
   alias Console.Services.Observability, as: ObsSvc
 
   @default_offset 30 * 60
@@ -20,6 +21,25 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
 
   def delete_observability_provider(%{id: id}, %{context: %{current_user: user}}),
     do: Observability.delete_provider(id, user)
+
+  def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
+    {start, stop, step} = prom_args(args)
+    Observability.query({cluster, node}, start, stop, step)
+  end
+
+  def metrics(%Cluster{} = cluster, args, _) do
+    {start, stop, step} = prom_args(args)
+    Observability.query(cluster, start, stop, step)
+  end
+
+  def metrics(%Service{id: id}, %{component_id: comp_id} = args, _) when is_binary(comp_id) do
+    {start, stop, step} = prom_args(args)
+    case Services.get_service_component!(comp_id) do
+      %ServiceComponent{service_id: ^id} = comp ->
+        Observability.query(comp, start, stop, step)
+      _ -> {:error, "component with id #{comp_id} not found"}
+    end
+  end
 
   def cluster_logs(cluster, %{query: query} = args, _) do
     with_client(:loki, fn ->

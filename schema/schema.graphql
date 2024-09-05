@@ -3161,12 +3161,21 @@ type ServiceDeployment {
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
 
+  componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
+
   "whether this service is editable"
   editable: Boolean
 
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type ServiceComponentMetrics {
+  cpu: [MetricResponse]
+  mem: [MetricResponse]
+  podCpu: [MetricResponse]
+  podMem: [MetricResponse]
 }
 
 "a representation of a past revision of a service"
@@ -3761,6 +3770,25 @@ type ClusterProvider {
   updatedAt: DateTime
 }
 
+type ClusterMetrics {
+  cpu: [MetricResponse]
+  memory: [MetricResponse]
+  cpuRequests: [MetricResponse]
+  memoryRequests: [MetricResponse]
+  cpuLimits: [MetricResponse]
+  memoryLimits: [MetricResponse]
+  pods: [MetricResponse]
+  cpuUsage: [MetricResponse]
+  memoryUsage: [MetricResponse]
+}
+
+type ClusterNodeMetrics {
+  cpu: [MetricResponse]
+  memory: [MetricResponse]
+  cpuUsage: [MetricResponse]
+  memoryUsage: [MetricResponse]
+}
+
 "a representation of a cluster you can deploy to"
 type Cluster {
   "internal id of this cluster"
@@ -3911,6 +3939,10 @@ type Cluster {
 
   "Queries logs for a cluster out of loki"
   logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
+
+  clusterMetrics(start: DateTime, stop: DateTime, step: String): ClusterMetrics
+
+  clusterNodeMetrics(node: String!, start: DateTime, stop: DateTime, step: String): ClusterNodeMetrics
 
   "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"
   runtimeServices: [RuntimeService]

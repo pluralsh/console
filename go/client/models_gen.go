@@ -631,7 +631,9 @@ type Cluster struct {
 	// Computes a list of statistics for OPA constraint violations w/in this cluster
 	ViolationStatistics []*ViolationStatistic `json:"violationStatistics,omitempty"`
 	// Queries logs for a cluster out of loki
-	Logs []*LogStream `json:"logs,omitempty"`
+	Logs               []*LogStream        `json:"logs,omitempty"`
+	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
+	ClusterNodeMetrics *ClusterNodeMetrics `json:"clusterNodeMetrics,omitempty"`
 	// fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries
 	RuntimeServices []*RuntimeService `json:"runtimeServices,omitempty"`
 	// whether the current user can edit this cluster
@@ -720,6 +722,25 @@ type ClusterInfo struct {
 	GitVersion *string `json:"gitVersion,omitempty"`
 	Platform   *string `json:"platform,omitempty"`
 	Version    *string `json:"version,omitempty"`
+}
+
+type ClusterMetrics struct {
+	CPU            []*MetricResponse `json:"cpu,omitempty"`
+	Memory         []*MetricResponse `json:"memory,omitempty"`
+	CPURequests    []*MetricResponse `json:"cpuRequests,omitempty"`
+	MemoryRequests []*MetricResponse `json:"memoryRequests,omitempty"`
+	CPULimits      []*MetricResponse `json:"cpuLimits,omitempty"`
+	MemoryLimits   []*MetricResponse `json:"memoryLimits,omitempty"`
+	Pods           []*MetricResponse `json:"pods,omitempty"`
+	CPUUsage       []*MetricResponse `json:"cpuUsage,omitempty"`
+	MemoryUsage    []*MetricResponse `json:"memoryUsage,omitempty"`
+}
+
+type ClusterNodeMetrics struct {
+	CPU         []*MetricResponse `json:"cpu,omitempty"`
+	Memory      []*MetricResponse `json:"memory,omitempty"`
+	CPUUsage    []*MetricResponse `json:"cpuUsage,omitempty"`
+	MemoryUsage []*MetricResponse `json:"memoryUsage,omitempty"`
 }
 
 type ClusterPing struct {
@@ -4132,6 +4153,13 @@ type ServiceComponent struct {
 	APIDeprecations []*APIDeprecation `json:"apiDeprecations,omitempty"`
 }
 
+type ServiceComponentMetrics struct {
+	CPU    []*MetricResponse `json:"cpu,omitempty"`
+	Mem    []*MetricResponse `json:"mem,omitempty"`
+	PodCPU []*MetricResponse `json:"podCpu,omitempty"`
+	PodMem []*MetricResponse `json:"podMem,omitempty"`
+}
+
 // a configuration item k/v pair
 type ServiceConfiguration struct {
 	Name  string `json:"name"`
@@ -4242,7 +4270,8 @@ type ServiceDeployment struct {
 	// imports from stack outputs
 	Imports []*ServiceImport `json:"imports,omitempty"`
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
-	Revisions *RevisionConnection `json:"revisions,omitempty"`
+	Revisions        *RevisionConnection      `json:"revisions,omitempty"`
+	ComponentMetrics *ServiceComponentMetrics `json:"componentMetrics,omitempty"`
 	// whether this service is editable
 	Editable   *bool   `json:"editable,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`

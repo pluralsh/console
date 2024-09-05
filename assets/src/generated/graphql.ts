@@ -704,6 +704,8 @@ export type Cluster = {
   agentUrl?: Maybe<Scalars['String']['output']>;
   /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
+  clusterMetrics?: Maybe<ClusterMetrics>;
+  clusterNodeMetrics?: Maybe<ClusterNodeMetrics>;
   /** a custom credential to use when provisioning this cluster */
   credential?: Maybe<ProviderCredential>;
   /** current k8s version as told to us by the deployment operator */
@@ -792,6 +794,23 @@ export type Cluster = {
   virtual?: Maybe<Scalars['Boolean']['output']>;
   /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterClusterMetricsArgs = {
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterClusterNodeMetricsArgs = {
+  node: Scalars['String']['input'];
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
@@ -929,6 +948,27 @@ export type ClusterInfo = {
   gitVersion?: Maybe<Scalars['String']['output']>;
   platform?: Maybe<Scalars['String']['output']>;
   version?: Maybe<Scalars['String']['output']>;
+};
+
+export type ClusterMetrics = {
+  __typename?: 'ClusterMetrics';
+  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  cpuLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  cpuRequests?: Maybe<Array<Maybe<MetricResponse>>>;
+  cpuUsage?: Maybe<Array<Maybe<MetricResponse>>>;
+  memory?: Maybe<Array<Maybe<MetricResponse>>>;
+  memoryLimits?: Maybe<Array<Maybe<MetricResponse>>>;
+  memoryRequests?: Maybe<Array<Maybe<MetricResponse>>>;
+  memoryUsage?: Maybe<Array<Maybe<MetricResponse>>>;
+  pods?: Maybe<Array<Maybe<MetricResponse>>>;
+};
+
+export type ClusterNodeMetrics = {
+  __typename?: 'ClusterNodeMetrics';
+  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  cpuUsage?: Maybe<Array<Maybe<MetricResponse>>>;
+  memory?: Maybe<Array<Maybe<MetricResponse>>>;
+  memoryUsage?: Maybe<Array<Maybe<MetricResponse>>>;
 };
 
 export type ClusterPing = {
@@ -7130,6 +7170,14 @@ export type ServiceComponent = {
   version?: Maybe<Scalars['String']['output']>;
 };
 
+export type ServiceComponentMetrics = {
+  __typename?: 'ServiceComponentMetrics';
+  cpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  mem?: Maybe<Array<Maybe<MetricResponse>>>;
+  podCpu?: Maybe<Array<Maybe<MetricResponse>>>;
+  podMem?: Maybe<Array<Maybe<MetricResponse>>>;
+};
+
 /** a configuration item k/v pair */
 export type ServiceConfiguration = {
   __typename?: 'ServiceConfiguration';
@@ -7174,6 +7222,7 @@ export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
   /** the cluster this service is deployed into */
   cluster?: Maybe<Cluster>;
+  componentMetrics?: Maybe<ServiceComponentMetrics>;
   /** a n / m representation of the number of healthy components of this service */
   componentStatus?: Maybe<Scalars['String']['output']>;
   /** the kubernetes component of a service */
@@ -7249,6 +7298,15 @@ export type ServiceDeployment = {
   version: Scalars['String']['output'];
   /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentComponentMetricsArgs = {
+  componentId: Scalars['ID']['input'];
+  start?: InputMaybe<Scalars['DateTime']['input']>;
+  step?: InputMaybe<Scalars['String']['input']>;
+  stop?: InputMaybe<Scalars['DateTime']['input']>;
 };
 
 
