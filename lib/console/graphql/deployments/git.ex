@@ -278,7 +278,7 @@ defmodule Console.GraphQl.Deployments.Git do
   @desc "Configuration for setting a pipeline context in an observer"
   input_object :observer_pipeline_action_attributes do
     field :pipeline_id, non_null(:id)
-    field :context,     non_null(:map), description: "the context to apply, use $value to interject the observed value"
+    field :context,     non_null(:json), description: "the context to apply, use $value to interject the observed value"
   end
 
   @desc "a git repository available for deployments"

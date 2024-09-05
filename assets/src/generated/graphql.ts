@@ -3195,7 +3195,7 @@ export type ObserverPipelineAction = {
 /** Configuration for setting a pipeline context in an observer */
 export type ObserverPipelineActionAttributes = {
   /** the context to apply, use $value to interject the observed value */
-  context: Scalars['Map']['input'];
+  context: Scalars['Json']['input'];
   pipelineId: Scalars['ID']['input'];
 };
 
