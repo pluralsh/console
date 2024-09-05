@@ -2653,7 +2653,7 @@ type ObserverPipelineAction struct {
 type ObserverPipelineActionAttributes struct {
 	PipelineID string `json:"pipelineId"`
 	// the context to apply, use $value to interject the observed value
-	Context map[string]interface{} `json:"context"`
+	Context string `json:"context"`
 }
 
 // Configuration for sending a pr in response to an observer

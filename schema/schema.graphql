@@ -4695,7 +4695,7 @@ input ObserverPipelineActionAttributes {
   pipelineId: ID!
 
   "the context to apply, use $value to interject the observed value"
-  context: Map!
+  context: Json!
 }
 
 "a git repository available for deployments"
