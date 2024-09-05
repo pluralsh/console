@@ -242,21 +242,21 @@ func GetConfigMapData(ctx context.Context, client ctrlruntimeclient.Client, name
 	return "", nil
 }
 
-func MarkCondition(set func(condition metav1.Condition), conditionType v1alpha1.ConditionType, conditionStatus metav1.ConditionStatus, conditionReason v1alpha1.ConditionReason, message string, messageArgs ...interface{}) {
+func MarkCondition(set func(condition metav1.Condition), conditionType v1alpha1.ConditionType, conditionStatus metav1.ConditionStatus, conditionReason v1alpha1.ConditionReason, message string) {
 	set(metav1.Condition{
 		Type:    conditionType.String(),
 		Status:  conditionStatus,
 		Reason:  conditionReason.String(),
-		Message: fmt.Sprintf(message, messageArgs...),
+		Message: message,
 	})
 }
 
-func MarkTrue(set func(metav1.Condition), conditionType v1alpha1.ConditionType, conditionReason v1alpha1.ConditionReason, message string, messageArgs ...interface{}) {
-	MarkCondition(set, conditionType, metav1.ConditionTrue, conditionReason, message, messageArgs...)
+func MarkTrue(set func(metav1.Condition), conditionType v1alpha1.ConditionType, conditionReason v1alpha1.ConditionReason, message string) {
+	MarkCondition(set, conditionType, metav1.ConditionTrue, conditionReason, message)
 }
 
-func MarkFalse(set func(metav1.Condition), conditionType v1alpha1.ConditionType, conditionReason v1alpha1.ConditionReason, message string, messageArgs ...interface{}) {
-	MarkCondition(set, conditionType, metav1.ConditionFalse, conditionReason, message, messageArgs...)
+func MarkFalse(set func(metav1.Condition), conditionType v1alpha1.ConditionType, conditionReason v1alpha1.ConditionReason, message string) {
+	MarkCondition(set, conditionType, metav1.ConditionFalse, conditionReason, message)
 }
 
 func SyncCondition(set func(condition metav1.Condition), conditionType, status, reason, message *string) {

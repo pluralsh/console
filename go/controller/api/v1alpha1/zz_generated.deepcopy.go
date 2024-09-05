@@ -3233,6 +3233,11 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.ProjectRef != nil {
+		in, out := &in.ProjectRef, &out.ProjectRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
 	if in.Bindings != nil {
 		in, out := &in.Bindings, &out.Bindings
 		*out = new(PrAutomationBindings)
