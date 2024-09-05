@@ -3,10 +3,10 @@ package client
 import (
 	"context"
 
+	console "github.com/pluralsh/console/go/client"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-
-	console "github.com/pluralsh/console/go/client"
 )
 
 func (c *client) CreatePrAutomation(ctx context.Context, attributes console.PrAutomationAttributes) (*console.PrAutomationFragment, error) {
@@ -35,6 +35,9 @@ func (c *client) DeletePrAutomation(ctx context.Context, id string) error {
 
 func (c *client) GetPrAutomation(ctx context.Context, id string) (*console.PrAutomationFragment, error) {
 	response, err := c.consoleClient.GetPrAutomation(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
 	if err == nil && (response == nil || response.PrAutomation == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
@@ -48,6 +51,9 @@ func (c *client) GetPrAutomation(ctx context.Context, id string) (*console.PrAut
 
 func (c *client) GetPrAutomationByName(ctx context.Context, name string) (*console.PrAutomationFragment, error) {
 	response, err := c.consoleClient.GetPrAutomationByName(ctx, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
 	if err == nil && (response == nil || response.PrAutomation == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, name)
 	}

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 
 	console "github.com/pluralsh/console/go/client"
@@ -100,7 +99,7 @@ func (r *ObserverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	// Sync ObservabilityProvider CRD with the Console API
 	apiProvider, err := r.sync(ctx, observer, changed)
 	if err != nil {
-		logger.Error(err, "unable to create or update observability provider")
+		logger.Error(err, "unable to create or update observer")
 		utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -144,11 +143,11 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 	if observer.Spec.ProjectRef != nil {
 		project := &v1alpha1.Project{}
 		if err = r.Get(ctx, client.ObjectKey{Name: observer.Spec.ProjectRef.Name, Namespace: observer.Spec.ProjectRef.Namespace}, project); err != nil {
-			return
+			return target, actions, projectID, err
 		}
 		if !project.Status.HasID() {
 			err = fmt.Errorf("project ID is nil")
-			return
+			return target, actions, projectID, err
 		}
 		projectID = project.Status.ID
 	}
@@ -161,7 +160,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		var helmAuthAttr *console.HelmAuthAttributes
 		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, helm.Provider, helm.Auth)
 		if err != nil {
-			return
+			return target, actions, projectID, err
 		}
 		target.Helm = &console.ObserverHelmAttributes{
 			URL:      helm.URL,
@@ -173,11 +172,11 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 	if git := observer.Spec.Target.Git; git != nil {
 		gitRepo := &v1alpha1.GitRepository{}
 		if err = r.Get(ctx, client.ObjectKey{Name: git.GitRepositoryRef.Name, Namespace: git.GitRepositoryRef.Namespace}, gitRepo); err != nil {
-			return
+			return target, actions, projectID, err
 		}
 		if !gitRepo.Status.HasID() {
 			err = fmt.Errorf("gitRepo ID is nil")
-			return
+			return target, actions, projectID, err
 		}
 		target.Git = &console.ObserverGitAttributes{
 			RepositoryID: gitRepo.Status.GetID(),
@@ -189,7 +188,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		var helmAuthAttr *console.HelmAuthAttributes
 		helmAuthAttr, err = r.HelmRepositoryAuth.HelmAuthAttributes(ctx, oci.Provider, oci.Auth)
 		if err != nil {
-			return
+			return target, actions, projectID, err
 		}
 		target.Oci = &console.ObserverOciAttributes{
 			URL:      oci.URL,
@@ -208,11 +207,11 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 			if pr := action.Configuration.Pr; pr != nil {
 				prAutomation := &v1alpha1.PrAutomation{}
 				if err = r.Get(ctx, client.ObjectKey{Name: pr.PrAutomationRef.Name, Namespace: pr.PrAutomationRef.Namespace}, prAutomation); err != nil {
-					return
+					return target, actions, projectID, err
 				}
 				if !prAutomation.Status.HasID() {
 					err = fmt.Errorf("PrAutomation ID is nil")
-					return
+					return target, actions, projectID, err
 				}
 
 				a.Configuration.Pr = &console.ObserverPrActionAttributes{
@@ -220,6 +219,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					Repository:     pr.Repository,
 					BranchTemplate: pr.BranchTemplate,
 				}
+				a.Configuration.Pr.Context = "{}"
 				if pr.Context.Raw != nil {
 					a.Configuration.Pr.Context = string(pr.Context.Raw)
 				}
@@ -227,26 +227,25 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 			if p := action.Configuration.Pipeline; p != nil {
 				pipeline := &v1alpha1.Pipeline{}
 				if err = r.Get(ctx, client.ObjectKey{Name: p.PipelineRef.Name, Namespace: p.PipelineRef.Namespace}, pipeline); err != nil {
-					return
+					return target, actions, projectID, err
 				}
 				if !pipeline.Status.HasID() {
 					err = fmt.Errorf("pipeline ID is nil")
-					return
+					return target, actions, projectID, err
 				}
 				a.Configuration.Pipeline = &console.ObserverPipelineActionAttributes{
 					PipelineID: pipeline.Status.GetID(),
 				}
+				a.Configuration.Pipeline.Context = "{}"
 				if p.Context.Raw != nil {
-					if err = json.Unmarshal(p.Context.Raw, &a.Configuration.Pipeline.Context); err != nil {
-						return
-					}
+					a.Configuration.Pipeline.Context = string(p.Context.Raw)
 				}
 			}
 			actions[i] = a
 		}
 
 	}
-	return
+	return target, actions, projectID, err
 }
 
 func (r *ObserverReconciler) handleExisting(ctx context.Context, observer *v1alpha1.Observer) (ctrl.Result, error) {

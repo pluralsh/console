@@ -9,4 +9,26 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: observer-sample
 spec:
-  # TODO(user): Add fields here
+  name: test
+  crontab: "5 4 * * *"
+  target:
+    order: SEMVER
+    target: GIT
+  actions:
+    - type: PR
+      configuration:
+        pr:
+          prAutomationRef:
+            name: github-automation
+            namespace: default
+    - type: PIPELINE
+      configuration:
+        pipeline:
+          pipelineRef:
+            name: test
+            namespace: default
+          context:
+            foo: test
+
+
+
