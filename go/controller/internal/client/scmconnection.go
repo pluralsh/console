@@ -2,9 +2,9 @@ package client
 
 import (
 	"context"
-	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 
 	gqlclient "github.com/pluralsh/console/go/client"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
