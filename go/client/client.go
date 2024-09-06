@@ -6950,6 +6950,7 @@ func (t *MyCluster_MyCluster__Restore_ClusterRestoreFragment_Backup_ClusterBacku
 type MyCluster_MyCluster_ struct {
 	ID      string                  "json:\"id\" graphql:\"id\""
 	Name    string                  "json:\"name\" graphql:\"name\""
+	Distro  *ClusterDistro          "json:\"distro,omitempty\" graphql:\"distro\""
 	Restore *ClusterRestoreFragment "json:\"restore,omitempty\" graphql:\"restore\""
 }
 
@@ -6964,6 +6965,12 @@ func (t *MyCluster_MyCluster_) GetName() string {
 		t = &MyCluster_MyCluster_{}
 	}
 	return t.Name
+}
+func (t *MyCluster_MyCluster_) GetDistro() *ClusterDistro {
+	if t == nil {
+		t = &MyCluster_MyCluster_{}
+	}
+	return t.Distro
 }
 func (t *MyCluster_MyCluster_) GetRestore() *ClusterRestoreFragment {
 	if t == nil {
@@ -16460,6 +16467,7 @@ const MyClusterDocument = `query MyCluster {
 		... {
 			id
 			name
+			distro
 			restore {
 				... ClusterRestoreFragment
 			}
