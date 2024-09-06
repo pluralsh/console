@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 
 	gqlclient "github.com/pluralsh/console/go/client"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -34,6 +35,9 @@ func (c *client) DeleteScmConnection(ctx context.Context, id string) error {
 
 func (c *client) GetScmConnection(ctx context.Context, id string) (*gqlclient.ScmConnectionFragment, error) {
 	response, err := c.consoleClient.GetScmConnection(ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
 	if err == nil && (response == nil || response.ScmConnection == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
 	}
@@ -47,6 +51,9 @@ func (c *client) GetScmConnection(ctx context.Context, id string) (*gqlclient.Sc
 
 func (c *client) GetScmConnectionByName(ctx context.Context, name string) (*gqlclient.ScmConnectionFragment, error) {
 	response, err := c.consoleClient.GetScmConnectionByName(ctx, name)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, name)
+	}
 	if err == nil && (response == nil || response.ScmConnection == nil) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, name)
 	}

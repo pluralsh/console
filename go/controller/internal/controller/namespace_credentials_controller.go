@@ -49,7 +49,7 @@ func (r *NamespaceCredentialsReconciler) Reconcile(ctx context.Context, req reco
 	}
 
 	utils.MarkCondition(nc.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewNamespaceCredentialsScope(ctx, r.Client, nc)
+	scope, err := NewDefaultScope(ctx, r.Client, nc)
 	if err != nil {
 		utils.MarkCondition(nc.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, fmt.Sprintf("failed to create scope: %s", err.Error()))
 		return ctrl.Result{}, err

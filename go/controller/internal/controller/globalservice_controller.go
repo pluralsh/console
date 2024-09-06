@@ -69,7 +69,7 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 	}
 
 	utils.MarkCondition(globalService.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewGlobalServiceScope(ctx, r.Client, globalService)
+	scope, err := NewDefaultScope(ctx, r.Client, globalService)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
