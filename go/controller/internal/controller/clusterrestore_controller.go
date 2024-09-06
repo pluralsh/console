@@ -63,7 +63,7 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	utils.MarkCondition(restore.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
 	// Ensure that status updates will always be persisted when exiting this function.
-	scope, err := NewClusterRestoreScope(ctx, r.Client, restore)
+	scope, err := NewDefaultScope(ctx, r.Client, restore)
 	if err != nil {
 		logger.Error(err, "Failed to create restore scope")
 		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

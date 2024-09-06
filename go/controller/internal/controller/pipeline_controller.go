@@ -69,7 +69,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	}
 	utils.MarkCondition(pipeline.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 	// Ensure that status updates will always be persisted when exiting this function.
-	scope, err := NewPipelineScope(ctx, r.Client, pipeline)
+	scope, err := NewDefaultScope(ctx, r.Client, pipeline)
 	if err != nil {
 		logger.Error(err, "Failed to create pipeline scope")
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

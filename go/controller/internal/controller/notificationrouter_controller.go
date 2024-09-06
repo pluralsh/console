@@ -67,7 +67,7 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewNotificationRouterScope(ctx, r.Client, notificationRouter)
+	scope, err := NewDefaultScope(ctx, r.Client, notificationRouter)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

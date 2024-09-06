@@ -81,7 +81,7 @@ func (r *PrAutomationTriggerReconciler) Reconcile(ctx context.Context, req ctrl.
 		return ctrl.Result{}, err
 	}
 
-	scope, err := NewPrAutomationTriggerScope(ctx, r.Client, trigger)
+	scope, err := NewDefaultScope(ctx, r.Client, trigger)
 	if err != nil {
 		utils.MarkFalse(trigger.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
