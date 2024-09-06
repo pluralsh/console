@@ -169,6 +169,7 @@ type ConsoleClient interface {
 	TokenExchange(ctx context.Context, token string, interceptors ...clientv2.RequestInterceptor) (*TokenExchange, error)
 	CreateAccessToken(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*CreateAccessToken, error)
 	DeleteAccessToken(ctx context.Context, token string, interceptors ...clientv2.RequestInterceptor) (*DeleteAccessToken, error)
+	SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error)
 	GetUser(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
 	DeleteUser(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteUser, error)
 	AddGroupMember(ctx context.Context, groupID string, userID string, interceptors ...clientv2.RequestInterceptor) (*AddGroupMember, error)
@@ -12125,6 +12126,31 @@ func (t *TokenExchange_TokenExchange) GetBoundRoles() []*TokenExchange_TokenExch
 	return t.BoundRoles
 }
 
+type SaveUpgradeInsights_SaveUpgradeInsights struct {
+	ID      string  "json:\"id\" graphql:\"id\""
+	Name    string  "json:\"name\" graphql:\"name\""
+	Version *string "json:\"version,omitempty\" graphql:\"version\""
+}
+
+func (t *SaveUpgradeInsights_SaveUpgradeInsights) GetID() string {
+	if t == nil {
+		t = &SaveUpgradeInsights_SaveUpgradeInsights{}
+	}
+	return t.ID
+}
+func (t *SaveUpgradeInsights_SaveUpgradeInsights) GetName() string {
+	if t == nil {
+		t = &SaveUpgradeInsights_SaveUpgradeInsights{}
+	}
+	return t.Name
+}
+func (t *SaveUpgradeInsights_SaveUpgradeInsights) GetVersion() *string {
+	if t == nil {
+		t = &SaveUpgradeInsights_SaveUpgradeInsights{}
+	}
+	return t.Version
+}
+
 type AddGroupMember_CreateGroupMember_GroupMemberFragment_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -13916,6 +13942,17 @@ func (t *DeleteAccessToken) GetDeleteAccessToken() *AccessTokenFragment {
 		t = &DeleteAccessToken{}
 	}
 	return t.DeleteAccessToken
+}
+
+type SaveUpgradeInsights struct {
+	SaveUpgradeInsights []*SaveUpgradeInsights_SaveUpgradeInsights "json:\"saveUpgradeInsights,omitempty\" graphql:\"saveUpgradeInsights\""
+}
+
+func (t *SaveUpgradeInsights) GetSaveUpgradeInsights() []*SaveUpgradeInsights_SaveUpgradeInsights {
+	if t == nil {
+		t = &SaveUpgradeInsights{}
+	}
+	return t.SaveUpgradeInsights
 }
 
 type GetUser struct {
@@ -27246,6 +27283,32 @@ func (c *Client) DeleteAccessToken(ctx context.Context, token string, intercepto
 	return &res, nil
 }
 
+const SaveUpgradeInsightsDocument = `mutation SaveUpgradeInsights ($insights: [UpgradeInsightAttributes]) {
+	saveUpgradeInsights(insights: $insights) {
+		id
+		name
+		version
+	}
+}
+`
+
+func (c *Client) SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error) {
+	vars := map[string]any{
+		"insights": insights,
+	}
+
+	var res SaveUpgradeInsights
+	if err := c.Client.Post(ctx, "SaveUpgradeInsights", SaveUpgradeInsightsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const GetUserDocument = `query GetUser ($email: String!) {
 	user(email: $email) {
 		... UserFragment
@@ -27532,6 +27595,7 @@ var DocumentOperationNames = map[string]string{
 	TokenExchangeDocument:                             "TokenExchange",
 	CreateAccessTokenDocument:                         "CreateAccessToken",
 	DeleteAccessTokenDocument:                         "DeleteAccessToken",
+	SaveUpgradeInsightsDocument:                       "SaveUpgradeInsights",
 	GetUserDocument:                                   "GetUser",
 	DeleteUserDocument:                                "DeleteUser",
 	AddGroupMemberDocument:                            "AddGroupMember",
