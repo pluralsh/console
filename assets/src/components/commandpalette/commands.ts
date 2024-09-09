@@ -3,6 +3,7 @@ import {
   BellIcon,
   ClusterIcon,
   DocumentIcon,
+  EyeIcon,
   GearTrainIcon,
   GitPullIcon,
   HistoryIcon,
@@ -272,6 +273,13 @@ export function useCommands(): CommandGroup[] {
       },
       {
         commands: [
+          {
+            label: 'Share secret',
+            icon: EyeIcon,
+            callback: () => console.log('share secret'),
+            options: { preventDefault: true },
+            hotkeys: ['shift X'], // TODO: Change?
+          },
           {
             label: `Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`,
             icon: SprayIcon,
