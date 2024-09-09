@@ -30,7 +30,7 @@ type NotificationSinkSpec struct {
 
 	// Type the channel type of this sink.
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:validation:Enum=SLACK;TEAMS
+	// +kubebuilder:validation:Enum=SLACK;TEAMS;PLURAL
 	Type console.SinkType `json:"type"`
 
 	// Configuration for the specific type
