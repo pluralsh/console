@@ -1,0 +1,27 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Cluster
+metadata:
+  name: mgmt
+  namespace: default
+spec:
+  handle: mgmt
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: NotificationSink
+metadata:
+  name: plural-sink
+  namespace: default
+spec:
+  type: PLURAL
+  name: plural-sink
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: NotificationRouter
+metadata:
+  name: plural
+  namespace: default
+spec:
+  events: ['*']
+  sinks:
+    - name: plural-sink
+      namespace: default
