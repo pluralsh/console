@@ -27,6 +27,12 @@ import Notification from './Notification'
 
 const NOTIFICATIONS_QUERY_PAGE_SIZE = 100
 
+const REACT_VIRTUAL_OPTIONS: ComponentProps<
+  typeof Table
+>['reactVirtualOptions'] = {
+  overscan: 10,
+}
+
 const columnHelper = createColumnHelper<AppNotificationFragment>()
 
 const columns = [
@@ -47,7 +53,12 @@ export function NotificationsPanel({
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const { data: _ } = useFetchPaginatedData({
+  const {
+    data: _,
+    pageInfo,
+    fetchNextPage,
+    setVirtualSlice,
+  } = useFetchPaginatedData({
     queryHook: useAppNotificationsQuery,
     pageSize: NOTIFICATIONS_QUERY_PAGE_SIZE,
     keyPath: ['appNotifications'],
@@ -181,6 +192,12 @@ export function NotificationsPanel({
           <Table
             columns={columns}
             data={notifications}
+            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            virtualizeRows
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
             hideHeader
             css={{
               border: 'none',
