@@ -2,7 +2,7 @@ defmodule Console.Deployments.GitTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
-  alias Console.Deployments.{Git, Services}
+  alias Console.Deployments.{Git, Services, Settings}
   alias Console.Commands.Plural
 
   describe "#create_repository/2" do
@@ -350,6 +350,110 @@ defmodule Console.Deployments.GitTest do
         title: "pr",
         url: "https://github.com/org/name/pulls/2",
       }, insert(:user))
+    end
+  end
+
+  describe "#upsert_observer/2" do
+    test "it can create a new observer record" do
+      admin = admin_user()
+      pra = insert(:pr_automation)
+
+      {:ok, observer} = Git.upsert_observer(%{
+        name: "observer",
+        target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        actions: [
+          %{type: :pr, configuration: %{
+            pr: %{automation_id: pra.id, context: %{some: "$value"}}
+          }}
+        ],
+        crontab: "*/5 * * *",
+      }, admin)
+
+      assert observer.name == "observer"
+      assert observer.target.helm.url == "https://pluralsh.github.io/console"
+      assert observer.target.helm.chart == "console"
+      assert hd(observer.actions).type == :pr
+      assert hd(observer.actions).configuration.pr.automation_id == pra.id
+      assert observer.crontab == "*/5 * * *"
+      assert observer.next_run_at
+      assert observer.last_run_at
+      assert observer.project_id == Settings.default_project!().id
+    end
+
+    test "it can update an existing observer record" do
+      admin = admin_user()
+      obs = insert(:observer)
+
+      {:ok, updated} = Git.upsert_observer(%{
+        name: obs.name,
+        target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        actions: [
+          %{type: :pr, configuration: %{
+            pr: %{automation_id: insert(:pr_automation).id, context: %{some: "$value"}}
+          }}
+        ],
+        crontab: "*/5 * * *",
+      }, admin)
+
+      assert updated.id == obs.id
+      assert updated.target.helm.url == "https://pluralsh.github.io/console"
+    end
+
+    test "project writers can create" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+      pra = insert(:pr_automation)
+
+      {:ok, observer} = Git.upsert_observer(%{
+        name: "observer",
+        target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        actions: [
+          %{type: :pr, configuration: %{
+            pr: %{automation_id: pra.id, context: %{some: "$value"}}
+          }}
+        ],
+        project_id: project.id,
+        crontab: "*/5 * * *",
+      }, user)
+
+      assert observer.name == "observer"
+      assert observer.target.helm.url == "https://pluralsh.github.io/console"
+      assert hd(observer.actions).type == :pr
+      assert hd(observer.actions).configuration.pr.automation_id == pra.id
+      assert observer.crontab == "*/5 * * *"
+      assert observer.next_run_at
+      assert observer.last_run_at
+      assert observer.project_id == project.id
+    end
+
+    test "randos cannot create" do
+      pra = insert(:pr_automation)
+
+      {:error, _} = Git.upsert_observer(%{
+        name: "observer",
+        target: %{helm: %{url: "https://pluralsh.github.io/console", chart: "console"}},
+        actions: [
+          %{type: :pr, pr: %{automation_id: pra.id, context: %{some: "$value"}}}
+        ],
+        crontab: "*/5 * * *",
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_observer/2" do
+    test "writers can delete observers" do
+      obs = insert(:observer)
+
+      {:ok, deleted} = Git.delete_observer(obs.id, admin_user())
+
+      assert deleted.id == obs.id
+      refute refetch(obs)
+    end
+
+    test "randos cannot delete" do
+      obs = insert(:observer)
+
+      {:error, _} = Git.delete_observer(obs.id, insert(:user))
     end
   end
 

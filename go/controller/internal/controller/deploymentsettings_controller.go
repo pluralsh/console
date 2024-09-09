@@ -74,7 +74,7 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 	if settings.Name != deploymentSettingsName || settings.Namespace != deploymentSettingsNamespace {
 		return ctrl.Result{}, nil
 	}
-	scope, err := NewDeploymentSettingsScope(ctx, r.Client, settings)
+	scope, err := NewDefaultScope(ctx, r.Client, settings)
 	if err != nil {
 		logger.Error(err, "failed to create deployment settings scope")
 		utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

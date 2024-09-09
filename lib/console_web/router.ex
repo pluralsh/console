@@ -46,7 +46,10 @@ defmodule ConsoleWeb.Router do
 
       forward "/gql", Console.ExternalGraphQl.Plug,
         schema: Console.ExternalGraphQl,
-        document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default]
+        document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default],
+        analyze_complexity: true,
+        max_complexity: 650,
+        token_limit: 5_000
 
       scope "/v1", ConsoleWeb do
         get "/digests", GitController, :digest
@@ -86,7 +89,10 @@ defmodule ConsoleWeb.Router do
 
     forward "/gql", Absinthe.Plug,
       schema: Console.GraphQl,
-      document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default]
+      document_providers: [Console.GraphQl.Apq, Absinthe.Plug.DocumentProvider.Default],
+      analyze_complexity: true,
+      max_complexity: 650,
+      token_limit: 5_000
   end
 
   scope "/", ConsoleWeb do

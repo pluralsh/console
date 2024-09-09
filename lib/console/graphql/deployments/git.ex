@@ -1,7 +1,16 @@
 defmodule Console.GraphQl.Deployments.Git do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.Deployments
-  alias Console.Schema.{GitRepository, HelmRepository, PullRequest, ScmConnection, ScmWebhook, PrAutomation, Configuration}
+  alias Console.Schema.{
+    GitRepository,
+    HelmRepository,
+    PullRequest,
+    ScmConnection,
+    ScmWebhook,
+    PrAutomation,
+    Configuration,
+    Observer
+  }
 
   ecto_enum :auth_method, GitRepository.AuthMethod
   ecto_enum :git_health, GitRepository.Health
@@ -12,6 +21,11 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :pr_status, PullRequest.Status
   ecto_enum :configuration_type, Configuration.Type
   ecto_enum :operation, Configuration.Condition.Operation
+  ecto_enum :observer_action_type, Observer.Action
+  ecto_enum :observer_target_type, Observer.TargetType
+  ecto_enum :observer_git_target_type, Observer.GitTargetType
+  ecto_enum :observer_target_order, Observer.TargetOrder
+  ecto_enum :observer_status, Observer.Status
 
   input_object :git_attributes do
     field :url,           non_null(:string), description: "the url of this repository"
@@ -102,6 +116,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :service_id,    :id, description: "link to a service if this can modify its configuration"
     field :connection_id, :id, description: "the scm connection to use for pr generation"
 
+
+    field :project_id,    :id, description: "the project this automation lives in"
     field :repository_id, :id, description: "a git repository to use for create mode prs"
 
     field :configuration, list_of(:pr_configuration_attributes)
@@ -198,6 +214,71 @@ defmodule Console.GraphQl.Deployments.Git do
     field :hmac,  non_null(:string), description: "the secret token for authenticating this webhook via hmac signature"
     field :type,  non_null(:scm_type), description: "the type of webhook to create"
     field :owner, non_null(:string), description: "the owner for this webhook in your SCM, eg a github org or gitlab group"
+  end
+
+  @desc "An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response"
+  input_object :observer_attributes do
+    field :name,       non_null(:string)
+    field :crontab,    non_null(:string)
+    field :target,     non_null(:observer_target_attributes)
+    field :actions,    list_of(:observer_action_attributes)
+    field :project_id, :id
+  end
+
+  @desc "A spec for a target to poll"
+  input_object :observer_target_attributes do
+    field :target, non_null(:observer_target_type)
+    field :format, :string
+    field :order,  non_null(:observer_target_order)
+    field :helm,   :observer_helm_attributes
+    field :oci,    :observer_oci_attributes
+    field :git,    :observer_git_attributes
+  end
+
+  @desc "A spec of an action that can be taken in response to an observed entity"
+  input_object :observer_action_attributes do
+    field :type, non_null(:observer_action_type)
+    field :configuration, non_null(:observer_action_configuration_attributes)
+  end
+
+  @desc "a spec for querying a helm repository in an observer"
+  input_object :observer_helm_attributes do
+    field :url,      non_null(:string)
+    field :chart,    non_null(:string)
+    field :provider, :helm_auth_provider
+    field :auth,     :helm_auth_attributes
+  end
+
+  @desc "a spec for querying a helm repository in an observer"
+  input_object :observer_oci_attributes do
+    field :url,      non_null(:string)
+    field :provider, :helm_auth_provider
+    field :auth,     :helm_auth_attributes
+  end
+
+  input_object :observer_git_attributes do
+    field :repository_id, non_null(:id)
+    field :type,          non_null(:observer_git_target_type)
+  end
+
+  @desc "configuration for an observer action"
+  input_object :observer_action_configuration_attributes do
+    field :pr,       :observer_pr_action_attributes
+    field :pipeline, :observer_pipeline_action_attributes
+  end
+
+  @desc "Configuration for sending a pr in response to an observer"
+  input_object :observer_pr_action_attributes do
+    field :automation_id,   non_null(:id)
+    field :repository,      :string
+    field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
+    field :context,         non_null(:json), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "Configuration for setting a pipeline context in an observer"
+  input_object :observer_pipeline_action_attributes do
+    field :pipeline_id, non_null(:id)
+    field :context,     non_null(:json), description: "the context to apply, use $value to interject the observed value"
   end
 
   @desc "a git repository available for deployments"
@@ -314,6 +395,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :repository, :git_repository,
       description: "the git repository to use for sourcing external templates",
       resolve: dataloader(Deployments)
+    field :project,    :project,
+      description: "the project this automation lives w/in",
+      resolve: dataloader(Deployments)
     field :cluster,    :cluster,
       description: "link to a cluster if this is to perform an upgrade",
       resolve: dataloader(Deployments)
@@ -426,6 +510,85 @@ defmodule Console.GraphQl.Deployments.Git do
     timestamps()
   end
 
+  @desc "An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response"
+  object :observer do
+    field :id,          non_null(:id)
+    field :name,        non_null(:string)
+    field :status,      non_null(:observer_status)
+    field :crontab,     non_null(:string)
+    field :last_run_at, non_null(:datetime)
+    field :next_run_at, non_null(:datetime)
+    field :target,      non_null(:observer_target)
+    field :actions,     list_of(:observer_action)
+
+    field :project, :project, resolve: dataloader(Deployments)
+    field :errors,  list_of(:service_error), resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  @desc "A spec for a target to poll"
+  object :observer_target do
+    field :target, non_null(:observer_target_type)
+
+    @desc """
+    a regex for extracting the target value, useful in cases where a semver is nested
+    in a larger release string.  The first capture group is the substring that is used for the value.
+    """
+    field :format, :string
+    field :order,  non_null(:observer_target_order), description: "the order in which polled results are applied, defaults to SEMVER"
+
+    field :helm,   :observer_helm_repo
+    field :oci,    :observer_oci_repo
+    field :git,    :observer_git_repo
+  end
+
+  @desc "A spec of an action that can be taken in response to an observed entity"
+  object :observer_action do
+    field :type, non_null(:observer_action_type)
+    field :configuration, non_null(:observer_action_configuration)
+  end
+
+  @desc "a spec for querying a helm in an observer"
+  object :observer_helm_repo do
+    field :url,      non_null(:string)
+    field :chart,    non_null(:string)
+    field :provider, :helm_auth_provider
+  end
+
+  @desc "a spec for querying a oci repository in an observer"
+  object :observer_oci_repo do
+    field :url,      non_null(:string)
+    field :provider, :helm_auth_provider
+  end
+
+  @desc "a spec for polling a git repository for recent updates"
+  object :observer_git_repo do
+    field :repository_id, non_null(:id)
+    field :type,          non_null(:observer_git_target_type),
+      description: "the resource within the git repository you want to poll"
+  end
+
+  @desc "configuration for an observer action"
+  object :observer_action_configuration do
+    field :pr,       :observer_pr_action
+    field :pipeline, :observer_pipeline_action
+  end
+
+  @desc "Configuration for sending a pr in response to an observer"
+  object :observer_pr_action do
+    field :automation_id,   non_null(:id)
+    field :repository,      :string
+    field :branch_template, :string, description: "a template to use for the created branch, use $value to interject the observed value"
+    field :context,         non_null(:json), description: "the context to apply, use $value to interject the observed value"
+  end
+
+  @desc "Configuration for setting a pipeline context in an observer"
+  object :observer_pipeline_action do
+    field :pipeline_id, non_null(:id)
+    field :context,     non_null(:map), description: "the context to apply, use $value to interject the observed value"
+  end
+
   connection node_type: :git_repository
   connection node_type: :helm_repository
   connection node_type: :scm_connection
@@ -433,6 +596,7 @@ defmodule Console.GraphQl.Deployments.Git do
   connection node_type: :pull_request
   connection node_type: :scm_webhook
   connection node_type: :dependency_management_service
+  connection node_type: :observer
 
   delta :git_repository
 
@@ -526,6 +690,21 @@ defmodule Console.GraphQl.Deployments.Git do
       middleware Authenticated
 
       resolve &Deployments.list_dependency_management_services/2
+    end
+
+    field :observer, :observer do
+      middleware Authenticated
+      arg :id,   :id
+      arg :name, :string
+
+      resolve &Deployments.resolve_observer/2
+    end
+
+    connection field :observers, node_type: :observer do
+      middleware Authenticated
+      arg :project_id, :id
+
+      resolve &Deployments.list_observers/2
     end
   end
 
@@ -678,6 +857,20 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :attributes, :helm_repository_attributes
 
       safe_resolve &Deployments.upsert_helm_repository/2
+    end
+
+    field :upsert_observer, :observer do
+      middleware Authenticated
+      arg :attributes, :observer_attributes
+
+      resolve &Deployments.upsert_observer/2
+    end
+
+    field :delete_observer, :observer do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_observer/2
     end
   end
 end

@@ -58,7 +58,7 @@ func (in *ProjectReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 	}
 	utils.MarkCondition(project.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
 
-	scope, err := NewProjectScope(ctx, in.Client, project)
+	scope, err := NewDefaultScope(ctx, in.Client, project)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(project.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

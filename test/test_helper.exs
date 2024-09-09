@@ -34,6 +34,7 @@ Mimic.copy(Tentacat.App.Installations)
 Mimic.copy(Tentacat.Organizations.Hooks)
 Mimic.copy(Console.Deployments.Pr.Git)
 Mimic.copy(Console.Deployments.Pr.Dispatcher)
+Mimic.copy(Console.Deployments.Observer.Runner)
 
 ExUnit.start()
 Ecto.Adapters.SQL.Sandbox.mode(Console.Repo, :manual)

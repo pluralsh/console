@@ -5,6 +5,7 @@ defmodule Console.Deployments.CronTest do
   alias Kazan.Apis.Core.V1, as: Core
   alias Console.Deployments.{Cron, Clusters, Services}
 
+
   describe "#prune_services/0" do
     test "it will wipe stale drained services" do
       svcs = insert_list(3, :service, deleted_at: Timex.now())
@@ -264,6 +265,41 @@ defmodule Console.Deployments.CronTest do
       for c <- ignore do
         refute refetch(c).last_run_at
       end
+    end
+  end
+
+  describe "#prune_notifications/0" do
+    test "it will wipe old read or really old unread notifications" do
+      read = insert_list(2, :app_notification, read_at: Timex.now() |> Timex.shift(days: -8))
+      unread = insert_list(2, :app_notification, inserted_at: Timex.now() |> Timex.shift(days: -40))
+      ignore = insert_list(3, :app_notification)
+
+      Cron.prune_notifications()
+
+      for n <- read ++ unread,
+        do: refute refetch(n)
+
+      for n <- ignore,
+        do: assert refetch(n)
+    end
+  end
+end
+
+defmodule Console.Deployments.AsyncCronTest do
+  use Console.DataCase, async: false
+  use Mimic
+  alias Console.Deployments.{Cron}
+
+  setup :set_mimic_global
+
+  describe "#run_observers/0" do
+    test "it can execute pending observers" do
+      insert_list(2, :observer, next_run_at: Timex.now() |> Timex.shift(minutes: -1))
+      insert(:observer, next_run_at: Timex.now() |> Timex.shift(minutes: 5))
+
+      expect(Console.Deployments.Observer.Runner, :run, 2, fn _ -> :ok end)
+
+      :ok = Cron.run_observers()
     end
   end
 end

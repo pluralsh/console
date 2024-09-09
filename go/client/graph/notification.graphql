@@ -15,6 +15,7 @@ fragment NotificationSinkFragment on NotificationSink {
     name
     type
     configuration { ...SinkConfigurationFragment }
+    notificationBindings { ...PolicyBindingFragment}
 }
 
 fragment SinkConfigurationFragment on SinkConfiguration {

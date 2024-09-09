@@ -780,6 +780,8 @@ export type Cluster = {
   /** key/value tags to filter clusters */
   tags?: Maybe<Array<Maybe<Tag>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** any upgrade insights provided by your cloud provider that have been discovered by our agent */
+  upgradeInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
   /** Checklist of tasks to complete to safely upgrade this cluster */
   upgradePlan?: Maybe<ClusterUpgradePlan>;
   /** desired k8s version for the cluster */
@@ -1308,6 +1310,7 @@ export type ConsoleConfiguration = {
   features?: Maybe<AvailableFeatures>;
   gitCommit?: Maybe<Scalars['String']['output']>;
   gitStatus?: Maybe<GitStatus>;
+  /** whether at least one cluster has been installed, false if a user hasn't fully onboarded */
   installed?: Maybe<Scalars['Boolean']['output']>;
   isDemoProject?: Maybe<Scalars['Boolean']['output']>;
   isSandbox?: Maybe<Scalars['Boolean']['output']>;
@@ -3065,6 +3068,200 @@ export type ObservableMetricAttributes = {
   providerId: Scalars['ID']['input'];
 };
 
+/** An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response */
+export type Observer = {
+  __typename?: 'Observer';
+  actions?: Maybe<Array<Maybe<ObserverAction>>>;
+  crontab: Scalars['String']['output'];
+  errors?: Maybe<Array<Maybe<ServiceError>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastRunAt: Scalars['DateTime']['output'];
+  name: Scalars['String']['output'];
+  nextRunAt: Scalars['DateTime']['output'];
+  project?: Maybe<Project>;
+  status: ObserverStatus;
+  target: ObserverTarget;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A spec of an action that can be taken in response to an observed entity */
+export type ObserverAction = {
+  __typename?: 'ObserverAction';
+  configuration: ObserverActionConfiguration;
+  type: ObserverActionType;
+};
+
+/** A spec of an action that can be taken in response to an observed entity */
+export type ObserverActionAttributes = {
+  configuration: ObserverActionConfigurationAttributes;
+  type: ObserverActionType;
+};
+
+/** configuration for an observer action */
+export type ObserverActionConfiguration = {
+  __typename?: 'ObserverActionConfiguration';
+  pipeline?: Maybe<ObserverPipelineAction>;
+  pr?: Maybe<ObserverPrAction>;
+};
+
+/** configuration for an observer action */
+export type ObserverActionConfigurationAttributes = {
+  pipeline?: InputMaybe<ObserverPipelineActionAttributes>;
+  pr?: InputMaybe<ObserverPrActionAttributes>;
+};
+
+export enum ObserverActionType {
+  Pipeline = 'PIPELINE',
+  Pr = 'PR'
+}
+
+/** An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response */
+export type ObserverAttributes = {
+  actions?: InputMaybe<Array<InputMaybe<ObserverActionAttributes>>>;
+  crontab: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  target: ObserverTargetAttributes;
+};
+
+export type ObserverConnection = {
+  __typename?: 'ObserverConnection';
+  edges?: Maybe<Array<Maybe<ObserverEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ObserverEdge = {
+  __typename?: 'ObserverEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Observer>;
+};
+
+export type ObserverGitAttributes = {
+  repositoryId: Scalars['ID']['input'];
+  type: ObserverGitTargetType;
+};
+
+/** a spec for polling a git repository for recent updates */
+export type ObserverGitRepo = {
+  __typename?: 'ObserverGitRepo';
+  repositoryId: Scalars['ID']['output'];
+  /** the resource within the git repository you want to poll */
+  type: ObserverGitTargetType;
+};
+
+export enum ObserverGitTargetType {
+  Tags = 'TAGS'
+}
+
+/** a spec for querying a helm repository in an observer */
+export type ObserverHelmAttributes = {
+  auth?: InputMaybe<HelmAuthAttributes>;
+  chart: Scalars['String']['input'];
+  provider?: InputMaybe<HelmAuthProvider>;
+  url: Scalars['String']['input'];
+};
+
+/** a spec for querying a helm in an observer */
+export type ObserverHelmRepo = {
+  __typename?: 'ObserverHelmRepo';
+  chart: Scalars['String']['output'];
+  provider?: Maybe<HelmAuthProvider>;
+  url: Scalars['String']['output'];
+};
+
+/** a spec for querying a helm repository in an observer */
+export type ObserverOciAttributes = {
+  auth?: InputMaybe<HelmAuthAttributes>;
+  provider?: InputMaybe<HelmAuthProvider>;
+  url: Scalars['String']['input'];
+};
+
+/** a spec for querying a oci repository in an observer */
+export type ObserverOciRepo = {
+  __typename?: 'ObserverOciRepo';
+  provider?: Maybe<HelmAuthProvider>;
+  url: Scalars['String']['output'];
+};
+
+/** Configuration for setting a pipeline context in an observer */
+export type ObserverPipelineAction = {
+  __typename?: 'ObserverPipelineAction';
+  /** the context to apply, use $value to interject the observed value */
+  context: Scalars['Map']['output'];
+  pipelineId: Scalars['ID']['output'];
+};
+
+/** Configuration for setting a pipeline context in an observer */
+export type ObserverPipelineActionAttributes = {
+  /** the context to apply, use $value to interject the observed value */
+  context: Scalars['Json']['input'];
+  pipelineId: Scalars['ID']['input'];
+};
+
+/** Configuration for sending a pr in response to an observer */
+export type ObserverPrAction = {
+  __typename?: 'ObserverPrAction';
+  automationId: Scalars['ID']['output'];
+  /** a template to use for the created branch, use $value to interject the observed value */
+  branchTemplate?: Maybe<Scalars['String']['output']>;
+  /** the context to apply, use $value to interject the observed value */
+  context: Scalars['Json']['output'];
+  repository?: Maybe<Scalars['String']['output']>;
+};
+
+/** Configuration for sending a pr in response to an observer */
+export type ObserverPrActionAttributes = {
+  automationId: Scalars['ID']['input'];
+  /** a template to use for the created branch, use $value to interject the observed value */
+  branchTemplate?: InputMaybe<Scalars['String']['input']>;
+  /** the context to apply, use $value to interject the observed value */
+  context: Scalars['Json']['input'];
+  repository?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum ObserverStatus {
+  Failed = 'FAILED',
+  Healthy = 'HEALTHY'
+}
+
+/** A spec for a target to poll */
+export type ObserverTarget = {
+  __typename?: 'ObserverTarget';
+  /**
+   * a regex for extracting the target value, useful in cases where a semver is nested
+   * in a larger release string.  The first capture group is the substring that is used for the value.
+   */
+  format?: Maybe<Scalars['String']['output']>;
+  git?: Maybe<ObserverGitRepo>;
+  helm?: Maybe<ObserverHelmRepo>;
+  oci?: Maybe<ObserverOciRepo>;
+  /** the order in which polled results are applied, defaults to SEMVER */
+  order: ObserverTargetOrder;
+  target: ObserverTargetType;
+};
+
+/** A spec for a target to poll */
+export type ObserverTargetAttributes = {
+  format?: InputMaybe<Scalars['String']['input']>;
+  git?: InputMaybe<ObserverGitAttributes>;
+  helm?: InputMaybe<ObserverHelmAttributes>;
+  oci?: InputMaybe<ObserverOciAttributes>;
+  order: ObserverTargetOrder;
+  target: ObserverTargetType;
+};
+
+export enum ObserverTargetOrder {
+  Latest = 'LATEST',
+  Semver = 'SEMVER'
+}
+
+export enum ObserverTargetType {
+  Git = 'GIT',
+  Helm = 'HELM',
+  Oci = 'OCI'
+}
+
 export enum Operation {
   Eq = 'EQ',
   Gt = 'GT',
@@ -3738,6 +3935,8 @@ export type PrAutomation = {
   message: Scalars['String']['output'];
   /** the name for this automation */
   name: Scalars['String']['output'];
+  /** the project this automation lives w/in */
+  project?: Maybe<Project>;
   /** the git repository to use for sourcing external templates */
   repository?: Maybe<GitRepository>;
   /** An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster */
@@ -3770,6 +3969,8 @@ export type PrAutomationAttributes = {
   identifier?: InputMaybe<Scalars['String']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  /** the project this automation lives in */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
   /** a git repository to use for create mode prs */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   role?: InputMaybe<PrRole>;
@@ -4397,6 +4598,7 @@ export type RootMutationType = {
   deleteNotificationSink?: Maybe<NotificationSink>;
   deleteObjectStore?: Maybe<ObjectStore>;
   deleteObservabilityProvider?: Maybe<ObservabilityProvider>;
+  deleteObserver?: Maybe<Observer>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
   deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
@@ -4464,6 +4666,8 @@ export type RootMutationType = {
   /** upserts a pipeline with a given name */
   savePipeline?: Maybe<Pipeline>;
   saveServiceContext?: Maybe<ServiceContext>;
+  /** agent api to persist upgrade insights for its cluster */
+  saveUpgradeInsights?: Maybe<Array<Maybe<UpgradeInsight>>>;
   selfManage?: Maybe<ServiceDeployment>;
   /** creates the service to enable self-hosted renovate in one pass */
   setupRenovate?: Maybe<ServiceDeployment>;
@@ -4508,6 +4712,7 @@ export type RootMutationType = {
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertObservabilityProvider?: Maybe<ObservabilityProvider>;
+  upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
   upsertVirtualCluster?: Maybe<Cluster>;
 };
@@ -4839,6 +5044,11 @@ export type RootMutationTypeDeleteObservabilityProviderArgs = {
 };
 
 
+export type RootMutationTypeDeleteObserverArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeletePeerArgs = {
   name: Scalars['String']['input'];
 };
@@ -5122,6 +5332,11 @@ export type RootMutationTypeSaveServiceContextArgs = {
 };
 
 
+export type RootMutationTypeSaveUpgradeInsightsArgs = {
+  insights?: InputMaybe<Array<InputMaybe<UpgradeInsightAttributes>>>;
+};
+
+
 export type RootMutationTypeSelfManageArgs = {
   values: Scalars['String']['input'];
 };
@@ -5361,6 +5576,11 @@ export type RootMutationTypeUpsertObservabilityProviderArgs = {
 };
 
 
+export type RootMutationTypeUpsertObserverArgs = {
+  attributes?: InputMaybe<ObserverAttributes>;
+};
+
+
 export type RootMutationTypeUpsertPolicyConstraintsArgs = {
   constraints?: InputMaybe<Array<InputMaybe<PolicyConstraintAttributes>>>;
 };
@@ -5470,6 +5690,8 @@ export type RootQueryType = {
   objectStores?: Maybe<ObjectStoreConnection>;
   observabilityProvider?: Maybe<ObservabilityProvider>;
   observabilityProviders?: Maybe<ObservabilityProviderConnection>;
+  observer?: Maybe<Observer>;
+  observers?: Maybe<ObserverConnection>;
   pagedClusterGates?: Maybe<PipelineGateConnection>;
   pagedClusterServices?: Maybe<ServiceDeploymentConnection>;
   persona?: Maybe<Persona>;
@@ -6036,6 +6258,21 @@ export type RootQueryTypeObservabilityProvidersArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeObserverArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeObserversArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -7802,6 +8039,64 @@ export type TerraformStateUrls = {
 export enum Tool {
   Helm = 'HELM',
   Terraform = 'TERRAFORM'
+}
+
+export type UpgradeInsight = {
+  __typename?: 'UpgradeInsight';
+  /** longform description of this insight */
+  description?: Maybe<Scalars['String']['output']>;
+  details?: Maybe<Array<Maybe<UpgradeInsightDetail>>>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  refreshedAt?: Maybe<Scalars['DateTime']['output']>;
+  status?: Maybe<UpgradeInsightStatus>;
+  transitionedAt?: Maybe<Scalars['DateTime']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the k8s version this insight applies to */
+  version?: Maybe<Scalars['String']['output']>;
+};
+
+export type UpgradeInsightAttributes = {
+  /** longform description of this insight */
+  description?: InputMaybe<Scalars['String']['input']>;
+  details?: InputMaybe<Array<InputMaybe<UpgradeInsightDetailAttributes>>>;
+  name: Scalars['String']['input'];
+  refreshedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  status?: InputMaybe<UpgradeInsightStatus>;
+  transitionedAt?: InputMaybe<Scalars['DateTime']['input']>;
+  /** the k8s version this insight applies to */
+  version?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpgradeInsightDetail = {
+  __typename?: 'UpgradeInsightDetail';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  removedIn?: Maybe<Scalars['String']['output']>;
+  replacedIn?: Maybe<Scalars['String']['output']>;
+  /** the replacement for this API */
+  replacement?: Maybe<Scalars['String']['output']>;
+  status?: Maybe<UpgradeInsightStatus>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a possibly deprecated API */
+  used?: Maybe<Scalars['String']['output']>;
+};
+
+export type UpgradeInsightDetailAttributes = {
+  removedIn?: InputMaybe<Scalars['String']['input']>;
+  replacedIn?: InputMaybe<Scalars['String']['input']>;
+  /** the replacement for this API */
+  replacement?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<UpgradeInsightStatus>;
+  /** a possibly deprecated API */
+  used?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum UpgradeInsightStatus {
+  Failed = 'FAILED',
+  Passing = 'PASSING',
+  Unknown = 'UNKNOWN'
 }
 
 export type UpgradePlan = {

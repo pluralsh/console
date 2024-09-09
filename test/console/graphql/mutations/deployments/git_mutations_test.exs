@@ -343,4 +343,51 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       """, %{"id" => hook.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "upsertObserver" do
+    test "admins can upsert observers" do
+      pra = insert(:pr_automation)
+
+      {:ok, %{data: %{"upsertObserver" => obs}}} = run_query("""
+        mutation Upsert($attrs: ObserverAttributes!) {
+          upsertObserver(attributes: $attrs) {
+            id
+            name
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "observer",
+          "crontab" => "*/5 * * * *",
+          "target" => %{
+            "target" => "HELM",
+            "order" => "SEMVER",
+            "helm" => %{"url" => "https://pluralsh.github.io/console", "chart" => "console"}
+          },
+          "actions" => [
+            %{"type" => "PR", "configuration" => %{
+              "pr" => %{"automation_id" => pra.id, "context" => Jason.encode!(%{"some" => "$value"})}
+            }}
+          ]
+        }
+      }, %{current_user: admin_user()})
+
+      assert obs["name"] == "observer"
+    end
+  end
+
+  describe "deleteObserver" do
+    test "it can delete an observer" do
+      observer = insert(:observer)
+
+      {:ok, %{data: %{"deleteObserver" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteObserver(id: $id) { id }
+        }
+      """, %{"id" => observer.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == observer.id
+      refute refetch(observer)
+    end
+  end
 end

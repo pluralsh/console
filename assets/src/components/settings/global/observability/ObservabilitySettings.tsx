@@ -29,8 +29,12 @@ export default function ObservabilitySettings() {
         updateSettings({
           variables: {
             attributes: {
-              prometheusConnection: formState.state.prometheusConnection,
-              lokiConnection: formState.state.lokiConnection,
+              prometheusConnection: formState.state.prometheusConnection.host
+                ? formState.state.prometheusConnection
+                : undefined,
+              lokiConnection: formState.state.lokiConnection.host
+                ? formState.state.lokiConnection
+                : undefined,
             },
           },
           onCompleted: (data) => {

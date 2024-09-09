@@ -2,6 +2,9 @@ defmodule Console.Schema.AppNotification do
   use Piazza.Ecto.Schema
   alias Console.Schema.{User}
 
+  @expiry [days: -7]
+  @too_old [days: -30]
+
   defenum Priority, low: 0, medium: 1, high: 2
 
   schema "app_notifications" do
@@ -27,9 +30,12 @@ defmodule Console.Schema.AppNotification do
   end
 
   def expired(query \\ __MODULE__) do
-    expiry = Timex.now() |> Timex.shift(days: -7)
+    expiry  = Timex.now() |> Timex.shift(@expiry)
+    too_old = Timex.now() |> Timex.shift(@too_old)
 
-    from(n in query, where: not is_nil(n.read_at) and n.read_at < ^expiry)
+    from(n in query,
+      where: (not is_nil(n.read_at) and n.read_at < ^expiry) or n.inserted_at < ^too_old
+    )
   end
 
   def changeset(model, attrs \\ %{}) do

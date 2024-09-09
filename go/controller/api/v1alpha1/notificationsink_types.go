@@ -36,6 +36,10 @@ type NotificationSinkSpec struct {
 	// Configuration for the specific type
 	// +kubebuilder:validation:Optional
 	Configuration SinkConfiguration `json:"configuration"`
+
+	// Bindings to determine users/groups to be notified for PLURAL sync types
+	// +kubebuilder:validation:Optional
+	Bindings []Binding `json:"bindings,omitempty"`
 }
 
 type SinkConfiguration struct {

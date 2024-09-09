@@ -4,11 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/runtime"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -19,7 +22,12 @@ const (
 	applicationCredentialsKeyName = "applicationCredentials"
 )
 
-func (in *HelmRepositoryReconciler) getAuthSecretRef(helmRepository *v1alpha1.HelmRepository) *corev1.SecretReference {
+type HelmRepositoryAuth struct {
+	client.Client
+	Scheme *runtime.Scheme
+}
+
+func (in *HelmRepositoryAuth) getAuthSecretRef(helmRepository *v1alpha1.HelmRepository) *corev1.SecretReference {
 	if helmRepository.Spec.Provider == nil || helmRepository.Spec.Auth == nil {
 		return nil
 	}
@@ -49,46 +57,36 @@ func (in *HelmRepositoryReconciler) getAuthSecretRef(helmRepository *v1alpha1.He
 	return nil
 }
 
-func (in *HelmRepositoryReconciler) tryAddOwnerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {
-	secretRef := in.getAuthSecretRef(helmRepository)
-	if secretRef == nil {
-		return nil
-	}
-
-	secret, err := utils.GetSecret(ctx, in.Client, secretRef)
-	if err != nil {
-		return err
-	}
-
-	return utils.TryAddControllerRef(ctx, in.Client, helmRepository, secret, in.Scheme)
-}
-
-func (in *HelmRepositoryReconciler) missingCredentialKeyError(key string) error {
+func (in *HelmRepositoryAuth) missingCredentialKeyError(key string) error {
 	return fmt.Errorf("%q key does not exist in referenced credential secret", key)
 }
 
-func (in *HelmRepositoryReconciler) authAttributes(ctx context.Context, helmRepository v1alpha1.HelmRepository) (*console.HelmAuthAttributes, error) {
-	if helmRepository.Spec.Provider == nil || helmRepository.Spec.Auth == nil {
+func (in *HelmRepositoryAuth) authAttributes(ctx context.Context, helmRepository v1alpha1.HelmRepository) (*console.HelmAuthAttributes, error) {
+	return in.HelmAuthAttributes(ctx, helmRepository.Spec.Provider, helmRepository.Spec.Auth)
+}
+
+func (in *HelmRepositoryAuth) HelmAuthAttributes(ctx context.Context, provider *console.HelmAuthProvider, auth *v1alpha1.HelmRepositoryAuth) (*console.HelmAuthAttributes, error) {
+	if provider == nil || auth == nil {
 		return nil, nil
 	}
 
-	switch *helmRepository.Spec.Provider {
+	switch *provider {
 	case console.HelmAuthProviderBasic:
-		return in.basicAuthAttributes(ctx, helmRepository.Spec.Auth.Basic)
+		return in.basicAuthAttributes(ctx, auth.Basic)
 	case console.HelmAuthProviderBearer:
-		return in.bearerAuthAttributes(ctx, helmRepository.Spec.Auth.Bearer)
+		return in.bearerAuthAttributes(ctx, auth.Bearer)
 	case console.HelmAuthProviderAws:
-		return in.awsAuthAttributes(ctx, helmRepository.Spec.Auth.Aws)
+		return in.awsAuthAttributes(ctx, auth.Aws)
 	case console.HelmAuthProviderAzure:
-		return in.azureAuthAttributes(ctx, helmRepository.Spec.Auth.Azure)
+		return in.azureAuthAttributes(ctx, auth.Azure)
 	case console.HelmAuthProviderGcp:
-		return in.gcpAuthAttributes(ctx, helmRepository.Spec.Auth.Gcp)
+		return in.gcpAuthAttributes(ctx, auth.Gcp)
 	}
 
 	return nil, nil
 }
 
-func (in *HelmRepositoryReconciler) basicAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthBasic) (*console.HelmAuthAttributes, error) {
+func (in *HelmRepositoryAuth) basicAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthBasic) (*console.HelmAuthAttributes, error) {
 	if auth == nil {
 		return nil, nil
 	}
@@ -111,7 +109,7 @@ func (in *HelmRepositoryReconciler) basicAuthAttributes(ctx context.Context, aut
 	}, nil
 }
 
-func (in *HelmRepositoryReconciler) bearerAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthBearer) (*console.HelmAuthAttributes, error) {
+func (in *HelmRepositoryAuth) bearerAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthBearer) (*console.HelmAuthAttributes, error) {
 	if auth == nil {
 		return nil, nil
 	}
@@ -133,7 +131,7 @@ func (in *HelmRepositoryReconciler) bearerAuthAttributes(ctx context.Context, au
 	}, nil
 }
 
-func (in *HelmRepositoryReconciler) awsAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthAWS) (*console.HelmAuthAttributes, error) {
+func (in *HelmRepositoryAuth) awsAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthAWS) (*console.HelmAuthAttributes, error) {
 	if auth == nil {
 		return nil, nil
 	}
@@ -164,7 +162,7 @@ func (in *HelmRepositoryReconciler) awsAuthAttributes(ctx context.Context, auth 
 	return attrs, nil
 }
 
-func (in *HelmRepositoryReconciler) azureAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthAzure) (*console.HelmAuthAttributes, error) {
+func (in *HelmRepositoryAuth) azureAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthAzure) (*console.HelmAuthAttributes, error) {
 	if auth == nil {
 		return nil, nil
 	}
@@ -196,7 +194,7 @@ func (in *HelmRepositoryReconciler) azureAuthAttributes(ctx context.Context, aut
 	return attrs, nil
 }
 
-func (in *HelmRepositoryReconciler) gcpAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthGCP) (*console.HelmAuthAttributes, error) {
+func (in *HelmRepositoryAuth) gcpAuthAttributes(ctx context.Context, auth *v1alpha1.HelmRepositoryAuthGCP) (*console.HelmAuthAttributes, error) {
 	if auth == nil || auth.ApplicationCredentialsSecretRef == nil {
 		return nil, nil
 	}

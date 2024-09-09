@@ -49,6 +49,7 @@ Binding ...
 _Appears in:_
 - [Bindings](#bindings)
 - [DeploymentSettingsBindings](#deploymentsettingsbindings)
+- [NotificationSinkSpec](#notificationsinkspec)
 - [PrAutomationBindings](#prautomationbindings)
 
 | Field | Description | Default | Validation |
@@ -1148,6 +1149,7 @@ _Appears in:_
 | `name` _string_ | Name the name of this service, if not provided NotificationSink's own name from NotificationSink.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `type` _[SinkType](#sinktype)_ | Type the channel type of this sink. |  | Enum: [SLACK TEAMS] <br />Optional: {} <br /> |
 | `configuration` _[SinkConfiguration](#sinkconfiguration)_ | Configuration for the specific type |  | Optional: {} <br /> |
+| `bindings` _[Binding](#binding) array_ | Bindings to determine users/groups to be notified for PLURAL sync types |  | Optional: {} <br /> |
 
 
 #### ObservabilityProvider
@@ -1505,8 +1507,9 @@ _Appears in:_
 | `title` _string_ | Title the title of the generated pr |  | Optional: {} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ClusterRef a cluster this pr works on |  | Optional: {} <br /> |
 | `scmConnectionRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ScmConnectionRef the SCM connection to use for generating this PR |  | Required: {} <br /> |
-| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef ... |  | Optional: {} <br /> |
-| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef the service this PR acts on |  | Optional: {} <br /> |
+| `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the repository this automation uses. |  | Optional: {} <br /> |
+| `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef the service this PR acts on. |  | Optional: {} <br /> |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef the project this automation belongs to. |  | Optional: {} <br /> |
 | `bindings` _[PrAutomationBindings](#prautomationbindings)_ | Bindings contain read and write policies of pr automation |  | Optional: {} <br /> |
 | `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration self-service configuration for the UI wizard generating this PR |  | Optional: {} <br /> |
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Specs for files to be templated and created |  | Optional: {} <br /> |

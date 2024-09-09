@@ -55,7 +55,7 @@ func (r *ProviderReconciler) Reconcile(ctx context.Context, req reconcile.Reques
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	utils.MarkCondition(provider.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
-	scope, err := NewProviderScope(ctx, r.Client, provider)
+	scope, err := NewDefaultScope(ctx, r.Client, provider)
 	if err != nil {
 		logger.Error(err, "failed to create scope")
 		utils.MarkCondition(provider.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

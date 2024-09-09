@@ -199,6 +199,10 @@ type RootQueryType {
 
   dependencyManagementServices(after: String, first: Int, before: String, last: Int): DependencyManagementServiceConnection
 
+  observer(id: ID, name: String): Observer
+
+  observers(after: String, first: Int, before: String, last: Int, projectId: ID): ObserverConnection
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -573,6 +577,10 @@ type RootMutationType {
 
   upsertHelmRepository(url: String!, attributes: HelmRepositoryAttributes): HelmRepository
 
+  upsertObserver(attributes: ObserverAttributes): Observer
+
+  deleteObserver(id: ID!): Observer
+
   createCluster(attributes: ClusterAttributes!): Cluster
 
   updateCluster(id: ID!, attributes: ClusterUpdateAttributes!): Cluster
@@ -712,6 +720,9 @@ type RootMutationType {
 
   "registers a list of runtime services discovered for the current cluster"
   registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
+
+  "agent api to persist upgrade insights for its cluster"
+  saveUpgradeInsights(insights: [UpgradeInsightAttributes]): [UpgradeInsight]
 
   upsertVirtualCluster(attributes: ClusterAttributes!, parentId: ID!): Cluster
 
@@ -3429,6 +3440,12 @@ enum ClusterDistro {
   K3S
 }
 
+enum UpgradeInsightStatus {
+  PASSING
+  FAILED
+  UNKNOWN
+}
+
 enum Conjunction {
   AND
   OR
@@ -3661,6 +3678,38 @@ input TagQuery {
   tags: [TagInput]
 }
 
+input UpgradeInsightAttributes {
+  name: String!
+
+  "the k8s version this insight applies to"
+  version: String
+
+  "longform description of this insight"
+  description: String
+
+  status: UpgradeInsightStatus
+
+  refreshedAt: DateTime
+
+  transitionedAt: DateTime
+
+  details: [UpgradeInsightDetailAttributes]
+}
+
+input UpgradeInsightDetailAttributes {
+  status: UpgradeInsightStatus
+
+  "a possibly deprecated API"
+  used: String
+
+  "the replacement for this API"
+  replacement: String
+
+  replacedIn: String
+
+  removedIn: String
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -3824,6 +3873,9 @@ type Cluster {
 
   "custom resources with dedicated views for this cluster"
   pinnedCustomResources: [PinnedCustomResource]
+
+  "any upgrade insights provided by your cloud provider that have been discovered by our agent"
+  upgradeInsights: [UpgradeInsight]
 
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
@@ -4159,6 +4211,50 @@ type PinnedCustomResource {
   cluster: Cluster
 }
 
+type UpgradeInsight {
+  id: ID!
+
+  name: String!
+
+  "the k8s version this insight applies to"
+  version: String
+
+  "longform description of this insight"
+  description: String
+
+  status: UpgradeInsightStatus
+
+  refreshedAt: DateTime
+
+  transitionedAt: DateTime
+
+  details: [UpgradeInsightDetail]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type UpgradeInsightDetail {
+  id: ID!
+
+  status: UpgradeInsightStatus
+
+  "a possibly deprecated API"
+  used: String
+
+  "the replacement for this API"
+  replacement: String
+
+  replacedIn: String
+
+  removedIn: String
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -4244,6 +4340,31 @@ enum Operation {
   LTE
   PREFIX
   SUFFIX
+}
+
+enum ObserverActionType {
+  PIPELINE
+  PR
+}
+
+enum ObserverTargetType {
+  OCI
+  HELM
+  GIT
+}
+
+enum ObserverGitTargetType {
+  TAGS
+}
+
+enum ObserverTargetOrder {
+  SEMVER
+  LATEST
+}
+
+enum ObserverStatus {
+  HEALTHY
+  FAILED
 }
 
 input GitAttributes {
@@ -4384,6 +4505,9 @@ input PrAutomationAttributes {
   "the scm connection to use for pr generation"
   connectionId: ID
 
+  "the project this automation lives in"
+  projectId: ID
+
   "a git repository to use for create mode prs"
   repositoryId: ID
 
@@ -4500,6 +4624,78 @@ input ScmWebhookAttributes {
 
   "the owner for this webhook in your SCM, eg a github org or gitlab group"
   owner: String!
+}
+
+"An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response"
+input ObserverAttributes {
+  name: String!
+  crontab: String!
+  target: ObserverTargetAttributes!
+  actions: [ObserverActionAttributes]
+  projectId: ID
+}
+
+"A spec for a target to poll"
+input ObserverTargetAttributes {
+  target: ObserverTargetType!
+  format: String
+  order: ObserverTargetOrder!
+  helm: ObserverHelmAttributes
+  oci: ObserverOciAttributes
+  git: ObserverGitAttributes
+}
+
+"A spec of an action that can be taken in response to an observed entity"
+input ObserverActionAttributes {
+  type: ObserverActionType!
+  configuration: ObserverActionConfigurationAttributes!
+}
+
+"a spec for querying a helm repository in an observer"
+input ObserverHelmAttributes {
+  url: String!
+  chart: String!
+  provider: HelmAuthProvider
+  auth: HelmAuthAttributes
+}
+
+"a spec for querying a helm repository in an observer"
+input ObserverOciAttributes {
+  url: String!
+  provider: HelmAuthProvider
+  auth: HelmAuthAttributes
+}
+
+input ObserverGitAttributes {
+  repositoryId: ID!
+  type: ObserverGitTargetType!
+}
+
+"configuration for an observer action"
+input ObserverActionConfigurationAttributes {
+  pr: ObserverPrActionAttributes
+  pipeline: ObserverPipelineActionAttributes
+}
+
+"Configuration for sending a pr in response to an observer"
+input ObserverPrActionAttributes {
+  automationId: ID!
+
+  repository: String
+
+  "a template to use for the created branch, use $value to interject the observed value"
+  branchTemplate: String
+
+  "the context to apply, use $value to interject the observed value"
+  context: Json!
+}
+
+"Configuration for setting a pipeline context in an observer"
+input ObserverPipelineActionAttributes {
+  pipelineId: ID!
+
+  "the context to apply, use $value to interject the observed value"
+  context: Json!
 }
 
 "a git repository available for deployments"
@@ -4666,6 +4862,9 @@ type PrAutomation {
   "the git repository to use for sourcing external templates"
   repository: GitRepository
 
+  "the project this automation lives w\/in"
+  project: Project
+
   "link to a cluster if this is to perform an upgrade"
   cluster: Cluster
 
@@ -4802,6 +5001,96 @@ type DependencyManagementService {
   updatedAt: DateTime
 }
 
+"An observer is a mechanism to poll an external helm, oci or other datasources and perform a list of actions in response"
+type Observer {
+  id: ID!
+  name: String!
+  status: ObserverStatus!
+  crontab: String!
+  lastRunAt: DateTime!
+  nextRunAt: DateTime!
+  target: ObserverTarget!
+  actions: [ObserverAction]
+  project: Project
+  errors: [ServiceError]
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"A spec for a target to poll"
+type ObserverTarget {
+  target: ObserverTargetType!
+
+  """
+  a regex for extracting the target value, useful in cases where a semver is nested
+  in a larger release string.  The first capture group is the substring that is used for the value.
+  """
+  format: String
+
+  "the order in which polled results are applied, defaults to SEMVER"
+  order: ObserverTargetOrder!
+
+  helm: ObserverHelmRepo
+
+  oci: ObserverOciRepo
+
+  git: ObserverGitRepo
+}
+
+"A spec of an action that can be taken in response to an observed entity"
+type ObserverAction {
+  type: ObserverActionType!
+  configuration: ObserverActionConfiguration!
+}
+
+"a spec for querying a helm in an observer"
+type ObserverHelmRepo {
+  url: String!
+  chart: String!
+  provider: HelmAuthProvider
+}
+
+"a spec for querying a oci repository in an observer"
+type ObserverOciRepo {
+  url: String!
+  provider: HelmAuthProvider
+}
+
+"a spec for polling a git repository for recent updates"
+type ObserverGitRepo {
+  repositoryId: ID!
+
+  "the resource within the git repository you want to poll"
+  type: ObserverGitTargetType!
+}
+
+"configuration for an observer action"
+type ObserverActionConfiguration {
+  pr: ObserverPrAction
+  pipeline: ObserverPipelineAction
+}
+
+"Configuration for sending a pr in response to an observer"
+type ObserverPrAction {
+  automationId: ID!
+
+  repository: String
+
+  "a template to use for the created branch, use $value to interject the observed value"
+  branchTemplate: String
+
+  "the context to apply, use $value to interject the observed value"
+  context: Json!
+}
+
+"Configuration for setting a pipeline context in an observer"
+type ObserverPipelineAction {
+  pipelineId: ID!
+
+  "the context to apply, use $value to interject the observed value"
+  context: Map!
+}
+
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
@@ -4835,6 +5124,11 @@ type ScmWebhookConnection {
 type DependencyManagementServiceConnection {
   pageInfo: PageInfo!
   edges: [DependencyManagementServiceEdge]
+}
+
+type ObserverConnection {
+  pageInfo: PageInfo!
+  edges: [ObserverEdge]
 }
 
 input CloneAttributes {
@@ -6483,17 +6777,30 @@ type AvailableFeatures {
 
 type ConsoleConfiguration {
   gitCommit: String
+
   isDemoProject: Boolean
+
   isSandbox: Boolean
+
   pluralLogin: Boolean
+
   vpnEnabled: Boolean
+
+  "whether at least one cluster has been installed, false if a user hasn't fully onboarded"
   installed: Boolean
+
   cloud: Boolean
+
   byok: Boolean
+
   externalOidc: Boolean
+
   oidcName: String
+
   features: AvailableFeatures
+
   manifest: PluralManifest
+
   gitStatus: GitStatus
 }
 
@@ -6722,6 +7029,11 @@ type RunbookExecutionEdge {
 
 type WebhookEdge {
   node: Webhook
+  cursor: String
+}
+
+type ObserverEdge {
+  node: Observer
   cursor: String
 }
 

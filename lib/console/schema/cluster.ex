@@ -15,7 +15,8 @@ defmodule Console.Schema.Cluster do
     PrAutomation,
     ClusterRestore,
     ObjectStore,
-    Project
+    Project,
+    UpgradeInsight
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -119,6 +120,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :project,        Project
     belongs_to :parent_cluster, __MODULE__
 
+    has_many :upgrade_insights, UpgradeInsight
     has_many :node_pools, ClusterNodePool, on_replace: :delete
     has_many :service_errors, ServiceError, on_replace: :delete
     has_many :services, Service
@@ -345,6 +347,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:service_errors)
     |> cast_assoc(:tags)
+    |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
     |> foreign_key_constraint(:id, name: :global_services, match: :prefix, message: "Cannot delete due to existing undeletable services bound to this cluster")

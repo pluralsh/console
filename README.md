@@ -19,6 +19,7 @@ We are currently trying to aggregate compatibility and dependency information fo
 
 * $50 for adding compatibilities for a specific version of an application
 * $150 for adding a new application and all to-date compatibility information
+* $300 for a new compatibility scraper (these are all defined in `utils/compatibility/scrapers`)
 
 To be eligible for the upgrade bounty you'll need to submit a PR to this repo with the changes and a link to whatever documentation confirms the correctness of the information.  We'll then review and if it's correct and useful for the broader community, you'll be eligible for the reward once merged.
 

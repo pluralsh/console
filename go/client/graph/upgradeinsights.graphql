@@ -1,0 +1,7 @@
+mutation SaveUpgradeInsights($insights: [UpgradeInsightAttributes]) {
+  saveUpgradeInsights(insights: $insights) {
+    id
+    name
+    version
+  }
+}

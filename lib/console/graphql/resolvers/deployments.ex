@@ -59,7 +59,9 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     StackDefinition,
     StackCron,
     ObservableMetric,
-    ObservabilityProvider
+    ObservabilityProvider,
+    UpgradeInsight,
+    UpgradeInsightDetail
   }
 
   def query(Project, _), do: Project
@@ -117,6 +119,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(StackCron, _), do: StackCron
   def query(ObservableMetric, _), do: ObservableMetric
   def query(ObservabilityProvider, _), do: ObservabilityProvider
+  def query(UpgradeInsight, _), do: UpgradeInsight
+  def query(UpgradeInsightDetail, _), do: UpgradeInsightDetail
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git
