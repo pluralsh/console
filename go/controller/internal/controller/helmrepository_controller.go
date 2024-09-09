@@ -27,10 +27,11 @@ import (
 // Implements reconcile.Reconciler and types.Controller.
 type HelmRepositoryReconciler struct {
 	client.Client
-	ConsoleClient    consoleclient.ConsoleClient
-	Scheme           *runtime.Scheme
-	UserGroupCache   cache.UserGroupCache
-	CredentialsCache credentials.NamespaceCredentialsCache
+	ConsoleClient      consoleclient.ConsoleClient
+	Scheme             *runtime.Scheme
+	UserGroupCache     cache.UserGroupCache
+	CredentialsCache   credentials.NamespaceCredentialsCache
+	HelmRepositoryAuth *HelmRepositoryAuth
 }
 
 // SetupWithManager is responsible for initializing new reconciler within provided ctrl.Manager.
@@ -110,15 +111,15 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 		return ctrl.Result{}, err
 	}
 
-	// Get HelmRepository SHA that can be saved back in the status to check for changes.
-	changed, sha, err := helmRepository.Diff(ctx, in.authAttributes, utils.HashObject)
+	// Get HelmRepositoryAuth SHA that can be saved back in the status to check for changes.
+	changed, sha, err := helmRepository.Diff(ctx, in.HelmRepositoryAuth.authAttributes, utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate Helm repository SHA")
 		utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 
-	// Sync HelmRepository CRD with the Console API.
+	// Sync HelmRepositoryAuth CRD with the Console API.
 	apiHelmRepository, err := in.sync(ctx, helmRepository, changed)
 	if err != nil {
 		logger.Error(err, "unable to sync Helm repository")
@@ -133,6 +134,21 @@ func (in *HelmRepositoryReconciler) Reconcile(ctx context.Context, req reconcile
 	utils.MarkCondition(helmRepository.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
 	return requeue, nil
+}
+
+func (in *HelmRepositoryReconciler) tryAddOwnerRef(ctx context.Context, helmRepository *v1alpha1.HelmRepository) error {
+
+	secretRef := in.HelmRepositoryAuth.getAuthSecretRef(helmRepository)
+	if secretRef == nil {
+		return nil
+	}
+
+	secret, err := utils.GetSecret(ctx, in.Client, secretRef)
+	if err != nil {
+		return err
+	}
+
+	return utils.TryAddControllerRef(ctx, in.Client, helmRepository, secret, in.Scheme)
 }
 
 func (in *HelmRepositoryReconciler) isAlreadyExists(ctx context.Context, helmRepository *v1alpha1.HelmRepository) (bool, error) {
@@ -184,14 +200,14 @@ func (in *HelmRepositoryReconciler) sync(ctx context.Context, helmRepository *v1
 		return nil, err
 	}
 
-	// Read the HelmRepository from Console API if it already exists and was not changed.
+	// Read the HelmRepositoryAuth from Console API if it already exists and was not changed.
 	if exists && !changed {
 		return in.ConsoleClient.GetHelmRepository(ctx, helmRepository.ConsoleName())
 	}
 
-	// Upsert HelmRepository if it does not exist or has changed.
+	// Upsert HelmRepositoryAuth if it does not exist or has changed.
 	logger.Info(fmt.Sprintf("upserting Helm repository %s", helmRepository.ConsoleName()))
-	attributes, err := helmRepository.Attributes(ctx, in.authAttributes)
+	attributes, err := helmRepository.Attributes(ctx, in.HelmRepositoryAuth.authAttributes)
 	if err != nil {
 		return nil, err
 	}

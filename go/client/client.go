@@ -116,6 +116,9 @@ type ConsoleClient interface {
 	GetObservabilityProvider(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error)
 	UpsertObservabilityProvider(ctx context.Context, attributes ObservabilityProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityProvider, error)
 	DeleteObservabilityProvider(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObservabilityProvider, error)
+	UpsertObserver(ctx context.Context, attributes ObserverAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObserver, error)
+	DeleteObserver(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObserver, error)
+	GetObserver(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObserver, error)
 	UpsertPolicyConstraints(ctx context.Context, constraints []*PolicyConstraintAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertPolicyConstraints, error)
 	ListPolicyConstraints(ctx context.Context, after *string, first *int64, before *string, last *int64, namespace *string, kind *string, q *string, interceptors ...clientv2.RequestInterceptor) (*ListPolicyConstraints, error)
 	ListViolationStatistics(ctx context.Context, field ConstraintViolationField, interceptors ...clientv2.RequestInterceptor) (*ListViolationStatistics, error)
@@ -2374,6 +2377,227 @@ func (t *ObservabilityProviderFragment) GetInsertedAt() *string {
 		t = &ObservabilityProviderFragment{}
 	}
 	return t.InsertedAt
+}
+
+type ObserverFragment struct {
+	ID         string                    "json:\"id\" graphql:\"id\""
+	Name       string                    "json:\"name\" graphql:\"name\""
+	Status     ObserverStatus            "json:\"status\" graphql:\"status\""
+	Crontab    string                    "json:\"crontab\" graphql:\"crontab\""
+	Target     ObserverTargetFragment    "json:\"target\" graphql:\"target\""
+	Actions    []*ObserverActionFragment "json:\"actions,omitempty\" graphql:\"actions\""
+	Project    *ProjectFragment          "json:\"project,omitempty\" graphql:\"project\""
+	Errors     []*ErrorFragment          "json:\"errors,omitempty\" graphql:\"errors\""
+	InsertedAt *string                   "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt  *string                   "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+}
+
+func (t *ObserverFragment) GetID() string {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return t.ID
+}
+func (t *ObserverFragment) GetName() string {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return t.Name
+}
+func (t *ObserverFragment) GetStatus() *ObserverStatus {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return &t.Status
+}
+func (t *ObserverFragment) GetCrontab() string {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return t.Crontab
+}
+func (t *ObserverFragment) GetTarget() *ObserverTargetFragment {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return &t.Target
+}
+func (t *ObserverFragment) GetActions() []*ObserverActionFragment {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return t.Actions
+}
+func (t *ObserverFragment) GetProject() *ProjectFragment {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return t.Project
+}
+func (t *ObserverFragment) GetErrors() []*ErrorFragment {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return t.Errors
+}
+func (t *ObserverFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *ObserverFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &ObserverFragment{}
+	}
+	return t.UpdatedAt
+}
+
+type ObserverActionFragment struct {
+	Type          ObserverActionType                  "json:\"type\" graphql:\"type\""
+	Configuration ObserverActionConfigurationFragment "json:\"configuration\" graphql:\"configuration\""
+}
+
+func (t *ObserverActionFragment) GetType() *ObserverActionType {
+	if t == nil {
+		t = &ObserverActionFragment{}
+	}
+	return &t.Type
+}
+func (t *ObserverActionFragment) GetConfiguration() *ObserverActionConfigurationFragment {
+	if t == nil {
+		t = &ObserverActionFragment{}
+	}
+	return &t.Configuration
+}
+
+type ObserverActionConfigurationFragment struct {
+	Pr       *ObserverPrActionFragment       "json:\"pr,omitempty\" graphql:\"pr\""
+	Pipeline *ObserverPipelineActionFragment "json:\"pipeline,omitempty\" graphql:\"pipeline\""
+}
+
+func (t *ObserverActionConfigurationFragment) GetPr() *ObserverPrActionFragment {
+	if t == nil {
+		t = &ObserverActionConfigurationFragment{}
+	}
+	return t.Pr
+}
+func (t *ObserverActionConfigurationFragment) GetPipeline() *ObserverPipelineActionFragment {
+	if t == nil {
+		t = &ObserverActionConfigurationFragment{}
+	}
+	return t.Pipeline
+}
+
+type ObserverPipelineActionFragment struct {
+	PipelineID string                 "json:\"pipelineId\" graphql:\"pipelineId\""
+	Context    map[string]interface{} "json:\"context\" graphql:\"context\""
+}
+
+func (t *ObserverPipelineActionFragment) GetPipelineID() string {
+	if t == nil {
+		t = &ObserverPipelineActionFragment{}
+	}
+	return t.PipelineID
+}
+func (t *ObserverPipelineActionFragment) GetContext() map[string]interface{} {
+	if t == nil {
+		t = &ObserverPipelineActionFragment{}
+	}
+	return t.Context
+}
+
+type ObserverPrActionFragment struct {
+	AutomationID   string  "json:\"automationId\" graphql:\"automationId\""
+	Repository     *string "json:\"repository,omitempty\" graphql:\"repository\""
+	BranchTemplate *string "json:\"branchTemplate,omitempty\" graphql:\"branchTemplate\""
+	Context        string  "json:\"context\" graphql:\"context\""
+}
+
+func (t *ObserverPrActionFragment) GetAutomationID() string {
+	if t == nil {
+		t = &ObserverPrActionFragment{}
+	}
+	return t.AutomationID
+}
+func (t *ObserverPrActionFragment) GetRepository() *string {
+	if t == nil {
+		t = &ObserverPrActionFragment{}
+	}
+	return t.Repository
+}
+func (t *ObserverPrActionFragment) GetBranchTemplate() *string {
+	if t == nil {
+		t = &ObserverPrActionFragment{}
+	}
+	return t.BranchTemplate
+}
+func (t *ObserverPrActionFragment) GetContext() string {
+	if t == nil {
+		t = &ObserverPrActionFragment{}
+	}
+	return t.Context
+}
+
+type ObserverTargetFragment struct {
+	Helm *ObserverHelmRepoFragment "json:\"helm,omitempty\" graphql:\"helm\""
+	Oci  *ObserverOciRepoFragment  "json:\"oci,omitempty\" graphql:\"oci\""
+}
+
+func (t *ObserverTargetFragment) GetHelm() *ObserverHelmRepoFragment {
+	if t == nil {
+		t = &ObserverTargetFragment{}
+	}
+	return t.Helm
+}
+func (t *ObserverTargetFragment) GetOci() *ObserverOciRepoFragment {
+	if t == nil {
+		t = &ObserverTargetFragment{}
+	}
+	return t.Oci
+}
+
+type ObserverOciRepoFragment struct {
+	URL      string            "json:\"url\" graphql:\"url\""
+	Provider *HelmAuthProvider "json:\"provider,omitempty\" graphql:\"provider\""
+}
+
+func (t *ObserverOciRepoFragment) GetURL() string {
+	if t == nil {
+		t = &ObserverOciRepoFragment{}
+	}
+	return t.URL
+}
+func (t *ObserverOciRepoFragment) GetProvider() *HelmAuthProvider {
+	if t == nil {
+		t = &ObserverOciRepoFragment{}
+	}
+	return t.Provider
+}
+
+type ObserverHelmRepoFragment struct {
+	URL      string            "json:\"url\" graphql:\"url\""
+	Chart    string            "json:\"chart\" graphql:\"chart\""
+	Provider *HelmAuthProvider "json:\"provider,omitempty\" graphql:\"provider\""
+}
+
+func (t *ObserverHelmRepoFragment) GetURL() string {
+	if t == nil {
+		t = &ObserverHelmRepoFragment{}
+	}
+	return t.URL
+}
+func (t *ObserverHelmRepoFragment) GetChart() string {
+	if t == nil {
+		t = &ObserverHelmRepoFragment{}
+	}
+	return t.Chart
+}
+func (t *ObserverHelmRepoFragment) GetProvider() *HelmAuthProvider {
+	if t == nil {
+		t = &ObserverHelmRepoFragment{}
+	}
+	return t.Provider
 }
 
 type PolicyConstraintConnectionFragment struct {
@@ -13361,6 +13585,39 @@ func (t *DeleteObservabilityProvider) GetDeleteObservabilityProvider() *Observab
 	return t.DeleteObservabilityProvider
 }
 
+type UpsertObserver struct {
+	UpsertObserver *ObserverFragment "json:\"upsertObserver,omitempty\" graphql:\"upsertObserver\""
+}
+
+func (t *UpsertObserver) GetUpsertObserver() *ObserverFragment {
+	if t == nil {
+		t = &UpsertObserver{}
+	}
+	return t.UpsertObserver
+}
+
+type DeleteObserver struct {
+	DeleteObserver *ObserverFragment "json:\"deleteObserver,omitempty\" graphql:\"deleteObserver\""
+}
+
+func (t *DeleteObserver) GetDeleteObserver() *ObserverFragment {
+	if t == nil {
+		t = &DeleteObserver{}
+	}
+	return t.DeleteObserver
+}
+
+type GetObserver struct {
+	Observer *ObserverFragment "json:\"observer,omitempty\" graphql:\"observer\""
+}
+
+func (t *GetObserver) GetObserver() *ObserverFragment {
+	if t == nil {
+		t = &GetObserver{}
+	}
+	return t.Observer
+}
+
 type UpsertPolicyConstraints struct {
 	UpsertPolicyConstraints *int64 "json:\"upsertPolicyConstraints,omitempty\" graphql:\"upsertPolicyConstraints\""
 }
@@ -22176,6 +22433,373 @@ func (c *Client) DeleteObservabilityProvider(ctx context.Context, id string, int
 	return &res, nil
 }
 
+const UpsertObserverDocument = `mutation UpsertObserver ($attributes: ObserverAttributes!) {
+	upsertObserver(attributes: $attributes) {
+		... ObserverFragment
+	}
+}
+fragment ObserverFragment on Observer {
+	id
+	name
+	status
+	crontab
+	target {
+		... ObserverTargetFragment
+	}
+	actions {
+		... ObserverActionFragment
+	}
+	project {
+		... ProjectFragment
+	}
+	errors {
+		... ErrorFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment ObserverTargetFragment on ObserverTarget {
+	helm {
+		... ObserverHelmRepoFragment
+	}
+	oci {
+		... ObserverOciRepoFragment
+	}
+}
+fragment ObserverHelmRepoFragment on ObserverHelmRepo {
+	url
+	chart
+	provider
+}
+fragment ObserverOciRepoFragment on ObserverOciRepo {
+	url
+	provider
+}
+fragment ObserverActionFragment on ObserverAction {
+	type
+	configuration {
+		... ObserverActionConfigurationFragment
+	}
+}
+fragment ObserverActionConfigurationFragment on ObserverActionConfiguration {
+	pr {
+		... ObserverPrActionFragment
+	}
+	pipeline {
+		... ObserverPipelineActionFragment
+	}
+}
+fragment ObserverPrActionFragment on ObserverPrAction {
+	automationId
+	repository
+	branchTemplate
+	context
+}
+fragment ObserverPipelineActionFragment on ObserverPipelineAction {
+	pipelineId
+	context
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) UpsertObserver(ctx context.Context, attributes ObserverAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObserver, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertObserver
+	if err := c.Client.Post(ctx, "UpsertObserver", UpsertObserverDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteObserverDocument = `mutation DeleteObserver ($id: ID!) {
+	deleteObserver(id: $id) {
+		... ObserverFragment
+	}
+}
+fragment ObserverFragment on Observer {
+	id
+	name
+	status
+	crontab
+	target {
+		... ObserverTargetFragment
+	}
+	actions {
+		... ObserverActionFragment
+	}
+	project {
+		... ProjectFragment
+	}
+	errors {
+		... ErrorFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment ObserverTargetFragment on ObserverTarget {
+	helm {
+		... ObserverHelmRepoFragment
+	}
+	oci {
+		... ObserverOciRepoFragment
+	}
+}
+fragment ObserverHelmRepoFragment on ObserverHelmRepo {
+	url
+	chart
+	provider
+}
+fragment ObserverOciRepoFragment on ObserverOciRepo {
+	url
+	provider
+}
+fragment ObserverActionFragment on ObserverAction {
+	type
+	configuration {
+		... ObserverActionConfigurationFragment
+	}
+}
+fragment ObserverActionConfigurationFragment on ObserverActionConfiguration {
+	pr {
+		... ObserverPrActionFragment
+	}
+	pipeline {
+		... ObserverPipelineActionFragment
+	}
+}
+fragment ObserverPrActionFragment on ObserverPrAction {
+	automationId
+	repository
+	branchTemplate
+	context
+}
+fragment ObserverPipelineActionFragment on ObserverPipelineAction {
+	pipelineId
+	context
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) DeleteObserver(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteObserver, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteObserver
+	if err := c.Client.Post(ctx, "DeleteObserver", DeleteObserverDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetObserverDocument = `query GetObserver ($id: ID, $name: String) {
+	observer(id: $id, name: $name) {
+		... ObserverFragment
+	}
+}
+fragment ObserverFragment on Observer {
+	id
+	name
+	status
+	crontab
+	target {
+		... ObserverTargetFragment
+	}
+	actions {
+		... ObserverActionFragment
+	}
+	project {
+		... ProjectFragment
+	}
+	errors {
+		... ErrorFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment ObserverTargetFragment on ObserverTarget {
+	helm {
+		... ObserverHelmRepoFragment
+	}
+	oci {
+		... ObserverOciRepoFragment
+	}
+}
+fragment ObserverHelmRepoFragment on ObserverHelmRepo {
+	url
+	chart
+	provider
+}
+fragment ObserverOciRepoFragment on ObserverOciRepo {
+	url
+	provider
+}
+fragment ObserverActionFragment on ObserverAction {
+	type
+	configuration {
+		... ObserverActionConfigurationFragment
+	}
+}
+fragment ObserverActionConfigurationFragment on ObserverActionConfiguration {
+	pr {
+		... ObserverPrActionFragment
+	}
+	pipeline {
+		... ObserverPipelineActionFragment
+	}
+}
+fragment ObserverPrActionFragment on ObserverPrAction {
+	automationId
+	repository
+	branchTemplate
+	context
+}
+fragment ObserverPipelineActionFragment on ObserverPipelineAction {
+	pipelineId
+	context
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+fragment ErrorFragment on ServiceError {
+	source
+	message
+}
+`
+
+func (c *Client) GetObserver(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObserver, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetObserver
+	if err := c.Client.Post(ctx, "GetObserver", GetObserverDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const UpsertPolicyConstraintsDocument = `mutation UpsertPolicyConstraints ($constraints: [PolicyConstraintAttributes!]) {
 	upsertPolicyConstraints(constraints: $constraints)
 }
@@ -27542,6 +28166,9 @@ var DocumentOperationNames = map[string]string{
 	GetObservabilityProviderDocument:                  "GetObservabilityProvider",
 	UpsertObservabilityProviderDocument:               "UpsertObservabilityProvider",
 	DeleteObservabilityProviderDocument:               "DeleteObservabilityProvider",
+	UpsertObserverDocument:                            "UpsertObserver",
+	DeleteObserverDocument:                            "DeleteObserver",
+	GetObserverDocument:                               "GetObserver",
 	UpsertPolicyConstraintsDocument:                   "UpsertPolicyConstraints",
 	ListPolicyConstraintsDocument:                     "ListPolicyConstraints",
 	ListViolationStatisticsDocument:                   "ListViolationStatistics",

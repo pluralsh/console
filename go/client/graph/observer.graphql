@@ -1,0 +1,86 @@
+mutation UpsertObserver($attributes: ObserverAttributes!) {
+    upsertObserver(attributes: $attributes) {
+        ... ObserverFragment
+    }
+}
+
+mutation DeleteObserver($id: ID!) {
+    deleteObserver(id: $id) {
+        ...ObserverFragment
+    }
+}
+
+query GetObserver($id: ID, $name: String) {
+    observer(id: $id, name: $name) {
+        ...ObserverFragment
+    }
+}
+
+fragment ObserverFragment on Observer {
+    id
+    name
+    status
+    crontab
+    target {
+        ... ObserverTargetFragment
+    }
+    actions {
+        ... ObserverActionFragment
+    }
+    project {
+        ... ProjectFragment
+    }
+    errors {
+        ...ErrorFragment
+    }
+    insertedAt
+    updatedAt
+}
+
+fragment ObserverActionFragment on ObserverAction {
+    type
+    configuration {
+        ... ObserverActionConfigurationFragment
+    }
+}
+
+fragment ObserverActionConfigurationFragment on ObserverActionConfiguration {
+    pr {
+        ... ObserverPrActionFragment
+    }
+    pipeline {
+        ... ObserverPipelineActionFragment
+    }
+}
+
+fragment ObserverPipelineActionFragment on ObserverPipelineAction {
+    pipelineId
+    context
+}
+
+fragment ObserverPrActionFragment on ObserverPrAction {
+    automationId
+    repository
+    branchTemplate
+    context
+}
+
+fragment ObserverTargetFragment on ObserverTarget {
+    helm {
+        ...ObserverHelmRepoFragment
+    }
+    oci {
+        ... ObserverOciRepoFragment
+    }
+}
+
+fragment ObserverOciRepoFragment on ObserverOciRepo {
+    url
+    provider
+}
+
+fragment ObserverHelmRepoFragment on ObserverHelmRepo {
+    url
+    chart
+    provider
+}

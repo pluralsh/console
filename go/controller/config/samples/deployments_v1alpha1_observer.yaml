@@ -1,0 +1,34 @@
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Observer
+metadata:
+  labels:
+    app.kubernetes.io/name: observer
+    app.kubernetes.io/instance: observer-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: observer-sample
+spec:
+  name: test
+  crontab: "5 4 * * *"
+  target:
+    order: SEMVER
+    target: GIT
+  actions:
+    - type: PR
+      configuration:
+        pr:
+          prAutomationRef:
+            name: github-automation
+            namespace: default
+    - type: PIPELINE
+      configuration:
+        pipeline:
+          pipelineRef:
+            name: test
+            namespace: default
+          context:
+            foo: test
+
+
+

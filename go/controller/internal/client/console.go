@@ -136,6 +136,10 @@ type ConsoleClient interface {
 	UpsertObservabilityProvider(ctx context.Context, attributes console.ObservabilityProviderAttributes) (*console.ObservabilityProviderFragment, error)
 	DeleteObservabilityProvider(ctx context.Context, id string) error
 	IsObservabilityProviderExists(ctx context.Context, name string) (bool, error)
+	UpsertObserver(ctx context.Context, attributes console.ObserverAttributes) (*console.ObserverFragment, error)
+	DeleteObserver(ctx context.Context, id string) error
+	GetObserver(ctx context.Context, id, name *string) (*console.ObserverFragment, error)
+	IsObserverExists(ctx context.Context, name string) (bool, error)
 }
 
 func New(url, token string) ConsoleClient {
