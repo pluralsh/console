@@ -10,11 +10,13 @@ import { PolicyBindingFragment } from '../../generated/graphql'
 
 import { useShareSecretContext } from './ShareSecretContext'
 
+type Binding = Pick<PolicyBindingFragment, 'user' | 'group'>
+
 export default function ShareSecretModal() {
   const { open, setOpen } = useShareSecretContext()
   const [secretName, setSecretName] = useState('')
   const [secretString, setSecretString] = useState('')
-  const [bindings, setBindings] = useState<any>([])
+  const [bindings, setBindings] = useState<Binding[]>([])
 
   const inputRef = useRef<HTMLInputElement>()
 
