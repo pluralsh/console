@@ -61,6 +61,7 @@ query TokenAudits($id: ID!, $cursor: String) {
   }
 }
 
+
 mutation CreateAccessToken($scopes: [ScopeAttributes]) {
   createAccessToken(scopes: $scopes) {
     ...AccessToken
@@ -75,6 +76,12 @@ mutation DeleteAccessToken($token: String!) {
 
 mutation ShareSecret($attributes: SharedSecretAttributes!){
   shareSecret(attributes: $attributes) {
+    ...SharedSecret
+  }
+}
+
+mutation ConsumeSecret($handle: String!){
+  consumeSecret(handle: $handle) {
     ...SharedSecret
   }
 }

@@ -10245,6 +10245,13 @@ export type ShareSecretMutationVariables = Exact<{
 
 export type ShareSecretMutation = { __typename?: 'RootMutationType', shareSecret?: { __typename?: 'SharedSecret', secret: string, handle: string, name: string, insertedAt?: string | null, updatedAt?: string | null } | null };
 
+export type ConsumeSecretMutationVariables = Exact<{
+  handle: Scalars['String']['input'];
+}>;
+
+
+export type ConsumeSecretMutation = { __typename?: 'RootMutationType', consumeSecret?: { __typename?: 'SharedSecret', secret: string, handle: string, name: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null };
 
 export type InviteFragment = { __typename?: 'Invite', secureId: string };
@@ -21176,6 +21183,39 @@ export function useShareSecretMutation(baseOptions?: Apollo.MutationHookOptions<
 export type ShareSecretMutationHookResult = ReturnType<typeof useShareSecretMutation>;
 export type ShareSecretMutationResult = Apollo.MutationResult<ShareSecretMutation>;
 export type ShareSecretMutationOptions = Apollo.BaseMutationOptions<ShareSecretMutation, ShareSecretMutationVariables>;
+export const ConsumeSecretDocument = gql`
+    mutation ConsumeSecret($handle: String!) {
+  consumeSecret(handle: $handle) {
+    ...SharedSecret
+  }
+}
+    ${SharedSecretFragmentDoc}`;
+export type ConsumeSecretMutationFn = Apollo.MutationFunction<ConsumeSecretMutation, ConsumeSecretMutationVariables>;
+
+/**
+ * __useConsumeSecretMutation__
+ *
+ * To run a mutation, you first call `useConsumeSecretMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConsumeSecretMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [consumeSecretMutation, { data, loading, error }] = useConsumeSecretMutation({
+ *   variables: {
+ *      handle: // value for 'handle'
+ *   },
+ * });
+ */
+export function useConsumeSecretMutation(baseOptions?: Apollo.MutationHookOptions<ConsumeSecretMutation, ConsumeSecretMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ConsumeSecretMutation, ConsumeSecretMutationVariables>(ConsumeSecretDocument, options);
+      }
+export type ConsumeSecretMutationHookResult = ReturnType<typeof useConsumeSecretMutation>;
+export type ConsumeSecretMutationResult = Apollo.MutationResult<ConsumeSecretMutation>;
+export type ConsumeSecretMutationOptions = Apollo.BaseMutationOptions<ConsumeSecretMutation, ConsumeSecretMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -21624,6 +21664,7 @@ export const namedOperations = {
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken',
     ShareSecret: 'ShareSecret',
+    ConsumeSecret: 'ConsumeSecret',
     Logout: 'Logout'
   },
   Subscription: {
