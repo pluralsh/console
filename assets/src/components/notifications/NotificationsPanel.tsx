@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import React, { ComponentProps } from 'react'
+import React, { ComponentProps, useMemo } from 'react'
 import {
   Button,
   Card,
@@ -11,17 +11,16 @@ import {
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import { createColumnHelper } from '@tanstack/react-table'
-
-import { isEmpty } from 'lodash'
+import isEmpty from 'lodash/isEmpty'
 
 import { NOTIFICATIONS_ABS_PATH } from '../../routes/settingsRoutesConst'
 import {
   AppNotificationFragment,
-  NotificationPriority,
   useAppNotificationsQuery,
   useReadAppNotificationsMutation,
 } from '../../generated/graphql'
 import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
+import { mapExistingNodes } from '../../utils/graphql'
 
 import Notification from './Notification'
 
@@ -53,75 +52,17 @@ export function NotificationsPanel({
   const theme = useTheme()
   const navigate = useNavigate()
 
-  const {
-    data: _,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData({
-    queryHook: useAppNotificationsQuery,
-    pageSize: NOTIFICATIONS_QUERY_PAGE_SIZE,
-    keyPath: ['appNotifications'],
-  })
+  const { data, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
+      queryHook: useAppNotificationsQuery,
+      pageSize: NOTIFICATIONS_QUERY_PAGE_SIZE,
+      keyPath: ['appNotifications'],
+    })
 
-  // const notifications = useMemo(
-  //   () => mapExistingNodes(data?.appNotifications),
-  //   [data?.appNotifications]
-  // )
-
-  const notifications: AppNotificationFragment[] = [
-    {
-      id: '0',
-      insertedAt: '2024-08-29T00:00:45Z',
-      text: 'Short message',
-      priority: NotificationPriority.Medium,
-    },
-    {
-      id: '0',
-      insertedAt: '2024-08-29T00:00:45Z',
-      text: 'Short message',
-      priority: NotificationPriority.High,
-    },
-    {
-      id: '0',
-      insertedAt: '2024-08-29T00:00:45Z',
-      text: 'Short message',
-      priority: NotificationPriority.Low,
-    },
-    {
-      id: '0',
-      insertedAt: '2024-08-29T00:00:45Z',
-      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
-      priority: NotificationPriority.Low,
-    },
-    {
-      id: '0',
-      insertedAt: '2024-08-29T00:00:45Z',
-      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
-      priority: NotificationPriority.Medium,
-    },
-    {
-      id: '0',
-      insertedAt: '2024-08-29T00:00:45Z',
-      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
-      priority: NotificationPriority.High,
-      readAt: '2024-08-29T00:00:45Z',
-    },
-    {
-      id: '0',
-      insertedAt: '2024-08-29T00:00:45Z',
-      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
-      priority: NotificationPriority.High,
-      readAt: '2024-08-29T00:00:45Z',
-    },
-    {
-      id: '0',
-      insertedAt: '2024-08-29T00:00:45Z',
-      text: 'This is a description for the list item. It is a section of markdown of variable length. By default, it extends to 2 lines, but the user may expand it by pressing the “Read more” button if it extends beyond 2 lines — like this one!',
-      priority: NotificationPriority.Medium,
-      readAt: '2024-08-29T00:00:45Z',
-    },
-  ]
+  const notifications = useMemo(
+    () => mapExistingNodes(data?.appNotifications),
+    [data?.appNotifications]
+  )
 
   const [mutation, { loading, error }] = useReadAppNotificationsMutation({
     onCompleted: () => refetchUnreadNotificationsCount(),
