@@ -52,6 +52,7 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { HelpMenuState, launchHelp } from '../help/HelpLauncher'
+import { useShareSecretContext } from '../sharesecret/ShareSecretContext'
 
 type CommandGroup = {
   commands: Command[]
@@ -110,6 +111,7 @@ export function useCommandsWithHotkeys() {
 }
 
 export function useCommands(): CommandGroup[] {
+  const { setOpen } = useShareSecretContext()
   const mode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
@@ -276,7 +278,7 @@ export function useCommands(): CommandGroup[] {
           {
             label: 'Share secret',
             icon: EyeIcon,
-            callback: () => console.log('share secret'),
+            callback: () => setOpen(true),
             options: { preventDefault: true },
             hotkeys: ['shift X'], // TODO: Change?
           },
