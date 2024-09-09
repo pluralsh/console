@@ -280,7 +280,7 @@ export function useCommands(): CommandGroup[] {
             icon: EyeIcon,
             callback: () => setOpen(true),
             options: { preventDefault: true },
-            hotkeys: ['shift X'], // TODO: Change?
+            hotkeys: ['C then S'],
           },
           {
             label: `Switch to ${mode === 'dark' ? 'light' : 'dark'} mode`,
