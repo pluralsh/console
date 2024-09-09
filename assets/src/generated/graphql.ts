@@ -10209,6 +10209,8 @@ export type AccessTokenFragment = { __typename?: 'AccessToken', id?: string | nu
 
 export type AccessTokenAuditFragment = { __typename?: 'AccessTokenAudit', id?: string | null, city?: string | null, count?: number | null, country?: string | null, insertedAt?: string | null, ip?: string | null, latitude?: string | null, longitude?: string | null, timestamp?: string | null, updatedAt?: string | null };
 
+export type SharedSecretFragment = { __typename?: 'SharedSecret', secret: string, handle: string, name: string, insertedAt?: string | null, updatedAt?: string | null };
+
 export type AccessTokensQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -10235,6 +10237,13 @@ export type DeleteAccessTokenMutationVariables = Exact<{
 
 
 export type DeleteAccessTokenMutation = { __typename?: 'RootMutationType', deleteAccessToken?: { __typename?: 'AccessToken', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, token?: string | null, scopes?: Array<{ __typename?: 'AccessTokenScope', api?: string | null, apis?: Array<string> | null, identifier?: string | null, ids?: Array<string> | null } | null> | null } | null };
+
+export type ShareSecretMutationVariables = Exact<{
+  attributes: SharedSecretAttributes;
+}>;
+
+
+export type ShareSecretMutation = { __typename?: 'RootMutationType', shareSecret?: { __typename?: 'SharedSecret', secret: string, handle: string, name: string, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type UserFragment = { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null };
 
@@ -12727,6 +12736,15 @@ export const AccessTokenAuditFragmentDoc = gql`
   latitude
   longitude
   timestamp
+  updatedAt
+}
+    `;
+export const SharedSecretFragmentDoc = gql`
+    fragment SharedSecret on SharedSecret {
+  secret
+  handle
+  name
+  insertedAt
   updatedAt
 }
     `;
@@ -21125,6 +21143,39 @@ export function useDeleteAccessTokenMutation(baseOptions?: Apollo.MutationHookOp
 export type DeleteAccessTokenMutationHookResult = ReturnType<typeof useDeleteAccessTokenMutation>;
 export type DeleteAccessTokenMutationResult = Apollo.MutationResult<DeleteAccessTokenMutation>;
 export type DeleteAccessTokenMutationOptions = Apollo.BaseMutationOptions<DeleteAccessTokenMutation, DeleteAccessTokenMutationVariables>;
+export const ShareSecretDocument = gql`
+    mutation ShareSecret($attributes: SharedSecretAttributes!) {
+  shareSecret(attributes: $attributes) {
+    ...SharedSecret
+  }
+}
+    ${SharedSecretFragmentDoc}`;
+export type ShareSecretMutationFn = Apollo.MutationFunction<ShareSecretMutation, ShareSecretMutationVariables>;
+
+/**
+ * __useShareSecretMutation__
+ *
+ * To run a mutation, you first call `useShareSecretMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useShareSecretMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [shareSecretMutation, { data, loading, error }] = useShareSecretMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useShareSecretMutation(baseOptions?: Apollo.MutationHookOptions<ShareSecretMutation, ShareSecretMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ShareSecretMutation, ShareSecretMutationVariables>(ShareSecretDocument, options);
+      }
+export type ShareSecretMutationHookResult = ReturnType<typeof useShareSecretMutation>;
+export type ShareSecretMutationResult = Apollo.MutationResult<ShareSecretMutation>;
+export type ShareSecretMutationOptions = Apollo.BaseMutationOptions<ShareSecretMutation, ShareSecretMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -21572,6 +21623,7 @@ export const namedOperations = {
     RestartStackRun: 'RestartStackRun',
     CreateAccessToken: 'CreateAccessToken',
     DeleteAccessToken: 'DeleteAccessToken',
+    ShareSecret: 'ShareSecret',
     Logout: 'Logout'
   },
   Subscription: {
@@ -21718,6 +21770,7 @@ export const namedOperations = {
     RunStep: 'RunStep',
     AccessToken: 'AccessToken',
     AccessTokenAudit: 'AccessTokenAudit',
+    SharedSecret: 'SharedSecret',
     User: 'User',
     Invite: 'Invite',
     RoleBinding: 'RoleBinding',
