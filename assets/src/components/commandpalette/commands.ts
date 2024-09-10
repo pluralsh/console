@@ -294,6 +294,6 @@ export function useCommands(): CommandGroup[] {
         ],
       },
     ],
-    [navigate, cluster, mode]
+    [navigate, cluster?.id, mode, setOpen]
   )
 }
