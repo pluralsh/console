@@ -23,10 +23,6 @@ export const getHelpSpacing = (theme: DefaultTheme) => ({
     top: theme.spacing.xxlarge,
     bottom: theme.spacing.xxlarge,
   },
-  icon: {
-    width: theme.spacing.xlarge,
-    height: theme.spacing.xlarge,
-  },
 })
 
 export function useHelpSpacing() {
@@ -50,9 +46,10 @@ export enum HelpOpenState {
 
 const HelpLauncherSC = styled.div(({ theme }) => ({
   display: 'flex',
+  width: '100%',
   position: 'relative',
   alignItems: 'end',
-  justifyContent: 'end',
+  paddingLeft: theme.spacing.xxsmall,
   pointerEvents: 'none',
   '& > *': {
     pointerEvents: 'auto',
@@ -61,20 +58,15 @@ const HelpLauncherSC = styled.div(({ theme }) => ({
 }))
 
 // @ts-ignore, see https://github.com/pmndrs/react-spring/issues/1515
-const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => {
-  const helpSpacing = getHelpSpacing(theme)
-
-  return {
-    display: 'flex',
-    position: 'absolute',
-    left: 0,
-    top: helpSpacing.icon.height + theme.spacing.xsmall,
-
-    minWidth: 240,
-    pointerEvents: 'none',
-    '& > *': { pointerEvents: 'auto' },
-  }
-})
+const HelpLauncherContentSC = styled(AnimatedDiv)(({ theme }) => ({
+  display: 'flex',
+  position: 'absolute',
+  right: -240 - theme.spacing.large,
+  bottom: 0,
+  width: 240,
+  pointerEvents: 'none',
+  '& > *': { pointerEvents: 'auto' },
+}))
 
 const getTransitionProps = (isOpen: boolean) => ({
   from: { opacity: 0, scale: `65%` },
@@ -201,13 +193,20 @@ function HelpLauncher() {
     [HelpMenuState.menu]: helpMenu,
   }
 
-  const onLauncherClick = useCallback(() => {
-    if (openState === HelpOpenState.open && menuState === HelpMenuState.menu) {
-      changeState(undefined, HelpOpenState.closed)
-    } else {
-      changeState(HelpMenuState.menu, HelpOpenState.open)
-    }
-  }, [changeState, menuState, openState])
+  const onLauncherClick = useCallback(
+    (event) => {
+      event.stopPropagation()
+      if (
+        openState === HelpOpenState.open &&
+        menuState === HelpMenuState.menu
+      ) {
+        changeState(undefined, HelpOpenState.closed)
+      } else {
+        changeState(HelpMenuState.menu, HelpOpenState.open)
+      }
+    },
+    [changeState, menuState, openState]
+  )
 
   const isOpen = openState === HelpOpenState.open
   const transitionProps = useMemo(() => getTransitionProps(isOpen), [isOpen])
@@ -216,7 +215,7 @@ function HelpLauncher() {
   const content = transitions((styles, menuState) => (
     <HelpLauncherContentSC
       style={{
-        transformOrigin: 'top left',
+        transformOrigin: 'bottom left',
         ...styles,
       }}
     >

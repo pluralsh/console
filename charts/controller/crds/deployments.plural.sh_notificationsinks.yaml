@@ -86,6 +86,7 @@ spec:
                 enum:
                 - SLACK
                 - TEAMS
+                - PLURAL
                 type: string
             type: object
           status:

@@ -20,7 +20,6 @@ import { clusterRoutes } from './clusterRoutes'
 import { appsRoutes } from './appsRoutes'
 import { cdRoutes } from './cdRoutes'
 import { prRoutes } from './prRoutes'
-import { notificationsRoutes } from './notificationsRoutes'
 import { backupsRoutes } from './backupRoutes'
 import { kubernetesRoute } from './kubernetesRoute'
 import { policiesRoutes } from './policiesRoutes'
@@ -168,7 +167,4 @@ export const consoleRoutes: RouteObject[] = [
 
   // PR QUEUE
   ...prRoutes,
-
-  // NOTIFICATIONS
-  ...notificationsRoutes,
 ]

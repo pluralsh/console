@@ -29,14 +29,24 @@ import ServiceAccounts from 'components/settings/usermanagement/serviceaccounts/
 
 import { AccessTokens } from 'components/profile/AccessTokens'
 
+import Notifications from '../components/settings/notifications/Notifications'
+
+import NotificationSinks from '../components/settings/notifications/sinks/NotificationSinks'
+
+import NotificationRouters from '../components/settings/notifications/routers/NotificationRouters'
+
 import {
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
+  NOTIFICATIONS_REL_PATH,
+  NOTIFICATIONS_ROUTERS_REL_PATH,
+  NOTIFICATIONS_SINKS_REL_PATH,
   PROJECT_SETTINGS_REL_PATH,
   SETTINGS_REL_PATH,
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
+import { RequireCdEnabled } from './cdRoutes'
 
 const userManagementRoutes = (
   <Route
@@ -125,6 +135,34 @@ const projectSettingsRoutes = (
     element={<ProjectSettings />}
   />
 )
+
+const notificationsRoutes = (
+  <Route
+    path={NOTIFICATIONS_REL_PATH}
+    element={<RequireCdEnabled />}
+  >
+    <Route
+      index
+      element={
+        <Navigate
+          replace
+          to={NOTIFICATIONS_ROUTERS_REL_PATH}
+        />
+      }
+    />
+    <Route element={<Notifications />}>
+      <Route
+        path={NOTIFICATIONS_ROUTERS_REL_PATH}
+        element={<NotificationRouters />}
+      />
+      <Route
+        path={NOTIFICATIONS_SINKS_REL_PATH}
+        element={<NotificationSinks />}
+      />
+    </Route>
+  </Route>
+)
+
 const auditRoutes = (
   <Route
     path={AUDITS_REL_PATH}
@@ -167,6 +205,7 @@ export const settingsRoutes = (
     {userManagementRoutes}
     {globalSettingsRoutes}
     {projectSettingsRoutes}
+    {notificationsRoutes}
     {auditRoutes}
     <Route
       path="access-tokens"

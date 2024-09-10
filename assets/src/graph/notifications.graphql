@@ -54,6 +54,15 @@ fragment NotificationRouter on NotificationRouter {
   updatedAt
 }
 
+fragment AppNotification on AppNotification {
+  id
+  insertedAt
+  updatedAt
+  readAt
+  priority
+  text
+}
+
 mutation UpsertNotificationRouter($attributes: NotificationRouterAttributes!) {
   upsertNotificationRouter(attributes: $attributes) {
     ...NotificationRouter
@@ -102,4 +111,30 @@ query NotificationSinks($q: String, $first: Int = 100, $after: String) {
       }
     }
   }
+}
+
+query UnreadAppNotifications {
+  unreadAppNotifications
+}
+
+query AppNotifications(
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+) {
+  appNotifications(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AppNotification
+      }
+    }
+  }
+}
+
+mutation ReadAppNotifications {
+  readAppNotifications
 }

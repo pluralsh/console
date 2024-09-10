@@ -14,7 +14,6 @@ import {
   HistoryIcon,
   HomeIcon,
   KubernetesAltIcon,
-  LightningIcon,
   LogoutIcon,
   PersonIcon,
   PrOpenIcon,
@@ -48,6 +47,8 @@ import { SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
+
+import HelpLauncher from '../help/HelpLauncher'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
@@ -176,13 +177,6 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.backups),
-    },
-    {
-      text: 'Notifications',
-      expandedLabel: 'Notifications',
-      icon: <LightningIcon />,
-      path: '/notifications',
-      enabled: isCDEnabled,
     },
     {
       text: 'Settings',
@@ -371,6 +365,7 @@ export default function Sidebar() {
               )}
             </SidebarItem>
           )}
+          <HelpLauncher />
           <SidebarItem
             ref={menuItemRef}
             className="sidebar-menu"

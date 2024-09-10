@@ -21,6 +21,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 import {
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
+  NOTIFICATIONS_REL_PATH,
   PROJECT_SETTINGS_REL_PATH,
   SETTINGS_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
@@ -33,6 +34,7 @@ const getDirectory = (
   { path: USER_MANAGEMENT_REL_PATH, label: 'User management' },
   { path: GLOBAL_SETTINGS_REL_PATH, label: 'Global settings' },
   { path: PROJECT_SETTINGS_REL_PATH, label: 'Project settings' },
+  { path: NOTIFICATIONS_REL_PATH, label: 'Notifications' },
   {
     path: AUDITS_REL_PATH,
     label: 'Audit logs',

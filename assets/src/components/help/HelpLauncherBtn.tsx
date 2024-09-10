@@ -1,11 +1,15 @@
 import { Merge } from 'type-fest'
 import {
-  CaretDownIcon,
+  CaretLeftIcon,
   IconFrame,
   IconFrameProps,
 } from '@pluralsh/design-system'
 
-import { CountBadge } from './CountBadge'
+import { useSidebar } from '@pluralsh/design-system/dist/components/Sidebar'
+
+import { useTheme } from 'styled-components'
+
+import { CountBadge } from '../utils/CountBadge'
 
 export function HelpLauncherBtn({
   variant,
@@ -15,14 +19,24 @@ export function HelpLauncherBtn({
   Omit<IconFrameProps, 'icon'>,
   { variant: 'help' | 'minimize'; count?: number }
 >) {
+  const theme = useTheme()
+  const { isExpanded } = useSidebar()
+
   const translate = count > 10 ? -7 : -6
 
   return (
-    <div css={{ position: 'relative' }}>
+    <div
+      css={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: theme.spacing.xsmall,
+        position: 'relative',
+      }}
+    >
       <IconFrame
         clickable
         type="secondary"
-        icon={variant === 'minimize' ? <CaretDownIcon /> : <span>?</span>}
+        icon={variant === 'minimize' ? <CaretLeftIcon /> : <span>?</span>}
         tooltip={variant === 'minimize' ? undefined : 'Help'}
         {...props}
       />
@@ -37,6 +51,7 @@ export function HelpLauncherBtn({
           }}
         />
       )}
+      {isExpanded && 'Help'}
     </div>
   )
 }
