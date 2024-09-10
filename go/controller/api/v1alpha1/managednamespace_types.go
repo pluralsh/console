@@ -96,6 +96,9 @@ type ServiceTemplate struct {
 	// Dependencies contain dependent services
 	// +kubebuilder:validation:Optional
 	Dependencies []corev1.ObjectReference `json:"dependencies,omitempty"`
+	// ConfigurationRef is a secret reference which should contain service configuration.
+	// +kubebuilder:validation:Optional
+	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
 }
 
 // +kubebuilder:object:root=true

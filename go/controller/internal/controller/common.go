@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -163,6 +165,22 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 	if srv.Kustomize != nil {
 		serviceTemplate.Kustomize = &console.KustomizeAttributes{
 			Path: srv.Kustomize.Path,
+		}
+	}
+	if srv.ConfigurationRef != nil {
+		serviceTemplate.Configuration = make([]*console.ConfigAttributes, 0)
+		secret := &corev1.Secret{}
+		name := types.NamespacedName{Name: srv.ConfigurationRef.Name, Namespace: srv.ConfigurationRef.Namespace}
+		err := c.Get(ctx, name, secret)
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range secret.Data {
+			value := string(v)
+			serviceTemplate.Configuration = append(serviceTemplate.Configuration, &console.ConfigAttributes{
+				Name:  k,
+				Value: &value,
+			})
 		}
 	}
 	return serviceTemplate, nil

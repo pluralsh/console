@@ -130,6 +130,20 @@ spec:
                 description: Attributes for configuring a service in something like
                   a managed namespace
                 properties:
+                  configurationRef:
+                    description: ConfigurationRef is a secret reference which should
+                      contain service configuration.
+                    properties:
+                      name:
+                        description: name is unique within a namespace to reference
+                          a secret resource.
+                        type: string
+                      namespace:
+                        description: namespace defines the space within which the
+                          secret name must be unique.
+                        type: string
+                    type: object
+                    x-kubernetes-map-type: atomic
                   contexts:
                     description: a list of context ids to add to this service
                     items:
