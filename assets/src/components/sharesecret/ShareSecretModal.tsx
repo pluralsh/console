@@ -28,10 +28,12 @@ import {
 import { isNonNullable } from '../../utils/isNonNullable'
 import { bindingToBindingAttributes } from '../settings/usermanagement/roles/misc'
 
+import { SECRETS_REL_PATH } from '../../routes/secretsRoutesConsts'
+
 import { useShareSecretContext } from './ShareSecretContext'
 
 const getUrl = (handle?: string) =>
-  `https://${window.location.host}/secret/${handle}`
+  `https://${window.location.host}/${SECRETS_REL_PATH}/${handle}`
 
 export default function ShareSecretModal() {
   const theme = useTheme()
@@ -62,7 +64,7 @@ export default function ShareSecretModal() {
   const [mutation, { loading, reset, data }] = useShareSecretMutation({
     onCompleted: (data) => {
       setCompleted(true)
-      window.navigator.clipboard.writeText?.(getUrl(data.shareSecret?.handle))
+      window.navigator.clipboard.writeText?.(getUrl(data.shareSecret?.handle)) // TODO: Test it.
       setToast(true)
       setTimeout(() => setToast(false), 3000)
     },

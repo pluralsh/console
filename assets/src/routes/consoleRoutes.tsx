@@ -27,6 +27,7 @@ import { policiesRoutes } from './policiesRoutes'
 import { stacksRoutes } from './stacksRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { HOME_REL_PATH } from './consoleRoutesConsts'
+import { secretsRoutes } from './secretsRoute'
 
 const buildsRoutes = [
   <Route
@@ -165,6 +166,9 @@ export const consoleRoutes: RouteObject[] = [
     path: HOME_REL_PATH,
     element: <Home />,
   },
+
+  // SECRETS
+  ...secretsRoutes,
 
   // PR QUEUE
   ...prRoutes,
