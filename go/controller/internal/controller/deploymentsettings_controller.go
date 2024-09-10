@@ -157,10 +157,18 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 		attr.AgentHelmValues = lo.ToPtr(string(rawHelmValues))
 	}
 	if settings.Spec.PrometheusConnection != nil {
-		attr.PrometheusConnection = settings.Spec.PrometheusConnection.Attributes()
+		pc, err := settings.Spec.PrometheusConnection.Attributes(ctx, r.Client, settings.Namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.PrometheusConnection = pc
 	}
 	if settings.Spec.LokiConnection != nil {
-		attr.LokiConnection = settings.Spec.LokiConnection.Attributes()
+		lc, err := settings.Spec.LokiConnection.Attributes(ctx, r.Client, settings.Namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.LokiConnection = lc
 	}
 	if settings.Spec.Stacks != nil {
 		var jobSpec *console.GateJobAttributes

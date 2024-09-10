@@ -17,11 +17,16 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"context"
+
 	console "github.com/pluralsh/console/go/client"
+	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // DeploymentSettingsSpec defines the desired state of DeploymentSettings
@@ -50,14 +55,26 @@ type HTTPConnection struct {
 	User *string `json:"user,omitempty"`
 	// password to connect w/ for basic auth
 	Password *string `json:"password,omitempty"`
+	// PasswordSecretRef selects a key of a password Secret
+	// +kubebuilder:validation:Optional
+	PasswordSecretRef *corev1.SecretKeySelector `json:"passwordSecretRef,omitempty"`
 }
 
-func (r *HTTPConnection) Attributes() *console.HTTPConnectionAttributes {
-	return &console.HTTPConnectionAttributes{
+func (r *HTTPConnection) Attributes(ctx context.Context, c client.Client, namespace string) (*console.HTTPConnectionAttributes, error) {
+	attr := &console.HTTPConnectionAttributes{
 		Host:     r.Host,
 		User:     r.User,
 		Password: r.Password,
 	}
+	if r.PasswordSecretRef != nil {
+		secret := &corev1.Secret{}
+		if err := c.Get(ctx, types.NamespacedName{Name: r.PasswordSecretRef.Name, Namespace: namespace}, secret); err != nil {
+			return nil, err
+		}
+		password := secret.Data[r.PasswordSecretRef.Key]
+		attr.Password = lo.ToPtr(string(password))
+	}
+	return attr, nil
 }
 
 type DeploymentSettingsBindings struct {
