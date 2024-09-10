@@ -7,7 +7,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { useConsumeSecretMutation } from '../../generated/graphql'
 import { InputRevealer } from '../cd/providers/InputRevealer'
@@ -21,7 +21,7 @@ export default function ConsumeSecret() {
   const navigate = useNavigate()
   const { handle = '' } = useParams()
 
-  useSetBreadcrumbs([{ label: 'secrets' }])
+  useSetBreadcrumbs(useMemo(() => [{ label: 'secrets' }], []))
 
   const [mutation, { loading, data, error }] = useConsumeSecretMutation({
     variables: { handle },
