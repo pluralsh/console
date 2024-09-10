@@ -44,7 +44,7 @@ export default function ConsumeSecret() {
         width: '100%',
       }}
     >
-      {error ? (
+      {error || !data ? (
         <Callout
           title="You do not have access to this secret"
           severity="danger"
@@ -105,7 +105,7 @@ export default function ConsumeSecret() {
               gap: theme.spacing.xsmall,
             }}
           >
-            <Body2BoldP>{data?.consumeSecret?.name}</Body2BoldP>
+            <Body2BoldP>{data.consumeSecret?.name}</Body2BoldP>
             <div
               css={{
                 display: 'flex',
@@ -113,13 +113,13 @@ export default function ConsumeSecret() {
               }}
             >
               <InputRevealer
-                value={data?.consumeSecret?.secret}
+                value={data.consumeSecret?.secret}
                 css={{ width: '100%' }}
               />
               <Button
                 onClick={() =>
                   navigator.clipboard.writeText(
-                    data?.consumeSecret?.secret ?? ''
+                    data.consumeSecret?.secret ?? ''
                   )
                 }
               >
