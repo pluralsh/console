@@ -1,4 +1,11 @@
-import { Button, FormField, Input, Modal } from '@pluralsh/design-system'
+import {
+  Button,
+  Code,
+  FormField,
+  Input,
+  Modal,
+  ReturnIcon,
+} from '@pluralsh/design-system'
 
 import {
   FormEvent,
@@ -79,6 +86,8 @@ export default function ShareSecretModal() {
     [reset, setCompleted]
   )
 
+  const url = `https://${window.location.host}/secret/${data?.shareSecret?.handle}`
+
   return (
     <Modal
       actions={
@@ -88,28 +97,40 @@ export default function ShareSecretModal() {
             gap: theme.spacing.medium,
           }}
         >
-          <Button
-            type="button"
-            secondary
-            onClick={() => setOpen(false)}
-          >
-            Cancel
-          </Button>
           {completed ? (
-            <Button
-              type="button"
-              onClick={onRestart}
-            >
-              Restart
-            </Button>
+            <>
+              <Button
+                secondary
+                startIcon={<ReturnIcon />}
+                type="button"
+                onClick={onRestart}
+              >
+                Restart
+              </Button>
+              <Button
+                type="button"
+                onClick={() => setOpen(false)}
+              >
+                Finish
+              </Button>
+            </>
           ) : (
-            <Button
-              type="submit"
-              disabled={disabled}
-              loading={loading}
-            >
-              Generate secret
-            </Button>
+            <>
+              <Button
+                type="button"
+                secondary
+                onClick={() => setOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={disabled}
+                loading={loading}
+              >
+                Generate secret
+              </Button>
+            </>
           )}
         </div>
       }
@@ -128,7 +149,7 @@ export default function ShareSecretModal() {
         }}
       >
         <FormField
-          required
+          required={!completed}
           label="Secret name"
         >
           <Input
@@ -139,7 +160,7 @@ export default function ShareSecretModal() {
           />
         </FormField>
         <FormField
-          required
+          required={!completed}
           label="Secret string"
         >
           <Input
@@ -148,7 +169,9 @@ export default function ShareSecretModal() {
             onChange={(e) => setSecret(e.currentTarget.value)}
           />
         </FormField>
-        {!completed && (
+        {completed ? (
+          <Code css={{ minHeight: 54 }}>{url}</Code>
+        ) : (
           <>
             <BindingInput
               type="group"
