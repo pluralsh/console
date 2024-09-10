@@ -1,8 +1,9 @@
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Button,
   Callout,
   Card,
+  ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -13,9 +14,11 @@ import { InputRevealer } from '../cd/providers/InputRevealer'
 import { Overline } from '../cd/utils/PermissionsModal'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import { Body2BoldP } from '../utils/typography/Text'
+import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts'
 
 export default function ConsumeSecret() {
   const theme = useTheme()
+  const navigate = useNavigate()
   const { handle = '' } = useParams()
 
   useSetBreadcrumbs([{ label: 'secrets' }])
@@ -45,11 +48,32 @@ export default function ConsumeSecret() {
         <Callout
           title="You do not have access to this secret"
           severity="danger"
-          css={{ maxWidth: 572 }}
+          css={{
+            maxWidth: 572,
+          }}
         >
-          Either this URL has already been consumed, or you do not have
-          permission to view this URL. If you think this is a mistake, please
-          contact the system administrator.
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.medium,
+            }}
+          >
+            <p>
+              Either this URL has already been consumed, or you do not have
+              permission to view this URL. If you think this is a mistake,
+              please contact the system administrator.
+            </p>
+            <Button
+              secondary
+              small
+              startIcon={<ReturnIcon />}
+              onClick={() => navigate(HOME_ABS_PATH)}
+              width="fit-content"
+            >
+              Back home
+            </Button>
+          </div>
         </Callout>
       ) : (
         <Card
