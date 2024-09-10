@@ -44,38 +44,7 @@ export default function ConsumeSecret() {
         width: '100%',
       }}
     >
-      {error || !data ? (
-        <Callout
-          title="You do not have access to this secret"
-          severity="danger"
-          css={{
-            maxWidth: 572,
-          }}
-        >
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.medium,
-            }}
-          >
-            <p>
-              Either this URL has already been consumed, or you do not have
-              permission to view this URL. If you think this is a mistake,
-              please contact the system administrator.
-            </p>
-            <Button
-              secondary
-              small
-              startIcon={<ReturnIcon />}
-              onClick={() => navigate(HOME_ABS_PATH)}
-              width="fit-content"
-            >
-              Back home
-            </Button>
-          </div>
-        </Callout>
-      ) : (
+      {data && (
         <Card
           css={{
             display: 'flex',
@@ -128,6 +97,38 @@ export default function ConsumeSecret() {
             </div>
           </div>
         </Card>
+      )}
+      {error && (
+        <Callout
+          title="You do not have access to this secret"
+          severity="danger"
+          css={{
+            maxWidth: 572,
+          }}
+        >
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.medium,
+            }}
+          >
+            <p>
+              Either this URL has already been consumed, or you do not have
+              permission to view this URL. If you think this is a mistake,
+              please contact the system administrator.
+            </p>
+            <Button
+              secondary
+              small
+              startIcon={<ReturnIcon />}
+              onClick={() => navigate(HOME_ABS_PATH)}
+              width="fit-content"
+            >
+              Back home
+            </Button>
+          </div>
+        </Callout>
       )}
     </div>
   )
