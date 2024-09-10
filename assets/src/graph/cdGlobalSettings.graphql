@@ -1,7 +1,6 @@
 fragment HttpConnection on HttpConnection {
   host
   user
-  password
 }
 
 fragment DeploymentSettings on DeploymentSettings {

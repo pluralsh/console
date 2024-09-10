@@ -87,7 +87,6 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :http_connection do
     field :host,     non_null(:string)
     field :user,     :string, description: "user to connect w/ for basic auth"
-    field :password, :string, description: "password to connect w/ for basic auth"
   end
 
   connection node_type: :project

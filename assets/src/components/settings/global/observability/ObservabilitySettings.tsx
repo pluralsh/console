@@ -9,6 +9,15 @@ import { useUpdateDeploymentSettingsMutation } from 'generated/graphql'
 
 import { useGlobalSettingsContext } from '../GlobalSettings'
 
+function filterIncomplete(attrs) {
+  for (let k in ["lokiConnection", "prometheusConnection"]) {
+    if (!attrs[k]?.password) {
+      delete attrs[k]
+    }
+  }
+  return attrs
+}
+
 export default function ObservabilitySettings() {
   const theme = useTheme()
   const { deploymentSettings, refetch } = useGlobalSettingsContext()
@@ -25,17 +34,19 @@ export default function ObservabilitySettings() {
   const onSubmit = useCallback<FormEventHandler>(
     (e) => {
       e.preventDefault()
+      let attributes = {
+        prometheusConnection: formState.state.prometheusConnection.host
+          ? formState.state.prometheusConnection
+          : undefined,
+        lokiConnection: formState.state.lokiConnection.host
+          ? formState.state.lokiConnection
+          : undefined,
+      }
+
       if (allowSubmit) {
         updateSettings({
           variables: {
-            attributes: {
-              prometheusConnection: formState.state.prometheusConnection.host
-                ? formState.state.prometheusConnection
-                : undefined,
-              lokiConnection: formState.state.lokiConnection.host
-                ? formState.state.lokiConnection
-                : undefined,
-            },
+            attributes: filterIncomplete(attributes),
           },
           onCompleted: (data) => {
             const { lokiConnection, prometheusConnection } =

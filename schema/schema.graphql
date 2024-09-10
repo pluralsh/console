@@ -1035,9 +1035,6 @@ type HttpConnection {
 
   "user to connect w\/ for basic auth"
   user: String
-
-  "password to connect w\/ for basic auth"
-  password: String
 }
 
 type ProjectConnection {

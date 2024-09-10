@@ -1855,8 +1855,6 @@ type HTTPConnection struct {
 	Host string `json:"host"`
 	// user to connect w/ for basic auth
 	User *string `json:"user,omitempty"`
-	// password to connect w/ for basic auth
-	Password *string `json:"password,omitempty"`
 }
 
 type HTTPConnectionAttributes struct {
