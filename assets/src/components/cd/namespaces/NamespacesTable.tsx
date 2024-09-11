@@ -71,7 +71,7 @@ export function NamespacesTable() {
     >
       {!data ? (
         <LoadingIndicator />
-      ) : !isEmpty(data?.managedNamespaces?.edges) ? (
+      ) : (
         <FullHeightTableWrap>
           <Table
             virtualizeRows
@@ -94,12 +94,11 @@ export function NamespacesTable() {
             reactTableOptions={reactTableOptions}
             reactVirtualOptions={NAMESPACES_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
+            emptyStateProps={{
+              message: "Looks like you don't have any namespaces yet",
+            }}
           />
         </FullHeightTableWrap>
-      ) : (
-        <div css={{ height: '100%' }}>
-          <EmptyState message="Looks like you don't have any namespaces yet." />
-        </div>
       )}
     </div>
   )

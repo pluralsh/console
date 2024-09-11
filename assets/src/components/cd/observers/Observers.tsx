@@ -97,6 +97,9 @@ export default function Observers() {
         onRowClick={(_e, { original }: Row<Edge<ObserverFragment>>) => {
           navigate(`${OBSERVERS_ABS_PATH}/${original.node?.id}`)
         }}
+        emptyStateProps={{
+          message: "Looks like you don't have any observers yet",
+        }}
         css={{
           maxHeight: 'unset',
           height: '100%',
