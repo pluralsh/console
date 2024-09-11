@@ -29,12 +29,15 @@ import ServiceAccounts from 'components/settings/usermanagement/serviceaccounts/
 
 import { AccessTokens } from 'components/profile/AccessTokens'
 
+import { GlobalSettingsSMTP } from 'components/settings/global/GlobalSettingsSMTP'
+
 import Notifications from '../components/settings/notifications/Notifications'
 
 import NotificationSinks from '../components/settings/notifications/sinks/NotificationSinks'
 
 import NotificationRouters from '../components/settings/notifications/routers/NotificationRouters'
 
+import { RequireCdEnabled } from './cdRoutes'
 import {
   AUDITS_REL_PATH,
   GLOBAL_SETTINGS_REL_PATH,
@@ -46,7 +49,6 @@ import {
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
-import { RequireCdEnabled } from './cdRoutes'
 
 const userManagementRoutes = (
   <Route
@@ -125,6 +127,10 @@ const globalSettingsRoutes = (
     <Route
       path="observability"
       element={<Observability />}
+    />
+    <Route
+      path="smtp"
+      element={<GlobalSettingsSMTP />}
     />
   </Route>
 )

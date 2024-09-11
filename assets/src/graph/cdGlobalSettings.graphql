@@ -3,6 +3,14 @@ fragment HttpConnection on HttpConnection {
   user
 }
 
+fragment SmtpSettings on SmtpSettings {
+  server
+  port
+  sender
+  user
+  ssl
+}
+
 fragment DeploymentSettings on DeploymentSettings {
   id
   name
@@ -25,6 +33,9 @@ fragment DeploymentSettings on DeploymentSettings {
   }
   createBindings {
     ...PolicyBinding
+  }
+  smtp {
+    ...SmtpSettings
   }
   readBindings {
     ...PolicyBinding
