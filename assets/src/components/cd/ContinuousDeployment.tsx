@@ -19,6 +19,7 @@ import {
   CLUSTERS_REL_PATH,
   GLOBAL_SERVICES_REL_PATH,
   NAMESPACES_REL_PATH,
+  OBSERVERS_REL_PATH,
   PIPELINES_REL_PATH,
   REPOS_REL_PATH,
   SERVICES_REL_PATH,
@@ -152,6 +153,11 @@ function useDirectory({ filtered = true }: { filtered?: boolean } = {}) {
         path: NAMESPACES_REL_PATH,
         label: 'Namespaces',
         enabled: personaConfiguration?.all || config?.services,
+      },
+      {
+        path: OBSERVERS_REL_PATH,
+        label: 'Observers',
+        enabled: true,
       },
     ]
 

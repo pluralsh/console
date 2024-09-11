@@ -1,0 +1,44 @@
+fragment Observer on Observer {
+  id
+  insertedAt
+  updatedAt
+  name
+  crontab
+  status
+  lastRunAt
+  nextRunAt
+  project { ...ProjectTiny }
+  target { ...ObserverTarget }
+}
+
+fragment ObserverTarget on ObserverTarget {
+  target
+  format
+  order
+  git {
+    type
+    repositoryId
+  }
+  helm {
+    url
+    provider
+    chart
+  }
+  oci {
+    provider
+    url
+  }
+}
+
+query Observers($first: Int, $last: Int, $before: String, $after: String, $projectId: ID) {
+  observers(first: $first, last: $last, before: $before, after: $after, projectId: $projectId) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Observer
+      }
+    }
+  }
+}
