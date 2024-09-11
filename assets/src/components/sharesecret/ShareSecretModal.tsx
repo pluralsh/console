@@ -8,7 +8,9 @@ import {
   Toast,
 } from '@pluralsh/design-system'
 import React, {
+  Dispatch,
   FormEvent,
+  SetStateAction,
   useCallback,
   useEffect,
   useMemo,
@@ -30,14 +32,17 @@ import { bindingToBindingAttributes } from '../settings/usermanagement/roles/mis
 
 import { SECRETS_PATH } from '../../routes/secretsRoutesConsts'
 
-import { useShareSecretContext } from './ShareSecretContext'
-
 const getUrl = (handle?: string) =>
   `https://${window.location.host}/${SECRETS_PATH}/${handle}`
 
-export default function ShareSecretModal() {
+export default function ShareSecretModal({
+  open,
+  setOpen,
+}: {
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+}) {
   const theme = useTheme()
-  const { open, setOpen } = useShareSecretContext()
   const [completed, setCompleted] = useState(false)
   const [toast, setToast] = useState(false)
   const [name, setName] = useState('')
@@ -51,7 +56,10 @@ export default function ShareSecretModal() {
 
   useEffect(() => inputRef.current?.focus?.(), [])
 
-  // TODO: Reset on each open.
+  useEffect(() => {
+    if (toastRef.current)
+      toastRef.current.style.setProperty('z-index', `${theme.zIndexes.tooltip}`)
+  }, [theme.zIndexes.tooltip])
 
   const { userBindings, groupBindings } = useMemo(() => {
     const { userBindings, groupBindings } = splitBindings(bindings)
@@ -102,11 +110,6 @@ export default function ShareSecretModal() {
     },
     [reset, setCompleted]
   )
-
-  useEffect(() => {
-    if (toastRef.current)
-      toastRef.current.style.setProperty('z-index', `${theme.zIndexes.tooltip}`)
-  }, [theme.zIndexes.tooltip])
 
   return (
     <>

@@ -52,7 +52,7 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { HelpMenuState, launchHelp } from '../help/HelpLauncher'
-import { useShareSecretContext } from '../sharesecret/ShareSecretContext'
+import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 
 type CommandGroup = {
   commands: Command[]
@@ -111,7 +111,7 @@ export function useCommandsWithHotkeys() {
 }
 
 export function useCommands(): CommandGroup[] {
-  const { setOpen } = useShareSecretContext()
+  const open = useShareSecretOpen()
   const mode = useThemeColorMode()
   const navigate = useNavigate()
   const projectId = useProjectId()
@@ -278,7 +278,7 @@ export function useCommands(): CommandGroup[] {
           {
             label: 'Share secret',
             icon: EyeIcon,
-            callback: () => setOpen(true),
+            callback: open,
             options: { preventDefault: true },
             hotkeys: ['C then S'],
           },
@@ -294,6 +294,6 @@ export function useCommands(): CommandGroup[] {
         ],
       },
     ],
-    [navigate, cluster?.id, mode, setOpen]
+    [navigate, cluster?.id, mode, open]
   )
 }
