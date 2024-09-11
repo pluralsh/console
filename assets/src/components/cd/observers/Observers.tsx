@@ -32,6 +32,40 @@ const columns = [
     meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
   }),
+  columnHelper.accessor(({ node }) => node?.crontab, {
+    id: 'crontab',
+    header: 'Crontab',
+    meta: { truncate: true },
+    cell: ({ getValue }) => getValue(),
+  }),
+  columnHelper.accessor(({ node }) => node?.status, {
+    id: 'status',
+    header: 'Status',
+    meta: { truncate: true },
+    cell: ({ getValue }) => getValue(), // TODO
+  }),
+  columnHelper.accessor(({ node }) => node?.lastRunAt, {
+    id: 'lastRunAt',
+    header: 'Last run',
+    meta: { truncate: true },
+    cell: ({ getValue }) => getValue(), // TODO
+  }),
+  columnHelper.accessor(({ node }) => node?.target, {
+    id: 'target',
+    header: 'Target',
+    cell: ({ getValue }) => getValue(), // TODO
+  }),
+  columnHelper.accessor(({ node }) => node?.errors, {
+    id: 'errors',
+    header: 'Errors',
+    cell: ({ getValue }) => getValue(), // TODO
+  }),
+  columnHelper.accessor(({ node }) => node, {
+    id: 'actions',
+    header: '',
+    meta: { gridTemplate: 'minmax(auto, 80px)' },
+    cell: ({ getValue }) => getValue(), // TODO
+  }),
 ]
 
 export default function Observers() {
@@ -40,14 +74,8 @@ export default function Observers() {
 
   const { data, loading, error, pageInfo, fetchNextPage } =
     useFetchPaginatedData(
-      {
-        queryHook: useObserversQuery,
-        pageSize,
-        keyPath: ['observers'],
-      },
-      {
-        projectId,
-      }
+      { queryHook: useObserversQuery, pageSize, keyPath: ['observers'] },
+      { projectId }
     )
 
   useSetBreadcrumbs(breadcrumbs)

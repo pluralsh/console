@@ -9,6 +9,7 @@ fragment Observer on Observer {
   nextRunAt
   project { ...ProjectTiny }
   target { ...ObserverTarget }
+  errors { ...ServiceError }
 }
 
 fragment ObserverTarget on ObserverTarget {
@@ -28,6 +29,11 @@ fragment ObserverTarget on ObserverTarget {
     provider
     url
   }
+}
+
+fragment ServiceError on ServiceError {
+  source
+  message
 }
 
 query Observers($first: Int, $last: Int, $before: String, $after: String, $projectId: ID) {

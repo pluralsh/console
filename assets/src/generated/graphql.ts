@@ -9038,9 +9038,11 @@ export type GetManagedNamespaceServicesQueryVariables = Exact<{
 
 export type GetManagedNamespaceServicesQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null } | null };
 
-export type ObserverFragment = { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null } };
+export type ObserverFragment = { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null };
 
 export type ObserverTargetFragment = { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null };
+
+export type ServiceErrorFragment = { __typename?: 'ServiceError', source: string, message: string };
 
 export type ObserversQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -9051,7 +9053,7 @@ export type ObserversQueryVariables = Exact<{
 }>;
 
 
-export type ObserversQuery = { __typename?: 'RootQueryType', observers?: { __typename?: 'ObserverConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObserverEdge', node?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null } } | null } | null> | null } | null };
+export type ObserversQuery = { __typename?: 'RootQueryType', observers?: { __typename?: 'ObserverConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObserverEdge', node?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null } | null> | null } | null };
 
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, revision?: { __typename?: 'Revision', id: string } | null };
 
@@ -11019,6 +11021,12 @@ export const ObserverTargetFragmentDoc = gql`
   }
 }
     `;
+export const ServiceErrorFragmentDoc = gql`
+    fragment ServiceError on ServiceError {
+  source
+  message
+}
+    `;
 export const ObserverFragmentDoc = gql`
     fragment Observer on Observer {
   id
@@ -11035,9 +11043,13 @@ export const ObserverFragmentDoc = gql`
   target {
     ...ObserverTarget
   }
+  errors {
+    ...ServiceError
+  }
 }
     ${ProjectTinyFragmentDoc}
-${ObserverTargetFragmentDoc}`;
+${ObserverTargetFragmentDoc}
+${ServiceErrorFragmentDoc}`;
 export const ContainerSpecFragmentDoc = gql`
     fragment ContainerSpec on ContainerSpec {
   args
@@ -21893,6 +21905,7 @@ export const namedOperations = {
     ServiceTemplate: 'ServiceTemplate',
     Observer: 'Observer',
     ObserverTarget: 'ObserverTarget',
+    ServiceError: 'ServiceError',
     PipelineServiceDeployment: 'PipelineServiceDeployment',
     ContainerSpec: 'ContainerSpec',
     JobGateSpec: 'JobGateSpec',
