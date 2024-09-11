@@ -64,9 +64,14 @@ export default function ShareSecretModal() {
   const [mutation, { loading, reset, data }] = useShareSecretMutation({
     onCompleted: (data) => {
       setCompleted(true)
-      navigator.clipboard.writeText(getUrl(data.shareSecret?.handle)) // TODO: Fix it.
-      setToast(true)
-      setTimeout(() => setToast(false), 3000)
+
+      navigator.clipboard
+        .writeText(getUrl(data.shareSecret?.handle))
+        .then(() => {
+          setToast(true)
+          setTimeout(() => setToast(false), 3000)
+        })
+        .catch((e) => console.error("Couldn't copy URL to clipboard", e))
     },
   })
 
