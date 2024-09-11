@@ -23,6 +23,8 @@ defmodule Console.Schema.User do
     field :api,              :string, virtual: true
     field :roles_updated,    :boolean, virtual: true, default: false
 
+    field :last_digest_at,   :utc_datetime_usec
+
     field :signing_private_key, Piazza.Ecto.EncryptedString
 
     has_many :assume_bindings, PolicyBinding,

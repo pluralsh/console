@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+  <head>
+    <title>
+    </title>
+    <!--[if !mso]><!-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!--<![endif]-->
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+      /* Globals */
+      body,
+      .email-full-container {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        color: white;
+        background-color: #171A21;
+        font-family: "Inter", sans-serif;
+      }
+      .email-full-container {
+        padding-top: 48px;
+        padding-bottom: 48px;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      p {
+        margin: 0;
+      }
+      /* Helpers */
+      .margin-horizontal-auto {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .margin-top-large {
+        margin-top: 24px;
+      }
+      .flex {
+        display: flex; /* https://www.caniemail.com/features/css-display-flex/ */
+      }
+      .fit-content {
+        width: fit-content;
+      }
+      .text-align-center {
+        text-align: center;
+      }
+      .margin-left-medium {
+        margin-left: 16px;
+      }
+      /* Content */
+      .email-container {
+        max-width: 504px;
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+      .header-logo {
+        width: 249px;
+        height: 40px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .company-info {
+        font-family: monospace;
+        font-size: 12px;
+        line-height: 16px;
+        color: #9095A2;
+      }
+      .social-icon {
+        width: 48px;
+        height: 48px;
+      }
+      .content-container {
+        margin-top: 48px;
+        margin-bottom: 24px;
+        border-radius: 6px;
+        overflow: hidden;
+        background-color: #21242C;
+      }
+      .top-gradient {
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(to right, #373EF1 0%, #969AF8 100%);
+      }
+      .content-wrapper {
+        padding: 32px;
+      }
+      .text-lead {
+        color: #C5C9D3;
+        font-size: 24px;
+        line-height: 32px;
+        letter-spacing: -0.25px;
+      }
+      .text-content {
+        color: #C5C9D3;
+        font-size: 16px;
+        line-height: 24px;
+        letter-spacing: 0.5px;
+      }
+      a.button,
+      a:any-link.button,
+      .button {
+        display: block;
+        padding: 12px 24px;
+        text-align: center;
+        color: #EBEFF0;
+        background-color: #4A51F2;
+        border-radius: 3px;
+        font-weight: 500;
+        font-size: 16px;
+        line-height: 24px;
+        letter-spacing: 0.5px;
+      }
+    </style>
+  </head>
+  <body bgcolor="#171A21" style="background-color: #171A21">
+    <div class="email-full-container" bgcolor="#171A21" style="background-color: #171A21">
+    <div class="email-container margin-horizontal-auto">
+      <div class="margin-horizontal-auto">
+        <div class="flex margin-horizontal-auto fit-content">
+          <img alt="Plural app" src="https://app.plural.sh/plural-email-header@2x.png" width="249" height="40" class="header-logo" />
+        </div>
+      </div>
+      <div class="content-container margin-horizontal-auto">
+        <div class="top-gradient"></div>
+        <div class="content-wrapper">
+          <%= @inner_content %>
+      </div>
+      <div class="margin-horizontal-auto fit-content">
+        <div class="company-info margin-horizontal-auto text-align-center fit-content">
+          <div>© Plural 2022</div>
+          <div>19 W 24th St FL 3</div>
+          <div>New York, NY 10010</div>
+        </div>
+        <div class="margin-horizontal-auto flex fit-content">
+          <a href="https://github.com/pluralsh/plural" target="_blank">
+            <img alt="GitHub" src="https://app.plural.sh/github_logo@2x.png" class="social-icon" />
+          </a>
+          <a href="https://discord.gg/pluralsh" target="_blank">
+            <img alt="Discord" src="https://app.plural.sh/discord_logo@2x.png" class="social-icon" />
+          </a>
+          <a href="https://twitter.com/plural_sh" target="_blank">
+            <img alt="Twitter" src="https://app.plural.sh/twitter_logo@2x.png" class="social-icon" />
+          </a>
+        </div>
+      </div>
+    </div>
+    </div>
+  </body>
+</html>

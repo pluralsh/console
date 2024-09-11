@@ -73,5 +73,8 @@ users:
     token: TEST
 """
 
+config :console, Console.Mailer,
+  adapter: Bamboo.TestAdapter
+
 config :console, Console.Deployments.Metrics.Provider.NewRelic,
   plug: {Req.Test, Console.Deployments.Metrics.Provider.NewRelic}

@@ -1354,6 +1354,8 @@ type DeploymentSettings struct {
 	AgentHelmValues *string `json:"agentHelmValues,omitempty"`
 	// global settings for stack configuration
 	Stacks *StackSettings `json:"stacks,omitempty"`
+	// smtp server configuration for email notifications
+	SMTP *SMTPSettings `json:"smtp,omitempty"`
 	// The console's expected agent version
 	AgentVsn string `json:"agentVsn"`
 	// the latest known k8s version
@@ -1386,7 +1388,9 @@ type DeploymentSettingsAttributes struct {
 	// connection details for a prometheus instance to use
 	PrometheusConnection *HTTPConnectionAttributes `json:"prometheusConnection,omitempty"`
 	// connection details for a loki instance to use
-	LokiConnection *HTTPConnectionAttributes  `json:"lokiConnection,omitempty"`
+	LokiConnection *HTTPConnectionAttributes `json:"lokiConnection,omitempty"`
+	// configuration for smtp message delivery
+	SMTP           *SMTPSettingsAttributes    `json:"smtp,omitempty"`
 	ReadBindings   []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings  []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	GitBindings    []*PolicyBindingAttributes `json:"gitBindings,omitempty"`
@@ -4470,6 +4474,24 @@ type SMTPInput struct {
 	Password *string `json:"password,omitempty"`
 	Sender   *string `json:"sender,omitempty"`
 	User     *string `json:"user,omitempty"`
+}
+
+// SMTP server configuration for email notifications
+type SMTPSettings struct {
+	Server string `json:"server"`
+	Port   int64  `json:"port"`
+	Sender string `json:"sender"`
+	User   string `json:"user"`
+	Ssl    bool   `json:"ssl"`
+}
+
+type SMTPSettingsAttributes struct {
+	Server   string `json:"server"`
+	Port     int64  `json:"port"`
+	Sender   string `json:"sender"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Ssl      bool   `json:"ssl"`
 }
 
 type Stack struct {

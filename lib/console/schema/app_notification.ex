@@ -17,6 +17,24 @@ defmodule Console.Schema.AppNotification do
     timestamps()
   end
 
+  def digest(query \\ __MODULE__, last) do
+    from(n in subquery(digest_subquery(query, last)),
+      join: u in User,
+        on: u.id == n.id,
+      order_by: [asc: u.id],
+      select: %{id: u.id, user: u, count: n.count}
+    )
+  end
+
+  defp digest_subquery(query, last) do
+    from(n in query,
+      join: u in assoc(n, :user),
+      where: n.inserted_at >= ^last,
+      group_by: u.id,
+      select: %{id: u.id, count: count(n.id)}
+    )
+  end
+
   def for_user(query \\ __MODULE__, user_id) do
     from(n in query, where: n.user_id == ^user_id)
   end

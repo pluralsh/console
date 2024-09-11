@@ -923,6 +923,9 @@ input DeploymentSettingsAttributes {
   "connection details for a loki instance to use"
   lokiConnection: HttpConnectionAttributes
 
+  "configuration for smtp message delivery"
+  smtp: SmtpSettingsAttributes
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -945,6 +948,15 @@ input HttpConnectionAttributes {
 input StackSettingsAttributes {
   jobSpec: GateJobAttributes
   connectionId: ID
+}
+
+input SmtpSettingsAttributes {
+  server: String!
+  port: Int!
+  sender: String!
+  user: String!
+  password: String!
+  ssl: Boolean!
 }
 
 "A unit of organization to control permissions for a set of objects within your Console instance"
@@ -992,6 +1004,9 @@ type DeploymentSettings {
   "global settings for stack configuration"
   stacks: StackSettings
 
+  "smtp server configuration for email notifications"
+  smtp: SmtpSettings
+
   "The console's expected agent version"
   agentVsn: String!
 
@@ -1035,6 +1050,15 @@ type HttpConnection {
 
   "user to connect w\/ for basic auth"
   user: String
+}
+
+"SMTP server configuration for email notifications"
+type SmtpSettings {
+  server: String!
+  port: Int!
+  sender: String!
+  user: String!
+  ssl: Boolean!
 }
 
 type ProjectConnection {

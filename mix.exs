@@ -137,6 +137,10 @@ defmodule Console.MixProject do
       {:http_stream, "~> 1.0.0"},
       {:solid, "~> 0.15"},
       {:x509, "~> 0.8.5"},
+      {:bamboo_phoenix, "~> 1.0"},
+      {:bamboo_smtp, "~> 4.1.0"},
+      {:bamboo, "~> 2.3", override: true},
+      {:hut, "~> 1.3", manager: :rebar3, override: true},
 
       # if using the Mint adapter:
       {:castore, "~> 0.1.7"},

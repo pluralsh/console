@@ -360,6 +360,15 @@ defmodule Console.Services.Users do
   end
 
   @doc """
+  Marks a list of user ids as having been digested
+  """
+  @spec digested([binary]) :: {integer, any}
+  def digested(user_ids) do
+    User.for_ids(user_ids)
+    |> Repo.update_all(set: [last_digest_at: Timex.now()])
+  end
+
+  @doc """
   Wipes all active refresh tokens for the given user
   """
   @spec logout_user(User.t) :: user_resp

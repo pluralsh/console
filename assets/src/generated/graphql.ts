@@ -1703,6 +1703,8 @@ export type DeploymentSettings = {
   readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** whether the byok cluster has been brought under self-management */
   selfManaged?: Maybe<Scalars['Boolean']['output']>;
+  /** smtp server configuration for email notifications */
+  smtp?: Maybe<SmtpSettings>;
   /** global settings for stack configuration */
   stacks?: Maybe<StackSettings>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -1722,6 +1724,8 @@ export type DeploymentSettingsAttributes = {
   /** connection details for a prometheus instance to use */
   prometheusConnection?: InputMaybe<HttpConnectionAttributes>;
   readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** configuration for smtp message delivery */
+  smtp?: InputMaybe<SmtpSettingsAttributes>;
   /** global configuration for stack execution */
   stacks?: InputMaybe<StackSettingsAttributes>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -7559,6 +7563,25 @@ export type SmtpInput = {
   sender?: InputMaybe<Scalars['String']['input']>;
   server?: InputMaybe<Scalars['String']['input']>;
   user?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** SMTP server configuration for email notifications */
+export type SmtpSettings = {
+  __typename?: 'SmtpSettings';
+  port: Scalars['Int']['output'];
+  sender: Scalars['String']['output'];
+  server: Scalars['String']['output'];
+  ssl: Scalars['Boolean']['output'];
+  user: Scalars['String']['output'];
+};
+
+export type SmtpSettingsAttributes = {
+  password: Scalars['String']['input'];
+  port: Scalars['Int']['input'];
+  sender: Scalars['String']['input'];
+  server: Scalars['String']['input'];
+  ssl: Scalars['Boolean']['input'];
+  user: Scalars['String']['input'];
 };
 
 export type Stack = {
