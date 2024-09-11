@@ -20,6 +20,7 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Broadcast,
   Console.Deployments.PubSub.Pipeline,
   Console.Deployments.PubSub.Notifications,
+  Console.Deployments.PubSub.Email,
 ]
 
 config :console, Console.Cron.Scheduler,
