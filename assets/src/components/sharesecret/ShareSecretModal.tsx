@@ -52,9 +52,6 @@ export default function ShareSecretModal({
   >([])
   const disabled = !name || !secret
   const toastRef = useRef<HTMLElement>()
-  const inputRef = useRef<HTMLInputElement>()
-
-  useEffect(() => inputRef.current?.focus?.(), [])
 
   useEffect(() => {
     if (toastRef.current)
@@ -178,7 +175,6 @@ export default function ShareSecretModal({
           >
             <Input
               disabled={completed}
-              inputProps={{ ref: inputRef }}
               value={name}
               onChange={(e) => setName(e.currentTarget.value)}
             />
