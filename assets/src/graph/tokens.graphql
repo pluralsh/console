@@ -24,6 +24,14 @@ fragment AccessTokenAudit on AccessTokenAudit {
   updatedAt
 }
 
+fragment SharedSecret on SharedSecret {
+  secret
+  handle
+  name
+  insertedAt
+  updatedAt
+}
+
 query AccessTokens {
   accessTokens(first: 500) {
     pageInfo {
@@ -62,5 +70,17 @@ mutation CreateAccessToken($scopes: [ScopeAttributes]) {
 mutation DeleteAccessToken($token: String!) {
   deleteAccessToken(token: $token) {
     ...AccessToken
+  }
+}
+
+mutation ShareSecret($attributes: SharedSecretAttributes!) {
+  shareSecret(attributes: $attributes) {
+    ...SharedSecret
+  }
+}
+
+mutation ConsumeSecret($handle: String!) {
+  consumeSecret(handle: $handle) {
+    ...SharedSecret
   }
 }

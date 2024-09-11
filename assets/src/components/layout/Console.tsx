@@ -19,6 +19,8 @@ import { CursorPositionProvider } from '../utils/CursorPosition'
 
 import { ProjectsProvider } from '../contexts/ProjectsContext'
 
+import { ShareSecretProvider } from '../sharesecret/ShareSecretContext'
+
 import Header from './Header'
 import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
@@ -37,9 +39,11 @@ export default function Console() {
                   <BillingSubscriptionProvider>
                     <BreadcrumbsProvider>
                       <TerminalThemeProvider>
-                        <DeploymentSettingsProvider>
-                          <ConsoleContent />
-                        </DeploymentSettingsProvider>
+                        <ShareSecretProvider>
+                          <DeploymentSettingsProvider>
+                            <ConsoleContent />
+                          </DeploymentSettingsProvider>
+                        </ShareSecretProvider>
                       </TerminalThemeProvider>
                     </BreadcrumbsProvider>
                   </BillingSubscriptionProvider>
