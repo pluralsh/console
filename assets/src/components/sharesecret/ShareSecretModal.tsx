@@ -46,6 +46,7 @@ export default function ShareSecretModal() {
     Pick<PolicyBindingFragment, 'user' | 'group'>[]
   >([])
   const disabled = !name || !secret
+  const toastRef = useRef<HTMLElement>()
   const inputRef = useRef<HTMLInputElement>()
 
   useEffect(() => inputRef.current?.focus?.(), [])
@@ -67,10 +68,7 @@ export default function ShareSecretModal() {
 
       navigator.clipboard
         .writeText(getUrl(data.shareSecret?.handle))
-        .then(() => {
-          setToast(true)
-          setTimeout(() => setToast(false), 3000)
-        })
+        .then(() => setToast(true))
         .catch((e) => console.error("Couldn't copy URL to clipboard", e))
     },
   })
@@ -104,6 +102,11 @@ export default function ShareSecretModal() {
     },
     [reset, setCompleted]
   )
+
+  useEffect(() => {
+    if (toastRef.current)
+      toastRef.current.style.setProperty('z-index', `${theme.zIndexes.tooltip}`)
+  }, [theme.zIndexes.tooltip])
 
   return (
     <>
@@ -220,12 +223,12 @@ export default function ShareSecretModal() {
         </div>
       </Modal>
       {toast && (
-        // TODO: Set zIndex.
         <Toast
           position={'bottom' as LayerPositionType}
           onClose={() => setToast(false)}
           margin="large"
           severity="success"
+          ref={toastRef}
         >
           Share secret URL copied!
         </Toast>
