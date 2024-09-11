@@ -4972,6 +4972,7 @@ export type User = {
   id: Scalars['ID']['output'];
   impersonationPolicy?: Maybe<ImpersonationPolicy>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  intercomId?: Maybe<Scalars['String']['output']>;
   invites?: Maybe<Array<Maybe<Invite>>>;
   jwt?: Maybe<Scalars['String']['output']>;
   loginMethod?: Maybe<LoginMethod>;

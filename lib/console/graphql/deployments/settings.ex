@@ -17,6 +17,9 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :stacks,                 :stack_settings_attributes, description: "global configuration for stack execution"
     field :prometheus_connection,  :http_connection_attributes, description: "connection details for a prometheus instance to use"
     field :loki_connection,        :http_connection_attributes, description: "connection details for a loki instance to use"
+
+    field :smtp, :smtp_settings_attributes, description: "configuration for smtp message delivery"
+
     field :read_bindings,          list_of(:policy_binding_attributes)
     field :write_bindings,         list_of(:policy_binding_attributes)
     field :git_bindings,           list_of(:policy_binding_attributes)
@@ -32,6 +35,15 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :stack_settings_attributes do
     field :job_spec,      :gate_job_attributes
     field :connection_id, :id
+  end
+
+  input_object :smtp_settings_attributes do
+    field :server,   non_null(:string)
+    field :port,     non_null(:integer)
+    field :sender,   non_null(:string)
+    field :user,     non_null(:string)
+    field :password, non_null(:string)
+    field :ssl,      non_null(:boolean)
   end
 
   @desc "A unit of organization to control permissions for a set of objects within your Console instance"
@@ -57,6 +69,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :prometheus_connection, :http_connection, description: "the way we can connect to your prometheus instance"
     field :agent_helm_values,     :string, description: "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
     field :stacks,                :stack_settings, description: "global settings for stack configuration"
+    field :smtp,                  :smtp_settings, description: "smtp server configuration for email notifications"
 
     field :agent_vsn, non_null(:string), description: "The console's expected agent version",
       resolve: fn _, _, _ -> {:ok, Settings.agent_vsn()} end
@@ -87,7 +100,15 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :http_connection do
     field :host,     non_null(:string)
     field :user,     :string, description: "user to connect w/ for basic auth"
-    field :password, :string, description: "password to connect w/ for basic auth"
+  end
+
+  @desc "SMTP server configuration for email notifications"
+  object :smtp_settings do
+    field :server,   non_null(:string)
+    field :port,     non_null(:integer)
+    field :sender,   non_null(:string)
+    field :user,     non_null(:string)
+    field :ssl,      non_null(:boolean)
   end
 
   connection node_type: :project

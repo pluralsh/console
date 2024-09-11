@@ -62,6 +62,7 @@ defmodule Console.ExternalGraphQl do
   import_types Console.GraphQl.Schema.Base
   import_types Console.GraphQl.Users
   import_types Console.GraphQl.Deployments
+  import_types Console.GraphQl.Observability
   import_types Console.GraphQl.Kubernetes.Pod
   import_types Console.GraphQl.Kubernetes.Node
   import_types Console.GraphQl.Kubernetes.Event
@@ -74,6 +75,7 @@ defmodule Console.ExternalGraphQl do
   import_types Console.GraphQl.Kubernetes.StatefulSet
   import_types Console.GraphQl.Kubernetes.Deployment
   import_types Console.GraphQl.Kubernetes.DaemonSet
+  import_types Console.GraphQl.Kubernetes.VerticalPodAutoscaler
 
   @sources [Deployments, User]
 

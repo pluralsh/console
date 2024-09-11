@@ -246,6 +246,25 @@ defmodule Console.GraphQl.Deployments.Cluster do
     timestamps()
   end
 
+  object :cluster_metrics do
+    field :cpu, list_of(:metric_response)
+    field :memory, list_of(:metric_response)
+    field :cpu_requests, list_of(:metric_response)
+    field :memory_requests, list_of(:metric_response)
+    field :cpu_limits, list_of(:metric_response)
+    field :memory_limits, list_of(:metric_response)
+    field :pods, list_of(:metric_response)
+    field :cpu_usage, list_of(:metric_response)
+    field :memory_usage, list_of(:metric_response)
+  end
+
+  object :cluster_node_metrics do
+    field :cpu, list_of(:metric_response)
+    field :memory, list_of(:metric_response)
+    field :cpu_usage, list_of(:metric_response)
+    field :memory_usage, list_of(:metric_response)
+  end
+
   @desc "a representation of a cluster you can deploy to"
   object :cluster do
     field :id,              non_null(:id), description: "internal id of this cluster"
@@ -340,6 +359,23 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :limit,      non_null(:integer)
 
       resolve &Deployments.cluster_logs/3
+    end
+
+    field :cluster_metrics, :cluster_metrics do
+      arg :start,        :datetime
+      arg :stop,         :datetime
+      arg :step,         :string
+
+      resolve &Deployments.metrics/3
+    end
+
+    field :cluster_node_metrics, :cluster_node_metrics do
+      arg :node, non_null(:string)
+      arg :start,        :datetime
+      arg :stop,         :datetime
+      arg :step,         :string
+
+      resolve &Deployments.metrics/3
     end
 
     @desc "fetches a list of runtime services found in this cluster, this is an expensive operation that should not be done in list queries"

@@ -126,4 +126,7 @@ config :libring,
 
 config :tzdata, :autoupdate, :disabled
 
+config :console, Console.Mailer,
+  adapter: Bamboo.SMTPAdapter
+
 import_config "#{Mix.env()}.exs"

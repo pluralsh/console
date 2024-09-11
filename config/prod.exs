@@ -20,6 +20,7 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Broadcast,
   Console.Deployments.PubSub.Pipeline,
   Console.Deployments.PubSub.Notifications,
+  Console.Deployments.PubSub.Email,
 ]
 
 config :console, Console.Cron.Scheduler,
@@ -48,6 +49,7 @@ config :console, Console.Cron.Scheduler,
     {"45 * * * *", {Console.Deployments.Cron, :migrate_kas, []}},
     {"30 * * * *", {Console.Deployments.Cron, :migrate_agents, []}},
     {"15 * * * *", {Console.Deployments.Cron, :update_upgrade_plans, []}},
+    {"0 */2 * * *", {Console.Email.Digest, :normal, []}},
     {"@daily", {Console.Deployments.Cron, :rotate_deploy_tokens, []}},
     {"@daily", {Console.Deployments.Cron, :prune_revisions, []}},
     {"@daily", {Console.Deployments.Cron, :prune_migrations, []}},

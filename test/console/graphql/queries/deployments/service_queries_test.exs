@@ -329,6 +329,41 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       refute found["helm"]["values"]
     end
 
+    test "it can fetch service component node metrics" do
+      user = admin_user()
+      service = insert(:service)
+      component = insert(:service_component,
+        service: service,
+        group: "apps",
+        version: "v1",
+        kind: "Deployment",
+        namespace: "ns",
+        name: "name"
+      )
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(HTTPoison, :post, 4, fn _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query serviceDeployment($id: ID!, $componentId: ID!) {
+          serviceDeployment(id: $id) {
+            id
+            componentMetrics(componentId: $componentId) {
+              cpu { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => service.id, "componentId" => component.id}, %{current_user: user})
+
+      assert found["id"] == service.id
+      refute Enum.empty?(found["componentMetrics"]["cpu"])
+    end
+
     test "it respects rbac" do
       user = insert(:user)
       service = insert(:service, read_bindings: [%{user_id: user.id}])

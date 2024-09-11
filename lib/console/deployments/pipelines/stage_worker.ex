@@ -40,7 +40,7 @@ defmodule Console.Deployments.Pipelines.StageWorker do
   def handle_call(%PipelineStage{} = stage, _, state) do
     Logger.info "maybe building promotion for #{stage.id} [#{stage.name}]"
     case Pipelines.build_promotion(stage) do
-      {:ok, _} = promo -> Logger.info "stage #{stage.id} promotion applied successfully"
+      {:ok, _} -> Logger.info "stage #{stage.id} promotion applied successfully"
       {:error, err} -> Logger.info "failed to apply stage #{stage.id} reason: #{inspect(err)}"
     end
     {:reply, :ok, state}

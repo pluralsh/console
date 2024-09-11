@@ -982,6 +982,8 @@ defmodule Console.Deployments.ServicesTest do
         errors: [%{message: "some error", source: "sync"}]
       }, service)
 
+      assert service.status == :failed
+
       %{errors: [error]} = Console.Repo.preload(service, [:errors])
       assert error.message == "some error"
       assert error.source == "sync"

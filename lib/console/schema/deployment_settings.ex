@@ -1,6 +1,7 @@
 defmodule Console.Schema.DeploymentSettings do
   use Piazza.Ecto.Schema
   alias Console.Schema.{PolicyBinding, GitRepository, Gates.JobSpec}
+  alias Piazza.Ecto.EncryptedString
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -29,7 +30,7 @@ defmodule Console.Schema.DeploymentSettings do
     field :create_policy_id, :binary_id
     field :git_policy_id,    :binary_id
 
-    field :agent_helm_values, Piazza.Ecto.EncryptedString
+    field :agent_helm_values, EncryptedString
 
     field :helm_changed, :boolean, virtual: true
     field :version_changed, :boolean, virtual: true
@@ -40,6 +41,15 @@ defmodule Console.Schema.DeploymentSettings do
     embeds_one :stacks, Stacks, on_replace: :update do
       embeds_one :job_spec, JobSpec, on_replace: :update
       field :connection_id, :binary_id
+    end
+
+    embeds_one :smtp, SMTP, on_replace: :update do
+      field :server,   :string
+      field :port,     :integer
+      field :sender,   :string
+      field :user,     :string
+      field :password, EncryptedString
+      field :ssl,      :boolean
     end
 
     belongs_to :artifact_repository, GitRepository
@@ -65,6 +75,10 @@ defmodule Console.Schema.DeploymentSettings do
     timestamps()
   end
 
+  @smtp ~w(sender port server user password ssl)a
+
+  def smtp_config(), do: @smtp
+
   @valid ~w(name enabled agent_version agent_helm_values manage_agents self_managed artifact_repository_id deployer_repository_id)a
 
   def changeset(model, attrs \\ %{}) do
@@ -76,6 +90,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_assoc(:create_bindings)
     |> cast_embed(:prometheus_connection)
     |> cast_embed(:loki_connection)
+    |> cast_embed(:smtp, with: &smtp_changeset/2)
     |> cast_embed(:stacks, with: &stacks_changeset/2)
     |> change_markers(agent_helm_values: :helm_changed, agent_version: :version_changed)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
@@ -88,5 +103,11 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(connection_id)a)
     |> cast_embed(:job_spec)
+  end
+
+  defp smtp_changeset(model, attrs) do
+    model
+    |> cast(attrs, @smtp)
+    |> validate_required(@smtp)
   end
 end

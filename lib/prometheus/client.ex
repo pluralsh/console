@@ -54,6 +54,7 @@ defmodule Prometheus.Client do
     Enum.reduce(variables, value, fn
       %{name: key, value: value}, str ->
         String.replace(str, "$#{key}", value)
+      {key, value}, str -> String.replace(str, "$#{key}", value)
       _, str -> str
     end)
   end

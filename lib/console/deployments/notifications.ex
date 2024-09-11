@@ -1,6 +1,7 @@
 defmodule Console.Deployments.Notifications do
   use Console.Services.Base
   import Console.Deployments.Policies
+  alias Console.PubSub
   alias Console.Schema.{
     NotificationSink,
     NotificationRouter,
@@ -73,6 +74,7 @@ defmodule Console.Deployments.Notifications do
       |> create_notifications()
     end)
     |> execute(extract: :secret)
+    |> notify(:create, user)
   end
 
   @doc """
@@ -186,4 +188,9 @@ defmodule Console.Deployments.Notifications do
   defp priority(%NotificationSink{configuration: %{plural: %{priority: priority}}}) when not is_nil(priority),
     do: priority
   defp priority(_), do: :low
+
+
+  defp notify({:ok, %SharedSecret{} = share}, :create, user),
+    do: handle_notify(PubSub.SharedSecretCreated, share, actor: user)
+  defp notify(pass, _, _), do: pass
 end

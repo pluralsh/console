@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
   use Console.DataCase, async: true
+  use Mimic
 
   describe "clusters" do
     test "it can list clusters in the system" do
@@ -267,6 +268,60 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert svc["version"] == "1.13.1"
       refute svc["addonVersion"]["blocking"]
       assert svc["addonVersion"]["kube"] == ~w(1.27 1.26 1.25 1.24 1.23 1.22 1.21)
+    end
+
+    test "it can fetch cluster metrics" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(HTTPoison, :post, 9, fn _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            clusterMetrics {
+              cpu { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      refute Enum.empty?(found["clusterMetrics"]["cpu"])
+    end
+
+    test "it can fetch cluster node metrics" do
+      user = admin_user()
+      cluster = insert(:cluster)
+      deployment_settings(prometheus_connection: %{url: "example.com"})
+
+      expect(HTTPoison, :post, 4, fn _, _, _ ->
+        {:ok, %HTTPoison.Response{status_code: 200, body: Poison.encode!(%{data: %{result: [
+          %{values: [[1, "1"]]}
+        ]}})}}
+      end)
+
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            clusterNodeMetrics(node: "some-node") {
+              cpu { values { timestamp value } }
+            }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: user})
+
+      assert found["id"] == cluster.id
+      refute Enum.empty?(found["clusterNodeMetrics"]["cpu"])
     end
 
     test "it respects rbac" do

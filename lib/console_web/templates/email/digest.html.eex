@@ -1,0 +1,9 @@
+<div class="fit-content margin-horizontal-auto text-lead">
+  You have <%= @count %> new notifications
+</div>
+<div class="fit-content margin-horizontal-auto text-content text-align-center margin-top-large">
+  Your environment has new activity, log into the Plural Console to see what's happening
+</div>
+<a class="button margin-top-large" href="<%= url("/") %>">
+  Login
+</a>

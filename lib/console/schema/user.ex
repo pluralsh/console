@@ -1,6 +1,12 @@
 defmodule Console.Schema.User do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{RoleBinding, Group, AccessToken, PolicyBinding}
+  alias Console.Schema.{
+    RoleBinding,
+    Group,
+    AccessToken,
+    PolicyBinding,
+    GroupMember
+  }
 
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
 
@@ -23,6 +29,8 @@ defmodule Console.Schema.User do
     field :api,              :string, virtual: true
     field :roles_updated,    :boolean, virtual: true, default: false
 
+    field :last_digest_at,   :utc_datetime_usec
+
     field :signing_private_key, Piazza.Ecto.EncryptedString
 
     has_many :assume_bindings, PolicyBinding,
@@ -36,6 +44,7 @@ defmodule Console.Schema.User do
 
     has_many :role_bindings, RoleBinding
     many_to_many :groups, Group, join_through: "group_members"
+    has_many :group_members, GroupMember
     has_many :group_role_bindings, through: [:groups, :role_bindings]
     has_one :token, AccessToken
 
@@ -58,6 +67,18 @@ defmodule Console.Schema.User do
     from(u in query,
       where: ilike(u.name, ^"%#{name}%") or like(u.email, ^"#{name}%")
     )
+  end
+
+  def for_bindings(query \\ __MODULE__, bindings) do
+    base = from(u in query, left_join: gm in assoc(u, :group_members), as: :gm, distinct: true)
+
+    Enum.reduce(bindings, base, fn
+      %{group_id: id}, q when is_binary(id) ->
+        from([u, gm: gm] in q, or_where: gm.group_id == ^id)
+      %{user_id: id}, q when is_binary(id) ->
+        from([u, gm: _] in q, or_where: u.id == ^id)
+      _, q -> q
+    end)
   end
 
   def ordered(query \\ __MODULE__, order \\ [asc: :email]) do
