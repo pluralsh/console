@@ -2,6 +2,7 @@ import { ComponentProps, useState } from 'react'
 import {
   IconFrame,
   LoopingLogo,
+  Modal,
   Table,
   TrashCanIcon,
   useSetBreadcrumbs,
@@ -29,6 +30,7 @@ import {
 import { Confirm } from '../../utils/Confirm'
 
 import ObserverStatusChip from './ObserverStatusChip'
+import ObserveTargetChip from './ObserveTargetChip'
 
 export const breadcrumbs = [
   ...CD_BASE_CRUMBS,
@@ -50,25 +52,58 @@ const columns = [
     meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
   }),
+  columnHelper.accessor(() => null, {
+    id: 'target',
+    header: 'Target',
+    cell: function Cell({
+      row: {
+        original: { node },
+      },
+    }) {
+      const [open, setOpen] = useState(false)
+
+      if (!node) return null
+
+      return (
+        <div onClick={(e) => e.stopPropagation()}>
+          <ObserveTargetChip
+            target={node.target.target}
+            clickable
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpen(true)
+            }}
+          />
+          <Modal
+            header={`${node.name} observer target`}
+            open={open}
+            onClose={() => setOpen(false)}
+          >
+            {node.target.target}
+          </Modal>
+        </div>
+      )
+    },
+  }),
   columnHelper.accessor(({ node }) => node?.crontab, {
     id: 'crontab',
     header: 'Crontab',
     cell: ({ getValue }) => getValue(),
-  }),
-  columnHelper.accessor(({ node }) => node?.status, {
-    id: 'status',
-    header: 'Status',
-    cell: ({ getValue }) => <ObserverStatusChip status={getValue()} />,
   }),
   columnHelper.accessor(({ node }) => node?.lastRunAt, {
     id: 'lastRunAt',
     header: 'Last run',
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
-  columnHelper.accessor(({ node }) => node?.target, {
-    id: 'target',
-    header: 'Target',
-    cell: () => '', // TODO
+  columnHelper.accessor(({ node }) => node?.nextRunAt, {
+    id: 'nextRunAt',
+    header: 'Next run',
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
+  }),
+  columnHelper.accessor(({ node }) => node?.status, {
+    id: 'status',
+    header: 'Status',
+    cell: ({ getValue }) => <ObserverStatusChip status={getValue()} />,
   }),
   columnHelper.accessor(() => null, {
     id: 'errors',
