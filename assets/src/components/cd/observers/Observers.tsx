@@ -4,6 +4,7 @@ import {
   LoopingLogo,
   Modal,
   Prop,
+  PropWide,
   Table,
   TrashCanIcon,
   useSetBreadcrumbs,
@@ -19,8 +20,7 @@ import {
 } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { Div } from 'honorable'
-
-import { useTheme } from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
@@ -31,6 +31,7 @@ import {
   ServiceErrorsModal,
 } from '../services/ServicesTableErrors'
 import { Confirm } from '../../utils/Confirm'
+import { Overline } from '../utils/PermissionsModal'
 
 import ObserverStatusChip from './ObserverStatusChip'
 import ObserverTargetChip from './ObserverTargetChip'
@@ -46,6 +47,16 @@ const pageSize = 100
 const virtualOptions: ComponentProps<typeof Table>['reactVirtualOptions'] = {
   overscan: 10,
 }
+
+const PropsContainer = styled.div(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xxsmall,
+}))
+
+const PropsContainerHeader = styled(Overline)(({ theme }) => ({
+  marginBottom: theme.spacing.xsmall,
+}))
 
 const columnHelper = createColumnHelper<Edge<ObserverFragment>>()
 
@@ -87,50 +98,71 @@ const columns = [
             <div
               css={{
                 display: 'flex',
-                flexWrap: 'wrap',
-                gap: theme.spacing.medium,
+                flexDirection: 'column',
+                gap: theme.spacing.large,
               }}
             >
-              <Prop
-                title="Type"
-                margin={0}
+              <div
+                css={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: theme.spacing.large,
+                }}
               >
-                <ObserverTargetChip target={node.target.target} />
-              </Prop>
-              {node.target.format && (
                 <Prop
-                  title="Format"
+                  title="Type"
                   margin={0}
                 >
-                  {node.target.format}
+                  <ObserverTargetChip target={node.target.target} />
                 </Prop>
-              )}
-              <Prop
-                title="Order"
-                margin={0}
-              >
-                <ObserverTargetOrderChip order={node.target.order} />
-              </Prop>
-              {node.target.git && (
-                <>
-                  <Prop title="Type">{node.target.git.type}</Prop>
-                  <Prop title="Repository ID">
-                    {node.target.git.repositoryId}
+                {node.target.format && (
+                  <Prop
+                    title="Format"
+                    margin={0}
+                  >
+                    {node.target.format}
                   </Prop>
-                </>
+                )}
+                <Prop
+                  title="Order"
+                  margin={0}
+                >
+                  <ObserverTargetOrderChip order={node.target.order} />
+                </Prop>
+              </div>
+              {node.target.git && (
+                <div>
+                  <PropsContainerHeader>Git</PropsContainerHeader>
+                  <PropsContainer>
+                    <PropWide title="Type">{node.target.git.type}</PropWide>
+                    <PropWide title="Repository ID">
+                      {node.target.git.repositoryId}
+                    </PropWide>
+                  </PropsContainer>
+                </div>
               )}
               {node.target.helm && (
-                <>
-                  <Prop title="Chart">{node.target.helm.chart}</Prop>
-                  <Prop title="URL">{node.target.helm.url}</Prop>
-                  <Prop title="Provider">{node.target.helm.provider}</Prop>
-                </>
+                <div>
+                  <PropsContainerHeader>Helm</PropsContainerHeader>
+                  <PropsContainer>
+                    <PropWide title="Chart">{node.target.helm.chart}</PropWide>
+                    <PropWide title="URL">{node.target.helm.url}</PropWide>
+                    <PropWide title="Provider">
+                      {node.target.helm.provider}
+                    </PropWide>
+                  </PropsContainer>
+                </div>
               )}
               {node.target.oci && (
-                <>
-                  <Prop title="Chart">{node.target.oci.url}</Prop>
-                  <Prop title="Provider">{node.target.oci.provider}</Prop>
-                </>
+                <div>
+                  <PropsContainerHeader>OCI</PropsContainerHeader>
+                  <PropsContainer>
+                    <PropWide title="Chart">{node.target.oci.url}</PropWide>
+                    <PropWide title="Provider">
+                      {node.target.oci.provider}
+                    </PropWide>
+                  </PropsContainer>
+                </div>
               )}
             </div>
           </Modal>
