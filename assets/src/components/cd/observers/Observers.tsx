@@ -1,11 +1,21 @@
 import { ComponentProps, useState } from 'react'
-import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  LoopingLogo,
+  Table,
+  TrashCanIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
 import { GqlError } from 'components/utils/Alert'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { ObserverFragment, useObserversQuery } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
+
+import { useMutation } from '@apollo/client'
+
+import { Div } from 'honorable'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
@@ -16,6 +26,10 @@ import {
   ServiceErrorsChip,
   ServiceErrorsModal,
 } from '../services/ServicesTableErrors'
+
+import { DELETE_NODE } from '../../cluster/queries'
+
+import { Confirm } from '../../utils/Confirm'
 
 import ObserverStatusChip from './ObserverStatusChip'
 
@@ -59,7 +73,7 @@ const columns = [
     header: 'Target',
     cell: () => '', // TODO
   }),
-  columnHelper.accessor(({ node }) => node, {
+  columnHelper.accessor(() => null, {
     id: 'errors',
     header: 'Errors',
     cell: function Cell({
@@ -91,11 +105,47 @@ const columns = [
       )
     },
   }),
-  columnHelper.accessor(({ node }) => node, {
+  columnHelper.accessor(() => null, {
     id: 'actions',
     header: '',
     meta: { gridTemplate: 'minmax(auto, 80px)' },
-    cell: () => '', // TODO
+    cell: function Cell({
+      row: {
+        original: { node },
+      },
+    }) {
+      const [confirm, setConfirm] = useState(false)
+      const [mutation, { loading }] = useMutation(DELETE_NODE, {
+        variables: { id: node?.id },
+        onCompleted: () => {
+          setConfirm(false)
+        },
+      })
+
+      return (
+        <Div onClick={(e) => e.stopPropagation()}>
+          <IconFrame
+            clickable
+            icon={<TrashCanIcon color="icon-danger" />}
+            onClick={() => setConfirm(true)}
+            textValue="Delete"
+            tooltip
+          />
+          {confirm && (
+            <Confirm
+              close={() => setConfirm(false)}
+              destructive
+              label="Delete"
+              loading={loading}
+              open={confirm}
+              submit={() => mutation()}
+              title="Delete observer"
+              text={`Are you sure you want to delete ${node?.name}?`}
+            />
+          )}
+        </Div>
+      )
+    },
   }),
 ]
 
