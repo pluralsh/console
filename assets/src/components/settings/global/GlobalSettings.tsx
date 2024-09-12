@@ -38,6 +38,10 @@ const directory = [
     path: 'observability',
     label: 'Observability',
   },
+  {
+    path: 'smtp',
+    label: 'SMTP',
+  },
 ]
 
 type GlobalSettingsContextType = {

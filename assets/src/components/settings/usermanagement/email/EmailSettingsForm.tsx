@@ -4,7 +4,7 @@ import { UPDATE_SMTP } from 'components/graphql/plural'
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 
-const clean = (smtp) => {
+export const cleanSmtpForm = (smtp) => {
   const { __typename, ...vals } = smtp || {}
 
   return vals
@@ -12,7 +12,7 @@ const clean = (smtp) => {
 
 export default function EmailSettingsForm({ smtp }) {
   const theme = useTheme()
-  const [form, setForm] = useState(clean(smtp))
+  const [form, setForm] = useState(cleanSmtpForm(smtp))
   const [mutation, { loading }] = useMutation(UPDATE_SMTP, {
     variables: { smtp: form },
   })
