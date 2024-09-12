@@ -7,9 +7,15 @@ fragment Observer on Observer {
   status
   lastRunAt
   nextRunAt
-  project { ...ProjectTiny }
-  target { ...ObserverTarget }
-  errors { ...ServiceError }
+  project {
+    ...ProjectTiny
+  }
+  target {
+    ...ObserverTarget
+  }
+  errors {
+    ...ServiceError
+  }
 }
 
 fragment ObserverTarget on ObserverTarget {
@@ -36,8 +42,20 @@ fragment ServiceError on ServiceError {
   message
 }
 
-query Observers($first: Int, $last: Int, $before: String, $after: String, $projectId: ID) {
-  observers(first: $first, last: $last, before: $before, after: $after, projectId: $projectId) {
+query Observers(
+  $first: Int
+  $last: Int
+  $before: String
+  $after: String
+  $projectId: ID
+) {
+  observers(
+    first: $first
+    last: $last
+    before: $before
+    after: $after
+    projectId: $projectId
+  ) {
     pageInfo {
       ...PageInfo
     }
