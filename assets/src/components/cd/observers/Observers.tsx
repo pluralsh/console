@@ -1,7 +1,6 @@
 import { ComponentProps } from 'react'
 import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { type Row, createColumnHelper } from '@tanstack/react-table'
-import { useNavigate } from 'react-router-dom'
+import { createColumnHelper } from '@tanstack/react-table'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
 import { GqlError } from 'components/utils/Alert'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
@@ -12,6 +11,8 @@ import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+
+import ObserverStatusChip from './ObserverStatusChip'
 
 export const breadcrumbs = [
   ...CD_BASE_CRUMBS,
@@ -36,14 +37,12 @@ const columns = [
   columnHelper.accessor(({ node }) => node?.crontab, {
     id: 'crontab',
     header: 'Crontab',
-    meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor(({ node }) => node?.status, {
     id: 'status',
     header: 'Status',
-    meta: { truncate: true },
-    cell: ({ getValue }) => getValue(), // TODO
+    cell: ({ getValue }) => <ObserverStatusChip status={getValue()} />,
   }),
   columnHelper.accessor(({ node }) => node?.lastRunAt, {
     id: 'lastRunAt',
@@ -53,23 +52,22 @@ const columns = [
   columnHelper.accessor(({ node }) => node?.target, {
     id: 'target',
     header: 'Target',
-    cell: ({ getValue }) => getValue(), // TODO
+    cell: () => '', // TODO
   }),
   columnHelper.accessor(({ node }) => node?.errors, {
     id: 'errors',
     header: 'Errors',
-    cell: ({ getValue }) => getValue(), // TODO
+    cell: () => '', // TODO
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
     header: '',
     meta: { gridTemplate: 'minmax(auto, 80px)' },
-    cell: ({ getValue }) => getValue(), // TODO
+    cell: () => '', // TODO
   }),
 ]
 
 export default function Observers() {
-  const navigate = useNavigate()
   const projectId = useProjectId()
 
   const { data, loading, error, pageInfo, fetchNextPage } =
@@ -94,9 +92,6 @@ export default function Observers() {
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
-        onRowClick={(_e, { original }: Row<Edge<ObserverFragment>>) => {
-          navigate(`${OBSERVERS_ABS_PATH}/${original.node?.id}`)
-        }}
         emptyStateProps={{
           message: "Looks like you don't have any observers yet",
         }}
