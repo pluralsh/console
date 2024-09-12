@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react'
+import { ComponentProps, useState } from 'react'
 import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
@@ -11,6 +11,11 @@ import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+
+import {
+  ServiceErrorsChip,
+  ServiceErrorsModal,
+} from '../services/ServicesTableErrors'
 
 import ObserverStatusChip from './ObserverStatusChip'
 
@@ -54,10 +59,37 @@ const columns = [
     header: 'Target',
     cell: () => '', // TODO
   }),
-  columnHelper.accessor(({ node }) => node?.errors, {
+  columnHelper.accessor(({ node }) => node, {
     id: 'errors',
     header: 'Errors',
-    cell: () => '', // TODO
+    cell: function Cell({
+      row: {
+        original: { node },
+      },
+    }) {
+      const [open, setOpen] = useState(false)
+
+      if (!node || !node.errors) return null
+
+      return (
+        <div onClick={(e) => e.stopPropagation()}>
+          <ServiceErrorsChip
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpen(true)
+            }}
+            clickable
+            errors={node.errors}
+          />
+          <ServiceErrorsModal
+            isOpen={open}
+            setIsOpen={setOpen}
+            header={`${node.name} observer errors`}
+            errors={node.errors}
+          />
+        </div>
+      )
+    },
   }),
   columnHelper.accessor(({ node }) => node, {
     id: 'actions',
