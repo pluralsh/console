@@ -9119,6 +9119,45 @@ export type GetManagedNamespaceServicesQueryVariables = Exact<{
 
 export type GetManagedNamespaceServicesQuery = { __typename?: 'RootQueryType', managedNamespace?: { __typename?: 'ManagedNamespace', services?: { __typename?: 'ServiceDeploymentConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ServiceDeploymentEdge', node?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null } | null } | null> | null } | null } | null };
 
+export type ObserverFragment = { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null };
+
+export type ObserverTargetFragment = { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null };
+
+export type ServiceErrorFragment = { __typename?: 'ServiceError', source: string, message: string };
+
+export type ObserversQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ObserversQuery = { __typename?: 'RootQueryType', observers?: { __typename?: 'ObserverConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ObserverEdge', node?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null } | null> | null } | null };
+
+export type ObserverQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ObserverQuery = { __typename?: 'RootQueryType', observer?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null };
+
+export type UpsertObserverMutationVariables = Exact<{
+  attrs?: InputMaybe<ObserverAttributes>;
+}>;
+
+
+export type UpsertObserverMutation = { __typename?: 'RootMutationType', upsertObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null };
+
+export type DeleteObserverMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteObserverMutation = { __typename?: 'RootMutationType', deleteObserver?: { __typename?: 'Observer', id: string, insertedAt?: string | null, updatedAt?: string | null, name: string, crontab: string, status: ObserverStatus, lastRunAt: string, nextRunAt: string, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, target: { __typename?: 'ObserverTarget', target: ObserverTargetType, format?: string | null, order: ObserverTargetOrder, git?: { __typename?: 'ObserverGitRepo', type: ObserverGitTargetType, repositoryId: string } | null, helm?: { __typename?: 'ObserverHelmRepo', url: string, provider?: HelmAuthProvider | null, chart: string } | null, oci?: { __typename?: 'ObserverOciRepo', provider?: HelmAuthProvider | null, url: string } | null }, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null } | null };
+
 export type PipelineServiceDeploymentFragment = { __typename?: 'ServiceDeployment', id: string, name: string, namespace: string, status: ServiceDeploymentStatus, componentStatus?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, revision?: { __typename?: 'Revision', id: string } | null };
 
 export type ContainerSpecFragment = { __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null };
@@ -11093,6 +11132,55 @@ export const ServiceTemplateFragmentDoc = gql`
   templated
 }
     ${GitRepositoryFragmentDoc}`;
+export const ObserverTargetFragmentDoc = gql`
+    fragment ObserverTarget on ObserverTarget {
+  target
+  format
+  order
+  git {
+    type
+    repositoryId
+  }
+  helm {
+    url
+    provider
+    chart
+  }
+  oci {
+    provider
+    url
+  }
+}
+    `;
+export const ServiceErrorFragmentDoc = gql`
+    fragment ServiceError on ServiceError {
+  source
+  message
+}
+    `;
+export const ObserverFragmentDoc = gql`
+    fragment Observer on Observer {
+  id
+  insertedAt
+  updatedAt
+  name
+  crontab
+  status
+  lastRunAt
+  nextRunAt
+  project {
+    ...ProjectTiny
+  }
+  target {
+    ...ObserverTarget
+  }
+  errors {
+    ...ServiceError
+  }
+}
+    ${ProjectTinyFragmentDoc}
+${ObserverTargetFragmentDoc}
+${ServiceErrorFragmentDoc}`;
 export const ContainerSpecFragmentDoc = gql`
     fragment ContainerSpec on ContainerSpec {
   args
@@ -15999,6 +16087,171 @@ export type GetManagedNamespaceServicesQueryHookResult = ReturnType<typeof useGe
 export type GetManagedNamespaceServicesLazyQueryHookResult = ReturnType<typeof useGetManagedNamespaceServicesLazyQuery>;
 export type GetManagedNamespaceServicesSuspenseQueryHookResult = ReturnType<typeof useGetManagedNamespaceServicesSuspenseQuery>;
 export type GetManagedNamespaceServicesQueryResult = Apollo.QueryResult<GetManagedNamespaceServicesQuery, GetManagedNamespaceServicesQueryVariables>;
+export const ObserversDocument = gql`
+    query Observers($first: Int, $last: Int, $before: String, $after: String, $projectId: ID) {
+  observers(
+    first: $first
+    last: $last
+    before: $before
+    after: $after
+    projectId: $projectId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Observer
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ObserverFragmentDoc}`;
+
+/**
+ * __useObserversQuery__
+ *
+ * To run a query within a React component, call `useObserversQuery` and pass it any options that fit your needs.
+ * When your component renders, `useObserversQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useObserversQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      before: // value for 'before'
+ *      after: // value for 'after'
+ *      projectId: // value for 'projectId'
+ *   },
+ * });
+ */
+export function useObserversQuery(baseOptions?: Apollo.QueryHookOptions<ObserversQuery, ObserversQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ObserversQuery, ObserversQueryVariables>(ObserversDocument, options);
+      }
+export function useObserversLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ObserversQuery, ObserversQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ObserversQuery, ObserversQueryVariables>(ObserversDocument, options);
+        }
+export function useObserversSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ObserversQuery, ObserversQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ObserversQuery, ObserversQueryVariables>(ObserversDocument, options);
+        }
+export type ObserversQueryHookResult = ReturnType<typeof useObserversQuery>;
+export type ObserversLazyQueryHookResult = ReturnType<typeof useObserversLazyQuery>;
+export type ObserversSuspenseQueryHookResult = ReturnType<typeof useObserversSuspenseQuery>;
+export type ObserversQueryResult = Apollo.QueryResult<ObserversQuery, ObserversQueryVariables>;
+export const ObserverDocument = gql`
+    query Observer($id: ID, $name: String) {
+  observer(id: $id, name: $name) {
+    ...Observer
+  }
+}
+    ${ObserverFragmentDoc}`;
+
+/**
+ * __useObserverQuery__
+ *
+ * To run a query within a React component, call `useObserverQuery` and pass it any options that fit your needs.
+ * When your component renders, `useObserverQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useObserverQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useObserverQuery(baseOptions?: Apollo.QueryHookOptions<ObserverQuery, ObserverQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ObserverQuery, ObserverQueryVariables>(ObserverDocument, options);
+      }
+export function useObserverLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ObserverQuery, ObserverQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ObserverQuery, ObserverQueryVariables>(ObserverDocument, options);
+        }
+export function useObserverSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ObserverQuery, ObserverQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ObserverQuery, ObserverQueryVariables>(ObserverDocument, options);
+        }
+export type ObserverQueryHookResult = ReturnType<typeof useObserverQuery>;
+export type ObserverLazyQueryHookResult = ReturnType<typeof useObserverLazyQuery>;
+export type ObserverSuspenseQueryHookResult = ReturnType<typeof useObserverSuspenseQuery>;
+export type ObserverQueryResult = Apollo.QueryResult<ObserverQuery, ObserverQueryVariables>;
+export const UpsertObserverDocument = gql`
+    mutation UpsertObserver($attrs: ObserverAttributes) {
+  upsertObserver(attributes: $attrs) {
+    ...Observer
+  }
+}
+    ${ObserverFragmentDoc}`;
+export type UpsertObserverMutationFn = Apollo.MutationFunction<UpsertObserverMutation, UpsertObserverMutationVariables>;
+
+/**
+ * __useUpsertObserverMutation__
+ *
+ * To run a mutation, you first call `useUpsertObserverMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertObserverMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertObserverMutation, { data, loading, error }] = useUpsertObserverMutation({
+ *   variables: {
+ *      attrs: // value for 'attrs'
+ *   },
+ * });
+ */
+export function useUpsertObserverMutation(baseOptions?: Apollo.MutationHookOptions<UpsertObserverMutation, UpsertObserverMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertObserverMutation, UpsertObserverMutationVariables>(UpsertObserverDocument, options);
+      }
+export type UpsertObserverMutationHookResult = ReturnType<typeof useUpsertObserverMutation>;
+export type UpsertObserverMutationResult = Apollo.MutationResult<UpsertObserverMutation>;
+export type UpsertObserverMutationOptions = Apollo.BaseMutationOptions<UpsertObserverMutation, UpsertObserverMutationVariables>;
+export const DeleteObserverDocument = gql`
+    mutation DeleteObserver($id: ID!) {
+  deleteObserver(id: $id) {
+    ...Observer
+  }
+}
+    ${ObserverFragmentDoc}`;
+export type DeleteObserverMutationFn = Apollo.MutationFunction<DeleteObserverMutation, DeleteObserverMutationVariables>;
+
+/**
+ * __useDeleteObserverMutation__
+ *
+ * To run a mutation, you first call `useDeleteObserverMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteObserverMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteObserverMutation, { data, loading, error }] = useDeleteObserverMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteObserverMutation(baseOptions?: Apollo.MutationHookOptions<DeleteObserverMutation, DeleteObserverMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteObserverMutation, DeleteObserverMutationVariables>(DeleteObserverDocument, options);
+      }
+export type DeleteObserverMutationHookResult = ReturnType<typeof useDeleteObserverMutation>;
+export type DeleteObserverMutationResult = Apollo.MutationResult<DeleteObserverMutation>;
+export type DeleteObserverMutationOptions = Apollo.BaseMutationOptions<DeleteObserverMutation, DeleteObserverMutationVariables>;
 export const PipelinesDocument = gql`
     query Pipelines($q: String, $first: Int = 50, $after: String, $projectId: ID) {
   pipelines(q: $q, first: $first, after: $after, projectId: $projectId) {
@@ -21745,6 +21998,8 @@ export const namedOperations = {
     GetManagedNamespaceName: 'GetManagedNamespaceName',
     GetManagedNamespace: 'GetManagedNamespace',
     GetManagedNamespaceServices: 'GetManagedNamespaceServices',
+    Observers: 'Observers',
+    Observer: 'Observer',
     Pipelines: 'Pipelines',
     PipelineBindings: 'PipelineBindings',
     JobGate: 'JobGate',
@@ -21856,6 +22111,8 @@ export const namedOperations = {
     UpdateDeploymentSettings: 'UpdateDeploymentSettings',
     UpsertObservabilityProvider: 'UpsertObservabilityProvider',
     DeleteObservabilityProvider: 'DeleteObservabilityProvider',
+    UpsertObserver: 'UpsertObserver',
+    DeleteObserver: 'DeleteObserver',
     deletePipeline: 'deletePipeline',
     ApproveGate: 'ApproveGate',
     CreatePipelineContext: 'CreatePipelineContext',
@@ -21965,6 +22222,9 @@ export const namedOperations = {
     ObservabilityProvider: 'ObservabilityProvider',
     ManagedNamespace: 'ManagedNamespace',
     ServiceTemplate: 'ServiceTemplate',
+    Observer: 'Observer',
+    ObserverTarget: 'ObserverTarget',
+    ServiceError: 'ServiceError',
     PipelineServiceDeployment: 'PipelineServiceDeployment',
     ContainerSpec: 'ContainerSpec',
     JobGateSpec: 'JobGateSpec',

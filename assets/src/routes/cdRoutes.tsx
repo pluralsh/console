@@ -86,6 +86,8 @@ import ClusterPRs from '../components/cd/cluster/ClusterPRs'
 
 import ServicePRs from '../components/cd/services/service/ServicePRs'
 
+import Observers from '../components/cd/observers/Observers'
+
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
@@ -106,6 +108,7 @@ import {
   NAMESPACE_INFO_PATH,
   NAMESPACE_SERVICES_PATH,
   NODE_REL_PATH,
+  OBSERVERS_REL_PATH,
   PIPELINES_REL_PATH,
   POD_REL_PATH,
   REPOS_REL_PATH,
@@ -204,6 +207,10 @@ const mainRoutes = (
     <Route
       path={PIPELINES_REL_PATH}
       element={<Pipelines />}
+    />
+    <Route
+      path={OBSERVERS_REL_PATH}
+      element={<Observers />}
     />
     <Route
       path="git"

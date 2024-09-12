@@ -1,9 +1,8 @@
 import { ComponentProps, useMemo } from 'react'
-import { EmptyState, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
 import type { Row } from '@tanstack/react-table'
-import isEmpty from 'lodash/isEmpty'
 import { ManagedNamespace, useManagedNamespacesQuery } from 'generated/graphql'
 import { getNamespacesDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
@@ -71,7 +70,7 @@ export function NamespacesTable() {
     >
       {!data ? (
         <LoadingIndicator />
-      ) : !isEmpty(data?.managedNamespaces?.edges) ? (
+      ) : (
         <FullHeightTableWrap>
           <Table
             virtualizeRows
@@ -94,12 +93,11 @@ export function NamespacesTable() {
             reactTableOptions={reactTableOptions}
             reactVirtualOptions={NAMESPACES_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
+            emptyStateProps={{
+              message: "Looks like you don't have any namespaces yet",
+            }}
           />
         </FullHeightTableWrap>
-      ) : (
-        <div css={{ height: '100%' }}>
-          <EmptyState message="Looks like you don't have any namespaces yet." />
-        </div>
       )}
     </div>
   )

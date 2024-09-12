@@ -1,0 +1,86 @@
+fragment Observer on Observer {
+  id
+  insertedAt
+  updatedAt
+  name
+  crontab
+  status
+  lastRunAt
+  nextRunAt
+  project {
+    ...ProjectTiny
+  }
+  target {
+    ...ObserverTarget
+  }
+  errors {
+    ...ServiceError
+  }
+}
+
+fragment ObserverTarget on ObserverTarget {
+  target
+  format
+  order
+  git {
+    type
+    repositoryId
+  }
+  helm {
+    url
+    provider
+    chart
+  }
+  oci {
+    provider
+    url
+  }
+}
+
+fragment ServiceError on ServiceError {
+  source
+  message
+}
+
+query Observers(
+  $first: Int
+  $last: Int
+  $before: String
+  $after: String
+  $projectId: ID
+) {
+  observers(
+    first: $first
+    last: $last
+    before: $before
+    after: $after
+    projectId: $projectId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Observer
+      }
+    }
+  }
+}
+
+query Observer($id: ID, $name: String) {
+  observer(id: $id, name: $name) {
+    ...Observer
+  }
+}
+
+mutation UpsertObserver($attrs: ObserverAttributes) {
+  upsertObserver(attributes: $attrs) {
+    ...Observer
+  }
+}
+
+mutation DeleteObserver($id: ID!) {
+  deleteObserver(id: $id) {
+    ...Observer
+  }
+}
