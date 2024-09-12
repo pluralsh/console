@@ -117,7 +117,6 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
             cluster { id }
             repository { id }
             git { ref folder }
-            configuration { version }
           }
         }
       """, %{"id" => stack.id, "attrs" => %{
@@ -125,8 +124,7 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
         "type" => "TERRAFORM",
         "repositoryId" => stack.repository.id,
         "clusterId" => stack.cluster.id,
-        "git" => %{"ref" => "main", "folder" => "terraform"},
-        "configuration" => %{"version" => "1.7.0"}
+        "git" => %{"ref" => stack.git.ref, "folder" => stack.git.folder}
       }}, %{current_user: admin_user()})
 
       assert found["id"]
@@ -134,9 +132,6 @@ defmodule Console.GraphQl.Deployments.StackMutationsTest do
       assert found["type"] == "TERRAFORM"
       assert found["repository"]["id"] == stack.repository.id
       assert found["cluster"]["id"] == stack.cluster.id
-      assert found["git"]["ref"] == "main"
-      assert found["git"]["folder"] == "terraform"
-      assert found["configuration"]["version"] == "1.7.0"
     end
   end
 

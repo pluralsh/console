@@ -5,9 +5,13 @@ defmodule Console.Deployments.Pr.Utils do
 
   @ttl :timer.hours(1)
 
+  @ansi_code ~r/\x1b\[[0-9;]*m/
+
   @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural Stacks?: ([[:alnum:]_\-]+)/]
   @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/Plural Services?: ([[:alnum:]_\/\-]+)/]
   @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/Plural Clusters?: ([[:alnum:]_\-]+)/]
+
+  def filter_ansi(text), do: String.replace(text, @ansi_code, "")
 
   def pr_associations(content) do
     Enum.reduce(~w(stack service cluster)a, %{}, &maybe_add(&2, :"#{&1}_id", scrape(&1, content)))

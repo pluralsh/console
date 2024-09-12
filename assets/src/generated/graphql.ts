@@ -1337,6 +1337,14 @@ export type ConfigurationValidation = {
   type?: Maybe<Scalars['String']['output']>;
 };
 
+/** Validations to apply to this configuration entry prior to PR creation */
+export type ConfigurationValidationAttributes = {
+  /** whether the string is json encoded */
+  json?: InputMaybe<Scalars['Boolean']['input']>;
+  /** regex a string value should match */
+  regex?: InputMaybe<Scalars['String']['input']>;
+};
+
 export enum Conjunction {
   And = 'AND',
   Or = 'OR'
@@ -4091,6 +4099,7 @@ export type PrConfigurationAttributes = {
   optional?: InputMaybe<Scalars['Boolean']['input']>;
   placeholder?: InputMaybe<Scalars['String']['input']>;
   type: ConfigurationType;
+  validation?: InputMaybe<ConfigurationValidationAttributes>;
   values?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
 };
 

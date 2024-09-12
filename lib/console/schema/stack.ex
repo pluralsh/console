@@ -78,6 +78,7 @@ defmodule Console.Schema.Stack do
     field :variables,       :map
 
     field :actor_changed, :boolean, virtual: true
+    field :runnable,      :boolean, virtual: true
 
     field :write_policy_id,  :binary_id
     field :read_policy_id,   :binary_id
@@ -188,6 +189,7 @@ defmodule Console.Schema.Stack do
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> change_markers(actor_id: :actor_changed)
+    |> determine_runnable()
     |> validate_required(~w(name type status project_id)a)
   end
 
@@ -223,5 +225,10 @@ defmodule Console.Schema.Stack do
   def lock_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(locked_at)a)
+  end
+
+  defp determine_runnable(cs) do
+    significant = Enum.any?(~w(files environment variables git job_spec configuration)a, &get_change(cs, &1))
+    put_change(cs, :runnable, significant)
   end
 end

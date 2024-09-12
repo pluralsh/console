@@ -358,12 +358,27 @@ type PrAutomationConfiguration struct {
 	// +kubebuilder:validation:Optional
 	Placeholder *string `json:"placeholder,omitempty"`
 
+	// Any additional validations you want to apply to this configuration item before generating a pr
+	// +kubebuilder:validation:Optional
+	Validation *PrAutomationConfigurationValidation `json:"validation,omitempty"`
+
 	// +kubebuilder:validation:Optional
 	Values []*string `json:"values,omitempty"`
 }
 
+// PrAutomationConfigurationValidation validations to apply to configuration items in a PR Automation
+type PrAutomationConfigurationValidation struct {
+	// A regex to match string-valued configuration items
+	// +kubebuilder:validation:Optional
+	Regex *string `json:"regex,omitempty"`
+
+	// Whether the string value is supposed to be json-encoded
+	// +kubebuilder:validation:Optional
+	Json *bool `json:"json,omitempty"`
+}
+
 func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttributes {
-	return &console.PrConfigurationAttributes{
+	conf := &console.PrConfigurationAttributes{
 		Type:          in.Type,
 		Name:          in.Name,
 		Default:       in.Default,
@@ -374,6 +389,15 @@ func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttrib
 		Condition:     in.Condition.Attributes(),
 		Values:        in.Values,
 	}
+
+	if in.Validation != nil {
+		conf.Validation = &console.ConfigurationValidationAttributes{
+			Regex: in.Validation.Regex,
+			JSON:  in.Validation.Json,
+		}
+	}
+
+	return conf
 }
 
 // Condition ...

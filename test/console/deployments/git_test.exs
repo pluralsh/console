@@ -268,7 +268,11 @@ defmodule Console.Deployments.GitTest do
         connection: conn,
         updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
         write_bindings: [%{user_id: user.id}],
-        create_bindings: [%{user_id: user.id}]
+        create_bindings: [%{user_id: user.id}],
+        configuration: [
+          %{name: "first", type: :int},
+          %{name: "second", type: :string, validation: %{regex: "[a-z0-9]+:[a-z0-9]+(,[a-z0-9]+:[a-z0-9]+)*"}}
+        ]
       )
       expect(Plural, :template, fn f, _, _ -> File.read(f) end)
       expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
@@ -278,13 +282,40 @@ defmodule Console.Deployments.GitTest do
       expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
       expect(Console.Deployments.Pr.Git, :push, fn _, "pr-test" -> {:ok, ""} end)
 
-      {:ok, pr} = Git.create_pull_request(%{}, pra.id, "pr-test", user)
+      {:ok, pr} = Git.create_pull_request(%{
+        "first" => 10,
+        "second" => "webapp:name1,cron:name2"
+      }, pra.id, "pr-test", user)
 
       assert pr.cluster_id == pra.cluster_id
       assert pr.url == "https://github.com/pr/url"
       assert pr.title == pra.title
 
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
+    end
+
+    test "it will reject a pull request w/o valid configuration" do
+      user = insert(:user)
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
+        write_bindings: [%{user_id: user.id}],
+        create_bindings: [%{user_id: user.id}],
+        configuration: [
+          %{name: "first", type: :int},
+          %{name: "second", type: :string, validation: %{regex: "[a-z0-9]+:[a-z0-9]+(,[a-z0-9]+:[a-z0-9]+)*"}}
+        ]
+      )
+
+      {:error, err} = Git.create_pull_request(%{
+        "first" => 10,
+        "second" => "bogus"
+      }, pra.id, "pr-test", user)
+
+      assert err =~ "does not match regex"
     end
 
     test "it can create a pull request with a github app" do

@@ -23,6 +23,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [NotificationRouter](#notificationrouter)
 - [NotificationSink](#notificationsink)
 - [ObservabilityProvider](#observabilityprovider)
+- [Observer](#observer)
 - [Pipeline](#pipeline)
 - [PipelineContext](#pipelinecontext)
 - [PrAutomation](#prautomation)
@@ -754,6 +755,7 @@ _Appears in:_
 | `host` _string_ |  |  |  |
 | `user` _string_ | user to connect with basic auth |  |  |
 | `password` _string_ | password to connect w/ for basic auth |  |  |
+| `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef selects a key of a password Secret |  | Optional: {} <br /> |
 
 
 
@@ -786,6 +788,8 @@ _Appears in:_
 
 _Appears in:_
 - [HelmRepositorySpec](#helmrepositoryspec)
+- [ObserverHelm](#observerhelm)
+- [ObserverOci](#observeroci)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
@@ -1147,7 +1151,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | Name the name of this service, if not provided NotificationSink's own name from NotificationSink.ObjectMeta will be used. |  | Optional: {} <br /> |
-| `type` _[SinkType](#sinktype)_ | Type the channel type of this sink. |  | Enum: [SLACK TEAMS] <br />Optional: {} <br /> |
+| `type` _[SinkType](#sinktype)_ | Type the channel type of this sink. |  | Enum: [SLACK TEAMS PLURAL] <br />Optional: {} <br /> |
 | `configuration` _[SinkConfiguration](#sinkconfiguration)_ | Configuration for the specific type |  | Optional: {} <br /> |
 | `bindings` _[Binding](#binding) array_ | Bindings to determine users/groups to be notified for PLURAL sync types |  | Optional: {} <br /> |
 
@@ -1222,6 +1226,189 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `identifier` _string_ |  |  | Required: {} <br /> |
 | `observabilityProviderRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
+
+
+#### Observer
+
+
+
+Observer is the Schema for the observers API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `Observer` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[ObserverSpec](#observerspec)_ |  |  |  |
+
+
+#### ObserverAction
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverSpec](#observerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `type` _[ObserverActionType](#observeractiontype)_ |  |  | Enum: [PIPELINE PR] <br />Type: string <br /> |
+| `configuration` _[ObserverConfiguration](#observerconfiguration)_ |  |  |  |
+
+
+#### ObserverConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverAction](#observeraction)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `pr` _[ObserverPrAction](#observerpraction)_ |  |  |  |
+| `pipeline` _[ObserverPipelineAction](#observerpipelineaction)_ |  |  |  |
+
+
+#### ObserverGit
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverTarget](#observertarget)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `gitRepositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | GitRepositoryRef references to Git repository. |  |  |
+| `type` _[ObserverGitTargetType](#observergittargettype)_ |  |  | Enum: [TAGS] <br />Type: string <br /> |
+
+
+#### ObserverHelm
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverTarget](#observertarget)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL of the Helm repository. |  | Required: {} <br /> |
+| `chart` _string_ | Chart of the Helm repository. |  | Required: {} <br /> |
+| `provider` _[HelmAuthProvider](#helmauthprovider)_ | Provider is the name of the Helm auth provider. |  | Enum: [BASIC BEARER GCP AZURE AWS] <br />Type: string <br /> |
+| `auth` _[HelmRepositoryAuth](#helmrepositoryauth)_ | Auth contains authentication credentials for the Helm repository. |  | Optional: {} <br /> |
+
+
+#### ObserverOci
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverTarget](#observertarget)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL of the Helm repository. |  | Required: {} <br /> |
+| `provider` _[HelmAuthProvider](#helmauthprovider)_ | Provider is the name of the Helm auth provider. |  | Enum: [BASIC BEARER GCP AZURE AWS] <br />Type: string <br /> |
+| `auth` _[HelmRepositoryAuth](#helmrepositoryauth)_ | Auth contains authentication credentials for the Helm repository. |  | Optional: {} <br /> |
+
+
+#### ObserverPipelineAction
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverConfiguration](#observerconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `pipelineRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PipelineRef references to Pipeline. |  |  |
+| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ |  |  |  |
+
+
+#### ObserverPrAction
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverConfiguration](#observerconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef references to PR automation. |  |  |
+| `repository` _string_ |  |  | Optional: {} <br /> |
+| `branchTemplate` _string_ | BranchTemplate a template to use for the created branch, use $value to interject the observed value |  |  |
+| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a ObserverPrAction context |  |  |
+
+
+#### ObserverSpec
+
+
+
+ObserverSpec defines the desired state of Observer
+
+
+
+_Appears in:_
+- [Observer](#observer)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ | the name of this observer, if not provided Observer's own name from Observer.ObjectMeta will be used. |  | Optional: {} <br /> |
+| `crontab` _string_ |  |  |  |
+| `target` _[ObserverTarget](#observertarget)_ |  |  |  |
+| `actions` _[ObserverAction](#observeraction) array_ |  |  |  |
+| `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this observer belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
+
+
+#### ObserverTarget
+
+
+
+
+
+
+
+_Appears in:_
+- [ObserverSpec](#observerspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `target` _[ObserverTargetType](#observertargettype)_ |  |  | Enum: [OCI HELM GIT] <br />Type: string <br /> |
+| `format` _string_ |  |  | Optional: {} <br /> |
+| `order` _[ObserverTargetOrder](#observertargetorder)_ |  |  | Enum: [SEMVER LATEST] <br />Type: string <br /> |
+| `helm` _[ObserverHelm](#observerhelm)_ |  |  | Optional: {} <br /> |
+| `oci` _[ObserverOci](#observeroci)_ |  |  | Optional: {} <br /> |
+| `git` _[ObserverGit](#observergit)_ |  |  | Optional: {} <br /> |
 
 
 #### Pipeline
@@ -1447,7 +1634,25 @@ _Appears in:_
 | `longform` _string_ |  |  | Optional: {} <br /> |
 | `optional` _boolean_ |  |  | Optional: {} <br /> |
 | `placeholder` _string_ |  |  | Optional: {} <br /> |
+| `validation` _[PrAutomationConfigurationValidation](#prautomationconfigurationvalidation)_ | Any additional validations you want to apply to this configuration item before generating a pr |  | Optional: {} <br /> |
 | `values` _string array_ |  |  | Optional: {} <br /> |
+
+
+#### PrAutomationConfigurationValidation
+
+
+
+PrAutomationConfigurationValidation validations to apply to configuration items in a PR Automation
+
+
+
+_Appears in:_
+- [PrAutomationConfiguration](#prautomationconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `regex` _string_ | A regex to match string-valued configuration items |  | Optional: {} <br /> |
+| `json` _boolean_ | Whether the string value is supposed to be json-encoded |  | Optional: {} <br /> |
 
 
 #### PrAutomationCreateConfiguration
@@ -1990,6 +2195,7 @@ _Appears in:_
 | `kustomize` _[ServiceKustomize](#servicekustomize)_ | Kustomize settings for service kustomization |  | Optional: {} <br /> |
 | `syncConfig` _[SyncConfigAttributes](#syncconfigattributes)_ | SyncConfig attributes to configure sync settings for this service |  | Optional: {} <br /> |
 | `dependencies` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
+| `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
 
 
 #### SinkConfiguration
