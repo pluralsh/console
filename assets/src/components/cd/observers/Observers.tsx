@@ -3,6 +3,7 @@ import {
   IconFrame,
   LoopingLogo,
   Modal,
+  Prop,
   Table,
   TrashCanIcon,
   useSetBreadcrumbs,
@@ -19,6 +20,8 @@ import {
 import { Edge } from 'utils/graphql'
 import { Div } from 'honorable'
 
+import { useTheme } from 'styled-components'
+
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 import { useProjectId } from '../../contexts/ProjectsContext'
@@ -30,7 +33,8 @@ import {
 import { Confirm } from '../../utils/Confirm'
 
 import ObserverStatusChip from './ObserverStatusChip'
-import ObserveTargetChip from './ObserveTargetChip'
+import ObserverTargetChip from './ObserverTargetChip'
+import ObserverTargetOrderChip from './ObserverTargetOrderChip'
 
 export const breadcrumbs = [
   ...CD_BASE_CRUMBS,
@@ -60,13 +64,14 @@ const columns = [
         original: { node },
       },
     }) {
+      const theme = useTheme()
       const [open, setOpen] = useState(false)
 
       if (!node) return null
 
       return (
         <div onClick={(e) => e.stopPropagation()}>
-          <ObserveTargetChip
+          <ObserverTargetChip
             target={node.target.target}
             clickable
             onClick={(e) => {
@@ -79,7 +84,55 @@ const columns = [
             open={open}
             onClose={() => setOpen(false)}
           >
-            {node.target.target}
+            <div
+              css={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: theme.spacing.medium,
+              }}
+            >
+              <Prop
+                title="Type"
+                margin={0}
+              >
+                <ObserverTargetChip target={node.target.target} />
+              </Prop>
+              {node.target.format && (
+                <Prop
+                  title="Format"
+                  margin={0}
+                >
+                  {node.target.format}
+                </Prop>
+              )}
+              <Prop
+                title="Order"
+                margin={0}
+              >
+                <ObserverTargetOrderChip order={node.target.order} />
+              </Prop>
+              {node.target.git && (
+                <>
+                  <Prop title="Type">{node.target.git.type}</Prop>
+                  <Prop title="Repository ID">
+                    {node.target.git.repositoryId}
+                  </Prop>
+                </>
+              )}
+              {node.target.helm && (
+                <>
+                  <Prop title="Chart">{node.target.helm.chart}</Prop>
+                  <Prop title="URL">{node.target.helm.url}</Prop>
+                  <Prop title="Provider">{node.target.helm.provider}</Prop>
+                </>
+              )}
+              {node.target.oci && (
+                <>
+                  <Prop title="Chart">{node.target.oci.url}</Prop>
+                  <Prop title="Provider">{node.target.oci.provider}</Prop>
+                </>
+              )}
+            </div>
           </Modal>
         </div>
       )

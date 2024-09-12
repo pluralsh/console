@@ -9,7 +9,7 @@ const targetDisplayName = {
   [ObserverTargetType.Oci]: 'OCI',
 } as const satisfies Record<ObserverTargetType, string>
 
-export default function ObserveTargetChip({
+export default function ObserverTargetChip({
   target,
   ...props
 }: {
