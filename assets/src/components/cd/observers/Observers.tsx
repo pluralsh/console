@@ -11,6 +11,7 @@ import { Edge } from 'utils/graphql'
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 import { useProjectId } from '../../contexts/ProjectsContext'
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
 export const breadcrumbs = [
   ...CD_BASE_CRUMBS,
@@ -47,8 +48,7 @@ const columns = [
   columnHelper.accessor(({ node }) => node?.lastRunAt, {
     id: 'lastRunAt',
     header: 'Last run',
-    meta: { truncate: true },
-    cell: ({ getValue }) => getValue(), // TODO
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
   columnHelper.accessor(({ node }) => node?.target, {
     id: 'target',

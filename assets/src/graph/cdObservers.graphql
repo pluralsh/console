@@ -48,3 +48,21 @@ query Observers($first: Int, $last: Int, $before: String, $after: String, $proje
     }
   }
 }
+
+query Observer($id: ID, $name: String) {
+  observer(id: $id, name: $name) {
+    ...Observer
+  }
+}
+
+mutation UpsertObserver($attrs: ObserverAttributes) {
+  upsertObserver(attributes: $attrs) {
+    ...Observer
+  }
+}
+
+mutation DeleteObserver($id: ID!) {
+  deleteObserver(id: $id) {
+    ...Observer
+  }
+}
