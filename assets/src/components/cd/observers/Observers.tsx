@@ -10,25 +10,22 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { OBSERVERS_ABS_PATH } from 'routes/cdRoutesConsts'
 import { GqlError } from 'components/utils/Alert'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { ObserverFragment, useObserversQuery } from 'generated/graphql'
+import {
+  ObserverFragment,
+  useDeleteObserverMutation,
+  useObserversQuery,
+} from 'generated/graphql'
 import { Edge } from 'utils/graphql'
-
-import { useMutation } from '@apollo/client'
-
 import { Div } from 'honorable'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
-
 import {
   ServiceErrorsChip,
   ServiceErrorsModal,
 } from '../services/ServicesTableErrors'
-
-import { DELETE_NODE } from '../../cluster/queries'
-
 import { Confirm } from '../../utils/Confirm'
 
 import ObserverStatusChip from './ObserverStatusChip'
@@ -115,8 +112,8 @@ const columns = [
       },
     }) {
       const [confirm, setConfirm] = useState(false)
-      const [mutation, { loading }] = useMutation(DELETE_NODE, {
-        variables: { id: node?.id },
+      const [mutation, { loading }] = useDeleteObserverMutation({
+        variables: { id: node?.id ?? '' },
         onCompleted: () => {
           setConfirm(false)
         },
