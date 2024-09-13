@@ -122,3 +122,7 @@ query NodeEvents(
     ...EventList
   }
 }
+
+mutation DrainNode($name: String!, $input: node_NodeDrainSpec_Input!) {
+  handleNodeDrain(name: $name, input: $input)
+}

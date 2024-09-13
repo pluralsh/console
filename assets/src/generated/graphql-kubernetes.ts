@@ -77,6 +77,8 @@ export type Mutation = {
   handleImageReferenceValidity?: Maybe<Validation_ImageReferenceValidity>;
   /** checks if provided name is valid */
   handleNameValidity?: Maybe<Validation_AppNameValidity>;
+  /** drains Node */
+  handleNodeDrain?: Maybe<Scalars['JSON']['output']>;
   /** checks if provided service protocol is valid */
   handleProtocolValidity?: Maybe<Validation_ProtocolValidity>;
   /** creates or updates a resource in a namespace */
@@ -215,6 +217,18 @@ export type MutationHandleNameValidityArgs = {
   input: Validation_AppNameValiditySpec_Input;
   itemsPerPage?: InputMaybe<Scalars['String']['input']>;
   metricNames?: InputMaybe<Scalars['String']['input']>;
+  page?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationHandleNodeDrainArgs = {
+  aggregations?: InputMaybe<Scalars['String']['input']>;
+  filterBy?: InputMaybe<Scalars['String']['input']>;
+  input: Node_NodeDrainSpec_Input;
+  itemsPerPage?: InputMaybe<Scalars['String']['input']>;
+  metricNames?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
   page?: InputMaybe<Scalars['String']['input']>;
   sortBy?: InputMaybe<Scalars['String']['input']>;
 };
@@ -2315,6 +2329,14 @@ export type Node_NodeDetail = {
   unschedulable: Scalars['Boolean']['output'];
 };
 
+export type Node_NodeDrainSpec_Input = {
+  deleteEmptyDirData?: InputMaybe<Scalars['Boolean']['input']>;
+  force?: InputMaybe<Scalars['Boolean']['input']>;
+  gracePeriodSeconds?: InputMaybe<Scalars['Int']['input']>;
+  ignoreAllDaemonSets?: InputMaybe<Scalars['Boolean']['input']>;
+  timeout?: InputMaybe<Scalars['BigInt']['input']>;
+};
+
 export type Node_NodeList = {
   __typename?: 'node_NodeList';
   cumulativeMetrics: Array<Maybe<Api_Metric>>;
@@ -3256,7 +3278,7 @@ export type V1_ConfigMapKeySelector = {
   __typename?: 'v1_ConfigMapKeySelector';
   /** The key to select. */
   key: Scalars['String']['output'];
-  /** Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
+  /** Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
   name?: Maybe<Scalars['String']['output']>;
   /** Specify whether the ConfigMap or its key must be defined */
   optional?: Maybe<Scalars['Boolean']['output']>;
@@ -3271,7 +3293,7 @@ export type V1_ConfigMapProjection = {
   __typename?: 'v1_ConfigMapProjection';
   /** items if unspecified, each key-value pair in the Data field of the referenced ConfigMap will be projected into the volume as a file whose name is the key and content is the value. If specified, the listed keys will be projected into the specified paths, and unlisted keys will not be present. If a key is specified which is not present in the ConfigMap, the volume setup will error unless it is marked optional. Paths must be relative and may not contain the '..' path or start with '..'. */
   items?: Maybe<Array<Maybe<V1_KeyToPath>>>;
-  /** Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
+  /** Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
   name?: Maybe<Scalars['String']['output']>;
   /** optional specify whether the ConfigMap or its keys must be defined */
   optional?: Maybe<Scalars['Boolean']['output']>;
@@ -3288,7 +3310,7 @@ export type V1_ConfigMapVolumeSource = {
   defaultMode?: Maybe<Scalars['Int']['output']>;
   /** items if unspecified, each key-value pair in the Data field of the referenced ConfigMap will be projected into the volume as a file whose name is the key and content is the value. If specified, the listed keys will be projected into the specified paths, and unlisted keys will not be present. If a key is specified which is not present in the ConfigMap, the volume setup will error unless it is marked optional. Paths must be relative and may not contain the '..' path or start with '..'. */
   items?: Maybe<Array<Maybe<V1_KeyToPath>>>;
-  /** Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
+  /** Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
   name?: Maybe<Scalars['String']['output']>;
   /** optional specify whether the ConfigMap or its keys must be defined */
   optional?: Maybe<Scalars['Boolean']['output']>;
@@ -3813,7 +3835,7 @@ export type V1_LabelSelectorRequirement = {
 /** LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace. */
 export type V1_LocalObjectReference = {
   __typename?: 'v1_LocalObjectReference';
-  /** Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
+  /** Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
   name?: Maybe<Scalars['String']['output']>;
 };
 
@@ -4360,7 +4382,7 @@ export type V1_SecretKeySelector = {
   __typename?: 'v1_SecretKeySelector';
   /** The key of the secret to select from.  Must be a valid secret key. */
   key: Scalars['String']['output'];
-  /** Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
+  /** Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
   name?: Maybe<Scalars['String']['output']>;
   /** Specify whether the Secret or its key must be defined */
   optional?: Maybe<Scalars['Boolean']['output']>;
@@ -4375,7 +4397,7 @@ export type V1_SecretProjection = {
   __typename?: 'v1_SecretProjection';
   /** items if unspecified, each key-value pair in the Data field of the referenced Secret will be projected into the volume as a file whose name is the key and content is the value. If specified, the listed keys will be projected into the specified paths, and unlisted keys will not be present. If a key is specified which is not present in the Secret, the volume setup will error unless it is marked optional. Paths must be relative and may not contain the '..' path or start with '..'. */
   items?: Maybe<Array<Maybe<V1_KeyToPath>>>;
-  /** Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
+  /** Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names */
   name?: Maybe<Scalars['String']['output']>;
   /** optional field specify whether the Secret or its key must be defined */
   optional?: Maybe<Scalars['Boolean']['output']>;
@@ -4883,6 +4905,14 @@ export type NodeEventsQueryVariables = Exact<{
 
 
 export type NodeEventsQuery = { __typename?: 'Query', handleGetNodeEvents?: { __typename?: 'common_EventList', errors: Array<any | null>, listMeta: { __typename?: 'types_ListMeta', totalItems: number }, events: Array<{ __typename?: 'common_Event', objectName?: string | null, objectNamespace?: string | null, reason: string, type: string, message: string, sourceComponent: string, sourceHost: string, count: number, firstSeen: string, lastSeen: string, typeMeta: { __typename?: 'types_TypeMeta', kind?: string | null, restartable?: boolean | null, scalable?: boolean | null }, objectMeta: { __typename?: 'types_ObjectMeta', uid?: string | null, name?: string | null, namespace?: string | null, labels?: any | null, annotations?: any | null, creationTimestamp?: string | null } } | null> } | null };
+
+export type DrainNodeMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  input: Node_NodeDrainSpec_Input;
+}>;
+
+
+export type DrainNodeMutation = { __typename?: 'Mutation', handleNodeDrain?: any | null };
 
 export type ListMetaFragment = { __typename?: 'types_ListMeta', totalItems: number };
 
@@ -7774,6 +7804,38 @@ export type NodeEventsQueryHookResult = ReturnType<typeof useNodeEventsQuery>;
 export type NodeEventsLazyQueryHookResult = ReturnType<typeof useNodeEventsLazyQuery>;
 export type NodeEventsSuspenseQueryHookResult = ReturnType<typeof useNodeEventsSuspenseQuery>;
 export type NodeEventsQueryResult = Apollo.QueryResult<NodeEventsQuery, NodeEventsQueryVariables>;
+export const DrainNodeDocument = gql`
+    mutation DrainNode($name: String!, $input: node_NodeDrainSpec_Input!) {
+  handleNodeDrain(name: $name, input: $input)
+}
+    `;
+export type DrainNodeMutationFn = Apollo.MutationFunction<DrainNodeMutation, DrainNodeMutationVariables>;
+
+/**
+ * __useDrainNodeMutation__
+ *
+ * To run a mutation, you first call `useDrainNodeMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDrainNodeMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [drainNodeMutation, { data, loading, error }] = useDrainNodeMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useDrainNodeMutation(baseOptions?: Apollo.MutationHookOptions<DrainNodeMutation, DrainNodeMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DrainNodeMutation, DrainNodeMutationVariables>(DrainNodeDocument, options);
+      }
+export type DrainNodeMutationHookResult = ReturnType<typeof useDrainNodeMutation>;
+export type DrainNodeMutationResult = Apollo.MutationResult<DrainNodeMutation>;
+export type DrainNodeMutationOptions = Apollo.BaseMutationOptions<DrainNodeMutation, DrainNodeMutationVariables>;
 export const NamespacedResourceDocument = gql`
     query NamespacedResource($kind: String!, $name: String!, $namespace: String!) {
   handleGetResource(kind: $kind, name: $name, namespace: $namespace) @rest(method: "GET", path: "_raw/{args.kind}/namespace/{args.namespace}/name/{args.name}") {
