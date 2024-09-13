@@ -7806,7 +7806,7 @@ export type NodeEventsSuspenseQueryHookResult = ReturnType<typeof useNodeEventsS
 export type NodeEventsQueryResult = Apollo.QueryResult<NodeEventsQuery, NodeEventsQueryVariables>;
 export const DrainNodeDocument = gql`
     mutation DrainNode($name: String!, $input: node_NodeDrainSpec_Input!) {
-  handleNodeDrain(name: $name, input: $input)
+  handleNodeDrain(name: $name, input: $input) @rest(type: "Void", path: "node/{args.name}/drain", method: "POST")
 }
     `;
 export type DrainNodeMutationFn = Apollo.MutationFunction<DrainNodeMutation, DrainNodeMutationVariables>;
