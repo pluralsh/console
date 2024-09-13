@@ -5,7 +5,7 @@ defmodule Console.Deployments.Git do
   alias Console.PubSub
   alias Console.Deployments.{Settings, Services, Clusters}
   alias Console.Services.Users
-  alias Console.Deployments.Pr.Dispatcher
+  alias Console.Deployments.Pr.{Dispatcher, Validation}
   alias Console.Schema.{
     GitRepository,
     User,
@@ -18,6 +18,8 @@ defmodule Console.Deployments.Git do
     HelmRepository,
     Observer
   }
+
+  require Logger
 
   @cache Console.conf(:cache_adapter)
   @ttl :timer.minutes(30)
@@ -281,8 +283,11 @@ defmodule Console.Deployments.Git do
   def create_pull_request(attrs \\ %{}, ctx, id, branch, identifier \\ nil, %User{} = user) do
     pr = get_pr_automation!(id)
          |> Repo.preload([:write_bindings, :create_bindings, :connection])
-    with {:ok, pr} <- allow(pr, user, :create),
+    with :ok <- Validation.validate(pr, ctx),
+         {:ok, pr} <- allow(pr, user, :create),
          {:ok, pr_attrs} <- Dispatcher.create(prep(pr, user, identifier), branch, ctx) do
+      Logger.info "creating pr #{pr_attrs[:url]}"
+
       %PullRequest{}
       |> PullRequest.changeset(
         Map.merge(pr_attrs, Map.take(pr, ~w(cluster_id service_id)a))

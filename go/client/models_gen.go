@@ -1056,6 +1056,14 @@ type ConfigurationValidation struct {
 	Message *string `json:"message,omitempty"`
 }
 
+// Validations to apply to this configuration entry prior to PR creation
+type ConfigurationValidationAttributes struct {
+	// regex a string value should match
+	Regex *string `json:"regex,omitempty"`
+	// whether the string is json encoded
+	JSON *bool `json:"json,omitempty"`
+}
+
 type ConsoleConfiguration struct {
 	GitCommit     *string `json:"gitCommit,omitempty"`
 	IsDemoProject *bool   `json:"isDemoProject,omitempty"`
@@ -3405,15 +3413,16 @@ type PrConfiguration struct {
 
 // the a configuration item for creating a new pr
 type PrConfigurationAttributes struct {
-	Type          ConfigurationType    `json:"type"`
-	Name          string               `json:"name"`
-	Default       *string              `json:"default,omitempty"`
-	Documentation *string              `json:"documentation,omitempty"`
-	Longform      *string              `json:"longform,omitempty"`
-	Placeholder   *string              `json:"placeholder,omitempty"`
-	Optional      *bool                `json:"optional,omitempty"`
-	Condition     *ConditionAttributes `json:"condition,omitempty"`
-	Values        []*string            `json:"values,omitempty"`
+	Type          ConfigurationType                  `json:"type"`
+	Name          string                             `json:"name"`
+	Default       *string                            `json:"default,omitempty"`
+	Documentation *string                            `json:"documentation,omitempty"`
+	Longform      *string                            `json:"longform,omitempty"`
+	Placeholder   *string                            `json:"placeholder,omitempty"`
+	Optional      *bool                              `json:"optional,omitempty"`
+	Condition     *ConditionAttributes               `json:"condition,omitempty"`
+	Validation    *ConfigurationValidationAttributes `json:"validation,omitempty"`
+	Values        []*string                          `json:"values,omitempty"`
 }
 
 // declaritive spec for whether a config item is relevant given prior config
