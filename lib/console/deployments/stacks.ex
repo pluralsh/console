@@ -133,11 +133,11 @@ defmodule Console.Deployments.Stacks do
       end)
       |> when_ok(:update)
     end)
-    |> add_operation(:run, fn
-      %{stack: %Stack{runnable: true} = stack} ->
-        trigger_run(stack.id, user)
-      _ -> {:ok, nil}
-    end)
+    # |> add_operation(:run, fn
+    #   %{stack: %Stack{runnable: true} = stack} ->
+    #     trigger_run(stack.id, user)
+    #   _ -> {:ok, nil}
+    # end)
     |> execute(extract: :stack)
     |> notify(:update, user)
   end
