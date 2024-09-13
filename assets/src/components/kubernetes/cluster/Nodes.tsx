@@ -1,7 +1,12 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  NetworkInIcon,
+  SortDescIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 
 import {
   Maybe,
@@ -9,18 +14,24 @@ import {
   Node_Node as NodeT,
   NodesQuery,
   NodesQueryVariables,
+  useDrainNodeMutation,
   useNodesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { Usage } from '../../cluster/TableElements'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
+import {
+  KubernetesClusterFragment,
+  useDeleteClusterMutation,
+} from '../../../generated/graphql'
 import {
   NODES_REL_PATH,
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+
+import { Confirm } from '../../utils/Confirm'
 
 import { getClusterBreadcrumbs } from './Cluster'
 
@@ -103,6 +114,44 @@ const colPods = columnHelper.accessor((node) => node?.allocatedResources, {
   },
 })
 
+const colActions = columnHelper.accessor(() => null, {
+  id: 'actions',
+  header: '',
+  cell: function Cell({ row: { original } }) {
+    const [open, setOpen] = useState(false)
+    const [mutation, { loading, error }] = useDrainNodeMutation({
+      variables: { name: original.objectMeta.name ?? '', input: {} },
+    })
+
+    return (
+      <>
+        <IconFrame
+          clickable
+          icon={<SortDescIcon color="icon-danger" />}
+          tooltip="Drain node"
+          onClick={(e) => {
+            e.stopPropagation()
+            setOpen(true)
+          }}
+        />
+        {open && (
+          <Confirm
+            close={() => setOpen(false)}
+            destructive
+            label="Drain node"
+            loading={loading}
+            error={error}
+            open={open}
+            submit={() => mutation()}
+            title="Drain node"
+            text={`Are you sure you want to drain ${original?.objectMeta.name} node?`}
+          />
+        )}
+      </>
+    )
+  },
+})
+
 export default function Nodes() {
   const cluster = useCluster()
 
@@ -119,6 +168,7 @@ export default function Nodes() {
       colPods,
       colLabels,
       colCreationTimestamp,
+      colActions,
     ],
     [colName, colLabels, colCreationTimestamp]
   )
