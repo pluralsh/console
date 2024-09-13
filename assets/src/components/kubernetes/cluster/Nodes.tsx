@@ -3,12 +3,12 @@ import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
 import {
   IconFrame,
-  NetworkInIcon,
   SortDescIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 
 import {
+  DrainNodeMutationVariables,
   Maybe,
   Node_NodeList as NodeListT,
   Node_Node as NodeT,
@@ -21,10 +21,7 @@ import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
 import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { Usage } from '../../cluster/TableElements'
-import {
-  KubernetesClusterFragment,
-  useDeleteClusterMutation,
-} from '../../../generated/graphql'
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   NODES_REL_PATH,
   getClusterAbsPath,
@@ -32,6 +29,8 @@ import {
 import { useCluster } from '../Cluster'
 
 import { Confirm } from '../../utils/Confirm'
+
+import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
 import { getClusterBreadcrumbs } from './Cluster'
 
@@ -118,9 +117,14 @@ const colActions = columnHelper.accessor(() => null, {
   id: 'actions',
   header: '',
   cell: function Cell({ row: { original } }) {
+    const cluster = useCluster()
     const [open, setOpen] = useState(false)
     const [mutation, { loading, error }] = useDrainNodeMutation({
-      variables: { name: original.objectMeta.name ?? '', input: {} },
+      client: KubernetesClient(cluster?.id ?? ''),
+      variables: {
+        name: original.objectMeta.name ?? '',
+        input: {},
+      } as DrainNodeMutationVariables,
     })
 
     return (
