@@ -4,7 +4,7 @@ defmodule Console.Deployments.Stacks do
   import Console.Deployments.Policies
   import Console.Deployments.Stacks.Commands
   alias Console.PubSub
-  alias Console.Deployments.{Services, Clusters, Settings, Git}
+  alias Console.Deployments.{Services, Clusters, Settings, Git, Stacks.Stability}
   alias Console.Deployments.Git.Discovery
   alias Console.Deployments.Pr.Dispatcher
   alias Kazan.Apis.Batch.V1, as: BatchV1
@@ -124,20 +124,22 @@ defmodule Console.Deployments.Stacks do
   def update_stack(attrs, id, %User{} = user) do
     start_transaction()
     |> add_operation(:stack, fn _ ->
-      get_stack!(id)
-      |> preloaded()
+      stack = get_stack!(id)
+              |> preloaded()
+
+      stack
       |> allow(user, :write)
       |> when_ok(fn s ->
-        Stack.changeset(s, attrs)
+        Stack.changeset(s, Stability.stabilize(attrs, stack))
         |> Stack.update_changeset()
       end)
       |> when_ok(:update)
     end)
-    # |> add_operation(:run, fn
-    #   %{stack: %Stack{runnable: true} = stack} ->
-    #     trigger_run(stack.id, user)
-    #   _ -> {:ok, nil}
-    # end)
+    |> add_operation(:run, fn
+      %{stack: %Stack{runnable: true} = stack} ->
+        trigger_run(stack.id, user)
+      _ -> {:ok, nil}
+    end)
     |> execute(extract: :stack)
     |> notify(:update, user)
   end

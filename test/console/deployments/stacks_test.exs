@@ -126,47 +126,63 @@ defmodule Console.Deployments.StacksTest do
   describe "#update_stack/3" do
     test "stack writers can update" do
       user = insert(:user)
+      repo = insert(:git_repository)
+      cluster = insert(:cluster)
+
+      {:ok, stack} = Stacks.create_stack(%{
+        name: "my-stack",
+        type: :terraform,
+        approval: true,
+        repository_id: repo.id,
+        cluster_id: cluster.id,
+        environment: [%{name: "first", value: "value"}, %{name: "second", value: "value2"}],
+        files: [%{path: "some-file", content: "blah"}, %{path: "other-file", content: "blahblah"}],
+        git: %{ref: "main", folder: "terraform"},
+        write_bindings: [%{user_id: user.id}]
+      }, admin_user())
+
+      {:ok, updated} = Stacks.update_stack(%{
+        name: "my-stack",
+        type: :terraform,
+        approval: true,
+        environment: [%{name: "first", value: "value"}, %{name: "second", value: "value2"}],
+        files: [%{path: "some-file", content: "blah"}, %{path: "other-file", content: "blahblah"}],
+        git: %{ref: "main", folder: "terraform"},
+      }, stack.id, user)
+
+      assert updated.name == "my-stack"
+      assert updated.type == :terraform
+      assert updated.approval
+      assert updated.git.ref == "main"
+      assert updated.git.folder == "terraform"
+      refute updated.runnable
+
+      assert_receive {:event, %PubSub.StackUpdated{item: ^updated}}
+    end
+
+    test "if it makes a meaningful change, a run will be auto-created" do
+      user = insert(:user)
       stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+      expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+      expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["new-folder/main.tf"], "a commit message"} end)
 
       {:ok, stack} = Stacks.update_stack(%{
         name: "my-stack",
         type: :terraform,
         approval: true,
-        git: %{ref: "main", folder: "terraform"},
+        git: %{ref: "main", folder: "new-folder"},
       }, stack.id, user)
 
       assert stack.name == "my-stack"
       assert stack.type == :terraform
       assert stack.approval
       assert stack.git.ref == "main"
-      assert stack.git.folder == "terraform"
+      assert stack.git.folder == "new-folder"
+
+      [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
 
       assert_receive {:event, %PubSub.StackUpdated{item: ^stack}}
     end
-
-    # test "if it makes a meaningful change, a run will be auto-created" do
-    #   user = insert(:user)
-    #   stack = insert(:stack, write_bindings: [%{user_id: user.id}])
-    #   expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
-    #   expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["new-folder/main.tf"], "a commit message"} end)
-
-    #   {:ok, stack} = Stacks.update_stack(%{
-    #     name: "my-stack",
-    #     type: :terraform,
-    #     approval: true,
-    #     git: %{ref: "main", folder: "new-folder"},
-    #   }, stack.id, user)
-
-    #   assert stack.name == "my-stack"
-    #   assert stack.type == :terraform
-    #   assert stack.approval
-    #   assert stack.git.ref == "main"
-    #   assert stack.git.folder == "new-folder"
-
-    #   [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
-
-    #   assert_receive {:event, %PubSub.StackUpdated{item: ^stack}}
-    # end
 
     test "you can update bindings" do
       user = admin_user()
