@@ -124,13 +124,11 @@ defmodule Console.Deployments.Stacks do
   def update_stack(attrs, id, %User{} = user) do
     start_transaction()
     |> add_operation(:stack, fn _ ->
-      stack = get_stack!(id)
-              |> preloaded()
-
-      stack
+      get_stack!(id)
+      |> preloaded()
       |> allow(user, :write)
       |> when_ok(fn s ->
-        Stack.changeset(s, Stability.stabilize(attrs, stack))
+        Stack.changeset(s, Stability.stabilize(attrs, s))
         |> Stack.update_changeset()
       end)
       |> when_ok(:update)

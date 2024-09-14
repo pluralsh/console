@@ -124,7 +124,7 @@ var _ = Describe("Observer Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("TGXUGI7FRHZ7XWT6LM3SDK3OHNRI7333EDWRODGAS3IBLXGPQ4RQ===="),
+					SHA: lo.ToPtr("SBXLHTYZVZ66QZISFNJG3B7ZXZO372IE74OEZEAMZGOBJLD7E2KA===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),
@@ -184,7 +184,7 @@ var _ = Describe("Observer Controller", Ordered, func() {
 			}{
 				expectedStatus: v1alpha1.Status{
 					ID:  lo.ToPtr(id),
-					SHA: lo.ToPtr("GHAUDI7QWJTE6JOWXSUU4T7A34JR4ZSPYZUTDOZJZ75ENRCE3SAA===="),
+					SHA: lo.ToPtr("YU4DSAT7ZQHQP4XU42MSLHXDTVL3KRCGM25WAJBRE7GUSE46AAGQ===="),
 					Conditions: []metav1.Condition{
 						{
 							Type:    v1alpha1.NamespacedCredentialsConditionType.String(),

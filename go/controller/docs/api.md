@@ -1403,7 +1403,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `target` _[ObserverTargetType](#observertargettype)_ |  |  | Enum: [OCI HELM GIT] <br />Type: string <br /> |
+| `type` _[ObserverTargetType](#observertargettype)_ |  |  | Enum: [OCI HELM GIT] <br />Type: string <br /> |
 | `format` _string_ |  |  | Optional: {} <br /> |
 | `order` _[ObserverTargetOrder](#observertargetorder)_ |  |  | Enum: [SEMVER LATEST] <br />Type: string <br /> |
 | `helm` _[ObserverHelm](#observerhelm)_ |  |  | Optional: {} <br /> |

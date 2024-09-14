@@ -553,7 +553,7 @@ spec:
                     - SEMVER
                     - LATEST
                     type: string
-                  target:
+                  type:
                     enum:
                     - OCI
                     - HELM
@@ -561,7 +561,7 @@ spec:
                     type: string
                 required:
                 - order
-                - target
+                - type
                 type: object
             required:
             - crontab
