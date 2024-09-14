@@ -288,5 +288,7 @@ defmodule Console do
     end)
   end
 
+  def jitter(seconds), do: :rand.uniform(seconds * 2) - seconds
+
   def storage, do: Console.Storage.Git
 end

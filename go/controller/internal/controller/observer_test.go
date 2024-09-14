@@ -70,8 +70,8 @@ var _ = Describe("Observer Controller", Ordered, func() {
 					Name:    lo.ToPtr(observerName),
 					Crontab: "5 4 * * *",
 					Target: v1alpha1.ObserverTarget{
-						Order:  gqlclient.ObserverTargetOrderSemver,
-						Target: gqlclient.ObserverTargetTypeOci,
+						Order: gqlclient.ObserverTargetOrderSemver,
+						Type:  gqlclient.ObserverTargetTypeOci,
 					},
 					Actions: []v1alpha1.ObserverAction{
 						{

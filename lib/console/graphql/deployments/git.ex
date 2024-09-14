@@ -234,7 +234,8 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A spec for a target to poll"
   input_object :observer_target_attributes do
-    field :target, non_null(:observer_target_type)
+    field :type,   :observer_target_type
+    field :target, :observer_target_type, description: "present for backwards compat"
     field :format, :string
     field :order,  non_null(:observer_target_order)
     field :helm,   :observer_helm_attributes
@@ -536,7 +537,10 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A spec for a target to poll"
   object :observer_target do
-    field :target, non_null(:observer_target_type)
+    field :type,   non_null(:observer_target_type)
+    field :target, non_null(:observer_target_type), resolve: fn
+      %{type: t}, _, _ -> {:ok, t}
+    end, description: "present for backwards compat, use `type` instead"
 
     @desc """
     a regex for extracting the target value, useful in cases where a semver is nested

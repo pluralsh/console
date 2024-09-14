@@ -50,7 +50,7 @@ end
 
 defmodule Console.OCI.Tags do
   @type t :: %__MODULE__{}
-  defstruct [:tags, :name]
+  defstruct [:name, tags: []]
 
   def new(%{"tags" => tags, "name" => name}),
     do: %__MODULE__{tags: tags, name: name}

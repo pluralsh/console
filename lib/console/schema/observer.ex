@@ -17,7 +17,7 @@ defmodule Console.Schema.Observer do
     field :next_run_at,    :utc_datetime_usec
 
     embeds_one :target, Target, on_replace: :update do
-      field :target, TargetType, default: :oci
+      field :type, TargetType, default: :oci
       field :format, :string
       field :order,  TargetOrder, default: :semver
 
@@ -58,7 +58,7 @@ defmodule Console.Schema.Observer do
     end
 
     belongs_to :project, Project
-    has_many   :errors,  ServiceError
+    has_many   :errors,  ServiceError, on_replace: :delete
 
     timestamps()
   end
@@ -92,12 +92,16 @@ defmodule Console.Schema.Observer do
 
   defp target_changeset(model, attrs) do
     model
-    |> cast(attrs, [:target, :format, :order])
+    |> cast(mv_target(attrs), [:type, :format, :order])
     |> cast_embed(:oci, with: &oci_changeset/2)
     |> cast_embed(:helm, with: &helm_changeset/2)
     |> cast_embed(:git, with: &git_changeset/2)
-    |> validate_required([:target, :order])
+    |> validate_required([:type, :order])
   end
+
+  defp mv_target(%{type: _} = attrs), do: attrs
+  defp mv_target(%{target: t} = attrs), do: Map.put(attrs, :type, t)
+  defp mv_target(attrs), do: attrs
 
   defp action_changeset(model, attrs) do
     model
@@ -160,11 +164,6 @@ defmodule Console.Schema.Observer do
   defp next_run(ndt) do
     DateTime.from_naive!(ndt, "Etc/UTC")
     |> Map.put(:microsecond, {0, 6})
-    |> Timex.shift(seconds: jitter())
-  end
-
-  defp jitter() do
-    min = :timer.seconds(60)
-    :rand.uniform(min) - min
+    |> Timex.shift(seconds: Console.jitter(60))
   end
 end

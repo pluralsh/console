@@ -28,13 +28,18 @@ defmodule Console.OCI.Client do
     put_in(client.client.options.dkr_repo, "#{repo}/#{suffix}")
   end
 
-  def tags(client) do
-    case authed_get(client, "/v2/:repo/tags/list") do
+  def tags(client, query \\ "", acc \\ %Tags{}) do
+    case authed_get(client, "/v2/:repo/tags/list?n=1000#{query}") do
+      {:ok, %Req.Response{status: 200, body: body, headers: %{"link" => _}}} ->
+        new = Tags.new(body)
+        tags(client, "&last=#{List.last(new.tags)}", merge_tags(acc, new))
       {:ok, %Req.Response{status: 200, body: body}} ->
-        {:ok, Tags.new(body)}
+        {:ok, merge_tags(acc, Tags.new(body))}
       err -> handle_error(err)
     end
   end
+
+  defp merge_tags(old, new), do: put_in(new.tags, Enum.concat(new.tags, old.tags))
 
   def manifest(%{client: req} = client, tag) do
     req = Req.Request.put_header(req, "accept", @manifest_types)
