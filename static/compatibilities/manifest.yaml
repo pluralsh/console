@@ -6,6 +6,7 @@ names:
 - amazon-vpc-cni-k8s
 - calico
 - cert-manager
+- chaos-mesh
 - cilium
 - contour
 - coredns
