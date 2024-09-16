@@ -149,7 +149,7 @@ const colActions = columnHelper.accessor(() => null, {
             open={open}
             submit={() => mutation()}
             title="Drain node"
-            text={`Are you sure you want to drain ${original?.objectMeta.name} node?`}
+            text={`Are you sure you want to drain ${original?.objectMeta.name} node? Node will be cordoned first. Please note that it may take a while to complete.`}
           />
         )}
       </>
