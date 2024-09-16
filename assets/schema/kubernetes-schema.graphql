@@ -5573,7 +5573,7 @@ type Mutation {
     """Aggregations to be performed for each metric (default: sum)"""
     aggregations: String
     input: node_NodeDrainSpec_Input!
-  ): JSON @httpOperation(subgraph: "api", path: "/api/v1/node/{args.name}/drain", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: POST, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
+  ): JSON @httpOperation(subgraph: "api", path: "/api/v1/node/{args.name}/drain", operationSpecificHeaders: "{\"Content-Type\":\"application/json\",\"Accept\":\"application/json\"}", httpMethod: PUT, queryParamArgMap: "{\"filterBy\":\"filterBy\",\"sortBy\":\"sortBy\",\"itemsPerPage\":\"itemsPerPage\",\"page\":\"page\",\"metricNames\":\"metricNames\",\"aggregations\":\"aggregations\"}")
   """scales ReplicationController to a number of replicas"""
   handleUpdateReplicasCount(
     """namespace of the ReplicationController"""
