@@ -1,7 +1,7 @@
-import { useMutation, useQuery } from '@apollo/client'
+import { ApolloError, useMutation, useQuery } from '@apollo/client'
 import { Button, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
-import { useMeQuery } from 'generated/graphql'
+import { User, useMeQuery } from 'generated/graphql'
 import gql from 'graphql-tag'
 import { Div, Flex, Form, P } from 'honorable'
 import { RefObject, useEffect, useRef, useState } from 'react'
@@ -41,16 +41,24 @@ const setInputFocus = (ref: RefObject<any>) => {
   })
 }
 
-function LoginError({ error }) {
+function LoginError({
+  me,
+  error,
+}: {
+  me: Nullable<User>
+  error: ApolloError | undefined
+}) {
   useEffect(() => {
-    const to = setTimeout(() => {
-      wipeToken()
-      wipeRefreshToken()
-      window.location = '/login' as any as Location
-    }, 2000)
+    if (!error?.networkError && !me) {
+      const to = setTimeout(() => {
+        wipeToken()
+        wipeRefreshToken()
+        window.location = '/login' as any as Location
+      }, 2000)
 
-    return () => clearTimeout(to)
-  }, [])
+      return () => clearTimeout(to)
+    }
+  }, [error?.networkError, me])
 
   console.error('Login error:', error)
 
@@ -109,7 +117,12 @@ export function EnsureLogin({ children }) {
   const loginContextValue = data
 
   if (error || (!loading && !data?.clusterInfo)) {
-    return <LoginError error={error} />
+    return (
+      <LoginError
+        me={data?.me}
+        error={error}
+      />
+    )
   }
 
   if (!data?.clusterInfo) return null
