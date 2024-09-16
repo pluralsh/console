@@ -163,8 +163,7 @@ const columns = [
                   <div>
                     <PropsContainerHeader>OCI</PropsContainerHeader>
                     <PropsContainer>
-                      <PropWide title="Chart">{node.target.oci.url}</PropWide>
-                      <PropWide title="Chart">{node.target.oci.url}</PropWide>
+                      <PropWide title="URL">{node.target.oci.url}</PropWide>
                       <PropWide title="Provider">
                         {node.target.oci.provider}
                       </PropWide>
