@@ -125,6 +125,7 @@ const colActions = columnHelper.accessor(() => null, {
         name: original.objectMeta.name ?? '',
         input: {},
       } as DrainNodeMutationVariables,
+      onCompleted: () => setOpen(false),
     })
 
     return (
