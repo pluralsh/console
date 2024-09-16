@@ -136,6 +136,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :placeholder,   :string
     field :optional,      :boolean
     field :condition,     :condition_attributes
+    field :validation,    :configuration_validation_attributes
     field :values,        list_of(:string)
   end
 
@@ -144,6 +145,12 @@ defmodule Console.GraphQl.Deployments.Git do
     field :operation, non_null(:operation)
     field :field,     non_null(:string)
     field :value,     :string
+  end
+
+  @desc "Validations to apply to this configuration entry prior to PR creation"
+  input_object :configuration_validation_attributes do
+    field :regex, :string, description: "regex a string value should match"
+    field :json,  :boolean, description: "whether the string is json encoded"
   end
 
   @desc "The operations to be performed on the files w/in the pr"

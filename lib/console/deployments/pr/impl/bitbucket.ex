@@ -52,7 +52,10 @@ defmodule Console.Deployments.Pr.Impl.BitBucket do
     with {:ok, group, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
       case post(conn, Path.join(["/repositories", "#{URI.encode(group)}", "pullrequests", number, "comments"]), %{
-        content: %{raw: body, markup: "markdown"}
+        content: %{
+          raw: filter_ansi(body),
+          markup: "markdown"
+        }
       }) do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
         err -> err

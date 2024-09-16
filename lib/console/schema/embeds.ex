@@ -131,12 +131,23 @@ defmodule Console.Schema.Configuration do
     field :values,        {:array, :string}
 
     embeds_one :condition, Condition
+
+    embeds_one :validation, Validation, on_replace: :update do
+      field :regex, :string
+      field :json,  :boolean
+    end
   end
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(type name default values documentation longform placeholder optional)a)
     |> cast_embed(:condition)
+    |> cast_embed(:validation, with: &validation_changeset/2)
     |> validate_required([:type, :name])
+  end
+
+  defp validation_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(regex json)a)
   end
 end

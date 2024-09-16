@@ -63,7 +63,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     with {:ok, group, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
       case post(conn, Path.join(["/api/v4/projects", "#{URI.encode(group)}", "merge_requests", number]), %{
-        body: body
+        body: filter_ansi(body)
       }) do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
         err -> err

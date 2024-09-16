@@ -185,6 +185,19 @@ spec:
                       - PASSWORD
                       - ENUM
                       type: string
+                    validation:
+                      description: Any additional validations you want to apply to
+                        this configuration item before generating a pr
+                      properties:
+                        json:
+                          description: Whether the string value is supposed to be
+                            json-encoded
+                          type: boolean
+                        regex:
+                          description: A regex to match string-valued configuration
+                            items
+                          type: string
+                      type: object
                     values:
                       items:
                         type: string

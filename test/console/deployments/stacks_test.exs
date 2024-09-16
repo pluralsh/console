@@ -144,6 +144,30 @@ defmodule Console.Deployments.StacksTest do
       assert_receive {:event, %PubSub.StackUpdated{item: ^stack}}
     end
 
+    # test "if it makes a meaningful change, a run will be auto-created" do
+    #   user = insert(:user)
+    #   stack = insert(:stack, write_bindings: [%{user_id: user.id}])
+    #   expect(Discovery, :sha, fn _, _ -> {:ok, "new-sha"} end)
+    #   expect(Discovery, :changes, fn _, _, _, _ -> {:ok, ["new-folder/main.tf"], "a commit message"} end)
+
+    #   {:ok, stack} = Stacks.update_stack(%{
+    #     name: "my-stack",
+    #     type: :terraform,
+    #     approval: true,
+    #     git: %{ref: "main", folder: "new-folder"},
+    #   }, stack.id, user)
+
+    #   assert stack.name == "my-stack"
+    #   assert stack.type == :terraform
+    #   assert stack.approval
+    #   assert stack.git.ref == "main"
+    #   assert stack.git.folder == "new-folder"
+
+    #   [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
+
+    #   assert_receive {:event, %PubSub.StackUpdated{item: ^stack}}
+    # end
+
     test "you can update bindings" do
       user = admin_user()
       stack = insert(:stack)
@@ -448,6 +472,9 @@ defmodule Console.Deployments.StacksTest do
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+
+      %{pull_request: sideload} = Console.Repo.preload(run, [:pull_request])
+      assert sideload.id == pr.id
 
       assert refetch(pr).sha == "new-sha"
     end

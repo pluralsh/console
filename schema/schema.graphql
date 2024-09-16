@@ -4583,6 +4583,7 @@ input PrConfigurationAttributes {
   placeholder: String
   optional: Boolean
   condition: ConditionAttributes
+  validation: ConfigurationValidationAttributes
   values: [String]
 }
 
@@ -4591,6 +4592,15 @@ input ConditionAttributes {
   operation: Operation!
   field: String!
   value: String
+}
+
+"Validations to apply to this configuration entry prior to PR creation"
+input ConfigurationValidationAttributes {
+  "regex a string value should match"
+  regex: String
+
+  "whether the string is json encoded"
+  json: Boolean
 }
 
 "The operations to be performed on the files w\/in the pr"

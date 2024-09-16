@@ -58,7 +58,7 @@ defmodule Console.Deployments.Pr.Impl.Github do
     with {:ok, owner, repo, number} <- get_pull_id(url),
          {:ok, client} <- client(conn) do
       case Tentacat.Pulls.Reviews.create(client, owner, repo, number, %{
-            "body" => body,
+            "body" => filter_ansi(body),
             "event" => "COMMENT"
       }) do
         {_, %{"id" => id}, _} -> {:ok, "#{id}"}

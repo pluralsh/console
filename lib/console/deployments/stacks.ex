@@ -118,18 +118,27 @@ defmodule Console.Deployments.Stacks do
   end
 
   @doc """
-  Updates an existing stack
+  Updates an existing stack and creates a new run if a runnable change occurred
   """
   @spec update_stack(map, binary, User.t) :: stack_resp
   def update_stack(attrs, id, %User{} = user) do
-    get_stack!(id)
-    |> preloaded()
-    |> allow(user, :write)
-    |> when_ok(fn s ->
-      Stack.changeset(s, attrs)
-      |> Stack.update_changeset()
+    start_transaction()
+    |> add_operation(:stack, fn _ ->
+      get_stack!(id)
+      |> preloaded()
+      |> allow(user, :write)
+      |> when_ok(fn s ->
+        Stack.changeset(s, attrs)
+        |> Stack.update_changeset()
+      end)
+      |> when_ok(:update)
     end)
-    |> when_ok(:update)
+    # |> add_operation(:run, fn
+    #   %{stack: %Stack{runnable: true} = stack} ->
+    #     trigger_run(stack.id, user)
+    #   _ -> {:ok, nil}
+    # end)
+    |> execute(extract: :stack)
     |> notify(:update, user)
   end
 
@@ -546,7 +555,8 @@ defmodule Console.Deployments.Stacks do
     end)
     |> add_operation(:run, fn %{stack: stack} ->
       case latest_run(stack.id) do
-        %StackRun{git: %{ref: sha}} -> create_run(stack, sha)
+        %StackRun{git: %{ref: sha}, message: msg} ->
+          create_run(stack, sha, %{message: msg})
         _ -> poll(stack)
       end
     end)
@@ -754,7 +764,7 @@ defmodule Console.Deployments.Stacks do
   defp notify(pass, _, _), do: pass
 
   defp notify({:ok, %StackRun{} = stack}, :create),
-    do: handle_notify(PubSub.StackRunCreated, stack)
+    do: notify_after(50, PubSub.StackRunCreated, stack)
   defp notify({:ok, %RunLog{} = log}, :create),
     do: handle_notify(PubSub.RunLogsCreated, log)
   defp notify({:ok, %StackRun{} = stack}, :update),
