@@ -9,7 +9,6 @@ import {
   HistoryIcon,
   HomeIcon,
   KubernetesAltIcon,
-  LifePreserverIcon,
   PeopleIcon,
   PodContainerIcon,
   PrOpenIcon,
@@ -51,7 +50,6 @@ import {
 import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
-import { HelpMenuState, launchHelp } from '../help/HelpLauncher'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
 
 type CommandGroup = {
@@ -263,13 +261,6 @@ export function useCommands(): CommandGroup[] {
             callback: () =>
               window.open('https://docs.plural.sh', '_blank', 'noopener'),
             hotkeys: ['shift D'],
-          },
-          {
-            label: 'Help (contact support)',
-            icon: LifePreserverIcon,
-            rightIcon: ArrowTopRightIcon,
-            callback: () => launchHelp(HelpMenuState.intercom),
-            hotkeys: ['shift I'],
           },
         ],
       },
