@@ -1,6 +1,7 @@
 import React, { ReactElement, useMemo } from 'react'
 import {
   Card,
+  Chip,
   ChipList,
   SidecarItem,
   Table,
@@ -98,9 +99,16 @@ export default function Node(): ReactElement {
             <ResourceReadyChip ready={node?.ready} />
           </SidecarItem>
           <SidecarItem heading="Unschedulable">
-            {node?.unschedulable ? 'True' : 'False'}
+            <Chip
+              size="small"
+              severity={node?.unschedulable ? 'danger' : 'success'}
+            >
+              {node?.unschedulable ? 'True' : 'False'}
+            </Chip>
           </SidecarItem>
-          <SidecarItem heading="Pod CIDR">{node?.podCIDR}</SidecarItem>
+          {node.podCIDR && (
+            <SidecarItem heading="Pod CIDR">{node?.podCIDR}</SidecarItem>
+          )}
         </MetadataSidecar>
       }
     >
