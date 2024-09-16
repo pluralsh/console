@@ -42,16 +42,16 @@ export function validateAndFilterConfig(
   config: Nullable<PrConfiguration>[],
   configVals: Record<string, string | undefined>
 ) {
-  const filteredValues: { name: string; value: string }[] = []
+  const filteredValues: { name: string; value: string | boolean }[] = []
   const isValid = config.reduce((acc, configItem) => {
     const conditionMet = conditionIsMet(configItem?.condition, configVals)
     const name = configItem?.name
 
     if (conditionMet && name) {
-      let value = configVals[name]
+      let value: string | boolean | undefined = configVals[name]
 
       if (configItem.type === ConfigurationType.Bool) {
-        value = parseToBool(value).toString()
+        value = parseToBool(value)
       }
 
       if (value) {
