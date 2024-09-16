@@ -15,6 +15,7 @@ import { GqlError } from 'components/utils/Alert'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import {
   ObserverFragment,
+  ObserverTargetType,
   useDeleteObserverMutation,
   useObserversQuery,
 } from 'generated/graphql'
@@ -130,40 +131,46 @@ const columns = [
                   <ObserverTargetOrderChip order={node.target.order} />
                 </Prop>
               </div>
-              {node.target.git && (
-                <div>
-                  <PropsContainerHeader>Git</PropsContainerHeader>
-                  <PropsContainer>
-                    <PropWide title="Type">{node.target.git.type}</PropWide>
-                    <PropWide title="Repository ID">
-                      {node.target.git.repositoryId}
-                    </PropWide>
-                  </PropsContainer>
-                </div>
-              )}
-              {node.target.helm && (
-                <div>
-                  <PropsContainerHeader>Helm</PropsContainerHeader>
-                  <PropsContainer>
-                    <PropWide title="Chart">{node.target.helm.chart}</PropWide>
-                    <PropWide title="URL">{node.target.helm.url}</PropWide>
-                    <PropWide title="Provider">
-                      {node.target.helm.provider}
-                    </PropWide>
-                  </PropsContainer>
-                </div>
-              )}
-              {node.target.oci && (
-                <div>
-                  <PropsContainerHeader>OCI</PropsContainerHeader>
-                  <PropsContainer>
-                    <PropWide title="Chart">{node.target.oci.url}</PropWide>
-                    <PropWide title="Provider">
-                      {node.target.oci.provider}
-                    </PropWide>
-                  </PropsContainer>
-                </div>
-              )}
+              {node.target.git &&
+                node.target.target === ObserverTargetType.Git && (
+                  <div>
+                    <PropsContainerHeader>Git</PropsContainerHeader>
+                    <PropsContainer>
+                      <PropWide title="Type">{node.target.git.type}</PropWide>
+                      <PropWide title="Repository ID">
+                        {node.target.git.repositoryId}
+                      </PropWide>
+                    </PropsContainer>
+                  </div>
+                )}
+              {node.target.helm &&
+                node.target.target === ObserverTargetType.Helm && (
+                  <div>
+                    <PropsContainerHeader>Helm</PropsContainerHeader>
+                    <PropsContainer>
+                      <PropWide title="Chart">
+                        {node.target.helm.chart}
+                      </PropWide>
+                      <PropWide title="URL">{node.target.helm.url}</PropWide>
+                      <PropWide title="Provider">
+                        {node.target.helm.provider}
+                      </PropWide>
+                    </PropsContainer>
+                  </div>
+                )}
+              {node.target.oci &&
+                node.target.target === ObserverTargetType.Oci && (
+                  <div>
+                    <PropsContainerHeader>OCI</PropsContainerHeader>
+                    <PropsContainer>
+                      <PropWide title="Chart">{node.target.oci.url}</PropWide>
+                      <PropWide title="Chart">{node.target.oci.url}</PropWide>
+                      <PropWide title="Provider">
+                        {node.target.oci.provider}
+                      </PropWide>
+                    </PropsContainer>
+                  </div>
+                )}
             </div>
           </Modal>
         </div>
