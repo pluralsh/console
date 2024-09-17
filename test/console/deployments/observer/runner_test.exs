@@ -61,16 +61,21 @@ defmodule Console.Deployments.Observer.RunnerTest do
       pipeline = insert(:pipeline)
       observer = insert(:observer,
         name: "observer",
-        target: %{type: :oci, oci: %{url: "oci://ghcr.io/pluralsh/console"}},
+        target: %{type: :oci, oci: %{url: "oci://ghcr.io/pluralsh/plural"}},
         actions: [
           %{type: :pipeline, configuration: %{
             pipeline: %{pipeline_id: pipeline.id, context: %{"some" => "$value"}}}
           }
         ],
-        crontab: "*/5 * * *"
+        crontab: "*/5 * * *",
+        last_run_at: Timex.now()
       )
 
       {:ok, obs} = Runner.run(observer)
+
+      assert Timex.after?(obs.next_run_at, obs.last_run_at)
+
+      assert Console.Helm.Utils.compare_versions(obs.last_value, "0.11.11") != :lt
 
       [context] = Console.Repo.all(Console.Schema.PipelineContext)
       assert context.pipeline_id == pipeline.id

@@ -1,19 +1,15 @@
-import { RefObject, useEffect, useRef, useState } from 'react'
-import { Button, LoopingLogo } from '@pluralsh/design-system'
-import { Div, Flex, Form, P } from 'honorable'
 import { useMutation, useQuery } from '@apollo/client'
-import { v4 as uuidv4 } from 'uuid'
-import gql from 'graphql-tag'
-import { IntercomProps, useIntercom } from 'react-use-intercom'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Button, LoopingLogo } from '@pluralsh/design-system'
 import { WelcomeHeader } from 'components/utils/WelcomeHeader'
+import { useMeQuery } from 'generated/graphql'
+import gql from 'graphql-tag'
+import { Div, Flex, Form, P } from 'honorable'
+import { RefObject, useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { isValidEmail } from 'utils/email'
-import { User, useMeQuery } from 'generated/graphql'
-import { useHelpSpacing } from 'components/help/HelpLauncher'
 
 import { useTheme } from 'styled-components'
 
-import { GqlError } from '../utils/Alert'
 import {
   setRefreshToken,
   setToken,
@@ -21,10 +17,11 @@ import {
   wipeToken,
 } from '../../helpers/auth'
 import { localized } from '../../helpers/hostname'
-import { ME_Q, SIGNIN } from '../graphql/users'
-import { LabelledInput } from '../utils/LabelledInput'
 import { LoginContextProvider } from '../contexts'
+import { ME_Q, SIGNIN } from '../graphql/users'
 import { LoginPortal } from '../login/LoginPortal'
+import { GqlError } from '../utils/Alert'
+import { LabelledInput } from '../utils/LabelledInput'
 
 // 30 seconds
 const POLL_INTERVAL = 30 * 1000
@@ -103,95 +100,11 @@ export function GrantAccess() {
   )
 }
 
-const FUDGED_USER = 'plrl-fudged-user'
-
-function fudgedUser(name?: string): IntercomUser {
-  let user: IntercomUser = {}
-
-  if (localStorage.getItem(FUDGED_USER)) {
-    let storedUser:
-      | { email?: unknown; name?: unknown; userId?: unknown }
-      | undefined
-      | null = {}
-
-    try {
-      storedUser = JSON.parse(localStorage.getItem(FUDGED_USER) || '')
-    } catch (e) {
-      console.error('Error retrieving fudged user: ', e)
-      storedUser = {}
-    }
-    const { name, email, userId } = storedUser || {}
-
-    user = {
-      ...(name && typeof name === 'string' ? { name } : {}),
-      ...(email && typeof email === 'string' ? { email } : {}),
-      ...(userId && typeof userId === 'string' ? { userId } : {}),
-    }
-  }
-
-  const id = uuidv4()
-  const randstr = Math.random().toString(36).slice(2)
-
-  user = {
-    email: user.email || `sandbox+${randstr}@plural.sh`,
-    name: user.name || name || 'Demo User',
-    userId: user.userId || id,
-  }
-
-  localStorage.setItem(FUDGED_USER, JSON.stringify(user))
-
-  return user
-}
-
-type IntercomUser = Pick<IntercomProps, 'email' | 'name' | 'userId'>
-
-function useIntercomAttributes(
-  pluralUser: User | null | undefined
-): IntercomProps | null | undefined {
-  const helpSpacing = useHelpSpacing()
-
-  if (!pluralUser) {
-    return null
-  }
-  const { email, name, pluralId, id } = pluralUser
-  let intercomUser: IntercomUser = {
-    email,
-    name,
-    userId: pluralId || id,
-  }
-
-  if (intercomUser.email === 'demo-user@plural.sh') {
-    intercomUser = fudgedUser(name)
-  }
-
-  return {
-    hideDefaultLauncher: true,
-    horizontalPadding: helpSpacing.padding.right,
-    verticalPadding: helpSpacing.padding.bottom,
-    ...intercomUser,
-  }
-}
-
 export function EnsureLogin({ children }) {
-  const location = useLocation()
   const { data, error, loading } = useMeQuery({
     pollInterval: POLL_INTERVAL,
     errorPolicy: 'ignore',
   })
-  const { boot, update } = useIntercom()
-  const intercomAttrs = useIntercomAttributes(data?.me)
-
-  useEffect(() => {
-    if (intercomAttrs) {
-      boot(intercomAttrs)
-    }
-  }, [boot, intercomAttrs])
-
-  useEffect(() => {
-    if (data?.me) {
-      update()
-    }
-  }, [data, location, update])
 
   const loginContextValue = data
 

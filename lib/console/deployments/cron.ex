@@ -294,10 +294,7 @@ defmodule Console.Deployments.Cron do
     Observer.runnable()
     |> Observer.ordered(asc: :id)
     |> Repo.stream(method: :keyset)
-    |> Console.throttle()
-    |> Flow.from_enumerable()
-    |> Flow.map(&Console.Deployments.Observer.Runner.run/1)
-    |> Flow.run()
+    |> Enum.each(&Console.Deployments.Observer.Discovery.runner/1)
   end
 
   defp log({:ok, %{id: id}}, msg), do: "Successfully #{msg} for #{id}"

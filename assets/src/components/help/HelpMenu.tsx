@@ -1,12 +1,7 @@
-import { Merge } from 'type-fest'
-import styled, { useTheme } from 'styled-components'
+import { Button, Card, DocumentIcon } from '@pluralsh/design-system'
 import { ComponentProps } from 'react'
-import {
-  Button,
-  Card,
-  DocumentIcon,
-  LifePreserverIcon,
-} from '@pluralsh/design-system'
+import styled, { useTheme } from 'styled-components'
+import { Merge } from 'type-fest'
 
 import { CountBadge } from '../utils/CountBadge'
 
@@ -52,13 +47,11 @@ const HelpMenuSC = styled(Card)(({ theme }) => ({
 
 export function HelpMenu({
   changeState,
-  intercomProps,
   ...props
 }: Merge<
   ComponentProps<typeof HelpMenuSC>,
   {
     changeState: (menuState?: HelpMenuState, openState?: HelpOpenState) => void
-    intercomProps: { unreadCount: number }
   }
 >) {
   const theme = useTheme()
@@ -80,18 +73,6 @@ export function HelpMenu({
         }
       >
         Search docs
-      </HelpMenuButton>
-      <HelpMenuButton
-        startIcon={
-          <LifePreserverIcon
-            size={16}
-            color={theme.colors['icon-info']}
-          />
-        }
-        onClick={() => changeState(HelpMenuState.intercom)}
-        count={intercomProps.unreadCount}
-      >
-        Contact support
       </HelpMenuButton>
       {/* <HelpMenuButton
         startIcon={

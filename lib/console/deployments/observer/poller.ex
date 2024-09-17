@@ -4,11 +4,11 @@ defmodule Console.Deployments.Observer.Poller do
   alias Console.Schema.{Observer, HelmRepository}
   alias Console.{Helm, OCI}
 
-  def poll(%Observer{last_value: last, target: %{type: :helm, helm: %{url: u}} = target}) when is_binary(u),
+  def poll(%Observer{last_value: last, target: %Observer.Target{type: :helm, helm: %{url: u}} = target}) when is_binary(u),
     do: poll_helm(target, last)
-  def poll(%Observer{last_value: last, target: %{type: :oci, oci: %{url: u}} = target}) when is_binary(u),
+  def poll(%Observer{last_value: last, target: %Observer.Target{type: :oci, oci: %{url: u}} = target}) when is_binary(u),
     do: poll_oci(target, last)
-  def poll(%Observer{last_value: last, target: %{type: :git, git: %{repository_id: id}} = target}) when is_binary(id),
+  def poll(%Observer{last_value: last, target: %Observer.Target{type: :git, git: %{repository_id: id}} = target}) when is_binary(id),
     do: poll_git(target, last)
   def poll(_), do: {:error, "no valid poller"}
 

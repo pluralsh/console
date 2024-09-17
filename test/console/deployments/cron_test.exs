@@ -284,22 +284,3 @@ defmodule Console.Deployments.CronTest do
     end
   end
 end
-
-defmodule Console.Deployments.AsyncCronTest do
-  use Console.DataCase, async: false
-  use Mimic
-  alias Console.Deployments.{Cron}
-
-  setup :set_mimic_global
-
-  describe "#run_observers/0" do
-    test "it can execute pending observers" do
-      insert_list(2, :observer, next_run_at: Timex.now() |> Timex.shift(minutes: -1))
-      insert(:observer, next_run_at: Timex.now() |> Timex.shift(minutes: 5))
-
-      expect(Console.Deployments.Observer.Runner, :run, 2, fn _ -> :ok end)
-
-      :ok = Cron.run_observers()
-    end
-  end
-end

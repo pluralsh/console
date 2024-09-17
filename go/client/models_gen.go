@@ -2709,6 +2709,8 @@ type ObserverPrActionAttributes struct {
 
 // A spec for a target to poll
 type ObserverTarget struct {
+	Type ObserverTargetType `json:"type"`
+	// present for backwards compat, use `type` instead
 	Target ObserverTargetType `json:"target"`
 	// a regex for extracting the target value, useful in cases where a semver is nested
 	// in a larger release string.  The first capture group is the substring that is used for the value.
@@ -2722,7 +2724,9 @@ type ObserverTarget struct {
 
 // A spec for a target to poll
 type ObserverTargetAttributes struct {
-	Target ObserverTargetType      `json:"target"`
+	Type *ObserverTargetType `json:"type,omitempty"`
+	// present for backwards compat
+	Target *ObserverTargetType     `json:"target,omitempty"`
 	Format *string                 `json:"format,omitempty"`
 	Order  ObserverTargetOrder     `json:"order"`
 	Helm   *ObserverHelmAttributes `json:"helm,omitempty"`

@@ -1,9 +1,4 @@
-import {
-  Button,
-  Card,
-  DiscordIcon,
-  LifePreserverIcon,
-} from '@pluralsh/design-system'
+import { Button, Card, DiscordIcon } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 import {
   Body2BoldP,
@@ -17,8 +12,6 @@ import {
   DOCS_INBROWSER_QUICKSTART_LINK,
 } from 'utils/constants'
 import { InlineLink } from 'components/utils/typography/InlineLink'
-
-import { useIntercom } from 'react-use-intercom'
 
 import { EmbedAspectRatio } from '../../utils/layout/EmbedAspectRatio'
 
@@ -79,7 +72,6 @@ const VideoCardSC = styled(Card)((_) => ({
 
 export function ClustersGettingStarted() {
   const theme = useTheme()
-  const intercom = useIntercom()
 
   return (
     <div
@@ -186,7 +178,7 @@ export function ClustersGettingStarted() {
               as="h4"
               css={{ marginBottom: theme.spacing.small }}
             >
-              Docs
+              Join the community
             </Body2BoldP>
             <Button
               onClick={() => {
@@ -195,24 +187,7 @@ export function ClustersGettingStarted() {
               secondary
               startIcon={<DiscordIcon />}
             >
-              Join the community
-            </Button>
-          </div>
-          <div css={{}}>
-            <Body2BoldP
-              as="h4"
-              css={{ marginBottom: theme.spacing.small }}
-            >
-              Docs
-            </Body2BoldP>
-            <Button
-              onClick={() => {
-                intercom?.show()
-              }}
-              secondary
-              startIcon={<LifePreserverIcon />}
-            >
-              Ask us on Intercom
+              Discord
             </Button>
           </div>
         </div>

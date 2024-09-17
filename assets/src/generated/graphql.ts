@@ -3288,7 +3288,9 @@ export type ObserverTarget = {
   oci?: Maybe<ObserverOciRepo>;
   /** the order in which polled results are applied, defaults to SEMVER */
   order: ObserverTargetOrder;
+  /** present for backwards compat, use `type` instead */
   target: ObserverTargetType;
+  type: ObserverTargetType;
 };
 
 /** A spec for a target to poll */
@@ -3298,7 +3300,9 @@ export type ObserverTargetAttributes = {
   helm?: InputMaybe<ObserverHelmAttributes>;
   oci?: InputMaybe<ObserverOciAttributes>;
   order: ObserverTargetOrder;
-  target: ObserverTargetType;
+  /** present for backwards compat */
+  target?: InputMaybe<ObserverTargetType>;
+  type?: InputMaybe<ObserverTargetType>;
 };
 
 export enum ObserverTargetOrder {

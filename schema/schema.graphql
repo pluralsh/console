@@ -4700,11 +4700,19 @@ input ObserverAttributes {
 
 "A spec for a target to poll"
 input ObserverTargetAttributes {
-  target: ObserverTargetType!
+  type: ObserverTargetType
+
+  "present for backwards compat"
+  target: ObserverTargetType
+
   format: String
+
   order: ObserverTargetOrder!
+
   helm: ObserverHelmAttributes
+
   oci: ObserverOciAttributes
+
   git: ObserverGitAttributes
 }
 
@@ -5082,6 +5090,9 @@ type Observer {
 
 "A spec for a target to poll"
 type ObserverTarget {
+  type: ObserverTargetType!
+
+  "present for backwards compat, use `type` instead"
   target: ObserverTargetType!
 
   """

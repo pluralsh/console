@@ -1,42 +1,20 @@
-import styled, { DefaultTheme, useTheme } from 'styled-components'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { useTransition } from 'react-spring'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import styled from 'styled-components'
 
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
 
 import { AnimatedDiv } from '@pluralsh/design-system'
 
 import { DocSearch } from './DocSearch'
-import { useHandleIntercom } from './useHandleIntercom'
 import { HelpLauncherBtn } from './HelpLauncherBtn'
 import { HelpMenu } from './HelpMenu'
-import { useIntercomUpdateUnread } from './IntercomUpdateUnread'
 import { useCustomEventListener } from './useCustomEventListener'
-import { useIntercomMini as useIntercomMiniChat } from './useIntercomMini'
-
-export const getHelpSpacing = (theme: DefaultTheme) => ({
-  // Intercom has a hard-minimum horizontal padding of 20px
-  // So padding.right must be 20px or larger
-  padding: {
-    right: theme.spacing.xxlarge,
-    left: theme.spacing.xxlarge,
-    top: theme.spacing.xxlarge,
-    bottom: theme.spacing.xxlarge,
-  },
-})
-
-export function useHelpSpacing() {
-  const theme = useTheme()
-
-  return getHelpSpacing(theme)
-}
 
 export enum HelpMenuState {
   menu = 'menu',
   docSearch = 'docSearch',
   // chatBot = 'chatBot',
-  intercom = 'intercom',
-  intercomMini = 'intercomMini',
 }
 
 export enum HelpOpenState {
@@ -121,20 +99,10 @@ function HelpLauncher() {
   const [openState, setOpenState] = useState<HelpOpenState>(
     HelpOpenState.closed
   )
-  const [intercomUnreadCount, setIntercomUnreadCount] = useState(0)
   const chatbotUnreadCount = 0
-  const { isOpen: intercomMiniIsOpen, close: closeIntercomMini } =
-    useIntercomMiniChat()
 
   const changeState = useCallback(
     (menuState?: HelpMenuState, openState?: HelpOpenState) => {
-      if (
-        intercomMiniIsOpen &&
-        // menuState !== HelpMenuState.intercom &&
-        menuState !== HelpMenuState.intercomMini
-      ) {
-        closeIntercomMini()
-      }
       if (menuState !== undefined) {
         setMenuState(menuState)
       }
@@ -145,41 +113,18 @@ function HelpLauncher() {
         }
       }
     },
-    [closeIntercomMini, intercomMiniIsOpen]
+    []
   )
-
-  useEffect(() => {
-    if (intercomMiniIsOpen) {
-      changeState(HelpMenuState.intercomMini, HelpOpenState.open)
-    }
-  }, [changeState, intercomMiniIsOpen])
-
-  const closeHelp = useCallback(() => {
-    changeState(HelpMenuState.menu, HelpOpenState.closed)
-  }, [changeState])
 
   // const minHelp = useCallback(() => {
   //   changeState(undefined, HelpOpenState.min)
   // }, [changeState])
 
-  useHandleIntercom({
-    menuState,
-    openState,
-    changeState,
-    closeHelp,
-  })
-  useIntercomUpdateUnread(setIntercomUnreadCount)
-
   useLaunchEventListener((menu) => {
     changeState(menu, HelpOpenState.open)
   })
 
-  const helpMenu = (
-    <HelpMenu
-      changeState={changeState}
-      intercomProps={{ unreadCount: intercomUnreadCount }}
-    />
-  )
+  const helpMenu = <HelpMenu changeState={changeState} />
   const contentOpts = {
     // [HelpMenuState.chatBot]: (
     //   <Chatbot
@@ -188,8 +133,6 @@ function HelpLauncher() {
     //   />
     // ),
     [HelpMenuState.docSearch]: null,
-    [HelpMenuState.intercom]: null,
-    [HelpMenuState.intercomMini]: null,
     [HelpMenuState.menu]: helpMenu,
   }
 
@@ -238,7 +181,7 @@ function HelpLauncher() {
             : 'help'
         }
         onClick={onLauncherClick}
-        count={intercomUnreadCount + chatbotUnreadCount}
+        count={chatbotUnreadCount}
       />
       {content}
       <DocSearch
