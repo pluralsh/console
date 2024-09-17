@@ -6,6 +6,8 @@ import moment from 'moment/moment'
 import yaml from 'js-yaml'
 import { capitalize } from 'lodash'
 
+import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
+
 import {
   Types_ListMeta as ListMetaT,
   Maybe,
@@ -110,9 +112,10 @@ const resourceConditionSeverity = {
 
 export function ResourceReadyChip({
   ready,
+  ...props
 }: {
   ready: string | boolean | undefined
-}) {
+} & ChipProps) {
   if (ready === undefined) return undefined
 
   const r = ready.toString()
@@ -122,6 +125,7 @@ export function ResourceReadyChip({
     <Chip
       size="small"
       severity={severity}
+      {...props}
     >
       {capitalize(r)}
     </Chip>

@@ -1,14 +1,23 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { filesize } from 'filesize'
-import { useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  IconFrame,
+  SortDescIcon,
+  Switch,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
+
+import { useTheme } from 'styled-components'
 
 import {
+  DrainNodeMutationVariables,
   Maybe,
   Node_NodeList as NodeListT,
   Node_Node as NodeT,
   NodesQuery,
   NodesQueryVariables,
+  useDrainNodeMutation,
   useNodesQuery,
 } from '../../../generated/graphql-kubernetes'
 import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
@@ -21,6 +30,10 @@ import {
   getClusterAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
+
+import { Confirm } from '../../utils/Confirm'
+
+import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
 import { getClusterBreadcrumbs } from './Cluster'
 
@@ -103,6 +116,61 @@ const colPods = columnHelper.accessor((node) => node?.allocatedResources, {
   },
 })
 
+const colActions = columnHelper.accessor(() => null, {
+  id: 'actions',
+  header: '',
+  cell: function Cell({ row: { original } }) {
+    const theme = useTheme()
+    const cluster = useCluster()
+    const [open, setOpen] = useState(false)
+    const [ignoreAllDaemonSets, setIgnoreAllDaemonSets] = useState(true)
+    const [mutation, { loading, error }] = useDrainNodeMutation({
+      client: KubernetesClient(cluster?.id ?? ''),
+      variables: {
+        name: original.objectMeta.name ?? '',
+        input: { ignoreAllDaemonSets },
+      } as DrainNodeMutationVariables,
+      onCompleted: () => setOpen(false),
+    })
+
+    return (
+      <>
+        <IconFrame
+          clickable
+          icon={<SortDescIcon color="icon-danger" />}
+          tooltip="Drain node"
+          onClick={(e) => {
+            e.stopPropagation()
+            setOpen(true)
+          }}
+        />
+        {open && (
+          <Confirm
+            close={() => setOpen(false)}
+            destructive
+            label="Drain node"
+            loading={loading}
+            error={error}
+            open={open}
+            submit={() => mutation()}
+            title="Drain node"
+            text={`Are you sure you want to drain ${original?.objectMeta.name} node? Node will be cordoned first. Please note that it may take a while to complete.`}
+            extraContent={
+              <Switch
+                checked={ignoreAllDaemonSets}
+                onChange={setIgnoreAllDaemonSets}
+                css={{ paddingTop: theme.spacing.medium }}
+              >
+                Ignore all daemon sets
+              </Switch>
+            }
+          />
+        )}
+      </>
+    )
+  },
+})
+
 export default function Nodes() {
   const cluster = useCluster()
 
@@ -119,6 +187,7 @@ export default function Nodes() {
       colPods,
       colLabels,
       colCreationTimestamp,
+      colActions,
     ],
     [colName, colLabels, colCreationTimestamp]
   )
