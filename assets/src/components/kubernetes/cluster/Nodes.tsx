@@ -4,8 +4,11 @@ import { filesize } from 'filesize'
 import {
   IconFrame,
   SortDescIcon,
+  Switch,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+
+import { useTheme } from 'styled-components'
 
 import {
   DrainNodeMutationVariables,
@@ -117,13 +120,15 @@ const colActions = columnHelper.accessor(() => null, {
   id: 'actions',
   header: '',
   cell: function Cell({ row: { original } }) {
+    const theme = useTheme()
     const cluster = useCluster()
     const [open, setOpen] = useState(false)
+    const [ignoreAllDaemonSets, setIgnoreAllDaemonSets] = useState(true)
     const [mutation, { loading, error }] = useDrainNodeMutation({
       client: KubernetesClient(cluster?.id ?? ''),
       variables: {
         name: original.objectMeta.name ?? '',
-        input: {},
+        input: { ignoreAllDaemonSets },
       } as DrainNodeMutationVariables,
       onCompleted: () => setOpen(false),
     })
@@ -150,6 +155,15 @@ const colActions = columnHelper.accessor(() => null, {
             submit={() => mutation()}
             title="Drain node"
             text={`Are you sure you want to drain ${original?.objectMeta.name} node? Node will be cordoned first. Please note that it may take a while to complete.`}
+            extraContent={
+              <Switch
+                checked={ignoreAllDaemonSets}
+                onChange={setIgnoreAllDaemonSets}
+                css={{ paddingTop: theme.spacing.medium }}
+              >
+                Ignore all daemon sets
+              </Switch>
+            }
           />
         )}
       </>
