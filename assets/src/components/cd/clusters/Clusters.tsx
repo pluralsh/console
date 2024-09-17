@@ -207,7 +207,6 @@ export default function Clusters() {
 
   return (
     <>
-      {!showGettingStarted && <ClustersGettingStarted />}
       {!isDemo ? (
         <div
           css={{
@@ -250,6 +249,7 @@ export default function Clusters() {
       ) : (
         <DemoTable mode={cdIsEnabled ? 'empty' : 'disabled'} />
       )}
+      {showGettingStarted && <ClustersGettingStarted />}
     </>
   )
 }
