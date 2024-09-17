@@ -152,7 +152,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 		projectID = project.Status.ID
 	}
 	target = console.ObserverTargetAttributes{
-		Target: observer.Spec.Target.Target,
+		Type:   lo.ToPtr(observer.Spec.Target.Type),
 		Format: observer.Spec.Target.Format,
 		Order:  observer.Spec.Target.Order,
 	}

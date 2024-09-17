@@ -61,7 +61,7 @@ type ObserverPipelineAction struct {
 type ObserverTarget struct {
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:validation:Enum:=OCI;HELM;GIT
-	Target console.ObserverTargetType `json:"target"`
+	Type console.ObserverTargetType `json:"type"`
 
 	// +kubebuilder:validation:Optional
 	Format *string `json:"format,omitempty"`
