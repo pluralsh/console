@@ -318,6 +318,28 @@ defmodule Console.Deployments.GitTest do
       assert err =~ "does not match regex"
     end
 
+    test "it will reject a pull request w/ empty string configs" do
+      user = insert(:user)
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
+        write_bindings: [%{user_id: user.id}],
+        create_bindings: [%{user_id: user.id}],
+        configuration: [
+          %{name: "first", type: :int},
+          %{name: "second", type: :string}
+        ]
+      )
+
+      {:error, _} = Git.create_pull_request(%{
+        "first" => 10,
+        "second" => ""
+      }, pra.id, "pr-test", user)
+    end
+
     test "it can create a pull request with a github app" do
       user = insert(:user)
       {:ok, pem_string, _} = Console.keypair("console@plural.sh")
