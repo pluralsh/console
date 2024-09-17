@@ -35,7 +35,7 @@ defmodule Console.Deployments.Pr.Validation do
     end
   end
 
-  defp do_validate(%Configuration{type: :string}, val) when is_binary(val), do: :ok
+  defp do_validate(%Configuration{type: :string}, val) when is_binary(val) and byte_size(val) > 0, do: :ok
   defp do_validate(%Configuration{type: t}, val),
     do: {:error, "value #{inspect(val)} does not match type #{String.upcase(to_string(t))}"}
 end
