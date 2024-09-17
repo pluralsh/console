@@ -138,7 +138,13 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :paused,              :boolean, description: "whether the stack is actively tracking changes in git"
     field :status,              non_null(:stack_status), description: "The status of the last run of the stack"
     field :job_spec,            :job_gate_spec, description: "optional k8s job configuration for the job that will apply this stack"
-    field :configuration,       non_null(:stack_configuration), description: "version/image config for the tool you're using"
+
+    @desc "version/image config for the tool you're using"
+    field :configuration,       non_null(:stack_configuration), resolve: fn
+      %{configuration: %{} = conf}, _, _ -> {:ok, conf}
+      _, _, _ -> {:ok, %{hooks: []}}
+    end
+
     field :approval,            :boolean, description: "whether to require approval"
     field :deleted_at,          :datetime, description: "whether this stack was previously deleted and is pending cleanup"
     field :cancellation_reason, :string, description: "why this run was cancelled"
@@ -229,7 +235,13 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :job_spec,            :job_gate_spec,
       description: "optional k8s job configuration for the job that will apply this stack",
       resolve: &Deployments.job_spec/3
-    field :configuration,       non_null(:stack_configuration), description: "version/image config for the tool you're using"
+
+    @desc "version/image config for the tool you're using"
+    field :configuration,       non_null(:stack_configuration), resolve: fn
+      %{configuration: %{} = conf}, _, _ -> {:ok, conf}
+      _, _, _ -> {:ok, %{hooks: []}}
+    end
+
     field :approval,            :boolean, description: "whether to require approval"
     field :message,             :string, description: "the commit message"
     field :approved_at,         :datetime, description: "when this run was approved"

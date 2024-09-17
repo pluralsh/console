@@ -4250,6 +4250,11 @@ func (in *ServiceTemplate) DeepCopyInto(out *ServiceTemplate) {
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}
+	if in.Protect != nil {
+		in, out := &in.Protect, &out.Protect
+		*out = new(bool)
+		**out = **in
+	}
 	if in.Contexts != nil {
 		in, out := &in.Contexts, &out.Contexts
 		*out = make([]string, len(*in))

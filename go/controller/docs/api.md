@@ -2189,6 +2189,7 @@ _Appears in:_
 | `namespace` _string_ | Namespace the namespace for this service (optional for managed namespaces) |  | Optional: {} <br /> |
 | `templated` _boolean_ |  |  | Optional: {} <br /> |
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
+| `protect` _boolean_ | Whether to protect this service from deletion.  Protected services are also not drained on cluster deletion. |  | Optional: {} <br /> |
 | `contexts` _string array_ | a list of context ids to add to this service |  | Optional: {} <br /> |
 | `git` _[GitRef](#gitref)_ | Git settings to configure git for a service |  | Optional: {} <br /> |
 | `helm` _[ServiceHelm](#servicehelm)_ | Helm settings to configure helm for a service |  | Optional: {} <br /> |

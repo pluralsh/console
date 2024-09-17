@@ -6,6 +6,7 @@ defmodule Console.Schema.ServiceTemplate do
     field :name,          :string
     field :namespace,     :string
     field :templated,     :boolean, default: true
+    field :protect,       :boolean, default: false
     field :contexts,      {:array, :string}
     field :configuration, {:array, :map}, virtual: true
     field :ignore_sync,   :boolean, virtual: true

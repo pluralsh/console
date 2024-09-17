@@ -449,6 +449,10 @@ spec:
                     description: Namespace the namespace for this service (optional
                       for managed namespaces)
                     type: string
+                  protect:
+                    description: Whether to protect this service from deletion.  Protected
+                      services are also not drained on cluster deletion.
+                    type: boolean
                   repositoryRef:
                     description: |-
                       ObjectReference contains enough information to let you inspect or modify the referred object.
