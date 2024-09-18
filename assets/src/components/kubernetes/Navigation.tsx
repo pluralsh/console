@@ -34,6 +34,7 @@ import {
 
 export const NAMESPACE_PARAM = 'namespace'
 export const FILTER_PARAM = 'filter'
+export const LAST_SELECTED_CLUSTER_KEY = 'plural-last-selected-cluster'
 
 const directory: Directory = [
   { path: WORKLOADS_REL_PATH, label: 'Workloads' },
@@ -63,6 +64,8 @@ export default function Navigation() {
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
 
   useLayoutEffect(() => {
+    if (clusterId) sessionStorage.setItem(LAST_SELECTED_CLUSTER_KEY, clusterId)
+
     const newParams = new URLSearchParams()
 
     if (!isEmpty(dataSelect.filter))
@@ -74,7 +77,7 @@ export default function Navigation() {
     if (newParams.toString() !== params.toString()) setParams(newParams)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataSelect, pathname])
+  }, [dataSelect, pathname, clusterId])
 
   return (
     <ResponsiveLayoutPage>
