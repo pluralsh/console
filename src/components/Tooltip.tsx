@@ -118,6 +118,7 @@ function Tooltip({
   const {
     x,
     y,
+    refs,
     reference,
     floating,
     strategy: finalStrategy,
@@ -197,6 +198,7 @@ function Tooltip({
         }
       >
         <CSSTransition
+          nodeRef={refs.floating}
           in={isOpen}
           appear
           timeout={250}

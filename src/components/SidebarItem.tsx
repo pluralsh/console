@@ -12,17 +12,21 @@ type SidebarItemProps = ComponentProps<typeof ItemSC> & {
   active?: boolean
 }
 
-function SidebarItemRef({
-  children,
-  tooltip = '',
-  expandedLabel = '',
-  className,
-  ...props
-}: SidebarItemProps) {
+function SidebarItemRef(
+  {
+    children,
+    tooltip = '',
+    expandedLabel = '',
+    className,
+    ...props
+  }: SidebarItemProps,
+  ref: Ref<HTMLDivElement>
+) {
   const { isExpanded } = useSidebar()
 
   return (
     <WithTooltip
+      ref={ref}
       tooltip={tooltip}
       className={className}
       {...props}
@@ -35,7 +39,7 @@ function SidebarItemRef({
 
 function WithTooltipRef(
   { children, clickable, tooltip = '', ...props }: SidebarItemProps,
-  ref: Ref<any>
+  ref: Ref<HTMLDivElement>
 ) {
   const { layout, isExpanded } = useSidebar()
 
@@ -117,18 +121,18 @@ const ItemSC = styled.div<{
 
 function ItemRef(
   { children, clickable = false, active = false, ...props }: SidebarItemProps,
-  ref: Ref<any>
+  ref: Ref<HTMLDivElement>
 ) {
   const { layout, variant } = useSidebar()
   const isHorizontal = layout === 'horizontal'
 
   return (
     <ItemSC
+      ref={ref}
       $clickable={clickable}
       $active={active}
       $isHorizontal={isHorizontal}
       $variant={variant}
-      ref={ref}
       {...props}
     >
       {children}

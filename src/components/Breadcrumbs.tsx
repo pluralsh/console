@@ -406,6 +406,7 @@ export function Breadcrumbs({
 }: BreadcrumbsProps & NavProps) {
   const contextCrumbs = useContext(BreadcrumbsContext)?.breadcrumbs
   const breadcrumbs = propsCrumbs || contextCrumbs
+  const nodeRef = useRef<HTMLDivElement>()
 
   if (!breadcrumbs) {
     throw Error(
@@ -430,15 +431,11 @@ export function Breadcrumbs({
         <Transition
           key={String(transitionKey.current)}
           timeout={200}
-          // Typing for 'addEndListener' on <Transition> component is incorrect
-          // when not providing 'ref' prop
-          // @ts-expect-error
-          addEndListener={(node, done) => {
-            node?.addEventListener('refitdone', done, false)
-          }}
+          nodeRef={nodeRef}
         >
           {(state) => (
             <DynamicBreadcrumbs
+              wrapperRef={nodeRef}
               minLength={minLength}
               maxLength={maxLength}
               collapsible={collapsible}

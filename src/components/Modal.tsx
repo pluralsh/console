@@ -1,29 +1,25 @@
 // this is just styling, actual modal logic is in ModalWrapper
 
-import {
-  type ReactNode,
-  type Ref,
-  forwardRef,
-  useCallback,
-  useEffect,
-} from 'react'
+import { type ReactNode, type Ref, forwardRef, useCallback } from 'react'
 
 import styled, {
   type StyledComponentPropsWithRef,
   useTheme,
 } from 'styled-components'
 
+import { VisuallyHidden } from 'react-aria'
+
+import * as Dialog from '@radix-ui/react-dialog'
+
 import { type ColorKey, type Nullable, type SeverityExt } from '../types'
 
-import useLockedBody from '../hooks/useLockedBody'
-
+import Card from './Card'
 import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import type createIcon from './icons/createIcon'
 import ErrorIcon from './icons/ErrorIcon'
 import InfoIcon from './icons/InfoIcon'
 import WarningIcon from './icons/WarningIcon'
 import { ModalWrapper, type ModalWrapperProps } from './ModalWrapper'
-import Card from './Card'
 
 export const SEVERITIES = [
   'info',
@@ -45,7 +41,6 @@ type ModalPropsType = ModalWrapperProps & {
   header?: ReactNode
   actions?: ReactNode
   severity?: ModalSeverity
-  lockBody?: boolean
   asForm?: boolean
   formProps?: StyledComponentPropsWithRef<'form'>
 }
@@ -147,7 +142,6 @@ function ModalRef(
     size = form ? 'large' : 'medium',
     onClose,
     severity,
-    lockBody = true,
     asForm = false,
     formProps = {},
     scrollable = true,
@@ -158,12 +152,6 @@ function ModalRef(
   const theme = useTheme()
   const HeaderIcon = severityToIcon[severity ?? 'default']
   const iconColorKey = severityToIconColorKey[severity ?? 'default']
-
-  const [, setBodyLocked] = useLockedBody(open && lockBody)
-
-  useEffect(() => {
-    setBodyLocked(lockBody && open)
-  }, [lockBody, open, setBodyLocked])
 
   const triggerClose = useCallback(
     (open: boolean) => {
@@ -195,6 +183,9 @@ function ModalRef(
           $scrollable={scrollable}
           $hasActions={!!actions}
         >
+          <VisuallyHidden>
+            <Dialog.Title>{header}</Dialog.Title>
+          </VisuallyHidden>
           {!!header && (
             <ModalHeaderWrapSC ref={ref}>
               {HeaderIcon && (
