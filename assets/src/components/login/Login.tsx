@@ -22,6 +22,8 @@ import { ME_Q, SIGNIN } from '../graphql/users'
 import { LoginPortal } from '../login/LoginPortal'
 import { GqlError } from '../utils/Alert'
 import { LabelledInput } from '../utils/LabelledInput'
+import LoadingIndicator from '../utils/LoadingIndicator'
+import ShowAfterDelay from '../utils/ShowAfterDelay'
 
 // 30 seconds
 const POLL_INTERVAL = 30 * 1000
@@ -180,7 +182,7 @@ export default function Login() {
   }, [])
 
   const { data } = useQuery(ME_Q)
-  const { data: loginData } = useQuery(LOGIN_INFO, {
+  const { data: loginData, loading } = useQuery(LOGIN_INFO, {
     variables: { redirect: localized('/oauth/callback') },
   })
 
@@ -198,6 +200,13 @@ export default function Login() {
   if (!loginMError && data?.me) {
     window.location = '/' as any as Location
   }
+
+  if (loading)
+    return (
+      <ShowAfterDelay>
+        <LoadingIndicator />
+      </ShowAfterDelay>
+    )
 
   if (loginData?.loginInfo?.oidcUri) {
     return (
