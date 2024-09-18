@@ -104,33 +104,28 @@ export default function Node() {
   })
 
   return (
-    <TabPanel
-      stateRef={tabStateRef}
-      as={
-        <ResponsivePageFullWidth
-          scrollable={
-            (currentTab?.label ?? 'Info') === 'Info' ||
-            currentTab?.label === 'Metadata'
-          }
-          heading={name}
-          headingContent={
-            <HeadingTabList
-              tabStateRef={tabStateRef}
-              currentTab={currentTab}
-            />
-          }
-          // eslint-disable-next-line react/no-children-prop
-          children={
-            <Outlet
-              context={{
-                node: data?.node,
-                nodeMetric: nodeMetricData?.nodeMetric,
-                refetch,
-              }}
-            />
-          }
+    <TabPanel stateRef={tabStateRef}>
+      <ResponsivePageFullWidth
+        scrollable={
+          (currentTab?.label ?? 'Info') === 'Info' ||
+          currentTab?.label === 'Metadata'
+        }
+        heading={name}
+        headingContent={
+          <HeadingTabList
+            tabStateRef={tabStateRef}
+            currentTab={currentTab}
+          />
+        }
+      >
+        <Outlet
+          context={{
+            node: data?.node,
+            nodeMetric: nodeMetricData?.nodeMetric,
+            refetch,
+          }}
         />
-      }
-    />
+      </ResponsivePageFullWidth>
+    </TabPanel>
   )
 }
