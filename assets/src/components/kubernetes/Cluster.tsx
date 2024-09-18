@@ -20,6 +20,8 @@ import LoadingIndicator from '../utils/LoadingIndicator'
 import { GqlError } from '../utils/Alert'
 import { useProjectId } from '../contexts/ProjectsContext'
 
+import { LAST_SELECTED_CLUSTER_KEY } from './Navigation'
+
 type ClusterContextT = {
   clusters: KubernetesClusterFragment[]
   refetch?: Nullable<() => void>
@@ -101,6 +103,8 @@ export default function Cluster() {
     [data?.clusters]
   )
 
+  const hasCurrentClusterId = clusters.some(({ id }) => id === clusterId)
+
   const cluster = useMemo(
     () => clusters.find(({ id }) => id === clusterId),
     [clusterId, clusters]
@@ -125,16 +129,26 @@ export default function Cluster() {
   )
 
   useEffect(() => {
-    if (!isEmpty(clusters) && !clusterId) {
+    if (!isEmpty(clusters) && !hasCurrentClusterId) {
+      const lastSelectedClusterId = sessionStorage.getItem(
+        LAST_SELECTED_CLUSTER_KEY
+      )
+      const lastSelectedClusterExists = clusters.some(
+        ({ id }) => id === lastSelectedClusterId
+      )
       const mgmtCluster = clusters.find(({ self }) => !!self)
 
-      if (mgmtCluster) {
-        navigate(getWorkloadsAbsPath(mgmtCluster.id) + search, {
-          replace: true,
-        })
-      }
+      const redirectId = lastSelectedClusterExists
+        ? lastSelectedClusterId
+        : mgmtCluster
+        ? mgmtCluster?.id
+        : clusters[0].id
+
+      navigate(getWorkloadsAbsPath(redirectId) + search, {
+        replace: true,
+      })
     }
-  }, [clusters, navigate, search, clusterId])
+  }, [clusters, navigate, search, clusterId, hasCurrentClusterId])
 
   if (error)
     return (
