@@ -49,16 +49,17 @@ export function validateAndFilterConfig(
 
     if (conditionMet && name) {
       let value: string | boolean | undefined = configVals[name]
+      const isBool = configItem.type === ConfigurationType.Bool
 
-      if (configItem.type === ConfigurationType.Bool) {
+      if (isBool) {
         value = parseToBool(value)
       }
 
-      if (value) {
-        filteredValues.push({ name, value })
+      if (value !== undefined || isBool) {
+        filteredValues.push({ name, value: value as string | boolean })
       }
 
-      return (!!configItem.optional || !!value) && acc
+      return (!!configItem.optional || !!value || isBool) && acc
     }
 
     return acc

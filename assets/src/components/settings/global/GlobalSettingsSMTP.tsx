@@ -22,7 +22,8 @@ export function GlobalSettingsSMTP() {
   const theme = useTheme()
   const { smtp } = useDeploymentSettings()
   const [form, setForm] = useState<SmtpSettingsAttributes>({
-    ...(cleanSmtpForm(smtp) || defaultForm),
+    ...defaultForm,
+    ...cleanSmtpForm(smtp),
     password: '',
   })
   const [showToast, setShowToast] = useState(false)
