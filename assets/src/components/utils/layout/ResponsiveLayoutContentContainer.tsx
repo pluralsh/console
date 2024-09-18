@@ -1,10 +1,15 @@
 import { Flex } from 'honorable'
+import { Ref, forwardRef } from 'react'
 
 export const RESPONSIVE_LAYOUT_CONTENT_WIDTH = 896
 
-export function ResponsiveLayoutContentContainer(props: any) {
+function ResponsiveLayoutContentContainerRef(
+  props: any,
+  ref: Ref<HTMLDivElement>
+) {
   return (
     <Flex
+      ref={ref}
       direction="column"
       flexGrow={1}
       flexShrink={1}
@@ -19,3 +24,7 @@ export function ResponsiveLayoutContentContainer(props: any) {
     />
   )
 }
+
+export const ResponsiveLayoutContentContainer = forwardRef(
+  ResponsiveLayoutContentContainerRef
+)

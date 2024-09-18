@@ -153,6 +153,9 @@ export function PermissionsModal({
       formProps={{ onSubmit }}
       size="custom"
       css={{ width: 1024, maxWidth: 1024 }}
+      onOpenAutoFocus={(e) => {
+        e.preventDefault()
+      }}
       actions={
         <div
           css={{

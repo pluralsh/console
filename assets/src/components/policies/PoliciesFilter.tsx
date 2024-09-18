@@ -144,9 +144,8 @@ function PoliciesFilter({
             No kind
           </Checkbox>
           {kinds?.map((kind) => (
-            <CheckboxWrapperSC>
+            <CheckboxWrapperSC key={kind.id}>
               <Checkbox
-                key={kind.id}
                 name="kinds"
                 value={kind.id}
                 checked={selectedKinds.includes(kind.id)}
@@ -177,9 +176,8 @@ function PoliciesFilter({
             No namespace
           </Checkbox>
           {namespaces?.map((namespace) => (
-            <CheckboxWrapperSC>
+            <CheckboxWrapperSC key={namespace.id}>
               <Checkbox
-                key={namespace.id}
                 name={namespaceLabel}
                 value={namespace}
                 checked={selectedNamespaces.includes(namespace.id)}

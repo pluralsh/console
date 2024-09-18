@@ -9,7 +9,7 @@ time it opens/closes.
  */
 
 import { usePrevious } from '@pluralsh/design-system'
-import { ReactElement, useLayoutEffect, useState } from 'react'
+import { ReactElement, useLayoutEffect, useRef, useState } from 'react'
 import { Transition, TransitionGroup } from 'react-transition-group'
 
 export function ModalMountTransition({
@@ -21,6 +21,8 @@ export function ModalMountTransition({
 }) {
   const wasOpen = usePrevious(open)
   const [counter, setCounter] = useState(0)
+  // this doesn't actually do anything, just to prevent TransitionGroup from using deprecated findDOMNode
+  const nodeRef = useRef(null)
 
   useLayoutEffect(() => {
     if (open && !wasOpen) {
@@ -33,6 +35,7 @@ export function ModalMountTransition({
     <TransitionGroup css={{ display: 'none' }}>
       {open || wasOpen ? (
         <Transition
+          nodeRef={nodeRef}
           key={key}
           mountOnEnter
           unmountOnExit

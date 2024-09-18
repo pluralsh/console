@@ -248,9 +248,11 @@ export function ComponentDetails({
         </div>
       )}
       <TabPanel
-        as={<Outlet context={outletContext} />}
+        css={{ display: 'contents' }}
         stateRef={tabStateRef}
-      />
+      >
+        <Outlet context={outletContext} />
+      </TabPanel>
     </ResponsivePageFullWidth>
   )
 }

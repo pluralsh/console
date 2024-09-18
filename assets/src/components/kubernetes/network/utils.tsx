@@ -24,11 +24,11 @@ export function TableEndpoints({
 }) {
   return endpoints.map((endpoint) =>
     isEmpty(endpoint?.ports) ? (
-      <TableText>{endpoint?.host}</TableText>
+      <TableText key={endpoint?.host}>{endpoint?.host}</TableText>
     ) : (
-      <div>
+      <div key={endpoint?.host}>
         {endpoint?.ports.map((port) => (
-          <TableText>
+          <TableText key={`${endpoint?.host}-${port?.port}-${port?.protocol}`}>
             {endpoint?.host}:{port?.port ?? port?.nodePort} {port?.protocol}
           </TableText>
         ))}

@@ -1,4 +1,4 @@
-import { ComponentProps } from 'react'
+import { ComponentProps, Ref, forwardRef } from 'react'
 import styled from 'styled-components'
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
@@ -17,13 +17,19 @@ const ResponsivePageFullWidthSC = styled(ResponsiveLayoutPage)<{
     : {}),
 }))
 
-export function ResponsivePageFullWidth({
-  scrollable = true,
-  children,
-  ...props
-}: ComponentProps<typeof ScrollablePage>) {
+function ResponsivePageFullWidthRef(
+  {
+    scrollable = true,
+    children,
+    ...props
+  }: ComponentProps<typeof ResponsivePageFullWidthSC>,
+  ref: Ref<HTMLDivElement>
+) {
   return (
-    <ResponsivePageFullWidthSC $scrollable={scrollable}>
+    <ResponsivePageFullWidthSC
+      $scrollable={scrollable}
+      ref={ref}
+    >
       <ScrollablePage
         scrollable={scrollable}
         fullWidth
@@ -34,3 +40,5 @@ export function ResponsivePageFullWidth({
     </ResponsivePageFullWidthSC>
   )
 }
+
+export const ResponsivePageFullWidth = forwardRef(ResponsivePageFullWidthRef)
