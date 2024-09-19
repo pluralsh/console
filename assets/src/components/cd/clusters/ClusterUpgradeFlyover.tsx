@@ -419,21 +419,7 @@ export function ClusterUpgradeFlyover({
       header={`Upgrade Plan for ${cluster?.name}`}
       open={open}
       onClose={onClose}
-      portal
-      size="large"
       minWidth={920}
-      actions={
-        <Button
-          type="button"
-          secondary
-          onClick={(e) => {
-            e.preventDefault()
-            onClose()
-          }}
-        >
-          Cancel
-        </Button>
-      }
     >
       <FlyoverContent
         open={open}
