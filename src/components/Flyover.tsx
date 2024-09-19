@@ -1,29 +1,119 @@
-import { type ReactNode, type Ref, forwardRef, useEffect } from 'react'
+import {
+  type ComponentPropsWithoutRef,
+  type ReactNode,
+  type Ref,
+  forwardRef,
+  useCallback,
+} from 'react'
 
-import styled, { type StyledComponentPropsWithRef } from 'styled-components'
+import styled from 'styled-components'
 
-import { type ModalProps } from 'honorable'
+import { VisuallyHidden } from 'react-aria'
 
-import useLockedBody from '../hooks/useLockedBody'
+import * as Dialog from '@radix-ui/react-dialog'
 
 import { CloseIcon } from '../icons'
 
-import { HonorableModal } from './HonorableModal'
 import IconFrame from './IconFrame'
+import { ModalWrapper } from './ModalWrapper'
+import { FillLevelContext } from './contexts/FillLevelContext'
 
-type FlyoverPropsType = Omit<ModalProps, 'size'> & {
+const ANIMATION_SPEED = '300ms'
+
+type FlyoverProps = {
+  open?: boolean
+  onClose?: () => void
   header?: ReactNode
-  lockBody?: boolean
   scrollable?: boolean
-  asForm?: boolean
-  formProps?: StyledComponentPropsWithRef<'form'>
-  width?: string
-  minWidth?: number
-  [x: string]: unknown
+  width?: string | number
+  minWidth?: string | number
+  children?: ReactNode
+} & ComponentPropsWithoutRef<'div'>
+
+function FlyoverRef(
+  {
+    open = false,
+    onClose,
+    header,
+    scrollable = true,
+    width = '40%',
+    minWidth = 570,
+    children,
+    ...props
+  }: FlyoverProps,
+  ref: Ref<any>
+) {
+  const triggerClose = useCallback(
+    (open: boolean) => {
+      if (!open) onClose?.()
+    },
+    [onClose]
+  )
+
+  return (
+    <ModalWrapperSC
+      ref={ref}
+      open={open}
+      onOpenChange={triggerClose}
+      $width={width}
+      $minWidth={minWidth}
+      overlayStyles={{
+        justifyContent: 'unset',
+        alignItems: 'flex-end',
+        padding: 0,
+      }}
+    >
+      <FillLevelContext.Provider value={1}>
+        <FlyoverWrapperSC>
+          <VisuallyHidden>
+            <Dialog.Title>{header}</Dialog.Title>
+          </VisuallyHidden>
+          {!!header && (
+            <FlyoverHeaderWrapSC>
+              <FlyoverHeaderSC>{header}</FlyoverHeaderSC>
+              <IconFrame
+                clickable
+                onClick={onClose}
+                icon={<CloseIcon />}
+              />
+            </FlyoverHeaderWrapSC>
+          )}
+          <FlyoverContentSC
+            $scrollable={scrollable}
+            {...props}
+          >
+            {children}
+          </FlyoverContentSC>
+        </FlyoverWrapperSC>
+      </FillLevelContext.Provider>
+    </ModalWrapperSC>
+  )
 }
 
-const FlyoverSC = styled.div(({ theme }) => ({
-  position: 'relative',
+const ModalWrapperSC = styled(ModalWrapper)<{
+  $width: string | number
+  $minWidth: string | number
+}>(({ $width, $minWidth }) => ({
+  height: '100%',
+  width: $width,
+  minWidth: $minWidth,
+  '@keyframes popIn': {
+    from: { transform: 'translateX(100%)', opacity: 0 },
+    to: { transform: 'translateX(0)', opacity: 1 },
+  },
+  '@keyframes popOut': {
+    from: { transform: 'translateX(0)', opacity: 1 },
+    to: { transform: 'translateX(100%)', opacity: 0 },
+  },
+  '&[data-state="open"]': {
+    animation: `popIn ${ANIMATION_SPEED} ease-out`,
+  },
+  '&[data-state="closed"]': {
+    animation: `popOut ${ANIMATION_SPEED} ease-out`,
+  },
+}))
+
+const FlyoverWrapperSC = styled.div(({ theme }) => ({
   backgroundColor: theme.colors['fill-zero'],
   height: '100%',
   display: 'flex',
@@ -34,11 +124,7 @@ const FlyoverSC = styled.div(({ theme }) => ({
 const FlyoverContentSC = styled.div<{
   $scrollable: boolean
 }>(({ theme, $scrollable }) => ({
-  position: 'relative',
-  zIndex: 0,
-  margin: 0,
   padding: theme.spacing.large,
-  backgroundColor: theme.colors['fill-zero'],
   ...theme.partials.text.body1,
   flexGrow: 1,
   ...($scrollable
@@ -51,92 +137,18 @@ const FlyoverContentSC = styled.div<{
 }))
 
 const FlyoverHeaderWrapSC = styled.div(({ theme }) => ({
+  display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  gap: theme.spacing.small,
   height: 56,
   borderBottom: `1px solid ${theme.colors.border}`,
-  backgroundColor: theme.colors['fill-zero'],
-  display: 'flex',
   padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
 }))
 
 const FlyoverHeaderSC = styled.h1(({ theme }) => ({
-  margin: 0,
   ...theme.partials.text.subtitle1,
-  color: theme.colors.semanticDefault,
+  color: theme.colors.text,
 }))
-
-function FlyoverRef(
-  {
-    children,
-    header,
-    open = false,
-    onClose,
-    lockBody = true,
-    asForm = false,
-    formProps = {},
-    scrollable = true,
-    width = '40%',
-    minWidth = 570,
-    ...props
-  }: FlyoverPropsType,
-  ref: Ref<any>
-) {
-  const [, setBodyLocked] = useLockedBody(open && lockBody)
-
-  useEffect(() => {
-    setBodyLocked(lockBody && open)
-  }, [lockBody, open, setBodyLocked])
-
-  return (
-    <HonorableModal
-      open={open}
-      onClose={onClose}
-      ref={ref}
-      scrollable={scrollable}
-      margin={0}
-      padding={0}
-      right="100%"
-      height="100%"
-      width={width}
-      minWidth={minWidth}
-      alignSelf="flex-end"
-      InnerDefaultStyle={{
-        opacity: 0,
-        transform: 'translateX(0)',
-        transition: 'transform 300ms ease, opacity 300ms ease',
-      }}
-      InnerTransitionStyle={{
-        entering: { opacity: 1, transform: 'translateX(0)' },
-        entered: { opacity: 1, transform: 'translateX(0)' },
-        exiting: { opacity: 0, transform: 'translateX(1000px)' },
-        exited: { opacity: 0, transform: 'translateX(1000px)' },
-      }}
-      {...props}
-    >
-      <FlyoverSC
-        as={asForm ? 'form' : undefined}
-        {...(asForm ? formProps : {})}
-      >
-        {!!header && (
-          <FlyoverHeaderWrapSC ref={ref}>
-            <FlyoverHeaderSC>{header}</FlyoverHeaderSC>
-            <IconFrame
-              textValue=""
-              display="flex"
-              size="small"
-              clickable
-              onClick={onClose}
-              icon={<CloseIcon />}
-            />
-          </FlyoverHeaderWrapSC>
-        )}
-        <FlyoverContentSC $scrollable={scrollable}>{children}</FlyoverContentSC>
-      </FlyoverSC>
-    </HonorableModal>
-  )
-}
 
 const Flyover = forwardRef(FlyoverRef)
 

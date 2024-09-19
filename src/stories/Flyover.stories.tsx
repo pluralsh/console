@@ -1,5 +1,5 @@
 import { Div, Flex, H3, P } from 'honorable'
-import { useState } from 'react'
+import { type FormEvent, useState } from 'react'
 
 import styled from 'styled-components'
 
@@ -49,7 +49,7 @@ function Template(args: any) {
         onClose={() => setOpen(false)}
         asForm={!!args.asForm}
         formProps={{
-          onSubmit: (e) => {
+          onSubmit: (e: FormEvent) => {
             e.preventDefault()
             alert('Form submitted')
           },

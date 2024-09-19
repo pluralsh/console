@@ -1,24 +1,21 @@
 import { Button, Flex, P } from 'honorable'
 import { type ReactElement, useEffect, useMemo, useState } from 'react'
 
-import { useTheme } from 'styled-components'
-
-import { type LayerPositionType } from '../components/Layer'
-import { Wizard } from '../components/wizard/Wizard'
-import { Picker, type StepConfig } from '../components/wizard/Picker'
-import { Stepper } from '../components/wizard/Stepper'
-import AppsIcon from '../components/icons/AppsIcon'
-import InstallIcon from '../components/icons/InstallIcon'
-import { Navigation } from '../components/wizard/Navigation'
-import { Installer } from '../components/wizard/Installer'
-import { Step } from '../components/wizard/Step'
-import Input from '../components/Input'
-import { useActive } from '../components/wizard'
-import { Toast } from '../components/Toast'
 import FormField from '../components/FormField'
+import Input from '../components/Input'
+import { type LayerPositionType } from '../components/Layer'
 import Modal from '../components/Modal'
+import { Toast } from '../components/Toast'
+import AppsIcon from '../components/icons/AppsIcon'
 import GlobeIcon from '../components/icons/GlobeIcon'
-import { HonorableModal } from '../components/HonorableModal'
+import InstallIcon from '../components/icons/InstallIcon'
+import { useActive } from '../components/wizard'
+import { Installer } from '../components/wizard/Installer'
+import { Navigation } from '../components/wizard/Navigation'
+import { Picker, type StepConfig } from '../components/wizard/Picker'
+import { Step } from '../components/wizard/Step'
+import { Stepper } from '../components/wizard/Stepper'
+import { Wizard } from '../components/wizard/Wizard'
 
 export default {
   title: 'Wizard',
@@ -133,7 +130,6 @@ const DEFAULT_STEPS: Array<StepConfig> = [
 ]
 
 function ModalTemplate() {
-  const theme = useTheme()
   const [open, setOpen] = useState(true)
   const [confirmClose, setConfirmClose] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -143,17 +139,10 @@ function ModalTemplate() {
     <Flex>
       <Button onClick={() => setOpen(true)}>Open</Button>
 
-      <HonorableModal
-        portal
+      <Modal
         open={open}
-        fontSize={16}
-        width={768}
-        maxWidth={768}
-        height={768}
-        paddingTop={theme.spacing.large}
-        paddingLeft={theme.spacing.large}
-        paddingRight={theme.spacing.large}
-        paddingBottom={theme.spacing.large}
+        onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
+        size="large"
       >
         <Wizard
           onClose={() => (inProgress ? setConfirmClose(true) : setOpen(false))}
@@ -173,7 +162,7 @@ function ModalTemplate() {
             ),
           }}
         </Wizard>
-      </HonorableModal>
+      </Modal>
 
       <Modal
         header="confirm cancellation"
