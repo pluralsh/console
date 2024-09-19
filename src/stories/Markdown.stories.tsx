@@ -71,10 +71,11 @@ console.info(sum(num1, num2));
 \`\`\`
 
 ###### Links
+https://google.com  
 [Absolute url](https://google.com)  
 [Absolute url - no protocol](//google.com)  
 [Relative url – Console Readme](README.md)  
-[Root relative url – Console Security](/SECURITY.md)  
+[Root relative url – Console Security](/SECURITY.md)
 
 ___
 

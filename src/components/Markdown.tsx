@@ -1,7 +1,8 @@
-import { Children, useMemo } from 'react'
 import { Div } from 'honorable'
+import { Children, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
+import remarkGfm from 'remark-gfm'
 import styled, { useTheme } from 'styled-components'
 
 import { isExternalUrl, removeTrailingSlashes } from '../utils/urls'
@@ -232,6 +233,7 @@ function Markdown({ text, gitUrl, mainBranch }: MarkdownProps) {
     () => (
       <ReactMarkdown
         rehypePlugins={[rehypeRaw]}
+        remarkPlugins={[remarkGfm]}
         components={{
           blockquote: render({ component: MdBlockquote }),
           ul: render({ component: MdUl }),
