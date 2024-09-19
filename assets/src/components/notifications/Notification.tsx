@@ -1,7 +1,7 @@
-import { useTheme } from 'styled-components'
-import React, { useEffect, useRef, useState } from 'react'
-import { Button } from '@pluralsh/design-system'
+import { Button, Markdown } from '@pluralsh/design-system'
 import moment from 'moment/moment'
+import { useEffect, useRef, useState } from 'react'
+import { useTheme } from 'styled-components'
 
 import { AppNotificationFragment } from '../../generated/graphql'
 
@@ -43,7 +43,6 @@ export default function Notification({
         flexDirection: 'column',
         gap: theme.spacing.small,
         padding: `${theme.spacing.large}px ${theme.spacing.medium}px `,
-        width: '100%',
       }}
     >
       <div
@@ -61,6 +60,7 @@ export default function Notification({
       <div
         ref={contentRef}
         css={{
+          wordBreak: 'break-word',
           ...(expand
             ? {}
             : {
@@ -71,7 +71,7 @@ export default function Notification({
               }),
         }}
       >
-        {notification.text}
+        <Markdown text={notification.text ?? ''} />
       </div>
       {clamped && (
         <Button
