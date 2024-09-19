@@ -11,14 +11,13 @@ import {
 import { DeleteIconButton } from 'components/utils/IconButtons'
 
 import { removeConnection, updateCache } from '../../../../utils/graphql'
-import { Info } from '../../../utils/Info'
 import { Permissions, hasRbac } from '../misc'
 
 import { EditPersonaAttributes } from './PersonaAttributesEdit'
 import PersonaView from './PersonaView'
 import { EditPersonaBindings } from './PersonaBindingsEdit'
 
-export default function Persona({ persona }: { persona: PersonaT }) {
+export default function PersonaActions({ persona }: { persona: PersonaT }) {
   const { me } = useContext<any>(LoginContext)
   const editable = !!me.roles?.admin || hasRbac(me, Permissions.USERS)
 
@@ -43,10 +42,6 @@ export default function Persona({ persona }: { persona: PersonaT }) {
       flexDirection="row"
       alignItems="center"
     >
-      <Info
-        text={persona.name}
-        description={persona.description || 'no description'}
-      />
       <Flex
         flex={false}
         direction="row"

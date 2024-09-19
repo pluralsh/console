@@ -1,63 +1,83 @@
 import isEmpty from 'lodash/isEmpty'
-import { EmptyState } from '@pluralsh/design-system'
-import { useState } from 'react'
-import { Div } from 'honorable'
+import { EmptyState, Table } from '@pluralsh/design-system'
+import { useMemo } from 'react'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { usePersonasQuery } from 'generated/graphql'
+import { PersonaFragment, usePersonasQuery } from 'generated/graphql'
+import { createColumnHelper } from '@tanstack/react-table'
 
-import { extendConnection } from '../../../../utils/graphql'
-import { List, ListItem } from '../../../utils/List'
-import { StandardScroller } from '../../../utils/SmoothScroller'
+import { GridTableWrapper } from '../../../utils/layout/ResponsiveGridLayouts'
+import { useFetchPaginatedData } from '../../../cd/utils/useFetchPaginatedData'
+import { GqlError } from '../../../utils/Alert'
 
+import { Info } from '../../../utils/Info'
+
+import PersonaActions from './PersonaActions'
 import PersonaCreate from './PersonaCreate'
-import Persona from './Persona'
+
+export const pageSize = 100
+
+const columnHelper = createColumnHelper<PersonaFragment>()
+const columns = [
+  columnHelper.accessor((persona) => persona, {
+    id: 'info',
+    cell: ({ getValue }) => {
+      const persona = getValue()
+
+      return (
+        <Info
+          text={persona.name}
+          description={persona.description}
+        />
+      )
+    },
+  }),
+  columnHelper.accessor((persona) => persona, {
+    id: 'actions',
+    meta: { gridTemplate: `fit-content(100px)` },
+    cell: function Cell({ getValue }) {
+      return <PersonaActions persona={getValue()} />
+    },
+  }),
+]
 
 export function PersonasList() {
-  const { data, loading, fetchMore } = usePersonasQuery()
-  const [listRef, setListRef] = useState<any>(null)
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData({
+      queryHook: usePersonasQuery,
+      keyPath: ['personas'],
+      pageSize,
+    })
 
-  if (!data?.personas) return <LoadingIndicator />
+  const personas = useMemo(
+    () => data?.personas?.edges?.map((edge) => edge?.node),
+    [data?.personas?.edges]
+  )
 
-  const { edges, pageInfo } = data.personas
+  if (error) return <GqlError error={error} />
+  if (!data?.personas?.edges) return <LoadingIndicator />
 
-  return (
-    <List background="fill-zero-selected">
-      {!isEmpty(edges) ? (
-        <StandardScroller
-          listRef={listRef}
-          setListRef={setListRef}
-          items={edges}
-          mapper={({ node: persona }) => (
-            <ListItem key={persona.id}>
-              <Persona persona={persona} />
-            </ListItem>
-          )}
-          loadNextPage={() =>
-            pageInfo.hasNextPage &&
-            fetchMore({
-              variables: { cursor: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { personas } }) =>
-                extendConnection(prev, personas, 'personas'),
-            })
-          }
-          hasNextPage={pageInfo.hasNextPage}
-          loading={loading}
-          placeholder={() => (
-            <Div
-              flex={false}
-              height="50px"
-              padding="small"
-            />
-          )}
-          handleScroll={undefined}
-          refreshKey={undefined}
-          setLoader={undefined}
-        />
-      ) : (
-        <EmptyState message={"Looks like you don't have any personas yet."}>
-          <PersonaCreate />
-        </EmptyState>
-      )}
-    </List>
+  return !isEmpty(personas) ? (
+    <GridTableWrapper>
+      <Table
+        virtualizeRows
+        rowBg="raised"
+        data={personas || []}
+        columns={columns}
+        hideHeader
+        hasNextPage={pageInfo?.hasNextPage}
+        fetchNextPage={fetchNextPage}
+        isFetchingNextPage={loading}
+        onVirtualSliceChange={setVirtualSlice}
+        reactVirtualOptions={{ overscan: 10 }}
+        css={{
+          maxHeight: 'unset',
+          height: '100%',
+        }}
+      />
+    </GridTableWrapper>
+  ) : (
+    <EmptyState message={"Looks like you don't have any personas yet."}>
+      <PersonaCreate />
+    </EmptyState>
   )
 }
