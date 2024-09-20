@@ -97,19 +97,19 @@ const ModalWrapperSC = styled(ModalWrapper)<{
   height: '100%',
   width: $width,
   minWidth: $minWidth,
-  '@keyframes popIn': {
+  '@keyframes slideIn': {
     from: { transform: 'translateX(100%)', opacity: 0 },
     to: { transform: 'translateX(0)', opacity: 1 },
   },
-  '@keyframes popOut': {
+  '@keyframes slideOut': {
     from: { transform: 'translateX(0)', opacity: 1 },
     to: { transform: 'translateX(100%)', opacity: 0 },
   },
   '&[data-state="open"]': {
-    animation: `popIn ${ANIMATION_SPEED} ease-out`,
+    animation: `slideIn ${ANIMATION_SPEED} ease-out`,
   },
   '&[data-state="closed"]': {
-    animation: `popOut ${ANIMATION_SPEED} ease-out`,
+    animation: `slideOut ${ANIMATION_SPEED} ease-out`,
   },
 }))
 
