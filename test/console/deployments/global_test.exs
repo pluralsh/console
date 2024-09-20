@@ -539,14 +539,17 @@ defmodule Console.Deployments.GlobalTest do
     test "it returns false if targets have all the same relevant config" do
       svc = insert(:service,
         helm: %{chart: "test", version: "0.4.0", repository: %{name: "chart", namespace: "infra"}},
-        templated: true
+        templated: true,
+        protect: false,
+        namespace: "test"
       )
 
       template = insert(:service_template,
         repository: svc.repository,
         helm: %{chart: "test", version: "0.4.0", repository: %{name: "chart", namespace: "infra"}},
         templated: true,
-        git: svc.git
+        git: svc.git,
+        namespace: "test"
       )
 
       refute Global.diff?(template, Console.Repo.preload(svc, [:contexts]))

@@ -7492,6 +7492,8 @@ export type ServiceTemplateAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
   /** the namespace for this service (optional for managed namespaces) */
   namespace?: InputMaybe<Scalars['String']['input']>;
+  /** whether to protect this templated service from deletion */
+  protect?: InputMaybe<Scalars['Boolean']['input']>;
   /** the id of a repository to source manifests for this service */
   repositoryId?: InputMaybe<Scalars['ID']['input']>;
   /** attributes to configure sync settings for this service */

@@ -78,6 +78,11 @@ type ServiceTemplate struct {
 	Templated *bool `json:"templated,omitempty"`
 	// +kubebuilder:validation:Optional
 	RepositoryRef *corev1.ObjectReference `json:"repositoryRef"`
+
+	// Whether to protect this service from deletion.  Protected services are also not drained on cluster deletion.
+	// +kubebuilder:validation:Optional
+	Protect *bool `json:"protect,omitempty"`
+
 	// a list of context ids to add to this service
 	// +kubebuilder:validation:Optional
 	Contexts []string `json:"contexts,omitempty"`
