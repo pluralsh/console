@@ -5,7 +5,7 @@ defmodule Console.Deployments.Observability.Metrics do
   import Console.Deployments.Observability.Utils
 
   @cluster post_process([
-    cpu: '1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster="$cluster"}[5m])',
+    cpu: '1 - avg(irate(node_cpu_seconds_total{mode="idle",cluster="$cluster"}[5m]))',
     memory: '(sum(node_memory_MemTotal_bytes{cluster="$cluster"}) - sum(node_memory_MemAvailable_bytes{cluster="$cluster"})) / sum(node_memory_MemTotal_bytes{cluster="$cluster"})',
     cpu_requests: 'sum(kube_pod_container_resource_requests{unit="core",cluster="$cluster"})',
     memory_requests: 'sum(kube_pod_container_resource_requests{unit="byte",cluster="$cluster"})',
