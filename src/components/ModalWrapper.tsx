@@ -4,6 +4,10 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { type ReactNode, forwardRef } from 'react'
 import styled, { type CSSObject, useTheme } from 'styled-components'
 
+import { FocusScope } from '@radix-ui/react-focus-scope'
+
+import WrapWithIf from './WrapWithIf'
+
 const ANIMATION_SPEED = '150ms'
 
 export type ModalWrapperProps = {
@@ -30,12 +34,24 @@ function ModalWrapperRef(
           onClick={(e) => e.stopPropagation()}
           style={overlayStyles}
         >
-          <ContentSC
-            ref={ref}
-            {...props}
+          <WrapWithIf
+            condition={// band-aid for firefox not letting our select component open inside a modal
+            // see https://github.com/radix-ui/primitives/issues/2544
+            navigator?.userAgent.toLowerCase().includes('firefox')}
+            wrapper={
+              <FocusScope
+                trapped={false}
+                loop
+              />
+            }
           >
-            {children}
-          </ContentSC>
+            <ContentSC
+              ref={ref}
+              {...props}
+            >
+              {children}
+            </ContentSC>
+          </WrapWithIf>
         </OverlaySC>
       </Dialog.Portal>
     </Dialog.Root>
