@@ -85,6 +85,7 @@ defmodule Console.MixProject do
       {:ecto_sql, "~> 3.9.0"},
       {:yajwt, "~> 1.4"},
       {:joken, "~> 2.6"},
+      {:mdex, "~> 0.1"},
       {:piazza_core, "~> 0.3.9", git: "https://github.com/michaeljguarino/piazza_core", branch: "master", override: true},
       {:flow, "~> 0.15.0"},
       {:bourne, "~> 1.1"},

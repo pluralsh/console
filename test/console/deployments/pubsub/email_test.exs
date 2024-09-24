@@ -28,4 +28,24 @@ defmodule Console.Deployments.PubSub.EmailTest do
       assert_delivered_email Builder.Secret.email(share, actor)
     end
   end
+
+  describe "AppNotificationCreated" do
+    test "it will deliver if an app notification is urgent" do
+      notif = insert(:app_notification, urgent: true)
+
+      event = %PubSub.AppNotificationCreated{item: notif}
+      Email.handle_event(event)
+
+      assert_delivered_email Builder.Notification.email(notif)
+    end
+
+    test "it will ignore if an app notification is not urgent" do
+      notif = insert(:app_notification, urgent: false)
+
+      event = %PubSub.AppNotificationCreated{item: notif}
+      Email.handle_event(event)
+
+      refute_delivered_email Builder.Notification.email(notif)
+    end
+  end
 end

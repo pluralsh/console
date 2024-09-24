@@ -3782,6 +3782,15 @@ export type PluralServiceDeployment = {
 
 export type PluralSinkAttributes = {
   priority: NotificationPriority;
+  /** whether to immediately deliver the derived notification via SMTP */
+  urgent?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type PluralSinkConfiguration = {
+  __typename?: 'PluralSinkConfiguration';
+  priority: NotificationPriority;
+  /** whether to immediately deliver the derived notification via SMTP */
+  urgent?: Maybe<Scalars['Boolean']['output']>;
 };
 
 export type PluralSubscription = {
@@ -7547,6 +7556,7 @@ export type SharedSecretAttributes = {
 export type SinkConfiguration = {
   __typename?: 'SinkConfiguration';
   id: Scalars['ID']['output'];
+  plural?: Maybe<PluralSinkConfiguration>;
   slack?: Maybe<UrlSinkConfiguration>;
   teams?: Maybe<UrlSinkConfiguration>;
 };

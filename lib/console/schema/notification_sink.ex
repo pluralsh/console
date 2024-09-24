@@ -19,6 +19,7 @@ defmodule Console.Schema.NotificationSink do
 
       embeds_one :plural, PluralConfiguration, on_replace: :update do
         field :priority, AppNotification.Priority
+        field :urgent,   :boolean
       end
     end
 
@@ -57,11 +58,17 @@ defmodule Console.Schema.NotificationSink do
     |> cast(attrs, [])
     |> cast_embed(:slack, with: &url_changeset/2)
     |> cast_embed(:teams, with: &url_changeset/2)
+    |> cast_embed(:plural, with: &plural_changeset/2)
   end
 
   defp url_changeset(model, attrs) do
     model
     |> cast(attrs, [:url])
     |> validate_required([:url])
+  end
+
+  defp plural_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(priority urgent)a)
   end
 end

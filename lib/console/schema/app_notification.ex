@@ -11,6 +11,7 @@ defmodule Console.Schema.AppNotification do
     field :priority, Priority, default: :low
     field :text,     :string
     field :read_at,  :utc_datetime_usec
+    field :urgent,   :boolean
 
     belongs_to :user, User
 
@@ -58,7 +59,7 @@ defmodule Console.Schema.AppNotification do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(user_id text priority)a)
+    |> cast(attrs, ~w(user_id text priority urgent)a)
     |> foreign_key_constraint(:user_id)
     |> validate_required(~w(user_id text)a)
   end

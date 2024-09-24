@@ -18,3 +18,12 @@ defimpl Console.Deployments.PubSub.Emailable, for: Console.PubSub.SharedSecretCr
     Secret.email(share, actor)
   end
 end
+
+defimpl Console.Deployments.PubSub.Emailable, for: Console.PubSub.AppNotificationCreated do
+  alias Console.Schema.AppNotification
+  alias Console.Email.Builder.Notification
+
+  def email(%{item: %AppNotification{urgent: true} = notif}),
+    do: Notification.email(notif)
+  def email(_), do: :ok
+end

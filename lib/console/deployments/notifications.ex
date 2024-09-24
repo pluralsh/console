@@ -39,7 +39,8 @@ defmodule Console.Deployments.Notifications do
   @spec create_notifications([map]) :: {:ok, [AppNotification.t]} | error
   def create_notifications(notifs) do
     notifs = Enum.map(notifs, &timestamped/1)
-    Repo.insert_all(AppNotification, notifs, returning: true)
+    AppNotification
+    |> Repo.insert_all(notifs, returning: true)
     |> elem(1)
     |> ok()
   end
@@ -155,8 +156,9 @@ defmodule Console.Deployments.Notifications do
   defp deliver(body, %NotificationSink{type: :plural} = sink) do
     %{notification_bindings: bindings} = Repo.preload(sink, [notification_bindings: [group: :members]])
     splat_userids(bindings)
-    |> Enum.map(& %{text: body, user_id: &1, priority: priority(sink)})
+    |> Enum.map(&Map.merge(%{text: body, user_id: &1}, attrs(sink)))
     |> create_notifications()
+    |> send_events()
   end
 
   defp url_deliver(url, body) do
@@ -185,10 +187,17 @@ defmodule Console.Deployments.Notifications do
     end)
   end
 
-  defp priority(%NotificationSink{configuration: %{plural: %{priority: priority}}}) when not is_nil(priority),
-    do: priority
-  defp priority(_), do: :low
+  defp attrs(%NotificationSink{configuration: %{plural: %{} = plural}}) do
+    %{priority: Map.get(plural, :priority) || :low, urgent: !!Map.get(plural, :urgent)}
+  end
+  defp attrs(_), do: %{priority: :low}
 
+
+  defp send_events({:ok, [_ | _] = notifs}) do
+    Enum.each(notifs, &handle_notify(PubSub.AppNotificationCreated, &1))
+    {:ok, notifs}
+  end
+  defp send_events(pass), do: pass
 
   defp notify({:ok, %SharedSecret{} = share}, :create, user),
     do: handle_notify(PubSub.SharedSecretCreated, share, actor: user)
