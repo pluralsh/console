@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
-	"fmt"
+
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	console "github.com/pluralsh/console/go/client"
 
@@ -33,7 +35,7 @@ func (in *PrAutomationReconciler) attributes(ctx context.Context, pra *v1alpha1.
 		return nil, err
 	}
 	if connectionID == nil {
-		return nil, fmt.Errorf("could not find ScmConnection: %s", pra.Spec.ScmConnectionRef.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{}, pra.Spec.ScmConnectionRef.Name)
 	}
 
 	projectID, err := helper.IDFromRef(pra.Spec.ProjectRef, &v1alpha1.Project{})
