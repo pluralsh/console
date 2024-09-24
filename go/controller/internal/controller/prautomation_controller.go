@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -85,6 +86,10 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Sync PrAutomation CRD with the Console API
 	apiPrAutomation, err := in.sync(ctx, prAutomation, changed)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			logger.Error(err, "unable to find referenced object")
+			return requeue, nil
+		}
 		logger.Error(err, "unable to create or update prAutomation")
 		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
