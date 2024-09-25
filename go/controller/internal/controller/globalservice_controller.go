@@ -20,6 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -107,14 +110,22 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	provider, err := r.getProvider(ctx, globalService)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			return RequeueAfter(requeueWaitForResources), nil
+		}
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return RequeueAfter(requeueWaitForResources), err
+		return ctrl.Result{}, err
 	}
 
 	project, err := r.getProject(ctx, globalService)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			return RequeueAfter(requeueWaitForResources), nil
+		}
 		utils.MarkCondition(globalService.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
-		return RequeueAfter(requeueWaitForResources), err
+		return ctrl.Result{}, err
 	}
 
 	attr := globalService.Attributes(provider.Status.ID, project.Status.ID)
@@ -213,7 +224,7 @@ func (r *GlobalServiceReconciler) getProvider(ctx context.Context, globalService
 		}
 		if provider.Status.ID == nil {
 			logger.Info("Provider is not ready")
-			return provider, fmt.Errorf("provider is not yet ready")
+			return provider, apierrors.NewNotFound(schema.GroupResource{}, globalService.Spec.ProviderRef.Name)
 		}
 	}
 
@@ -230,7 +241,7 @@ func (r *GlobalServiceReconciler) getProject(ctx context.Context, globalService 
 
 		if project.Status.ID == nil {
 			logger.Info("Project is not ready")
-			return project, fmt.Errorf("project is not yet ready")
+			return project, apierrors.NewNotFound(schema.GroupResource{}, globalService.Spec.ProjectRef.Name)
 		}
 
 		if err := controllerutil.SetOwnerReference(project, globalService, r.Scheme); err != nil {

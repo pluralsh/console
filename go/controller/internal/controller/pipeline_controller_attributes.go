@@ -20,6 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	v1 "k8s.io/api/core/v1"
 
 	console "github.com/pluralsh/console/go/client"
@@ -80,7 +83,7 @@ func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context,
 	}
 
 	if service.Status.ID == nil {
-		return nil, fmt.Errorf("service %s is not yet ready", service.Name)
+		return nil, errors.NewNotFound(schema.GroupResource{}, service.Name)
 	}
 
 	// Extracting cluster ref from the service, not from the custom resource field (i.e. PipelineStageService.ClusterRef).

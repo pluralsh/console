@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -109,6 +111,9 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		logger.Info("create managed namespace", "name", managedNamespace.Name)
 		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if err != nil {
+			if errors.IsNotFound(err) {
+				return RequeueAfter(requeueWaitForResources), nil
+			}
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
@@ -126,6 +131,10 @@ func (r *ManagedNamespaceReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		logger.Info("update managed namespace", "name", managedNamespace.Name)
 		attr, err := r.getNamespaceAttributes(ctx, managedNamespace)
 		if err != nil {
+			if errors.IsNotFound(err) {
+				utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+				return RequeueAfter(requeueWaitForResources), nil
+			}
 			utils.MarkCondition(managedNamespace.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return requeue, err
 		}
@@ -278,7 +287,7 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		if project.Status.ID == nil {
 			logger.Info("Project is not ready")
 			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
-			return nil, nil
+			return nil, errors.NewNotFound(schema.GroupResource{}, ns.Spec.ProjectRef.Name)
 		}
 
 		if err := controllerutil.SetOwnerReference(project, ns, r.Scheme); err != nil {
@@ -298,7 +307,8 @@ func (r *ManagedNamespaceReconciler) getRepository(ctx context.Context, ns *v1al
 			return nil, err
 		}
 		if repository.Status.ID == nil {
-			return nil, fmt.Errorf("repository %s is not ready", repository.Name)
+			utils.MarkCondition(ns.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "repository is not ready")
+			return nil, errors.NewNotFound(schema.GroupResource{}, ns.Spec.Service.RepositoryRef.Name)
 		}
 		if repository.Status.Health == v1alpha1.GitHealthFailed {
 			return nil, fmt.Errorf("repository %s is not healthy", repository.Name)

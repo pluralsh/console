@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -105,7 +107,7 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 		if project.Status.ID == nil {
 			logger.Info("Project is not ready")
 			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, "project is not ready")
-			return requeue, nil
+			return RequeueAfter(requeueWaitForResources), nil
 		}
 
 		if err := controllerutil.SetOwnerReference(project, pipeline, r.Scheme); err != nil {
@@ -116,8 +118,12 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	// Prepare attributes object that is used to calculate SHA and save changes.
 	attrs, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
 	if err != nil {
+		if apierrors.IsNotFound(err) {
+			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			return RequeueAfter(requeueWaitForResources), nil
+		}
 		utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return requeue, nil
+		return ctrl.Result{}, err
 	}
 
 	// Calculate SHA to detect changes that should be applied in the Console API.
