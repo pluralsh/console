@@ -19,8 +19,6 @@ const breadcrumbs: Breadcrumb[] = [
   { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
 ]
 
-export const POLICIES_QUERY_PAGE_SIZE = 100
-
 export const POLL_INTERVAL = 10_000
 
 export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
@@ -53,7 +51,6 @@ export function Policies() {
     useFetchPaginatedData(
       {
         queryHook: usePolicyConstraintsQuery,
-        pageSize: POLICIES_QUERY_PAGE_SIZE,
         keyPath: ['policyConstraints'],
       },
       policyQFilters

@@ -43,8 +43,6 @@ export const breadcrumbs = [
   { label: 'observers', url: OBSERVERS_ABS_PATH },
 ]
 
-const pageSize = 100
-
 const virtualOptions: ComponentProps<typeof Table>['reactVirtualOptions'] = {
   overscan: 10,
 }
@@ -277,7 +275,7 @@ export default function Observers() {
 
   const { data, loading, error, pageInfo, fetchNextPage } =
     useFetchPaginatedData(
-      { queryHook: useObserversQuery, pageSize, keyPath: ['observers'] },
+      { queryHook: useObserversQuery, keyPath: ['observers'] },
       { projectId }
     )
 

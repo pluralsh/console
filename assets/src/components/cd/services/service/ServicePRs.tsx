@@ -28,10 +28,7 @@ import {
   ColStatus,
   ColTitle,
 } from '../../../pr/queue/PrQueueColumns'
-import {
-  PRS_REACT_VIRTUAL_OPTIONS,
-  PR_QUERY_PAGE_SIZE,
-} from '../../../pr/queue/PrQueue'
+import { PRS_REACT_VIRTUAL_OPTIONS } from '../../../pr/queue/PrQueue'
 import { GqlError } from '../../../utils/Alert'
 import { useThrottle } from '../../../hooks/useThrottle'
 import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
@@ -88,7 +85,6 @@ export default function ServicePRs() {
   } = useFetchPaginatedData(
     {
       queryHook: usePullRequestsQuery,
-      pageSize: PR_QUERY_PAGE_SIZE,
       keyPath: ['pullRequests'],
     },
     {

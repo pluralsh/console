@@ -21,8 +21,6 @@ import { useSetPageScrollable } from '../../ContinuousDeployment'
 
 import { ManagedNamespaceContextT, getBreadcrumbs } from './ManagedNamespace'
 
-const MANAGED_NAMESPACES_QUERY_PAGE_SIZE = 100
-
 const MANAGED_NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
@@ -54,7 +52,6 @@ export function ManagedNamespaceServices() {
   } = useFetchPaginatedData(
     {
       queryHook: useGetManagedNamespaceServicesQuery,
-      pageSize: MANAGED_NAMESPACES_QUERY_PAGE_SIZE,
       keyPath: ['managedNamespace', 'services'],
     },
     { namespaceId }

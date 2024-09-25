@@ -25,8 +25,6 @@ import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import ConfigureClusterBackups from './ConfigureClusterBackups'
 import { ColActions, ColCluster, ColName, ColProvider } from './ClusterColumns'
 
-const QUERY_PAGE_SIZE = 100
-
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
@@ -56,14 +54,8 @@ export default function Clusters() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useClustersObjectStoresQuery,
-      pageSize: QUERY_PAGE_SIZE,
-      keyPath: ['clusters'],
-    },
-    {
-      backups: true,
-    }
+    { queryHook: useClustersObjectStoresQuery, keyPath: ['clusters'] },
+    { backups: true }
   )
 
   const clusters = data?.clusters

@@ -24,8 +24,6 @@ import { mapExistingNodes } from '../../utils/graphql'
 
 import Notification from './Notification'
 
-const NOTIFICATIONS_QUERY_PAGE_SIZE = 100
-
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
@@ -55,7 +53,6 @@ export function NotificationsPanel({
   const { data, pageInfo, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData({
       queryHook: useAppNotificationsQuery,
-      pageSize: NOTIFICATIONS_QUERY_PAGE_SIZE,
       keyPath: ['appNotifications'],
     })
 

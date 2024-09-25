@@ -47,7 +47,6 @@ export default function ScmConnections() {
     setVirtualSlice,
   } = useFetchPaginatedData({
     queryHook: useScmConnectionsQuery,
-    pageSize: PR_QUERY_PAGE_SIZE,
     keyPath: ['scmConnections'],
   })
 

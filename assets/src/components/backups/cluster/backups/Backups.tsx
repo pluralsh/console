@@ -32,8 +32,6 @@ import {
   ColStatus,
 } from './BackupsColumns'
 
-const QUERY_PAGE_SIZE = 100
-
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
@@ -65,14 +63,8 @@ export default function Backups() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useClusterBackupsQuery,
-      pageSize: QUERY_PAGE_SIZE,
-      keyPath: ['clusterBackups'],
-    },
-    {
-      clusterId,
-    }
+    { queryHook: useClusterBackupsQuery, keyPath: ['clusterBackups'] },
+    { clusterId }
   )
 
   useSetBreadcrumbs(

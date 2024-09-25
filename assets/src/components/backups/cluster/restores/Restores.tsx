@@ -36,8 +36,6 @@ import {
 } from '../../../../routes/backupRoutesConsts'
 import { DateTimeCol } from '../../../utils/table/DateTimeCol'
 
-const QUERY_PAGE_SIZE = 100
-
 const restoreStatusSeverity = {
   [RestoreStatus.Created]: 'info',
   [RestoreStatus.Pending]: 'info',
@@ -152,14 +150,8 @@ export default function Restores() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useClusterRestoresQuery,
-      pageSize: QUERY_PAGE_SIZE,
-      keyPath: ['clusterRestores'],
-    },
-    {
-      clusterId,
-    }
+    { queryHook: useClusterRestoresQuery, keyPath: ['clusterRestores'] },
+    { clusterId }
   )
 
   useSetBreadcrumbs(

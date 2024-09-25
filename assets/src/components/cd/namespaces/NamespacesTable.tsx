@@ -14,11 +14,7 @@ import { useProjectId } from 'components/contexts/ProjectsContext'
 
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
-import {
-  NAMESPACES_QUERY_PAGE_SIZE,
-  NAMESPACES_REACT_VIRTUAL_OPTIONS,
-  columns,
-} from './Namespaces'
+import { NAMESPACES_REACT_VIRTUAL_OPTIONS, columns } from './Namespaces'
 
 export function NamespacesTable() {
   const theme = useTheme()
@@ -36,7 +32,6 @@ export function NamespacesTable() {
   } = useFetchPaginatedData(
     {
       queryHook: useManagedNamespacesQuery,
-      pageSize: NAMESPACES_QUERY_PAGE_SIZE,
       keyPath: ['managedNamespaces'],
     },
     { projectId }

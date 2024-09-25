@@ -1,7 +1,6 @@
 import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 
 import { usePullRequestsQuery } from 'generated/graphql'
-import { PR_QUERY_PAGE_SIZE } from 'components/pr/queue/PrQueue'
 import { GqlError } from 'components/utils/Alert'
 
 import { Title2H1 } from '../../utils/typography/Text'
@@ -18,14 +17,8 @@ export function PrCard() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: usePullRequestsQuery,
-      pageSize: PR_QUERY_PAGE_SIZE,
-      keyPath: ['pullRequests'],
-    },
-    {
-      open: true,
-    }
+    { queryHook: usePullRequestsQuery, keyPath: ['pullRequests'] },
+    { open: true }
   )
 
   if (error) {

@@ -95,8 +95,6 @@ enum MenuItemKey {
   Delete = 'delete',
 }
 
-const QUERY_PAGE_SIZE = 100
-
 const pollInterval = 5 * 1000
 
 const getDirectory = (type: Nullable<StackType>) => [
@@ -147,7 +145,6 @@ export default function Stacks() {
     useFetchPaginatedData(
       {
         queryHook: useStacksQuery,
-        pageSize: QUERY_PAGE_SIZE,
         keyPath: ['infrastructureStacks'],
       },
       {

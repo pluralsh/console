@@ -64,8 +64,6 @@ export const CD_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'clusters', url: `${CD_REL_PATH}/${CLUSTERS_REL_PATH}` },
 ]
 
-export const CLUSTERS_QUERY_PAGE_SIZE = 100
-
 type TableWrapperSCProps = {
   $blurred: boolean
 }
@@ -131,7 +129,6 @@ export default function Clusters() {
   } = useFetchPaginatedData(
     {
       queryHook: useClustersQuery,
-      pageSize: CLUSTERS_QUERY_PAGE_SIZE,
       keyPath: ['clusters'],
     },
     {

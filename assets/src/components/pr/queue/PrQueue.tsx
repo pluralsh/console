@@ -27,7 +27,6 @@ export const PRS_REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const PR_QUERY_PAGE_SIZE = 100
 const PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
 
 type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
@@ -60,14 +59,8 @@ export default function OutstandingPrs() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: usePullRequestsQuery,
-      pageSize: PR_QUERY_PAGE_SIZE,
-      keyPath: ['pullRequests'],
-    },
-    {
-      q: debouncedSearchString,
-    }
+    { queryHook: usePullRequestsQuery, keyPath: ['pullRequests'] },
+    { q: debouncedSearchString }
   )
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {

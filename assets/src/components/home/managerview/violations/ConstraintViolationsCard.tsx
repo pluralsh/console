@@ -11,8 +11,6 @@ import { useTheme } from 'styled-components'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
-import { POLICIES_QUERY_PAGE_SIZE } from 'components/policies/Policies'
-
 import { PoliciesTable } from 'components/policies/PoliciesTable'
 
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
@@ -32,7 +30,6 @@ export function ConstraintViolationsCard() {
     setVirtualSlice,
   } = useFetchPaginatedData({
     queryHook: usePolicyConstraintsQuery,
-    pageSize: POLICIES_QUERY_PAGE_SIZE,
     keyPath: ['policyConstraints'],
   })
 

@@ -12,10 +12,7 @@ import {
   ColStatus,
   ColTitle,
 } from '../../pr/queue/PrQueueColumns'
-import {
-  PRS_REACT_VIRTUAL_OPTIONS,
-  PR_QUERY_PAGE_SIZE,
-} from '../../pr/queue/PrQueue'
+import { PRS_REACT_VIRTUAL_OPTIONS } from '../../pr/queue/PrQueue'
 import { GqlError } from '../../utils/Alert'
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 import { usePullRequestsQuery } from '../../../generated/graphql'
@@ -50,7 +47,6 @@ export default function ClusterPRs() {
   } = useFetchPaginatedData(
     {
       queryHook: usePullRequestsQuery,
-      pageSize: PR_QUERY_PAGE_SIZE,
       keyPath: ['pullRequests'],
     },
     {

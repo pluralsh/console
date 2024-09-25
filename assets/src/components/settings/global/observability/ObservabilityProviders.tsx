@@ -19,7 +19,6 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
 >['reactVirtualOptions'] = {
   overscan: 10,
 }
-const OBSERVABILITY_PROVIDER_QUERY_PAGE_SIZE = 100
 
 const OBSERVABILITY_PROVIDERS_TABLE_HEIGHT = '224px'
 
@@ -34,7 +33,6 @@ export default function ObservabilityProviders() {
     setVirtualSlice,
   } = useFetchPaginatedData({
     queryHook: useObservabilityProvidersQuery,
-    pageSize: OBSERVABILITY_PROVIDER_QUERY_PAGE_SIZE,
     keyPath: ['observabilityProviders'],
   })
 

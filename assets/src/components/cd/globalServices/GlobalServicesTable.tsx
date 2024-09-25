@@ -17,11 +17,7 @@ import { useProjectId } from 'components/contexts/ProjectsContext'
 
 import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
 
-import {
-  GLOBAL_SERVICES_QUERY_PAGE_SIZE,
-  GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS,
-  columns,
-} from './GlobalService'
+import { GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS, columns } from './GlobalService'
 
 function GlobalServicesTableComponent({
   setRefetch,
@@ -43,7 +39,6 @@ function GlobalServicesTableComponent({
   } = useFetchPaginatedData(
     {
       queryHook: useGlobalServicesQuery,
-      pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
       keyPath: ['globalServices'],
     },
     { projectId }

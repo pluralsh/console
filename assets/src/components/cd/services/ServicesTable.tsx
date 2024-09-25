@@ -22,7 +22,6 @@ import { useProjectId } from '../../contexts/ProjectsContext'
 
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
 import {
-  SERVICES_QUERY_PAGE_SIZE,
   SERVICES_REACT_VIRTUAL_OPTIONS,
   ServicesContextT,
   columns,
@@ -53,7 +52,6 @@ export default function ServicesTable() {
   } = useFetchPaginatedData(
     {
       queryHook: useServiceDeploymentsQuery,
-      pageSize: SERVICES_QUERY_PAGE_SIZE,
       keyPath: ['serviceDeployments'],
     },
     {

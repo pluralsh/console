@@ -29,8 +29,6 @@ import { useProjectId } from '../../contexts/ProjectsContext'
 
 import { columns } from './PipelinesColumns'
 
-export const QUERY_PAGE_SIZE = 100
-
 export const PIPELINES_CRUMBS = [
   ...CD_BASE_CRUMBS,
   { label: 'pipelines', url: PIPELINES_ABS_PATH },
@@ -47,7 +45,6 @@ export default function PipelineList() {
     useFetchPaginatedData(
       {
         queryHook: usePipelinesQuery,
-        pageSize: QUERY_PAGE_SIZE,
         keyPath: ['pipelines'],
       },
       {

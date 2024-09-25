@@ -16,7 +16,6 @@ import { Permissions, hasRbac } from '../misc'
 
 import GroupCreate from './GroupCreate'
 import { groupsColsEditable, groupsColsView } from './GroupsColumns'
-import { GROUPS_QUERY_PAGE_SIZE } from './Groups'
 
 export function GroupsList({ q }: any) {
   const { me } = useContext(LoginContext)
@@ -27,7 +26,6 @@ export function GroupsList({ q }: any) {
       {
         queryHook: useGroupsQuery,
         keyPath: ['groups'],
-        pageSize: GROUPS_QUERY_PAGE_SIZE,
       },
       { q }
     )

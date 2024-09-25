@@ -1,10 +1,7 @@
 import { H1 } from 'honorable'
 
 import { useTheme } from 'styled-components'
-import {
-  CLUSTERS_QUERY_PAGE_SIZE,
-  CLUSTERS_REACT_VIRTUAL_OPTIONS,
-} from 'components/cd/clusters/Clusters'
+import { CLUSTERS_REACT_VIRTUAL_OPTIONS } from 'components/cd/clusters/Clusters'
 import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
 import { GqlError } from 'components/utils/Alert'
 import { useClustersQuery, useUpgradeStatisticsQuery } from 'generated/graphql'
@@ -32,7 +29,6 @@ export function ClusterOverviewCard() {
   } = useFetchPaginatedData(
     {
       queryHook: useClustersQuery,
-      pageSize: CLUSTERS_QUERY_PAGE_SIZE,
       keyPath: ['clusters'],
     },
     {

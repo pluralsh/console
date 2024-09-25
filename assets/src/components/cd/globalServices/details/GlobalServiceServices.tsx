@@ -21,8 +21,6 @@ import { useSetPageScrollable } from '../../ContinuousDeployment'
 
 import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
 
-const GLOBAL_SERVICES_QUERY_PAGE_SIZE = 100
-
 const GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
@@ -57,7 +55,6 @@ export function GlobalServiceServices() {
   } = useFetchPaginatedData(
     {
       queryHook: useGetGlobalServiceServicesQuery,
-      pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
       keyPath: ['globalService', 'services'],
     },
     { serviceId: globalServiceId }

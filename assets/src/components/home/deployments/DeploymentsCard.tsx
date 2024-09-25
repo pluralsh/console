@@ -4,10 +4,7 @@ import {
   ServiceDeploymentStatus,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
-import {
-  SERVICES_QUERY_PAGE_SIZE,
-  SERVICES_REACT_VIRTUAL_OPTIONS,
-} from 'components/cd/services/Services'
+import { SERVICES_REACT_VIRTUAL_OPTIONS } from 'components/cd/services/Services'
 import { GqlError } from 'components/utils/Alert'
 import pluralize from 'pluralize'
 
@@ -31,7 +28,6 @@ export function DeploymentsCard() {
   } = useFetchPaginatedData(
     {
       queryHook: useServiceDeploymentsQuery,
-      pageSize: SERVICES_QUERY_PAGE_SIZE,
       keyPath: ['serviceDeployments'],
     },
     {

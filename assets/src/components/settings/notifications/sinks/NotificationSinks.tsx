@@ -31,7 +31,6 @@ const REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-const QUERY_PAGE_SIZE = 100
 const crumbs = [
   ...NOTIFICATIONS_BASE_CRUMBS,
   {
@@ -55,7 +54,6 @@ export default function NotificationSinks() {
     setVirtualSlice,
   } = useFetchPaginatedData({
     queryHook: useNotificationSinksQuery,
-    pageSize: QUERY_PAGE_SIZE,
     keyPath: ['notificationSinks'],
   })
 

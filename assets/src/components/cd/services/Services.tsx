@@ -67,8 +67,6 @@ export const SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
   overscan: 10,
 }
 
-export const SERVICES_QUERY_PAGE_SIZE = 100
-
 export function getServiceStatuses(
   serviceStatuses?: Maybe<Maybe<ServiceStatusCountFragment>[]>
 ): Record<StatusTabKey, number | undefined> {

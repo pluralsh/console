@@ -26,8 +26,6 @@ import { GqlError } from '../../utils/Alert'
 import CreateObjectStore from './CreateObjectStore'
 import { ColActions, ColName, ColProvider } from './ObjectStoreColumns'
 
-const QUERY_PAGE_SIZE = 100
-
 const REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
 >['reactVirtualOptions'] = {
@@ -57,7 +55,6 @@ export default function ObjectStores() {
     setVirtualSlice,
   } = useFetchPaginatedData({
     queryHook: useObjectStoresQuery,
-    pageSize: QUERY_PAGE_SIZE,
     keyPath: ['objectStores'],
   })
 
