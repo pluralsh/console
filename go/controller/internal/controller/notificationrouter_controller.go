@@ -126,7 +126,7 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 		attr, err := r.genNotificationRouterAttr(ctx, notificationRouter)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+				utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
 				return RequeueAfter(requeueWaitForResources), nil
 			}
 			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

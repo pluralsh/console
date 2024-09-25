@@ -98,7 +98,7 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	apiRestore, err := r.sync(ctx, restore)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+			utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
 			return RequeueAfter(requeueWaitForResources), nil
 		}
 		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())

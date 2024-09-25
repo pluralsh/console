@@ -109,7 +109,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		attr, err := r.genCustomStackRunAttr(ctx, stack)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
 				return RequeueAfter(requeueWaitForResources), nil
 			}
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
@@ -130,7 +130,7 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		attr, err := r.genCustomStackRunAttr(ctx, stack)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
 				return RequeueAfter(requeueWaitForResources), nil
 			}
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())

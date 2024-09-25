@@ -89,7 +89,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	apiPrAutomation, err := in.sync(ctx, prAutomation, changed)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			utils.MarkCondition(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+			utils.MarkCondition(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
 			return requeue, nil
 		}
 		logger.Error(err, "unable to create or update prAutomation")
