@@ -22,7 +22,9 @@ const ColumnDelete = (refetch) =>
   })
 
 function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
-  const context = (props: CellContext<VPNClientRow, unknown>): JSX.Element => {
+  return function context(
+    props: CellContext<VPNClientRow, unknown>
+  ): JSX.Element {
     const { isReady, name } = props.row.original
 
     return (
@@ -33,8 +35,6 @@ function cell(refetch): ColumnDefTemplate<CellContext<VPNClientRow, unknown>> {
       />
     )
   }
-
-  return context
 }
 
 interface DeleteActionsProps {

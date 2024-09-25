@@ -5,7 +5,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { ComponentProps, useMemo } from 'react'
+import { useMemo } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
 

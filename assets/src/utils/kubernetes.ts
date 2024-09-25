@@ -16,7 +16,7 @@ export function isEqual({ metadata: first }, { metadata: second }) {
 }
 
 export function cpuParser(input?: string | null) {
-  if (!input || typeof input !== 'string') {
+  if (!input) {
     return undefined
   }
   const milliMatch = input.match(/^([0-9]+)([a-z])$/)

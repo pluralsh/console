@@ -7,8 +7,6 @@ import { ComponentStatusChip } from '../apps/app/components/misc'
 
 import { InfoSection } from './info/common'
 
-export const componentsWithLogs: string[] = ['deployment', 'statefulset']
-
 export default function MetadataOutlet() {
   const { component, data } = useOutletContext<any>()
 

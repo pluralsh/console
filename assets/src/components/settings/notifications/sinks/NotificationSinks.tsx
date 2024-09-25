@@ -1,4 +1,4 @@
-import { ComponentProps, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Button,
   LoopingLogo,

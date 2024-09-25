@@ -1,4 +1,4 @@
-import { ComponentProps, useState } from 'react'
+import { useState } from 'react'
 import {
   IconFrame,
   LoopingLogo,

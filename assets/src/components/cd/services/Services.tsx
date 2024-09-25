@@ -1,17 +1,9 @@
-import {
-  ComponentProps,
-  Dispatch,
-  SetStateAction,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { Dispatch, SetStateAction, useMemo, useRef, useState } from 'react'
 import {
   ListIcon,
   NetworkInterfaceIcon,
   SubTab,
   TabList,
-  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'

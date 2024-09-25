@@ -45,7 +45,7 @@ export default function TypeaheadEditor({
             break
           case 'Tab':
           case 'Enter':
-            if (target === null || suggestions.length === 0) break
+            if (suggestions.length === 0) break
             event.preventDefault()
             Transforms.select(editor, target)
             insertMention(editor, suggestions[index].value)

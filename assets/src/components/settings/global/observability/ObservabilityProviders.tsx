@@ -3,7 +3,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 
 import { useObservabilityProvidersQuery } from 'generated/graphql'
 
-import { ComponentProps, useState } from 'react'
+import { useState } from 'react'
 
 import { GqlError } from 'components/utils/Alert'
 

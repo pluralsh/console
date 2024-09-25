@@ -1,4 +1,4 @@
-import { ComponentProps, useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   Button,

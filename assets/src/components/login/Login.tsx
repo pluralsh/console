@@ -19,11 +19,13 @@ import {
 import { localized } from '../../helpers/hostname'
 import { LoginContextProvider } from '../contexts'
 import { ME_Q, SIGNIN } from '../graphql/users'
-import { LoginPortal } from '../login/LoginPortal'
+
 import { GqlError } from '../utils/Alert'
 import { LabelledInput } from '../utils/LabelledInput'
 import LoadingIndicator from '../utils/LoadingIndicator'
 import ShowAfterDelay from '../utils/ShowAfterDelay'
+
+import { LoginPortal } from './LoginPortal'
 
 // 30 seconds
 const POLL_INTERVAL = 30 * 1000

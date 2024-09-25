@@ -110,7 +110,7 @@ export function RestoreDatabaseModal({
     }
   }
 
-  const modal = (
+  return (
     <Modal
       header={`Restore ${name} database from point in time`}
       open={isOpen}
@@ -188,6 +188,4 @@ export function RestoreDatabaseModal({
       </Flex>
     </Modal>
   )
-
-  return modal
 }

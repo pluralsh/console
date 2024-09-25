@@ -99,9 +99,8 @@ export const CD_BASE_CRUMBS = [
 
 function useCurrentTab() {
   const pathMatch = useMatch(`${CD_ABS_PATH}/:tab/*`)
-  const tab = pathMatch?.params?.tab || ''
 
-  return tab
+  return pathMatch?.params?.tab || ''
 }
 
 export function useDefaultCDPath() {

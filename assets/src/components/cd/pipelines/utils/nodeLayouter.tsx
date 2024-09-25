@@ -14,13 +14,11 @@ function measureNode(node: FlowNode, zoom) {
 
   const rect = domNode?.getBoundingClientRect()
 
-  const ret = {
+  return {
     ...node,
     width: (rect?.width || 200) / zoom,
     height: (rect?.height || 200) / zoom,
   }
-
-  return ret
 }
 export type DagreDirection = 'LR' | 'RL' | 'TB' | 'BT'
 export const getLayoutedElements = (
@@ -41,7 +39,7 @@ export const getLayoutedElements = (
     align: 'UL',
     marginx: margin,
     marginy: margin,
-    nodesep: gridGap * 1,
+    nodesep: gridGap,
     ranksep: gridGap * 4,
   })
 

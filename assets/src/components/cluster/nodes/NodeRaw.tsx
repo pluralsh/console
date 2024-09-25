@@ -10,11 +10,7 @@ import { RawPageCode } from '../RawPageCode'
 
 export default function NodeEvents() {
   const { name } = useParams()
-  const { data, refetch: _refetch } = useQuery<{
-    node: {
-      raw: string
-    }
-  }>(NODE_RAW_Q, {
+  const { data } = useQuery<{ node: { raw: string } }>(NODE_RAW_Q, {
     variables: { name },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',

@@ -209,9 +209,7 @@ export default function RunbookAlert({ alert }: { alert: RunbookAlertStatus }) {
                 </ChipList>
               </ExpandedItem>
             )}
-            {true && (
-              <ExpandedItem heading="fingerprint">{fingerprint}</ExpandedItem>
-            )}
+            <ExpandedItem heading="fingerprint">{fingerprint}</ExpandedItem>
           </div>
         </AccordionItem>
       </Accordion>

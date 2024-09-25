@@ -11,7 +11,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 import { useOutletContext } from 'react-router-dom'
-import { ComponentProps, useMemo } from 'react'
+import { useMemo } from 'react'
 
 import { columns } from 'components/cd/services/Services'
 

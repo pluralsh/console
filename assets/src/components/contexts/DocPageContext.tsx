@@ -29,7 +29,6 @@ const reducer: ImmerReducer<
       draft.selectedHash = action.payload
 
       return draft
-      break
     case 'setHash':
       draft.selectedHash = action.payload
 
