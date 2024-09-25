@@ -344,8 +344,8 @@ query ClusterBasic($id: ID!) {
   }
 }
 
-query ClusterPods($clusterId: ID, $namespace: String) {
-  pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
+query ClusterPods($clusterId: ID, $namespace: String, $first: Int, $after: String, $before: String, $last: Int) {
+  pods(first: $first, after: $after, before: $before, last: $last, clusterId: $clusterId, namespace: $namespace) {
     pageInfo {
       ...PageInfo
     }

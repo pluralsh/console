@@ -8810,6 +8810,10 @@ export type ClusterBasicQuery = { __typename?: 'RootQueryType', cluster?: { __ty
 export type ClusterPodsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   namespace?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -14539,8 +14543,15 @@ export type ClusterBasicLazyQueryHookResult = ReturnType<typeof useClusterBasicL
 export type ClusterBasicSuspenseQueryHookResult = ReturnType<typeof useClusterBasicSuspenseQuery>;
 export type ClusterBasicQueryResult = Apollo.QueryResult<ClusterBasicQuery, ClusterBasicQueryVariables>;
 export const ClusterPodsDocument = gql`
-    query ClusterPods($clusterId: ID, $namespace: String) {
-  pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
+    query ClusterPods($clusterId: ID, $namespace: String, $first: Int, $after: String, $before: String, $last: Int) {
+  pods(
+    first: $first
+    after: $after
+    before: $before
+    last: $last
+    clusterId: $clusterId
+    namespace: $namespace
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -14568,6 +14579,10 @@ ${PodFragmentDoc}`;
  *   variables: {
  *      clusterId: // value for 'clusterId'
  *      namespace: // value for 'namespace'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
  *   },
  * });
  */
