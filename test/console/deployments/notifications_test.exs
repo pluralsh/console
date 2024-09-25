@@ -1,6 +1,7 @@
 defmodule Console.Deployments.NotificationsTest do
   use Console.DataCase, async: true
   use Mimic
+  alias Console.PubSub
   alias Console.Deployments.Notifications
 
   describe "#upsert_sink/2" do
@@ -144,6 +145,35 @@ defmodule Console.Deployments.NotificationsTest do
 
       assert Enum.find(res, & &1.user_id == user.id)
       assert Enum.find(res, & &1.user_id == user2.id)
+      assert Enum.all?(res, & &1.priority == :low)
+
+      for e <- res,
+        do: assert_receive {:event, %PubSub.AppNotificationCreated{item: ^e}}
+    end
+
+    test "if a plural notification sink is configured as urgent, it will mark notifications as urgent" do
+      user = insert(:user)
+      %{group: group} = insert(:group_member)
+      service = insert(:service)
+      sink = insert(:notification_sink,
+        type: :plural,
+        configuration: %{plural: %{urgent: true}},
+        notification_bindings: [
+          %{user_id: user.id},
+          %{group_id: group.id}
+        ]
+      )
+
+      {:ok, res} = Notifications.deliver(
+        "service.update",
+        %{service: service, source: %{url: service.repository.url, ref: "main"}},
+        sink
+      )
+
+      assert Enum.all?(res, & &1.urgent)
+
+      for e <- res,
+        do: assert_receive {:event, %PubSub.AppNotificationCreated{item: ^e}}
     end
   end
 

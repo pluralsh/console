@@ -27,6 +27,7 @@ defmodule Console.GraphQl.Deployments.Notification do
 
   input_object :plural_sink_attributes do
     field :priority, non_null(:notification_priority)
+    field :urgent,   :boolean, description: "whether to immediately deliver the derived notification via SMTP"
   end
 
   input_object :notification_router_attributes do
@@ -104,9 +105,15 @@ defmodule Console.GraphQl.Deployments.Notification do
   end
 
   object :sink_configuration do
-    field :id,    non_null(:id)
-    field :slack, :url_sink_configuration
-    field :teams, :url_sink_configuration
+    field :id,     non_null(:id)
+    field :slack,  :url_sink_configuration
+    field :teams,  :url_sink_configuration
+    field :plural, :plural_sink_configuration
+  end
+
+  object :plural_sink_configuration do
+    field :priority, non_null(:notification_priority)
+    field :urgent,   :boolean, description: "whether to immediately deliver the derived notification via SMTP"
   end
 
   @desc "A notification sink based off slack incoming webhook urls"

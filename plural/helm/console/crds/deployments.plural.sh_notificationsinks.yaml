@@ -60,6 +60,22 @@ spec:
               configuration:
                 description: Configuration for the specific type
                 properties:
+                  plural:
+                    description: Plural sink configuration knobs
+                    properties:
+                      priority:
+                        description: The priority to label any delivered notification
+                          as
+                        enum:
+                        - LOW
+                        - MEDIUM
+                        - HIGH
+                        type: string
+                      urgent:
+                        description: Whether to immediately deliver the notification
+                          via SMTP
+                        type: boolean
+                    type: object
                   slack:
                     description: Slack url
                     properties:

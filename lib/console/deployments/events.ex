@@ -67,3 +67,5 @@ defmodule Console.PubSub.StackRunCompleted, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.RunLogsCreated, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.SharedSecretCreated, do: use Piazza.PubSub.Event
+
+defmodule Console.PubSub.AppNotificationCreated, do: use Piazza.PubSub.Event
