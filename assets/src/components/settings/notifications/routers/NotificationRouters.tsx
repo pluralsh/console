@@ -1,4 +1,4 @@
-import { ComponentProps, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   Button,
   LoopingLogo,
@@ -20,16 +20,13 @@ import {
   NOTIFICATIONS_ROUTERS_ABS_PATH,
 } from 'routes/settingsRoutesConst'
 
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { columns } from './NotificationRoutersColumns'
 import { CreateNotificationRouterModal } from './CreateNotificationRouterModal'
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const crumbs = [
   ...NOTIFICATIONS_BASE_CRUMBS,
@@ -99,7 +96,7 @@ export default function NotificationRouters() {
         <Table
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={data?.notificationRouters?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

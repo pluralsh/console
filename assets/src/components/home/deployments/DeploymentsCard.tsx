@@ -1,10 +1,12 @@
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import {
   ServiceDeploymentStatus,
   useServiceDeploymentsQuery,
 } from 'generated/graphql'
-import { SERVICES_REACT_VIRTUAL_OPTIONS } from 'components/cd/services/Services'
 import { GqlError } from 'components/utils/Alert'
 import pluralize from 'pluralize'
 
@@ -30,10 +32,7 @@ export function DeploymentsCard() {
       queryHook: useServiceDeploymentsQuery,
       keyPath: ['serviceDeployments'],
     },
-    {
-      status: ServiceDeploymentStatus.Failed,
-      projectId,
-    }
+    { status: ServiceDeploymentStatus.Failed, projectId }
   )
 
   if (error) {
@@ -56,7 +55,7 @@ export function DeploymentsCard() {
         hasNextPage={pageInfo?.hasNextPage}
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
-        reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         onVirtualSliceChange={setVirtualSlice}
         css={{ maxHeight: HOME_CARD_MAX_HEIGHT }}
       />

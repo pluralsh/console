@@ -1,4 +1,3 @@
-import { ComponentProps } from 'react'
 import { LoopingLogo, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
@@ -10,16 +9,13 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { columns } from './ScmWebhooksColumns'
 import { CreateScmWebhook } from './CreateScmWebhook'
-
-export const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 export const PR_QUERY_PAGE_SIZE = 100
 
@@ -85,7 +81,7 @@ export default function ScmWebhooks() {
         <Table
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={data?.scmWebhooks?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

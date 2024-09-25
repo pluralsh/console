@@ -61,12 +61,6 @@ export const columns = [
   ColActions,
 ]
 
-export const SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
-
 export function getServiceStatuses(
   serviceStatuses?: Maybe<Maybe<ServiceStatusCountFragment>[]>
 ): Record<StatusTabKey, number | undefined> {

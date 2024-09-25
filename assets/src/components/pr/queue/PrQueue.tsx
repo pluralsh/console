@@ -17,15 +17,12 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { prColumns } from './PrQueueColumns'
-
-export const PRS_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
 
@@ -96,7 +93,7 @@ export default function OutstandingPrs() {
       <FullHeightTableWrap>
         <Table
           columns={prColumns}
-          reactVirtualOptions={PRS_REACT_VIRTUAL_OPTIONS}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={data?.pullRequests?.edges || []}
           virtualizeRows
           reactTableOptions={reactTableOptions}

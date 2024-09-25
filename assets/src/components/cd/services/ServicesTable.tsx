@@ -16,17 +16,15 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useOutletContext } from 'react-router-dom'
 
-import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
 import { ServicesFilters, StatusTabKey } from './ServicesFilters'
-import {
-  SERVICES_REACT_VIRTUAL_OPTIONS,
-  ServicesContextT,
-  columns,
-  getServiceStatuses,
-} from './Services'
+import { ServicesContextT, columns, getServiceStatuses } from './Services'
 
 export default function ServicesTable() {
   const theme = useTheme()
@@ -136,7 +134,7 @@ export default function ServicesTable() {
               fetchNextPage={fetchNextPage}
               isFetchingNextPage={loading}
               reactTableOptions={reactTableOptions}
-              reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
               onVirtualSliceChange={setVirtualSlice}
             />
           </FullHeightTableWrap>

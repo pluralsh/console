@@ -18,17 +18,14 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { columns } from './PrAutomationsColumns'
 
 const DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const crumbs = [
   ...PR_BASE_CRUMBS,
@@ -94,7 +91,7 @@ export default function AutomationPr() {
         <Table
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={data?.prAutomations?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

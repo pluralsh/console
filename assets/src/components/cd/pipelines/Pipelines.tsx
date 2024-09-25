@@ -12,8 +12,6 @@ import { useNavigate } from 'react-router-dom'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
-import { PRS_REACT_VIRTUAL_OPTIONS } from 'components/pr/queue/PrQueue'
-
 import { GqlError } from 'components/utils/Alert'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { PipelineFragment, usePipelinesQuery } from 'generated/graphql'
@@ -23,7 +21,10 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
-import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -84,7 +85,7 @@ export default function PipelineList() {
       <FullHeightTableWrap>
         <Table
           columns={columns}
-          reactVirtualOptions={PRS_REACT_VIRTUAL_OPTIONS}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={data?.pipelines?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

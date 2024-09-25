@@ -9,7 +9,10 @@ import { ComponentProps, useMemo } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
 
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import {
   useClusterBackupsQuery,
@@ -31,12 +34,6 @@ import {
   ColCluster,
   ColStatus,
 } from './BackupsColumns'
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const columns = [ColCluster, ColBackupId, ColBackupDate, ColStatus, ColActions]
 
@@ -109,7 +106,7 @@ export default function Backups() {
             loose
             columns={columns}
             reactTableOptions={{ meta: { refetch, cluster } }}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={data?.clusterBackups?.edges || []}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}

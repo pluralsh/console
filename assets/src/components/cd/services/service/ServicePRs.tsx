@@ -28,10 +28,12 @@ import {
   ColStatus,
   ColTitle,
 } from '../../../pr/queue/PrQueueColumns'
-import { PRS_REACT_VIRTUAL_OPTIONS } from '../../../pr/queue/PrQueue'
 import { GqlError } from '../../../utils/Alert'
 import { useThrottle } from '../../../hooks/useThrottle'
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../../utils/table/useFetchPaginatedData'
 
 import {
   getServiceDetailsBreadcrumbs,
@@ -136,7 +138,7 @@ export default function ServicePRs() {
           <FullHeightTableWrap>
             <Table
               columns={columns}
-              reactVirtualOptions={PRS_REACT_VIRTUAL_OPTIONS}
+              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
               data={data?.pullRequests?.edges || []}
               virtualizeRows
               reactTableOptions={reactTableOptions}

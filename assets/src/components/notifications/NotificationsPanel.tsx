@@ -19,16 +19,13 @@ import {
   useAppNotificationsQuery,
   useReadAppNotificationsMutation,
 } from '../../generated/graphql'
-import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../utils/table/useFetchPaginatedData'
 import { mapExistingNodes } from '../../utils/graphql'
 
 import Notification from './Notification'
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const columnHelper = createColumnHelper<AppNotificationFragment>()
 
@@ -130,7 +127,7 @@ export function NotificationsPanel({
           <Table
             columns={columns}
             data={notifications}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}

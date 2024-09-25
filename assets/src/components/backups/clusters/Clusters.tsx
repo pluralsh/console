@@ -10,7 +10,10 @@ import { ComponentProps, useMemo } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import { useNavigate } from 'react-router-dom'
 
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import {
   BACKUPS_ABS_PATH,
@@ -24,12 +27,6 @@ import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 
 import ConfigureClusterBackups from './ConfigureClusterBackups'
 import { ColActions, ColCluster, ColName, ColProvider } from './ClusterColumns'
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 export const BACKUPS_CLUSTERS_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
@@ -90,7 +87,7 @@ export default function Clusters() {
             loose
             columns={columns}
             reactTableOptions={{ meta: { refetch } }}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={clusters?.edges || []}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}

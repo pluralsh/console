@@ -8,7 +8,7 @@ import {
 } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { ComponentProps, useState } from 'react'
+import { useState } from 'react'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
@@ -16,11 +16,7 @@ import { PipelinePullRequestsModal } from './PipelinePullRequests'
 
 type RowData = Edge<PipelineContextFragment>
 export const columnHelper = createColumnHelper<RowData>()
-export const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
+
 const ColId = columnHelper.accessor((row) => row.node?.id, {
   id: 'id',
   header: 'Context ID',

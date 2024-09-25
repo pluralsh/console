@@ -15,17 +15,14 @@ import { ComponentProps, useMemo } from 'react'
 
 import { columns } from 'components/cd/services/Services'
 
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../../utils/table/useFetchPaginatedData'
 
 import { useSetPageScrollable } from '../../ContinuousDeployment'
 
 import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
-
-const GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 export function GlobalServiceServices() {
   const navigate = useNavigate()
@@ -92,7 +89,7 @@ export function GlobalServiceServices() {
           )
         }
         reactTableOptions={{ meta: { refetch } }}
-        reactVirtualOptions={GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         emptyStateProps={{ message: 'No services found.' }}
       />
     </FullHeightTableWrap>

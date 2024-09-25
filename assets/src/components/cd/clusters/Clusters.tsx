@@ -50,7 +50,10 @@ import {
 
 import { TagsFilter } from '../services/ClusterTagsFilter'
 
-import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
@@ -237,7 +240,7 @@ export default function Clusters() {
                 hasNextPage={pageInfo?.hasNextPage}
                 fetchNextPage={fetchNextPage}
                 isFetchingNextPage={loading}
-                reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
+                reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
                 onVirtualSliceChange={setVirtualSlice}
               />
             </FullHeightTableWrap>
@@ -249,11 +252,6 @@ export default function Clusters() {
       {showGettingStarted && <ClustersGettingStarted />}
     </>
   )
-}
-export const CLUSTERS_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
 }
 
 export function ClustersTable({
@@ -272,7 +270,7 @@ export function ClustersTable({
   return (
     <Table
       loose
-      reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={data || []}
       columns={cdClustersColumns}
       reactTableOptions={reactTableOptions}

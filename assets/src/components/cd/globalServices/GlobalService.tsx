@@ -1,9 +1,7 @@
-import { ComponentProps, useMemo, useState } from 'react'
-import { Button, Chip, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useMemo, useState } from 'react'
+import { Button, useSetBreadcrumbs } from '@pluralsh/design-system'
 
-import { AuthMethod } from 'generated/graphql'
 import { CD_REL_PATH, GLOBAL_SERVICES_REL_PATH } from 'routes/cdRoutesConsts'
-import { createMapperWithFallback } from 'utils/mapping'
 
 import { useTheme } from 'styled-components'
 
@@ -23,30 +21,6 @@ import {
   ColTags,
 } from './GlobalServicesColumns'
 import { GlobalServicesTable } from './GlobalServicesTable'
-
-const authMethodToLabel = createMapperWithFallback<AuthMethod, string>(
-  {
-    SSH: 'SSH',
-    BASIC: 'Basic',
-  },
-  'Unknown'
-)
-
-export function AuthMethodChip({
-  authMethod,
-}: {
-  authMethod: AuthMethod | null | undefined
-}) {
-  return <Chip severity="neutral">{authMethodToLabel(authMethod)}</Chip>
-}
-
-export const GLOBAL_SERVICES_QUERY_PAGE_SIZE = 100
-
-export const GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 export const columns = [
   ColServiceName,

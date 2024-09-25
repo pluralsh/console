@@ -15,17 +15,14 @@ import { ComponentProps, useMemo } from 'react'
 
 import { columns } from 'components/cd/services/Services'
 
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../../utils/table/useFetchPaginatedData'
 
 import { useSetPageScrollable } from '../../ContinuousDeployment'
 
 import { ManagedNamespaceContextT, getBreadcrumbs } from './ManagedNamespace'
-
-const MANAGED_NAMESPACES_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 export function ManagedNamespaceServices() {
   const navigate = useNavigate()
@@ -89,7 +86,7 @@ export function ManagedNamespaceServices() {
           )
         }
         reactTableOptions={{ meta: { refetch } }}
-        reactVirtualOptions={MANAGED_NAMESPACES_REACT_VIRTUAL_OPTIONS}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         emptyStateProps={{ message: 'No services found.' }}
       />
     </FullHeightTableWrap>

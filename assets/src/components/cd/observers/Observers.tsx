@@ -24,7 +24,10 @@ import { Div } from 'honorable'
 import styled, { useTheme } from 'styled-components'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
-import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../utils/table/useFetchPaginatedData'
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import {
@@ -42,10 +45,6 @@ export const breadcrumbs = [
   ...CD_BASE_CRUMBS,
   { label: 'observers', url: OBSERVERS_ABS_PATH },
 ]
-
-const virtualOptions: ComponentProps<typeof Table>['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const PropsContainer = styled.div(({ theme }) => ({
   display: 'flex',
@@ -289,7 +288,7 @@ export default function Observers() {
     <FullHeightTableWrap>
       <Table
         columns={columns}
-        reactVirtualOptions={virtualOptions}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         data={data?.observers?.edges || []}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}

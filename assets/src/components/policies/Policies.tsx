@@ -1,9 +1,9 @@
-import { Breadcrumb, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { usePolicyConstraintsQuery } from 'generated/graphql'
-import { ComponentProps, useState } from 'react'
+import { useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
 import styled from 'styled-components'
 
@@ -20,12 +20,6 @@ const breadcrumbs: Breadcrumb[] = [
 ]
 
 export const POLL_INTERVAL = 10_000
-
-export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 export function Policies() {
   useSetBreadcrumbs(breadcrumbs)

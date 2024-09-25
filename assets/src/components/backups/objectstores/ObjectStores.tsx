@@ -11,7 +11,10 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useTheme } from 'styled-components'
 
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import {
@@ -25,12 +28,6 @@ import { GqlError } from '../../utils/Alert'
 
 import CreateObjectStore from './CreateObjectStore'
 import { ColActions, ColName, ColProvider } from './ObjectStoreColumns'
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const BACKUPS_OBJECT_STORES_BASE_CRUMBS: Breadcrumb[] = [
   { label: 'backups', url: BACKUPS_ABS_PATH },
@@ -90,7 +87,7 @@ export default function ObjectStores() {
             loose
             columns={columns}
             reactTableOptions={{ meta: { refetch } }}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={objectStores?.edges || []}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}

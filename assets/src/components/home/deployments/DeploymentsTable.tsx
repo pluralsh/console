@@ -4,7 +4,6 @@ import { ComponentProps } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Edge } from 'utils/graphql'
 import { Row } from '@tanstack/react-table'
-import { SERVICES_REACT_VIRTUAL_OPTIONS } from 'components/cd/services/Services'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
 import {
@@ -16,6 +15,8 @@ import {
   ColStatus,
 } from 'components/cd/services/ServicesColumns'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
+
+import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
 export function DeploymentsTable({
   refetch,
@@ -39,7 +40,7 @@ export function DeploymentsTable({
       loose
       data={data}
       columns={deploymentsColumns}
-      reactVirtualOptions={SERVICES_REACT_VIRTUAL_OPTIONS}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       reactTableOptions={reactTableOptions}
       onRowClick={(
         _e,

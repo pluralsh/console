@@ -4,7 +4,10 @@ import { useGroupsQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useContext, useMemo } from 'react'
 
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -54,7 +57,7 @@ export function GroupsList({ q }: any) {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        reactVirtualOptions={{ overscan: 10 }}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         reactTableOptions={reactTableOptions}
         css={{
           height: '100%',
