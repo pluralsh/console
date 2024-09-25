@@ -3,6 +3,9 @@ package controller
 import (
 	"context"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -90,6 +93,10 @@ func (r *GitRepositoryReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 
 	attrs, err := r.getRepositoryAttributes(ctx, repo)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+			return RequeueAfter(requeueWaitForResources), nil
+		}
 		utils.MarkCondition(repo.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return requeue, err
 	}
@@ -170,6 +177,9 @@ func (r *GitRepositoryReconciler) getRepositoryAttributes(ctx context.Context, r
 		connection := &v1alpha1.ScmConnection{}
 		if err := r.Get(ctx, types.NamespacedName{Name: repo.Spec.ConnectionRef.Name, Namespace: repo.Spec.ConnectionRef.Namespace}, connection); err != nil {
 			return nil, err
+		}
+		if connection.Status.ID == nil {
+			return nil, apierrors.NewNotFound(schema.GroupResource{}, repo.Spec.ConnectionRef.Name)
 		}
 
 		if err := utils.TryAddOwnerRef(ctx, r.Client, repo, connection, r.Scheme); err != nil {

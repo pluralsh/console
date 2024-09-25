@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/pluralsh/polly/containers"
 	"github.com/samber/lo"
 	corev1 "k8s.io/api/core/v1"
@@ -123,6 +125,10 @@ func (r *NotificationRouterReconciler) Reconcile(ctx context.Context, req ctrl.R
 		logger.Info("upsert notification router", "name", notificationRouter.NotificationName())
 		attr, err := r.genNotificationRouterAttr(ctx, notificationRouter)
 		if err != nil {
+			if errors.IsNotFound(err) {
+				utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+				return RequeueAfter(requeueWaitForResources), nil
+			}
 			utils.MarkCondition(notificationRouter.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
@@ -186,7 +192,7 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 		}
 
 		if notifSink.Status.ID == nil {
-			return nil, fmt.Errorf("sink %s has not been reconciled", sink.Name)
+			return nil, errors.NewNotFound(schema.GroupResource{}, sink.Name)
 		}
 
 		attr.RouterSinks = append(attr.RouterSinks, &console.RouterSinkAttributes{SinkID: *notifSink.Status.ID})
@@ -204,7 +210,7 @@ func (r *NotificationRouterReconciler) getClusterID(ctx context.Context, obj *co
 		return nil, err
 	}
 	if !cluster.Status.HasID() {
-		return nil, fmt.Errorf("cluster is not ready yet")
+		return nil, errors.NewNotFound(schema.GroupResource{}, obj.Name)
 	}
 	return cluster.Status.ID, nil
 }
@@ -218,7 +224,7 @@ func (r *NotificationRouterReconciler) getServiceID(ctx context.Context, objRef 
 		return nil, err
 	}
 	if !resource.Status.HasID() {
-		return nil, fmt.Errorf("cluster is not ready yet")
+		return nil, errors.NewNotFound(schema.GroupResource{}, objRef.Name)
 	}
 	return resource.Status.ID, nil
 }
@@ -232,7 +238,7 @@ func (r *NotificationRouterReconciler) getPipelineID(ctx context.Context, objRef
 		return nil, err
 	}
 	if !resource.Status.HasID() {
-		return nil, fmt.Errorf("pipeline is not ready yet")
+		return nil, errors.NewNotFound(schema.GroupResource{}, objRef.Name)
 	}
 	return resource.Status.ID, nil
 }

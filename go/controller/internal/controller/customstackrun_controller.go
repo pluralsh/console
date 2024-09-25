@@ -20,6 +20,8 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	"github.com/pluralsh/polly/algorithms"
 	"github.com/samber/lo"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -106,6 +108,10 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		logger.Info("create custom stack run", "name", stack.CustomStackRunName())
 		attr, err := r.genCustomStackRunAttr(ctx, stack)
 		if err != nil {
+			if errors.IsNotFound(err) {
+				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+				return RequeueAfter(requeueWaitForResources), nil
+			}
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
@@ -123,6 +129,10 @@ func (r *CustomStackRunReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 		logger.Info("upsert custom stack run", "name", stack.CustomStackRunName())
 		attr, err := r.genCustomStackRunAttr(ctx, stack)
 		if err != nil {
+			if errors.IsNotFound(err) {
+				utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+				return RequeueAfter(requeueWaitForResources), nil
+			}
 			utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return ctrl.Result{}, err
 		}
@@ -192,6 +202,9 @@ func (r *CustomStackRunReconciler) genCustomStackRunAttr(ctx context.Context, st
 		stack := &v1alpha1.InfrastructureStack{}
 		if err := r.Get(ctx, client.ObjectKey{Name: stackRun.Spec.StackRef.Name, Namespace: stackRun.Namespace}, stack); err != nil {
 			return nil, err
+		}
+		if stack.Status.ID == nil {
+			return nil, errors.NewNotFound(schema.GroupResource{}, stackRun.Spec.StackRef.Name)
 		}
 		attr.StackID = stack.Status.ID
 	}

@@ -20,6 +20,9 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -94,6 +97,10 @@ func (r *ClusterRestoreReconciler) Reconcile(ctx context.Context, req ctrl.Reque
 	// Sync resource with Console API.
 	apiRestore, err := r.sync(ctx, restore)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
+			return RequeueAfter(requeueWaitForResources), nil
+		}
 		utils.MarkCondition(restore.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReason, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -127,16 +134,16 @@ func (r *ClusterRestoreReconciler) sync(ctx context.Context, restore *v1alpha1.C
 	if restore.Spec.HasBackupID() {
 		backupID = restore.Spec.GetBackupID()
 	} else {
-		cluster := &v1alpha1.Cluster{}
-		key := client.ObjectKey{Name: restore.Spec.BackupClusterRef.Name, Namespace: restore.Spec.BackupClusterRef.Namespace}
-		if err := r.Get(ctx, key, cluster); err != nil {
+		helper := utils.NewConsoleHelper(ctx, r.ConsoleClient, r.Client)
+		clusterID, err := helper.IDFromRef(restore.Spec.BackupClusterRef, &v1alpha1.Cluster{})
+		if err != nil {
 			return nil, err
 		}
-		if !cluster.Status.HasID() {
-			return nil, fmt.Errorf("cluster has no ID set yet")
+		if clusterID == nil {
+			return nil, errors.NewNotFound(schema.GroupResource{}, restore.Spec.BackupClusterRef.Name)
 		}
 
-		backup, err := r.ConsoleClient.GetClusterBackup(cluster.Status.ID, restore.Spec.BackupNamespace, restore.Spec.BackupName)
+		backup, err := r.ConsoleClient.GetClusterBackup(clusterID, restore.Spec.BackupNamespace, restore.Spec.BackupName)
 		if err != nil {
 			return nil, err
 		}

@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -87,7 +89,7 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 	apiPrAutomation, err := in.sync(ctx, prAutomation, changed)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			logger.Error(err, "unable to find referenced object")
+			utils.MarkCondition(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notReadyError)
 			return requeue, nil
 		}
 		logger.Error(err, "unable to create or update prAutomation")
