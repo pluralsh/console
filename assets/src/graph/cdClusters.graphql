@@ -311,7 +311,7 @@ query ClustersTiny($projectId: ID, $first: Int) {
 }
 
 query ClusterSelector(
-  $first: Int = 100
+  $first: Int
   $after: String
   $q: String
   $currentClusterId: ID

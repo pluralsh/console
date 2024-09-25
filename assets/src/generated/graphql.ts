@@ -14408,7 +14408,7 @@ export type ClustersTinyLazyQueryHookResult = ReturnType<typeof useClustersTinyL
 export type ClustersTinySuspenseQueryHookResult = ReturnType<typeof useClustersTinySuspenseQuery>;
 export type ClustersTinyQueryResult = Apollo.QueryResult<ClustersTinyQuery, ClustersTinyQueryVariables>;
 export const ClusterSelectorDocument = gql`
-    query ClusterSelector($first: Int = 100, $after: String, $q: String, $currentClusterId: ID, $projectId: ID) {
+    query ClusterSelector($first: Int, $after: String, $q: String, $currentClusterId: ID, $projectId: ID) {
   clusters(first: $first, after: $after, q: $q, projectId: $projectId) {
     pageInfo {
       ...PageInfo
