@@ -117,18 +117,14 @@ export function useCommands(): CommandGroup[] {
   const { data } = useClustersTinyQuery({
     pollInterval: 120_000,
     fetchPolicy: 'cache-and-network',
-    variables: { projectId },
+    variables: { projectId, first: 1 },
   })
 
-  const clusters = useMemo(
-    () => mapExistingNodes(data?.clusters),
-    [data?.clusters]
-  )
+  const cluster = useMemo(() => {
+    const clusters = mapExistingNodes(data?.clusters)
 
-  const cluster = useMemo(
-    () => (!isEmpty(clusters) ? clusters[0] : undefined),
-    [clusters]
-  )
+    return !isEmpty(clusters) ? clusters[0] : undefined
+  }, [data?.clusters])
 
   return useMemo(
     () => [

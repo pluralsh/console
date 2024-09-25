@@ -300,8 +300,8 @@ fragment ClusterBasic on Cluster {
   currentVersion
 }
 
-query ClustersTiny($projectId: ID) {
-  clusters(first: 200, projectId: $projectId) {
+query ClustersTiny($projectId: ID, $first: Int) {
+  clusters(first: $first, projectId: $projectId) {
     edges {
       node {
         ...ClusterTiny
