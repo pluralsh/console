@@ -15,7 +15,7 @@ import { ComponentProps, useMemo } from 'react'
 
 import { columns } from 'components/cd/services/Services'
 
-import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 
 import { useSetPageScrollable } from '../../ContinuousDeployment'
 

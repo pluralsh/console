@@ -31,7 +31,7 @@ import {
 import { PRS_REACT_VIRTUAL_OPTIONS } from '../../../pr/queue/PrQueue'
 import { GqlError } from '../../../utils/Alert'
 import { useThrottle } from '../../../hooks/useThrottle'
-import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 
 import {
   getServiceDetailsBreadcrumbs,

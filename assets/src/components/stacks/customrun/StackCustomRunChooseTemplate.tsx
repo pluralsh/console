@@ -4,7 +4,7 @@ import {
 } from 'generated/graphql'
 
 import { Row, createColumnHelper } from '@tanstack/react-table'
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useMemo } from 'react'

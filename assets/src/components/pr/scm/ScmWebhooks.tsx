@@ -10,7 +10,7 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_SCM_WEBHOOKS_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { columns } from './ScmWebhooksColumns'
 import { CreateScmWebhook } from './CreateScmWebhook'

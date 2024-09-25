@@ -20,7 +20,7 @@ import {
   NOTIFICATIONS_ROUTERS_ABS_PATH,
 } from 'routes/settingsRoutesConst'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { columns } from './NotificationRoutersColumns'
 import { CreateNotificationRouterModal } from './CreateNotificationRouterModal'

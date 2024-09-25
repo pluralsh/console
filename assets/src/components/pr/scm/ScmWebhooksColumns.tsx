@@ -17,7 +17,7 @@ import { Edge, removeConnection, updateCache } from 'utils/graphql'
 
 import CopyButton from 'components/utils/CopyButton'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { TruncateStart } from 'components/utils/table/TruncateStart'
+import { TruncateStart } from 'components/utils/table/Truncate'
 
 import { MoreMenu } from 'components/utils/MoreMenu'
 

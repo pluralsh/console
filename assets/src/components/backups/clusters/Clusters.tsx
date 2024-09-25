@@ -10,7 +10,7 @@ import { ComponentProps, useMemo } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import { useNavigate } from 'react-router-dom'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import {
   BACKUPS_ABS_PATH,

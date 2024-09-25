@@ -9,7 +9,7 @@ import {
   Common_PodInfo as PodInfoT,
 } from '../../../generated/graphql-kubernetes'
 import { Readiness, ReadinessT } from '../../../utils/status'
-import { TruncateStart } from '../../utils/table/TruncateStart'
+import { TruncateStart } from '../../utils/table/Truncate'
 
 const podStatusSeverity = {
   Running: 'success',

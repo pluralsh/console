@@ -52,7 +52,7 @@ import {
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
-import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { GqlError } from '../utils/Alert'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'

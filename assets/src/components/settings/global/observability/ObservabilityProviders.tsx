@@ -7,7 +7,7 @@ import { ComponentProps, useState } from 'react'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { SettingsPageHeader } from 'components/settings/Settings'
 

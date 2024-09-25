@@ -23,7 +23,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { CD_BASE_CRUMBS } from '../ContinuousDeployment'
 
-import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 

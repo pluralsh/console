@@ -36,7 +36,7 @@ import { NamespaceListFooter } from '../../cluster/pods/Pods'
 import { columnHelper } from '../../cluster/nodes/NodesList'
 import { TableCaretLink } from '../../cluster/TableElements'
 import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
-import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 const POLL_INTERVAL = 10 * 1000
 

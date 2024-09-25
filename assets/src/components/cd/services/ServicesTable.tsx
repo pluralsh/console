@@ -16,7 +16,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useOutletContext } from 'react-router-dom'
 
-import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 

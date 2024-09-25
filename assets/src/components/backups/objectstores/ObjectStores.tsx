@@ -11,7 +11,7 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useTheme } from 'styled-components'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment'
 import {

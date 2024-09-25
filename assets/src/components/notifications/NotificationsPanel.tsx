@@ -19,7 +19,7 @@ import {
   useAppNotificationsQuery,
   useReadAppNotificationsMutation,
 } from '../../generated/graphql'
-import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { mapExistingNodes } from '../../utils/graphql'
 
 import Notification from './Notification'

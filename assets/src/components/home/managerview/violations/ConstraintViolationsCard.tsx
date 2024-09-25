@@ -1,6 +1,6 @@
 import { H1 } from 'honorable'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { GqlError } from 'components/utils/Alert'
 import {
   PolicyAggregate,

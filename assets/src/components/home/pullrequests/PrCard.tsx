@@ -1,4 +1,4 @@
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { usePullRequestsQuery } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'

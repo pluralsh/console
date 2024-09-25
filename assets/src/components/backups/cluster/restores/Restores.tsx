@@ -12,7 +12,7 @@ import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
 import { capitalize } from 'lodash'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import {
   ClusterBasicFragment,

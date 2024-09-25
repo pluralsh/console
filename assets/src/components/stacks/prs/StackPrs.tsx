@@ -5,7 +5,7 @@ import { useOutletContext, useParams } from 'react-router-dom'
 
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'

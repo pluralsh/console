@@ -7,7 +7,7 @@ import { useUsersQuery } from 'generated/graphql'
 import { LoginContext } from 'components/contexts'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 

@@ -15,7 +15,7 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useProjectId } from 'components/contexts/ProjectsContext'
 
-import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 import { GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS, columns } from './GlobalService'
 

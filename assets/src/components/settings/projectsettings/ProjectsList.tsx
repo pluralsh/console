@@ -4,7 +4,7 @@ import { useProjectsQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 

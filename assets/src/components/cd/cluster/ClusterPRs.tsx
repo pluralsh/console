@@ -14,7 +14,7 @@ import {
 } from '../../pr/queue/PrQueueColumns'
 import { PRS_REACT_VIRTUAL_OPTIONS } from '../../pr/queue/PrQueue'
 import { GqlError } from '../../utils/Alert'
-import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 import { usePullRequestsQuery } from '../../../generated/graphql'
 import { useThrottle } from '../../hooks/useThrottle'
 

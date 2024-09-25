@@ -17,7 +17,7 @@ import { useThrottle } from 'components/hooks/useThrottle'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { prColumns } from './PrQueueColumns'
 

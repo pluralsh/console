@@ -7,7 +7,7 @@ import { ComponentProps, useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
 import styled from 'styled-components'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { Overline } from 'components/cd/utils/PermissionsModal'
 
