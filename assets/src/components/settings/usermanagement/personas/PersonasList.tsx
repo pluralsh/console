@@ -8,7 +8,10 @@ import { createColumnHelper } from '@tanstack/react-table'
 import { GridTableWrapper } from '../../../utils/layout/ResponsiveGridLayouts'
 import { GqlError } from '../../../utils/Alert'
 import { Info } from '../../../utils/Info'
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../../utils/table/useFetchPaginatedData'
 
 import PersonaActions from './PersonaActions'
 import PersonaCreate from './PersonaCreate'
@@ -64,7 +67,7 @@ export function PersonasList() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        reactVirtualOptions={{ overscan: 10 }}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         css={{
           maxHeight: 'unset',
           height: '100%',
