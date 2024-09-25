@@ -8,7 +8,6 @@ import (
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -161,8 +160,7 @@ var _ = Describe("PR Automation Controller", func() {
 					}
 
 					_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: prAutomationObjectKey})
-					Expect(errors.IsNotFound(err)).To(BeTrue())
-					Expect(err).To(MatchError(errors.NewNotFound(common.AsGroupResource(v1alpha1.GroupName, &v1alpha1.ScmConnection{}), scmConnectionName)))
+					Expect(err).NotTo(HaveOccurred())
 				})
 			})
 		})
@@ -301,7 +299,7 @@ var _ = Describe("PR Automation Controller", func() {
 					})).To(Succeed())
 				})
 
-				It("should error with cluster not found", func() {
+				It("should requeue when cluster not found", func() {
 					fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 					fakeConsoleClient.On("IsPrAutomationExistsByName", mock.Anything, prAutomationName).Return(false, nil)
 					fakeConsoleClient.On("CreatePrAutomation", mock.Anything, mock.Anything).Return(&gqlclient.PrAutomationFragment{
@@ -316,8 +314,7 @@ var _ = Describe("PR Automation Controller", func() {
 					}
 
 					_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{NamespacedName: prAutomationObjectKey})
-					Expect(errors.IsNotFound(err)).To(BeTrue())
-					Expect(err).To(MatchError(errors.NewNotFound(common.AsGroupResource(v1alpha1.GroupName, &v1alpha1.Cluster{}), clusterName)))
+					Expect(err).NotTo(HaveOccurred())
 				})
 			})
 		})

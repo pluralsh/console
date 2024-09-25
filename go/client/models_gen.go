@@ -4409,6 +4409,8 @@ type ServiceTemplateAttributes struct {
 	// the namespace for this service (optional for managed namespaces)
 	Namespace *string `json:"namespace,omitempty"`
 	Templated *bool   `json:"templated,omitempty"`
+	// whether to protect this templated service from deletion
+	Protect *bool `json:"protect,omitempty"`
 	// the id of a repository to source manifests for this service
 	RepositoryID *string `json:"repositoryId,omitempty"`
 	// a list of context ids to add to this service

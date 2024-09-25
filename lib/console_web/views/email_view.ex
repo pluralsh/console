@@ -1,7 +1,7 @@
 defmodule ConsoleWeb.EmailView do
   use ConsoleWeb, :view
 
-  def url(path), do: "#{Console.conf(:host)}#{path}"
+  def url(path), do: Console.url(path)
 
   def row(assigns \\ %{}, do: block), do: render_template("row.html", assigns, block)
 

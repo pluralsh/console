@@ -465,6 +465,7 @@ defmodule Console.Deployments.Global do
         owner_id: owner_id,
         configuration: Enum.map(Map.merge(dest_secrets, source_secrets), fn {k, v} -> %{name: k, value: v} end),
         repository_id: source.repository_id,
+        protect: source.protect,
         sync_config: clean(source.sync_config),
         git: clean(source.git),
         helm: clean(source.helm),
@@ -510,8 +511,8 @@ defmodule Console.Deployments.Global do
     dest = Repo.preload(dest, [:dependencies])
     with {:ok, source_secrets} <- configuration(spec),
          {:ok, dest_secrets} <- Services.configuration(dest),
-      do: (spec.repository_id != dest.repository_id || spec.templated != dest.templated ||
-            specs_different?(spec, dest) || !contexts_equal?(spec, dest) || !deps_equal?(spec, dest) ||
+      do: (fields_different?(spec, dest) || specs_different?(spec, dest) ||
+            !contexts_equal?(spec, dest) || !deps_equal?(spec, dest) ||
             missing_source?(source_secrets, dest_secrets))
   end
 
@@ -526,7 +527,7 @@ defmodule Console.Deployments.Global do
   def diff?(_, _), do: false
 
   defp diff?(%Service{} = s, %Service{} = d, source, dest) do
-    missing_source?(source, dest) || !deps_equal?(s, d) || specs_different?(s, d) || s.repository_id != d.repository_id || s.namespace != d.namespace || s.templated != d.templated
+    missing_source?(source, dest) || !deps_equal?(s, d) || specs_different?(s, d) || fields_different?(s, d)
   end
 
   defp ensure_revision(%ServiceTemplate{} = template, config) do
@@ -570,6 +571,10 @@ defmodule Console.Deployments.Global do
   defp deps_equal?(%{dependencies: deps}, svc) do
     MapSet.new(svc.dependencies || [], & &1.name)
     |> MapSet.equal?(MapSet.new(deps || [], & &1.name))
+  end
+
+  defp fields_different?(svc1, svc2) do
+    Enum.any?(~w(repository_id namespace templated protect)a, & Map.get(svc1, &1) != Map.get(svc2, &1))
   end
 
   @spec svc_deps([ServiceDependency.t], [ServiceDependency.t]) :: [ServiceDependency.t]

@@ -11,6 +11,8 @@ import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettingsContext'
 
+import { useLogin } from 'components/contexts'
+
 import { PluralProvider } from '../contexts/PluralContext'
 import { InstallationsProvider } from '../Installations'
 import { EnsureLogin } from '../login/Login'
@@ -26,6 +28,7 @@ import { ContentOverlay } from './Overlay'
 import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
+import { CloudConsoleWelcomeModal } from './CloudConsoleWelcomeModal'
 
 export default function Console() {
   return (
@@ -59,6 +62,7 @@ export default function Console() {
 
 function ConsoleContent() {
   const isProduction = import.meta.env.MODE === 'production'
+  const { configuration } = useLogin()
 
   return (
     <Flex
@@ -89,6 +93,9 @@ function ConsoleContent() {
             </Toast>
           )}
         </WithApplicationUpdate>
+      )}
+      {configuration?.cloud && !configuration?.installed && (
+        <CloudConsoleWelcomeModal />
       )}
       <Header />
       <Flex

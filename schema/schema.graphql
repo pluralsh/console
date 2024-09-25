@@ -1808,6 +1808,9 @@ input ServiceTemplateAttributes {
 
   templated: Boolean
 
+  "whether to protect this templated service from deletion"
+  protect: Boolean
+
   "the id of a repository to source manifests for this service"
   repositoryId: ID
 

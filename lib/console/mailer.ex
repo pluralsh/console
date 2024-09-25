@@ -11,7 +11,7 @@ defmodule Console.Mailer do
       :ok
     else
       {:error, err} ->
-        Logger.info "not delivering email, reason: #{err}"
+        Logger.info "not delivering email, reason: #{inspect(err)}"
         {:error, err}
     end
   end
@@ -24,11 +24,14 @@ defmodule Console.Mailer do
     end
   end
 
-  defp smtp_config() do
+  def smtp_config() do
     case Settings.cached() do
-      %DeploymentSettings{smtp: %DeploymentSettings.SMTP{} = smtp} ->
-        {:ok, Map.take(smtp, DeploymentSettings.smtp_config())}
+      %DeploymentSettings{smtp: %DeploymentSettings.SMTP{} = config} -> {:ok, smtp(config)}
       _ -> {:error, "smtp not configured"}
     end
+  end
+
+  defp smtp(%DeploymentSettings.SMTP{user: u, password: p, server: s, port: port, ssl: ssl}) do
+    %{username: u, password: p, server: s, port: port, ssl: ssl, auth: :always}
   end
 end

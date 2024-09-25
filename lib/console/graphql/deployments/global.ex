@@ -35,6 +35,7 @@ defmodule Console.GraphQl.Deployments.Global do
     field :name,          :string, description: "the name for this service (optional for managed namespaces)"
     field :namespace,     :string, description: "the namespace for this service (optional for managed namespaces)"
     field :templated,     :boolean
+    field :protect,       :boolean, description: "whether to protect this templated service from deletion"
     field :repository_id, :id, description: "the id of a repository to source manifests for this service"
     field :contexts,      list_of(:id), description: "a list of context ids to add to this service"
     field :configuration, list_of(:config_attributes), description: "a list of secure configuration that will be added to any services created by this template"

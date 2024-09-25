@@ -105,6 +105,7 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 		Namespace:    srv.Namespace,
 		Templated:    lo.ToPtr(true),
 		RepositoryID: repositoryID,
+		Protect:      srv.Protect,
 		SyncConfig:   syncConf,
 	}
 	if len(srv.Dependencies) > 0 {

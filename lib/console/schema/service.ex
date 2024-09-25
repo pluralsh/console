@@ -165,7 +165,7 @@ defmodule Console.Schema.Service do
   end
 
   def drainable(query \\ __MODULE__) do
-    from(s in query, where: s.name != "deploy-operator")
+    from(s in query, where: s.name != "deploy-operator" and (is_nil(s.protect) or not s.protect))
   end
 
   def nonsystem(query \\ __MODULE__) do
