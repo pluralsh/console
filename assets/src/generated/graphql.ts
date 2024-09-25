@@ -14298,7 +14298,7 @@ export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMuta
 export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
 export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
 export const ClustersDocument = gql`
-    query Clusters($first: Int = 100, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID) {
+    query Clusters($first: Int, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID) {
   clusters(
     first: $first
     after: $after

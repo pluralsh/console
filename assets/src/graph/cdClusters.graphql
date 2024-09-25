@@ -246,7 +246,7 @@ fragment Cluster on Cluster {
 }
 
 query Clusters(
-  $first: Int = 100
+  $first: Int
   $after: String
   $q: String
   $healthy: Boolean
