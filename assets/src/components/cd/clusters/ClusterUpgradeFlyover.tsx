@@ -15,6 +15,7 @@ import {
 import {
   ClustersRowFragment,
   UpgradeInsight,
+  UpgradeInsightStatus,
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
@@ -30,6 +31,7 @@ import RuntimeServices, {
   getClusterKubeVersion,
 } from './runtime/RuntimeServices'
 import { clusterUpgradeColumns } from './clusterUpgradeColumns'
+import { upgradeInsightsColumns } from './upgradeInsightsColumns'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -73,6 +75,8 @@ function FlyoverContent({ open, cluster, refetch }) {
     {
       id: '1',
       name: 'Deprecated APIs removed in Kubernetes v1.32',
+      status: UpgradeInsightStatus.Failed,
+      version: '1.32',
     },
   ] // TODO  data?.cluster?.upgradeInsights
 
@@ -181,7 +185,15 @@ function FlyoverContent({ open, cluster, refetch }) {
           {deprecationType === DeprecationType.CloudProvider && (
             <div>
               {!isEmpty(upgradeInsights) ? (
-                <div>todo</div>
+                <Table
+                  flush
+                  data={upgradeInsights || []}
+                  columns={upgradeInsightsColumns}
+                  css={{
+                    maxHeight: 181,
+                    height: '100%',
+                  }}
+                />
               ) : (
                 <EmptyState description="No services with cloud provider insights discovered!" />
               )}
