@@ -80,9 +80,7 @@ export const ColUrl = columnHelper.accessor(({ node }) => node?.url, {
           gap: theme.spacing.small,
         }}
       >
-        <TruncateUrl>
-          <span>{url}</span>
-        </TruncateUrl>
+        <TruncateUrl css={{ flexGrow: 1 }}>{url}</TruncateUrl>
         <CopyButton text={url} />
       </div>
     )
