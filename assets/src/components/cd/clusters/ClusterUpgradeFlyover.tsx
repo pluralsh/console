@@ -3,281 +3,33 @@ import {
   Accordion,
   AccordionItem,
   AppIcon,
-  Button,
   ChecklistIcon,
   Chip,
-  ClusterIcon,
   ConfettiIcon,
-  Flex,
   Flyover,
-  IconFrame,
-  ListBoxItem,
-  Select,
   SuccessIcon,
   Tab,
   TabList,
   Table,
-  Tooltip,
-  WrapWithIf,
 } from '@pluralsh/design-system'
-import { Confirm } from 'components/utils/Confirm'
 import {
-  ApiDeprecation,
   ClustersRowFragment,
-  RuntimeServicesQuery,
-  useCreatePullRequestMutation,
+  UpgradeInsight,
   useRuntimeServicesQuery,
-  useUpdateClusterMutation,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { coerce } from 'semver'
+import React, { useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import {
-  isUpgrading,
-  nextSupportedVersion,
-  supportedUpgrades,
-  toNiceVersion,
-  toProviderSupportedVersion,
-} from 'utils/semver'
-
-import { createColumnHelper } from '@tanstack/react-table'
 
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 
-import { TabularNumbers } from '../../cluster/TableElements'
 import { GqlError } from '../../utils/Alert'
 
 import { deprecationsColumns } from './deprecationsColumns'
 import RuntimeServices, {
   getClusterKubeVersion,
 } from './runtime/RuntimeServices'
-
-const supportedVersions = (cluster: ClustersRowFragment | null) =>
-  cluster?.provider?.supportedVersions?.map((vsn) => coerce(vsn)?.raw) ?? []
-
-const columnHelperUpgrade = createColumnHelper<ClustersRowFragment>()
-
-function ClusterUpgradePr({ prs, setError }) {
-  const pr = prs[0]
-  const [mutation, { loading, error }] = useCreatePullRequestMutation({
-    variables: {
-      id: pr.id,
-      branch: 'mjg/upgrade',
-      context: JSON.stringify({ version: '1.28' }),
-    },
-    onCompleted: (data) => {
-      const url = data.createPullRequest?.url
-
-      if (url) {
-        window.open(url, '_blank')?.focus()
-      }
-    },
-  })
-
-  useEffect(() => {
-    setError(error)
-  }, [error, setError])
-
-  return (
-    <Button
-      type="button"
-      secondary
-      onClick={mutation}
-      loading={loading}
-    >
-      Upgrade Now
-    </Button>
-  )
-}
-
-function ClustersUpgradeNow({
-  cluster,
-  targetVersion,
-  apiDeprecations,
-  refetch,
-  setError,
-}: {
-  cluster?: ClustersRowFragment | null
-  targetVersion: Nullable<string>
-  apiDeprecations: ApiDeprecation[]
-  refetch: Nullable<() => void>
-  setError: Nullable<(error: Nullable<ApolloError>) => void>
-}) {
-  const [updateCluster, { loading, error }] = useUpdateClusterMutation({
-    variables: {
-      id: cluster?.id ?? '',
-      attributes: {
-        version: toProviderSupportedVersion(
-          targetVersion,
-          cluster?.provider?.cloud
-        ),
-      },
-    },
-    onCompleted: () => {
-      refetch?.()
-      setError?.(undefined)
-      setConfirm(false)
-    },
-    onError: (e: ApolloError) => setError?.(e),
-  })
-  const [confirm, setConfirm] = useState(false)
-  const hasDeprecations = !isEmpty(apiDeprecations)
-  const onClick = useCallback(
-    () => (!hasDeprecations ? updateCluster() : setConfirm(true)),
-    [hasDeprecations, updateCluster]
-  )
-  const upgrading =
-    !cluster?.self && isUpgrading(cluster?.version, cluster?.currentVersion)
-
-  const tooltip = upgrading
-    ? 'Cluster is already upgrading'
-    : cluster?.deletedAt
-    ? 'Cluster is being deleted'
-    : null
-
-  return (
-    <>
-      <WrapWithIf
-        condition={upgrading || !!cluster?.deletedAt}
-        wrapper={<Tooltip label={tooltip} />}
-      >
-        <div>
-          <Button
-            small
-            disabled={!targetVersion || upgrading || !!cluster?.deletedAt}
-            destructive={hasDeprecations}
-            floating={!hasDeprecations}
-            width="fit-content"
-            loading={!hasDeprecations && loading}
-            onClick={onClick}
-          >
-            Upgrade now
-          </Button>
-        </div>
-      </WrapWithIf>
-      <Confirm
-        open={confirm}
-        title="Confirm upgrade"
-        text="This could be a destructive action. Before updating your Kubernetes version check and fix all deprecated resources."
-        close={() => setConfirm(false)}
-        submit={updateCluster}
-        loading={loading}
-        error={error}
-        destructive
-      />
-    </>
-  )
-}
-
-const upgradeColumns = [
-  columnHelperUpgrade.accessor(({ name }) => name, {
-    id: 'cluster',
-    header: 'Cluster',
-    cell: ({ getValue }) => (
-      <Flex
-        gap="xsmall"
-        alignItems="center"
-      >
-        <IconFrame
-          type="floating"
-          icon={<ClusterIcon />}
-        />
-        <span css={{ whiteSpace: 'nowrap' }}>{getValue()}</span>
-      </Flex>
-    ),
-  }),
-  columnHelperUpgrade.accessor((cluster) => cluster?.currentVersion, {
-    id: 'version',
-    header: 'Current version',
-    cell: ({ getValue }) => <div>{toNiceVersion(getValue())}</div>,
-  }),
-  columnHelperUpgrade.accessor((cluster) => cluster, {
-    id: 'actions',
-    header: '',
-    meta: {
-      gridTemplate: 'fit-content(500px)',
-    },
-    cell: function Cell({ table, getValue, row: { original } }) {
-      const theme = useTheme()
-      const cluster = getValue()
-      const upgrades = useMemo(
-        () => supportedUpgrades(cluster.version, supportedVersions(cluster)),
-        [cluster]
-      )
-      const upgradeVersion = nextSupportedVersion(
-        cluster?.version,
-        cluster?.provider?.supportedVersions
-      )
-      const [targetVersion, setTargetVersion] =
-        useState<Nullable<string>>(upgradeVersion)
-
-      const { refetch, setError, runtimeServiceData } = table.options.meta as {
-        refetch?: () => void
-        setError?: (error: Nullable<ApolloError>) => void
-        runtimeServiceData?: RuntimeServicesQuery
-      }
-
-      useEffect(() => {
-        if (!upgrades.some((upgrade) => upgrade === targetVersion)) {
-          setTargetVersion(undefined)
-        }
-      }, [targetVersion, upgrades])
-
-      if (!isEmpty(cluster.prAutomations)) {
-        return (
-          <ClusterUpgradePr
-            prs={cluster.prAutomations}
-            setError={setError}
-          />
-        )
-      }
-
-      if (isEmpty(upgrades) || original.self) return null
-
-      return (
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.medium,
-            alignItems: 'center',
-          }}
-        >
-          <div css={{ minWidth: 170 }}>
-            <Select
-              label="Select version"
-              selectedKey={targetVersion}
-              onSelectionChange={setTargetVersion as any}
-            >
-              {upgrades.map((v) => (
-                <ListBoxItem
-                  key={v}
-                  label={
-                    <TabularNumbers css={{ textAlign: 'right' }}>
-                      {toNiceVersion(
-                        toProviderSupportedVersion(v, cluster?.provider?.cloud)
-                      )}
-                    </TabularNumbers>
-                  }
-                />
-              ))}
-            </Select>
-          </div>
-          <ClustersUpgradeNow
-            cluster={cluster}
-            targetVersion={targetVersion}
-            apiDeprecations={
-              (runtimeServiceData?.cluster
-                ?.apiDeprecations as ApiDeprecation[]) || []
-            }
-            refetch={refetch}
-            setError={setError}
-          />
-        </div>
-      )
-    },
-  }),
-]
+import { clusterUpgradeColumns } from './clusterUpgradeColumns'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -317,7 +69,12 @@ function FlyoverContent({ open, cluster, refetch }) {
 
   const runtimeServices = data?.cluster?.runtimeServices
   const apiDeprecations = data?.cluster?.apiDeprecations
-  const upgradeInsights = data?.cluster?.upgradeInsights
+  const upgradeInsights: UpgradeInsight[] = [
+    {
+      id: '1',
+      name: 'Deprecated APIs removed in Kubernetes v1.32',
+    },
+  ] // TODO  data?.cluster?.upgradeInsights
 
   return (
     <div
@@ -339,7 +96,7 @@ function FlyoverContent({ open, cluster, refetch }) {
       )}
       <Table
         data={[cluster]}
-        columns={upgradeColumns}
+        columns={clusterUpgradeColumns}
         css={{
           maxHeight: 'unset',
           height: '100%',
