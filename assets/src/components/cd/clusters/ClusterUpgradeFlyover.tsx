@@ -5,6 +5,7 @@ import {
   AppIcon,
   Button,
   ChecklistIcon,
+  Chip,
   ClusterIcon,
   ConfettiIcon,
   Flex,
@@ -285,6 +286,17 @@ export enum DeprecationType {
   CloudProvider = 'cloudProvider',
 }
 
+function DeprecationCountChip({ count }: { count: number }) {
+  return (
+    <Chip
+      size="small"
+      severity={count === 0 ? 'neutral' : 'warning'}
+    >
+      {count}
+    </Chip>
+  )
+}
+
 function FlyoverContent({ open, cluster, refetch }) {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
@@ -305,6 +317,7 @@ function FlyoverContent({ open, cluster, refetch }) {
 
   const runtimeServices = data?.cluster?.runtimeServices
   const apiDeprecations = data?.cluster?.apiDeprecations
+  const upgradeInsights = data?.cluster?.upgradeInsights
 
   return (
     <div
@@ -367,32 +380,55 @@ function FlyoverContent({ open, cluster, refetch }) {
             >
               <Tab
                 key={DeprecationType.GitOps}
-                innerProps={{ flexGrow: 1, justifyContent: 'center' }}
+                innerProps={{
+                  flexGrow: 1,
+                  gap: theme.spacing.xsmall,
+                  justifyContent: 'center',
+                }}
                 css={{ display: 'flex', flexGrow: 1 }}
               >
-                Detected by GitOps
+                <div>Detected by GitOps</div>
+                <DeprecationCountChip count={apiDeprecations?.length ?? 0} />
               </Tab>
               <Tab
                 key={DeprecationType.CloudProvider}
-                innerProps={{ flexGrow: 1, justifyContent: 'center' }}
+                innerProps={{
+                  flexGrow: 1,
+                  gap: theme.spacing.xsmall,
+                  justifyContent: 'center',
+                }}
                 css={{ display: 'flex', flexGrow: 1 }}
               >
                 Detected by Cloud Provider
+                <DeprecationCountChip count={upgradeInsights?.length ?? 0} />
               </Tab>
             </TabList>
           </div>
-          {!isEmpty(apiDeprecations) ? (
-            <Table
-              flush
-              data={apiDeprecations || []}
-              columns={deprecationsColumns}
-              css={{
-                maxHeight: 181,
-                height: '100%',
-              }}
-            />
-          ) : (
-            <EmptyState description="No services with api deprecations discovered!" />
+          {deprecationType === DeprecationType.GitOps && (
+            <div>
+              {!isEmpty(apiDeprecations) ? (
+                <Table
+                  flush
+                  data={apiDeprecations || []}
+                  columns={deprecationsColumns}
+                  css={{
+                    maxHeight: 181,
+                    height: '100%',
+                  }}
+                />
+              ) : (
+                <EmptyState description="No services with API deprecations discovered!" />
+              )}
+            </div>
+          )}
+          {deprecationType === DeprecationType.CloudProvider && (
+            <div>
+              {!isEmpty(upgradeInsights) ? (
+                <div>todo</div>
+              ) : (
+                <EmptyState description="No services with cloud provider insights discovered!" />
+              )}
+            </div>
           )}
         </AccordionItem>
       </Accordion>
