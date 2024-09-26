@@ -422,6 +422,8 @@ export function ClusterUpgradeFlyover({
       open={open}
       onClose={onClose}
       minWidth={920}
+      borderRadius={0}
+      borderLeft={theme.borders.default}
       boxShadow={theme.boxShadows.modal}
     >
       <FlyoverContent
