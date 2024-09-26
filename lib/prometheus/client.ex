@@ -1,6 +1,7 @@
 defmodule Prometheus.Client do
   alias Console.Schema.DeploymentSettings.Connection
   alias Prometheus.{Response, Data, Result}
+  require Logger
   @headers [{"content-type", "application/x-www-form-urlencoded"}]
 
   defstruct [:host, :user, :password]
@@ -17,6 +18,7 @@ defmodule Prometheus.Client do
 
   def query(client \\ nil, query, start, end_t, step, variables) do
     query = variable_subst(query, variables)
+    Logger.info "Issuing prometheus query: #{query}"
     HTTPoison.post(
       Path.join(host(client), "/api/v1/query_range"),
       {:form, [
