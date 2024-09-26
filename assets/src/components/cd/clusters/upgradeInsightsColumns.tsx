@@ -1,5 +1,17 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import { UpgradeInsight } from 'generated/graphql'
+import { UpgradeInsight, UpgradeInsightStatus } from 'generated/graphql'
+import { Chip } from '@pluralsh/design-system'
+import capitalize from 'lodash/capitalize'
+import { ComponentProps } from 'react'
+
+const statusToSeverity = {
+  [UpgradeInsightStatus.Passing]: 'success',
+  [UpgradeInsightStatus.Failed]: 'danger',
+  [UpgradeInsightStatus.Unknown]: 'neutral',
+} as const satisfies Record<
+  UpgradeInsightStatus,
+  ComponentProps<typeof Chip>['severity']
+>
 
 const columnHelperDeprecations = createColumnHelper<UpgradeInsight>()
 
@@ -12,7 +24,13 @@ export const upgradeInsightsColumns = [
   columnHelperDeprecations.accessor(({ status }) => status, {
     id: 'status',
     header: 'Insight status',
-    cell: ({ getValue }) => <div>{getValue()}</div>,
+    cell: ({ getValue }) => {
+      const status = getValue() ?? UpgradeInsightStatus.Unknown
+
+      return (
+        <Chip severity={statusToSeverity[status]}>{capitalize(status)}</Chip>
+      )
+    },
   }),
   columnHelperDeprecations.accessor(({ version }) => version, {
     id: 'version',
