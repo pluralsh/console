@@ -114,12 +114,12 @@ export default function ClusterSelector({
             <ListBoxFooter>Loading</ListBoxFooter>
           ) : isEmpty(clusters) ? (
             <ListBoxFooter>No results</ListBoxFooter>
-          ) : pageInfo.hasNextPage ? (
+          ) : pageInfo?.hasNextPage ? (
             <ListBoxFooterPlus>Show more</ListBoxFooterPlus>
           ) : undefined
         }
         onFooterClick={() => {
-          if (pageInfo.hasNextPage) {
+          if (pageInfo?.hasNextPage) {
             fetchNextPage()
           } else {
             setClusterSelectIsOpen(false)
