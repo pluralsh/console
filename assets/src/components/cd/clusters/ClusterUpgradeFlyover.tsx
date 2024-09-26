@@ -13,6 +13,8 @@ import {
   ListBoxItem,
   Select,
   SuccessIcon,
+  Tab,
+  TabList,
   Table,
   Tooltip,
   WrapWithIf,
@@ -27,7 +29,7 @@ import {
   useUpdateClusterMutation,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { coerce } from 'semver'
 import styled, { useTheme } from 'styled-components'
 import {
@@ -278,9 +280,16 @@ const upgradeColumns = [
 
 const POLL_INTERVAL = 10 * 1000
 
+export enum DeprecationType {
+  GitOps = 'gitOps',
+  CloudProvider = 'cloudProvider',
+}
+
 function FlyoverContent({ open, cluster, refetch }) {
-  const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
   const theme = useTheme()
+  const tabStateRef = useRef<any>(null)
+  const [deprecationType, setDeprecationType] = useState(DeprecationType.GitOps)
+  const [upgradeError, setError] = useState<Nullable<ApolloError>>(undefined)
 
   const kubeVersion = getClusterKubeVersion(cluster)
   const { data, error } = useRuntimeServicesQuery({
@@ -341,6 +350,37 @@ function FlyoverContent({ open, cluster, refetch }) {
             />
           }
         >
+          <div
+            css={{
+              display: 'flex',
+              flexGrow: 1,
+            }}
+          >
+            <TabList
+              css={{ flexGrow: 1 }}
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: deprecationType,
+                onSelectionChange: setDeprecationType as any,
+              }}
+            >
+              <Tab
+                key={DeprecationType.GitOps}
+                innerProps={{ flexGrow: 1, justifyContent: 'center' }}
+                css={{ display: 'flex', flexGrow: 1 }}
+              >
+                Detected by GitOps
+              </Tab>
+              <Tab
+                key={DeprecationType.CloudProvider}
+                innerProps={{ flexGrow: 1, justifyContent: 'center' }}
+                css={{ display: 'flex', flexGrow: 1 }}
+              >
+                Detected by Cloud Provider
+              </Tab>
+            </TabList>
+          </div>
           {!isEmpty(apiDeprecations) ? (
             <Table
               flush
