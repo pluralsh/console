@@ -4,6 +4,8 @@ import { Chip } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
 import { ComponentProps } from 'react'
 
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
+
 const statusToSeverity = {
   [UpgradeInsightStatus.Passing]: 'success',
   [UpgradeInsightStatus.Failed]: 'danger',
@@ -40,11 +42,11 @@ export const upgradeInsightsColumns = [
   columnHelperDeprecations.accessor(({ refreshedAt }) => refreshedAt, {
     id: 'lastRefresh',
     header: 'Last refresh',
-    cell: ({ getValue }) => <div>{getValue()}</div>,
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
   columnHelperDeprecations.accessor(({ transitionedAt }) => transitionedAt, {
     id: 'lastTransition',
     header: 'Last transition',
-    cell: ({ getValue }) => <div>{getValue()}</div>,
+    cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
 ] // TODO

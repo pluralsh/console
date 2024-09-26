@@ -77,6 +77,8 @@ function FlyoverContent({ open, cluster, refetch }) {
       name: 'Deprecated APIs removed in Kubernetes v1.32',
       status: UpgradeInsightStatus.Failed,
       version: '1.32',
+      refreshedAt: '2024-08-23T06:52:01.430Z',
+      transitionedAt: '2024-08-23T06:52:01.430Z',
     },
   ] // TODO  data?.cluster?.upgradeInsights
 
