@@ -1,10 +1,13 @@
-import { createColumnHelper } from '@tanstack/react-table'
+import { Row, createColumnHelper } from '@tanstack/react-table'
 import { UpgradeInsight, UpgradeInsightStatus } from 'generated/graphql'
 import { Chip, CollapseIcon } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
-import { ComponentProps } from 'react'
+import React, { ComponentProps } from 'react'
+
+import { useTheme } from 'styled-components'
 
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
+import { OverlineH1 } from '../../utils/typography/Text'
 
 const statusToSeverity = {
   [UpgradeInsightStatus.Passing]: 'success',
@@ -75,3 +78,21 @@ export const upgradeInsightsColumns = [
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }),
 ]
+
+export function UpgradeInsightExpansionPanel({
+  row,
+}: {
+  row: Row<UpgradeInsight>
+}) {
+  const theme = useTheme()
+
+  return (
+    // TODO
+    <div>
+      <OverlineH1 css={{ color: theme.colors['text-xlight'] }}>
+        Description
+      </OverlineH1>
+      <p>{row.original.description}</p>
+    </div>
+  )
+}

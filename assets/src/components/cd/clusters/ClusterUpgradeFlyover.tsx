@@ -34,7 +34,10 @@ import RuntimeServices, {
   getClusterKubeVersion,
 } from './runtime/RuntimeServices'
 import { clusterUpgradeColumns } from './clusterUpgradeColumns'
-import { upgradeInsightsColumns } from './upgradeInsightsColumns'
+import {
+  UpgradeInsightExpansionPanel,
+  upgradeInsightsColumns,
+} from './UpgradeInsights'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -85,6 +88,19 @@ function FlyoverContent({ open, cluster, refetch }) {
       version: '1.32',
       refreshedAt: '2024-08-23T06:52:01.430Z',
       transitionedAt: '2024-08-23T06:52:01.430Z',
+      details: [
+        {
+          id: '1',
+          used: '/apis/flowcontrol.apiserver.k8s.io/v1beta3/flowschemas',
+          replacement: '/apis/flowcontrol.apiserver.k8s.io/flowschemas',
+          replacedIn: '1.21',
+        },
+        {
+          id: '1',
+          used: '/apis/flowcontrol.apiserver.k8s.io/v1beta2/flowschemas',
+          removedIn: '1.21',
+        },
+      ],
     },
     {
       id: '2',
@@ -214,15 +230,12 @@ function FlyoverContent({ open, cluster, refetch }) {
                   flush
                   data={upgradeInsights || []}
                   columns={upgradeInsightsColumns}
-                  expandable
                   getRowCanExpand={(row: Row<UpgradeInsight>) =>
                     row.original.description || !isEmpty(row.original.details)
                   }
-                  renderExpanded={({ row }: { row: Row<UpgradeInsight> }) => (
-                    <div>{row.original.description}</div>
-                  )}
+                  renderExpanded={UpgradeInsightExpansionPanel}
                   css={{
-                    maxHeight: 181,
+                    maxHeight: 400,
                     height: '100%',
                   }}
                 />
