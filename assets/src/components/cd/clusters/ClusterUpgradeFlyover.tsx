@@ -25,6 +25,8 @@ import styled, { useTheme } from 'styled-components'
 
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 
+import { Row } from '@tanstack/react-table'
+
 import { GqlError } from '../../utils/Alert'
 
 import { deprecationsColumns } from './deprecationsColumns'
@@ -76,8 +78,22 @@ function FlyoverContent({ open, cluster, refetch }) {
     {
       id: '1',
       name: 'Deprecated APIs removed in Kubernetes v1.32',
+      description:
+        'Check usage of deprecated APIs that are scheduled for removal in Kubernetes v1.32.' +
+        'Upgrading your cluster before migrating to the updated APIs supported by v1.32 could cause application impact.',
       status: UpgradeInsightStatus.Failed,
       version: '1.32',
+      refreshedAt: '2024-08-23T06:52:01.430Z',
+      transitionedAt: '2024-08-23T06:52:01.430Z',
+    },
+    {
+      id: '2',
+      name: 'Deprecated APIs removed in Kubernetes v1.33',
+      description:
+        'Check usage of deprecated APIs that are scheduled for removal in Kubernetes v1.32.' +
+        'Upgrading your cluster before migrating to the updated APIs supported by v1.32 could cause application impact.',
+      status: UpgradeInsightStatus.Passing,
+      version: '1.33',
       refreshedAt: '2024-08-23T06:52:01.430Z',
       transitionedAt: '2024-08-23T06:52:01.430Z',
     },
@@ -198,6 +214,13 @@ function FlyoverContent({ open, cluster, refetch }) {
                   flush
                   data={upgradeInsights || []}
                   columns={upgradeInsightsColumns}
+                  expandable
+                  getRowCanExpand={(row: Row<UpgradeInsight>) =>
+                    row.original.description || !isEmpty(row.original.details)
+                  }
+                  renderExpanded={({ row }: { row: Row<UpgradeInsight> }) => (
+                    <div>{row.original.description}</div>
+                  )}
                   css={{
                     maxHeight: 181,
                     height: '100%',

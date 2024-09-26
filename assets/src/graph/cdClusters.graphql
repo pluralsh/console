@@ -78,8 +78,6 @@ fragment UpgradeInsight on UpgradeInsight {
   details {
     ...UpgradeInsightDetail
   }
-  insertedAt
-  updatedAt
   refreshedAt
   transitionedAt
   version
@@ -88,8 +86,6 @@ fragment UpgradeInsight on UpgradeInsight {
 
 fragment UpgradeInsightDetail on UpgradeInsightDetail {
   id
-  insertedAt
-  updatedAt
   removedIn
   replacedIn
   replacement
