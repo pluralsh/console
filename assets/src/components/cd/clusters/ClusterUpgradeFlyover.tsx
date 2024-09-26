@@ -414,12 +414,15 @@ export function ClusterUpgradeFlyover({
   cluster: ClustersRowFragment | null | undefined
   refetch: Nullable<() => void>
 }) {
+  const theme = useTheme()
+
   return (
     <Flyover
       header={`Upgrade Plan for ${cluster?.name}`}
       open={open}
       onClose={onClose}
       minWidth={920}
+      boxShadow={theme.boxShadows.modal}
     >
       <FlyoverContent
         open={open}
