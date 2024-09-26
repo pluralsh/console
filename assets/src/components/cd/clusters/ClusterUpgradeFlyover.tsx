@@ -11,6 +11,7 @@ import {
   Tab,
   TabList,
   Table,
+  WarningIcon,
 } from '@pluralsh/design-system'
 import {
   ClustersRowFragment,
@@ -150,6 +151,9 @@ function FlyoverContent({ open, cluster, refetch }) {
                 }}
                 css={{ display: 'flex', flexGrow: 1 }}
               >
+                {!isEmpty(apiDeprecations) && (
+                  <WarningIcon color="icon-warning" />
+                )}
                 <div>Detected by GitOps</div>
                 <DeprecationCountChip count={apiDeprecations?.length ?? 0} />
               </Tab>
@@ -162,6 +166,9 @@ function FlyoverContent({ open, cluster, refetch }) {
                 }}
                 css={{ display: 'flex', flexGrow: 1 }}
               >
+                {!isEmpty(upgradeInsights) && (
+                  <WarningIcon color="icon-warning" />
+                )}
                 Detected by Cloud Provider
                 <DeprecationCountChip count={upgradeInsights?.length ?? 0} />
               </Tab>
