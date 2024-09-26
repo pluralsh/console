@@ -1404,6 +1404,8 @@ export type ContainerAttributes = {
   env?: InputMaybe<Array<InputMaybe<EnvAttributes>>>;
   envFrom?: InputMaybe<Array<InputMaybe<EnvFromAttributes>>>;
   image: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  resources?: InputMaybe<ContainerResourcesAttributes>;
 };
 
 /** container env variable */
@@ -1423,17 +1425,23 @@ export type ContainerEnvFrom = {
 export type ContainerRecommendation = {
   __typename?: 'ContainerRecommendation';
   containerName?: Maybe<Scalars['String']['output']>;
-  lowerBound?: Maybe<ContainerResources>;
+  lowerBound?: Maybe<ResourceRequest>;
   name?: Maybe<Scalars['String']['output']>;
-  target?: Maybe<ContainerResources>;
-  uncappedTarget?: Maybe<ContainerResources>;
-  upperBound?: Maybe<ContainerResources>;
+  target?: Maybe<ResourceRequest>;
+  uncappedTarget?: Maybe<ResourceRequest>;
+  upperBound?: Maybe<ResourceRequest>;
 };
 
+/** A combined kubernetes pod container resource requests spec */
 export type ContainerResources = {
   __typename?: 'ContainerResources';
-  cpu?: Maybe<Scalars['String']['output']>;
-  memory?: Maybe<Scalars['String']['output']>;
+  limits?: Maybe<ResourceRequest>;
+  requests?: Maybe<ResourceRequest>;
+};
+
+export type ContainerResourcesAttributes = {
+  limits?: InputMaybe<ResourceRequestAttributes>;
+  requests?: InputMaybe<ResourceRequestAttributes>;
 };
 
 /** a shortform spec for job containers, designed for ease-of-use */
@@ -1443,6 +1451,7 @@ export type ContainerSpec = {
   env?: Maybe<Array<Maybe<ContainerEnv>>>;
   envFrom?: Maybe<Array<Maybe<ContainerEnvFrom>>>;
   image: Scalars['String']['output'];
+  resources?: Maybe<ContainerResources>;
 };
 
 export type ContainerState = {
@@ -1805,6 +1814,8 @@ export type GateJobAttributes = {
   namespace: Scalars['String']['input'];
   /** if you'd rather define the job spec via straight k8s yaml */
   raw?: InputMaybe<Scalars['String']['input']>;
+  /** request overrides if you don't want to manually configure individual containers */
+  resources?: InputMaybe<ContainerResourcesAttributes>;
   serviceAccount?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -2495,6 +2506,8 @@ export type JobGateSpec = {
   namespace: Scalars['String']['output'];
   /** a raw kubernetes job resource, overrides any other configuration */
   raw?: Maybe<Scalars['String']['output']>;
+  /** requests overrides for cases where direct container configuration is unnecessary */
+  requests?: Maybe<ContainerResources>;
   /** the service account the pod will use */
   serviceAccount?: Maybe<Scalars['String']['output']>;
 };
@@ -4479,6 +4492,18 @@ export type ResourceEdge = {
   __typename?: 'ResourceEdge';
   from: Scalars['String']['output'];
   to: Scalars['String']['output'];
+};
+
+/** A kubernetes pod container resource request spec */
+export type ResourceRequest = {
+  __typename?: 'ResourceRequest';
+  cpu?: Maybe<Scalars['String']['output']>;
+  memory?: Maybe<Scalars['String']['output']>;
+};
+
+export type ResourceRequestAttributes = {
+  cpu?: InputMaybe<Scalars['String']['input']>;
+  memory?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type ResourceSelector = {

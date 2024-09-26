@@ -153,6 +153,10 @@ type JobSpec struct {
 	// Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file.
 	// +kubebuilder:validation:Optional
 	Raw *batchv1.JobSpec `json:"raw,omitempty"`
+
+	// Resource specification that overrides implicit container resources when containers are not directly configured.
+	// +kubebuilder:validation:Optional
+	Resources *ContainerResources `json:"resources,omitempty"`
 }
 
 type Container struct {
@@ -168,6 +172,23 @@ type Container struct {
 
 	// +kubebuilder:validation:Optional
 	EnvFrom []*EnvFrom `json:"envFrom,omitempty"`
+
+	// +kubebuilder:validation:Optional
+	Resources *ContainerResources `json:"resources,omitempty"`
+}
+
+type ContainerResources struct {
+	// +kubebuilder:validation:Optional
+	Requests *ContainerResourceRequests `json:"requests,omitempty"`
+	// +kubebuilder:validation:Optional
+	Limits *ContainerResourceRequests `json:"limits,omitempty"`
+}
+
+type ContainerResourceRequests struct {
+	// +kubebuilder:validation:Optional
+	CPU *string `json:"cpu,omitempty"`
+	// +kubebuilder:validation:Optional
+	Memory *string `json:"memory,omitempty"`
 }
 
 type Env struct {

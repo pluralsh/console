@@ -2541,14 +2541,29 @@ input GateJobAttributes {
   annotations: Json
 
   serviceAccount: String
+
+  "request overrides if you don't want to manually configure individual containers"
+  resources: ContainerResourcesAttributes
 }
 
 "the attributes for a container"
 input ContainerAttributes {
+  name: String
   image: String!
   args: [String]
   env: [EnvAttributes]
   envFrom: [EnvFromAttributes]
+  resources: ContainerResourcesAttributes
+}
+
+input ContainerResourcesAttributes {
+  requests: ResourceRequestAttributes
+  limits: ResourceRequestAttributes
+}
+
+input ResourceRequestAttributes {
+  cpu: String
+  memory: String
 }
 
 input EnvAttributes {
@@ -2757,6 +2772,9 @@ type JobGateSpec {
 
   "the service account the pod will use"
   serviceAccount: String
+
+  "requests overrides for cases where direct container configuration is unnecessary"
+  requests: ContainerResources
 }
 
 "a shortform spec for job containers, designed for ease-of-use"
@@ -2765,6 +2783,7 @@ type ContainerSpec {
   args: [String]
   env: [ContainerEnv]
   envFrom: [ContainerEnvFrom]
+  resources: ContainerResources
 }
 
 "container env variable"
@@ -2777,6 +2796,18 @@ type ContainerEnv {
 type ContainerEnvFrom {
   configMap: String!
   secret: String!
+}
+
+"A combined kubernetes pod container resource requests spec"
+type ContainerResources {
+  requests: ResourceRequest
+  limits: ResourceRequest
+}
+
+"A kubernetes pod container resource request spec"
+type ResourceRequest {
+  cpu: String
+  memory: String
 }
 
 "the configuration of a service within a pipeline stage, including optional promotion criteria"
@@ -5960,18 +5991,13 @@ type Recommendation {
   containerRecommendations: [ContainerRecommendation]
 }
 
-type ContainerResources {
-  cpu: String
-  memory: String
-}
-
 type ContainerRecommendation {
   name: String
   containerName: String
-  target: ContainerResources
-  lowerBound: ContainerResources
-  upperBound: ContainerResources
-  uncappedTarget: ContainerResources
+  target: ResourceRequest
+  lowerBound: ResourceRequest
+  upperBound: ResourceRequest
+  uncappedTarget: ResourceRequest
 }
 
 type ConfigurationOverlay {

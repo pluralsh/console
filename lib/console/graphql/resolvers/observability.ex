@@ -33,8 +33,9 @@ defmodule Console.GraphQl.Resolvers.Observability do
   def ts(ts), do: Timex.to_unix(ts) * @nano
 
   def prom_args(args) do
-    now = Timex.now()
-    start = Timex.shift(now, seconds: -Map.get(args, :offset, @default_offset))
-    {start, args[:stop] || now, args[:step] || "5m"}
+    {get_start(args), args[:stop] || Timex.now(), args[:step] || "5m"}
   end
+
+  defp get_start(%{start: start}) when not is_nil(start), do: start
+  defp get_start(args), do: Timex.shift(Timex.now(), seconds: -Map.get(args, :offset, @default_offset))
 end

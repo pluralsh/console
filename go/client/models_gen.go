@@ -1100,10 +1100,12 @@ type Container struct {
 
 // the attributes for a container
 type ContainerAttributes struct {
-	Image   string               `json:"image"`
-	Args    []*string            `json:"args,omitempty"`
-	Env     []*EnvAttributes     `json:"env,omitempty"`
-	EnvFrom []*EnvFromAttributes `json:"envFrom,omitempty"`
+	Name      *string                       `json:"name,omitempty"`
+	Image     string                        `json:"image"`
+	Args      []*string                     `json:"args,omitempty"`
+	Env       []*EnvAttributes              `json:"env,omitempty"`
+	EnvFrom   []*EnvFromAttributes          `json:"envFrom,omitempty"`
+	Resources *ContainerResourcesAttributes `json:"resources,omitempty"`
 }
 
 // container env variable
@@ -1119,25 +1121,32 @@ type ContainerEnvFrom struct {
 }
 
 type ContainerRecommendation struct {
-	Name           *string             `json:"name,omitempty"`
-	ContainerName  *string             `json:"containerName,omitempty"`
-	Target         *ContainerResources `json:"target,omitempty"`
-	LowerBound     *ContainerResources `json:"lowerBound,omitempty"`
-	UpperBound     *ContainerResources `json:"upperBound,omitempty"`
-	UncappedTarget *ContainerResources `json:"uncappedTarget,omitempty"`
+	Name           *string          `json:"name,omitempty"`
+	ContainerName  *string          `json:"containerName,omitempty"`
+	Target         *ResourceRequest `json:"target,omitempty"`
+	LowerBound     *ResourceRequest `json:"lowerBound,omitempty"`
+	UpperBound     *ResourceRequest `json:"upperBound,omitempty"`
+	UncappedTarget *ResourceRequest `json:"uncappedTarget,omitempty"`
 }
 
+// A combined kubernetes pod container resource requests spec
 type ContainerResources struct {
-	CPU    *string `json:"cpu,omitempty"`
-	Memory *string `json:"memory,omitempty"`
+	Requests *ResourceRequest `json:"requests,omitempty"`
+	Limits   *ResourceRequest `json:"limits,omitempty"`
+}
+
+type ContainerResourcesAttributes struct {
+	Requests *ResourceRequestAttributes `json:"requests,omitempty"`
+	Limits   *ResourceRequestAttributes `json:"limits,omitempty"`
 }
 
 // a shortform spec for job containers, designed for ease-of-use
 type ContainerSpec struct {
-	Image   string              `json:"image"`
-	Args    []*string           `json:"args,omitempty"`
-	Env     []*ContainerEnv     `json:"env,omitempty"`
-	EnvFrom []*ContainerEnvFrom `json:"envFrom,omitempty"`
+	Image     string              `json:"image"`
+	Args      []*string           `json:"args,omitempty"`
+	Env       []*ContainerEnv     `json:"env,omitempty"`
+	EnvFrom   []*ContainerEnvFrom `json:"envFrom,omitempty"`
+	Resources *ContainerResources `json:"resources,omitempty"`
 }
 
 type ContainerState struct {
@@ -1466,6 +1475,8 @@ type GateJobAttributes struct {
 	Labels         *string                `json:"labels,omitempty"`
 	Annotations    *string                `json:"annotations,omitempty"`
 	ServiceAccount *string                `json:"serviceAccount,omitempty"`
+	// request overrides if you don't want to manually configure individual containers
+	Resources *ContainerResourcesAttributes `json:"resources,omitempty"`
 }
 
 // detailed gate specifications
@@ -2044,6 +2055,8 @@ type JobGateSpec struct {
 	Annotations map[string]interface{} `json:"annotations,omitempty"`
 	// the service account the pod will use
 	ServiceAccount *string `json:"serviceAccount,omitempty"`
+	// requests overrides for cases where direct container configuration is unnecessary
+	Requests *ContainerResources `json:"requests,omitempty"`
 }
 
 type JobReference struct {
@@ -3748,6 +3761,17 @@ type RepositoryEdge struct {
 type ResourceEdge struct {
 	From string `json:"from"`
 	To   string `json:"to"`
+}
+
+// A kubernetes pod container resource request spec
+type ResourceRequest struct {
+	CPU    *string `json:"cpu,omitempty"`
+	Memory *string `json:"memory,omitempty"`
+}
+
+type ResourceRequestAttributes struct {
+	CPU    *string `json:"cpu,omitempty"`
+	Memory *string `json:"memory,omitempty"`
 }
 
 type ResourceSelector struct {
