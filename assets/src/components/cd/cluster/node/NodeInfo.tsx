@@ -67,15 +67,11 @@ export default function NodeInfo() {
       }}
     >
       <section>
-        <SubTitle>Overview</SubTitle>
-        <Card css={{ padding: theme.spacing.medium }}>
-          <NodeGraphs
-            status={node.status}
-            pods={pods}
-            name={nodeName}
-            usage={nodeMetric.usage}
-          />
-        </Card>
+        <NodeGraphs
+          node={node}
+          name={nodeName}
+          clusterId={clusterId}
+        />
       </section>
       <section>
         <SubTitle>Pods</SubTitle>

@@ -1,111 +1,170 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Flex } from 'honorable'
-
-import { NodeStatus, NodeUsage, Pod } from 'generated/graphql'
-import { cpuParser, memoryParser } from 'utils/kubernetes'
+import { Node, useClusterNodeMetricsQuery } from 'generated/graphql'
+import { isNull } from 'lodash'
+import { Card } from '@pluralsh/design-system'
+import { useTheme } from 'styled-components'
 
 import { getPodResources } from '../pods/getPodResources'
-
-import { NodeMetrics } from '../constants'
 import { getAllContainersFromPods } from '../utils'
 import { GaugeWrap, ResourceGauge } from '../Gauges'
+import { useDeploymentSettings } from '../../contexts/DeploymentSettingsContext'
+import { Prometheus } from '../../../utils/prometheus'
+import RadialBarChart from '../../utils/RadialBarChart'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { SubTitle } from '../../utils/SubTitle'
 
 import { SaturationGraphs } from './SaturationGraphs'
 
 export function NodeGraphs({
-  status,
-  pods,
   name,
-  usage,
+  clusterId,
+  node,
 }: {
-  status?: NodeStatus
-  pods?: Pod[]
   name?: string
-  usage?: NodeUsage | null
+  clusterId?: string
+  node: Node
 }) {
+  const theme = useTheme()
+  const { prometheusConnection } = useDeploymentSettings()
+  const { data, loading } = useClusterNodeMetricsQuery({
+    variables: {
+      clusterId: clusterId ?? '',
+      node: name ?? '',
+    },
+    skip: !prometheusConnection || !clusterId || !name,
+    fetchPolicy: 'cache-and-network',
+    pollInterval: 60_000,
+  })
+
+  const cpuTotal = Prometheus.capacity(Prometheus.CapacityType.CPU, node)
+  const memTotal = Prometheus.capacity(Prometheus.CapacityType.Memory, node)
+  const podsTotal = Prometheus.capacity(Prometheus.CapacityType.Pods, node)
+  const shouldRenderMetrics =
+    !!prometheusConnection &&
+    !isNull(cpuTotal) &&
+    !isNull(memTotal) &&
+    !!clusterId
+
   const { cpu: cpuReservations, memory: memoryReservations } = useMemo(() => {
-    const allContainers = getAllContainersFromPods(pods)
+    const allContainers = getAllContainersFromPods(node?.pods)
 
     return getPodResources(allContainers)
-  }, [pods])
-
-  const localize = useCallback(
-    (metric) => metric.replaceAll('{instance}', name),
-    [name]
-  )
-  const capacity =
-    (status?.capacity as unknown as { cpu?: string; memory?: string }) ?? {}
+  }, [node?.pods])
 
   const chartData = useMemo(() => {
-    const cpuTotal = cpuParser(capacity.cpu)
-    const memTotal = memoryParser(capacity.memory)
-
-    const cpuUsed = cpuParser(usage?.cpu) ?? undefined
-    const memUsed = memoryParser(usage?.memory) ?? undefined
+    const cpuUsed = Prometheus.toValues(
+      data?.cluster?.clusterNodeMetrics?.cpuUsage
+    )
+    const memUsed = Prometheus.toValues(
+      data?.cluster?.clusterNodeMetrics?.memoryUsage
+    )
+    const podsUsed = node?.pods?.length ?? 0
 
     return {
-      cpu: cpuUsed !== undefined &&
-        cpuTotal !== undefined && {
-          used: cpuUsed,
-          total: cpuTotal,
-          remainder: cpuTotal - cpuUsed || 0,
-          ...cpuReservations,
-        },
-      memory: memUsed !== undefined &&
-        memTotal !== undefined && {
-          used: memUsed,
-          total: memTotal,
-          remainder: memTotal - memUsed,
-          ...memoryReservations,
-        },
+      cpu: {
+        used: Prometheus.avg(cpuUsed),
+        total: cpuTotal!,
+        ...cpuReservations,
+      },
+      memory: {
+        used: Prometheus.avg(memUsed),
+        total: memTotal!,
+        ...memoryReservations,
+      },
+      pods: {
+        used: podsUsed,
+        total: podsTotal!,
+        remainder: podsTotal! - podsUsed,
+      },
     }
   }, [
-    capacity.cpu,
-    capacity.memory,
     cpuReservations,
+    cpuTotal,
+    data?.cluster?.clusterNodeMetrics?.cpuUsage,
+    data?.cluster?.clusterNodeMetrics?.memoryUsage,
+    memTotal,
     memoryReservations,
-    usage?.cpu,
-    usage?.memory,
+    node?.pods?.length,
+    podsTotal,
   ])
 
-  if (!chartData) {
-    return null
-  }
+  if (loading) return <LoadingIndicator />
+  if (!chartData) return null
+  if (!shouldRenderMetrics) return null
 
   return (
-    <Flex
-      flex={false}
-      flexDirection="row"
-      align="center"
-      justifyContent="center"
-      width="100%"
-      gap="medium"
-      overflow="visible"
-    >
-      <GaugeWrap
-        heading="CPU Reservation"
-        width="auto"
-        height="auto"
-      >
-        <ResourceGauge
-          {...chartData.cpu}
-          type="cpu"
-        />
-      </GaugeWrap>
-      <GaugeWrap
-        heading="Memory Reservation"
-        width="auto"
-        height="auto"
-      >
-        <ResourceGauge
-          {...chartData.memory}
-          type="memory"
-        />
-      </GaugeWrap>
-      <SaturationGraphs
-        cpu={localize(NodeMetrics.CPU)}
-        mem={localize(NodeMetrics.Memory)}
-      />
-    </Flex>
+    <>
+      <SubTitle>Overview</SubTitle>
+      <Card css={{ padding: theme.spacing.xlarge }}>
+        <Flex
+          flex={false}
+          flexDirection="row"
+          align="center"
+          justifyContent="center"
+          width="100%"
+          gap="medium"
+          overflow="visible"
+        >
+          <GaugeWrap
+            heading="CPU Reservation"
+            width="auto"
+            height="auto"
+          >
+            <ResourceGauge
+              {...chartData.cpu}
+              type="cpu"
+            />
+          </GaugeWrap>
+          <GaugeWrap
+            heading="Memory Reservation"
+            width="auto"
+            height="auto"
+          >
+            <ResourceGauge
+              {...chartData.memory}
+              type="memory"
+            />
+          </GaugeWrap>
+          <GaugeWrap
+            heading="Pods"
+            width="auto"
+            height="auto"
+          >
+            <RadialBarChart
+              data={[
+                {
+                  id: 'Pod usage',
+                  data: [
+                    {
+                      x: 'Pods used',
+                      y: chartData.pods.used,
+                    },
+                    {
+                      x: 'Pods available',
+                      y: chartData.pods.remainder,
+                    },
+                  ],
+                },
+              ]}
+              centerLabel="Used"
+              centerVal={`${Math.round(
+                (chartData.pods.used / chartData.pods.total) * 100
+              )}%`}
+            />
+          </GaugeWrap>
+          <SaturationGraphs
+            cpuUsage={Prometheus.toValues(
+              data?.cluster?.clusterNodeMetrics?.cpuUsage
+            )}
+            cpuTotal={cpuTotal!}
+            memUsage={Prometheus.toValues(
+              data?.cluster?.clusterNodeMetrics?.memoryUsage
+            )}
+            memTotal={memTotal!}
+          />
+        </Flex>
+      </Card>
+    </>
   )
 }

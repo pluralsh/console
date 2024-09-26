@@ -82,7 +82,7 @@ export function Graph({
   }, [data, selected])
 
   if (graph.length === 0)
-    return <span css={theme.partials.text.caption}>no data</span>
+    return <Span css={theme.partials.text.caption}>no data</Span>
 
   const hasData = !!graph[0].data[0]
 
@@ -106,7 +106,7 @@ export function Graph({
         type: 'linear',
         min: 0,
         max: 'auto',
-        stacked: true,
+        stacked: false,
         reverse: false,
       }}
       colors={COLORS}

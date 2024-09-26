@@ -2,8 +2,8 @@ import { useOutletContext } from 'react-router-dom'
 import { ColumnDef } from '@tanstack/react-table'
 import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
-
 import { Cluster } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 
 import {
   ColCpuTotal,
@@ -20,6 +20,8 @@ import {
 } from '../../cluster/nodes/NodesList'
 import { TableCaretLink } from '../../cluster/TableElements'
 import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
+import { useDeploymentSettings } from '../../contexts/DeploymentSettingsContext'
+import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
 
 export const ColActions = (clusterId?: string) =>
   columnHelper.accessor(() => null, {
@@ -38,6 +40,8 @@ export const ColActions = (clusterId?: string) =>
 
 export default function ClusterNodes() {
   const theme = useTheme()
+  const metricsEnabled =
+    !!useDeploymentSettings()?.prometheusConnection ?? false
   const { cluster } = useOutletContext() as { cluster: Cluster }
 
   const columns: ColumnDef<TableData, any>[] = useMemo(
@@ -55,22 +59,6 @@ export default function ClusterNodes() {
     [cluster]
   )
 
-  // const usage: ResourceUsage = useMemo(() => {
-  //   if (!cluster) {
-  //     return null
-  //   }
-  //   const cpu = sumBy(
-  //     cluster.nodeMetrics,
-  //     (metrics) => cpuParser(metrics?.usage?.cpu) ?? 0
-  //   )
-  //   const mem = sumBy(
-  //     cluster.nodeMetrics,
-  //     (metrics) => memoryParser((metrics as any)?.usage?.memory) ?? 0
-  //   )
-
-  //   return { cpu, mem }
-  // }, [cluster])
-
   return (
     <div
       css={{
@@ -79,13 +67,12 @@ export default function ClusterNodes() {
         gap: theme.spacing.medium,
       }}
     >
-      {/* {!isEmpty(cluster.nodes) && prometheusConnection && (
+      {!isEmpty(cluster.nodes) && metricsEnabled && (
         <ClusterMetrics
-          nodes={cluster?.nodes?.filter((node): node is Node => !!node) || []}
-          usage={usage}
+          nodes={cluster?.nodes?.filter((node): boolean => !!node) || []}
           cluster={cluster}
         />
-      )} */}
+      )}
       <NodesList
         nodes={cluster?.nodes || []}
         nodeMetrics={cluster?.nodeMetrics || []}

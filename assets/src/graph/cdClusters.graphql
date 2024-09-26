@@ -194,6 +194,32 @@ fragment ClustersRow on Cluster {
   }
 }
 
+fragment ClusterMetricsFragment on Cluster {
+  clusterMetrics(start: $start, stop: $stop, step: $step) {
+    cpu { ...MetricResponse }
+    cpuUsage { ...MetricResponse }
+    cpuRequests { ...MetricResponse }
+    cpuLimits { ...MetricResponse }
+
+    memory { ...MetricResponse }
+    memoryUsage { ...MetricResponse }
+    memoryRequests { ...MetricResponse }
+    memoryLimits { ...MetricResponse }
+
+    pods { ...MetricResponse }
+  }
+}
+
+fragment ClusterNodeMetricsFragment on Cluster {
+  clusterNodeMetrics(node: $node, start: $start, stop: $stop, step: $step) {
+    cpu { ...MetricResponse }
+    cpuUsage { ...MetricResponse }
+
+    memory { ...MetricResponse }
+    memoryUsage { ...MetricResponse }
+  }
+}
+
 fragment Cluster on Cluster {
   ...ClustersRow
   apiDeprecations {
@@ -494,5 +520,17 @@ query ClusterLogs(
     logs(query: $query, start: $start, end: $end, limit: $limit) {
       ...LogStream
     }
+  }
+}
+
+query ClusterMetrics($clusterId: ID!, $start: DateTime, $stop: DateTime, $step: String) {
+  cluster(id: $clusterId) {
+    ...ClusterMetricsFragment
+  }
+}
+
+query ClusterNodeMetrics($clusterId: ID!, $node: String!, $start: DateTime, $stop: DateTime, $step: String) {
+  cluster(id: $clusterId) {
+    ...ClusterNodeMetricsFragment
   }
 }
