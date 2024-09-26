@@ -71,6 +71,32 @@ fragment ApiDeprecation on ApiDeprecation {
   replacement
 }
 
+fragment UpgradeInsight on UpgradeInsight {
+  id
+  name
+  description
+  details {
+    ...UpgradeInsightDetail
+  }
+  insertedAt
+  updatedAt
+  refreshedAt
+  transitionedAt
+  version
+  status
+}
+
+fragment UpgradeInsightDetail on UpgradeInsightDetail {
+  id
+  insertedAt
+  updatedAt
+  removedIn
+  replacedIn
+  replacement
+  status
+  used
+}
+
 fragment RuntimeService on RuntimeService {
   id
   name
@@ -422,6 +448,9 @@ query RuntimeServices(
     }
     apiDeprecations {
       ...ApiDeprecation
+    }
+    upgradeInsights {
+      ...UpgradeInsight
     }
   }
 }
