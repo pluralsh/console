@@ -1,6 +1,6 @@
 import { H1 } from 'honorable'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { GqlError } from 'components/utils/Alert'
 import {
   PolicyAggregate,
@@ -10,8 +10,6 @@ import {
 import { useTheme } from 'styled-components'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
-
-import { POLICIES_QUERY_PAGE_SIZE } from 'components/policies/Policies'
 
 import { PoliciesTable } from 'components/policies/PoliciesTable'
 
@@ -32,7 +30,6 @@ export function ConstraintViolationsCard() {
     setVirtualSlice,
   } = useFetchPaginatedData({
     queryHook: usePolicyConstraintsQuery,
-    pageSize: POLICIES_QUERY_PAGE_SIZE,
     keyPath: ['policyConstraints'],
   })
 

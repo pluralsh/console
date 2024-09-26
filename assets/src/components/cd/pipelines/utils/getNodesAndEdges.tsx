@@ -39,7 +39,7 @@ const TYPE_SORT_VALS = Object.fromEntries(
 )
 
 function createNodeEdges(nodeId: string, toId: string, fromId: string) {
-  const edges: Edge<any>[] = []
+  const edges: Edge[] = []
 
   if (toId) {
     edges.push({
@@ -75,7 +75,7 @@ export function getNodesAndEdges(pipeline: PipelineFragment) {
 }
 
 function getGateNodes(pipeEdges: PipelineStageEdgeFragment[]) {
-  const allEdges: Edge<any>[] = []
+  const allEdges: Edge[] = []
 
   const nodes = pipeEdges?.flatMap((e) => {
     let edge = e
@@ -106,31 +106,33 @@ function getGateNodes(pipeEdges: PipelineStageEdgeFragment[]) {
       }
     }) as Record<NodeType, PipelineGateFragment[]>
 
-    const ret = (Object.entries(groupedGates) as Entries<typeof groupedGates>)
-      // Order of edges matters to Dagre layout, so sort by type ahead of time
-      .sort(([aType], [bType]) => TYPE_SORT_VALS[bType] - TYPE_SORT_VALS[aType])
-      .flatMap(([type, gates]) => {
-        // Don't add unsupported gate types
-        if (type !== NodeType.Job && type !== NodeType.Approval) {
-          return []
-        }
-        // Gate types that get their own node
-        if (type === NodeType.Job) {
-          const { edges, nodes } = getFlatGateNodesAndEdges(gates, edge, type)
+    return (
+      (Object.entries(groupedGates) as Entries<typeof groupedGates>)
+        // Order of edges matters to Dagre layout, so sort by type ahead of time
+        .sort(
+          ([aType], [bType]) => TYPE_SORT_VALS[bType] - TYPE_SORT_VALS[aType]
+        )
+        .flatMap(([type, gates]) => {
+          // Don't add unsupported gate types
+          if (type !== NodeType.Job && type !== NodeType.Approval) {
+            return []
+          }
+          // Gate types that get their own node
+          if (type === NodeType.Job) {
+            const { edges, nodes } = getFlatGateNodesAndEdges(gates, edge, type)
+
+            allEdges.push(...edges)
+
+            return nodes
+          }
+
+          const { edges, node } = getGroupedGateNodeAndEdges(edge, type, gates)
 
           allEdges.push(...edges)
 
-          return nodes
-        }
-
-        const { edges, node } = getGroupedGateNodeAndEdges(edge, type, gates)
-
-        allEdges.push(...edges)
-
-        return node || []
-      })
-
-    return ret
+          return node || []
+        })
+    )
   })
 
   return { nodes, edges: allEdges }
@@ -164,7 +166,7 @@ function getFlatGateNodesAndEdges(
   edge: PipelineStageEdgeFragment,
   type: NodeType
 ) {
-  const edges: Edge<any>[] = []
+  const edges: Edge[] = []
 
   const nodes = gates?.flatMap((gate) => {
     const nodeId = gate.id

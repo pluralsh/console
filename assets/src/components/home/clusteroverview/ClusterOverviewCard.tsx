@@ -2,10 +2,9 @@ import { H1 } from 'honorable'
 
 import { useTheme } from 'styled-components'
 import {
-  CLUSTERS_QUERY_PAGE_SIZE,
-  CLUSTERS_REACT_VIRTUAL_OPTIONS,
-} from 'components/cd/clusters/Clusters'
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 import { GqlError } from 'components/utils/Alert'
 import { useClustersQuery, useUpgradeStatisticsQuery } from 'generated/graphql'
 
@@ -32,7 +31,6 @@ export function ClusterOverviewCard() {
   } = useFetchPaginatedData(
     {
       queryHook: useClustersQuery,
-      pageSize: CLUSTERS_QUERY_PAGE_SIZE,
       keyPath: ['clusters'],
     },
     {
@@ -77,7 +75,7 @@ export function ClusterOverviewCard() {
             hasNextPage={pageInfo?.hasNextPage}
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
-            reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
             width="100%"
             css={{ maxHeight: '100%' }}

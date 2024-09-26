@@ -12,13 +12,12 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useProjectId } from 'components/contexts/ProjectsContext'
 
-import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
-
 import {
-  NAMESPACES_QUERY_PAGE_SIZE,
-  NAMESPACES_REACT_VIRTUAL_OPTIONS,
-  columns,
-} from './Namespaces'
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../utils/table/useFetchPaginatedData'
+
+import { columns } from './Namespaces'
 
 export function NamespacesTable() {
   const theme = useTheme()
@@ -36,7 +35,6 @@ export function NamespacesTable() {
   } = useFetchPaginatedData(
     {
       queryHook: useManagedNamespacesQuery,
-      pageSize: NAMESPACES_QUERY_PAGE_SIZE,
       keyPath: ['managedNamespaces'],
     },
     { projectId }
@@ -91,7 +89,7 @@ export function NamespacesTable() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             reactTableOptions={reactTableOptions}
-            reactVirtualOptions={NAMESPACES_REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
             emptyStateProps={{
               message: "Looks like you don't have any namespaces yet",

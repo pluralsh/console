@@ -1,17 +1,9 @@
-import {
-  ComponentProps,
-  Dispatch,
-  SetStateAction,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { Dispatch, SetStateAction, useMemo, useRef, useState } from 'react'
 import {
   ListIcon,
   NetworkInterfaceIcon,
   SubTab,
   TabList,
-  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -60,14 +52,6 @@ export const columns = [
   ColErrors,
   ColActions,
 ]
-
-export const SERVICES_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
-
-export const SERVICES_QUERY_PAGE_SIZE = 100
 
 export function getServiceStatuses(
   serviceStatuses?: Maybe<Maybe<ServiceStatusCountFragment>[]>

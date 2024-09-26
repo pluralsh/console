@@ -21,7 +21,7 @@ import {
 
 import { Edge } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
-import { TruncateStart } from 'components/utils/table/TruncateStart'
+import { TruncateStart } from 'components/utils/table/Truncate'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { StackedText } from 'components/utils/table/StackedText'
 import { BasicLink } from 'components/utils/typography/BasicLink'

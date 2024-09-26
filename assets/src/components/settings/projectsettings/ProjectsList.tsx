@@ -4,7 +4,10 @@ import { useProjectsQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -43,7 +46,7 @@ export function ProjectsList() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        reactVirtualOptions={{ overscan: 10 }}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         css={{
           height: '100%',
         }}

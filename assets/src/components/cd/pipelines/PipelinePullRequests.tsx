@@ -4,7 +4,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import { PullRequestFragment } from 'generated/graphql'
 import { ComponentProps, useMemo } from 'react'
 
-import { REACT_VIRTUAL_OPTIONS } from './PipelineContexts'
+import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
 export function PipelinePullRequestsModal({
   pullRequests,
@@ -40,7 +40,7 @@ export function PipelinePullRequestsTable({
   return (
     <Table
       columns={prColumns}
-      reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       data={pullRequestEdges || []}
       virtualizeRows
       css={{

@@ -23,7 +23,7 @@ export function PrConfigurationInput({
 
   return type === ConfigurationType.Bool ? (
     <Switch
-      checked={!!configBoolVal}
+      checked={configBoolVal}
       onChange={(isChecked) => {
         setValue(isChecked.toString())
       }}

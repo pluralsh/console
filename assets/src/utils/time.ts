@@ -4,9 +4,7 @@ import moment, { Moment } from 'moment-timezone'
 export const MINUTE_TO_SECONDS = 60
 export const HOUR_TO_SECONDS = MINUTE_TO_SECONDS * 60
 export const DAY_TO_SECONDS = HOUR_TO_SECONDS * 24
-
 export const SECOND_TO_MILLISECONDS = 1000
-export const MINUTE_TO_MILLISECONDS = SECOND_TO_MILLISECONDS * 60
 
 export const DURATIONS = [
   {

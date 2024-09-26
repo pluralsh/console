@@ -36,6 +36,7 @@ import { NamespaceListFooter } from '../../cluster/pods/Pods'
 import { columnHelper } from '../../cluster/nodes/NodesList'
 import { TableCaretLink } from '../../cluster/TableElements'
 import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -101,10 +102,20 @@ export default function ClusterPods() {
     variables: { clusterId },
     pollInterval: POLL_INTERVAL,
   })
-  const { data, error } = useClusterPodsQuery({
-    variables: { clusterId, namespace },
-    pollInterval: POLL_INTERVAL,
-  })
+
+  const { data, error, loading, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        pollInterval: POLL_INTERVAL,
+        queryHook: useClusterPodsQuery,
+        keyPath: ['pods'],
+      },
+      {
+        clusterId,
+        namespace,
+      }
+    )
+
   const theme = useTheme()
   const [filterString, setFilterString] = useState('')
   const debouncedFilterString = useDebounce(filterString, 300)
@@ -234,6 +245,10 @@ export default function ClusterPods() {
             pods={pods}
             columns={columns}
             reactTableOptions={reactTableOptions}
+            hasNextPage={pageInfo?.hasNextPage}
+            fetchNextPage={fetchNextPage}
+            isFetchingNextPage={loading}
+            onVirtualSliceChange={setVirtualSlice}
             refetch={refetch}
             linkBasePath={getPodDetailsPath({
               clusterId,

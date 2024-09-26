@@ -5,11 +5,14 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { ComponentProps, useMemo } from 'react'
+import { useMemo } from 'react'
 import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import {
   useClusterBackupsQuery,
@@ -31,14 +34,6 @@ import {
   ColCluster,
   ColStatus,
 } from './BackupsColumns'
-
-const QUERY_PAGE_SIZE = 100
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const columns = [ColCluster, ColBackupId, ColBackupDate, ColStatus, ColActions]
 
@@ -65,14 +60,8 @@ export default function Backups() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useClusterBackupsQuery,
-      pageSize: QUERY_PAGE_SIZE,
-      keyPath: ['clusterBackups'],
-    },
-    {
-      clusterId,
-    }
+    { queryHook: useClusterBackupsQuery, keyPath: ['clusterBackups'] },
+    { clusterId }
   )
 
   useSetBreadcrumbs(
@@ -117,7 +106,7 @@ export default function Backups() {
             loose
             columns={columns}
             reactTableOptions={{ meta: { refetch, cluster } }}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={data?.clusterBackups?.edges || []}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}

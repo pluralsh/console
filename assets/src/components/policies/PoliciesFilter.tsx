@@ -10,10 +10,11 @@ import {
   useViolationStatisticsQuery,
 } from 'generated/graphql'
 
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { useProjectId } from '../contexts/ProjectsContext'
+import { mapExistingNodes } from '../../utils/graphql'
 
 function PoliciesFilter({
   selectedKinds,
@@ -63,7 +64,10 @@ function PoliciesFilter({
     }))
     .filter(({ id }) => Boolean(id))
 
-  const clusters = clustersData?.clusters?.edges
+  const clusters = useMemo(
+    () => mapExistingNodes(clustersData?.clusters),
+    [clustersData?.clusters]
+  )
 
   const clusterLabel = 'Cluster'
   const kindLabel = 'Kind'
@@ -104,24 +108,19 @@ function PoliciesFilter({
           >
             No cluster
           </Checkbox>
-          {clusters?.map((edge) => {
-            if (!edge?.node) return null
-            const { node } = edge
-
-            return (
-              <Checkbox
-                key={node.id}
-                name={clusterLabel}
-                value={node.id}
-                checked={selectedClusters.includes(node.id)}
-                onChange={({ target: { checked } }: any) => {
-                  handleCheckboxChange(setSelectedClusters, node.id, checked)
-                }}
-              >
-                {node.name}
-              </Checkbox>
-            )
-          })}
+          {clusters?.map((node) => (
+            <Checkbox
+              key={node.id}
+              name={clusterLabel}
+              value={node.id}
+              checked={selectedClusters.includes(node.id)}
+              onChange={({ target: { checked } }: any) => {
+                handleCheckboxChange(setSelectedClusters, node.id, checked)
+              }}
+            >
+              {node.name}
+            </Checkbox>
+          ))}
         </Flex>
       </AccordionItem>
       <AccordionItem

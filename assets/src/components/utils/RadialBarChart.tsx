@@ -121,7 +121,7 @@ function RadialBarChart({
 } & Omit<Partial<ComponentProps<typeof ResponsiveRadialBar>>, 'data'>) {
   const chartTheme = useChartTheme()
   const CenteredMetric = useMemo(
-    () => (true ? createCenteredMetric(centerVal, centerLabel) : () => null),
+    () => createCenteredMetric(centerVal, centerLabel),
     [centerLabel, centerVal]
   )
 

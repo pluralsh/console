@@ -226,9 +226,8 @@ export default function ClusterMetadata() {
 
 function formatJson(jsonObject) {
   try {
-    const formattedJson = JSON.stringify(jsonObject, null, 2) // Convert the object back into a formatted string
-
-    return formattedJson
+    // Convert the object back into a formatted string
+    return JSON.stringify(jsonObject, null, 2)
   } catch (e) {
     console.error('Invalid JSON:', e)
 

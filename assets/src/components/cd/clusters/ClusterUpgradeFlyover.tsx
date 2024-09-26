@@ -27,7 +27,7 @@ import {
   useUpdateClusterMutation,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { coerce } from 'semver'
 import styled, { useTheme } from 'styled-components'
 import {

@@ -12,7 +12,10 @@ import isEmpty from 'lodash/isEmpty'
 import { useParams } from 'react-router-dom'
 import { capitalize } from 'lodash'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import {
   ClusterBasicFragment,
@@ -36,8 +39,6 @@ import {
 } from '../../../../routes/backupRoutesConsts'
 import { DateTimeCol } from '../../../utils/table/DateTimeCol'
 
-const QUERY_PAGE_SIZE = 100
-
 const restoreStatusSeverity = {
   [RestoreStatus.Created]: 'info',
   [RestoreStatus.Pending]: 'info',
@@ -47,12 +48,6 @@ const restoreStatusSeverity = {
   RestoreStatus,
   ComponentProps<typeof Chip>['severity']
 >
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 const columnHelper = createColumnHelper<Edge<ClusterRestore>>()
 
@@ -152,14 +147,8 @@ export default function Restores() {
     fetchNextPage,
     setVirtualSlice,
   } = useFetchPaginatedData(
-    {
-      queryHook: useClusterRestoresQuery,
-      pageSize: QUERY_PAGE_SIZE,
-      keyPath: ['clusterRestores'],
-    },
-    {
-      clusterId,
-    }
+    { queryHook: useClusterRestoresQuery, keyPath: ['clusterRestores'] },
+    { clusterId }
   )
 
   useSetBreadcrumbs(
@@ -204,7 +193,7 @@ export default function Restores() {
             loose
             columns={columns}
             reactTableOptions={{ meta: { refetch, cluster } }}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={data?.clusterRestores?.edges || []}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}

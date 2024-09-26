@@ -13,12 +13,12 @@ import { ClusterProviderIcon } from 'components/utils/Provider'
 import { ClusterTinyFragment, useClusterSelectorQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { useTheme } from 'styled-components'
-import { extendConnection } from 'utils/graphql'
 
 import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 import { ClusterUpgradeChip } from '../clusters/ClusterUpgrade'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 export default function ClusterSelector({
   onClusterChange,
@@ -40,43 +40,35 @@ export default function ClusterSelector({
   const [inputValue, setInputValue] = useState('')
   const throttledInput = useThrottle(inputValue, 100)
   const [clusterSelectIsOpen, setClusterSelectIsOpen] = useState(false)
-  const {
-    data: currentData,
-    fetchMore,
-    previousData,
-    loading,
-  } = useClusterSelectorQuery({
-    variables: {
-      q: throttledInput || null,
-      currentClusterId: clusterId,
-      projectId,
+
+  const { data, loading, pageInfo, fetchNextPage } = useFetchPaginatedData(
+    {
+      queryHook: useClusterSelectorQuery,
+      keyPath: ['clusters'],
+      errorPolicy: 'ignore',
     },
-    fetchPolicy: 'cache-and-network',
-    errorPolicy: 'ignore',
-  })
-  const data = currentData || previousData
+    { q: throttledInput || null, currentClusterId: clusterId, projectId }
+  )
+
   const clusters = useMemo(
     () => data?.clusters?.edges?.flatMap((e) => (e?.node ? e.node : [])) || [],
     [data?.clusters?.edges]
   )
-  const pageInfo = data?.clusters?.pageInfo
 
   const findCluster = useCallback(
     (clusterId: Nullable<string>) => {
       if (!clusterId) {
         return null
       }
-      if (currentData?.cluster && currentData?.cluster.id === clusterId) {
-        return currentData.cluster
-      }
-      if (previousData?.cluster && previousData?.cluster.id === clusterId) {
-        return previousData.cluster
+      if (data?.cluster && data?.cluster.id === clusterId) {
+        return data.cluster
       }
 
       return clusters?.find((cluster) => cluster?.id === clusterId)
     },
-    [clusters, currentData?.cluster, previousData?.cluster]
+    [clusters, data?.cluster]
   )
+
   const selectedCluster = useMemo(
     () => findCluster(clusterId),
     [clusterId, findCluster]
@@ -122,20 +114,13 @@ export default function ClusterSelector({
             <ListBoxFooter>Loading</ListBoxFooter>
           ) : isEmpty(clusters) ? (
             <ListBoxFooter>No results</ListBoxFooter>
-          ) : data?.clusters?.pageInfo.hasNextPage ? (
+          ) : pageInfo?.hasNextPage ? (
             <ListBoxFooterPlus>Show more</ListBoxFooterPlus>
           ) : undefined
         }
         onFooterClick={() => {
-          if (data?.clusters?.pageInfo.hasNextPage) {
-            if (!pageInfo) {
-              return
-            }
-            fetchMore({
-              variables: { after: pageInfo.endCursor },
-              updateQuery: (prev, { fetchMoreResult: { clusters } }) =>
-                extendConnection(prev, clusters, 'clusters'),
-            })
+          if (pageInfo?.hasNextPage) {
+            fetchNextPage()
           } else {
             setClusterSelectIsOpen(false)
           }

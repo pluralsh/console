@@ -169,6 +169,7 @@ export default function ClusterAddOns() {
       >
         {addOns.map((addon, i) => (
           <ClusterAddOnsEntry
+            key={addon.id}
             addon={addon}
             active={addon.id === addOn?.id}
             first={i === 0}

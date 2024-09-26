@@ -17,7 +17,7 @@ export function StackSettingsModal(
   props: ComponentProps<typeof StackSettingsModalInner>
 ) {
   return (
-    <ModalMountTransition open={!!props.open}>
+    <ModalMountTransition open={props.open}>
       <StackSettingsModalInner {...props} />
     </ModalMountTransition>
   )

@@ -22,7 +22,7 @@ import {
 
 import { Edge, removeConnection, updateCache } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
-import { TruncateStart } from 'components/utils/table/TruncateStart'
+import { TruncateStart } from 'components/utils/table/Truncate'
 import { StackedText } from 'components/utils/table/StackedText'
 import { MoreMenu } from 'components/utils/MoreMenu'
 

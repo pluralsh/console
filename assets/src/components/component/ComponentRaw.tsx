@@ -42,7 +42,7 @@ export function RawYaml({ raw }: { raw?: object | string | null | undefined }) {
 
 export function RawJson({ raw }: { raw?: object | string | null | undefined }) {
   const rawStr = useMemo(() => {
-    let json = ''
+    let json: string
 
     try {
       json = raw

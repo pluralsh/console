@@ -23,7 +23,7 @@ import { ReadinessT } from 'utils/status'
 import { Confirm } from 'components/utils/Confirm'
 import { useMutation } from '@apollo/client'
 
-import { TruncateStart } from 'components/utils/table/TruncateStart'
+import { TruncateStart } from 'components/utils/table/Truncate'
 
 import { InlineLink } from 'components/utils/typography/InlineLink'
 

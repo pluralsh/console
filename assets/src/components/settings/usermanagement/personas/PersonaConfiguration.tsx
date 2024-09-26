@@ -38,59 +38,55 @@ export function PersonaConfiguration({
       >
         Enable all
       </Switch>
-      {true && (
-        <div
-          css={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          }}
-        >
-          {Object.entries(configTabs).map(([key, label]) => (
+      <div
+        css={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        }}
+      >
+        {Object.entries(configTabs).map(([key, label]) => (
+          <div
+            key={key}
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.xsmall,
+            }}
+          >
+            <Body2P
+              as="h3"
+              css={{ color: theme.colors['text-xlight'] }}
+            >
+              {label}
+            </Body2P>
             <div
-              key={key}
               css={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: theme.spacing.xsmall,
               }}
             >
-              <Body2P
-                as="h3"
-                css={{ color: theme.colors['text-xlight'] }}
-              >
-                {label}
-              </Body2P>
-              <div
-                css={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: theme.spacing.xsmall,
-                }}
-              >
-                {configuration[key] &&
-                  Object.entries(configuration[key]).map(
-                    ([subKey, checked]) => (
-                      <Switch
-                        key={subKey}
-                        disabled={!!configuration.all || viewOnly}
-                        checked={!!configuration.all || !!checked}
-                        onChange={() =>
-                          setConfiguration?.(
-                            produce(configuration, (draft) => {
-                              draft[key][subKey] = !draft[key][subKey]
-                            })
-                          )
-                        }
-                      >
-                        {configKeyToLabel(subKey)}
-                      </Switch>
-                    )
-                  )}
-              </div>
+              {configuration[key] &&
+                Object.entries(configuration[key]).map(([subKey, checked]) => (
+                  <Switch
+                    key={subKey}
+                    disabled={!!configuration.all || viewOnly}
+                    checked={!!configuration.all || !!checked}
+                    onChange={() =>
+                      setConfiguration?.(
+                        produce(configuration, (draft) => {
+                          draft[key][subKey] = !draft[key][subKey]
+                        })
+                      )
+                    }
+                  >
+                    {configKeyToLabel(subKey)}
+                  </Switch>
+                ))}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

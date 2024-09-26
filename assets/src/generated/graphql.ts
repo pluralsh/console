@@ -8788,6 +8788,7 @@ export type ClusterBasicFragment = { __typename?: 'Cluster', handle?: string | n
 
 export type ClustersTinyQueryVariables = Exact<{
   projectId?: InputMaybe<Scalars['ID']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -8821,6 +8822,10 @@ export type ClusterBasicQuery = { __typename?: 'RootQueryType', cluster?: { __ty
 export type ClusterPodsQueryVariables = Exact<{
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   namespace?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -14305,7 +14310,7 @@ export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMuta
 export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
 export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
 export const ClustersDocument = gql`
-    query Clusters($first: Int = 100, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID) {
+    query Clusters($first: Int, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID) {
   clusters(
     first: $first
     after: $after
@@ -14370,8 +14375,8 @@ export type ClustersLazyQueryHookResult = ReturnType<typeof useClustersLazyQuery
 export type ClustersSuspenseQueryHookResult = ReturnType<typeof useClustersSuspenseQuery>;
 export type ClustersQueryResult = Apollo.QueryResult<ClustersQuery, ClustersQueryVariables>;
 export const ClustersTinyDocument = gql`
-    query ClustersTiny($projectId: ID) {
-  clusters(first: 200, projectId: $projectId) {
+    query ClustersTiny($projectId: ID, $first: Int) {
+  clusters(first: $first, projectId: $projectId) {
     edges {
       node {
         ...ClusterTiny
@@ -14394,6 +14399,7 @@ export const ClustersTinyDocument = gql`
  * const { data, loading, error } = useClustersTinyQuery({
  *   variables: {
  *      projectId: // value for 'projectId'
+ *      first: // value for 'first'
  *   },
  * });
  */
@@ -14414,7 +14420,7 @@ export type ClustersTinyLazyQueryHookResult = ReturnType<typeof useClustersTinyL
 export type ClustersTinySuspenseQueryHookResult = ReturnType<typeof useClustersTinySuspenseQuery>;
 export type ClustersTinyQueryResult = Apollo.QueryResult<ClustersTinyQuery, ClustersTinyQueryVariables>;
 export const ClusterSelectorDocument = gql`
-    query ClusterSelector($first: Int = 100, $after: String, $q: String, $currentClusterId: ID, $projectId: ID) {
+    query ClusterSelector($first: Int, $after: String, $q: String, $currentClusterId: ID, $projectId: ID) {
   clusters(first: $first, after: $after, q: $q, projectId: $projectId) {
     pageInfo {
       ...PageInfo
@@ -14549,8 +14555,15 @@ export type ClusterBasicLazyQueryHookResult = ReturnType<typeof useClusterBasicL
 export type ClusterBasicSuspenseQueryHookResult = ReturnType<typeof useClusterBasicSuspenseQuery>;
 export type ClusterBasicQueryResult = Apollo.QueryResult<ClusterBasicQuery, ClusterBasicQueryVariables>;
 export const ClusterPodsDocument = gql`
-    query ClusterPods($clusterId: ID, $namespace: String) {
-  pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
+    query ClusterPods($clusterId: ID, $namespace: String, $first: Int, $after: String, $before: String, $last: Int) {
+  pods(
+    first: $first
+    after: $after
+    before: $before
+    last: $last
+    clusterId: $clusterId
+    namespace: $namespace
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -14578,6 +14591,10 @@ ${PodFragmentDoc}`;
  *   variables: {
  *      clusterId: // value for 'clusterId'
  *      namespace: // value for 'namespace'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
  *   },
  * });
  */

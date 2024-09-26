@@ -1,13 +1,13 @@
-import { Breadcrumb, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { usePolicyConstraintsQuery } from 'generated/graphql'
-import { ComponentProps, useState } from 'react'
+import { useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
 import styled from 'styled-components'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
 import { Overline } from 'components/cd/utils/PermissionsModal'
 
@@ -19,15 +19,7 @@ const breadcrumbs: Breadcrumb[] = [
   { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
 ]
 
-export const POLICIES_QUERY_PAGE_SIZE = 100
-
 export const POLL_INTERVAL = 10_000
-
-export const POLICIES_REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
 
 export function Policies() {
   useSetBreadcrumbs(breadcrumbs)
@@ -53,7 +45,6 @@ export function Policies() {
     useFetchPaginatedData(
       {
         queryHook: usePolicyConstraintsQuery,
-        pageSize: POLICIES_QUERY_PAGE_SIZE,
         keyPath: ['policyConstraints'],
       },
       policyQFilters

@@ -33,6 +33,4 @@ export function StackTypeIcon({
         />
       )
   }
-
-  return undefined
 }
