@@ -495,7 +495,6 @@ function ClusterUpgradeAccordionTrigger({
 }
 
 const TriggerWrapperSC = styled.div(({ theme }) => ({
-  padding: theme.spacing.xsmall,
   gap: theme.spacing.large,
   cursor: 'pointer',
   fontSize: '18px',
