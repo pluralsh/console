@@ -76,9 +76,9 @@ defmodule Console.Deployments.Observability do
   end
 
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "Deployment", name: name, namespace: ns} = comp),
-    do: {:ok, %{name: name, namespace: ns, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+-[a-z0-9]+"}}
+    do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[a-z0-9]+-[a-z0-9]+"]}
   defp component_args(%ServiceComponent{group: "apps", version: "v1", kind: "StatefulSet", name: name, namespace: ns} = comp),
-    do: {:ok, %{name: name, namespace: ns, cluster: comp.service.cluster.handle, regex: "-[0-9]+"}}
+    do: {:ok, [namespace: ns, name: name, cluster: comp.service.cluster.handle, regex: "-[0-9]+"]}
   defp component_args(%ServiceComponent{group: g, kind: k}), do: {:error, "unsupported component kind #{g}/#{k}"}
 
   defp bulk_query(queries, ctx, start, stop, step) do
