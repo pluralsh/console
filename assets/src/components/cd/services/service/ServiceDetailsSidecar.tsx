@@ -81,6 +81,7 @@ export function ServiceDetailsSidecar({
           message="Resync service"
           tooltipMessage="Use this to sync this service now instead of at the next poll interval"
           variables={{ id }}
+          width="100%"
         />
       </div>
       <Sidecar>
