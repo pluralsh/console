@@ -151,6 +151,7 @@ export default function Cluster() {
             />
           </div>
           <TabList
+            scrollable
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',
