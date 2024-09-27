@@ -17,6 +17,8 @@ import { Graph } from 'components/utils/Graph'
 import GraphHeader from 'components/utils/GraphHeader'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
+import moment from 'moment/moment'
+
 import { format } from '../apps/app/dashboards/dashboard/misc'
 
 import { ComponentDetailsContext } from './ComponentDetails'
@@ -174,25 +176,22 @@ function PodGraphs({
 function Metric({
   serviceId,
   componentId,
-  name,
-  namespace,
-  regex,
   duration: { step, offset },
-  cluster,
   ...props
 }) {
   const theme = useTheme()
-  // const stop = moment()
-  // const start = stop.subtract({ hour: 2 })
-
-  const { data } = useServiceDeploymentComponentMetricsQuery({
+  const start = useMemo(
+    () => moment().subtract({ second: offset }).toISOString(),
+    [offset]
+  )
+  const { data, loading } = useServiceDeploymentComponentMetricsQuery({
     variables: {
       id: serviceId,
       componentId,
       step,
-      // stop: start.toISOString(),
-      // start: `${moment().subtract({ hour: 2 }).toISOString()}`,
+      start,
     },
+    skip: !serviceId || !componentId,
     pollInterval: 60_000,
     fetchPolicy: 'cache-and-network',
   })
@@ -208,8 +207,6 @@ function Metric({
       podMem: (podMem || []).filter(isNonNullable),
     }
   }, [data])
-
-  if (!data) return <LoadingIndicator />
 
   let content = <EmptyState message="No metrics available" />
 
@@ -228,6 +225,8 @@ function Metric({
     )
   }
 
+  if (loading && !data) return <LoadingIndicator />
+
   return (
     <Card
       css={{
@@ -242,19 +241,10 @@ function Metric({
   )
 }
 
-const kindToRegex = {
-  deployment: '-[a-z0-9]+-[a-z0-9]+',
-  statefulset: '-[0-9]+',
-}
-
 export default function ComponentMetrics() {
   const theme = useTheme()
   const [duration, setDuration] = useState<any>(DURATIONS[0])
-  const { component, cluster, serviceId } =
-    useOutletContext<ComponentDetailsContext>()
-  const componentName = component.name?.toLowerCase()
-  const componentKind = component.kind?.toLowerCase()
-  const componentNamespace = component.namespace?.toLowerCase()
+  const { component, serviceId } = useOutletContext<ComponentDetailsContext>()
 
   return (
     <div
@@ -273,13 +263,9 @@ export default function ComponentMetrics() {
         top={0}
       />
       <Metric
-        namespace={componentNamespace}
-        name={componentName}
         serviceId={serviceId}
         componentId={component?.id}
-        regex={kindToRegex[componentKind]}
         duration={duration}
-        cluster={cluster}
         maxHeight="100%"
         overflowY="auto"
       />
