@@ -6475,6 +6475,7 @@ export type RootQueryTypePolicyConstraintsArgs = {
   namespace?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   q?: InputMaybe<Scalars['String']['input']>;
+  violated?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 

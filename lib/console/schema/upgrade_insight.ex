@@ -13,7 +13,9 @@ defmodule Console.Schema.UpgradeInsight do
     field :transitioned_at, :utc_datetime_usec
 
 
-    has_many :details, UpgradeInsightDetail, foreign_key: :insight_id
+    has_many :details, UpgradeInsightDetail,
+      foreign_key: :insight_id,
+      on_replace: :delete
     belongs_to :cluster, Cluster
 
     timestamps()
