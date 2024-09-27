@@ -186,6 +186,7 @@ export default function Cluster() {
               flexGrow: 1,
               flexShrink: 0,
               gap: theme.spacing.small,
+              marginLeft: theme.spacing.large,
             }}
           >
             {headerContent}
