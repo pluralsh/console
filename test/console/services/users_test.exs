@@ -197,6 +197,16 @@ defmodule Console.Services.UsersTest do
       assert group.name == "group"
       assert group.description == "description"
     end
+
+    test "it will backfill users in global groups" do
+      users = insert_list(3, :user)
+
+      {:ok, group} = Users.create_group(%{name: "global", global: true})
+
+      assert group.global
+      for user <- users,
+        do: assert Users.get_group_member(group.id, user.id)
+    end
   end
 
   describe "#delete_group/2" do

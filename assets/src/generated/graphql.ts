@@ -1404,6 +1404,8 @@ export type ContainerAttributes = {
   env?: InputMaybe<Array<InputMaybe<EnvAttributes>>>;
   envFrom?: InputMaybe<Array<InputMaybe<EnvFromAttributes>>>;
   image: Scalars['String']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  resources?: InputMaybe<ContainerResourcesAttributes>;
 };
 
 /** container env variable */
@@ -1423,17 +1425,23 @@ export type ContainerEnvFrom = {
 export type ContainerRecommendation = {
   __typename?: 'ContainerRecommendation';
   containerName?: Maybe<Scalars['String']['output']>;
-  lowerBound?: Maybe<ContainerResources>;
+  lowerBound?: Maybe<ResourceRequest>;
   name?: Maybe<Scalars['String']['output']>;
-  target?: Maybe<ContainerResources>;
-  uncappedTarget?: Maybe<ContainerResources>;
-  upperBound?: Maybe<ContainerResources>;
+  target?: Maybe<ResourceRequest>;
+  uncappedTarget?: Maybe<ResourceRequest>;
+  upperBound?: Maybe<ResourceRequest>;
 };
 
+/** A combined kubernetes pod container resource requests spec */
 export type ContainerResources = {
   __typename?: 'ContainerResources';
-  cpu?: Maybe<Scalars['String']['output']>;
-  memory?: Maybe<Scalars['String']['output']>;
+  limits?: Maybe<ResourceRequest>;
+  requests?: Maybe<ResourceRequest>;
+};
+
+export type ContainerResourcesAttributes = {
+  limits?: InputMaybe<ResourceRequestAttributes>;
+  requests?: InputMaybe<ResourceRequestAttributes>;
 };
 
 /** a shortform spec for job containers, designed for ease-of-use */
@@ -1443,6 +1451,7 @@ export type ContainerSpec = {
   env?: Maybe<Array<Maybe<ContainerEnv>>>;
   envFrom?: Maybe<Array<Maybe<ContainerEnvFrom>>>;
   image: Scalars['String']['output'];
+  resources?: Maybe<ContainerResources>;
 };
 
 export type ContainerState = {
@@ -1805,6 +1814,8 @@ export type GateJobAttributes = {
   namespace: Scalars['String']['input'];
   /** if you'd rather define the job spec via straight k8s yaml */
   raw?: InputMaybe<Scalars['String']['input']>;
+  /** request overrides if you don't want to manually configure individual containers */
+  resources?: InputMaybe<ContainerResourcesAttributes>;
   serviceAccount?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -2061,6 +2072,8 @@ export type GlobalServiceEdge = {
 export type Group = {
   __typename?: 'Group';
   description?: Maybe<Scalars['String']['output']>;
+  /** automatically adds all users in the system to this group */
+  global?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
@@ -2069,6 +2082,7 @@ export type Group = {
 
 export type GroupAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
+  global?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
 };
 
@@ -2495,6 +2509,8 @@ export type JobGateSpec = {
   namespace: Scalars['String']['output'];
   /** a raw kubernetes job resource, overrides any other configuration */
   raw?: Maybe<Scalars['String']['output']>;
+  /** requests overrides for cases where direct container configuration is unnecessary */
+  requests?: Maybe<ContainerResources>;
   /** the service account the pod will use */
   serviceAccount?: Maybe<Scalars['String']['output']>;
 };
@@ -4481,6 +4497,18 @@ export type ResourceEdge = {
   to: Scalars['String']['output'];
 };
 
+/** A kubernetes pod container resource request spec */
+export type ResourceRequest = {
+  __typename?: 'ResourceRequest';
+  cpu?: Maybe<Scalars['String']['output']>;
+  memory?: Maybe<Scalars['String']['output']>;
+};
+
+export type ResourceRequestAttributes = {
+  cpu?: InputMaybe<Scalars['String']['input']>;
+  memory?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type ResourceSelector = {
   __typename?: 'ResourceSelector';
   excluded?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
@@ -6450,6 +6478,7 @@ export type RootQueryTypePolicyConstraintsArgs = {
   namespace?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   q?: InputMaybe<Scalars['String']['input']>;
+  violated?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -8177,6 +8206,7 @@ export type UpgradeInsightDetail = {
   __typename?: 'UpgradeInsightDetail';
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
   removedIn?: Maybe<Scalars['String']['output']>;
   replacedIn?: Maybe<Scalars['String']['output']>;
   /** the replacement for this API */
@@ -8188,6 +8218,8 @@ export type UpgradeInsightDetail = {
 };
 
 export type UpgradeInsightDetailAttributes = {
+  /** the latest timestamp this insight has been observed */
+  lastUsedAt?: InputMaybe<Scalars['DateTime']['input']>;
   removedIn?: InputMaybe<Scalars['String']['input']>;
   replacedIn?: InputMaybe<Scalars['String']['input']>;
   /** the replacement for this API */
@@ -8200,7 +8232,8 @@ export type UpgradeInsightDetailAttributes = {
 export enum UpgradeInsightStatus {
   Failed = 'FAILED',
   Passing = 'PASSING',
-  Unknown = 'UNKNOWN'
+  Unknown = 'UNKNOWN',
+  Warning = 'WARNING'
 }
 
 export type UpgradePlan = {

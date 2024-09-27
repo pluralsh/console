@@ -87,6 +87,12 @@ defmodule Console.Schema.PolicyConstraint do
     from(p in query, where: ilike(p.name, ^"%#{q}%"))
   end
 
+  def with_violations(query \\ __MODULE__, violated)
+  def with_violations(query, true) do
+    from(p in query, where: p.violation_count > 0)
+  end
+  def with_violations(query, _), do: query
+
   def statistics(query \\ __MODULE__, field) do
     from(p in query,
       join: v in assoc(p, :violations),

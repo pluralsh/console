@@ -1,5 +1,39 @@
+defmodule Console.Schema.Gates.ResourceRequests do
+  use Piazza.Ecto.Schema
+
+  embedded_schema do
+    field :cpu,    :string
+    field :memory, :string
+  end
+
+  def changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, ~w(cpu memory)a)
+  end
+end
+
+defmodule Console.Schema.Gates.Resources do
+  use Piazza.Ecto.Schema
+
+  alias Console.Schema.Gates.ResourceRequests
+
+  embedded_schema do
+    embeds_one :requests, ResourceRequests, on_replace: :update
+    embeds_one :limits, ResourceRequests, on_replace: :update
+  end
+
+  def changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:requests)
+    |> cast_embed(:limits)
+  end
+end
+
 defmodule Console.Schema.Gates.JobSpec do
   use Piazza.Ecto.Schema
+
+  alias Console.Schema.Gates.Resources
 
   embedded_schema do
     field :namespace,       :string
@@ -8,9 +42,12 @@ defmodule Console.Schema.Gates.JobSpec do
     field :labels,          :map
     field :annotations,     :map
 
+    embeds_one :resources, Resources, on_replace: :update
+
     embeds_many :containers, Container, on_replace: :delete do
-      field       :image, :string
-      field       :args,  {:array, :string}, default: []
+      field :name,  :string
+      field :image, :string
+      field :args,  {:array, :string}, default: []
 
       embeds_many :env, Env, on_replace: :delete do
         field :name,  :string
@@ -21,6 +58,8 @@ defmodule Console.Schema.Gates.JobSpec do
         field :secret,     :string
         field :config_map, :string
       end
+
+      embeds_one :resources, Resources, on_replace: :update
     end
   end
 
@@ -30,14 +69,16 @@ defmodule Console.Schema.Gates.JobSpec do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:containers, with: &container_changeset/2)
+    |> cast_embed(:resources)
     |> validate_required([:namespace])
   end
 
   def container_changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(image args)a)
+    |> cast(attrs, ~w(name image args)a)
     |> cast_embed(:env, with: &env_changeset/2)
     |> cast_embed(:env_from, with: &env_from_changeset/2)
+    |> cast_embed(:resources)
     |> validate_required([:image])
   end
 
