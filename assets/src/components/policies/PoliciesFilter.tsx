@@ -99,6 +99,7 @@ function PoliciesFilter({
       >
         <Flex flexDirection="column">
           <Checkbox
+            small
             name={clusterLabel}
             value={null}
             checked={selectedClusters.includes(null)}
@@ -110,6 +111,7 @@ function PoliciesFilter({
           </Checkbox>
           {clusters?.map((node) => (
             <Checkbox
+              small
               key={node.id}
               name={clusterLabel}
               value={node.id}
@@ -133,6 +135,7 @@ function PoliciesFilter({
       >
         <Flex flexDirection="column">
           <Checkbox
+            small
             name={kindLabel}
             value={null}
             checked={selectedKinds.includes(null)}
@@ -145,6 +148,7 @@ function PoliciesFilter({
           {kinds?.map((kind) => (
             <CheckboxWrapperSC key={kind.id}>
               <Checkbox
+                small
                 name="kinds"
                 value={kind.id}
                 checked={selectedKinds.includes(kind.id)}
@@ -165,6 +169,7 @@ function PoliciesFilter({
       >
         <Flex flexDirection="column">
           <Checkbox
+            small
             name={namespaceLabel}
             value={null}
             checked={selectedNamespaces.includes(null)}
@@ -177,6 +182,7 @@ function PoliciesFilter({
           {namespaces?.map((namespace) => (
             <CheckboxWrapperSC key={namespace.id}>
               <Checkbox
+                small
                 name={namespaceLabel}
                 value={namespace}
                 checked={selectedNamespaces.includes(namespace.id)}
