@@ -1,10 +1,7 @@
 import { useQuery } from '@apollo/client'
 import { useParams } from 'react-router-dom'
-import { Card } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-
 import { Event, NodeMetric, Node as NodeT, Pod } from 'generated/graphql'
-
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../constants'
@@ -18,7 +15,6 @@ import {
   PodsList,
 } from '../pods/PodsList'
 import { NODE_Q } from '../queries'
-
 import { SubTitle } from '../../utils/SubTitle'
 
 import { NodeGraphs } from './NodeGraphs'
@@ -51,7 +47,7 @@ export default function NodeInfo() {
 
   if (!data) return <LoadingIndicator />
 
-  const { node, nodeMetric } = data
+  const { node } = data
 
   return (
     <div
@@ -61,17 +57,10 @@ export default function NodeInfo() {
         gap: theme.spacing.xlarge,
       }}
     >
-      <section>
-        <SubTitle>Overview</SubTitle>
-        <Card css={{ padding: theme.spacing.medium }}>
-          <NodeGraphs
-            status={node.status}
-            pods={node.pods}
-            name={name}
-            usage={nodeMetric.usage}
-          />
-        </Card>
-      </section>
+      <NodeGraphs
+        name={name}
+        node={node}
+      />
       <section>
         <SubTitle>Pods</SubTitle>
         <PodsList

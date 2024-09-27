@@ -1,56 +1,49 @@
 import { useMemo } from 'react'
-import { useQuery } from '@apollo/client'
-import { format } from 'components/apps/app/dashboards/dashboard/misc'
-
-import { Graph } from 'components/utils/Graph'
-
 import { Div } from 'honorable'
 
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+import { format } from 'components/apps/app/dashboards/dashboard/misc'
+import { Graph } from 'components/utils/Graph'
 
-import { CLUSTER_SATURATION } from '../queries'
-
+import { MetricResult } from '../../../generated/graphql'
 import { datum } from '../utils'
 
 export function SaturationGraphs({
-  cpu,
-  mem,
-  clusterId,
+  cpuTotal,
+  memTotal,
+  cpuUsage,
+  memUsage,
 }: {
-  cpu: string
-  mem: string
-  clusterId?: string
+  cpuTotal: number
+  memTotal: number
+  cpuUsage: Array<MetricResult>
+  memUsage: Array<MetricResult>
 }) {
-  const { prometheusConnection } = useDeploymentSettings()
-
-  const { data } = useQuery(CLUSTER_SATURATION, {
-    skip: !prometheusConnection,
-    variables: {
-      cpuUtilization: cpu,
-      memUtilization: mem,
-      clusterId,
-      offset: 2 * 60 * 60,
-    },
-    fetchPolicy: 'network-only',
-    pollInterval: 10000,
-  })
-
   const result = useMemo(() => {
-    if (!data) {
-      return null
-    }
-
-    const { cpuUtilization, memUtilization } = data
-
-    if (!cpuUtilization[0] || !memUtilization[0]) {
+    if (!cpuUsage || !memUsage || cpuTotal === 0 || memTotal === 0) {
       return null
     }
 
     return [
-      { id: 'CPU usage', data: cpuUtilization[0].values.map(datum) },
-      { id: 'Memory usage', data: memUtilization[0].values.map(datum) },
+      {
+        id: 'CPU usage',
+        data: cpuUsage
+          .map(({ timestamp, value }) => ({
+            timestamp,
+            value: parseFloat(value ?? '0') / cpuTotal,
+          }))
+          .map(datum),
+      },
+      {
+        id: 'Memory usage',
+        data: memUsage
+          .map(({ timestamp, value }) => ({
+            timestamp,
+            value: parseFloat(value ?? '0') / memTotal,
+          }))
+          .map(datum),
+      },
     ]
-  }, [data])
+  }, [cpuTotal, cpuUsage, memTotal, memUsage])
 
   if (!result) {
     return null

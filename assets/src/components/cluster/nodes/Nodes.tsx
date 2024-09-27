@@ -1,18 +1,12 @@
 import { useMemo } from 'react'
 import { useQuery } from '@apollo/client'
-import { sumBy } from 'lodash'
 import { Flex } from 'honorable'
-import { Card, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { useSetBreadcrumbs } from '@pluralsh/design-system'
 import type { Node, NodeMetric } from 'generated/graphql'
-import { cpuParser, memoryParser } from 'utils/kubernetes'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { ColumnDef } from '@tanstack/react-table'
-
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-
-import { useTheme } from 'styled-components'
 
 import { SHORT_POLL_INTERVAL } from '../constants'
 import { NODES_Q } from '../queries'
@@ -41,8 +35,6 @@ const breadcrumbs = [{ label: 'nodes', url: '/nodes' }]
 
 export default function Nodes() {
   useSetBreadcrumbs(breadcrumbs)
-  const theme = useTheme()
-  const { prometheusConnection } = useDeploymentSettings()
 
   const { data, refetch } = useQuery<{
     nodes: Node[]
@@ -51,22 +43,6 @@ export default function Nodes() {
     pollInterval: SHORT_POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-
-  const usage: ResourceUsage = useMemo(() => {
-    if (!data) {
-      return null
-    }
-    const cpu = sumBy(
-      data.nodeMetrics,
-      (metrics) => cpuParser(metrics?.usage?.cpu) ?? 0
-    )
-    const mem = sumBy(
-      data.nodeMetrics,
-      (metrics) => memoryParser((metrics as any)?.usage?.memory) ?? 0
-    )
-
-    return { cpu, mem }
-  }, [data])
 
   // Memoize columns to prevent rerendering entire table
   const columns: ColumnDef<TableData, any>[] = useMemo(
@@ -93,14 +69,7 @@ export default function Nodes() {
           direction="column"
           gap="xlarge"
         >
-          {!!prometheusConnection && (
-            <Card css={{ padding: theme.spacing.xlarge }}>
-              <ClusterMetrics
-                nodes={data.nodes}
-                usage={usage}
-              />
-            </Card>
-          )}
+          <ClusterMetrics nodes={data.nodes} />
           <NodesList
             nodes={data.nodes}
             nodeMetrics={data.nodeMetrics}
