@@ -49,7 +49,7 @@ export function cpuFormat(value?: string | number | null) {
     return `${value * MULTIPLES.m}m`
   }
 
-  return `${value}`
+  return value.toPrecision(2)
 }
 
 export function memoryFormat(value?: number | null | undefined) {

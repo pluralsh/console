@@ -7,14 +7,17 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
-import { MetricResponseFragment, useUsageQuery } from 'generated/graphql'
+import {
+  MetricResponseFragment,
+  useServiceDeploymentComponentMetricsQuery,
+} from 'generated/graphql'
 
 import RangePicker from 'components/utils/RangePicker'
 import { Graph } from 'components/utils/Graph'
 import GraphHeader from 'components/utils/GraphHeader'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { POLL_INTERVAL } from '../cluster/constants'
+import { format } from '../apps/app/dashboards/dashboard/misc'
 
 import { ComponentDetailsContext } from './ComponentDetails'
 
@@ -63,10 +66,13 @@ function Graphs({
             flexGrow: 1,
           }}
         >
-          <GraphHeader title="Overall CPU Usage" />
+          <GraphHeader
+            title="Overall CPU Usage"
+            tooltip="100% usage means that 1 vCore is fully used. Overall usage can exceed 100% if there are more vCores available."
+          />
           <Graph
             data={[{ id: 'cpu', data: cpuValues }]}
-            yFormat={undefined}
+            yFormat={(v) => format(v, 'percent')}
             tickRotation={undefined}
           />
         </div>
@@ -134,10 +140,13 @@ function PodGraphs({
             flexGrow: 1,
           }}
         >
-          <GraphHeader title="Pod CPU Usage" />
+          <GraphHeader
+            title="Pod CPU Usage"
+            tooltip="100% usage means that 1 vCore is fully used. Overall usage can exceed 100% if there are more vCores available."
+          />
           <Graph
             data={cpuGraph}
-            yFormat={undefined}
+            yFormat={(v) => format(v, 'percent')}
             tickRotation={undefined}
           />
         </div>
@@ -163,6 +172,8 @@ function PodGraphs({
 }
 
 function Metric({
+  serviceId,
+  componentId,
   name,
   namespace,
   regex,
@@ -171,22 +182,24 @@ function Metric({
   ...props
 }) {
   const theme = useTheme()
-  const clusterInfix = cluster ? `cluster="${cluster?.handle}",` : ''
-  const { data } = useUsageQuery({
+  // const stop = moment()
+  // const start = stop.subtract({ hour: 2 })
+
+  const { data } = useServiceDeploymentComponentMetricsQuery({
     variables: {
-      cpu: `sum(rate(container_cpu_usage_seconds_total{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
-      mem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}",image!="",container!=""})`,
-      podCpu: `sum(rate(container_cpu_usage_seconds_total{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}[5m])) by (pod)`,
-      podMem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}",image!="",container!=""}) by (pod)`,
-      clusterId: cluster?.id,
+      id: serviceId,
+      componentId,
       step,
-      offset,
+      // stop: start.toISOString(),
+      // start: `${moment().subtract({ hour: 2 }).toISOString()}`,
     },
-    pollInterval: POLL_INTERVAL,
+    pollInterval: 60_000,
+    fetchPolicy: 'cache-and-network',
   })
 
   const { cpu, mem, podCpu, podMem } = useMemo(() => {
-    const { cpu, mem, podCpu, podMem } = data || {}
+    const { cpu, mem, podCpu, podMem } =
+      data?.serviceDeployment?.componentMetrics || {}
 
     return {
       cpu: (cpu || []).filter(isNonNullable),
@@ -237,7 +250,8 @@ const kindToRegex = {
 export default function ComponentMetrics() {
   const theme = useTheme()
   const [duration, setDuration] = useState<any>(DURATIONS[0])
-  const { component, cluster } = useOutletContext<ComponentDetailsContext>()
+  const { component, cluster, serviceId } =
+    useOutletContext<ComponentDetailsContext>()
   const componentName = component.name?.toLowerCase()
   const componentKind = component.kind?.toLowerCase()
   const componentNamespace = component.namespace?.toLowerCase()
@@ -261,6 +275,8 @@ export default function ComponentMetrics() {
       <Metric
         namespace={componentNamespace}
         name={componentName}
+        serviceId={serviceId}
+        componentId={component?.id}
         regex={kindToRegex[componentKind]}
         duration={duration}
         cluster={cluster}

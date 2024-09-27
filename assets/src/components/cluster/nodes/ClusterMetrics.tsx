@@ -25,11 +25,12 @@ export function ClusterMetrics({
 }) {
   const theme = useTheme()
   const { prometheusConnection } = useDeploymentSettings()
+  const metricsEnabled = Prometheus.enabled(prometheusConnection)
   const { data, loading } = useClusterMetricsQuery({
     variables: {
       clusterId: cluster?.id ?? '',
     },
-    skip: !prometheusConnection || !cluster?.id,
+    skip: !metricsEnabled || !cluster?.id,
     fetchPolicy: 'cache-and-network',
     pollInterval: 60_000,
   })
@@ -38,10 +39,11 @@ export function ClusterMetrics({
   const memTotal = Prometheus.capacity(Prometheus.CapacityType.Memory, ...nodes)
   const podsTotal = Prometheus.capacity(Prometheus.CapacityType.Pods, ...nodes)
   const shouldRenderMetrics =
-    !!prometheusConnection &&
+    metricsEnabled &&
     !isNull(cpuTotal) &&
     !isNull(memTotal) &&
-    !!cluster?.id
+    !!cluster?.id &&
+    (data?.cluster?.clusterMetrics?.cpuUsage?.length ?? 0) > 0
 
   if (loading) return <LoadingIndicator />
   if (!shouldRenderMetrics) return null

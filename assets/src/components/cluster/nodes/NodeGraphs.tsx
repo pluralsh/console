@@ -27,12 +27,13 @@ export function NodeGraphs({
 }) {
   const theme = useTheme()
   const { prometheusConnection } = useDeploymentSettings()
+  const metricsEnabled = Prometheus.enabled(prometheusConnection)
   const { data, loading } = useClusterNodeMetricsQuery({
     variables: {
       clusterId: clusterId ?? '',
       node: name ?? '',
     },
-    skip: !prometheusConnection || !clusterId || !name,
+    skip: !metricsEnabled || !clusterId || !name,
     fetchPolicy: 'cache-and-network',
     pollInterval: 60_000,
   })
@@ -41,10 +42,11 @@ export function NodeGraphs({
   const memTotal = Prometheus.capacity(Prometheus.CapacityType.Memory, node)
   const podsTotal = Prometheus.capacity(Prometheus.CapacityType.Pods, node)
   const shouldRenderMetrics =
-    !!prometheusConnection &&
+    metricsEnabled &&
     !isNull(cpuTotal) &&
     !isNull(memTotal) &&
-    !!clusterId
+    !!clusterId &&
+    (data?.cluster?.clusterNodeMetrics?.cpuUsage?.length ?? 0) > 0
 
   const { cpu: cpuReservations, memory: memoryReservations } = useMemo(() => {
     const allContainers = getAllContainersFromPods(node?.pods)

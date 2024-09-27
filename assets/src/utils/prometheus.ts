@@ -1,6 +1,12 @@
 import { sumBy } from 'lodash'
 
-import { Maybe, MetricResponse, MetricResult, Node } from '../generated/graphql'
+import {
+  HttpConnection,
+  Maybe,
+  MetricResponse,
+  MetricResult,
+  Node,
+} from '../generated/graphql'
 
 import { cpuParser, memoryParser } from './kubernetes'
 
@@ -60,12 +66,17 @@ function toValues(
   return (metrics.at(0)?.values ?? []) as Array<MetricResult>
 }
 
+function enabled(connection: Nullable<HttpConnection>): boolean {
+  return !!connection && connection?.host?.length > 0
+}
+
 export const Prometheus = {
   // Functions
   avg,
   capacity,
   toValues,
   pods,
+  enabled,
   // Types
   CapacityType,
 }
