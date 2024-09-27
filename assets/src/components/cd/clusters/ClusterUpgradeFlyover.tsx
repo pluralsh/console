@@ -79,6 +79,17 @@ function FlyoverContent({ open, cluster, refetch }) {
   const apiDeprecations = data?.cluster?.apiDeprecations
   const upgradeInsights: UpgradeInsight[] = [
     {
+      id: '0',
+      name: 'Deprecated APIs removed in Kubernetes v1.33',
+      description:
+        'Check usage of deprecated APIs that are scheduled for removal in Kubernetes v1.32.' +
+        'Upgrading your cluster before migrating to the updated APIs supported by v1.32 could cause application impact.',
+      status: UpgradeInsightStatus.Passing,
+      version: '1.33',
+      refreshedAt: '2024-08-23T06:52:01.430Z',
+      transitionedAt: '2024-08-23T06:52:01.430Z',
+    },
+    {
       id: '1',
       name: 'Deprecated APIs removed in Kubernetes v1.32',
       description:
@@ -94,11 +105,20 @@ function FlyoverContent({ open, cluster, refetch }) {
           used: '/apis/flowcontrol.apiserver.k8s.io/v1beta3/flowschemas',
           replacement: '/apis/flowcontrol.apiserver.k8s.io/flowschemas',
           replacedIn: '1.21',
+          status: UpgradeInsightStatus.Passing,
         },
         {
           id: '1',
+          used: '/apis/flowcontrol.apiserver.k8s.io/v1beta3/flowschemas',
+          replacement: '/apis/flowcontrol.apiserver.k8s.io/flowschemas',
+          replacedIn: '1.21',
+          status: UpgradeInsightStatus.Failed,
+        },
+        {
+          id: '2',
           used: '/apis/flowcontrol.apiserver.k8s.io/v1beta2/flowschemas',
           removedIn: '1.21',
+          status: UpgradeInsightStatus.Unknown,
         },
       ],
     },
@@ -108,7 +128,7 @@ function FlyoverContent({ open, cluster, refetch }) {
       description:
         'Check usage of deprecated APIs that are scheduled for removal in Kubernetes v1.32.' +
         'Upgrading your cluster before migrating to the updated APIs supported by v1.32 could cause application impact.',
-      status: UpgradeInsightStatus.Passing,
+      status: UpgradeInsightStatus.Unknown,
       version: '1.33',
       refreshedAt: '2024-08-23T06:52:01.430Z',
       transitionedAt: '2024-08-23T06:52:01.430Z',
