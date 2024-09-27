@@ -14,6 +14,7 @@ const statusToSeverity = {
   [UpgradeInsightStatus.Passing]: 'success',
   [UpgradeInsightStatus.Failed]: 'danger',
   [UpgradeInsightStatus.Unknown]: 'neutral',
+  [UpgradeInsightStatus.Warning]: 'warning',
 } as const satisfies Record<
   UpgradeInsightStatus,
   ComponentProps<typeof Chip>['severity']

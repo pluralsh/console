@@ -2,7 +2,7 @@ defmodule Console.Schema.UpgradeInsight do
   use Piazza.Ecto.Schema
   alias Console.Schema.{Cluster, UpgradeInsightDetail}
 
-  defenum Status, passing: 0, failed: 1, unknown: 2
+  defenum Status, passing: 0, failed: 1, unknown: 2, warning: 3
 
   schema "upgrade_insights" do
     field :name,            :string
@@ -11,7 +11,6 @@ defmodule Console.Schema.UpgradeInsight do
     field :status,          Status
     field :refreshed_at,    :utc_datetime_usec
     field :transitioned_at, :utc_datetime_usec
-
 
     has_many :details, UpgradeInsightDetail,
       foreign_key: :insight_id,

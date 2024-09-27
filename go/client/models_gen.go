@@ -1692,13 +1692,16 @@ type Group struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
-	InsertedAt  *string `json:"insertedAt,omitempty"`
-	UpdatedAt   *string `json:"updatedAt,omitempty"`
+	// automatically adds all users in the system to this group
+	Global     *bool   `json:"global,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
 type GroupAttributes struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
+	Global      *bool   `json:"global,omitempty"`
 }
 
 type GroupConnection struct {
@@ -5034,6 +5037,7 @@ type UpgradeInsightDetail struct {
 	Replacement *string `json:"replacement,omitempty"`
 	ReplacedIn  *string `json:"replacedIn,omitempty"`
 	RemovedIn   *string `json:"removedIn,omitempty"`
+	LastUsedAt  *string `json:"lastUsedAt,omitempty"`
 	InsertedAt  *string `json:"insertedAt,omitempty"`
 	UpdatedAt   *string `json:"updatedAt,omitempty"`
 }
@@ -5046,6 +5050,8 @@ type UpgradeInsightDetailAttributes struct {
 	Replacement *string `json:"replacement,omitempty"`
 	ReplacedIn  *string `json:"replacedIn,omitempty"`
 	RemovedIn   *string `json:"removedIn,omitempty"`
+	// the latest timestamp this insight has been observed
+	LastUsedAt *string `json:"lastUsedAt,omitempty"`
 }
 
 type UpgradePlan struct {
@@ -7256,17 +7262,19 @@ const (
 	UpgradeInsightStatusPassing UpgradeInsightStatus = "PASSING"
 	UpgradeInsightStatusFailed  UpgradeInsightStatus = "FAILED"
 	UpgradeInsightStatusUnknown UpgradeInsightStatus = "UNKNOWN"
+	UpgradeInsightStatusWarning UpgradeInsightStatus = "WARNING"
 )
 
 var AllUpgradeInsightStatus = []UpgradeInsightStatus{
 	UpgradeInsightStatusPassing,
 	UpgradeInsightStatusFailed,
 	UpgradeInsightStatusUnknown,
+	UpgradeInsightStatusWarning,
 }
 
 func (e UpgradeInsightStatus) IsValid() bool {
 	switch e {
-	case UpgradeInsightStatusPassing, UpgradeInsightStatusFailed, UpgradeInsightStatusUnknown:
+	case UpgradeInsightStatusPassing, UpgradeInsightStatusFailed, UpgradeInsightStatusUnknown, UpgradeInsightStatusWarning:
 		return true
 	}
 	return false

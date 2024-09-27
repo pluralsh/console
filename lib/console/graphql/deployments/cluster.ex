@@ -215,6 +215,8 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
     field :replaced_in, :string
     field :removed_in,  :string
+
+    field :last_used_at, :datetime, description: "the latest timestamp this insight has been observed"
   end
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -639,8 +641,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :used,        :string, description: "a possibly deprecated API"
     field :replacement, :string, description: "the replacement for this API"
 
-    field :replaced_in, :string
-    field :removed_in,  :string
+    field :replaced_in,  :string
+    field :removed_in,   :string
+    field :last_used_at, :datetime
 
     timestamps()
   end

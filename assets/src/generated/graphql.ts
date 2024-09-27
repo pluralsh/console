@@ -2072,6 +2072,8 @@ export type GlobalServiceEdge = {
 export type Group = {
   __typename?: 'Group';
   description?: Maybe<Scalars['String']['output']>;
+  /** automatically adds all users in the system to this group */
+  global?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
@@ -2080,6 +2082,7 @@ export type Group = {
 
 export type GroupAttributes = {
   description?: InputMaybe<Scalars['String']['input']>;
+  global?: InputMaybe<Scalars['Boolean']['input']>;
   name: Scalars['String']['input'];
 };
 
@@ -8203,6 +8206,7 @@ export type UpgradeInsightDetail = {
   __typename?: 'UpgradeInsightDetail';
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
   removedIn?: Maybe<Scalars['String']['output']>;
   replacedIn?: Maybe<Scalars['String']['output']>;
   /** the replacement for this API */
@@ -8214,6 +8218,8 @@ export type UpgradeInsightDetail = {
 };
 
 export type UpgradeInsightDetailAttributes = {
+  /** the latest timestamp this insight has been observed */
+  lastUsedAt?: InputMaybe<Scalars['DateTime']['input']>;
   removedIn?: InputMaybe<Scalars['String']['input']>;
   replacedIn?: InputMaybe<Scalars['String']['input']>;
   /** the replacement for this API */
@@ -8226,7 +8232,8 @@ export type UpgradeInsightDetailAttributes = {
 export enum UpgradeInsightStatus {
   Failed = 'FAILED',
   Passing = 'PASSING',
-  Unknown = 'UNKNOWN'
+  Unknown = 'UNKNOWN',
+  Warning = 'WARNING'
 }
 
 export type UpgradePlan = {

@@ -3519,6 +3519,7 @@ enum UpgradeInsightStatus {
   PASSING
   FAILED
   UNKNOWN
+  WARNING
 }
 
 enum Conjunction {
@@ -3783,6 +3784,9 @@ input UpgradeInsightDetailAttributes {
   replacedIn: String
 
   removedIn: String
+
+  "the latest timestamp this insight has been observed"
+  lastUsedAt: DateTime
 }
 
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -4347,6 +4351,8 @@ type UpgradeInsightDetail {
   replacedIn: String
 
   removedIn: String
+
+  lastUsedAt: DateTime
 
   insertedAt: DateTime
 
@@ -6554,6 +6560,7 @@ input ScopeAttributes {
 input GroupAttributes {
   name: String!
   description: String
+  global: Boolean
 }
 
 input RoleAttributes {
@@ -6663,9 +6670,16 @@ type Invite {
 
 type Group {
   id: ID!
+
   name: String!
+
   description: String
+
+  "automatically adds all users in the system to this group"
+  global: Boolean
+
   insertedAt: DateTime
+
   updatedAt: DateTime
 }
 
