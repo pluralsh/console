@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
-import { Card } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import { Node, NodeMetric } from 'generated/graphql'
 import LoadingIndicator from 'components/utils/LoadingIndicator'

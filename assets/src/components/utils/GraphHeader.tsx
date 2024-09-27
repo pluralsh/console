@@ -1,10 +1,5 @@
 import { Div } from 'honorable'
-import {
-  InfoIcon,
-  InfoOutlineIcon,
-  Tooltip,
-  WrapWithIf,
-} from '@pluralsh/design-system'
+import { InfoOutlineIcon, Tooltip, WrapWithIf } from '@pluralsh/design-system'
 
 export default function GraphHeader({
   title,

@@ -7,23 +7,36 @@ fragment MetricResponse on MetricResponse {
 }
 
 fragment ComponentMetricsFragment on ServiceDeployment {
-  componentMetrics(componentId: $componentId, start: $start, stop: $stop, step: $step) {
-    cpu { ...MetricResponse }
-    mem { ...MetricResponse }
+  componentMetrics(
+    componentId: $componentId
+    start: $start
+    stop: $stop
+    step: $step
+  ) {
+    cpu {
+      ...MetricResponse
+    }
+    mem {
+      ...MetricResponse
+    }
 
-    podCpu { ...MetricResponse }
-    podMem { ...MetricResponse }
+    podCpu {
+      ...MetricResponse
+    }
+    podMem {
+      ...MetricResponse
+    }
   }
 }
 
 query ServiceDeploymentComponentMetrics(
-  $id: ID,
-  $name: String,
-  $cluster: String,
-  $componentId: ID!,
-  $start: DateTime,
-  $stop: DateTime,
-  $step: String,
+  $id: ID
+  $name: String
+  $cluster: String
+  $componentId: ID!
+  $start: DateTime
+  $stop: DateTime
+  $step: String
 ) {
   serviceDeployment(id: $id, name: $name, cluster: $cluster) {
     ...ComponentMetricsFragment

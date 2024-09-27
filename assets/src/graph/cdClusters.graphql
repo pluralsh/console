@@ -196,27 +196,53 @@ fragment ClustersRow on Cluster {
 
 fragment ClusterMetricsFragment on Cluster {
   clusterMetrics(start: $start, stop: $stop, step: $step) {
-    cpu { ...MetricResponse }
-    cpuUsage { ...MetricResponse }
-    cpuRequests { ...MetricResponse }
-    cpuLimits { ...MetricResponse }
+    cpu {
+      ...MetricResponse
+    }
+    cpuUsage {
+      ...MetricResponse
+    }
+    cpuRequests {
+      ...MetricResponse
+    }
+    cpuLimits {
+      ...MetricResponse
+    }
 
-    memory { ...MetricResponse }
-    memoryUsage { ...MetricResponse }
-    memoryRequests { ...MetricResponse }
-    memoryLimits { ...MetricResponse }
+    memory {
+      ...MetricResponse
+    }
+    memoryUsage {
+      ...MetricResponse
+    }
+    memoryRequests {
+      ...MetricResponse
+    }
+    memoryLimits {
+      ...MetricResponse
+    }
 
-    pods { ...MetricResponse }
+    pods {
+      ...MetricResponse
+    }
   }
 }
 
 fragment ClusterNodeMetricsFragment on Cluster {
   clusterNodeMetrics(node: $node, start: $start, stop: $stop, step: $step) {
-    cpu { ...MetricResponse }
-    cpuUsage { ...MetricResponse }
+    cpu {
+      ...MetricResponse
+    }
+    cpuUsage {
+      ...MetricResponse
+    }
 
-    memory { ...MetricResponse }
-    memoryUsage { ...MetricResponse }
+    memory {
+      ...MetricResponse
+    }
+    memoryUsage {
+      ...MetricResponse
+    }
   }
 }
 
@@ -523,13 +549,24 @@ query ClusterLogs(
   }
 }
 
-query ClusterMetrics($clusterId: ID!, $start: DateTime, $stop: DateTime, $step: String) {
+query ClusterMetrics(
+  $clusterId: ID!
+  $start: DateTime
+  $stop: DateTime
+  $step: String
+) {
   cluster(id: $clusterId) {
     ...ClusterMetricsFragment
   }
 }
 
-query ClusterNodeMetrics($clusterId: ID!, $node: String!, $start: DateTime, $stop: DateTime, $step: String) {
+query ClusterNodeMetrics(
+  $clusterId: ID!
+  $node: String!
+  $start: DateTime
+  $stop: DateTime
+  $step: String
+) {
   cluster(id: $clusterId) {
     ...ClusterNodeMetricsFragment
   }
