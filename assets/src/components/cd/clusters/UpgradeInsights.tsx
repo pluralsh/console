@@ -4,7 +4,6 @@ import { Chip, CollapseIcon } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
 import React, { ComponentProps } from 'react'
 import { useTheme } from 'styled-components'
-import isEmpty from 'lodash/isEmpty'
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
@@ -149,8 +148,8 @@ export function UpgradeInsightExpansionPanel({
                         color: theme.colors['text-light'],
                       }}
                     >
-                      {replacement && <span>Replaced with: {replacement}</span>}
-                      {!isEmpty(removedIn) && <span>Removed</span>}
+                      {!!replacement && <>Replaced with: {replacement}</>}
+                      {!!removedIn && <>Removed</>}
                     </div>
                   </div>
                   <div>
@@ -168,10 +167,8 @@ export function UpgradeInsightExpansionPanel({
                         textAlign: 'right',
                       }}
                     >
-                      {replacedIn && (
-                        <span>Replacement version: {replacedIn}</span>
-                      )}
-                      {removedIn && <span>Removal version: {removedIn}</span>}
+                      {replacedIn && <>Replacement version: {replacedIn}</>}
+                      {removedIn && <>Removal version: {removedIn}</>}
                     </div>
                   </div>
                 </div>
