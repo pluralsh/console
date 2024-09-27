@@ -123,10 +123,7 @@ export function UpgradeInsightExpansionPanel({
               ) => (
                 <div
                   css={{
-                    borderBottom:
-                      i !== details.length - 1
-                        ? theme.borders.default
-                        : undefined,
+                    borderTop: i !== 0 ? theme.borders.default : undefined,
                     display: 'flex',
                     justifyContent: 'space-between',
                     paddingBottom: theme.spacing.xsmall,
