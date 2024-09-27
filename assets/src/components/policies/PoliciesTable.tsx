@@ -13,7 +13,8 @@ import { getPolicyDetailsPath } from 'routes/policiesRoutesConsts'
 
 import { ColActions } from 'components/home/clusteroverview/ClusterOverviewTable'
 
-import { POLICIES_REACT_VIRTUAL_OPTIONS } from './Policies'
+import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../utils/table/useFetchPaginatedData'
+
 import {
   ColCluster,
   ColDescription,
@@ -99,7 +100,7 @@ export function PoliciesTable({
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             reactTableOptions={reactTableOptions}
-            reactVirtualOptions={POLICIES_REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
           />
         </FullHeightTableWrap>

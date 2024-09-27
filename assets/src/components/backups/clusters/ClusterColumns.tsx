@@ -152,6 +152,5 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
 })
 
 enum MenuItemKey {
-  Navigate = 'navigate',
   Delete = 'delete',
 }

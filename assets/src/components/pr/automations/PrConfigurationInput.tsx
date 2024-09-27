@@ -25,7 +25,7 @@ export function PrConfigurationInput({
     case ConfigurationType.Bool:
       return (
         <Switch
-          checked={!!configBoolVal}
+          checked={configBoolVal}
           onChange={(isChecked) => {
             setValue(isChecked.toString())
           }}

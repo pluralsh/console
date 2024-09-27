@@ -19,7 +19,7 @@ import {
 
 import { Edge } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
-import { TruncateEnd } from 'components/utils/table/TruncateStart'
+import { TruncateEnd } from 'components/utils/table/Truncate'
 import { MoreMenu } from 'components/utils/MoreMenu'
 
 import { EditNotificationSinkModal } from './UpsertNotificationSinkModal'

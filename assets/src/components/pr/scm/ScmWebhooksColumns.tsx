@@ -17,7 +17,7 @@ import { Edge, removeConnection, updateCache } from 'utils/graphql'
 
 import CopyButton from 'components/utils/CopyButton'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { TruncateStart } from 'components/utils/table/TruncateStart'
+import { TruncateStart } from 'components/utils/table/Truncate'
 
 import { MoreMenu } from 'components/utils/MoreMenu'
 
@@ -80,9 +80,7 @@ export const ColUrl = columnHelper.accessor(({ node }) => node?.url, {
           gap: theme.spacing.small,
         }}
       >
-        <TruncateUrl>
-          <span>{url}</span>
-        </TruncateUrl>
+        <TruncateUrl css={{ flexGrow: 1 }}>{url}</TruncateUrl>
         <CopyButton text={url} />
       </div>
     )

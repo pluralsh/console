@@ -1,4 +1,4 @@
-import { ComponentProps, useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   ArrowTopRightIcon,
   Button,
@@ -18,19 +18,15 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 
 import { PR_BASE_CRUMBS, PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { columns } from './PrAutomationsColumns'
 
 const DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
-
-const QUERY_PAGE_SIZE = 100
 const crumbs = [
   ...PR_BASE_CRUMBS,
   {
@@ -54,7 +50,6 @@ export default function AutomationPr() {
     setVirtualSlice,
   } = useFetchPaginatedData({
     queryHook: usePrAutomationsQuery,
-    pageSize: QUERY_PAGE_SIZE,
     keyPath: ['prAutomations'],
   })
 
@@ -96,7 +91,7 @@ export default function AutomationPr() {
         <Table
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
-          reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+          reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
           data={data?.prAutomations?.edges || []}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}

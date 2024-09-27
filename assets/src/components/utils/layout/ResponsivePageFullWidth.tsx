@@ -1,34 +1,33 @@
-import { ComponentProps, Ref, forwardRef } from 'react'
-import styled from 'styled-components'
+import { CSSProperties, ComponentProps, Ref, forwardRef } from 'react'
 
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 
 import { ScrollablePage } from './ScrollablePage'
 
-const ResponsivePageFullWidthSC = styled(ResponsiveLayoutPage)<{
-  $scrollable: boolean
-}>(({ $scrollable }) => ({
-  flexDirection: 'column',
-  ...($scrollable
-    ? {
-        paddingRight: 0,
-        paddingBottom: 0,
-      }
-    : {}),
-}))
-
-function ResponsivePageFullWidthRef(
-  {
-    scrollable = true,
-    children,
-    ...props
-  }: ComponentProps<typeof ResponsivePageFullWidthSC>,
-  ref: Ref<HTMLDivElement>
-) {
-  return (
-    <ResponsivePageFullWidthSC
-      $scrollable={scrollable}
+export const ResponsivePageFullWidth = forwardRef(
+  (
+    {
+      scrollable = true,
+      style,
+      children,
+      ...props
+    }: { scrollable?: boolean; style?: CSSProperties } & ComponentProps<
+      typeof ResponsiveLayoutPage
+    >,
+    ref: Ref<HTMLDivElement>
+  ) => (
+    <ResponsiveLayoutPage
       ref={ref}
+      css={{
+        flexDirection: 'column',
+        ...(scrollable
+          ? {
+              paddingRight: 0,
+              paddingBottom: 0,
+            }
+          : {}),
+        ...style,
+      }}
     >
       <ScrollablePage
         scrollable={scrollable}
@@ -37,8 +36,6 @@ function ResponsivePageFullWidthRef(
       >
         {children}
       </ScrollablePage>
-    </ResponsivePageFullWidthSC>
+    </ResponsiveLayoutPage>
   )
-}
-
-export const ResponsivePageFullWidth = forwardRef(ResponsivePageFullWidthRef)
+)

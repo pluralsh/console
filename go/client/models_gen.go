@@ -3139,6 +3139,14 @@ type PluralServiceDeployment struct {
 
 type PluralSinkAttributes struct {
 	Priority NotificationPriority `json:"priority"`
+	// whether to immediately deliver the derived notification via SMTP
+	Urgent *bool `json:"urgent,omitempty"`
+}
+
+type PluralSinkConfiguration struct {
+	Priority NotificationPriority `json:"priority"`
+	// whether to immediately deliver the derived notification via SMTP
+	Urgent *bool `json:"urgent,omitempty"`
 }
 
 type PluralSubscription struct {
@@ -4464,9 +4472,10 @@ type SharedSecretAttributes struct {
 }
 
 type SinkConfiguration struct {
-	ID    string                `json:"id"`
-	Slack *URLSinkConfiguration `json:"slack,omitempty"`
-	Teams *URLSinkConfiguration `json:"teams,omitempty"`
+	ID     string                   `json:"id"`
+	Slack  *URLSinkConfiguration    `json:"slack,omitempty"`
+	Teams  *URLSinkConfiguration    `json:"teams,omitempty"`
+	Plural *PluralSinkConfiguration `json:"plural,omitempty"`
 }
 
 type SinkConfigurationAttributes struct {

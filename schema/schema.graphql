@@ -2164,6 +2164,9 @@ input UrlSinkAttributes {
 
 input PluralSinkAttributes {
   priority: NotificationPriority!
+
+  "whether to immediately deliver the derived notification via SMTP"
+  urgent: Boolean
 }
 
 input NotificationRouterAttributes {
@@ -2276,6 +2279,14 @@ type SinkConfiguration {
   id: ID!
   slack: UrlSinkConfiguration
   teams: UrlSinkConfiguration
+  plural: PluralSinkConfiguration
+}
+
+type PluralSinkConfiguration {
+  priority: NotificationPriority!
+
+  "whether to immediately deliver the derived notification via SMTP"
+  urgent: Boolean
 }
 
 "A notification sink based off slack incoming webhook urls"

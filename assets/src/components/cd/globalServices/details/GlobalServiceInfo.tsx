@@ -175,7 +175,7 @@ function TagsModalInner({
 
 export function TagsModal(props: ComponentProps<typeof TagsModalInner>) {
   return (
-    <ModalMountTransition open={!!props.open}>
+    <ModalMountTransition open={props.open}>
       <TagsModalInner {...props} />
     </ModalMountTransition>
   )

@@ -49,10 +49,24 @@ type SinkConfiguration struct {
 	// Teams url
 	// +kubebuilder:validation:Optional
 	Teams *SinkURL `json:"teams,omitempty"`
+
+	// Plural sink configuration knobs
+	// +kubebuilder:validation:Optional
+	Plural *PluralSinkConfiguration `json:"plural,omitempty"`
 }
 
 type SinkURL struct {
 	URL string `json:"url"`
+}
+
+type PluralSinkConfiguration struct {
+	// The priority to label any delivered notification as
+	// +kubebuilder:validation:Enum=LOW;MEDIUM;HIGH
+	Priority console.NotificationPriority `json:"priority,omitempty"`
+
+	// Whether to immediately deliver the notification via SMTP
+	// +kubebuilder:validation:Optional
+	Urgent *bool `json:"urgent,omitempty"`
 }
 
 //+kubebuilder:object:root=true

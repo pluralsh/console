@@ -15,13 +15,12 @@ import { GqlError } from 'components/utils/Alert'
 
 import { useProjectId } from 'components/contexts/ProjectsContext'
 
-import { useFetchPaginatedData } from '../utils/useFetchPaginatedData'
-
 import {
-  GLOBAL_SERVICES_QUERY_PAGE_SIZE,
-  GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS,
-  columns,
-} from './GlobalService'
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../utils/table/useFetchPaginatedData'
+
+import { columns } from './GlobalService'
 
 function GlobalServicesTableComponent({
   setRefetch,
@@ -43,7 +42,6 @@ function GlobalServicesTableComponent({
   } = useFetchPaginatedData(
     {
       queryHook: useGlobalServicesQuery,
-      pageSize: GLOBAL_SERVICES_QUERY_PAGE_SIZE,
       keyPath: ['globalServices'],
     },
     { projectId }
@@ -105,7 +103,7 @@ function GlobalServicesTableComponent({
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             reactTableOptions={reactTableOptions}
-            reactVirtualOptions={GLOBAL_SERVICES_REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             onVirtualSliceChange={setVirtualSlice}
             emptyStateProps={{
               message: "Looks like you don't have any service deployments yet.",

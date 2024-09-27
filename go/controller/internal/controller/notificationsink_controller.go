@@ -285,6 +285,14 @@ func genNotificationSinkAttr(notificationSink *v1alpha1.NotificationSink) consol
 			URL: notificationSink.Spec.Configuration.Teams.URL,
 		}
 	}
+
+	if plrl := notificationSink.Spec.Configuration.Plural; plrl != nil {
+		attr.Configuration.Plural = &console.PluralSinkAttributes{
+			Priority: plrl.Priority,
+			Urgent:   plrl.Urgent,
+		}
+	}
+
 	if notificationSink.Spec.Type == console.SinkTypePlural {
 		attr.NotificationBindings = policyBindings(notificationSink.Spec.Bindings)
 	}

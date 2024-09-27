@@ -27,6 +27,7 @@ const (
 	// requeueAfter is the time between scheduled reconciles if there are no changes to the CRD.
 	requeueAfter            = 30 * time.Second
 	requeueWaitForResources = 5 * time.Second
+	notFoundOrReadyError    = "unable to find referenced object or is not ready yet"
 )
 
 var (

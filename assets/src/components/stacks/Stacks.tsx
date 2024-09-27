@@ -52,7 +52,7 @@ import {
   getStacksAbsPath,
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
-import { useFetchPaginatedData } from '../cd/utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { GqlError } from '../utils/Alert'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
@@ -94,8 +94,6 @@ enum MenuItemKey {
   Detach = 'detach',
   Delete = 'delete',
 }
-
-const QUERY_PAGE_SIZE = 100
 
 const pollInterval = 5 * 1000
 
@@ -147,7 +145,6 @@ export default function Stacks() {
     useFetchPaginatedData(
       {
         queryHook: useStacksQuery,
-        pageSize: QUERY_PAGE_SIZE,
         keyPath: ['infrastructureStacks'],
       },
       {

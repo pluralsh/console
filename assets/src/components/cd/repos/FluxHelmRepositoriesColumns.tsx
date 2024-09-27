@@ -39,13 +39,6 @@ export const ColNamespace = columnHelper.accessor(
   }
 )
 
-export const ColAuthMethod = columnHelper.accessor((node) => node?.spec.type, {
-  id: 'type',
-  header: 'Type',
-  enableSorting: true,
-  cell: ({ getValue }) => getValue(),
-})
-
 export const ColStatus = columnHelper.accessor(
   (repo) => (repo?.status?.ready ? GitHealth.Pullable : GitHealth.Failed),
   {

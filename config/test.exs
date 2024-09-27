@@ -78,3 +78,5 @@ config :console, Console.Mailer,
 
 config :console, Console.Deployments.Metrics.Provider.NewRelic,
   plug: {Req.Test, Console.Deployments.Metrics.Provider.NewRelic}
+
+config :bamboo, :refute_timeout, 10

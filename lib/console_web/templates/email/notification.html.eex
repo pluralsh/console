@@ -1,0 +1,11 @@
+<div class="fit-content margin-horizontal-auto text-lead">
+  You have a new activity in Plural
+</div>
+
+<div class="fit-content margin-horizontal-auto text-content text-align-center margin-top-large">
+  <%= markdown(@notification.text) %>
+</div>
+
+<a class="button margin-top-large" href="<%= url("/") %>">
+  Login to the Plural Console to see more
+</a>

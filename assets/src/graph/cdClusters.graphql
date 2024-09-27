@@ -71,6 +71,28 @@ fragment ApiDeprecation on ApiDeprecation {
   replacement
 }
 
+fragment UpgradeInsight on UpgradeInsight {
+  id
+  name
+  description
+  details {
+    ...UpgradeInsightDetail
+  }
+  refreshedAt
+  transitionedAt
+  version
+  status
+}
+
+fragment UpgradeInsightDetail on UpgradeInsightDetail {
+  id
+  removedIn
+  replacedIn
+  replacement
+  status
+  used
+}
+
 fragment RuntimeService on RuntimeService {
   id
   name
@@ -298,7 +320,7 @@ fragment Cluster on Cluster {
 }
 
 query Clusters(
-  $first: Int = 100
+  $first: Int
   $after: String
   $q: String
   $healthy: Boolean
@@ -352,8 +374,8 @@ fragment ClusterBasic on Cluster {
   currentVersion
 }
 
-query ClustersTiny($projectId: ID) {
-  clusters(first: 200, projectId: $projectId) {
+query ClustersTiny($projectId: ID, $first: Int) {
+  clusters(first: $first, projectId: $projectId) {
     edges {
       node {
         ...ClusterTiny
@@ -363,7 +385,7 @@ query ClustersTiny($projectId: ID) {
 }
 
 query ClusterSelector(
-  $first: Int = 100
+  $first: Int
   $after: String
   $q: String
   $currentClusterId: ID
@@ -396,8 +418,22 @@ query ClusterBasic($id: ID!) {
   }
 }
 
-query ClusterPods($clusterId: ID, $namespace: String) {
-  pods(first: 100, clusterId: $clusterId, namespace: $namespace) {
+query ClusterPods(
+  $clusterId: ID
+  $namespace: String
+  $first: Int
+  $after: String
+  $before: String
+  $last: Int
+) {
+  pods(
+    first: $first
+    after: $after
+    before: $before
+    last: $last
+    clusterId: $clusterId
+    namespace: $namespace
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -460,6 +496,9 @@ query RuntimeServices(
     }
     apiDeprecations {
       ...ApiDeprecation
+    }
+    upgradeInsights {
+      ...UpgradeInsight
     }
   }
 }

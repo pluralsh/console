@@ -4,7 +4,6 @@ import {
   Modal,
   Tooltip,
 } from '@pluralsh/design-system'
-import { PipelineStageEdgeFragment } from 'generated/graphql'
 import { ComponentProps, useState } from 'react'
 import { type NodeProps, Position } from 'reactflow'
 import { useTheme } from 'styled-components'
@@ -175,5 +174,3 @@ function DetailsModal({
     </Modal>
   )
 }
-
-export type EdgeNode = NodeProps<PipelineStageEdgeFragment & TreeNodeMeta>

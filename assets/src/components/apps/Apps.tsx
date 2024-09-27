@@ -182,11 +182,8 @@ export default function Apps() {
     const filteredByState = appsByState[filter]
 
     const fuse = new Fuse(filteredByState, searchOptions)
-    const filteredByQuery = query
-      ? fuse.search(query).map(({ item }) => item)
-      : filteredByState
 
-    return filteredByQuery
+    return query ? fuse.search(query).map(({ item }) => item) : filteredByState
   }, [appsByState, filter, query])
   const noFilteredApps = filteredApps?.length < 1
 

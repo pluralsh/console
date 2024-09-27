@@ -10,10 +10,8 @@ import EventsTable from '../../utils/EventsTable'
 
 export default function NodeEvents() {
   const { name } = useParams()
-  const { data, refetch: _refetch } = useQuery<{
-    node: {
-      events?: Event[]
-    }
+  const { data } = useQuery<{
+    node: { events?: Event[] }
   }>(NODE_EVENTS_Q, {
     variables: { name },
     fetchPolicy: 'cache-and-network',

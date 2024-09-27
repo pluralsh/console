@@ -45,7 +45,7 @@ import { LinkTabWrap } from '../../../utils/Tabs'
 
 import { PluralErrorBoundary } from '../../PluralErrorBoundary'
 import { GqlError } from '../../../utils/Alert'
-import { useFetchPaginatedData } from '../../utils/useFetchPaginatedData'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { useProjectId } from '../../../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../../../utils/graphql'
 import { TRUNCATE } from '../../../utils/truncate'

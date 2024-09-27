@@ -1577,6 +1577,23 @@ _Appears in:_
 
 
 
+#### PluralSinkConfiguration
+
+
+
+
+
+
+
+_Appears in:_
+- [SinkConfiguration](#sinkconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `priority` _[NotificationPriority](#notificationpriority)_ | The priority to label any delivered notification as |  | Enum: [LOW MEDIUM HIGH] <br /> |
+| `urgent` _boolean_ | Whether to immediately deliver the notification via SMTP |  | Optional: {} <br /> |
+
+
 #### PrAutomation
 
 
@@ -2214,6 +2231,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `slack` _[SinkURL](#sinkurl)_ | Slack url |  | Optional: {} <br /> |
 | `teams` _[SinkURL](#sinkurl)_ | Teams url |  | Optional: {} <br /> |
+| `plural` _[PluralSinkConfiguration](#pluralsinkconfiguration)_ | Plural sink configuration knobs |  | Optional: {} <br /> |
 
 
 #### SinkURL

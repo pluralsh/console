@@ -6,15 +6,15 @@ import { PersonaFragment, usePersonasQuery } from 'generated/graphql'
 import { createColumnHelper } from '@tanstack/react-table'
 
 import { GridTableWrapper } from '../../../utils/layout/ResponsiveGridLayouts'
-import { useFetchPaginatedData } from '../../../cd/utils/useFetchPaginatedData'
 import { GqlError } from '../../../utils/Alert'
-
 import { Info } from '../../../utils/Info'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from '../../../utils/table/useFetchPaginatedData'
 
 import PersonaActions from './PersonaActions'
 import PersonaCreate from './PersonaCreate'
-
-export const pageSize = 100
 
 const columnHelper = createColumnHelper<PersonaFragment>()
 const columns = [
@@ -45,7 +45,6 @@ export function PersonasList() {
     useFetchPaginatedData({
       queryHook: usePersonasQuery,
       keyPath: ['personas'],
-      pageSize,
     })
 
   const personas = useMemo(
@@ -68,7 +67,7 @@ export function PersonasList() {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        reactVirtualOptions={{ overscan: 10 }}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         css={{
           maxHeight: 'unset',
           height: '100%',

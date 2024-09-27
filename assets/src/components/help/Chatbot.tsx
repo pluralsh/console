@@ -221,7 +221,7 @@ function ChatbotFrame({
   ComponentProps<typeof ChatbotFrameSC>,
   { onClose: () => void; onMin: () => void }
 >) {
-  const [lazyQ, { called, loading, data, error: _error }] = useChatLazyQuery()
+  const [lazyQ, { called, loading, data }] = useChatLazyQuery()
   const hasMounted = useRef(false)
   const wasLoading = usePrevious(loading)
   const historyScrollRef = useRef<HTMLDivElement>(null)

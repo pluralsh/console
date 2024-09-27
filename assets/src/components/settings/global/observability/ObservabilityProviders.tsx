@@ -3,23 +3,19 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 
 import { useObservabilityProvidersQuery } from 'generated/graphql'
 
-import { ComponentProps, useState } from 'react'
+import { useState } from 'react'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { SettingsPageHeader } from 'components/settings/Settings'
 
 import { EditObservabilityProviderModal } from './EditObservabilityProvider'
 import { columns } from './ObservabilityProvidersColumns'
-
-const REACT_VIRTUAL_OPTIONS: ComponentProps<
-  typeof Table
->['reactVirtualOptions'] = {
-  overscan: 10,
-}
-const OBSERVABILITY_PROVIDER_QUERY_PAGE_SIZE = 100
 
 const OBSERVABILITY_PROVIDERS_TABLE_HEIGHT = '224px'
 
@@ -34,7 +30,6 @@ export default function ObservabilityProviders() {
     setVirtualSlice,
   } = useFetchPaginatedData({
     queryHook: useObservabilityProvidersQuery,
-    pageSize: OBSERVABILITY_PROVIDER_QUERY_PAGE_SIZE,
     keyPath: ['observabilityProviders'],
   })
 
@@ -61,7 +56,7 @@ export default function ObservabilityProviders() {
           <Table
             columns={columns}
             reactTableOptions={{ meta: { refetch } }}
-            reactVirtualOptions={REACT_VIRTUAL_OPTIONS}
+            reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
             data={data?.observabilityProviders?.edges || []}
             virtualizeRows
             hasNextPage={pageInfo?.hasNextPage}

@@ -49,8 +49,6 @@ import {
 
 import { PipelinePullRequestsModal } from '../PipelinePullRequests'
 
-import { StopPropagation } from '../../../utils/StopPropagation'
-
 import { CountBadge } from '../../../utils/CountBadge'
 
 import {
@@ -317,11 +315,16 @@ export function StageNode(
                       }}
                     >
                       {servicePullRequests[serviceId]?.length && (
-                        <StopPropagation>
+                        <div
+                          style={{ display: 'contents' }}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                          }}
+                        >
                           <PrsButton
                             pullRequests={servicePullRequests[serviceId]}
                           />
-                        </StopPropagation>
+                        </div>
                       )}
                     </div>
                   </ServiceCard>

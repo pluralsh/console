@@ -1,19 +1,16 @@
 import { ReactElement, useMemo } from 'react'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { Outlet, useParams } from 'react-router-dom'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 import {
   ClusterRoleQueryVariables,
-  Clusterrole_ClusterRoleDetail as ClusterRoleT,
   useClusterRoleQuery,
 } from '../../../generated/graphql-kubernetes'
 import { MetadataSidecar } from '../common/utils'
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
-import PolicyRules from '../common/PolicyRules'
-import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
@@ -61,15 +58,5 @@ export default function ClusterRole(): ReactElement {
     >
       <Outlet context={cr} />
     </ResourceDetails>
-  )
-}
-
-export function RolePolicyRules(): ReactElement {
-  const cr = useOutletContext() as ClusterRoleT
-
-  return (
-    <FullHeightTableWrap>
-      <PolicyRules rules={cr.rules} />
-    </FullHeightTableWrap>
   )
 }

@@ -4,7 +4,10 @@ import { useGroupsQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useContext, useMemo } from 'react'
 
-import { useFetchPaginatedData } from 'components/cd/utils/useFetchPaginatedData'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -16,7 +19,6 @@ import { Permissions, hasRbac } from '../misc'
 
 import GroupCreate from './GroupCreate'
 import { groupsColsEditable, groupsColsView } from './GroupsColumns'
-import { GROUPS_QUERY_PAGE_SIZE } from './Groups'
 
 export function GroupsList({ q }: any) {
   const { me } = useContext(LoginContext)
@@ -27,7 +29,6 @@ export function GroupsList({ q }: any) {
       {
         queryHook: useGroupsQuery,
         keyPath: ['groups'],
-        pageSize: GROUPS_QUERY_PAGE_SIZE,
       },
       { q }
     )
@@ -56,7 +57,7 @@ export function GroupsList({ q }: any) {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
-        reactVirtualOptions={{ overscan: 10 }}
+        reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         reactTableOptions={reactTableOptions}
         css={{
           height: '100%',

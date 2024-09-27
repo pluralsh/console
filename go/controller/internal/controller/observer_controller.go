@@ -4,6 +4,9 @@ import (
 	"context"
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+
 	console "github.com/pluralsh/console/go/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/pluralsh/console/go/controller/internal/utils"
@@ -100,6 +103,10 @@ func (r *ObserverReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	apiProvider, err := r.sync(ctx, observer, changed)
 	if err != nil {
 		logger.Error(err, "unable to create or update observer")
+		if errors.IsNotFound(err) {
+			utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
+			return RequeueAfter(requeueWaitForResources), nil
+		}
 		utils.MarkCondition(observer.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
@@ -175,7 +182,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 			return target, actions, projectID, err
 		}
 		if !gitRepo.Status.HasID() {
-			err = fmt.Errorf("gitRepo ID is nil")
+			err = errors.NewNotFound(schema.GroupResource{}, gitRepo.Name)
 			return target, actions, projectID, err
 		}
 		target.Git = &console.ObserverGitAttributes{
@@ -210,7 +217,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					return target, actions, projectID, err
 				}
 				if !prAutomation.Status.HasID() {
-					err = fmt.Errorf("PrAutomation ID is nil")
+					err = errors.NewNotFound(schema.GroupResource{}, prAutomation.Name)
 					return target, actions, projectID, err
 				}
 
@@ -230,7 +237,7 @@ func (r *ObserverReconciler) getAttributes(ctx context.Context, observer *v1alph
 					return target, actions, projectID, err
 				}
 				if !pipeline.Status.HasID() {
-					err = fmt.Errorf("pipeline ID is nil")
+					err = errors.NewNotFound(schema.GroupResource{}, pipeline.Name)
 					return target, actions, projectID, err
 				}
 				a.Configuration.Pipeline = &console.ObserverPipelineActionAttributes{

@@ -13,8 +13,9 @@ import {
   columnHelper,
 } from 'components/cd/clusters/ClustersColumns'
 import { TableCaretLink } from 'components/cluster/TableElements'
-import { CLUSTERS_REACT_VIRTUAL_OPTIONS } from 'components/cd/clusters/Clusters'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
+
+import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
 export function ClusterOverViewTable({
   refetch,
@@ -38,7 +39,7 @@ export function ClusterOverViewTable({
       loose
       data={data}
       columns={clusterOverviewColumns}
-      reactVirtualOptions={CLUSTERS_REACT_VIRTUAL_OPTIONS}
+      reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       reactTableOptions={reactTableOptions}
       onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) =>
         navigate(

@@ -92,7 +92,7 @@ export function TimezoneComboBox({
     ? `${currentZone.friendlyName} (${currentZone.offset})`
     : 'Select a timezone'
 
-  const comboBox = (
+  return (
     <ComboBox
       inputValue={comboInputTz}
       onInputChange={setComboInputTz}
@@ -111,6 +111,4 @@ export function TimezoneComboBox({
       ))}
     </ComboBox>
   )
-
-  return comboBox
 }

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
 import { VirtualItem } from '@tanstack/react-virtual'
 import { extendConnection, updateNestedConnection } from 'utils/graphql'
 import {
@@ -12,6 +12,11 @@ import {
   QueryHookOptions,
   QueryResult,
 } from '@apollo/client'
+import { Table } from '@pluralsh/design-system'
+
+export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
+  typeof Table
+>['reactVirtualOptions'] = { overscan: 10 }
 
 export const DEFAULT_PAGE_SIZE = 100
 
