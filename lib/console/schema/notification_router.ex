@@ -35,7 +35,7 @@ defmodule Console.Schema.NotificationRouter do
         dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.stack_id) and f.stack_id == ^id) or ^q)
     end)
 
-    from(query, where:  ^dyno)
+    from(query, where: ^dyno)
   end
 
   def for_event(query \\ __MODULE__, event) do

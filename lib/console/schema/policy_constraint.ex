@@ -88,9 +88,8 @@ defmodule Console.Schema.PolicyConstraint do
   end
 
   def with_violations(query \\ __MODULE__, violated)
-  def with_violations(query, true) do
-    from(p in query, where: p.violation_count > 0)
-  end
+  def with_violations(query, true), do: from(p in query, where: p.violation_count > 0)
+  def with_violations(query, false), do: from(p in query, where: p.violation_count == 0 or is_nil(p.violation_count))
   def with_violations(query, _), do: query
 
   def statistics(query \\ __MODULE__, field) do
