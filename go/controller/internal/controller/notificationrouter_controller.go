@@ -153,7 +153,6 @@ func (r *NotificationRouterReconciler) genNotificationRouterAttr(ctx context.Con
 		Name: router.NotificationName(),
 	}
 	events := containers.NewSet[string]()
-	events.Add("*")
 	for _, event := range router.Spec.Events {
 		events.Add(event)
 	}

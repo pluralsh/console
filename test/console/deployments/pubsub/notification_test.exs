@@ -27,6 +27,25 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       event = %PubSub.ServiceUpdated{item: svc}
       :ok = Notifications.handle_event(event)
     end
+
+    test "it will properly ignore if event is different" do
+      svc = insert(:service)
+      %{user: u, group: g} = insert(:group_member)
+      router = insert(:notification_router, events: ["pr.create", "stack.run"])
+      sink = insert(:notification_sink,
+        type: :plural,
+        notification_bindings: [%{group_id: g.id}],
+        configuration: %{plural: %{urgent: true}}
+      )
+      insert(:router_filter)
+      insert(:router_sink, router: router, sink: sink)
+
+      event = %PubSub.ServiceUpdated{item: svc}
+      :ok = Notifications.handle_event(event)
+
+      refute Console.Schema.AppNotification.for_user(u.id)
+             |> Console.Repo.exists?()
+    end
   end
 
   describe "PullRequestCreated" do
