@@ -16,10 +16,10 @@ export const table: BaseSchema = {
         (child): child is Tag =>
           isTag(child) && child?.name.toLowerCase() === 'thead'
       )
-      .children.find(
+      ?.children.find(
         (tr): tr is Tag => isTag(tr) && tr?.name.toLowerCase() === 'tr'
       )
-      .children.filter(
+      ?.children.filter(
         (th): th is Tag => isTag(th) && th?.name.toLowerCase() === 'th'
       )
       .map((th) => th.children)
