@@ -10116,6 +10116,7 @@ export type PolicyConstraintsQueryVariables = Exact<{
   namespace?: InputMaybe<Scalars['String']['input']>;
   namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
   q?: InputMaybe<Scalars['String']['input']>;
+  violated?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -20150,7 +20151,7 @@ export type DeletePersonaMutationHookResult = ReturnType<typeof useDeletePersona
 export type DeletePersonaMutationResult = Apollo.MutationResult<DeletePersonaMutation>;
 export type DeletePersonaMutationOptions = Apollo.BaseMutationOptions<DeletePersonaMutation, DeletePersonaMutationVariables>;
 export const PolicyConstraintsDocument = gql`
-    query PolicyConstraints($after: String, $before: String, $clusters: [ID], $first: Int, $kind: String, $kinds: [String], $last: Int, $namespace: String, $namespaces: [String], $q: String) {
+    query PolicyConstraints($after: String, $before: String, $clusters: [ID], $first: Int, $kind: String, $kinds: [String], $last: Int, $namespace: String, $namespaces: [String], $q: String, $violated: Boolean) {
   policyConstraints(
     after: $after
     before: $before
@@ -20162,6 +20163,7 @@ export const PolicyConstraintsDocument = gql`
     namespace: $namespace
     namespaces: $namespaces
     q: $q
+    violated: $violated
   ) {
     pageInfo {
       ...PageInfo
@@ -20198,6 +20200,7 @@ ${PolicyConstraintFragmentDoc}`;
  *      namespace: // value for 'namespace'
  *      namespaces: // value for 'namespaces'
  *      q: // value for 'q'
+ *      violated: // value for 'violated'
  *   },
  * });
  */

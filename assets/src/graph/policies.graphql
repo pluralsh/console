@@ -26,6 +26,7 @@ query PolicyConstraints(
   $namespace: String
   $namespaces: [String]
   $q: String
+  $violated: Boolean
 ) {
   policyConstraints(
     after: $after
@@ -38,6 +39,7 @@ query PolicyConstraints(
     namespace: $namespace
     namespaces: $namespaces
     q: $q
+    violated: $violated
   ) {
     pageInfo {
       ...PageInfo
