@@ -73,14 +73,27 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :labels,          :json
     field :annotations,     :json
     field :service_account, :string
+    field :resources,       :container_resources_attributes, description: "request overrides if you don't want to manually configure individual containers"
   end
 
   @desc "the attributes for a container"
   input_object :container_attributes do
-    field :image,    non_null(:string)
-    field :args,     list_of(:string)
-    field :env,      list_of(:env_attributes)
-    field :env_from, list_of(:env_from_attributes)
+    field :name,      :string
+    field :image,     non_null(:string)
+    field :args,      list_of(:string)
+    field :env,       list_of(:env_attributes)
+    field :env_from,  list_of(:env_from_attributes)
+    field :resources, :container_resources_attributes
+  end
+
+  input_object :container_resources_attributes do
+    field :requests, :resource_request_attributes
+    field :limits,   :resource_request_attributes
+  end
+
+  input_object :resource_request_attributes do
+    field :cpu,    :string
+    field :memory, :string
   end
 
   input_object :env_attributes do
@@ -225,14 +238,16 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :labels,          :map, description: "any pod labels to apply"
     field :annotations,     :map, description: "any pod annotations to apply"
     field :service_account, :string, description: "the service account the pod will use"
+    field :requests,        :container_resources, description: "requests overrides for cases where direct container configuration is unnecessary"
   end
 
   @desc "a shortform spec for job containers, designed for ease-of-use"
   object :container_spec do
-    field :image,    non_null(:string)
-    field :args,     list_of(:string)
-    field :env,      list_of(:container_env)
-    field :env_from, list_of(:container_env_from)
+    field :image,     non_null(:string)
+    field :args,      list_of(:string)
+    field :env,       list_of(:container_env)
+    field :env_from,  list_of(:container_env_from)
+    field :resources, :container_resources
   end
 
   @desc "container env variable"
@@ -245,6 +260,18 @@ defmodule Console.GraphQl.Deployments.Pipeline do
   object :container_env_from do
     field :config_map, non_null(:string)
     field :secret,     non_null(:string)
+  end
+
+  @desc "A combined kubernetes pod container resource requests spec"
+  object :container_resources do
+    field :requests, :resource_request
+    field :limits,   :resource_request
+  end
+
+  @desc "A kubernetes pod container resource request spec"
+  object :resource_request do
+    field :cpu,    :string
+    field :memory, :string
   end
 
   @desc "the configuration of a service within a pipeline stage, including optional promotion criteria"

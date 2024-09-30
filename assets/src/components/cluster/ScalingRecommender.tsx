@@ -12,9 +12,9 @@ import {
   ConfigurationOverlay,
   ConfigurationOverlaySpec,
   ContainerRecommendation,
-  ContainerResources,
   LabelPair,
   Maybe,
+  ResourceRequest,
   RootQueryType,
 } from 'generated/graphql'
 import { useMutation, useQuery } from '@apollo/client'
@@ -176,7 +176,7 @@ function ContainerRecommendations({
   )
 }
 
-export function ScalingEdit({ rec }: { rec: ContainerResources }) {
+export function ScalingEdit({ rec }: { rec: ResourceRequest }) {
   const { namespace, overlays, setIsModifying, setSuccess } =
     useScalingContext()
   const { cpu, memory } = rec || {}

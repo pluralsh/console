@@ -10,6 +10,8 @@ defmodule Console.Schema.UpgradeInsightDetail do
     field :replaced_in, :string
     field :removed_in,  :string
 
+    field :last_used_at, :utc_datetime_usec
+
     belongs_to :insight, UpgradeInsight
 
     timestamps()
@@ -17,7 +19,7 @@ defmodule Console.Schema.UpgradeInsightDetail do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(status used replacement replaced_in removed_in insight_id)a)
+    |> cast(attrs, ~w(status used replacement replaced_in removed_in insight_id last_used_at)a)
     |> foreign_key_constraint(:insight_id)
     |> validate_required(~w(status used replacement)a)
   end

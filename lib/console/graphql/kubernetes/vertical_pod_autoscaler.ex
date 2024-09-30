@@ -30,17 +30,12 @@ defmodule Console.GraphQl.Kubernetes.VerticalPodAutoscaler do
     field :container_recommendations, list_of(:container_recommendation)
   end
 
-  object :container_resources do
-    field :cpu,    :string
-    field :memory, :string
-  end
-
   object :container_recommendation do
     field :name,            :string
     field :container_name,  :string
-    field :target,          :container_resources
-    field :lower_bound,     :container_resources
-    field :upper_bound,     :container_resources
-    field :uncapped_target, :container_resources
+    field :target,          :resource_request
+    field :lower_bound,     :resource_request
+    field :upper_bound,     :resource_request
+    field :uncapped_target, :resource_request
   end
 end

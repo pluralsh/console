@@ -1,37 +1,52 @@
 import { Flex } from 'honorable'
-import { ClusterFragment, Node } from 'generated/graphql'
-
+import {
+  ClusterFragment,
+  Maybe,
+  Node,
+  useClusterMetricsQuery,
+} from 'generated/graphql'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-
 import { Card } from '@pluralsh/design-system'
-
 import { useTheme } from 'styled-components'
+import { isNull } from 'lodash'
 
-import { ClusterMetrics as Metrics } from '../constants'
+import { Prometheus } from '../../../utils/prometheus'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import { ClusterGauges } from './ClusterGauges'
-import { ResourceUsage } from './Nodes'
 import { SaturationGraphs } from './SaturationGraphs'
-
-export function replaceMetric(metric, cluster) {
-  if (!cluster) return metric
-
-  return metric.replaceAll(`cluster=""`, `cluster="${cluster}"`)
-}
 
 export function ClusterMetrics({
   nodes,
-  usage,
   cluster,
 }: {
-  nodes: Node[]
-  usage: ResourceUsage
+  nodes: Maybe<Node>[]
   cluster?: ClusterFragment
 }) {
   const theme = useTheme()
   const { prometheusConnection } = useDeploymentSettings()
+  const metricsEnabled = Prometheus.enabled(prometheusConnection)
+  const { data, loading } = useClusterMetricsQuery({
+    variables: {
+      clusterId: cluster?.id ?? '',
+    },
+    skip: !metricsEnabled || !cluster?.id,
+    fetchPolicy: 'cache-and-network',
+    pollInterval: 60_000,
+  })
 
-  if (!prometheusConnection) return null
+  const cpuTotal = Prometheus.capacity(Prometheus.CapacityType.CPU, ...nodes)
+  const memTotal = Prometheus.capacity(Prometheus.CapacityType.Memory, ...nodes)
+  const podsTotal = Prometheus.capacity(Prometheus.CapacityType.Pods, ...nodes)
+  const shouldRenderMetrics =
+    metricsEnabled &&
+    !isNull(cpuTotal) &&
+    !isNull(memTotal) &&
+    !!cluster?.id &&
+    (data?.cluster?.clusterMetrics?.cpuUsage?.length ?? 0) > 0
+
+  if (loading) return <LoadingIndicator />
+  if (!shouldRenderMetrics) return null
 
   return (
     <Card css={{ padding: theme.spacing.xlarge }}>
@@ -52,20 +67,44 @@ export function ClusterMetrics({
           wrap="wrap"
         >
           <ClusterGauges
-            nodes={nodes}
-            usage={usage}
-            cluster={cluster}
+            cpu={{
+              usage: Prometheus.toValues(
+                data?.cluster?.clusterMetrics?.cpuUsage
+              ),
+              requests: Prometheus.toValues(
+                data?.cluster?.clusterMetrics?.cpuRequests
+              ),
+              limits: Prometheus.toValues(
+                data?.cluster?.clusterMetrics?.cpuLimits
+              ),
+              total: cpuTotal!,
+            }}
+            memory={{
+              usage: Prometheus.toValues(
+                data?.cluster?.clusterMetrics?.memoryUsage
+              ),
+              requests: Prometheus.toValues(
+                data?.cluster?.clusterMetrics?.memoryRequests
+              ),
+              limits: Prometheus.toValues(
+                data?.cluster?.clusterMetrics?.memoryLimits
+              ),
+              total: memTotal!,
+            }}
+            pods={{
+              used: Prometheus.toValues(data?.cluster?.clusterMetrics?.pods),
+              total: podsTotal!,
+            }}
           />
           <SaturationGraphs
-            clusterId={cluster?.id}
-            cpu={replaceMetric(
-              cluster ? Metrics.CPUCD : Metrics.CPU,
-              cluster?.handle
+            cpuUsage={Prometheus.toValues(
+              data?.cluster?.clusterMetrics?.cpuUsage
             )}
-            mem={replaceMetric(
-              cluster ? Metrics.MemoryCD : Metrics.Memory,
-              cluster?.handle
+            cpuTotal={cpuTotal!}
+            memUsage={Prometheus.toValues(
+              data?.cluster?.clusterMetrics?.memoryUsage
             )}
+            memTotal={memTotal!}
           />
         </Flex>
       </Flex>

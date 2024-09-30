@@ -31,6 +31,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
       {:namespace, ns}, q -> PolicyConstraint.for_namespace(q, ns)
       {:kind, k}, q -> PolicyConstraint.for_kind(q, k)
       {:kinds, ks}, q -> PolicyConstraint.for_kinds(q, ks)
+      {:violated, v}, q -> PolicyConstraint.with_violations(q, v)
       {:namespaces, ns}, q ->
         PolicyConstraint.for_namespaces(q, Enum.filter(ns, & &1), Enum.any?(ns, &is_nil/1))
       {:clusters, ids}, q -> PolicyConstraint.for_clusters(q, ids)

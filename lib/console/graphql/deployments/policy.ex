@@ -104,6 +104,7 @@ defmodule Console.GraphQl.Deployments.Policy do
       arg :kinds,      list_of(:string)
       arg :namespaces, list_of(:string)
       arg :clusters,   list_of(:id)
+      arg :violated,   :boolean
       arg :q,          :string
 
       resolve &Deployments.list_policy_constraints/2

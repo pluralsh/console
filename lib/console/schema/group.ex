@@ -21,11 +21,11 @@ defmodule Console.Schema.Group do
     from(g in query, where: g.global)
   end
 
-  @valid ~w(name description)a
-
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(m in query, order_by: ^order)
   end
+
+  @valid ~w(name description global)a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -7,14 +7,19 @@ import { isNonNullable } from 'utils/isNonNullable'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'
 
-import { MetricResponseFragment, useUsageQuery } from 'generated/graphql'
+import {
+  MetricResponseFragment,
+  useServiceDeploymentComponentMetricsQuery,
+} from 'generated/graphql'
 
 import RangePicker from 'components/utils/RangePicker'
 import { Graph } from 'components/utils/Graph'
 import GraphHeader from 'components/utils/GraphHeader'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { POLL_INTERVAL } from '../cluster/constants'
+import moment from 'moment/moment'
+
+import { format } from '../apps/app/dashboards/dashboard/misc'
 
 import { ComponentDetailsContext } from './ComponentDetails'
 
@@ -63,10 +68,13 @@ function Graphs({
             flexGrow: 1,
           }}
         >
-          <GraphHeader title="Overall CPU Usage" />
+          <GraphHeader
+            title="Overall CPU Usage"
+            tooltip="100% usage means that 1 vCore is fully used. Overall usage can exceed 100% if there are more vCores available."
+          />
           <Graph
             data={[{ id: 'cpu', data: cpuValues }]}
-            yFormat={undefined}
+            yFormat={(v) => format(v, 'percent')}
             tickRotation={undefined}
           />
         </div>
@@ -134,10 +142,13 @@ function PodGraphs({
             flexGrow: 1,
           }}
         >
-          <GraphHeader title="Pod CPU Usage" />
+          <GraphHeader
+            title="Pod CPU Usage"
+            tooltip="100% usage means that 1 vCore is fully used. Overall usage can exceed 100% if there are more vCores available."
+          />
           <Graph
             data={cpuGraph}
-            yFormat={undefined}
+            yFormat={(v) => format(v, 'percent')}
             tickRotation={undefined}
           />
         </div>
@@ -163,30 +174,31 @@ function PodGraphs({
 }
 
 function Metric({
-  name,
-  namespace,
-  regex,
+  serviceId,
+  componentId,
   duration: { step, offset },
-  cluster,
   ...props
 }) {
   const theme = useTheme()
-  const clusterInfix = cluster ? `cluster="${cluster?.handle}",` : ''
-  const { data } = useUsageQuery({
+  const start = useMemo(
+    () => moment().subtract({ second: offset }).toISOString(),
+    [offset]
+  )
+  const { data, loading } = useServiceDeploymentComponentMetricsQuery({
     variables: {
-      cpu: `sum(rate(container_cpu_usage_seconds_total{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}[5m]))`,
-      mem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}",image!="",container!=""})`,
-      podCpu: `sum(rate(container_cpu_usage_seconds_total{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}"}[5m])) by (pod)`,
-      podMem: `sum(container_memory_working_set_bytes{${clusterInfix}namespace="${namespace}",pod=~"${name}${regex}",image!="",container!=""}) by (pod)`,
-      clusterId: cluster?.id,
+      id: serviceId,
+      componentId,
       step,
-      offset,
+      start,
     },
-    pollInterval: POLL_INTERVAL,
+    skip: !serviceId || !componentId,
+    pollInterval: 60_000,
+    fetchPolicy: 'cache-and-network',
   })
 
   const { cpu, mem, podCpu, podMem } = useMemo(() => {
-    const { cpu, mem, podCpu, podMem } = data || {}
+    const { cpu, mem, podCpu, podMem } =
+      data?.serviceDeployment?.componentMetrics || {}
 
     return {
       cpu: (cpu || []).filter(isNonNullable),
@@ -195,8 +207,6 @@ function Metric({
       podMem: (podMem || []).filter(isNonNullable),
     }
   }, [data])
-
-  if (!data) return <LoadingIndicator />
 
   let content = <EmptyState message="No metrics available" />
 
@@ -215,6 +225,8 @@ function Metric({
     )
   }
 
+  if (loading && !data) return <LoadingIndicator />
+
   return (
     <Card
       css={{
@@ -229,18 +241,10 @@ function Metric({
   )
 }
 
-const kindToRegex = {
-  deployment: '-[a-z0-9]+-[a-z0-9]+',
-  statefulset: '-[0-9]+',
-}
-
 export default function ComponentMetrics() {
   const theme = useTheme()
   const [duration, setDuration] = useState<any>(DURATIONS[0])
-  const { component, cluster } = useOutletContext<ComponentDetailsContext>()
-  const componentName = component.name?.toLowerCase()
-  const componentKind = component.kind?.toLowerCase()
-  const componentNamespace = component.namespace?.toLowerCase()
+  const { component, serviceId } = useOutletContext<ComponentDetailsContext>()
 
   return (
     <div
@@ -259,11 +263,9 @@ export default function ComponentMetrics() {
         top={0}
       />
       <Metric
-        namespace={componentNamespace}
-        name={componentName}
-        regex={kindToRegex[componentKind]}
+        serviceId={serviceId}
+        componentId={component?.id}
         duration={duration}
-        cluster={cluster}
         maxHeight="100%"
         overflowY="auto"
       />

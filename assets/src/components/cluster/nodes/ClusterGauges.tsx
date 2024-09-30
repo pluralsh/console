@@ -1,114 +1,74 @@
 import { useMemo } from 'react'
-import { useQuery } from '@apollo/client'
-import { memoryParser } from 'kubernetes-resource-parser'
-import { sumBy } from 'lodash'
 
-import { ClusterFragment, MetricResponse, Node } from 'generated/graphql'
-import { cpuParser } from 'utils/kubernetes'
-
+import { MetricResult } from 'generated/graphql'
 import RadialBarChart from 'components/utils/RadialBarChart'
 
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-
-import { ClusterMetrics as Metrics } from '../constants'
-import { NODE_METRICS_Q } from '../queries'
 import { GaugeWrap, ResourceGauge } from '../Gauges'
+import { Prometheus } from '../../../utils/prometheus'
 
-import { ResourceUsage } from './Nodes'
-import { replaceMetric } from './ClusterMetrics'
+interface CPUClusterMetrics {
+  usage: Array<MetricResult>
+  requests: Array<MetricResult>
+  limits: Array<MetricResult>
+  total: number
+}
 
-type Capacity = { cpu?: string; pods?: string; memory?: string } | undefined
+interface MemoryClusterMetrics {
+  usage: Array<MetricResult>
+  requests: Array<MetricResult>
+  limits: Array<MetricResult>
+  total: number
+}
 
-const datum = (data: MetricResponse[]) =>
-  data[0]?.values?.[0]?.value ? parseFloat(data[0].values[0].value) : undefined
+interface PodsClusterMetrics {
+  used: Array<MetricResult>
+  total: number
+}
 
 export function ClusterGauges({
-  nodes,
-  usage,
-  cluster,
+  cpu,
+  memory,
+  pods,
 }: {
-  nodes: Node[]
-  usage: ResourceUsage
-  cluster?: ClusterFragment
+  cpu: CPUClusterMetrics
+  memory: MemoryClusterMetrics
+  pods: PodsClusterMetrics
 }) {
-  const { prometheusConnection } = useDeploymentSettings()
-  const { data } = useQuery<{
-    cpuRequests: MetricResponse[]
-    cpuLimits: MetricResponse[]
-    memRequests: MetricResponse[]
-    memLimits: MetricResponse[]
-    pods: MetricResponse[]
-  }>(NODE_METRICS_Q, {
-    skip: !prometheusConnection,
-    variables: {
-      clusterId: cluster?.id,
-      cpuRequests: cluster
-        ? replaceMetric(Metrics.CPURequestsCD, cluster?.handle)
-        : Metrics.CPURequests,
-      cpuLimits: cluster
-        ? replaceMetric(Metrics.CPULimitsCD, cluster?.handle)
-        : Metrics.CPULimits,
-      memRequests: cluster
-        ? replaceMetric(Metrics.MemoryRequestsCD, cluster?.handle)
-        : Metrics.MemoryRequests,
-      memLimits: cluster
-        ? replaceMetric(Metrics.MemoryLimitsCD, cluster?.handle)
-        : Metrics.MemoryLimits,
-      pods: cluster
-        ? replaceMetric(Metrics.PodsCD, cluster?.handle)
-        : Metrics.Pods,
-      offset: 5 * 60,
-    },
-    fetchPolicy: 'network-only',
-    pollInterval: 5000,
-  })
+  const hasCPUMetrics =
+    !!cpu?.usage && !!cpu?.limits && !!cpu?.requests && cpu?.total > 0
+  const hasMemoryMetrics =
+    !!memory?.usage &&
+    !!memory?.limits &&
+    !!memory?.requests &&
+    memory?.total > 0
+  const hasPodMetrics = !!pods?.used && pods?.total > 0
 
   const chartData = useMemo(() => {
-    if (!data) {
+    if (!hasCPUMetrics || !hasMemoryMetrics || !hasPodMetrics) {
       return null
     }
-    const cpuRequests = datum(data.cpuRequests)
-    const cpuLimits = datum(data.cpuLimits)
-    const memRequests = datum(data.memRequests)
-    const memLimits = datum(data.memLimits)
-    const podsUsed = datum(data.pods)
-
-    const cpuTotal = sumBy(
-      nodes,
-      (n) => cpuParser((n?.status?.capacity as Capacity)?.cpu) ?? 0
-    )
-    const memTotal = sumBy(nodes, (n) =>
-      memoryParser((n?.status?.capacity as Capacity)?.memory)
-    )
-    const podsTotal = sumBy(nodes, (n) => {
-      const pods = (n?.status?.capacity as Capacity)?.pods
-
-      return pods ? parseInt(pods) ?? 0 : 0
-    })
-    const { cpu: cpuUsed, mem: memUsed } = usage || {}
 
     return {
-      cpu: cpuUsed !== undefined && {
-        used: cpuUsed,
-        total: cpuTotal,
-        requests: cpuRequests,
-        limits: cpuLimits,
+      cpu: {
+        used: Prometheus.avg(cpu.usage),
+        total: cpu.total,
+        requests: Prometheus.avg(cpu.requests),
+        limits: Prometheus.avg(cpu.limits),
       },
-      memory: memUsed !== undefined && {
-        used: memUsed,
-        total: memTotal,
-        requests: memRequests || 0,
-        limits: memLimits,
+      memory: {
+        used: Prometheus.avg(memory.usage),
+        total: memory.total,
+        requests: Prometheus.avg(memory.requests),
+        limits: Prometheus.avg(memory.limits),
       },
       pods: {
-        used: podsUsed || 0,
-        total: podsTotal,
-        remainder: podsTotal - (podsUsed || 0),
+        used: Prometheus.pods(pods.used),
+        total: pods.total,
+        remainder: pods.total - Prometheus.pods(pods.used),
       },
     }
-  }, [data, nodes, usage])
+  }, [cpu, memory, pods, hasCPUMetrics, hasMemoryMetrics, hasPodMetrics])
 
-  if (!prometheusConnection) return null
   if (!chartData) return null
 
   return (

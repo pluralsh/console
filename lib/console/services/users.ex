@@ -283,9 +283,22 @@ defmodule Console.Services.Users do
 
   @spec create_group(map) :: group_resp
   def create_group(attrs) do
-    %Group{}
-    |> Group.changeset(attrs)
-    |> Repo.insert()
+    start_transaction()
+    |> add_operation(:group, fn _ ->
+      %Group{}
+      |> Group.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> add_operation(:members, fn
+      %{group: %Group{id: id, global: true}} ->
+        members = Repo.all(User)
+                 |> Enum.map(&timestamped(%{user_id: &1.id, group_id: id}))
+
+        Repo.insert_all(GroupMember, members)
+        |> ok()
+      _ -> {:ok, []}
+    end)
+    |> execute(extract: :group)
   end
 
   @spec delete_group(binary) :: group_resp
