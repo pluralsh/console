@@ -192,6 +192,13 @@ dashboard:
     enabled: false
   api:
     containers:
+      resources:
+        requests:
+          cpu: 500m
+          memory: 500Mi
+        limits:
+          cpu: 2
+          memory: 2Gi
       args:
       - --act-as-proxy
       - --apiserver-host=https://$(KAS_HOST)/k8s-proxy

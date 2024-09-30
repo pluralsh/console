@@ -99,7 +99,7 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
   end
 end
 
-defimpl Console.PubSub.Recurse, for: Console.PubSub.PullRequestCreated do
+defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
   alias Console.{Schema.PullRequest, Deployments.Stacks}
 
   def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id),

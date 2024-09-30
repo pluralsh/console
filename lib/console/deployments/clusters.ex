@@ -41,7 +41,7 @@ defmodule Console.Deployments.Clusters do
   True if there's been one cluster that's successfully pinged in the fleet
   """
   @spec installed?() :: boolean
-  @decorate cacheable(cache: @cache_adapter, key: :installed, opts: [ttl: @readme_ttl])
+  @decorate cacheable(cache: @cache_adapter, key: :installed, opts: [ttl: :timer.minutes(10)])
   def installed?() do
     Cluster.pinged()
     |> Repo.exists?()
