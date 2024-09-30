@@ -10,14 +10,14 @@ import {
   useClustersQuery,
   useViolationStatisticsQuery,
 } from 'generated/graphql'
-
 import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-
 import { useDebounce } from '@react-hooks-library/core'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../utils/graphql'
+import { StandardScroller } from '../utils/SmoothScroller'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 
 function PoliciesFilter({
   selectedKinds,
@@ -36,6 +36,7 @@ function PoliciesFilter({
 }) {
   const theme = useTheme()
   const projectId = useProjectId()
+  const [listRef, setListRef] = useState<any>(null)
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
 
@@ -49,13 +50,23 @@ function PoliciesFilter({
       field: ConstraintViolationField.Namespace,
     },
   })
-  const { data: clustersData, previousData } = useClustersQuery({
-    variables: {
-      first: 100,
-      projectId,
-      ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
+
+  const {
+    data: clustersData,
+    loading,
+    pageInfo,
+    fetchNextPage,
+  } = useFetchPaginatedData(
+    {
+      queryHook: useClustersQuery,
+      keyPath: ['clusters'],
+      pageSize: 5, // TODO
     },
-  })
+    {
+      q: debouncedSearchString,
+      projectId,
+    }
+  )
 
   const kinds = kindsData?.violationStatistics
     ?.map((statistic) => ({
@@ -72,8 +83,8 @@ function PoliciesFilter({
     .filter(({ id }) => Boolean(id))
 
   const clusters = useMemo(
-    () => mapExistingNodes(clustersData?.clusters ?? previousData?.clusters),
-    [clustersData?.clusters, previousData?.clusters]
+    () => mapExistingNodes(clustersData?.clusters),
+    [clustersData?.clusters]
   )
 
   const clusterLabel = 'Cluster'
@@ -110,33 +121,34 @@ function PoliciesFilter({
           value={searchString}
           onChange={(e) => setSearchString?.(e.currentTarget.value)}
         />
-        <Flex flexDirection="column">
-          <Checkbox
-            small
-            name={clusterLabel}
-            value={null}
-            checked={selectedClusters.includes(null)}
-            onChange={({ target: { checked } }: any) =>
-              handleCheckboxChange(setSelectedClusters, null, checked)
-            }
-          >
-            No cluster
-          </Checkbox>
-          {clusters?.map((node) => (
-            <Checkbox
-              small
-              key={node.id}
-              name={clusterLabel}
-              value={node.id}
-              checked={selectedClusters.includes(node.id)}
-              onChange={({ target: { checked } }: any) => {
-                handleCheckboxChange(setSelectedClusters, node.id, checked)
-              }}
-            >
-              {node.name}
-            </Checkbox>
-          ))}
-        </Flex>
+        <div css={{ height: 200 }}>
+          <StandardScroller
+            listRef={listRef}
+            setListRef={setListRef}
+            items={[{ id: null, name: 'No cluster' }, ...clusters]}
+            loading={loading}
+            placeholder={() => <div css={{ height: 28 }} />}
+            hasNextPage={pageInfo?.hasNextPage}
+            mapper={(node) => (
+              <Checkbox
+                small
+                key={node.id}
+                name={clusterLabel}
+                value={node.id}
+                checked={selectedClusters.includes(node.id)}
+                onChange={({ target: { checked } }: any) => {
+                  handleCheckboxChange(setSelectedClusters, node.id, checked)
+                }}
+              >
+                {node.name}
+              </Checkbox>
+            )}
+            loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
+            refreshKey={undefined}
+            setLoader={undefined}
+            handleScroll={undefined}
+          />
+        </div>
       </AccordionItem>
       <AccordionItem
         trigger={kindLabel}
