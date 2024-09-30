@@ -10,14 +10,15 @@ import {
   useClustersQuery,
   useViolationStatisticsQuery,
 } from 'generated/graphql'
-import { Dispatch, SetStateAction, useMemo, useState } from 'react'
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useDebounce } from '@react-hooks-library/core'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../utils/graphql'
-import { StandardScroller } from '../utils/SmoothScroller'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
+
+const FETCH_MARGIN = 30
 
 function PoliciesFilter({
   selectedKinds,
@@ -36,7 +37,6 @@ function PoliciesFilter({
 }) {
   const theme = useTheme()
   const projectId = useProjectId()
-  const [listRef, setListRef] = useState<any>(null)
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
 
@@ -60,7 +60,6 @@ function PoliciesFilter({
     {
       queryHook: useClustersQuery,
       keyPath: ['clusters'],
-      pageSize: 5, // TODO
     },
     {
       q: debouncedSearchString,
@@ -105,6 +104,23 @@ function PoliciesFilter({
     })
   }
 
+  const fetchMoreOnBottomReached = useCallback(
+    (element?: HTMLDivElement | undefined) => {
+      if (!element) return
+
+      const { scrollHeight, scrollTop, clientHeight } = element
+
+      if (
+        scrollHeight - scrollTop - clientHeight < FETCH_MARGIN &&
+        !loading &&
+        pageInfo.hasNextPage
+      ) {
+        fetchNextPage()
+      }
+    },
+    [fetchNextPage, loading, pageInfo]
+  )
+
   return (
     <Accordion
       defaultValue={[clusterLabel, kindLabel, namespaceLabel]}
@@ -121,33 +137,26 @@ function PoliciesFilter({
           value={searchString}
           onChange={(e) => setSearchString?.(e.currentTarget.value)}
         />
-        <div css={{ height: 200 }}>
-          <StandardScroller
-            listRef={listRef}
-            setListRef={setListRef}
-            items={[{ id: null, name: 'No cluster' }, ...clusters]}
-            loading={loading}
-            placeholder={() => <div css={{ height: 28 }} />}
-            hasNextPage={pageInfo?.hasNextPage}
-            mapper={(node) => (
-              <Checkbox
-                small
-                key={node.id}
-                name={clusterLabel}
-                value={node.id}
-                checked={selectedClusters.includes(node.id)}
-                onChange={({ target: { checked } }: any) => {
-                  handleCheckboxChange(setSelectedClusters, node.id, checked)
-                }}
-              >
-                {node.name}
-              </Checkbox>
-            )}
-            loadNextPage={() => pageInfo?.hasNextPage && fetchNextPage()}
-            refreshKey={undefined}
-            setLoader={undefined}
-            handleScroll={undefined}
-          />
+        <div
+          css={{ minHeight: 56, maxHeight: 200, overflowY: 'auto' }}
+          onScrollCapture={(e) =>
+            fetchMoreOnBottomReached(e?.target as HTMLDivElement)
+          }
+        >
+          {[{ id: null, name: 'No cluster' }, ...clusters].map((cluster) => (
+            <Checkbox
+              small
+              key={cluster.id}
+              name={clusterLabel}
+              value={cluster.id}
+              checked={selectedClusters.includes(cluster.id)}
+              onChange={({ target: { checked } }: any) => {
+                handleCheckboxChange(setSelectedClusters, cluster.id, checked)
+              }}
+            >
+              {cluster.name}
+            </Checkbox>
+          ))}
         </div>
       </AccordionItem>
       <AccordionItem
