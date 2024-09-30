@@ -124,16 +124,6 @@ export function Policies() {
               className="statusTab"
             >
               {label}
-              {/* {!isNil(statusCounts?.[key]) && ( */}
-              {/*  <Chip */}
-              {/*    fillLevel={statusFilter === key ? 2 : 0} */}
-              {/*    size="small" */}
-              {/*    severity={serviceStatusToSeverity(key as any)} */}
-              {/*    loading={isNil(statusCounts?.[key])} */}
-              {/*  > */}
-              {/*    {statusCounts?.[key]} */}
-              {/*  </Chip> */}
-              {/* )} */}
             </SubTab>
           ))}
         </TabList>

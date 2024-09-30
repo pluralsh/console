@@ -3,6 +3,7 @@ import {
   AccordionItem,
   Checkbox,
   Flex,
+  Input,
 } from '@pluralsh/design-system'
 import {
   ConstraintViolationField,
@@ -10,8 +11,10 @@ import {
   useViolationStatisticsQuery,
 } from 'generated/graphql'
 
-import { Dispatch, SetStateAction, useMemo } from 'react'
+import { Dispatch, SetStateAction, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+
+import { useDebounce } from '@react-hooks-library/core'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../utils/graphql'
@@ -33,6 +36,9 @@ function PoliciesFilter({
 }) {
   const theme = useTheme()
   const projectId = useProjectId()
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useDebounce(searchString, 100)
+
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: {
       field: ConstraintViolationField.Kind,
@@ -43,10 +49,11 @@ function PoliciesFilter({
       field: ConstraintViolationField.Namespace,
     },
   })
-  const { data: clustersData } = useClustersQuery({
+  const { data: clustersData, previousData } = useClustersQuery({
     variables: {
       first: 100,
       projectId,
+      ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
     },
   })
 
@@ -65,8 +72,8 @@ function PoliciesFilter({
     .filter(({ id }) => Boolean(id))
 
   const clusters = useMemo(
-    () => mapExistingNodes(clustersData?.clusters),
-    [clustersData?.clusters]
+    () => mapExistingNodes(clustersData?.clusters ?? previousData?.clusters),
+    [clustersData?.clusters, previousData?.clusters]
   )
 
   const clusterLabel = 'Cluster'
@@ -97,6 +104,12 @@ function PoliciesFilter({
         trigger={clusterLabel}
         value={clusterLabel}
       >
+        <Input
+          placeholder="Filter clusters"
+          marginBottom={theme.spacing.small}
+          value={searchString}
+          onChange={(e) => setSearchString?.(e.currentTarget.value)}
+        />
         <Flex flexDirection="column">
           <Checkbox
             small
