@@ -709,12 +709,13 @@ func (t *GateStatusFragment) GetJobRef() *JobReferenceFragment {
 }
 
 type JobSpecFragment struct {
-	Namespace      string                   "json:\"namespace\" graphql:\"namespace\""
-	Raw            *string                  "json:\"raw,omitempty\" graphql:\"raw\""
-	Containers     []*ContainerSpecFragment "json:\"containers,omitempty\" graphql:\"containers\""
-	Labels         map[string]interface{}   "json:\"labels,omitempty\" graphql:\"labels\""
-	Annotations    map[string]interface{}   "json:\"annotations,omitempty\" graphql:\"annotations\""
-	ServiceAccount *string                  "json:\"serviceAccount,omitempty\" graphql:\"serviceAccount\""
+	Namespace      string                      "json:\"namespace\" graphql:\"namespace\""
+	Raw            *string                     "json:\"raw,omitempty\" graphql:\"raw\""
+	Containers     []*ContainerSpecFragment    "json:\"containers,omitempty\" graphql:\"containers\""
+	Labels         map[string]interface{}      "json:\"labels,omitempty\" graphql:\"labels\""
+	Annotations    map[string]interface{}      "json:\"annotations,omitempty\" graphql:\"annotations\""
+	ServiceAccount *string                     "json:\"serviceAccount,omitempty\" graphql:\"serviceAccount\""
+	Requests       *ContainerResourcesFragment "json:\"requests,omitempty\" graphql:\"requests\""
 }
 
 func (t *JobSpecFragment) GetNamespace() string {
@@ -752,6 +753,48 @@ func (t *JobSpecFragment) GetServiceAccount() *string {
 		t = &JobSpecFragment{}
 	}
 	return t.ServiceAccount
+}
+func (t *JobSpecFragment) GetRequests() *ContainerResourcesFragment {
+	if t == nil {
+		t = &JobSpecFragment{}
+	}
+	return t.Requests
+}
+
+type ContainerResourcesFragment struct {
+	Requests *ResourceRequestFragment "json:\"requests,omitempty\" graphql:\"requests\""
+	Limits   *ResourceRequestFragment "json:\"limits,omitempty\" graphql:\"limits\""
+}
+
+func (t *ContainerResourcesFragment) GetRequests() *ResourceRequestFragment {
+	if t == nil {
+		t = &ContainerResourcesFragment{}
+	}
+	return t.Requests
+}
+func (t *ContainerResourcesFragment) GetLimits() *ResourceRequestFragment {
+	if t == nil {
+		t = &ContainerResourcesFragment{}
+	}
+	return t.Limits
+}
+
+type ResourceRequestFragment struct {
+	CPU    *string "json:\"cpu,omitempty\" graphql:\"cpu\""
+	Memory *string "json:\"memory,omitempty\" graphql:\"memory\""
+}
+
+func (t *ResourceRequestFragment) GetCPU() *string {
+	if t == nil {
+		t = &ResourceRequestFragment{}
+	}
+	return t.CPU
+}
+func (t *ResourceRequestFragment) GetMemory() *string {
+	if t == nil {
+		t = &ResourceRequestFragment{}
+	}
+	return t.Memory
 }
 
 type JobReferenceFragment struct {
@@ -20069,6 +20112,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -20081,6 +20127,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment GateStatusFragment on GateStatus {
 	jobRef {
@@ -20154,6 +20212,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -20166,6 +20227,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment GateStatusFragment on GateStatus {
 	jobRef {
@@ -20230,6 +20303,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -20242,6 +20318,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment GateStatusFragment on GateStatus {
 	jobRef {
@@ -20304,6 +20392,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -20316,6 +20407,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment GateStatusFragment on GateStatus {
 	jobRef {
@@ -24209,6 +24312,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -24221,6 +24327,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -24413,6 +24531,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -24425,6 +24546,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -24663,6 +24796,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -24675,6 +24811,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -24913,6 +25061,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -24925,6 +25076,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -25163,6 +25326,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -25175,6 +25341,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -25414,6 +25592,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -25426,6 +25607,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -25601,6 +25794,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -25613,6 +25809,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -25779,6 +25987,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -25791,6 +26002,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -25958,6 +26181,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -25970,6 +26196,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -26136,6 +26374,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -26148,6 +26389,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -26314,6 +26567,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -26326,6 +26582,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -26556,6 +26824,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -26568,6 +26839,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -27127,6 +27410,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -27139,6 +27425,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image
@@ -27381,6 +27679,9 @@ fragment JobSpecFragment on JobGateSpec {
 	labels
 	annotations
 	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
 }
 fragment ContainerSpecFragment on ContainerSpec {
 	image
@@ -27393,6 +27694,18 @@ fragment ContainerSpecFragment on ContainerSpec {
 		configMap
 		secret
 	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
 }
 fragment StackConfigurationFragment on StackConfiguration {
 	image

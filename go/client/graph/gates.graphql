@@ -42,6 +42,17 @@ fragment JobSpecFragment on JobGateSpec {
     labels
     annotations
     serviceAccount
+    requests { ...ContainerResourcesFragment }
+}
+
+fragment ContainerResourcesFragment on ContainerResources {
+    requests { ...ResourceRequestFragment }
+    limits { ...ResourceRequestFragment }
+}
+
+fragment ResourceRequestFragment on ResourceRequest {
+    cpu
+    memory
 }
 
 fragment JobReferenceFragment on JobReference {
