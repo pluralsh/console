@@ -3,18 +3,22 @@ import {
   AccordionItem,
   Checkbox,
   Flex,
+  Input,
 } from '@pluralsh/design-system'
 import {
   ConstraintViolationField,
   useClustersQuery,
   useViolationStatisticsQuery,
 } from 'generated/graphql'
-
-import { Dispatch, SetStateAction, useMemo } from 'react'
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { useDebounce } from '@react-hooks-library/core'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../utils/graphql'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
+
+const FETCH_MARGIN = 30
 
 function PoliciesFilter({
   selectedKinds,
@@ -33,6 +37,9 @@ function PoliciesFilter({
 }) {
   const theme = useTheme()
   const projectId = useProjectId()
+  const [searchString, setSearchString] = useState('')
+  const debouncedSearchString = useDebounce(searchString, 100)
+
   const { data: kindsData } = useViolationStatisticsQuery({
     variables: {
       field: ConstraintViolationField.Kind,
@@ -43,12 +50,22 @@ function PoliciesFilter({
       field: ConstraintViolationField.Namespace,
     },
   })
-  const { data: clustersData } = useClustersQuery({
-    variables: {
-      first: 100,
-      projectId,
+
+  const {
+    data: clustersData,
+    loading,
+    pageInfo,
+    fetchNextPage,
+  } = useFetchPaginatedData(
+    {
+      queryHook: useClustersQuery,
+      keyPath: ['clusters'],
     },
-  })
+    {
+      q: debouncedSearchString,
+      projectId,
+    }
+  )
 
   const kinds = kindsData?.violationStatistics
     ?.map((statistic) => ({
@@ -87,6 +104,23 @@ function PoliciesFilter({
     })
   }
 
+  const fetchMoreOnBottomReached = useCallback(
+    (element?: HTMLDivElement | undefined) => {
+      if (!element) return
+
+      const { scrollHeight, scrollTop, clientHeight } = element
+
+      if (
+        scrollHeight - scrollTop - clientHeight < FETCH_MARGIN &&
+        !loading &&
+        pageInfo.hasNextPage
+      ) {
+        fetchNextPage()
+      }
+    },
+    [fetchNextPage, loading, pageInfo]
+  )
+
   return (
     <Accordion
       defaultValue={[clusterLabel, kindLabel, namespaceLabel]}
@@ -97,31 +131,33 @@ function PoliciesFilter({
         trigger={clusterLabel}
         value={clusterLabel}
       >
-        <Flex flexDirection="column">
-          <Checkbox
-            name={clusterLabel}
-            value={null}
-            checked={selectedClusters.includes(null)}
-            onChange={({ target: { checked } }: any) =>
-              handleCheckboxChange(setSelectedClusters, null, checked)
-            }
-          >
-            No cluster
-          </Checkbox>
-          {clusters?.map((node) => (
+        <Input
+          placeholder="Filter clusters"
+          marginBottom={theme.spacing.small}
+          value={searchString}
+          onChange={(e) => setSearchString?.(e.currentTarget.value)}
+        />
+        <div
+          css={{ minHeight: 56, maxHeight: 200, overflowY: 'auto' }}
+          onScrollCapture={(e) =>
+            fetchMoreOnBottomReached(e?.target as HTMLDivElement)
+          }
+        >
+          {[{ id: null, name: 'No cluster' }, ...clusters].map((cluster) => (
             <Checkbox
-              key={node.id}
+              small
+              key={cluster.id}
               name={clusterLabel}
-              value={node.id}
-              checked={selectedClusters.includes(node.id)}
+              value={cluster.id}
+              checked={selectedClusters.includes(cluster.id)}
               onChange={({ target: { checked } }: any) => {
-                handleCheckboxChange(setSelectedClusters, node.id, checked)
+                handleCheckboxChange(setSelectedClusters, cluster.id, checked)
               }}
             >
-              {node.name}
+              {cluster.name}
             </Checkbox>
           ))}
-        </Flex>
+        </div>
       </AccordionItem>
       <AccordionItem
         trigger={kindLabel}
@@ -133,6 +169,7 @@ function PoliciesFilter({
       >
         <Flex flexDirection="column">
           <Checkbox
+            small
             name={kindLabel}
             value={null}
             checked={selectedKinds.includes(null)}
@@ -145,6 +182,7 @@ function PoliciesFilter({
           {kinds?.map((kind) => (
             <CheckboxWrapperSC key={kind.id}>
               <Checkbox
+                small
                 name="kinds"
                 value={kind.id}
                 checked={selectedKinds.includes(kind.id)}
@@ -165,6 +203,7 @@ function PoliciesFilter({
       >
         <Flex flexDirection="column">
           <Checkbox
+            small
             name={namespaceLabel}
             value={null}
             checked={selectedNamespaces.includes(null)}
@@ -177,6 +216,7 @@ function PoliciesFilter({
           {namespaces?.map((namespace) => (
             <CheckboxWrapperSC key={namespace.id}>
               <Checkbox
+                small
                 name={namespaceLabel}
                 value={namespace}
                 checked={selectedNamespaces.includes(namespace.id)}

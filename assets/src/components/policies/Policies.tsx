@@ -1,15 +1,21 @@
-import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Breadcrumb,
+  Input,
+  SearchIcon,
+  SubTab,
+  TabList,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { usePolicyConstraintsQuery } from 'generated/graphql'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { POLICIES_REL_PATH } from 'routes/policiesRoutesConsts'
 import styled from 'styled-components'
-
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-
 import { Overline } from 'components/cd/utils/PermissionsModal'
+import { useDebounce } from '@react-hooks-library/core'
 
 import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
@@ -21,9 +27,28 @@ const breadcrumbs: Breadcrumb[] = [
 
 export const POLL_INTERVAL = 10_000
 
+enum ViolationFilter {
+  All = 'All',
+  Passing = 'Passing',
+  Violated = 'Violated',
+}
+
+const violatedParam = (filter: ViolationFilter) => {
+  switch (filter) {
+    case ViolationFilter.Violated:
+      return true
+    case ViolationFilter.Passing:
+      return false
+    case ViolationFilter.All:
+    default:
+      return undefined
+  }
+}
+
 export function Policies() {
-  useSetBreadcrumbs(breadcrumbs)
-  // const [searchString, setSearchString] = useState('')
+  const tabStateRef = useRef<any>(null)
+  const [searchString, setSearchString] = useState('')
+  const [violationFilter, setViolationFilter] = useState(ViolationFilter.All)
   const [selectedKinds, setSelectedKinds] = useState<(string | null)[]>([])
   const [selectedNamespaces, setSelectedNamespaces] = useState<
     (string | null)[]
@@ -32,13 +57,14 @@ export function Policies() {
     []
   )
 
-  // const debouncedSearchString = useDebounce(searchString, 100)
+  const debouncedSearchString = useDebounce(searchString, 100)
 
   const policyQFilters = {
-    // ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
+    ...(debouncedSearchString ? { q: debouncedSearchString } : {}),
     ...(selectedKinds.length ? { kinds: selectedKinds } : {}),
     ...(selectedNamespaces.length ? { namespaces: selectedNamespaces } : {}),
     ...(selectedClusters.length ? { clusters: selectedClusters } : {}),
+    violated: violatedParam(violationFilter),
   }
 
   const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
@@ -49,14 +75,14 @@ export function Policies() {
       },
       policyQFilters
     )
+
   const policies = data?.policyConstraints?.edges
 
-  if (error) {
-    return <GqlError error={error} />
-  }
-  if (!data) {
-    return <LoadingIndicator />
-  }
+  useSetBreadcrumbs(breadcrumbs)
+
+  if (error) return <GqlError error={error} />
+
+  if (!data) return <LoadingIndicator />
 
   return (
     <PoliciesContainer>
@@ -71,7 +97,7 @@ export function Policies() {
           setSelectedClusters={setSelectedClusters}
         />
       </div>
-      {/* <div className="search">
+      <div className="search">
         <Input
           placeholder="Search policies"
           startIcon={<SearchIcon />}
@@ -79,8 +105,29 @@ export function Policies() {
           onChange={(e) => {
             setSearchString?.(e.currentTarget.value)
           }}
+          flexGrow={0.5}
         />
-      </div> */}
+        <TabList
+          stateRef={tabStateRef}
+          stateProps={{
+            orientation: 'horizontal',
+            selectedKey: violationFilter,
+            onSelectionChange: (key) => {
+              setViolationFilter(key as ViolationFilter)
+            },
+          }}
+        >
+          {Object.values(ViolationFilter)?.map((label) => (
+            <SubTab
+              key={label}
+              textValue={label}
+              className="statusTab"
+            >
+              {label}
+            </SubTab>
+          ))}
+        </TabList>
+      </div>
       <div className="violations">
         {policies && policies?.length > 0 && (
           <PoliciesViolationsGauge filters={policyQFilters} />
@@ -112,10 +159,10 @@ const PoliciesContainer = styled.div(({ theme }) => ({
   overflowY: 'auto',
   padding: theme.spacing.large,
   gridTemplateColumns: 'auto 250px',
-  gridTemplateRows: 'auto 1fr',
+  gridTemplateRows: 'auto auto 1fr',
   gap: '16px 16px',
   gridTemplateAreas: `
-    // "search filter"
+    "search filter"
     "violations filter"
     "table filter"
   `,
@@ -131,6 +178,8 @@ const PoliciesContainer = styled.div(({ theme }) => ({
     gap: theme.spacing.small,
   },
   '.search': {
+    display: 'flex',
+    justifyContent: 'space-between',
     gridArea: 'search',
   },
   '.violations': {
