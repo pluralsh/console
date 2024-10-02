@@ -165,8 +165,10 @@ export function UpgradeInsightExpansionPanel({
                         textAlign: 'right',
                       }}
                     >
-                      {replacedIn && <>Replacement version: {replacedIn}</>}
-                      {removedIn && <>Removal version: {removedIn}</>}
+                      {replacedIn && (
+                        <div>Replacement version: {replacedIn}</div>
+                      )}
+                      {removedIn && <div>Removal version: {removedIn}</div>}
                     </div>
                   </div>
                 </div>
