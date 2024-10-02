@@ -16,15 +16,15 @@ import {
 import {
   ClustersRowFragment,
   UpgradeInsight,
+  UpgradeInsightStatus,
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
 import React, { useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
-
 import { Row } from '@tanstack/react-table'
+import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 import { GqlError } from '../../utils/Alert'
 
@@ -45,16 +45,25 @@ export enum DeprecationType {
   CloudProvider = 'cloudProvider',
 }
 
-function DeprecationCountChip({ count }: { count: number }) {
+function DeprecationCountChip({
+  count,
+  ...props
+}: { count: number } & ChipProps) {
   return (
     <Chip
       size="small"
       severity={count === 0 ? 'neutral' : 'warning'}
+      {...props}
     >
       {count}
     </Chip>
   )
 }
+
+const statesWithIssues = [
+  UpgradeInsightStatus.Warning,
+  UpgradeInsightStatus.Failed,
+]
 
 function FlyoverContent({ open, cluster, refetch }) {
   const theme = useTheme()
@@ -77,6 +86,10 @@ function FlyoverContent({ open, cluster, refetch }) {
   const runtimeServices = data?.cluster?.runtimeServices
   const apiDeprecations = data?.cluster?.apiDeprecations
   const upgradeInsights = data?.cluster?.upgradeInsights
+
+  const upgradeIssues = upgradeInsights?.filter(
+    (i) => i?.status && statesWithIssues.includes(i.status)
+  )
 
   return (
     <div
@@ -161,11 +174,14 @@ function FlyoverContent({ open, cluster, refetch }) {
                 }}
                 css={{ display: 'flex', flexGrow: 1 }}
               >
-                {!isEmpty(upgradeInsights) && (
+                {!isEmpty(upgradeIssues) && (
                   <WarningIcon color="icon-warning" />
                 )}
                 Detected by Cloud Provider
-                <DeprecationCountChip count={upgradeInsights?.length ?? 0} />
+                <DeprecationCountChip
+                  count={upgradeInsights?.length ?? 0}
+                  severity={isEmpty(upgradeIssues) ? 'neutral' : 'warning'}
+                />
               </Tab>
             </TabList>
           </div>
