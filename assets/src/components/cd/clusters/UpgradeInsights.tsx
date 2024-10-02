@@ -131,7 +131,13 @@ export function UpgradeInsightExpansionPanel({
                     paddingTop: theme.spacing.xsmall,
                   }}
                 >
-                  <div>
+                  <div
+                    css={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                    }}
+                  >
                     <div
                       css={{
                         ...theme.partials.text.body2Bold,
@@ -146,11 +152,16 @@ export function UpgradeInsightExpansionPanel({
                         color: theme.colors['text-light'],
                       }}
                     >
-                      {!!replacement && <>Replaced with: {replacement}</>}
-                      {!!removedIn && <>Removed</>}
+                      {!!replacement && <div>Replaced with: {replacement}</div>}
                     </div>
                   </div>
-                  <div>
+                  <div
+                    css={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                    }}
+                  >
                     <div css={{ display: 'flex', justifyContent: 'end' }}>
                       <UpgradeInsightStatusChip
                         status={status}
