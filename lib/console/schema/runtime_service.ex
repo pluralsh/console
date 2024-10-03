@@ -3,8 +3,9 @@ defmodule Console.Schema.RuntimeService do
   alias Console.Schema.{Service, Cluster}
 
   schema "runtime_services" do
-    field :name,    :string
-    field :version, :string
+    field :name,           :string
+    field :version,        :string
+    field :instance_count, :integer, default: 1
 
     field :addon,         :map, virtual: true
     field :addon_version, :map, virtual: true
@@ -27,7 +28,7 @@ defmodule Console.Schema.RuntimeService do
     from(rs in query, order_by: ^order)
   end
 
-  @valid ~w(name version service_id cluster_id)a
+  @valid ~w(name version instance_count service_id cluster_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
