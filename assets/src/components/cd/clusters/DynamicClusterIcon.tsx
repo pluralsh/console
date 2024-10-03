@@ -6,6 +6,7 @@ import {
   ManagementClusterIcon,
   ShieldLockIcon,
   Spinner,
+  VirtualClusterIcon,
 } from '@pluralsh/design-system'
 
 import { PROTECT_TT_TEXT } from './ProtectBadge'
@@ -15,6 +16,7 @@ interface DynamicClusterIconProps {
   upgrading?: boolean
   protect?: boolean
   self?: boolean
+  virtual?: boolean
   type?: ComponentProps<typeof IconFrame>['type']
 }
 
@@ -35,6 +37,7 @@ export function DynamicClusterIcon({
   upgrading = false,
   protect = false,
   self = false,
+  virtual = false,
   type = 'secondary',
 }: DynamicClusterIconProps): ReactElement {
   const theme = useTheme()
@@ -65,6 +68,8 @@ export function DynamicClusterIcon({
                   : theme.colors['icon-info']
               }
             />
+          ) : virtual ? (
+            <VirtualClusterIcon fullColor={false} />
           ) : self ? (
             <ManagementClusterIcon />
           ) : (

@@ -88,6 +88,8 @@ import ServicePRs from '../components/cd/services/service/ServicePRs'
 
 import Observers from '../components/cd/observers/Observers'
 
+import VClusters from '../components/cd/cluster/ClusterVClusters'
+
 import {
   CD_REL_PATH,
   CLUSTERS_REL_PATH,
@@ -99,6 +101,7 @@ import {
   CLUSTER_PRS_REL_PATH,
   CLUSTER_REL_PATH,
   CLUSTER_SERVICES_PATH,
+  CLUSTER_VCLUSTERS_REL_PATH,
   GLOBAL_SERVICES_REL_PATH,
   GLOBAL_SERVICE_INFO_PATH,
   GLOBAL_SERVICE_PARAM_ID,
@@ -325,6 +328,10 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_METADATA_PATH}
       element={<ClusterMetadata />}
+    />
+    <Route
+      path={CLUSTER_VCLUSTERS_REL_PATH}
+      element={<VClusters />}
     />
     <Route
       path={CLUSTER_PRS_REL_PATH}

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+  Chip,
   GearTrainIcon,
   ListBoxItem,
   PeopleIcon,
@@ -37,7 +38,6 @@ import { roundToTwoPlaces } from 'components/cluster/utils'
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
 import { ClusterSettingsModal } from '../cluster/ClusterSettings'
-
 import { DetachClusterModal } from '../providers/DetachCluster'
 
 import ClusterUpgrade from './ClusterUpgrade'
@@ -67,9 +67,12 @@ export function ColClusterContent({
       | 'self'
       | 'deletedAt'
       | 'handle'
+      | 'virtual'
     >
   >
 }) {
+  const theme = useTheme()
+
   if (!cluster) {
     return null
   }
@@ -83,16 +86,27 @@ export function ColClusterContent({
         upgrading={upgrading}
         protect={!!cluster?.protect}
         self={!!cluster?.self}
+        virtual={!!cluster?.virtual}
       />
       <StackedText
         first={
-          <BasicLink
-            as={Link}
-            to={`/cd/clusters/${cluster?.id}`}
-            css={{ whiteSpace: 'nowrap' }}
-          >
-            {cluster?.name}
-          </BasicLink>
+          <>
+            <BasicLink
+              as={Link}
+              to={`/cd/clusters/${cluster?.id}`}
+              css={{ whiteSpace: 'nowrap' }}
+            >
+              {cluster?.name}
+            </BasicLink>
+            {cluster?.virtual && (
+              <Chip
+                size="small"
+                css={{ marginLeft: theme.spacing.xxsmall }}
+              >
+                virtual
+              </Chip>
+            )}
+          </>
         }
         second={`handle: ${cluster?.handle}`}
       />
