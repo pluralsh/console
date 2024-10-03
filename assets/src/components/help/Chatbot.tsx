@@ -354,14 +354,14 @@ function ChatbotFrame({
             const name = msg.name
               ? msg.name
               : role === Role.assistant
-              ? 'Plural AI'
-              : userName
+                ? 'Plural AI'
+                : userName
             const ref =
               i === lastAsstMsgIdx
                 ? lastAsstMsgRef
                 : i === lastUserMsgIdx
-                ? lastUserMsgRef
-                : undefined
+                  ? lastUserMsgRef
+                  : undefined
 
             return (
               <ChatMessage

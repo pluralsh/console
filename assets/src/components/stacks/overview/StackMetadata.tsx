@@ -1,5 +1,5 @@
 import { Card, Prop } from '@pluralsh/design-system'
-import React from 'react'
+
 import { Link, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import capitalize from 'lodash/capitalize'

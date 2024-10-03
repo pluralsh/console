@@ -96,14 +96,14 @@ export function UsageUnstyled({
       {isNullishIsh(used)
         ? '—'
         : typeof used === 'number'
-        ? roundToTwoPlaces(used)
-        : used}
+          ? roundToTwoPlaces(used)
+          : used}
       {' / '}
       {isNullishIsh(total)
         ? '—'
         : typeof total === 'number'
-        ? roundToTwoPlaces(total)
-        : total}
+          ? roundToTwoPlaces(total)
+          : total}
       {units && ` ${units}`}
     </div>
   )

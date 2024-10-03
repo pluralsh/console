@@ -413,7 +413,7 @@ function AddContextModal({
       }
       try {
         JSON.parse(json)
-      } catch (e) {
+      } catch (_) {
         setJsonError('Invalid JSON')
 
         return

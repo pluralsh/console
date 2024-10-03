@@ -14,7 +14,6 @@ enum FileError {
 function GcpCredentials({
   setCreds,
 }: {
-  // eslint-disable-next-line react/no-unused-prop-types
   creds?: string | undefined
   setCreds: (creds: string | undefined) => void
 }) {
@@ -41,7 +40,7 @@ function GcpCredentials({
 
       try {
         credentials = JSON.parse(content)
-      } catch (e) {
+      } catch (_) {
         setFileError(FileError.InvalidFormat)
         setCreds('')
 

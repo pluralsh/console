@@ -1,10 +1,4 @@
-import React, {
-  PureComponent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { PureComponent, useCallback, useEffect, useRef, useState } from 'react'
 import { VariableSizeList } from 'react-window-reversed'
 import {
   FixedSizeList as FixedList,

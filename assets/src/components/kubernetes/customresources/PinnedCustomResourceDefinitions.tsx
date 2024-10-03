@@ -1,6 +1,6 @@
 import styled, { useTheme } from 'styled-components'
 import { Button, CloseIcon, Toast, Tooltip } from '@pluralsh/design-system'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { ApolloError } from 'apollo-boost'
 
 import { useNavigate } from 'react-router-dom'

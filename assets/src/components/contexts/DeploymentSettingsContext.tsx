@@ -5,6 +5,8 @@ import {
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
 
+import { isValidURL } from '../../utils/url'
+
 const DeploymentSettingsContext = createContext<
   DeploymentSettingsFragment | undefined | null
 >(null)
@@ -18,13 +20,13 @@ export function useDeploymentSettings() {
 export function useLogsEnabled() {
   const ctx = useDeploymentSettings()
 
-  return !!ctx?.lokiConnection
+  return isValidURL(ctx?.lokiConnection?.host ?? '')
 }
 
 export function useMetricsEnabled() {
   const ctx = useDeploymentSettings()
 
-  return !!ctx?.prometheusConnection
+  return isValidURL(ctx?.prometheusConnection?.host ?? '')
 }
 
 export function DeploymentSettingsProvider({

@@ -42,8 +42,8 @@ export function appState({ status: { conditions } }) {
     error.status === 'True'
       ? Readiness.Failed
       : ready.status === 'True'
-      ? Readiness.Ready
-      : Readiness.InProgress
+        ? Readiness.Ready
+        : Readiness.InProgress
 
   return { ready, error, readiness }
 }

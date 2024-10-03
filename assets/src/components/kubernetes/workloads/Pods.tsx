@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import {
   InfoOutlineIcon,
   Tooltip,

@@ -10,8 +10,8 @@ const secretKey =
   MODE === 'production'
     ? VITE_PROD_SECRET_KEY
     : MODE === 'test'
-    ? '1234567890'
-    : VITE_DEV_SECRET_KEY
+      ? '1234567890'
+      : VITE_DEV_SECRET_KEY
 const encryptStorage = new EncryptStorage(secretKey)
 
 export function wipeToken() {

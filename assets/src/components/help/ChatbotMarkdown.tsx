@@ -106,7 +106,6 @@ const MdListSC = styled.ul.withConfig(commonCfg)(({ theme }) => ({
   },
 }))
 
-// eslint-disable-next-line react/function-component-definition
 const MdList = ({
   node: _node,
   depth: _depth,

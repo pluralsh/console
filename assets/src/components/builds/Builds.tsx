@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import { Flex } from 'honorable'
 import { Card, useSetBreadcrumbs } from '@pluralsh/design-system'

@@ -1,4 +1,4 @@
-import React, { Dispatch, useState } from 'react'
+import { Dispatch, useState } from 'react'
 import { Button, Modal, ValidatedInput } from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { usePinCustomResourceMutation } from 'generated/graphql'

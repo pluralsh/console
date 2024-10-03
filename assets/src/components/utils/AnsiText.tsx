@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import Anser from 'anser'
 import { escapeCarriageReturn } from 'escape-carriage'
 

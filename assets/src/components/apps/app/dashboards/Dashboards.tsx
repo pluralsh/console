@@ -61,7 +61,7 @@ export default function Dashboards() {
             description={
               (
                 <div>
-                  If you're interested in adding your dashboards to this
+                  If you&apos;re interested in adding your dashboards to this
                   application,&nbsp;
                   <A
                     inline

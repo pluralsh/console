@@ -23,8 +23,8 @@ export function insertBetweenLimited<T, TVal, TRemainder extends Remainder<T>>(
     | (undefined extends TRemainder
         ? never
         : TRemainder extends (...args: any) => infer Return
-        ? Return
-        : TRemainder)
+          ? Return
+          : TRemainder)
   )[] = []
 
   const arrLimit =

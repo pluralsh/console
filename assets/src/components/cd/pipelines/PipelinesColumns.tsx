@@ -67,10 +67,10 @@ const ColStatus = columnHelper.accessor(({ node }) => node?.status, {
       (closed || 0) > 0
         ? 'Stopped'
         : (running || 0) > 0
-        ? 'Running'
-        : (pending || 0) > 0
-        ? 'Pending'
-        : 'Complete'
+          ? 'Running'
+          : (pending || 0) > 0
+            ? 'Pending'
+            : 'Complete'
 
     return (
       <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>

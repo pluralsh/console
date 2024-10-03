@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { InlineCode } from '@pluralsh/design-system'
 import { useOutletContext, useParams } from 'react-router-dom'
 

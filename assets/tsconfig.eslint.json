@@ -1,11 +1,13 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "rootDir": ".",
     "types": ["@types/node"],
-    "noEmit": true,
-    "allowJs": true
+    "allowJs": true,
+    "moduleResolution": "Node"
   },
-  "include": ["src", "vite.config.mts", "vitest.config.mts", ".eslintrc.js"],
-  "exclude": ["src/archive"]
+  "include": ["src", "vite.config.ts", "vitest.config.ts",
+    "eslint.config.mjs"
+  ],
+  "exclude": ["src/archive/**"]
 }

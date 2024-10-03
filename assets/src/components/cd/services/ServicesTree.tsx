@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { EmptyState, TabPanel } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import isEmpty from 'lodash/isEmpty'

@@ -1,5 +1,5 @@
-import React, { ReactNode, useMemo, useState } from 'react'
-import yaml from 'js-yaml'
+import { ReactNode, useMemo, useState } from 'react'
+import { dump } from 'js-yaml'
 import {
   Button,
   Code,
@@ -90,7 +90,7 @@ function OutputValueModal({
             key: 'yaml',
             label: 'YAML',
             language: 'yaml',
-            content: yaml.dump(value),
+            content: dump(value),
           },
           {
             key: 'json',

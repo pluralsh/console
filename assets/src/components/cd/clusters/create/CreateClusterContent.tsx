@@ -47,10 +47,10 @@ export function attributesAreValid(
     (cloud === ProviderCloud.AWS
       ? settingsAreValidAws(attributes.cloudSettings?.aws || {})
       : cloud === ProviderCloud.GCP
-      ? settingsAreValidGcp(attributes.cloudSettings?.gcp || {})
-      : cloud === ProviderCloud.Azure
-      ? settingsAreValidAzure(attributes.cloudSettings?.azure || {})
-      : false)
+        ? settingsAreValidGcp(attributes.cloudSettings?.gcp || {})
+        : cloud === ProviderCloud.Azure
+          ? settingsAreValidAzure(attributes.cloudSettings?.azure || {})
+          : false)
   )
 }
 

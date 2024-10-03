@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from 'react'
+import { useContext, useMemo } from 'react'
 import { ApolloProvider } from '@apollo/client'
 
 import { buildClient } from '../helpers/client'

@@ -18,7 +18,8 @@ export default function DemoBanner() {
         textAlign="center"
       >
         You are using a Plural demo GCP project, which will expire 6 hours after
-        creation. If you'd like to learn how to deploy on your own cloud,&nbsp;
+        creation. If you&apos;d like to learn how to deploy on your own
+        cloud,&nbsp;
         <A
           inline
           href="https://docs.plural.sh/getting-started/quickstart"

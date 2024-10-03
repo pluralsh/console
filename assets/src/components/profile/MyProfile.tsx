@@ -37,8 +37,8 @@ export default function MyProfile() {
 
   if (!me) return null
 
-  const currentTab = directory.find(
-    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  const currentTab = directory.find((tab) =>
+    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
   )
 
   return (

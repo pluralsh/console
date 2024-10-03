@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { IconFrame, PushPinIcon } from '@pluralsh/design-system'
 
 import { useIsPinnedResource } from '../Cluster'

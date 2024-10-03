@@ -19,7 +19,7 @@ function usePersistedSessionState<T>(
       const item = sessionStorage.getItem(`plural-${key}`)
 
       if (item) return parser(JSON.parse(item))
-    } catch (error) {
+    } catch (_) {
       console.error('Error on sessionStorage.getItem of', key)
     }
 

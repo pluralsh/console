@@ -47,8 +47,8 @@ export default function UserManagement() {
   const directory = getDirectory(me, configuration).filter(
     ({ enabled }) => enabled
   )
-  const currentTab = directory.find(
-    (tab) => pathname?.startsWith(`${USER_MANAGEMENT_ABS_PATH}/${tab.path}`)
+  const currentTab = directory.find((tab) =>
+    pathname?.startsWith(`${USER_MANAGEMENT_ABS_PATH}/${tab.path}`)
   )
 
   const headerContent = (

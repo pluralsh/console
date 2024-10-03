@@ -124,7 +124,7 @@ export function useCommands(): CommandGroup[] {
     const clusters = mapExistingNodes(data?.clusters)
 
     return !isEmpty(clusters)
-      ? clusters.find(({ self }) => !!self) ?? clusters[0]
+      ? (clusters.find(({ self }) => !!self) ?? clusters[0])
       : undefined
   }, [data?.clusters])
 

@@ -20,7 +20,7 @@ import {
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import React, { useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { Row } from '@tanstack/react-table'

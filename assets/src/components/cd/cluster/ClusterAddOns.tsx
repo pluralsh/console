@@ -1,30 +1,30 @@
 import { Chip, EmptyState, SubTab, TabList } from '@pluralsh/design-system'
-import React, { useEffect, useMemo, useRef } from 'react'
-import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   RuntimeServiceDetailsFragment,
   useRuntimeServiceQuery,
   useRuntimeServicesQuery,
 } from 'generated/graphql'
-import { isNonNullable } from 'utils/isNonNullable'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useTheme } from 'styled-components'
 import { isEmpty } from 'lodash'
-
-import { POLL_INTERVAL, useSetPageHeaderContent } from '../ContinuousDeployment'
-import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
-import { LinkTabWrap } from '../../utils/Tabs'
-import { PropCard } from '../globalServices/details/GlobalServiceInfo'
-import { toNiceVersion } from '../../../utils/semver'
-import { GqlError } from '../../utils/Alert'
+import { useEffect, useMemo, useRef } from 'react'
+import { Outlet, useMatch, useNavigate, useParams } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
 import {
   CLUSTER_ADDONS_PARAM_ID,
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
 } from '../../../routes/cdRoutesConsts'
+import { toNiceVersion } from '../../../utils/semver'
+import { GqlError } from '../../utils/Alert'
+import { LinkTabWrap } from '../../utils/Tabs'
+import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
+
+import { POLL_INTERVAL, useSetPageHeaderContent } from '../ContinuousDeployment'
+import { PropCard } from '../globalServices/details/GlobalServiceInfo'
+import { useClusterContext } from './Cluster'
 
 import ClusterAddOnsEntry from './ClusterAddOnsEntry'
-import { useClusterContext } from './Cluster'
 
 export const versionPlaceholder = '_VSN_PLACEHOLDER_'
 

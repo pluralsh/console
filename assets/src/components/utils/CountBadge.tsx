@@ -10,8 +10,8 @@ const CountBadgeSC = styled.div<{
         ? 18
         : 14
       : $label.length > 1
-      ? 18
-      : 16
+        ? 18
+        : 16
   const fontSize = $size === 'small' ? 10.5 : $label.length > 1 ? 10.5 : 12
 
   return {

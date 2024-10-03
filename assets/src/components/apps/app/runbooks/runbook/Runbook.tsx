@@ -179,7 +179,6 @@ export default function Runbook() {
       }
     >
       {selectedTab === 'runbook' && (
-        // eslint-disable-next-line react/jsx-no-constructed-context-values
         <ActionContext.Provider value={{ ref, setRef }}>
           <Flex
             direction="column"

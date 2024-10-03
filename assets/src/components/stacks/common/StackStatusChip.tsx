@@ -1,4 +1,4 @@
-import React, { ComponentProps } from 'react'
+import { ComponentProps } from 'react'
 import { Chip } from '@pluralsh/design-system'
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 import capitalize from 'lodash/capitalize'

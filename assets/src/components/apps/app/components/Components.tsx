@@ -161,8 +161,8 @@ function ComponentKindSelect({
           {allSelected
             ? 'All components'
             : sortedSelectedKinds.length === 0
-            ? 'Select types'
-            : sortedSelectedKinds.join(', ')}
+              ? 'Select types'
+              : sortedSelectedKinds.join(', ')}
         </FilterTrigger>
       }
       selectionMode="multiple"

@@ -1,6 +1,6 @@
 import { createColumnHelper } from '@tanstack/react-table'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 
 import {
   Common_EventList as EventListT,

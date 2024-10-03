@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import { ReactElement } from 'react'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 

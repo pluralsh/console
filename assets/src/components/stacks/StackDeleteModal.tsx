@@ -1,5 +1,3 @@
-import React from 'react'
-
 import { Confirm } from '../utils/Confirm'
 import { StackFragment, useDeleteStackMutation } from '../../generated/graphql'
 

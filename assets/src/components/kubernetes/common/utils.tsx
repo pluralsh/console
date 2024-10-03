@@ -1,5 +1,5 @@
 import uniqWith from 'lodash/uniqWith'
-import React, { ReactNode, useMemo, useState } from 'react'
+import { ReactNode, useMemo, useState } from 'react'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { Chip, ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
 import moment from 'moment/moment'

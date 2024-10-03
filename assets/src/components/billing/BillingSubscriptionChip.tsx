@@ -21,8 +21,8 @@ export default function BillingSubscriptionChip() {
         {isEnterprisePlan
           ? 'Enterprise'
           : isProPlan
-          ? 'Professional'
-          : 'Open-source'}
+            ? 'Professional'
+            : 'Open-source'}
       </Chip>
     </Link>
   )

@@ -1,5 +1,5 @@
 import { AppIcon } from '@pluralsh/design-system'
-import React from 'react'
+
 import { useTheme } from 'styled-components'
 
 import { useNavigate } from 'react-router-dom'

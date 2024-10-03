@@ -14,7 +14,7 @@ function getSpecRaw(componentRaw: Nullable<string>) {
 
   try {
     json = JSON.parse(componentRaw || '')
-  } catch (e) {
+  } catch (_) {
     json = undefined
   }
 

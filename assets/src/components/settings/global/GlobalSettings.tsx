@@ -69,8 +69,8 @@ export function GlobalSettings() {
     [data, refetch]
   )
 
-  const currentTab = directory.find(
-    (tab) => pathname?.startsWith(`${GLOBAL_SETTINGS_ABS_PATH}/${tab.path}`)
+  const currentTab = directory.find((tab) =>
+    pathname?.startsWith(`${GLOBAL_SETTINGS_ABS_PATH}/${tab.path}`)
   )
 
   const headerContent = (

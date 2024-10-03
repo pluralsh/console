@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import {
   CheckIcon,
@@ -29,8 +29,8 @@ const Compatibility = memo(
     const label = isCurrentVersion
       ? 'Current'
       : isCompatible
-      ? 'Compatible'
-      : 'Not compatible'
+        ? 'Compatible'
+        : 'Not compatible'
 
     return (
       <IconFrame

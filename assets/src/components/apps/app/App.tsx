@@ -182,8 +182,8 @@ function SideNavEntries({
               (docPageContext.selectedHash === docPageRootHash ||
                 !docPageContext.selectedHash)
             : type === 'docPageHash'
-            ? isInCurrentPath && docPageContext.selectedHash === props.id
-            : isInCurrentPath
+              ? isInCurrentPath && docPageContext.selectedHash === props.id
+              : isInCurrentPath
 
         return (
           <TreeNavEntry
@@ -198,12 +198,12 @@ function SideNavEntries({
                   },
                 }
               : type === 'docPage'
-              ? {
-                  onClick: () => {
-                    docPageContext.scrollToHash(docPageRootHash)
-                  },
-                }
-              : {})}
+                ? {
+                    onClick: () => {
+                      docPageContext.scrollToHash(docPageRootHash)
+                    },
+                  }
+                : {})}
           >
             {!isEmpty(subpaths) ? (
               <SideNavEntries
@@ -253,8 +253,8 @@ function AppWithoutContext() {
   }
   if (!repoData?.repository) return <LoadingIndicator />
 
-  const currentTab = directory.find(
-    (tab) => pathname?.startsWith(`${pathPrefix}/${tab.path}`)
+  const currentTab = directory.find((tab) =>
+    pathname?.startsWith(`${pathPrefix}/${tab.path}`)
   )
   const {
     name,

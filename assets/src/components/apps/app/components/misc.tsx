@@ -121,7 +121,6 @@ export function ComponentIcon({
     | 'certificate'
     | 'secret'
     // `& {}` is hack to still show autocomplete for above options
-    // eslint-disable-next-line @typescript-eslint/ban-types
     | (string & {})
   size?: number | undefined
 }) {

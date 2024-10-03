@@ -150,16 +150,16 @@ export default function Repositories() {
     repoKind === RepoKind.Helm
       ? helmQueryResult
       : repoKind === RepoKind.Flux
-      ? fluxQueryResult
-      : gitQueryResult
+        ? fluxQueryResult
+        : gitQueryResult
 
   const statusCounts = useMemo(
     () =>
       repoKind === RepoKind.Git
         ? countsFromGitRepos(gitQueryResult?.data)
         : repoKind === RepoKind.Helm
-        ? countsFromHelmRepos(helmQueryResult?.data)
-        : countsFromFluxHelmRepos(fluxQueryResult?.data),
+          ? countsFromHelmRepos(helmQueryResult?.data)
+          : countsFromFluxHelmRepos(fluxQueryResult?.data),
     [
       gitQueryResult?.data,
       helmQueryResult?.data,

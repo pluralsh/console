@@ -100,7 +100,6 @@ export function CreateStackModalFormEnvironment({
                   key={i}
                   className="displayContents"
                 >
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                   <td>
                     <FormField
                       error={errors.duplicate || errors.noName}
@@ -108,8 +107,8 @@ export function CreateStackModalFormEnvironment({
                         errors.noName
                           ? 'Name cannot be empty'
                           : errors.duplicate
-                          ? 'Duplicate name'
-                          : undefined
+                            ? 'Duplicate name'
+                            : undefined
                       }
                     >
                       <Input
@@ -126,7 +125,6 @@ export function CreateStackModalFormEnvironment({
                       />
                     </FormField>
                   </td>
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                   <td>
                     <Input
                       value={env.value}
@@ -141,7 +139,6 @@ export function CreateStackModalFormEnvironment({
                       }
                     />
                   </td>
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                   <td>
                     <div css={{ display: 'flex' }}>
                       <Switch
@@ -153,6 +150,7 @@ export function CreateStackModalFormEnvironment({
                             })
                           )
                         }
+                        as={undefined}
                       />
                       <DeleteIconButton
                         css={{ marginTop: 4 }}

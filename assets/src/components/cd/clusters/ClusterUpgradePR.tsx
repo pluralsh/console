@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { Button } from '@pluralsh/design-system'
 
 import { useCreatePullRequestMutation } from '../../../generated/graphql'

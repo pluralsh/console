@@ -42,12 +42,11 @@ export function fetchUsers(client: ApolloClient<any>, query, setSuggestions) {
       query: SearchUsersDocument,
       variables: { q: query },
     })
-    .then(
-      ({ data }) =>
-        data?.users?.edges?.map((edge) => ({
-          value: edge?.node,
-          label: UserSuggestion(edge?.node),
-        }))
+    .then(({ data }) =>
+      data?.users?.edges?.map((edge) => ({
+        value: edge?.node,
+        label: UserSuggestion(edge?.node),
+      }))
     )
     .then(setSuggestions)
 }
@@ -58,12 +57,11 @@ export function fetchGroups(client: ApolloClient<any>, query, setSuggestions) {
       query: SearchGroupsDocument,
       variables: { q: query },
     })
-    .then(
-      ({ data }) =>
-        data?.groups?.edges?.map((edge) => ({
-          value: edge?.node,
-          label: GroupSuggestion(edge?.node),
-        }))
+    .then(({ data }) =>
+      data?.groups?.edges?.map((edge) => ({
+        value: edge?.node,
+        label: GroupSuggestion(edge?.node),
+      }))
     )
     .then(setSuggestions)
 }

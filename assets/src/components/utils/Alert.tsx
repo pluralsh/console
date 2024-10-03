@@ -16,8 +16,8 @@ export function GqlError({
       {typeof error === 'string'
         ? error
         : typeof error === 'boolean'
-        ? ''
-        : error?.graphQLErrors?.[0]?.message || ''}
+          ? ''
+          : error?.graphQLErrors?.[0]?.message || ''}
     </Callout>
   )
 }

@@ -89,7 +89,7 @@ function DeleteSecret({
               gap: theme.spacing.medium,
             }}
           >
-            <p>Are you sure you want to delete this secret?"</p>
+            <p>Are you sure you want to delete this secret?</p>
             <p>{secretName}</p>
           </div>
         }

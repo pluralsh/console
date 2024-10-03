@@ -48,15 +48,15 @@ const ColStatus = columnHelper.accessor(
               status === 'true'
                 ? 'success'
                 : status === 'false'
-                ? 'danger'
-                : 'neutral'
+                  ? 'danger'
+                  : 'neutral'
             }
           >
             {status === 'true'
               ? 'Ready'
               : status === 'false'
-              ? 'Unhealthy'
-              : 'Unknown'}
+                ? 'Unhealthy'
+                : 'Unknown'}
           </Chip>
         </div>
       )

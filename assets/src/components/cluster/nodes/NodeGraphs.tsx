@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { Flex } from 'honorable'
 import { Node, useClusterNodeMetricsQuery } from 'generated/graphql'
 import { isNull } from 'lodash'

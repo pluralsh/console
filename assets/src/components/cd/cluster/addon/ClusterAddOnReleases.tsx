@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { EmptyState, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { TabularNumbers } from 'components/cluster/TableElements'

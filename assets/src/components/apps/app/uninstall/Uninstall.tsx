@@ -53,9 +53,9 @@ export default function Uninstall() {
             body2
             color="text-light"
           >
-            To uninstall the application, type the application's name {appName}{' '}
-            to confirm. This is action is <b>destructive</b> and can result in
-            underlying data from the application being deleted.
+            To uninstall the application, type the application&apos;s name{' '}
+            {appName} to confirm. This is action is <b>destructive</b> and can
+            result in underlying data from the application being deleted.
           </P>
           <Flex
             direction="row"

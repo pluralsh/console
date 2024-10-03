@@ -7,7 +7,7 @@ import {
   ReturnIcon,
   Toast,
 } from '@pluralsh/design-system'
-import React, {
+import {
   Dispatch,
   FormEvent,
   SetStateAction,
