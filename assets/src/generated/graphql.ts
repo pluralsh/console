@@ -2444,6 +2444,19 @@ export type IngressTls = {
   hosts?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
 };
 
+export type InsightClientInfo = {
+  __typename?: 'InsightClientInfo';
+  count?: Maybe<Scalars['String']['output']>;
+  lastRequestAt?: Maybe<Scalars['DateTime']['output']>;
+  userAgent?: Maybe<Scalars['String']['output']>;
+};
+
+export type InsightClientInfoAttributes = {
+  count?: InputMaybe<Scalars['String']['input']>;
+  lastRequestAt?: InputMaybe<Scalars['DateTime']['input']>;
+  userAgent?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type Installation = {
   __typename?: 'Installation';
   id: Scalars['ID']['output'];
@@ -7040,6 +7053,8 @@ export type RuntimeService = {
   addonVersion?: Maybe<AddonVersion>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the number of instances of this service we've detected */
+  instanceCount?: Maybe<Scalars['Int']['output']>;
   /** add-on name */
   name: Scalars['String']['output'];
   /** the plural service it came from */
@@ -7050,6 +7065,8 @@ export type RuntimeService = {
 };
 
 export type RuntimeServiceAttributes = {
+  /** the number of instances of this service we've found */
+  instanceCount?: InputMaybe<Scalars['Int']['input']>;
   name: Scalars['String']['input'];
   version: Scalars['String']['input'];
 };
@@ -8204,6 +8221,8 @@ export type UpgradeInsightAttributes = {
 
 export type UpgradeInsightDetail = {
   __typename?: 'UpgradeInsightDetail';
+  /** information about the HTTP clients triggering this insight */
+  clientInfo?: Maybe<Array<Maybe<InsightClientInfo>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   lastUsedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -8218,6 +8237,8 @@ export type UpgradeInsightDetail = {
 };
 
 export type UpgradeInsightDetailAttributes = {
+  /** descriptions of the HTTP clients triggering this insight */
+  clientInfo?: InputMaybe<Array<InputMaybe<InsightClientInfoAttributes>>>;
   /** the latest timestamp this insight has been observed */
   lastUsedAt?: InputMaybe<Scalars['DateTime']['input']>;
   removedIn?: InputMaybe<Scalars['String']['input']>;

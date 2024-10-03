@@ -3725,7 +3725,11 @@ input AzureSettingsAttributes {
 
 input RuntimeServiceAttributes {
   name: String!
+
   version: String!
+
+  "the number of instances of this service we've found"
+  instanceCount: Int
 }
 
 input AgentMigrationAttributes {
@@ -3781,12 +3785,21 @@ input UpgradeInsightDetailAttributes {
   "the replacement for this API"
   replacement: String
 
+  "descriptions of the HTTP clients triggering this insight"
+  clientInfo: [InsightClientInfoAttributes]
+
   replacedIn: String
 
   removedIn: String
 
   "the latest timestamp this insight has been observed"
   lastUsedAt: DateTime
+}
+
+input InsightClientInfoAttributes {
+  userAgent: String
+  count: String
+  lastRequestAt: DateTime
 }
 
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -4217,6 +4230,9 @@ type RuntimeService {
   "add-on version, should be semver formatted"
   version: String!
 
+  "the number of instances of this service we've detected"
+  instanceCount: Int
+
   "the full specification of this kubernetes add-on"
   addon: RuntimeAddon
 
@@ -4348,6 +4364,9 @@ type UpgradeInsightDetail {
   "the replacement for this API"
   replacement: String
 
+  "information about the HTTP clients triggering this insight"
+  clientInfo: [InsightClientInfo]
+
   replacedIn: String
 
   removedIn: String
@@ -4357,6 +4376,12 @@ type UpgradeInsightDetail {
   insertedAt: DateTime
 
   updatedAt: DateTime
+}
+
+type InsightClientInfo {
+  userAgent: String
+  count: String
+  lastRequestAt: DateTime
 }
 
 type ClusterConnection {

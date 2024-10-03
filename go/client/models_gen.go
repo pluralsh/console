@@ -2004,6 +2004,18 @@ type IngressTLS struct {
 	Hosts []*string `json:"hosts,omitempty"`
 }
 
+type InsightClientInfo struct {
+	UserAgent     *string `json:"userAgent,omitempty"`
+	Count         *string `json:"count,omitempty"`
+	LastRequestAt *string `json:"lastRequestAt,omitempty"`
+}
+
+type InsightClientInfoAttributes struct {
+	UserAgent     *string `json:"userAgent,omitempty"`
+	Count         *string `json:"count,omitempty"`
+	LastRequestAt *string `json:"lastRequestAt,omitempty"`
+}
+
 type Installation struct {
 	ID         string      `json:"id"`
 	Repository *Repository `json:"repository,omitempty"`
@@ -4036,6 +4048,8 @@ type RuntimeService struct {
 	Name string `json:"name"`
 	// add-on version, should be semver formatted
 	Version string `json:"version"`
+	// the number of instances of this service we've detected
+	InstanceCount *int64 `json:"instanceCount,omitempty"`
 	// the full specification of this kubernetes add-on
 	Addon *RuntimeAddon `json:"addon,omitempty"`
 	// the version of the add-on you've currently deployed
@@ -4049,6 +4063,8 @@ type RuntimeService struct {
 type RuntimeServiceAttributes struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`
+	// the number of instances of this service we've found
+	InstanceCount *int64 `json:"instanceCount,omitempty"`
 }
 
 type S3Store struct {
@@ -5035,11 +5051,13 @@ type UpgradeInsightDetail struct {
 	Used *string `json:"used,omitempty"`
 	// the replacement for this API
 	Replacement *string `json:"replacement,omitempty"`
-	ReplacedIn  *string `json:"replacedIn,omitempty"`
-	RemovedIn   *string `json:"removedIn,omitempty"`
-	LastUsedAt  *string `json:"lastUsedAt,omitempty"`
-	InsertedAt  *string `json:"insertedAt,omitempty"`
-	UpdatedAt   *string `json:"updatedAt,omitempty"`
+	// information about the HTTP clients triggering this insight
+	ClientInfo []*InsightClientInfo `json:"clientInfo,omitempty"`
+	ReplacedIn *string              `json:"replacedIn,omitempty"`
+	RemovedIn  *string              `json:"removedIn,omitempty"`
+	LastUsedAt *string              `json:"lastUsedAt,omitempty"`
+	InsertedAt *string              `json:"insertedAt,omitempty"`
+	UpdatedAt  *string              `json:"updatedAt,omitempty"`
 }
 
 type UpgradeInsightDetailAttributes struct {
@@ -5048,8 +5066,10 @@ type UpgradeInsightDetailAttributes struct {
 	Used *string `json:"used,omitempty"`
 	// the replacement for this API
 	Replacement *string `json:"replacement,omitempty"`
-	ReplacedIn  *string `json:"replacedIn,omitempty"`
-	RemovedIn   *string `json:"removedIn,omitempty"`
+	// descriptions of the HTTP clients triggering this insight
+	ClientInfo []*InsightClientInfoAttributes `json:"clientInfo,omitempty"`
+	ReplacedIn *string                        `json:"replacedIn,omitempty"`
+	RemovedIn  *string                        `json:"removedIn,omitempty"`
 	// the latest timestamp this insight has been observed
 	LastUsedAt *string `json:"lastUsedAt,omitempty"`
 }

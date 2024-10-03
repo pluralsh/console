@@ -167,8 +167,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   input_object :runtime_service_attributes do
-    field :name,    non_null(:string)
-    field :version, non_null(:string)
+    field :name,           non_null(:string)
+    field :version,        non_null(:string)
+    field :instance_count, :integer, description: "the number of instances of this service we've found"
   end
 
   input_object :agent_migration_attributes do
@@ -212,11 +213,18 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :status,      :upgrade_insight_status
     field :used,        :string, description: "a possibly deprecated API"
     field :replacement, :string, description: "the replacement for this API"
+    field :client_info, list_of(:insight_client_info_attributes), description: "descriptions of the HTTP clients triggering this insight"
 
     field :replaced_in, :string
     field :removed_in,  :string
 
     field :last_used_at, :datetime, description: "the latest timestamp this insight has been observed"
+  end
+
+  input_object :insight_client_info_attributes do
+    field :user_agent,      :string
+    field :count,           :string
+    field :last_request_at, :datetime
   end
 
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
@@ -527,12 +535,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   @desc "a service encapsulating a controller like istio/ingress-nginx/etc that is meant to extend the kubernetes api"
   object :runtime_service do
-    field :id,            non_null(:id)
-    field :name,          non_null(:string), description: "add-on name"
-    field :version,       non_null(:string), description: "add-on version, should be semver formatted"
-    field :addon,         :runtime_addon,    description: "the full specification of this kubernetes add-on"
-    field :addon_version, :addon_version,    description: "the version of the add-on you've currently deployed"
-    field :service,       :service_deployment,
+    field :id,             non_null(:id)
+    field :name,           non_null(:string), description: "add-on name"
+    field :version,        non_null(:string), description: "add-on version, should be semver formatted"
+    field :instance_count, :integer, description: "the number of instances of this service we've detected"
+    field :addon,          :runtime_addon,    description: "the full specification of this kubernetes add-on"
+    field :addon_version,  :addon_version,    description: "the version of the add-on you've currently deployed"
+    field :service,        :service_deployment,
       resolve: dataloader(Deployments),
       description: "the plural service it came from"
 
@@ -640,12 +649,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :status,      :upgrade_insight_status
     field :used,        :string, description: "a possibly deprecated API"
     field :replacement, :string, description: "the replacement for this API"
+    field :client_info, list_of(:insight_client_info), description: "information about the HTTP clients triggering this insight"
 
     field :replaced_in,  :string
     field :removed_in,   :string
     field :last_used_at, :datetime
 
     timestamps()
+  end
+
+  object :insight_client_info do
+    field :user_agent,      :string
+    field :count,           :string
+    field :last_request_at, :datetime
   end
 
   connection node_type: :cluster

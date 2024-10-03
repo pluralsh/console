@@ -385,6 +385,11 @@ export enum CloudProvider {
   Aws = 'AWS'
 }
 
+export type CloudRegions = {
+  __typename?: 'CloudRegions';
+  aws?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
 export type CloudShell = {
   __typename?: 'CloudShell';
   aesKey: Scalars['String']['output'];
@@ -2208,6 +2213,17 @@ export type PlatformSubscriptionLineItems = {
   quantity: Scalars['Int']['output'];
 };
 
+export type PluralCloudRegions = {
+  __typename?: 'PluralCloudRegions';
+  dedicated: CloudRegions;
+  shared: CloudRegions;
+};
+
+export type PluralCloudSettings = {
+  __typename?: 'PluralCloudSettings';
+  regions?: Maybe<PluralCloudRegions>;
+};
+
 export type PluralConfiguration = {
   __typename?: 'PluralConfiguration';
   gitCommit?: Maybe<Scalars['String']['output']>;
@@ -3408,7 +3424,7 @@ export type RootMutationTypeLinkPublisherArgs = {
 
 
 export type RootMutationTypeLoginArgs = {
-  captcha?: InputMaybe<Scalars['String']['input']>;
+  captcha: Scalars['String']['input'];
   deviceToken?: InputMaybe<Scalars['String']['input']>;
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
@@ -3733,6 +3749,7 @@ export type RootQueryType = {
   charts?: Maybe<ChartConnection>;
   chat?: Maybe<ChatMessage>;
   closure?: Maybe<Array<Maybe<ClosureItem>>>;
+  cloudSettings?: Maybe<PluralCloudSettings>;
   /** Get a cluster by its ID. */
   cluster?: Maybe<Cluster>;
   /** Get a list of clusters owned by the current account. */
