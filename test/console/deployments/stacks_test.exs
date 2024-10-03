@@ -338,7 +338,7 @@ defmodule Console.Deployments.StacksTest do
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
-      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
     end
 
     test "it will not create a new run if there are no file changes" do
@@ -404,7 +404,7 @@ defmodule Console.Deployments.StacksTest do
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
-      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
     end
 
     test "it can create a new run with a stack definition" do
@@ -448,7 +448,7 @@ defmodule Console.Deployments.StacksTest do
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
       [_] = StackRun.for_stack(stack.id) |> Console.Repo.all()
-      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
     end
 
     test "it can create a new run from a pr if the sha changes" do
@@ -487,7 +487,7 @@ defmodule Console.Deployments.StacksTest do
       assert stack.sha == "old-sha"
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
-      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
 
       %{pull_request: sideload} = Console.Repo.preload(run, [:pull_request])
       assert sideload.id == pr.id
@@ -531,7 +531,7 @@ defmodule Console.Deployments.StacksTest do
       assert stack.sha == "new-sha"
       %{environment: [_], files: [_]} = Console.Repo.preload(stack, [:environment, :files])
 
-      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}
+      assert_receive {:event, %PubSub.StackRunCreated{item: ^run}}, :timer.seconds(10)
     end
 
     test "it will ignore if the shas are the same" do

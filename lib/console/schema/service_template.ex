@@ -61,7 +61,7 @@ defmodule Console.Schema.ServiceTemplate do
     end
   end
 
-  @valid ~w(name namespace templated repository_id contexts revision_id)a
+  @valid ~w(name protect namespace templated repository_id contexts revision_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

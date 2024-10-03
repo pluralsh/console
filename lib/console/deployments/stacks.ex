@@ -764,7 +764,7 @@ defmodule Console.Deployments.Stacks do
   defp notify(pass, _, _), do: pass
 
   defp notify({:ok, %StackRun{} = stack}, :create),
-    do: notify_after(50, PubSub.StackRunCreated, stack)
+    do: notify_after(:timer.seconds(5), PubSub.StackRunCreated, stack)
   defp notify({:ok, %RunLog{} = log}, :create),
     do: handle_notify(PubSub.RunLogsCreated, log)
   defp notify({:ok, %StackRun{} = stack}, :update),
