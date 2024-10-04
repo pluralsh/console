@@ -1,12 +1,15 @@
+import type { Breadcrumb } from '@pluralsh/design-system'
 import {
-  Breadcrumb,
   SubTab,
   TabList,
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
+
+import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+import { LinkTabWrap } from 'components/utils/Tabs'
+import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
 import {
   Outlet,
   useMatch,
@@ -14,7 +17,6 @@ import {
   useOutletContext,
   useParams,
 } from 'react-router-dom'
-import { LinkTabWrap } from 'components/utils/Tabs'
 import {
   CD_ABS_PATH,
   CLUSTERS_REL_PATH,
@@ -27,14 +29,13 @@ import {
   CLUSTER_PODS_PATH,
   CLUSTER_PRS_REL_PATH,
   CLUSTER_SERVICES_PATH,
+  CLUSTER_VCLUSTERS_REL_PATH,
 } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
-import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
-
 import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
-import { CD_BASE_CRUMBS, PageHeaderContext } from '../ContinuousDeployment'
 import LoadingIndicator from '../../utils/LoadingIndicator'
+import { CD_BASE_CRUMBS, PageHeaderContext } from '../ContinuousDeployment'
 import ClusterSelector from '../utils/ClusterSelector'
 
 import ClusterPermissions from './ClusterPermissions'
@@ -45,6 +46,7 @@ const directory = [
   { path: CLUSTER_NODES_PATH, label: 'Nodes' },
   { path: CLUSTER_PODS_PATH, label: 'Pods' },
   { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
+  { path: CLUSTER_VCLUSTERS_REL_PATH, label: 'VClusters', vclusters: true },
   { path: CLUSTER_LOGS_PATH, label: 'Logs', logs: true },
   { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
   { path: CLUSTER_PRS_REL_PATH, label: 'PRs' },
@@ -82,8 +84,16 @@ export const getClusterBreadcrumbs = ({
   ]
 }
 
-function tabEnabled(tab, logs) {
-  return !tab.logs || logs
+function tabEnabled(tab, logsEnabled: boolean, isVCluster: boolean) {
+  if (tab?.logs) {
+    return logsEnabled
+  }
+
+  if (tab?.vclusters) {
+    return !isVCluster
+  }
+
+  return true
 }
 
 export default function Cluster() {
@@ -93,7 +103,7 @@ export default function Cluster() {
   const { clusterId } = useParams<{ clusterId: string }>()
   const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab/*`)?.params?.tab || ''
   const [refetchServices, setRefetchServices] = useState(() => () => {})
-  const logs = useLogsEnabled()
+  const logsEnabled = useLogsEnabled()
 
   const currentTab = directory.find(({ path }) => path === tab)
 
@@ -133,6 +143,7 @@ export default function Cluster() {
         tab !== 'services' &&
         tab !== 'pods' &&
         tab !== CLUSTER_PRS_REL_PATH &&
+        tab !== CLUSTER_VCLUSTERS_REL_PATH &&
         tab !== 'addons' &&
         tab !== 'logs'
       }
@@ -159,7 +170,9 @@ export default function Cluster() {
             }}
           >
             {directory
-              .filter((t) => tabEnabled(t, logs))
+              .filter((t) =>
+                tabEnabled(t, logsEnabled, cluster?.virtual ?? false)
+              )
               .map(({ label, path }) => (
                 <LinkTabWrap
                   css={{ minWidth: 'fit-content' }}

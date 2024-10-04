@@ -214,6 +214,7 @@ fragment ClustersRow on Cluster {
     deprecations
     incompatibilities
   }
+  virtual
 }
 
 fragment ClusterMetricsFragment on Cluster {
@@ -317,6 +318,9 @@ fragment Cluster on Cluster {
     name
     value
   }
+  parentCluster {
+    ...ClustersRow
+  }
 }
 
 query Clusters(
@@ -363,6 +367,7 @@ fragment ClusterTiny on Cluster {
     deprecations
     incompatibilities
   }
+  virtual
 }
 
 fragment ClusterBasic on Cluster {
@@ -382,6 +387,34 @@ query ClustersTiny($projectId: ID, $first: Int) {
       }
     }
   }
+}
+
+query VClusters(
+  $parentId: ID!
+  $first: Int
+  $after: String
+  $q: String
+  $healthy: Boolean
+  $projectId: ID
+) {
+  clusters(
+    first: $first
+    after: $after
+    q: $q
+    healthy: $healthy
+    projectId: $projectId
+    parentId: $parentId
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClustersRow
+      }
+    }
+  }
+  tags
 }
 
 query ClusterSelector(

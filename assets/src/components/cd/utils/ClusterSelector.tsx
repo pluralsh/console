@@ -4,21 +4,23 @@ import {
   ListBoxFooter,
   ListBoxFooterPlus,
   ListBoxItem,
+  ManagementClusterIcon,
   SearchIcon,
+  VirtualClusterIcon,
 } from '@pluralsh/design-system'
-import { useCallback, useMemo, useState } from 'react'
 
 import { useThrottle } from 'components/hooks/useThrottle'
+
+import { FillLevelDiv } from 'components/utils/FillLevelDiv'
 import { ClusterProviderIcon } from 'components/utils/Provider'
 import { ClusterTinyFragment, useClusterSelectorQuery } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
+import { useCallback, useMemo, useState } from 'react'
 import { useTheme } from 'styled-components'
 
-import { FillLevelDiv } from 'components/utils/FillLevelDiv'
-
 import { useProjectId } from '../../contexts/ProjectsContext'
-import { ClusterUpgradeChip } from '../clusters/ClusterUpgrade'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
+import { ClusterUpgradeChip } from '../clusters/ClusterUpgrade'
 
 export default function ClusterSelector({
   onClusterChange,
@@ -83,7 +85,13 @@ export default function ClusterSelector({
         titleContent={
           !hideTitleContent ? (
             <div css={{ display: 'flex', gap: theme.spacing.xsmall }}>
-              <ClusterIcon />
+              {data?.cluster?.self ? (
+                <ManagementClusterIcon />
+              ) : data?.cluster?.virtual ? (
+                <VirtualClusterIcon fullColor={false} />
+              ) : (
+                <ClusterIcon />
+              )}
             </div>
           ) : undefined
         }
