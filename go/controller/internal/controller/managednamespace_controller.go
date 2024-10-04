@@ -274,6 +274,15 @@ func (r *ManagedNamespaceReconciler) getNamespaceAttributes(ctx context.Context,
 		if err != nil {
 			return nil, err
 		}
+
+		if st.Name == nil {
+			st.Name = lo.ToPtr(ns.GetName())
+		}
+
+		if st.Namespace == nil {
+			st.Namespace = lo.ToPtr(ns.GetNamespace())
+		}
+
 		attr.Service = st
 	}
 

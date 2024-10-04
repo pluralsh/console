@@ -20,22 +20,13 @@ defmodule Console.Schema.NotificationRouter do
   end
 
   def for_filters(query \\ __MODULE__, filters) do
-    query = from(nr in query, left_join: f in assoc(nr, :filters), as: :filters)
-
-    dyno = Enum.reduce(filters, dynamic(true), fn
-      {:regex, r}, q ->
-        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.regex) and fragment("? ~ ?", f.regex, ^r)) or ^q)
-      {:cluster_id, id}, q ->
-        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.cluster_id) and f.cluster_id == ^id) or ^q)
-      {:service_id, id}, q ->
-        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.service_id) and f.service_id == ^id) or ^q)
-      {:pipeline_id, id}, q ->
-        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.pipeline_id) and f.pipeline_id == ^id) or ^q)
-      {:stack_id, id}, q ->
-        dynamic([nr, filters: f], not is_nil(f.id) or (not is_nil(f.stack_id) and f.stack_id == ^id) or ^q)
-    end)
-
-    from(query, where: ^dyno)
+    from(nr in query,
+      left_join: f in assoc(nr, :filters),
+      left_join: f2 in ^RouterFilter.for_filters(filters),
+        on: f2.router_id == nr.id,
+      where: is_nil(f.id) or not is_nil(f2.id),
+      distinct: true
+    )
   end
 
   def for_event(query \\ __MODULE__, event) do
@@ -52,7 +43,7 @@ defmodule Console.Schema.NotificationRouter do
 
   @valid ~w(name events)a
 
-  @events ~w(* service.update stack.run cluster.create pipeline.update pr.create pr.close)
+  @events ~w(service.update stack.run cluster.create pipeline.update pr.create pr.close *)
   @error_msg "events must all be one of [#{Enum.join(@events, ",")}]"
 
   def changeset(model, attrs \\ %{}) do

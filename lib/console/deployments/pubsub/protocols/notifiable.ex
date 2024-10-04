@@ -79,7 +79,7 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunCreat
   alias Console.Deployments.Notifications.Utils
 
   def message(%{item: run}) do
-    run = Console.Repo.preload(run, [:stack])
+    run = Console.Repo.preload(run, [:stack, :repository])
     {"stack.run", Utils.filters(run), %{stack_run: run}}
   end
 end

@@ -14,6 +14,21 @@ defmodule Console.Schema.RouterFilter do
     timestamps()
   end
 
+  def for_filters(query \\ __MODULE__, filters) do
+    Enum.reduce(filters, query, fn
+      {:regex, r}, q ->
+        from(f in q, or_where: not is_nil(f.regex) and fragment("? ~ ?", ^r, f.regex))
+      {:cluster_id, id}, q ->
+        from(f in q, or_where: not is_nil(f.cluster_id) and f.cluster_id == ^id)
+      {:service_id, id}, q ->
+        from(f in q, or_where: not is_nil(f.service_id) and f.service_id == ^id)
+      {:pipeline_id, id}, q ->
+        from(f in q, or_where: not is_nil(f.pipeline_id) and f.pipeline_id == ^id)
+      {:stack_id, id}, q ->
+        from(f in q, or_where: not is_nil(f.stack_id) and f.stack_id == ^id)
+    end)
+  end
+
   @valid ~w(cluster_id service_id pipeline_id router_id regex)a
 
   def changeset(model, attrs \\ %{}) do

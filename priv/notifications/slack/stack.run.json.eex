@@ -6,9 +6,64 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "🚀 *The following stack has an updated run:*\n<%= @stack_run.stack.name %>"
+                "text": "🚀 *The <%= @stack_run.stack.name %> stack has an updated run* "
             }
         },
+		{
+			"type": "rich_text",
+			"elements": [
+				{
+					"type": "rich_text_section",
+					"elements": [
+						{
+							"type": "text",
+							"text": "Repository",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": "
+						},
+						{
+							"type": "link",
+							"url": "<%= @stack_run.repository.url %>\n"
+						},
+						{
+							"type": "text",
+							"text": "Sha",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": "
+						},
+						{
+							"type": "link",
+							"url": "<%= @stack_run.git.ref %>\n"
+						},
+						{
+							"type": "text",
+							"text": "Folder",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": "
+						},
+						{
+							"type": "link",
+							"url": "<%= @stack_run.git.folder %>"
+						}
+					]
+				}
+			]
+		},
 		{
 			"type": "actions",
 			"elements": [
