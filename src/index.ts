@@ -1,4 +1,4 @@
-export { Avatar, Menu, MenuItem } from 'honorable'
+export { Avatar } from 'honorable'
 
 // Icons
 export * from './icons'
@@ -35,6 +35,8 @@ export { default as IconFrame } from './components/IconFrame'
 export { default as Input } from './components/Input'
 export { default as Input2 } from './components/Input2'
 export { default as Markdown } from './components/Markdown'
+export { default as Menu } from './components/Menu'
+export { default as MenuItem } from './components/MenuItem'
 export type { PageCardProps } from './components/PageCard'
 export { default as PageCard } from './components/PageCard'
 export { default as PageTitle } from './components/PageTitle'

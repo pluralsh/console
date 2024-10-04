@@ -87,7 +87,7 @@ const ItemSC = styled.div<{
   textDecoration: 'none',
   whiteSpace: 'nowrap',
   width: $isHorizontal ? undefined : '100%',
-  height: $isHorizontal ? undefined : 32,
+  height: $isHorizontal ? undefined : 39,
   flexGrow: 0,
   padding: $isHorizontal ? undefined : theme.spacing.small,
   borderRadius: '3px',

@@ -27,7 +27,7 @@ function SidebarSectionRef(
       align="center"
       ref={ref}
       borderBottom={isHorizontal ? '' : '1px solid border'}
-      gap={isHorizontal ? 'medium' : 'xsmall'}
+      gap={isHorizontal ? 'medium' : 'xxsmall'}
       padding={12}
       width={isHorizontal ? 'auto' : '100%'}
       {...styles}
