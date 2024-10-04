@@ -38,7 +38,7 @@ export default function NodeInfo() {
   const params = useParams()
   const nodeName = params[NODE_PARAM_NAME] as string
   const clusterId = params[NODE_PARAM_CLUSTER] as string
-  const { node, nodeMetric, refetch } = useOutletContext() as {
+  const { node, refetch } = useOutletContext() as {
     node: Node
     nodeMetric: NodeMetric
     refetch?: Nullable<() => void>
