@@ -4,7 +4,7 @@ export default createIcon(({ size, color = '#E0E3E5', fullColor = true }) => (
   <svg
     width={size}
     height={size}
-    viewBox="0 0 16 16"
+    viewBox="0 0 13 12"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
