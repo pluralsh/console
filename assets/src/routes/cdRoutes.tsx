@@ -88,7 +88,7 @@ import ServicePRs from '../components/cd/services/service/ServicePRs'
 
 import Observers from '../components/cd/observers/Observers'
 
-import VClusters from '../components/cd/cluster/ClusterVClusters'
+import VClusters from '../components/cd/cluster/VClusters'
 
 import {
   CD_REL_PATH,

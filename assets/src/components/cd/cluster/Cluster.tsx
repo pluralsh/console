@@ -1,10 +1,10 @@
+import type { Breadcrumb } from '@pluralsh/design-system'
 import {
   SubTab,
   TabList,
   TabPanel,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import type { Breadcrumb } from '@pluralsh/design-system'
 
 import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
@@ -19,6 +19,7 @@ import {
 } from 'react-router-dom'
 import {
   CD_ABS_PATH,
+  CLUSTERS_REL_PATH,
   CLUSTER_ABS_PATH,
   CLUSTER_ADDONS_REL_PATH,
   CLUSTER_LOGS_PATH,
@@ -29,16 +30,10 @@ import {
   CLUSTER_PRS_REL_PATH,
   CLUSTER_SERVICES_PATH,
   CLUSTER_VCLUSTERS_REL_PATH,
-  CLUSTERS_REL_PATH,
 } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
-import {
-  ClusterFragment,
-  useClusterQuery,
-  useVClustersQuery,
-} from '../../../generated/graphql'
-import { useProjectId } from '../../contexts/ProjectsContext'
+import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 import { CD_BASE_CRUMBS, PageHeaderContext } from '../ContinuousDeployment'
 import ClusterSelector from '../utils/ClusterSelector'
@@ -89,13 +84,13 @@ export const getClusterBreadcrumbs = ({
   ]
 }
 
-function tabEnabled(tab, logsEnabled: boolean, hasVClusters: boolean) {
+function tabEnabled(tab, logsEnabled: boolean, isVCluster: boolean) {
   if (tab?.logs) {
     return logsEnabled
   }
 
   if (tab?.vclusters) {
-    return hasVClusters
+    return !isVCluster
   }
 
   return true
@@ -104,26 +99,11 @@ function tabEnabled(tab, logsEnabled: boolean, hasVClusters: boolean) {
 export default function Cluster() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const projectId = useProjectId()
   const tabStateRef = useRef<any>(null)
   const { clusterId } = useParams<{ clusterId: string }>()
   const tab = useMatch(`${CLUSTER_ABS_PATH}/:tab/*`)?.params?.tab || ''
   const [refetchServices, setRefetchServices] = useState(() => () => {})
   const logsEnabled = useLogsEnabled()
-
-  const { data: vclustersData } = useVClustersQuery({
-    variables: {
-      first: 1,
-      projectId,
-      parentId: clusterId ?? '',
-    },
-    skip: !clusterId,
-  })
-
-  const hasVClusters = useMemo(
-    () => (vclustersData?.clusters?.edges?.length ?? 0) > 0,
-    [vclustersData]
-  )
 
   const currentTab = directory.find(({ path }) => path === tab)
 
@@ -190,7 +170,9 @@ export default function Cluster() {
             }}
           >
             {directory
-              .filter((t) => tabEnabled(t, logsEnabled, hasVClusters))
+              .filter((t) =>
+                tabEnabled(t, logsEnabled, cluster?.virtual ?? false)
+              )
               .map(({ label, path }) => (
                 <LinkTabWrap
                   css={{ minWidth: 'fit-content' }}

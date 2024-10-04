@@ -8857,16 +8857,16 @@ export type ClustersTinyQueryVariables = Exact<{
 export type ClustersTinyQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null } | null> | null } | null };
 
 export type VClustersQueryVariables = Exact<{
+  parentId: Scalars['ID']['input'];
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   healthy?: InputMaybe<Scalars['Boolean']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
-  parentId: Scalars['ID']['input'];
 }>;
 
 
-export type VClustersQuery = { __typename?: 'RootQueryType', clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null } | null> | null } | null };
+export type VClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, identifier: string, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null } | null> | null } | null, clusterStatuses?: Array<{ __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null } | null> | null };
 
 export type ClusterSelectorQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -14634,7 +14634,7 @@ export type ClustersTinyLazyQueryHookResult = ReturnType<typeof useClustersTinyL
 export type ClustersTinySuspenseQueryHookResult = ReturnType<typeof useClustersTinySuspenseQuery>;
 export type ClustersTinyQueryResult = Apollo.QueryResult<ClustersTinyQuery, ClustersTinyQueryVariables>;
 export const VClustersDocument = gql`
-    query VClusters($first: Int, $after: String, $q: String, $healthy: Boolean, $projectId: ID, $parentId: ID!) {
+    query VClusters($parentId: ID!, $first: Int, $after: String, $q: String, $healthy: Boolean, $projectId: ID) {
   clusters(
     first: $first
     after: $after
@@ -14648,13 +14648,18 @@ export const VClustersDocument = gql`
     }
     edges {
       node {
-        ...ClusterTiny
+        ...ClustersRow
       }
     }
   }
+  clusterStatuses {
+    ...ClusterStatusInfo
+  }
+  tags
 }
     ${PageInfoFragmentDoc}
-${ClusterTinyFragmentDoc}`;
+${ClustersRowFragmentDoc}
+${ClusterStatusInfoFragmentDoc}`;
 
 /**
  * __useVClustersQuery__
@@ -14668,12 +14673,12 @@ ${ClusterTinyFragmentDoc}`;
  * @example
  * const { data, loading, error } = useVClustersQuery({
  *   variables: {
+ *      parentId: // value for 'parentId'
  *      first: // value for 'first'
  *      after: // value for 'after'
  *      q: // value for 'q'
  *      healthy: // value for 'healthy'
  *      projectId: // value for 'projectId'
- *      parentId: // value for 'parentId'
  *   },
  * });
  */

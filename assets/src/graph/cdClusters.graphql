@@ -389,17 +389,25 @@ query ClustersTiny($projectId: ID, $first: Int) {
   }
 }
 
-query VClusters($first: Int, $after: String, $q: String, $healthy: Boolean, $projectId: ID, $parentId: ID!) {
+query VClusters(
+  $parentId: ID!,
+  $first: Int,
+  $after: String,
+  $q: String,
+  $healthy: Boolean,
+  $projectId: ID,
+) {
   clusters(first: $first, after: $after, q: $q, healthy: $healthy, projectId: $projectId, parentId: $parentId) {
     pageInfo {
       ...PageInfo
     }
     edges {
       node {
-        ...ClusterTiny
+        ...ClustersRow
       }
     }
   }
+  tags
 }
 
 query ClusterSelector(
