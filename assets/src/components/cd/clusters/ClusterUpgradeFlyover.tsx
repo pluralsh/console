@@ -20,7 +20,7 @@ import {
   useRuntimeServicesQuery,
 } from 'generated/graphql'
 import isEmpty from 'lodash/isEmpty'
-import { useRef, useState } from 'react'
+import { ComponentType, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { Row } from '@tanstack/react-table'
@@ -328,7 +328,7 @@ function ClusterUpgradeAccordionTrigger({
   subtitle,
   checked,
 }: {
-  icon: React.ComponentType<IconProps>
+  icon: ComponentType<IconProps>
   title: string
   subtitle?: string
   checked: boolean

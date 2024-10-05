@@ -1,3 +1,4 @@
+import { expect } from 'vitest'
 import { isSubsetEqual } from './isSubsetEqual'
 
 const set: Record<string, any> = {

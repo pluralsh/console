@@ -150,7 +150,6 @@ export function CreateStackModalFormEnvironment({
                             })
                           )
                         }
-                        as={undefined}
                       />
                       <DeleteIconButton
                         css={{ marginTop: 4 }}

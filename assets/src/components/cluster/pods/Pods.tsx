@@ -1,4 +1,3 @@
-import { ComponentProps, forwardRef, useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@apollo/client'
 import {
   AppsIcon,
@@ -10,22 +9,24 @@ import {
   SearchIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { useDebounce } from '@react-hooks-library/core'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import Fuse from 'fuse.js'
+import type { RootQueryType } from 'generated/graphql'
+import { isEmpty, uniqBy } from 'lodash'
+import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { useDebounce } from '@react-hooks-library/core'
-import type { RootQueryType } from 'generated/graphql'
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { isEqual } from 'utils/kubernetes'
-import { isEmpty, uniqBy } from 'lodash'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { GqlError } from 'components/utils/Alert'
 
-import { PODS_Q, PODS_SUB } from '../queries'
 import { SHORT_POLL_INTERVAL } from '../constants'
+import { PODS_Q, PODS_SUB } from '../queries'
 
+import { ComponentPropsWithRef } from 'react-spring'
 import {
   ColActions,
   ColContainers,
@@ -36,8 +37,8 @@ import {
   ColName,
   ColNamespace,
   ColRestarts,
-  PodWithId,
   PodsList,
+  PodWithId,
 } from './PodsList'
 
 const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
@@ -45,15 +46,15 @@ const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
 }))
 
 export const NamespaceListFooter = forwardRef<
-  HTMLDivElement,
-  Omit<ComponentProps<typeof ListBoxFooterPlusInner>, 'children'>
+  HTMLButtonElement,
+  Omit<ComponentPropsWithRef<typeof ListBoxFooterPlusInner>, 'children'>
 >(({ leftContent, ...props }, ref) => {
   const theme = useTheme()
   const label = 'Clear selection'
 
   return (
     <ListBoxFooterPlusInner
-      ref={ref}
+      ref={ref as any}
       leftContent={
         leftContent || (
           <AppsIcon

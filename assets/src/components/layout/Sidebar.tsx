@@ -371,7 +371,6 @@ export default function Sidebar() {
             className="sidebar-menu"
             active={isMenuOpen}
             clickable
-            collapsed
             onClick={(e) => {
               e.stopPropagation()
               setIsMenuOpen((x) => !x)

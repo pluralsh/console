@@ -10,16 +10,6 @@ import { Ul } from 'honorable'
 
 type Hue = Required<CardProps>['hue']
 
-const LiBare = styled.li(
-  ({ $extendStyle }: { $extendStyle?: Record<string, any> }) => ({
-    margin: 0,
-    textIndent: 0,
-    padding: 0,
-    listStyle: 'none',
-    ...$extendStyle,
-  })
-)
-
 const fillLevelToBorderColor: Record<FillLevel, string> = {
   0: 'border',
   1: 'border',
@@ -27,11 +17,14 @@ const fillLevelToBorderColor: Record<FillLevel, string> = {
   3: 'border-fill-three',
 }
 
-const ListItemSC = styled(LiBare)<{
+const ListItemSC = styled.li<{
   $last?: boolean
   $hue?: string
   $fillLevel?: FillLevel
 }>(({ theme, $last = false, $fillLevel }) => ({
+  margin: 0,
+  textIndent: 0,
+  listStyle: 'none',
   padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
   borderBottomStyle: $last ? 'none' : 'solid',
   borderColor:

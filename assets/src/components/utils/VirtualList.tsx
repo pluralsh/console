@@ -68,7 +68,7 @@ export function VirtualList<
   meta: M
 } & ComponentProps<typeof VirtualParentSC>) {
   const theme = useTheme()
-  const parentRef = useRef<HTMLElement>(null)
+  const parentRef = useRef<HTMLDivElement>(null)
 
   const rowCount = rows.length
   const getScrollElement = useCallback(() => parentRef.current, [parentRef])

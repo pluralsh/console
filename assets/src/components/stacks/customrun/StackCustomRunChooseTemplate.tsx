@@ -3,10 +3,10 @@ import {
   useCustomStackRunsQuery,
 } from 'generated/graphql'
 
-import { Row, createColumnHelper } from '@tanstack/react-table'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { useMemo } from 'react'
 
 import { mapExistingNodes } from 'utils/graphql'
@@ -73,7 +73,7 @@ export function StackCustomRunChooseTemplate({
           css={{
             height: '100%',
           }}
-          onRowClick={(_, { original }: Row<CustomStackRunFragment>) => {
+          onRowClick={(_, { original }) => {
             setStep(StepName.Settings)
             setType('prebaked')
             setSelectedCustomRun(original)

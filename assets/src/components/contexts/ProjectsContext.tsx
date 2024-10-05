@@ -1,6 +1,7 @@
 import {
   Dispatch,
   ReactElement,
+  ReactNode,
   SetStateAction,
   createContext,
   useContext,
@@ -42,7 +43,7 @@ export function useProjectId() {
 export function ProjectsProvider({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }): ReactElement {
   const [error, setError] = useState<ApolloError>()
 

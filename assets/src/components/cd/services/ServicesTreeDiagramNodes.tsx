@@ -370,7 +370,7 @@ function ServicesTreeDiagramServiceNodeModal({
           <Table
             columns={columns}
             data={service.components ?? []}
-            onRowClick={(e, { original }) =>
+            onRowClick={(_e, { original }) =>
               navigate(
                 getServiceComponentPath({
                   componentId: original.id,

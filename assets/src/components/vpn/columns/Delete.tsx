@@ -1,8 +1,6 @@
 import { Button, Tooltip, TrashCanIcon } from '@pluralsh/design-system'
-import { CellContext } from '@tanstack/react-table'
+import { CellContext, ColumnDefTemplate } from '@tanstack/react-table'
 import { Dispatch, useState } from 'react'
-
-import { ColumnDefTemplate } from '@tanstack/table-core/src/types'
 
 import { DeleteClient } from '../actions/Delete'
 

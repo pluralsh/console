@@ -8,7 +8,7 @@ import {
 } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-import { useState } from 'react'
+import { ReactNode, useState } from 'react'
 
 import { PIPELINES_ABS_PATH } from 'routes/cdRoutesConsts'
 
@@ -36,7 +36,7 @@ const ColId = columnHelper.accessor((row) => row.node?.id, {
 export const tableInteractiveTargetingProp =
   'data-plural-table-interactive' as const
 
-export function TableInteractive({ children }: { children: React.ReactNode }) {
+export function TableInteractive({ children }: { children: ReactNode }) {
   return (
     <div
       {...{ [tableInteractiveTargetingProp]: '' }}

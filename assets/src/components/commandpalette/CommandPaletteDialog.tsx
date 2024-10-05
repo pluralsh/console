@@ -32,7 +32,7 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
       padding: '14px 16px',
       width: '100%',
 
-      '::placeholder': {
+      '&::placeholder': {
         color: theme.colors['text-xlight'],
       },
     },
@@ -46,7 +46,7 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
       gap: theme.spacing.xsmall,
       padding: `${theme.spacing.small}px 16px`,
 
-      ':hover': {
+      '&:hover': {
         backgroundColor: theme.colors['fill-one-hover'],
       },
     },
@@ -100,7 +100,7 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
           },
         },
 
-        ':hover': {
+        '&:hover': {
           backgroundColor: theme.colors['fill-one-hover'],
         },
       },

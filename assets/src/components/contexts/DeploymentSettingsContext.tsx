@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo } from 'react'
+import { createContext, ReactNode, useContext, useMemo } from 'react'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   DeploymentSettingsFragment,
@@ -32,7 +32,7 @@ export function useMetricsEnabled() {
 export function DeploymentSettingsProvider({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   const { data } = useDeploymentSettingsQuery({
     pollInterval: POLL_INTERVAL,

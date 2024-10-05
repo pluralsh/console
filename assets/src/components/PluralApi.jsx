@@ -1,4 +1,4 @@
-import { useContext, useMemo } from 'react'
+import { useContext, useMemo, createContext } from 'react'
 import { ApolloProvider } from '@apollo/client'
 
 import { buildClient } from '../helpers/client'
@@ -9,7 +9,7 @@ import { LoginContext } from './contexts'
 const PLURAL_GQL = 'https://app.plural.sh/gql'
 const PLURAL_WSS = 'wss://app.plural.sh/socket'
 
-export const PluralApiContext = React.createContext({})
+export const PluralApiContext = createContext({})
 const API_CACHE = {}
 
 export function PluralApi({ children }) {

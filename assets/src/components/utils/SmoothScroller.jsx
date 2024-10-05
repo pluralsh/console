@@ -1,11 +1,18 @@
-import { PureComponent, useCallback, useEffect, useRef, useState } from 'react'
-import { VariableSizeList } from 'react-window-reversed'
+import memoize from 'memoize-one'
+import {
+  PureComponent,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
+import Autosizer from 'react-virtualized-auto-sizer'
 import {
   FixedSizeList as FixedList,
   VariableSizeList as List,
 } from 'react-window'
-import Autosizer from 'react-virtualized-auto-sizer'
-import memoize from 'memoize-one'
+import { VariableSizeList } from 'react-window-reversed'
 
 import { CellMeasurer } from './CellMeasurer'
 
@@ -119,7 +126,7 @@ const Item = ({ index, mapper, isItemLoaded, placeholder, items, setSize }) => {
   )
 }
 
-const ItemWrapper = React.memo(
+const ItemWrapper = memo(
   ({
     data: {
       setSize,
@@ -184,7 +191,7 @@ const ItemWrapper = React.memo(
   areEqual
 )
 
-const FixedItemWrapper = React.memo(
+const FixedItemWrapper = memo(
   ({ data: { items, isItemLoaded, placeholder, mapper }, style, index }) => (
     <div style={style}>
       <Item

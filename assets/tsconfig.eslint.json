@@ -2,12 +2,9 @@
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "rootDir": ".",
-    "types": ["@types/node"],
+    "types": ["@types/node", "mocha"],
     "allowJs": true,
     "moduleResolution": "Node"
   },
-  "include": ["src", "vite.config.ts", "vitest.config.ts",
-    "eslint.config.mjs"
-  ],
-  "exclude": ["src/archive/**"]
+  "include": ["eslint.config.mjs"]
 }

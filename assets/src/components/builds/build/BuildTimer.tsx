@@ -18,9 +18,8 @@ export function Timer({ insertedAt, completedAt }) {
 
   return (
     <TooltipTime
-      as="span"
       date={completedAt}
-      prefix={<>Completed at:&nbsp;</>}
+      prefix="Completed at: "
     >
       {moment.utc(fromBeginning(end).as('milliseconds')).format('HH:mm:ss')}
     </TooltipTime>

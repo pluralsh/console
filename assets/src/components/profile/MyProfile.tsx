@@ -11,7 +11,7 @@ import { LoginContext } from 'components/contexts'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { useTheme } from 'styled-components'
 
-const getDirectory = (me, configuration) => [
+const getDirectory = (_, configuration) => [
   { path: 'me', label: 'Profile', enabled: true },
   { path: 'security', label: 'Security', enabled: true },
   { path: 'permissions', label: 'Permissions', enabled: true },

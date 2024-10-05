@@ -208,7 +208,7 @@ export function ModalForm({
                   maxHeight: 'unset',
                   height: '100%',
                 }}
-                onRowClick={(e, row) => {
+                onRowClick={(_e, row) => {
                   const original =
                     row.original as ServiceDeploymentRevisionFragment
 

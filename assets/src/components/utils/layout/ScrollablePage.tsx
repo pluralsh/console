@@ -5,19 +5,19 @@ import styled, { CSSProperties } from 'styled-components'
 import ConsolePageTitle from './ConsolePageTitle'
 
 const ScrollablePageContent = styled.div<{
-  scrollable?: boolean
-  extraStyles?: CSSProperties
-  maxContentWidth?: number
-  fullWidth?: boolean
-  noPadding?: boolean
+  $scrollable?: boolean
+  $extraStyles?: CSSProperties
+  $maxContentWidth?: number
+  $fullWidth?: boolean
+  $noPadding?: boolean
 }>(
   ({
     theme,
-    scrollable,
-    extraStyles,
-    maxContentWidth,
-    fullWidth,
-    noPadding,
+    $scrollable: scrollable,
+    $extraStyles: extraStyles,
+    $maxContentWidth: maxContentWidth,
+    $fullWidth: fullWidth,
+    $noPadding: noPadding,
   }) => ({
     position: 'relative',
     height: '100%',
@@ -104,12 +104,12 @@ export function ScrollablePage({
         </Div>
       )}
       <ScrollablePageContent
-        scrollable={scrollable}
-        extraStyles={contentStyles}
-        maxContentWidth={maxContentWidth}
-        fullWidth={fullWidth}
+        $scrollable={scrollable}
+        $extraStyles={contentStyles}
+        $maxContentWidth={maxContentWidth}
+        $fullWidth={fullWidth}
         ref={scrollRef}
-        noPadding={noPadding}
+        $noPadding={noPadding}
       >
         <div className="widthLimiter">{children}</div>
       </ScrollablePageContent>

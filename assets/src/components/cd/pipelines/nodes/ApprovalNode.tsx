@@ -50,8 +50,9 @@ const ApproverCardSC = styled(StatusCard)(({ theme }) => ({
 export function ApproverCard({
   gate,
   ...props
-}: { gate: PipelineGateFragment } & ComponentPropsWithoutRef<
-  typeof ApproverCardSC
+}: { gate: PipelineGateFragment } & Omit<
+  ComponentPropsWithoutRef<typeof ApproverCardSC>,
+  'status' | 'statusLabel'
 >) {
   const { approver } = gate
 

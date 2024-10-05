@@ -132,7 +132,6 @@ function ClusterSettingsModalInner({
           <Switch
             checked={state.protect}
             onChange={(checked) => updateState({ protect: checked })}
-            as={undefined}
           >
             Protect from deletion
           </Switch>

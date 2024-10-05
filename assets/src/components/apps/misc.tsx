@@ -4,10 +4,10 @@ import { type styledTheme } from '@pluralsh/design-system'
 import { Application } from 'generated/graphql'
 
 export const ListItemBorder = styled.div<{
-  color?: string
-  width?: number
-  radius?: number
-}>(({ theme, color, radius = 4, width = 3 }) => ({
+  $color?: string
+  $width?: number
+  $radius?: number
+}>(({ theme, $color: color, $radius: radius = 4, $width: width = 3 }) => ({
   position: 'absolute',
   top: 0,
   left: 0,
