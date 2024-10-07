@@ -4208,9 +4208,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:3.74.0":
-  version: 3.74.0
-  resolution: "@pluralsh/design-system@npm:3.74.0"
+"@pluralsh/design-system@npm:3.74.1":
+  version: 3.74.1
+  resolution: "@pluralsh/design-system@npm:3.74.1"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
@@ -4244,7 +4244,6 @@ __metadata:
     rehype-raw: 7.0.0
     remark-gfm: 4.0.0
     resize-observer-polyfill: 1.5.1
-    styled-container-query: 1.3.5
     type-fest: 4.8.3
     use-immer: 0.9.0
     usehooks-ts: 2.9.1
@@ -4257,7 +4256,7 @@ __metadata:
     react-dom: ">=18.3.1"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.13"
-  checksum: 4e499bec20f5b0d7e689c1d18ca6c4e206eb8911fc26365b998db6ccfce2e07335de4437b6294b996e5a0a1549d071a07b5efc9dea7d4493dc700eb8b49b30bf
+  checksum: 03b4282b91d10e4752e2c998ec8d0b0c87b32a9fc5afea1f6815c38f8b1a819bfd9848fad45890b50c2cc737a8d892a92dd95ca746da0023e0038920ed0c85e0
   languageName: node
   linkType: hard
 
@@ -10171,7 +10170,7 @@ __metadata:
     "@nivo/pie": 0.87.0
     "@nivo/radial-bar": 0.87.0
     "@nivo/tooltip": 0.87.0
-    "@pluralsh/design-system": 3.74.0
+    "@pluralsh/design-system": 3.74.1
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0
@@ -18815,13 +18814,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resize-observer@npm:^1.0.0":
-  version: 1.0.4
-  resolution: "resize-observer@npm:1.0.4"
-  checksum: 43e2f45e40507279cad474f6bd2fe62e92de1fd1d67cd5285ece1fec6c1b664c4d3795b094b2be292244bf542b1b5402578670400beadc2cfedac8fb483a0976
-  languageName: node
-  linkType: hard
-
 "resolve-from@npm:5.0.0, resolve-from@npm:^5.0.0":
   version: 5.0.0
   resolution: "resolve-from@npm:5.0.0"
@@ -19362,13 +19354,6 @@ __metadata:
   version: 1.8.1
   resolution: "shell-quote@npm:1.8.1"
   checksum: 5f01201f4ef504d4c6a9d0d283fa17075f6770bfbe4c5850b074974c68062f37929ca61700d95ad2ac8822e14e8c4b990ca0e6e9272e64befd74ce5e19f0736b
-  languageName: node
-  linkType: hard
-
-"shorthash@npm:0.0.2":
-  version: 0.0.2
-  resolution: "shorthash@npm:0.0.2"
-  checksum: 4048833f2a7f324350cc1a48a6b64bca268e5a2e9c59cb6cad3607c41fd800bf1739498fe4b8b6737709cdb540fb74125fb7254eba98bdd3dc41e8d9f7990b20
   languageName: node
   linkType: hard
 
@@ -20099,22 +20084,6 @@ __metadata:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
   checksum: cb836c5d4cc8d183f4b70a4a1b1aa13551c57389e9c8fe3286619eef9fc81466fee09c39a1c8b5aa03deb0e466e4d5ee04921f7d9f3b7afe4744e539e6047550
-  languageName: node
-  linkType: hard
-
-"styled-container-query@npm:1.3.5":
-  version: 1.3.5
-  resolution: "styled-container-query@npm:1.3.5"
-  dependencies:
-    classnames: ^2.2.6
-    hoist-non-react-statics: ^3.3.2
-    resize-observer: ^1.0.0
-    shorthash: 0.0.2
-  peerDependencies:
-    react: ^16.9.0
-    react-dom: ^16.9.0
-    styled-components: ^4.3.2
-  checksum: 4bc8e046234ce39b33df199603bf4a3887abb5239966d5b3904b45b79889385320bd0df7129a0805c945947aa692ca6b950296d041ee68b6b667f912926c3b77
   languageName: node
   linkType: hard
 
