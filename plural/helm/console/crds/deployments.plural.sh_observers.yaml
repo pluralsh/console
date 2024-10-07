@@ -45,13 +45,20 @@ spec:
             description: ObserverSpec defines the desired state of Observer
             properties:
               actions:
+                description: A list of predefined actions to take if a new Target
+                  is discovered in the last poll loop
                 items:
                   properties:
                     configuration:
+                      description: The configuration for the given action, relative
+                        to its current Type
                       properties:
                         pipeline:
                           properties:
                             context:
+                              description: Context is a templated context that will
+                                become the PipelineContext applied to the given pipeline,
+                                use `$value` to interpolate the observed value
                               type: object
                               x-kubernetes-preserve-unknown-fields: true
                             pipelineRef:
@@ -109,7 +116,9 @@ spec:
                                 value
                               type: string
                             context:
-                              description: Context is a ObserverPrAction context
+                              description: Context is a templated context that will
+                                become the context applied to the given PR Automation,
+                                use `$value` to interpolate the observed value
                               type: object
                               x-kubernetes-preserve-unknown-fields: true
                             prAutomationRef:
@@ -173,6 +182,7 @@ spec:
                   type: object
                 type: array
               crontab:
+                description: The crontab you will poll the given Target with
                 type: string
               name:
                 description: the name of this observer, if not provided Observer's
@@ -225,6 +235,8 @@ spec:
                 type: object
                 x-kubernetes-map-type: atomic
               target:
+                description: The target object to poll, triggering the list of Actions
+                  w/ the discovered value
                 properties:
                   format:
                     type: string

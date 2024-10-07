@@ -76,6 +76,11 @@ defmodule Console.Plural.Queries do
 
   @oidc_provider_fragment """
     fragment OIDCProviderFragment on OidcProvider {
+      id
+      name
+      description
+      clientId
+      clientSecret
       redirectUris
       bindings {
         user { id name email }
@@ -223,6 +228,33 @@ defmodule Console.Plural.Queries do
     }
   """
 
+  @oidc_create """
+    mutation Create($attributes: OidcAttributes!) {
+      createOidcProvider(attributes: $attributes) {
+        ...OIDCProviderFragment
+      }
+    }
+    #{@oidc_provider_fragment}
+  """
+
+  @oidc_update """
+    mutation Update($id: ID!, $attributes: OidcAttributes!) {
+      updateOidcProvider(id: $id, attributes: $attributes) {
+        ...OIDCProviderFragment
+      }
+    }
+    #{@oidc_provider_fragment}
+  """
+
+  @oidc_delete """
+    mutation Delete($id: ID!, $attributes: OidcAttributes!) {
+      deleteOidcProvider(id: $id, attributes: $attributes) {
+        ...OIDCProviderFragment
+      }
+    }
+    #{@oidc_provider_fragment}
+  """
+
   @get_incident """
     query Incident($id: ID!) {
       incident(id: $id) { ...IncidentFragment }
@@ -303,6 +335,12 @@ defmodule Console.Plural.Queries do
   def install_recipe_mutation(), do: @install_recipe
 
   def upsert_oidc_provider(), do: @oidc_upsert
+
+  def create_oidc_provider(), do: @oidc_create
+
+  def delete_oidc_provider(), do: @oidc_delete
+
+  def update_oidc_provider(), do: @oidc_update
 
   def get_incident_query(), do: @get_incident
 

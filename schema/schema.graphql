@@ -845,6 +845,12 @@ type RootMutationType {
 
   deleteProject(id: ID!): Project
 
+  createOidcProvider(type: OidcProviderType!, attributes: OidcProviderAttributes!): OidcProvider
+
+  updateOidcProvider(type: OidcProviderType!, id: ID!, attributes: OidcProviderAttributes!): OidcProvider
+
+  deleteOidcProvider(type: OidcProviderType!, id: ID!): OidcProvider
+
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
     rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID
@@ -897,6 +903,39 @@ type PolicyBinding {
 input RbacAttributes {
   readBindings: [PolicyBindingAttributes]
   writeBindings: [PolicyBindingAttributes]
+}
+
+"Supported OIDC-compatible Auth Providers"
+enum OidcProviderType {
+  PLURAL
+}
+
+"Configuration settings for creating a new OIDC provider client"
+input OidcProviderAttributes {
+  name: String!
+
+  description: String
+
+  "the redirect uris oidc is whitelisted to use"
+  redirectUris: [String]
+}
+
+"A representation of a created OIDC provider client"
+type OidcProvider {
+  id: ID!
+
+  name: String!
+
+  description: String
+
+  "the redirect uris oidc is whitelisted to use"
+  redirectUris: [String]
+
+  "the generated client ID used in configuring OAuth clients"
+  clientId: String!
+
+  "the generated client secret, used in configuring an OAuth client"
+  clientSecret: String!
 }
 
 input ProjectAttributes {

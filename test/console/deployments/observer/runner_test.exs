@@ -73,7 +73,7 @@ defmodule Console.Deployments.Observer.RunnerTest do
 
       {:ok, obs} = Runner.run(observer)
 
-      assert Timex.after?(obs.next_run_at, obs.last_run_at)
+      refute Timex.equal?(obs.next_run_at, observer.next_run_at)
 
       assert Console.Helm.Utils.compare_versions(obs.last_value, "0.11.11") != :lt
 

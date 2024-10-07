@@ -29,6 +29,8 @@ end
 defmodule Console.Plural.ProviderBinding do
   alias Console.Plural.{User, Group}
 
+  use Accessible
+
   defstruct [:user, :group]
 
   def spec() do
@@ -42,7 +44,9 @@ end
 defmodule Console.Plural.OIDCProvider do
   alias Console.Plural.{ProviderBinding}
 
-  defstruct [:redirectUris, :bindings]
+  use Accessible
+
+  defstruct [:redirectUris, :bindings, :id, :name, :description]
 
   def spec() do
     %__MODULE__{
