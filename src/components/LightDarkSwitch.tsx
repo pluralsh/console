@@ -214,7 +214,6 @@ const SwitchHandleSC = styled(
 
 export function LightDarkSwitch({
   children,
-  as,
   className,
   ...props
 }: SwitchProps) {
@@ -231,7 +230,6 @@ export function LightDarkSwitch({
 
   return (
     <SwitchSC
-      as={as}
       className={className}
       {...styleProps}
     >

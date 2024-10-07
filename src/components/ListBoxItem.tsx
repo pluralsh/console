@@ -168,8 +168,8 @@ type ListBoxFooterProps = ComponentPropsWithRef<typeof ListBoxFooterInner> & {
   leftContent?: ReactNode
   rightContent?: ReactNode
 }
-const ListBoxFooterInner = styled.button<{ focused?: boolean }>(
-  ({ theme, focused = false }) => ({
+const ListBoxFooterInner = styled.button<{ $focused?: boolean }>(
+  ({ theme, $focused: focused = false }) => ({
     ...theme.partials.reset.button,
     display: 'flex',
     position: 'relative',
@@ -220,7 +220,7 @@ const ListBoxFooter = forwardRef<HTMLButtonElement, ListBoxFooterProps>(
 const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
-const ListBoxFooterPlus = forwardRef<HTMLDivElement, ListBoxFooterProps>(
+const ListBoxFooterPlus = forwardRef<HTMLButtonElement, ListBoxFooterProps>(
   ({ leftContent, children, ...props }, ref) => (
     <ListBoxFooterPlusInner
       ref={ref}

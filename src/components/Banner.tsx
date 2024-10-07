@@ -1,17 +1,17 @@
-import { type ReactNode, type Ref, forwardRef } from 'react'
 import { Div, Flex, type FlexProps, Span, type SpanProps } from 'honorable'
+import { type ReactNode, type Ref, forwardRef } from 'react'
 import styled from 'styled-components'
 
 import { type ColorKey, type SeverityExt, sanitizeSeverity } from '../types'
 
 import { FillLevelProvider } from './contexts/FillLevelContext'
-import ErrorIcon from './icons/ErrorIcon'
+import IconFrame from './IconFrame'
+import CheckRoundedIcon from './icons/CheckRoundedIcon'
 import CloseIcon from './icons/CloseIcon'
+import type createIcon from './icons/createIcon'
+import ErrorIcon from './icons/ErrorIcon'
 import InfoIcon from './icons/InfoIcon'
 import WarningIcon from './icons/WarningIcon'
-import CheckRoundedIcon from './icons/CheckRoundedIcon'
-import type createIcon from './icons/createIcon'
-import IconFrame from './IconFrame'
 
 export const BANNER_SEVERITIES = [
   'info',
@@ -53,7 +53,7 @@ const severityToIcon: Record<BannerSeverity, ReturnType<typeof createIcon>> = {
   success: CheckRoundedIcon,
 }
 
-const BannerOuter = styled.div<{
+const BannerOuter: any = styled.div<{
   $borderColorKey: ColorKey
   $fullWidth?: boolean
 }>(({ $borderColorKey, $fullWidth, theme }) => ({
@@ -110,11 +110,7 @@ const Content = styled.p<{ $hasHeading: boolean }>(
   })
 )
 
-const CloseButton = styled(IconFrame).attrs({
-  size: 'medium',
-  clickable: true,
-  icon: <CloseIcon />,
-})(({ theme }) => ({
+const CloseButton = styled(IconFrame)(({ theme }) => ({
   marginLeft: theme.spacing.medium,
 }))
 
@@ -167,7 +163,14 @@ function BannerRef(
         </div>
       </BannerInner>
       <Div flexGrow={1} />
-      {typeof onClose === 'function' && <CloseButton onClick={onClose} />}
+      {typeof onClose === 'function' && (
+        <CloseButton
+          size="medium"
+          clickable
+          icon={<CloseIcon />}
+          onClick={onClose}
+        />
+      )}
     </BannerOuter>
   )
 

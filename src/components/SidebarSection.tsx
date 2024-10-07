@@ -8,7 +8,7 @@ type SidebarSectionProps = FlexProps & {
 }
 
 const styles = {
-  ':last-of-type': {
+  '&:last-of-type': {
     border: 'none',
   },
 }

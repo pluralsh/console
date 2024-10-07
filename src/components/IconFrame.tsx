@@ -1,6 +1,5 @@
-import { ButtonBase, Flex } from 'honorable'
+import { ButtonBase, Flex, type FlexProps } from 'honorable'
 import {
-  type ComponentProps,
   type ReactElement,
   type ReactNode,
   cloneElement,
@@ -98,7 +97,9 @@ type IconFrameProps = {
   type?: Type
   selected?: boolean
   background?: SemanticColorKey
-} & Omit<ComponentProps<typeof IconFrameSC>, 'size'>
+} & FlexProps & {
+    as?: any
+  }
 
 const IconFrameSC = styled(Flex)<{
   $type: Type

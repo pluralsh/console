@@ -57,7 +57,7 @@ const Animated = styled.div<{
   backgroundColor: 'inherit',
   transition: 'all 0.2s ease',
   zIndex: 10,
-  ':last-of-type': {
+  '&:last-of-type': {
     borderBottom: 'none',
   },
 }))

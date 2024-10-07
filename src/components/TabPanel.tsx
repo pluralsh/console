@@ -63,7 +63,7 @@ export const TabPanelClone = styled(
       ref: tabRef,
       ...props,
     })
-)<{ vertical: boolean }>(({ theme }) => ({
+)(({ theme }) => ({
   position: 'relative',
   '&:focus, &:focus-visible': {
     outline: 'none',

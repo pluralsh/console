@@ -1,6 +1,7 @@
 import React, {
   type PropsWithChildren,
   type ReactNode,
+  createContext,
   useContext,
   useEffect,
   useMemo,
@@ -29,8 +30,9 @@ export type Breadcrumb = BreadcrumbBase &
       }
   )
 
-export const BreadcrumbsContext =
-  React.createContext<BreadcrumbsContextT | null>(null)
+export const BreadcrumbsContext = createContext<BreadcrumbsContextT | null>(
+  null
+)
 
 export function BreadcrumbsProvider({
   children,

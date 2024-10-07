@@ -1,10 +1,10 @@
-import styled from 'styled-components'
-
-import { type ComponentProps } from 'react'
+import styled, { type PolymorphicComponentProps } from 'styled-components'
 
 import { MediaWrap } from './MediaWrap'
 
-export function Figure(props: ComponentProps<typeof MediaWrap>) {
+export function Figure(
+  props: PolymorphicComponentProps<'web', typeof MediaWrap, 'figure', any>
+) {
   return (
     <MediaWrap
       as="figure"

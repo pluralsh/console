@@ -26,7 +26,7 @@ type FlyoverProps = {
   header?: ReactNode
   scrollable?: boolean
   width?: string | number
-  minWidth?: string | number
+  minWidth?: number
   children?: ReactNode
 } & ComponentPropsWithoutRef<'div'>
 
@@ -92,11 +92,11 @@ function FlyoverRef(
 
 const ModalWrapperSC = styled(ModalWrapper)<{
   $width: string | number
-  $minWidth: string | number
+  $minWidth: number
 }>(({ $width, $minWidth }) => ({
   height: '100%',
   width: $width,
-  minWidth: $minWidth,
+  minWidth: `min(100vw, ${$minWidth}px)`,
   '@keyframes slideIn': {
     from: { transform: 'translateX(100%)', opacity: 0 },
     to: { transform: 'translateX(0)', opacity: 1 },
@@ -121,7 +121,6 @@ const FlyoverWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'hidden',
-  position: 'absolute',
 }))
 
 const FlyoverContentSC = styled.div<{

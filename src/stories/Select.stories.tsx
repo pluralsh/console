@@ -247,7 +247,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
 
   return (
     <div
-      css={{
+      style={{
         display: 'flex',
         flexDirection: 'column',
         gap: theme.spacing.large,
@@ -350,7 +350,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           ))}
         </Select>
 
-        <div css={{ display: 'flex', justifyContent: 'right' }}>
+        <div style={{ display: 'flex', justifyContent: 'right' }}>
           <Select
             label="Version"
             selectedKey={selectedKey}
@@ -397,7 +397,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           </Select>
         </div>
 
-        <div css={{ display: 'flex', justifyContent: 'right' }}>
+        <div style={{ display: 'flex', justifyContent: 'right' }}>
           <Select
             label="Version"
             selectedKey={selectedKey}
@@ -540,7 +540,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
             />
           ))}
         </Select>
-        <div css={{ display: 'flex', justifyContent: 'right' }}>
+        <div style={{ display: 'flex', justifyContent: 'right' }}>
           <Select
             label="Version"
             selectionMode="multiple"
@@ -581,7 +581,7 @@ function Template({ onFillLevel }: { onFillLevel: any }) {
           </Select>
         </div>
 
-        <div css={{ display: 'flex', justifyContent: 'right' }}>
+        <div style={{ display: 'flex', justifyContent: 'right' }}>
           <Select
             label="Version"
             selectionMode="multiple"

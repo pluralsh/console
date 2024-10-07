@@ -124,12 +124,12 @@ function CopyButtonBase({
     </Button>
   )
 }
-const CopyButton = styled(CopyButtonBase)<{ verticallyCenter: boolean }>(
-  ({ verticallyCenter, theme }) => ({
+const CopyButton = styled(CopyButtonBase)<{ $verticallyCenter: boolean }>(
+  ({ $verticallyCenter, theme }) => ({
     position: 'absolute',
     right: theme.spacing.medium,
-    top: verticallyCenter ? '50%' : theme.spacing.medium,
-    transform: verticallyCenter ? 'translateY(-50%)' : 'none',
+    top: $verticallyCenter ? '50%' : theme.spacing.medium,
+    transform: $verticallyCenter ? 'translateY(-50%)' : 'none',
     boxShadow: theme.boxShadows.slight,
   })
 )
@@ -184,7 +184,7 @@ const TabsDropdownButton = styled(
       />
     )
   })
-)<{ isOpen?: boolean }>(({ isOpen = false, theme }) => ({
+)<{ $isOpen?: boolean }>(({ $isOpen: isOpen = false, theme }) => ({
   '.dropdownIcon': {
     transform: isOpen ? 'scaleY(-1)' : 'scaleY(1)',
     transition: 'transform 0.1s ease',
@@ -334,7 +334,7 @@ function CodeContent({
       <CopyButton
         copied={copied}
         handleCopy={handleCopy}
-        verticallyCenter={!multiLine}
+        $verticallyCenter={!multiLine}
       />
       <Div
         paddingHorizontal="medium"

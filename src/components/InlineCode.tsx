@@ -66,7 +66,7 @@ const CodeElt = styled.code<{ $parentFillLevel: FillLevel }>(
   })
 )
 
-const InlineCode = forwardRef<HTMLElement, ComponentProps<typeof CodeElt>>(
+const InlineCode = forwardRef<HTMLElement, ComponentProps<'code'>>(
   ({ ...props }, ref) => {
     const parentFillLevel = useFillLevel()
 

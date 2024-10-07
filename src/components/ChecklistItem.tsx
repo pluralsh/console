@@ -27,10 +27,10 @@ const ChecklistItemInner = styled(ChecklistItemInnerUnstyled)(
       alignItems: 'center',
       color: selected ? theme.colors.text : theme.colors['text-light'],
       cursor: 'pointer',
-      ':hover': {
+      '&:hover': {
         background: theme.colors['fill-two-hover'],
       },
-      ':focus': {
+      '&:focus': {
         outline: `${theme.colors['border-outline-focused']} solid 1px`,
       },
 

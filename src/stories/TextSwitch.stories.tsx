@@ -74,7 +74,7 @@ function Template({ label, ...args }: ComponentProps<typeof TextSwitch>) {
         name="radio-group-controlled1"
         label={label || 'Match'}
         value={selectedValue1}
-        onChange={setSelectedValue1}
+        onChange={(value) => setSelectedValue1(value as string)}
         options={options1}
         {...args}
       />
@@ -83,7 +83,7 @@ function Template({ label, ...args }: ComponentProps<typeof TextSwitch>) {
         label={label || 'Options'}
         labelPosition="end"
         value={selectedValue2}
-        onChange={setSelectedValue2}
+        onChange={(value) => setSelectedValue2(value as string)}
         options={options2}
         {...args}
       />

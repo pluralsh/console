@@ -3,6 +3,7 @@ import {
   type ComponentType,
   type ReactElement,
   type ReactFragment,
+  type ReactNode,
   type Ref,
   type RefAttributes,
   createContext,
@@ -22,13 +23,10 @@ import {
 } from 'react-aria'
 import { useRadioGroupState } from 'react-stately'
 
-import classNames from 'classnames'
-import styled, {
-  type DefaultTheme,
-  type StyledComponent,
-} from 'styled-components'
-import { VisuallyHidden, useFocusRing } from 'react-aria'
 import { type ComponentPropsWithRef, useSpring } from '@react-spring/web'
+import classNames from 'classnames'
+import { VisuallyHidden, useFocusRing } from 'react-aria'
+import styled from 'styled-components'
 
 import { type SetRequired } from 'type-fest'
 
@@ -51,7 +49,7 @@ export type TextSwitchProps = SetRequired<
   size: TextSwitchSize
   options: TextSwitchOptions
   labelPosition?: 'start' | 'end'
-} & ComponentPropsWithRef<StyledComponent<'div', DefaultTheme>>
+} & ComponentPropsWithRef<'div'>
 
 const sizeToHeight = { small: 22 } as const satisfies Record<
   TextSwitchSize,
@@ -256,7 +254,7 @@ const TextSwitchOptionSC = styled.label<{
   '&:not(:first-of-type)': {
     marginRight: -2,
   },
-  ':focus': {
+  '&:focus': {
     outline: 'none',
   },
   ...(!$disabled
@@ -287,8 +285,9 @@ export type TextSwitchOptionProps = AriaRadioProps & {
   defaultSelected?: boolean
   selected?: boolean
   name?: string
+  label?: ReactNode
   onChange?: ComponentProps<'input'>['onChange']
-} & ComponentProps<typeof TextSwitchOptionSC>
+} & ComponentProps<'label'>
 
 function TextSwitchOption({
   size,

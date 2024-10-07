@@ -108,11 +108,11 @@ export function toInitials(name: string) {
 }
 
 const AppIconSC = styled.div<{
-  $color: ValueOf<typeof hueToColor>
-  $borderColor: ValueOf<typeof hueToBorderColor>
-  $hasBorder: boolean
-  $boxSize: number
-  $clickable: boolean
+  $color?: ValueOf<typeof hueToColor>
+  $borderColor?: ValueOf<typeof hueToBorderColor>
+  $hasBorder?: boolean
+  $boxSize?: number
+  $clickable?: boolean
 }>(({ theme, $color, $borderColor, $hasBorder, $boxSize, $clickable }) => ({
   display: 'flex',
   alignItems: 'center',

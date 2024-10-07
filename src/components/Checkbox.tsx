@@ -68,7 +68,7 @@ const HonorableLabelStyled = styled(Label)<{
     : theme.colors['text-light'],
   cursor: $disabled ? 'not-allowed' : 'pointer',
   margin: 0,
-  ':focus': {
+  '&:focus': {
     outline: 'none',
   },
   '.box': {
@@ -78,7 +78,7 @@ const HonorableLabelStyled = styled(Label)<{
     ...($isFocusVisible
       ? { ...theme.partials.focus.outline, border: 'none' }
       : {}),
-    '::before, .icon': {
+    '&::before, .icon': {
       position: 'absolute',
       content: '""',
       top: 0,
@@ -86,11 +86,11 @@ const HonorableLabelStyled = styled(Label)<{
       width: '100%',
       height: '100%',
     },
-    '::before, &': {
+    '&::before, &': {
       borderRadius: theme.borderRadiuses.medium,
     },
     /* before for the border */
-    '::before': {
+    '&::before': {
       zIndex: 0,
       border: theme.borders.input,
       ...($disabled
@@ -114,7 +114,7 @@ const HonorableLabelStyled = styled(Label)<{
   },
   ...(!$disabled
     ? {
-        ':hover': {
+        '&:hover': {
           color: theme.colors.text,
           '.box': {
             backgroundColor: theme.colors['action-input-hover'],
@@ -129,7 +129,7 @@ const HonorableLabelStyled = styled(Label)<{
             backgroundColor: theme.colors['action-primary'],
           },
         },
-        ':hover.checked, :hover.indeterminate': {
+        '&:hover.checked, &:hover.indeterminate': {
           '.box::before': {
             border: 'none',
             backgroundColor: theme.colors['action-primary-hover'],

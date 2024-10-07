@@ -119,7 +119,7 @@ function ScrollingBGImageBase({ height, ...props }: ScrollingBGImageProps) {
     backgroundRepeat: 'repeat-y',
     height,
     width: height * 6,
-    ':nth-child(2n)': {
+    '&:nth-child(2n)': {
       transform: 'rotate(180deg)',
     },
   }

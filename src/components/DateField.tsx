@@ -35,7 +35,7 @@ const DateSegmentSC = styled.div(({ theme }) => {
     },
 
     textTransform: 'uppercase',
-    ':focus-visible': {
+    '&:focus-visible': {
       background: theme.colors['fill-three-selected'],
       borderRadius: theme.borderRadiuses.medium,
     },

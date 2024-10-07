@@ -104,9 +104,9 @@ const columns = [
     enableSorting: true,
     cell: (info: any) => info.getValue(),
     header: () => (
-      <div css={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         <div>Function</div>
-        <div css={{ fontSize: 12, fontWeight: 400 }}>Caption</div>
+        <div style={{ fontSize: 12, fontWeight: 400 }}>Caption</div>
       </div>
     ),
   }),
@@ -268,7 +268,7 @@ function PagedTemplate({ data, pageSize, ...args }: any) {
         data={pagedData}
       />
       {virtualSlice && (
-        <p css={{ ...theme.partials.text.body2 }}>
+        <p style={{ ...theme.partials.text.body2 }}>
           Virtual slice start index: {virtualSlice.start.index}
           <br />
           Virtual slice end index: {virtualSlice.end.index}

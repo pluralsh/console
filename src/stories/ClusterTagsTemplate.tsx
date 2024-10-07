@@ -123,15 +123,15 @@ export function ClusterTagsTemplate({
             inputContent={
               selectedTagArr.length > -1 && (
                 <TextSwitch
-                  onClick={(e: MouseEvent) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
                   size="small"
                   value={searchLogic}
-                  onChange={setSearchLogic}
+                  onChange={(value) => setSearchLogic(value as string)}
                   options={[
                     { label: 'All', value: 'AND' },
                     { label: 'Any', value: 'OR' },
                   ]}
-                  css={{ marginRight: theme.spacing.xxsmall }}
+                  style={{ marginRight: theme.spacing.xxsmall }}
                   label="Match"
                   labelPosition="start"
                 />

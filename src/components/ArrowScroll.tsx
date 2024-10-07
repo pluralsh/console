@@ -22,7 +22,7 @@ const ComponentWrapperSC = styled.div({
   },
 })
 const ArrowWrapperSC = styled.div<{
-  $direction: 'left' | 'right'
+  $direction?: 'left' | 'right'
 }>(({ theme, $direction }) => ({
   color: theme.colors['icon-light'],
   zIndex: theme.zIndexes.modal,

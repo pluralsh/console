@@ -75,7 +75,7 @@ function Template({ onFillLevel, ...args }: any) {
 function StretchedTemplate({ onFillLevel, ...args }: any) {
   return (
     <div
-      css={{
+      style={{
         position: 'absolute',
         height: '100vh',
         padding: 32,

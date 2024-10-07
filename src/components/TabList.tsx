@@ -183,7 +183,7 @@ const TabClone = styled(
       ref: tabRef,
       ...props,
     })
-)<{ vertical: boolean }>(({ theme, vertical }) => ({
+)<{ $vertical: boolean }>(({ theme, $vertical: vertical }) => ({
   position: 'relative',
   '&:focus, &:focus-visible': {
     outline: 'none',
@@ -244,7 +244,7 @@ function TabRenderer({ item, state, stateProps, stateRef }: TabRendererProps) {
       tabRef={ref}
       {...props}
       active={state.selectedKey === item.key}
-      vertical={stateProps.orientation === 'vertical'}
+      $vertical={stateProps.orientation === 'vertical'}
       {...item.props}
     >
       {item.rendered}

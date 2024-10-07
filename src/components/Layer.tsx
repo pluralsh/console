@@ -117,34 +117,34 @@ export type MarginType =
   | number
 
 const LayerWrapper = styled.div<{
-  position: LayerPositionType
-  margin: SimpleMarginType
-}>(({ position, margin }) => ({
+  $position: LayerPositionType
+  $margin: SimpleMarginType
+}>(({ $position, $margin }) => ({
   display: 'flex',
-  position: 'absolute',
+  $position: 'absolute',
   pointerEvents: 'none',
   '& > *': {
     pointerEvents: 'auto',
   },
   overflow: 'hidden',
-  alignItems: position.startsWith('top')
+  alignItems: $position.startsWith('top')
     ? 'start'
-    : position.startsWith('bottom')
+    : $position.startsWith('bottom')
     ? 'end'
     : 'center',
-  justifyContent: position.endsWith('left')
+  justifyContent: $position.endsWith('left')
     ? 'start'
-    : position.endsWith('right')
+    : $position.endsWith('right')
     ? 'end'
     : 'center',
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  paddingLeft: margin.left ?? undefined,
-  paddingRight: margin.right ?? undefined,
-  paddingTop: margin.top ?? undefined,
-  paddingBottom: margin.bottom ?? undefined,
+  paddingLeft: $margin.left ?? undefined,
+  paddingRight: $margin.right ?? undefined,
+  paddingTop: $margin.top ?? undefined,
+  paddingBottom: $margin.bottom ?? undefined,
 }))
 
 function LayerRef(
@@ -290,8 +290,8 @@ function LayerRef(
 
   const portalContent = (
     <LayerWrapper
-      position={position}
-      margin={margin}
+      $position={position}
+      $margin={margin}
     >
       {transitions((styles) => (
         <AnimatedDiv

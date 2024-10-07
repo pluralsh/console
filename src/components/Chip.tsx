@@ -1,25 +1,22 @@
 import { type FlexProps } from 'honorable'
 import {
   type ComponentProps,
+  type ComponentPropsWithRef,
   type ReactElement,
   type Ref,
   forwardRef,
 } from 'react'
-import styled, {
-  type DefaultTheme,
-  type StyledComponent,
-  useTheme,
-} from 'styled-components'
+import styled, { type DefaultTheme, useTheme } from 'styled-components'
 
 import { type SEVERITIES } from '../types'
 
-import { Spinner } from './Spinner'
 import Card, {
   type BaseCardProps,
   type CardFillLevel,
   useDecideFillLevel,
 } from './Card'
 import CloseIcon from './icons/CloseIcon'
+import { Spinner } from './Spinner'
 import Tooltip from './Tooltip'
 
 export const CHIP_CLOSE_ATTR_KEY = 'data-close-button' as const
@@ -36,7 +33,7 @@ export type ChipProps = Omit<FlexProps, 'size'> &
     icon?: ReactElement
     loading?: boolean
     closeButton?: boolean
-    closeButtonProps?: ComponentProps<StyledComponent<'button', DefaultTheme>>
+    closeButtonProps?: ComponentPropsWithRef<'div'>
     clickable?: boolean
     truncateWidth?: number
     truncateEdge?: 'start' | 'end'
@@ -179,9 +176,8 @@ function ChipRef(
     disabled,
     tooltip,
     tooltipProps,
-    as,
     ...props
-  }: ChipProps & { as?: ComponentProps<typeof ChipCardSC>['forwardedAs'] },
+  }: ChipProps,
   ref: Ref<any>
 ) {
   fillLevel = useDecideFillLevel({ hue, fillLevel })
@@ -202,7 +198,6 @@ function ChipRef(
       $severity={severity}
       $truncateWidth={truncateWidth}
       $truncateEdge={truncateEdge}
-      {...(as ? { forwardedAs: as } : {})}
       {...props}
     >
       {loading && (
@@ -224,7 +219,6 @@ function ChipRef(
         <CloseButtonSC
           disabled={disabled}
           $fillLevel={fillLevel}
-          $severity={severity}
           {...{
             [CHIP_CLOSE_ATTR_KEY]: '',
           }}

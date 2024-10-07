@@ -1,4 +1,4 @@
-import { type ComponentProps } from 'react'
+import { type ComponentPropsWithRef } from 'react'
 import styled, { keyframes } from 'styled-components'
 
 const rotateAnim = keyframes`
@@ -41,14 +41,12 @@ const SpinnerSC = styled(
 export function Spinner({
   color,
   size = 16,
-  as,
   ...props
-}: { color?: string; size?: number } & ComponentProps<typeof SpinnerSC>) {
+}: { color?: string; size?: number } & ComponentPropsWithRef<'div'>) {
   return (
     <SpinnerSC
       $color={color}
       $size={size}
-      {...(as ? { forwardedAs: as } : {})}
       {...props}
     />
   )

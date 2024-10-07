@@ -51,7 +51,7 @@ const HonorableLabelStyled = styled(Label)<{
     : theme.colors['text-light'],
   cursor: $disabled ? 'not-allowed' : 'pointer',
   margin: 0,
-  ':focus': {
+  '&:focus': {
     outline: 'none',
   },
   '.box': {
@@ -88,9 +88,9 @@ const HonorableLabelStyled = styled(Label)<{
   },
   ...(!$disabled
     ? {
-        ':hover': {
+        '&:hover': {
           color: theme.colors.text,
-          ':not(.checked) .box': {
+          '&:not(.checked) .box': {
             backgroundColor: theme.colors['action-input-hover'],
           },
           '.icon': {
@@ -100,7 +100,7 @@ const HonorableLabelStyled = styled(Label)<{
         ...($isFocusVisible
           ? {
               color: theme.colors.text,
-              ':not(.checked) .box': {
+              '&:not(.checked) .box': {
                 backgroundColor: theme.colors['action-input-hover'],
               },
             }

@@ -5,11 +5,12 @@ import Tooltip from '../components/Tooltip'
 
 import { type SidebarVariant, useSidebar } from './Sidebar'
 
-type SidebarItemProps = ComponentProps<typeof ItemSC> & {
+type SidebarItemProps = ComponentProps<'div'> & {
   clickable?: boolean
   tooltip?: string
   expandedLabel?: string
   active?: boolean
+  [key: string]: unknown
 }
 
 function SidebarItemRef(
@@ -41,12 +42,11 @@ function WithTooltipRef(
   { children, clickable, tooltip = '', ...props }: SidebarItemProps,
   ref: Ref<HTMLDivElement>
 ) {
-  const { layout, isExpanded } = useSidebar()
+  const { isExpanded } = useSidebar()
 
   if (!tooltip || isExpanded)
     return (
       <Item
-        layout={layout}
         clickable={clickable}
         ref={ref}
         {...props}
@@ -63,7 +63,6 @@ function WithTooltipRef(
       whiteSpace="nowrap"
     >
       <Item
-        layout={layout}
         clickable={clickable}
         ref={ref}
         {...props}
@@ -105,7 +104,7 @@ const ItemSC = styled.div<{
         cursor: 'pointer',
         ...(!$active
           ? {
-              ':hover': {
+              '&:hover': {
                 backgroundColor:
                   theme.mode === 'light'
                     ? theme.colors['fill-zero-hover']

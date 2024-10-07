@@ -95,9 +95,9 @@ function getGridTemplateCols(columnDefs: ColumnDef<unknown>[] = []): string {
     .join(' ')
 }
 
-const T = styled.table<{ gridTemplateColumns: string }>(
-  ({ theme, gridTemplateColumns }) => ({
-    gridTemplateColumns,
+const T = styled.table<{ $gridTemplateColumns: string }>(
+  ({ theme, $gridTemplateColumns }) => ({
+    gridTemplateColumns: $gridTemplateColumns,
     backgroundColor: theme.colors['fill-one'],
     borderSpacing: 0,
     display: 'grid',
@@ -708,7 +708,7 @@ function TableRef(
         width="100%"
         {...props}
       >
-        <T gridTemplateColumns={gridTemplateColumns}>
+        <T $gridTemplateColumns={gridTemplateColumns}>
           <Thead>
             {headerGroups.map((headerGroup) => (
               <Tr key={headerGroup.id}>

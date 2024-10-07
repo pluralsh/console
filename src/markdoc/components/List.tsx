@@ -1,6 +1,4 @@
-import styled from 'styled-components'
-
-import { type ComponentProps } from 'react'
+import styled, { type PolymorphicComponentProps } from 'styled-components'
 
 import { useFillLevel } from '../../index'
 import { useMarkdocContext } from '../MarkdocContext'
@@ -52,7 +50,12 @@ export const ListItem = styled.li.withConfig(commonCfg)(({ theme }) => {
 export function List({
   ordered,
   ...props
-}: { ordered?: boolean } & ComponentProps<typeof StyledList>) {
+}: { ordered?: boolean } & PolymorphicComponentProps<
+  'web',
+  object,
+  'ol' | 'ul',
+  any
+>) {
   return (
     <StyledList
       as={ordered ? 'ol' : 'ul'}

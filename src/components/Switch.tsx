@@ -1,11 +1,11 @@
-import { type ComponentProps, useMemo, useRef } from 'react'
-import { useToggleState } from 'react-stately'
+import { useMemo, useRef } from 'react'
 import {
   type AriaSwitchProps,
   VisuallyHidden,
   useSwitch as useAriaSwitch,
   useFocusRing,
 } from 'react-aria'
+import { useToggleState } from 'react-stately'
 import styled from 'styled-components'
 
 export type SwitchStyleProps = {
@@ -25,8 +25,7 @@ type UseSwitchProps = Omit<
   readOnly?: boolean
 }
 
-export type SwitchProps = UseSwitchProps &
-  Pick<ComponentProps<typeof SwitchSC>, 'as'> & { className?: string }
+export type SwitchProps = UseSwitchProps & { className?: string }
 
 const SwitchSC = styled.label<SwitchStyleProps>(
   ({ $checked, $disabled, $readOnly, theme }) => ({
@@ -152,12 +151,11 @@ export const useSwitch = ({
   )
 }
 
-export function Switch({ children, as, className, ...props }: SwitchProps) {
+export function Switch({ children, className, ...props }: SwitchProps) {
   const { inputProps, styleProps } = useSwitch(props)
 
   return (
     <SwitchSC
-      as={as}
       className={className}
       {...styleProps}
     >

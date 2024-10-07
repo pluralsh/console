@@ -140,8 +140,8 @@ const InputRootSC = styled.div<{
   },
 }))
 const InputBaseSC = styled.input<{
-  $padStart: 'xsmall' | 'small' | 'medium' | undefined | null
-  $padEnd: 'xsmall' | 'small' | 'medium' | undefined | null
+  $padStart?: 'xsmall' | 'small' | 'medium' | undefined | null
+  $padEnd?: 'xsmall' | 'small' | 'medium' | undefined | null
 }>(({ theme, $padStart, $padEnd }) => ({
   ...theme.partials.reset.input,
   width: '100%',
@@ -345,11 +345,10 @@ const Input2 = forwardRef<HTMLDivElement, InputPropsFull>(
             </InputContentSC>
           )}
           <InputBaseSC
-            $padStart={!inputContent ? inputPadStart : 'xxsmall'}
+            $padStart={!inputContent ? inputPadStart : 'xsmall'}
             $padEnd={inputPadEnd}
             disabled={disabled}
             value={value}
-            error={error}
             placeholder={placeholder}
             onChange={wrappedOnChange}
             onFocus={onFocus}

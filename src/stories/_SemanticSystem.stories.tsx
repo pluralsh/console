@@ -56,8 +56,10 @@ function Template() {
   )
 }
 
-const ShadowedBox = styled(FilledBox)<{ shadow: string }>(
-  ({ theme, shadow }) => ({ boxShadow: (theme.boxShadows as any)[shadow] })
+const ShadowedBox = styled(FilledBox)<{ $shadow: string }>(
+  ({ theme, $shadow: shadow }) => ({
+    boxShadow: (theme.boxShadows as any)[shadow],
+  })
 )
 
 const ShadowsWrap = styled(FlexWrap)(({ theme }) => ({
@@ -80,7 +82,7 @@ function Shadows() {
         'focused',
       ].map((key) => (
         <BlockWrapper key={key}>
-          <ShadowedBox shadow={key} />
+          <ShadowedBox $shadow={key} />
           <ItemLabel>{key}</ItemLabel>
         </BlockWrapper>
       ))}
@@ -88,7 +90,7 @@ function Shadows() {
   )
 }
 
-const RadiusedBox = styled(FilledBox)<{ $radius: 'medium' | 'large' }>(
+const RadiusedBox = styled(FilledBox)<{ $radius?: 'medium' | 'large' }>(
   ({ theme, $radius: radius }) => ({
     borderRadius: theme.borderRadiuses[radius],
   })
@@ -135,8 +137,8 @@ function BoxBorders() {
 }
 
 const ScrollbarBox = styled(FilledBox)<{
-  fillLevel?: FillLevel
-}>(({ theme, fillLevel }) => ({
+  $fillLevel?: FillLevel
+}>(({ theme, $fillLevel: fillLevel }) => ({
   ...theme.partials.scrollBar({ fillLevel }),
   ...theme.partials.text.caption,
   backgroundColor: (theme.colors as any)[fillLevelToBGColor[fillLevel]],
@@ -171,7 +173,7 @@ function Scrollbars() {
           <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="vertical"
-              fillLevel={fillLevel}
+              $fillLevel={fillLevel}
             >
               <div className="inner">{exampleText}</div>
             </ScrollbarBox>
@@ -184,7 +186,7 @@ function Scrollbars() {
           <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="horizontal"
-              fillLevel={fillLevel}
+              $fillLevel={fillLevel}
             >
               <div className="inner">{exampleText}</div>
             </ScrollbarBox>
@@ -197,7 +199,7 @@ function Scrollbars() {
           <BlockWrapper key={fillLevel}>
             <ScrollbarBox
               className="both"
-              fillLevel={fillLevel}
+              $fillLevel={fillLevel}
             >
               <div className="inner">{exampleText}</div>
             </ScrollbarBox>

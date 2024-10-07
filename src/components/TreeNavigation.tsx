@@ -1,10 +1,15 @@
+import { useSpring } from '@react-spring/web'
+import classNames from 'classnames'
+import { Div } from 'honorable'
 import {
   Children,
   type ComponentProps,
   type Key,
+  type MouseEventHandler,
   type MutableRefObject,
   type PropsWithChildren,
   type ReactElement,
+  type ReactNode,
   createContext,
   forwardRef,
   useCallback,
@@ -14,20 +19,17 @@ import {
   useMemo,
   useState,
 } from 'react'
-import classNames from 'classnames'
-import { useSpring } from '@react-spring/web'
 import useMeasure from 'react-use-measure'
 import styled, { useTheme } from 'styled-components'
 import { type ImmerReducer, useImmerReducer } from 'use-immer'
-import { Div } from 'honorable'
 
 import usePrevious from '../hooks/usePrevious'
 import useUnmount from '../hooks/useUnmount'
 import { CaretRightIcon } from '../icons'
 
+import { AnimatedDiv } from './AnimatedDiv'
 import { useNavigationContext } from './contexts/NavigationContext'
 import Tab, { TAB_INDICATOR_THICKNESS } from './Tab'
-import { AnimatedDiv } from './AnimatedDiv'
 
 export type SideNavProps = {
   desktop: boolean
@@ -53,36 +55,6 @@ const KeyboardNavContext = createContext<{
 }>({
   keyboardNavigable: true,
 })
-
-const StyledLink = styled.a(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.small,
-  cursor: 'pointer',
-  flexGrow: 1,
-  flexShrink: 1,
-  margin: 0,
-  padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
-  ...theme.partials.text.body2,
-  textDecoration: 'none',
-  color: theme.colors['text-light'],
-  '.iconRight': {
-    display: 'flex',
-    justifyContent: 'right',
-    flexGrow: 1,
-  },
-  '&:hover': {
-    color: theme.colors.text,
-  },
-  '&:focus, &:focus-visible': {
-    outline: 'none',
-    boxShadow: 'none',
-  },
-  '&:focus-visible::after': {
-    borderStartStartRadius: theme.borderRadiuses.medium,
-    borderEndStartRadius: theme.borderRadiuses.medium,
-    ...theme.partials.focus.insetAbsolute,
-  },
-}))
 
 const CaretButton = styled(
   ({
@@ -169,6 +141,7 @@ function NavLink({
   onClick,
   onClickCaret,
   icon,
+  href,
   children,
   ...props
 }: {
@@ -176,10 +149,11 @@ function NavLink({
   isOpen?: boolean
   activeSecondary: boolean
   icon?: ReactElement
+  href?: string
   desktop: boolean
   active: boolean
   onClickCaret?: () => void
-} & Partial<ComponentProps<typeof StyledLink>>) {
+} & ComponentProps<typeof Tab>) {
   const { Link } = useNavigationContext()
   const depth = useContext(NavDepthContext)
   const theme = useTheme()
@@ -192,7 +166,7 @@ function NavLink({
         vertical
         iconLeft={icon}
         onClick={(e) => {
-          onClick(e)
+          onClick(e as any)
         }}
         width="100%"
         innerProps={{
@@ -203,7 +177,7 @@ function NavLink({
           paddingRight: 0,
         }}
         textDecoration="none"
-        {...(props.href ? { as: Link } : {})}
+        {...(href ? { as: Link } : {})}
         {...props}
       >
         <Div
@@ -238,7 +212,7 @@ export const TopHeading = styled.h6(({ theme }) => ({
   ...theme.partials.marketingText.label,
 }))
 
-const SubSectionsListWrap = styled.ul<{ indentLevel: number }>((_) => ({
+const SubSectionsListWrap = styled.ul<{ $indentLevel: number }>((_) => ({
   margin: 0,
   padding: 0,
   listStyle: 'none',
@@ -252,7 +226,7 @@ function SubSectionsListRef(
 
   return (
     <SubSectionsListWrap
-      indentLevel={navDepth}
+      $indentLevel={navDepth}
       ref={ref}
       className={className}
       {...props}
@@ -297,16 +271,17 @@ const useActiveStates = () => {
 export function TreeNavEntry({
   href,
   icon,
-  toMenu,
   onOpenChange,
   label,
   onClick,
   active,
   children,
   ...props
-}: PropsWithChildren<Omit<ComponentProps<typeof NavLink>, 'isSubSection'>> & {
+}: Partial<ComponentProps<typeof NavLink>> & {
   indentLevel?: number
   loading?: boolean
+  onOpenChange?: (open: boolean) => void
+  label?: ReactNode
 }) {
   const id = useId()
   const { hasActiveDescendents, setActiveState } = useActiveStates()
@@ -382,7 +357,7 @@ export function TreeNavEntry({
         isOpen={isOpen && hasSections}
         active={active && !hasActiveDescendents}
         activeSecondary={hasActiveDescendents}
-        onClick={(e: Event) => {
+        onClick={(e: MouseEventHandler<HTMLAnchorElement>) => {
           onClick?.(e)
           if (hasActiveDescendents) {
             setIsOpen(true)
@@ -391,7 +366,6 @@ export function TreeNavEntry({
           }
         }}
         onClickCaret={toggleOpen}
-        toMenu={toMenu}
         {...props}
       >
         {label}

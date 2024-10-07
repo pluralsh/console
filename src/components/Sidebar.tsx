@@ -20,7 +20,7 @@ type SidebarBaseProps = {
   isExpanded?: boolean
   setIsExpanded?: Dispatch<SetStateAction<boolean>>
 }
-type SidebarProps = SidebarBaseProps & ComponentProps<typeof SidebarSC>
+type SidebarProps = SidebarBaseProps & Partial<ComponentProps<typeof SidebarSC>>
 
 export const SIDEBAR_WIDTH = 64
 const SIDEBAR_HEIGHT = 56
@@ -79,7 +79,6 @@ function SidebarRef(
       <SidebarSC
         $isHorizontal={layout === 'horizontal'}
         $variant={variant}
-        $isExpanded={isExpanded}
         ref={ref}
         {...props}
       />

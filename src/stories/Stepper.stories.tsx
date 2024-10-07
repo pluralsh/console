@@ -13,7 +13,7 @@ export default {
 function Template(args: any) {
   return (
     <div
-      css={{
+      style={{
         display: 'flex',
         maxWidth: args.containerWidth || undefined,
         background: args.showContainer

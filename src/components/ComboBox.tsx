@@ -76,22 +76,6 @@ type ComboBoxProps = Exclude<ComboBoxInputProps, 'children'> & {
     'onLoadMore' | 'isLoading' | 'validationState' | 'placeholder'
   >
 
-export const ComboBoxInputInner = styled.div<{ isOpen: boolean }>(
-  ({ theme, isOpen }) => ({
-    '.arrow': {
-      transition: 'transform 0.1s ease',
-      display: 'flex',
-      marginLeft: theme.spacing.medium,
-      alignItems: 'center',
-      ...(isOpen
-        ? {
-            transform: 'scaleY(-100%)',
-          }
-        : {}),
-    },
-  })
-)
-
 type ComboBoxInputProps = {
   showArrow?: boolean
   isOpen?: boolean
@@ -538,7 +522,6 @@ function ComboBox({
         prefix={prefix}
         titleContent={titleContent}
         showClearButton={showClearButton}
-        setIsOpen={setIsOpen}
         startIcon={startIcon}
         endIcon={endIcon}
         outerInputProps={outerInputProps}

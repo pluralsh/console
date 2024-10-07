@@ -92,7 +92,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
           backgroundColor: 'fill-zero',
         },
       ],
-      '::placeholder': [
+      '&::placeholder': [
         {
           color: 'text-xlight',
         },
@@ -206,19 +206,19 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             borderColor: 'border-outline-focused',
             // ...focusPartials.button,
           },
-          ':hover': {
+          '&:hover': {
             backgroundColor: 'action-primary-hover',
             border: '1px solid action-primary-hover',
           },
-          ':active': {
+          '&:active': {
             backgroundColor: 'action-primary',
             border: '1px solid action-primary',
           },
-          ':disabled': {
+          '&:disabled': {
             color: 'text-primary-disabled',
             backgroundColor: 'action-primary-disabled',
             border: '1px solid action-primary-disabled',
-            ':hover': {
+            '&:hover': {
               backgroundColor: 'action-primary-disabled',
               border: '1px solid action-primary-disabled',
             },
@@ -229,25 +229,25 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             color: 'text-light',
             backgroundColor: 'transparent',
             border: '1px solid border-input',
-            ':hover': {
+            '&:hover': {
               color: 'text',
               backgroundColor: 'action-input-hover',
               border: '1px solid border-input',
             },
-            ':active': {
+            '&:active': {
               color: 'text',
               backgroundColor: 'transparent',
               border: '1px solid border-input',
             },
-            ':focus-visible': {
+            '&:focus-visible': {
               color: 'text',
               backgroundColor: 'action-input-hover',
             },
-            ':disabled': {
+            '&:disabled': {
               color: 'text-disabled',
               backgroundColor: 'transparent',
               border: '1px solid border-input',
-              ':hover': {
+              '&:hover': {
                 backgroundColor: 'transparent',
                 border: '1px solid border-input',
               },
@@ -258,25 +258,25 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             color: 'text-light',
             backgroundColor: 'transparent',
             border: '1px solid transparent',
-            ':hover': {
+            '&:hover': {
               color: 'text',
               backgroundColor: 'action-input-hover',
               border: '1px solid transparent',
             },
-            ':active': {
+            '&:active': {
               color: 'text',
               backgroundColor: 'transparent',
               border: '1px solid transparent',
             },
-            ':focus-visible': {
+            '&:focus-visible': {
               color: 'text',
               backgroundColor: 'action-input-hover',
             },
-            ':disabled': {
+            '&:disabled': {
               color: 'text-disabled',
               backgroundColor: 'transparent',
               border: '1px solid transparent',
-              ':hover': {
+              '&:hover': {
                 backgroundColor: 'transparent',
                 border: '1px solid transparent',
               },
@@ -289,14 +289,14 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             backgroundColor: 'transparent',
             border: '1px solid transparent',
             paddingHorizontal: '0',
-            ':hover': {
+            '&:hover': {
               backgroundColor: 'transparent',
               textDecoration: 'underline',
             },
-            ':active': {
+            '&:active': {
               textDecoration: 'underline',
             },
-            ':focus-visible': {
+            '&:focus-visible': {
               backgroundColor: 'transparent',
               textDecoration: 'underline',
             },
@@ -306,22 +306,22 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             color: 'text-danger',
             backgroundColor: 'transparent',
             border: '1px solid border-danger',
-            ':hover': {
+            '&:hover': {
               backgroundColor: 'action-input-hover',
               border: '1px solid border-danger',
             },
-            ':active': {
+            '&:active': {
               backgroundColor: 'transparent',
               border: '1px solid border-danger',
             },
-            ':focus-visible': {
+            '&:focus-visible': {
               backgroundColor: 'action-input-hover',
             },
-            ':disabled': {
+            '&:disabled': {
               color: 'text-disabled',
               backgroundColor: 'transparent',
               border: '1px solid border-disabled',
-              ':hover': {
+              '&:hover': {
                 backgroundColor: 'transparent',
                 border: '1px solid border-disabled',
               },
@@ -337,26 +337,26 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
             '&': {
               boxShadow: boxShadows.slight,
             },
-            ':hover': {
+            '&:hover': {
               color: 'text',
               backgroundColor: 'fill-two',
               border: '1px solid border-input',
               boxShadow: boxShadows.moderate,
             },
-            ':active': {
+            '&:active': {
               color: 'text',
               backgroundColor: 'fill-two-hover',
               border: '1px solid border-input',
             },
-            ':focus-visible': {
+            '&:focus-visible': {
               color: 'text',
               backgroundColor: 'fill-two-selected',
             },
-            ':disabled': {
+            '&:disabled': {
               color: 'text-disabled',
               backgroundColor: 'transparent',
               border: '1px solid border-input',
-              ':hover': {
+              '&:hover': {
                 backgroundColor: 'transparent',
                 border: '1px solid border-input',
               },
@@ -698,7 +698,7 @@ const getHonorableThemeProps = ({ mode }: { mode: ColorMode }) => {
                 : 'action-link-inactive',
             },
           },
-          ':hover': {
+          '&:hover': {
             color: 'text',
             '> div:first-of-type': {
               backgroundColor: checked

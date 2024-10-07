@@ -157,7 +157,7 @@ const CardSC = styled(Div)<{
   $severity: Severity
   $selected: boolean
   $clickable: boolean
-  disabled: boolean
+  $disabled: boolean
 }>(
   ({
     theme,
@@ -166,7 +166,7 @@ const CardSC = styled(Div)<{
     $severity: severity,
     $selected: selected,
     $clickable: clickable,
-    disabled,
+    $disabled: disabled,
   }) => ({
     ...theme.partials.reset.button,
     border: `1px solid ${theme.colors[fillToNeutralBorderC[fillLevel]]}`,
@@ -188,7 +188,7 @@ const CardSC = styled(Div)<{
       !disabled &&
       !selected &&
       severity === 'neutral' && {
-        ':hover': {
+        '&:hover': {
           backgroundColor: theme.colors[fillToNeutralHoverBgC[fillLevel]],
         },
       }),
@@ -230,7 +230,7 @@ const Card = forwardRef(
             type: 'button',
             'data-clickable': 'true',
           })}
-          disabled={clickable && disabled}
+          $disabled={clickable && disabled}
           {...props}
         />
       </FillLevelProvider>

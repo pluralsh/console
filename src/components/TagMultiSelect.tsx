@@ -1,10 +1,6 @@
 import { type ComponentProps, type Key, useMemo, useState } from 'react'
 
-import styled, {
-  type DefaultTheme,
-  type StyledComponent,
-  useTheme,
-} from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import {
   Chip,
@@ -33,6 +29,10 @@ type TagMultiSelectProps = {
   options: string[]
   loading: boolean
   innerChips?: boolean
+  selectedTagKeys?: Set<Key>
+  setSelectedTagKeys?: (keys: Set<Key>) => void
+  inputValue?: string
+  setInputValue?: (value: string) => void
   selectedMatchType?: 'AND' | 'OR'
   onSelectedTagsChange?: (keys: Set<Key>) => void
   onFilterChange?: (value: string) => void
@@ -54,7 +54,7 @@ function TagMultiSelect({
   comboBoxProps,
   selectProps,
   ...props
-}: TagMultiSelectProps & ComponentProps<StyledComponent<'div', DefaultTheme>>) {
+}: TagMultiSelectProps & ComponentProps<'div'>) {
   const theme = useTheme()
   const selectedTagArr = useMemo(() => [...selectedTagKeys], [selectedTagKeys])
   const [isOpen, setIsOpen] = useState(false)
@@ -197,7 +197,5 @@ const MultiSelectMatchButtonContainer = styled.div`
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     border-right: none;
-    minwidth: fit-content;
-    text-wrap: nowrap;
   }
 `

@@ -1,11 +1,14 @@
 // this is just styling, actual modal logic is in ModalWrapper
 
-import { type ReactNode, type Ref, forwardRef, useCallback } from 'react'
+import {
+  type ComponentPropsWithRef,
+  type ReactNode,
+  type Ref,
+  forwardRef,
+  useCallback,
+} from 'react'
 
-import styled, {
-  type StyledComponentPropsWithRef,
-  useTheme,
-} from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { VisuallyHidden } from 'react-aria'
 
@@ -42,7 +45,7 @@ type ModalPropsType = ModalWrapperProps & {
   actions?: ReactNode
   severity?: ModalSeverity
   asForm?: boolean
-  formProps?: StyledComponentPropsWithRef<'form'>
+  formProps?: ComponentPropsWithRef<'form'>
 }
 
 const severityToIconColorKey = {
@@ -72,8 +75,8 @@ const sizeToWidth = {
 } as const satisfies Partial<Record<ModalSize, number | string | undefined>>
 
 const ModalSC = styled(Card)<{
-  $width: number
-  $maxWidth: number
+  $width: number | string
+  $maxWidth: number | string
 }>(({ $width, $maxWidth }) => ({
   position: 'relative',
   display: 'flex',

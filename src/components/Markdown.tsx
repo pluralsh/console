@@ -97,42 +97,42 @@ const MdH1 = styled.h1.withConfig(commonCfg)(({ theme }) => ({
   color: theme.colors.text,
   marginTop: theme.spacing.large,
   marginBottom: theme.spacing.small,
-  ':first-of-type': { marginTop: 0 },
+  '&:first-of-type': { marginTop: 0 },
 }))
 const MdH2 = styled.h2.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.text.subtitle1,
   color: theme.colors.text,
   marginTop: theme.spacing.large,
   marginBottom: theme.spacing.small,
-  ':first-of-type': { marginTop: 0 },
+  '&:first-of-type': { marginTop: 0 },
 }))
 const MdH3 = styled.h3.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.text.subtitle2,
   color: theme.colors.text,
   marginTop: theme.spacing.large,
   marginBottom: theme.spacing.small,
-  ':first-of-type': { marginTop: 0 },
+  '&:first-of-type': { marginTop: 0 },
 }))
 const MdH4 = styled.h4.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.text.body1Bold,
   color: theme.colors.text,
   marginTop: theme.spacing.large,
   marginBottom: theme.spacing.small,
-  ':first-of-type': { marginTop: 0 },
+  '&:first-of-type': { marginTop: 0 },
 }))
 const MdH5 = styled.h5.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.text.body1Bold,
   color: theme.colors.text,
   marginTop: theme.spacing.large,
   marginBottom: theme.spacing.small,
-  ':first-of-type': { marginTop: 0 },
+  '&:first-of-type': { marginTop: 0 },
 }))
 const MdH6 = styled.h6.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.text.body1Bold,
   color: theme.colors.text,
   marginTop: theme.spacing.large,
   marginBottom: theme.spacing.small,
-  ':first-of-type': { marginTop: 0 },
+  '&:first-of-type': { marginTop: 0 },
 }))
 const MdImg = styled.img(() => ({ display: 'inline', maxWidth: '100%' }))
 const MdP = styled.p.withConfig(commonCfg)(({ theme }) => ({
