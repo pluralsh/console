@@ -141,8 +141,8 @@ export default function Cluster() {
       const redirectId = lastSelectedClusterExists
         ? lastSelectedClusterId
         : mgmtCluster
-        ? mgmtCluster?.id
-        : clusters[0].id
+          ? mgmtCluster?.id
+          : clusters[0].id
 
       navigate(getWorkloadsAbsPath(redirectId) + search, {
         replace: true,

@@ -4,9 +4,9 @@ const parseHeaders = (rawHeaders) => {
   // https://tools.ietf.org/html/rfc7230#section-3.2
   const preProcessedHeaders = rawHeaders.replace(/\r?\n[\t ]+/g, ' ')
 
-  preProcessedHeaders.split(/\r?\n/).forEach((line) => {
+  preProcessedHeaders.split(/\r?\n/).forEach((line: string) => {
     const parts = line.split(':')
-    const key = parts.shift().trim()
+    const key = parts.shift()?.trim()
 
     if (key) {
       const value = parts.join(':').trim()
@@ -23,7 +23,12 @@ export const uploadFetch = (url, options) =>
     const xhr = new XMLHttpRequest()
 
     xhr.onload = () => {
-      const opts = {
+      const opts: {
+        status: number
+        statusText: string
+        headers: Headers
+        url?: Nullable<string>
+      } = {
         status: xhr.status,
         statusText: xhr.statusText,
         headers: parseHeaders(xhr.getAllResponseHeaders() || ''),
@@ -33,7 +38,7 @@ export const uploadFetch = (url, options) =>
         'responseURL' in xhr
           ? xhr.responseURL
           : opts.headers.get('X-Request-URL')
-      const body = 'response' in xhr ? xhr.response : xhr.responseText
+      const body = xhr.response
 
       resolve(new Response(body, opts))
     }

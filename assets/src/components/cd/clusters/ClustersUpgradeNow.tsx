@@ -1,15 +1,15 @@
 import { ApolloError } from '@apollo/client'
-
-import React, { useCallback, useState } from 'react'
-import isEmpty from 'lodash/isEmpty'
 import { Button, Tooltip, WrapWithIf } from '@pluralsh/design-system'
+import isEmpty from 'lodash/isEmpty'
 
-import { isUpgrading, toProviderSupportedVersion } from '../../../utils/semver'
+import { useCallback, useState } from 'react'
 import {
   ApiDeprecation,
   ClustersRowFragment,
   useUpdateClusterMutation,
 } from '../../../generated/graphql'
+
+import { isUpgrading, toProviderSupportedVersion } from '../../../utils/semver'
 import { Confirm } from '../../utils/Confirm'
 
 export function ClustersUpgradeNow({
@@ -54,8 +54,8 @@ export function ClustersUpgradeNow({
   const tooltip = upgrading
     ? 'Cluster is already upgrading'
     : cluster?.deletedAt
-    ? 'Cluster is being deleted'
-    : null
+      ? 'Cluster is being deleted'
+      : null
 
   return (
     <>

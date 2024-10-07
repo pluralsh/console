@@ -39,7 +39,7 @@ const getPrefs = () => {
 
   try {
     parsedPrefs = storedPrefs ? JSON.parse(storedPrefs) : {}
-  } catch (e) {
+  } catch (_) {
     parsedPrefs = {}
   }
 
@@ -69,7 +69,7 @@ const mergeConsent = (prev: Partial<Consent>, next: unknown) => {
     newConsent[key] =
       typeof nextVal === 'boolean'
         ? nextVal
-        : prev[key] ?? DEFAULT_PREFS.consent[key]
+        : (prev[key] ?? DEFAULT_PREFS.consent[key])
   }
 
   return newConsent

@@ -23,7 +23,7 @@ function avg(metrics: Array<MetricResult>): number | undefined {
 
   return (
     metrics.reduce((acc, cur) => acc + (cpuParser(cur?.value) ?? 0), 0) /
-      metrics.length ?? undefined
+    metrics.length
   )
 }
 

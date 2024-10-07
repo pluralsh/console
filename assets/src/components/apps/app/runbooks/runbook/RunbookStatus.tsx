@@ -33,7 +33,7 @@ function AlertsTooltipLabel({
               gap="small"
               size={16}
               {...{
-                ':not(:last-child)': {
+                '&:not(:last-child)': {
                   borderBottom: theme.borders['fill-two'],
                 },
               }}

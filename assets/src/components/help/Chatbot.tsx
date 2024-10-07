@@ -1,21 +1,3 @@
-import { PluralApi } from 'components/PluralApi'
-import {
-  ComponentProps,
-  KeyboardEvent,
-  ReactNode,
-  Ref,
-  forwardRef,
-  useCallback,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-} from 'react'
-import styled, { useTheme } from 'styled-components'
-import {
-  ChatMessageAttributes,
-  useChatLazyQuery,
-} from 'generated/graphql-plural'
 import {
   Card,
   CaretDownIcon,
@@ -29,8 +11,26 @@ import {
 } from '@pluralsh/design-system'
 import { useLogin } from 'components/contexts'
 import { usePlatform } from 'components/hooks/usePlatform'
+import { PluralApi } from 'components/PluralApi'
 import { submitForm } from 'components/utils/submitForm'
-import { Merge } from 'type-fest'
+import {
+  ChatMessageAttributes,
+  useChatLazyQuery,
+} from 'generated/graphql-plural'
+import {
+  ComponentProps,
+  ComponentPropsWithRef,
+  KeyboardEvent,
+  ReactNode,
+  Ref,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+} from 'react'
+import styled, { useTheme } from 'styled-components'
 
 import { textAreaInsert } from 'components/utils/textAreaInsert'
 
@@ -40,6 +40,7 @@ import classNames from 'classnames'
 
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
 
+import { BaseCardProps } from '@pluralsh/design-system/dist/components/Card'
 import ChatbotMarkdown from './ChatbotMarkdown'
 
 const INTRO =
@@ -123,7 +124,7 @@ const ChatMessage = forwardRef(
       role,
       ...props
     }: ChatMessageAttributes & ComponentProps<typeof ChatMessageSC>,
-    ref
+    ref: Ref<HTMLLIElement>
   ) => {
     let finalContent: ReactNode
 
@@ -213,14 +214,10 @@ const ChatbotFrameSC = styled(Card)(({ theme }) => ({
   },
 }))
 
-function ChatbotFrame({
-  onClose,
-  onMin,
-  ...props
-}: Merge<
-  ComponentProps<typeof ChatbotFrameSC>,
-  { onClose: () => void; onMin: () => void }
->) {
+type ChatbotFrameProps = ComponentPropsWithRef<'div'> &
+  BaseCardProps & { onClose: () => void; onMin: () => void }
+
+function ChatbotFrame({ onClose, onMin, ...props }: ChatbotFrameProps) {
   const [lazyQ, { called, loading, data }] = useChatLazyQuery()
   const hasMounted = useRef(false)
   const wasLoading = usePrevious(loading)
@@ -354,14 +351,14 @@ function ChatbotFrame({
             const name = msg.name
               ? msg.name
               : role === Role.assistant
-              ? 'Plural AI'
-              : userName
+                ? 'Plural AI'
+                : userName
             const ref =
               i === lastAsstMsgIdx
                 ? lastAsstMsgRef
                 : i === lastUserMsgIdx
-                ? lastUserMsgRef
-                : undefined
+                  ? lastUserMsgRef
+                  : undefined
 
             return (
               <ChatMessage
@@ -491,7 +488,7 @@ const ChatbotTextArea = forwardRef(
   }
 )
 
-export default function Chatbot(props: ComponentProps<typeof ChatbotFrame>) {
+export default function Chatbot(props: ChatbotFrameProps) {
   return (
     <PluralApi>
       <ChatbotFrame {...props} />

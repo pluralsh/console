@@ -21,8 +21,8 @@ export default function Audits() {
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
   const currentView =
-    DIRECTORY.find(
-      (tab) => pathname?.startsWith(`${AUDITS_ABS_PATH}/${tab.path}`)
+    DIRECTORY.find((tab) =>
+      pathname?.startsWith(`${AUDITS_ABS_PATH}/${tab.path}`)
     )?.path || DIRECTORY[0].path
 
   useSetPageHeaderContent(

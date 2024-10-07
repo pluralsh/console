@@ -1,8 +1,8 @@
-import { ReactElement, useMemo } from 'react'
 import { Code, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { Outlet, useOutletContext, useParams } from 'react-router-dom'
+import { dump } from 'js-yaml'
 import { isEmpty } from 'lodash'
-import yaml from 'js-yaml'
+import { ReactElement, useMemo } from 'react'
+import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 
 import {
   ConfigMapQueryVariables,
@@ -10,14 +10,14 @@ import {
   useConfigMapQuery,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import { MetadataSidecar } from '../common/utils'
-import { NAMESPACE_PARAM } from '../Navigation'
 import {
   CONFIG_MAPS_REL_PATH,
   getConfigurationAbsPath,
   getResourceDetailsAbsPath,
 } from '../../../routes/kubernetesRoutesConsts'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { MetadataSidecar } from '../common/utils'
+import { NAMESPACE_PARAM } from '../Navigation'
 
 import ResourceDetails, { TabEntry } from '../common/ResourceDetails'
 
@@ -91,7 +91,7 @@ export function ConfigMapData(): ReactElement {
         key: 'yaml',
         label: 'YAML',
         language: 'yaml',
-        content: yaml.dump(cm?.data),
+        content: dump(cm?.data),
       },
       {
         key: 'json',

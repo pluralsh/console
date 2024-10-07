@@ -6,7 +6,7 @@ import {
   Prop,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { isEmpty } from 'lodash'
 import { useTheme } from 'styled-components'

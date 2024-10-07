@@ -1,24 +1,24 @@
-import { Row, createColumnHelper } from '@tanstack/react-table'
-import { ComponentProps, useMemo } from 'react'
-import { filesize } from 'filesize'
-import type { Container, ContainerStatus, Maybe, Port } from 'generated/graphql'
-import {
-  Readiness,
-  ReadinessT,
-  containerStatusToReadiness,
-  readinessToLabel,
-} from 'utils/status'
 import {
   IconFrame,
   Table,
   TerminalIcon,
   Tooltip,
 } from '@pluralsh/design-system'
-import { cpuParser, memoryParser } from 'utils/kubernetes'
-import { Flex, Span } from 'honorable'
+import { createColumnHelper } from '@tanstack/react-table'
 import { UnstyledLink } from 'components/utils/Link'
-import styled from 'styled-components'
+import { filesize } from 'filesize'
+import type { Container, ContainerStatus, Maybe, Port } from 'generated/graphql'
+import { Flex, Span } from 'honorable'
+import { ComponentProps, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
+import styled from 'styled-components'
+import { cpuParser, memoryParser } from 'utils/kubernetes'
+import {
+  Readiness,
+  ReadinessT,
+  containerStatusToReadiness,
+  readinessToLabel,
+} from 'utils/status'
 
 import {
   ContainerStatusChip,
@@ -323,7 +323,7 @@ export function ContainersList({
       {...TABLE_HEIGHT}
       {...(rowLink
         ? {
-            onRowClick: (_e, { original }: Row<ContainerTableRow>) =>
+            onRowClick: (_e, { original }) =>
               original?.readiness === Readiness.Ready &&
               navigate(`/pods/${namespace}/${podName}/shell/${original?.name}`),
           }

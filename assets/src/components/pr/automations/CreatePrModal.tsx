@@ -54,7 +54,7 @@ function CreatePrModalBase({
   onClose,
 }: {
   prAutomation: PrAutomationFragment
-  // eslint-disable-next-line react/no-unused-prop-types
+
   refetch: Nullable<() => void>
   open: boolean
   onClose: Nullable<() => void>

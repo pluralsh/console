@@ -108,7 +108,7 @@ function ChartLegend({ data }: { data: PieChartData }) {
     <div css={{ flex: 1 }}>
       {data.map((datum) => (
         <div key={datum.id}>
-          <PropWideBold title={datum.label}>
+          <PropWideBold title={datum.label ?? ''}>
             <span css={{ color: datum.color }}>{datum.value}</span>
           </PropWideBold>
         </div>

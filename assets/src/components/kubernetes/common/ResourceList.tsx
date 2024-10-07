@@ -134,7 +134,7 @@ export function ResourceList<
     () =>
       isLoading
         ? Array(SKELETON_ITEMS).fill({})
-        : (resourceList?.[itemsKey] as Array<TResource>) ?? [],
+        : ((resourceList?.[itemsKey] as Array<TResource>) ?? []),
     [isLoading, itemsKey, resourceList]
   )
   const { page, hasNextPage } = usePageInfo(items, resourceList?.listMeta)

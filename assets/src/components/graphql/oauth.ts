@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 
-import { UserFragment } from './incidents'
+import { UserFragment } from './incidents.js'
 
 export const GroupFragment = gql`
   fragment GroupFragment on Group {

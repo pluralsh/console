@@ -1,4 +1,3 @@
-import React from 'react'
 import { Chip } from '@pluralsh/design-system'
 
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'

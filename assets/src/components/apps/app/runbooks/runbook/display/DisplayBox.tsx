@@ -26,10 +26,10 @@ function grommetBoxAttrsToFlex(attrs: Record<string, string>) {
       key === 'align'
         ? 'alignItems'
         : key === 'justify'
-        ? 'justifyContent'
-        : key === 'direction'
-        ? 'flexDirection'
-        : key,
+          ? 'justifyContent'
+          : key === 'direction'
+            ? 'flexDirection'
+            : key,
       value === 'start' ? 'flex-start' : value === 'end' ? 'flex-end' : value,
     ])
   )

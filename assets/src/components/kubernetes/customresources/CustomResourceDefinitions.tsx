@@ -1,5 +1,5 @@
 import { createColumnHelper } from '@tanstack/react-table'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useTheme } from 'styled-components'
 import { ChipList, useSetBreadcrumbs } from '@pluralsh/design-system'
 

@@ -1,14 +1,13 @@
 import { AppIcon, Chip } from '@pluralsh/design-system'
-import React from 'react'
-import { useTheme } from 'styled-components'
 import { useNavigate, useParams } from 'react-router-dom'
-
-import { TRUNCATE } from '../../utils/truncate'
+import { useTheme } from 'styled-components'
 import { RuntimeServiceFragment } from '../../../generated/graphql'
 import {
   CLUSTER_PARAM_ID,
   getClusterAddOnDetailsPath,
 } from '../../../routes/cdRoutesConsts'
+
+import { TRUNCATE } from '../../utils/truncate'
 
 export default function ClusterAddOnsEntry({
   addon,

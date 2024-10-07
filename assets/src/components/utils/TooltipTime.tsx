@@ -1,5 +1,6 @@
 import { Tooltip } from '@pluralsh/design-system'
 import { TabularNumbers } from 'components/cluster/TableElements'
+
 import isArray from 'lodash/isArray'
 import {
   ComponentProps,
@@ -10,7 +11,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled, { DefaultTheme, StyledComponent } from 'styled-components'
+import styled from 'styled-components'
 
 export const CopiedSC = styled.div(({ theme }) => ({
   fontSize: '.9em',
@@ -31,7 +32,7 @@ type BaseProps = {
   ComponentProps<typeof Tooltip>,
   'placement' | 'displayOn' | 'manualOpen'
 > &
-  ComponentPropsWithRef<StyledComponent<'div', DefaultTheme>>
+  ComponentPropsWithRef<'div'>
 type SingleProps = {
   date: ReactElement | string | undefined | null
   prefix?: ReactElement | string | undefined | null

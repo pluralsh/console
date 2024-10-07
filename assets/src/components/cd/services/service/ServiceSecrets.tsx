@@ -89,7 +89,7 @@ function DeleteSecret({
               gap: theme.spacing.medium,
             }}
           >
-            <p>Are you sure you want to delete this secret?"</p>
+            <p>Are you sure you want to delete this secret?</p>
             <p>{secretName}</p>
           </div>
         }
@@ -126,7 +126,7 @@ function SecretEditModal({
     update,
   } = useUpdateState(initialValue || { name: '', value: '' })
   const nameRef = useRef<HTMLInputElement>()
-  const valueRef = useRef<HTMLInputElement>()
+  const valueRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (mode === 'edit') {

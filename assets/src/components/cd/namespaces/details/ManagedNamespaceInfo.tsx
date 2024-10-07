@@ -8,7 +8,7 @@ import {
   GlobeIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
 import { useSetPageScrollable } from '../../ContinuousDeployment'

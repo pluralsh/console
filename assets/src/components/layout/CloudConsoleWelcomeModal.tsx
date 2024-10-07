@@ -33,7 +33,7 @@ export function CloudConsoleWelcomeModal() {
           onClick={() => setOpen(false)}
           disabled={!canClose}
         >
-          I'm done
+          I&apos;m done
         </Button>
       }
     >

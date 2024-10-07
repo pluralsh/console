@@ -60,7 +60,10 @@ export function JobInfoCard({
 }: {
   gate: PipelineGateFragment
   container?: Nullable<ContainerSpecFragment>
-} & ComponentPropsWithoutRef<typeof JobInfoCardSC>) {
+} & Omit<
+  ComponentPropsWithoutRef<typeof JobInfoCardSC>,
+  'status' | 'statusLabel'
+>) {
   return (
     <JobInfoCardSC
       status={gate.state ? gateStateToCardStatus[gate.state] : undefined}

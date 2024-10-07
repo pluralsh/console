@@ -66,10 +66,10 @@ const FileDropSC = styled.div<{
       cursor: disabled
         ? 'not-allowed'
         : isDragActive
-        ? 'copy'
-        : hasFiles
-        ? undefined
-        : 'pointer',
+          ? 'copy'
+          : hasFiles
+            ? undefined
+            : 'pointer',
       color: disabled ? theme.colors['text-disabled'] : theme.colors.text,
       display: 'flex',
       alignItems: 'center',
@@ -80,10 +80,10 @@ const FileDropSC = styled.div<{
       borderColor: isDragAccept
         ? theme.colors['border-outline-focused']
         : error || isDragReject
-        ? theme.colors['border-danger']
-        : hasFiles
-        ? theme.colors['border-success']
-        : theme.colors['border-input'],
+          ? theme.colors['border-danger']
+          : hasFiles
+            ? theme.colors['border-success']
+            : theme.colors['border-input'],
       borderStyle: 'dashed',
       borderRadius: theme.borderRadiuses.medium,
       padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
@@ -158,10 +158,10 @@ export function FileDrop({
   const message = isDragReject
     ? finalMessages.reject
     : isDragAccept
-    ? finalMessages.accept
-    : !hasFiles
-    ? finalMessages.default
-    : undefined
+      ? finalMessages.accept
+      : !hasFiles
+        ? finalMessages.default
+        : undefined
 
   return (
     <FileDropSC

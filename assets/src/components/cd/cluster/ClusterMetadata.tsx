@@ -193,8 +193,8 @@ function ClusterStatusChip({
           phase?.toLowerCase() === 'provisioned'
             ? 'success'
             : failureReason || failureMessage
-            ? 'danger'
-            : 'neutral'
+              ? 'danger'
+              : 'neutral'
         }
       >
         {phase || 'Unknown'}

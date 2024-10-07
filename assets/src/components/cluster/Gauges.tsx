@@ -92,8 +92,8 @@ export function ResourceGauge({
         type === 'cpu'
           ? (val) => cpuFmt(roundToTwoPlaces(val))
           : type === 'memory'
-          ? (val) => filesize(roundToTwoPlaces(val)) as string
-          : undefined
+            ? (val) => filesize(roundToTwoPlaces(val)) as string
+            : undefined
       }
       centerVal={`${Math.round((used / total) * 100)}%`}
       centerLabel="used"

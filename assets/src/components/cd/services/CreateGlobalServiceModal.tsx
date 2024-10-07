@@ -160,7 +160,7 @@ export function CreateGlobalServiceModal({
             <StepBody>
               Global services will be automatically replicated across clusters.
               Clusters will be selected based on the tags and provider specified
-              (leave either blank if you don't want to filter on them).
+              (leave either blank if you don&apos;t want to filter on them).
             </StepBody>
             <StepBody>
               <StepH css={{ display: 'inline' }}>Service:</StepH>{' '}

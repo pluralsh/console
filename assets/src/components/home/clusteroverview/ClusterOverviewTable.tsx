@@ -1,10 +1,4 @@
 import { Table } from '@pluralsh/design-system'
-import { ClustersRowFragment } from 'generated/graphql'
-import { ComponentProps } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
-import { Edge } from 'utils/graphql'
-import { Row } from '@tanstack/react-table'
 import {
   ColCluster,
   ColProvider,
@@ -14,6 +8,9 @@ import {
 } from 'components/cd/clusters/ClustersColumns'
 import { TableCaretLink } from 'components/cluster/TableElements'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
+import { ComponentProps } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
@@ -41,7 +38,7 @@ export function ClusterOverViewTable({
       columns={clusterOverviewColumns}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
       reactTableOptions={reactTableOptions}
-      onRowClick={(_e, { original }: Row<Edge<ClustersRowFragment>>) =>
+      onRowClick={(_e, { original }) =>
         navigate(
           getClusterDetailsPath({
             clusterId: original.node?.id,

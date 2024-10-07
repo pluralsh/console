@@ -91,7 +91,7 @@ export default function Build({ build }) {
         <div>
           <TimeFromNow
             date={[insertedAt, completedAt]}
-            prefix={[<>Started:&nbsp;</>, <>Completed:&nbsp;</>]}
+            prefix={['Started: ', 'Completed: '] as any}
             endContent={humanizeDur(
               new Date(completedAt).getTime() - new Date(insertedAt).getTime()
             )}

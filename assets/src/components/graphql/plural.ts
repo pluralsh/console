@@ -1,8 +1,8 @@
 import { gql } from 'apollo-boost'
 
 import { ConfigurationOverlayFragment, LogFilterFragment } from './kubernetes'
-import { PageInfo } from './base'
-import { BuildFragment } from './builds'
+import { PageInfo } from './base.js'
+import { BuildFragment } from './builds.js'
 
 export const RepositoryFragment = gql`
   fragment RepositoryFragment on Repository {

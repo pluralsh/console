@@ -1,9 +1,11 @@
-import { useOutletContext } from 'react-router-dom'
-import { ColumnDef } from '@tanstack/react-table'
-import { useMemo } from 'react'
-import { useTheme } from 'styled-components'
+import type { ColumnDef } from '@tanstack/react-table'
 import { Cluster } from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { useMemo } from 'react'
+import { useOutletContext } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
+import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
 
 import {
   ColCpuTotal,
@@ -13,15 +15,13 @@ import {
   ColName,
   ColRegion,
   ColStatus,
+  columnHelper,
   ColZone,
   NodesList,
   TableData,
-  columnHelper,
 } from '../../cluster/nodes/NodesList'
 import { TableCaretLink } from '../../cluster/TableElements'
-import { getNodeDetailsPath } from '../../../routes/cdRoutesConsts'
-import { useDeploymentSettings } from '../../contexts/DeploymentSettingsContext'
-import { ClusterMetrics } from '../../cluster/nodes/ClusterMetrics'
+import { useMetricsEnabled } from '../../contexts/DeploymentSettingsContext'
 
 export const ColActions = (clusterId?: string) =>
   columnHelper.accessor(() => null, {
@@ -40,8 +40,7 @@ export const ColActions = (clusterId?: string) =>
 
 export default function ClusterNodes() {
   const theme = useTheme()
-  const metricsEnabled =
-    !!useDeploymentSettings()?.prometheusConnection ?? false
+  const metricsEnabled = useMetricsEnabled()
   const { cluster } = useOutletContext() as { cluster: Cluster }
 
   const columns: ColumnDef<TableData, any>[] = useMemo(

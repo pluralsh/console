@@ -246,7 +246,6 @@ const HelmValuesFilesInput = memo(
                 key={i}
                 className="displayContents"
               >
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                 <th>
                   <FormField
                     error={errors.duplicate}
@@ -266,7 +265,6 @@ const HelmValuesFilesInput = memo(
                     />
                   </FormField>
                 </th>
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
                 <th>
                   <DeleteIconButton
                     disabled={i === 0 && !valuesFile}

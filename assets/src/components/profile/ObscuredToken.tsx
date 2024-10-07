@@ -17,9 +17,12 @@ export function ObscuredToken({
 }) {
   length = length || 0 > 0 ? length || 0 : (token || '').length
 
-  const firstCount = Math.min(length, (showFirst || 0) > 0 ? showFirst ?? 0 : 0)
+  const firstCount = Math.min(
+    length,
+    (showFirst || 0) > 0 ? (showFirst ?? 0) : 0
+  )
   const lastCount = Math.min(
-    (showLast || 0) > 0 ? showLast ?? 0 : 0,
+    (showLast || 0) > 0 ? (showLast ?? 0) : 0,
     Math.max(length - firstCount, 0)
   )
   const theme = useTheme()

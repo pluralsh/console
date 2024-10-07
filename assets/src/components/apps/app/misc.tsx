@@ -66,7 +66,7 @@ export function ListItem({
       onClick={onClick}
       {...props}
     >
-      <ListItemBorder color={borderColor} />
+      <ListItemBorder $color={borderColor} />
       <LeftContainer>
         {icon && (
           <IconFrame

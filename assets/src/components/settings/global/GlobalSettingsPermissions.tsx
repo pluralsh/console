@@ -71,8 +71,8 @@ function GlobalSettingsPermissionsCard({
           return group
             ? { groupId: group.id }
             : user
-            ? { userId: user.id }
-            : null
+              ? { userId: user.id }
+              : null
         })
         .filter(isNonNullable)
 

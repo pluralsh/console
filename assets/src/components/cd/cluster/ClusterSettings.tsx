@@ -6,20 +6,20 @@ import {
   Modal,
   Switch,
 } from '@pluralsh/design-system'
-import { ComponentProps, useMemo, useState } from 'react'
-import isEqual from 'lodash/isEqual'
-import { useTheme } from 'styled-components'
+
+import { useUpdateState } from 'components/hooks/useUpdateState'
+
+import { GqlError } from 'components/utils/Alert'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import {
   ClusterFragment,
   ClustersRowFragment,
   useUpdateClusterMutation,
 } from 'generated/graphql'
-
-import { GqlError } from 'components/utils/Alert'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
-
-import { useUpdateState } from 'components/hooks/useUpdateState'
+import isEqual from 'lodash/isEqual'
+import { ComponentProps, useMemo, useState } from 'react'
+import { useTheme } from 'styled-components'
 
 import { tagsToNameValue } from '../services/CreateGlobalService'
 import { TagSelection } from '../services/TagSelection'

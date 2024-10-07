@@ -1,4 +1,4 @@
-/* eslint-disable no-useless-escape */
+import { expect } from 'vitest'
 import { parseScript, splitCommand } from './cmdLineParse'
 
 describe('parseScript', () => {

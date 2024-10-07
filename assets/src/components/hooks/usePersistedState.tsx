@@ -19,7 +19,7 @@ function usePersistedState<T>(
       const item = localStorage.getItem(`plural-${key}`)
 
       if (item) return parser(JSON.parse(item))
-    } catch (error) {
+    } catch (_) {
       console.error('Error on localStorage.getItem of', key)
     }
 

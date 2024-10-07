@@ -1,5 +1,6 @@
 import {
   ComponentProps,
+  ReactNode,
   Ref,
   forwardRef,
   useCallback,
@@ -110,8 +111,8 @@ export const SplitPane = forwardRef(
       ...props
     }: {
       id: string
-      pane1: React.ReactNode
-      pane2: React.ReactNode
+      pane1: ReactNode
+      pane2: ReactNode
     } & ComponentProps<typeof SplitPaneSC>,
     parentRef: Ref<HTMLDivElement>
   ) => {
@@ -180,7 +181,7 @@ export const SplitPane = forwardRef(
             e.stopPropagation()
             setDragging(true)
           }}
-          onKeyDown={(e: KeyboardEvent) => {
+          onKeyDown={(e) => {
             if (e.key === 'ArrowDown') {
               setSplit((prev) =>
                 Math.min(

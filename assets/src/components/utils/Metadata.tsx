@@ -8,8 +8,8 @@ const MAX_COLS = 4
 
 export const CARD_CONTENT_MAX_WIDTH = 1526
 
-const MetadataGridGrid = styled.div<{ maxCols: number }>(
-  ({ theme, maxCols = MAX_COLS }) => ({
+const MetadataGridGrid = styled.div<{ $maxCols: number }>(
+  ({ theme, $maxCols: maxCols = MAX_COLS }) => ({
     ...makeGrid({
       maxCols,
       minColWidth: 186,
@@ -44,7 +44,7 @@ export function MetadataGrid(props) {
   return (
     <MetadataCard>
       <MetadataGridGrid
-        maxCols={maxCols}
+        $maxCols={maxCols}
         {...props}
       />
     </MetadataCard>

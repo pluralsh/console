@@ -9,7 +9,7 @@ export function CustomLegend({
     <LegendWrapperSC>
       {data.map((item, index) => (
         <LegendItemSC key={index}>
-          <LegendSymbolSC color={item.color} />
+          <LegendSymbolSC $color={item.color} />
           <LegendTextSC>
             {`${item.value ?? ''} `}
             {item.label}
@@ -29,12 +29,14 @@ const LegendItemSC = styled.div({
   display: 'flex',
   alignItems: 'center',
 })
-const LegendSymbolSC = styled.div<{ color: string }>(({ color, theme }) => ({
-  backgroundColor: color,
-  borderRadius: '50%',
-  height: theme.spacing.xsmall,
-  width: theme.spacing.xsmall,
-}))
+const LegendSymbolSC = styled.div<{ $color: string }>(
+  ({ $color: color, theme }) => ({
+    backgroundColor: color,
+    borderRadius: '50%',
+    height: theme.spacing.xsmall,
+    width: theme.spacing.xsmall,
+  })
+)
 const LegendTextSC = styled.span(({ theme }) => ({
   marginLeft: theme.spacing.xsmall,
   minWidth: 'fit-content',

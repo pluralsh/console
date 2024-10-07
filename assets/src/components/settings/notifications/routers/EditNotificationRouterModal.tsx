@@ -184,7 +184,7 @@ function EditNotificationRouterModalBase({
         <FormField label="Events">
           <List>
             {events.map((event) => (
-              <ListItem>{event}</ListItem>
+              <ListItem key={event}>{event}</ListItem>
             ))}
           </List>
         </FormField>

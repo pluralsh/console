@@ -57,8 +57,8 @@ export function SideNavEntries({
               (docPageContext?.selectedHash === docPageRootHash ||
                 !docPageContext?.selectedHash)
             : type === 'docPageHash'
-            ? isInCurrentPath && docPageContext?.selectedHash === id
-            : isInCurrentPath
+              ? isInCurrentPath && docPageContext?.selectedHash === id
+              : isInCurrentPath
 
         return (
           <TreeNavEntry
@@ -73,12 +73,12 @@ export function SideNavEntries({
                   },
                 }
               : type === 'docPage'
-              ? {
-                  onClick: () => {
-                    docPageContext?.scrollToHash?.(docPageRootHash)
-                  },
-                }
-              : {})}
+                ? {
+                    onClick: () => {
+                      docPageContext?.scrollToHash?.(docPageRootHash)
+                    },
+                  }
+                : {})}
           >
             {subpaths && !isEmpty(subpaths) ? (
               <SideNavEntries

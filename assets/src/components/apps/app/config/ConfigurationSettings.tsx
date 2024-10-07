@@ -1,7 +1,7 @@
+import { useMutation } from '@apollo/client'
+import { load } from 'js-yaml'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@apollo/client'
-import yaml from 'js-yaml'
 
 import { Button, Card, ListBoxItem, Select } from '@pluralsh/design-system'
 
@@ -11,8 +11,8 @@ import isEqualWith from 'lodash/isEqualWith'
 
 import { omitBy } from 'lodash'
 
-import { EXECUTE_OVERLAY } from './queries'
 import ConfigurationSettingsField from './ConfigurationSettingsField'
+import { EXECUTE_OVERLAY } from './queries'
 
 function organizeOverlays(overlays) {
   return overlays.reduce((acc, overlay) => {
@@ -43,7 +43,7 @@ export function ConfigurationSettings({
     onCompleted,
   })
 
-  const values = useMemo(() => yaml.load(helm), [helm])
+  const values = useMemo(() => load(helm), [helm])
   const folders = useMemo(() => organizeOverlays(overlays), [overlays])
   const [folder, setFolder] = useState<any>(Object.keys(folders)[0])
   const [subfolder, setSubfolder] = useState<any>(

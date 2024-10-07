@@ -1,4 +1,4 @@
-import React, { ReactNode, useMemo } from 'react'
+import { ReactNode, useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
 import { getResourceDetailsAbsPath } from '../../../routes/kubernetesRoutesConsts'

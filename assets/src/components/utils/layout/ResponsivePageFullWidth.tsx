@@ -13,7 +13,8 @@ export const ResponsivePageFullWidth = forwardRef(
       ...props
     }: { scrollable?: boolean; style?: CSSProperties } & ComponentProps<
       typeof ResponsiveLayoutPage
-    >,
+    > &
+      ComponentProps<typeof ScrollablePage>,
     ref: Ref<HTMLDivElement>
   ) => (
     <ResponsiveLayoutPage

@@ -45,7 +45,7 @@ const ExpandedItemDivider = styled.div.attrs(() => ({ 'aria-hidden': true }))(
   ({ theme }) => ({
     gridColumn: '1 / -1',
     borderBottom: theme.borders['fill-two'],
-    ...{ ':last-child': { display: 'none' } },
+    ...{ '&:last-child': { display: 'none' } },
   })
 )
 
@@ -75,7 +75,7 @@ const ChipList = styled.div(({ theme }) => ({
 const RunbookAlertWrapper = styled.div<{ $isOpen: boolean }>(
   ({ theme, $isOpen }) => ({
     ...{
-      ':not(:last-child)': {
+      '&:not(:last-child)': {
         borderBottom: $isOpen
           ? theme.borders['fill-two']
           : theme.borders.default,
@@ -89,7 +89,7 @@ const RunbookAlertWrapper = styled.div<{ $isOpen: boolean }>(
       cursor: 'pointer',
       textDecoration: 'none',
       width: '100%',
-      ':hover': { backgroundColor: theme.colors['fill-one-hover'] },
+      '&:hover': { backgroundColor: theme.colors['fill-one-hover'] },
       '.info': {
         flexGrow: 1,
         marginLeft: theme.spacing.small,

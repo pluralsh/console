@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { GearTrainIcon, IconFrame } from '@pluralsh/design-system'
 
 import { StackEnvironment } from '../../../generated/graphql'

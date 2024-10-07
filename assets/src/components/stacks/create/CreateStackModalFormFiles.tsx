@@ -127,8 +127,8 @@ export function CreateStackModalFormFiles({
                   errors.noPath
                     ? 'Path cannot be empty'
                     : errors.duplicate
-                    ? 'Duplicate path'
-                    : undefined
+                      ? 'Duplicate path'
+                      : undefined
                 }
               >
                 <Input

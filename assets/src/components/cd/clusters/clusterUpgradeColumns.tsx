@@ -9,7 +9,7 @@ import {
 } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { ApolloError } from '@apollo/client'
 import isEmpty from 'lodash/isEmpty'
 

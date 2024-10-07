@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import Anser from 'anser'
 import { escapeCarriageReturn } from 'escape-carriage'
 
@@ -34,7 +34,7 @@ export function AnsiLine({ line }) {
   )
 }
 
-export const AnsiText = React.memo(({ text }: any) => {
+export const AnsiText = memo(({ text }: any) => {
   if (!text) return null
 
   return text.split(/\r?\n/).map((line, ind) => (

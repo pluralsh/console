@@ -1,9 +1,11 @@
-import { createContext, useContext, useMemo } from 'react'
+import { createContext, ReactNode, useContext, useMemo } from 'react'
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   DeploymentSettingsFragment,
   useDeploymentSettingsQuery,
 } from 'generated/graphql'
+
+import { isValidURL } from '../../utils/url'
 
 const DeploymentSettingsContext = createContext<
   DeploymentSettingsFragment | undefined | null
@@ -18,19 +20,19 @@ export function useDeploymentSettings() {
 export function useLogsEnabled() {
   const ctx = useDeploymentSettings()
 
-  return !!ctx?.lokiConnection
+  return isValidURL(ctx?.lokiConnection?.host ?? '')
 }
 
 export function useMetricsEnabled() {
   const ctx = useDeploymentSettings()
 
-  return !!ctx?.prometheusConnection
+  return isValidURL(ctx?.prometheusConnection?.host ?? '')
 }
 
 export function DeploymentSettingsProvider({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   const { data } = useDeploymentSettingsQuery({
     pollInterval: POLL_INTERVAL,

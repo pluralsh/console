@@ -15,7 +15,7 @@ import {
   Modal,
   Table,
 } from '@pluralsh/design-system'
-import React, { Dispatch, ReactNode, SetStateAction, useState } from 'react'
+import { Dispatch, ReactNode, SetStateAction, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import moment from 'moment'
 
@@ -131,8 +131,8 @@ export function ServicesTreeDiagramServiceNode(
         data.status === ServiceDeploymentStatus.Failed
           ? theme.colors['border-danger']
           : data.status === ServiceDeploymentStatus.Stale
-          ? theme.colors['border-warning']
-          : undefined
+            ? theme.colors['border-warning']
+            : undefined
       }
       gap={0}
       padding={0}
@@ -370,7 +370,7 @@ function ServicesTreeDiagramServiceNodeModal({
           <Table
             columns={columns}
             data={service.components ?? []}
-            onRowClick={(e, { original }) =>
+            onRowClick={(_e, { original }) =>
               navigate(
                 getServiceComponentPath({
                   componentId: original.id,

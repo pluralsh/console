@@ -7,7 +7,7 @@ import {
   Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'

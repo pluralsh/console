@@ -24,6 +24,7 @@ import {
 
 import { prColumns } from './PrQueueColumns'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const PR_STATUS_TAB_KEYS = ['ALL', 'OPEN', 'CLOSED'] as const
 
 type PrStatusTabKey = (typeof PR_STATUS_TAB_KEYS)[number]
@@ -32,7 +33,7 @@ export default function OutstandingPrs() {
   const theme = useTheme()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useThrottle(searchString, 200)
-  const [_statusFilter, _setStatusFilter] = useState<PrStatusTabKey>('ALL')
+  const [_statusFilter, _setStatusFilter] = useState<PrStatusTabKey>()
 
   useSetBreadcrumbs(
     useMemo(

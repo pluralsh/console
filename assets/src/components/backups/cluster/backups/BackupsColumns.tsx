@@ -87,7 +87,6 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
   header: '',
   meta: { gridTemplate: `fit-content(100px)` },
   cell: function ActionColumn({ getValue }) {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const backup = getValue()
     const navigate = useNavigate()
     const theme = useTheme()

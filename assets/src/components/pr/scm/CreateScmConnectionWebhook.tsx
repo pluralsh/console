@@ -167,8 +167,8 @@ export function ScmConnectionWebhookForm({
         connection?.type === ScmType.Github
           ? (`${scmTypeToLabel[connection.type]} organization` as const)
           : connection?.type === ScmType.Gitlab
-          ? (`${scmTypeToLabel[connection.type]} group` as const)
-          : 'Owner'
+            ? (`${scmTypeToLabel[connection.type]} group` as const)
+            : 'Owner'
       }
       required
     >

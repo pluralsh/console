@@ -94,7 +94,7 @@ export default function Clusters() {
             fetchNextPage={fetchNextPage}
             isFetchingNextPage={loading}
             onVirtualSliceChange={setVirtualSlice}
-            onRowClick={(e, { original: { node } }) =>
+            onRowClick={(_e, { original: { node } }) =>
               navigate(getBackupsClusterAbsPath(node?.id))
             }
             css={{

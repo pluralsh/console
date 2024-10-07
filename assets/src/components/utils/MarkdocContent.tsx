@@ -1,8 +1,8 @@
-import React from 'react'
 import { getMdContent } from '@pluralsh/design-system/dist/markdoc'
 import { type RenderableTreeNode, renderers } from '@markdoc/markdoc'
 
 import { components, config } from 'markdoc/mdSchema'
+import React from 'react'
 
 export default function MarkdocComponent({
   raw,
@@ -26,6 +26,5 @@ export default function MarkdocComponent({
     },
   })
 
-  // eslint-disable-next-line react/jsx-no-useless-fragment
   return <>{node}</>
 }

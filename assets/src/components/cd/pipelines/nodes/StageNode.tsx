@@ -1,5 +1,3 @@
-import { useNavigate, useParams } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
 import {
   Button,
   Chip,
@@ -11,21 +9,22 @@ import {
   PrOpenIcon,
   Tooltip,
 } from '@pluralsh/design-system'
+import { produce } from 'immer'
+import { groupBy, mapValues } from 'lodash'
+import isEmpty from 'lodash/isEmpty'
+import upperFirst from 'lodash/upperFirst'
 import {
   ComponentProps,
-  ComponentPropsWithoutRef,
   FormEvent,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { type NodeProps } from 'reactflow'
-import isEmpty from 'lodash/isEmpty'
-import upperFirst from 'lodash/upperFirst'
+import styled, { useTheme } from 'styled-components'
 import { MergeDeep } from 'type-fest'
-import { produce } from 'immer'
-import { groupBy, mapValues } from 'lodash'
 
 import {
   PipelineContextsDocument,
@@ -37,10 +36,10 @@ import {
   useCreatePipelineContextMutation,
 } from 'generated/graphql'
 
-import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
 import {
   ServiceErrorsChip,
@@ -102,18 +101,6 @@ const ServiceCardSC = styled(StatusCard)(({ theme }) => ({
   },
 }))
 
-export function ServiceCard({
-  state,
-  ...props
-}: ComponentPropsWithoutRef<typeof ServiceCardSC>) {
-  return (
-    <ServiceCardSC
-      state={state}
-      {...props}
-    />
-  )
-}
-
 export function getStageStatus(stage: PipelineStageFragment) {
   return (stage.services || []).every(
     (svc) => svc?.service?.status === ServiceDeploymentStatus.Healthy
@@ -167,7 +154,7 @@ function PrsButton({
           clickable
           onClick={(e) => {
             setOpen(true)
-            e.target?.blur()
+            ;(e.target as HTMLElement)?.blur()
           }}
           icon={<PrOpenIcon />}
           tooltip={
@@ -277,7 +264,7 @@ export function StageNode(
 
               return (
                 <li key={serviceId}>
-                  <ServiceCard
+                  <ServiceCardSC
                     fillLevel={0}
                     clickable
                     onClick={() => {
@@ -327,7 +314,7 @@ export function StageNode(
                         </div>
                       )}
                     </div>
-                  </ServiceCard>
+                  </ServiceCardSC>
                 </li>
               )
             })}
@@ -413,7 +400,7 @@ function AddContextModal({
       }
       try {
         JSON.parse(json)
-      } catch (e) {
+      } catch (_) {
         setJsonError('Invalid JSON')
 
         return

@@ -1,7 +1,6 @@
-import React from 'react'
-
 import gql from 'graphql-tag'
 import { useQuery } from '@apollo/client'
+import { createContext } from 'react'
 
 const ME_Q = gql`
   query {
@@ -23,7 +22,7 @@ const ME_Q = gql`
 `
 
 // const POLL_INTERVAL=30000
-export const CurrentUserContext = React.createContext({})
+export const CurrentUserContext = createContext({})
 
 export default function CurrentUser({ children }) {
   const { loading, error, data } = useQuery(ME_Q)

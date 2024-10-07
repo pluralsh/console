@@ -93,8 +93,8 @@ const StatusPanelHeader = styled.div({
   lineHeight: '24px',
 })
 
-const AppStatusWrap = styled.div<{ last: boolean }>(
-  ({ theme, last = false }) => ({
+const AppStatusWrap = styled.div<{ $last: boolean }>(
+  ({ theme, $last: last = false }) => ({
     alignItems: 'center',
     cursor: 'pointer',
     borderBottom: !last ? theme.borders['fill-two'] : undefined,
@@ -208,7 +208,7 @@ export function StatusPanel({ statuses, open, onClose }) {
               onClose()
               navigate(`/apps/${app.name}`)
             }}
-            last={i === apps.length - 1}
+            $last={i === apps.length - 1}
           >
             {hasIcons(app) && <AppIcon src={getIcon(app, theme.mode)} />}
             <AppName>{app.name}</AppName>

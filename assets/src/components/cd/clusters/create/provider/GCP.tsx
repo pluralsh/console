@@ -7,6 +7,7 @@ import { RegionsForProvider } from '../helpers'
 import { ProviderCloud } from '../types'
 import { CloudSettings, useCreateClusterContext } from '../CreateCluster'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const CLOUD = ProviderCloud.GCP as const
 
 const requiredProps: (keyof CloudSettings<typeof CLOUD>)[] = ['region']

@@ -6,7 +6,7 @@ import {
   ListBoxItem,
   Select,
 } from '@pluralsh/design-system'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { useOutletContext, useParams } from 'react-router-dom'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { useTheme } from 'styled-components'

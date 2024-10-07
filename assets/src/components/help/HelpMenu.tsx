@@ -48,12 +48,9 @@ const HelpMenuSC = styled(Card)(({ theme }) => ({
 export function HelpMenu({
   changeState,
   ...props
-}: Merge<
-  ComponentProps<typeof HelpMenuSC>,
-  {
-    changeState: (menuState?: HelpMenuState, openState?: HelpOpenState) => void
-  }
->) {
+}: ComponentProps<typeof HelpMenuSC> & {
+  changeState: (menuState?: HelpMenuState, openState?: HelpOpenState) => void
+}) {
   const theme = useTheme()
 
   return (

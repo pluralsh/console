@@ -6,7 +6,7 @@ import {
 } from '@pluralsh/design-system'
 import { Link, useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
-import React, {
+import {
   ComponentProps,
   createContext,
   memo,

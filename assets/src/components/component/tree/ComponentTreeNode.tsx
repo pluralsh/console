@@ -61,7 +61,7 @@ export function ComponentTreeNode({
         padding: `${theme.spacing.xsmall}px ${theme.spacing.medium}px`,
         gap: theme.spacing.medium,
         width: 240,
-        ':hover': {
+        '&:hover': {
           backgroundColor:
             theme.mode === 'light'
               ? theme.colors['fill-two-hover']

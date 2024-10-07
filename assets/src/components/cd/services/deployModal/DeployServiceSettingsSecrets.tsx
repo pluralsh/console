@@ -85,7 +85,6 @@ export function DeployServiceSettingsSecrets({
             <tr />
             <th>Name</th>
             <th>Value</th>
-            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
             <th />
           </thead>
 
@@ -95,7 +94,6 @@ export function DeployServiceSettingsSecrets({
               key={i}
               className="displayContents"
             >
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
               <th>
                 <FormField
                   error={errors.duplicate || errors.noName}
@@ -103,8 +101,8 @@ export function DeployServiceSettingsSecrets({
                     errors.noName
                       ? 'Name cannot be empty'
                       : errors.duplicate
-                      ? 'Duplicate name'
-                      : undefined
+                        ? 'Duplicate name'
+                        : undefined
                   }
                 >
                   <Input
@@ -121,7 +119,6 @@ export function DeployServiceSettingsSecrets({
                   />
                 </FormField>
               </th>
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
               <th>
                 <InputRevealer
                   defaultRevealed={false}
@@ -136,7 +133,6 @@ export function DeployServiceSettingsSecrets({
                   }
                 />
               </th>
-              {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
               <th>
                 <DeleteIconButton
                   css={{ marginTop: 4 }}

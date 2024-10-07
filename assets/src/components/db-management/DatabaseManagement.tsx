@@ -68,7 +68,7 @@ const ListBoxFooterPlusInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
 const NamespaceListFooter = forwardRef<
-  HTMLDivElement,
+  HTMLButtonElement,
   Omit<ListBoxFooterProps, 'children'>
 >(({ leftContent, ...props }, ref) => {
   const theme = useTheme()

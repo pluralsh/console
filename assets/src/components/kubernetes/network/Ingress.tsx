@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo } from 'react'
+import { ReactElement, useMemo } from 'react'
 import { Outlet, useOutletContext, useParams } from 'react-router-dom'
 import {
   Card,
@@ -195,11 +195,10 @@ export function IngressInfo(): ReactElement {
   const tls = useMemo(() => {
     const map = new Map<string, string | undefined>()
 
-    ingress.spec.tls?.forEach(
-      (spec) =>
-        spec?.hosts?.forEach((host) => {
-          if (host) map.set(host, spec.secretName ?? undefined)
-        })
+    ingress.spec.tls?.forEach((spec) =>
+      spec?.hosts?.forEach((host) => {
+        if (host) map.set(host, spec.secretName ?? undefined)
+      })
     )
 
     return map
@@ -208,16 +207,15 @@ export function IngressInfo(): ReactElement {
   const rules = useMemo(
     () =>
       (ingress.spec.rules ?? [])
-        .map(
-          (rule) =>
-            rule?.http?.paths.map(
-              (specPath) =>
-                ({
-                  host: rule.host || '',
-                  path: specPath,
-                  tlsSecretName: rule.host ? tls.get(rule.host) || '' : '',
-                }) as IngressRuleFlatT
-            )
+        .map((rule) =>
+          rule?.http?.paths.map(
+            (specPath) =>
+              ({
+                host: rule.host || '',
+                path: specPath,
+                tlsSecretName: rule.host ? tls.get(rule.host) || '' : '',
+              }) as IngressRuleFlatT
+          )
         )
         .flat(),
     [ingress.spec.rules, tls]

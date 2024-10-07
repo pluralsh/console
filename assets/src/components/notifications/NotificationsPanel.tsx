@@ -1,5 +1,5 @@
 import { useTheme } from 'styled-components'
-import React, { ComponentProps, useMemo } from 'react'
+import { ComponentProps, useMemo } from 'react'
 import {
   Button,
   Card,

@@ -1,6 +1,6 @@
-import { ReactElement } from 'react'
 import { Chip, ChipList, CloseIcon, Code } from '@pluralsh/design-system'
-import yaml from 'js-yaml'
+import { dump } from 'js-yaml'
+import { ReactElement } from 'react'
 
 import {
   Pod_Container as ContainerT,
@@ -290,7 +290,7 @@ function Probe({
           `${probe?.grpc?.service}:${probe?.grpc?.port}`}
       </ResourceInfoCardEntry>
       <ResourceInfoCardEntry heading="HTTP Get">
-        {probe?.httpGet && <Code>{yaml.dump(probe?.httpGet)}</Code>}
+        {probe?.httpGet && <Code>{dump(probe?.httpGet)}</Code>}
       </ResourceInfoCardEntry>
       <ResourceInfoCardEntry heading="TCP socket">
         {probe?.tcpSocket?.host &&

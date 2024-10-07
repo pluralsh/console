@@ -7,8 +7,8 @@ type BillingFeatureBlockBannerPropsType = {
   placeholderImageURL?: string
 }
 
-const Wrapper = styled.div<{ backgroundImage?: string }>(
-  ({ theme, backgroundImage }) => ({
+const Wrapper = styled.div<{ $backgroundImage?: string }>(
+  ({ theme, $backgroundImage: backgroundImage }) => ({
     display: 'flex',
     flexDirection: 'column',
     flexGrow: 1,
@@ -47,7 +47,7 @@ export default function BillingFeatureBlockBanner({
   const theme = useTheme()
 
   return (
-    <Wrapper backgroundImage={placeholderImageURL}>
+    <Wrapper $backgroundImage={placeholderImageURL}>
       <Card
         css={{ padding: theme.spacing.large }}
         fillLevel={2}

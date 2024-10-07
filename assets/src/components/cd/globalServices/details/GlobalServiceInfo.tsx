@@ -13,7 +13,7 @@ import {
   Modal,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import React, { ComponentProps, ReactElement, useMemo, useState } from 'react'
+import { ComponentProps, ReactElement, useMemo, useState } from 'react'
 import { useNavigate, useOutletContext } from 'react-router-dom'
 
 import isEqual from 'lodash/isEqual'

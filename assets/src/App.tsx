@@ -1,5 +1,3 @@
-import { ReactNode } from 'react'
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
 import { ApolloProvider } from '@apollo/client'
 import { mergeDeep } from '@apollo/client/utilities'
 import {
@@ -10,20 +8,26 @@ import {
   styledThemeLight,
   useThemeColorMode,
 } from '@pluralsh/design-system'
+import { ReactNode } from 'react'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import { CssBaseline, ThemeProvider } from 'honorable'
-import { ThemeProvider as StyledThemeProvider } from 'styled-components'
+import {
+  ThemeProvider as StyledThemeProvider,
+  StyleSheetManager,
+} from 'styled-components'
 
 import DocSearchStyles from 'components/help/DocSearchStyles'
 import { OverlayContextProvider } from 'components/layout/Overlay'
 
-import { DEFAULT_THEME } from './theme'
-import 'react-toggle/style.css'
 import 'react-pulse-dot/dist/index.css'
+import 'react-toggle/style.css'
 import { client } from './helpers/client'
 import { rootRoutes } from './routes/rootRoutes'
+import { DEFAULT_THEME } from './theme'
 
 import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
+import { shouldForwardProp } from 'utils/shouldForwardProp'
 
 const router = createBrowserRouter(rootRoutes)
 
@@ -47,14 +51,16 @@ function ThemeProviders({ children }: { children: ReactNode }) {
 
   return (
     <ThemeProvider theme={honorableTheme}>
-      <StyledThemeProvider theme={mergedStyledTheme}>
-        <OverlayContextProvider>
-          <CssBaseline />
-          <GlobalStyle />
-          <DocSearchStyles />
-          <PluralErrorBoundary>{children}</PluralErrorBoundary>
-        </OverlayContextProvider>
-      </StyledThemeProvider>
+      <StyleSheetManager shouldForwardProp={shouldForwardProp}>
+        <StyledThemeProvider theme={mergedStyledTheme}>
+          <OverlayContextProvider>
+            <CssBaseline />
+            <GlobalStyle />
+            <DocSearchStyles />
+            <PluralErrorBoundary>{children}</PluralErrorBoundary>
+          </OverlayContextProvider>
+        </StyledThemeProvider>
+      </StyleSheetManager>
     </ThemeProvider>
   )
 }

@@ -1,7 +1,7 @@
 /** Union of primitives to skip with deep omit utilities. */
 type Primitive =
   | string
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
   | Function
   | number
   | boolean
@@ -13,11 +13,11 @@ type Primitive =
 export type DeepOmit<T, K extends keyof any> = T extends Primitive
   ? T
   : T extends any[]
-  ? {
-      [P in keyof T]: DeepOmit<T[P], K>
-    }
-  : {
-      [P in Exclude<keyof T, K>]: T[P] extends infer TP // Distribute over unions
-        ? DeepOmit<TP, K>
-        : never
-    }
+    ? {
+        [P in keyof T]: DeepOmit<T[P], K>
+      }
+    : {
+        [P in Exclude<keyof T, K>]: T[P] extends infer TP // Distribute over unions
+          ? DeepOmit<TP, K>
+          : never
+      }

@@ -1,8 +1,7 @@
 import { ListBoxItem, Tooltip } from '@pluralsh/design-system'
-import { CellContext } from '@tanstack/react-table'
+import { CellContext, ColumnDefTemplate } from '@tanstack/react-table'
 import { Div } from 'honorable'
 import { Dispatch, useContext, useMemo, useState } from 'react'
-import { ColumnDefTemplate } from '@tanstack/table-core/src/types'
 import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import styled from 'styled-components'
 

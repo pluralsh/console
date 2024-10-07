@@ -86,7 +86,7 @@ export default function AppCard({ app }: any) {
       className={`app-${name}`}
       onClick={() => navigate(`/apps/${name}`)}
     >
-      <ListItemBorder color={borderColor} />
+      <ListItemBorder $color={borderColor} />
       <div
         css={{
           display: 'flex',

@@ -7,8 +7,8 @@ function UsageBarUnstyled({ usage, ...props }: { usage: number }) {
     usage > 0.9
       ? theme.colors['icon-danger']
       : usage > 0.75
-      ? theme.colors['border-warning']
-      : theme.colors['icon-success']
+        ? theme.colors['border-warning']
+        : theme.colors['icon-success']
 
   return (
     <ProgressBar

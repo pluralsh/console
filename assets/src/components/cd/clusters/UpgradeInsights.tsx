@@ -2,7 +2,7 @@ import { Row, createColumnHelper } from '@tanstack/react-table'
 import { UpgradeInsight, UpgradeInsightStatus } from 'generated/graphql'
 import { Chip, CollapseIcon } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
-import React, { ComponentProps } from 'react'
+import { ComponentProps } from 'react'
 import { useTheme } from 'styled-components'
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 

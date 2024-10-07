@@ -163,7 +163,6 @@ export function updateCache(cache, { query, variables, update }: any) {
   cache.writeQuery({ query, variables, data: update(prev) })
 }
 
-// eslint-disable-next-line
 export const prune = ({ __typename, ...rest }) => rest
 
 export function deepFetch(map, path) {

@@ -10,11 +10,11 @@ import { useUpdateDeploymentSettingsMutation } from 'generated/graphql'
 import { useGlobalSettingsContext } from '../GlobalSettings'
 
 function filterIncomplete(attrs) {
-  for (const k in ['lokiConnection', 'prometheusConnection']) {
+  ;['lokiConnection', 'prometheusConnection'].forEach((k) => {
     if (!attrs[k]?.password) {
       delete attrs[k]
     }
-  }
+  })
 
   return attrs
 }
