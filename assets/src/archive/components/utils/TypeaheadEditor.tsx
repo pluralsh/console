@@ -10,8 +10,6 @@ import {
 } from 'slate-react'
 import { Emoji } from 'emoji-mart'
 
-import { EntityType } from '../incidents/types'
-
 function Portal({ children }) {
   return ReactDOM.createPortal(children, document.body)
 }
@@ -65,7 +63,7 @@ export default function TypeaheadEditor({
 
   useEffect(() => {
     if (target && suggestions.length > 0) {
-      const el = ref.current
+      const el: any = ref.current
       const domRange = ReactEditor.toDOMRange(editor, target)
       const rect = domRange.getBoundingClientRect()
 
@@ -83,7 +81,7 @@ export default function TypeaheadEditor({
   return (
     <Slate
       editor={editor}
-      value={value}
+      initialValue={value}
       onChange={(value) => {
         setValue(value)
         const { selection } = editor

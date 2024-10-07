@@ -2,21 +2,22 @@
 // only so we could remove forge-core and grommet
 // this is only used by the old scroller component, which should be deprecated replaced with a table at some point
 
-import * as React from 'react'
-import { findDOMNode } from 'react-dom'
+import { Component, createRef } from 'react'
 
 /**
  * Wraps a cell and measures its rendered content.
  * Measurements are stored in a per-cell cache.
  * Cached-content is not be re-measured.
  */
-export class CellMeasurer extends React.PureComponent {
+export class CellMeasurer extends Component<any, any> {
   static __internalCellMeasurerFlag = false
 
   _child = null
 
+  inputRef = createRef<HTMLElement>()
+  refreshOn = null
+
   componentDidMount() {
-    this.refreshOn = null
     this._maybeMeasureCell()
   }
 
@@ -36,8 +37,7 @@ export class CellMeasurer extends React.PureComponent {
   }
 
   _getCellMeasurements() {
-    // eslint-disable-next-line react/no-find-dom-node
-    const node = this._child || findDOMNode(this)
+    const node = this._child || (this.inputRef.current as HTMLElement)
 
     // TODO Check for a bad combination of fixedWidth and missing numeric width or vice versa with height
 

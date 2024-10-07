@@ -53,7 +53,6 @@ export function InstallationsProvider({ children }) {
 
   return (
     <InstallationContext.Provider
-      // eslint-disable-next-line react/jsx-no-constructed-context-values
       value={{ applications: data?.applications || [] }}
     >
       {children}

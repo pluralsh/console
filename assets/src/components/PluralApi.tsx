@@ -15,7 +15,8 @@ const API_CACHE = {}
 export function PluralApi({ children }) {
   const { token } = useContext(LoginContext)
   const { client, socket } = useMemo(() => {
-    if (API_CACHE[token]) return API_CACHE[token]
+    if (!token) return undefined
+    if (!!token && !!API_CACHE[token]) return API_CACHE[token]
     const res = buildClient(
       PLURAL_GQL,
       PLURAL_WSS,
@@ -31,7 +32,6 @@ export function PluralApi({ children }) {
   }, [token])
 
   return (
-    // eslint-disable-next-line react/jsx-no-constructed-context-values
     <PluralApiContext.Provider value={{ socket }}>
       <ApolloProvider client={client}>
         <CurrentUser>{children}</CurrentUser>

@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 
-import { MetricResponseFragment } from './dashboards'
+import { MetricResponseFragment } from './dashboards.js'
 import {
   DeploymentFragment,
   NodeFragment,

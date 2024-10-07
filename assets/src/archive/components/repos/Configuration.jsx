@@ -12,7 +12,7 @@ import {
 import Toggle from 'react-toggle'
 
 import { ModalHeader } from '../../../components/utils/Modal'
-import { INSTALL_RECIPE, RECIPE_Q } from '../../../components/graphql/plural'
+import { INSTALL_RECIPE, RECIPE_Q } from '../../../components/graphql/plural.js'
 
 import { LabelledInput } from '../../../components/utils/LabelledInput'
 import {
@@ -20,7 +20,7 @@ import {
   deepFetch,
   updateCache,
 } from '../../../utils/graphql'
-import { BUILDS_Q } from '../../../components/graphql/builds'
+import { BUILDS_Q } from '../../../components/graphql/builds.js'
 
 import { trimSuffix } from '../../../utils/array'
 

@@ -1,6 +1,6 @@
 import memoize from 'memoize-one'
 import {
-  PureComponent,
+  Component,
   memo,
   useCallback,
   useEffect,
@@ -12,12 +12,12 @@ import {
   FixedSizeList as FixedList,
   VariableSizeList as List,
 } from 'react-window'
-import { VariableSizeList } from 'react-window-reversed'
+import * as rwr from 'react-window-reversed'
 
-import { CellMeasurer } from './CellMeasurer'
+import { CellMeasurer } from './CellMeasurer.js'
 
-class SmartLoader extends PureComponent {
-  _listRef = null
+class SmartLoader extends Component<any, any> {
+  _listRef: any = null
 
   _lastRenderedStartIndex = -1
 
@@ -56,7 +56,7 @@ class SmartLoader extends PureComponent {
 
   _loadUnloadedRanges = (startIndex, stopIndex) => {
     // loadMoreRows was renamed to loadMoreItems in v1.0.3; will be removed in v2.0
-    // eslint-disable-next-line react/destructuring-assignment
+
     const loadMoreItems = this.props.loadMoreItems || this.props.loadMoreRows
     const promise = loadMoreItems()
 
@@ -114,7 +114,14 @@ function areEqual(prevProps, nextProps) {
   )
 }
 
-const Item = ({ index, mapper, isItemLoaded, placeholder, items, setSize }) => {
+const Item = ({
+  index,
+  mapper,
+  isItemLoaded,
+  placeholder,
+  items,
+  setSize,
+}: Partial<any>) => {
   if (!isItemLoaded(index)) {
     return placeholder && placeholder(index)
   }
@@ -139,8 +146,8 @@ const ItemWrapper = memo(
     },
     style,
     index,
-  }) => {
-    const [rowRef, setRowRef] = useState(null)
+  }: any) => {
+    const [rowRef, setRowRef] = useState<Nullable<HTMLDivElement>>()
     const item = items[index]
     const sizeCallback = useCallback(() => {
       if (rowRef) setSize(index, rowRef.getBoundingClientRect().height)
@@ -192,7 +199,11 @@ const ItemWrapper = memo(
 )
 
 const FixedItemWrapper = memo(
-  ({ data: { items, isItemLoaded, placeholder, mapper }, style, index }) => (
+  ({
+    data: { items, isItemLoaded, placeholder, mapper },
+    style,
+    index,
+  }: any) => (
     <div style={style}>
       <Item
         index={index}
@@ -275,7 +286,7 @@ export default function SmoothScroller({
       {({ onItemsRendered, ref }) => (
         <Autosizer>
           {({ height, width }) => (
-            <VariableSizeList
+            <rwr.VariableSizeList
               reversed
               height={height}
               width={width}
@@ -307,7 +318,7 @@ export default function SmoothScroller({
               {...props}
             >
               {ItemWrapper}
-            </VariableSizeList>
+            </rwr.VariableSizeList>
           )}
         </Autosizer>
       )}
@@ -442,7 +453,9 @@ export function FixedScroller({
                 items,
                 null,
                 width,
-                placeholder
+                placeholder,
+                null,
+                null
               )}
               onItemsRendered={onItemsRendered}
               ref={ref}

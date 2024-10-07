@@ -4,7 +4,7 @@ import { ModalHeader } from 'forge-core'
 import { Box, Text } from 'grommet'
 import { chunk } from 'lodash'
 
-import { RECIPES_Q } from '../../../components/graphql/plural'
+import { RECIPES_Q } from '../../../components/graphql/plural.js'
 import ProviderIcon from '../../../components/utils/Provider'
 
 import { MODAL_WIDTH, PROVIDER_WIDTH } from './constants'

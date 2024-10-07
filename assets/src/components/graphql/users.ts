@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost'
 
-import { PageInfo } from './base'
+import { PageInfo } from './base.js'
 
 export const UserFragment = gql`
   fragment UserFragment on User {
