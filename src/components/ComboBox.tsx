@@ -110,7 +110,6 @@ function OpenButton({
   buttonProps,
   ...props
 }: HTMLAttributes<HTMLDivElement> & {
-  isOpen?: boolean
   buttonRef: RefObject<any>
   buttonProps: AriaButtonProps
 }) {
@@ -157,7 +156,6 @@ function ComboBoxInput({
   buttonProps,
   showArrow = true,
   hasChips = false,
-  isOpen,
   onInputClick,
   loading,
   ...props
@@ -186,7 +184,6 @@ function ComboBoxInput({
       dropdownButton={
         showArrow ? (
           <OpenButton
-            isOpen={isOpen}
             buttonRef={buttonRef}
             buttonProps={buttonProps}
           />

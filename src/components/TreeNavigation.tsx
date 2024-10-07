@@ -177,7 +177,7 @@ function NavLink({
           paddingRight: 0,
         }}
         textDecoration="none"
-        {...(href ? { as: Link } : {})}
+        {...(href ? { as: Link, href } : {})}
         {...props}
       >
         <Div
