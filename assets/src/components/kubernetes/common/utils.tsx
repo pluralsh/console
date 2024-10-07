@@ -1,27 +1,27 @@
-import uniqWith from 'lodash/uniqWith'
-import { ReactNode, useMemo, useState } from 'react'
-import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { Chip, ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
-import moment from 'moment/moment'
-import yaml from 'js-yaml'
+import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
+import { dump } from 'js-yaml'
 import { capitalize } from 'lodash'
+import uniqWith from 'lodash/uniqWith'
+import moment from 'moment/moment'
+import { ReactNode, useMemo, useState } from 'react'
 
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
+import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
   Types_ListMeta as ListMetaT,
   Maybe,
   Types_ObjectMeta as ObjectMetaT,
   Types_TypeMeta as TypeMetaT,
 } from '../../../generated/graphql-kubernetes'
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
-import { KubernetesClusterFragment } from '../../../generated/graphql'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
+import { DateTimeCol } from '../../utils/table/DateTimeCol'
 
-import { Kind, Resource } from './types'
 import Annotations from './Annotations'
-import ResourceLink from './ResourceLink'
 import DeleteResourceButton from './DeleteResource'
+import ResourceLink from './ResourceLink'
+import { Kind, Resource } from './types'
 
 export const ITEMS_PER_PAGE = 25
 
@@ -215,7 +215,7 @@ export const useCodeTabs = (obj: Nullable<object>): Array<CodeTabData> =>
               key: 'yaml',
               label: 'YAML',
               language: 'yaml',
-              content: yaml.dump(obj),
+              content: dump(obj),
             },
             {
               key: 'json',

@@ -1,5 +1,7 @@
+import * as Dialog from '@radix-ui/react-dialog'
 import { Command } from 'cmdk'
 import { Dispatch, SetStateAction, useEffect, useState } from 'react'
+import { VisuallyHidden } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
 
 import { ModalWrapper } from '@pluralsh/design-system'
@@ -134,6 +136,9 @@ export default function CommandPaletteDialog({
       open={open}
       onOpenChange={setOpen}
     >
+      <VisuallyHidden>
+        <Dialog.Title>Command Palette</Dialog.Title>
+      </VisuallyHidden>
       <Command>
         <CommandPalette
           value={value}

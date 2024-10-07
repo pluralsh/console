@@ -1,9 +1,9 @@
+import { ApolloError } from '@apollo/client'
+import { CodeEditor } from '@pluralsh/design-system'
+import { dump, load } from 'js-yaml'
+import pluralize from 'pluralize'
 import { ReactElement, useEffect, useMemo, useState } from 'react'
 import { useMatch, useParams } from 'react-router-dom'
-import { CodeEditor } from '@pluralsh/design-system'
-import pluralize from 'pluralize'
-import yaml from 'js-yaml'
-import { ApolloError } from '@apollo/client'
 import { useTheme } from 'styled-components'
 
 import { GraphQLErrors } from '@apollo/client/errors'
@@ -18,10 +18,10 @@ import {
   useResourceUpdateMutation,
 } from '../../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
-import LoadingIndicator from '../../utils/LoadingIndicator'
 import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts'
-import { GqlError } from '../../utils/Alert'
 import { hash } from '../../../utils/sha'
+import { GqlError } from '../../utils/Alert'
+import LoadingIndicator from '../../utils/LoadingIndicator'
 
 export default function Raw(): ReactElement {
   const theme = useTheme()
@@ -54,7 +54,7 @@ export default function Raw(): ReactElement {
       kind,
       name,
       namespace,
-      input: yaml.load(current ?? '{}'),
+      input: load(current ?? '{}'),
     } as ResourceQueryVariables & NamespacedResourceQueryVariables,
   })
   const [mutation] = updateMutation({
@@ -80,7 +80,7 @@ export default function Raw(): ReactElement {
       return
     }
 
-    const current = yaml.dump(data?.handleGetResource?.Object)
+    const current = dump(data?.handleGetResource?.Object)
 
     setCurrent(current)
     calculateSHA(current)
@@ -121,7 +121,7 @@ export default function Raw(): ReactElement {
         saveLabel="Update"
         onSave={(v) => {
           try {
-            const input = yaml.load(v)
+            const input = load(v)
 
             setUpdating(true)
             mutation({

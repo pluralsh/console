@@ -8,18 +8,20 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['setupTests.ts'],
     root: 'src',
-    cache: {
-      dir: '../node_modules',
-    },
     coverage: {
       provider: 'istanbul',
       reportsDirectory: '../coverage',
     },
+    deps: {
+      inline: [
+        '@pluralsh/design-system',
+        'pluralsh-absinthe-socket-apollo-link',
+      ],
+    },
   },
-  plugins: [tsconfigPaths() as any],
-  optimizeDeps: {
-    include: ['pluralsh-absinthe-socket-apollo-link'],
-  },
+  cacheDir: '../node_modules/',
+  esbuild: { jsx: 'automatic' },
+  plugins: [tsconfigPaths()],
   resolve: {
     mainFields: ['module'],
   },

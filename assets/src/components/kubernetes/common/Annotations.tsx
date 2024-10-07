@@ -1,7 +1,7 @@
-import { ReactElement, useCallback, useState } from 'react'
 import { ChipList, Code, Modal } from '@pluralsh/design-system'
+import { ReactElement, useCallback, useState } from 'react'
 
-import yaml from 'js-yaml'
+import { dump } from 'js-yaml'
 
 interface AnnotationsProps {
   annotations: object
@@ -29,7 +29,7 @@ export default function Annotations({
               key: 'yaml',
               label: 'YAML',
               language: 'yaml',
-              content: yaml.dump(object),
+              content: dump(object),
             },
             {
               key: 'json',
