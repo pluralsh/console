@@ -123,8 +123,6 @@ export type {
 } from './components/AppList'
 export { AppList } from './components/AppList'
 export { default as Slider } from './components/Slider'
-export { default as PricingCalculator } from './components/pricingcalculator/PricingCalculator'
-export { default as PricingCalculatorExtended } from './components/pricingcalculator/PricingCalculatorExtended'
 export { default as Layer } from './components/Layer'
 export { Breadcrumbs } from './components/Breadcrumbs'
 export { DatePicker } from './components/DatePicker'
