@@ -15,4 +15,10 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    esbuildOptions: {
+      target: 'esnext',
+      format: 'esm',
+    },
+  },
 })

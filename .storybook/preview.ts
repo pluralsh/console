@@ -1,22 +1,37 @@
-import * as jest from 'jest-mock'
-
 import { type Preview } from '@storybook/react'
+import { fn } from '@storybook/test'
+import { themes } from '@storybook/theming'
 
+import { DEFAULT_COLOR_MODE } from '../src/theme'
 import themeDecorator from '../src/ThemeDecorator'
-import { COLOR_MODES, DEFAULT_COLOR_MODE } from '../src/theme'
 
-// @ts-expect-error
-window.jest = jest
+// Copied from https://github.com/storybookjs/storybook/blob/v8.2.5/code/core/src/theming/utils.ts
+const { window: globalWindow } = global
+
+export const getPreferredColorScheme = () => {
+  if (!globalWindow || !globalWindow.matchMedia) return 'light'
+
+  const isDarkThemePreferred = globalWindow.matchMedia(
+    '(prefers-color-scheme: dark)'
+  ).matches
+
+  if (isDarkThemePreferred) return 'dark'
+
+  return 'light'
+}
 
 const preview: Preview = {
   parameters: {
     layout: 'fullscreen',
-    actions: { argTypesRegex: '^on[A-Z].*' },
+    actions: { onClick: fn },
     controls: {
       matchers: {
         color: /(background|color)$/i,
         date: /Date$/,
       },
+    },
+    docs: {
+      theme: themes.dark,
     },
     options: {
       storySort: {
@@ -24,22 +39,35 @@ const preview: Preview = {
       },
     },
   },
+
   globalTypes: {
     theme: {
+      name: 'Toggle theme',
       description: 'Global theme for components',
-      defaultValue: DEFAULT_COLOR_MODE,
       toolbar: {
         // The label to show for this toolbar item
         title: 'Theme',
         icon: 'circlehollow',
         // Array of plain string values or MenuItem shape (see below)
-        items: COLOR_MODES,
+        items: [
+          { value: 'light', icon: 'circlehollow', title: 'Light' },
+          { value: 'dark', icon: 'circle', title: 'Dark' },
+        ],
         // Change title based on selected value
         dynamicTitle: true,
+        showName: true,
       },
     },
   },
+
+  initialGlobals: {
+    theme: DEFAULT_COLOR_MODE,
+  },
+
   decorators: [themeDecorator],
+
+  // TODO: Enable if we need autodocs
+  // tags: ['autodocs'],
 }
 
 export default preview

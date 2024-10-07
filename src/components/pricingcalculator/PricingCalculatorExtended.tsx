@@ -1,6 +1,8 @@
 import { forwardRef, useEffect, useMemo, useState } from 'react'
 import { Switch } from 'honorable'
 
+import { useTheme } from 'styled-components'
+
 import Card, { type CardProps } from '../Card'
 
 import {
@@ -39,6 +41,7 @@ const PricingCalculatorExtended = forwardRef<
     },
     ref
   ) => {
+    const theme = useTheme()
     const [providerId, setProviderId] = useState(PROVIDERS[0].id)
     const [clusters, setClusters] = useState(clustersDefault)
     const [apps, setApps] = useState(appsDefault)
@@ -73,9 +76,11 @@ const PricingCalculatorExtended = forwardRef<
 
     return (
       <Card
-        padding="xlarge"
-        {...props}
+        css={{
+          padding: theme.spacing.xlarge,
+        }}
         ref={ref}
+        {...props}
       >
         <PricingCalculatorContainerQuery>
           <PricingCalculatorWrap>

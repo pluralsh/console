@@ -1,5 +1,4 @@
 import { type ComponentProps, type Key, useMemo, useState } from 'react'
-
 import styled, { useTheme } from 'styled-components'
 
 import {
@@ -12,13 +11,7 @@ import {
   SelectButton,
   type SelectPropsSingle,
 } from '..'
-
 import { isNonNullable } from '../utils/isNonNullable'
-
-export type MultiSelectTag = {
-  name: string
-  value: string
-}
 
 const matchOptions = [
   { label: 'All', value: 'AND' },
@@ -28,11 +21,11 @@ const matchOptions = [
 type TagMultiSelectProps = {
   options: string[]
   loading: boolean
+  selectedTagKeys: Set<Key>
+  setSelectedTagKeys: (keys: Set<Key>) => void
+  inputValue: string
+  setInputValue: (value: string) => void
   innerChips?: boolean
-  selectedTagKeys?: Set<Key>
-  setSelectedTagKeys?: (keys: Set<Key>) => void
-  inputValue?: string
-  setInputValue?: (value: string) => void
   selectedMatchType?: 'AND' | 'OR'
   onSelectedTagsChange?: (keys: Set<Key>) => void
   onFilterChange?: (value: string) => void
@@ -41,7 +34,21 @@ type TagMultiSelectProps = {
   selectProps?: Omit<SelectPropsSingle, 'children'>
 }
 
-function TagMultiSelect({
+const MultiSelectMatchButtonContainer = styled.div`
+  > div {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+  }
+`
+
+const TagMultiSelect = styled(TagMultiSelectUnstyled)(({ theme }) => ({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+}))
+
+function TagMultiSelectUnstyled({
   options,
   loading,
   innerChips = true,
@@ -56,7 +63,10 @@ function TagMultiSelect({
   ...props
 }: TagMultiSelectProps & ComponentProps<'div'>) {
   const theme = useTheme()
-  const selectedTagArr = useMemo(() => [...selectedTagKeys], [selectedTagKeys])
+  const selectedTagArr = useMemo(
+    () => [...(selectedTagKeys ?? [])],
+    [selectedTagKeys]
+  )
   const [isOpen, setIsOpen] = useState(false)
   const [searchLogic, setSearchLogic] = useState<string>(
     selectedMatchType || matchOptions[0].value
@@ -72,7 +82,7 @@ function TagMultiSelect({
   }
 
   return (
-    <TagMultiSelectWrapperSC {...props}>
+    <div {...props}>
       <Flex>
         <Select
           label="Pick search logic"
@@ -114,7 +124,7 @@ function TagMultiSelect({
               : undefined
           }
           onDeleteChip={(chipKey) => {
-            const newKeys = new Set(selectedTagKeys)
+            const newKeys = new Set(selectedTagKeys ?? [])
 
             newKeys.delete(chipKey)
             setSelectedTagKeys(newKeys)
@@ -141,7 +151,7 @@ function TagMultiSelect({
         >
           {options
             .map((tagStr) => {
-              if (selectedTagKeys.has(tagStr)) {
+              if (selectedTagKeys?.has(tagStr) ?? false) {
                 return null
               }
 
@@ -179,23 +189,9 @@ function TagMultiSelect({
           }}
         />
       )}
-    </TagMultiSelectWrapperSC>
+    </div>
   )
 }
 
 export { TagMultiSelect }
 export type { TagMultiSelectProps }
-
-const TagMultiSelectWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xsmall,
-}))
-
-const MultiSelectMatchButtonContainer = styled.div`
-  > div {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: none;
-  }
-`

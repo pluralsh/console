@@ -1,6 +1,8 @@
 import chroma from 'chroma-js'
 import { type CSSProperties } from 'react'
 
+import { type ColorMode } from '../theme'
+
 import { semanticColorsDark } from './colors-semantic-dark'
 import { semanticColorsLight } from './colors-semantic-light'
 
@@ -8,7 +10,7 @@ const shadowL = chroma(semanticColorsLight['shadow-default'])
 const shadowLPurple = chroma(semanticColorsLight['shadow-purple'])
 const shadowD = chroma(semanticColorsDark['shadow-default'])
 
-export const getBoxShadows = ({ mode }: { mode: 'dark' | 'light' }) =>
+export const getBoxShadows = ({ mode }: { mode: ColorMode }) =>
   ({
     ...(mode === 'dark'
       ? {

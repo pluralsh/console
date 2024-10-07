@@ -1,4 +1,4 @@
-import { type Key } from 'react'
+import { type Key, useState } from 'react'
 
 import { TagMultiSelect } from '../components/TagMultiSelect'
 
@@ -17,6 +17,9 @@ export default function TagMultiSelectTemplate({
   onFilterChange?: (value: string) => void
   onChangeMatchType?: (value: 'AND' | 'OR') => void
 }) {
+  const [selected, setSelected] = useState<Set<Key>>()
+  const [input, setInput] = useState<string>()
+
   return (
     <div style={{ width: `${width}%` }}>
       <TagMultiSelect
@@ -25,6 +28,10 @@ export default function TagMultiSelectTemplate({
         onSelectedTagsChange={onSelectedTagsChange}
         onFilterChange={onFilterChange}
         onChangeMatchType={onChangeMatchType}
+        selectedTagKeys={selected}
+        setSelectedTagKeys={setSelected}
+        inputValue={input}
+        setInputValue={setInput}
       />
     </div>
   )
