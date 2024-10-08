@@ -33,7 +33,7 @@ const useResizeObserver = (
     RO.observe(ref.current)
 
     return () => {
-      RO.disconnect()
+      RO?.disconnect()
       RO = null
     }
   }, [ref, handleResize])

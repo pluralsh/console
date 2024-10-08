@@ -341,9 +341,11 @@ export function DynamicBreadcrumbs({
 
   const refitCrumbList = useCallback(
     ({ width: wrapperWidth }: { width: number }) => {
-      const lists = Array.from(
-        wrapperRef?.current?.querySelectorAll(`[${CRUMB_LIST_ATTR}]`)
-      )
+      const lists = wrapperRef?.current
+        ? Array.from(
+            wrapperRef.current.querySelectorAll(`[${CRUMB_LIST_ATTR}]`)
+          )
+        : []
       const { id } = lists.reduce(
         (prev, next) => {
           const prevWidth = prev.width
