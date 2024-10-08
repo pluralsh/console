@@ -36,6 +36,10 @@ type PipelineSpec struct {
 	// If not provided, it will use the default project.
 	// +kubebuilder:validation:Optional
 	ProjectRef *v1.ObjectReference `json:"projectRef,omitempty"`
+
+	// Bindings contain read and write policies of this pipeline
+	// +kubebuilder:validation:Optional
+	Bindings *Bindings `json:"bindings,omitempty"`
 }
 
 // PipelineStage defines the Pipeline stage.
