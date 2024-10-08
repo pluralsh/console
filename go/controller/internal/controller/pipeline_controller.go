@@ -20,6 +20,7 @@ import (
 	"context"
 	goerrors "errors"
 	"fmt"
+
 	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 
 	console "github.com/pluralsh/console/go/client"
