@@ -121,7 +121,7 @@ const LayerWrapper = styled.div<{
   $margin: SimpleMarginType
 }>(({ $position, $margin }) => ({
   display: 'flex',
-  $position: 'absolute',
+  position: 'absolute',
   pointerEvents: 'none',
   '& > *': {
     pointerEvents: 'auto',
