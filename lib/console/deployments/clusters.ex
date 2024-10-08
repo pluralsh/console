@@ -450,7 +450,7 @@ defmodule Console.Deployments.Clusters do
     addons = runtime_services(cluster)
     Cluster.changeset(cluster, %{
       upgrade_plan: %{
-        deprecations: length(deps) == 0 && Enum.all?(insights, & &1.status == :passing),
+        deprecations: length(deps) == 0 && Enum.all?(insights, & &1.status != :failed),
         compatibilities: !Enum.any?(addons, fn
           %{addon_version: %Version{} = vsn} ->
             Version.blocking?(vsn, cluster.current_version)
