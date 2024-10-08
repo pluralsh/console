@@ -38,6 +38,8 @@ defmodule Console.Deployments.OAuth do
   defp rewire({:ok, resp}) do
     Map.from_struct(resp)
     |> Console.move([:redirectUris], [:redirect_uris])
+    |> Console.move([:clientId], [:client_id])
+    |> Console.move([:clientSecret], [:client_secret])
     |> ok()
   end
 
