@@ -487,6 +487,49 @@ type CascadeAttributes struct {
 	Detach *bool `json:"detach,omitempty"`
 }
 
+// A catalog is an organized collection of PR Automations used for permissioning and discovery
+type Catalog struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	// longform description for the purpose of this catalog
+	Description *string `json:"description,omitempty"`
+	// short category name used for browsing catalogs
+	Category *string `json:"category,omitempty"`
+	// the name of the author of this catalog
+	Author  *string  `json:"author,omitempty"`
+	Project *Project `json:"project,omitempty"`
+	// read policy for this catalog
+	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
+	// write policy for this catalog
+	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
+	InsertedAt    *string          `json:"insertedAt,omitempty"`
+	UpdatedAt     *string          `json:"updatedAt,omitempty"`
+}
+
+type CatalogAttributes struct {
+	Name string `json:"name"`
+	// the name of the author of this catalog, used for attribution only
+	Author      string  `json:"author"`
+	Description *string `json:"description,omitempty"`
+	// short category name for browsability
+	Category *string `json:"category,omitempty"`
+	// owning project of the catalog, permissions will propagate down
+	ProjectID     *string                    `json:"projectId,omitempty"`
+	Tags          []*TagAttributes           `json:"tags,omitempty"`
+	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+}
+
+type CatalogConnection struct {
+	PageInfo PageInfo       `json:"pageInfo"`
+	Edges    []*CatalogEdge `json:"edges,omitempty"`
+}
+
+type CatalogEdge struct {
+	Node   *Catalog `json:"node,omitempty"`
+	Cursor *string  `json:"cursor,omitempty"`
+}
+
 type Certificate struct {
 	Metadata Metadata          `json:"metadata"`
 	Status   CertificateStatus `json:"status"`
@@ -3374,6 +3417,8 @@ type PrAutomation struct {
 	Addon *string `json:"addon,omitempty"`
 	// the git repository to use for sourcing external templates
 	Repository *GitRepository `json:"repository,omitempty"`
+	// the catalog this pr automation belongs to
+	Catalog *Catalog `json:"catalog,omitempty"`
 	// the project this automation lives w/in
 	Project *Project `json:"project,omitempty"`
 	// link to a cluster if this is to perform an upgrade
@@ -3407,6 +3452,8 @@ type PrAutomationAttributes struct {
 	ServiceID *string `json:"serviceId,omitempty"`
 	// the scm connection to use for pr generation
 	ConnectionID *string `json:"connectionId,omitempty"`
+	// the catalog this automation will belong to
+	CatalogID *string `json:"catalogId,omitempty"`
 	// the project this automation lives in
 	ProjectID *string `json:"projectId,omitempty"`
 	// a git repository to use for create mode prs

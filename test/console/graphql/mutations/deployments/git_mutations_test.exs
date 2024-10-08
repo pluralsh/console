@@ -390,4 +390,41 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
       refute refetch(observer)
     end
   end
+
+  describe "upsertcatalog" do
+    test "admins can upsert catalogs" do
+      {:ok, %{data: %{"upsertCatalog" => cat}}} = run_query("""
+        mutation Upsert($attrs: CatalogAttributes!) {
+          upsertCatalog(attributes: $attrs) {
+            id
+            name
+            author
+          }
+        }
+      """, %{
+        "attrs" => %{
+          "name" => "catalog",
+          "author" => "Plural",
+        }
+      }, %{current_user: admin_user()})
+
+      assert cat["name"] == "catalog"
+      assert cat["author"] == "Plural"
+    end
+  end
+
+  describe "deletecatalog" do
+    test "it can delete an catalog" do
+      catalog = insert(:catalog)
+
+      {:ok, %{data: %{"deleteCatalog" => deleted}}} = run_query("""
+        mutation Delete($id: ID!) {
+          deleteCatalog(id: $id) { id }
+        }
+      """, %{"id" => catalog.id}, %{current_user: admin_user()})
+
+      assert deleted["id"] == catalog.id
+      refute refetch(catalog)
+    end
+  end
 end

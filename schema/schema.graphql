@@ -203,6 +203,10 @@ type RootQueryType {
 
   observers(after: String, first: Int, before: String, last: Int, projectId: ID): ObserverConnection
 
+  catalog(id: ID, name: String): Catalog
+
+  catalogs(after: String, first: Int, before: String, last: Int, projectId: ID): CatalogConnection
+
   "exchanges a kubeconfig token for user info"
   tokenExchange(token: String!): User
 
@@ -580,6 +584,10 @@ type RootMutationType {
   upsertObserver(attributes: ObserverAttributes): Observer
 
   deleteObserver(id: ID!): Observer
+
+  upsertCatalog(attributes: CatalogAttributes): Catalog
+
+  deleteCatalog(id: ID!): Catalog
 
   createCluster(attributes: ClusterAttributes!): Cluster
 
@@ -4535,6 +4543,27 @@ enum ObserverStatus {
   FAILED
 }
 
+input CatalogAttributes {
+  name: String!
+
+  "the name of the author of this catalog, used for attribution only"
+  author: String!
+
+  description: String
+
+  "short category name for browsability"
+  category: String
+
+  "owning project of the catalog, permissions will propagate down"
+  projectId: ID
+
+  tags: [TagAttributes]
+
+  readBindings: [PolicyBindingAttributes]
+
+  writeBindings: [PolicyBindingAttributes]
+}
+
 input GitAttributes {
   "the url of this repository"
   url: String!
@@ -4672,6 +4701,9 @@ input PrAutomationAttributes {
 
   "the scm connection to use for pr generation"
   connectionId: ID
+
+  "the catalog this automation will belong to"
+  catalogId: ID
 
   "the project this automation lives in"
   projectId: ID
@@ -5048,6 +5080,9 @@ type PrAutomation {
   "the git repository to use for sourcing external templates"
   repository: GitRepository
 
+  "the catalog this pr automation belongs to"
+  catalog: Catalog
+
   "the project this automation lives w\/in"
   project: Project
 
@@ -5280,6 +5315,34 @@ type ObserverPipelineAction {
   context: Map!
 }
 
+"A catalog is an organized collection of PR Automations used for permissioning and discovery"
+type Catalog {
+  id: ID!
+
+  name: String!
+
+  "longform description for the purpose of this catalog"
+  description: String
+
+  "short category name used for browsing catalogs"
+  category: String
+
+  "the name of the author of this catalog"
+  author: String
+
+  project: Project
+
+  "read policy for this catalog"
+  readBindings: [PolicyBinding]
+
+  "write policy for this catalog"
+  writeBindings: [PolicyBinding]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type GitRepositoryConnection {
   pageInfo: PageInfo!
   edges: [GitRepositoryEdge]
@@ -5318,6 +5381,11 @@ type DependencyManagementServiceConnection {
 type ObserverConnection {
   pageInfo: PageInfo!
   edges: [ObserverEdge]
+}
+
+type CatalogConnection {
+  pageInfo: PageInfo!
+  edges: [CatalogEdge]
 }
 
 input CloneAttributes {
@@ -7221,6 +7289,11 @@ type RunbookExecutionEdge {
 
 type WebhookEdge {
   node: Webhook
+  cursor: String
+}
+
+type CatalogEdge {
+  node: Catalog
   cursor: String
 }
 

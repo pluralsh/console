@@ -195,4 +195,56 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
              |> ids_equal(observers)
     end
   end
+
+  describe "catalog" do
+    test "it can fetch an catalog by name" do
+      catalog = insert(:catalog)
+
+      {:ok, %{data: %{"catalog" => found}}} = run_query("""
+        query Catalog($name: String!) {
+          catalog(name: $name) {
+            id
+            name
+          }
+        }
+      """, %{"name" => catalog.name}, %{current_user: insert(:user)})
+
+      assert found["id"] == catalog.id
+      assert found["name"] == catalog.name
+    end
+  end
+
+  describe "catalogs" do
+    test "it can fetch paginated catalogs" do
+      catalogs = insert_list(3, :catalog)
+
+      {:ok, %{data: %{"catalogs" => found}}} = run_query("""
+        query {
+          catalogs(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(catalogs)
+    end
+
+    test "it can filter by project" do
+      project = insert(:project)
+      catalogs = insert_list(3, :catalog, project: project)
+      insert_list(3, :catalog)
+
+      {:ok, %{data: %{"catalogs" => found}}} = run_query("""
+        query Catalogs($id: ID!) {
+          catalogs(projectId: $id, first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{"id" => project.id}, %{current_user: insert(:user)})
+
+      assert from_connection(found)
+             |> ids_equal(catalogs)
+    end
+  end
 end

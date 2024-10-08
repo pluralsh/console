@@ -1,6 +1,6 @@
 defmodule Console.Schema.Tag do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service, Stack}
+  alias Console.Schema.{Cluster, Service, Stack, Catalog}
 
   schema "tags" do
     field :name,  :string
@@ -9,6 +9,7 @@ defmodule Console.Schema.Tag do
     belongs_to :cluster, Cluster
     belongs_to :service, Service
     belongs_to :stack,   Stack
+    belongs_to :catalog, Catalog
 
     timestamps()
   end
@@ -16,6 +17,8 @@ defmodule Console.Schema.Tag do
   def cluster(query \\ __MODULE__), do: from(t in query, where: not is_nil(t.cluster_id))
 
   def stack(query \\ __MODULE__), do: from(t in query, where: not is_nil(t.stack_id))
+
+  def catalog(query \\ __MODULE__), do: from(t in query, where: not is_nil(t.catalog_id))
 
   def for_name(query \\ __MODULE__, name), do: from(t in query, where: t.name == ^name)
 
@@ -48,6 +51,10 @@ defmodule Console.Schema.Tag do
     from(t in q, select: %{stack_id: t.stack_id, count: count(t.id)})
   end
 
+  defp do_select(q, :catalog_id) do
+    from(t in q, select: %{catalog_id: t.stack_id, count: count(t.id)})
+  end
+
   def search(query \\ __MODULE__, q) do
     sq = "%#{q}%"
     from(t in query, where: like(t.name, ^sq) or like(t.value, ^sq))
@@ -73,8 +80,10 @@ defmodule Console.Schema.Tag do
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:stack_id)
+    |> foreign_key_constraint(:catalog_id)
     |> unique_constraint([:cluster_id, :name])
     |> unique_constraint([:service_id, :name])
+    |> unique_constraint([:catalog_id, :name])
     |> validate_required([:name, :value])
   end
 end

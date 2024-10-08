@@ -10,6 +10,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
     ScmWebhook,
     HelmRepository,
     Observer,
+    Catalog,
     DependencyManagementService
   }
 
@@ -26,6 +27,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def resolve_observer(%{id: id}, _) when is_binary(id), do: {:ok, Git.get_observer!(id)}
   def resolve_observer(%{name: name}, _), do: {:ok, Git.get_observer_by_name(name)}
+
+  def resolve_catalog(%{id: id}, _) when is_binary(id), do: {:ok, Git.get_catalog!(id)}
+  def resolve_catalog(%{name: name}, _), do: {:ok, Git.get_catalog_by_name(name)}
 
   def list_git_repositories(args, _) do
     GitRepository.ordered()
@@ -68,6 +72,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
   def list_observers(args, _) do
     Observer.ordered()
     |> filter_proj(Observer, args)
+    |> paginate(args)
+  end
+
+  def list_catalogs(args, _) do
+    Catalog.ordered()
+    |> filter_proj(Catalog, args)
     |> paginate(args)
   end
 
@@ -143,6 +153,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def delete_observer(%{id: id}, %{context: %{current_user: user}}),
     do: Git.delete_observer(id, user)
+
+  def upsert_catalog(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Git.upsert_catalog(attrs, user)
+
+  def delete_catalog(%{id: id}, %{context: %{current_user: user}}),
+    do: Git.delete_catalog(id, user)
 
   defp pr_filters(query, args) do
     Enum.reduce(args, query, fn

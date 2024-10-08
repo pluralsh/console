@@ -27,6 +27,17 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :observer_target_order, Observer.TargetOrder
   ecto_enum :observer_status, Observer.Status
 
+  input_object :catalog_attributes do
+    field :name,           non_null(:string)
+    field :author,         non_null(:string), description: "the name of the author of this catalog, used for attribution only"
+    field :description,    :string
+    field :category,       :string, description: "short category name for browsability"
+    field :project_id,     :id, description: "owning project of the catalog, permissions will propagate down"
+    field :tags,           list_of(:tag_attributes)
+    field :read_bindings,  list_of(:policy_binding_attributes)
+    field :write_bindings, list_of(:policy_binding_attributes)
+  end
+
   input_object :git_attributes do
     field :url,           non_null(:string), description: "the url of this repository"
     field :private_key,   :string, description: "an ssh private key to use with this repo if an ssh url was given"
@@ -117,6 +128,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :connection_id, :id, description: "the scm connection to use for pr generation"
 
 
+    field :catalog_id,    :id, description: "the catalog this automation will belong to"
     field :project_id,    :id, description: "the project this automation lives in"
     field :repository_id, :id, description: "a git repository to use for create mode prs"
 
@@ -403,6 +415,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :repository, :git_repository,
       description: "the git repository to use for sourcing external templates",
       resolve: dataloader(Deployments)
+    field :catalog,    :catalog,
+      resolve: dataloader(Deployments),
+      description: "the catalog this pr automation belongs to"
     field :project,    :project,
       description: "the project this automation lives w/in",
       resolve: dataloader(Deployments)
@@ -600,6 +615,27 @@ defmodule Console.GraphQl.Deployments.Git do
     field :context,     non_null(:map), description: "the context to apply, use $value to interject the observed value"
   end
 
+
+  @desc "A catalog is an organized collection of PR Automations used for permissioning and discovery"
+  object :catalog do
+    field :id,          non_null(:id)
+    field :name,        non_null(:string)
+    field :description, :string, description: "longform description for the purpose of this catalog"
+    field :category,    :string, description: "short category name used for browsing catalogs"
+    field :author,      :string, description: "the name of the author of this catalog"
+
+    field :project, :project, resolve: dataloader(Deployments)
+
+    field :read_bindings,  list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "read policy for this catalog"
+    field :write_bindings, list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "write policy for this catalog"
+
+    timestamps()
+  end
+
   connection node_type: :git_repository
   connection node_type: :helm_repository
   connection node_type: :scm_connection
@@ -608,6 +644,7 @@ defmodule Console.GraphQl.Deployments.Git do
   connection node_type: :scm_webhook
   connection node_type: :dependency_management_service
   connection node_type: :observer
+  connection node_type: :catalog
 
   delta :git_repository
 
@@ -716,6 +753,21 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :project_id, :id
 
       resolve &Deployments.list_observers/2
+    end
+
+    field :catalog, :catalog do
+      middleware Authenticated
+      arg :id,   :id
+      arg :name, :string
+
+      resolve &Deployments.resolve_catalog/2
+    end
+
+    connection field :catalogs, node_type: :catalog do
+      middleware Authenticated
+      arg :project_id, :id
+
+      resolve &Deployments.list_catalogs/2
     end
   end
 
@@ -882,6 +934,20 @@ defmodule Console.GraphQl.Deployments.Git do
       arg :id, non_null(:id)
 
       resolve &Deployments.delete_observer/2
+    end
+
+    field :upsert_catalog, :catalog do
+      middleware Authenticated
+      arg :attributes, :catalog_attributes
+
+      resolve &Deployments.upsert_catalog/2
+    end
+
+    field :delete_catalog, :catalog do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.delete_catalog/2
     end
   end
 end

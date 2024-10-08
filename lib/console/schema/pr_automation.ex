@@ -7,7 +7,8 @@ defmodule Console.Schema.PrAutomation do
     PolicyBinding,
     Configuration,
     Project,
-    GitRepository
+    GitRepository,
+    Catalog
   }
 
   defenum MatchStrategy, any: 0, all: 1, recursive: 2
@@ -62,6 +63,7 @@ defmodule Console.Schema.PrAutomation do
     belongs_to :connection, ScmConnection
     belongs_to :repository, GitRepository
     belongs_to :project,    Project
+    belongs_to :catalog,    Catalog
 
     has_many :write_bindings, PolicyBinding,
       on_replace: :delete,
@@ -84,7 +86,7 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name project_id role identifier message title branch documentation addon repository_id cluster_id service_id connection_id)a
+  @valid ~w(name project_id role identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model
@@ -103,6 +105,7 @@ defmodule Console.Schema.PrAutomation do
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:connection_id)
     |> foreign_key_constraint(:project_id)
+    |> foreign_key_constraint(:catalog_id)
   end
 
   defp update_changeset(model, attrs) do
