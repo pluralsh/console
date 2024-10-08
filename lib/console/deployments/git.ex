@@ -16,7 +16,8 @@ defmodule Console.Deployments.Git do
     PullRequest,
     DependencyManagementService,
     HelmRepository,
-    Observer
+    Observer,
+    Catalog
   }
 
   require Logger
@@ -31,6 +32,7 @@ defmodule Console.Deployments.Git do
   @type automation_resp :: {:ok, PrAutomation.t} | Console.error
   @type pull_request_resp :: {:ok, PullRequest.t} | Console.error
   @type observer_resp :: {:ok, Observer.t} | Console.error
+  @type catalog_resp :: {:ok, Catalog.t} | Console.error
 
   @decorate cacheable(cache: @cache, key: {:git_repo, id}, opts: [ttl: @ttl])
   def cached!(id), do: Repo.get!(GitRepository, id)
@@ -65,6 +67,12 @@ defmodule Console.Deployments.Git do
   def get_observer_by_name!(name), do: Repo.get_by!(Observer, name: name)
 
   def get_observer!(id), do: Repo.get!(Observer, id)
+
+  def get_catalog_by_name(name), do: Repo.get_by(Catalog, name: name)
+
+  def get_catalog_by_name!(name), do: Repo.get_by!(Catalog, name: name)
+
+  def get_catalog!(id), do: Repo.get!(Catalog, id)
 
   def get_pr_automation_by_name(name), do: Repo.get_by(PrAutomation, name: name)
 
@@ -401,6 +409,30 @@ defmodule Console.Deployments.Git do
     |> allow(user, :git)
     |> when_ok(&HelmRepository.changeset(&1, attrs))
     |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Upserts a new catalog instance, requires at least project write permissions
+  """
+  @spec upsert_catalog(map, User.t) :: catalog_resp
+  def upsert_catalog(%{name: name} = attrs, %User{} = user) do
+    case get_catalog_by_name(name) do
+      %Catalog{} = catalog -> Repo.preload(catalog, [:read_bindings, :write_bindings])
+      nil -> %Catalog{project_id: attrs[:project_id] || Settings.default_project!().id}
+    end
+    |> allow(user, :write)
+    |> when_ok(&Catalog.changeset(&1, attrs))
+    |> when_ok(&Repo.insert_or_update/1)
+  end
+
+  @doc """
+  Deletes the given catalog, works if user has write permissions on the catalog on up
+  """
+  @spec delete_catalog(binary, User.t) :: catalog_resp
+  def delete_catalog(id, %User{} = user) do
+    get_catalog!(id)
+    |> allow(user, :write)
+    |> when_ok(:delete)
   end
 
   @doc """

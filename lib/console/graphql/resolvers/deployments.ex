@@ -61,7 +61,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ObservableMetric,
     ObservabilityProvider,
     UpgradeInsight,
-    UpgradeInsightDetail
+    UpgradeInsightDetail,
+    Catalog
   }
 
   def query(Project, _), do: Project
@@ -117,6 +118,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ServiceImport, _), do: ServiceImport
   def query(StackDefinition, _), do: StackDefinition
   def query(StackCron, _), do: StackCron
+  def query(Catalog, _), do: Catalog
   def query(ObservableMetric, _), do: ObservableMetric
   def query(ObservabilityProvider, _), do: ObservabilityProvider
   def query(UpgradeInsight, _), do: UpgradeInsight

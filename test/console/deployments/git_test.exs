@@ -510,6 +510,73 @@ defmodule Console.Deployments.GitTest do
     end
   end
 
+  describe "#upsert_catalog/2" do
+    test "it can create a new catalog record" do
+      admin = admin_user()
+
+      {:ok, catalog} = Git.upsert_catalog(%{
+        name: "catalog",
+        author: "Plural",
+      }, admin)
+
+      assert catalog.name == "catalog"
+      assert catalog.author == "Plural"
+      assert catalog.project_id == Settings.default_project!().id
+    end
+
+    test "it can update an existing catalog record" do
+      admin = admin_user()
+      cat = insert(:catalog)
+      group = insert(:group)
+
+      {:ok, updated} = Git.upsert_catalog(%{
+        name: cat.name,
+        read_bindings: [%{group_id: group.id}]
+      }, admin)
+
+      assert updated.id == cat.id
+      [read] = updated.read_bindings
+      assert read.group_id == group.id
+    end
+
+    test "project writers can create" do
+      user = insert(:user)
+      project = insert(:project, write_bindings: [%{user_id: user.id}])
+
+      {:ok, catalog} = Git.upsert_catalog(%{
+        name: "catalog",
+        author: "Plural",
+        project_id: project.id,
+      }, user)
+
+      assert catalog.name == "catalog"
+      assert catalog.project_id == project.id
+    end
+
+    test "randos cannot create" do
+      {:error, _} = Git.upsert_catalog(%{
+        name: "catalog",
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_catalog/2" do
+    test "writers can delete catalogs" do
+      cat = insert(:catalog)
+
+      {:ok, deleted} = Git.delete_catalog(cat.id, admin_user())
+
+      assert deleted.id == cat.id
+      refute refetch(cat)
+    end
+
+    test "randos cannot delete" do
+      cat = insert(:catalog)
+
+      {:error, _} = Git.delete_catalog(cat.id, insert(:user))
+    end
+  end
+
   describe "setupRenovate" do
     test "it can create a service for renovate" do
       git = insert(:git_repository, url: "https://github.com/pluralsh/scaffolds.git")

@@ -27,7 +27,8 @@ defmodule Console.Deployments.Policies.Rbac do
     Project,
     User,
     SharedSecret,
-    Observer
+    Observer,
+    Catalog
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -70,7 +71,7 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%ProviderCredential{} = cred, %User{} = user, action),
     do: recurse(cred, user, action, fn _ -> Settings.fetch() end)
   def evaluate(%PrAutomation{} = pr, %User{} = user, action),
-    do: recurse(pr, user, action, & &1.project)
+    do: recurse(pr, user, action, & [&1.project, &1.catalog])
   def evaluate(%Observer{} = obs, %User{} = user, action),
     do: recurse(obs, user, action, & &1.project)
   def evaluate(%GitRepository{}, %User{} = user, action),
@@ -107,6 +108,8 @@ defmodule Console.Deployments.Policies.Rbac do
       _ -> Settings.fetch()
     end)
   end
+  def evaluate(%Catalog{} = catalog, %User{} = user, action),
+    do: recurse(catalog, user, action, & &1.project)
   def evaluate(%User{} = sa, %User{} = user, :assume), do: recurse(sa, user, :assume)
   def evaluate(%SharedSecret{} = share, %User{} = user, :consume), do: recurse(share, user, :notify)
   def evaluate(_, _, _), do: false
@@ -133,7 +136,9 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(%DeploymentSettings{} = settings),
     do: Repo.preload(settings, [:read_bindings, :write_bindings, :git_bindings, :create_bindings])
   def preload(%PrAutomation{} = pr),
-    do: Repo.preload(pr, [:write_bindings, :create_bindings, project: @bindings])
+    do: Repo.preload(pr, [:write_bindings, :create_bindings, catalog: @top_preloads])
+  def preload(%Catalog{} = pr),
+    do: Repo.preload(pr, @top_preloads)
   def preload(%Observer{} = obs),
     do: Repo.preload(obs, [project: @bindings])
   def preload(%PolicyConstraint{} = pr),
@@ -157,6 +162,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)
+  defp recurse(l, user, action, next) when is_list(l),
+    do: Enum.any?(l, &recurse(&1, user, action, next))
   defp recurse(%{} = resource, user, action, next) do
     resource = preload(resource)
 

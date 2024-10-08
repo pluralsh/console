@@ -666,6 +666,16 @@ defmodule Console.Factory do
     }
   end
 
+  def catalog_factory do
+    %Schema.Catalog{
+      name: sequence(:catalog, & "catalog-#{&1}"),
+      author: "Plural",
+      read_policy_id: Ecto.UUID.generate(),
+      write_policy_id: Ecto.UUID.generate(),
+      project: Settings.default_project!()
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

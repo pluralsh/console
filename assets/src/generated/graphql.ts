@@ -635,6 +635,52 @@ export type CascadeAttributes = {
   detach?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+/** A catalog is an organized collection of PR Automations used for permissioning and discovery */
+export type Catalog = {
+  __typename?: 'Catalog';
+  /** the name of the author of this catalog */
+  author?: Maybe<Scalars['String']['output']>;
+  /** short category name used for browsing catalogs */
+  category?: Maybe<Scalars['String']['output']>;
+  /** longform description for the purpose of this catalog */
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  project?: Maybe<Project>;
+  /** read policy for this catalog */
+  readBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** write policy for this catalog */
+  writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+export type CatalogAttributes = {
+  /** the name of the author of this catalog, used for attribution only */
+  author: Scalars['String']['input'];
+  /** short category name for browsability */
+  category?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  /** owning project of the catalog, permissions will propagate down */
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  readBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  tags?: InputMaybe<Array<InputMaybe<TagAttributes>>>;
+  writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type CatalogConnection = {
+  __typename?: 'CatalogConnection';
+  edges?: Maybe<Array<Maybe<CatalogEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type CatalogEdge = {
+  __typename?: 'CatalogEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Catalog>;
+};
+
 export type Certificate = {
   __typename?: 'Certificate';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -4037,6 +4083,8 @@ export type PrAutomation = {
   __typename?: 'PrAutomation';
   /** link to an add-on name if this can update it */
   addon?: Maybe<Scalars['String']['output']>;
+  /** the catalog this pr automation belongs to */
+  catalog?: Maybe<Catalog>;
   /** link to a cluster if this is to perform an upgrade */
   cluster?: Maybe<Cluster>;
   configuration?: Maybe<Array<Maybe<PrConfiguration>>>;
@@ -4074,6 +4122,8 @@ export type PrAutomationAttributes = {
   /** link to an add-on name if this can update it */
   addon?: InputMaybe<Scalars['String']['input']>;
   branch?: InputMaybe<Scalars['String']['input']>;
+  /** the catalog this automation will belong to */
+  catalogId?: InputMaybe<Scalars['ID']['input']>;
   /** link to a cluster if this is to perform an upgrade */
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   configuration?: InputMaybe<Array<InputMaybe<PrConfigurationAttributes>>>;
@@ -4716,6 +4766,7 @@ export type RootMutationType = {
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
   deleteAccessToken?: Maybe<AccessToken>;
+  deleteCatalog?: Maybe<Catalog>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
   deleteCluster?: Maybe<Cluster>;
   deleteClusterProvider?: Maybe<ClusterProvider>;
@@ -4843,6 +4894,7 @@ export type RootMutationType = {
   updateStackDefinition?: Maybe<StackDefinition>;
   updateStackRun?: Maybe<StackRun>;
   updateUser?: Maybe<User>;
+  upsertCatalog?: Maybe<Catalog>;
   upsertHelmRepository?: Maybe<HelmRepository>;
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
@@ -5103,6 +5155,11 @@ export type RootMutationTypeCreateWebhookArgs = {
 
 export type RootMutationTypeDeleteAccessTokenArgs = {
   token: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeleteCatalogArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -5709,6 +5766,11 @@ export type RootMutationTypeUpdateUserArgs = {
 };
 
 
+export type RootMutationTypeUpsertCatalogArgs = {
+  attributes?: InputMaybe<CatalogAttributes>;
+};
+
+
 export type RootMutationTypeUpsertHelmRepositoryArgs = {
   attributes?: InputMaybe<HelmRepositoryAttributes>;
   url: Scalars['String']['input'];
@@ -5762,6 +5824,8 @@ export type RootQueryType = {
   builds?: Maybe<BuildConnection>;
   cachedPods?: Maybe<Array<Maybe<Pod>>>;
   canary?: Maybe<Canary>;
+  catalog?: Maybe<Catalog>;
+  catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
   /** fetches an individual cluster */
   cluster?: Maybe<Cluster>;
@@ -5996,6 +6060,21 @@ export type RootQueryTypeCanaryArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeCatalogArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeCatalogsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -8915,7 +8994,7 @@ export type VClustersQueryVariables = Exact<{
 }>;
 
 
-export type VClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, identifier: string, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null } | null> | null } | null, clusterStatuses?: Array<{ __typename?: 'ClusterStatusInfo', count?: number | null, healthy?: boolean | null } | null> | null };
+export type VClustersQuery = { __typename?: 'RootQueryType', tags?: Array<string | null> | null, clusters?: { __typename?: 'ClusterConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterEdge', node?: { __typename?: 'Cluster', currentVersion?: string | null, id: string, self?: boolean | null, protect?: boolean | null, name: string, handle?: string | null, distro?: ClusterDistro | null, installed?: boolean | null, pingedAt?: string | null, deletedAt?: string | null, version?: string | null, kubeletVersion?: string | null, virtual?: boolean | null, nodes?: Array<{ __typename?: 'Node', status: { __typename?: 'NodeStatus', capacity?: Record<string, unknown> | null } } | null> | null, nodeMetrics?: Array<{ __typename?: 'NodeMetric', usage?: { __typename?: 'NodeUsage', cpu?: string | null, memory?: string | null } | null } | null> | null, provider?: { __typename?: 'ClusterProvider', id: string, cloud: string, name: string, namespace: string, supportedVersions?: Array<string | null> | null } | null, prAutomations?: Array<{ __typename?: 'PrAutomation', id: string, name: string, documentation?: string | null, addon?: string | null, identifier: string, role?: PrRole | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, repository?: { __typename?: 'GitRepository', url: string, refs?: Array<string> | null } | null, connection?: { __typename?: 'ScmConnection', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, type: ScmType, username?: string | null, baseUrl?: string | null, apiUrl?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null } | null> | null, service?: { __typename?: 'ServiceDeployment', id: string, repository?: { __typename?: 'GitRepository', url: string } | null } | null, status?: { __typename?: 'ClusterStatus', conditions?: Array<{ __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null } | null> | null } | null };
 
 export type ClusterSelectorQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -14701,14 +14780,10 @@ export const VClustersDocument = gql`
       }
     }
   }
-  clusterStatuses {
-    ...ClusterStatusInfo
-  }
   tags
 }
     ${PageInfoFragmentDoc}
-${ClustersRowFragmentDoc}
-${ClusterStatusInfoFragmentDoc}`;
+${ClustersRowFragmentDoc}`;
 
 /**
  * __useVClustersQuery__
