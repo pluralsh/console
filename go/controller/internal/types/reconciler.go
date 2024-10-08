@@ -152,6 +152,7 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			ConsoleClient:    consoleClient,
 			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
+			UserGroupCache:   userGroupCache,
 		}, nil
 	case ProviderReconciler:
 		return &controller.ProviderReconciler{

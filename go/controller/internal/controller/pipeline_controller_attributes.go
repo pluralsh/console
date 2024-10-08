@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
@@ -69,11 +70,21 @@ func (r *PipelineReconciler) pipelineAttributes(ctx context.Context, p *v1alpha1
 		})
 	}
 
-	return &console.PipelineAttributes{
+	attr := &console.PipelineAttributes{
 		Stages:    stages,
 		Edges:     edges,
 		ProjectID: projectID,
-	}, nil
+	}
+
+	if p.Spec.Bindings != nil {
+		if err := r.ensure(p); err != nil {
+			return nil, err
+		}
+		attr.ReadBindings = policyBindings(p.Spec.Bindings.Read)
+		attr.WriteBindings = policyBindings(p.Spec.Bindings.Write)
+	}
+
+	return attr, nil
 }
 
 func (r *PipelineReconciler) pipelineStageServiceAttributes(ctx context.Context, stageService v1alpha1.PipelineStageService) (*console.StageServiceAttributes, error) {
@@ -189,4 +200,32 @@ func (r *PipelineReconciler) pipelineEdgeGateSpecAttributes(spec *v1alpha1.GateS
 	return &console.GateSpecAttributes{
 		Job: job,
 	}, nil
+}
+
+// ensure makes sure that user-friendly input such as userEmail/groupName in
+// bindings are transformed into valid IDs on the v1alpha1.Binding object before creation
+func (r *PipelineReconciler) ensure(p *v1alpha1.Pipeline) error {
+	if p.Spec.Bindings == nil {
+		return nil
+	}
+
+	bindings, req, err := ensureBindings(p.Spec.Bindings.Read, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+
+	p.Spec.Bindings.Read = bindings
+
+	bindings, req2, err := ensureBindings(p.Spec.Bindings.Write, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+
+	p.Spec.Bindings.Write = bindings
+
+	if req || req2 {
+		return operrors.ErrRetriable
+	}
+
+	return nil
 }

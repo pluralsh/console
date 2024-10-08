@@ -18,10 +18,18 @@ package controller
 
 import (
 	"context"
+	goerrors "errors"
 	"fmt"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
 
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/utils"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -32,14 +40,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/utils"
-
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 )
 
 const (
@@ -52,6 +52,7 @@ type PipelineReconciler struct {
 	ConsoleClient    consoleclient.ConsoleClient
 	Scheme           *runtime.Scheme
 	CredentialsCache credentials.NamespaceCredentialsCache
+	UserGroupCache   cache.UserGroupCache
 }
 
 //+kubebuilder:rbac:groups=deployments.plural.sh,resources=pipelines,verbs=get;list;watch;create;update;patch;delete
@@ -118,6 +119,10 @@ func (r *PipelineReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_
 	// Prepare attributes object that is used to calculate SHA and save changes.
 	attrs, err := r.pipelineAttributes(ctx, pipeline, project.Status.ID)
 	if err != nil {
+		if goerrors.Is(err, operrors.ErrRetriable) {
+			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+			return requeue, nil
+		}
 		if apierrors.IsNotFound(err) {
 			utils.MarkCondition(pipeline.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
 			return RequeueAfter(requeueWaitForResources), nil
