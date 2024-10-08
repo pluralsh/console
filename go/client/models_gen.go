@@ -2762,6 +2762,27 @@ type ObserverTargetAttributes struct {
 	Git    *ObserverGitAttributes  `json:"git,omitempty"`
 }
 
+// A representation of a created OIDC provider client
+type OidcProvider struct {
+	ID          string  `json:"id"`
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	// the redirect uris oidc is whitelisted to use
+	RedirectUris []*string `json:"redirectUris,omitempty"`
+	// the generated client ID used in configuring OAuth clients
+	ClientID string `json:"clientId"`
+	// the generated client secret, used in configuring an OAuth client
+	ClientSecret string `json:"clientSecret"`
+}
+
+// Configuration settings for creating a new OIDC provider client
+type OidcProviderAttributes struct {
+	Name        string  `json:"name"`
+	Description *string `json:"description,omitempty"`
+	// the redirect uris oidc is whitelisted to use
+	RedirectUris []*string `json:"redirectUris,omitempty"`
+}
+
 type OverlayUpdate struct {
 	Path []*string `json:"path,omitempty"`
 }
@@ -6416,6 +6437,46 @@ func (e *ObserverTargetType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ObserverTargetType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Supported OIDC-compatible Auth Providers
+type OidcProviderType string
+
+const (
+	OidcProviderTypePlural OidcProviderType = "PLURAL"
+)
+
+var AllOidcProviderType = []OidcProviderType{
+	OidcProviderTypePlural,
+}
+
+func (e OidcProviderType) IsValid() bool {
+	switch e {
+	case OidcProviderTypePlural:
+		return true
+	}
+	return false
+}
+
+func (e OidcProviderType) String() string {
+	return string(e)
+}
+
+func (e *OidcProviderType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OidcProviderType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OidcProviderType", str)
+	}
+	return nil
+}
+
+func (e OidcProviderType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

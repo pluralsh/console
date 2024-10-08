@@ -41,6 +41,7 @@
   import_types Console.GraphQl.Deployments.Stack
   import_types Console.GraphQl.Deployments.Observability
   import_types Console.GraphQl.Deployments.Settings
+  import_types Console.GraphQl.Deployments.OAuth
 
 
   input_object :rbac_attributes do
@@ -85,6 +86,7 @@
     import_fields :stack_mutations
     import_fields :observability_provider_mutations
     import_fields :settings_mutations
+    import_fields :oauth_mutations
 
     @desc "a reusable mutation for updating rbac settings on core services"
     field :update_rbac, :boolean do

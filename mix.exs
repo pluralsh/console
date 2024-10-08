@@ -120,6 +120,7 @@ defmodule Console.MixProject do
       {:prometheus_plugs, "~> 1.1.1"},
       {:prometheus_ecto, "~> 1.4.3"},
       {:guardian, "~> 1.2.1"},
+      {:accessible, "~> 0.3.0"},
       {:httpoison, "~> 1.7", override: true},
       {:nebulex, "~> 2.6"},
       {:shards, "~> 1.0"},      #=> For using :shards as backend

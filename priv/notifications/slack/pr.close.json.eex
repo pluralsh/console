@@ -1,11 +1,11 @@
 {
-    "text": "✔ Pull request <%= @pr.status %>",
+    "text": "❌ Pull request <%= @pr.status %>",
 	"blocks": [
          {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "✔ *Pull request <%= @pr.status %>:*\n<%= @pr.title %>"
+                "text": "❌ *Pull request <%= @pr.status %>:*\n<%= @pr.title %>"
             }
         },
 		{
@@ -23,7 +23,7 @@
 						},
 						{
 							"type": "text",
-							"text": ": <%= @pr.url %>\n\n"
+							"text": ": <%= @pr.url %>\n"
 						},
 						{
 							"type": "text",

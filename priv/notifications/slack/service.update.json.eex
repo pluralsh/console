@@ -23,11 +23,11 @@
 						},
 						{
 							"type": "text",
-							"text": ": <%= @service.sha %>\n\n"
+							"text": ": <%= @service.sha %>\n"
 						},
 						{
 							"type": "text",
-							"text": "Source",
+							"text": "Repository",
 							"style": {
 								"bold": true
 							}
@@ -38,11 +38,22 @@
 						},
 						{
 							"type": "link",
-							"url": "<%= @source.url %>"
+							"url": "<%= @source.url %>\n"
 						},
 						{
 							"type": "text",
-							"text": " <%= @source.ref %>"
+							"text": "Location",
+							"style": {
+								"bold": true
+							}
+						},
+						{
+							"type": "text",
+							"text": ": "
+						},
+						{
+							"type": "text",
+							"text": "<%= @source.ref %>"
 						}
 					]
 				}

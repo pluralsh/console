@@ -14,10 +14,13 @@ type ObserverSpec struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
 
+	// The crontab you will poll the given Target with
 	Crontab string `json:"crontab"`
 
+	// The target object to poll, triggering the list of Actions w/ the discovered value
 	Target ObserverTarget `json:"target"`
 
+	// A list of predefined actions to take if a new Target is discovered in the last poll loop
 	Actions []ObserverAction `json:"actions,omitempty"`
 
 	// ProjectRef references project this observer belongs to.
@@ -31,6 +34,7 @@ type ObserverAction struct {
 	// +kubebuilder:validation:Enum:=PIPELINE;PR
 	Type console.ObserverActionType `json:"type"`
 
+	// The configuration for the given action, relative to its current Type
 	Configuration ObserverConfiguration `json:"configuration"`
 }
 
@@ -47,7 +51,7 @@ type ObserverPrAction struct {
 	// BranchTemplate a template to use for the created branch, use $value to interject the observed value
 	BranchTemplate *string `json:"branchTemplate,omitempty"`
 
-	// Context is a ObserverPrAction context
+	// Context is a templated context that will become the context applied to the given PR Automation, use `$value` to interpolate the observed value
 	Context runtime.RawExtension `json:"context,omitempty"`
 }
 
@@ -55,6 +59,7 @@ type ObserverPipelineAction struct {
 	// PipelineRef references to Pipeline.
 	PipelineRef v1.ObjectReference `json:"pipelineRef"`
 
+	// Context is a templated context that will become the PipelineContext applied to the given pipeline, use `$value` to interpolate the observed value
 	Context runtime.RawExtension `json:"context,omitempty"`
 }
 

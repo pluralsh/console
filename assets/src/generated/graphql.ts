@@ -3345,6 +3345,33 @@ export enum ObserverTargetType {
   Oci = 'OCI'
 }
 
+/** A representation of a created OIDC provider client */
+export type OidcProvider = {
+  __typename?: 'OidcProvider';
+  /** the generated client ID used in configuring OAuth clients */
+  clientId: Scalars['String']['output'];
+  /** the generated client secret, used in configuring an OAuth client */
+  clientSecret: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  /** the redirect uris oidc is whitelisted to use */
+  redirectUris?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+};
+
+/** Configuration settings for creating a new OIDC provider client */
+export type OidcProviderAttributes = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  /** the redirect uris oidc is whitelisted to use */
+  redirectUris?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+};
+
+/** Supported OIDC-compatible Auth Providers */
+export enum OidcProviderType {
+  Plural = 'PLURAL'
+}
+
 export enum Operation {
   Eq = 'EQ',
   Gt = 'GT',
@@ -4664,6 +4691,7 @@ export type RootMutationType = {
   createInvite?: Maybe<Invite>;
   createManagedNamespace?: Maybe<ManagedNamespace>;
   createObjectStore?: Maybe<ObjectStore>;
+  createOidcProvider?: Maybe<OidcProvider>;
   createPeer?: Maybe<WireguardPeer>;
   createPersona?: Maybe<Persona>;
   createPinnedCustomResource?: Maybe<PinnedCustomResource>;
@@ -4704,6 +4732,7 @@ export type RootMutationType = {
   deleteObjectStore?: Maybe<ObjectStore>;
   deleteObservabilityProvider?: Maybe<ObservabilityProvider>;
   deleteObserver?: Maybe<Observer>;
+  deleteOidcProvider?: Maybe<OidcProvider>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
   deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
@@ -4795,6 +4824,7 @@ export type RootMutationType = {
   updateGroup?: Maybe<Group>;
   updateManagedNamespace?: Maybe<ManagedNamespace>;
   updateObjectStore?: Maybe<ObjectStore>;
+  updateOidcProvider?: Maybe<OidcProvider>;
   updatePersona?: Maybe<Persona>;
   updatePrAutomation?: Maybe<PrAutomation>;
   updateProject?: Maybe<Project>;
@@ -4951,6 +4981,12 @@ export type RootMutationTypeCreateManagedNamespaceArgs = {
 
 export type RootMutationTypeCreateObjectStoreArgs = {
   attributes: ObjectStoreAttributes;
+};
+
+
+export type RootMutationTypeCreateOidcProviderArgs = {
+  attributes: OidcProviderAttributes;
+  type: OidcProviderType;
 };
 
 
@@ -5151,6 +5187,12 @@ export type RootMutationTypeDeleteObservabilityProviderArgs = {
 
 export type RootMutationTypeDeleteObserverArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteOidcProviderArgs = {
+  id: Scalars['ID']['input'];
+  type: OidcProviderType;
 };
 
 
@@ -5552,6 +5594,13 @@ export type RootMutationTypeUpdateManagedNamespaceArgs = {
 export type RootMutationTypeUpdateObjectStoreArgs = {
   attributes: ObjectStoreAttributes;
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeUpdateOidcProviderArgs = {
+  attributes: OidcProviderAttributes;
+  id: Scalars['ID']['input'];
+  type: OidcProviderType;
 };
 
 

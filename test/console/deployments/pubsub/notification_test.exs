@@ -31,19 +31,41 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
     test "it will properly ignore if event is different" do
       svc = insert(:service)
       %{user: u, group: g} = insert(:group_member)
-      router = insert(:notification_router, events: ["pr.create", "stack.run"])
+      router = insert(:notification_router, events: ["service.update"])
+      insert(:router_filter, router: router, service: insert(:service))
       sink = insert(:notification_sink,
         type: :plural,
         notification_bindings: [%{group_id: g.id}],
         configuration: %{plural: %{urgent: true}}
       )
-      insert(:router_filter)
+      insert(:router_filter, service: svc)
       insert(:router_sink, router: router, sink: sink)
 
       event = %PubSub.ServiceUpdated{item: svc}
       :ok = Notifications.handle_event(event)
 
       refute Console.Schema.AppNotification.for_user(u.id)
+             |> Console.Repo.exists?()
+    end
+
+    test "it will properly create if event is mapped " do
+      svc = insert(:service)
+      %{user: u, group: g} = insert(:group_member)
+      router = insert(:notification_router, events: ["service.update"])
+      insert(:router_filter, router: router, service: insert(:service))
+      insert(:router_filter, router: router, service: svc)
+      sink = insert(:notification_sink,
+        type: :plural,
+        notification_bindings: [%{group_id: g.id}],
+        configuration: %{plural: %{urgent: true}}
+      )
+      insert(:router_filter, service: svc)
+      insert(:router_sink, router: router, sink: sink)
+
+      event = %PubSub.ServiceUpdated{item: svc}
+      :ok = Notifications.handle_event(event)
+
+      assert Console.Schema.AppNotification.for_user(u.id)
              |> Console.Repo.exists?()
     end
   end

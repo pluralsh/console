@@ -468,6 +468,27 @@ _Appears in:_
 | `args` _string array_ |  |  | Optional: {} <br /> |
 | `env` _[Env](#env) array_ |  |  | Optional: {} <br /> |
 | `envFrom` _[EnvFrom](#envfrom) array_ |  |  | Optional: {} <br /> |
+| `resources` _[ContainerResources](#containerresources)_ |  |  | Optional: {} <br /> |
+
+
+
+
+#### ContainerResources
+
+
+
+
+
+
+
+_Appears in:_
+- [Container](#container)
+- [JobSpec](#jobspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `requests` _[ContainerResourceRequests](#containerresourcerequests)_ |  |  | Optional: {} <br /> |
+| `limits` _[ContainerResourceRequests](#containerresourcerequests)_ |  |  | Optional: {} <br /> |
 
 
 #### CustomRunStep
@@ -980,6 +1001,7 @@ _Appears in:_
 | `annotations` _object (keys:string, values:string)_ |  |  | Optional: {} <br /> |
 | `serviceAccount` _string_ |  |  | Optional: {} <br />Type: string <br /> |
 | `raw` _[JobSpec](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#jobspec-v1-batch)_ | Raw can be used if you'd rather define the job spec via straight Kubernetes manifest file. |  | Optional: {} <br /> |
+| `resources` _[ContainerResources](#containerresources)_ | Resource specification that overrides implicit container resources when containers are not directly configured. |  | Optional: {} <br /> |
 
 
 #### ManagedNamespace
@@ -1260,7 +1282,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `type` _[ObserverActionType](#observeractiontype)_ |  |  | Enum: [PIPELINE PR] <br />Type: string <br /> |
-| `configuration` _[ObserverConfiguration](#observerconfiguration)_ |  |  |  |
+| `configuration` _[ObserverConfiguration](#observerconfiguration)_ | The configuration for the given action, relative to its current Type |  |  |
 
 
 #### ObserverConfiguration
@@ -1348,7 +1370,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `pipelineRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PipelineRef references to Pipeline. |  |  |
-| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ |  |  |  |
+| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a templated context that will become the PipelineContext applied to the given pipeline, use `$value` to interpolate the observed value |  |  |
 
 
 #### ObserverPrAction
@@ -1367,7 +1389,7 @@ _Appears in:_
 | `prAutomationRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | PrAutomationRef references to PR automation. |  |  |
 | `repository` _string_ |  |  | Optional: {} <br /> |
 | `branchTemplate` _string_ | BranchTemplate a template to use for the created branch, use $value to interject the observed value |  |  |
-| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a ObserverPrAction context |  |  |
+| `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a templated context that will become the context applied to the given PR Automation, use `$value` to interpolate the observed value |  |  |
 
 
 #### ObserverSpec
@@ -1384,9 +1406,9 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | the name of this observer, if not provided Observer's own name from Observer.ObjectMeta will be used. |  | Optional: {} <br /> |
-| `crontab` _string_ |  |  |  |
-| `target` _[ObserverTarget](#observertarget)_ |  |  |  |
-| `actions` _[ObserverAction](#observeraction) array_ |  |  |  |
+| `crontab` _string_ | The crontab you will poll the given Target with |  |  |
+| `target` _[ObserverTarget](#observertarget)_ | The target object to poll, triggering the list of Actions w/ the discovered value |  |  |
+| `actions` _[ObserverAction](#observeraction) array_ | A list of predefined actions to take if a new Target is discovered in the last poll loop |  |  |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef references project this observer belongs to.<br />If not provided, it will use the default project. |  | Optional: {} <br /> |
 
 

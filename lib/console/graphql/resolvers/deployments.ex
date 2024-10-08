@@ -134,6 +134,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   delegates Console.GraphQl.Resolvers.Deployments.Global
   delegates Console.GraphQl.Resolvers.Deployments.Stack
   delegates Console.GraphQl.Resolvers.Deployments.Settings
+  delegates Console.GraphQl.Resolvers.Deployments.OAuth
 
   def list_addons(_, _), do: AddOns.addons()
 

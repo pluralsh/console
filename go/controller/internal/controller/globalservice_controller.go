@@ -143,6 +143,15 @@ func (r *GlobalServiceReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 		if err != nil {
 			return ctrl.Result{}, err
 		}
+
+		if st.Name == nil {
+			st.Name = lo.ToPtr(globalService.GetName())
+		}
+
+		if st.Namespace == nil {
+			st.Namespace = lo.ToPtr(globalService.GetNamespace())
+		}
+
 		attr.Template = st
 	}
 
