@@ -1474,6 +1474,16 @@ type DeploymentStrategy struct {
 	RollingUpdate *RollingUpdate `json:"rollingUpdate,omitempty"`
 }
 
+type EmailSettings struct {
+	// whether you want to receive digest emails
+	Digest *bool `json:"digest,omitempty"`
+}
+
+type EmailSettingsAttributes struct {
+	// whether you want to receive digest emails
+	Digest *bool `json:"digest,omitempty"`
+}
+
 type EnvAttributes struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
@@ -5221,6 +5231,7 @@ type User struct {
 	Profile             *string          `json:"profile,omitempty"`
 	PluralID            *string          `json:"pluralId,omitempty"`
 	Roles               *UserRoles       `json:"roles,omitempty"`
+	EmailSettings       *EmailSettings   `json:"emailSettings,omitempty"`
 	ReadTimestamp       *string          `json:"readTimestamp,omitempty"`
 	BuildTimestamp      *string          `json:"buildTimestamp,omitempty"`
 	RefreshToken        *RefreshToken    `json:"refreshToken,omitempty"`
@@ -5236,11 +5247,12 @@ type User struct {
 }
 
 type UserAttributes struct {
-	Name              *string             `json:"name,omitempty"`
-	Email             *string             `json:"email,omitempty"`
-	Password          *string             `json:"password,omitempty"`
-	Roles             *UserRoleAttributes `json:"roles,omitempty"`
-	SigningPrivateKey *string             `json:"signingPrivateKey,omitempty"`
+	Name              *string                  `json:"name,omitempty"`
+	Email             *string                  `json:"email,omitempty"`
+	Password          *string                  `json:"password,omitempty"`
+	Roles             *UserRoleAttributes      `json:"roles,omitempty"`
+	EmailSettings     *EmailSettingsAttributes `json:"emailSettings,omitempty"`
+	SigningPrivateKey *string                  `json:"signingPrivateKey,omitempty"`
 }
 
 type UserConnection struct {

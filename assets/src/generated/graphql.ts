@@ -1814,6 +1814,17 @@ export type DeploymentStrategy = {
   type?: Maybe<Scalars['String']['output']>;
 };
 
+export type EmailSettings = {
+  __typename?: 'EmailSettings';
+  /** whether you want to receive digest emails */
+  digest?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type EmailSettingsAttributes = {
+  /** whether you want to receive digest emails */
+  digest?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type EnvAttributes = {
   name: Scalars['String']['input'];
   value: Scalars['String']['input'];
@@ -6649,8 +6660,11 @@ export type RootQueryTypePrAutomationArgs = {
 export type RootQueryTypePrAutomationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  catalogId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -8476,6 +8490,7 @@ export type User = {
   buildTimestamp?: Maybe<Scalars['DateTime']['output']>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   email: Scalars['String']['output'];
+  emailSettings?: Maybe<EmailSettings>;
   groups?: Maybe<Array<Maybe<Group>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -8493,6 +8508,7 @@ export type User = {
 
 export type UserAttributes = {
   email?: InputMaybe<Scalars['String']['input']>;
+  emailSettings?: InputMaybe<EmailSettingsAttributes>;
   name?: InputMaybe<Scalars['String']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<UserRoleAttributes>;

@@ -48,6 +48,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
 
   def list_pr_automations(args, _) do
     PrAutomation.ordered()
+    |> pra_filters(args)
     |> paginate(args)
   end
 
@@ -166,6 +167,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Git do
       {:service_id, sid}, q -> PullRequest.for_service(q, sid)
       {:open, true}, q -> PullRequest.open(q)
       {:q, search}, q -> PullRequest.search(q, search)
+      _, q -> q
+    end)
+  end
+
+  defp pra_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:catalog_id, cid}, q -> PrAutomation.for_catalog(q, cid)
+      {:project_id, cid}, q -> PrAutomation.for_project(q, cid)
+      {:q, search}, q -> PrAutomation.search(q, search)
       _, q -> q
     end)
   end
