@@ -78,10 +78,10 @@ export type SelectProps = Exclude<SelectButtonProps, 'children'> & {
 type TriggerProps = {
   buttonRef: RefObject<HTMLElement>
   buttonElt: any
-  $isOpen: boolean
+  isOpen: boolean
 } & HTMLAttributes<HTMLElement>
 
-function Trigger({ buttonElt, $isOpen, ...props }: TriggerProps) {
+function Trigger({ buttonElt, isOpen, ...props }: TriggerProps) {
   const ref = props.buttonRef
   const { buttonProps } = useButton(props, ref)
   const theme = useTheme()
@@ -90,10 +90,10 @@ function Trigger({ buttonElt, $isOpen, ...props }: TriggerProps) {
     ref,
     ...buttonProps,
     ...(buttonElt?.props?.type ? { type: buttonElt.props.type } : {}),
-    $isOpen,
+    isOpen,
     style: {
       appearance: 'unset',
-      ...($isOpen ? { zIndex: theme.zIndexes.tooltip + 1 } : {}),
+      ...(isOpen ? { zIndex: theme.zIndexes.tooltip + 1 } : {}),
     },
     tabIndex: 0,
   })
@@ -374,7 +374,7 @@ function Select({
       <Trigger
         buttonRef={triggerRef as unknown as RefObject<HTMLElement>}
         buttonElt={triggerButton}
-        $isOpen={state.isOpen}
+        isOpen={state.isOpen}
         {...triggerProps}
       />
       <PopoverListBox

@@ -34,12 +34,10 @@ type TagMultiSelectProps = {
   selectProps?: Omit<SelectPropsSingle, 'children'>
 }
 
-const MultiSelectMatchButtonContainer = styled.div`
-  > div {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-right: none;
-  }
+const MultiSelectMatchButtonContainer = styled(SelectButton)`
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: none;
 `
 
 const TagMultiSelect = styled(TagMultiSelectUnstyled)(({ theme }) => ({
@@ -94,9 +92,7 @@ function TagMultiSelectUnstyled({
           defaultOpen={false}
           triggerButton={
             <MultiSelectMatchButtonContainer>
-              <SelectButton>
-                {matchOptions.find((el) => el.value === searchLogic).label}
-              </SelectButton>
+              {matchOptions.find((el) => el.value === searchLogic).label}
             </MultiSelectMatchButtonContainer>
           }
           {...selectProps}
