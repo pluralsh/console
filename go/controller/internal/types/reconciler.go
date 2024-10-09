@@ -41,6 +41,7 @@ const (
 	NamespaceCredentialsReconciler  Reconciler = "namespacecredentials"
 	ObservabilityProviderReconciler Reconciler = "observabilityprovider"
 	ObserverReconciler              Reconciler = "observerprovider"
+	OIDCProviderReconciler          Reconciler = "oidcprovider"
 )
 
 // ToReconciler maps reconciler string to a Reconciler type.
@@ -93,6 +94,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case ObservabilityProviderReconciler:
 		fallthrough
 	case ObserverReconciler:
+		fallthrough
+	case OIDCProviderReconciler:
 		fallthrough
 	case ProviderReconciler:
 		return Reconciler(reconciler), nil
@@ -244,6 +247,13 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 			Scheme:           mgr.GetScheme(),
 			CredentialsCache: credentialsCache,
 		}, nil
+	case OIDCProviderReconciler:
+		return &controller.OIDCProviderReconciler{
+			Client:           mgr.GetClient(),
+			ConsoleClient:    consoleClient,
+			Scheme:           mgr.GetScheme(),
+			CredentialsCache: credentialsCache,
+		}, nil
 	case CustomStackRunReconciler:
 		return &controller.CustomStackRunReconciler{
 			Client:           mgr.GetClient(),
@@ -329,6 +339,7 @@ func Reconcilers() ReconcilerList {
 		ObservabilityProviderReconciler,
 		ObserverReconciler,
 		StackDefinitionReconciler,
+		OIDCProviderReconciler,
 	}
 }
 

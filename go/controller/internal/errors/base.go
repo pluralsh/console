@@ -61,6 +61,14 @@ func IsNotFound(err error) bool {
 	return newAPIError(errorResponse).Has(ErrorNotFound)
 }
 
+func IgnoreNotFound(err error) error {
+	if IsNotFound(err) {
+		return nil
+	}
+
+	return err
+}
+
 func IsDeleteRepository(err error) bool {
 	if err == nil {
 		return false
