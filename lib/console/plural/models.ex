@@ -46,7 +46,7 @@ defmodule Console.Plural.OIDCProvider do
 
   use Accessible
 
-  defstruct [:redirectUris, :bindings, :id, :name, :description, :clientId, :clientSecret]
+  defstruct [:redirectUris, :bindings, :id, :name, :description, :clientId, :clientSecret, :authMethod]
 
   def spec() do
     %__MODULE__{

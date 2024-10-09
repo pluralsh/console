@@ -3402,9 +3402,16 @@ export enum ObserverTargetType {
   Oci = 'OCI'
 }
 
+/** Supported methods for fetching an OIDC auth token */
+export enum OidcAuthMethod {
+  Basic = 'BASIC',
+  Post = 'POST'
+}
+
 /** A representation of a created OIDC provider client */
 export type OidcProvider = {
   __typename?: 'OidcProvider';
+  authMethod?: Maybe<OidcAuthMethod>;
   /** the generated client ID used in configuring OAuth clients */
   clientId: Scalars['String']['output'];
   /** the generated client secret, used in configuring an OAuth client */
@@ -3418,6 +3425,7 @@ export type OidcProvider = {
 
 /** Configuration settings for creating a new OIDC provider client */
 export type OidcProviderAttributes = {
+  authMethod?: InputMaybe<OidcAuthMethod>;
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   /** the redirect uris oidc is whitelisted to use */

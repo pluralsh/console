@@ -918,9 +918,17 @@ enum OidcProviderType {
   PLURAL
 }
 
+"Supported methods for fetching an OIDC auth token"
+enum OidcAuthMethod {
+  POST
+  BASIC
+}
+
 "Configuration settings for creating a new OIDC provider client"
 input OidcProviderAttributes {
   name: String!
+
+  authMethod: OidcAuthMethod
 
   description: String
 
@@ -935,6 +943,8 @@ type OidcProvider {
   name: String!
 
   description: String
+
+  authMethod: OidcAuthMethod
 
   "the redirect uris oidc is whitelisted to use"
   redirectUris: [String]

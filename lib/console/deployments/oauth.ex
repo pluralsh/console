@@ -40,10 +40,16 @@ defmodule Console.Deployments.OAuth do
     |> Console.move([:redirectUris], [:redirect_uris])
     |> Console.move([:clientId], [:client_id])
     |> Console.move([:clientSecret], [:client_secret])
+    |> Console.move([:authMethod], [:auth_method])
     |> ok()
   end
 
   defp rewire(pass), do: pass
 
-  defp rewire_attrs(attrs), do: Console.move(attrs, [:redirect_uris], [:redirectUris])
+  defp rewire_attrs(attrs) do
+    attrs
+    |> Map.update(:auth_method, :post, &String.upcase("#{&1}"))
+    |> Console.move([:redirect_uris], [:redirectUris])
+    |> Console.move([:auth_method], [:authMethod])
+  end
 end
