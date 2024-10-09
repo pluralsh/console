@@ -1,32 +1,33 @@
-import { Flex, P } from 'honorable'
 import {
   Button,
   ContentCard,
+  Flex,
   ValidatedInput,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useContext, useState } from 'react'
+import { useState } from 'react'
 
-import { UPDATE_USER } from 'components/graphql/users'
-
-import { LoginContext } from 'components/contexts'
-import { useMutation } from '@apollo/client'
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { ValidationResponse } from '@pluralsh/design-system/dist/components/ValidatedInput'
-import { isValidEmail } from 'utils/email'
+import { useLogin } from 'components/contexts'
+import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { isEmpty } from 'lodash'
+import { isValidEmail } from 'utils/email'
 
+import { Body2P } from 'components/utils/typography/Text'
+import { useUpdateUserMutation } from 'generated/graphql'
 import { PROFILE_BREADCRUMBS } from './MyProfile'
 
 export function Profile() {
   useSetBreadcrumbs(PROFILE_BREADCRUMBS)
-  const { me } = useContext<any>(LoginContext)
-  const [name, setName] = useState<string>(me.name)
-  const [email, setEmail] = useState<string>(me.email)
-  const [mutation, { loading }] = useMutation(UPDATE_USER, {
-    variables: { attributes: { name, email } },
+  const { me } = useLogin()
+  const [name, setName] = useState<string>(me?.name ?? '')
+  const [email, setEmail] = useState<string>(me?.email ?? '')
+  const [mutation, { loading }] = useUpdateUserMutation({
+    variables: {
+      attributes: { name, email },
+    },
   })
-  const changed = name !== me.name || email !== me.email
+  const changed = name !== me?.name || email !== me?.email
   const valid = !isEmpty(name) && isValidEmail(email)
 
   return (
@@ -37,7 +38,7 @@ export function Profile() {
       >
         <Flex
           direction="column"
-          gap="small"
+          gap="large"
         >
           <ValidatedInput
             label="Full name"
@@ -56,28 +57,20 @@ export function Profile() {
                 : { error: true, message: 'Invalid email address' }
             }
           />
-        </Flex>
-        <Flex
-          align="center"
-          gap="medium"
-          justifyContent="flex-end"
-          marginTop="small"
-        >
-          {changed && (
-            <P
-              body2
-              color="text-xlight"
-            >
-              Unsaved changes
-            </P>
-          )}
-          <Button
-            disabled={!valid}
-            onClick={() => mutation()}
-            loading={loading}
+          <Flex
+            align="center"
+            justifyContent="flex-end"
+            gap="medium"
           >
-            Save
-          </Button>
+            {changed && <Body2P $color="text-xlight">Unsaved changes</Body2P>}
+            <Button
+              disabled={!valid || !changed}
+              onClick={() => mutation()}
+              loading={loading}
+            >
+              Save
+            </Button>
+          </Flex>
         </Flex>
       </ContentCard>
     </ScrollablePage>

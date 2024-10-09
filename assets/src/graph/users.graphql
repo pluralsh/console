@@ -3,6 +3,9 @@ fragment User on User {
   pluralId
   name
   email
+  emailSettings {
+    digest
+  }
   profile
   backgroundColor
   readTimestamp
@@ -116,6 +119,12 @@ query SearchUsers($q: String, $cursor: String) {
         ...User
       }
     }
+  }
+}
+
+mutation UpdateUser($attributes: UserAttributes!) {
+  updateUser(attributes: $attributes) {
+    ...User
   }
 }
 
