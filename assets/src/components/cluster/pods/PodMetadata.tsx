@@ -9,9 +9,6 @@ import { Readiness, podStatusToReadiness } from 'utils/status'
 
 import { useTheme } from 'styled-components'
 
-import { getPodContainersStats as getContainersStats } from '../containers/getPodContainersStats'
-import { ContainerStatuses } from '../ContainerStatuses'
-
 type Phase = 'Running' | 'Succeeded' | 'Pending' | 'Failed'
 
 function phaseToReadiness(phase?: string | null) {
@@ -31,7 +28,6 @@ function phaseToReadiness(phase?: string | null) {
 export default function Metadata({ pod }: { pod: Pod }) {
   const theme = useTheme()
   const { labels, annotations } = pod.metadata
-  const containerStats = getContainersStats(pod.status)
 
   return (
     <Flex direction="column">
@@ -49,13 +45,6 @@ export default function Metadata({ pod }: { pod: Pod }) {
             title="Annotations"
           />
           <div>
-            <PropWide
-              title="containers"
-              fontWeight={600}
-            >
-              <ContainerStatuses statuses={containerStats.statuses || []} />
-            </PropWide>
-
             <PropWide
               title="Phase"
               fontWeight={600}

@@ -37,6 +37,8 @@ import { podStatusToReadiness } from '../../../../../utils/status'
 import { StatusChip } from '../../../../cluster/TableElements'
 import LogsLegend from '../../../../apps/app/logs/LogsLegend'
 import { getServiceDetailsBreadcrumbs } from '../ServiceDetails'
+import { ContainerStatuses } from '../../../../cluster/ContainerStatuses.tsx'
+import { getPodContainersStats as getContainersStats } from '../../../../cluster/containers/getPodContainersStats.tsx'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -102,7 +104,6 @@ export default function Pod() {
   })
 
   const pod = data?.pod
-  const readiness = podStatusToReadiness(pod?.status)
 
   if (error) {
     return <GqlError error={error} />
@@ -110,6 +111,9 @@ export default function Pod() {
   if (!pod) {
     return <LoadingIndicator />
   }
+
+  const readiness = podStatusToReadiness(pod.status)
+  const containerStats = getContainersStats(pod.status)
 
   return (
     <ResponsiveLayoutPage>
@@ -172,6 +176,9 @@ export default function Pod() {
           </SidecarItem>
           <SidecarItem heading="Status">
             <StatusChip readiness={readiness} />
+          </SidecarItem>
+          <SidecarItem heading="Containers">
+            <ContainerStatuses statuses={containerStats.statuses || []} />
           </SidecarItem>
         </Sidecar>
         {tab === 'logs' && <LogsLegend />}

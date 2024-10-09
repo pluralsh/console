@@ -16,7 +16,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import SideNav from './PodSideNav'
 import Sidecar from './PodSidecar'
 
-export default function Node() {
+export default function Pod() {
   const tabStateRef = useRef<any>()
   const theme = useTheme()
   const { name = '', namespace = '' } = useParams()

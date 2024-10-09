@@ -5,13 +5,16 @@ import { Link } from 'react-router-dom'
 import { podStatusToReadiness } from 'utils/status'
 
 import { StatusChip } from '../TableElements'
+import { getPodContainersStats as getContainersStats } from '../containers/getPodContainersStats.tsx'
+import { ContainerStatuses } from '../ContainerStatuses.tsx'
 
 export default function PodSidecar({ pod }: { pod?: Pod | null }) {
   if (!pod) {
     return null
   }
 
-  const readiness = podStatusToReadiness(pod?.status)
+  const readiness = podStatusToReadiness(pod.status)
+  const containerStats = getContainersStats(pod.status)
 
   return (
     <Sidecar heading="Metadata">
@@ -32,6 +35,9 @@ export default function PodSidecar({ pod }: { pod?: Pod | null }) {
       </SidecarItem>
       <SidecarItem heading="Status">
         <StatusChip readiness={readiness} />
+      </SidecarItem>
+      <SidecarItem heading="Containers">
+        <ContainerStatuses statuses={containerStats.statuses || []} />
       </SidecarItem>
     </Sidecar>
   )
