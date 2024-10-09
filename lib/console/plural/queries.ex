@@ -81,6 +81,7 @@ defmodule Console.Plural.Queries do
       description
       clientId
       clientSecret
+      authMethod
       redirectUris
       bindings {
         user { id name email }

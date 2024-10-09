@@ -2807,9 +2807,10 @@ type ObserverTargetAttributes struct {
 
 // A representation of a created OIDC provider client
 type OidcProvider struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Description *string `json:"description,omitempty"`
+	ID          string          `json:"id"`
+	Name        string          `json:"name"`
+	Description *string         `json:"description,omitempty"`
+	AuthMethod  *OidcAuthMethod `json:"authMethod,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
 	// the generated client ID used in configuring OAuth clients
@@ -2820,8 +2821,9 @@ type OidcProvider struct {
 
 // Configuration settings for creating a new OIDC provider client
 type OidcProviderAttributes struct {
-	Name        string  `json:"name"`
-	Description *string `json:"description,omitempty"`
+	Name        string          `json:"name"`
+	AuthMethod  *OidcAuthMethod `json:"authMethod,omitempty"`
+	Description *string         `json:"description,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
 }
@@ -6484,6 +6486,48 @@ func (e *ObserverTargetType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ObserverTargetType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Supported methods for fetching an OIDC auth token
+type OidcAuthMethod string
+
+const (
+	OidcAuthMethodPost  OidcAuthMethod = "POST"
+	OidcAuthMethodBasic OidcAuthMethod = "BASIC"
+)
+
+var AllOidcAuthMethod = []OidcAuthMethod{
+	OidcAuthMethodPost,
+	OidcAuthMethodBasic,
+}
+
+func (e OidcAuthMethod) IsValid() bool {
+	switch e {
+	case OidcAuthMethodPost, OidcAuthMethodBasic:
+		return true
+	}
+	return false
+}
+
+func (e OidcAuthMethod) String() string {
+	return string(e)
+}
+
+func (e *OidcAuthMethod) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = OidcAuthMethod(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid OidcAuthMethod", str)
+	}
+	return nil
+}
+
+func (e OidcAuthMethod) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
