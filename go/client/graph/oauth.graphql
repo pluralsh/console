@@ -1,0 +1,27 @@
+fragment OIDCProviderFragment on OidcProvider {
+    id
+    name
+    description
+    clientId
+    clientSecret
+    redirectUris
+}
+
+mutation CreateOIDCProvider($type: OidcProviderType!, $attributes: OidcProviderAttributes!) {
+    createOidcProvider(type: $type, attributes: $attributes){
+        ...OIDCProviderFragment
+    }
+}
+
+mutation UpdateOIDCProvider($id: ID!, $type: OidcProviderType!, $attributes: OidcProviderAttributes!) {
+    updateOidcProvider(id: $id, type: $type, attributes: $attributes){
+        ...OIDCProviderFragment
+    }
+}
+
+mutation DeleteOIDCProvider($id: ID!, $type: OidcProviderType!) {
+    deleteOidcProvider(id: $id, type: $type){
+        ...OIDCProviderFragment
+    }
+}
+
