@@ -112,6 +112,9 @@ type ConsoleClient interface {
 	GetNotificationRouterByName(ctx context.Context, name *string, interceptors ...clientv2.RequestInterceptor) (*GetNotificationRouterByName, error)
 	DeleteNotificationRouter(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteNotificationRouter, error)
 	UpsertNotificationRouter(ctx context.Context, attributes NotificationRouterAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertNotificationRouter, error)
+	CreateOIDCProvider(ctx context.Context, typeArg OidcProviderType, attributes OidcProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateOIDCProvider, error)
+	UpdateOIDCProvider(ctx context.Context, id string, typeArg OidcProviderType, attributes OidcProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateOIDCProvider, error)
+	DeleteOIDCProvider(ctx context.Context, id string, typeArg OidcProviderType, interceptors ...clientv2.RequestInterceptor) (*DeleteOIDCProvider, error)
 	ListObservabilityProviders(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListObservabilityProviders, error)
 	GetObservabilityProvider(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetObservabilityProvider, error)
 	UpsertObservabilityProvider(ctx context.Context, attributes ObservabilityProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertObservabilityProvider, error)
@@ -2381,6 +2384,52 @@ func (t *URLSinkConfigurationFragment) GetURL() string {
 		t = &URLSinkConfigurationFragment{}
 	}
 	return t.URL
+}
+
+type OIDCProviderFragment struct {
+	ID           string    "json:\"id\" graphql:\"id\""
+	Name         string    "json:\"name\" graphql:\"name\""
+	Description  *string   "json:\"description,omitempty\" graphql:\"description\""
+	ClientID     string    "json:\"clientId\" graphql:\"clientId\""
+	ClientSecret string    "json:\"clientSecret\" graphql:\"clientSecret\""
+	RedirectUris []*string "json:\"redirectUris,omitempty\" graphql:\"redirectUris\""
+}
+
+func (t *OIDCProviderFragment) GetID() string {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.ID
+}
+func (t *OIDCProviderFragment) GetName() string {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.Name
+}
+func (t *OIDCProviderFragment) GetDescription() *string {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.Description
+}
+func (t *OIDCProviderFragment) GetClientID() string {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.ClientID
+}
+func (t *OIDCProviderFragment) GetClientSecret() string {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.ClientSecret
+}
+func (t *OIDCProviderFragment) GetRedirectUris() []*string {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.RedirectUris
 }
 
 type ObservabilityProviderFragment struct {
@@ -13584,6 +13633,39 @@ func (t *UpsertNotificationRouter) GetUpsertNotificationRouter() *NotificationRo
 	return t.UpsertNotificationRouter
 }
 
+type CreateOIDCProvider struct {
+	CreateOidcProvider *OIDCProviderFragment "json:\"createOidcProvider,omitempty\" graphql:\"createOidcProvider\""
+}
+
+func (t *CreateOIDCProvider) GetCreateOidcProvider() *OIDCProviderFragment {
+	if t == nil {
+		t = &CreateOIDCProvider{}
+	}
+	return t.CreateOidcProvider
+}
+
+type UpdateOIDCProvider struct {
+	UpdateOidcProvider *OIDCProviderFragment "json:\"updateOidcProvider,omitempty\" graphql:\"updateOidcProvider\""
+}
+
+func (t *UpdateOIDCProvider) GetUpdateOidcProvider() *OIDCProviderFragment {
+	if t == nil {
+		t = &UpdateOIDCProvider{}
+	}
+	return t.UpdateOidcProvider
+}
+
+type DeleteOIDCProvider struct {
+	DeleteOidcProvider *OIDCProviderFragment "json:\"deleteOidcProvider,omitempty\" graphql:\"deleteOidcProvider\""
+}
+
+func (t *DeleteOIDCProvider) GetDeleteOidcProvider() *OIDCProviderFragment {
+	if t == nil {
+		t = &DeleteOIDCProvider{}
+	}
+	return t.DeleteOidcProvider
+}
+
 type ListObservabilityProviders struct {
 	ObservabilityProviders *ListObservabilityProviders_ObservabilityProviders "json:\"observabilityProviders,omitempty\" graphql:\"observabilityProviders\""
 }
@@ -22397,6 +22479,106 @@ func (c *Client) UpsertNotificationRouter(ctx context.Context, attributes Notifi
 	return &res, nil
 }
 
+const CreateOIDCProviderDocument = `mutation CreateOIDCProvider ($type: OidcProviderType!, $attributes: OidcProviderAttributes!) {
+	createOidcProvider(type: $type, attributes: $attributes) {
+		... OIDCProviderFragment
+	}
+}
+fragment OIDCProviderFragment on OidcProvider {
+	id
+	name
+	description
+	clientId
+	clientSecret
+	redirectUris
+}
+`
+
+func (c *Client) CreateOIDCProvider(ctx context.Context, typeArg OidcProviderType, attributes OidcProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateOIDCProvider, error) {
+	vars := map[string]any{
+		"type":       typeArg,
+		"attributes": attributes,
+	}
+
+	var res CreateOIDCProvider
+	if err := c.Client.Post(ctx, "CreateOIDCProvider", CreateOIDCProviderDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpdateOIDCProviderDocument = `mutation UpdateOIDCProvider ($id: ID!, $type: OidcProviderType!, $attributes: OidcProviderAttributes!) {
+	updateOidcProvider(id: $id, type: $type, attributes: $attributes) {
+		... OIDCProviderFragment
+	}
+}
+fragment OIDCProviderFragment on OidcProvider {
+	id
+	name
+	description
+	clientId
+	clientSecret
+	redirectUris
+}
+`
+
+func (c *Client) UpdateOIDCProvider(ctx context.Context, id string, typeArg OidcProviderType, attributes OidcProviderAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateOIDCProvider, error) {
+	vars := map[string]any{
+		"id":         id,
+		"type":       typeArg,
+		"attributes": attributes,
+	}
+
+	var res UpdateOIDCProvider
+	if err := c.Client.Post(ctx, "UpdateOIDCProvider", UpdateOIDCProviderDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteOIDCProviderDocument = `mutation DeleteOIDCProvider ($id: ID!, $type: OidcProviderType!) {
+	deleteOidcProvider(id: $id, type: $type) {
+		... OIDCProviderFragment
+	}
+}
+fragment OIDCProviderFragment on OidcProvider {
+	id
+	name
+	description
+	clientId
+	clientSecret
+	redirectUris
+}
+`
+
+func (c *Client) DeleteOIDCProvider(ctx context.Context, id string, typeArg OidcProviderType, interceptors ...clientv2.RequestInterceptor) (*DeleteOIDCProvider, error) {
+	vars := map[string]any{
+		"id":   id,
+		"type": typeArg,
+	}
+
+	var res DeleteOIDCProvider
+	if err := c.Client.Post(ctx, "DeleteOIDCProvider", DeleteOIDCProviderDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListObservabilityProvidersDocument = `query ListObservabilityProviders ($after: String, $first: Int, $before: String, $last: Int) {
 	observabilityProviders(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -28475,6 +28657,9 @@ var DocumentOperationNames = map[string]string{
 	GetNotificationRouterByNameDocument:               "GetNotificationRouterByName",
 	DeleteNotificationRouterDocument:                  "DeleteNotificationRouter",
 	UpsertNotificationRouterDocument:                  "UpsertNotificationRouter",
+	CreateOIDCProviderDocument:                        "CreateOIDCProvider",
+	UpdateOIDCProviderDocument:                        "UpdateOIDCProvider",
+	DeleteOIDCProviderDocument:                        "DeleteOIDCProvider",
 	ListObservabilityProvidersDocument:                "ListObservabilityProviders",
 	GetObservabilityProviderDocument:                  "GetObservabilityProvider",
 	UpsertObservabilityProviderDocument:               "UpsertObservabilityProvider",
