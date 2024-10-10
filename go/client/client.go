@@ -2387,12 +2387,13 @@ func (t *URLSinkConfigurationFragment) GetURL() string {
 }
 
 type OIDCProviderFragment struct {
-	ID           string    "json:\"id\" graphql:\"id\""
-	Name         string    "json:\"name\" graphql:\"name\""
-	Description  *string   "json:\"description,omitempty\" graphql:\"description\""
-	ClientID     string    "json:\"clientId\" graphql:\"clientId\""
-	ClientSecret string    "json:\"clientSecret\" graphql:\"clientSecret\""
-	RedirectUris []*string "json:\"redirectUris,omitempty\" graphql:\"redirectUris\""
+	ID           string          "json:\"id\" graphql:\"id\""
+	Name         string          "json:\"name\" graphql:\"name\""
+	Description  *string         "json:\"description,omitempty\" graphql:\"description\""
+	ClientID     string          "json:\"clientId\" graphql:\"clientId\""
+	ClientSecret string          "json:\"clientSecret\" graphql:\"clientSecret\""
+	AuthMethod   *OidcAuthMethod "json:\"authMethod,omitempty\" graphql:\"authMethod\""
+	RedirectUris []*string       "json:\"redirectUris,omitempty\" graphql:\"redirectUris\""
 }
 
 func (t *OIDCProviderFragment) GetID() string {
@@ -2424,6 +2425,12 @@ func (t *OIDCProviderFragment) GetClientSecret() string {
 		t = &OIDCProviderFragment{}
 	}
 	return t.ClientSecret
+}
+func (t *OIDCProviderFragment) GetAuthMethod() *OidcAuthMethod {
+	if t == nil {
+		t = &OIDCProviderFragment{}
+	}
+	return t.AuthMethod
 }
 func (t *OIDCProviderFragment) GetRedirectUris() []*string {
 	if t == nil {
@@ -22490,6 +22497,7 @@ fragment OIDCProviderFragment on OidcProvider {
 	description
 	clientId
 	clientSecret
+	authMethod
 	redirectUris
 }
 `
@@ -22523,6 +22531,7 @@ fragment OIDCProviderFragment on OidcProvider {
 	description
 	clientId
 	clientSecret
+	authMethod
 	redirectUris
 }
 `
@@ -22557,6 +22566,7 @@ fragment OIDCProviderFragment on OidcProvider {
 	description
 	clientId
 	clientSecret
+	authMethod
 	redirectUris
 }
 `
