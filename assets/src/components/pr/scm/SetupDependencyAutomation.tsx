@@ -12,8 +12,6 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { randomId } from 'kbar/lib/utils'
-
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import {
   SetupRenovateMutationVariables,
@@ -33,6 +31,7 @@ import { scmTypeToIcon } from './PrScmConnectionsColumns'
 const REPOSITORY_EXTRACT_REGEX =
   /(?<userOrOrg>[^/:]+)\/(?<repository>[^/]+)?\.git$/
 
+const randomId = () => Math.random().toString(36).substring(2, 9)
 interface SetupDependencyAutomationFormProps {
   formState: Partial<SetupRenovateAttributes>
   updateFormState: (update: Partial<SetupRenovateAttributes>) => void

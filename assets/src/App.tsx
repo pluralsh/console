@@ -1,5 +1,4 @@
 import { ApolloProvider } from '@apollo/client'
-import { mergeDeep } from '@apollo/client/utilities'
 import {
   GlobalStyle,
   honorableThemeDark,
@@ -11,7 +10,7 @@ import {
 import { ReactNode } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
-import { CssBaseline, ThemeProvider } from 'honorable'
+import { CssBaseline, ThemeProvider as HonorableThemeProvider } from 'honorable'
 import {
   ThemeProvider as StyledThemeProvider,
   StyleSheetManager,
@@ -20,14 +19,11 @@ import {
 import DocSearchStyles from 'components/help/DocSearchStyles'
 import { OverlayContextProvider } from 'components/layout/Overlay'
 
-import 'react-pulse-dot/dist/index.css'
-import 'react-toggle/style.css'
 import { client } from './helpers/client'
 import { rootRoutes } from './routes/rootRoutes'
-import { DEFAULT_THEME } from './theme'
 
-import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
 import { shouldForwardProp } from 'utils/shouldForwardProp'
+import { PluralErrorBoundary } from './components/cd/PluralErrorBoundary'
 
 const router = createBrowserRouter(rootRoutes)
 
@@ -47,12 +43,11 @@ function ThemeProviders({ children }: { children: ReactNode }) {
   const honorableTheme =
     colorMode === 'light' ? honorableThemeLight : honorableThemeDark
   const styledTheme = colorMode === 'light' ? styledThemeLight : styledThemeDark
-  const mergedStyledTheme = mergeDeep(DEFAULT_THEME, styledTheme)
 
   return (
-    <ThemeProvider theme={honorableTheme}>
+    <HonorableThemeProvider theme={honorableTheme}>
       <StyleSheetManager shouldForwardProp={shouldForwardProp}>
-        <StyledThemeProvider theme={mergedStyledTheme}>
+        <StyledThemeProvider theme={styledTheme}>
           <OverlayContextProvider>
             <CssBaseline />
             <GlobalStyle />
@@ -61,6 +56,6 @@ function ThemeProviders({ children }: { children: ReactNode }) {
           </OverlayContextProvider>
         </StyledThemeProvider>
       </StyleSheetManager>
-    </ThemeProvider>
+    </HonorableThemeProvider>
   )
 }
