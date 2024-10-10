@@ -1,8 +1,6 @@
 import { useMemo, useRef } from 'react'
-import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
 import {
-  Sidecar,
-  SidecarItem,
   Tab,
   TabList,
   TabPanel,
@@ -17,15 +15,12 @@ import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPa
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { GqlError } from 'components/utils/Alert'
 
-import { A } from 'honorable'
-
 import {
   SERVICE_POD_ABS_PATH,
   SERVICE_POD_PARAM_CLUSTER,
   SERVICE_POD_PARAM_NAME,
   SERVICE_POD_PARAM_NAMESPACE,
   SERVICE_POD_PARAM_SERVICE,
-  getNodeDetailsPath,
   getServicePodDetailsPath,
 } from '../../../../../routes/cdRoutesConsts'
 import {
@@ -33,12 +28,10 @@ import {
   useServiceDeploymentTinyQuery,
 } from '../../../../../generated/graphql'
 import { LinkTabWrap } from '../../../../utils/Tabs'
-import { podStatusToReadiness } from '../../../../../utils/status'
-import { PhaseChip, StatusChip } from '../../../../cluster/TableElements'
+
 import LogsLegend from '../../../../apps/app/logs/LogsLegend'
 import { getServiceDetailsBreadcrumbs } from '../ServiceDetails'
-import { ContainerStatuses } from '../../../../cluster/ContainerStatuses.tsx'
-import { getPodContainersStats as getContainersStats } from '../../../../cluster/containers/getPodContainersStats.tsx'
+import PodSidecar from '../../../cluster/pod/PodSidecar.tsx'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -112,9 +105,6 @@ export default function Pod() {
     return <LoadingIndicator />
   }
 
-  const readiness = podStatusToReadiness(pod.status)
-  const containerStats = getContainersStats(pod.status)
-
   return (
     <ResponsiveLayoutPage>
       <ResponsiveLayoutSidenavContainer
@@ -153,37 +143,10 @@ export default function Pod() {
           flexDirection: 'column',
         }}
       >
-        <Sidecar>
-          <SidecarItem heading="Pod name">{pod?.metadata?.name}</SidecarItem>
-          <SidecarItem heading="Namespace">
-            {pod?.metadata?.namespace}
-          </SidecarItem>
-          <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
-          <SidecarItem heading="Parent node">
-            <A
-              as={Link}
-              to={getNodeDetailsPath({
-                clusterId,
-                name: pod?.spec.nodeName,
-              })}
-              inline
-            >
-              {pod?.spec.nodeName}
-            </A>
-          </SidecarItem>
-          <SidecarItem heading="Service account">
-            {pod?.spec.serviceAccountName}
-          </SidecarItem>
-          <SidecarItem heading="Phase">
-            <PhaseChip phase={pod?.status?.phase} />
-          </SidecarItem>
-          <SidecarItem heading="Status">
-            <StatusChip readiness={readiness} />
-          </SidecarItem>
-          <SidecarItem heading="Containers">
-            <ContainerStatuses statuses={containerStats.statuses || []} />
-          </SidecarItem>
-        </Sidecar>
+        <PodSidecar
+          pod={pod}
+          clusterId={clusterId}
+        />
         {tab === 'logs' && <LogsLegend />}
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
