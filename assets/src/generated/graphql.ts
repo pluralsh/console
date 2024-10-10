@@ -1646,6 +1646,7 @@ export type DaemonSetSpec = {
 
 export type DaemonSetStatus = {
   __typename?: 'DaemonSetStatus';
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   currentNumberScheduled?: Maybe<Scalars['Int']['output']>;
   desiredNumberScheduled?: Maybe<Scalars['Int']['output']>;
   numberReady?: Maybe<Scalars['Int']['output']>;
@@ -1803,6 +1804,7 @@ export type DeploymentSpec = {
 export type DeploymentStatus = {
   __typename?: 'DeploymentStatus';
   availableReplicas?: Maybe<Scalars['Int']['output']>;
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   readyReplicas?: Maybe<Scalars['Int']['output']>;
   replicas?: Maybe<Scalars['Int']['output']>;
   unavailableReplicas?: Maybe<Scalars['Int']['output']>;
@@ -7643,6 +7645,7 @@ export type ServiceSpec = {
 
 export type ServiceStatus = {
   __typename?: 'ServiceStatus';
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   loadBalancer?: Maybe<LoadBalancerStatus>;
 };
 
@@ -8194,6 +8197,7 @@ export type StatefulSetSpec = {
 
 export type StatefulSetStatus = {
   __typename?: 'StatefulSetStatus';
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   currentReplicas?: Maybe<Scalars['Int']['output']>;
   readyReplicas?: Maybe<Scalars['Int']['output']>;
   replicas?: Maybe<Scalars['Int']['output']>;

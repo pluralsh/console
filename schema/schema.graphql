@@ -5924,6 +5924,7 @@ type DaemonSetStatus {
   currentNumberScheduled: Int
   desiredNumberScheduled: Int
   numberReady: Int
+  conditions: [StatusCondition]
 }
 
 type DaemonSetSpec {
@@ -6345,6 +6346,7 @@ type Service {
 
 type ServiceStatus {
   loadBalancer: LoadBalancerStatus
+  conditions: [StatusCondition]
 }
 
 type LoadBalancerStatus {
@@ -6384,6 +6386,7 @@ type StatefulSetStatus {
   replicas: Int
   readyReplicas: Int
   updatedReplicas: Int
+  conditions: [StatusCondition]
 }
 
 type StatefulSetSpec {
@@ -6413,6 +6416,7 @@ type DeploymentStatus {
   replicas: Int
   readyReplicas: Int
   unavailableReplicas: Int
+  conditions: [StatusCondition]
 }
 
 type DeploymentSpec {

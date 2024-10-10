@@ -35,6 +35,7 @@ defmodule Console.GraphQl.Kubernetes.Deployment do
     field :replicas,             :integer
     field :ready_replicas,       :integer
     field :unavailable_replicas, :integer
+    field :conditions,           list_of(:status_condition)
   end
 
   object :deployment_spec do

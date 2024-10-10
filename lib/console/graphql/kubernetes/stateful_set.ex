@@ -22,6 +22,7 @@ defmodule Console.GraphQl.Kubernetes.StatefulSet do
     field :replicas,             :integer
     field :ready_replicas,       :integer
     field :updated_replicas,     :integer
+    field :conditions,           list_of(:status_condition)
   end
 
   object :stateful_set_spec do
