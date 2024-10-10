@@ -7,9 +7,16 @@ defmodule Console.GraphQl.Deployments.OAuth do
     value :plural
   end
 
+  @desc "Supported methods for fetching an OIDC auth token"
+  enum :oidc_auth_method do
+    value :post
+    value :basic
+  end
+
   @desc "Configuration settings for creating a new OIDC provider client"
   input_object :oidc_provider_attributes do
     field :name,          non_null(:string)
+    field :auth_method,   :oidc_auth_method
     field :description,   :string
     field :redirect_uris, list_of(:string), description: "the redirect uris oidc is whitelisted to use"
   end
@@ -19,6 +26,7 @@ defmodule Console.GraphQl.Deployments.OAuth do
     field :id,            non_null(:id)
     field :name,          non_null(:string)
     field :description,   :string
+    field :auth_method,   :oidc_auth_method
     field :redirect_uris, list_of(:string), description: "the redirect uris oidc is whitelisted to use"
     field :client_id,     non_null(:string), description: "the generated client ID used in configuring OAuth clients"
     field :client_secret, non_null(:string), description: "the generated client secret, used in configuring an OAuth client"

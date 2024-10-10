@@ -187,7 +187,7 @@ type RootQueryType {
 
   scmConnection(id: ID, name: String): ScmConnection
 
-  prAutomations(after: String, first: Int, before: String, last: Int): PrAutomationConnection
+  prAutomations(after: String, first: Int, before: String, last: Int, catalogId: ID, projectId: ID, q: String): PrAutomationConnection
 
   prAutomation(id: ID, name: String): PrAutomation
 
@@ -918,9 +918,17 @@ enum OidcProviderType {
   PLURAL
 }
 
+"Supported methods for fetching an OIDC auth token"
+enum OidcAuthMethod {
+  POST
+  BASIC
+}
+
 "Configuration settings for creating a new OIDC provider client"
 input OidcProviderAttributes {
   name: String!
+
+  authMethod: OidcAuthMethod
 
   description: String
 
@@ -935,6 +943,8 @@ type OidcProvider {
   name: String!
 
   description: String
+
+  authMethod: OidcAuthMethod
 
   "the redirect uris oidc is whitelisted to use"
   redirectUris: [String]
@@ -6664,6 +6674,7 @@ input UserAttributes {
   email: String
   password: String
   roles: UserRoleAttributes
+  emailSettings: EmailSettingsAttributes
   signingPrivateKey: String
 }
 
@@ -6676,6 +6687,11 @@ input ServiceAccountAttributes {
 
 input UserRoleAttributes {
   admin: Boolean
+}
+
+input EmailSettingsAttributes {
+  "whether you want to receive digest emails"
+  digest: Boolean
 }
 
 input InviteAttributes {
@@ -6766,6 +6782,7 @@ type User {
   profile: String
   pluralId: String
   roles: UserRoles
+  emailSettings: EmailSettings
   readTimestamp: DateTime
   buildTimestamp: DateTime
   refreshToken: RefreshToken
@@ -6793,6 +6810,11 @@ type RefreshToken {
 
 type UserRoles {
   admin: Boolean
+}
+
+type EmailSettings {
+  "whether you want to receive digest emails"
+  digest: Boolean
 }
 
 type Invite {

@@ -18,6 +18,7 @@ defmodule Console.GraphQl.Users do
     field :email,               :string
     field :password,            :string
     field :roles,               :user_role_attributes
+    field :email_settings,      :email_settings_attributes
     field :signing_private_key, :string
   end
 
@@ -30,6 +31,10 @@ defmodule Console.GraphQl.Users do
 
   input_object :user_role_attributes do
     field :admin, :boolean
+  end
+
+  input_object :email_settings_attributes do
+    field :digest, :boolean, description: "whether you want to receive digest emails"
   end
 
   input_object :invite_attributes do
@@ -109,6 +114,7 @@ defmodule Console.GraphQl.Users do
     field :profile,         :string
     field :plural_id,       :string
     field :roles,           :user_roles
+    field :email_settings,  :email_settings
     field :read_timestamp,  :datetime
     field :build_timestamp, :datetime
     field :refresh_token,   :refresh_token
@@ -149,6 +155,10 @@ defmodule Console.GraphQl.Users do
 
   object :user_roles do
     field :admin, :boolean
+  end
+
+  object :email_settings do
+    field :digest, :boolean, description: "whether you want to receive digest emails"
   end
 
   object :invite do

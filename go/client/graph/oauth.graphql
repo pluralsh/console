@@ -4,6 +4,7 @@ fragment OIDCProviderFragment on OidcProvider {
     description
     clientId
     clientSecret
+    authMethod
     redirectUris
 }
 

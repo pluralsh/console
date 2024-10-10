@@ -78,6 +78,14 @@ defmodule Console.Schema.PrAutomation do
     timestamps()
   end
 
+  def for_catalog(query \\ __MODULE__, catalog_id) do
+    from(p in query, where: p.catalog_id == ^catalog_id)
+  end
+
+  def search(query \\ __MODULE__, q) do
+    from(p in query, where: ilike(p.name, ^"%#{q}%"))
+  end
+
   def for_project(query \\ __MODULE__, proj_id) do
     from(p in query, where: p.project_id == ^proj_id)
   end
