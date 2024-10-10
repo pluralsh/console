@@ -42,6 +42,10 @@ defmodule Console.Schema.User do
       field :admin, :boolean, default: false
     end
 
+    embeds_one :email_settings, EmailSettings, on_replace: :update do
+      field :digest, :boolean, default: true
+    end
+
     has_many :role_bindings, RoleBinding
     many_to_many :groups, Group, join_through: "group_members"
     has_many :group_members, GroupMember
@@ -92,6 +96,7 @@ defmodule Console.Schema.User do
     |> cast(attrs, @valid)
     |> cast_assoc(:assume_bindings)
     |> cast_embed(:roles, with: &role_changeset/2)
+    |> cast_embed(:email_settings, with: &settings_changeset/2)
     |> unique_constraint(:email)
     |> unique_constraint(:bot_name)
     |> validate_length(:password, min: 10)
@@ -106,6 +111,11 @@ defmodule Console.Schema.User do
   def role_changeset(model, attrs) do
     model
     |> cast(attrs, [:admin])
+  end
+
+  def settings_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:digest])
   end
 
   defp hash_password(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do

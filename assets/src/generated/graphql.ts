@@ -1814,6 +1814,17 @@ export type DeploymentStrategy = {
   type?: Maybe<Scalars['String']['output']>;
 };
 
+export type EmailSettings = {
+  __typename?: 'EmailSettings';
+  /** whether you want to receive digest emails */
+  digest?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type EmailSettingsAttributes = {
+  /** whether you want to receive digest emails */
+  digest?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type EnvAttributes = {
   name: Scalars['String']['input'];
   value: Scalars['String']['input'];
@@ -3391,9 +3402,16 @@ export enum ObserverTargetType {
   Oci = 'OCI'
 }
 
+/** Supported methods for fetching an OIDC auth token */
+export enum OidcAuthMethod {
+  Basic = 'BASIC',
+  Post = 'POST'
+}
+
 /** A representation of a created OIDC provider client */
 export type OidcProvider = {
   __typename?: 'OidcProvider';
+  authMethod?: Maybe<OidcAuthMethod>;
   /** the generated client ID used in configuring OAuth clients */
   clientId: Scalars['String']['output'];
   /** the generated client secret, used in configuring an OAuth client */
@@ -3407,6 +3425,7 @@ export type OidcProvider = {
 
 /** Configuration settings for creating a new OIDC provider client */
 export type OidcProviderAttributes = {
+  authMethod?: InputMaybe<OidcAuthMethod>;
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   /** the redirect uris oidc is whitelisted to use */
@@ -6649,8 +6668,11 @@ export type RootQueryTypePrAutomationArgs = {
 export type RootQueryTypePrAutomationsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
+  catalogId?: InputMaybe<Scalars['ID']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -8476,6 +8498,7 @@ export type User = {
   buildTimestamp?: Maybe<Scalars['DateTime']['output']>;
   deletedAt?: Maybe<Scalars['DateTime']['output']>;
   email: Scalars['String']['output'];
+  emailSettings?: Maybe<EmailSettings>;
   groups?: Maybe<Array<Maybe<Group>>>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -8493,6 +8516,7 @@ export type User = {
 
 export type UserAttributes = {
   email?: InputMaybe<Scalars['String']['input']>;
+  emailSettings?: InputMaybe<EmailSettingsAttributes>;
   name?: InputMaybe<Scalars['String']['input']>;
   password?: InputMaybe<Scalars['String']['input']>;
   roles?: InputMaybe<UserRoleAttributes>;

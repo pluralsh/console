@@ -706,6 +706,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :pr_automations, node_type: :pr_automation do
       middleware Authenticated
+      arg :catalog_id, :id
+      arg :project_id, :id
+      arg :q,          :string
 
       resolve &Deployments.list_pr_automations/2
     end
