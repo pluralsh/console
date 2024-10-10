@@ -21,19 +21,19 @@ export default function PodSidecar({
 
   return (
     <Sidecar>
-      <SidecarItem heading="Pod name">{pod?.metadata?.name}</SidecarItem>
+      <SidecarItem heading="Pod name">{pod.metadata?.name}</SidecarItem>
       <SidecarItem heading="Pod namespace">
-        {pod?.metadata?.namespace}
+        {pod.metadata?.namespace}
       </SidecarItem>
-      <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
+      <SidecarItem heading="IP">{pod.status?.podIp}</SidecarItem>
       <SidecarItem heading="Parent node">
         {clusterId ? (
           <A
             as={Link}
-            to={getNodeDetailsPath({ clusterId, name: pod?.spec.nodeName })}
+            to={getNodeDetailsPath({ clusterId, name: pod.spec.nodeName })}
             inline
           >
-            {pod?.spec.nodeName}
+            {pod.spec.nodeName}
           </A>
         ) : (
           <A
@@ -46,10 +46,10 @@ export default function PodSidecar({
         )}
       </SidecarItem>
       <SidecarItem heading="Service account">
-        {pod?.spec.serviceAccountName}
+        {pod.spec.serviceAccountName}
       </SidecarItem>
       <SidecarItem heading="Phase">
-        <PhaseChip phase={pod?.status?.phase} />
+        <PhaseChip phase={pod.status?.phase} />
       </SidecarItem>
       <SidecarItem heading="Status">
         <StatusChip readiness={readiness} />
