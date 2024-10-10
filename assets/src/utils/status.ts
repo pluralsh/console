@@ -7,6 +7,23 @@ import {
 } from 'generated/graphql'
 import { ComponentProps } from 'react'
 
+type PhaseI = 'Running' | 'Succeeded' | 'Pending' | 'Failed'
+
+export const Phase = {
+  Running: 'Running',
+  Succeeded: 'Succeeded',
+  Pending: 'Pending',
+  Failed: 'Failed',
+} as const satisfies Record<PhaseI, PhaseI>
+export type PhaseT = (typeof Phase)[PhaseI]
+
+export const phaseToSeverity = {
+  [Phase.Running]: 'success',
+  [Phase.Succeeded]: 'success',
+  [Phase.Pending]: 'info',
+  [Phase.Failed]: 'critical',
+} as const satisfies Record<PhaseT, ComponentProps<typeof Chip>['severity']>
+
 type ReadinessI =
   | 'Ready'
   | 'InProgress'
@@ -14,6 +31,7 @@ type ReadinessI =
   | 'Complete'
   | 'Completed'
   | 'Running'
+
 export const Readiness = {
   Ready: 'Ready',
   InProgress: 'InProgress',

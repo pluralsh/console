@@ -34,7 +34,7 @@ import {
 } from '../../../../../generated/graphql'
 import { LinkTabWrap } from '../../../../utils/Tabs'
 import { podStatusToReadiness } from '../../../../../utils/status'
-import { StatusChip } from '../../../../cluster/TableElements'
+import { PhaseChip, StatusChip } from '../../../../cluster/TableElements'
 import LogsLegend from '../../../../apps/app/logs/LogsLegend'
 import { getServiceDetailsBreadcrumbs } from '../ServiceDetails'
 import { ContainerStatuses } from '../../../../cluster/ContainerStatuses.tsx'
@@ -153,7 +153,7 @@ export default function Pod() {
           flexDirection: 'column',
         }}
       >
-        <Sidecar heading="Metadata">
+        <Sidecar>
           <SidecarItem heading="Pod name">{pod?.metadata?.name}</SidecarItem>
           <SidecarItem heading="Namespace">
             {pod?.metadata?.namespace}
@@ -173,6 +173,9 @@ export default function Pod() {
           </SidecarItem>
           <SidecarItem heading="Service account">
             {pod?.spec.serviceAccountName}
+          </SidecarItem>
+          <SidecarItem heading="Phase">
+            <PhaseChip phase={pod?.status?.phase} />
           </SidecarItem>
           <SidecarItem heading="Status">
             <StatusChip readiness={readiness} />

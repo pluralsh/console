@@ -4,7 +4,7 @@ import { A } from 'honorable'
 import { Link } from 'react-router-dom'
 import { podStatusToReadiness } from 'utils/status'
 
-import { StatusChip } from '../TableElements'
+import { PhaseChip, StatusChip } from '../TableElements'
 import { getPodContainersStats as getContainersStats } from '../containers/getPodContainersStats.tsx'
 import { ContainerStatuses } from '../ContainerStatuses.tsx'
 
@@ -17,7 +17,7 @@ export default function PodSidecar({ pod }: { pod?: Pod | null }) {
   const containerStats = getContainersStats(pod.status)
 
   return (
-    <Sidecar heading="Metadata">
+    <Sidecar>
       <SidecarItem heading="Pod name">{pod?.metadata?.name}</SidecarItem>
       <SidecarItem heading="Namespace">{pod?.metadata?.namespace}</SidecarItem>
       <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
@@ -32,6 +32,9 @@ export default function PodSidecar({ pod }: { pod?: Pod | null }) {
       </SidecarItem>
       <SidecarItem heading="Service account">
         {pod.spec.serviceAccountName}
+      </SidecarItem>
+      <SidecarItem heading="Phase">
+        <PhaseChip phase={pod?.status?.phase} />
       </SidecarItem>
       <SidecarItem heading="Status">
         <StatusChip readiness={readiness} />
