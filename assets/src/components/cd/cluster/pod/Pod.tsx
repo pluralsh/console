@@ -1,8 +1,6 @@
 import { useMemo, useRef } from 'react'
-import { Link, Outlet, useMatch, useParams } from 'react-router-dom'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
 import {
-  Sidecar,
-  SidecarItem,
   Tab,
   TabList,
   TabPanel,
@@ -14,7 +12,6 @@ import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/Respon
 import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { A } from 'honorable'
 
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
@@ -25,15 +22,13 @@ import {
   POD_PARAM_CLUSTER,
   POD_PARAM_NAME,
   POD_PARAM_NAMESPACE,
-  getNodeDetailsPath,
   getPodDetailsPath,
 } from '../../../../routes/cdRoutesConsts'
 import { useClusterQuery, usePodQuery } from '../../../../generated/graphql'
 import { LinkTabWrap } from '../../../utils/Tabs'
-import { podStatusToReadiness } from '../../../../utils/status'
-import { StatusChip } from '../../../cluster/TableElements'
 import LogsLegend from '../../../apps/app/logs/LogsLegend'
 import { getClusterBreadcrumbs } from '../Cluster'
+import PodSidecar from './PodSidecar.tsx'
 
 const DIRECTORY = [
   { path: '', label: 'Info' },
@@ -92,7 +87,6 @@ export default function Pod() {
   })
 
   const pod = data?.pod
-  const readiness = podStatusToReadiness(pod?.status)
 
   if (error) {
     return <GqlError error={error} />
@@ -139,28 +133,10 @@ export default function Pod() {
           flexDirection: 'column',
         }}
       >
-        <Sidecar heading="Metadata">
-          <SidecarItem heading="Pod name">{pod?.metadata?.name}</SidecarItem>
-          <SidecarItem heading="Namespace">
-            {pod?.metadata?.namespace}
-          </SidecarItem>
-          <SidecarItem heading="IP">{pod?.status?.podIp}</SidecarItem>
-          <SidecarItem heading="Parent node">
-            <A
-              as={Link}
-              to={getNodeDetailsPath({ clusterId, name: pod?.spec.nodeName })}
-              inline
-            >
-              {pod?.spec.nodeName}
-            </A>
-          </SidecarItem>
-          <SidecarItem heading="Service account">
-            {pod?.spec.serviceAccountName}
-          </SidecarItem>
-          <SidecarItem heading="Status">
-            <StatusChip readiness={readiness} />
-          </SidecarItem>
-        </Sidecar>
+        <PodSidecar
+          pod={pod}
+          clusterId={clusterId}
+        />
         {tab === 'logs' && <LogsLegend />}
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>

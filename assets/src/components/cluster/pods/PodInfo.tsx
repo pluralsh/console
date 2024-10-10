@@ -79,6 +79,7 @@ export default function PodInfo() {
       <Flex
         direction="column"
         gap="xlarge"
+        paddingBottom="large"
       >
         <section>
           <SubTitle>Containers</SubTitle>

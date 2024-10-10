@@ -11,6 +11,8 @@ import { Flex } from 'honorable'
 import { CSSProperties, ComponentProps, ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
+  PhaseT,
+  phaseToSeverity,
   ReadinessT,
   readinessToContainerLabel,
   readinessToLabel,
@@ -60,6 +62,17 @@ export const ContainerStatusChip = styled(
   ({ readiness }: { readiness: ReadinessT }) => (
     <Chip severity={readinessToSeverity[readiness]}>
       {readinessToContainerLabel[readiness]}
+    </Chip>
+  )
+)((_) => ({}))
+
+export const PhaseChip = styled(
+  ({ phase, ...props }: { phase: PhaseT } & ChipProps) => (
+    <Chip
+      severity={phaseToSeverity[phase]}
+      {...props}
+    >
+      {phase}
     </Chip>
   )
 )((_) => ({}))

@@ -14,9 +14,9 @@ import { POLL_INTERVAL } from '../constants'
 import LoadingIndicator from '../../utils/LoadingIndicator'
 
 import SideNav from './PodSideNav'
-import Sidecar from './PodSidecar'
+import PodSidecar from '../../cd/cluster/pod/PodSidecar.tsx'
 
-export default function Node() {
+export default function Pod() {
   const tabStateRef = useRef<any>()
   const theme = useTheme()
   const { name = '', namespace = '' } = useParams()
@@ -64,7 +64,7 @@ export default function Node() {
       </TabPanel>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutSidecarContainer>
-        <Sidecar pod={data?.pod} />
+        <PodSidecar pod={pod} />
       </ResponsiveLayoutSidecarContainer>
     </ResponsiveLayoutPage>
   )
