@@ -1324,9 +1324,10 @@ type DaemonSetSpec struct {
 }
 
 type DaemonSetStatus struct {
-	CurrentNumberScheduled *int64 `json:"currentNumberScheduled,omitempty"`
-	DesiredNumberScheduled *int64 `json:"desiredNumberScheduled,omitempty"`
-	NumberReady            *int64 `json:"numberReady,omitempty"`
+	CurrentNumberScheduled *int64             `json:"currentNumberScheduled,omitempty"`
+	DesiredNumberScheduled *int64             `json:"desiredNumberScheduled,omitempty"`
+	NumberReady            *int64             `json:"numberReady,omitempty"`
+	Conditions             []*StatusCondition `json:"conditions,omitempty"`
 }
 
 type Dashboard struct {
@@ -1463,10 +1464,11 @@ type DeploymentSpec struct {
 }
 
 type DeploymentStatus struct {
-	AvailableReplicas   *int64 `json:"availableReplicas,omitempty"`
-	Replicas            *int64 `json:"replicas,omitempty"`
-	ReadyReplicas       *int64 `json:"readyReplicas,omitempty"`
-	UnavailableReplicas *int64 `json:"unavailableReplicas,omitempty"`
+	AvailableReplicas   *int64             `json:"availableReplicas,omitempty"`
+	Replicas            *int64             `json:"replicas,omitempty"`
+	ReadyReplicas       *int64             `json:"readyReplicas,omitempty"`
+	UnavailableReplicas *int64             `json:"unavailableReplicas,omitempty"`
+	Conditions          []*StatusCondition `json:"conditions,omitempty"`
 }
 
 type DeploymentStrategy struct {
@@ -4500,6 +4502,7 @@ type ServiceSpec struct {
 
 type ServiceStatus struct {
 	LoadBalancer *LoadBalancerStatus `json:"loadBalancer,omitempty"`
+	Conditions   []*StatusCondition  `json:"conditions,omitempty"`
 }
 
 // a rollup count of the statuses of services in a query
@@ -4994,10 +4997,11 @@ type StatefulSetSpec struct {
 }
 
 type StatefulSetStatus struct {
-	CurrentReplicas *int64 `json:"currentReplicas,omitempty"`
-	Replicas        *int64 `json:"replicas,omitempty"`
-	ReadyReplicas   *int64 `json:"readyReplicas,omitempty"`
-	UpdatedReplicas *int64 `json:"updatedReplicas,omitempty"`
+	CurrentReplicas *int64             `json:"currentReplicas,omitempty"`
+	Replicas        *int64             `json:"replicas,omitempty"`
+	ReadyReplicas   *int64             `json:"readyReplicas,omitempty"`
+	UpdatedReplicas *int64             `json:"updatedReplicas,omitempty"`
+	Conditions      []*StatusCondition `json:"conditions,omitempty"`
 }
 
 type StatusComponent struct {
