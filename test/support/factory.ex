@@ -672,6 +672,7 @@ defmodule Console.Factory do
       author: "Plural",
       read_policy_id: Ecto.UUID.generate(),
       write_policy_id: Ecto.UUID.generate(),
+      create_policy_id: Ecto.UUID.generate(),
       project: Settings.default_project!()
     }
   end

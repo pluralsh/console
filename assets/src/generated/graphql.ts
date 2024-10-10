@@ -642,8 +642,14 @@ export type Catalog = {
   author?: Maybe<Scalars['String']['output']>;
   /** short category name used for browsing catalogs */
   category?: Maybe<Scalars['String']['output']>;
+  /** create policy for this catalog, can give permission to just create prs */
+  createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+  /** a darkmode icon url to use for this catalog */
+  darkIcon?: Maybe<Scalars['String']['output']>;
   /** longform description for the purpose of this catalog */
   description?: Maybe<Scalars['String']['output']>;
+  /** an icon url to use for this catalog */
+  icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
@@ -660,7 +666,12 @@ export type CatalogAttributes = {
   author: Scalars['String']['input'];
   /** short category name for browsability */
   category?: InputMaybe<Scalars['String']['input']>;
+  createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+  /** a darkmode icon url to use for this catalog */
+  darkIcon?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  /** an icon url to use for this catalog */
+  icon?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   /** owning project of the catalog, permissions will propagate down */
   projectId?: InputMaybe<Scalars['ID']['input']>;
@@ -1646,6 +1657,7 @@ export type DaemonSetSpec = {
 
 export type DaemonSetStatus = {
   __typename?: 'DaemonSetStatus';
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   currentNumberScheduled?: Maybe<Scalars['Int']['output']>;
   desiredNumberScheduled?: Maybe<Scalars['Int']['output']>;
   numberReady?: Maybe<Scalars['Int']['output']>;
@@ -1803,6 +1815,7 @@ export type DeploymentSpec = {
 export type DeploymentStatus = {
   __typename?: 'DeploymentStatus';
   availableReplicas?: Maybe<Scalars['Int']['output']>;
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   readyReplicas?: Maybe<Scalars['Int']['output']>;
   replicas?: Maybe<Scalars['Int']['output']>;
   unavailableReplicas?: Maybe<Scalars['Int']['output']>;
@@ -4112,8 +4125,12 @@ export type PrAutomation = {
   /** users who can generate prs with this automation */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   creates?: Maybe<PrCreateSpec>;
+  /** a darkmode icon url to use for this catalog */
+  darkIcon?: Maybe<Scalars['String']['output']>;
   deletes?: Maybe<PrDeleteSpec>;
   documentation?: Maybe<Scalars['String']['output']>;
+  /** an icon url to use for this catalog */
+  icon?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier: Scalars['String']['output'];
@@ -4151,8 +4168,12 @@ export type PrAutomationAttributes = {
   /** users who can create prs with this automation */
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   creates?: InputMaybe<PrAutomationCreateSpecAttributes>;
+  /** a darkmode icon url to use for this catalog */
+  darkIcon?: InputMaybe<Scalars['String']['input']>;
   deletes?: InputMaybe<PrAutomationDeleteSpecAttributes>;
   documentation?: InputMaybe<Scalars['String']['input']>;
+  /** an icon url to use for this catalog */
+  icon?: InputMaybe<Scalars['String']['input']>;
   /** string id for a repository, eg for github, this is {organization}/{repository-name} */
   identifier?: InputMaybe<Scalars['String']['input']>;
   message?: InputMaybe<Scalars['String']['input']>;
@@ -7643,6 +7664,7 @@ export type ServiceSpec = {
 
 export type ServiceStatus = {
   __typename?: 'ServiceStatus';
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   loadBalancer?: Maybe<LoadBalancerStatus>;
 };
 
@@ -8194,6 +8216,7 @@ export type StatefulSetSpec = {
 
 export type StatefulSetStatus = {
   __typename?: 'StatefulSetStatus';
+  conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   currentReplicas?: Maybe<Scalars['Int']['output']>;
   readyReplicas?: Maybe<Scalars['Int']['output']>;
   replicas?: Maybe<Scalars['Int']['output']>;

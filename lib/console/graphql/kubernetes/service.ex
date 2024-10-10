@@ -19,6 +19,7 @@ defmodule Console.GraphQl.Kubernetes.Service do
 
   object :service_status do
     field :load_balancer, :load_balancer_status
+    field :conditions,    list_of(:status_condition)
   end
 
   object :load_balancer_status do

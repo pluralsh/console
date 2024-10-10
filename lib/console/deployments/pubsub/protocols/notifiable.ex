@@ -77,7 +77,9 @@ end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunCreated do
   alias Console.Deployments.Notifications.Utils
+  alias Console.Schema.StackRun
 
+  def message(%{item: %StackRun{pull_request_id: id}}) when is_binary(id), do: :ok
   def message(%{item: run}) do
     run = Console.Repo.preload(run, [:stack, :repository])
     {"stack.run", Utils.filters(run), %{stack_run: run}}
