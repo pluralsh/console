@@ -39,8 +39,8 @@ function useGetLogUrl({
   return isApp
     ? `/apps/${namespace}/logs${name ? `?${asQuery({ pod: name })}` : ''}`
     : name
-    ? `/pods/${namespace}/${name}/logs`
-    : null
+      ? `/pods/${namespace}/${name}/logs`
+      : null
 }
 
 function ViewLogsButton({ metadata }: any) {
@@ -79,6 +79,7 @@ export default function PodInfo() {
       <Flex
         direction="column"
         gap="xlarge"
+        paddingBottom="large"
       >
         <section>
           <SubTitle>Containers</SubTitle>
