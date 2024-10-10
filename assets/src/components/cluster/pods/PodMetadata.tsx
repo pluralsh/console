@@ -44,7 +44,13 @@ export default function Metadata({ pod }: { pod: Pod }) {
             vals={annotations}
             title="Annotations"
           />
-          <div>
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.xxsmall,
+            }}
+          >
             <PropWide
               title="Phase"
               fontWeight={600}
