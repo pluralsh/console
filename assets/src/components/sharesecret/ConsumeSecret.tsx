@@ -1,4 +1,3 @@
-import { useNavigate, useParams } from 'react-router-dom'
 import {
   Button,
   Callout,
@@ -6,15 +5,15 @@ import {
   ReturnIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { useMemo } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { useEffect, useMemo } from 'react'
 
 import { useConsumeSecretMutation } from '../../generated/graphql'
+import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts'
 import { InputRevealer } from '../cd/providers/InputRevealer'
 import { Overline } from '../cd/utils/PermissionsModal'
-import LoadingIndicator from '../utils/LoadingIndicator'
 import { Body2BoldP } from '../utils/typography/Text'
-import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts'
 
 export default function ConsumeSecret() {
   const theme = useTheme()
@@ -27,14 +26,6 @@ export default function ConsumeSecret() {
     variables: { handle },
   })
 
-  useEffect(() => {
-    mutation()
-    // Only run on first mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  if (loading) return <LoadingIndicator />
-
   return (
     <div
       css={{
@@ -44,29 +35,60 @@ export default function ConsumeSecret() {
         width: '100%',
       }}
     >
-      {data && (
-        <Card
+      <Card
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.xlarge,
+          maxWidth: 572,
+          padding: theme.spacing.xlarge,
+        }}
+      >
+        <div
           css={{
             display: 'flex',
             flexDirection: 'column',
-            gap: theme.spacing.xlarge,
-            maxWidth: 572,
-            padding: theme.spacing.xlarge,
+            gap: theme.spacing.xsmall,
           }}
         >
-          <div
+          <Overline>Share secret</Overline>
+          <p>
+            A user of this Console has shared a secret with you. After you
+            display this secret a single time it expires.
+          </p>
+        </div>
+        {error ? (
+          <Callout
+            title="You do not have access to this secret"
+            severity="danger"
             css={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.xsmall,
+              maxWidth: 572,
             }}
           >
-            <Overline>Share secret</Overline>
-            <p>
-              A user of this Console has shared a secret with you. After you
-              display this secret a single time it expires.
-            </p>
-          </div>
+            <div
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.medium,
+              }}
+            >
+              <p>
+                Either this URL has already been consumed, or you do not have
+                permission to view this URL. If you think this is a mistake,
+                please contact the system administrator.
+              </p>
+              <Button
+                secondary
+                small
+                startIcon={<ReturnIcon />}
+                onClick={() => navigate(HOME_ABS_PATH)}
+                width="fit-content"
+              >
+                Back home
+              </Button>
+            </div>
+          </Callout>
+        ) : data ? (
           <div
             css={{
               display: 'flex',
@@ -96,40 +118,15 @@ export default function ConsumeSecret() {
               </Button>
             </div>
           </div>
-        </Card>
-      )}
-      {error && (
-        <Callout
-          title="You do not have access to this secret"
-          severity="danger"
-          css={{
-            maxWidth: 572,
-          }}
-        >
-          <div
-            css={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: theme.spacing.medium,
-            }}
+        ) : (
+          <Button
+            loading={loading}
+            onClick={() => mutation()}
           >
-            <p>
-              Either this URL has already been consumed, or you do not have
-              permission to view this URL. If you think this is a mistake,
-              please contact the system administrator.
-            </p>
-            <Button
-              secondary
-              small
-              startIcon={<ReturnIcon />}
-              onClick={() => navigate(HOME_ABS_PATH)}
-              width="fit-content"
-            >
-              Back home
-            </Button>
-          </div>
-        </Callout>
-      )}
+            Consume secret
+          </Button>
+        )}
+      </Card>
     </div>
   )
 }

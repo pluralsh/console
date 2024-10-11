@@ -41,6 +41,11 @@ defmodule Console.Deployments.OAuth do
     |> Console.move([:clientId], [:client_id])
     |> Console.move([:clientSecret], [:client_secret])
     |> Console.move([:authMethod], [:auth_method])
+    |> Map.update(:auth_method, :post, fn
+      "POST" -> :post
+      "BASIC" -> :basic
+      _ -> nil
+    end)
     |> ok()
   end
 
@@ -48,7 +53,7 @@ defmodule Console.Deployments.OAuth do
 
   defp rewire_attrs(attrs) do
     attrs
-    |> Map.update(:auth_method, :post, &String.upcase("#{&1}"))
+    |> Map.update(:auth_method, :POST, &String.upcase("#{&1}"))
     |> Console.move([:redirect_uris], [:redirectUris])
     |> Console.move([:auth_method], [:authMethod])
   end
