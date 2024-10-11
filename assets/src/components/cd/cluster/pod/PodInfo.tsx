@@ -18,6 +18,7 @@ import {
   ContainersList,
   ShellLink,
   columnHelper,
+  ColExpander,
 } from '../../../cluster/containers/ContainersList'
 import { Readiness } from '../../../../utils/status'
 import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
@@ -70,6 +71,7 @@ export const ColActions = columnHelper.display({
 })
 
 const columns = [
+  ColExpander,
   ColName,
   ColImage,
   ColMemoryReservation,
@@ -99,6 +101,7 @@ export default function PodInfo() {
       <Flex
         direction="column"
         gap="xlarge"
+        paddingBottom="large"
       >
         <section>
           <SubTitle>Containers</SubTitle>
