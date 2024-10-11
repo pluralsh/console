@@ -225,6 +225,16 @@ func (in *CatalogSpec) DeepCopyInto(out *CatalogSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Icon != nil {
+		in, out := &in.Icon, &out.Icon
+		*out = new(string)
+		**out = **in
+	}
+	if in.DarkIcon != nil {
+		in, out := &in.DarkIcon, &out.DarkIcon
+		*out = new(string)
+		**out = **in
+	}
 	if in.Description != nil {
 		in, out := &in.Description, &out.Description
 		*out = new(string)
@@ -3451,6 +3461,16 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 	}
 	if in.Branch != nil {
 		in, out := &in.Branch, &out.Branch
+		*out = new(string)
+		**out = **in
+	}
+	if in.Icon != nil {
+		in, out := &in.Icon, &out.Icon
+		*out = new(string)
+		**out = **in
+	}
+	if in.DarkIcon != nil {
+		in, out := &in.DarkIcon, &out.DarkIcon
 		*out = new(string)
 		**out = **in
 	}

@@ -103,9 +103,15 @@ spec:
                 type: object
               category:
                 type: string
+              darkIcon:
+                description: An darkmode icon url to annotate this pr automation
+                type: string
               description:
                 description: Description is a description of this Catalog.
                 example: my catalog description
+                type: string
+              icon:
+                description: An icon url to annotate this pr automation
                 type: string
               name:
                 type: string

@@ -248,8 +248,8 @@ defmodule Console.Plural.Queries do
   """
 
   @oidc_delete """
-    mutation Delete($id: ID!, $attributes: OidcAttributes!) {
-      deleteOidcProvider(id: $id, attributes: $attributes) {
+    mutation Delete($id: ID!) {
+      deleteOidcProvider(id: $id) {
         ...OIDCProviderFragment
       }
     }
