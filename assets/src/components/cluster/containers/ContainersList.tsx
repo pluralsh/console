@@ -386,47 +386,54 @@ export function ContainerExpansionPanel({
           css={{
             display: 'flex',
             flexDirection: 'column',
-            flexWrap: 'wrap',
             gap: theme.spacing.small,
           }}
         >
           <Overline css={{ color: theme.colors['text-xlight'] }}>
             Terminated
           </Overline>
-          <Prop
-            title="Started"
-            margin={0}
+          <div
+            css={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: theme.spacing.small,
+            }}
           >
-            {moment(status?.state?.terminated.startedAt).format(
-              'MMM D, YYYY h:mm'
-            )}
-          </Prop>
-          <Prop
-            title="Finished"
-            margin={0}
-          >
-            {moment(status?.state?.terminated.finishedAt).format(
-              'MMM D, YYYY h:mm'
-            )}
-          </Prop>
-          <Prop
-            title="Exit code"
-            margin={0}
-          >
-            {status?.state?.terminated.exitCode}
-          </Prop>
-          <Prop
-            title="Reason"
-            margin={0}
-          >
-            {status?.state?.terminated.reason}
-          </Prop>
-          <Prop
-            title="Message"
-            margin={0}
-          >
-            {status?.state?.terminated.message}
-          </Prop>
+            <Prop
+              title="Started"
+              margin={0}
+            >
+              {moment(status?.state?.terminated.startedAt).format(
+                'MMM D, YYYY h:mm'
+              )}
+            </Prop>
+            <Prop
+              title="Finished"
+              margin={0}
+            >
+              {moment(status?.state?.terminated.finishedAt).format(
+                'MMM D, YYYY h:mm'
+              )}
+            </Prop>
+            <Prop
+              title="Exit code"
+              margin={0}
+            >
+              {status?.state?.terminated.exitCode}
+            </Prop>
+            <Prop
+              title="Reason"
+              margin={0}
+            >
+              {status?.state?.terminated.reason}
+            </Prop>
+            <Prop
+              title="Message"
+              margin={0}
+            >
+              {status?.state?.terminated.message ?? '-'}
+            </Prop>
+          </div>
         </div>
       )}
       {status?.state?.waiting && (
@@ -434,25 +441,32 @@ export function ContainerExpansionPanel({
           css={{
             display: 'flex',
             flexDirection: 'column',
-            flexWrap: 'wrap',
             gap: theme.spacing.small,
           }}
         >
           <Overline css={{ color: theme.colors['text-xlight'] }}>
             Waiting
           </Overline>
-          <Prop
-            title="Reason"
-            margin={0}
+          <div
+            css={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: theme.spacing.small,
+            }}
           >
-            {status?.state?.waiting.reason}
-          </Prop>
-          <Prop
-            title="Message"
-            margin={0}
-          >
-            {status?.state?.waiting.message}
-          </Prop>
+            <Prop
+              title="Reason"
+              margin={0}
+            >
+              {status?.state?.waiting.reason}
+            </Prop>
+            <Prop
+              title="Message"
+              margin={0}
+            >
+              {status?.state?.waiting.message ?? '-'}
+            </Prop>
+          </div>
         </div>
       )}
     </div>
