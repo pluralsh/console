@@ -3,8 +3,15 @@ defmodule Console.Deployments.OAuth do
   alias Console.Plural.Accounts
 
   @type oauth_type :: :plural
+  @type auth_method :: :post | :basic
   @type error :: {:error, term}
-  @type provider :: %{id: binary, name: binary, description: binary, redirect_urls: [binary]}
+  @type provider :: %{
+    id: binary,
+    name: binary | nil,
+    auth_method: auth_method | nil,
+    description: binary | nil,
+    redirect_urls: [binary]
+  }
   @type provider_resp :: {:ok, provider} | error
 
   @doc """

@@ -496,14 +496,20 @@ type Catalog struct {
 	// short category name used for browsing catalogs
 	Category *string `json:"category,omitempty"`
 	// the name of the author of this catalog
-	Author  *string  `json:"author,omitempty"`
-	Project *Project `json:"project,omitempty"`
+	Author *string `json:"author,omitempty"`
+	// an icon url to use for this catalog
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this catalog
+	DarkIcon *string  `json:"darkIcon,omitempty"`
+	Project  *Project `json:"project,omitempty"`
 	// read policy for this catalog
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy for this catalog
 	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
-	InsertedAt    *string          `json:"insertedAt,omitempty"`
-	UpdatedAt     *string          `json:"updatedAt,omitempty"`
+	// create policy for this catalog, can give permission to just create prs
+	CreateBindings []*PolicyBinding `json:"createBindings,omitempty"`
+	InsertedAt     *string          `json:"insertedAt,omitempty"`
+	UpdatedAt      *string          `json:"updatedAt,omitempty"`
 }
 
 type CatalogAttributes struct {
@@ -514,10 +520,15 @@ type CatalogAttributes struct {
 	// short category name for browsability
 	Category *string `json:"category,omitempty"`
 	// owning project of the catalog, permissions will propagate down
-	ProjectID     *string                    `json:"projectId,omitempty"`
-	Tags          []*TagAttributes           `json:"tags,omitempty"`
-	ReadBindings  []*PolicyBindingAttributes `json:"readBindings,omitempty"`
-	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	ProjectID *string `json:"projectId,omitempty"`
+	// an icon url to use for this catalog
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this catalog
+	DarkIcon       *string                    `json:"darkIcon,omitempty"`
+	Tags           []*TagAttributes           `json:"tags,omitempty"`
+	ReadBindings   []*PolicyBindingAttributes `json:"readBindings,omitempty"`
+	WriteBindings  []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
+	CreateBindings []*PolicyBindingAttributes `json:"createBindings,omitempty"`
 }
 
 type CatalogConnection struct {
@@ -1324,9 +1335,10 @@ type DaemonSetSpec struct {
 }
 
 type DaemonSetStatus struct {
-	CurrentNumberScheduled *int64 `json:"currentNumberScheduled,omitempty"`
-	DesiredNumberScheduled *int64 `json:"desiredNumberScheduled,omitempty"`
-	NumberReady            *int64 `json:"numberReady,omitempty"`
+	CurrentNumberScheduled *int64             `json:"currentNumberScheduled,omitempty"`
+	DesiredNumberScheduled *int64             `json:"desiredNumberScheduled,omitempty"`
+	NumberReady            *int64             `json:"numberReady,omitempty"`
+	Conditions             []*StatusCondition `json:"conditions,omitempty"`
 }
 
 type Dashboard struct {
@@ -1463,10 +1475,11 @@ type DeploymentSpec struct {
 }
 
 type DeploymentStatus struct {
-	AvailableReplicas   *int64 `json:"availableReplicas,omitempty"`
-	Replicas            *int64 `json:"replicas,omitempty"`
-	ReadyReplicas       *int64 `json:"readyReplicas,omitempty"`
-	UnavailableReplicas *int64 `json:"unavailableReplicas,omitempty"`
+	AvailableReplicas   *int64             `json:"availableReplicas,omitempty"`
+	Replicas            *int64             `json:"replicas,omitempty"`
+	ReadyReplicas       *int64             `json:"readyReplicas,omitempty"`
+	UnavailableReplicas *int64             `json:"unavailableReplicas,omitempty"`
+	Conditions          []*StatusCondition `json:"conditions,omitempty"`
 }
 
 type DeploymentStrategy struct {
@@ -3413,13 +3426,17 @@ type PrAutomation struct {
 	// the name for this automation
 	Name string `json:"name"`
 	// An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster
-	Role          *PrRole            `json:"role,omitempty"`
-	Documentation *string            `json:"documentation,omitempty"`
-	Title         string             `json:"title"`
-	Message       string             `json:"message"`
-	Updates       *PrUpdateSpec      `json:"updates,omitempty"`
-	Creates       *PrCreateSpec      `json:"creates,omitempty"`
-	Deletes       *PrDeleteSpec      `json:"deletes,omitempty"`
+	Role          *PrRole       `json:"role,omitempty"`
+	Documentation *string       `json:"documentation,omitempty"`
+	Title         string        `json:"title"`
+	Message       string        `json:"message"`
+	Updates       *PrUpdateSpec `json:"updates,omitempty"`
+	Creates       *PrCreateSpec `json:"creates,omitempty"`
+	Deletes       *PrDeleteSpec `json:"deletes,omitempty"`
+	// an icon url to use for this catalog
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this catalog
+	DarkIcon      *string            `json:"darkIcon,omitempty"`
 	Configuration []*PrConfiguration `json:"configuration,omitempty"`
 	// write policy for this pr automation, also propagates to the notifications list for any created PRs
 	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
@@ -3456,6 +3473,10 @@ type PrAutomationAttributes struct {
 	Updates       *PrAutomationUpdateSpecAttributes `json:"updates,omitempty"`
 	Creates       *PrAutomationCreateSpecAttributes `json:"creates,omitempty"`
 	Deletes       *PrAutomationDeleteSpecAttributes `json:"deletes,omitempty"`
+	// an icon url to use for this catalog
+	Icon *string `json:"icon,omitempty"`
+	// a darkmode icon url to use for this catalog
+	DarkIcon *string `json:"darkIcon,omitempty"`
 	// link to an add-on name if this can update it
 	Addon *string `json:"addon,omitempty"`
 	// link to a cluster if this is to perform an upgrade
@@ -4500,6 +4521,7 @@ type ServiceSpec struct {
 
 type ServiceStatus struct {
 	LoadBalancer *LoadBalancerStatus `json:"loadBalancer,omitempty"`
+	Conditions   []*StatusCondition  `json:"conditions,omitempty"`
 }
 
 // a rollup count of the statuses of services in a query
@@ -4994,10 +5016,11 @@ type StatefulSetSpec struct {
 }
 
 type StatefulSetStatus struct {
-	CurrentReplicas *int64 `json:"currentReplicas,omitempty"`
-	Replicas        *int64 `json:"replicas,omitempty"`
-	ReadyReplicas   *int64 `json:"readyReplicas,omitempty"`
-	UpdatedReplicas *int64 `json:"updatedReplicas,omitempty"`
+	CurrentReplicas *int64             `json:"currentReplicas,omitempty"`
+	Replicas        *int64             `json:"replicas,omitempty"`
+	ReadyReplicas   *int64             `json:"readyReplicas,omitempty"`
+	UpdatedReplicas *int64             `json:"updatedReplicas,omitempty"`
+	Conditions      []*StatusCondition `json:"conditions,omitempty"`
 }
 
 type StatusComponent struct {

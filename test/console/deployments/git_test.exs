@@ -294,6 +294,40 @@ defmodule Console.Deployments.GitTest do
       assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
     end
 
+    test "global writers can create a pull request off of a pr automation instance" do
+      user = insert(:user)
+      conn = insert(:scm_connection, token: "some-pat")
+      deployment_settings(write_bindings: [%{user_id: user.id}])
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
+        configuration: [
+          %{name: "first", type: :int},
+          %{name: "second", type: :string, validation: %{regex: "[a-z0-9]+:[a-z0-9]+(,[a-z0-9]+:[a-z0-9]+)*"}}
+        ]
+      )
+      expect(Plural, :template, fn f, _, _ -> File.read(f) end)
+      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
+        {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
+      end)
+      expect(Console.Deployments.Pr.Git, :setup, fn conn, "pluralsh/console", "pr-test" -> {:ok, conn} end)
+      expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
+      expect(Console.Deployments.Pr.Git, :push, fn _, "pr-test" -> {:ok, ""} end)
+
+      {:ok, pr} = Git.create_pull_request(%{
+        "first" => 10,
+        "second" => "webapp:name1,cron:name2"
+      }, pra.id, "pr-test", user)
+
+      assert pr.cluster_id == pra.cluster_id
+      assert pr.url == "https://github.com/pr/url"
+      assert pr.title == pra.title
+
+      assert_receive {:event, %PubSub.PullRequestCreated{item: ^pr}}
+    end
+
     test "it will reject a pull request w/o valid configuration" do
       user = insert(:user)
       conn = insert(:scm_connection, token: "some-pat")

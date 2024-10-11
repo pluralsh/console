@@ -140,5 +140,16 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
 
       {:ok, _} = Jason.decode(body)
     end
+
+    test "it will ignore pr based stack runs" do
+      run = insert(:stack_run, pull_request: insert(:pull_request))
+      router = insert(:notification_router, events: ["stack.run"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router, stack: run.stack)
+      reject(HTTPoison, :post, 3)
+
+      event = %PubSub.StackRunCreated{item: run}
+      :ok = Notifications.handle_event(event)
+    end
   end
 end

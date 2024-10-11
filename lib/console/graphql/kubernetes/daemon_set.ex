@@ -21,6 +21,7 @@ defmodule Console.GraphQl.Kubernetes.DaemonSet do
     field :current_number_scheduled, :integer
     field :desired_number_scheduled, :integer
     field :number_ready,             :integer
+    field :conditions,               list_of(:status_condition)
   end
 
   object :daemon_set_spec do
