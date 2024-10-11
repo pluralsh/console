@@ -75,6 +75,8 @@ func (in *PrAutomation) Attributes(clusterID, serviceID, connectionID, repositor
 		Title:         in.Spec.Title,
 		Message:       in.Spec.Message,
 		Branch:        in.Spec.Branch,
+		Icon:          in.Spec.Icon,
+		DarkIcon:      in.Spec.DarkIcon,
 		Updates:       in.Spec.Updates.Attributes(),
 		Creates:       in.Spec.Creates.Attributes(),
 		Deletes:       in.Spec.Deletes.Attributes(),
@@ -125,6 +127,14 @@ type PrAutomationSpec struct {
 	// The base branch this pr will be based on (defaults to the repo's main branch)
 	// +kubebuilder:validation:Optional
 	Branch *string `json:"branch,omitempty"`
+
+	// An icon url to annotate this pr automation
+	// +kubebuilder:validation:Optional
+	Icon *string `json:"icon,omitempty"`
+
+	// An darkmode icon url to annotate this pr automation
+	// +kubebuilder:validation:Optional
+	DarkIcon *string `json:"darkIcon,omitempty"`
 
 	// Documentation ...
 	// +kubebuilder:validation:Optional

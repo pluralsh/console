@@ -39,11 +39,7 @@
 						},
 						{
 							"type": "text",
-							"text": ": "
-						},
-						{
-							"type": "link",
-							"url": "<%= @stack_run.git.ref %>\n"
+							"text": ": <%= @stack_run.git.ref %>\n"
 						},
 						{
 							"type": "text",

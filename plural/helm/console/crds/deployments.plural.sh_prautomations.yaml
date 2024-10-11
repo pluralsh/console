@@ -250,6 +250,9 @@ spec:
                       type: object
                     type: array
                 type: object
+              darkIcon:
+                description: An darkmode icon url to annotate this pr automation
+                type: string
               deletes:
                 description: Spec for files and folders to be deleted
                 properties:
@@ -266,6 +269,9 @@ spec:
                 type: object
               documentation:
                 description: Documentation ...
+                type: string
+              icon:
+                description: An icon url to annotate this pr automation
                 type: string
               identifier:
                 description: Identifier is a string referencing the repository, i.e.
