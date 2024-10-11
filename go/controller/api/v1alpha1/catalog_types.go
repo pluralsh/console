@@ -2,6 +2,7 @@ package v1alpha1
 
 import (
 	console "github.com/pluralsh/console/go/client"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -10,13 +11,20 @@ import (
 type CatalogSpec struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty"`
-
+	// +kubebuilder:validation:Required
+	Author string `json:"author"`
 	// Description is a description of this Catalog.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
 	// +kubebuilder:example:=my catalog description
 	Description *string `json:"description,omitempty"`
-
+	// +kubebuilder:validation:Optional
+	Category *string `json:"category,omitempty"`
+	// ProjectRef owning project of the catalog, permissions will propagate down
+	// +kubebuilder:validation:Optional
+	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
+	// +kubebuilder:validation:Optional
+	Tags map[string]string `json:"tags,omitempty"`
 	// Bindings contain read and write policies of this Catalog.
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`
@@ -60,10 +68,22 @@ func (c *Catalog) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&c.Status.Conditions, condition)
 }
 
-func (c *Catalog) Attributes() console.CatalogAttributes {
-	attrs := console.CatalogAttributes{
+func (c *Catalog) Attributes(projectID *string) *console.CatalogAttributes {
+	attrs := &console.CatalogAttributes{
 		Name:        c.CatalogName(),
+		Author:      c.Spec.Author,
 		Description: c.Spec.Description,
+		Category:    c.Spec.Category,
+		ProjectID:   projectID,
+	}
+	if len(c.Spec.Tags) > 0 {
+		attrs.Tags = make([]*console.TagAttributes, 0)
+		for k, v := range c.Spec.Tags {
+			attrs.Tags = append(attrs.Tags, &console.TagAttributes{
+				Name:  k,
+				Value: v,
+			})
+		}
 	}
 
 	if c.Spec.Bindings != nil {
@@ -72,4 +92,13 @@ func (c *Catalog) Attributes() console.CatalogAttributes {
 	}
 
 	return attrs
+}
+
+func (c *Catalog) Diff(hasher Hasher) (changed bool, sha string, err error) {
+	currentSha, err := hasher(c.Spec)
+	if err != nil {
+		return false, "", err
+	}
+
+	return !c.Status.IsSHAEqual(currentSha), currentSha, nil
 }
