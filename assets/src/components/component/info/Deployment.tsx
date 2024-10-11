@@ -6,6 +6,7 @@ import { useTheme } from 'styled-components'
 import { DeploymentFragment } from 'generated/graphql'
 
 import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
+import { ConditionsTable } from './Conditions'
 
 export function StatusChart({
   green,
@@ -78,7 +79,7 @@ export function DeploymentBase({
 
   const {
     spec,
-    status: { availableReplicas, replicas, unavailableReplicas },
+    status: { availableReplicas, replicas, unavailableReplicas, conditions },
   } = deployment
 
   return (
@@ -121,6 +122,14 @@ export function DeploymentBase({
           </PropWideBold>
         </PaddedCard>
       </InfoSection>
+      {conditions && (
+        <InfoSection
+          css={{ minWidth: '100%' }}
+          title="Conditions"
+        >
+          <ConditionsTable conditions={conditions} />
+        </InfoSection>
+      )}
     </>
   )
 }
