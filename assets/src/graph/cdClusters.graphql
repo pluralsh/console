@@ -91,6 +91,15 @@ fragment UpgradeInsightDetail on UpgradeInsightDetail {
   replacement
   status
   used
+  clientInfo {
+    ...InsightClientInfo
+  }
+}
+
+fragment InsightClientInfo on InsightClientInfo {
+  userAgent
+  count
+  lastRequestAt
 }
 
 fragment RuntimeService on RuntimeService {
