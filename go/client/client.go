@@ -15,6 +15,9 @@ type ConsoleClient interface {
 	UpdateClusterRestore(ctx context.Context, id string, attributes RestoreAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateClusterRestore, error)
 	CreateClusterRestore(ctx context.Context, backupID string, interceptors ...clientv2.RequestInterceptor) (*CreateClusterRestore, error)
 	GetClusterRestore(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetClusterRestore, error)
+	UpsertCatalog(ctx context.Context, attributes *CatalogAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCatalog, error)
+	DeleteCatalog(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCatalog, error)
+	GetCatalog(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalog, error)
 	CreateCluster(ctx context.Context, attributes ClusterAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateCluster, error)
 	UpdateCluster(ctx context.Context, id string, attributes ClusterUpdateAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateCluster, error)
 	DeleteCluster(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCluster, error)
@@ -245,6 +248,80 @@ func (t *ClusterRestoreFragment) GetBackup() *ClusterBackupFragment {
 		t = &ClusterRestoreFragment{}
 	}
 	return t.Backup
+}
+
+type CatalogFragment struct {
+	ID            string                   "json:\"id\" graphql:\"id\""
+	Name          string                   "json:\"name\" graphql:\"name\""
+	Description   *string                  "json:\"description,omitempty\" graphql:\"description\""
+	Category      *string                  "json:\"category,omitempty\" graphql:\"category\""
+	Author        *string                  "json:\"author,omitempty\" graphql:\"author\""
+	Project       *ProjectFragment         "json:\"project,omitempty\" graphql:\"project\""
+	ReadBindings  []*PolicyBindingFragment "json:\"readBindings,omitempty\" graphql:\"readBindings\""
+	WriteBindings []*PolicyBindingFragment "json:\"writeBindings,omitempty\" graphql:\"writeBindings\""
+	InsertedAt    *string                  "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
+	UpdatedAt     *string                  "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
+}
+
+func (t *CatalogFragment) GetID() string {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.ID
+}
+func (t *CatalogFragment) GetName() string {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.Name
+}
+func (t *CatalogFragment) GetDescription() *string {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.Description
+}
+func (t *CatalogFragment) GetCategory() *string {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.Category
+}
+func (t *CatalogFragment) GetAuthor() *string {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.Author
+}
+func (t *CatalogFragment) GetProject() *ProjectFragment {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.Project
+}
+func (t *CatalogFragment) GetReadBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.ReadBindings
+}
+func (t *CatalogFragment) GetWriteBindings() []*PolicyBindingFragment {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.WriteBindings
+}
+func (t *CatalogFragment) GetInsertedAt() *string {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.InsertedAt
+}
+func (t *CatalogFragment) GetUpdatedAt() *string {
+	if t == nil {
+		t = &CatalogFragment{}
+	}
+	return t.UpdatedAt
 }
 
 type ClusterFragment struct {
@@ -12573,6 +12650,39 @@ func (t *GetClusterRestore) GetClusterRestore() *ClusterRestoreFragment {
 	return t.ClusterRestore
 }
 
+type UpsertCatalog struct {
+	UpsertCatalog *CatalogFragment "json:\"upsertCatalog,omitempty\" graphql:\"upsertCatalog\""
+}
+
+func (t *UpsertCatalog) GetUpsertCatalog() *CatalogFragment {
+	if t == nil {
+		t = &UpsertCatalog{}
+	}
+	return t.UpsertCatalog
+}
+
+type DeleteCatalog struct {
+	DeleteCatalog *CatalogFragment "json:\"deleteCatalog,omitempty\" graphql:\"deleteCatalog\""
+}
+
+func (t *DeleteCatalog) GetDeleteCatalog() *CatalogFragment {
+	if t == nil {
+		t = &DeleteCatalog{}
+	}
+	return t.DeleteCatalog
+}
+
+type GetCatalog struct {
+	Catalog *CatalogFragment "json:\"catalog,omitempty\" graphql:\"catalog\""
+}
+
+func (t *GetCatalog) GetCatalog() *CatalogFragment {
+	if t == nil {
+		t = &GetCatalog{}
+	}
+	return t.Catalog
+}
+
 type CreateCluster struct {
 	CreateCluster *CreateCluster_CreateCluster "json:\"createCluster,omitempty\" graphql:\"createCluster\""
 }
@@ -14563,6 +14673,232 @@ func (c *Client) GetClusterRestore(ctx context.Context, id string, interceptors 
 
 	var res GetClusterRestore
 	if err := c.Client.Post(ctx, "GetClusterRestore", GetClusterRestoreDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const UpsertCatalogDocument = `mutation UpsertCatalog ($attributes: CatalogAttributes) {
+	upsertCatalog(attributes: $attributes) {
+		... CatalogFragment
+	}
+}
+fragment CatalogFragment on Catalog {
+	id
+	name
+	description
+	category
+	author
+	project {
+		... ProjectFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) UpsertCatalog(ctx context.Context, attributes *CatalogAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertCatalog, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res UpsertCatalog
+	if err := c.Client.Post(ctx, "UpsertCatalog", UpsertCatalogDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const DeleteCatalogDocument = `mutation DeleteCatalog ($id: ID!) {
+	deleteCatalog(id: $id) {
+		... CatalogFragment
+	}
+}
+fragment CatalogFragment on Catalog {
+	id
+	name
+	description
+	category
+	author
+	project {
+		... ProjectFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) DeleteCatalog(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteCatalog, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res DeleteCatalog
+	if err := c.Client.Post(ctx, "DeleteCatalog", DeleteCatalogDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetCatalogDocument = `query GetCatalog ($id: ID, $name: String) {
+	catalog(id: $id, name: $name) {
+		... CatalogFragment
+	}
+}
+fragment CatalogFragment on Catalog {
+	id
+	name
+	description
+	category
+	author
+	project {
+		... ProjectFragment
+	}
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+	insertedAt
+	updatedAt
+}
+fragment ProjectFragment on Project {
+	id
+	insertedAt
+	updatedAt
+	name
+	default
+	description
+	readBindings {
+		... PolicyBindingFragment
+	}
+	writeBindings {
+		... PolicyBindingFragment
+	}
+}
+fragment PolicyBindingFragment on PolicyBinding {
+	id
+	group {
+		... GroupFragment
+	}
+	user {
+		... UserFragment
+	}
+}
+fragment GroupFragment on Group {
+	id
+	name
+	description
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) GetCatalog(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetCatalog, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetCatalog
+	if err := c.Client.Post(ctx, "GetCatalog", GetCatalogDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -28570,6 +28906,9 @@ var DocumentOperationNames = map[string]string{
 	UpdateClusterRestoreDocument:                      "UpdateClusterRestore",
 	CreateClusterRestoreDocument:                      "CreateClusterRestore",
 	GetClusterRestoreDocument:                         "GetClusterRestore",
+	UpsertCatalogDocument:                             "UpsertCatalog",
+	DeleteCatalogDocument:                             "DeleteCatalog",
+	GetCatalogDocument:                                "GetCatalog",
 	CreateClusterDocument:                             "CreateCluster",
 	UpdateClusterDocument:                             "UpdateCluster",
 	DeleteClusterDocument:                             "DeleteCluster",
