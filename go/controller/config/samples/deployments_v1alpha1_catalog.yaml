@@ -9,4 +9,4 @@ metadata:
     app.kubernetes.io/created-by: controller
   name: catalog-sample
 spec:
-  # TODO(user): Add fields here
+  author: test@plural.sh

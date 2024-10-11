@@ -88,19 +88,20 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadonlyConditionType, v1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	// Get Catalog SHA that can be saved back in the status to check for changes
-	changed, sha, err := catalog.Diff(utils.HashObject)
-	if err != nil {
-		logger.Error(err, "unable to calculate catalog SHA")
-		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
 	// Sync Catalog CRD with the Console API
 	if err := r.ensure(catalog); err != nil {
 		if goerrors.Is(err, operrors.ErrRetriable) {
 			utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 			return requeue, nil
 		}
+		return ctrl.Result{}, err
+	}
+
+	// Get Catalog SHA that can be saved back in the status to check for changes
+	changed, sha, err := catalog.Diff(utils.HashObject)
+	if err != nil {
+		logger.Error(err, "unable to calculate catalog SHA")
+		utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
 	}
 	if changed {
@@ -125,7 +126,7 @@ func (r *CatalogReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	utils.MarkCondition(catalog.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
 
-	return requeue, nil
+	return ctrl.Result{}, nil
 }
 
 func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Catalog) (*v1alpha1.Project, error) {
@@ -142,7 +143,7 @@ func (r *CatalogReconciler) getProject(ctx context.Context, catalog *v1alpha1.Ca
 		}
 
 		if err := controllerutil.SetOwnerReference(project, catalog, r.Scheme); err != nil {
-			return project, fmt.Errorf("could not set global service owner reference, got error: %+v", err)
+			return project, fmt.Errorf("could not set catalog owner reference, got error: %+v", err)
 		}
 	}
 
