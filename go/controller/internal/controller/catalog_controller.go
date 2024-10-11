@@ -245,7 +245,13 @@ func (r *CatalogReconciler) ensure(catalog *v1alpha1.Catalog) error {
 	}
 	catalog.Spec.Bindings.Write = bindings
 
-	if req || req2 {
+	bindings, req3, err := ensureBindings(catalog.Spec.Bindings.Create, r.UserGroupCache)
+	if err != nil {
+		return err
+	}
+	catalog.Spec.Bindings.Create = bindings
+
+	if req || req2 || req3 {
 		return operrors.ErrRetriable
 	}
 

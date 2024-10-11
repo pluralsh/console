@@ -27,7 +27,22 @@ type CatalogSpec struct {
 	Tags map[string]string `json:"tags,omitempty"`
 	// Bindings contain read and write policies of this Catalog.
 	// +kubebuilder:validation:Optional
-	Bindings *Bindings `json:"bindings,omitempty"`
+	Bindings *CatalogBindings `json:"bindings,omitempty"`
+}
+
+// CatalogBindings ...
+type CatalogBindings struct {
+	// Create bindings.
+	// +kubebuilder:validation:Optional
+	Create []Binding `json:"create,omitempty"`
+
+	// Read bindings.
+	// +kubebuilder:validation:Optional
+	Read []Binding `json:"read,omitempty"`
+
+	// Write bindings.
+	// +kubebuilder:validation:Optional
+	Write []Binding `json:"write,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -89,6 +104,7 @@ func (c *Catalog) Attributes(projectID *string) *console.CatalogAttributes {
 	if c.Spec.Bindings != nil {
 		attrs.ReadBindings = PolicyBindings(c.Spec.Bindings.Read)
 		attrs.WriteBindings = PolicyBindings(c.Spec.Bindings.Write)
+		attrs.CreateBindings = PolicyBindings(c.Spec.Bindings.Create)
 	}
 
 	return attrs
