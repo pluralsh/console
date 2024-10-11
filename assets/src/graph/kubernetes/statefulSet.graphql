@@ -7,6 +7,9 @@ fragment StatefulSet on StatefulSet {
     currentReplicas
     readyReplicas
     updatedReplicas
+    conditions {
+      ...StatusCondition
+    }
   }
   spec {
     replicas

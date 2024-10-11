@@ -3,19 +3,30 @@ import { useTheme } from 'styled-components'
 
 import { InfoSection, PaddedCard, PropGroup, PropWideBold } from './common'
 import { StatusChart } from './Deployment'
+import { ConditionsTable } from './Conditions'
+import { ComponentDetailsContext } from '../ComponentDetails'
+import { StatefulSetQuery } from 'generated/graphql'
 
 export default function StatefulSet() {
   const theme = useTheme()
-  const { data } = useOutletContext<any>()
+  const {
+    data: { statefulSet },
+  } = useOutletContext<ComponentDetailsContext>() as {
+    data: StatefulSetQuery
+  }
 
-  if (!data?.statefulSet) return null
+  if (!statefulSet) return null
 
   const {
-    statefulSet: {
-      spec,
-      status: { replicas, currentReplicas, updatedReplicas, readyReplicas },
+    spec,
+    status: {
+      replicas,
+      currentReplicas,
+      updatedReplicas,
+      readyReplicas,
+      conditions,
     },
-  } = data
+  } = statefulSet
 
   return (
     <>
@@ -51,6 +62,14 @@ export default function StatefulSet() {
           </PropWideBold>
         </PaddedCard>
       </InfoSection>
+      {conditions && (
+        <InfoSection
+          css={{ minWidth: '100%' }}
+          title="Conditions"
+        >
+          <ConditionsTable conditions={conditions} />
+        </InfoSection>
+      )}
     </>
   )
 }
