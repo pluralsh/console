@@ -13,6 +13,7 @@ import { useTheme } from 'styled-components'
 
 const getDirectory = (_, configuration) => [
   { path: 'me', label: 'Profile', enabled: true },
+  { path: 'email-settings', label: 'Email settings', enabled: true },
   { path: 'security', label: 'Security', enabled: true },
   { path: 'permissions', label: 'Permissions', enabled: true },
   { path: 'access-tokens', label: 'Access tokens', enabled: true },

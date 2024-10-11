@@ -7,9 +7,9 @@ import {
   ReturnIcon,
   Toast,
 } from '@pluralsh/design-system'
+import { LayerPositionType } from '@pluralsh/design-system/dist/components/Layer'
 import {
   Dispatch,
-  FormEvent,
   SetStateAction,
   useCallback,
   useEffect,
@@ -18,7 +18,6 @@ import {
   useState,
 } from 'react'
 import { useTheme } from 'styled-components'
-import { LayerPositionType } from '@pluralsh/design-system/dist/components/Layer'
 
 import { splitBindings } from '../settings/usermanagement/roles/RoleFormBindings'
 import { BindingInput } from '../utils/BindingInput'
@@ -56,7 +55,7 @@ export default function ShareSecretModal({
   useEffect(() => {
     if (toastRef.current)
       toastRef.current.style.setProperty('z-index', `${theme.zIndexes.tooltip}`)
-  }, [theme.zIndexes.tooltip])
+  }, [theme.zIndexes.tooltip, toast])
 
   const { userBindings, groupBindings } = useMemo(() => {
     const { userBindings, groupBindings } = splitBindings(bindings)
@@ -78,35 +77,26 @@ export default function ShareSecretModal({
     },
   })
 
-  const onSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault()
+  const onSubmit = useCallback(() => {
+    if (disabled) return
 
-      if (disabled) return
-
-      mutation({
-        variables: {
-          attributes: {
-            name,
-            secret,
-            notificationBindings: bindings
-              .filter(isNonNullable)
-              .map(bindingToBindingAttributes),
-          },
+    mutation({
+      variables: {
+        attributes: {
+          name,
+          secret,
+          notificationBindings: bindings
+            .filter(isNonNullable)
+            .map(bindingToBindingAttributes),
         },
-      })
-    },
-    [bindings, disabled, mutation, name, secret]
-  )
+      },
+    })
+  }, [bindings, disabled, mutation, name, secret])
 
-  const onRestart = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault()
-      reset()
-      setCompleted(false)
-    },
-    [reset, setCompleted]
-  )
+  const onRestart = useCallback(() => {
+    reset()
+    setCompleted(false)
+  }, [reset, setCompleted])
 
   return (
     <>
@@ -123,29 +113,22 @@ export default function ShareSecretModal({
                 <Button
                   secondary
                   startIcon={<ReturnIcon />}
-                  type="button"
                   onClick={onRestart}
                 >
                   Restart
                 </Button>
-                <Button
-                  type="button"
-                  onClick={() => setOpen(false)}
-                >
-                  Finish
-                </Button>
+                <Button onClick={() => setOpen(false)}>Finish</Button>
               </>
             ) : (
               <>
                 <Button
-                  type="button"
                   secondary
                   onClick={() => setOpen(false)}
                 >
                   Cancel
                 </Button>
                 <Button
-                  type="submit"
+                  onClick={onSubmit}
                   disabled={disabled}
                   loading={loading}
                 >
@@ -155,8 +138,6 @@ export default function ShareSecretModal({
             )}
           </div>
         }
-        asForm
-        formProps={{ onSubmit }}
         header="Share secret"
         open={open}
         onClose={() => setOpen(false)}
@@ -169,20 +150,14 @@ export default function ShareSecretModal({
             gap: theme.spacing.large,
           }}
         >
-          <FormField
-            required={!completed}
-            label="Secret name"
-          >
+          <FormField label="Secret name">
             <Input
               disabled={completed}
               value={name}
               onChange={(e) => setName(e.currentTarget.value)}
             />
           </FormField>
-          <FormField
-            required={!completed}
-            label="Secret string"
-          >
+          <FormField label="Secret string">
             <Input
               disabled={completed}
               value={secret}
