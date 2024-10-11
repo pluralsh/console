@@ -27,6 +27,7 @@ import { stacksRoutes } from './stacksRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { HOME_REL_PATH } from './consoleRoutesConsts'
 import { secretsRoutes } from './secretsRoute'
+import { EmailSettings } from 'components/profile/EmailSettings'
 
 const buildsRoutes = [
   <Route
@@ -74,6 +75,10 @@ const profileRoutes = [
     <Route
       path="me"
       element={<Profile />}
+    />
+    <Route
+      path="email-settings"
+      element={<EmailSettings />}
     />
     <Route
       path="security"

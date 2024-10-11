@@ -5,10 +5,12 @@ import capitalize from 'lodash/capitalize'
 import { ComponentProps } from 'react'
 import { useTheme } from 'styled-components'
 import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
-
+import pluralize from 'pluralize'
 import { DateTimeCol } from '../../utils/table/DateTimeCol'
 import { OverlineH1 } from '../../utils/typography/Text'
 import { isNonNullable } from '../../../utils/isNonNullable'
+import isEmpty from 'lodash/isEmpty'
+import moment from 'moment/moment'
 
 const statusToSeverity = {
   [UpgradeInsightStatus.Passing]: 'success',
@@ -119,69 +121,98 @@ export function UpgradeInsightExpansionPanel({
                   replacedIn,
                   removedIn,
                   status = UpgradeInsightStatus.Unknown,
+                  clientInfo,
                 },
                 i
               ) => (
                 <div
                   css={{
                     borderTop: i !== 0 ? theme.borders.default : undefined,
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    paddingBottom: theme.spacing.xsmall,
+                    paddingBottom: theme.spacing.xxsmall,
                     paddingTop: theme.spacing.xsmall,
                   }}
                 >
                   <div
                     css={{
                       display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
+                      justifyContent: 'space-between',
                     }}
                   >
                     <div
                       css={{
-                        ...theme.partials.text.body2Bold,
-                        color: theme.colors.text,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
                       }}
                     >
-                      {used}
+                      <div
+                        css={{
+                          ...theme.partials.text.body2Bold,
+                          color: theme.colors.text,
+                        }}
+                      >
+                        {used}
+                      </div>
+                      <div
+                        css={{
+                          ...theme.partials.text.caption,
+                          color: theme.colors['text-light'],
+                        }}
+                      >
+                        {!!replacement && (
+                          <div>Replaced with: {replacement}</div>
+                        )}
+                      </div>
                     </div>
+                    <div
+                      css={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <div css={{ display: 'flex', justifyContent: 'end' }}>
+                        <UpgradeInsightStatusChip
+                          status={status}
+                          size="small"
+                          marginBottom={theme.spacing.xxxsmall}
+                        />
+                      </div>
+                      <div
+                        css={{
+                          ...theme.partials.text.caption,
+                          color: theme.colors['text-xlight'],
+                          textAlign: 'right',
+                        }}
+                      >
+                        {replacedIn && (
+                          <div>Replacement version: {replacedIn}</div>
+                        )}
+                        {removedIn && <div>Removal version: {removedIn}</div>}
+                      </div>
+                    </div>
+                  </div>
+                  {!isEmpty(clientInfo) && (
                     <div
                       css={{
                         ...theme.partials.text.caption,
                         color: theme.colors['text-light'],
+                        paddingBottom: theme.spacing.small,
                       }}
                     >
-                      {!!replacement && <div>Replaced with: {replacement}</div>}
+                      <div>Clients:</div>
+                      {clientInfo?.map((client) => (
+                        <div>
+                          {client?.userAgent} made {client?.count ?? 0}
+                          {pluralize(' request', client?.count ?? 0)}, last
+                          request at{' '}
+                          {moment(client?.lastRequestAt).format(
+                            'MMM D, YYYY h:mm a'
+                          )}
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  <div
-                    css={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <div css={{ display: 'flex', justifyContent: 'end' }}>
-                      <UpgradeInsightStatusChip
-                        status={status}
-                        size="small"
-                        marginBottom={theme.spacing.xxxsmall}
-                      />
-                    </div>
-                    <div
-                      css={{
-                        ...theme.partials.text.caption,
-                        color: theme.colors['text-xlight'],
-                        textAlign: 'right',
-                      }}
-                    >
-                      {replacedIn && (
-                        <div>Replacement version: {replacedIn}</div>
-                      )}
-                      {removedIn && <div>Removal version: {removedIn}</div>}
-                    </div>
-                  </div>
+                  )}
                 </div>
               )
             )}

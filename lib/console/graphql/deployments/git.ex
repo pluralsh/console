@@ -33,9 +33,13 @@ defmodule Console.GraphQl.Deployments.Git do
     field :description,    :string
     field :category,       :string, description: "short category name for browsability"
     field :project_id,     :id, description: "owning project of the catalog, permissions will propagate down"
-    field :tags,           list_of(:tag_attributes)
-    field :read_bindings,  list_of(:policy_binding_attributes)
-    field :write_bindings, list_of(:policy_binding_attributes)
+    field :icon,           :string, description: "an icon url to use for this catalog"
+    field :dark_icon,      :string, description: "a darkmode icon url to use for this catalog"
+
+    field :tags,            list_of(:tag_attributes)
+    field :read_bindings,   list_of(:policy_binding_attributes)
+    field :write_bindings,  list_of(:policy_binding_attributes)
+    field :create_bindings, list_of(:policy_binding_attributes)
   end
 
   input_object :git_attributes do
@@ -121,6 +125,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :updates,       :pr_automation_update_spec_attributes
     field :creates,       :pr_automation_create_spec_attributes
     field :deletes,       :pr_automation_delete_spec_attributes
+
+    field :icon,      :string, description: "an icon url to use for this catalog"
+    field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
 
     field :addon,         :string, description: "link to an add-on name if this can update it"
     field :cluster_id,    :id, description: "link to a cluster if this is to perform an upgrade"
@@ -401,6 +408,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :creates,       :pr_create_spec
     field :deletes,       :pr_delete_spec
 
+    field :icon,      :string, description: "an icon url to use for this catalog"
+    field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
+
     field :configuration, list_of(:pr_configuration)
 
     field :write_bindings, list_of(:policy_binding),
@@ -624,6 +634,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :category,    :string, description: "short category name used for browsing catalogs"
     field :author,      :string, description: "the name of the author of this catalog"
 
+    field :icon,      :string, description: "an icon url to use for this catalog"
+    field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
+
     field :project, :project, resolve: dataloader(Deployments)
 
     field :read_bindings,  list_of(:policy_binding),
@@ -632,6 +645,9 @@ defmodule Console.GraphQl.Deployments.Git do
     field :write_bindings, list_of(:policy_binding),
       resolve: dataloader(Deployments),
       description: "write policy for this catalog"
+    field :create_bindings, list_of(:policy_binding),
+      resolve: dataloader(Deployments),
+      description: "create policy for this catalog, can give permission to just create prs"
 
     timestamps()
   end
@@ -706,6 +722,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
     connection field :pr_automations, node_type: :pr_automation do
       middleware Authenticated
+      arg :catalog_id, :id
+      arg :project_id, :id
+      arg :q,          :string
 
       resolve &Deployments.list_pr_automations/2
     end

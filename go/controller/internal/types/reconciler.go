@@ -4,12 +4,10 @@ import (
 	"fmt"
 
 	"github.com/pluralsh/console/go/controller/internal/cache"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-
-	ctrl "sigs.k8s.io/controller-runtime"
-
 	"github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/controller"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 // Reconciler is a name of reconciler supported by this controller.
@@ -41,6 +39,7 @@ const (
 	NamespaceCredentialsReconciler  Reconciler = "namespacecredentials"
 	ObservabilityProviderReconciler Reconciler = "observabilityprovider"
 	ObserverReconciler              Reconciler = "observerprovider"
+	CatalogReconciler               Reconciler = "catalogprovider"
 	OIDCProviderReconciler          Reconciler = "oidcprovider"
 )
 
@@ -94,6 +93,8 @@ func ToReconciler(reconciler string) (Reconciler, error) {
 	case ObservabilityProviderReconciler:
 		fallthrough
 	case ObserverReconciler:
+		fallthrough
+	case CatalogReconciler:
 		fallthrough
 	case OIDCProviderReconciler:
 		fallthrough
@@ -301,6 +302,13 @@ func (sc Reconciler) ToController(mgr ctrl.Manager, consoleClient client.Console
 				Scheme: mgr.GetScheme(),
 			},
 		}, nil
+	case CatalogReconciler:
+		return &controller.CatalogReconciler{
+			Client:         mgr.GetClient(),
+			ConsoleClient:  consoleClient,
+			Scheme:         mgr.GetScheme(),
+			UserGroupCache: userGroupCache,
+		}, nil
 	default:
 		return nil, fmt.Errorf("reconciler %q is not supported", sc)
 	}
@@ -339,6 +347,7 @@ func Reconcilers() ReconcilerList {
 		ObservabilityProviderReconciler,
 		ObserverReconciler,
 		StackDefinitionReconciler,
+		CatalogReconciler,
 		OIDCProviderReconciler,
 	}
 }

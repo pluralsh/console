@@ -187,7 +187,7 @@ type RootQueryType {
 
   scmConnection(id: ID, name: String): ScmConnection
 
-  prAutomations(after: String, first: Int, before: String, last: Int): PrAutomationConnection
+  prAutomations(after: String, first: Int, before: String, last: Int, catalogId: ID, projectId: ID, q: String): PrAutomationConnection
 
   prAutomation(id: ID, name: String): PrAutomation
 
@@ -918,9 +918,17 @@ enum OidcProviderType {
   PLURAL
 }
 
+"Supported methods for fetching an OIDC auth token"
+enum OidcAuthMethod {
+  POST
+  BASIC
+}
+
 "Configuration settings for creating a new OIDC provider client"
 input OidcProviderAttributes {
   name: String!
+
+  authMethod: OidcAuthMethod
 
   description: String
 
@@ -935,6 +943,8 @@ type OidcProvider {
   name: String!
 
   description: String
+
+  authMethod: OidcAuthMethod
 
   "the redirect uris oidc is whitelisted to use"
   redirectUris: [String]
@@ -4557,11 +4567,19 @@ input CatalogAttributes {
   "owning project of the catalog, permissions will propagate down"
   projectId: ID
 
+  "an icon url to use for this catalog"
+  icon: String
+
+  "a darkmode icon url to use for this catalog"
+  darkIcon: String
+
   tags: [TagAttributes]
 
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
+
+  createBindings: [PolicyBindingAttributes]
 }
 
 input GitAttributes {
@@ -4689,6 +4707,12 @@ input PrAutomationAttributes {
   creates: PrAutomationCreateSpecAttributes
 
   deletes: PrAutomationDeleteSpecAttributes
+
+  "an icon url to use for this catalog"
+  icon: String
+
+  "a darkmode icon url to use for this catalog"
+  darkIcon: String
 
   "link to an add-on name if this can update it"
   addon: String
@@ -5066,6 +5090,12 @@ type PrAutomation {
 
   deletes: PrDeleteSpec
 
+  "an icon url to use for this catalog"
+  icon: String
+
+  "a darkmode icon url to use for this catalog"
+  darkIcon: String
+
   configuration: [PrConfiguration]
 
   "write policy for this pr automation, also propagates to the notifications list for any created PRs"
@@ -5330,6 +5360,12 @@ type Catalog {
   "the name of the author of this catalog"
   author: String
 
+  "an icon url to use for this catalog"
+  icon: String
+
+  "a darkmode icon url to use for this catalog"
+  darkIcon: String
+
   project: Project
 
   "read policy for this catalog"
@@ -5337,6 +5373,9 @@ type Catalog {
 
   "write policy for this catalog"
   writeBindings: [PolicyBinding]
+
+  "create policy for this catalog, can give permission to just create prs"
+  createBindings: [PolicyBinding]
 
   insertedAt: DateTime
 
@@ -5914,6 +5953,7 @@ type DaemonSetStatus {
   currentNumberScheduled: Int
   desiredNumberScheduled: Int
   numberReady: Int
+  conditions: [StatusCondition]
 }
 
 type DaemonSetSpec {
@@ -6335,6 +6375,7 @@ type Service {
 
 type ServiceStatus {
   loadBalancer: LoadBalancerStatus
+  conditions: [StatusCondition]
 }
 
 type LoadBalancerStatus {
@@ -6374,6 +6415,7 @@ type StatefulSetStatus {
   replicas: Int
   readyReplicas: Int
   updatedReplicas: Int
+  conditions: [StatusCondition]
 }
 
 type StatefulSetSpec {
@@ -6403,6 +6445,7 @@ type DeploymentStatus {
   replicas: Int
   readyReplicas: Int
   unavailableReplicas: Int
+  conditions: [StatusCondition]
 }
 
 type DeploymentSpec {
@@ -6664,6 +6707,7 @@ input UserAttributes {
   email: String
   password: String
   roles: UserRoleAttributes
+  emailSettings: EmailSettingsAttributes
   signingPrivateKey: String
 }
 
@@ -6676,6 +6720,11 @@ input ServiceAccountAttributes {
 
 input UserRoleAttributes {
   admin: Boolean
+}
+
+input EmailSettingsAttributes {
+  "whether you want to receive digest emails"
+  digest: Boolean
 }
 
 input InviteAttributes {
@@ -6766,6 +6815,7 @@ type User {
   profile: String
   pluralId: String
   roles: UserRoles
+  emailSettings: EmailSettings
   readTimestamp: DateTime
   buildTimestamp: DateTime
   refreshToken: RefreshToken
@@ -6793,6 +6843,11 @@ type RefreshToken {
 
 type UserRoles {
   admin: Boolean
+}
+
+type EmailSettings {
+  "whether you want to receive digest emails"
+  digest: Boolean
 }
 
 type Invite {

@@ -1,0 +1,30 @@
+mutation UpsertCatalog($attributes: CatalogAttributes) {
+    upsertCatalog(attributes: $attributes) {
+        ...CatalogFragment
+    }
+}
+
+mutation DeleteCatalog($id: ID!) {
+    deleteCatalog(id: $id) {
+        ...CatalogFragment
+    }
+}
+
+query GetCatalog($id: ID, $name: String) {
+    catalog(id: $id, name: $name) {
+        ...CatalogFragment
+    }
+}
+
+fragment CatalogFragment on Catalog {
+    id
+    name
+    description
+    category
+    author
+    project { ...ProjectFragment}
+    readBindings { ...PolicyBindingFragment}
+    writeBindings { ...PolicyBindingFragment}
+    insertedAt
+    updatedAt
+}

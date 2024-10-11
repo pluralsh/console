@@ -26,6 +26,9 @@ defmodule Console.Schema.PrAutomation do
     field :write_policy_id,  :binary_id
     field :create_policy_id, :binary_id
 
+    field :icon,      :string
+    field :dark_icon, :string
+
     embeds_one :creates, CreateSpec, on_replace: :update do
       embeds_one :git, Service.Git, on_replace: :update
 
@@ -78,6 +81,14 @@ defmodule Console.Schema.PrAutomation do
     timestamps()
   end
 
+  def for_catalog(query \\ __MODULE__, catalog_id) do
+    from(p in query, where: p.catalog_id == ^catalog_id)
+  end
+
+  def search(query \\ __MODULE__, q) do
+    from(p in query, where: ilike(p.name, ^"%#{q}%"))
+  end
+
   def for_project(query \\ __MODULE__, proj_id) do
     from(p in query, where: p.project_id == ^proj_id)
   end
@@ -86,7 +97,7 @@ defmodule Console.Schema.PrAutomation do
     from(p in query, order_by: ^order)
   end
 
-  @valid ~w(name project_id role identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id)a
+  @valid ~w(name project_id icon dark_icon role identifier message title branch documentation addon catalog_id repository_id cluster_id service_id connection_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

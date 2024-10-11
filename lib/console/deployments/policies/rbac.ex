@@ -112,6 +112,7 @@ defmodule Console.Deployments.Policies.Rbac do
     do: recurse(catalog, user, action, & &1.project)
   def evaluate(%User{} = sa, %User{} = user, :assume), do: recurse(sa, user, :assume)
   def evaluate(%SharedSecret{} = share, %User{} = user, :consume), do: recurse(share, user, :notify)
+  def evaluate(l, user, action) when is_list(l), do: Enum.any?(l, &evaluate(&1, user, action))
   def evaluate(_, _, _), do: false
 
   @bindings [:read_bindings, :write_bindings]
@@ -136,9 +137,9 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(%DeploymentSettings{} = settings),
     do: Repo.preload(settings, [:read_bindings, :write_bindings, :git_bindings, :create_bindings])
   def preload(%PrAutomation{} = pr),
-    do: Repo.preload(pr, [:write_bindings, :create_bindings, catalog: @top_preloads])
+    do: Repo.preload(pr, [:write_bindings, :create_bindings, catalog: @top_preloads, project: @bindings])
   def preload(%Catalog{} = pr),
-    do: Repo.preload(pr, @top_preloads)
+    do: Repo.preload(pr, [:write_bindings, :create_bindings, :read_bindings, project: @bindings])
   def preload(%Observer{} = obs),
     do: Repo.preload(obs, [project: @bindings])
   def preload(%PolicyConstraint{} = pr),
@@ -162,8 +163,6 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(pass), do: pass
 
   defp recurse(resource, user, action, func \\ fn _ -> nil end)
-  defp recurse(l, user, action, next) when is_list(l),
-    do: Enum.any?(l, &recurse(&1, user, action, next))
   defp recurse(%{} = resource, user, action, next) do
     resource = preload(resource)
 

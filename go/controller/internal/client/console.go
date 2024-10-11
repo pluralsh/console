@@ -140,6 +140,10 @@ type ConsoleClient interface {
 	DeleteObserver(ctx context.Context, id string) error
 	GetObserver(ctx context.Context, id, name *string) (*console.ObserverFragment, error)
 	IsObserverExists(ctx context.Context, name string) (bool, error)
+	UpsertCatalog(ctx context.Context, attributes *console.CatalogAttributes) (*console.CatalogFragment, error)
+	GetCatalog(ctx context.Context, id, name *string) (*console.CatalogFragment, error)
+	DeleteCatalog(ctx context.Context, id string) error
+	IsCatalogExists(ctx context.Context, name string) (bool, error)
 	CreateOIDCProvider(ctx context.Context, pType console.OidcProviderType, attributes console.OidcProviderAttributes) (*console.OIDCProviderFragment, error)
 	UpdateOIDCProvider(ctx context.Context, id string, pType console.OidcProviderType, attributes console.OidcProviderAttributes) (*console.OIDCProviderFragment, error)
 	DeleteOIDCProvider(ctx context.Context, id string, pType console.OidcProviderType) error

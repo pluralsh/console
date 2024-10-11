@@ -1,17 +1,19 @@
 import {
+  CollapseIcon,
   IconFrame,
+  Prop,
   Table,
   TerminalIcon,
   Tooltip,
 } from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { createColumnHelper, Row } from '@tanstack/react-table'
 import { UnstyledLink } from 'components/utils/Link'
 import { filesize } from 'filesize'
-import type { Container, ContainerStatus, Maybe, Port } from 'generated/graphql'
+import { Container, ContainerStatus, Maybe, Port } from 'generated/graphql'
 import { Flex, Span } from 'honorable'
 import { ComponentProps, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
 import {
   Readiness,
@@ -26,6 +28,8 @@ import {
   TableText,
   Usage,
 } from '../TableElements'
+import { Overline } from '../../cd/utils/PermissionsModal.tsx'
+import moment from 'moment/moment'
 
 type ContainerTableRow = {
   name?: string
@@ -57,6 +61,32 @@ export const ColStatus = columnHelper.accessor(
     header: 'Status',
   }
 )
+
+export const ColExpander = {
+  id: 'expander',
+  header: () => {},
+  cell: ({ row }) =>
+    row.getCanExpand() && (
+      <CollapseIcon
+        size={8}
+        cursor="pointer"
+        style={
+          row.getIsExpanded()
+            ? {
+                transform: 'rotate(270deg)',
+                transitionDuration: '.2s',
+                transitionProperty: 'transform',
+              }
+            : {
+                transform: 'rotate(180deg)',
+                transitionDuration: '.2s',
+                transitionProperty: 'transform',
+              }
+        }
+        onClick={row.getToggleExpandedHandler()}
+      />
+    ),
+}
 
 export const ColName = columnHelper.accessor((row) => row.name, {
   id: 'name',
@@ -231,7 +261,7 @@ function toTableData(
     statuses,
     isInit = false,
   }: { isInit: boolean; statuses?: Record<string, Maybe<ContainerStatus>> }
-) {
+): ContainerTableRow {
   const requests = container?.resources?.requests
   const limits = container?.resources?.limits
   const memoryRequests = memoryParser(requests?.memory)
@@ -255,6 +285,7 @@ function toTableData(
     },
     ports: container.ports || undefined,
     readiness: containerStatusToReadiness(status),
+    status: status ?? undefined,
   }
 }
 
@@ -292,6 +323,7 @@ export function ContainersList({
   columns = useMemo(
     () =>
       columns ?? [
+        ColExpander,
         ColName,
         ColImage,
         ColMemoryReservation,
@@ -321,6 +353,11 @@ export function ContainersList({
         },
       }}
       {...TABLE_HEIGHT}
+      getRowCanExpand={(row: Row<ContainerTableRow>) =>
+        row.original.status?.state?.terminated ||
+        row.original.status?.state?.waiting
+      }
+      renderExpanded={ContainerExpansionPanel}
       {...(rowLink
         ? {
             onRowClick: (_e, { original }) =>
@@ -329,5 +366,109 @@ export function ContainersList({
           }
         : {})}
     />
+  )
+}
+
+export function ContainerExpansionPanel({
+  row,
+}: {
+  row: Row<ContainerTableRow>
+}) {
+  const theme = useTheme()
+  const {
+    original: { status },
+  } = row
+
+  return (
+    <div>
+      {status?.state?.terminated && (
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.small,
+          }}
+        >
+          <Overline css={{ color: theme.colors['text-xlight'] }}>
+            Terminated
+          </Overline>
+          <div
+            css={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: theme.spacing.small,
+            }}
+          >
+            <Prop
+              title="Started"
+              margin={0}
+            >
+              {moment(status?.state?.terminated.startedAt).format(
+                'MMM D, YYYY h:mm'
+              )}
+            </Prop>
+            <Prop
+              title="Finished"
+              margin={0}
+            >
+              {moment(status?.state?.terminated.finishedAt).format(
+                'MMM D, YYYY h:mm'
+              )}
+            </Prop>
+            <Prop
+              title="Exit code"
+              margin={0}
+            >
+              {status?.state?.terminated.exitCode}
+            </Prop>
+            <Prop
+              title="Reason"
+              margin={0}
+            >
+              {status?.state?.terminated.reason}
+            </Prop>
+            <Prop
+              title="Message"
+              margin={0}
+            >
+              {status?.state?.terminated.message ?? '-'}
+            </Prop>
+          </div>
+        </div>
+      )}
+      {status?.state?.waiting && (
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.small,
+          }}
+        >
+          <Overline css={{ color: theme.colors['text-xlight'] }}>
+            Waiting
+          </Overline>
+          <div
+            css={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: theme.spacing.small,
+            }}
+          >
+            <Prop
+              title="Reason"
+              margin={0}
+            >
+              {status?.state?.waiting.reason}
+            </Prop>
+            <Prop
+              title="Message"
+              margin={0}
+            >
+              {status?.state?.waiting.message ?? '-'}
+            </Prop>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
