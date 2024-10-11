@@ -1,4 +1,3 @@
-import { Div, type DivProps, Flex, H1, H3, P, Span } from 'honorable'
 import {
   type ComponentProps,
   type ReactNode,
@@ -11,12 +10,13 @@ import styled, { useTheme } from 'styled-components'
 import Chip from './Chip'
 import PadlockLockedIcon from './icons/PadlockLockedIcon'
 import VerifiedIcon from './icons/VerifiedIcon'
-import Card from './Card'
+import Card, { type CardProps } from './Card'
 import RocketIcon from './icons/RocketIcon'
 
 import AppIcon from './AppIcon'
+import Flex from './Flex'
 
-type RepositoryCardProps = DivProps & {
+type RepositoryCardProps = CardProps & {
   title?: string
   publisher?: string
   priv?: boolean
@@ -107,15 +107,17 @@ function RepositoryCardRef(
     <Card
       ref={ref}
       clickable
-      flexDirection="column"
-      paddingTop={
-        featuredLabel ? theme.spacing.large + theme.spacing.medium : 'large'
-      }
-      paddingRight="large"
-      paddingBottom="large"
-      paddingLeft="large"
-      width="100%"
-      position="relative"
+      style={{
+        flexDirection: 'column',
+        paddingTop: featuredLabel
+          ? theme.spacing.large + theme.spacing.medium
+          : theme.spacing.large,
+        paddingRight: theme.spacing.large,
+        paddingBottom: theme.spacing.large,
+        paddingLeft: theme.spacing.large,
+        width: '100%',
+        position: 'relative',
+      }}
       {...props}
     >
       {featuredLabel && <FeaturedBorder>{featuredLabel}</FeaturedBorder>}
@@ -144,21 +146,16 @@ function RepositoryCardRef(
             )}
             <Flex
               direction="row"
-              marginLeft={size === 'small' ? 'small' : 0}
+              marginLeft={size === 'small' ? theme.spacing.small : 0}
               width="100%"
               align="flex-start"
               justify="space-between"
             >
               <Flex direction="column">
-                <H1
-                  color="text"
-                  {...(variant === 'marketing'
-                    ? featuredLabel
-                      ? { title2: true }
-                      : { subtitle1: true }
-                    : size === 'large'
-                    ? { title1: true }
-                    : { title2: true })}
+                <HeaderSC
+                  $variant={variant}
+                  $featuredLabel={!!featuredLabel}
+                  $size={size}
                 >
                   {title}
                   {!!verified && (
@@ -170,22 +167,19 @@ function RepositoryCardRef(
                       left={4}
                     />
                   )}
-                </H1>
-                <H3
-                  body2
-                  {...(variant === 'marketing' && !featuredLabel
-                    ? { caption: true }
-                    : { body2: true })}
-                  color="text-xlight"
-                  marginBottom={size === 'large' ? 'small' : 0}
+                </HeaderSC>
+                <SubheaderSC
+                  $variant={variant}
+                  $featuredLabel={!!featuredLabel}
+                  $size={size}
                 >
                   {publisher}
-                </H3>
+                </SubheaderSC>
               </Flex>
               <Flex
                 justifyContent="end"
                 flexGrow={1}
-                marginLeft="medium"
+                marginLeft={theme.spacing.medium}
                 gap="small"
                 alignItems="center"
               >
@@ -209,25 +203,11 @@ function RepositoryCardRef(
               </Flex>
             </Flex>
           </Flex>
-          {description && (
-            <P
-              body2
-              marginTop="xsmall"
-              color="text-light"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: '2',
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden',
-              }}
-            >
-              {description}
-            </P>
-          )}
-          <Div flexGrow={1} />
+          {description && <DescriptionSC>{description}</DescriptionSC>}
+          <div style={{ flexGrow: 1 }} />
           {(trending || tags?.length > 0) && (
             <Flex
-              marginTop="medium"
+              marginTop={theme.spacing.medium}
               gap="xsmall"
               flexWrap="wrap"
             >
@@ -237,12 +217,7 @@ function RepositoryCardRef(
                   hue="lighter"
                 >
                   <RocketIcon color="action-link-inline" />
-                  <Span
-                    color="action-link-inline"
-                    marginLeft="xxsmall"
-                  >
-                    Trending
-                  </Span>
+                  <SpanSC>Trending</SpanSC>
                 </Chip>
               )}
               {tags
@@ -264,6 +239,52 @@ function RepositoryCardRef(
     </Card>
   )
 }
+
+const HeaderSC = styled.h1<{
+  $variant?: RepositoryCardProps['variant']
+  $featuredLabel?: boolean
+  $size?: RepositoryCardProps['size']
+}>(({ theme, $variant, $featuredLabel, $size }) => ({
+  margin: 0,
+  color: theme.colors.text,
+  ...($variant === 'marketing'
+    ? $featuredLabel
+      ? { ...theme.partials.text.title2 }
+      : { ...theme.partials.text.subtitle1 }
+    : $size === 'large'
+    ? { ...theme.partials.text.title1 }
+    : { ...theme.partials.text.title2 }),
+}))
+
+const SubheaderSC = styled.h3<{
+  $variant?: RepositoryCardProps['variant']
+  $featuredLabel?: boolean
+  $size?: RepositoryCardProps['size']
+}>(({ theme, $variant, $featuredLabel, $size }) => ({
+  margin: 0,
+  ...theme.partials.text.body2,
+  color: theme.colors['text-xlight'],
+  marginBottom: $size === 'large' ? theme.spacing.small : 0,
+  ...($variant === 'marketing' && !$featuredLabel
+    ? { ...theme.partials.text.caption }
+    : {}),
+}))
+
+const SpanSC = styled.span(({ theme }) => ({
+  color: theme.colors['action-link-inline'],
+  marginLeft: theme.spacing.xxsmall,
+}))
+
+const DescriptionSC = styled.p(({ theme }) => ({
+  ...theme.partials.text.body2,
+  margin: 0,
+  marginTop: theme.spacing.xsmall,
+  color: theme.colors['text-light'],
+  display: '-webkit-box',
+  WebkitLineClamp: '2',
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+}))
 
 const RepositoryCard = forwardRef(RepositoryCardRef)
 

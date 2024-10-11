@@ -7,7 +7,7 @@ import {
   forwardRef,
   memo,
 } from 'react'
-import { useTheme } from 'styled-components'
+import styled, { type DefaultTheme } from 'styled-components'
 
 type FlexBaseProps = {
   /**
@@ -45,15 +45,15 @@ type FlexBaseProps = {
     | 'space-around'
     | 'space-evenly'
 
-  gap?: string
-
+  gap?: keyof DefaultTheme['spacing']
+  padding?: keyof DefaultTheme['spacing']
   children?: ReactNode
 }
 
 type FlexProps = Omit<CSSProperties, keyof FlexBaseProps> & FlexBaseProps
 
-function FlexRef(props: FlexProps, ref: Ref<any>) {
-  const {
+function FlexRef(
+  {
     direction,
     wrap,
     basis,
@@ -62,31 +62,68 @@ function FlexRef(props: FlexProps, ref: Ref<any>) {
     align,
     justify,
     gap,
+    padding,
     children,
     ...otherProps
-  } = props
-  const theme = useTheme()
-
+  }: FlexProps,
+  ref: Ref<any>
+) {
   return (
-    <div
+    <FlexSC
       ref={ref}
-      style={{
-        display: 'flex',
-        flexDirection: direction,
-        flexWrap: typeof wrap === 'boolean' ? 'wrap' : wrap,
-        flexBasis: basis,
-        flexGrow: typeof grow === 'boolean' ? 1 : grow,
-        flexShrink: typeof shrink === 'boolean' ? 1 : shrink,
-        alignItems: align,
-        justifyContent: justify,
-        gap: (theme.spacing as any)[gap] || 0,
-        ...otherProps,
+      {...{
+        $direction: direction,
+        $wrap: wrap,
+        $basis: basis,
+        $grow: grow,
+        $shrink: shrink,
+        $align: align,
+        $justify: justify,
+        $gap: gap,
+        $padding: padding,
       }}
+      style={{ ...otherProps }}
     >
       {children}
-    </div>
+    </FlexSC>
   )
 }
+
+const FlexSC = styled.div<{
+  $direction?: FlexProps['direction']
+  $wrap?: FlexProps['wrap']
+  $basis?: FlexProps['basis']
+  $grow?: FlexProps['grow']
+  $shrink?: FlexProps['shrink']
+  $align?: FlexProps['align']
+  $justify?: FlexProps['justify']
+  $gap?: FlexProps['gap']
+  $padding?: FlexProps['padding']
+}>(
+  ({
+    theme,
+    $direction,
+    $wrap,
+    $basis,
+    $grow,
+    $shrink,
+    $align,
+    $justify,
+    $gap,
+    $padding,
+  }) => ({
+    display: 'flex',
+    flexDirection: $direction,
+    flexWrap: typeof $wrap === 'boolean' ? 'wrap' : $wrap,
+    flexBasis: $basis,
+    flexGrow: typeof $grow === 'boolean' ? 1 : $grow,
+    flexShrink: typeof $shrink === 'boolean' ? 1 : $shrink,
+    alignItems: $align,
+    justifyContent: $justify,
+    gap: theme.spacing[$gap] || 0,
+    padding: theme.spacing[$padding] || 0,
+  })
+)
 
 const BaseFlex = forwardRef(FlexRef)
 
