@@ -28,8 +28,8 @@ import {
   TableText,
   Usage,
 } from '../TableElements'
-import { OverlineH1 } from '../../utils/typography/Text.tsx'
 import { Overline } from '../../cd/utils/PermissionsModal.tsx'
+import moment from 'moment/moment'
 
 type ContainerTableRow = {
   name?: string
@@ -382,15 +382,51 @@ export function ContainerExpansionPanel({
   return (
     <div>
       {status?.state?.terminated && (
-        <div>
-          <OverlineH1 css={{ color: theme.colors['text-xlight'] }}>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            flexWrap: 'wrap',
+            gap: theme.spacing.small,
+          }}
+        >
+          <Overline css={{ color: theme.colors['text-xlight'] }}>
             Terminated
-          </OverlineH1>
-          <p>Reason: {status?.state?.terminated.reason}</p>
-          <p>Message: {status?.state?.terminated.message}</p>
-          <p>Exit code: {status?.state?.terminated.exitCode}</p>
-          <p>Started: {status?.state?.terminated.startedAt}</p>
-          <p>Finished: {status?.state?.terminated.finishedAt}</p>
+          </Overline>
+          <Prop
+            title="Started"
+            margin={0}
+          >
+            {moment(status?.state?.terminated.startedAt).format(
+              'MMM D, YYYY h:mm'
+            )}
+          </Prop>
+          <Prop
+            title="Finished"
+            margin={0}
+          >
+            {moment(status?.state?.terminated.finishedAt).format(
+              'MMM D, YYYY h:mm'
+            )}
+          </Prop>
+          <Prop
+            title="Exit code"
+            margin={0}
+          >
+            {status?.state?.terminated.exitCode}
+          </Prop>
+          <Prop
+            title="Reason"
+            margin={0}
+          >
+            {status?.state?.terminated.reason}
+          </Prop>
+          <Prop
+            title="Message"
+            margin={0}
+          >
+            {status?.state?.terminated.message}
+          </Prop>
         </div>
       )}
       {status?.state?.waiting && (
@@ -398,6 +434,7 @@ export function ContainerExpansionPanel({
           css={{
             display: 'flex',
             flexDirection: 'column',
+            flexWrap: 'wrap',
             gap: theme.spacing.small,
           }}
         >
