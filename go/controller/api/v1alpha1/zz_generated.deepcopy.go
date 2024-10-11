@@ -194,6 +194,23 @@ func (in *CatalogSpec) DeepCopyInto(out *CatalogSpec) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Category != nil {
+		in, out := &in.Category, &out.Category
+		*out = new(string)
+		**out = **in
+	}
+	if in.ProjectRef != nil {
+		in, out := &in.ProjectRef, &out.ProjectRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
+	if in.Tags != nil {
+		in, out := &in.Tags, &out.Tags
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.Bindings != nil {
 		in, out := &in.Bindings, &out.Bindings
 		*out = new(Bindings)
