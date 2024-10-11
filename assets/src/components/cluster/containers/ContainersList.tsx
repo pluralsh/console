@@ -1,6 +1,7 @@
 import {
   CollapseIcon,
   IconFrame,
+  Prop,
   Table,
   TerminalIcon,
   Tooltip,
@@ -28,6 +29,7 @@ import {
   Usage,
 } from '../TableElements'
 import { OverlineH1 } from '../../utils/typography/Text.tsx'
+import { Overline } from '../../cd/utils/PermissionsModal.tsx'
 
 type ContainerTableRow = {
   name?: string
@@ -259,7 +261,7 @@ function toTableData(
     statuses,
     isInit = false,
   }: { isInit: boolean; statuses?: Record<string, Maybe<ContainerStatus>> }
-) {
+): ContainerTableRow {
   const requests = container?.resources?.requests
   const limits = container?.resources?.limits
   const memoryRequests = memoryParser(requests?.memory)
@@ -283,6 +285,7 @@ function toTableData(
     },
     ports: container.ports || undefined,
     readiness: containerStatusToReadiness(status),
+    status: status ?? undefined,
   }
 }
 
@@ -391,12 +394,28 @@ export function ContainerExpansionPanel({
         </div>
       )}
       {status?.state?.waiting && (
-        <div>
-          <OverlineH1 css={{ color: theme.colors['text-xlight'] }}>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.small,
+          }}
+        >
+          <Overline css={{ color: theme.colors['text-xlight'] }}>
             Waiting
-          </OverlineH1>
-          <p>Reason: {status?.state?.waiting.reason}</p>
-          <p>Message: {status?.state?.waiting.message}</p>
+          </Overline>
+          <Prop
+            title="Reason"
+            margin={0}
+          >
+            {status?.state?.waiting.reason}
+          </Prop>
+          <Prop
+            title="Message"
+            margin={0}
+          >
+            {status?.state?.waiting.message}
+          </Prop>
         </div>
       )}
     </div>
