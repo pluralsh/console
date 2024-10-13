@@ -4737,11 +4737,28 @@ input PrAutomationAttributes {
 
   configuration: [PrConfigurationAttributes]
 
+  confirmation: PrConfirmationAttributes
+
   "users who can update this automation"
   writeBindings: [PolicyBindingAttributes]
 
   "users who can create prs with this automation"
   createBindings: [PolicyBindingAttributes]
+}
+
+"Additional details to verify all prerequisites are satisfied before generating this pr"
+input PrConfirmationAttributes {
+  "optional markdown text to present before pr create"
+  text: String
+
+  "itemized checklist to complete before pr create"
+  checklist: [PrChecklistAttributes]
+}
+
+"a checkbox item to render before creating a pr"
+input PrChecklistAttributes {
+  "the label for the checkbox"
+  label: String!
 }
 
 "the a configuration item for creating a new pr"
@@ -5098,6 +5115,9 @@ type PrAutomation {
 
   configuration: [PrConfiguration]
 
+  "optional confirmation block to express prerequisites for this PR"
+  confirmation: PrConfirmation
+
   "write policy for this pr automation, also propagates to the notifications list for any created PRs"
   writeBindings: [PolicyBinding]
 
@@ -5198,6 +5218,21 @@ type PrConfigurationCondition {
 
   "a fixed value to check against if its a binary operation"
   value: String
+}
+
+"Additional details to verify all prerequisites are satisfied before generating this pr"
+type PrConfirmation {
+  "optional markdown text to present before pr create"
+  text: String
+
+  "itemized checklist to complete before pr create"
+  checklist: [PrChecklist]
+}
+
+"a checkbox item to render before creating a pr"
+type PrChecklist {
+  "the label for the checkbox"
+  label: String!
 }
 
 "A reference to a pull request for your kubernetes related IaC"

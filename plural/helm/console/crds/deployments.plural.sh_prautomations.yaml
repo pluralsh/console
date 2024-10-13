@@ -207,6 +207,28 @@ spec:
                   - type
                   type: object
                 type: array
+              confirmation:
+                description: Additional details to verify all prerequisites are satisfied
+                  before generating this pr
+                properties:
+                  checklist:
+                    description: An itemized checklist to present to confirm each
+                      prerequisite is satisfied
+                    items:
+                      description: A checkbox to render to confirm a PR prerequisite
+                        is satisfied
+                      properties:
+                        label:
+                          description: The label of this checkbox
+                          type: string
+                      required:
+                      - label
+                      type: object
+                    type: array
+                  text:
+                    description: Markdown text to explain this pr
+                    type: string
+                type: object
               creates:
                 description: Specs for files to be templated and created
                 properties:

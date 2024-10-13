@@ -3438,6 +3438,8 @@ type PrAutomation struct {
 	// a darkmode icon url to use for this catalog
 	DarkIcon      *string            `json:"darkIcon,omitempty"`
 	Configuration []*PrConfiguration `json:"configuration,omitempty"`
+	// optional confirmation block to express prerequisites for this PR
+	Confirmation *PrConfirmation `json:"confirmation,omitempty"`
 	// write policy for this pr automation, also propagates to the notifications list for any created PRs
 	WriteBindings []*PolicyBinding `json:"writeBindings,omitempty"`
 	// users who can generate prs with this automation
@@ -3492,6 +3494,7 @@ type PrAutomationAttributes struct {
 	// a git repository to use for create mode prs
 	RepositoryID  *string                      `json:"repositoryId,omitempty"`
 	Configuration []*PrConfigurationAttributes `json:"configuration,omitempty"`
+	Confirmation  *PrConfirmationAttributes    `json:"confirmation,omitempty"`
 	// users who can update this automation
 	WriteBindings []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	// users who can create prs with this automation
@@ -3539,6 +3542,18 @@ type PrAutomationUpdateSpecAttributes struct {
 	MatchStrategy     *MatchStrategy                `json:"matchStrategy,omitempty"`
 }
 
+// a checkbox item to render before creating a pr
+type PrChecklist struct {
+	// the label for the checkbox
+	Label string `json:"label"`
+}
+
+// a checkbox item to render before creating a pr
+type PrChecklistAttributes struct {
+	// the label for the checkbox
+	Label string `json:"label"`
+}
+
 // the a configuration item for creating a new pr, used for templating the ultimate code changes made
 type PrConfiguration struct {
 	Type          ConfigurationType         `json:"type"`
@@ -3574,6 +3589,22 @@ type PrConfigurationCondition struct {
 	Field string `json:"field"`
 	// a fixed value to check against if its a binary operation
 	Value *string `json:"value,omitempty"`
+}
+
+// Additional details to verify all prerequisites are satisfied before generating this pr
+type PrConfirmation struct {
+	// optional markdown text to present before pr create
+	Text *string `json:"text,omitempty"`
+	// itemized checklist to complete before pr create
+	Checklist []*PrChecklist `json:"checklist,omitempty"`
+}
+
+// Additional details to verify all prerequisites are satisfied before generating this pr
+type PrConfirmationAttributes struct {
+	// optional markdown text to present before pr create
+	Text *string `json:"text,omitempty"`
+	// itemized checklist to complete before pr create
+	Checklist []*PrChecklistAttributes `json:"checklist,omitempty"`
 }
 
 // templated files used to add new files to a given pr

@@ -141,8 +141,21 @@ defmodule Console.GraphQl.Deployments.Git do
 
     field :configuration, list_of(:pr_configuration_attributes)
 
+    field :confirmation,  :pr_confirmation_attributes
+
     field :write_bindings,  list_of(:policy_binding_attributes), description: "users who can update this automation"
     field :create_bindings, list_of(:policy_binding_attributes), description: "users who can create prs with this automation"
+  end
+
+  @desc "Additional details to verify all prerequisites are satisfied before generating this pr"
+  input_object :pr_confirmation_attributes do
+    field :text,      :string, description: "optional markdown text to present before pr create"
+    field :checklist, list_of(:pr_checklist_attributes), description: "itemized checklist to complete before pr create"
+  end
+
+  @desc "a checkbox item to render before creating a pr"
+  input_object :pr_checklist_attributes do
+    field :label, non_null(:string), description: "the label for the checkbox"
   end
 
   @desc "the a configuration item for creating a new pr"
@@ -412,6 +425,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :dark_icon, :string, description: "a darkmode icon url to use for this catalog"
 
     field :configuration, list_of(:pr_configuration)
+    field :confirmation,  :pr_confirmation, description: "optional confirmation block to express prerequisites for this PR"
 
     field :write_bindings, list_of(:policy_binding),
       description: "write policy for this pr automation, also propagates to the notifications list for any created PRs",
@@ -499,6 +513,17 @@ defmodule Console.GraphQl.Deployments.Git do
     field :operation, non_null(:operation), description: "a boolean operation to apply"
     field :field,     non_null(:string), description: "the prior field to check"
     field :value,     :string, description: "a fixed value to check against if its a binary operation"
+  end
+
+  @desc "Additional details to verify all prerequisites are satisfied before generating this pr"
+  object :pr_confirmation do
+    field :text,      :string, description: "optional markdown text to present before pr create"
+    field :checklist, list_of(:pr_checklist), description: "itemized checklist to complete before pr create"
+  end
+
+  @desc "a checkbox item to render before creating a pr"
+  object :pr_checklist do
+    field :label, non_null(:string), description: "the label for the checkbox"
   end
 
   @desc "A reference to a pull request for your kubernetes related IaC"

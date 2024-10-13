@@ -86,6 +86,7 @@ func (in *PrAutomation) Attributes(clusterID, serviceID, connectionID, repositor
 		ConnectionID:  connectionID,
 		RepositoryID:  repositoryID,
 		ProjectID:     projectID,
+		Confirmation:  in.Spec.Confirmation.Attributes(),
 		Configuration: algorithms.Map(in.Spec.Configuration, func(c PrAutomationConfiguration) *console.PrConfigurationAttributes {
 			return c.Attributes()
 		}),
@@ -183,6 +184,10 @@ type PrAutomationSpec struct {
 	// Configuration self-service configuration for the UI wizard generating this PR
 	// +kubebuilder:validation:Optional
 	Configuration []PrAutomationConfiguration `json:"configuration,omitempty"`
+
+	// Additional details to verify all prerequisites are satisfied before generating this pr
+	// +kubebuilder:validation:Optional
+	Confirmation *PrAutomationConfirmation `json:"confirmation,omitempty"`
 
 	// Specs for files to be templated and created
 	// +kubebuilder:validation:Optional
@@ -338,6 +343,36 @@ func (in *RegexReplacement) Attributes() *console.RegexReplacementAttributes {
 		Replacement: in.Replacement,
 		File:        in.File,
 		Templated:   in.Templated,
+	}
+}
+
+// Additional details to verify all prerequisites are satisfied before generating this pr
+type PrAutomationConfirmation struct {
+	// Markdown text to explain this pr
+	// +kubebuilder:validation:Optional
+	Text *string `json:"text,omitempty"`
+
+	// An itemized checklist to present to confirm each prerequisite is satisfied
+	// +kubebuilder:validation:Optional
+	Checklist []PrConfirmationChecklist `json:"checklist,omitempty"`
+}
+
+// A checkbox to render to confirm a PR prerequisite is satisfied
+type PrConfirmationChecklist struct {
+	// The label of this checkbox
+	Label string `json:"label"`
+}
+
+func (in *PrAutomationConfirmation) Attributes() *console.PrConfirmationAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.PrConfirmationAttributes{
+		Text: in.Text,
+		Checklist: algorithms.Map(in.Checklist, func(item PrConfirmationChecklist) *console.PrChecklistAttributes {
+			return &console.PrChecklistAttributes{Label: item.Label}
+		}),
 	}
 }
 
