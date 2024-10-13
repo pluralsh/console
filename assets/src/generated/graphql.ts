@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -4120,6 +4120,8 @@ export type PrAutomation = {
   /** link to a cluster if this is to perform an upgrade */
   cluster?: Maybe<Cluster>;
   configuration?: Maybe<Array<Maybe<PrConfiguration>>>;
+  /** optional confirmation block to express prerequisites for this PR */
+  confirmation?: Maybe<PrConfirmation>;
   /** the scm connection to use for pr generation */
   connection?: Maybe<ScmConnection>;
   /** users who can generate prs with this automation */
@@ -4163,6 +4165,7 @@ export type PrAutomationAttributes = {
   /** link to a cluster if this is to perform an upgrade */
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   configuration?: InputMaybe<Array<InputMaybe<PrConfigurationAttributes>>>;
+  confirmation?: InputMaybe<PrConfirmationAttributes>;
   /** the scm connection to use for pr generation */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
   /** users who can create prs with this automation */
@@ -4234,6 +4237,19 @@ export type PrAutomationUpdateSpecAttributes = {
   yq?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** a checkbox item to render before creating a pr */
+export type PrChecklist = {
+  __typename?: 'PrChecklist';
+  /** the label for the checkbox */
+  label: Scalars['String']['output'];
+};
+
+/** a checkbox item to render before creating a pr */
+export type PrChecklistAttributes = {
+  /** the label for the checkbox */
+  label: Scalars['String']['input'];
+};
+
 /** the a configuration item for creating a new pr, used for templating the ultimate code changes made */
 export type PrConfiguration = {
   __typename?: 'PrConfiguration';
@@ -4271,6 +4287,23 @@ export type PrConfigurationCondition = {
   operation: Operation;
   /** a fixed value to check against if its a binary operation */
   value?: Maybe<Scalars['String']['output']>;
+};
+
+/** Additional details to verify all prerequisites are satisfied before generating this pr */
+export type PrConfirmation = {
+  __typename?: 'PrConfirmation';
+  /** itemized checklist to complete before pr create */
+  checklist?: Maybe<Array<Maybe<PrChecklist>>>;
+  /** optional markdown text to present before pr create */
+  text?: Maybe<Scalars['String']['output']>;
+};
+
+/** Additional details to verify all prerequisites are satisfied before generating this pr */
+export type PrConfirmationAttributes = {
+  /** itemized checklist to complete before pr create */
+  checklist?: InputMaybe<Array<InputMaybe<PrChecklistAttributes>>>;
+  /** optional markdown text to present before pr create */
+  text?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** templated files used to add new files to a given pr */

@@ -59,6 +59,13 @@ defmodule Console.Schema.PrAutomation do
       field :folders, {:array, :string}
     end
 
+    embeds_one :confirmation, Confirmation, on_replace: :update do
+      field :text, :string
+      embeds_many :checklist, Checklist, on_replace: :delete do
+        field :label, :string
+      end
+    end
+
     embeds_many :configuration, Configuration, on_replace: :delete
 
     belongs_to :cluster,    Cluster
@@ -105,6 +112,7 @@ defmodule Console.Schema.PrAutomation do
     |> cast_embed(:updates, with: &update_changeset/2)
     |> cast_embed(:creates, with: &create_changeset/2)
     |> cast_embed(:deletes, with: &delete_changeset/2)
+    |> cast_embed(:confirmation, with: &confirmation_changeset/2)
     |> cast_embed(:configuration)
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:create_bindings)
@@ -145,5 +153,17 @@ defmodule Console.Schema.PrAutomation do
 
   defp regex_replacement_cs(model, attrs) do
     cast(model, attrs, ~w(regex replacement file templated)a)
+  end
+
+  defp confirmation_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:text])
+    |> cast_embed(:checklist, with: &checklist_changeset/2)
+  end
+
+  defp checklist_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:label])
+    |> validate_required([:label])
   end
 end

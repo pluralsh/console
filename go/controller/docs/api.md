@@ -1758,6 +1758,23 @@ _Appears in:_
 | `json` _boolean_ | Whether the string value is supposed to be json-encoded |  | Optional: {} <br /> |
 
 
+#### PrAutomationConfirmation
+
+
+
+Additional details to verify all prerequisites are satisfied before generating this pr
+
+
+
+_Appears in:_
+- [PrAutomationSpec](#prautomationspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `text` _string_ | Markdown text to explain this pr |  | Optional: {} <br /> |
+| `checklist` _[PrConfirmationChecklist](#prconfirmationchecklist) array_ | An itemized checklist to present to confirm each prerequisite is satisfied |  | Optional: {} <br /> |
+
+
 #### PrAutomationCreateConfiguration
 
 
@@ -1822,6 +1839,7 @@ _Appears in:_
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef the project this automation belongs to. |  | Optional: {} <br /> |
 | `bindings` _[PrAutomationBindings](#prautomationbindings)_ | Bindings contain read and write policies of pr automation |  | Optional: {} <br /> |
 | `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration self-service configuration for the UI wizard generating this PR |  | Optional: {} <br /> |
+| `confirmation` _[PrAutomationConfirmation](#prautomationconfirmation)_ | Additional details to verify all prerequisites are satisfied before generating this pr |  | Optional: {} <br /> |
 | `creates` _[PrAutomationCreateConfiguration](#prautomationcreateconfiguration)_ | Specs for files to be templated and created |  | Optional: {} <br /> |
 | `updates` _[PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)_ | Spec for files to be updated, using regex replacement |  | Optional: {} <br /> |
 | `deletes` _[PrAutomationDeleteConfiguration](#prautomationdeleteconfiguration)_ | Spec for files and folders to be deleted |  | Optional: {} <br /> |
@@ -1900,6 +1918,22 @@ _Appears in:_
 | `regexes` _string array_ | The regexes to apply on each file |  | Optional: {} <br /> |
 | `replaceTemplate` _string_ | The template to use when replacing a regex |  | Optional: {} <br /> |
 | `yq` _string_ | (Unused so far) |  | Optional: {} <br /> |
+
+
+#### PrConfirmationChecklist
+
+
+
+A checkbox to render to confirm a PR prerequisite is satisfied
+
+
+
+_Appears in:_
+- [PrAutomationConfirmation](#prautomationconfirmation)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `label` _string_ | The label of this checkbox |  |  |
 
 
 #### Project
