@@ -6,6 +6,9 @@ fragment Deployment on Deployment {
     availableReplicas
     replicas
     unavailableReplicas
+    conditions {
+      ...StatusCondition
+    }
   }
   spec {
     replicas

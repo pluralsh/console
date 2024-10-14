@@ -13,6 +13,15 @@ type CatalogSpec struct {
 	Name *string `json:"name,omitempty"`
 	// +kubebuilder:validation:Required
 	Author string `json:"author"`
+
+	// An icon url to annotate this pr automation
+	// +kubebuilder:validation:Optional
+	Icon *string `json:"icon,omitempty"`
+
+	// An darkmode icon url to annotate this pr automation
+	// +kubebuilder:validation:Optional
+	DarkIcon *string `json:"darkIcon,omitempty"`
+
 	// Description is a description of this Catalog.
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Type:=string
@@ -89,6 +98,8 @@ func (c *Catalog) Attributes(projectID *string) *console.CatalogAttributes {
 		Author:      c.Spec.Author,
 		Description: c.Spec.Description,
 		Category:    c.Spec.Category,
+		Icon:        c.Spec.Icon,
+		DarkIcon:    c.Spec.DarkIcon,
 		ProjectID:   projectID,
 	}
 	if len(c.Spec.Tags) > 0 {
