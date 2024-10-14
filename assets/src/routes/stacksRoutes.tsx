@@ -48,7 +48,9 @@ import {
   STACK_RUNS_REPOSITORY_REL_PATH,
   STACK_RUNS_STATE_REL_PATH,
   STACK_STATE_REL_PATH,
+  STACK_VARS_REL_PATH,
 } from './stacksRoutesConsts'
+import StackVariables from '../components/stacks/variables/StackVariables.tsx'
 
 export const stacksRoutes = [
   <Route
@@ -83,6 +85,10 @@ export const stacksRoutes = [
     <Route
       path={STACK_OVERVIEW_REL_PATH}
       element={<StackOverview />}
+    />
+    <Route
+      path={STACK_VARS_REL_PATH}
+      element={<StackVariables />}
     />
     <Route
       path={STACK_ENV_REL_PATH}
