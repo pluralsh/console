@@ -9061,6 +9061,49 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_Revision) GetID() string
 	return t.ID
 }
 
+type GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs struct {
+	Name   string "json:\"name\" graphql:\"name\""
+	Value  string "json:\"value\" graphql:\"value\""
+	Secret *bool  "json:\"secret,omitempty\" graphql:\"secret\""
+}
+
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs{}
+	}
+	return t.Name
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs) GetValue() string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs{}
+	}
+	return t.Value
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs) GetSecret() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs{}
+	}
+	return t.Secret
+}
+
+type GetServiceDeploymentForAgent_ServiceDeployment_Imports struct {
+	ID      string                                                            "json:\"id\" graphql:\"id\""
+	Outputs []*GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
+}
+
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports) GetID() string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports) GetOutputs() []*GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports{}
+	}
+	return t.Outputs
+}
+
 type GetServiceDeploymentForAgent_ServiceDeployment struct {
 	ID            string                                                          "json:\"id\" graphql:\"id\""
 	Name          string                                                          "json:\"name\" graphql:\"name\""
@@ -9079,6 +9122,7 @@ type GetServiceDeploymentForAgent_ServiceDeployment struct {
 	SyncConfig    *GetServiceDeploymentForAgent_ServiceDeployment_SyncConfig      "json:\"syncConfig,omitempty\" graphql:\"syncConfig\""
 	Components    []*GetServiceDeploymentForAgent_ServiceDeployment_Components    "json:\"components,omitempty\" graphql:\"components\""
 	Revision      *GetServiceDeploymentForAgent_ServiceDeployment_Revision        "json:\"revision,omitempty\" graphql:\"revision\""
+	Imports       []*GetServiceDeploymentForAgent_ServiceDeployment_Imports       "json:\"imports,omitempty\" graphql:\"imports\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetID() string {
@@ -9182,6 +9226,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetRevision() *GetServi
 		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
 	}
 	return t.Revision
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment) GetImports() []*GetServiceDeploymentForAgent_ServiceDeployment_Imports {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment{}
+	}
+	return t.Imports
 }
 
 type GetServiceDeploymentByHandle_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -19476,6 +19526,14 @@ const GetServiceDeploymentForAgentDocument = `query GetServiceDeploymentForAgent
 		}
 		revision {
 			id
+		}
+		imports {
+			id
+			outputs {
+				name
+				value
+				secret
+			}
 		}
 	}
 }
