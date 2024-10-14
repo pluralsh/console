@@ -1,17 +1,20 @@
-import { ComponentProps, useState } from 'react'
 import {
   Button,
+  Card,
+  Checkbox,
   Code,
   FormField,
   GearTrainIcon,
   GitPullIcon,
   LinkoutIcon,
+  Markdown,
   Modal,
   Stepper,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
-import { Link } from 'react-router-dom'
 import Input2 from '@pluralsh/design-system/dist/components/Input2'
+import { ComponentProps, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 import {
   PrAutomationFragment,
@@ -21,12 +24,12 @@ import {
 
 import { PR_QUEUE_ABS_PATH } from 'routes/prRoutesConsts'
 
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { GqlError } from 'components/utils/Alert'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { Body1BoldP, Body1P } from 'components/utils/typography/Text'
 
-import { validateAndFilterConfig } from './prConfigurationUtils'
 import { PrConfigurationFields } from './PrConfigurationFields'
+import { validateAndFilterConfig } from './prConfigurationUtils'
 
 function CreateSuccess({ pr }: { pr: PullRequestFragment }) {
   const theme = useTheme()
@@ -49,13 +52,10 @@ const steps = [
 
 function CreatePrModalBase({
   prAutomation,
-  // refetch,
   open,
   onClose,
 }: {
   prAutomation: PrAutomationFragment
-
-  refetch: Nullable<() => void>
   open: boolean
   onClose: Nullable<() => void>
 }) {
@@ -82,13 +82,25 @@ function CreatePrModalBase({
   })
   const { isValid: configIsValid, values: filteredConfig } =
     validateAndFilterConfig(configuration, configVals)
-  const allowSubmit = branch && configIsValid
 
   const configJson = JSON.stringify(
     Object.fromEntries(filteredConfig.map((cfg) => [cfg.name, cfg.value])),
     undefined,
     2
   )
+
+  const { confirmation } = prAutomation
+  const [checkedItems, setCheckedItems] = useState<Record<string, boolean>>(
+    confirmation?.checklist
+      ?.filter((item): item is { label: string } => !!item?.label)
+      .reduce((map, item) => {
+        map[item.label] = false
+        return map
+      }, {}) ?? {}
+  )
+  const allChecked = Object.values(checkedItems).every((v) => v)
+
+  const allowSubmit = branch && configIsValid && allChecked
 
   return (
     <Modal
@@ -98,7 +110,6 @@ function CreatePrModalBase({
         switch (currentStep) {
           case 'config':
             if (configIsValid) setCurrentStep('review')
-
             return
           case 'review':
             mutation({
@@ -250,6 +261,17 @@ function CreatePrModalBase({
               gap: theme.spacing.medium,
             }}
           >
+            {confirmation?.text && (
+              <Card
+                css={{
+                  padding: theme.spacing.medium,
+                  '& :last-child': { margin: 0 },
+                }}
+              >
+                <Markdown text={confirmation.text} />
+              </Card>
+            )}
+
             <FormField
               label="Configuration review"
               name="configuration"
@@ -281,6 +303,27 @@ function CreatePrModalBase({
                 onChange={(e) => setBranch(e.target.value)}
               />
             </FormField>
+            {confirmation?.checklist && (
+              <FormField
+                label="Ensure the following are done before creating this PR:"
+                name="confirmation"
+              >
+                {Object.entries(checkedItems).map(([label, checked]) => (
+                  <Checkbox
+                    key={label}
+                    checked={checked}
+                    onChange={(e) =>
+                      setCheckedItems({
+                        ...checkedItems,
+                        [label]: e.target.checked,
+                      })
+                    }
+                  >
+                    {label}
+                  </Checkbox>
+                ))}
+              </FormField>
+            )}
             {error && <GqlError error={error} />}
           </div>
         )}

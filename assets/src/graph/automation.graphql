@@ -29,6 +29,9 @@ fragment PrAutomation on PrAutomation {
   configuration {
     ...PrConfiguration
   }
+  confirmation {
+    ...PrConfirmation
+  }
 }
 
 fragment PrConfiguration on PrConfiguration {
@@ -45,6 +48,13 @@ fragment PrConfiguration on PrConfiguration {
   optional
   placeholder
   type
+}
+
+fragment PrConfirmation on PrConfirmation {
+  checklist {
+    label
+  }
+  text
 }
 
 query PrAutomations($first: Int = 100, $after: String) {
