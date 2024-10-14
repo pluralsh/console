@@ -39,7 +39,11 @@ const columns = [
       // eslint-disable-next-line react-hooks/rules-of-hooks
       const theme = useTheme()
 
-      return <span css={{ ...theme.partials.text.code }}>{getValue()}</span>
+      return (
+        <span css={{ ...theme.partials.text.code }}>
+          {JSON.stringify(getValue())}
+        </span>
+      )
     },
   }),
 ]
