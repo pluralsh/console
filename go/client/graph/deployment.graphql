@@ -171,6 +171,10 @@ query GetServiceDeploymentForAgent($id: ID!) {
         }
         imports {
             id
+            stack {
+                id
+                name
+            }
             outputs {
                 name
                 value

@@ -9061,6 +9061,24 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_Revision) GetID() string
 	return t.ID
 }
 
+type GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack struct {
+	ID   *string "json:\"id,omitempty\" graphql:\"id\""
+	Name string  "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack) GetID() *string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack{}
+	}
+	return t.ID
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack) GetName() string {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack{}
+	}
+	return t.Name
+}
+
 type GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs struct {
 	Name   string "json:\"name\" graphql:\"name\""
 	Value  string "json:\"value\" graphql:\"value\""
@@ -9088,6 +9106,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs) GetSecr
 
 type GetServiceDeploymentForAgent_ServiceDeployment_Imports struct {
 	ID      string                                                            "json:\"id\" graphql:\"id\""
+	Stack   *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack     "json:\"stack,omitempty\" graphql:\"stack\""
 	Outputs []*GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs "json:\"outputs,omitempty\" graphql:\"outputs\""
 }
 
@@ -9096,6 +9115,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports) GetID() string 
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports{}
 	}
 	return t.ID
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports) GetStack() *GetServiceDeploymentForAgent_ServiceDeployment_Imports_Stack {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Imports{}
+	}
+	return t.Stack
 }
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_Imports) GetOutputs() []*GetServiceDeploymentForAgent_ServiceDeployment_Imports_Outputs {
 	if t == nil {
@@ -19529,6 +19554,10 @@ const GetServiceDeploymentForAgentDocument = `query GetServiceDeploymentForAgent
 		}
 		imports {
 			id
+			stack {
+				id
+				name
+			}
 			outputs {
 				name
 				value
