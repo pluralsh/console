@@ -169,6 +169,19 @@ query GetServiceDeploymentForAgent($id: ID!) {
         revision {
             id
         }
+        imports {
+            id
+            stack {
+                id
+                name
+            }
+            outputs {
+                name
+                value
+                secret
+            }
+
+        }
     }
 }
 
