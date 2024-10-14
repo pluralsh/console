@@ -17,6 +17,8 @@ export const STACK_STATE_REL_PATH = `state`
 
 export const STACK_OUTPUT_REL_PATH = `output`
 
+export const STACK_VARS_REL_PATH = `vars`
+
 export const STACK_ENV_REL_PATH = `env`
 
 export const STACK_FILES_REL_PATH = `files`
