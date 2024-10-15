@@ -42,7 +42,7 @@ const statusToDisplay = {
   [Readiness.Completed]: 'Complete',
 } as const satisfies Record<ReadinessT, string>
 
-const stateToDisplay = {
+export const stateToDisplay = {
   [ComponentState.Running]: 'Running',
   [ComponentState.Pending]: 'In progress',
   [ComponentState.Failed]: 'Failed',

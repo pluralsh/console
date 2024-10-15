@@ -1,13 +1,14 @@
 import {
   type Breadcrumb,
   Callout,
+  Flex,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { type Key } from '@react-types/shared'
+import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-
-import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
 
 import {
   SERVICE_PARAM_CLUSTER_ID,
@@ -17,19 +18,22 @@ import {
 } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 
+import {
+  ComponentStateFilter,
+  useComponentKindSelect,
+} from 'components/apps/app/components/Components'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { useComponentKindSelect } from 'components/apps/app/components/Components'
 
 import { ComponentList } from 'components/apps/app/components/ComponentList'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
+import { countDeprecations } from './deprecationUtils'
+import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
-import { countDeprecations } from './deprecationUtils'
-import { ServiceDeprecationsModal } from './ServiceDeprecationsModal'
 
 export const getServiceComponentsBreadcrumbs = ({
   service,
@@ -51,6 +55,7 @@ export default function ServiceComponents() {
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const [showDeprecations, setShowDeprecations] = useState(false)
   const outletContext = useServiceContext()
+  const [selectedStates, setSelectedStates] = useState<Set<Key>>(new Set())
 
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
@@ -89,7 +94,15 @@ export default function ServiceComponents() {
     <ScrollablePage
       scrollable
       heading="Components"
-      headingContent={kindSelector}
+      headingContent={
+        <Flex gap="medium">
+          {kindSelector}
+          <ComponentStateFilter
+            selectedStates={selectedStates}
+            setSelectedStates={setSelectedStates}
+          />
+        </Flex>
+      }
     >
       <ModalMountTransition open={showDeprecations}>
         <ServiceDeprecationsModal
@@ -134,6 +147,7 @@ export default function ServiceComponents() {
           }
           components={components}
           selectedKinds={selectedKinds.size > 0 ? selectedKinds : allKinds}
+          selectedStates={selectedStates}
         />
       </div>
     </ScrollablePage>

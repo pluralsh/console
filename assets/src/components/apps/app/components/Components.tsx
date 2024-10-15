@@ -7,9 +7,12 @@ import {
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo, useState } from 'react'
 
+import { type Key } from '@react-types/shared'
 import styled, { useTheme } from 'styled-components'
 
-import { ComponentIcon } from './misc'
+import { ComponentIcon, ComponentStateChip } from './misc'
+import { ComponentState } from 'generated/graphql'
+import { upperFirst } from 'lodash'
 
 const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
@@ -33,7 +36,7 @@ function FilterFooter({ allSelected = true, ...props }) {
   )
 }
 
-const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
+export const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
   ({ $width }) => ({
     width: $width || 220,
     '&, *': {
@@ -186,6 +189,51 @@ function ComponentKindSelect({
           key={kind}
           leftContent={<ComponentIcon kind={kind} />}
           label={kind}
+        />
+      ))}
+    </Select>
+  )
+}
+
+export function ComponentStateFilter({
+  selectedStates,
+  setSelectedStates,
+}: {
+  selectedStates: Set<Key>
+  setSelectedStates: (states: Set<Key>) => void
+}) {
+  const allSelected =
+    selectedStates.size >= Object.values(ComponentState).length
+  const triggerLabel = allSelected
+    ? 'All states'
+    : selectedStates.size === 0
+      ? 'Select states'
+      : Array.from(selectedStates)
+          .map((s) => upperFirst((s as string).toLowerCase()))
+          .join(', ')
+
+  return (
+    <Select
+      selectionMode="multiple"
+      selectedKeys={selectedStates}
+      onSelectionChange={setSelectedStates}
+      label="Select states"
+      triggerButton={<FilterTrigger>{triggerLabel}</FilterTrigger>}
+      dropdownFooterFixed={
+        <FilterFooter
+          allSelected={allSelected}
+          onClick={() =>
+            setSelectedStates(
+              new Set(allSelected ? undefined : Object.values(ComponentState))
+            )
+          }
+        />
+      }
+    >
+      {Object.values(ComponentState).map((state) => (
+        <ListBoxItem
+          key={state}
+          label={<ComponentStateChip state={state} />}
         />
       ))}
     </Select>
