@@ -1,11 +1,11 @@
 {
-    "text": "❌ Pull request <%= @pr.status %>",
+    "text": "<%= Console.Schema.PullRequest.icon(@pr) %> Pull request <%= @pr.status %>",
 	"blocks": [
          {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "❌ *Pull request <%= @pr.status %>:*\n<%= @pr.title %>"
+                "text": "<%= Console.Schema.PullRequest.icon(@pr) %> *Pull request <%= @pr.status %>:*\n<%= @pr.title %>"
             }
         },
 		{

@@ -127,6 +127,21 @@ type AgentMigrationAttributes struct {
 	Configuration *string `json:"configuration,omitempty"`
 }
 
+// Settings for configuring access to common LLM providers
+type AiSettings struct {
+	Enabled   *bool              `json:"enabled,omitempty"`
+	Provider  *AiProvider        `json:"provider,omitempty"`
+	Openai    *OpenaiSettings    `json:"openai,omitempty"`
+	Anthropic *AnthropicSettings `json:"anthropic,omitempty"`
+}
+
+// Anthropic connection information
+type AnthropicSettings struct {
+	AccessToken *string `json:"accessToken,omitempty"`
+	// the anthropic model version to use
+	Model *string `json:"model,omitempty"`
+}
+
 // a representation of a kubernetes api deprecation
 type APIDeprecation struct {
 	// the kubernetes version the deprecation was posted
@@ -1428,6 +1443,8 @@ type DeploymentSettings struct {
 	Stacks *StackSettings `json:"stacks,omitempty"`
 	// smtp server configuration for email notifications
 	SMTP *SMTPSettings `json:"smtp,omitempty"`
+	// settings for LLM provider clients
+	Ai *AiSettings `json:"ai,omitempty"`
 	// The console's expected agent version
 	AgentVsn string `json:"agentVsn"`
 	// the latest known k8s version
@@ -2849,6 +2866,13 @@ type OidcProviderAttributes struct {
 	Description *string         `json:"description,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
+}
+
+// OpenAI connection information
+type OpenaiSettings struct {
+	AccessToken *string `json:"accessToken,omitempty"`
+	// the openai model version to use
+	Model *string `json:"model,omitempty"`
 }
 
 type OverlayUpdate struct {
@@ -5432,6 +5456,47 @@ type WireguardPeerSpec struct {
 type WireguardPeerStatus struct {
 	Ready      *bool              `json:"ready,omitempty"`
 	Conditions []*StatusCondition `json:"conditions,omitempty"`
+}
+
+type AiProvider string
+
+const (
+	AiProviderOpenai    AiProvider = "OPENAI"
+	AiProviderAnthropic AiProvider = "ANTHROPIC"
+)
+
+var AllAiProvider = []AiProvider{
+	AiProviderOpenai,
+	AiProviderAnthropic,
+}
+
+func (e AiProvider) IsValid() bool {
+	switch e {
+	case AiProviderOpenai, AiProviderAnthropic:
+		return true
+	}
+	return false
+}
+
+func (e AiProvider) String() string {
+	return string(e)
+}
+
+func (e *AiProvider) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AiProvider(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AiProvider", str)
+	}
+	return nil
+}
+
+func (e AiProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type AuditAction string

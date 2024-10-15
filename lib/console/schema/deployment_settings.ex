@@ -3,6 +3,8 @@ defmodule Console.Schema.DeploymentSettings do
   alias Console.Schema.{PolicyBinding, GitRepository, Gates.JobSpec}
   alias Piazza.Ecto.EncryptedString
 
+  defenum AIProvider, openai: 0, anthropic: 1
+
   defmodule Connection do
     use Piazza.Ecto.Schema
 
@@ -52,6 +54,21 @@ defmodule Console.Schema.DeploymentSettings do
       field :ssl,      :boolean
     end
 
+    embeds_one :ai, AI, on_replace: :update do
+      field :enabled, :boolean, default: false
+      field :provider, AIProvider, default: :openai
+
+      embeds_one :openai, OpenAi, on_replace: :update do
+        field :access_key, EncryptedString
+        field :model,      :string
+      end
+
+      embeds_one :anthropic, Anthropic, on_replace: :update do
+        field :access_key, EncryptedString
+        field :model,      :string
+      end
+    end
+
     belongs_to :artifact_repository, GitRepository
     belongs_to :deployer_repository, GitRepository
 
@@ -90,6 +107,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_assoc(:create_bindings)
     |> cast_embed(:prometheus_connection)
     |> cast_embed(:loki_connection)
+    |> cast_embed(:ai, with: &ai_changeset/2)
     |> cast_embed(:smtp, with: &smtp_changeset/2)
     |> cast_embed(:stacks, with: &stacks_changeset/2)
     |> change_markers(agent_helm_values: :helm_changed, agent_version: :version_changed)
@@ -109,5 +127,17 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, @smtp)
     |> validate_required(@smtp)
+  end
+
+  defp ai_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(enabled provider openai anthropic)a)
+    |> cast_embed(:openai, with: &ai_api_changeset/2)
+    |> cast_embed(:anthropic, with: &ai_api_changeset/2)
+  end
+
+  defp ai_api_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(access_key model)a)
   end
 end

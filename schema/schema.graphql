@@ -956,6 +956,11 @@ type OidcProvider {
   clientSecret: String!
 }
 
+enum AiProvider {
+  OPENAI
+  ANTHROPIC
+}
+
 input ProjectAttributes {
   name: String!
   description: String
@@ -1064,6 +1069,9 @@ type DeploymentSettings {
   "smtp server configuration for email notifications"
   smtp: SmtpSettings
 
+  "settings for LLM provider clients"
+  ai: AiSettings
+
   "The console's expected agent version"
   agentVsn: String!
 
@@ -1116,6 +1124,30 @@ type SmtpSettings {
   sender: String!
   user: String!
   ssl: Boolean!
+}
+
+"Settings for configuring access to common LLM providers"
+type AiSettings {
+  enabled: Boolean
+  provider: AiProvider
+  openai: OpenaiSettings
+  anthropic: AnthropicSettings
+}
+
+"OpenAI connection information"
+type OpenaiSettings {
+  accessToken: String
+
+  "the openai model version to use"
+  model: String
+}
+
+"Anthropic connection information"
+type AnthropicSettings {
+  accessToken: String
+
+  "the anthropic model version to use"
+  model: String
 }
 
 type ProjectConnection {

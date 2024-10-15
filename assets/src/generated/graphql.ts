@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -173,6 +173,28 @@ export type AgentMigrationAttributes = {
   configuration?: InputMaybe<Scalars['Json']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   ref?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum AiProvider {
+  Anthropic = 'ANTHROPIC',
+  Openai = 'OPENAI'
+}
+
+/** Settings for configuring access to common LLM providers */
+export type AiSettings = {
+  __typename?: 'AiSettings';
+  anthropic?: Maybe<AnthropicSettings>;
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  openai?: Maybe<OpenaiSettings>;
+  provider?: Maybe<AiProvider>;
+};
+
+/** Anthropic connection information */
+export type AnthropicSettings = {
+  __typename?: 'AnthropicSettings';
+  accessToken?: Maybe<Scalars['String']['output']>;
+  /** the anthropic model version to use */
+  model?: Maybe<Scalars['String']['output']>;
 };
 
 /** a representation of a kubernetes api deprecation */
@@ -1753,6 +1775,8 @@ export type DeploymentSettings = {
   agentHelmValues?: Maybe<Scalars['String']['output']>;
   /** The console's expected agent version */
   agentVsn: Scalars['String']['output'];
+  /** settings for LLM provider clients */
+  ai?: Maybe<AiSettings>;
   /** the repo to fetch CAPI manifests from, for both providers and clusters */
   artifactRepository?: Maybe<GitRepository>;
   /** your compliant k8s version */
@@ -3449,6 +3473,14 @@ export type OidcProviderAttributes = {
 export enum OidcProviderType {
   Plural = 'PLURAL'
 }
+
+/** OpenAI connection information */
+export type OpenaiSettings = {
+  __typename?: 'OpenaiSettings';
+  accessToken?: Maybe<Scalars['String']['output']>;
+  /** the openai model version to use */
+  model?: Maybe<Scalars['String']['output']>;
+};
 
 export enum Operation {
   Eq = 'EQ',
