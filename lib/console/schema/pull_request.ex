@@ -30,6 +30,10 @@ defmodule Console.Schema.PullRequest do
     timestamps()
   end
 
+  def icon(%__MODULE__{status: :merged}), do: "✔"
+  def icon(%__MODULE__{status: :closed}), do: "❌"
+  def icon(_), do: ""
+
   def open(query \\ __MODULE__) do
     from(pr in query, where: pr.status == ^:open)
   end

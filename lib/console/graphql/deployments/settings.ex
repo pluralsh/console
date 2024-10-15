@@ -3,6 +3,8 @@ defmodule Console.GraphQl.Deployments.Settings do
   alias Console.Deployments.Settings
   alias Console.GraphQl.Resolvers.{Deployments}
 
+  ecto_enum :ai_provider, Console.Schema.DeploymentSettings.AIProvider
+
   input_object :project_attributes do
     field :name,          non_null(:string)
     field :description,   :string
@@ -35,6 +37,23 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :stack_settings_attributes do
     field :job_spec,      :gate_job_attributes
     field :connection_id, :id
+  end
+
+  input_object :ai_settings_attributes do
+    field :enabled,   :boolean
+    field :provider,  :ai_provider
+    field :openai,    :openai_settings_attributes
+    field :anthropic, :anthropic_settings_attributes
+  end
+
+  input_object :openai_settings_attributes do
+    field :access_token, :string
+    field :model,        :string
+  end
+
+  input_object :anthropic_settings_attributes do
+    field :access_token, :string
+    field :model,        :string
   end
 
   input_object :smtp_settings_attributes do
@@ -70,6 +89,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :agent_helm_values,     :string, description: "custom helm values to apply to all agents (useful for things like adding customary annotations/labels)"
     field :stacks,                :stack_settings, description: "global settings for stack configuration"
     field :smtp,                  :smtp_settings, description: "smtp server configuration for email notifications"
+    field :ai,                    :ai_settings, description: "settings for LLM provider clients"
 
     field :agent_vsn, non_null(:string), description: "The console's expected agent version",
       resolve: fn _, _, _ -> {:ok, Settings.agent_vsn()} end
@@ -109,6 +129,26 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :sender,   non_null(:string)
     field :user,     non_null(:string)
     field :ssl,      non_null(:boolean)
+  end
+
+  @desc "Settings for configuring access to common LLM providers"
+  object :ai_settings do
+    field :enabled,   :boolean
+    field :provider,  :ai_provider
+    field :openai,    :openai_settings
+    field :anthropic, :anthropic_settings
+  end
+
+  @desc "OpenAI connection information"
+  object :openai_settings do
+    field :access_token, :string
+    field :model,        :string, description: "the openai model version to use"
+  end
+
+  @desc "Anthropic connection information"
+  object :anthropic_settings do
+    field :access_token, :string
+    field :model,        :string, description: "the anthropic model version to use"
   end
 
   connection node_type: :project
