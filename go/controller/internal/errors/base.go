@@ -17,10 +17,11 @@ func (k KnownError) Error() string {
 }
 
 const (
-	ErrorNotFound       KnownError = "could not find resource"
-	ErrExpected         KnownError = "this is a transient, expected error"
-	ErrRetriable        KnownError = "Still waiting on read/write bindings, requeueing until they're available"
-	ErrDeleteRepository            = "could not delete repository"
+	ErrorNotFound             KnownError = "could not find resource"
+	ErrorNotFoundOIDCProvider KnownError = "the resource you requested was not found"
+	ErrExpected               KnownError = "this is a transient, expected error"
+	ErrRetriable              KnownError = "Still waiting on read/write bindings, requeueing until they're available"
+	ErrDeleteRepository                  = "could not delete repository"
 )
 
 type wrappedErrorResponse struct {
@@ -58,7 +59,15 @@ func IsNotFound(err error) bool {
 		return false
 	}
 
-	return newAPIError(errorResponse).Has(ErrorNotFound)
+	return newAPIError(errorResponse).Has(ErrorNotFound) || newAPIError(errorResponse).Has(ErrorNotFoundOIDCProvider)
+}
+
+func IgnoreNotFound(err error) error {
+	if IsNotFound(err) {
+		return nil
+	}
+
+	return err
 }
 
 func IsDeleteRepository(err error) bool {
