@@ -38,6 +38,7 @@ fragment Stack on InfrastructureStack {
   paused
   status
   approval
+  variables
   environment {
     name
     value

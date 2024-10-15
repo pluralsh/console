@@ -50,6 +50,7 @@ import {
   STACK_RUNS_REL_PATH,
   STACK_STATE_REL_PATH,
   getStacksAbsPath,
+  STACK_VARS_REL_PATH,
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
@@ -110,6 +111,7 @@ const getDirectory = (type: Nullable<StackType>) => [
     label: 'Output',
     enabled: type === StackType.Terraform,
   },
+  { path: STACK_VARS_REL_PATH, label: 'Variables', enabled: true },
   { path: STACK_ENV_REL_PATH, label: 'Environment', enabled: true },
   { path: STACK_FILES_REL_PATH, label: 'Files', enabled: true },
   { path: STACK_JOB_REL_PATH, label: 'Job', enabled: true },
