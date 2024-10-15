@@ -245,7 +245,6 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         />
         <CreatePrModal
           prAutomation={prAutomation}
-          refetch={refetch}
           open={menuKey === MenuItemKey.CreatePr}
           onClose={() => setMenuKey('')}
         />
