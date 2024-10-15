@@ -88,6 +88,6 @@ type OIDCProviderSpec struct {
 	// - 'clientId'
 	// - 'clientSecret'
 	//
-	// +kubebuilder:validation:Optional
-	CredentialsSecretRef *corev1.LocalObjectReference `json:"credentialsSecretRef,omitempty"`
+	// +kubebuilder:validation:Required
+	CredentialsSecretRef corev1.LocalObjectReference `json:"credentialsSecretRef"`
 }

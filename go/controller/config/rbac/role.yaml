@@ -8,8 +8,17 @@ rules:
   - ""
   resources:
   - configmaps
+  verbs:
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
+  - ""
+  resources:
   - secrets
   verbs:
+  - create
   - get
   - list
   - patch
@@ -33,6 +42,7 @@ rules:
   - notificationsinks
   - observabilityproviders
   - observers
+  - oidcproviders
   - pipelinecontexts
   - pipelines
   - prautomations
@@ -70,6 +80,7 @@ rules:
   - notificationsinks/finalizers
   - observabilityproviders/finalizers
   - observers/finalizers
+  - oidcproviders/finalizers
   - pipelinecontexts/finalizers
   - pipelines/finalizers
   - prautomations/finalizers
@@ -101,6 +112,7 @@ rules:
   - notificationsinks/status
   - observabilityproviders/status
   - observers/status
+  - oidcproviders/status
   - pipelinecontexts/status
   - pipelines/status
   - prautomations/status

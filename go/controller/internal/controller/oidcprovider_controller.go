@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -17,6 +18,7 @@ import (
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
 	"github.com/pluralsh/console/go/controller/internal/credentials"
+	"github.com/pluralsh/console/go/controller/internal/errors"
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
@@ -40,6 +42,15 @@ func (in *OIDCProviderReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(in)
 }
 
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=oidcproviders,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=oidcproviders/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=deployments.plural.sh,resources=oidcproviders/finalizers,verbs=update
+//+kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;patch;create
+
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the resource closer to the desired state.
+// For more details, check Reconcile and its Result here:
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (in *OIDCProviderReconciler) Reconcile(ctx context.Context, req reconcile.Request) (_ reconcile.Result, reterr error) {
 	logger := log.FromContext(ctx)
 
@@ -127,21 +138,17 @@ func (in *OIDCProviderReconciler) addOrRemoveFinalizer(ctx context.Context, oidc
 
 		if exists {
 			logger.Info("deleting OIDCProvider")
-			if err := in.ConsoleClient.DeleteOIDCProvider(ctx, oidcProvider.Status.GetID(), console.OidcProviderTypePlural); err != nil {
+			if err := in.ConsoleClient.DeleteOIDCProvider(ctx, oidcProvider.Status.GetID(), console.OidcProviderTypePlural); errors.IgnoreNotFound(err) != nil {
 				// if it fails to delete the external dependency here, return with error
 				// so that it can be retried.
 				utils.MarkCondition(oidcProvider.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 				return &ctrl.Result{}, err
 			}
 
-			// If deletion process started requeue so that we can make sure oidc provider
-			// has been deleted from Console API before removing the finalizer.
-			return &requeue, nil
+			// Stop reconciliation as the item is being deleted
+			controllerutil.RemoveFinalizer(oidcProvider, OIDCProviderFinalizer)
+			return &ctrl.Result{}, nil
 		}
-
-		// Stop reconciliation as the item is being deleted
-		controllerutil.RemoveFinalizer(oidcProvider, OIDCProviderFinalizer)
-		return &ctrl.Result{}, nil
 	}
 
 	return nil, nil
@@ -157,13 +164,15 @@ func (in *OIDCProviderReconciler) sync(ctx context.Context, oidcProvider *v1alph
 	// Update only if OIDCProvider has changed
 	if changed && exists {
 		logger.Info("updating OIDCProvider")
-		return in.ConsoleClient.UpdateOIDCProvider(ctx, oidcProvider.Status.GetID(), providerType, oidcProvider.Attributes())
+		response, err := in.ConsoleClient.UpdateOIDCProvider(ctx, oidcProvider.Status.GetID(), providerType, oidcProvider.Attributes())
+		return in.backfillCredentialsRefSecret(ctx, oidcProvider, response, err)
 	}
 
 	// Create the OIDCProvider in Console API if it doesn't exist
 	if !exists {
 		logger.Info("creating OIDCProvider")
-		return in.ConsoleClient.CreateOIDCProvider(ctx, providerType, oidcProvider.Attributes())
+		response, err := in.ConsoleClient.CreateOIDCProvider(ctx, providerType, oidcProvider.Attributes())
+		return in.backfillCredentialsRefSecret(ctx, oidcProvider, response, err)
 	}
 
 	// Return a mocked object with ID as it will be used to sync the status.
@@ -174,4 +183,57 @@ func (in *OIDCProviderReconciler) sync(ctx context.Context, oidcProvider *v1alph
 
 func (in *OIDCProviderReconciler) isAlreadyExists(oidcProvider *v1alpha1.OIDCProvider) bool {
 	return oidcProvider.Status.HasID()
+}
+
+func (in *OIDCProviderReconciler) isSecretExists(ctx context.Context, name, namespace string) (bool, error) {
+	secret := &corev1.Secret{}
+	err := client.IgnoreNotFound(in.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, secret))
+	return err == nil, err
+}
+
+func (in *OIDCProviderReconciler) backfillCredentialsRefSecret(
+	ctx context.Context,
+	oidcProvider *v1alpha1.OIDCProvider,
+	oidcFragment *console.OIDCProviderFragment,
+	err error,
+) (*console.OIDCProviderFragment, error) {
+	if err != nil {
+		return nil, err
+	}
+
+	secret := &corev1.Secret{}
+	err = in.Get(ctx, client.ObjectKey{
+		Name:      oidcProvider.Spec.CredentialsSecretRef.Name,
+		Namespace: oidcProvider.GetNamespace(),
+	}, secret)
+	if client.IgnoreNotFound(err) != nil {
+		return nil, err
+	}
+
+	stringData := map[string]string{
+		"clientId":     oidcFragment.ClientID,
+		"clientSecret": oidcFragment.ClientSecret,
+	}
+
+	// Not found
+	if err != nil {
+		secret = &corev1.Secret{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      oidcProvider.Spec.CredentialsSecretRef.Name,
+				Namespace: oidcProvider.GetNamespace(),
+			},
+			StringData: stringData,
+		}
+
+		if err = in.Create(ctx, secret); err != nil {
+			return nil, err
+		}
+	} else {
+		secret.StringData = stringData
+		if err = in.Update(ctx, secret); err != nil {
+			return nil, err
+		}
+	}
+
+	return oidcFragment, utils.TryAddOwnerRef(ctx, in.Client, oidcProvider, secret, in.Scheme)
 }

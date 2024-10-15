@@ -1276,7 +1276,7 @@ _Appears in:_
 | `name` _string_ | Name of this OIDCProvider. If not provided OIDCProvider's own name<br />from OIDCProvider.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `description` _string_ | Description can be used to describe this OIDCProvider. |  | Optional: {} <br /> |
 | `redirectUris` _string array_ | RedirectUris is a list of custom run steps that will be executed as<br />part of the stack run. |  | Optional: {} <br /> |
-| `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.<br />It will be created once OIDCProvider is created in the Console API.<br />Secret will contain 2 keys:<br />- 'clientId'<br />- 'clientSecret' |  | Optional: {} <br /> |
+| `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.<br />It will be created once OIDCProvider is created in the Console API.<br />Secret will contain 2 keys:<br />- 'clientId'<br />- 'clientSecret' |  | Required: {} <br /> |
 
 
 #### ObservabilityProvider
