@@ -185,12 +185,6 @@ func (in *OIDCProviderReconciler) isAlreadyExists(oidcProvider *v1alpha1.OIDCPro
 	return oidcProvider.Status.HasID()
 }
 
-func (in *OIDCProviderReconciler) isSecretExists(ctx context.Context, name, namespace string) (bool, error) {
-	secret := &corev1.Secret{}
-	err := client.IgnoreNotFound(in.Get(ctx, client.ObjectKey{Name: name, Namespace: namespace}, secret))
-	return err == nil, err
-}
-
 func (in *OIDCProviderReconciler) backfillCredentialsRefSecret(
 	ctx context.Context,
 	oidcProvider *v1alpha1.OIDCProvider,
@@ -201,39 +195,43 @@ func (in *OIDCProviderReconciler) backfillCredentialsRefSecret(
 		return nil, err
 	}
 
-	secret := &corev1.Secret{}
-	err = in.Get(ctx, client.ObjectKey{
-		Name:      oidcProvider.Spec.CredentialsSecretRef.Name,
-		Namespace: oidcProvider.GetNamespace(),
-	}, secret)
-	if client.IgnoreNotFound(err) != nil {
-		return nil, err
-	}
-
 	stringData := map[string]string{
 		"clientId":     oidcFragment.ClientID,
 		"clientSecret": oidcFragment.ClientSecret,
 	}
 
-	// Not found
+	secret, err := in.createOrUpdateSecret(ctx, oidcProvider.Spec.CredentialsSecretRef.Name, oidcProvider.GetNamespace(), stringData)
 	if err != nil {
-		secret = &corev1.Secret{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      oidcProvider.Spec.CredentialsSecretRef.Name,
-				Namespace: oidcProvider.GetNamespace(),
-			},
-			StringData: stringData,
-		}
-
-		if err = in.Create(ctx, secret); err != nil {
-			return nil, err
-		}
-	} else {
-		secret.StringData = stringData
-		if err = in.Update(ctx, secret); err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	return oidcFragment, utils.TryAddOwnerRef(ctx, in.Client, oidcProvider, secret, in.Scheme)
+}
+
+func (in *OIDCProviderReconciler) createOrUpdateSecret(
+	ctx context.Context,
+	name, namespace string,
+	data map[string]string,
+) (*corev1.Secret, error) {
+	secret := &corev1.Secret{}
+	err := in.Get(ctx, client.ObjectKey{
+		Name:      name,
+		Namespace: namespace,
+	}, secret)
+	if client.IgnoreNotFound(err) != nil {
+		return nil, err
+	}
+
+	secret.Name = name
+	secret.Namespace = namespace
+	secret.StringData = data
+
+	// Not found
+	if err != nil {
+		err = in.Create(ctx, secret)
+		return secret, err
+	}
+
+	err = in.Update(ctx, secret)
+	return secret, err
 }
