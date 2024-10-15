@@ -4,28 +4,25 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.3
-  name: observabilityproviders.deployments.plural.sh
+  name: oidcproviders.deployments.plural.sh
 spec:
   group: deployments.plural.sh
   names:
-    kind: ObservabilityProvider
-    listKind: ObservabilityProviderList
-    plural: observabilityproviders
-    singular: observabilityprovider
+    kind: OIDCProvider
+    listKind: OIDCProviderList
+    plural: oidcproviders
+    singular: oidcprovider
   scope: Namespaced
   versions:
   - additionalPrinterColumns:
-    - description: ID of the ObservabilityProvider in the Console API.
+    - description: ID of the OIDCProvider in the Console API.
       jsonPath: .status.id
       name: ID
       type: string
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: |-
-          ObservabilityProvider defines metrics provider used
-          by i.e. InfrastructureStack to determine if a stack run
-          should be cancelled.
+        description: OIDCProvider is the Schema for the OIDCProviders API
         properties:
           apiVersion:
             description: |-
@@ -45,55 +42,39 @@ spec:
           metadata:
             type: object
           spec:
+            description: OIDCProviderSpec defines the desired state of OIDCProvider
             properties:
-              credentials:
-                description: Credentials to access the configured provider Type.
+              credentialsSecretRef:
+                description: |-
+                  CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.
+                  It will be created once OIDCProvider is created in the Console API.
+
+                  Secret will contain 2 keys:
+                  - 'clientId'
+                  - 'clientSecret'
                 properties:
-                  datadog:
+                  name:
                     description: |-
-                      Datadog is a reference to the secret with credentials used to access datadog.
-                      It requires 2 keys to be provided in a secret:
-                      - 'apiKey'
-                      - 'appKey'
-                    properties:
-                      name:
-                        description: name is unique within a namespace to reference
-                          a secret resource.
-                        type: string
-                      namespace:
-                        description: namespace defines the space within which the
-                          secret name must be unique.
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
-                  newrelic:
-                    description: |-
-                      Newrelic is a reference to the secret with credentials used to access newrelic.
-                      It requires 1 key to be provided in a secret:
-                      - 'apiKey'
-                    properties:
-                      name:
-                        description: name is unique within a namespace to reference
-                          a secret resource.
-                        type: string
-                      namespace:
-                        description: namespace defines the space within which the
-                          secret name must be unique.
-                        type: string
-                    type: object
-                    x-kubernetes-map-type: atomic
+                      Name of the referent.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
                 type: object
+                x-kubernetes-map-type: atomic
+              description:
+                description: Description can be used to describe this OIDCProvider.
+                type: string
               name:
-                description: Name of the ObservabilityProvider in the Console API.
+                description: |-
+                  Name of this OIDCProvider. If not provided OIDCProvider's own name
+                  from OIDCProvider.ObjectMeta will be used.
                 type: string
-              type:
-                description: Type of the ObservabilityProvider.
-                enum:
-                - DATADOG
-                - NEWRELIC
-                type: string
-            required:
-            - type
+              redirectUris:
+                description: |-
+                  RedirectUris is a list of custom run steps that will be executed as
+                  part of the stack run.
+                items:
+                  type: string
+                type: array
             type: object
           status:
             properties:
@@ -165,8 +146,6 @@ spec:
                 description: SHA of last applied configuration.
                 type: string
             type: object
-        required:
-        - spec
         type: object
     served: true
     storage: true

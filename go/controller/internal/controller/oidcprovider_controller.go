@@ -85,7 +85,7 @@ func (in *OIDCProviderReconciler) Reconcile(ctx context.Context, req reconcile.R
 	// Mark resource as managed by this operator.
 	utils.MarkCondition(oidcProvider.SetCondition, v1alpha1.ReadonlyConditionType, metav1.ConditionFalse, v1alpha1.ReadonlyConditionReason, "")
 
-	// Get StackDefinition SHA that can be saved back in the status to check for changes
+	// Get OIDCProvider SHA that can be saved back in the status to check for changes
 	changed, sha, err := oidcProvider.Diff(utils.HashObject)
 	if err != nil {
 		logger.Error(err, "unable to calculate oidc provider SHA")
@@ -122,7 +122,7 @@ func (in *OIDCProviderReconciler) addOrRemoveFinalizer(ctx context.Context, oidc
 
 	// If object is being deleted cleanup and remove the finalizer.
 	if !oidcProvider.ObjectMeta.DeletionTimestamp.IsZero() {
-		// Remove StackDefinition from Console API if it exists
+		// Remove OIDCProvider from Console API if it exists
 		exists := in.isAlreadyExists(oidcProvider)
 
 		if exists {
@@ -134,7 +134,7 @@ func (in *OIDCProviderReconciler) addOrRemoveFinalizer(ctx context.Context, oidc
 				return &ctrl.Result{}, err
 			}
 
-			// If deletion process started requeue so that we can make sure stack definition
+			// If deletion process started requeue so that we can make sure oidc provider
 			// has been deleted from Console API before removing the finalizer.
 			return &requeue, nil
 		}
@@ -162,7 +162,7 @@ func (in *OIDCProviderReconciler) sync(ctx context.Context, oidcProvider *v1alph
 
 	// Create the OIDCProvider in Console API if it doesn't exist
 	if !exists {
-		logger.Info("creating StackDefinition")
+		logger.Info("creating OIDCProvider")
 		return in.ConsoleClient.CreateOIDCProvider(ctx, providerType, oidcProvider.Attributes())
 	}
 
