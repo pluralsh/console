@@ -92,7 +92,7 @@ export function IngressBase({ ingress }: { ingress: IngressFragment }) {
   const rules = ingress.spec?.rules || []
 
   useSetPageHeaderContent(
-    useMemo(() => <Button secondary>View certificate</Button>, [theme])
+    useMemo(() => <Button secondary>View certificate</Button>, [])
   )
 
   return (
