@@ -78,18 +78,11 @@ export default function IngressOutlet() {
 
   const ingress = data?.ingress as Nullable<IngressFragment>
 
-  return <IngressBase ingress={ingress} />
+  return ingress ? <IngressBase ingress={ingress} /> : null
 }
 
-export function IngressBase({
-  ingress,
-}: {
-  ingress: Nullable<IngressFragment>
-}) {
+export function IngressBase({ ingress }: { ingress: IngressFragment }) {
   const theme = useTheme()
-
-  if (!ingress) return null
-
   const loadBalancer = ingress.status?.loadBalancer
   const balancerIngress =
     !!loadBalancer?.ingress && !isEmpty(loadBalancer.ingress)
@@ -107,11 +100,7 @@ export function IngressBase({
     >
       {balancerIngress && (
         <>
-          <InfoSectionH2
-            css={{
-              marginBottom: theme.spacing.medium,
-            }}
-          >
+          <InfoSectionH2 css={{ marginBottom: theme.spacing.medium }}>
             Status
           </InfoSectionH2>
           <PaddedCard>
@@ -121,11 +110,7 @@ export function IngressBase({
           </PaddedCard>
         </>
       )}
-      <InfoSectionH2
-        css={{
-          marginTop: theme.spacing.large,
-        }}
-      >
+      <InfoSectionH2 css={{ marginTop: theme.spacing.large }}>
         Spec
       </InfoSectionH2>
       <Routes rules={rules} />

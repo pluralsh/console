@@ -1,5 +1,12 @@
 import { Button, SubTab, TabList, TabPanel } from '@pluralsh/design-system'
-import { useContext, useEffect, useMemo, useRef } from 'react'
+import {
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { Link, Outlet, useMatch, useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
 import {
@@ -37,6 +44,7 @@ import { isEmpty } from 'lodash'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
 import { isUnstructured } from './ComponentInfo'
+import { PageHeaderContext } from '../cd/ContinuousDeployment.tsx'
 
 export const kindToQuery = {
   certificate: CertificateDocument,
@@ -163,6 +171,9 @@ export function ComponentDetails({
 
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
 
+  const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
+
   useEffect(() => {
     if (!cdView || currentTab) return
 
@@ -179,80 +190,83 @@ export function ComponentDetails({
   if (!me || loading) return <LoadingIndicator />
 
   return (
-    <ResponsivePageFullWidth
-      scrollable={
-        currentTab?.path === '' ||
-        currentTab?.path === 'info' ||
-        currentTab?.path === 'metadata'
-      }
-      heading={componentName}
-      headingContent={
-        <div>
-          <div
-            css={{
-              display: 'flex',
-              gap: theme.spacing.medium,
-              className: 'DELETE',
-              margin: `${theme.spacing.medium}px 0`,
-            }}
-          >
-            <TabList
-              stateRef={tabStateRef}
-              stateProps={{
-                orientation: 'horizontal',
-                selectedKey: currentTab?.path,
+    <PageHeaderContext.Provider value={pageHeaderContext}>
+      <ResponsivePageFullWidth
+        scrollable={
+          currentTab?.path === '' ||
+          currentTab?.path === 'info' ||
+          currentTab?.path === 'metadata'
+        }
+        heading={componentName}
+        headingContent={
+          <div>
+            <div
+              css={{
+                display: 'flex',
+                gap: theme.spacing.medium,
+                className: 'DELETE',
+                margin: `${theme.spacing.medium}px 0`,
               }}
             >
-              {filteredDirectory.map(({ label, path }) => (
-                <LinkTabWrap
-                  key={path}
-                  textValue={label}
-                  to={path}
-                  subTab
-                >
-                  <SubTab>{label}</SubTab>
-                </LinkTabWrap>
-              ))}
-            </TabList>
-            {pluralServiceDeploymentRef?.id &&
-              pluralServiceDeploymentRef?.cluster?.id && (
-                <Button
-                  as={Link}
-                  to={getServiceDetailsPath({
-                    serviceId: pluralServiceDeploymentRef?.id,
-                    clusterId: pluralServiceDeploymentRef?.cluster.id,
-                  })}
-                >
-                  View service
-                </Button>
-              )}
+              <TabList
+                stateRef={tabStateRef}
+                stateProps={{
+                  orientation: 'horizontal',
+                  selectedKey: currentTab?.path,
+                }}
+              >
+                {filteredDirectory.map(({ label, path }) => (
+                  <LinkTabWrap
+                    key={path}
+                    textValue={label}
+                    to={path}
+                    subTab
+                  >
+                    <SubTab>{label}</SubTab>
+                  </LinkTabWrap>
+                ))}
+              </TabList>
+              {pluralServiceDeploymentRef?.id &&
+                pluralServiceDeploymentRef?.cluster?.id && (
+                  <Button
+                    as={Link}
+                    to={getServiceDetailsPath({
+                      serviceId: pluralServiceDeploymentRef?.id,
+                      clusterId: pluralServiceDeploymentRef?.cluster.id,
+                    })}
+                  >
+                    View service
+                  </Button>
+                )}
 
-            <ScalingRecommenderModal
-              kind={kind}
-              componentName={componentName}
-              namespace={component.namespace || ''}
-            />
-            {!service?.id && (
-              <ViewLogsButton
-                metadata={value?.metadata}
-                kind={componentKind}
+              <ScalingRecommenderModal
+                kind={kind}
+                componentName={componentName}
+                namespace={component.namespace || ''}
               />
-            )}
+              {!service?.id && (
+                <ViewLogsButton
+                  metadata={value?.metadata}
+                  kind={componentKind}
+                />
+              )}
+              {headerContent}
+            </div>
           </div>
-        </div>
-      }
-    >
-      {error && currentTab?.path !== 'dryrun' && (
-        <div css={{ marginBottom: theme.spacing.medium }}>
-          <GqlError error={error} />
-        </div>
-      )}
-      <TabPanel
-        css={{ display: 'contents' }}
-        stateRef={tabStateRef}
+        }
       >
-        <Outlet context={outletContext} />
-      </TabPanel>
-    </ResponsivePageFullWidth>
+        {error && currentTab?.path !== 'dryrun' && (
+          <div css={{ marginBottom: theme.spacing.medium }}>
+            <GqlError error={error} />
+          </div>
+        )}
+        <TabPanel
+          css={{ display: 'contents' }}
+          stateRef={tabStateRef}
+        >
+          <Outlet context={outletContext} />
+        </TabPanel>
+      </ResponsivePageFullWidth>
+    </PageHeaderContext.Provider>
   )
 }
