@@ -1,4 +1,4 @@
-import { Button, Table } from '@pluralsh/design-system'
+import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import isEmpty from 'lodash/isEmpty'
 import { useMemo } from 'react'
@@ -16,7 +16,6 @@ import {
   PaddedCard,
   PropWideBold,
 } from './common'
-import { useSetPageHeaderContent } from '../../cd/ContinuousDeployment.tsx'
 
 const COLUMN_HELPER = createColumnHelper<any>()
 
@@ -90,10 +89,6 @@ export function IngressBase({ ingress }: { ingress: IngressFragment }) {
       ? loadBalancer.ingress
       : null
   const rules = ingress.spec?.rules || []
-
-  useSetPageHeaderContent(
-    useMemo(() => <Button secondary>View certificate</Button>, [])
-  )
 
   return (
     <div

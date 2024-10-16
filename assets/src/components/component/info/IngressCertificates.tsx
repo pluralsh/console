@@ -1,4 +1,4 @@
-import { Chip, Table } from '@pluralsh/design-system'
+import { Button, Chip, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { CertificateFragment } from 'generated/graphql'
 import { ComponentProps } from 'react'
@@ -8,90 +8,90 @@ import { InfoSectionH3 } from './common'
 
 const columnHelper = createColumnHelper<CertificateFragment>()
 
-const ColName = columnHelper.accessor((row) => row.metadata?.name, {
-  id: 'name',
-  header: 'Name',
-  meta: { gridTemplate: 'minmax(max-content, 1fr)' },
-  cell: function Cell({ getValue }) {
-    return getValue()
-  },
-})
-
-/** Map condtion type to Chip severity */
-export const toSeverity = {
-  ready: 'success',
-  unhealthy: 'danger',
-} as const satisfies Record<string, ComponentProps<typeof Chip>['severity']>
-
-const ColStatus = columnHelper.accessor(
-  (row) =>
-    row?.status?.conditions?.find?.((c) => c?.type?.toLowerCase() === 'ready')
-      ?.status,
-  {
-    id: 'status',
-    header: 'Status',
+const columns = [
+  columnHelper.accessor((row) => row.metadata?.name, {
+    id: 'name',
+    header: 'Name',
     meta: { gridTemplate: 'minmax(max-content, 1fr)' },
     cell: function Cell({ getValue }) {
-      const theme = useTheme()
-      const status = getValue()?.toLowerCase()
+      return getValue()
+    },
+  }),
+  columnHelper.accessor(
+    (row) =>
+      row?.status?.conditions?.find?.((c) => c?.type?.toLowerCase() === 'ready')
+        ?.status,
+    {
+      id: 'status',
+      header: 'Status',
+      meta: { gridTemplate: 'minmax(max-content, 1fr)' },
+      cell: function Cell({ getValue }) {
+        const theme = useTheme()
+        const status = getValue()?.toLowerCase()
 
-      return (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.xsmall,
-          }}
-        >
-          <Chip
-            severity={
-              status === 'true'
-                ? 'success'
-                : status === 'false'
-                  ? 'danger'
-                  : 'neutral'
-            }
+        return (
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.xsmall,
+            }}
           >
-            {status === 'true'
-              ? 'Ready'
-              : status === 'false'
-                ? 'Unhealthy'
-                : 'Unknown'}
-          </Chip>
-        </div>
-      )
+            <Chip
+              severity={
+                status === 'true'
+                  ? 'success'
+                  : status === 'false'
+                    ? 'danger'
+                    : 'neutral'
+              }
+            >
+              {status === 'true'
+                ? 'Ready'
+                : status === 'false'
+                  ? 'Unhealthy'
+                  : 'Unknown'}
+            </Chip>
+          </div>
+        )
+      },
+    }
+  ),
+  columnHelper.accessor(
+    (row) =>
+      row?.status?.conditions?.find?.((c) => c?.type?.toLowerCase() === 'ready')
+        ?.message,
+    {
+      id: 'statusMsg',
+      header: 'Status message',
+      meta: { gridTemplate: 'minmax(max-content, 1fr)' },
+      cell: function Cell({ getValue }) {
+        const theme = useTheme()
+        const message = getValue()
+
+        return (
+          <div
+            css={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: theme.spacing.xsmall,
+            }}
+          >
+            {message && <p>{message}</p>}
+          </div>
+        )
+      },
+    }
+  ),
+  columnHelper.accessor((_) => null, {
+    id: 'actions',
+    header: '',
+    meta: { gridTemplate: 'max-content' },
+    cell: function Cell() {
+      return <Button secondary>View certificate</Button>
     },
-  }
-)
-
-const ColStatusMessage = columnHelper.accessor(
-  (row) =>
-    row?.status?.conditions?.find?.((c) => c?.type?.toLowerCase() === 'ready')
-      ?.message,
-  {
-    id: 'statusMsg',
-    header: 'Status message',
-    meta: { gridTemplate: 'minmax(max-content, 1fr)' },
-    cell: function Cell({ getValue }) {
-      const theme = useTheme()
-      const message = getValue()
-
-      return (
-        <div
-          css={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: theme.spacing.xsmall,
-          }}
-        >
-          {message && <p>{message}</p>}
-        </div>
-      )
-    },
-  }
-)
-
-const columns = [ColName, ColStatus, ColStatusMessage]
+  }),
+]
 
 function CertificatesTable({
   certificates,
