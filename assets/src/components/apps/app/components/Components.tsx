@@ -8,27 +8,19 @@ import {
 import { ReactElement, useMemo, useState } from 'react'
 
 import { type Key } from '@react-types/shared'
-import styled, { useTheme } from 'styled-components'
+import styled from 'styled-components'
 
-import { ComponentIcon, ComponentStateChip } from './misc'
 import { ComponentState } from 'generated/graphql'
-import { upperFirst } from 'lodash'
+import { ComponentIcon, ComponentStateChip } from './misc'
 
 const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
 
 function FilterFooter({ allSelected = true, ...props }) {
-  const theme = useTheme()
-
   return (
     <FilterFooterInner
-      leftContent={
-        <ComponentsIcon
-          size={16}
-          color={theme.colors['text-primary-accent'] as string}
-        />
-      }
+      leftContent={<ComponentsIcon />}
       {...props}
     >
       {allSelected ? 'Clear all' : 'Select all'}
@@ -196,38 +188,33 @@ function ComponentKindSelect({
 }
 
 export function ComponentStateFilter({
-  selectedStates,
-  setSelectedStates,
+  selectedState,
+  setSelectedState,
 }: {
-  selectedStates: Set<Key>
-  setSelectedStates: (states: Set<Key>) => void
+  selectedState: Key | null
+  setSelectedState: (state: Key | null) => void
 }) {
-  const allSelected =
-    selectedStates.size >= Object.values(ComponentState).length
-  const triggerLabel = allSelected
-    ? 'All states'
-    : selectedStates.size === 0
-      ? 'Select states'
-      : Array.from(selectedStates)
-          .map((s) => upperFirst((s as string).toLowerCase()))
-          .join(', ')
-
   return (
     <Select
-      selectionMode="multiple"
-      selectedKeys={selectedStates}
-      onSelectionChange={setSelectedStates}
-      label="Select states"
-      triggerButton={<FilterTrigger>{triggerLabel}</FilterTrigger>}
+      selectionMode="single"
+      selectedKey={selectedState}
+      onSelectionChange={setSelectedState}
+      triggerButton={
+        <FilterTrigger>
+          {selectedState ? (
+            <ComponentStateChip state={selectedState as ComponentState} />
+          ) : (
+            'Select state'
+          )}
+        </FilterTrigger>
+      }
       dropdownFooterFixed={
-        <FilterFooter
-          allSelected={allSelected}
-          onClick={() =>
-            setSelectedStates(
-              new Set(allSelected ? undefined : Object.values(ComponentState))
-            )
-          }
-        />
+        <FilterFooterInner
+          leftContent={<ComponentsIcon />}
+          onClick={() => setSelectedState(null)}
+        >
+          Clear selection
+        </FilterFooterInner>
       }
     >
       {Object.values(ComponentState).map((state) => (

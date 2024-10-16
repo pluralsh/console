@@ -4,11 +4,14 @@ import {
   Flex,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { type Key } from '@react-types/shared'
-import { useServiceDeploymentComponentsQuery } from 'generated/graphql'
+import {
+  ComponentState,
+  useServiceDeploymentComponentsQuery,
+} from 'generated/graphql'
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
+import { type Key } from '@react-types/shared'
 
 import {
   SERVICE_PARAM_CLUSTER_ID,
@@ -55,7 +58,7 @@ export default function ServiceComponents() {
   const clusterId = useParams()[SERVICE_PARAM_CLUSTER_ID]
   const [showDeprecations, setShowDeprecations] = useState(false)
   const outletContext = useServiceContext()
-  const [selectedStates, setSelectedStates] = useState<Set<Key>>(new Set())
+  const [selectedState, setSelectedState] = useState<Key | null>(null)
 
   const { data, error } = useServiceDeploymentComponentsQuery({
     variables: { id: serviceId || '' },
@@ -98,8 +101,8 @@ export default function ServiceComponents() {
         <Flex gap="medium">
           {kindSelector}
           <ComponentStateFilter
-            selectedStates={selectedStates}
-            setSelectedStates={setSelectedStates}
+            selectedState={selectedState}
+            setSelectedState={setSelectedState}
           />
         </Flex>
       }
@@ -147,7 +150,7 @@ export default function ServiceComponents() {
           }
           components={components}
           selectedKinds={selectedKinds.size > 0 ? selectedKinds : allKinds}
-          selectedStates={selectedStates}
+          selectedState={selectedState as ComponentState | null}
         />
       </div>
     </ScrollablePage>

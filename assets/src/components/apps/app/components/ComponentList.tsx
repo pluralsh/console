@@ -1,22 +1,21 @@
 import { EmptyState } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 
-import { type Key } from '@react-types/shared'
 import { useTheme } from 'styled-components'
 
+import { ComponentState } from 'generated/graphql'
 import ComponentCard, { type Component } from './ComponentCard'
 import { compareComponents } from './Components'
-import { ComponentState } from 'generated/graphql'
 
 export function ComponentList<C extends Component>({
   components,
   selectedKinds,
-  selectedStates,
+  selectedState,
   setUrl,
 }: {
   components: C[] | null | undefined
   selectedKinds: any
-  selectedStates?: Set<Key>
+  selectedState?: ComponentState | null
   setUrl: (component: C) => string | undefined
 }) {
   const theme = useTheme()
@@ -24,15 +23,14 @@ export function ComponentList<C extends Component>({
     () =>
       components
         ?.filter((comp) => selectedKinds.has(comp?.kind))
-        .filter((comp) =>
-          selectedStates
-            ? selectedStates.size === 0 ||
-              (!comp?.state && selectedStates.has(ComponentState.Running)) ||
-              selectedStates.has(comp?.state as Key)
-            : true
+        .filter(
+          (comp) =>
+            !selectedState ||
+            (!comp?.state && selectedState === ComponentState.Running) ||
+            selectedState === comp?.state
         )
         .sort(compareComponents),
-    [components, selectedKinds, selectedStates]
+    [components, selectedKinds, selectedState]
   )
 
   return (filteredComponents || []).length === 0 ? (
