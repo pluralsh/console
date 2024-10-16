@@ -3,16 +3,19 @@ import { useMemo } from 'react'
 
 import { useTheme } from 'styled-components'
 
+import { ComponentState } from 'generated/graphql'
 import ComponentCard, { type Component } from './ComponentCard'
 import { compareComponents } from './Components'
 
 export function ComponentList<C extends Component>({
   components,
   selectedKinds,
+  selectedState,
   setUrl,
 }: {
   components: C[] | null | undefined
   selectedKinds: any
+  selectedState?: ComponentState | null
   setUrl: (component: C) => string | undefined
 }) {
   const theme = useTheme()
@@ -20,8 +23,14 @@ export function ComponentList<C extends Component>({
     () =>
       components
         ?.filter((comp) => selectedKinds.has(comp?.kind))
+        .filter(
+          (comp) =>
+            !selectedState ||
+            (!comp?.state && selectedState === ComponentState.Running) ||
+            selectedState === comp?.state
+        )
         .sort(compareComponents),
-    [components, selectedKinds]
+    [components, selectedKinds, selectedState]
   )
 
   return (filteredComponents || []).length === 0 ? (

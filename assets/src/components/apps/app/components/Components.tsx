@@ -7,25 +7,20 @@ import {
 } from '@pluralsh/design-system'
 import { ReactElement, useMemo, useState } from 'react'
 
-import styled, { useTheme } from 'styled-components'
+import { type Key } from '@react-types/shared'
+import styled from 'styled-components'
 
-import { ComponentIcon } from './misc'
+import { ComponentState } from 'generated/graphql'
+import { ComponentIcon, ComponentStateChip } from './misc'
 
 const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
 
 function FilterFooter({ allSelected = true, ...props }) {
-  const theme = useTheme()
-
   return (
     <FilterFooterInner
-      leftContent={
-        <ComponentsIcon
-          size={16}
-          color={theme.colors['text-primary-accent'] as string}
-        />
-      }
+      leftContent={<ComponentsIcon />}
       {...props}
     >
       {allSelected ? 'Clear all' : 'Select all'}
@@ -33,7 +28,7 @@ function FilterFooter({ allSelected = true, ...props }) {
   )
 }
 
-const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
+export const FilterTrigger = styled(SelectButton)<{ $width?: number }>(
   ({ $width }) => ({
     width: $width || 220,
     '&, *': {
@@ -186,6 +181,46 @@ function ComponentKindSelect({
           key={kind}
           leftContent={<ComponentIcon kind={kind} />}
           label={kind}
+        />
+      ))}
+    </Select>
+  )
+}
+
+export function ComponentStateFilter({
+  selectedState,
+  setSelectedState,
+}: {
+  selectedState: Key | null
+  setSelectedState: (state: Key | null) => void
+}) {
+  return (
+    <Select
+      selectionMode="single"
+      selectedKey={selectedState}
+      onSelectionChange={setSelectedState}
+      triggerButton={
+        <FilterTrigger>
+          {selectedState ? (
+            <ComponentStateChip state={selectedState as ComponentState} />
+          ) : (
+            'Select state'
+          )}
+        </FilterTrigger>
+      }
+      dropdownFooterFixed={
+        <FilterFooterInner
+          leftContent={<ComponentsIcon />}
+          onClick={() => setSelectedState(null)}
+        >
+          Clear selection
+        </FilterFooterInner>
+      }
+    >
+      {Object.values(ComponentState).map((state) => (
+        <ListBoxItem
+          key={state}
+          label={<ComponentStateChip state={state} />}
         />
       ))}
     </Select>

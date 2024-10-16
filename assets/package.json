@@ -145,6 +145,7 @@
     "@graphql-codegen/typescript-react-apollo": "4.1.0",
     "@pluralsh/eslint-config-typescript": "2.5.150",
     "@pluralsh/stylelint-config": "2.0.10",
+    "@react-types/shared": "3.25.0",
     "@testing-library/dom": "10.4.0",
     "@testing-library/jest-dom": "5.16.5",
     "@testing-library/react": "16.0.1",
