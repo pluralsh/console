@@ -1,10 +1,11 @@
-import { Button, Chip, Table } from '@pluralsh/design-system'
+import { Button, Chip, Modal, Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { CertificateFragment } from 'generated/graphql'
-import { ComponentProps } from 'react'
+import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { InfoSectionH3 } from './common'
+import { RawYaml } from '../ComponentRaw.tsx'
 
 const columnHelper = createColumnHelper<CertificateFragment>()
 
@@ -83,12 +84,33 @@ const columns = [
       },
     }
   ),
-  columnHelper.accessor((_) => null, {
+  columnHelper.accessor((row) => row, {
     id: 'actions',
     header: '',
     meta: { gridTemplate: 'max-content' },
-    cell: function Cell() {
-      return <Button secondary>View certificate</Button>
+    cell: function Cell({ getValue }) {
+      const certificate = getValue()
+      const [open, setOpen] = useState(false)
+
+      return (
+        <>
+          <Button
+            secondary
+            onClick={() => setOpen(true)}
+          >
+            View certificate
+          </Button>
+          <Modal
+            header={`${certificate.metadata?.name} - Raw`}
+            scrollable={false}
+            size="auto"
+            open={open}
+            onClose={() => setOpen(false)}
+          >
+            <RawYaml raw={certificate.raw} />
+          </Modal>
+        </>
+      )
     },
   }),
 ]
