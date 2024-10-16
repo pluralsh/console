@@ -19,7 +19,8 @@ defmodule Console.Schema.Stack do
     Tag,
     Service,
     Project,
-    StackDefinition
+    StackDefinition,
+    AiInsight
   }
 
   defenum Type, terraform: 0, ansible: 1, custom: 2
@@ -95,6 +96,7 @@ defmodule Console.Schema.Stack do
     belongs_to :project,    Project
     belongs_to :parent,     Service
     belongs_to :definition, StackDefinition
+    belongs_to :insight,    AiInsight, on_replace: :update
 
     has_one :state, StackState,
       on_replace: :update,
@@ -181,6 +183,7 @@ defmodule Console.Schema.Stack do
     |> cast_assoc(:cron)
     |> cast_assoc(:observable_metrics)
     |> cast_assoc(:tags)
+    |> cast_assoc(:insight)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:connection_id)

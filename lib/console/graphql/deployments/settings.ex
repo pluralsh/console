@@ -141,14 +141,12 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "OpenAI connection information"
   object :openai_settings do
-    field :access_token, :string
-    field :model,        :string, description: "the openai model version to use"
+    field :model, :string, description: "the openai model version to use"
   end
 
   @desc "Anthropic connection information"
   object :anthropic_settings do
-    field :access_token, :string
-    field :model,        :string, description: "the anthropic model version to use"
+    field :model, :string, description: "the anthropic model version to use"
   end
 
   connection node_type: :project

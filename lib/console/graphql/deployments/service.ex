@@ -200,6 +200,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :contexts,       list_of(:service_context), resolve: dataloader(Deployments), description: "bound contexts for this service"
     field :dependencies,   list_of(:service_dependency), resolve: dataloader(Deployments), description: "the dependencies of this service, actualization will not happen until all are HEALTHY"
     field :imports,        list_of(:service_import), resolve: dataloader(Deployments), description: "imports from stack outputs"
+    field :insight,        :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this service"
 
     @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
     connection field :revisions, node_type: :revision do
@@ -294,6 +295,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :namespace,  :string, description: "kubernetes namespace of this resource"
     field :name,       non_null(:string), description: "kubernetes name of this resource"
 
+    field :insight, :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this component"
     field :content, :component_content, resolve: dataloader(Deployments), description: "the live and desired states of this service component"
     field :service, :service_deployment, resolve: dataloader(Deployments), description: "the service this component belongs to"
     field :api_deprecations, list_of(:api_deprecation), resolve: dataloader(Deployments), description: "any api deprecations discovered from this component"
@@ -317,6 +319,15 @@ defmodule Console.GraphQl.Deployments.Service do
     field :blocking,      :boolean, description: "whether you cannot safely upgrade to the next kubernetes version if this deprecation exists"
 
     field :component, :service_component, resolve: dataloader(Deployments), description: "the component of this deprecation"
+  end
+
+  @desc "A representation of a LLM-derived insight"
+  object :ai_insight do
+    field :sha,   :string, description: "a deduplication sha for this insight"
+    field :text,  :string, description: "the text of this insight"
+    field :error, list_of(:service_error), description: "any errors generated when compiling this insight"
+
+    timestamps()
   end
 
   @desc "an error sent from the deploy operator about sync progress"

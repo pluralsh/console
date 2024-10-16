@@ -12,6 +12,8 @@ defmodule Console.Deployments.Notifications do
     PolicyBinding
   }
 
+  require Logger
+
   @type error :: Console.error
   @type router_resp :: {:ok, NotificationRouter.t} | error
   @type sink_resp :: {:ok, NotificationSink.t} | error
@@ -162,16 +164,23 @@ defmodule Console.Deployments.Notifications do
   end
 
   defp url_deliver(url, body) do
+    Logger.info "delivering body: #{body}"
     HTTPoison.post(url, body, [
       {"content-type", "application/json"},
       {"accept", "application/json"}
     ])
+    |> log_errors()
   end
 
   defp update_blob(type, event, map) do
     Path.join([:code.priv_dir(:console), "notifications", "#{type}", "#{event}.json.eex"])
     |> EEx.eval_file(assigns: Map.to_list(map))
   end
+
+  defp log_errors({:ok, %HTTPoison.Response{status_code: c, body: b}}) when is_integer(c) and (c < 200 or c >= 300) do
+    Logger.error "Failed to deliver incoming webhook: #{b}"
+  end
+  defp log_errors(pass), do: pass
 
   defp secret_blob(user, share) do
     Path.join([:code.priv_dir(:console), "notifications", "secret.txt.eex"])

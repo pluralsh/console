@@ -42,6 +42,7 @@ config :console, Console.Cron.Scheduler,
     {"*/4 * * * *", {Console.Deployments.Cron, :scan_pending_promotions, []}},
     {"*/4 * * * *", {Console.Deployments.Cron, :scan_pending_contexts, []}},
     {"*/10 * * * *", {Console.Deployments.Init, :ensure_secret, []}},
+    {"*/5 * * * *", {Console.AI.Cron, :services, []}},
     {"0 0 1-31/2 * *", {Console.Deployments.Cron, :backfill_deprecations, []}},
     {"*/10 * * * *", {Console.Deployments.Cron, :backfill_global_services, []}},
     {"*/10 * * * *", {Console.Deployments.Cron, :backfill_managed_namespaces, []}},
@@ -57,6 +58,7 @@ config :console, Console.Cron.Scheduler,
     {"@daily", {Console.Deployments.Cron, :prune_notifications, []}},
     {"@daily", {Console.Cron.Jobs, :prune_notifications, []}},
     {"@daily", {Console.Cron.Jobs, :prune_audits, []}},
+    {"@daily", {Console.AI.Cron, :trim, []}}
   ]
 
 config :console, :watchers, [
