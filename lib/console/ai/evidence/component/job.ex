@@ -3,7 +3,7 @@ defmodule Console.AI.Evidence.Component.Job do
 
   def hydrate(%BatchV1.Job{metadata: %{namespace: ns}, spec: %{selector: selector}}) do
     list_pods(ns, selector)
-    |> default_empty(fn %{items: pods} -> pod_messages("job", pods) end)
+    |> default_empty(&pod_messages("job", &1))
   end
   def hydrate(_), do: {:ok, []}
 end

@@ -3,9 +3,7 @@ defmodule Console.AI.Evidence.Component.StatefulSet do
 
   def hydrate(%AppsV1.StatefulSet{metadata: %{namespace: ns}, spec: %{selector: selector}}) do
     list_pods(ns, selector)
-    |> default_empty(fn %{items: pods} ->
-      pod_messages("statefulset", pods)
-    end)
+    |> default_empty(&pod_messages("statefulset", &1))
   end
   def hydrate(_), do: {:ok, []}
 end
