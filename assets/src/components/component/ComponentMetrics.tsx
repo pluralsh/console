@@ -1,25 +1,23 @@
 import { Card, EmptyState } from '@pluralsh/design-system'
-import { useMemo, useState } from 'react'
-import { useOutletContext } from 'react-router-dom'
-import { DURATIONS } from 'utils/time'
-import { filesize } from 'filesize'
-import { isNonNullable } from 'utils/isNonNullable'
-import { useTheme } from 'styled-components'
-import isEmpty from 'lodash/isEmpty'
+import { Graph } from 'components/utils/Graph'
+import GraphHeader from 'components/utils/GraphHeader'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
+
+import RangePicker from 'components/utils/RangePicker'
 
 import {
   MetricResponseFragment,
   useServiceDeploymentComponentMetricsQuery,
 } from 'generated/graphql'
-
-import RangePicker from 'components/utils/RangePicker'
-import { Graph } from 'components/utils/Graph'
-import GraphHeader from 'components/utils/GraphHeader'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import isEmpty from 'lodash/isEmpty'
 
 import moment from 'moment/moment'
-
-import { format } from '../apps/app/dashboards/dashboard/misc'
+import { useMemo, useState } from 'react'
+import { useOutletContext } from 'react-router-dom'
+import { useTheme } from 'styled-components'
+import { isNonNullable } from 'utils/isNonNullable'
+import { DURATIONS } from 'utils/time'
+import { Prometheus } from '../../utils/prometheus.ts'
 
 import { ComponentDetailsContext } from './ComponentDetails'
 
@@ -68,13 +66,10 @@ function Graphs({
             flexGrow: 1,
           }}
         >
-          <GraphHeader
-            title="Overall CPU Usage"
-            tooltip="100% usage means that 1 vCore is fully used. Overall usage can exceed 100% if there are more vCores available."
-          />
+          <GraphHeader title="Overall CPU Usage (cores)" />
           <Graph
             data={[{ id: 'cpu', data: cpuValues }]}
-            yFormat={(v) => format(v, 'percent')}
+            yFormat={(v) => Prometheus.format(v, 'cpu')}
             tickRotation={undefined}
           />
         </div>
@@ -87,10 +82,10 @@ function Graphs({
             flexGrow: 1,
           }}
         >
-          <GraphHeader title="Overall Memory Usage" />
+          <GraphHeader title="Overall Memory Usage (bytes)" />
           <Graph
             data={[{ id: 'memory', data: memValues }]}
-            yFormat={filesize}
+            yFormat={(v) => Prometheus.format(v, 'memory')}
             tickRotation={undefined}
           />
         </div>
@@ -142,13 +137,10 @@ function PodGraphs({
             flexGrow: 1,
           }}
         >
-          <GraphHeader
-            title="Pod CPU Usage"
-            tooltip="100% usage means that 1 vCore is fully used. Overall usage can exceed 100% if there are more vCores available."
-          />
+          <GraphHeader title="Pod CPU Usage (cores)" />
           <Graph
             data={cpuGraph}
-            yFormat={(v) => format(v, 'percent')}
+            yFormat={(v) => Prometheus.format(v, 'cpu')}
             tickRotation={undefined}
           />
         </div>
@@ -161,10 +153,10 @@ function PodGraphs({
             flexGrow: 1,
           }}
         >
-          <GraphHeader title="Pod Memory Usage" />
+          <GraphHeader title="Pod Memory Usage (bytes)" />
           <Graph
             data={memGraph}
-            yFormat={filesize}
+            yFormat={(v) => Prometheus.format(v, 'memory')}
             tickRotation={undefined}
           />
         </div>

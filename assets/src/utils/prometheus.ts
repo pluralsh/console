@@ -70,6 +70,59 @@ function enabled(connection: Nullable<HttpConnection>): boolean {
   return !!connection && connection?.host?.length > 0
 }
 
+function format(value: number, type: 'cpu' | 'memory'): string {
+  switch (type) {
+    case 'cpu':
+      return formatCPU(value)
+    case 'memory':
+      return formatMemory(value)
+  }
+}
+
+// values is expected to be provided normalized to the cores base
+function formatCPU(value: number): string {
+  // Normalize from cores to the millicores base
+  // 0.12 (cores) == 120 (millicores)
+  value = value * 1000
+
+  /** Base for prefixes */
+  const coreBase = 1000
+
+  /** Names of the suffixes where I-th name is for base^I suffix. */
+  const corePowerSuffixes = ['m', '', 'k', 'M', 'G', 'T']
+
+  let divider = 1
+  let power = 0
+
+  while (value / divider >= coreBase && power < corePowerSuffixes.length - 1) {
+    divider *= coreBase
+    power += 1
+  }
+
+  return `${Number((value / divider).toFixed(0))}${corePowerSuffixes[power]}`
+}
+
+function formatMemory(value: number): string {
+  /** Base for binary prefixes */
+  const memoryBase = 1024
+
+  /** Names of the suffixes where I-th name is for base^I suffix. */
+  const memoryPowerSuffixes = ['', 'Ki', 'Mi', 'Gi', 'Ti', 'Pi']
+
+  let divider = 1
+  let power = 0
+
+  while (
+    value / divider > memoryBase &&
+    power < memoryPowerSuffixes.length - 1
+  ) {
+    divider *= memoryBase
+    power += 1
+  }
+
+  return `${Number((value / divider).toFixed(0))}${memoryPowerSuffixes[power]}`
+}
+
 export const Prometheus = {
   // Functions
   avg,
@@ -77,6 +130,7 @@ export const Prometheus = {
   toValues,
   pods,
   enabled,
+  format,
   // Types
   CapacityType,
 }
