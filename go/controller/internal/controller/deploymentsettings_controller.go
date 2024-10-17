@@ -21,13 +21,6 @@ import (
 	goerrors "errors"
 	"fmt"
 
-	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/api/v1alpha1"
-	"github.com/pluralsh/console/go/controller/internal/cache"
-	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-	operrors "github.com/pluralsh/console/go/controller/internal/errors"
-	"github.com/pluralsh/console/go/controller/internal/utils"
 	"github.com/samber/lo"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -37,6 +30,14 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/yaml"
+
+	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/api/v1alpha1"
+	"github.com/pluralsh/console/go/controller/internal/cache"
+	consoleclient "github.com/pluralsh/console/go/controller/internal/client"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
+	operrors "github.com/pluralsh/console/go/controller/internal/errors"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 const (
@@ -169,6 +170,13 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 			return nil, err
 		}
 		attr.LokiConnection = lc
+	}
+	if settings.Spec.AI != nil {
+		ai, err := settings.Spec.AI.Attributes(ctx, r.Client, settings.Namespace)
+		if err != nil {
+			return nil, err
+		}
+		attr.Ai = ai
 	}
 	if settings.Spec.Stacks != nil {
 		var jobSpec *console.GateJobAttributes
