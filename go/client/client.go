@@ -8903,6 +8903,7 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_Kustomize) GetPath() str
 type GetServiceDeploymentForAgent_ServiceDeployment_Helm struct {
 	Release     *string   "json:\"release,omitempty\" graphql:\"release\""
 	ValuesFiles []*string "json:\"valuesFiles,omitempty\" graphql:\"valuesFiles\""
+	IgnoreHooks *bool     "json:\"ignoreHooks,omitempty\" graphql:\"ignoreHooks\""
 }
 
 func (t *GetServiceDeploymentForAgent_ServiceDeployment_Helm) GetRelease() *string {
@@ -8916,6 +8917,12 @@ func (t *GetServiceDeploymentForAgent_ServiceDeployment_Helm) GetValuesFiles() [
 		t = &GetServiceDeploymentForAgent_ServiceDeployment_Helm{}
 	}
 	return t.ValuesFiles
+}
+func (t *GetServiceDeploymentForAgent_ServiceDeployment_Helm) GetIgnoreHooks() *bool {
+	if t == nil {
+		t = &GetServiceDeploymentForAgent_ServiceDeployment_Helm{}
+	}
+	return t.IgnoreHooks
 }
 
 type GetServiceDeploymentForAgent_ServiceDeployment_Configuration struct {
@@ -19523,6 +19530,7 @@ const GetServiceDeploymentForAgentDocument = `query GetServiceDeploymentForAgent
 		helm {
 			release
 			valuesFiles
+			ignoreHooks
 		}
 		configuration {
 			name

@@ -140,6 +140,7 @@ query GetServiceDeploymentForAgent($id: ID!) {
         helm {
             release
             valuesFiles
+            ignoreHooks
         }
         configuration {
             name
