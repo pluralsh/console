@@ -24,7 +24,7 @@ defmodule Console.AI.CronTest do
       expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
       expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
       expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
 
       Cron.services()
 
@@ -47,7 +47,7 @@ defmodule Console.AI.CronTest do
       run   = insert(:stack_run, stack: stack)
       step  = insert(:run_step, status: :failed, cmd: "echo", args: ["hello", "work"])
       insert(:run_log, step: step, logs: "blah blah blah")
-      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
 
       Cron.stacks()
 

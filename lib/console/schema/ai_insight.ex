@@ -5,8 +5,9 @@ defmodule Console.Schema.AiInsight do
   @slow [minutes: -45]
 
   schema "ai_insights" do
-    field :sha,   :string
-    field :text,  :string
+    field :sha,     :string
+    field :text,    :string
+    field :summary, :string
 
     embeds_many :error, Error, on_replace: :delete do
       field :source,  :string
@@ -33,7 +34,7 @@ defmodule Console.Schema.AiInsight do
 
   def changeset(model, attrs \\ %{}) do
     model
-    |> cast(attrs, ~w(sha text)a)
+    |> cast(attrs, ~w(sha summary text)a)
     |> cast_embed(:error, with: &error_changeset/2)
   end
 

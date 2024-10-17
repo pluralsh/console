@@ -422,6 +422,14 @@ type RootQueryType {
   projects(after: String, first: Int, before: String, last: Int, q: String): ProjectConnection
 
   project(id: ID, name: String): Project
+
+  aiCompletion(
+    "the initial system prompt to use for this completion"
+    system: String!
+
+    "the actual user-provided prompt to give to the underlying LLM"
+    input: String!
+  ): String
 }
 
 type RootMutationType {
@@ -3506,22 +3514,6 @@ type ApiDeprecation {
   component: ServiceComponent
 }
 
-"A representation of a LLM-derived insight"
-type AiInsight {
-  "a deduplication sha for this insight"
-  sha: String
-
-  "the text of this insight"
-  text: String
-
-  "any errors generated when compiling this insight"
-  error: [ServiceError]
-
-  insertedAt: DateTime
-
-  updatedAt: DateTime
-}
-
 "an error sent from the deploy operator about sync progress"
 type ServiceError {
   source: String!
@@ -5520,6 +5512,25 @@ type ObserverConnection {
 type CatalogConnection {
   pageInfo: PageInfo!
   edges: [CatalogEdge]
+}
+
+"A representation of a LLM-derived insight"
+type AiInsight {
+  "a deduplication sha for this insight"
+  sha: String
+
+  "the text of this insight"
+  text: String
+
+  "a shortish summary of this insight"
+  summary: String
+
+  "any errors generated when compiling this insight"
+  error: [ServiceError]
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 input CloneAttributes {
