@@ -1,4 +1,5 @@
 defmodule Console.AI.Evidence.Base do
+  import Console.Services.Base, only: [ok: 1]
   alias Console.Schema.ServiceComponent
   alias Console.Deployments.Clusters
   alias Console.AI.Evidence.Component.Pod
@@ -18,7 +19,7 @@ defmodule Console.AI.Evidence.Base do
   end
 
   def default_empty({:ok, res}, fun), do: {:ok, fun.(res)}
-  def default_empty(_), do: {:ok, []}
+  def default_empty(_, _), do: {:ok, []}
 
   def interpolate(str, first, last), do: "#{first}#{str}#{last}"
 
@@ -55,9 +56,34 @@ defmodule Console.AI.Evidence.Base do
     |> prepend({:user, "the #{parent} manages a number of pods, here is a subsample of them"})
   end
 
-  def list_pods(ns, label_selector) do
-    CoreV1.list_namespaced_pod!(ns, label_selector: construct_label_selector(label_selector))
+  def list_pods(ns, selector) do
+    &CoreV1.list_namespaced_pod!(ns, [label_selector: construct_label_selector(selector)] ++ k8s_page(&1, 500))
+    |> k8s_paginator(fn p -> !ready_condition?(p.status.conditions) end, nil, [])
+    |> ok()
+  end
+
+  def ready_condition?([_ | _] = conditions) do
+    Enum.any?(conditions, fn
+      %{type: "Ready", status: "True"} -> true
+      %{"type" => "Ready", "status" => "True"} -> true
+      _ -> false
+    end)
+  end
+  def ready_condition?(_), do: false
+
+  def k8s_page(continue, limit) when is_binary(continue), do: [continue: continue, limit: limit]
+  def k8s_page(_, limit), do: [limit: limit]
+
+  def k8s_paginator(query_fun, filter_fun, continue \\ nil, res \\ []) do
+    query_fun.(continue)
     |> Kube.Utils.run()
+    |> case do
+      {:ok, %{metadata: %MetaV1.ListMeta{continue: c}, items: items}} when is_binary(c) ->
+        k8s_paginator(query_fun, filter_fun, c, res ++ Enum.filter(items, filter_fun))
+      {:ok, %{items: items}} ->
+        res ++ Enum.filter(items, filter_fun)
+      _ -> res
+    end
   end
 
   def encode(%{__struct__: model, metadata: _} = k8s),
