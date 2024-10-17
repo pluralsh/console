@@ -1,0 +1,33 @@
+{
+	"text": "✨ *New insights generated for your stack <%= @stack.name %>",
+	"blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "✨ *New insights generated for your stack <%= @stack.name %>:*"
+            }
+        },
+		{
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": <%= Jason.encode!(Console.truncate(@insight.text, 2800)) %>
+            }
+		},
+        {
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View Stack",
+						"emoji": true
+					},
+					"url": "<%= Console.url("/stacks/#{@stack.id}") %>"
+				}
+			]
+		}
+	]
+}

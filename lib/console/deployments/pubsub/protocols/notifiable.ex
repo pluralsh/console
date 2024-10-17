@@ -13,12 +13,13 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Any do
 end
 
 defmodule Console.Deployments.Notifications.Utils do
-  alias Console.Schema.{Service, Cluster, Pipeline, PullRequest, StackRun}
+  alias Console.Schema.{Service, Cluster, Pipeline, PullRequest, StackRun, Stack}
   def filters(%Service{id: id, cluster_id: cid}), do: [service_id: id, cluster_id: cid]
   def filters(%Cluster{id: id}), do: [cluster_id: id]
   def filters(%Pipeline{id: id}), do: [pipeline_id: id]
   def filters(%PullRequest{url: url}), do: [regex: url]
   def filters(%StackRun{stack_id: id}), do: [stack_id: id]
+  def filters(%Stack{id: id}), do: [stack_id: id]
   def filters(_), do: []
 end
 
@@ -99,6 +100,27 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ServiceInsigh
       true ->
         svc = Console.Repo.preload(svc, [:cluster, :repository])
         {"service.insight", Utils.filters(svc), %{service: svc, insight: insight}}
+      _ -> :ok
+    end
+  end
+  def message(_), do: :ok
+
+  defp ts(%AiInsight{inserted_at: iat, updated_at: uat}), do: uat || iat
+end
+
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackInsight do
+  alias Console.Deployments.Notifications.Utils
+  alias Console.Schema.AiInsight
+  require Logger
+
+  def message(%{item: {stack, %AiInsight{text: t} = insight}}) when byte_size(t) > 0 do
+    Timex.now()
+    |> Timex.shift(minutes: -5)
+    |> Timex.before?(ts(insight))
+    |> case do
+      true ->
+        stack = Console.Repo.preload(stack, [:cluster, :repository])
+        {"stack.insight", Utils.filters(stack), %{stack: stack, insight: insight}}
       _ -> :ok
     end
   end

@@ -47,6 +47,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :version,       :string
     field :release,       :string
     field :url,           :string
+    field :ignore_hooks,  :boolean
     field :set,           :helm_value_attributes
     field :repository,    :namespaced_name
     field :git,           :git_ref_attributes
@@ -259,6 +260,7 @@ defmodule Console.GraphQl.Deployments.Service do
       description: "a helm values file to use with this service, requires auth and so is heavy to query",
       resolve: &Deployments.helm_values/3
     field :release,       :string
+    field :ignore_hooks,  :boolean
     field :git,           :git_ref, description: "spec of where to find the chart in git"
     field :repository_id, :id, description: "a git repository in Plural to use as a source"
     field :repository,    :object_reference, description: "pointer to the flux helm repository resource used for this chart"

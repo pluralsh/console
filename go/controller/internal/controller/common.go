@@ -137,6 +137,7 @@ func genServiceTemplate(ctx context.Context, c runtimeclient.Client, namespace s
 			ValuesFiles: srv.Helm.ValuesFiles,
 			Version:     srv.Helm.Version,
 			URL:         srv.Helm.URL,
+			IgnoreHooks: srv.Helm.IgnoreHooks,
 		}
 		if srv.Helm.Repository != nil {
 			serviceTemplate.Helm.Repository = &console.NamespacedName{

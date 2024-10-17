@@ -56,7 +56,7 @@ defmodule Console.AI.OpenAI do
 
   defp chat(%__MODULE__{access_key: token, model: model}, history) do
     body = Jason.encode!(%{
-      model: model || "chatgpt-4o-latest",
+      model: model || "gpt-4o-mini",
       messages: history,
     })
 

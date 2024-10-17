@@ -3,9 +3,11 @@ defmodule Console.AI.Cron do
   alias Console.{Repo, PubSub}
   alias Console.AI.Worker
   alias Console.Deployments.Settings
-  alias Console.Schema.{AiInsight, Service, DeploymentSettings}
+  alias Console.Schema.{AiInsight, Stack, Service, DeploymentSettings}
 
   require Logger
+
+  @chunk 100
 
   def trim() do
     AiInsight.expired()
@@ -18,18 +20,32 @@ defmodule Console.AI.Cron do
       |> Service.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
       |> Console.throttle()
-      |> Stream.chunk_every(20)
-      |> Stream.map(fn chunk ->
-        Enum.map(chunk, & {&1, Worker.generate(&1)})
-        |> Enum.map(fn {svc, t} -> {svc, Worker.await(t)} end)
-        |> Enum.map(fn
-          {svc, {:ok, insight}} ->
-            handle_notify(PubSub.ServiceInsight, {svc, insight})
-          res ->
-            Logger.info "not sending event for result: #{inspect(res)}"
-        end)
-      end)
+      |> Stream.chunk_every(@chunk)
+      |> Stream.map(&batch_insight(PubSub.ServiceInsight, &1))
       |> Stream.run()
+    end)
+  end
+
+  def stacks() do
+    if_enabled(fn ->
+      Stack.for_status(:failed)
+      |> Stack.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Console.throttle()
+      |> Stream.chunk_every(@chunk)
+      |> Stream.map(&batch_insight(PubSub.StackInsight, &1))
+      |> Stream.run()
+    end)
+  end
+
+  defp batch_insight(event, chunk) do
+    Enum.map(chunk, & {&1, Worker.generate(&1)})
+    |> Enum.map(fn {res, t} -> {res, Worker.await(t)} end)
+    |> Enum.map(fn
+      {res, {:ok, insight}} ->
+        handle_notify(event, {res, insight})
+      res ->
+        Logger.info "not sending event for result: #{inspect(res)}"
     end)
   end
 

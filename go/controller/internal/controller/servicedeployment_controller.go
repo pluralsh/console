@@ -317,6 +317,7 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 			Version:     service.Spec.Helm.Version,
 			Chart:       service.Spec.Helm.Chart,
 			URL:         service.Spec.Helm.URL,
+			IgnoreHooks: service.Spec.Helm.IgnoreHooks,
 		}
 		if service.Spec.Helm.Repository != nil {
 			attr.Helm.Repository = &console.NamespacedName{

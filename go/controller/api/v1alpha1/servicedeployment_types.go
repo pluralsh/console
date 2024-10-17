@@ -64,6 +64,10 @@ type ServiceHelm struct {
 	// pointer to the FluxCD helm repository to use
 	// +kubebuilder:validation:Optional
 	Repository *NamespacedName `json:"repository,omitempty"`
+
+	// whether you want to completely ignore any helm hooks when actualizing this service
+	// +kubebuilder:validation:Optional
+	IgnoreHooks *bool `json:"ignoreHooks,omitempty"`
 }
 
 type ServiceDependency struct {
