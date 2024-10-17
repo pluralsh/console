@@ -2289,6 +2289,7 @@ export type HelmChartVersion = {
 export type HelmConfigAttributes = {
   chart?: InputMaybe<Scalars['String']['input']>;
   git?: InputMaybe<GitRefAttributes>;
+  ignoreHooks?: InputMaybe<Scalars['Boolean']['input']>;
   release?: InputMaybe<Scalars['String']['input']>;
   repository?: InputMaybe<NamespacedName>;
   /** pointer to a Plural GitRepository */
@@ -2355,6 +2356,7 @@ export type HelmSpec = {
   chart?: Maybe<Scalars['String']['output']>;
   /** spec of where to find the chart in git */
   git?: Maybe<GitRef>;
+  ignoreHooks?: Maybe<Scalars['Boolean']['output']>;
   release?: Maybe<Scalars['String']['output']>;
   /** pointer to the flux helm repository resource used for this chart */
   repository?: Maybe<ObjectReference>;

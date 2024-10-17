@@ -27,12 +27,12 @@ defimpl Console.AI.Evidence, for: Console.Schema.Service do
 
   def preload(comp), do: Console.Repo.preload(comp, [:insight, :cluster, :errors, :repository])
 
-  defp description(%Service{status: s, namespace: ns, name: name, cluster: %Cluster{name: cluster}} = svc) do
+  defp description(%Service{status: s, namespace: ns, name: name, cluster: %Cluster{name: cluster} = c} = svc) do
     [
       {:user, """
         The plural service #{name} is currently in state #{s}, meaning: #{state_description(svc)}.
 
-        Some details about this service, it's syncing into the kubenetes namespace #{ns} in the cluster #{cluster}.
+        Some details about this service, it's syncing into the kubenetes namespace #{ns} in the #{c.distro} kubernetes cluster #{cluster}.
 
         #{git_source(svc)}
         #{helm_source(svc)}

@@ -220,6 +220,10 @@ spec:
                       chart:
                         description: chart to use
                         type: string
+                      ignoreHooks:
+                        description: whether you want to completely ignore any helm
+                          hooks when actualizing this service
+                        type: boolean
                       release:
                         description: name of the helm release to use when applying
                         type: string

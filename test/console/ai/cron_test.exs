@@ -39,4 +39,27 @@ defmodule Console.AI.CronTest do
       assert_receive {:event, %PubSub.ServiceInsight{item: {%{id: ^id}, _}}}
     end
   end
+
+  describe "#stacks/0" do
+    test "it will gather info from stack runs and generate" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      stack = insert(:stack, status: :failed)
+      run   = insert(:stack_run, stack: stack)
+      step  = insert(:run_step, status: :failed, cmd: "echo", args: ["hello", "work"])
+      insert(:run_log, step: step, logs: "blah blah blah")
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+
+      Cron.stacks()
+
+      %{id: id} = stack = Console.Repo.preload(refetch(stack), [:insight])
+
+      assert stack.insight.text
+
+      run = Console.Repo.preload(refetch(run), [:insight])
+
+      assert run.insight.text
+
+      assert_receive {:event, %PubSub.StackInsight{item: {%{id: ^id}, _}}}
+    end
+  end
 end

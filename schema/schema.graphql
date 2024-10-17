@@ -3088,6 +3088,8 @@ input HelmConfigAttributes {
 
   url: String
 
+  ignoreHooks: Boolean
+
   set: HelmValueAttributes
 
   repository: NamespacedName
@@ -3391,6 +3393,8 @@ type HelmSpec {
   values: String
 
   release: String
+
+  ignoreHooks: Boolean
 
   "spec of where to find the chart in git"
   git: GitRef

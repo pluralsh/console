@@ -1,0 +1,9 @@
+✨ We have a new insight into an issue with your stack
+
+<%= @stack.name %> currently is <%= @stack.status %>
+
+Here's what we've found:
+
+<%= @insight.text %>
+
+View full details: <%= Console.url("/stacks/#{@stack.id}") %>

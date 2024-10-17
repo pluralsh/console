@@ -97,6 +97,7 @@ require (
 replace (
 	github.com/pluralsh/console/go/client => ../client
 	k8s.io/api => k8s.io/api v0.29.3
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.29.3
 	k8s.io/apimachinery => k8s.io/apimachinery v0.29.3
 	k8s.io/client-go => k8s.io/client-go v0.29.3
 	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.17.5

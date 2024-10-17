@@ -164,6 +164,10 @@ defmodule Console.Schema.Stack do
     from(s in query, order_by: ^order)
   end
 
+  def for_status(query \\ __MODULE__, status) do
+    from(s in query, where: s.status == ^status)
+  end
+
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
   @valid ~w(name type paused actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
