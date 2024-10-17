@@ -7,6 +7,7 @@ defmodule Console.AI.Evidence.Component.Resource do
     Ingress,
     CronJob,
     Job,
+    Raw
   }
   alias Console.Schema.ServiceComponent
 
@@ -42,12 +43,45 @@ defmodule Console.AI.Evidence.Component.Resource do
     |> Kube.Client.raw()
   end
 
+  def generate(resource) do
+    with {:ok, events} <- events(resource),
+         {:ok, hydration} <- hydrate(resource) do
+      {:ok, [{:user, """
+          The kubernetes component #{description(resource)} could also be related.
+
+          The raw json object itself is as follows:
+
+          ```json
+          #{encode(resource)}
+          ```
+          """
+        }]
+        ++ tpl_events(events)
+        ++ tpl_hydration(hydration)
+      }
+    end
+  end
+
+  defp tpl_hydration([_ | _] = hydration) do
+    [
+      {:user, "And I've also found some more useful context to help understand what's going on with this component"}
+      | hydration
+    ]
+  end
+  defp tpl_hydration(_), do: []
+
+  defp description(resource) do
+    {g, v, k, namespace, name} = Kube.Utils.identifier(resource)
+    "#{g}/#{v} #{k}#{ns(namespace)} with name #{name}"
+  end
+
   def hydrate(%AppsV1.Deployment{} = dep), do: Deployment.hydrate(dep)
   def hydrate(%AppsV1.StatefulSet{} = ss), do: StatefulSet.hydrate(ss)
   def hydrate(%AppsV1.DaemonSet{} = ds), do: DaemonSet.hydrate(ds)
   def hydrate(%NetworkingV1.Ingress{} = ing), do: Ingress.hydrate(ing)
   def hydrate(%BatchV1.CronJob{} = cj), do: CronJob.hydrate(cj)
   def hydrate(%BatchV1.Job{} = cj), do: Job.hydrate(cj)
+  def hydrate(%{"metadata" => _} = raw), do: Raw.hydrate(raw)
   def hydrate(_), do: {:ok, []}
 
   def events(resource) do
