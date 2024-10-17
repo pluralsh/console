@@ -79,9 +79,10 @@ function format(value: number, type: 'cpu' | 'memory'): string {
   }
 }
 
-// values is expected to be provided normalized to the core base
+// values is expected to be provided normalized to the cores base
 function formatCPU(value: number): string {
   // Normalize from cores to the millicores base
+  // 0.12 (cores) == 120 (millicores)
   value = value * 1000
 
   /** Base for prefixes */
@@ -119,7 +120,7 @@ function formatMemory(value: number): string {
     power += 1
   }
 
-  return `${Number((value / divider).toFixed(0))} ${memoryPowerSuffixes[power]}`
+  return `${Number((value / divider).toFixed(0))}${memoryPowerSuffixes[power]}`
 }
 
 export const Prometheus = {
