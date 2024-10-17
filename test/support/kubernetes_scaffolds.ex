@@ -142,7 +142,7 @@ defmodule KubernetesScaffolds do
 
   def certificate(name) do
     %Kube.Certificate{
-      metadata: %ObjectMeta{name: name, namespace: name},
+      metadata: %ObjectMeta{uid: Ecto.UUID.generate(), name: name, namespace: name},
       status: %Kube.Certificate.Status{
         renewal_time: DateTime.utc_now() |> DateTime.to_iso8601()
       },

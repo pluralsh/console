@@ -1,0 +1,41 @@
+defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
+  use Console.AI.Evidence.Base
+  alias Console.AI.Evidence.Component.Resource
+  alias Console.Schema.ServiceComponent
+
+  def generate(%ServiceComponent{service: %{cluster: cluster}} = comp) do
+    save_kubeconfig(cluster)
+    with {:ok, resource} <- Resource.resource(comp, cluster),
+         {:ok, events} <- Resource.events(resource),
+         {:ok, hydration} <- Resource.hydrate(resource) do
+      {:ok, [{:user, """
+          The kubernetes component #{description(comp)} is in #{comp.state} state, meaning #{meaning(comp.state)}.
+
+          The raw json object itself is as follows:
+
+          ```json
+          #{encode(resource)}
+          ```
+          """
+        }]
+        ++ tpl_events(events)
+        ++ tpl_hydration(hydration)
+      }
+    end
+  end
+
+  def insight(%{insight: insight}), do: insight
+
+  def preload(comp), do: Console.Repo.preload(comp, [:insight, service: :cluster])
+
+  defp tpl_hydration([_ | _] = hydration) do
+    [
+      {:user, "And I've also found some more useful context to help understand what's going on with this component"}
+      | hydration
+    ]
+  end
+  defp tpl_hydration(_), do: []
+
+  defp description(%ServiceComponent{} = comp),
+    do: "#{comp.group}/#{comp.version} #{comp.kind}#{ns(comp.namespace)} with name #{comp.name}"
+end

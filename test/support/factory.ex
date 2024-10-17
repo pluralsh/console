@@ -677,6 +677,12 @@ defmodule Console.Factory do
     }
   end
 
+  def ai_insight_factory do
+    %Schema.AiInsight{
+      text: "some insight",
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

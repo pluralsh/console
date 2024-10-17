@@ -13,7 +13,8 @@ defmodule Console.Schema.StackRun do
     StackFile,
     User,
     ServiceError,
-    PullRequest
+    PullRequest,
+    AiInsight
   }
 
   schema "stack_runs" do
@@ -66,6 +67,7 @@ defmodule Console.Schema.StackRun do
     belongs_to :approver,     User
     belongs_to :pull_request, PullRequest
     belongs_to :actor,        User
+    belongs_to :insight,      AiInsight, on_replace: :update
 
     timestamps()
   end
@@ -128,6 +130,7 @@ defmodule Console.Schema.StackRun do
     |> cast_assoc(:steps)
     |> cast_assoc(:files)
     |> cast_assoc(:errors)
+    |> cast_assoc(:insight)
     |> put_new_change(:id, &Piazza.Ecto.UUID.generate_monotonic/0)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:cluster_id)

@@ -175,6 +175,19 @@ export type AgentMigrationAttributes = {
   ref?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** A representation of a LLM-derived insight */
+export type AiInsight = {
+  __typename?: 'AiInsight';
+  /** any errors generated when compiling this insight */
+  error?: Maybe<Array<Maybe<ServiceError>>>;
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** a deduplication sha for this insight */
+  sha?: Maybe<Scalars['String']['output']>;
+  /** the text of this insight */
+  text?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
   Openai = 'OPENAI'
@@ -192,7 +205,6 @@ export type AiSettings = {
 /** Anthropic connection information */
 export type AnthropicSettings = {
   __typename?: 'AnthropicSettings';
-  accessToken?: Maybe<Scalars['String']['output']>;
   /** the anthropic model version to use */
   model?: Maybe<Scalars['String']['output']>;
 };
@@ -2424,6 +2436,8 @@ export type InfrastructureStack = {
   git: GitRef;
   id?: Maybe<Scalars['ID']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** an insight explaining the state of this stack */
+  insight?: Maybe<AiInsight>;
   /** optional k8s job configuration for the job that will apply this stack */
   jobSpec?: Maybe<JobGateSpec>;
   /** whether you want Plural to manage the state of this stack */
@@ -3477,7 +3491,6 @@ export enum OidcProviderType {
 /** OpenAI connection information */
 export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
-  accessToken?: Maybe<Scalars['String']['output']>;
   /** the openai model version to use */
   model?: Maybe<Scalars['String']['output']>;
 };
@@ -7460,6 +7473,8 @@ export type ServiceComponent = {
   group?: Maybe<Scalars['String']['output']>;
   /** internal id */
   id: Scalars['ID']['output'];
+  /** an insight explaining the state of this component */
+  insight?: Maybe<AiInsight>;
   /** api kind of this resource */
   kind: Scalars['String']['output'];
   /** kubernetes name of this resource */
@@ -7561,6 +7576,8 @@ export type ServiceDeployment = {
   /** imports from stack outputs */
   imports?: Maybe<Array<Maybe<ServiceImport>>>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** an insight explaining the state of this service */
+  insight?: Maybe<AiInsight>;
   /** the desired sync interval for this service */
   interval?: Maybe<Scalars['String']['output']>;
   /** kustomize related service metadata */
@@ -8105,6 +8122,8 @@ export type StackRun = {
   git: GitRef;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** an insight explaining the state of this stack run */
+  insight?: Maybe<AiInsight>;
   /** the kubernetes job for this run (useful for debugging if issues arise) */
   job?: Maybe<Job>;
   /** optional k8s job configuration for the job that will apply this stack */

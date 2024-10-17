@@ -1,0 +1,9 @@
+✨ We have a new insight into an issue with your service
+
+<%= @service.name %> is currently in state <%= @service.state %>
+
+Here's what we've found:
+
+<%= @insight.text %>
+
+View full details: <%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>

@@ -18,7 +18,8 @@ defmodule Console.Schema.Service do
     ServiceImport,
     ServiceContextBinding,
     NamespaceInstance,
-    ServiceDependency
+    ServiceDependency,
+    AiInsight
   }
 
   defenum Promotion, ignore: 0, proceed: 1, rollback: 2
@@ -131,6 +132,7 @@ defmodule Console.Schema.Service do
     belongs_to :cluster,    Cluster
     belongs_to :repository, GitRepository
     belongs_to :owner,      GlobalService
+    belongs_to :insight,    AiInsight, on_replace: :update
     belongs_to :parent,     __MODULE__
 
     has_one :reference_cluster,  Cluster
@@ -242,6 +244,14 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.status == ^status)
   end
 
+  def for_statuses(query \\ __MODULE__, statuses) do
+    vals = Enum.map(statuses, fn s ->
+      {:ok, s} = Status.dump(s)
+      s
+    end)
+    from(s in query, where: s.status in ^vals)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :cluster_id, asc: :name]) do
     from(s in query, order_by: ^order)
   end
@@ -300,6 +310,7 @@ defmodule Console.Schema.Service do
     |> cast_assoc(:context_bindings)
     |> cast_assoc(:dependencies)
     |> cast_assoc(:imports)
+    |> cast_assoc(:insight)
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:owner_id)
     |> foreign_key_constraint(:repository_id)

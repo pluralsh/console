@@ -85,3 +85,24 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackRunCreat
     {"stack.run", Utils.filters(run), %{stack_run: run}}
   end
 end
+
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ServiceInsight do
+  alias Console.Deployments.Notifications.Utils
+  alias Console.Schema.AiInsight
+  require Logger
+
+  def message(%{item: {svc, %AiInsight{text: t} = insight}}) when byte_size(t) > 0 do
+    Timex.now()
+    |> Timex.shift(minutes: -5)
+    |> Timex.before?(ts(insight))
+    |> case do
+      true ->
+        svc = Console.Repo.preload(svc, [:cluster, :repository])
+        {"service.insight", Utils.filters(svc), %{service: svc, insight: insight}}
+      _ -> :ok
+    end
+  end
+  def message(_), do: :ok
+
+  defp ts(%AiInsight{inserted_at: iat, updated_at: uat}), do: uat || iat
+end

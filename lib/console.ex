@@ -14,6 +14,10 @@ defmodule Console do
 
   def cloud?(), do: !!Console.conf(:cloud)
 
+  def truncate(str, len) when byte_size(str) > len,
+    do: "#{String.slice(str, 0, len - 3)}..."
+  def truncate(str, _), do: str
+
   def byok?() do
     case {provider(), Console.conf(:byok)} do
       {_, true} -> true

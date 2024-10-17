@@ -291,9 +291,12 @@ defmodule Console.Deployments.Services do
   def add_errors(%Service{id: svc_id}, errors) do
     get_service(svc_id)
     |> Repo.preload([:errors])
-    |> Service.changeset(%{errors: errors})
+    |> Service.changeset(mark_failed(%{errors: errors}))
     |> Repo.update()
   end
+
+  defp mark_failed(%{errors: [_ | _]} = attrs), do: Map.put(attrs, :status, :failed)
+  defp mark_failed(attrs), do: attrs
 
   @doc """
   Updates a service and creates a new revision
