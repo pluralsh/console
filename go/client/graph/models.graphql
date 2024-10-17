@@ -151,6 +151,7 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
     createBindings { ...PolicyBindingFragment }
     artifactRepository { ...GitRepositoryFragment }
     deployerRepository { ...GitRepositoryFragment }
+    ai { ...AISettingsFragment }
 }
 
 fragment ClusterEdgeFragment on ClusterEdge {
@@ -224,4 +225,15 @@ fragment NamespaceMetadataFragment on NamespaceMetadata {
 fragment ClusterTargetFragment on ClusterTarget {
     tags
     distro
+}
+
+fragment AISettingsFragment on AiSettings {
+    enabled
+    provider
+    openai {
+        model
+    }
+    anthropic {
+        model
+    }
 }

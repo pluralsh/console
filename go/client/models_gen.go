@@ -147,10 +147,22 @@ type AiSettings struct {
 	Anthropic *AnthropicSettings `json:"anthropic,omitempty"`
 }
 
+type AiSettingsAttributes struct {
+	Enabled   *bool                        `json:"enabled,omitempty"`
+	Provider  *AiProvider                  `json:"provider,omitempty"`
+	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
+	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+}
+
 // Anthropic connection information
 type AnthropicSettings struct {
 	// the anthropic model version to use
 	Model *string `json:"model,omitempty"`
+}
+
+type AnthropicSettingsAttributes struct {
+	AccessToken *string `json:"accessToken,omitempty"`
+	Model       *string `json:"model,omitempty"`
 }
 
 // a representation of a kubernetes api deprecation
@@ -1490,7 +1502,9 @@ type DeploymentSettingsAttributes struct {
 	// connection details for a loki instance to use
 	LokiConnection *HTTPConnectionAttributes `json:"lokiConnection,omitempty"`
 	// configuration for smtp message delivery
-	SMTP           *SMTPSettingsAttributes    `json:"smtp,omitempty"`
+	SMTP *SMTPSettingsAttributes `json:"smtp,omitempty"`
+	// configuration for LLM provider clients
+	Ai             *AiSettingsAttributes      `json:"ai,omitempty"`
 	ReadBindings   []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings  []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	GitBindings    []*PolicyBindingAttributes `json:"gitBindings,omitempty"`
@@ -2887,6 +2901,11 @@ type OidcProviderAttributes struct {
 type OpenaiSettings struct {
 	// the openai model version to use
 	Model *string `json:"model,omitempty"`
+}
+
+type OpenaiSettingsAttributes struct {
+	AccessToken *string `json:"accessToken,omitempty"`
+	Model       *string `json:"model,omitempty"`
 }
 
 type OverlayUpdate struct {

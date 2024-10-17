@@ -1780,6 +1780,7 @@ type DeploymentSettingsFragment struct {
 	CreateBindings     []*PolicyBindingFragment "json:\"createBindings,omitempty\" graphql:\"createBindings\""
 	ArtifactRepository *GitRepositoryFragment   "json:\"artifactRepository,omitempty\" graphql:\"artifactRepository\""
 	DeployerRepository *GitRepositoryFragment   "json:\"deployerRepository,omitempty\" graphql:\"deployerRepository\""
+	Ai                 *AISettingsFragment      "json:\"ai,omitempty\" graphql:\"ai\""
 }
 
 func (t *DeploymentSettingsFragment) GetID() string {
@@ -1835,6 +1836,12 @@ func (t *DeploymentSettingsFragment) GetDeployerRepository() *GitRepositoryFragm
 		t = &DeploymentSettingsFragment{}
 	}
 	return t.DeployerRepository
+}
+func (t *DeploymentSettingsFragment) GetAi() *AISettingsFragment {
+	if t == nil {
+		t = &DeploymentSettingsFragment{}
+	}
+	return t.Ai
 }
 
 type ClusterEdgeFragment struct {
@@ -2159,6 +2166,38 @@ func (t *ClusterTargetFragment) GetDistro() *ClusterDistro {
 		t = &ClusterTargetFragment{}
 	}
 	return t.Distro
+}
+
+type AISettingsFragment struct {
+	Enabled   *bool                         "json:\"enabled,omitempty\" graphql:\"enabled\""
+	Provider  *AiProvider                   "json:\"provider,omitempty\" graphql:\"provider\""
+	Openai    *AISettingsFragment_Openai    "json:\"openai,omitempty\" graphql:\"openai\""
+	Anthropic *AISettingsFragment_Anthropic "json:\"anthropic,omitempty\" graphql:\"anthropic\""
+}
+
+func (t *AISettingsFragment) GetEnabled() *bool {
+	if t == nil {
+		t = &AISettingsFragment{}
+	}
+	return t.Enabled
+}
+func (t *AISettingsFragment) GetProvider() *AiProvider {
+	if t == nil {
+		t = &AISettingsFragment{}
+	}
+	return t.Provider
+}
+func (t *AISettingsFragment) GetOpenai() *AISettingsFragment_Openai {
+	if t == nil {
+		t = &AISettingsFragment{}
+	}
+	return t.Openai
+}
+func (t *AISettingsFragment) GetAnthropic() *AISettingsFragment_Anthropic {
+	if t == nil {
+		t = &AISettingsFragment{}
+	}
+	return t.Anthropic
 }
 
 type ManagedNamespaceEdgeFragment struct {
@@ -4775,6 +4814,28 @@ func (t *GroupMemberFragment_Group) GetID() string {
 	return t.ID
 }
 
+type DeploymentSettingsFragment_Ai_AISettingsFragment_Openai struct {
+	Model *string "json:\"model,omitempty\" graphql:\"model\""
+}
+
+func (t *DeploymentSettingsFragment_Ai_AISettingsFragment_Openai) GetModel() *string {
+	if t == nil {
+		t = &DeploymentSettingsFragment_Ai_AISettingsFragment_Openai{}
+	}
+	return t.Model
+}
+
+type DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic struct {
+	Model *string "json:\"model,omitempty\" graphql:\"model\""
+}
+
+func (t *DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic) GetModel() *string {
+	if t == nil {
+		t = &DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic{}
+	}
+	return t.Model
+}
+
 type ClusterEdgeFragment_Node_ClusterFragment_Provider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	Name      string                    "json:\"name\" graphql:\"name\""
@@ -4880,6 +4941,28 @@ func (t *GlobalServiceFragment_Service) GetID() string {
 		t = &GlobalServiceFragment_Service{}
 	}
 	return t.ID
+}
+
+type AISettingsFragment_Openai struct {
+	Model *string "json:\"model,omitempty\" graphql:\"model\""
+}
+
+func (t *AISettingsFragment_Openai) GetModel() *string {
+	if t == nil {
+		t = &AISettingsFragment_Openai{}
+	}
+	return t.Model
+}
+
+type AISettingsFragment_Anthropic struct {
+	Model *string "json:\"model,omitempty\" graphql:\"model\""
+}
+
+func (t *AISettingsFragment_Anthropic) GetModel() *string {
+	if t == nil {
+		t = &AISettingsFragment_Anthropic{}
+	}
+	return t.Model
 }
 
 type PipelineFragment_Stages_PipelineStageFragment_Services_Criteria struct {
@@ -8717,6 +8800,50 @@ func (t *AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Confi
 		t = &AddServiceError_UpdateServiceComponents_ServiceDeploymentFragment_Configuration{}
 	}
 	return t.Value
+}
+
+type UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai struct {
+	Model *string "json:\"model,omitempty\" graphql:\"model\""
+}
+
+func (t *UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai) GetModel() *string {
+	if t == nil {
+		t = &UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai{}
+	}
+	return t.Model
+}
+
+type UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic struct {
+	Model *string "json:\"model,omitempty\" graphql:\"model\""
+}
+
+func (t *UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic) GetModel() *string {
+	if t == nil {
+		t = &UpdateDeploymentSettings_UpdateDeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic{}
+	}
+	return t.Model
+}
+
+type GetDeploymentSettings_DeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai struct {
+	Model *string "json:\"model,omitempty\" graphql:\"model\""
+}
+
+func (t *GetDeploymentSettings_DeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai) GetModel() *string {
+	if t == nil {
+		t = &GetDeploymentSettings_DeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Openai{}
+	}
+	return t.Model
+}
+
+type GetDeploymentSettings_DeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic struct {
+	Model *string "json:\"model,omitempty\" graphql:\"model\""
+}
+
+func (t *GetDeploymentSettings_DeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic) GetModel() *string {
+	if t == nil {
+		t = &GetDeploymentSettings_DeploymentSettings_DeploymentSettingsFragment_Ai_AISettingsFragment_Anthropic{}
+	}
+	return t.Model
 }
 
 type GetServiceDeployment_ServiceDeployment_ServiceDeploymentExtended_Revision_RevisionFragment_Git struct {
@@ -19202,6 +19329,9 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
 	deployerRepository {
 		... GitRepositoryFragment
 	}
+	ai {
+		... AISettingsFragment
+	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -19229,6 +19359,16 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+}
+fragment AISettingsFragment on AiSettings {
+	enabled
+	provider
+	openai {
+		model
+	}
+	anthropic {
+		model
+	}
 }
 `
 
@@ -19274,6 +19414,9 @@ fragment DeploymentSettingsFragment on DeploymentSettings {
 	deployerRepository {
 		... GitRepositoryFragment
 	}
+	ai {
+		... AISettingsFragment
+	}
 }
 fragment PolicyBindingFragment on PolicyBinding {
 	id
@@ -19301,6 +19444,16 @@ fragment GitRepositoryFragment on GitRepository {
 	authMethod
 	url
 	decrypt
+}
+fragment AISettingsFragment on AiSettings {
+	enabled
+	provider
+	openai {
+		model
+	}
+	anthropic {
+		model
+	}
 }
 `
 
