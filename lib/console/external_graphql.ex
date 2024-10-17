@@ -61,6 +61,7 @@ defmodule Console.ExternalGraphQl do
   import_types Console.GraphQl.CustomTypes
   import_types Console.GraphQl.Schema.Base
   import_types Console.GraphQl.Users
+  import_types Console.GraphQl.AI
   import_types Console.GraphQl.Deployments
   import_types Console.GraphQl.Observability
   import_types Console.GraphQl.Kubernetes.Pod

@@ -54,7 +54,7 @@ defmodule ConsoleWeb.Plugs.Token do
   def get_cluster(%Plug.Conn{private: %{} = private}), do: Map.get(private, @token_key)
   def get_cluster(_), do: nil
 
-  defp get_token(conn) do
+  def get_token(conn) do
     case get_req_header(conn, "authorization") do
       ["Token deploy-" <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :deploy)
       ["Token console-" <> _ = token | _] -> match_and_extract(~r/^Token\:?\s+(.*)$/, String.trim(token), :user)
@@ -63,7 +63,14 @@ defmodule ConsoleWeb.Plugs.Token do
     end
   end
 
-  defp match_and_extract(regex, token, type) do
+  def get_bearer_token(conn) do
+    case get_req_header(conn, "authorization") do
+      ["Bearer " <> _ = token | _] -> match_and_extract(~r/^Bearer\:?\s+(.*)$/, String.trim(token), :bearer)
+      _ -> {:error, :unauthorized}
+    end
+  end
+
+  def match_and_extract(regex, token, type) do
     case Regex.run(regex, token) do
       [_, match] -> {:ok, type, String.trim(match)}
       _ -> :error

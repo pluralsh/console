@@ -20,6 +20,7 @@ defmodule Console.GraphQl do
   import_types Console.GraphQl.Runbooks
   import_types Console.GraphQl.Webhooks
   import_types Console.GraphQl.Database
+  import_types Console.GraphQl.AI
   import_types Console.GraphQl.Deployments
 
   @sources [
@@ -66,6 +67,7 @@ defmodule Console.GraphQl do
     import_fields :webhook_queries
     import_fields :database_queries
     import_fields :deployment_queries
+    import_fields :ai_queries
   end
 
   mutation do

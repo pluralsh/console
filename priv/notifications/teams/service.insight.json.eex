@@ -5,12 +5,13 @@
     "summary": "✨ New insights generated for your service <%= @service.name %>",
     "sections": [{
         "activityTitle": "✨ *New insights generated for your service <%= @service.name %>*",
-        "activityText": <%= Jason.encode!(Console.truncate(@insight.text, 2800)) %>,
+        "activitySubtitle": "Here's a brief summary of what we've found",
+        "activityText": <%= Jason.encode!(Console.truncate(@text, 2800)) %>,
         "markdown": true
     }],
     "potentialAction": [{
         "@type": "OpenUri",
-        "name": "Go to URL",
+        "name": "View the full insight in Plural",
         "targets": [{
             "os": "default",
             "uri": "<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"

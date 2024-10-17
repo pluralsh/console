@@ -183,6 +183,8 @@ export type AiInsight = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a deduplication sha for this insight */
   sha?: Maybe<Scalars['String']['output']>;
+  /** a shortish summary of this insight */
+  summary?: Maybe<Scalars['String']['output']>;
   /** the text of this insight */
   text?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -5952,6 +5954,7 @@ export type RootQueryType = {
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   ai?: Maybe<Scalars['String']['output']>;
+  aiCompletion?: Maybe<Scalars['String']['output']>;
   appNotifications?: Maybe<AppNotificationConnection>;
   application?: Maybe<Application>;
   applications?: Maybe<Array<Maybe<Application>>>;
@@ -6145,6 +6148,12 @@ export type RootQueryTypeAccessTokensArgs = {
 
 export type RootQueryTypeAiArgs = {
   prompt: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeAiCompletionArgs = {
+  input: Scalars['String']['input'];
+  system: Scalars['String']['input'];
 };
 
 

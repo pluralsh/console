@@ -323,14 +323,6 @@ defmodule Console.GraphQl.Deployments.Service do
     field :component, :service_component, resolve: dataloader(Deployments), description: "the component of this deprecation"
   end
 
-  @desc "A representation of a LLM-derived insight"
-  object :ai_insight do
-    field :sha,   :string, description: "a deduplication sha for this insight"
-    field :text,  :string, description: "the text of this insight"
-    field :error, list_of(:service_error), description: "any errors generated when compiling this insight"
-
-    timestamps()
-  end
 
   @desc "an error sent from the deploy operator about sync progress"
   object :service_error do
