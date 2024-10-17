@@ -202,11 +202,23 @@ export type AiSettings = {
   provider?: Maybe<AiProvider>;
 };
 
+export type AiSettingsAttributes = {
+  anthropic?: InputMaybe<AnthropicSettingsAttributes>;
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  openai?: InputMaybe<OpenaiSettingsAttributes>;
+  provider?: InputMaybe<AiProvider>;
+};
+
 /** Anthropic connection information */
 export type AnthropicSettings = {
   __typename?: 'AnthropicSettings';
   /** the anthropic model version to use */
   model?: Maybe<Scalars['String']['output']>;
+};
+
+export type AnthropicSettingsAttributes = {
+  accessToken?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** a representation of a kubernetes api deprecation */
@@ -1826,6 +1838,8 @@ export type DeploymentSettings = {
 export type DeploymentSettingsAttributes = {
   /** custom helm values to apply to all agents (useful for things like adding customary annotations/labels) */
   agentHelmValues?: InputMaybe<Scalars['String']['input']>;
+  /** configuration for LLM provider clients */
+  ai?: InputMaybe<AiSettingsAttributes>;
   artifactRepositoryId?: InputMaybe<Scalars['ID']['input']>;
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   deployerRepositoryId?: InputMaybe<Scalars['ID']['input']>;
@@ -3495,6 +3509,11 @@ export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
   /** the openai model version to use */
   model?: Maybe<Scalars['String']['output']>;
+};
+
+export type OpenaiSettingsAttributes = {
+  accessToken?: InputMaybe<Scalars['String']['input']>;
+  model?: InputMaybe<Scalars['String']['input']>;
 };
 
 export enum Operation {

@@ -22,6 +22,8 @@ defmodule Console.GraphQl.Deployments.Settings do
 
     field :smtp, :smtp_settings_attributes, description: "configuration for smtp message delivery"
 
+    field :ai, :ai_settings_attributes, description: "configuration for LLM provider clients"
+
     field :read_bindings,          list_of(:policy_binding_attributes)
     field :write_bindings,         list_of(:policy_binding_attributes)
     field :git_bindings,           list_of(:policy_binding_attributes)

@@ -988,6 +988,9 @@ input DeploymentSettingsAttributes {
   "configuration for smtp message delivery"
   smtp: SmtpSettingsAttributes
 
+  "configuration for LLM provider clients"
+  ai: AiSettingsAttributes
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -1010,6 +1013,23 @@ input HttpConnectionAttributes {
 input StackSettingsAttributes {
   jobSpec: GateJobAttributes
   connectionId: ID
+}
+
+input AiSettingsAttributes {
+  enabled: Boolean
+  provider: AiProvider
+  openai: OpenaiSettingsAttributes
+  anthropic: AnthropicSettingsAttributes
+}
+
+input OpenaiSettingsAttributes {
+  accessToken: String
+  model: String
+}
+
+input AnthropicSettingsAttributes {
+  accessToken: String
+  model: String
 }
 
 input SmtpSettingsAttributes {
