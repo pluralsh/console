@@ -101,6 +101,28 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     end
   end
 
+  def metrics_summary(cluster, _args, _) do
+    case Clusters.cluster_metrics(cluster) do
+      {:ok, %Kube.MetricsAggregate{status: %Kube.MetricsAggregate.Status{} = metrics}} ->
+        {:ok, %{
+          cpu_available: cores(metrics.cpu_available_millicores),
+          cpu_total: cores(metrics.cpu_total_millicores),
+          cpu_used: metrics.cpu_used_percentage,
+          memory_available: milli(metrics.memory_available_bytes),
+          memory_total: milli(metrics.memory_total_bytes),
+          memory_used: metrics.memory_used_percentage,
+          nodes: metrics.nodes
+        }}
+      _ -> {:ok, nil}
+    end
+  end
+
+  defp cores(val) when is_integer(val), do: val / 1000
+  defp cores(_), do: nil
+
+  defp milli(val) when is_integer(val), do: val / (1024 * 1024)
+  defp milli(_), do: nil
+
   def cluster_statuses(args, %{context: %{current_user: user}}) do
     Cluster.for_user(user)
     |> cluster_filters(args)

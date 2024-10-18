@@ -4117,6 +4117,9 @@ type Cluster {
   "any upgrade insights provided by your cloud provider that have been discovered by our agent"
   upgradeInsights: [UpgradeInsight]
 
+  "A summation of the metrics utilization of the current cluster"
+  metricsSummary: ClusterMetricsSummary
+
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
 
@@ -4186,6 +4189,29 @@ type ClusterRevision {
   nodePools: [NodePool]
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+"A summarization of the core cpu and memory metrics for this cluster"
+type ClusterMetricsSummary {
+  nodes: Int
+
+  "the cpu available in vcpu"
+  cpuAvailable: Float
+
+  "the total cpu in the cluster measured in vcpu"
+  cpuTotal: Float
+
+  "a percentage cpu utilization of the cluster"
+  cpuUsed: Int
+
+  "the total number of megabytes unused in the cluster"
+  memoryAvailable: Float
+
+  "the total number of megabytes available in the cluster"
+  memoryTotal: Float
+
+  "a percentage memory utilization of the cluster"
+  memoryUsed: Int
 }
 
 "a specification for a node pool to be created in this cluster"

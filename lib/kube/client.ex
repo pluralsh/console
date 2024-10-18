@@ -34,6 +34,8 @@ defmodule Kube.Client do
   get_request :get_git_repository, Kube.GitRepository
   get_request :get_service_deployment, Kube.ServiceDeployment
 
+  cluster_get_request :get_metrics_aggregate, Kube.MetricsAggregate
+
   delete_request :delete_wireguard_peer, Kube.WireguardPeer
   delete_request :delete_certificate, Kube.Certificate
   delete_request :delete_postgresql, Kube.Postgresql

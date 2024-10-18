@@ -26,6 +26,21 @@ defmodule Kube.Client.Base do
   def path_builder(g, v, k, namespace), do: "/apis/#{g}/#{v}/namespaces/#{Console.namespace(namespace)}/#{k}"
   def path_builder(g, v, k, namespace, name), do: "#{path_builder(g, v, k, namespace)}/#{name}"
 
+  defmacro cluster_get_request(name, model) do
+    quote do
+      def unquote(name)(name, params \\ %{}) do
+        {g, v, k} = unquote(model).gvk()
+        %Kazan.Request{
+          method: "get",
+          path: path(g, v, k, nil, name),
+          query_params: params,
+          response_model: unquote(model)
+        }
+        |> Kube.Utils.run()
+      end
+    end
+  end
+
   defmacro get_request(name, model) do
     quote do
       def unquote(name)(namespace, name, params \\ %{}) do

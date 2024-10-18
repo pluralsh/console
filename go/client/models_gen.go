@@ -716,6 +716,8 @@ type Cluster struct {
 	PinnedCustomResources []*PinnedCustomResource `json:"pinnedCustomResources,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	UpgradeInsights []*UpgradeInsight `json:"upgradeInsights,omitempty"`
+	// A summation of the metrics utilization of the current cluster
+	MetricsSummary *ClusterMetricsSummary `json:"metricsSummary,omitempty"`
 	// the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null
 	Status *ClusterStatus `json:"status,omitempty"`
 	// a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit
@@ -828,6 +830,23 @@ type ClusterMetrics struct {
 	Pods           []*MetricResponse `json:"pods,omitempty"`
 	CPUUsage       []*MetricResponse `json:"cpuUsage,omitempty"`
 	MemoryUsage    []*MetricResponse `json:"memoryUsage,omitempty"`
+}
+
+// A summarization of the core cpu and memory metrics for this cluster
+type ClusterMetricsSummary struct {
+	Nodes *int64 `json:"nodes,omitempty"`
+	// the cpu available in vcpu
+	CPUAvailable *float64 `json:"cpuAvailable,omitempty"`
+	// the total cpu in the cluster measured in vcpu
+	CPUTotal *float64 `json:"cpuTotal,omitempty"`
+	// a percentage cpu utilization of the cluster
+	CPUUsed *int64 `json:"cpuUsed,omitempty"`
+	// the total number of megabytes unused in the cluster
+	MemoryAvailable *float64 `json:"memoryAvailable,omitempty"`
+	// the total number of megabytes available in the cluster
+	MemoryTotal *float64 `json:"memoryTotal,omitempty"`
+	// a percentage memory utilization of the cluster
+	MemoryUsed *int64 `json:"memoryUsed,omitempty"`
 }
 
 type ClusterNodeMetrics struct {
