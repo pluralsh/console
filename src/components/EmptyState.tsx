@@ -6,7 +6,7 @@ import {
 } from 'react'
 import styled from 'styled-components'
 
-type EmptyStateProps = ComponentProps<typeof EmptyStateSC> & {
+export type EmptyStateProps = ComponentProps<typeof EmptyStateSC> & {
   message: string
   description?: string
   icon?: ReactElement

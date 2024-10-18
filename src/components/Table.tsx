@@ -41,7 +41,7 @@ import Button from './Button'
 import CaretUpIcon from './icons/CaretUpIcon'
 import ArrowRightIcon from './icons/ArrowRightIcon'
 import { FillLevelProvider } from './contexts/FillLevelContext'
-import EmptyState from './EmptyState'
+import EmptyState, { type EmptyStateProps } from './EmptyState'
 import { Spinner } from './Spinner'
 
 export type TableProps = DivProps & {
@@ -64,7 +64,7 @@ export type TableProps = DivProps & {
   >
   reactTableOptions?: Partial<Omit<TableOptions<any>, 'data' | 'columns'>>
   onRowClick?: (e: MouseEvent<HTMLTableRowElement>, row: Row<any>) => void
-  emptyStateProps?: ComponentProps<typeof EmptyState>
+  emptyStateProps?: EmptyStateProps
   hasNextPage?: boolean
   fetchNextPage?: () => void
   isFetchingNextPage?: boolean
