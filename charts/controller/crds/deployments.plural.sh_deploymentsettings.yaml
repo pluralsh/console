@@ -44,6 +44,88 @@ spec:
                   (useful for things like adding customary annotations/labels)
                 type: object
                 x-kubernetes-preserve-unknown-fields: true
+              ai:
+                description: AI settings specifies a configuration for LLM provider
+                  clients
+                properties:
+                  anthropic:
+                    description: Anthropic holds the Anthropic provider configuration.
+                    properties:
+                      model:
+                        description: Model is the LLM model name to use.
+                        type: string
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the token to access
+                          the configured AI provider.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    required:
+                    - model
+                    - tokenSecretRef
+                    type: object
+                  enabled:
+                    default: false
+                    description: Enabled defines whether to enable the AI integration
+                      or not.
+                    type: boolean
+                  openAI:
+                    description: OpenAI holds the OpenAI provider configuration.
+                    properties:
+                      model:
+                        description: Model is the LLM model name to use.
+                        type: string
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the token to access
+                          the configured AI provider.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    required:
+                    - model
+                    - tokenSecretRef
+                    type: object
+                  provider:
+                    default: OPENAI
+                    description: Provider defines which of the supported LLM providers
+                      should be used.
+                    enum:
+                    - OPENAI
+                    - ANTHROPIC
+                    type: string
+                type: object
               bindings:
                 description: Bindings
                 properties:
@@ -117,12 +199,14 @@ spec:
                     type: array
                 type: object
               lokiConnection:
-                description: connection details for a loki instance to use
+                description: LokiConnection connection details for a loki instance
+                  to use
                 properties:
                   host:
+                    description: Host ...
                     type: string
                   password:
-                    description: password to connect w/ for basic auth
+                    description: Password to connect w/ for basic auth
                     type: string
                   passwordSecretRef:
                     description: PasswordSecretRef selects a key of a password Secret
@@ -145,7 +229,7 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   user:
-                    description: user to connect with basic auth
+                    description: User to connect with basic auth
                     type: string
                 required:
                 - host
@@ -155,9 +239,10 @@ spec:
                   instance to use
                 properties:
                   host:
+                    description: Host ...
                     type: string
                   password:
-                    description: password to connect w/ for basic auth
+                    description: Password to connect w/ for basic auth
                     type: string
                   passwordSecretRef:
                     description: PasswordSecretRef selects a key of a password Secret
@@ -180,7 +265,7 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                   user:
-                    description: user to connect with basic auth
+                    description: User to connect with basic auth
                     type: string
                 required:
                 - host
