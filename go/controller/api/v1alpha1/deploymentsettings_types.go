@@ -208,7 +208,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 
 		attr.Openai = &console.OpenaiSettingsAttributes{
 			AccessToken: &token,
-			Model:       in.OpenAI.Model,
+			Model:       &in.OpenAI.Model,
 		}
 	case console.AiProviderAnthropic:
 		token, err := in.Anthropic.Token(ctx, c, namespace)
@@ -218,7 +218,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 
 		attr.Anthropic = &console.AnthropicSettingsAttributes{
 			AccessToken: &token,
-			Model:       in.OpenAI.Model,
+			Model:       &in.OpenAI.Model,
 		}
 	}
 
@@ -228,10 +228,10 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 type AIProviderSettings struct {
 	// Model is the LLM model name to use.
 	//
-	// +kubebuilder:validation:Optional
-	Model *string `json:"model,omitempty"`
+	// +kubebuilder:validation:Required
+	Model string `json:"model"`
 
-	// TokenSecretRef is a reference to the secret holding the token to access
+	// TokenSecretRef is a reference to the local secret holding the token to access
 	// the configured AI provider.
 	//
 	// +kubebuilder:validation:Required
