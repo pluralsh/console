@@ -838,6 +838,8 @@ export type Cluster = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
   metadata?: Maybe<Scalars['Map']['output']>;
+  /** A summation of the metrics utilization of the current cluster */
+  metricsSummary?: Maybe<ClusterMetricsSummary>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
   /** list the cached node metrics for a cluster, can also be stale up to 5m */
@@ -1066,6 +1068,24 @@ export type ClusterMetrics = {
   memoryRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   memoryUsage?: Maybe<Array<Maybe<MetricResponse>>>;
   pods?: Maybe<Array<Maybe<MetricResponse>>>;
+};
+
+/** A summarization of the core cpu and memory metrics for this cluster */
+export type ClusterMetricsSummary = {
+  __typename?: 'ClusterMetricsSummary';
+  /** the cpu available in vcpu */
+  cpuAvailable?: Maybe<Scalars['Float']['output']>;
+  /** the total cpu in the cluster measured in vcpu */
+  cpuTotal?: Maybe<Scalars['Float']['output']>;
+  /** a percentage cpu utilization of the cluster */
+  cpuUsed?: Maybe<Scalars['Int']['output']>;
+  /** the total number of megabytes unused in the cluster */
+  memoryAvailable?: Maybe<Scalars['Float']['output']>;
+  /** the total number of megabytes available in the cluster */
+  memoryTotal?: Maybe<Scalars['Float']['output']>;
+  /** a percentage memory utilization of the cluster */
+  memoryUsed?: Maybe<Scalars['Int']['output']>;
+  nodes?: Maybe<Scalars['Int']['output']>;
 };
 
 export type ClusterNodeMetrics = {

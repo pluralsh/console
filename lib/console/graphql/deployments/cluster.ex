@@ -334,6 +334,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve: dataloader(Deployments),
       description: "any upgrade insights provided by your cloud provider that have been discovered by our agent"
 
+    field :metrics_summary, :cluster_metrics_summary,
+      resolve: &Deployments.metrics_summary/3,
+      description: "A summation of the metrics utilization of the current cluster"
+
     field :status, :cluster_status,
       description: "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null",
       resolve: &Deployments.resolve_cluster_status/3
@@ -410,6 +414,17 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :node_pools, list_of(:node_pool)
 
     timestamps()
+  end
+
+  @desc "A summarization of the core cpu and memory metrics for this cluster"
+  object :cluster_metrics_summary do
+    field :nodes,               :integer
+    field :cpu_available,       :float,   description: "the cpu available in vcpu"
+    field :cpu_total,           :float,   description: "the total cpu in the cluster measured in vcpu"
+    field :cpu_used,            :integer, description: "a percentage cpu utilization of the cluster"
+    field :memory_available,    :float,   description: "the total number of megabytes unused in the cluster"
+    field :memory_total,        :float,   description: "the total number of megabytes available in the cluster"
+    field :memory_used,         :integer, description: "a percentage memory utilization of the cluster"
   end
 
   @desc "a specification for a node pool to be created in this cluster"

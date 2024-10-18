@@ -14,7 +14,7 @@ defmodule Console.AI.Evidence.Base do
       alias Kazan.Apis.Apps.V1, as: AppsV1
       alias Kazan.Apis.Networking.V1, as: NetworkingV1
       alias Kazan.Apis.Batch.V1, as: BatchV1
-      alias Kazan.Models.Apimachinery.Meta.V1.{LabelSelector, LabelSelectorRequirement}
+      alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
     end
   end
 
@@ -78,9 +78,9 @@ defmodule Console.AI.Evidence.Base do
     query_fun.(continue)
     |> Kube.Utils.run()
     |> case do
-      {:ok, %{metadata: %MetaV1.ListMeta{continue: c}, items: items}} when is_binary(c) ->
+      {:ok, %{metadata: %MetaV1.ListMeta{continue: c}, items: items}} when is_binary(c) and is_list(items) ->
         k8s_paginator(query_fun, filter_fun, c, res ++ Enum.filter(items, filter_fun))
-      {:ok, %{items: items}} ->
+      {:ok, %{items: items}} when is_list(items) ->
         res ++ Enum.filter(items, filter_fun)
       _ -> res
     end
