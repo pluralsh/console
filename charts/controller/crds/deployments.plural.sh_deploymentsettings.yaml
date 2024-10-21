@@ -85,6 +85,21 @@ spec:
                     description: Enabled defines whether to enable the AI integration
                       or not.
                     type: boolean
+                  ollama:
+                    description: Ollama holds configuration for a self-hosted Ollama
+                      deployment, more details available at https://github.com/ollama/ollama
+                    properties:
+                      model:
+                        description: Model is the Ollama model to use when querying
+                          the /chat api
+                        type: string
+                      url:
+                        description: URL is the url this model is queryable on
+                        type: string
+                    required:
+                    - model
+                    - url
+                    type: object
                   openAI:
                     description: OpenAI holds the OpenAI provider configuration.
                     properties:
@@ -124,6 +139,7 @@ spec:
                     enum:
                     - OPENAI
                     - ANTHROPIC
+                    - OLLAMA
                     type: string
                 type: object
               bindings:

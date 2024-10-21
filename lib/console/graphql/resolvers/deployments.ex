@@ -62,7 +62,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     ObservabilityProvider,
     UpgradeInsight,
     UpgradeInsightDetail,
-    Catalog
+    Catalog,
+    AiInsight
   }
 
   def query(Project, _), do: Project
@@ -123,6 +124,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(ObservabilityProvider, _), do: ObservabilityProvider
   def query(UpgradeInsight, _), do: UpgradeInsight
   def query(UpgradeInsightDetail, _), do: UpgradeInsightDetail
+  def query(AiInsight, _), do: AiInsight
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

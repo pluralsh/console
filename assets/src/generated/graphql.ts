@@ -192,7 +192,15 @@ export type AiInsight = {
 
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
+  Ollama = 'OLLAMA',
   Openai = 'OPENAI'
+}
+
+/** A role to pass to an LLM, modeled after OpenAI's chat api roles */
+export enum AiRole {
+  Assistant = 'ASSISTANT',
+  System = 'SYSTEM',
+  User = 'USER'
 }
 
 /** Settings for configuring access to common LLM providers */
@@ -200,6 +208,7 @@ export type AiSettings = {
   __typename?: 'AiSettings';
   anthropic?: Maybe<AnthropicSettings>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
+  ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
   provider?: Maybe<AiProvider>;
 };
@@ -207,6 +216,7 @@ export type AiSettings = {
 export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
 };
@@ -772,6 +782,12 @@ export type Changelog = {
   repo: Scalars['String']['output'];
   tool: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** A basic AI chat message input, modeled after OpenAI's api model */
+export type ChatMessage = {
+  content: Scalars['String']['input'];
+  role: AiRole;
 };
 
 export type CloneAttributes = {
@@ -3526,6 +3542,19 @@ export enum OidcProviderType {
   Plural = 'PLURAL'
 }
 
+export type OllamaAttributes = {
+  model: Scalars['String']['input'];
+  url: Scalars['String']['input'];
+};
+
+/** Settings for a self-hosted ollama-based LLM deployment */
+export type OllamaSettings = {
+  __typename?: 'OllamaSettings';
+  model: Scalars['String']['output'];
+  /** the url your ollama deployment is hosted on */
+  url: Scalars['String']['output'];
+};
+
 /** OpenAI connection information */
 export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
@@ -5974,6 +6003,7 @@ export type RootQueryType = {
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   ai?: Maybe<Scalars['String']['output']>;
+  /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
   appNotifications?: Maybe<AppNotificationConnection>;
   application?: Maybe<Application>;
@@ -6172,7 +6202,8 @@ export type RootQueryTypeAiArgs = {
 
 
 export type RootQueryTypeAiCompletionArgs = {
-  input: Scalars['String']['input'];
+  chat?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  input?: InputMaybe<Scalars['String']['input']>;
   system: Scalars['String']['input'];
 };
 

@@ -3,7 +3,7 @@ defmodule Console.Schema.DeploymentSettings do
   alias Console.Schema.{PolicyBinding, GitRepository, Gates.JobSpec}
   alias Piazza.Ecto.EncryptedString
 
-  defenum AIProvider, openai: 0, anthropic: 1
+  defenum AIProvider, openai: 0, anthropic: 1, ollama: 2
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -66,6 +66,11 @@ defmodule Console.Schema.DeploymentSettings do
       embeds_one :anthropic, Anthropic, on_replace: :update do
         field :access_key, EncryptedString
         field :model,      :string
+      end
+
+      embeds_one :ollama, Ollama, on_replace: :update do
+        field :model, :string
+        field :url,   :string
       end
     end
 
@@ -134,10 +139,17 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast(attrs, ~w(enabled provider)a)
     |> cast_embed(:openai, with: &ai_api_changeset/2)
     |> cast_embed(:anthropic, with: &ai_api_changeset/2)
+    |> cast_embed(:ollama, with: &ollama_changeset/2)
   end
 
   defp ai_api_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(access_key model)a)
+  end
+
+  defp ollama_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(url model)a)
+    |> validate_required(~w(url model)a)
   end
 end

@@ -21,6 +21,9 @@ find-versions:
 	aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > k8s-versions/eks.json
 	az aks get-versions --location eastus --output json > k8s-versions/aks.json
 
+download-deprecations:
+	curl -L https://raw.githubusercontent.com/FairwindsOps/pluto/refs/heads/master/versions.yaml --output static/versions.yml
+
 build: ## Build the Docker image
 	docker build --build-arg GIT_COMMIT=$(GIT_COMMIT) \
 		--build-arg TARGETARCH=$(TARGETARCH) \

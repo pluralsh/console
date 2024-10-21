@@ -147,6 +147,7 @@ type AiSettings struct {
 	Provider  *AiProvider        `json:"provider,omitempty"`
 	Openai    *OpenaiSettings    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettings `json:"anthropic,omitempty"`
+	Ollama    *OllamaSettings    `json:"ollama,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -154,6 +155,7 @@ type AiSettingsAttributes struct {
 	Provider  *AiProvider                  `json:"provider,omitempty"`
 	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
 }
 
 // Anthropic connection information
@@ -609,6 +611,12 @@ type Changelog struct {
 	Content    *string `json:"content,omitempty"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+// A basic AI chat message input, modeled after OpenAI's api model
+type ChatMessage struct {
+	Role    AiRole `json:"role"`
+	Content string `json:"content"`
 }
 
 type CloneAttributes struct {
@@ -2916,6 +2924,18 @@ type OidcProviderAttributes struct {
 	Description *string         `json:"description,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
+}
+
+type OllamaAttributes struct {
+	Model string `json:"model"`
+	URL   string `json:"url"`
+}
+
+// Settings for a self-hosted ollama-based LLM deployment
+type OllamaSettings struct {
+	Model string `json:"model"`
+	// the url your ollama deployment is hosted on
+	URL string `json:"url"`
 }
 
 // OpenAI connection information
@@ -5523,16 +5543,18 @@ type AiProvider string
 const (
 	AiProviderOpenai    AiProvider = "OPENAI"
 	AiProviderAnthropic AiProvider = "ANTHROPIC"
+	AiProviderOllama    AiProvider = "OLLAMA"
 )
 
 var AllAiProvider = []AiProvider{
 	AiProviderOpenai,
 	AiProviderAnthropic,
+	AiProviderOllama,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama:
 		return true
 	}
 	return false
@@ -5556,6 +5578,50 @@ func (e *AiProvider) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AiProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// A role to pass to an LLM, modeled after OpenAI's chat api roles
+type AiRole string
+
+const (
+	AiRoleSystem    AiRole = "SYSTEM"
+	AiRoleAssistant AiRole = "ASSISTANT"
+	AiRoleUser      AiRole = "USER"
+)
+
+var AllAiRole = []AiRole{
+	AiRoleSystem,
+	AiRoleAssistant,
+	AiRoleUser,
+}
+
+func (e AiRole) IsValid() bool {
+	switch e {
+	case AiRoleSystem, AiRoleAssistant, AiRoleUser:
+		return true
+	}
+	return false
+}
+
+func (e AiRole) String() string {
+	return string(e)
+}
+
+func (e *AiRole) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AiRole(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AiRole", str)
+	}
+	return nil
+}
+
+func (e AiRole) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

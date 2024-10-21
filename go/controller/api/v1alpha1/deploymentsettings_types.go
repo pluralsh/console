@@ -178,7 +178,7 @@ type AISettings struct {
 
 	// Provider defines which of the supported LLM providers should be used.
 	//
-	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC
+	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA
 	// +kubebuilder:default=OPENAI
 	// +kubebuilder:validation:Optional
 	Provider *console.AiProvider `json:"provider,omitempty"`
@@ -192,6 +192,11 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Anthropic *AIProviderSettings `json:"anthropic,omitempty"`
+
+	// Ollama holds configuration for a self-hosted Ollama deployment, more details available at https://github.com/ollama/ollama
+	//
+	// +kubebuilder:validation:Optional
+	Ollama *OllamaSettings `json:"ollama,omitempty"`
 }
 
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
@@ -221,6 +226,11 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AccessToken: &token,
 			Model:       &in.OpenAI.Model,
 		}
+	case console.AiProviderOllama:
+		attr.Ollama = &console.OllamaAttributes{
+			URL:   in.Ollama.URL,
+			Model: in.Ollama.Model,
+		}
 	}
 
 	return attr, nil
@@ -237,6 +247,19 @@ type AIProviderSettings struct {
 	//
 	// +kubebuilder:validation:Required
 	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
+}
+
+// Settings for configuring a self-hosted Ollama LLM, more details at https://github.com/ollama/ollama
+type OllamaSettings struct {
+	// URL is the url this model is queryable on
+	//
+	// +kubebuilder:validation:Required
+	URL string `json:"url"`
+
+	// Model is the Ollama model to use when querying the /chat api
+	//
+	// +kubebuilder:validation:Required
+	Model string `json:"model"`
 }
 
 func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {

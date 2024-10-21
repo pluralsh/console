@@ -12,7 +12,8 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
          {:ok, events} <- Resource.events(resource),
          {:ok, hydration} <- Resource.hydrate(resource) do
       {:ok, [{:user, """
-          The kubernetes component #{description(comp)} is in #{comp.state} state, meaning #{meaning(comp.state)}.
+          The kubernetes component #{description(comp)} is in #{comp.state} state, meaning #{meaning(comp.state)}.  It is deployed
+          on the #{distro(cluster.distro)} kubernetes cluster named #{cluster.name} using Plural's GitOps tooling.
 
           The raw json object itself is as follows:
 

@@ -15,6 +15,7 @@ export function ComponentInsights() {
       direction="column"
       gap="medium"
       overflow="hidden"
+      maxHeight="100%"
     >
       <Flex
         justify="space-between"
