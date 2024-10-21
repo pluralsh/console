@@ -189,14 +189,15 @@ defmodule Console.Deployments.Pipelines do
   @doc """
   Whether all promotion gates for this edge are currently open
   """
-  @spec open?(PipelineEdge.t) :: boolean
-  def open?(%PipelineEdge{gates: [_ | _] = gates}) do
+  @spec open?(PipelineEdge.t, PipelinePromotion.t) :: boolean
+  def open?(%PipelineEdge{gates: [_ | _] = gates}, %PipelinePromotion{revised_at: r}) when not is_nil(r) do
     Enum.all?(gates, fn
-      %PipelineGate{state: :open} -> true
+      %PipelineGate{state: :open} = g ->
+        Timex.after?(coalesce(g.updated_at, g.inserted_at), r)
       _ -> false
     end)
   end
-  def open?(_), do: true
+  def open?(_, _), do: true
 
   @doc """
   Whether an edge was promoted after the given dt
@@ -309,9 +310,10 @@ defmodule Console.Deployments.Pipelines do
   """
   @spec build_promotion(PipelineStage.t) :: promotion_resp
   def build_promotion(%PipelineStage{id: id} = stage) do
+    preloads = [:context, from_edges: :gates, promotion: [services: :revision], services: [service: :revision]]
     start_transaction()
     |> add_operation(:stage, fn _ ->
-      case Repo.preload(stage, [:context, from_edges: :gates, promotion: [services: :revision], services: [service: :revision]]) do
+      case Repo.preload(stage, preloads) do
         %{from_edges: [_ | _]} = stage -> {:ok, stage}
         _ -> {:error, "this stage has no successors"}
       end
@@ -366,7 +368,7 @@ defmodule Console.Deployments.Pipelines do
     |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, services: [:service, :revision]])} end)
     |> add_operation(:edges, fn %{promo: %{stage: stage}} -> {:ok, edges(stage)} end)
     |> add_operation(:resolve, fn %{promo: promotion, edges: edges} ->
-      Enum.filter(edges, &open?/1)
+      Enum.filter(edges, &open?(&1, promotion))
       |> Enum.filter(& !promoted?(&1, promotion.revised_at)) # don't drive promotion for edge if it's promoted_at is later than the revised_at of promotion
       |> Enum.filter(& !pr_promoted?(&1, promotion)) # don't drive promotion if contexts are equal
       |> Enum.reduce(start_transaction(), &promote_edge(&2, promotion, &1))

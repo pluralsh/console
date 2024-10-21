@@ -38,6 +38,7 @@ defmodule Console.AI.Evidence.Component.Raw do
     |> Enum.flat_map(fn {_, vals} -> vals end)
     |> gen_msgs(uid)
   end
+  def hydrate(_), do: {:ok, []}
 
   defp gen_msgs([], _), do: {:ok, []}
   defp gen_msgs(results, uid) do
