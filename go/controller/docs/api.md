@@ -39,6 +39,42 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 
 
 
+#### AIProviderSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `model` _string_ | Model is the LLM model name to use. |  | Required: {} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: {} <br /> |
+
+
+#### AISettings
+
+
+
+AISettings holds the configuration for LLM provider clients.
+
+
+
+_Appears in:_
+- [DeploymentSettingsSpec](#deploymentsettingsspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `enabled` _boolean_ | Enabled defines whether to enable the AI integration or not. | false | Optional: {} <br /> |
+| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC] <br />Optional: {} <br /> |
+| `openAI` _[AIProviderSettings](#aiprovidersettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: {} <br /> |
+| `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: {} <br /> |
+
+
 
 
 #### Binding
@@ -539,7 +575,7 @@ _Appears in:_
 
 #### ContainerResources
 
-
+_Underlying type:_ _[struct{Requests *ContainerResourceRequests "json:\"requests,omitempty\""; Limits *ContainerResourceRequests "json:\"limits,omitempty\""}](#struct{requests-*containerresourcerequests-"json:\"requests,omitempty\"";-limits-*containerresourcerequests-"json:\"limits,omitempty\""})_
 
 
 
@@ -549,10 +585,6 @@ _Appears in:_
 - [Container](#container)
 - [JobSpec](#jobspec)
 
-| Field | Description | Default | Validation |
-| --- | --- | --- | --- |
-| `requests` _[ContainerResourceRequests](#containerresourcerequests)_ |  |  | Optional: {} <br /> |
-| `limits` _[ContainerResourceRequests](#containerresourcerequests)_ |  |  | Optional: {} <br /> |
 
 
 #### CustomRunStep
@@ -663,35 +695,14 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `agentHelmValues` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | AgentHelmValues custom helm values to apply to all agents (useful for things like adding customary annotations/labels) |  | Optional: {} <br /> |
-| `stacks` _[StackSettings](#stacksettings)_ | Stacks global configuration for stack execution |  |  |
+| `stacks` _[StackSettings](#stacksettings)_ | Stacks global configuration for stack execution |  | Optional: {} <br /> |
 | `bindings` _[DeploymentSettingsBindings](#deploymentsettingsbindings)_ | Bindings |  | Optional: {} <br /> |
-| `prometheusConnection` _[HTTPConnection](#httpconnection)_ | PrometheusConnection connection details for a prometheus instance to use |  |  |
-| `lokiConnection` _[HTTPConnection](#httpconnection)_ | connection details for a loki instance to use |  |  |
-
-
-#### Env
-
-_Underlying type:_ _[struct{Name string "json:\"name\""; Value string "json:\"value\""}](#struct{name-string-"json:\"name\"";-value-string-"json:\"value\""})_
+| `prometheusConnection` _[HTTPConnection](#httpconnection)_ | PrometheusConnection connection details for a prometheus instance to use |  | Optional: {} <br /> |
+| `lokiConnection` _[HTTPConnection](#httpconnection)_ | LokiConnection connection details for a loki instance to use |  | Optional: {} <br /> |
+| `ai` _[AISettings](#aisettings)_ | AI settings specifies a configuration for LLM provider clients |  | Optional: {} <br /> |
 
 
 
-
-
-_Appears in:_
-- [Container](#container)
-
-
-
-#### EnvFrom
-
-_Underlying type:_ _[struct{Secret string "json:\"secret\""; ConfigMap string "json:\"configMap\""}](#struct{secret-string-"json:\"secret\"";-configmap-string-"json:\"configmap\""})_
-
-
-
-
-
-_Appears in:_
-- [Container](#container)
 
 
 
@@ -837,9 +848,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `host` _string_ |  |  |  |
-| `user` _string_ | user to connect with basic auth |  |  |
-| `password` _string_ | password to connect w/ for basic auth |  |  |
+| `host` _string_ | Host ... |  | Required: {} <br /> |
+| `user` _string_ | User to connect with basic auth |  | Optional: {} <br /> |
+| `password` _string_ | Password to connect w/ for basic auth |  | Optional: {} <br /> |
 | `passwordSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | PasswordSecretRef selects a key of a password Secret |  | Optional: {} <br /> |
 
 
@@ -1276,7 +1287,7 @@ _Appears in:_
 | `name` _string_ | Name of this OIDCProvider. If not provided OIDCProvider's own name<br />from OIDCProvider.ObjectMeta will be used. |  | Optional: {} <br /> |
 | `description` _string_ | Description can be used to describe this OIDCProvider. |  | Optional: {} <br /> |
 | `redirectUris` _string array_ | RedirectUris is a list of custom run steps that will be executed as<br />part of the stack run. |  | Optional: {} <br /> |
-| `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.<br />It will be created once OIDCProvider is created in the Console API.<br /><br />Secret will contain 2 keys:<br />- 'clientId'<br />- 'clientSecret' |  | Required: {} <br /> |
+| `credentialsSecretRef` _[LocalObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#localobjectreference-v1-core)_ | CredentialsSecretRef is a local reference to the secret that contains OIDC provider credentials.<br />It will be created once OIDCProvider is created in the Console API.<br />Secret will contain 2 keys:<br />- 'clientId'<br />- 'clientSecret' |  | Required: {} <br /> |
 
 
 #### ObservabilityProvider
