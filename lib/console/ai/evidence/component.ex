@@ -3,6 +3,9 @@ defimpl Console.AI.Evidence, for: Console.Schema.ServiceComponent do
   alias Console.AI.Evidence.Component.Resource
   alias Console.Schema.ServiceComponent
 
+  @blacklist ~w(Secret ConfigMap)
+
+  def generate(%ServiceComponent{kind: kind}) when kind in @blacklist, do: {:ok, []}
   def generate(%ServiceComponent{service: %{cluster: cluster}} = comp) do
     save_kubeconfig(cluster)
     with {:ok, resource} <- Resource.resource(comp, cluster),

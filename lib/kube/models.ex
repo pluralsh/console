@@ -19,6 +19,7 @@ Kube.Parser.parse(path: "static/crds/slashcommand.yaml", module: Kube.SlashComma
 Kube.Parser.parse(path: "static/crds/ss-resize.yaml", module: Kube.StatefulSetResize)
 Kube.Parser.parse(path: "static/crds/dashboard.yaml", module: Kube.Dashboard)
 Kube.Parser.parse(path: "static/crds/runbook.yaml", module: Kube.Runbook)
+Kube.Parser.parse(path: "static/crds/metricsaggregate.yaml", module: Kube.MetricsAggregate)
 
 # plural cd crds
 Kube.Parser.parse(path: "charts/controller/crds/deployments.plural.sh_clusters.yaml", module: Kube.PluralCluster)
