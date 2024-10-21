@@ -29,7 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	console "github.com/pluralsh/console/go/client"
-	"github.com/pluralsh/console/go/controller/internal/utils"
+	utils "github.com/pluralsh/console/go/controller/internal/utils/safe"
 )
 
 func init() {
