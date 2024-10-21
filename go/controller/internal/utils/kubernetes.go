@@ -193,6 +193,20 @@ func GetSecret(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1
 	return secret, nil
 }
 
+func GetSecretKey(ctx context.Context, client ctrlruntimeclient.Client, selector *corev1.SecretKeySelector, namespace string) (string, error) {
+	secret := &corev1.Secret{}
+	if err := client.Get(ctx, types.NamespacedName{Name: selector.Name, Namespace: namespace}, secret); err != nil {
+		return "", err
+	}
+
+	key, exists := secret.Data[selector.Key]
+	if !exists {
+		return "", fmt.Errorf("secret %s does not contain key %s", selector.Name, selector.Key)
+	}
+
+	return string(key), nil
+}
+
 func GetCluster(ctx context.Context, client ctrlruntimeclient.Client, ref *corev1.ObjectReference) (*v1alpha1.Cluster, error) {
 	cluster := &v1alpha1.Cluster{}
 	if err := client.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: ref.Namespace}, cluster); err != nil {

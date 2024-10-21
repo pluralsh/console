@@ -29,6 +29,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	console "github.com/pluralsh/console/go/client"
+	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
 func init() {
@@ -243,15 +244,5 @@ func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namesp
 		return "", fmt.Errorf("configured ai provider settings cannot be nil")
 	}
 
-	secret := &corev1.Secret{}
-	if err := c.Get(ctx, types.NamespacedName{Name: in.TokenSecretRef.Name, Namespace: namespace}, secret); err != nil {
-		return "", err
-	}
-
-	token, exists := secret.Data[in.TokenSecretRef.Key]
-	if !exists {
-		return "", fmt.Errorf("token secret does not contain key %s", in.TokenSecretRef.Key)
-	}
-
-	return string(token), nil
+	return utils.GetSecretKey(ctx, c, &in.TokenSecretRef, namespace)
 }
