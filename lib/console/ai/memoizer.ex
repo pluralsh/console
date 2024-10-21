@@ -27,18 +27,21 @@ defmodule Console.AI.Memoizer do
   end
 
   defp persist(%schema{} = model, history, sha) do
-    attrs = case Provider.completion(history) do
-      {:ok, result} ->
-        %{insight: %{text: result, errors: [], sha: sha}}
-      {:error, error} ->
-        %{insight: %{errors: [%{source: "ai", error: error}], sha: sha}}
-    end
-
-    schema.changeset(model, attrs)
+    model
+    |> schema.changeset(insight_attrs(history, sha))
     |> Repo.update()
     |> case do
       {:ok, %{insight: insight}} -> {:ok, insight}
       {:error, _} -> {:error, "failed to persist insight to db"}
+    end
+  end
+
+  defp insight_attrs(history, sha) do
+    with {:ok, insight} <- Provider.completion(history),
+         {:ok, summary} <- Provider.summary(insight) do
+      %{insight: %{text: insight, summary: summary, errors: [], sha: sha}}
+    else
+      {:error, error} -> %{insight: %{errors: [%{source: "ai", error: error}], sha: sha}}
     end
   end
 

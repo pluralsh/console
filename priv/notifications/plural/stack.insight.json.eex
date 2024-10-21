@@ -2,8 +2,8 @@
 
 <%= @stack.name %> currently is <%= @stack.status %>
 
-Here's what we've found:
+Here's a brief summary of what we've found:
 
-<%= @insight.text %>
+<%= @text %>
 
 View full details: <%= Console.url("/stacks/#{@stack.id}") %>

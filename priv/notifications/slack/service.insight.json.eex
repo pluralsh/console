@@ -12,7 +12,14 @@
 			"type": "section",
 			"text": {
                 "type": "plain_text",
-                "text": <%= Jason.encode!(Console.truncate(@insight.text, 2800)) %>
+                "text": "Here's a brief summary of what we've found:\n"
+            }
+		},
+		{
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": <%= Jason.encode!(Console.truncate(@text, 2800)) %>
             }
 		},
         {
@@ -22,7 +29,7 @@
 					"type": "button",
 					"text": {
 						"type": "plain_text",
-						"text": "View Service",
+						"text": "View The Full Insight Here",
 						"emoji": true
 					},
 					"url": "<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"

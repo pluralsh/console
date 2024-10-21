@@ -133,6 +133,8 @@ type AiInsight struct {
 	Sha *string `json:"sha,omitempty"`
 	// the text of this insight
 	Text *string `json:"text,omitempty"`
+	// a shortish summary of this insight
+	Summary *string `json:"summary,omitempty"`
 	// any errors generated when compiling this insight
 	Error      []*ServiceError `json:"error,omitempty"`
 	InsertedAt *string         `json:"insertedAt,omitempty"`

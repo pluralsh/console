@@ -1,14 +1,24 @@
 defmodule ConsoleWeb.WebhookController do
   use ConsoleWeb, :controller
-  alias Alertmanager.Alert
-  alias Console.Services.{Builds, Users, Alertmanager}
-  alias Console.Schema.{ScmWebhook}
+  alias Console.Services.{Builds, Users}
+  alias Console.Schema.{ScmWebhook, Cluster}
   alias Console.Deployments.Pr.Dispatcher
-  alias Console.Deployments.Git
+  alias Console.Deployments.{Git, Clusters}
 
   require Logger
 
   plug ConsoleWeb.Verifier when action == :webhook
+
+  def cluster(conn, _) do
+    with {:ok, _, token} <- ConsoleWeb.Plugs.Token.get_bearer_token(conn),
+         ["plrl", id, auth] <- String.split(token, ":"),
+         {:ok, _, _} <- Console.Guardian.resource_from_token(auth),
+         %Cluster{id: id} = Clusters.get_cluster(id) do
+      send_resp(conn, 200, id)
+    else
+      _ -> send_resp(conn, 400, "invalid token")
+    end
+  end
 
   def scm(conn, %{"id" => id}) do
     with %ScmWebhook{} = hook <- Git.get_scm_webhook_by_ext_id(id),
@@ -28,19 +38,6 @@ defmodule ConsoleWeb.WebhookController do
     bot = Users.get_bot!("console")
     with {:ok, _} <- Builds.create(params, bot),
       do: json(conn, %{ok: true})
-  end
-
-  def alertmanager(conn, %{"alerts" => alerts}) when is_list(alerts) do
-    Enum.each(alerts, fn alert ->
-      Alert.build(alert)
-      |> Alertmanager.handle_alert()
-    end)
-
-    json(conn, %{ok: true})
-  end
-
-  def alertmanager(conn, _payload) do
-    json(conn, %{ok: true})
   end
 
   defp verify(conn, %ScmWebhook{type: :github, hmac: hmac}) do

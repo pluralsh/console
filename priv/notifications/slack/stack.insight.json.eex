@@ -8,11 +8,18 @@
                 "text": "✨ *New insights generated for your stack <%= @stack.name %>:*"
             }
         },
+        {
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": "Here's a brief summary of what we've found:\n"
+            }
+		},
 		{
 			"type": "section",
 			"text": {
                 "type": "plain_text",
-                "text": <%= Jason.encode!(Console.truncate(@insight.text, 2800)) %>
+                "text": <%= Jason.encode!(Console.truncate(@text, 2800)) %>
             }
 		},
         {
@@ -22,7 +29,7 @@
 					"type": "button",
 					"text": {
 						"type": "plain_text",
-						"text": "View Stack",
+						"text": "View the full insight in Plural",
 						"emoji": true
 					},
 					"url": "<%= Console.url("/stacks/#{@stack.id}") %>"

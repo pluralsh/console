@@ -12,13 +12,14 @@ defmodule ConsoleWeb.Router do
   end
 
   get "/health", ConsoleWeb.HealthController, :health
-  post "/alertmanager", ConsoleWeb.WebhookController, :alertmanager
 
   scope "/v1", ConsoleWeb do
     pipe_through [:api]
 
     post "/webhook", WebhookController, :webhook
     post "/webhooks/piazza", WebhookController, :piazza
+
+    get "/dashboard/cluster", WebhookController, :cluster
   end
 
   scope "/ext" do

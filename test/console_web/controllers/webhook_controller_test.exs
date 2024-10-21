@@ -1,11 +1,20 @@
 defmodule ConsoleWeb.WebhookControllerTest do
   use ConsoleWeb.ConnCase, async: true
 
-  describe "#alertmanager/2" do
-    test "it can accept an alertmanager webhook", %{conn: conn} do
-      conn
-      |> post("/alertmanager", %{})
-      |> response(200)
+  describe "#cluster/2" do
+    test "it can handle a dashboard cluster id request", %{conn: conn} do
+      cluster = insert(:cluster)
+      user = insert(:user)
+
+      {:ok, token, _} = Console.Guardian.encode_and_sign(user, %{})
+
+      resp =
+        conn
+        |> put_req_header("authorization", "Bearer plrl:#{cluster.id}:#{token}")
+        |> get("/v1/dashboard/cluster")
+        |> response(200)
+
+      assert resp == cluster.id
     end
   end
 
