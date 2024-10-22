@@ -101,6 +101,9 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   repository {
     pulledAt
   }
+  insight {
+    ...AiInsightFragment
+  }
 }
 
 fragment ServiceDeploymentComponent on ServiceComponent {
@@ -118,6 +121,9 @@ fragment ServiceDeploymentComponent on ServiceComponent {
   content {
     desired
     live
+  }
+  insight {
+    ...AiInsightFragment
   }
 }
 

@@ -1,0 +1,11 @@
+fragment AiInsightFragment on AiInsight {
+  text
+  summary
+  sha
+  updatedAt
+  insertedAt
+  error {
+    message
+    source
+  }
+}

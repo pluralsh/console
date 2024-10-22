@@ -67,6 +67,9 @@ fragment Stack on InfrastructureStack {
     name
     value
   }
+  insight {
+    ...AiInsightFragment
+  }
 }
 
 fragment StackRun on StackRun {
@@ -82,6 +85,9 @@ fragment StackRun on StackRun {
   approver {
     name
     email
+  }
+  insight {
+    ...AiInsightFragment
   }
 }
 
