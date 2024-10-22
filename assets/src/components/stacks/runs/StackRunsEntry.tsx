@@ -5,17 +5,22 @@ import {
   Tooltip,
 } from '@pluralsh/design-system'
 import moment from 'moment'
-import { CSSObject, useTheme } from 'styled-components'
 import { useNavigate } from 'react-router'
 import { useParams } from 'react-router-dom'
+import { CSSObject, useTheme } from 'styled-components'
 
 import { StackRunFragment } from '../../../generated/graphql'
-import { getStackRunsAbsPath } from '../../../routes/stacksRoutesConsts'
+import {
+  getStackRunsAbsPath,
+  STACK_RUNS_INSIGHTS_REL_PATH,
+} from '../../../routes/stacksRoutesConsts'
 
 import { TRUNCATE } from '../../utils/truncate'
 
-import StackStatusChip from '../common/StackStatusChip'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 import StackRunIcon from '../common/StackRunIcon'
+import StackStatusChip from '../common/StackStatusChip'
 
 export default function StackRunsEntry({
   stackRun,
@@ -37,6 +42,7 @@ export default function StackRunsEntry({
     git: { ref },
   } = stackRun
   const theme = useTheme()
+  const { ai } = useDeploymentSettings()
 
   return (
     <div
@@ -124,6 +130,12 @@ export default function StackRunsEntry({
         {moment(insertedAt).fromNow()}
       </div>
       <StackStatusChip status={status} />
+      {ai?.enabled && (
+        <AiInsightSummaryIcon
+          navPath={`${getStackRunsAbsPath(stackId, id)}/${STACK_RUNS_INSIGHTS_REL_PATH}`}
+          insight={stackRun.insight}
+        />
+      )}
       <IconFrame icon={<CaretRightIcon />} />
     </div>
   )

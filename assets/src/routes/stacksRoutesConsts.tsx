@@ -32,6 +32,7 @@ export const STACK_RUNS_PLAN_REL_PATH = 'plan'
 export const STACK_RUNS_OUTPUT_REL_PATH = 'output'
 export const STACK_RUNS_JOB_REL_PATH = 'job'
 export const STACK_RUNS_REPOSITORY_REL_PATH = 'repository'
+export const STACK_RUNS_INSIGHTS_REL_PATH = 'insights'
 
 export function getStacksAbsPath(stackId: string | null | undefined) {
   return `/${STACKS_ROOT_PATH}/${stackId}`
