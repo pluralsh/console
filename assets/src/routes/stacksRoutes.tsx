@@ -36,6 +36,7 @@ import {
   STACKS_ABS_PATH,
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
+  STACK_INSIGHTS_REL_PATH,
   STACK_JOB_REL_PATH,
   STACK_OUTPUT_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
@@ -51,6 +52,7 @@ import {
   STACK_VARS_REL_PATH,
 } from './stacksRoutesConsts'
 import StackVariables from '../components/stacks/variables/StackVariables.tsx'
+import { StackInsights } from 'components/stacks/insights/StackInsights.tsx'
 
 export const stacksRoutes = [
   <Route
@@ -89,6 +91,10 @@ export const stacksRoutes = [
     <Route
       path={STACK_VARS_REL_PATH}
       element={<StackVariables />}
+    />
+    <Route
+      path={STACK_INSIGHTS_REL_PATH}
+      element={<StackInsights />}
     />
     <Route
       path={STACK_ENV_REL_PATH}

@@ -9,3 +9,8 @@ fragment AiInsight on AiInsight {
     source
   }
 }
+
+fragment AiInsightSummary on AiInsight {
+  summary
+  updatedAt
+}

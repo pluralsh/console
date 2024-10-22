@@ -76,6 +76,9 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     name
   }
   dryRun
+  insight {
+    ...AiInsightSummary
+  }
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {

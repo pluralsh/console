@@ -1,8 +1,10 @@
 import {
+  AiSparkleFilledIcon,
   Button,
   CloseIcon,
   EmptyState,
   FiltersIcon,
+  Flex,
   GearTrainIcon,
   IconFrame,
   Input,
@@ -51,6 +53,7 @@ import {
   STACK_STATE_REL_PATH,
   getStacksAbsPath,
   STACK_VARS_REL_PATH,
+  STACK_INSIGHTS_REL_PATH,
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
@@ -72,6 +75,7 @@ import StackDetachModal from './StackDetachModal'
 import StackPermissionsModal from './StackPermissionsModal'
 import StackEntry from './StacksEntry'
 import { StackSettingsModal } from './StackSettingsModal'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -98,7 +102,7 @@ enum MenuItemKey {
 
 const pollInterval = 5 * 1000
 
-const getDirectory = (type: Nullable<StackType>) => [
+const getDirectory = (type: Nullable<StackType>, aiEnabled: boolean) => [
   { path: STACK_RUNS_REL_PATH, label: 'Runs', enabled: true },
   { path: STACK_PRS_REL_PATH, label: 'PRs', enabled: true },
   {
@@ -112,6 +116,16 @@ const getDirectory = (type: Nullable<StackType>) => [
     enabled: type === StackType.Terraform,
   },
   { path: STACK_VARS_REL_PATH, label: 'Variables', enabled: true },
+  {
+    path: STACK_INSIGHTS_REL_PATH,
+    label: (
+      <Flex gap="small">
+        <span>Insights</span>
+        <AiSparkleFilledIcon color={'icon-info'} />
+      </Flex>
+    ),
+    enabled: aiEnabled,
+  },
   { path: STACK_ENV_REL_PATH, label: 'Environment', enabled: true },
   { path: STACK_FILES_REL_PATH, label: 'Files', enabled: true },
   { path: STACK_JOB_REL_PATH, label: 'Job', enabled: true },
@@ -121,6 +135,7 @@ const getDirectory = (type: Nullable<StackType>) => [
 export default function Stacks() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { ai } = useDeploymentSettings()
   const { stackId = '' } = useParams()
   const projectId = useProjectId()
   const tabStateRef = useRef<any>(null)
@@ -180,8 +195,8 @@ export default function Stacks() {
 
   const fullStack = useMemo(() => stackData?.infrastructureStack, [stackData])
   const directory = useMemo(
-    () => getDirectory(fullStack?.type),
-    [fullStack?.type]
+    () => getDirectory(fullStack?.type, !!ai?.enabled),
+    [ai?.enabled, fullStack?.type]
   )
   const currentTab = directory.find(({ path }) => path === tab)
   const deleteLabel = fullStack?.deletedAt
@@ -457,15 +472,9 @@ export default function Stacks() {
                 <LinkTabWrap
                   subTab
                   key={path}
-                  textValue={label}
                   to={`${getStacksAbsPath(stackId)}/${path}`}
                 >
-                  <SubTab
-                    key={path}
-                    textValue={label}
-                  >
-                    {label}
-                  </SubTab>
+                  <SubTab key={path}>{label}</SubTab>
                 </LinkTabWrap>
               ))}
           </TabList>
