@@ -203,12 +203,20 @@ dashboard:
       - --act-as-proxy
       - --apiserver-host=https://$(KAS_HOST)/k8s-proxy
       - --apiserver-skip-tls-verify
+      - --metrics-provider=none
+      - --cluster-context-enabled=true
+      - --token-exchange-endpoint=http://$(CONSOLE_HOST)/v1/dashboard/cluster
       env:
       - name: KAS_HOST
         valueFrom:
           secretKeyRef:
             name: console-env
             key: KAS_HOST
+      - name: CONSOLE_HOST
+        valueFrom:
+          secretKeyRef:
+            name: console-env
+            key: CONSOLE_HOST
 
 provider: custom
 

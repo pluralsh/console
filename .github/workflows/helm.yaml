@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4.2.1
         with:
           fetch-depth: 0
-      - uses: azure/setup-helm@v3
+      - uses: azure/setup-helm@v4.2.0
       - run: helm template charts/console --set dashboard.app.security.csrfKey=dummycsrfkey
       - run: helm template plural/helm/console --set dashboard.app.security.csrfKey=dummycsrfkey
