@@ -1,4 +1,4 @@
-fragment AiInsightFragment on AiInsight {
+fragment AiInsight on AiInsight {
   text
   summary
   sha

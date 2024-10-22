@@ -11,6 +11,10 @@ fragment StackTiny on InfrastructureStack {
   }
   paused
   status
+  insight {
+    summary
+    updatedAt
+  }
 }
 
 fragment Stack on InfrastructureStack {
@@ -68,7 +72,7 @@ fragment Stack on InfrastructureStack {
     value
   }
   insight {
-    ...AiInsightFragment
+    ...AiInsight
   }
 }
 
@@ -87,7 +91,7 @@ fragment StackRun on StackRun {
     email
   }
   insight {
-    ...AiInsightFragment
+    ...AiInsight
   }
 }
 

@@ -8810,7 +8810,7 @@ export type WireguardPeerStatus = {
   ready?: Maybe<Scalars['Boolean']['output']>;
 };
 
-export type AiInsightFragmentFragment = { __typename?: 'AiInsight', text?: string | null, summary?: string | null, sha?: string | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null };
+export type AiInsightFragment = { __typename?: 'AiInsight', text?: string | null, summary?: string | null, sha?: string | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null };
 
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
@@ -10568,7 +10568,7 @@ export type UpdateServiceAccountMutationVariables = Exact<{
 
 export type UpdateServiceAccountMutation = { __typename?: 'RootMutationType', updateServiceAccount?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
 
-export type StackTinyFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null };
+export type StackTinyFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', summary?: string | null, updatedAt?: string | null } | null };
 
 export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, approval?: boolean | null, variables?: Record<string, unknown> | null, configuration: { __typename?: 'StackConfiguration', image?: string | null, version?: string | null }, repository?: { __typename?: 'GitRepository', id: string, url: string, pulledAt?: string | null } | null, git: { __typename?: 'GitRef', ref: string, folder: string }, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', namespace: string, raw?: string | null, annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', image: string, args?: Array<string | null> | null, env?: Array<{ __typename?: 'ContainerEnv', value: string, name: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', secret: string, configMap: string } | null> | null } | null> | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, insight?: { __typename?: 'AiInsight', text?: string | null, summary?: string | null, sha?: string | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null };
 
@@ -10614,7 +10614,7 @@ export type StacksQueryVariables = Exact<{
 }>;
 
 
-export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null } | null } | null> | null } | null };
+export type StacksQuery = { __typename?: 'RootQueryType', infrastructureStacks?: { __typename?: 'InfrastructureStackConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'InfrastructureStackEdge', node?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', summary?: string | null, updatedAt?: string | null } | null } | null } | null> | null } | null };
 
 export type StackQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10628,7 +10628,7 @@ export type StackTinyQueryVariables = Exact<{
 }>;
 
 
-export type StackTinyQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null } | null };
+export type StackTinyQuery = { __typename?: 'RootQueryType', infrastructureStack?: { __typename?: 'InfrastructureStack', id?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, name: string, type: StackType, paused?: boolean | null, status: StackStatus, repository?: { __typename?: 'GitRepository', url: string, pulledAt?: string | null } | null, insight?: { __typename?: 'AiInsight', summary?: string | null, updatedAt?: string | null } | null } | null };
 
 export type StackStateQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -12246,8 +12246,8 @@ export const ApiDeprecationFragmentDoc = gql`
   replacement
 }
     `;
-export const AiInsightFragmentFragmentDoc = gql`
-    fragment AiInsightFragment on AiInsight {
+export const AiInsightFragmentDoc = gql`
+    fragment AiInsight on AiInsight {
   text
   summary
   sha
@@ -12277,11 +12277,11 @@ export const ServiceDeploymentComponentFragmentDoc = gql`
     live
   }
   insight {
-    ...AiInsightFragment
+    ...AiInsight
   }
 }
     ${ApiDeprecationFragmentDoc}
-${AiInsightFragmentFragmentDoc}`;
+${AiInsightFragmentDoc}`;
 export const ServiceTreeNodeFragmentDoc = gql`
     fragment ServiceTreeNode on ServiceDeployment {
   id
@@ -12901,12 +12901,12 @@ export const ServiceDeploymentDetailsFragmentDoc = gql`
     pulledAt
   }
   insight {
-    ...AiInsightFragment
+    ...AiInsight
   }
 }
     ${ServiceDeploymentsRowFragmentDoc}
 ${ServiceDeploymentComponentFragmentDoc}
-${AiInsightFragmentFragmentDoc}`;
+${AiInsightFragmentDoc}`;
 export const PluralObjectStatusFragmentDoc = gql`
     fragment PluralObjectStatus on PluralObjectStatus {
   id
@@ -13391,6 +13391,10 @@ export const StackTinyFragmentDoc = gql`
   }
   paused
   status
+  insight {
+    summary
+    updatedAt
+  }
 }
     `;
 export const StackFragmentDoc = gql`
@@ -13449,11 +13453,11 @@ export const StackFragmentDoc = gql`
     value
   }
   insight {
-    ...AiInsightFragment
+    ...AiInsight
   }
 }
     ${ClusterTinyFragmentDoc}
-${AiInsightFragmentFragmentDoc}`;
+${AiInsightFragmentDoc}`;
 export const StackRunFragmentDoc = gql`
     fragment StackRun on StackRun {
   id
@@ -13470,10 +13474,10 @@ export const StackRunFragmentDoc = gql`
     email
   }
   insight {
-    ...AiInsightFragment
+    ...AiInsight
   }
 }
-    ${AiInsightFragmentFragmentDoc}`;
+    ${AiInsightFragmentDoc}`;
 export const CustomStackRunFragmentDoc = gql`
     fragment CustomStackRun on CustomStackRun {
   id
@@ -23052,7 +23056,7 @@ export const namedOperations = {
     LogsDelta: 'LogsDelta'
   },
   Fragment: {
-    AiInsightFragment: 'AiInsightFragment',
+    AiInsight: 'AiInsight',
     CostAnalysis: 'CostAnalysis',
     FileContent: 'FileContent',
     Configuration: 'Configuration',
