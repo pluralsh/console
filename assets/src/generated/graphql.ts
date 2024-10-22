@@ -180,6 +180,7 @@ export type AiInsight = {
   __typename?: 'AiInsight';
   /** any errors generated when compiling this insight */
   error?: Maybe<Array<Maybe<ServiceError>>>;
+  freshness?: Maybe<InsightFreshness>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a deduplication sha for this insight */
   sha?: Maybe<Scalars['String']['output']>;
@@ -220,6 +221,54 @@ export type AiSettingsAttributes = {
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
 };
+
+export type Alert = {
+  __typename?: 'Alert';
+  annotations?: Maybe<Scalars['Map']['output']>;
+  /** the cluster this alert was associated with */
+  cluster?: Maybe<Cluster>;
+  fingerprint?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  message?: Maybe<Scalars['String']['output']>;
+  /** the project this alert was associated with */
+  project?: Maybe<Project>;
+  provider: ObservabilityWebhookType;
+  /** the service this alert was associated with */
+  service?: Maybe<Service>;
+  severity: AlertSeverity;
+  state: AlertState;
+  /** key/value tags to filter clusters */
+  tags?: Maybe<Array<Maybe<Tag>>>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
+};
+
+export type AlertConnection = {
+  __typename?: 'AlertConnection';
+  edges?: Maybe<Array<Maybe<AlertEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AlertEdge = {
+  __typename?: 'AlertEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Alert>;
+};
+
+export enum AlertSeverity {
+  Critical = 'CRITICAL',
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM',
+  Undefined = 'UNDEFINED'
+}
+
+export enum AlertState {
+  Firing = 'FIRING',
+  Resolved = 'RESOLVED'
+}
 
 /** Anthropic connection information */
 export type AnthropicSettings = {
@@ -823,6 +872,8 @@ export type Cluster = {
   __typename?: 'Cluster';
   /** the url this clusters deployment operator will use for gql requests */
   agentUrl?: Maybe<Scalars['String']['output']>;
+  /** list all alerts discovered for this cluster */
+  alerts?: Maybe<AlertConnection>;
   /** all api deprecations for all services in this cluster */
   apiDeprecations?: Maybe<Array<Maybe<ApiDeprecation>>>;
   clusterMetrics?: Maybe<ClusterMetrics>;
@@ -917,6 +968,15 @@ export type Cluster = {
   virtual?: Maybe<Scalars['Boolean']['output']>;
   /** write policy for this cluster */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a representation of a cluster you can deploy to */
+export type ClusterAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2619,6 +2679,13 @@ export type InsightClientInfoAttributes = {
   userAgent?: InputMaybe<Scalars['String']['input']>;
 };
 
+/** enumerable to describe the recency of this insight */
+export enum InsightFreshness {
+  Expired = 'EXPIRED',
+  Fresh = 'FRESH',
+  Stale = 'STALE'
+}
+
 export type Installation = {
   __typename?: 'Installation';
   id: Scalars['ID']['output'];
@@ -3293,6 +3360,41 @@ export type ObservabilityProviderEdge = {
 export enum ObservabilityProviderType {
   Datadog = 'DATADOG',
   Newrelic = 'NEWRELIC'
+}
+
+/** A webhook receiver for an observability provider like grafana or datadog */
+export type ObservabilityWebhook = {
+  __typename?: 'ObservabilityWebhook';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  name: Scalars['String']['output'];
+  type: ObservabilityWebhookType;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the url for this specific webhook */
+  url: Scalars['String']['output'];
+};
+
+/** input data to persist a webhook receiver for an observability provider like grafana or datadog */
+export type ObservabilityWebhookAttributes = {
+  name: Scalars['String']['input'];
+  secret?: InputMaybe<Scalars['String']['input']>;
+  type: ObservabilityWebhookType;
+};
+
+export type ObservabilityWebhookConnection = {
+  __typename?: 'ObservabilityWebhookConnection';
+  edges?: Maybe<Array<Maybe<ObservabilityWebhookEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ObservabilityWebhookEdge = {
+  __typename?: 'ObservabilityWebhookEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ObservabilityWebhook>;
+};
+
+export enum ObservabilityWebhookType {
+  Grafana = 'GRAFANA'
 }
 
 export type ObservableMetric = {
@@ -4474,6 +4576,8 @@ export type PrUpdateSpec = {
 /** A unit of organization to control permissions for a set of objects within your Console instance */
 export type Project = {
   __typename?: 'Project';
+  /** list all alerts discovered for this project */
+  alerts?: Maybe<AlertConnection>;
   default?: Maybe<Scalars['Boolean']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
@@ -4484,6 +4588,15 @@ export type Project = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** write policy across this project */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** A unit of organization to control permissions for a set of objects within your Console instance */
+export type ProjectAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type ProjectAttributes = {
@@ -4972,6 +5085,7 @@ export type RootMutationType = {
   deleteNotificationSink?: Maybe<NotificationSink>;
   deleteObjectStore?: Maybe<ObjectStore>;
   deleteObservabilityProvider?: Maybe<ObservabilityProvider>;
+  deleteObservabilityWebhook?: Maybe<ObservabilityWebhook>;
   deleteObserver?: Maybe<Observer>;
   deleteOidcProvider?: Maybe<OidcProvider>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
@@ -5089,6 +5203,7 @@ export type RootMutationType = {
   upsertNotificationRouter?: Maybe<NotificationRouter>;
   upsertNotificationSink?: Maybe<NotificationSink>;
   upsertObservabilityProvider?: Maybe<ObservabilityProvider>;
+  upsertObservabilityWebhook?: Maybe<ObservabilityWebhook>;
   upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
   upsertVirtualCluster?: Maybe<Cluster>;
@@ -5428,6 +5543,11 @@ export type RootMutationTypeDeleteObjectStoreArgs = {
 
 
 export type RootMutationTypeDeleteObservabilityProviderArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeleteObservabilityWebhookArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -5982,6 +6102,11 @@ export type RootMutationTypeUpsertObservabilityProviderArgs = {
 };
 
 
+export type RootMutationTypeUpsertObservabilityWebhookArgs = {
+  attributes: ObservabilityWebhookAttributes;
+};
+
+
 export type RootMutationTypeUpsertObserverArgs = {
   attributes?: InputMaybe<ObserverAttributes>;
 };
@@ -6100,6 +6225,8 @@ export type RootQueryType = {
   objectStores?: Maybe<ObjectStoreConnection>;
   observabilityProvider?: Maybe<ObservabilityProvider>;
   observabilityProviders?: Maybe<ObservabilityProviderConnection>;
+  observabilityWebhook?: Maybe<ObservabilityWebhook>;
+  observabilityWebhooks?: Maybe<ObservabilityWebhookConnection>;
   observer?: Maybe<Observer>;
   observers?: Maybe<ObserverConnection>;
   pagedClusterGates?: Maybe<PipelineGateConnection>;
@@ -6686,6 +6813,20 @@ export type RootQueryTypeObservabilityProviderArgs = {
 
 
 export type RootQueryTypeObservabilityProvidersArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type RootQueryTypeObservabilityWebhookArgs = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeObservabilityWebhooksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -7622,6 +7763,8 @@ export type ServiceDependencyAttributes = {
 /** a reference to a service deployed from a git repo into a cluster */
 export type ServiceDeployment = {
   __typename?: 'ServiceDeployment';
+  /** list all alerts discovered for this service */
+  alerts?: Maybe<AlertConnection>;
   /** the cluster this service is deployed into */
   cluster?: Maybe<Cluster>;
   componentMetrics?: Maybe<ServiceComponentMetrics>;
@@ -7702,6 +7845,15 @@ export type ServiceDeployment = {
   version: Scalars['String']['output'];
   /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
+};
+
+
+/** a reference to a service deployed from a git repo into a cluster */
+export type ServiceDeploymentAlertsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

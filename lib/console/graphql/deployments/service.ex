@@ -208,6 +208,11 @@ defmodule Console.GraphQl.Deployments.Service do
       resolve &Deployments.list_revisions/3
     end
 
+    @desc "list all alerts discovered for this service"
+    connection field :alerts, node_type: :alert do
+      resolve &Deployments.list_alerts/3
+    end
+
     field :component_metrics, :service_component_metrics do
       arg :component_id, non_null(:id)
       arg :start,        :datetime

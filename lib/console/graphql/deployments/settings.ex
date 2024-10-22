@@ -80,6 +80,11 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :description, :string
     field :default,     :boolean
 
+    @desc "list all alerts discovered for this project"
+    connection field :alerts, node_type: :alert do
+      resolve &Deployments.list_alerts/3
+    end
+
     field :read_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy across this project"
     field :write_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy across this project"
 

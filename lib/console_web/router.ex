@@ -28,6 +28,7 @@ defmodule ConsoleWeb.Router do
       pipe_through [:api]
 
       scope "/v1", ConsoleWeb do
+        post "/webhooks/observability/:type/:id", WebhookController, :observability
         post "/webhooks/:type/:id", WebhookController, :scm
 
         scope "/states" do

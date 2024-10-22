@@ -683,6 +683,27 @@ defmodule Console.Factory do
     }
   end
 
+  def observability_webhook_factory do
+    %Schema.ObservabilityWebhook{
+      type: :grafana,
+      name: sequence(:obs_hook, & "obs-wh-#{&1}"),
+      external_id: sequence(:obs_id, & "obs-wh-id-#{&1}"),
+      secret: Ecto.UUID.generate()
+    }
+  end
+
+  def alert_factory do
+    %Schema.Alert{
+      type: :grafana,
+      severity: :low,
+      state: :firing,
+      title: "blah",
+      message: "blah",
+      fingerprint: Ecto.UUID.generate(),
+      annotations: %{"some" => "annotation"}
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

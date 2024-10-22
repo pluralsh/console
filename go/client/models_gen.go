@@ -134,7 +134,8 @@ type AiInsight struct {
 	// the text of this insight
 	Text *string `json:"text,omitempty"`
 	// a shortish summary of this insight
-	Summary *string `json:"summary,omitempty"`
+	Summary   *string           `json:"summary,omitempty"`
+	Freshness *InsightFreshness `json:"freshness,omitempty"`
 	// any errors generated when compiling this insight
 	Error      []*ServiceError `json:"error,omitempty"`
 	InsertedAt *string         `json:"insertedAt,omitempty"`
@@ -156,6 +157,38 @@ type AiSettingsAttributes struct {
 	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
 	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
+}
+
+type Alert struct {
+	ID          string                   `json:"id"`
+	Provider    ObservabilityWebhookType `json:"provider"`
+	Severity    AlertSeverity            `json:"severity"`
+	State       AlertState               `json:"state"`
+	Title       *string                  `json:"title,omitempty"`
+	Message     *string                  `json:"message,omitempty"`
+	Fingerprint *string                  `json:"fingerprint,omitempty"`
+	Annotations map[string]interface{}   `json:"annotations,omitempty"`
+	URL         *string                  `json:"url,omitempty"`
+	// key/value tags to filter clusters
+	Tags []*Tag `json:"tags,omitempty"`
+	// the cluster this alert was associated with
+	Cluster *Cluster `json:"cluster,omitempty"`
+	// the service this alert was associated with
+	Service *Service `json:"service,omitempty"`
+	// the project this alert was associated with
+	Project    *Project `json:"project,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type AlertConnection struct {
+	PageInfo PageInfo     `json:"pageInfo"`
+	Edges    []*AlertEdge `json:"edges,omitempty"`
+}
+
+type AlertEdge struct {
+	Node   *Alert  `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
 }
 
 // Anthropic connection information
@@ -734,6 +767,8 @@ type Cluster struct {
 	PolicyConstraints *PolicyConstraintConnection `json:"policyConstraints,omitempty"`
 	// Computes a list of statistics for OPA constraint violations w/in this cluster
 	ViolationStatistics []*ViolationStatistic `json:"violationStatistics,omitempty"`
+	// list all alerts discovered for this cluster
+	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// Queries logs for a cluster out of loki
 	Logs               []*LogStream        `json:"logs,omitempty"`
 	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
@@ -2730,6 +2765,34 @@ type ObservabilityProviderEdge struct {
 	Cursor *string                `json:"cursor,omitempty"`
 }
 
+// A webhook receiver for an observability provider like grafana or datadog
+type ObservabilityWebhook struct {
+	ID   string                   `json:"id"`
+	Type ObservabilityWebhookType `json:"type"`
+	Name string                   `json:"name"`
+	// the url for this specific webhook
+	URL        string  `json:"url"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+// input data to persist a webhook receiver for an observability provider like grafana or datadog
+type ObservabilityWebhookAttributes struct {
+	Type   ObservabilityWebhookType `json:"type"`
+	Name   string                   `json:"name"`
+	Secret *string                  `json:"secret,omitempty"`
+}
+
+type ObservabilityWebhookConnection struct {
+	PageInfo PageInfo                    `json:"pageInfo"`
+	Edges    []*ObservabilityWebhookEdge `json:"edges,omitempty"`
+}
+
+type ObservabilityWebhookEdge struct {
+	Node   *ObservabilityWebhook `json:"node,omitempty"`
+	Cursor *string               `json:"cursor,omitempty"`
+}
+
 type ObservableMetric struct {
 	ID         string                 `json:"id"`
 	Identifier string                 `json:"identifier"`
@@ -3741,6 +3804,8 @@ type Project struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	Default     *bool   `json:"default,omitempty"`
+	// list all alerts discovered for this project
+	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// read policy across this project
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy across this project
@@ -4570,7 +4635,9 @@ type ServiceDeployment struct {
 	// an insight explaining the state of this service
 	Insight *AiInsight `json:"insight,omitempty"`
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
-	Revisions        *RevisionConnection      `json:"revisions,omitempty"`
+	Revisions *RevisionConnection `json:"revisions,omitempty"`
+	// list all alerts discovered for this service
+	Alerts           *AlertConnection         `json:"alerts,omitempty"`
 	ComponentMetrics *ServiceComponentMetrics `json:"componentMetrics,omitempty"`
 	// whether this service is editable
 	Editable   *bool   `json:"editable,omitempty"`
@@ -5625,6 +5692,94 @@ func (e AiRole) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type AlertSeverity string
+
+const (
+	AlertSeverityLow       AlertSeverity = "LOW"
+	AlertSeverityMedium    AlertSeverity = "MEDIUM"
+	AlertSeverityHigh      AlertSeverity = "HIGH"
+	AlertSeverityCritical  AlertSeverity = "CRITICAL"
+	AlertSeverityUndefined AlertSeverity = "UNDEFINED"
+)
+
+var AllAlertSeverity = []AlertSeverity{
+	AlertSeverityLow,
+	AlertSeverityMedium,
+	AlertSeverityHigh,
+	AlertSeverityCritical,
+	AlertSeverityUndefined,
+}
+
+func (e AlertSeverity) IsValid() bool {
+	switch e {
+	case AlertSeverityLow, AlertSeverityMedium, AlertSeverityHigh, AlertSeverityCritical, AlertSeverityUndefined:
+		return true
+	}
+	return false
+}
+
+func (e AlertSeverity) String() string {
+	return string(e)
+}
+
+func (e *AlertSeverity) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AlertSeverity(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AlertSeverity", str)
+	}
+	return nil
+}
+
+func (e AlertSeverity) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AlertState string
+
+const (
+	AlertStateFiring   AlertState = "FIRING"
+	AlertStateResolved AlertState = "RESOLVED"
+)
+
+var AllAlertState = []AlertState{
+	AlertStateFiring,
+	AlertStateResolved,
+}
+
+func (e AlertState) IsValid() bool {
+	switch e {
+	case AlertStateFiring, AlertStateResolved:
+		return true
+	}
+	return false
+}
+
+func (e AlertState) String() string {
+	return string(e)
+}
+
+func (e *AlertState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AlertState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AlertState", str)
+	}
+	return nil
+}
+
+func (e AlertState) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type AuditAction string
 
 const (
@@ -6373,6 +6528,50 @@ func (e HelmAuthProvider) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// enumerable to describe the recency of this insight
+type InsightFreshness string
+
+const (
+	InsightFreshnessFresh   InsightFreshness = "FRESH"
+	InsightFreshnessStale   InsightFreshness = "STALE"
+	InsightFreshnessExpired InsightFreshness = "EXPIRED"
+)
+
+var AllInsightFreshness = []InsightFreshness{
+	InsightFreshnessFresh,
+	InsightFreshnessStale,
+	InsightFreshnessExpired,
+}
+
+func (e InsightFreshness) IsValid() bool {
+	switch e {
+	case InsightFreshnessFresh, InsightFreshnessStale, InsightFreshnessExpired:
+		return true
+	}
+	return false
+}
+
+func (e InsightFreshness) String() string {
+	return string(e)
+}
+
+func (e *InsightFreshness) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = InsightFreshness(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid InsightFreshness", str)
+	}
+	return nil
+}
+
+func (e InsightFreshness) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type MatchStrategy string
 
 const (
@@ -6538,6 +6737,45 @@ func (e *ObservabilityProviderType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ObservabilityProviderType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ObservabilityWebhookType string
+
+const (
+	ObservabilityWebhookTypeGrafana ObservabilityWebhookType = "GRAFANA"
+)
+
+var AllObservabilityWebhookType = []ObservabilityWebhookType{
+	ObservabilityWebhookTypeGrafana,
+}
+
+func (e ObservabilityWebhookType) IsValid() bool {
+	switch e {
+	case ObservabilityWebhookTypeGrafana:
+		return true
+	}
+	return false
+}
+
+func (e ObservabilityWebhookType) String() string {
+	return string(e)
+}
+
+func (e *ObservabilityWebhookType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ObservabilityWebhookType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ObservabilityWebhookType", str)
+	}
+	return nil
+}
+
+func (e ObservabilityWebhookType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

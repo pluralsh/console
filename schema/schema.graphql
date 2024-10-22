@@ -417,6 +417,10 @@ type RootQueryType {
 
   observabilityProviders(after: String, first: Int, before: String, last: Int): ObservabilityProviderConnection
 
+  observabilityWebhook(id: ID, name: String): ObservabilityWebhook
+
+  observabilityWebhooks(after: String, first: Int, before: String, last: Int): ObservabilityWebhookConnection
+
   deploymentSettings: DeploymentSettings
 
   projects(after: String, first: Int, before: String, last: Int, q: String): ProjectConnection
@@ -855,6 +859,10 @@ type RootMutationType {
 
   deleteObservabilityProvider(id: ID!): ObservabilityProvider
 
+  upsertObservabilityWebhook(attributes: ObservabilityWebhookAttributes!): ObservabilityWebhook
+
+  deleteObservabilityWebhook(id: ID!): ObservabilityWebhook
+
   updateDeploymentSettings(attributes: DeploymentSettingsAttributes!): DeploymentSettings
 
   enableDeployments: DeploymentSettings
@@ -1070,6 +1078,9 @@ type Project {
 
   default: Boolean
 
+  "list all alerts discovered for this project"
+  alerts(after: String, first: Int, before: String, last: Int): AlertConnection
+
   "read policy across this project"
   readBindings: [PolicyBinding]
 
@@ -1204,6 +1215,23 @@ enum ObservabilityProviderType {
   NEWRELIC
 }
 
+enum ObservabilityWebhookType {
+  GRAFANA
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+  UNDEFINED
+}
+
+enum AlertState {
+  FIRING
+  RESOLVED
+}
+
 input ObservabilityProviderAttributes {
   type: ObservabilityProviderType!
   name: String!
@@ -1229,6 +1257,13 @@ input ObservableMetricAttributes {
   providerId: ID!
 }
 
+"input data to persist a webhook receiver for an observability provider like grafana or datadog"
+input ObservabilityWebhookAttributes {
+  type: ObservabilityWebhookType!
+  name: String!
+  secret: String
+}
+
 type ObservabilityProvider {
   id: ID!
   type: ObservabilityProviderType!
@@ -1245,9 +1280,71 @@ type ObservableMetric {
   updatedAt: DateTime
 }
 
+"A webhook receiver for an observability provider like grafana or datadog"
+type ObservabilityWebhook {
+  id: ID!
+
+  type: ObservabilityWebhookType!
+
+  name: String!
+
+  "the url for this specific webhook"
+  url: String!
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type Alert {
+  id: ID!
+
+  provider: ObservabilityWebhookType!
+
+  severity: AlertSeverity!
+
+  state: AlertState!
+
+  title: String
+
+  message: String
+
+  fingerprint: String
+
+  annotations: Map
+
+  url: String
+
+  "key\/value tags to filter clusters"
+  tags: [Tag]
+
+  "the cluster this alert was associated with"
+  cluster: Cluster
+
+  "the service this alert was associated with"
+  service: Service
+
+  "the project this alert was associated with"
+  project: Project
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
 type ObservabilityProviderConnection {
   pageInfo: PageInfo!
   edges: [ObservabilityProviderEdge]
+}
+
+type ObservabilityWebhookConnection {
+  pageInfo: PageInfo!
+  edges: [ObservabilityWebhookEdge]
+}
+
+type AlertConnection {
+  pageInfo: PageInfo!
+  edges: [AlertEdge]
 }
 
 enum StackStatus {
@@ -3371,6 +3468,9 @@ type ServiceDeployment {
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
 
+  "list all alerts discovered for this service"
+  alerts(after: String, first: Int, before: String, last: Int): AlertConnection
+
   componentMetrics(componentId: ID!, start: DateTime, stop: DateTime, step: String): ServiceComponentMetrics
 
   "whether this service is editable"
@@ -4171,6 +4271,9 @@ type Cluster {
 
   "Computes a list of statistics for OPA constraint violations w\/in this cluster"
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
+
+  "list all alerts discovered for this cluster"
+  alerts(after: String, first: Int, before: String, last: Int): AlertConnection
 
   "Queries logs for a cluster out of loki"
   logs(query: LokiQuery!, start: Long, end: Long, limit: Int!): [LogStream]
@@ -5587,6 +5690,13 @@ enum AiRole {
   USER
 }
 
+"enumerable to describe the recency of this insight"
+enum InsightFreshness {
+  FRESH
+  STALE
+  EXPIRED
+}
+
 "A basic AI chat message input, modeled after OpenAI's api model"
 input ChatMessage {
   role: AiRole!
@@ -5603,6 +5713,8 @@ type AiInsight {
 
   "a shortish summary of this insight"
   summary: String
+
+  freshness: InsightFreshness
 
   "any errors generated when compiling this insight"
   error: [ServiceError]
@@ -7684,6 +7796,16 @@ type StackRunEdge {
 
 type InfrastructureStackEdge {
   node: InfrastructureStack
+  cursor: String
+}
+
+type AlertEdge {
+  node: Alert
+  cursor: String
+}
+
+type ObservabilityWebhookEdge {
+  node: ObservabilityWebhook
   cursor: String
 }
 

@@ -9,6 +9,13 @@ defmodule Console.GraphQl.AI do
     value :user
   end
 
+  @desc "enumerable to describe the recency of this insight"
+  enum :insight_freshness do
+    value :fresh
+    value :stale
+    value :expired
+  end
+
   @desc "A basic AI chat message input, modeled after OpenAI's api model"
   input_object :chat_message do
     field :role,    non_null(:ai_role)
@@ -17,10 +24,11 @@ defmodule Console.GraphQl.AI do
 
   @desc "A representation of a LLM-derived insight"
   object :ai_insight do
-    field :sha,     :string, description: "a deduplication sha for this insight"
-    field :text,    :string, description: "the text of this insight"
-    field :summary, :string, description: "a shortish summary of this insight"
-    field :error,   list_of(:service_error), description: "any errors generated when compiling this insight"
+    field :sha,       :string, description: "a deduplication sha for this insight"
+    field :text,      :string, description: "the text of this insight"
+    field :summary,   :string, description: "a shortish summary of this insight"
+    field :freshness, :insight_freshness, resolve: fn insight, _, _ -> {:ok, Console.Schema.AiInsight.freshness(insight)} end
+    field :error,     list_of(:service_error), description: "any errors generated when compiling this insight"
 
     timestamps()
   end
