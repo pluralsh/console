@@ -1,3 +1,5 @@
+export { default as AiSparkleFilledIcon } from './components/icons/AiSparkleFilledIcon'
+export { default as AiSparkleOutlineIcon } from './components/icons/AiSparkleOutlineIcon'
 export { default as AmazonLogoIcon } from './components/icons/AmazonLogoIcon'
 export { default as AnsibleIcon } from './components/icons/AnsibleIcon'
 export { default as ApiIcon } from './components/icons/ApiIcon'

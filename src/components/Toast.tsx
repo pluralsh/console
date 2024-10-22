@@ -1,10 +1,9 @@
-import { type FlexProps } from 'honorable'
 import { type Ref, forwardRef, useCallback, useEffect, useState } from 'react'
 
 import { type Severity } from '../types'
 import { type Extends } from '../utils/ts-utils'
 
-import Banner from './Banner'
+import Banner, { type BannerProps } from './Banner'
 import Layer, { type LayerPositionType } from './Layer'
 
 export type ToastSeverity = Extends<Severity, 'info' | 'success' | 'danger'>
@@ -16,7 +15,7 @@ type ToastProps = {
   onCloseComplete?: () => void
   show?: boolean
   severity?: ToastSeverity
-} & FlexProps
+} & BannerProps
 
 const defaults = {
   closeTimeout: 10000, // 10 seconds
@@ -110,4 +109,4 @@ function GraphQLToast({
   )
 }
 
-export { Toast, GraphQLToast }
+export { GraphQLToast, Toast }

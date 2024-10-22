@@ -23,7 +23,7 @@ export const BANNER_SEVERITIES = [
 type BannerSeverity = Extract<SeverityExt, (typeof BANNER_SEVERITIES)[number]>
 const DEFAULT_SEVERITY: BannerSeverity = 'success'
 
-type BannerProps = FlexProps & {
+export type BannerProps = FlexProps & {
   severity?: BannerSeverity | 'error'
   heading?: ReactNode
   action?: ReactNode
