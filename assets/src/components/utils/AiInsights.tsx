@@ -8,7 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import { AiInsightFragment } from 'generated/graphql'
+import { AiInsightSummaryFragment } from 'generated/graphql'
 import { useNavigate } from 'react-router-dom'
 
 export function AiInsightSummaryIcon({
@@ -17,14 +17,26 @@ export function AiInsightSummaryIcon({
   iconFrameType = 'tertiary',
   ...props
 }: {
-  insight: Nullable<Pick<AiInsightFragment, 'summary' | 'updatedAt'>>
+  insight: Nullable<AiInsightSummaryFragment>
   navPath?: string
   iconFrameType?: IconFrameProps['type']
 } & IconProps) {
   const navigate = useNavigate()
 
+  // if updated within the last 10 min
+  const isNew =
+    !!insight?.updatedAt &&
+    new Date().getTime() - new Date(insight.updatedAt).getTime() <
+      10 * 60 * 1000
+
+  // if updated more than 1 hour ago
+  const isStale =
+    !!insight?.updatedAt &&
+    new Date().getTime() - new Date(insight.updatedAt).getTime() >
+      60 * 60 * 1000
+
   // transparent icon just for even spacing
-  if (!insight?.summary)
+  if (!insight?.summary || isStale)
     return (
       <IconFrame
         icon={
@@ -35,12 +47,6 @@ export function AiInsightSummaryIcon({
         }
       />
     )
-
-  // if updated within the last 30 min
-  const isFresh =
-    !!insight.updatedAt &&
-    new Date(insight.updatedAt).getTime() - new Date().getTime() <
-      30 * 60 * 1000
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation()
@@ -65,7 +71,7 @@ export function AiInsightSummaryIcon({
         {...(navPath && { clickable: true, onClick: handleClick })}
         type={iconFrameType}
         icon={
-          isFresh ? (
+          isNew ? (
             <AiSparkleFilledIcon
               color="icon-info"
               {...props}

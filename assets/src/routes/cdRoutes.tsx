@@ -125,6 +125,7 @@ import {
   SERVICE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
+import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -499,6 +500,10 @@ const serviceDetailsRoutes = (
     <Route
       element={<ServiceDryRun />}
       path="dryrun"
+    />
+    <Route
+      element={<ServiceInsights />}
+      path="insights"
     />
     <Route
       element={<ServiceSettings />}

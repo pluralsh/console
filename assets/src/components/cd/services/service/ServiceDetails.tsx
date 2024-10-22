@@ -6,7 +6,7 @@ import {
   useParams,
 } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Flex } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
 import isEmpty from 'lodash/isEmpty'
 
@@ -53,6 +53,7 @@ import ServiceSelector from '../ServiceSelector'
 import { useProjectId } from '../../../contexts/ProjectsContext'
 
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
+import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 
 type ServiceContextType = {
   docs: ReturnType<typeof getDocsData>
@@ -161,6 +162,19 @@ export const getDirectory = ({
         />
       ),
       enabled: !isEmpty(serviceDeployment.dependencies),
+    },
+    {
+      path: 'insights',
+      label: (
+        <Flex
+          justify="space-between"
+          align="center"
+        >
+          <span>Insights</span>
+          <AiInsightSummaryIcon insight={serviceDeployment.insight} />
+        </Flex>
+      ),
+      enabled: !!serviceDeployment.insight,
     },
   ]
 }

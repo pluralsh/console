@@ -102,18 +102,18 @@ enum MenuItemKey {
 
 const pollInterval = 5 * 1000
 
-const getDirectory = (type: Nullable<StackType>, aiEnabled: boolean) => [
+const getDirectory = (stack: Nullable<StackFragment>, aiEnabled: boolean) => [
   { path: STACK_RUNS_REL_PATH, label: 'Runs', enabled: true },
   { path: STACK_PRS_REL_PATH, label: 'PRs', enabled: true },
   {
     path: STACK_STATE_REL_PATH,
     label: 'State',
-    enabled: type === StackType.Terraform,
+    enabled: stack?.type === StackType.Terraform,
   },
   {
     path: STACK_OUTPUT_REL_PATH,
     label: 'Output',
-    enabled: type === StackType.Terraform,
+    enabled: stack?.type === StackType.Terraform,
   },
   { path: STACK_VARS_REL_PATH, label: 'Variables', enabled: true },
   {
@@ -121,7 +121,7 @@ const getDirectory = (type: Nullable<StackType>, aiEnabled: boolean) => [
     label: (
       <Flex gap="small">
         <span>Insights</span>
-        <AiSparkleFilledIcon color={'icon-info'} />
+        {stack?.insight && <AiSparkleFilledIcon color={'icon-info'} />}
       </Flex>
     ),
     enabled: aiEnabled,
@@ -195,8 +195,8 @@ export default function Stacks() {
 
   const fullStack = useMemo(() => stackData?.infrastructureStack, [stackData])
   const directory = useMemo(
-    () => getDirectory(fullStack?.type, !!ai?.enabled),
-    [ai?.enabled, fullStack?.type]
+    () => getDirectory(fullStack, !!ai?.enabled),
+    [ai?.enabled, fullStack]
   )
   const currentTab = directory.find(({ path }) => path === tab)
   const deleteLabel = fullStack?.deletedAt
