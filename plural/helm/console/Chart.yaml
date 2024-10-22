@@ -12,7 +12,7 @@ dependencies:
     version: 0.0.85
     repository: file://../../../charts/controller
   - name: kubernetes-dashboard
-    version: 7.6.1
+    version: 7.9.0
     alias: dashboard
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled
