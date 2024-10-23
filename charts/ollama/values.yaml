@@ -21,13 +21,13 @@ knative:
 # Docker image
 image:
   # -- Docker image registry
-  repository: zreigz/ollama
+  repository: ollama/ollama
 
   # -- Docker pull policy
   pullPolicy: IfNotPresent
 
   # -- Docker image tag, overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: ""
 
 # -- Docker registry secret names as an array
 imagePullSecrets: []
@@ -75,13 +75,14 @@ ollama:
   # models:
   #  - llama2
   #  - mistral
-  models: []
+  models:
+    - llama3
 
   # -- Add insecure flag for pulling at container startup
   insecure: false
 
   # -- Override ollama-data volume mount path to "/root/.ollama" if you use models , default: "/tmp"
-  mountPath: ""
+  mountPath: "/root/.ollama"
 
 # Service account
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
