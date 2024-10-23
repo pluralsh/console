@@ -1,5 +1,6 @@
 .PHONY: help
 
+OLLAMA_BASE_MODEL ?= llama3
 GCP_PROJECT ?= pluralsh
 APP_NAME ?= console
 APP_VSN ?= `git describe`
@@ -20,6 +21,24 @@ find-versions:
 	gcloud container get-server-config --zone=us-central1-f --format=json > k8s-versions/gke.json
 	aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > k8s-versions/eks.json
 	az aks get-versions --location eastus --output json > k8s-versions/aks.json
+
+
+update-ollama-helm-chart: ## update ollama Helm chart
+	helm repo add ollama-helm https://otwld.github.io/ollama-helm/
+	helm repo update
+	rm -rf charts/ollama
+	helm pull ollama-helm/ollama --untar --untardir charts
+
+docker-build-ollama: ## build ollama image
+	docker build \
+			--build-arg=OLLAMA_BASE_MODEL=$(OLLAMA_BASE_MODEL) \
+    	  	-t ollama:$(OLLAMA_BASE_MODEL) \
+    	  	-t gcr.io/$(GCP_PROJECT)/ollama:$(OLLAMA_BASE_MODEL) \
+    		-f dockerfiles/ollama/base.Dockerfile \
+    		.
+
+docker-push-ollama: ## push ollama image
+	docker push gcr.io/$(GCP_PROJECT)/ollama:$(OLLAMA_BASE_MODEL)
 
 download-deprecations:
 	curl -L https://raw.githubusercontent.com/FairwindsOps/pluto/refs/heads/master/versions.yaml --output static/versions.yml
