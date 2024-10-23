@@ -147,6 +147,7 @@ type AiSettings struct {
 	Provider  *AiProvider        `json:"provider,omitempty"`
 	Openai    *OpenaiSettings    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettings `json:"anthropic,omitempty"`
+	Ollama    *OllamaSettings    `json:"ollama,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -154,6 +155,7 @@ type AiSettingsAttributes struct {
 	Provider  *AiProvider                  `json:"provider,omitempty"`
 	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
 }
 
 // Anthropic connection information
@@ -611,6 +613,12 @@ type Changelog struct {
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
+// A basic AI chat message input, modeled after OpenAI's api model
+type ChatMessage struct {
+	Role    AiRole `json:"role"`
+	Content string `json:"content"`
+}
+
 type CloneAttributes struct {
 	S3AccessKeyID     *string `json:"s3AccessKeyId,omitempty"`
 	S3SecretAccessKey *string `json:"s3SecretAccessKey,omitempty"`
@@ -716,6 +724,8 @@ type Cluster struct {
 	PinnedCustomResources []*PinnedCustomResource `json:"pinnedCustomResources,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	UpgradeInsights []*UpgradeInsight `json:"upgradeInsights,omitempty"`
+	// A summation of the metrics utilization of the current cluster
+	MetricsSummary *ClusterMetricsSummary `json:"metricsSummary,omitempty"`
 	// the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null
 	Status *ClusterStatus `json:"status,omitempty"`
 	// a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit
@@ -828,6 +838,23 @@ type ClusterMetrics struct {
 	Pods           []*MetricResponse `json:"pods,omitempty"`
 	CPUUsage       []*MetricResponse `json:"cpuUsage,omitempty"`
 	MemoryUsage    []*MetricResponse `json:"memoryUsage,omitempty"`
+}
+
+// A summarization of the core cpu and memory metrics for this cluster
+type ClusterMetricsSummary struct {
+	Nodes *int64 `json:"nodes,omitempty"`
+	// the cpu available in vcpu
+	CPUAvailable *float64 `json:"cpuAvailable,omitempty"`
+	// the total cpu in the cluster measured in vcpu
+	CPUTotal *float64 `json:"cpuTotal,omitempty"`
+	// a percentage cpu utilization of the cluster
+	CPUUsed *int64 `json:"cpuUsed,omitempty"`
+	// the total number of megabytes unused in the cluster
+	MemoryAvailable *float64 `json:"memoryAvailable,omitempty"`
+	// the total number of megabytes available in the cluster
+	MemoryTotal *float64 `json:"memoryTotal,omitempty"`
+	// a percentage memory utilization of the cluster
+	MemoryUsed *int64 `json:"memoryUsed,omitempty"`
 }
 
 type ClusterNodeMetrics struct {
@@ -2897,6 +2924,18 @@ type OidcProviderAttributes struct {
 	Description *string         `json:"description,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
+}
+
+type OllamaAttributes struct {
+	Model string `json:"model"`
+	URL   string `json:"url"`
+}
+
+// Settings for a self-hosted ollama-based LLM deployment
+type OllamaSettings struct {
+	Model string `json:"model"`
+	// the url your ollama deployment is hosted on
+	URL string `json:"url"`
 }
 
 // OpenAI connection information
@@ -5504,16 +5543,18 @@ type AiProvider string
 const (
 	AiProviderOpenai    AiProvider = "OPENAI"
 	AiProviderAnthropic AiProvider = "ANTHROPIC"
+	AiProviderOllama    AiProvider = "OLLAMA"
 )
 
 var AllAiProvider = []AiProvider{
 	AiProviderOpenai,
 	AiProviderAnthropic,
+	AiProviderOllama,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama:
 		return true
 	}
 	return false
@@ -5537,6 +5578,50 @@ func (e *AiProvider) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AiProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// A role to pass to an LLM, modeled after OpenAI's chat api roles
+type AiRole string
+
+const (
+	AiRoleSystem    AiRole = "SYSTEM"
+	AiRoleAssistant AiRole = "ASSISTANT"
+	AiRoleUser      AiRole = "USER"
+)
+
+var AllAiRole = []AiRole{
+	AiRoleSystem,
+	AiRoleAssistant,
+	AiRoleUser,
+}
+
+func (e AiRole) IsValid() bool {
+	switch e {
+	case AiRoleSystem, AiRoleAssistant, AiRoleUser:
+		return true
+	}
+	return false
+}
+
+func (e AiRole) String() string {
+	return string(e)
+}
+
+func (e *AiRole) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AiRole(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AiRole", str)
+	}
+	return nil
+}
+
+func (e AiRole) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

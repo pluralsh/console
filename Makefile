@@ -22,6 +22,7 @@ find-versions:
 	aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > k8s-versions/eks.json
 	az aks get-versions --location eastus --output json > k8s-versions/aks.json
 
+
 update-ollama-helm-chart: ## update ollama Helm chart
 	helm repo add ollama-helm https://otwld.github.io/ollama-helm/
 	helm repo update
@@ -38,6 +39,9 @@ docker-build-ollama: ## build ollama image
 
 docker-push-ollama: ## push ollama image
 	docker push gcr.io/$(GCP_PROJECT)/ollama:$(OLLAMA_BASE_MODEL)
+
+download-deprecations:
+	curl -L https://raw.githubusercontent.com/FairwindsOps/pluto/refs/heads/master/versions.yaml --output static/versions.yml
 
 build: ## Build the Docker image
 	docker build --build-arg GIT_COMMIT=$(GIT_COMMIT) \

@@ -78,7 +78,8 @@ import { StackSettingsModal } from './StackSettingsModal'
 
 export type StackOutletContextT = {
   stack: StackFragment
-  refetch?: Nullable<() => void>
+  refetch: () => void
+  loading: boolean
 }
 
 export const getBreadcrumbs = (
@@ -472,11 +473,17 @@ export default function Stacks() {
                 </LinkTabWrap>
               ))}
           </TabList>
-          {stackLoading ? (
+          {!fullStack ? (
             <LoopingLogo css={{ flex: 1 }} />
           ) : (
             <Outlet
-              context={{ stack: fullStack, refetch } as StackOutletContextT}
+              context={
+                {
+                  stack: fullStack,
+                  refetch,
+                  loading,
+                } satisfies StackOutletContextT
+              }
             />
           )}
         </div>

@@ -6,8 +6,32 @@ on:
     - cron: '0 0 * * *'
 
 jobs:
+  api-deprecations-update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      pull-requests: 'write'
+    steps:
+      - uses: actions/checkout@v3
+      - run: make liquid-docs
+      - id: date
+        run: echo "date=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+      - uses: peter-evans/create-pull-request@v5
+        with:
+          title: "Upgrade deprecated apis list"
+          body: Upgrade our deprecations table with all current data
+          commit-message: Upgrade our deprecations table with all current data
+          branch: deprecations-${{steps.date.outputs.date}}
+          labels: enhancement
+          base: master
+
   run-compatibility-updater:
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'write'
+      id-token: 'write'
+      pull-requests: 'write'
 
     steps:
     - name: Checkout repository
@@ -33,4 +57,5 @@ jobs:
         body: Automated Pull Request to update compatibility matrix
         commit-message: Updated compatibility matrix ${{ steps.date.outputs.DATE }}
         branch: compatibility-matrix-update-${{ steps.date.outputs.DATE }}
+        labels: enhancement
         base: master

@@ -1,22 +1,23 @@
-import { Flex } from '@pluralsh/design-system'
+import { Button, Flex, ReloadIcon } from '@pluralsh/design-system'
 import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import { CaptionP } from 'components/utils/typography/Text'
-import { ServiceDeploymentComponentFragment } from 'generated/graphql'
 import { useOutletContext } from 'react-router-dom'
 import { dateTimeFormat } from 'utils/date'
+import { ComponentDetailsContext } from './ComponentDetails.tsx'
 
 export function ComponentInsights() {
-  const { component } = useOutletContext<{
-    component: ServiceDeploymentComponentFragment
-  }>()
+  const { component, refetch, loading } =
+    useOutletContext<ComponentDetailsContext>()
 
   return (
     <Flex
       direction="column"
       gap="medium"
       overflow="hidden"
+      maxHeight="100%"
     >
       <Flex
+        align={'center'}
         justify="space-between"
         gap="small"
       >
@@ -25,9 +26,16 @@ export function ComponentInsights() {
           $color="text-xlight"
         >
           {component.insight?.updatedAt &&
-            `Last updated ${dateTimeFormat(component.insight?.updatedAt)}`}
+            `Last updated at ${dateTimeFormat(component.insight?.updatedAt)}`}
         </CaptionP>
-        {/* TODO: Add refresh button here */}
+        <Button
+          floating
+          startIcon={<ReloadIcon />}
+          onClick={() => refetch()}
+          loading={loading}
+        >
+          Refresh insights
+        </Button>
       </Flex>
       <InsightDisplay text={component.insight?.text} />
     </Flex>

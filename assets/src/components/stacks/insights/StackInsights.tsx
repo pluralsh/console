@@ -1,8 +1,10 @@
 import {
+  Button,
   Card,
   EmptyState,
   Flex,
   Markdown,
+  ReloadIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useMemo } from 'react'
@@ -10,11 +12,11 @@ import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { CaptionP } from 'components/utils/typography/Text'
-import { dateTimeFormat } from 'utils/date'
 import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
+import moment from 'moment/moment'
 
 export function StackInsights() {
-  const { stack } = useOutletContext() as StackOutletContextT
+  const { stack, refetch, loading } = useOutletContext() as StackOutletContextT
 
   useSetBreadcrumbs(
     useMemo(
@@ -37,9 +39,16 @@ export function StackInsights() {
           $color="text-xlight"
         >
           {stack.insight?.updatedAt &&
-            `Last updated ${dateTimeFormat(stack.insight?.updatedAt)}`}
+            `Last updated ${moment(stack.insight?.updatedAt).fromNow()}`}
         </CaptionP>
-        {/* TODO: Add refresh button here */}
+        <Button
+          floating
+          startIcon={<ReloadIcon />}
+          onClick={() => refetch?.()}
+          loading={loading}
+        >
+          Refresh insights
+        </Button>
       </Flex>
       <InsightDisplay text={stack.insight?.text} />
     </Flex>

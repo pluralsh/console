@@ -107,16 +107,14 @@ export default function ComponentCard<C extends Component>({
           </Tooltip>
         </p>
       </div>
-      {component.insight && (
-        <AiInsightSummaryIcon
-          navPath={`${getServiceComponentPath({
-            clusterId,
-            serviceId,
-            componentId: component.id,
-          })}/insights`}
-          insight={component.insight}
-        />
-      )}
+      <AiInsightSummaryIcon
+        navPath={`${getServiceComponentPath({
+          clusterId,
+          serviceId,
+          componentId: component.id,
+        })}/insights`}
+        insight={component.insight}
+      />
       {state || state === null ? (
         <ComponentStateChip
           state={componentState}

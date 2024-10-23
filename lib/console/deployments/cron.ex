@@ -59,6 +59,7 @@ defmodule Console.Deployments.Cron do
     |> Repo.stream(method: :keyset)
     |> Stream.each(fn cluster ->
       Logger.info "warming node caches for cluster"
+      Clusters.warm(:cluster_metrics, cluster)
       Clusters.warm(:nodes, cluster)
       Clusters.warm(:node_metrics, cluster)
       Clusters.warm(:api_discovery, cluster)

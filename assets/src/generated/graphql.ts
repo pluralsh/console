@@ -192,7 +192,15 @@ export type AiInsight = {
 
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
+  Ollama = 'OLLAMA',
   Openai = 'OPENAI'
+}
+
+/** A role to pass to an LLM, modeled after OpenAI's chat api roles */
+export enum AiRole {
+  Assistant = 'ASSISTANT',
+  System = 'SYSTEM',
+  User = 'USER'
 }
 
 /** Settings for configuring access to common LLM providers */
@@ -200,6 +208,7 @@ export type AiSettings = {
   __typename?: 'AiSettings';
   anthropic?: Maybe<AnthropicSettings>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
+  ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
   provider?: Maybe<AiProvider>;
 };
@@ -207,6 +216,7 @@ export type AiSettings = {
 export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
 };
@@ -774,6 +784,12 @@ export type Changelog = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** A basic AI chat message input, modeled after OpenAI's api model */
+export type ChatMessage = {
+  content: Scalars['String']['input'];
+  role: AiRole;
+};
+
 export type CloneAttributes = {
   s3AccessKeyId?: InputMaybe<Scalars['String']['input']>;
   s3Endpoint?: InputMaybe<Scalars['String']['input']>;
@@ -838,6 +854,8 @@ export type Cluster = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
   metadata?: Maybe<Scalars['Map']['output']>;
+  /** A summation of the metrics utilization of the current cluster */
+  metricsSummary?: Maybe<ClusterMetricsSummary>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
   /** list the cached node metrics for a cluster, can also be stale up to 5m */
@@ -1066,6 +1084,24 @@ export type ClusterMetrics = {
   memoryRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   memoryUsage?: Maybe<Array<Maybe<MetricResponse>>>;
   pods?: Maybe<Array<Maybe<MetricResponse>>>;
+};
+
+/** A summarization of the core cpu and memory metrics for this cluster */
+export type ClusterMetricsSummary = {
+  __typename?: 'ClusterMetricsSummary';
+  /** the cpu available in vcpu */
+  cpuAvailable?: Maybe<Scalars['Float']['output']>;
+  /** the total cpu in the cluster measured in vcpu */
+  cpuTotal?: Maybe<Scalars['Float']['output']>;
+  /** a percentage cpu utilization of the cluster */
+  cpuUsed?: Maybe<Scalars['Int']['output']>;
+  /** the total number of megabytes unused in the cluster */
+  memoryAvailable?: Maybe<Scalars['Float']['output']>;
+  /** the total number of megabytes available in the cluster */
+  memoryTotal?: Maybe<Scalars['Float']['output']>;
+  /** a percentage memory utilization of the cluster */
+  memoryUsed?: Maybe<Scalars['Int']['output']>;
+  nodes?: Maybe<Scalars['Int']['output']>;
 };
 
 export type ClusterNodeMetrics = {
@@ -3505,6 +3541,19 @@ export type OidcProviderAttributes = {
 export enum OidcProviderType {
   Plural = 'PLURAL'
 }
+
+export type OllamaAttributes = {
+  model: Scalars['String']['input'];
+  url: Scalars['String']['input'];
+};
+
+/** Settings for a self-hosted ollama-based LLM deployment */
+export type OllamaSettings = {
+  __typename?: 'OllamaSettings';
+  model: Scalars['String']['output'];
+  /** the url your ollama deployment is hosted on */
+  url: Scalars['String']['output'];
+};
 
 /** OpenAI connection information */
 export type OpenaiSettings = {
@@ -5954,6 +6003,7 @@ export type RootQueryType = {
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   ai?: Maybe<Scalars['String']['output']>;
+  /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
   appNotifications?: Maybe<AppNotificationConnection>;
   application?: Maybe<Application>;
@@ -6152,7 +6202,8 @@ export type RootQueryTypeAiArgs = {
 
 
 export type RootQueryTypeAiCompletionArgs = {
-  input: Scalars['String']['input'];
+  chat?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  input?: InputMaybe<Scalars['String']['input']>;
   system: Scalars['String']['input'];
 };
 
@@ -10576,6 +10627,10 @@ export type StackFragment = { __typename?: 'InfrastructureStack', id?: string | 
 
 export type StackRunFragment = { __typename?: 'StackRun', id: string, insertedAt?: string | null, message?: string | null, status: StackStatus, approval?: boolean | null, approvedAt?: string | null, git: { __typename?: 'GitRef', ref: string }, approver?: { __typename?: 'User', name: string, email: string } | null, insight?: { __typename?: 'AiInsight', text?: string | null, summary?: string | null, sha?: string | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null };
 
+export type ObservableMetricFragment = { __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null };
+
+export type StackRunDetailsFragment = { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', text?: string | null, summary?: string | null, sha?: string | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null };
+
 export type CustomStackRunFragment = { __typename?: 'CustomStackRun', id: string, name: string, documentation?: string | null, commands?: Array<{ __typename?: 'StackCommand', args?: Array<string | null> | null, cmd: string } | null> | null, configuration?: Array<{ __typename?: 'PrConfiguration', values?: Array<string | null> | null, default?: string | null, documentation?: string | null, longform?: string | null, name: string, optional?: boolean | null, placeholder?: string | null, type: ConfigurationType, condition?: { __typename?: 'PrConfigurationCondition', field: string, operation: Operation, value?: string | null } | null } | null> | null };
 
 export type StackConfigurationFragment = { __typename?: 'StackConfiguration', version?: string | null, image?: string | null };
@@ -10677,7 +10732,7 @@ export type StackRunQueryVariables = Exact<{
 }>;
 
 
-export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null } | null };
+export type StackRunQuery = { __typename?: 'RootQueryType', stackRun?: { __typename?: 'StackRun', id: string, status: StackStatus, updatedAt?: string | null, insertedAt?: string | null, type: StackType, message?: string | null, approval?: boolean | null, approvedAt?: string | null, cancellationReason?: string | null, approver?: { __typename?: 'User', id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null, stack?: { __typename?: 'InfrastructureStack', name: string, observableMetrics?: Array<{ __typename?: 'ObservableMetric', identifier: string, provider?: { __typename?: 'ObservabilityProvider', name: string, type: ObservabilityProviderType } | null } | null> | null } | null, configuration: { __typename?: 'StackConfiguration', version?: string | null, image?: string | null }, state?: { __typename?: 'StackState', id: string, plan?: string | null, state?: Array<{ __typename?: 'StackStateResource', name: string, resource: string, identifier: string, links?: Array<string | null> | null, configuration?: Record<string, unknown> | null } | null> | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, git: { __typename?: 'GitRef', files?: Array<string> | null, ref: string, folder: string }, pullRequest?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null } | null, output?: Array<{ __typename?: 'StackOutput', name: string, value: string, secret?: boolean | null } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, self?: boolean | null, distro?: ClusterDistro | null, virtual?: boolean | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null } | null, environment?: Array<{ __typename?: 'StackEnvironment', name: string, value: string, secret?: boolean | null } | null> | null, errors?: Array<{ __typename?: 'ServiceError', source: string, message: string } | null> | null, files?: Array<{ __typename?: 'StackFile', path: string, content: string } | null> | null, jobSpec?: { __typename?: 'JobGateSpec', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null, namespace: string, raw?: string | null, serviceAccount?: string | null, containers?: Array<{ __typename?: 'ContainerSpec', args?: Array<string | null> | null, image: string, env?: Array<{ __typename?: 'ContainerEnv', name: string, value: string } | null> | null, envFrom?: Array<{ __typename?: 'ContainerEnvFrom', configMap: string, secret: string } | null> | null } | null> | null } | null, steps?: Array<{ __typename?: 'RunStep', id: string, name: string, insertedAt?: string | null, updatedAt?: string | null, status: StepStatus, stage: StepStage, args?: Array<string> | null, cmd: string, index: number, logs?: Array<{ __typename?: 'RunLogs', id: string, updatedAt?: string | null, insertedAt?: string | null, logs: string } | null> | null } | null> | null, insight?: { __typename?: 'AiInsight', text?: string | null, summary?: string | null, sha?: string | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null };
 
 export type StackRunJobQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -13488,20 +13543,15 @@ export const StackRunFragmentDoc = gql`
   }
 }
     ${AiInsightFragmentDoc}`;
-export const CustomStackRunFragmentDoc = gql`
-    fragment CustomStackRun on CustomStackRun {
-  id
-  name
-  documentation
-  commands {
-    args
-    cmd
+export const ObservableMetricFragmentDoc = gql`
+    fragment ObservableMetric on ObservableMetric {
+  provider {
+    name
+    type
   }
-  configuration {
-    ...PrConfiguration
-  }
+  identifier
 }
-    ${PrConfigurationFragmentDoc}`;
+    `;
 export const StackConfigurationFragmentDoc = gql`
     fragment StackConfiguration on StackConfiguration {
   version
@@ -13571,6 +13621,96 @@ export const RunStepFragmentDoc = gql`
   }
 }
     `;
+export const StackRunDetailsFragmentDoc = gql`
+    fragment StackRunDetails on StackRun {
+  id
+  status
+  updatedAt
+  insertedAt
+  type
+  message
+  approval
+  approvedAt
+  approver {
+    ...User
+  }
+  cancellationReason
+  stack {
+    name
+    observableMetrics {
+      ...ObservableMetric
+    }
+  }
+  configuration {
+    ...StackConfiguration
+  }
+  state {
+    ...StackState
+  }
+  repository {
+    ...GitRepository
+  }
+  git {
+    files
+    ref
+    folder
+  }
+  pullRequest {
+    ...PullRequest
+  }
+  output {
+    ...StackOutput
+  }
+  cluster {
+    ...ClusterTiny
+  }
+  environment {
+    ...StackEnvironment
+  }
+  errors {
+    ...ServiceErrors
+  }
+  files {
+    ...StackFile
+  }
+  jobSpec {
+    ...JobGateSpec
+  }
+  steps {
+    ...RunStep
+  }
+  insight {
+    ...AiInsight
+  }
+}
+    ${UserFragmentDoc}
+${ObservableMetricFragmentDoc}
+${StackConfigurationFragmentDoc}
+${StackStateFragmentDoc}
+${GitRepositoryFragmentDoc}
+${PullRequestFragmentDoc}
+${StackOutputFragmentDoc}
+${ClusterTinyFragmentDoc}
+${StackEnvironmentFragmentDoc}
+${ServiceErrorsFragmentDoc}
+${StackFileFragmentDoc}
+${JobGateSpecFragmentDoc}
+${RunStepFragmentDoc}
+${AiInsightFragmentDoc}`;
+export const CustomStackRunFragmentDoc = gql`
+    fragment CustomStackRun on CustomStackRun {
+  id
+  name
+  documentation
+  commands {
+    args
+    cmd
+  }
+  configuration {
+    ...PrConfiguration
+  }
+}
+    ${PrConfigurationFragmentDoc}`;
 export const AccessTokenFragmentDoc = gql`
     fragment AccessToken on AccessToken {
   id
@@ -21715,80 +21855,10 @@ export type StackRunsQueryResult = Apollo.QueryResult<StackRunsQuery, StackRunsQ
 export const StackRunDocument = gql`
     query StackRun($id: ID!) {
   stackRun(id: $id) {
-    id
-    status
-    updatedAt
-    insertedAt
-    type
-    message
-    approval
-    approvedAt
-    approver {
-      ...User
-    }
-    cancellationReason
-    stack {
-      name
-      observableMetrics {
-        provider {
-          name
-          type
-        }
-        identifier
-      }
-    }
-    configuration {
-      ...StackConfiguration
-    }
-    state {
-      ...StackState
-    }
-    repository {
-      ...GitRepository
-    }
-    git {
-      files
-      ref
-      folder
-    }
-    pullRequest {
-      ...PullRequest
-    }
-    output {
-      ...StackOutput
-    }
-    cluster {
-      ...ClusterTiny
-    }
-    environment {
-      ...StackEnvironment
-    }
-    errors {
-      ...ServiceErrors
-    }
-    files {
-      ...StackFile
-    }
-    jobSpec {
-      ...JobGateSpec
-    }
-    steps {
-      ...RunStep
-    }
+    ...StackRunDetails
   }
 }
-    ${UserFragmentDoc}
-${StackConfigurationFragmentDoc}
-${StackStateFragmentDoc}
-${GitRepositoryFragmentDoc}
-${PullRequestFragmentDoc}
-${StackOutputFragmentDoc}
-${ClusterTinyFragmentDoc}
-${StackEnvironmentFragmentDoc}
-${ServiceErrorsFragmentDoc}
-${StackFileFragmentDoc}
-${JobGateSpecFragmentDoc}
-${RunStepFragmentDoc}`;
+    ${StackRunDetailsFragmentDoc}`;
 
 /**
  * __useStackRunQuery__
@@ -23210,6 +23280,8 @@ export const namedOperations = {
     StackTiny: 'StackTiny',
     Stack: 'Stack',
     StackRun: 'StackRun',
+    ObservableMetric: 'ObservableMetric',
+    StackRunDetails: 'StackRunDetails',
     CustomStackRun: 'CustomStackRun',
     StackConfiguration: 'StackConfiguration',
     StackStateResource: 'StackStateResource',

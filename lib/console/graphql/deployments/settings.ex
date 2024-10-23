@@ -46,6 +46,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :provider,  :ai_provider
     field :openai,    :openai_settings_attributes
     field :anthropic, :anthropic_settings_attributes
+    field :ollama,    :ollama_attributes
   end
 
   input_object :openai_settings_attributes do
@@ -56,6 +57,11 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :anthropic_settings_attributes do
     field :access_token, :string
     field :model,        :string
+  end
+
+  input_object :ollama_attributes do
+    field :model, non_null(:string)
+    field :url,   non_null(:string)
   end
 
   input_object :smtp_settings_attributes do
@@ -139,6 +145,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :provider,  :ai_provider
     field :openai,    :openai_settings
     field :anthropic, :anthropic_settings
+    field :ollama,    :ollama_settings
   end
 
   @desc "OpenAI connection information"
@@ -149,6 +156,12 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "Anthropic connection information"
   object :anthropic_settings do
     field :model, :string, description: "the anthropic model version to use"
+  end
+
+  @desc "Settings for a self-hosted ollama-based LLM deployment"
+  object :ollama_settings do
+    field :model, non_null(:string)
+    field :url,   non_null(:string), description: "the url your ollama deployment is hosted on"
   end
 
   connection node_type: :project

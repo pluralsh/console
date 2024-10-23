@@ -8,9 +8,10 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 
-import { StackOutput, StackRun } from '../../../../generated/graphql'
+import { StackOutput } from '../../../../generated/graphql'
 
 import OutputValue from './Value'
+import { StackRunOutletContextT } from '../Route.tsx'
 
 const columnHelper = createColumnHelper<StackOutput>()
 
@@ -46,7 +47,7 @@ function useColumns(): Array<object> {
 }
 
 export default function StackRunOutput(): ReactNode {
-  const { stackRun } = useOutletContext<{ stackRun: StackRun }>()
+  const { stackRun } = useOutletContext<StackRunOutletContextT>()
   const isEmpty = (stackRun.output ?? []).length === 0
   const columns = useColumns()
 

@@ -17,6 +17,7 @@ defmodule Console.AI.Cron do
   def services() do
     if_enabled(fn ->
       Service.for_statuses([:failed, :stale])
+      |> Service.stable()
       |> Service.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
       |> Console.throttle()
