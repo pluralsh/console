@@ -13,8 +13,10 @@ import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
+import { useTheme } from 'styled-components'
 
 export function ServiceInsights() {
+  const theme = useTheme()
   const { service } = useServiceContext()
   const { serviceId, clusterId } = useParams()
 
@@ -39,6 +41,7 @@ export function ServiceInsights() {
       direction="column"
       gap="medium"
       overflow="hidden"
+      marginBottom={theme.spacing.large}
     >
       <Flex
         justify="space-between"
