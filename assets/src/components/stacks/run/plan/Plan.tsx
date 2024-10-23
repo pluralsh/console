@@ -4,10 +4,10 @@ import { useOutletContext } from 'react-router-dom'
 import CommandLog from 'components/builds/build/progress/CommandLog'
 import { Card } from '@pluralsh/design-system'
 
-import { StackRun } from '../../../../generated/graphql'
+import { StackRunOutletContextT } from '../Route.tsx'
 
 export default function StackRunPlan(): ReactNode {
-  const { stackRun } = useOutletContext<{ stackRun: StackRun }>()
+  const { stackRun } = useOutletContext<StackRunOutletContextT>()
   const value = stackRun.state?.plan ?? ''
 
   return (

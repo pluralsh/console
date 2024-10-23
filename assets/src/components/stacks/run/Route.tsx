@@ -7,7 +7,10 @@ import { ReactNode, useMemo } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { StackRun, useStackRunQuery } from '../../../generated/graphql'
+import {
+  StackRunDetailsFragment,
+  useStackRunQuery,
+} from '../../../generated/graphql'
 import { getBreadcrumbs } from '../Stacks'
 import {
   STACK_RUNS_REL_PATH,
@@ -20,6 +23,12 @@ import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveL
 
 import StackRunHeader from './Header'
 import StackRunSidecar from './Sidecar'
+
+export type StackRunOutletContextT = {
+  stackRun: StackRunDetailsFragment
+  refetch: () => void
+  loading: boolean
+}
 
 export function getRunBreadcrumbs(
   stackName: Nullable<string>,
@@ -42,20 +51,13 @@ export default function StackRunDetail(): ReactNode {
   const { stackId, runId } = useParams()
   const theme = useTheme()
 
-  const {
-    data: stackRunQuery,
-    loading: loadingStackRun,
-    refetch,
-    error,
-  } = useStackRunQuery({
-    variables: {
-      id: runId!,
-    },
+  const { data, loading, refetch, error } = useStackRunQuery({
+    variables: { id: runId! },
     skip: !runId,
     pollInterval: 5_000,
   })
 
-  const stackRun: StackRun = stackRunQuery?.stackRun as StackRun
+  const stackRun = data?.stackRun
 
   useSetBreadcrumbs(
     useMemo(
@@ -65,7 +67,7 @@ export default function StackRunDetail(): ReactNode {
     )
   )
 
-  if (loadingStackRun) {
+  if (loading && !stackRun) {
     return <LoadingIndicator />
   }
 
@@ -101,7 +103,15 @@ export default function StackRunDetail(): ReactNode {
             flexDirection: 'column',
           }}
         >
-          <Outlet context={{ stackRun }} />
+          <Outlet
+            context={
+              {
+                stackRun,
+                refetch,
+                loading,
+              } satisfies StackRunOutletContextT
+            }
+          />
         </div>
       </ResponsiveLayoutContentContainer>
       <StackRunSidecar stackRun={stackRun} />

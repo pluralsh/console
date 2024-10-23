@@ -14,7 +14,6 @@ import {
 import {
   JobFragment,
   PipelineGateJobFragment,
-  StackRun,
   useStackRunJobQuery,
 } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
@@ -28,6 +27,7 @@ import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import { getStackRunsAbsPath } from 'routes/stacksRoutesConsts'
 
 import { TRUNCATE } from '../../../utils/truncate'
+import { StackRunOutletContextT } from '../Route.tsx'
 
 const DIRECTORY = [
   { path: 'logs', label: 'Logs' },
@@ -62,7 +62,7 @@ export default function RunJob() {
   const theme = useTheme()
   const {
     stackRun: { cluster },
-  } = useOutletContext() as { stackRun: StackRun }
+  } = useOutletContext<StackRunOutletContextT>()
 
   const { stackId, runId } = useParams()
   const { pathname } = useLocation()

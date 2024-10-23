@@ -14,7 +14,7 @@ import { Link } from 'react-router-dom'
 
 import { PrStatusChip } from 'components/pr/queue/PrQueueColumns'
 
-import { StackRun } from '../../../generated/graphql'
+import { StackRunDetailsFragment } from '../../../generated/graphql'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
 import StackApprovalChip from '../common/StackApprovalChip'
 import { ClusterProviderIcon } from '../../utils/Provider'
@@ -25,7 +25,7 @@ import StackStatusChip from '../common/StackStatusChip'
 import StackObservabilityMetrics from '../common/StackObservabilityMetrics'
 
 interface StackRunSidecarProps {
-  stackRun: StackRun
+  stackRun: StackRunDetailsFragment
 }
 
 export default function StackRunSidecar({

@@ -285,16 +285,14 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
               <GlobeIcon color={theme.colors['icon-light']} />
             </Tooltip>
           )}
-          {node?.insight && (
-            <AiInsightSummaryIcon
-              navPath={`${getServiceDetailsPath({
-                clusterId: node?.cluster?.id,
-                serviceId: node?.id,
-              })}/insights`}
-              insight={node?.insight}
-              iconFrameType="floating"
-            />
-          )}
+          <AiInsightSummaryIcon
+            navPath={`${getServiceDetailsPath({
+              clusterId: node?.cluster?.id,
+              serviceId: node?.id,
+            })}/insights`}
+            insight={node?.insight}
+            iconFrameType="floating"
+          />
           <ServicesRollbackDeployment
             refetch={refetch}
             serviceDeployment={serviceDeployment}

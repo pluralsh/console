@@ -10,19 +10,23 @@ import { IconProps } from '@pluralsh/design-system/dist/components/icons/createI
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { AiInsightSummaryFragment } from 'generated/graphql'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 export function AiInsightSummaryIcon({
   insight,
   navPath,
+  preserveSpace = false,
   asIconFrame = true,
   iconFrameType = 'tertiary',
   ...props
 }: {
   insight: Nullable<AiInsightSummaryFragment>
   navPath?: string
+  preserveSpace?: boolean
   asIconFrame?: boolean
   iconFrameType?: IconFrameProps['type']
 } & IconProps) {
+  const theme = useTheme()
   const navigate = useNavigate()
 
   // if updated within the last 10 min
@@ -37,9 +41,8 @@ export function AiInsightSummaryIcon({
     new Date().getTime() - new Date(insight.updatedAt).getTime() >
       60 * 60 * 1000
 
-  // transparent icon just for even spacing
   if (!insight?.summary || isStale)
-    return (
+    return preserveSpace ? (
       <IconFrame
         icon={
           <AiSparkleFilledIcon
@@ -48,7 +51,7 @@ export function AiInsightSummaryIcon({
           />
         }
       />
-    )
+    ) : null
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation()
@@ -78,6 +81,11 @@ export function AiInsightSummaryIcon({
           {insight.summary}
         </Flex>
       }
+      border={'1px solid transparent'}
+      borderRadius={theme.borderRadiuses.medium}
+      backgroundImage={`linear-gradient(${theme.colors['fill-two']}, ${theme.colors['fill-two']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`}
+      backgroundOrigin={'border-box'}
+      backgroundClip={'padding-box, border-box'}
     >
       {asIconFrame ? (
         <IconFrame
@@ -91,6 +99,7 @@ export function AiInsightSummaryIcon({
     </Tooltip>
   )
 }
+
 export function InsightsTabLabel({
   insight,
 }: {
@@ -103,12 +112,10 @@ export function InsightsTabLabel({
       justify="space-between"
     >
       <span>Insights</span>
-      {insight && (
-        <AiInsightSummaryIcon
-          insight={insight}
-          asIconFrame={false}
-        />
-      )}
+      <AiInsightSummaryIcon
+        insight={insight}
+        asIconFrame={false}
+      />
     </Flex>
   )
 }

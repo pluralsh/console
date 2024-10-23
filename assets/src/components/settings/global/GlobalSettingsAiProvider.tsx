@@ -129,6 +129,7 @@ export function GlobalSettingsAiProvider() {
           </FormField>
           <FormField
             label="Access token"
+            required={form.enabled}
             flex={1}
           >
             <InputRevealer
