@@ -75,7 +75,8 @@ ollama:
   # models:
   #  - llama2
   #  - mistral
-  models: []
+  models:
+    - llama3
 
   # -- Add insecure flag for pulling at container startup
   insecure: false
@@ -170,20 +171,20 @@ ingress:
 # ref: http://kubernetes.io/docs/user-guide/compute-resources/
 resources:
   # -- Pod requests
-  requests: {}
+  requests:
     # Memory request
-    # memory: 4096Mi
+    memory: 4096Mi
 
     # CPU request
-    # cpu: 2000m
+    cpu: 1000m
 
   # -- Pod limit
-  limits: {}
+  limits:
     # Memory limit
-    # memory: 8192Mi
+    memory: 8192Mi
 
     # CPU limit
-    # cpu: 4000m
+    cpu: 2000m
 
 # Configure extra options for liveness probe
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -236,7 +237,7 @@ readinessProbe:
 # Configure autoscaling
 autoscaling:
   # -- Enable autoscaling
-  enabled: false
+  enabled: true
 
   # -- Number of minimum replicas
   minReplicas: 1
@@ -275,7 +276,7 @@ extraEnv: []
 # ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 persistentVolume:
   # -- Enable persistence using PVC
-  enabled: false
+  enabled: true
 
   # -- Ollama server data Persistent Volume access modes
   # Must match those of existing PV or dynamic provisioner
