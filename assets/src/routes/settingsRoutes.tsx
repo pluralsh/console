@@ -49,6 +49,7 @@ import {
   USER_MANAGEMENT_ABS_PATH,
   USER_MANAGEMENT_REL_PATH,
 } from './settingsRoutesConst'
+import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider'
 
 const userManagementRoutes = (
   <Route
@@ -119,6 +120,10 @@ const globalSettingsRoutes = (
     <Route
       path="repositories"
       element={<GlobalSettingsRepositories />}
+    />
+    <Route
+      path="ai-provider"
+      element={<GlobalSettingsAiProvider />}
     />
     <Route
       path="agents"

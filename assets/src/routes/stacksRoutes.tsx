@@ -36,11 +36,13 @@ import {
   STACKS_ABS_PATH,
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
+  STACK_INSIGHTS_REL_PATH,
   STACK_JOB_REL_PATH,
   STACK_OUTPUT_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
   STACK_PRS_REL_PATH,
   STACK_RUNS_ABS_PATH,
+  STACK_RUNS_INSIGHTS_REL_PATH,
   STACK_RUNS_JOB_REL_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
   STACK_RUNS_PLAN_REL_PATH,
@@ -51,6 +53,8 @@ import {
   STACK_VARS_REL_PATH,
 } from './stacksRoutesConsts'
 import StackVariables from '../components/stacks/variables/StackVariables.tsx'
+import { StackInsights } from 'components/stacks/insights/StackInsights.tsx'
+import { StackRunInsights } from 'components/stacks/run/insights/StackRunInsights.tsx'
 
 export const stacksRoutes = [
   <Route
@@ -91,6 +95,10 @@ export const stacksRoutes = [
       element={<StackVariables />}
     />
     <Route
+      path={STACK_INSIGHTS_REL_PATH}
+      element={<StackInsights />}
+    />
+    <Route
       path={STACK_ENV_REL_PATH}
       element={<StackEnvironment />}
     />
@@ -110,6 +118,10 @@ export const stacksRoutes = [
     <Route
       index
       element={<StackRunProgress />}
+    />
+    <Route
+      path={STACK_RUNS_INSIGHTS_REL_PATH}
+      element={<StackRunInsights />}
     />
     <Route
       path={STACK_RUNS_REPOSITORY_REL_PATH}

@@ -76,6 +76,9 @@ fragment ServiceDeploymentsRow on ServiceDeployment {
     name
   }
   dryRun
+  insight {
+    ...AiInsightSummary
+  }
 }
 
 fragment ServiceDeploymentDetails on ServiceDeployment {
@@ -101,6 +104,9 @@ fragment ServiceDeploymentDetails on ServiceDeployment {
   repository {
     pulledAt
   }
+  insight {
+    ...AiInsight
+  }
 }
 
 fragment ServiceDeploymentComponent on ServiceComponent {
@@ -118,6 +124,9 @@ fragment ServiceDeploymentComponent on ServiceComponent {
   content {
     desired
     live
+  }
+  insight {
+    ...AiInsight
   }
 }
 

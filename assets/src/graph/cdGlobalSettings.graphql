@@ -11,6 +11,17 @@ fragment SmtpSettings on SmtpSettings {
   ssl
 }
 
+fragment AiSettings on AiSettings {
+  anthropic {
+    model
+  }
+  openai {
+    model
+  }
+  enabled
+  provider
+}
+
 fragment DeploymentSettings on DeploymentSettings {
   id
   name
@@ -36,6 +47,9 @@ fragment DeploymentSettings on DeploymentSettings {
   }
   smtp {
     ...SmtpSettings
+  }
+  ai {
+    ...AiSettings
   }
   readBindings {
     ...PolicyBinding

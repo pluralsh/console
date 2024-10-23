@@ -54,7 +54,6 @@ export default function UserManagement() {
   const headerContent = (
     <TabList
       scrollable
-      paddingBottom="large"
       stateRef={tabStateRef}
       stateProps={{
         selectedKey: currentTab?.path,
