@@ -58,6 +58,8 @@ import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 type ServiceContextType = {
   docs: ReturnType<typeof getDocsData>
   service: ServiceDeploymentDetailsFragment
+  refetch: () => void
+  loading: boolean
 }
 
 export const useServiceContext = () => useOutletContext<ServiceContextType>()
@@ -197,7 +199,12 @@ function ServiceDetailsBase() {
     [serviceListData?.serviceDeployments]
   )
 
-  const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
+  const {
+    data: serviceData,
+    error: serviceError,
+    refetch,
+    loading,
+  } = useServiceDeploymentQuery({
     variables: { id: serviceId },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
@@ -259,6 +266,8 @@ function ServiceDetailsBase() {
               {
                 docs,
                 service: serviceDeployment,
+                refetch,
+                loading,
               } satisfies ServiceContextType
             }
           />
