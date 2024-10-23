@@ -1,3 +1,64 @@
+![otwld ollama helm chart banner](./banner.png)
+
+![GitHub License](https://img.shields.io/github/license/otwld/ollama-helm)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/ollama-helm)](https://artifacthub.io/packages/helm/ollama-helm/ollama)
+[![Build Status](https://drone.otwld.com/api/badges/otwld/ollama-helm/status.svg)](https://drone.otwld.com/otwld/ollama-helm)
+[![Discord](https://img.shields.io/badge/Discord-OTWLD-blue?logo=discord&logoColor=white)](https://discord.gg/U24mpqTynB)
+
+
+[Ollama](https://ollama.ai/), get up and running with large language models, locally.
+
+This Community Chart is for deploying [Ollama](https://github.com/ollama/ollama). 
+
+## Requirements
+
+- Kubernetes: `>= 1.16.0-0` for **CPU only**
+
+- Kubernetes: `>= 1.26.0-0` for **GPU** stable support (NVIDIA and AMD)
+
+*Not all GPUs are currently supported with ollama (especially with AMD)*
+
+## Deploying Ollama chart
+
+To install the `ollama` chart in the `ollama` namespace:
+
+```console
+helm repo add ollama-helm https://otwld.github.io/ollama-helm/
+helm repo update
+helm install ollama ollama-helm/ollama --namespace ollama
+```
+
+## Upgrading Ollama chart
+
+First please read the [release notes](https://github.com/ollama/ollama/releases) of Ollama to make sure there are no backwards incompatible changes.
+
+Make adjustments to your values as needed, then run `helm upgrade`:
+
+```console
+# -- This pulls the latest version of the ollama chart from the repo.
+helm repo update
+helm upgrade ollama ollama-helm/ollama --namespace ollama --values values.yaml
+```
+
+## Uninstalling Ollama chart
+
+To uninstall/delete the `ollama` deployment in the `ollama` namespace:
+
+```console
+helm delete ollama --namespace ollama
+```
+
+Substitute your values if they differ from the examples. See `helm delete --help` for a full reference on `delete` parameters and flags.
+
+
+## Interact with Ollama
+
+- **Ollama documentation can be found [HERE](https://github.com/ollama/ollama/tree/main/docs)**
+- Interact with RESTful API: [Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md) 
+- Interact with official clients libraries: [ollama-js](https://github.com/ollama/ollama-js#custom-client) and [ollama-python](https://github.com/ollama/ollama-python#custom-client)
+- Interact with langchain: [langchain-js](https://github.com/ollama/ollama/blob/main/docs/tutorials/langchainjs.md) and [langchain-python](https://github.com/ollama/ollama/blob/main/docs/tutorials/langchainpy.md)
+
+
 ## Examples
 - **It's highly recommended to run an updated version of Kubernetes for deploying ollama with GPU**
 
@@ -130,3 +191,67 @@ ingress:
 | volumes | list | `[]` | Additional volumes on the output Deployment definition. |
 ----------------------------------------------
 
+## Core team
+
+<table>
+    <tr>
+       <td align="center">
+            <a href="https://github.com/jdetroyes"
+                ><img
+                    src="https://github.com/jdetroyes.png?size=200"
+                    width="50"
+                    style="margin-bottom: -4px; border-radius: 8px;"
+                    alt="Jean Baptiste Detroyes"
+                /><br /><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Jean Baptiste&nbsp;Detroyes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></a
+            >
+            <div style="margin-top: 4px">
+                <a href="https://github.com/jdetroyes" title="Github"
+                    ><img
+                        width="16"
+                        src="https://raw.githubusercontent.com/MarsiBarsi/readme-icons/main/github.svg"
+                /></a>
+                <a
+                    href="mailto:jdetroyes@otwld.com"
+                    title="Email"
+                    ><img
+                        width="16"
+                        src="https://raw.githubusercontent.com/MarsiBarsi/readme-icons/main/send.svg"
+                /></a>
+            </div>
+        </td>
+       <td align="center">
+            <a href="https://github.com/ntrehout"
+                ><img
+                    src="https://github.com/ntrehout.png?size=200"
+                    width="50"
+                    style="margin-bottom: -4px; border-radius: 8px;"
+                    alt="Jean Baptiste Detroyes"
+                /><br /><b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Nathan&nbsp;Tréhout&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></a
+            >
+            <div style="margin-top: 4px">
+                <a href="https://x.com/n_trehout" title="Twitter"
+                    ><img
+                        width="16"
+                        src="https://raw.githubusercontent.com/MarsiBarsi/readme-icons/main/twitter.svg"
+                /></a>
+                <a href="https://github.com/ntrehout" title="Github"
+                    ><img
+                        width="16"
+                        src="https://raw.githubusercontent.com/MarsiBarsi/readme-icons/main/github.svg"
+                /></a>
+                <a
+                    href="mailto:ntrehout@otwld.com"
+                    title="Email"
+                    ><img
+                        width="16"
+                        src="https://raw.githubusercontent.com/MarsiBarsi/readme-icons/main/send.svg"
+                /></a>
+            </div>
+        </td>
+    </tr>
+</table>
+
+## Support
+
+- For questions, suggestions, and discussion about Ollama please refer to the [Ollama issue page](https://github.com/ollama/ollama/issues)
+- For questions, suggestions, and discussion about this chart please visit [Ollama-Helm issue page](https://github.com/otwld/ollama-helm/issues) or join our [OTWLD Discord](https://discord.gg/U24mpqTynB)

@@ -22,7 +22,11 @@ find-versions:
 	aws eks describe-addon-versions | jq -r ".addons[] | .addonVersions[] | .compatibilities[] | .clusterVersion" | sort | uniq > k8s-versions/eks.json
 	az aks get-versions --location eastus --output json > k8s-versions/aks.json
 
-
+update-ollama-helm-chart: ## update ollama Helm chart
+	helm repo add ollama-helm https://otwld.github.io/ollama-helm/
+	helm repo update
+	rm -rf charts/ollama
+	helm pull ollama-helm/ollama --untar --untardir charts
 
 docker-build-ollama: ## build ollama image
 	docker build \

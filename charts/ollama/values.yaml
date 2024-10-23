@@ -75,14 +75,13 @@ ollama:
   # models:
   #  - llama2
   #  - mistral
-  models:
-    - llama3
+  models: []
 
   # -- Add insecure flag for pulling at container startup
   insecure: false
 
-  # -- Override ollama-data volume mount path to "/root/.ollama" if you use models , default: "/tmp"
-  mountPath: "/root/.ollama"
+  # -- Override ollama-data volume mount path, default: "/root/.ollama"
+  mountPath: ""
 
 # Service account
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
@@ -171,20 +170,20 @@ ingress:
 # ref: http://kubernetes.io/docs/user-guide/compute-resources/
 resources:
   # -- Pod requests
-  requests:
+  requests: {}
     # Memory request
-    memory: 4096Mi
+    # memory: 4096Mi
 
     # CPU request
-    cpu: 2000m
+    # cpu: 2000m
 
   # -- Pod limit
-  limits:
+  limits: {}
     # Memory limit
-    memory: 8192Mi
+    # memory: 8192Mi
 
     # CPU limit
-    cpu: 4000m
+    # cpu: 4000m
 
 # Configure extra options for liveness probe
 # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
@@ -276,7 +275,7 @@ extraEnv: []
 # ref: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 persistentVolume:
   # -- Enable persistence using PVC
-  enabled: true
+  enabled: false
 
   # -- Ollama server data Persistent Volume access modes
   # Must match those of existing PV or dynamic provisioner
