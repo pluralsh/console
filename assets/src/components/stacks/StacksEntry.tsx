@@ -85,6 +85,12 @@ export default function StackEntry({
         >
           {stack.name}
         </div>
+        {ai?.enabled && (
+          <AiInsightSummaryIcon
+            navPath={`${getStacksAbsPath(stack.id)}/${STACK_INSIGHTS_REL_PATH}`}
+            insight={stack.insight}
+          />
+        )}
         <StackStatusChip
           status={stack.status}
           deleting={!!stack.deletedAt}
@@ -98,13 +104,6 @@ export default function StackEntry({
                 }
           }
         />
-        {ai?.enabled && (
-          <AiInsightSummaryIcon
-            navPath={`${getStacksAbsPath(stack.id)}/${STACK_INSIGHTS_REL_PATH}`}
-            insight={stack.insight}
-            preserveSpace
-          />
-        )}
       </div>
       <div
         css={{

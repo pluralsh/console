@@ -129,14 +129,13 @@ export default function StackRunsEntry({
       >
         {moment(insertedAt).fromNow()}
       </div>
-      <StackStatusChip status={status} />
       {ai?.enabled && (
         <AiInsightSummaryIcon
           navPath={`${getStackRunsAbsPath(stackId, id)}/${STACK_RUNS_INSIGHTS_REL_PATH}`}
           insight={stackRun.insight}
-          preserveSpace
         />
       )}
+      <StackStatusChip status={status} />
       <IconFrame icon={<CaretRightIcon />} />
     </div>
   )
