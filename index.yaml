@@ -3982,6 +3982,36 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.1/controller-0.0.1.tgz
     version: 0.0.1
+  ollama:
+  - annotations:
+      artifacthub.io/category: ai-machine-learning
+      artifacthub.io/changes: |
+        - kind: changed
+          description: upgrade app version to 0.3.14
+    apiVersion: v2
+    appVersion: 0.3.14
+    created: "2024-10-23T16:37:38.670882828Z"
+    description: Get up and running with large language models locally.
+    digest: 490ee9d299197e7ef1cec7512ea98c20586ebf992782cc7eb2af857f9f6810f2
+    home: https://ollama.ai/
+    icon: https://ollama.ai/public/ollama.png
+    keywords:
+    - ai
+    - llm
+    - llama
+    - mistral
+    kubeVersion: ^1.16.0-0
+    maintainers:
+    - email: contact@otwld.com
+      name: OTWLD
+    name: ollama
+    sources:
+    - https://github.com/ollama/ollama
+    - https://github.com/otwld/ollama-helm
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/ollama-chart-v0.63.0/ollama-0.63.0.tgz
+    version: 0.63.0
   system-upgrade-controller:
   - apiVersion: v2
     appVersion: v0.13.1
@@ -4036,4 +4066,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-12T00:26:52.403948462Z"
+generated: "2024-10-23T16:37:38.671207135Z"
