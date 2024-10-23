@@ -16,7 +16,7 @@ import { isEmpty } from 'lodash'
 
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import {
-  StackRun,
+  StackRunDetailsFragment,
   StackStatus,
   useApproveStackRunMutation,
   useRestartStackRunMutation,
@@ -35,7 +35,7 @@ import { LinkTabWrap } from '../../utils/Tabs'
 import { TRUNCATE } from '../../utils/truncate'
 import { StackTypeIcon } from '../common/StackTypeIcon'
 
-function getDirectory(stackRun: StackRun) {
+function getDirectory(stackRun: StackRunDetailsFragment) {
   return [
     { path: '', label: 'Progress' },
     {
@@ -46,17 +46,17 @@ function getDirectory(stackRun: StackRun) {
     {
       path: STACK_RUNS_STATE_REL_PATH,
       label: 'State',
-      condition: (s: StackRun) => !isEmpty(s.state?.state),
+      condition: (s: StackRunDetailsFragment) => !isEmpty(s.state?.state),
     },
     {
       path: STACK_RUNS_PLAN_REL_PATH,
       label: 'Plan',
-      condition: (s: StackRun) => !isEmpty(s.state?.plan),
+      condition: (s: StackRunDetailsFragment) => !isEmpty(s.state?.plan),
     },
     {
       path: STACK_RUNS_OUTPUT_REL_PATH,
       label: 'Output',
-      condition: (s: StackRun) => !isEmpty(s.output),
+      condition: (s: StackRunDetailsFragment) => !isEmpty(s.output),
     },
     { path: STACK_RUNS_JOB_REL_PATH, label: 'Job' },
   ]
@@ -69,7 +69,7 @@ const TERMINAL_STATES = [
 ]
 
 interface StackRunHeaderProps {
-  stackRun: StackRun
+  stackRun: StackRunDetailsFragment
   refetch?: Nullable<() => void>
 }
 
@@ -256,7 +256,11 @@ function StackRunHeaderButtons({ stackRun, refetch }): ReactNode {
   )
 }
 
-function StackRunNav({ stackRun }: { stackRun: StackRun }): ReactNode {
+function StackRunNav({
+  stackRun,
+}: {
+  stackRun: StackRunDetailsFragment
+}): ReactNode {
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
   const directory = getDirectory(stackRun)

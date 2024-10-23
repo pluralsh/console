@@ -2,7 +2,7 @@ import { isEmpty } from 'lodash'
 
 import { useTheme } from 'styled-components'
 
-import { Maybe, ObservableMetric } from '../../../generated/graphql'
+import { Maybe, ObservableMetricFragment } from '../../../generated/graphql'
 
 // TODO: Replace with real icon once possible.
 function MetricProviderIcon() {
@@ -46,7 +46,7 @@ function MetricProviderIcon() {
 export default function StackObservabilityMetrics({
   observableMetrics,
 }: {
-  observableMetrics?: Maybe<Maybe<ObservableMetric>[]>
+  observableMetrics?: Maybe<Maybe<ObservableMetricFragment>[]>
 }) {
   const theme = useTheme()
 

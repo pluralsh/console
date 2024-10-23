@@ -4,11 +4,11 @@ import { Card, Prop } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
 
-import { StackRun } from '../../../../generated/graphql'
+import { StackRunOutletContextT } from '../Route.tsx'
 
 export default function StackRunRepository(): ReactNode {
   const theme = useTheme()
-  const { stackRun } = useOutletContext<{ stackRun: StackRun }>()
+  const { stackRun } = useOutletContext<StackRunOutletContextT>()
 
   return (
     <Card

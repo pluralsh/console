@@ -1,15 +1,16 @@
-import { Flex } from '@pluralsh/design-system'
+import { Button, Flex, ReloadIcon } from '@pluralsh/design-system'
 import { useOutletContext } from 'react-router-dom'
 
 import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useTheme } from 'styled-components'
 import { dateTimeFormat } from 'utils/date'
-import { StackRun } from '../../../../generated/graphql'
+import { StackRunOutletContextT } from '../Route.tsx'
 
 export function StackRunInsights() {
   const theme = useTheme()
-  const { stackRun } = useOutletContext<{ stackRun: StackRun }>()
+  const { stackRun, refetch, loading } =
+    useOutletContext<StackRunOutletContextT>()
   return (
     <Flex
       direction="column"
@@ -29,7 +30,14 @@ export function StackRunInsights() {
           {stackRun.insight?.updatedAt &&
             `Last updated ${dateTimeFormat(stackRun.insight?.updatedAt)}`}
         </CaptionP>
-        {/* TODO: Add refresh button here */}
+        <Button
+          floating
+          startIcon={<ReloadIcon />}
+          onClick={() => refetch()}
+          loading={loading}
+        >
+          Refresh insights
+        </Button>
       </Flex>
       <InsightDisplay text={stackRun.insight?.text} />
     </Flex>
