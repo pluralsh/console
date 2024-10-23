@@ -179,7 +179,7 @@ export function ComponentDetails({
     }
   }, [navigate, currentTab, filteredDirectory, service, component, cdView])
 
-  if (!me || loading) return <LoadingIndicator />
+  if (!me || (!data && loading)) return <LoadingIndicator />
 
   return (
     <PageHeaderContext.Provider value={pageHeaderContext}>
