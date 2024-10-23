@@ -15,12 +15,14 @@ import { useTheme } from 'styled-components'
 export function AiInsightSummaryIcon({
   insight,
   navPath,
+  preserveSpace = true,
   asIconFrame = true,
   iconFrameType = 'tertiary',
   ...props
 }: {
   insight: Nullable<AiInsightSummaryFragment>
   navPath?: string
+  preserveSpace?: boolean
   asIconFrame?: boolean
   iconFrameType?: IconFrameProps['type']
 } & IconProps) {
@@ -39,9 +41,8 @@ export function AiInsightSummaryIcon({
     new Date().getTime() - new Date(insight.updatedAt).getTime() >
       60 * 60 * 1000
 
-  // transparent icon just for even spacing
   if (!insight?.summary || isStale)
-    return (
+    return preserveSpace ? (
       <IconFrame
         icon={
           <AiSparkleFilledIcon
@@ -50,7 +51,7 @@ export function AiInsightSummaryIcon({
           />
         }
       />
-    )
+    ) : null
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation()
