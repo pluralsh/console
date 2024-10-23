@@ -15,7 +15,7 @@ import { useTheme } from 'styled-components'
 export function AiInsightSummaryIcon({
   insight,
   navPath,
-  preserveSpace = true,
+  preserveSpace = false,
   asIconFrame = true,
   iconFrameType = 'tertiary',
   ...props
@@ -114,7 +114,6 @@ export function InsightsTabLabel({
       <span>Insights</span>
       <AiInsightSummaryIcon
         insight={insight}
-        preserveSpace={false}
         asIconFrame={false}
       />
     </Flex>

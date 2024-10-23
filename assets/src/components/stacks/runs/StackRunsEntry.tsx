@@ -134,6 +134,7 @@ export default function StackRunsEntry({
         <AiInsightSummaryIcon
           navPath={`${getStackRunsAbsPath(stackId, id)}/${STACK_RUNS_INSIGHTS_REL_PATH}`}
           insight={stackRun.insight}
+          preserveSpace
         />
       )}
       <IconFrame icon={<CaretRightIcon />} />

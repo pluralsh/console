@@ -102,6 +102,7 @@ export default function StackEntry({
           <AiInsightSummaryIcon
             navPath={`${getStacksAbsPath(stack.id)}/${STACK_INSIGHTS_REL_PATH}`}
             insight={stack.insight}
+            preserveSpace
           />
         )}
       </div>
