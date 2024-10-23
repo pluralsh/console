@@ -99,6 +99,7 @@ export function AiInsightSummaryIcon({
     </Tooltip>
   )
 }
+
 export function InsightsTabLabel({
   insight,
 }: {
@@ -111,12 +112,11 @@ export function InsightsTabLabel({
       justify="space-between"
     >
       <span>Insights</span>
-      {insight && (
-        <AiInsightSummaryIcon
-          insight={insight}
-          asIconFrame={false}
-        />
-      )}
+      <AiInsightSummaryIcon
+        insight={insight}
+        preserveSpace={false}
+        asIconFrame={false}
+      />
     </Flex>
   )
 }
