@@ -82,7 +82,7 @@ export function AiInsightSummaryIcon({
       }
       border={'1px solid transparent'}
       borderRadius={theme.borderRadiuses.medium}
-      backgroundImage={`linear-gradient(${theme.colors['fill-two']}, ${theme.colors['fill-two']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, rgba(0, 0, 0, 0))`}
+      backgroundImage={`linear-gradient(${theme.colors['fill-two']}, ${theme.colors['fill-two']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`}
       backgroundOrigin={'border-box'}
       backgroundClip={'padding-box, border-box'}
     >
