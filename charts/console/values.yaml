@@ -174,7 +174,7 @@ affinity:
         topologyKey: "kubernetes.io/hostname"
 
 monitoring:
-  enabled: false
+  enabled: true
   prometheus: k8s
 
 dashboard:
