@@ -2992,6 +2992,8 @@ type OidcProviderAttributes struct {
 type OllamaAttributes struct {
 	Model string `json:"model"`
 	URL   string `json:"url"`
+	// An http authorization header to use on calls to the Ollama api
+	Authorization *string `json:"authorization,omitempty"`
 }
 
 // Settings for a self-hosted ollama-based LLM deployment

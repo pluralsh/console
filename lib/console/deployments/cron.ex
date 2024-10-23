@@ -17,7 +17,8 @@ defmodule Console.Deployments.Cron do
     PullRequest,
     RunLog,
     AppNotification,
-    Observer
+    Observer,
+    Alert
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -52,6 +53,12 @@ defmodule Console.Deployments.Cron do
       end
     end)
     |> Stream.run()
+  end
+
+  def prune_alerts() do
+    Logger.info "pruning all expired alerts"
+    Alert.expired()
+    |> Repo.delete_all()
   end
 
   def cache_warm() do

@@ -60,8 +60,9 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :ollama_attributes do
-    field :model, non_null(:string)
-    field :url,   non_null(:string)
+    field :model,         non_null(:string)
+    field :url,           non_null(:string)
+    field :authorization, :string, description: "An http authorization header to use on calls to the Ollama api"
   end
 
   input_object :smtp_settings_attributes do

@@ -227,9 +227,15 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Model:       &in.OpenAI.Model,
 		}
 	case console.AiProviderOllama:
+		auth, err := in.Ollama.Authorization(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
 		attr.Ollama = &console.OllamaAttributes{
-			URL:   in.Ollama.URL,
-			Model: in.Ollama.Model,
+			URL:           in.Ollama.URL,
+			Model:         in.Ollama.Model,
+			Authorization: auth,
 		}
 	}
 
@@ -260,6 +266,12 @@ type OllamaSettings struct {
 	//
 	// +kubebuilder:validation:Required
 	Model string `json:"model"`
+
+	// TokenSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header
+	// to send to your ollama api in case authorization is required (eg for an instance hosted on a public network)
+	//
+	// +kubebuilder:validation:Optional
+	AuthorizationSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef"`
 }
 
 func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
@@ -268,4 +280,17 @@ func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namesp
 	}
 
 	return utils.GetSecretKey(ctx, c, &in.TokenSecretRef, namespace)
+}
+
+func (in *OllamaSettings) Authorization(ctx context.Context, c client.Client, namespace string) (*string, error) {
+	if in == nil {
+		return nil, fmt.Errorf("configured ollama settings cannot be nil")
+	}
+
+	if in.AuthorizationSecretRef == nil {
+		return nil, nil
+	}
+
+	res, err := utils.GetSecretKey(ctx, c, in.AuthorizationSecretRef, namespace)
+	return lo.ToPtr(res), err
 }

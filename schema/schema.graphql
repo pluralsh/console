@@ -1056,7 +1056,11 @@ input AnthropicSettingsAttributes {
 
 input OllamaAttributes {
   model: String!
+
   url: String!
+
+  "An http authorization header to use on calls to the Ollama api"
+  authorization: String
 }
 
 input SmtpSettingsAttributes {

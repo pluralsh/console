@@ -69,8 +69,9 @@ defmodule Console.Schema.DeploymentSettings do
       end
 
       embeds_one :ollama, Ollama, on_replace: :update do
-        field :model, :string
-        field :url,   :string
+        field :model,         :string
+        field :url,           :string
+        field :authorization, EncryptedString
       end
     end
 
@@ -149,7 +150,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ollama_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url model)a)
+    |> cast(attrs, ~w(url model authorization)a)
     |> validate_required(~w(url model)a)
   end
 end

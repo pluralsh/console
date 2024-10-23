@@ -32,7 +32,7 @@
 						"text": "View The Full Insight Here",
 						"emoji": true
 					},
-					"url": "<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>"
+					"url": "<%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/insights") %>"
 				}
 			]
 		}

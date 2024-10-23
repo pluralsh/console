@@ -3645,6 +3645,8 @@ export enum OidcProviderType {
 }
 
 export type OllamaAttributes = {
+  /** An http authorization header to use on calls to the Ollama api */
+  authorization?: InputMaybe<Scalars['String']['input']>;
   model: Scalars['String']['input'];
   url: Scalars['String']['input'];
 };
