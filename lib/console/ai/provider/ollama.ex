@@ -6,7 +6,7 @@ defmodule Console.AI.Ollama do
 
   require Logger
 
-  defstruct [:url, :model]
+  defstruct [:url, :model, :authorization]
 
   @type t :: %__MODULE__{}
 
@@ -32,7 +32,7 @@ defmodule Console.AI.Ollama do
     def spec(), do: %__MODULE__{message: [Ollama.Message.spec()]}
   end
 
-  def new(opts), do: %__MODULE__{url: opts.url, model: opts.model}
+  def new(opts), do: %__MODULE__{url: opts.url, model: opts.model, authorization: opts.authorization}
 
   @doc """
   Generate a anthropic completion from
@@ -48,14 +48,14 @@ defmodule Console.AI.Ollama do
     end
   end
 
-  defp chat(%__MODULE__{url: url, model: model}, history) do
+  defp chat(%__MODULE__{url: url, model: model} = ollama, history) do
     body = Jason.encode!(%{
       model: model,
       messages: history,
     })
 
     "#{url}/api/chat"
-    |> HTTPoison.post(body, @base_headers, @options)
+    |> HTTPoison.post(body, auth(ollama, @base_headers), @options)
     |> handle_response(ChatResponse.spec())
   end
 
@@ -66,4 +66,8 @@ defmodule Console.AI.Ollama do
     {:error, "ollama error: #{body}"}
   end
   defp handle_response({:error, err}, _), do: {:error, "ollama network error: #{Jason.encode!(Map.from_struct(err))}"}
+
+  defp auth(%__MODULE__{authorization: auth}, headers) when is_binary(auth),
+    do: [{"authorization", auth} | headers]
+  defp auth(_, headers), do: headers
 end

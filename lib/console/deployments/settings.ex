@@ -24,6 +24,9 @@ defmodule Console.Deployments.Settings do
   @spec get_project_by_name!(binary) :: Project.t
   def get_project_by_name!(name), do: Repo.get_by!(Project, name: name)
 
+  @spec get_project_by_name(binary) :: Project.t | nil
+  def get_project_by_name(name), do: Repo.get_by(Project, name: name)
+
   @doc """
   same as `fetch/0` but caches in the process dict
   """

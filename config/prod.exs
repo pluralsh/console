@@ -59,6 +59,7 @@ config :console, Console.Cron.Scheduler,
     {"@daily", {Console.Deployments.Cron, :prune_notifications, []}},
     {"@daily", {Console.Cron.Jobs, :prune_notifications, []}},
     {"@daily", {Console.Cron.Jobs, :prune_audits, []}},
+    {"@daily", {Console.Cron.Jobs, :prune_alerts, []}},
     {"@daily", {Console.AI.Cron, :trim, []}}
   ]
 

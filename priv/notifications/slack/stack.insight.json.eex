@@ -32,7 +32,7 @@
 						"text": "View the full insight in Plural",
 						"emoji": true
 					},
-					"url": "<%= Console.url("/stacks/#{@stack.id}") %>"
+					"url": "<%= Console.url("/stacks/#{@stack.id}/insights") %>"
 				}
 			]
 		}

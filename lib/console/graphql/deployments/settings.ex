@@ -60,8 +60,9 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :ollama_attributes do
-    field :model, non_null(:string)
-    field :url,   non_null(:string)
+    field :model,         non_null(:string)
+    field :url,           non_null(:string)
+    field :authorization, :string, description: "An http authorization header to use on calls to the Ollama api"
   end
 
   input_object :smtp_settings_attributes do
@@ -79,6 +80,11 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :name,        non_null(:string)
     field :description, :string
     field :default,     :boolean
+
+    @desc "list all alerts discovered for this project"
+    connection field :alerts, node_type: :alert do
+      resolve &Deployments.list_alerts/3
+    end
 
     field :read_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy across this project"
     field :write_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy across this project"

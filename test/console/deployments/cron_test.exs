@@ -250,6 +250,18 @@ defmodule Console.Deployments.CronTest do
     end
   end
 
+  describe "#prune_alerts/0" do
+    test "it can remove old alerts" do
+      rm = insert_list(3, :alert, inserted_at: Timex.now() |> Timex.shift(days: -3), updated_at: Timex.now() |> Timex.shift(days: -3))
+      keep = insert_list(3, :alert)
+
+      Cron.prune_alerts()
+
+      for l <- rm, do: refute refetch(l)
+      for l <- keep, do: assert refetch(l)
+    end
+  end
+
   describe "#spawn_stack_crons/0" do
     test "it can spawn cron runs for a stack" do
       crons = for _ <- 1..3,

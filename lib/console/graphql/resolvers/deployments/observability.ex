@@ -1,7 +1,16 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   use Console.GraphQl.Resolvers.Deployments.Base
   import Console.GraphQl.Resolvers.Observability, only: [prom_args: 1]
-  alias Console.Schema.{DeploymentSettings, ObservabilityProvider, Cluster, Service, ServiceComponent}
+  alias Console.Schema.{
+    Alert,
+    DeploymentSettings,
+    ObservabilityProvider,
+    ObservabilityWebhook,
+    Cluster,
+    Service,
+    Project,
+    ServiceComponent
+  }
   alias Console.Deployments.{Settings, Observability, Services}
   alias Console.Services.Observability, as: ObsSvc
 
@@ -16,11 +25,31 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
     |> paginate(args)
   end
 
+  def get_observability_webhook(%{id: id}, _) when is_binary(id), do: {:ok, Observability.get_webhook!(id)}
+  def get_observability_webhook(%{name: n}, _) when is_binary(n), do: {:ok, Observability.get_webhook_by_name!(n)}
+
+  def list_observability_webhooks(args, _) do
+    ObservabilityWebhook.ordered()
+    |> paginate(args)
+  end
+
+  def list_alerts(parent, args, _) do
+    for_parent(parent)
+    |> Alert.ordered()
+    |> paginate(args)
+  end
+
   def upsert_observability_provider(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Observability.upsert_provider(attrs, user)
 
   def delete_observability_provider(%{id: id}, %{context: %{current_user: user}}),
     do: Observability.delete_provider(id, user)
+
+  def upsert_observability_webhook(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: Observability.upsert_webhook(attrs, user)
+
+  def delete_observability_webhook(%{id: id}, %{context: %{current_user: user}}),
+    do: Observability.delete_webhook(id, user)
 
   def metrics(%Cluster{} = cluster, %{node: node} = args, _) when is_binary(node) do
     {start, stop, step} = prom_args(args)
@@ -84,4 +113,8 @@ defmodule Console.GraphQl.Resolvers.Deployments.Observability do
   defp find(%DeploymentSettings{loki_connection: loki}, :loki), do: loki
   defp find(%DeploymentSettings{prometheus_connection: prometheus}, :prometheus), do: prometheus
   defp find(_, _), do: nil
+
+  defp for_parent(%Service{id: id}), do: Alert.for_service(id)
+  defp for_parent(%Cluster{id: id}), do: Alert.for_cluster(id)
+  defp for_parent(%Project{id: id}), do: Alert.for_project(id)
 end

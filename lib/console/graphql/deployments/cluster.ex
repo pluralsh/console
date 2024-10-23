@@ -365,6 +365,11 @@ defmodule Console.GraphQl.Deployments.Cluster do
       resolve &Deployments.violation_statistics/3
     end
 
+    @desc "list all alerts discovered for this cluster"
+    connection field :alerts, node_type: :alert do
+      resolve &Deployments.list_alerts/3
+    end
+
     @desc "Queries logs for a cluster out of loki"
     field :logs, list_of(:log_stream) do
       arg :query,      non_null(:loki_query)

@@ -93,6 +93,28 @@ spec:
                         description: Model is the Ollama model to use when querying
                           the /chat api
                         type: string
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header
+                          to send to your ollama api in case authorization is required (eg for an instance hosted on a public network)
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
                       url:
                         description: URL is the url this model is queryable on
                         type: string

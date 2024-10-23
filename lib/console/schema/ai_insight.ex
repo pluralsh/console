@@ -17,6 +17,16 @@ defmodule Console.Schema.AiInsight do
     timestamps()
   end
 
+  @spec freshness(t()) :: :fast | :slow | :expired
+  def freshness(%__MODULE__{} = insight) do
+    at = ts(insight)
+    cond do
+      Timex.before?(at, expiry(@slow)) -> :expired
+      Timex.before?(at, expiry(@fast)) -> :stale
+      true -> :fresh
+    end
+  end
+
   def expired(query \\ __MODULE__) do
     too_old = Timex.now() |> Timex.shift(hours: -1)
     from(i in query, where: coalesce(i.updated_at, i.inserted_at) <= ^too_old)

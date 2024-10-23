@@ -13,7 +13,16 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Any do
 end
 
 defmodule Console.Deployments.Notifications.Utils do
-  alias Console.Schema.{Service, Cluster, Pipeline, PullRequest, StackRun, Stack, AiInsight}
+  alias Console.Schema.{
+    Alert,
+    Service,
+    Cluster,
+    Pipeline,
+    PullRequest,
+    StackRun,
+    Stack,
+    AiInsight
+  }
 
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.hours(1)
@@ -33,10 +42,16 @@ defmodule Console.Deployments.Notifications.Utils do
   def filters(%PullRequest{url: url}), do: [regex: url]
   def filters(%StackRun{stack_id: id}), do: [stack_id: id]
   def filters(%Stack{id: id}), do: [stack_id: id]
+  def filters(%Alert{} = alert) do
+    Map.take(alert, ~w(service_id cluster_id project_id)a)
+    |> drop_nils()
+  end
   def filters(_), do: []
 
   def insight(%AiInsight{summary: summary}) when is_binary(summary), do: summary
   def insight(_), do: "View in Plural to see the full insight"
+
+  defp drop_nils(map), do: Enum.filter(map, &elem(&1, 1))
 end
 
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.Schema.Pipeline do
@@ -129,4 +144,10 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackInsight 
     end)
   end
   def message(_), do: :ok
+end
+
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertCreated do
+  alias Console.Deployments.Notifications.Utils
+
+  def message(%{item: alert}), do: {"alert.fired", Utils.filters(alert), %{alert: alert}}
 end

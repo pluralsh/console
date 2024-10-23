@@ -1,9 +1,9 @@
 defmodule ConsoleWeb.WebhookController do
   use ConsoleWeb, :controller
   alias Console.Services.{Builds, Users}
-  alias Console.Schema.{ScmWebhook, Cluster}
+  alias Console.Schema.{ScmWebhook, Cluster, ObservabilityWebhook}
   alias Console.Deployments.Pr.Dispatcher
-  alias Console.Deployments.{Git, Clusters}
+  alias Console.Deployments.{Git, Clusters, Observability}
 
   require Logger
 
@@ -34,6 +34,20 @@ defmodule ConsoleWeb.WebhookController do
     end
   end
 
+  def observability(conn, %{"id" => id} = attrs) do
+    with %ObservabilityWebhook{} = hook <- Observability.get_webhook_by_ext_id(id),
+         :ok <- verify(conn, hook),
+         {:ok, attrs} <- Observability.Webhook.payload(hook, attrs),
+         {:ok, _} <- Observability.persist_alert(attrs) do
+      json(conn, %{ignored: false, message: "persisted alert"})
+    else
+      :reject -> send_resp(conn, 403, "Forbidden")
+      err ->
+        Logger.info "did not process observability webhook, result: #{inspect(err)}"
+        json(conn, %{ignored: true})
+    end
+  end
+
   def webhook(conn, params) do
     bot = Users.get_bot!("console")
     with {:ok, _} <- Builds.create(params, bot),
@@ -53,6 +67,15 @@ defmodule ConsoleWeb.WebhookController do
   defp verify(conn, %ScmWebhook{type: :gitlab, hmac: hmac}) do
     with [token] <- get_req_header(conn, "x-gitlab-token"),
          true <- Plug.Crypto.secure_compare(hmac, token) do
+      :ok
+    else
+      _ -> :reject
+    end
+  end
+
+  defp verify(conn, %ObservabilityWebhook{type: :grafana, secret: secret}) do
+    with {_, password} <- Plug.BasicAuth.parse_basic_auth(conn),
+         true <- Plug.Crypto.secure_compare(secret, password) do
       :ok
     else
       _ -> :reject

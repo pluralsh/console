@@ -1,0 +1,5 @@
+⏰ An alert has fired in your infrastructure
+
+<%= @alert.message %>
+
+You can view it here: <%= Console.url("/alerts/#{@alert.id}") %>
