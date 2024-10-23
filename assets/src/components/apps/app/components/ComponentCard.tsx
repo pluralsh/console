@@ -1,11 +1,13 @@
 import { Card, IconFrame, Tooltip } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { TRUNCATE } from 'components/utils/truncate'
-import { ComponentState } from 'generated/graphql'
+import { AiInsightSummaryFragment, ComponentState } from 'generated/graphql'
 
 import { ComponentIcon, ComponentStateChip, ComponentStatusChip } from './misc'
+import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
+import { getServiceComponentPath } from 'routes/cdRoutesConsts'
 
 const ComponentCardSC = styled(Card)(({ theme }) => ({
   '&&': {
@@ -50,12 +52,14 @@ const ComponentCardSC = styled(Card)(({ theme }) => ({
 }))
 
 export type Component = {
+  id: string
   name: string
-  group?: string | null | undefined
+  group?: Nullable<string>
   kind: string
-  status?: string | null | undefined
-  state?: ComponentState | null | undefined
-  synced?: boolean | null | undefined
+  status?: Nullable<string>
+  state?: Nullable<ComponentState>
+  synced?: Nullable<boolean>
+  insight?: Nullable<AiInsightSummaryFragment>
 }
 
 export default function ComponentCard<C extends Component>({
@@ -65,6 +69,7 @@ export default function ComponentCard<C extends Component>({
   component: C
   url?: string
 }) {
+  const { clusterId, serviceId } = useParams()
   const { name, group, kind, status, state, synced } = component
   const kindString = `${group || 'v1'}/${kind.toLowerCase()}`
   const componentState =
@@ -102,6 +107,16 @@ export default function ComponentCard<C extends Component>({
           </Tooltip>
         </p>
       </div>
+      {component.insight && (
+        <AiInsightSummaryIcon
+          navPath={`${getServiceComponentPath({
+            clusterId,
+            serviceId,
+            componentId: component.id,
+          })}/insights`}
+          insight={component.insight}
+        />
+      )}
       {state || state === null ? (
         <ComponentStateChip
           state={componentState}

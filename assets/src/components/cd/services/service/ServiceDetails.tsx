@@ -1,3 +1,6 @@
+import { Chip } from '@pluralsh/design-system'
+import capitalize from 'lodash/capitalize'
+import isEmpty from 'lodash/isEmpty'
 import { memo, useContext, useMemo } from 'react'
 import {
   Outlet,
@@ -6,9 +9,6 @@ import {
   useParams,
 } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { Chip, Flex } from '@pluralsh/design-system'
-import capitalize from 'lodash/capitalize'
-import isEmpty from 'lodash/isEmpty'
 
 import {
   ServiceDeploymentDetailsFragment,
@@ -17,18 +17,18 @@ import {
 } from 'generated/graphql'
 import { mapExistingNodes } from 'utils/graphql'
 
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { getDocsData } from 'components/apps/app/App'
 import {
   DocPageContextProvider,
   useDocPageContext,
 } from 'components/contexts/DocPageContext'
-import { getDocsData } from 'components/apps/app/App'
+import { GqlError } from 'components/utils/Alert'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   SERVICE_COMPONENTS_PATH,
   SERVICE_PARAM_CLUSTER_ID,
@@ -38,9 +38,9 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 
-import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
+import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 
 import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
 
@@ -52,8 +52,8 @@ import ServiceSelector from '../ServiceSelector'
 
 import { useProjectId } from '../../../contexts/ProjectsContext'
 
+import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
-import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 
 type ServiceContextType = {
   docs: ReturnType<typeof getDocsData>
@@ -165,15 +165,7 @@ export const getDirectory = ({
     },
     {
       path: 'insights',
-      label: (
-        <Flex
-          justify="space-between"
-          align="center"
-        >
-          <span>Insights</span>
-          <AiInsightSummaryIcon insight={serviceDeployment.insight} />
-        </Flex>
-      ),
+      label: <InsightsTabLabel insight={serviceDeployment.insight} />,
       enabled: !!serviceDeployment.insight,
     },
   ]

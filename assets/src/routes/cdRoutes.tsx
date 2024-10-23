@@ -126,6 +126,7 @@ import {
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
 import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
+import { ComponentInsights } from 'components/component/ComponentInsights'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -155,6 +156,10 @@ export const componentRoutes = (
     <Route
       path="info"
       element={<ComponentInfo />}
+    />
+    <Route
+      path="insights"
+      element={<ComponentInsights />}
     />
     <Route
       path="metrics"

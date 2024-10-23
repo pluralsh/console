@@ -14,11 +14,13 @@ import { useNavigate } from 'react-router-dom'
 export function AiInsightSummaryIcon({
   insight,
   navPath,
+  asIconFrame = true,
   iconFrameType = 'tertiary',
   ...props
 }: {
   insight: Nullable<AiInsightSummaryFragment>
   navPath?: string
+  asIconFrame?: boolean
   iconFrameType?: IconFrameProps['type']
 } & IconProps) {
   const navigate = useNavigate()
@@ -50,8 +52,18 @@ export function AiInsightSummaryIcon({
 
   const handleClick = (e: MouseEvent) => {
     e.stopPropagation()
+    e.preventDefault()
     navigate(navPath ?? '')
   }
+
+  const icon = isNew ? (
+    <AiSparkleFilledIcon
+      color="icon-info"
+      {...props}
+    />
+  ) : (
+    <AiSparkleOutlineIcon {...props} />
+  )
 
   return (
     <Tooltip
@@ -67,20 +79,36 @@ export function AiInsightSummaryIcon({
         </Flex>
       }
     >
-      <IconFrame
-        {...(navPath && { clickable: true, onClick: handleClick })}
-        type={iconFrameType}
-        icon={
-          isNew ? (
-            <AiSparkleFilledIcon
-              color="icon-info"
-              {...props}
-            />
-          ) : (
-            <AiSparkleOutlineIcon {...props} />
-          )
-        }
-      />
+      {asIconFrame ? (
+        <IconFrame
+          {...(navPath && { clickable: true, onClick: handleClick })}
+          type={iconFrameType}
+          icon={icon}
+        />
+      ) : (
+        icon
+      )}
     </Tooltip>
+  )
+}
+export function InsightsTabLabel({
+  insight,
+}: {
+  insight: Nullable<AiInsightSummaryFragment>
+}) {
+  return (
+    <Flex
+      gap="small"
+      align="center"
+      justify="space-between"
+    >
+      <span>Insights</span>
+      {insight && (
+        <AiInsightSummaryIcon
+          insight={insight}
+          asIconFrame={false}
+        />
+      )}
+    </Flex>
   )
 }

@@ -1,10 +1,8 @@
 import {
-  AiSparkleFilledIcon,
   Button,
   CloseIcon,
   EmptyState,
   FiltersIcon,
-  Flex,
   GearTrainIcon,
   IconFrame,
   Input,
@@ -43,30 +41,32 @@ import {
   useStacksQuery,
 } from '../../generated/graphql'
 import {
+  getStacksAbsPath,
   STACK_ENV_REL_PATH,
   STACK_FILES_REL_PATH,
+  STACK_INSIGHTS_REL_PATH,
   STACK_JOB_REL_PATH,
   STACK_OUTPUT_REL_PATH,
   STACK_OVERVIEW_REL_PATH,
   STACK_PRS_REL_PATH,
   STACK_RUNS_REL_PATH,
   STACK_STATE_REL_PATH,
-  getStacksAbsPath,
   STACK_VARS_REL_PATH,
-  STACK_INSIGHTS_REL_PATH,
 } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
-import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { GqlError } from '../utils/Alert'
 import KickButton from '../utils/KickButton'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage'
 import { StandardScroller } from '../utils/SmoothScroller'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
 import { LinkTabWrap } from '../utils/Tabs'
 
 import { useProjectId } from '../contexts/ProjectsContext'
 
 import { MoreMenu } from '../utils/MoreMenu'
 
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
+import { InsightsTabLabel } from 'components/utils/AiInsights'
 import CreateStack from './create/CreateStack'
 import StackCustomRun from './customrun/StackCustomRun'
 import { StackDeletedEmptyState } from './StackDeletedEmptyState'
@@ -75,7 +75,6 @@ import StackDetachModal from './StackDetachModal'
 import StackPermissionsModal from './StackPermissionsModal'
 import StackEntry from './StacksEntry'
 import { StackSettingsModal } from './StackSettingsModal'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 export type StackOutletContextT = {
   stack: StackFragment
@@ -118,12 +117,7 @@ const getDirectory = (stack: Nullable<StackFragment>, aiEnabled: boolean) => [
   { path: STACK_VARS_REL_PATH, label: 'Variables', enabled: true },
   {
     path: STACK_INSIGHTS_REL_PATH,
-    label: (
-      <Flex gap="small">
-        <span>Insights</span>
-        {stack?.insight && <AiSparkleFilledIcon color={'icon-info'} />}
-      </Flex>
-    ),
+    label: <InsightsTabLabel insight={stack?.insight} />,
     enabled: aiEnabled,
   },
   { path: STACK_ENV_REL_PATH, label: 'Environment', enabled: true },

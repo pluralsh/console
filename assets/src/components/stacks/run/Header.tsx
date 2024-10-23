@@ -1,21 +1,20 @@
-import { ReactNode, useMemo, useRef } from 'react'
-import { useTheme } from 'styled-components'
-import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  AiSparkleFilledIcon,
   AppIcon,
   Button,
   Callout,
-  Flex,
   GitCommitIcon,
   GraphQLToast,
   ReloadIcon,
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
+import { ReactNode, useMemo, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
 
+import { InsightsTabLabel } from 'components/utils/AiInsights'
 import {
   StackRun,
   StackStatus,
@@ -33,20 +32,15 @@ import {
   getStackRunsAbsPath,
 } from '../../../routes/stacksRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
-import { StackTypeIcon } from '../common/StackTypeIcon'
 import { TRUNCATE } from '../../utils/truncate'
+import { StackTypeIcon } from '../common/StackTypeIcon'
 
 function getDirectory(stackRun: StackRun) {
   return [
     { path: '', label: 'Progress' },
     {
       path: STACK_RUNS_INSIGHTS_REL_PATH,
-      label: (
-        <Flex gap="small">
-          <span>Insights</span>
-          {stackRun.insight && <AiSparkleFilledIcon color={'icon-info'} />}
-        </Flex>
-      ),
+      label: <InsightsTabLabel insight={stackRun.insight} />,
     },
     { path: STACK_RUNS_REPOSITORY_REL_PATH, label: 'Repository' },
     {
