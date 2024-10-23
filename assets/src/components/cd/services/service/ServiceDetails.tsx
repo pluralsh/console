@@ -142,6 +142,11 @@ export const getDirectory = ({
       label: <ErrorsLabel count={serviceDeployment.errors?.length} />,
       enabled: true,
     },
+    {
+      path: 'insights',
+      label: <InsightsTabLabel insight={serviceDeployment.insight} />,
+      enabled: !!serviceDeployment.insight,
+    },
     { path: 'settings', label: 'Settings', enabled: true },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
     { path: 'secrets', label: 'Secrets', enabled: true },
@@ -164,11 +169,6 @@ export const getDirectory = ({
         />
       ),
       enabled: !isEmpty(serviceDeployment.dependencies),
-    },
-    {
-      path: 'insights',
-      label: <InsightsTabLabel insight={serviceDeployment.insight} />,
-      enabled: !!serviceDeployment.insight,
     },
   ]
 }

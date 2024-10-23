@@ -253,6 +253,11 @@ defmodule Console.Schema.Service do
     from(s in query, where: s.status in ^vals)
   end
 
+  def stable(query \\ __MODULE__) do
+    at = Timex.now() |> Timex.shift(minutes: -5)
+    from(s in query, where: s.status != :stale or coalesce(s.updated_at, s.inserted_at) <= ^at)
+  end
+
   def ordered(query \\ __MODULE__, order \\ [asc: :cluster_id, asc: :name]) do
     from(s in query, order_by: ^order)
   end

@@ -423,12 +423,16 @@ type RootQueryType {
 
   project(id: ID, name: String): Project
 
+  "General api to query the configured LLM for your console"
   aiCompletion(
     "the initial system prompt to use for this completion"
     system: String!
 
     "the actual user-provided prompt to give to the underlying LLM"
-    input: String!
+    input: String
+
+    "a list of chat prompts to give to the llm"
+    chat: [ChatMessage]
   ): String
 }
 
@@ -967,6 +971,7 @@ type OidcProvider {
 enum AiProvider {
   OPENAI
   ANTHROPIC
+  OLLAMA
 }
 
 input ProjectAttributes {
@@ -1028,6 +1033,7 @@ input AiSettingsAttributes {
   provider: AiProvider
   openai: OpenaiSettingsAttributes
   anthropic: AnthropicSettingsAttributes
+  ollama: OllamaAttributes
 }
 
 input OpenaiSettingsAttributes {
@@ -1038,6 +1044,11 @@ input OpenaiSettingsAttributes {
 input AnthropicSettingsAttributes {
   accessToken: String
   model: String
+}
+
+input OllamaAttributes {
+  model: String!
+  url: String!
 }
 
 input SmtpSettingsAttributes {
@@ -1160,6 +1171,7 @@ type AiSettings {
   provider: AiProvider
   openai: OpenaiSettings
   anthropic: AnthropicSettings
+  ollama: OllamaSettings
 }
 
 "OpenAI connection information"
@@ -1172,6 +1184,14 @@ type OpenaiSettings {
 type AnthropicSettings {
   "the anthropic model version to use"
   model: String
+}
+
+"Settings for a self-hosted ollama-based LLM deployment"
+type OllamaSettings {
+  model: String!
+
+  "the url your ollama deployment is hosted on"
+  url: String!
 }
 
 type ProjectConnection {
@@ -4117,6 +4137,9 @@ type Cluster {
   "any upgrade insights provided by your cloud provider that have been discovered by our agent"
   upgradeInsights: [UpgradeInsight]
 
+  "A summation of the metrics utilization of the current cluster"
+  metricsSummary: ClusterMetricsSummary
+
   "the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null"
   status: ClusterStatus
 
@@ -4186,6 +4209,29 @@ type ClusterRevision {
   nodePools: [NodePool]
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+"A summarization of the core cpu and memory metrics for this cluster"
+type ClusterMetricsSummary {
+  nodes: Int
+
+  "the cpu available in vcpu"
+  cpuAvailable: Float
+
+  "the total cpu in the cluster measured in vcpu"
+  cpuTotal: Float
+
+  "a percentage cpu utilization of the cluster"
+  cpuUsed: Int
+
+  "the total number of megabytes unused in the cluster"
+  memoryAvailable: Float
+
+  "the total number of megabytes available in the cluster"
+  memoryTotal: Float
+
+  "a percentage memory utilization of the cluster"
+  memoryUsed: Int
 }
 
 "a specification for a node pool to be created in this cluster"
@@ -5532,6 +5578,19 @@ type ObserverConnection {
 type CatalogConnection {
   pageInfo: PageInfo!
   edges: [CatalogEdge]
+}
+
+"A role to pass to an LLM, modeled after OpenAI's chat api roles"
+enum AiRole {
+  SYSTEM
+  ASSISTANT
+  USER
+}
+
+"A basic AI chat message input, modeled after OpenAI's api model"
+input ChatMessage {
+  role: AiRole!
+  content: String!
 }
 
 "A representation of a LLM-derived insight"

@@ -192,7 +192,15 @@ export type AiInsight = {
 
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
+  Ollama = 'OLLAMA',
   Openai = 'OPENAI'
+}
+
+/** A role to pass to an LLM, modeled after OpenAI's chat api roles */
+export enum AiRole {
+  Assistant = 'ASSISTANT',
+  System = 'SYSTEM',
+  User = 'USER'
 }
 
 /** Settings for configuring access to common LLM providers */
@@ -200,6 +208,7 @@ export type AiSettings = {
   __typename?: 'AiSettings';
   anthropic?: Maybe<AnthropicSettings>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
+  ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
   provider?: Maybe<AiProvider>;
 };
@@ -207,6 +216,7 @@ export type AiSettings = {
 export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
 };
@@ -774,6 +784,12 @@ export type Changelog = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** A basic AI chat message input, modeled after OpenAI's api model */
+export type ChatMessage = {
+  content: Scalars['String']['input'];
+  role: AiRole;
+};
+
 export type CloneAttributes = {
   s3AccessKeyId?: InputMaybe<Scalars['String']['input']>;
   s3Endpoint?: InputMaybe<Scalars['String']['input']>;
@@ -838,6 +854,8 @@ export type Cluster = {
   logs?: Maybe<Array<Maybe<LogStream>>>;
   /** arbitrary json metadata to store user-specific state of this cluster (eg IAM roles for add-ons) */
   metadata?: Maybe<Scalars['Map']['output']>;
+  /** A summation of the metrics utilization of the current cluster */
+  metricsSummary?: Maybe<ClusterMetricsSummary>;
   /** human readable name of this cluster, will also translate to cloud k8s name */
   name: Scalars['String']['output'];
   /** list the cached node metrics for a cluster, can also be stale up to 5m */
@@ -1066,6 +1084,24 @@ export type ClusterMetrics = {
   memoryRequests?: Maybe<Array<Maybe<MetricResponse>>>;
   memoryUsage?: Maybe<Array<Maybe<MetricResponse>>>;
   pods?: Maybe<Array<Maybe<MetricResponse>>>;
+};
+
+/** A summarization of the core cpu and memory metrics for this cluster */
+export type ClusterMetricsSummary = {
+  __typename?: 'ClusterMetricsSummary';
+  /** the cpu available in vcpu */
+  cpuAvailable?: Maybe<Scalars['Float']['output']>;
+  /** the total cpu in the cluster measured in vcpu */
+  cpuTotal?: Maybe<Scalars['Float']['output']>;
+  /** a percentage cpu utilization of the cluster */
+  cpuUsed?: Maybe<Scalars['Int']['output']>;
+  /** the total number of megabytes unused in the cluster */
+  memoryAvailable?: Maybe<Scalars['Float']['output']>;
+  /** the total number of megabytes available in the cluster */
+  memoryTotal?: Maybe<Scalars['Float']['output']>;
+  /** a percentage memory utilization of the cluster */
+  memoryUsed?: Maybe<Scalars['Int']['output']>;
+  nodes?: Maybe<Scalars['Int']['output']>;
 };
 
 export type ClusterNodeMetrics = {
@@ -3505,6 +3541,19 @@ export type OidcProviderAttributes = {
 export enum OidcProviderType {
   Plural = 'PLURAL'
 }
+
+export type OllamaAttributes = {
+  model: Scalars['String']['input'];
+  url: Scalars['String']['input'];
+};
+
+/** Settings for a self-hosted ollama-based LLM deployment */
+export type OllamaSettings = {
+  __typename?: 'OllamaSettings';
+  model: Scalars['String']['output'];
+  /** the url your ollama deployment is hosted on */
+  url: Scalars['String']['output'];
+};
 
 /** OpenAI connection information */
 export type OpenaiSettings = {
@@ -5954,6 +6003,7 @@ export type RootQueryType = {
   accessTokens?: Maybe<AccessTokenConnection>;
   account?: Maybe<Account>;
   ai?: Maybe<Scalars['String']['output']>;
+  /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
   appNotifications?: Maybe<AppNotificationConnection>;
   application?: Maybe<Application>;
@@ -6152,7 +6202,8 @@ export type RootQueryTypeAiArgs = {
 
 
 export type RootQueryTypeAiCompletionArgs = {
-  input: Scalars['String']['input'];
+  chat?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  input?: InputMaybe<Scalars['String']['input']>;
   system: Scalars['String']['input'];
 };
 
