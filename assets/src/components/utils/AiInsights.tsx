@@ -10,6 +10,7 @@ import { IconProps } from '@pluralsh/design-system/dist/components/icons/createI
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { AiInsightSummaryFragment } from 'generated/graphql'
 import { useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 export function AiInsightSummaryIcon({
   insight,
@@ -23,6 +24,7 @@ export function AiInsightSummaryIcon({
   asIconFrame?: boolean
   iconFrameType?: IconFrameProps['type']
 } & IconProps) {
+  const theme = useTheme()
   const navigate = useNavigate()
 
   // if updated within the last 10 min
@@ -78,6 +80,11 @@ export function AiInsightSummaryIcon({
           {insight.summary}
         </Flex>
       }
+      border={'1px solid transparent'}
+      borderRadius={theme.borderRadiuses.medium}
+      backgroundImage={`linear-gradient(${theme.colors['fill-two']}, ${theme.colors['fill-two']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, rgba(0, 0, 0, 0))`}
+      backgroundOrigin={'border-box'}
+      backgroundClip={'padding-box, border-box'}
     >
       {asIconFrame ? (
         <IconFrame
