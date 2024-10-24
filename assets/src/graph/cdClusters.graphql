@@ -183,17 +183,6 @@ fragment ClustersRow on Cluster {
     memoryAvailable
     memoryTotal
   }
-  nodes {
-    status {
-      capacity
-    }
-  }
-  nodeMetrics {
-    usage {
-      cpu
-      memory
-    }
-  }
   installed
   pingedAt
   deletedAt
