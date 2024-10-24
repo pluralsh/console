@@ -14,3 +14,7 @@ fragment AiInsightSummary on AiInsight {
   summary
   updatedAt
 }
+
+query AI($prompt: String!) {
+  ai(prompt: $prompt)
+}

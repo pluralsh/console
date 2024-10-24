@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9019,6 +9019,13 @@ export type AiInsightFragment = { __typename?: 'AiInsight', text?: string | null
 
 export type AiInsightSummaryFragment = { __typename?: 'AiInsight', summary?: string | null, updatedAt?: string | null };
 
+export type AiQueryVariables = Exact<{
+  prompt: Scalars['String']['input'];
+}>;
+
+
+export type AiQuery = { __typename?: 'RootQueryType', ai?: string | null };
+
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
 export type FileContentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
@@ -13955,6 +13962,44 @@ export const RefreshTokenFragmentDoc = gql`
   updatedAt
 }
     `;
+export const AiDocument = gql`
+    query AI($prompt: String!) {
+  ai(prompt: $prompt)
+}
+    `;
+
+/**
+ * __useAiQuery__
+ *
+ * To run a query within a React component, call `useAiQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAiQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAiQuery({
+ *   variables: {
+ *      prompt: // value for 'prompt'
+ *   },
+ * });
+ */
+export function useAiQuery(baseOptions: Apollo.QueryHookOptions<AiQuery, AiQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AiQuery, AiQueryVariables>(AiDocument, options);
+      }
+export function useAiLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiQuery, AiQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AiQuery, AiQueryVariables>(AiDocument, options);
+        }
+export function useAiSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiQuery, AiQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AiQuery, AiQueryVariables>(AiDocument, options);
+        }
+export type AiQueryHookResult = ReturnType<typeof useAiQuery>;
+export type AiLazyQueryHookResult = ReturnType<typeof useAiLazyQuery>;
+export type AiSuspenseQueryHookResult = ReturnType<typeof useAiSuspenseQuery>;
+export type AiQueryResult = Apollo.QueryResult<AiQuery, AiQueryVariables>;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -23064,6 +23109,7 @@ export type RefreshSuspenseQueryHookResult = ReturnType<typeof useRefreshSuspens
 export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVariables>;
 export const namedOperations = {
   Query: {
+    AI: 'AI',
     App: 'App',
     AppInfo: 'AppInfo',
     Repository: 'Repository',
