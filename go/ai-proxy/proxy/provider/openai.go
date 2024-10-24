@@ -22,14 +22,14 @@ func (in *OpenAIProxy) ModifyRequest(r *httputil.ProxyRequest) {
 	r.Out.Header.Add("Authorization", "Bearer "+in.token)
 	r.SetXForwarded()
 
-	err := in.ModifyRequestBody(r)
+	err := in.modifyRequestBody(r)
 	if err != nil {
 		klog.ErrorS(err, "failed to map request body")
 		return
 	}
 }
 
-func (in *OpenAIProxy) ModifyRequestBody(r *httputil.ProxyRequest) error {
+func (in *OpenAIProxy) modifyRequestBody(r *httputil.ProxyRequest) error {
 	endpoint := r.Out.URL.Path
 	switch endpoint {
 	case openai.EndpointChat:
@@ -40,6 +40,16 @@ func (in *OpenAIProxy) ModifyRequestBody(r *httputil.ProxyRequest) error {
 }
 
 func (in *OpenAIProxy) ModifyResponse(r *http.Response) error {
+	err := in.modifyResponseBody(r)
+	if err != nil {
+		klog.ErrorS(err, "failed to map request body")
+		return err
+	}
+
+	return nil
+}
+
+func (in *OpenAIProxy) modifyResponseBody(r *http.Response) error {
 	endpoint := r.Request.URL.Path
 	switch endpoint {
 	case openai.EndpointChat:
