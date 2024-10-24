@@ -101,6 +101,33 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       assert pinged["pingedAt"]
       assert pinged["installed"]
     end
+
+    test "it can ship insight components" do
+      cluster = insert(:cluster, version: "1.24.1")
+
+      {:ok, %{data: %{"pingCluster" => pinged}}} = run_query("""
+        mutation Ping($ping: ClusterPing!) {
+          pingCluster(attributes: $ping) {
+            id
+            pingedAt
+            installed
+            version
+            currentVersion
+          }
+        }
+      """, %{"ping" => %{
+        "currentVersion" => "1.24.2",
+        "insightComponents" => [%{"group" => "apps", "version" => "v1", "kind" => "Deployment", "name" => "test"}]
+      }}, %{cluster: cluster})
+
+      assert pinged["id"] == cluster.id
+      assert pinged["currentVersion"] == "1.24.2"
+      assert pinged["version"] == "1.24.2"
+      assert pinged["pingedAt"]
+      assert pinged["installed"]
+
+      %{insight_components: [_]} = Console.Repo.preload(cluster, [:insight_components])
+    end
   end
 
   describe "registerRuntimeServices" do

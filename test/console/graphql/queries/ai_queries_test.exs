@@ -21,10 +21,16 @@ defmodule Console.GraphQl.AiQueriesTest do
     test "it can generate a suggestion for a fix given an existing insight" do
       user = insert(:user)
       git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      parent = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+
       svc = insert(:service,
         repository: git,
         git: %{ref: "main", folder: "charts/deployment-operator"},
-        write_bindings: [%{user_id: user.id}]
+        write_bindings: [%{user_id: user.id}],
+        parent: parent
       )
       insight = insert(:ai_insight, service: svc)
 

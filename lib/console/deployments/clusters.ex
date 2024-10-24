@@ -545,6 +545,7 @@ defmodule Console.Deployments.Clusters do
   def ping(attrs, %Cluster{id: id}) do
     attrs = Map.merge(attrs, %{pinged_at: Timex.now(), installed: true})
     get_cluster(id)
+    |> Repo.preload([:insight_components])
     |> Cluster.ping_changeset(attrs)
     |> Repo.update()
     |> notify(:ping)

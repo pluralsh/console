@@ -16,7 +16,9 @@ defmodule Console.Schema.Cluster do
     ClusterRestore,
     ObjectStore,
     Project,
-    UpgradeInsight
+    UpgradeInsight,
+    AiInsight,
+    ClusterInsightComponent
   }
 
   defenum Distro, generic: 0, eks: 1, aks: 2, gke: 3, rke: 4, k3s: 5
@@ -118,6 +120,7 @@ defmodule Console.Schema.Cluster do
     belongs_to :object_store,   ObjectStore
     belongs_to :restore,        ClusterRestore
     belongs_to :project,        Project
+    belongs_to :insight,        AiInsight
     belongs_to :parent_cluster, __MODULE__
 
     has_many :upgrade_insights, UpgradeInsight
@@ -126,6 +129,7 @@ defmodule Console.Schema.Cluster do
     has_many :services, Service
     has_many :tags, Tag, on_replace: :delete
     has_many :api_deprecations, through: [:services, :api_deprecations]
+    has_many :insight_components, ClusterInsightComponent, on_replace: :delete
 
     has_many :pr_automations, PrAutomation, on_replace: :delete
     has_many :read_bindings, PolicyBinding,
@@ -376,6 +380,7 @@ defmodule Console.Schema.Cluster do
   def ping_changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, ~w(pinged_at distro kubelet_version current_version installed)a)
+    |> cast_assoc(:insight_components)
     |> change_markers(distro: :distro_changed)
     |> update_vsn()
   end
