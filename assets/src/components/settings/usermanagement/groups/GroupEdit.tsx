@@ -101,6 +101,7 @@ function EditGroupMembersModal({
       open={open}
       size="large"
       onClose={onClose}
+      onOpenAutoFocus={(e) => e.preventDefault()}
       actions={
         <Button
           onClick={onClose}
@@ -115,6 +116,11 @@ function EditGroupMembersModal({
         gap="large"
       >
         {errorMsg}
+        <GroupMembers
+          group={group}
+          edit
+          skip={!open}
+        />
         <FormField
           label="Add users"
           width="100%"
@@ -147,11 +153,6 @@ function EditGroupMembersModal({
             {suggestions.map(({ label }) => label)}
           </ComboBox>
         </FormField>
-        <GroupMembers
-          group={group}
-          edit
-          skip={!open}
-        />
       </Flex>
     </Modal>
   )
