@@ -3863,8 +3863,21 @@ input TagAttributes {
 
 input ClusterPing {
   currentVersion: String!
+
   kubeletVersion: String
+
   distro: ClusterDistro
+
+  "scraped k8s objects to use for cluster insights, don't send at all if not w\/in the last scrape interval"
+  insightComponents: [ClusterInsightComponentAttributes]
+}
+
+input ClusterInsightComponentAttributes {
+  group: String
+  version: String!
+  kind: String!
+  namespace: String
+  name: String!
 }
 
 input ClusterUpdateAttributes {
@@ -4257,6 +4270,9 @@ type Cluster {
 
   "the parent of this virtual cluster"
   parentCluster: Cluster
+
+  "an ai insight generated about issues discovered which might impact the health of this cluster"
+  insight: AiInsight
 
   "list cached nodes for a cluster, this can be stale up to 5m"
   nodes: [Node]
@@ -5738,6 +5754,8 @@ input ChatMessage {
 
 "A representation of a LLM-derived insight"
 type AiInsight {
+  id: ID!
+
   "a deduplication sha for this insight"
   sha: String
 

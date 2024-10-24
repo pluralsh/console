@@ -24,6 +24,7 @@ defmodule Console.GraphQl.AI do
 
   @desc "A representation of a LLM-derived insight"
   object :ai_insight do
+    field :id,        non_null(:id)
     field :sha,       :string, description: "a deduplication sha for this insight"
     field :text,      :string, description: "the text of this insight"
     field :summary,   :string, description: "a shortish summary of this insight"

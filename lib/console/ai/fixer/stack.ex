@@ -3,14 +3,15 @@ defmodule Console.AI.Fixer.Stack do
   use Console.AI.Evidence.Base
   import Console.AI.Fixer.Base
   alias Console.Repo
+  alias Console.AI.Fixer.Parent
   alias Console.Schema.{Stack, Service, GitRepository}
   alias Console.Deployments.{Stacks}
 
   def prompt(%Stack{} = stack, insight) do
-    stack = Repo.preload(stack, [:repository])
+    stack = Repo.preload(stack, [:repository, :parent])
     with {:ok, f} <- Stacks.tarstream(stack),
          {:ok, code} <- code_prompt(f) do
-      ok([
+      Enum.concat([
         {:user, """
           We've found the following insight about a Plural Stack that is currently in #{stack.status} state:
 
@@ -20,7 +21,13 @@ defmodule Console.AI.Fixer.Stack do
           I'll do my best to list all the needed resources below.
         """},
         {:user, stack_details(stack)} | code
-      ])
+      ], Parent.parent_prompt(
+        stack.parent,
+        child: "#{stack.name} stack",
+        cr: "InfrastructureStack",
+        cr_additional: " specifying the name #{stack.name}"
+      ))
+      |> ok()
     end
   end
 
