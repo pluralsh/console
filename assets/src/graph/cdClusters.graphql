@@ -175,6 +175,14 @@ fragment ClustersRow on Cluster {
   name
   handle
   distro
+  metricsSummary {
+    cpuUsed
+    cpuAvailable
+    cpuTotal
+    memoryUsed
+    memoryAvailable
+    memoryTotal
+  }
   nodes {
     status {
       capacity

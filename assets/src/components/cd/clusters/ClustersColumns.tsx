@@ -16,13 +16,6 @@ import { Cluster, ClustersRowFragment } from 'generated/graphql'
 
 import { isUpgrading, toNiceVersion } from 'utils/semver'
 import { Edge } from 'utils/graphql'
-import {
-  cpuFormat,
-  cpuParser,
-  memoryFormat,
-  memoryParser,
-} from 'utils/kubernetes'
-
 import { getProviderName } from 'components/utils/Provider'
 import {
   DistroProviderIconFrame,
@@ -33,7 +26,6 @@ import { BasicLink } from 'components/utils/typography/BasicLink'
 import { StackedText } from 'components/utils/table/StackedText'
 import { UsageBar } from 'components/cluster/nodes/UsageBar'
 import { TableText, TabularNumbers } from 'components/cluster/TableElements'
-import { roundToTwoPlaces } from 'components/cluster/utils'
 
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
@@ -44,6 +36,7 @@ import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
 import { ClusterConditions } from './ClusterConditions'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
+import { filesize } from 'filesize'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -193,33 +186,23 @@ export const ColVersion = columnHelper.accessor(({ node }) => node, {
   },
 })
 
+const cpuFormat = (cpu: Nullable<number>) => (cpu ? `${cpu} vCPU` : '—')
+
 export const ColCpu = columnHelper.accessor(({ node }) => node, {
   id: 'cpu',
   header: 'CPU',
   cell: ({ getValue }) => {
     const cluster = getValue()
-    const usage = cluster?.nodeMetrics?.reduce(
-      (acc, current) => acc + (cpuParser(current?.usage?.cpu) ?? 0),
-      0
-    )
-    const capacity = cluster?.nodes?.reduce(
-      (acc, current) =>
-        // @ts-ignore
-        acc + (cpuParser(current?.status?.capacity?.cpu) ?? 0),
-      0
-    )
-    const display = `${usage ? cpuFormat(roundToTwoPlaces(usage)) : '—'} / ${
-      capacity ? cpuFormat(capacity) : '—'
-    }`
+    const display = `${cpuFormat(cluster?.metricsSummary?.cpuTotal)} / ${cpuFormat(cluster?.metricsSummary?.cpuAvailable)}`
 
-    return usage !== undefined && !!capacity ? (
+    return cluster?.metricsSummary?.cpuUsed !== undefined ? (
       <Tooltip
         label={display}
         placement="top"
       >
         <TableText>
           <UsageBar
-            usage={usage / capacity}
+            usage={(cluster?.metricsSummary?.cpuUsed ?? 0) / 100}
             width={120}
           />
         </TableText>
@@ -230,34 +213,24 @@ export const ColCpu = columnHelper.accessor(({ node }) => node, {
   },
 })
 
+const memFormat = (memory: Nullable<number>) =>
+  memory ? filesize(memory * 1_000_000) : '—'
+
 export const ColMemory = columnHelper.accessor(({ node }) => node, {
   id: 'memory',
   header: 'Memory',
   cell: ({ getValue }) => {
     const cluster = getValue()
-    const usage = cluster?.nodeMetrics?.reduce(
-      (acc, current) => acc + (memoryParser(current?.usage?.memory) ?? 0),
-      0
-    )
-    const capacity = cluster?.nodes?.reduce(
-      (acc, current) =>
-        // @ts-ignore
-        acc + (memoryParser(current?.status?.capacity?.memory) ?? 0),
-      0
-    )
+    const display = `${memFormat(cluster?.metricsSummary?.memoryTotal)} / ${memFormat(cluster?.metricsSummary?.memoryAvailable)}`
 
-    const display = `${usage ? memoryFormat(usage) : '—'} / ${
-      capacity ? memoryFormat(capacity) : '—'
-    }`
-
-    return usage !== undefined && !!capacity ? (
+    return cluster?.metricsSummary?.memoryUsed !== undefined ? (
       <Tooltip
         label={display}
         placement="top"
       >
         <TableText>
           <UsageBar
-            usage={usage / capacity}
+            usage={(cluster?.metricsSummary?.memoryUsed ?? 0) / 100}
             width={120}
           />
         </TableText>
