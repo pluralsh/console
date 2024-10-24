@@ -986,6 +986,7 @@ enum AiProvider {
   OPENAI
   ANTHROPIC
   OLLAMA
+  AZURE
 }
 
 input ProjectAttributes {
@@ -1048,6 +1049,7 @@ input AiSettingsAttributes {
   openai: OpenaiSettingsAttributes
   anthropic: AnthropicSettingsAttributes
   ollama: OllamaAttributes
+  azure: AzureOpenaiAttributes
 }
 
 input OpenaiSettingsAttributes {
@@ -1067,6 +1069,17 @@ input OllamaAttributes {
 
   "An http authorization header to use on calls to the Ollama api"
   authorization: String
+}
+
+input AzureOpenaiAttributes {
+  "the endpoint of your azure openai version, should look like: https:\/\/{endpoint}\/openai\/deployments\/{deployment-id}"
+  endpoint: String!
+
+  "the api version you want to use"
+  apiVersion: String
+
+  "the azure openai access token to use"
+  accessToken: String!
 }
 
 input SmtpSettingsAttributes {
@@ -1193,6 +1206,7 @@ type AiSettings {
   openai: OpenaiSettings
   anthropic: AnthropicSettings
   ollama: OllamaSettings
+  azure: AzureOpenaiSettings
 }
 
 "OpenAI connection information"
@@ -1213,6 +1227,15 @@ type OllamaSettings {
 
   "the url your ollama deployment is hosted on"
   url: String!
+}
+
+"Settings for configuring against Azure OpenAI"
+type AzureOpenaiSettings {
+  "the endpoint of your azure openai version, should look like: https:\/\/{endpoint}\/openai\/deployments\/{deployment-id}"
+  endpoint: String!
+
+  "the api version you want to use"
+  apiVersion: String
 }
 
 type ProjectConnection {

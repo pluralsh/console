@@ -144,11 +144,12 @@ type AiInsight struct {
 
 // Settings for configuring access to common LLM providers
 type AiSettings struct {
-	Enabled   *bool              `json:"enabled,omitempty"`
-	Provider  *AiProvider        `json:"provider,omitempty"`
-	Openai    *OpenaiSettings    `json:"openai,omitempty"`
-	Anthropic *AnthropicSettings `json:"anthropic,omitempty"`
-	Ollama    *OllamaSettings    `json:"ollama,omitempty"`
+	Enabled   *bool                `json:"enabled,omitempty"`
+	Provider  *AiProvider          `json:"provider,omitempty"`
+	Openai    *OpenaiSettings      `json:"openai,omitempty"`
+	Anthropic *AnthropicSettings   `json:"anthropic,omitempty"`
+	Ollama    *OllamaSettings      `json:"ollama,omitempty"`
+	Azure     *AzureOpenaiSettings `json:"azure,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -157,6 +158,7 @@ type AiSettingsAttributes struct {
 	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
 	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
+	Azure     *AzureOpenaiAttributes       `json:"azure,omitempty"`
 }
 
 type Alert struct {
@@ -419,6 +421,23 @@ type AzureCloudSettings struct {
 	SubscriptionID *string `json:"subscriptionId,omitempty"`
 	ResourceGroup  *string `json:"resourceGroup,omitempty"`
 	Network        *string `json:"network,omitempty"`
+}
+
+type AzureOpenaiAttributes struct {
+	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
+	Endpoint string `json:"endpoint"`
+	// the api version you want to use
+	APIVersion *string `json:"apiVersion,omitempty"`
+	// the azure openai access token to use
+	AccessToken string `json:"accessToken"`
+}
+
+// Settings for configuring against Azure OpenAI
+type AzureOpenaiSettings struct {
+	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
+	Endpoint string `json:"endpoint"`
+	// the api version you want to use
+	APIVersion *string `json:"apiVersion,omitempty"`
 }
 
 type AzureSettingsAttributes struct {
@@ -5613,17 +5632,19 @@ const (
 	AiProviderOpenai    AiProvider = "OPENAI"
 	AiProviderAnthropic AiProvider = "ANTHROPIC"
 	AiProviderOllama    AiProvider = "OLLAMA"
+	AiProviderAzure     AiProvider = "AZURE"
 )
 
 var AllAiProvider = []AiProvider{
 	AiProviderOpenai,
 	AiProviderAnthropic,
 	AiProviderOllama,
+	AiProviderAzure,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure:
 		return true
 	}
 	return false

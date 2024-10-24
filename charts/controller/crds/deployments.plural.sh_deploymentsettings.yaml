@@ -80,6 +80,44 @@ spec:
                     - model
                     - tokenSecretRef
                     type: object
+                  azure:
+                    description: Azure holds configuration for using AzureOpenAI to
+                      generate LLM insights
+                    properties:
+                      apiVersion:
+                        description: The azure openai Data plane - inference api version
+                          to use, defaults to 2024-10-01-preview or the latest available
+                        type: string
+                      endpoint:
+                        description: 'Your Azure OpenAI endpoint, should be formatted
+                          like: https://{endpoint}/openai/deployments/{deployment-id}"'
+                        type: string
+                      tokenSecretRef:
+                        description: |-
+                          TokenSecretRef is a reference to the local secret holding the token to access
+                          the configured AI provider.
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    required:
+                    - endpoint
+                    - tokenSecretRef
+                    type: object
                   enabled:
                     default: false
                     description: Enabled defines whether to enable the AI integration
@@ -162,6 +200,7 @@ spec:
                     - OPENAI
                     - ANTHROPIC
                     - OLLAMA
+                    - AZURE
                     type: string
                 type: object
               bindings:

@@ -193,6 +193,7 @@ export type AiInsight = {
 
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
+  Azure = 'AZURE',
   Ollama = 'OLLAMA',
   Openai = 'OPENAI'
 }
@@ -208,6 +209,7 @@ export enum AiRole {
 export type AiSettings = {
   __typename?: 'AiSettings';
   anthropic?: Maybe<AnthropicSettings>;
+  azure?: Maybe<AzureOpenaiSettings>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
   ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
@@ -216,6 +218,7 @@ export type AiSettings = {
 
 export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
+  azure?: InputMaybe<AzureOpenaiAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
@@ -569,6 +572,24 @@ export type AzureCloudSettings = {
   network?: Maybe<Scalars['String']['output']>;
   resourceGroup?: Maybe<Scalars['String']['output']>;
   subscriptionId?: Maybe<Scalars['String']['output']>;
+};
+
+export type AzureOpenaiAttributes = {
+  /** the azure openai access token to use */
+  accessToken: Scalars['String']['input'];
+  /** the api version you want to use */
+  apiVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
+  endpoint: Scalars['String']['input'];
+};
+
+/** Settings for configuring against Azure OpenAI */
+export type AzureOpenaiSettings = {
+  __typename?: 'AzureOpenaiSettings';
+  /** the api version you want to use */
+  apiVersion?: Maybe<Scalars['String']['output']>;
+  /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
+  endpoint: Scalars['String']['output'];
 };
 
 export type AzureSettingsAttributes = {

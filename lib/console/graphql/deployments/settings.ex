@@ -47,6 +47,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :openai,    :openai_settings_attributes
     field :anthropic, :anthropic_settings_attributes
     field :ollama,    :ollama_attributes
+    field :azure,     :azure_openai_attributes
   end
 
   input_object :openai_settings_attributes do
@@ -63,6 +64,12 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model,         non_null(:string)
     field :url,           non_null(:string)
     field :authorization, :string, description: "An http authorization header to use on calls to the Ollama api"
+  end
+
+  input_object :azure_openai_attributes do
+    field :endpoint,     non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
+    field :api_version,  :string, description: "the api version you want to use"
+    field :access_token, non_null(:string), description: "the azure openai access token to use"
   end
 
   input_object :smtp_settings_attributes do
@@ -152,6 +159,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :openai,    :openai_settings
     field :anthropic, :anthropic_settings
     field :ollama,    :ollama_settings
+    field :azure,     :azure_openai_settings
   end
 
   @desc "OpenAI connection information"
@@ -168,6 +176,12 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :ollama_settings do
     field :model, non_null(:string)
     field :url,   non_null(:string), description: "the url your ollama deployment is hosted on"
+  end
+
+  @desc "Settings for configuring against Azure OpenAI"
+  object :azure_openai_settings do
+    field :endpoint,    non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
+    field :api_version, :string, description: "the api version you want to use"
   end
 
   connection node_type: :project
