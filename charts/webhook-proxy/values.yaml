@@ -128,3 +128,4 @@ configMap:
   # If not set, a name is generated using the fullname template
   name: ""
   annotations: {}
+  host: "console.console.svc.cluster.local:4000"

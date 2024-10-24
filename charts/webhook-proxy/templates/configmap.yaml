@@ -9,4 +9,10 @@ metadata:
   {{- end }}
 data:
   server-block.conf: |-
-    ...
+    server {
+      listen 0.0.0.0:8080;
+
+      location /ext/v1/webhooks/ {
+        proxy_pass {{ .Values.configMap.host}}/ext/v1/webhooks/;
+      }
+    }
