@@ -120,7 +120,7 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
   defp cores(val) when is_integer(val), do: val / 1000
   defp cores(_), do: nil
 
-  defp milli(val) when is_integer(val), do: val / (1024 * 1024)
+  defp milli(val) when is_integer(val), do: val / (1000 * 1000)
   defp milli(_), do: nil
 
   def cluster_statuses(args, %{context: %{current_user: user}}) do

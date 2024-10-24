@@ -193,6 +193,7 @@ export type AiInsight = {
 
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
+  Azure = 'AZURE',
   Ollama = 'OLLAMA',
   Openai = 'OPENAI'
 }
@@ -208,6 +209,7 @@ export enum AiRole {
 export type AiSettings = {
   __typename?: 'AiSettings';
   anthropic?: Maybe<AnthropicSettings>;
+  azure?: Maybe<AzureOpenaiSettings>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
   ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
@@ -216,6 +218,7 @@ export type AiSettings = {
 
 export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
+  azure?: InputMaybe<AzureOpenaiAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
@@ -569,6 +572,24 @@ export type AzureCloudSettings = {
   network?: Maybe<Scalars['String']['output']>;
   resourceGroup?: Maybe<Scalars['String']['output']>;
   subscriptionId?: Maybe<Scalars['String']['output']>;
+};
+
+export type AzureOpenaiAttributes = {
+  /** the azure openai access token to use */
+  accessToken: Scalars['String']['input'];
+  /** the api version you want to use */
+  apiVersion?: InputMaybe<Scalars['String']['input']>;
+  /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
+  endpoint: Scalars['String']['input'];
+};
+
+/** Settings for configuring against Azure OpenAI */
+export type AzureOpenaiSettings = {
+  __typename?: 'AzureOpenaiSettings';
+  /** the api version you want to use */
+  apiVersion?: Maybe<Scalars['String']['output']>;
+  /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
+  endpoint: Scalars['String']['output'];
 };
 
 export type AzureSettingsAttributes = {
@@ -1151,13 +1172,13 @@ export type ClusterMetricsSummary = {
   __typename?: 'ClusterMetricsSummary';
   /** the cpu available in vcpu */
   cpuAvailable?: Maybe<Scalars['Float']['output']>;
-  /** the total cpu in the cluster measured in vcpu */
+  /** the total cpu in use in the cluster measured in vcpu */
   cpuTotal?: Maybe<Scalars['Float']['output']>;
   /** a percentage cpu utilization of the cluster */
   cpuUsed?: Maybe<Scalars['Int']['output']>;
-  /** the total number of megabytes unused in the cluster */
-  memoryAvailable?: Maybe<Scalars['Float']['output']>;
   /** the total number of megabytes available in the cluster */
+  memoryAvailable?: Maybe<Scalars['Float']['output']>;
+  /** the total number of megabytes in use in the cluster */
   memoryTotal?: Maybe<Scalars['Float']['output']>;
   /** a percentage memory utilization of the cluster */
   memoryUsed?: Maybe<Scalars['Int']['output']>;
@@ -6132,6 +6153,8 @@ export type RootQueryType = {
   ai?: Maybe<Scalars['String']['output']>;
   /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
+  /** Use the content of an insight and additional context from its associated object to suggest a fix */
+  aiSuggestedFix?: Maybe<Scalars['String']['output']>;
   appNotifications?: Maybe<AppNotificationConnection>;
   application?: Maybe<Application>;
   applications?: Maybe<Array<Maybe<Application>>>;
@@ -6334,6 +6357,11 @@ export type RootQueryTypeAiCompletionArgs = {
   chat?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   input?: InputMaybe<Scalars['String']['input']>;
   system: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeAiSuggestedFixArgs = {
+  insightId: Scalars['ID']['input'];
 };
 
 

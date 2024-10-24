@@ -43,5 +43,13 @@ defmodule Console.GraphQl.AI do
 
       resolve &AI.ai_completion/2
     end
+
+    @desc "Use the content of an insight and additional context from its associated object to suggest a fix"
+    field :ai_suggested_fix, :string do
+      middleware Authenticated
+      arg :insight_id, non_null(:id), description: "the ai insight you want to suggest a fix for"
+
+      resolve &AI.ai_suggested_fix/2
+    end
   end
 end
