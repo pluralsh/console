@@ -72,6 +72,7 @@ func FromChatCompletionResponse(in openai.ChatCompletion) ollamaapi.ChatResponse
 		Model:     in.Model,
 		CreatedAt: time.Unix(in.Created, 0),
 		Message:   toFlatMessage(in.Choices),
+		Done:      true,
 	}
 }
 
@@ -81,11 +82,10 @@ func toFlatMessage(choices []openai.Choice) ollamaapi.Message {
 		return result
 	}
 
-	for _, choice := range choices {
-		result.Role = choice.Message.Role
-		contentString, _ := choice.Message.Content.(string)
-		result.Content += contentString
-	}
+	choice := choices[0]
+	result.Role = choice.Message.Role
+	contentString, _ := choice.Message.Content.(string)
+	result.Content = contentString
 
 	return result
 }
