@@ -175,16 +175,13 @@ fragment ClustersRow on Cluster {
   name
   handle
   distro
-  nodes {
-    status {
-      capacity
-    }
-  }
-  nodeMetrics {
-    usage {
-      cpu
-      memory
-    }
+  metricsSummary {
+    cpuUsed
+    cpuAvailable
+    cpuTotal
+    memoryUsed
+    memoryAvailable
+    memoryTotal
   }
   installed
   pingedAt
