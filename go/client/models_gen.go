@@ -880,13 +880,13 @@ type ClusterMetricsSummary struct {
 	Nodes *int64 `json:"nodes,omitempty"`
 	// the cpu available in vcpu
 	CPUAvailable *float64 `json:"cpuAvailable,omitempty"`
-	// the total cpu in the cluster measured in vcpu
+	// the total cpu in use in the cluster measured in vcpu
 	CPUTotal *float64 `json:"cpuTotal,omitempty"`
 	// a percentage cpu utilization of the cluster
 	CPUUsed *int64 `json:"cpuUsed,omitempty"`
-	// the total number of megabytes unused in the cluster
-	MemoryAvailable *float64 `json:"memoryAvailable,omitempty"`
 	// the total number of megabytes available in the cluster
+	MemoryAvailable *float64 `json:"memoryAvailable,omitempty"`
+	// the total number of megabytes in use in the cluster
 	MemoryTotal *float64 `json:"memoryTotal,omitempty"`
 	// a percentage memory utilization of the cluster
 	MemoryUsed *int64 `json:"memoryUsed,omitempty"`

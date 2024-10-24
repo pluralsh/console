@@ -425,10 +425,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
   object :cluster_metrics_summary do
     field :nodes,               :integer
     field :cpu_available,       :float,   description: "the cpu available in vcpu"
-    field :cpu_total,           :float,   description: "the total cpu in the cluster measured in vcpu"
+    field :cpu_total,           :float,   description: "the total cpu in use in the cluster measured in vcpu"
     field :cpu_used,            :integer, description: "a percentage cpu utilization of the cluster"
-    field :memory_available,    :float,   description: "the total number of megabytes unused in the cluster"
-    field :memory_total,        :float,   description: "the total number of megabytes available in the cluster"
+    field :memory_available,    :float,   description: "the total number of megabytes available in the cluster"
+    field :memory_total,        :float,   description: "the total number of megabytes in use in the cluster"
     field :memory_used,         :integer, description: "a percentage memory utilization of the cluster"
   end
 

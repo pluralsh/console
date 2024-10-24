@@ -438,6 +438,12 @@ type RootQueryType {
     "a list of chat prompts to give to the llm"
     chat: [ChatMessage]
   ): String
+
+  "Use the content of an insight and additional context from its associated object to suggest a fix"
+  aiSuggestedFix(
+    "the ai insight you want to suggest a fix for"
+    insightId: ID!
+  ): String
 }
 
 type RootMutationType {
@@ -4325,16 +4331,16 @@ type ClusterMetricsSummary {
   "the cpu available in vcpu"
   cpuAvailable: Float
 
-  "the total cpu in the cluster measured in vcpu"
+  "the total cpu in use in the cluster measured in vcpu"
   cpuTotal: Float
 
   "a percentage cpu utilization of the cluster"
   cpuUsed: Int
 
-  "the total number of megabytes unused in the cluster"
+  "the total number of megabytes available in the cluster"
   memoryAvailable: Float
 
-  "the total number of megabytes available in the cluster"
+  "the total number of megabytes in use in the cluster"
   memoryTotal: Float
 
   "a percentage memory utilization of the cluster"
