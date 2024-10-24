@@ -60,3 +60,10 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create the name of the config map to use
+*/}}
+{{- define "webhook-proxy.configMapName" -}}
+{{- default (include "webhook-proxy.fullname" .) .Values.configMap.name }}
+{{- end }}
