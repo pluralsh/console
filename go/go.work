@@ -1,6 +1,7 @@
 go 1.22.5
 
 use (
+	./ai-proxy
 	./client // github.com/pluralsh/console/go/client
 	./controller // github.com/pluralsh/console/go/controller
 	./oci-auth // github.com/pluralsh/console/go/oci-auth
