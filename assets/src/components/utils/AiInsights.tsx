@@ -8,7 +8,7 @@ import {
 } from '@pluralsh/design-system'
 import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { Overline } from 'components/cd/utils/PermissionsModal'
-import { AiInsightSummaryFragment } from 'generated/graphql'
+import { AiInsightSummaryFragment, InsightFreshness } from 'generated/graphql'
 import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -29,19 +29,7 @@ export function AiInsightSummaryIcon({
   const theme = useTheme()
   const navigate = useNavigate()
 
-  // if updated within the last 10 min
-  const isNew =
-    !!insight?.updatedAt &&
-    new Date().getTime() - new Date(insight.updatedAt).getTime() <
-      10 * 60 * 1000
-
-  // if updated more than 1 hour ago
-  const isStale =
-    !!insight?.updatedAt &&
-    new Date().getTime() - new Date(insight.updatedAt).getTime() >
-      60 * 60 * 1000
-
-  if (!insight?.summary || isStale)
+  if (!insight?.summary || insight.freshness === InsightFreshness.Expired)
     return preserveSpace ? (
       <IconFrame
         icon={
@@ -59,14 +47,15 @@ export function AiInsightSummaryIcon({
     navigate(navPath ?? '')
   }
 
-  const icon = isNew ? (
-    <AiSparkleFilledIcon
-      color="icon-info"
-      {...props}
-    />
-  ) : (
-    <AiSparkleOutlineIcon {...props} />
-  )
+  const icon =
+    insight.freshness === InsightFreshness.Fresh ? (
+      <AiSparkleFilledIcon
+        color="icon-info"
+        {...props}
+      />
+    ) : (
+      <AiSparkleOutlineIcon {...props} />
+    )
 
   return (
     <Tooltip
