@@ -12,7 +12,9 @@ data:
     server {
       listen 80;
 
-      root /usr/share/nginx/html;
+      location / {
+        return 404;
+      }
 
       location /ext/v1/webhooks/ {
         proxy_pass {{ .Values.configMap.host}}/ext/v1/webhooks/;
