@@ -124,8 +124,4 @@ affinity: {}
 
 # Config map with NGINX configuration.
 configMap:
-  # The name of the config map to use.
-  # If not set, a name is generated using the fullname template
-  name: ""
-  annotations: {}
   host: "http://console.plrl-console.svc.cluster.local:4000"
