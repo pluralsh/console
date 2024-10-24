@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 
@@ -34,17 +33,17 @@ func (in *OpenAIProxy) ModifyRequestBody(r *httputil.ProxyRequest) error {
 	endpoint := r.Out.URL.Path
 	switch endpoint {
 	case openai.EndpointChat:
-		return replaceBody(r, openai.ToChatCompletionRequest)
+		return hijackRequest(r, openai.ToChatCompletionRequest)
 	}
 
-	panic(fmt.Errorf("no ollama -> openai mapping registered for endpoint: %s", endpoint))
+	return nil
 }
 
 func (in *OpenAIProxy) ModifyResponse(r *http.Response) error {
 	endpoint := r.Request.URL.Path
 	switch endpoint {
 	case openai.EndpointChat:
-		return replaceResponseBody(r, openai.FromChatCompletionResponse)
+		return hijackResponse(r, openai.FromChatCompletionResponse)
 	}
 
 	return nil
