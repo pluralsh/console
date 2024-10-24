@@ -1,7 +1,9 @@
 import {
+  AiSparkleFilledIcon,
   ArrowLeftIcon,
   ArrowRightIcon,
   Breadcrumbs,
+  Button,
   IconFrame,
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
@@ -59,6 +61,18 @@ export default function Subheader() {
       <BreadcrumbsContainerSC>
         <Breadcrumbs className="crumbs" />
       </BreadcrumbsContainerSC>
+      <Button
+        border={'1px solid transparent'}
+        borderRadius={theme.borderRadiuses.medium}
+        backgroundImage={`linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`}
+        backgroundOrigin={'border-box'}
+        backgroundClip={'padding-box, border-box'}
+        secondary
+        small
+        startIcon={<AiSparkleFilledIcon size={14} />}
+      >
+        Explain with AI
+      </Button>
     </SubheaderSC>
   )
 }
