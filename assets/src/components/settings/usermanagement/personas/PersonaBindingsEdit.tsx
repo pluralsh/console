@@ -106,6 +106,7 @@ export function EditPersonaBindingsModal({
       asForm
       formProps={{ onSubmit }}
       onClose={onClose}
+      onOpenAutoFocus={(e) => e.preventDefault()}
       actions={
         <div
           css={{
