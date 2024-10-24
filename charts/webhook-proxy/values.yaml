@@ -122,10 +122,10 @@ tolerations: []
 
 affinity: {}
 
-# Config map with custom server block to be added to NGINX configuration.
+# Config map with NGINX configuration.
 configMap:
   # The name of the config map to use.
   # If not set, a name is generated using the fullname template
   name: ""
   annotations: {}
-  host: "console.console.svc.cluster.local:4000"
+  host: "http://console.console"

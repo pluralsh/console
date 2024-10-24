@@ -8,9 +8,14 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 data:
-  server-block.conf: |-
+  default.conf: |-
     server {
-      listen 0.0.0.0:8080;
+      listen 80;
+
+      error_page   500 502 503 504  /50x.html;
+      location = /50x.html {
+        root   /usr/share/nginx/html;
+      }
 
       location /ext/v1/webhooks/ {
         proxy_pass {{ .Values.configMap.host}}/ext/v1/webhooks/;

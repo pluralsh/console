@@ -47,12 +47,14 @@ spec:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
+            - name: configuration
+              mountPath: /etc/nginx/conf.d
+            {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
-          {{- end }}
+            {{- end }}
       volumes:
-        - name: server-block
+        - name: configuration
           configMap:
             name: {{ include "webhook-proxy.configMapName" . }}
         {{- with .Values.volumes }}
