@@ -41,7 +41,7 @@ type ConsoleClient interface {
 	CreateCluster(attrs console.ClusterAttributes) (*console.ClusterFragment, error)
 	UpdateCluster(id string, attrs console.ClusterUpdateAttributes) (*console.ClusterFragment, error)
 	ListClusters() (*console.ListClusters, error)
-	DeleteCluster(id string) (*console.TinyClusterFragment, error)
+	DeleteCluster(id string) (*console.DeleteCluster_DeleteCluster, error)
 	IsClusterExisting(id *string) (bool, error)
 	IsClusterDeleting(id *string) bool
 	CreateProvider(ctx context.Context, attributes console.ClusterProviderAttributes) (*console.ClusterProviderFragment, error)
