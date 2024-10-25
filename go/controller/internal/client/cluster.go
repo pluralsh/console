@@ -29,8 +29,6 @@ func (c *client) CreateCluster(attrs console.ClusterAttributes) (*console.Cluste
 		CurrentVersion: response.CreateCluster.CurrentVersion,
 		KasURL:         response.CreateCluster.KasURL,
 		Tags:           response.CreateCluster.Tags,
-		Credential:     response.CreateCluster.Credential,
-		Provider:       response.CreateCluster.Provider,
 		NodePools:      response.CreateCluster.NodePools,
 	}, nil
 }
@@ -69,6 +67,25 @@ func (c *client) GetCluster(id *string) (*console.ClusterFragment, error) {
 	return response.Cluster, err
 }
 
+func (c *client) GetTinyCluster(id *string) (*console.TinyClusterFragment, error) {
+	if id == nil {
+		return nil, errors.NewNotFound(schema.GroupResource{}, "")
+	}
+
+	response, err := c.consoleClient.GetTinyCluster(c.ctx, id)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *id)
+	}
+	if err == nil && (response == nil || response.Cluster == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, *id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.Cluster, err
+}
+
 func (c *client) GetClusterByHandle(handle *string) (*console.ClusterFragment, error) {
 	response, err := c.consoleClient.GetClusterByHandle(c.ctx, handle)
 	if internalerror.IsNotFound(err) {
@@ -88,7 +105,7 @@ func (c *client) ListClusters() (*console.ListClusters, error) {
 	return c.consoleClient.ListClusters(c.ctx, nil, nil, nil)
 }
 
-func (c *client) DeleteCluster(id string) (*console.ClusterFragment, error) {
+func (c *client) DeleteCluster(id string) (*console.TinyClusterFragment, error) {
 	response, err := c.consoleClient.DeleteCluster(c.ctx, id)
 	if err != nil {
 		return nil, err
@@ -101,7 +118,7 @@ func (c *client) DeleteCluster(id string) (*console.ClusterFragment, error) {
 }
 
 func (c *client) IsClusterExisting(id *string) (bool, error) {
-	cluster, err := c.GetCluster(id)
+	cluster, err := c.GetTinyCluster(id)
 	if errors.IsNotFound(err) {
 		return false, nil
 	}
@@ -114,7 +131,7 @@ func (c *client) IsClusterExisting(id *string) (bool, error) {
 }
 
 func (c *client) IsClusterDeleting(id *string) bool {
-	cluster, err := c.GetCluster(id)
+	cluster, err := c.GetTinyCluster(id)
 	if err != nil {
 		return false
 	}
