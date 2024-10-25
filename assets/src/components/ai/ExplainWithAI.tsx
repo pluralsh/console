@@ -9,8 +9,6 @@ export default function ExplainWithAI() {
   const [open, setOpen] = useState(false)
   const prompt = useExplainWithAIPrompt()
 
-  if (!prompt) return null
-
   return (
     <div
       css={{
@@ -21,16 +19,19 @@ export default function ExplainWithAI() {
     >
       <AIButton
         active={open}
+        visible={!!prompt}
         onClick={() => setOpen(true)}
         width={163}
       >
         Explain with AI
       </AIButton>
-      <ExplainWithAIPanel
-        prompt={prompt}
-        open={open}
-        onClose={() => setOpen(false)}
-      />
+      {prompt && (
+        <ExplainWithAIPanel
+          prompt={prompt}
+          open={open}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </div>
   )
 }
