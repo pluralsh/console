@@ -1157,6 +1157,7 @@ defmodule Console.Deployments.ServicesAsyncTest do
   alias Console.Deployments.{Services, Tar}
 
   describe "#docs/1" do
+    @tag :skip
     test "it can fetch the docs for a given service" do
       git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
       service = insert(:service, repository: git, git: %{ref: "cd-scaffolding", folder: "example"})

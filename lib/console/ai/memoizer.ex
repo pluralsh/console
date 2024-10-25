@@ -28,7 +28,7 @@ defmodule Console.AI.Memoizer do
 
   defp persist(%schema{} = model, history, sha) do
     model
-    |> schema.changeset(insight_attrs(history, sha))
+    |> schema.changeset(insight_attrs(model, history, sha))
     |> Repo.update()
     |> case do
       {:ok, %{insight: insight}} -> {:ok, insight}
@@ -36,12 +36,13 @@ defmodule Console.AI.Memoizer do
     end
   end
 
-  defp insight_attrs(history, sha) do
+  defp insight_attrs(%{insight_id: id}, history, sha) do
     with {:ok, insight} <- Provider.completion(history),
          {:ok, summary} <- Provider.summary(insight) do
-      %{insight: %{text: insight, summary: summary, errors: [], sha: sha}}
+      %{insight: %{id: id, text: insight, summary: summary, errors: [], sha: sha}}
     else
-      {:error, error} -> %{insight: %{errors: [%{source: "ai", error: error}], sha: sha}}
+      {:error, error} ->
+        %{insight: %{id: id, errors: [%{source: "ai", error: error}], sha: sha}}
     end
   end
 
