@@ -5823,6 +5823,28 @@ func (t *CreateCluster_CreateCluster) GetProject() *TinyProjectFragment {
 	return t.Project
 }
 
+type DeleteCluster_DeleteCluster struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DeleteCluster_DeleteCluster) GetID() string {
+	if t == nil {
+		t = &DeleteCluster_DeleteCluster{}
+	}
+	return t.ID
+}
+
+type DetachCluster_DetachCluster struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *DetachCluster_DetachCluster) GetID() string {
+	if t == nil {
+		t = &DetachCluster_DetachCluster{}
+	}
+	return t.ID
+}
+
 type CreateClusterProvider_CreateClusterProvider_ClusterProviderFragment_Service_ServiceDeploymentFragment_Components struct {
 	ID        string                    "json:\"id\" graphql:\"id\""
 	Name      string                    "json:\"name\" graphql:\"name\""
@@ -11908,10 +11930,10 @@ func (t *UpdateCluster) GetUpdateCluster() *ClusterFragment {
 }
 
 type DeleteCluster struct {
-	DeleteCluster *TinyClusterFragment "json:\"deleteCluster,omitempty\" graphql:\"deleteCluster\""
+	DeleteCluster *DeleteCluster_DeleteCluster "json:\"deleteCluster,omitempty\" graphql:\"deleteCluster\""
 }
 
-func (t *DeleteCluster) GetDeleteCluster() *TinyClusterFragment {
+func (t *DeleteCluster) GetDeleteCluster() *DeleteCluster_DeleteCluster {
 	if t == nil {
 		t = &DeleteCluster{}
 	}
@@ -11919,10 +11941,10 @@ func (t *DeleteCluster) GetDeleteCluster() *TinyClusterFragment {
 }
 
 type DetachCluster struct {
-	DetachCluster *TinyClusterFragment "json:\"detachCluster,omitempty\" graphql:\"detachCluster\""
+	DetachCluster *DetachCluster_DetachCluster "json:\"detachCluster,omitempty\" graphql:\"detachCluster\""
 }
 
-func (t *DetachCluster) GetDetachCluster() *TinyClusterFragment {
+func (t *DetachCluster) GetDetachCluster() *DetachCluster_DetachCluster {
 	if t == nil {
 		t = &DetachCluster{}
 	}
@@ -14320,23 +14342,8 @@ func (c *Client) UpdateCluster(ctx context.Context, id string, attributes Cluste
 
 const DeleteClusterDocument = `mutation DeleteCluster ($id: ID!) {
 	deleteCluster(id: $id) {
-		... TinyClusterFragment
+		id
 	}
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
 }
 `
 
@@ -14359,23 +14366,8 @@ func (c *Client) DeleteCluster(ctx context.Context, id string, interceptors ...c
 
 const DetachClusterDocument = `mutation DetachCluster ($id: ID!) {
 	detachCluster(id: $id) {
-		... TinyClusterFragment
+		id
 	}
-}
-fragment TinyClusterFragment on Cluster {
-	id
-	name
-	handle
-	self
-	deletedAt
-	project {
-		... TinyProjectFragment
-	}
-}
-fragment TinyProjectFragment on Project {
-	id
-	name
-	default
 }
 `
 

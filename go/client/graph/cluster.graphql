@@ -94,13 +94,13 @@ mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
 
 mutation DeleteCluster($id: ID!) {
     deleteCluster(id: $id) {
-        ...TinyClusterFragment
+        id
     }
 }
 
 mutation DetachCluster($id: ID!) {
     detachCluster(id: $id) {
-        ...TinyClusterFragment
+        id
     }
 }
 
