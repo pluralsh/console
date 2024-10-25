@@ -3,6 +3,10 @@ kind: ConfigMap
 metadata:
   name: {{ include "webhook-proxy.configMapName" . }}
   labels: {{- include "webhook-proxy.labels" . | nindent 4 }}
+  {{- with .Values.configMap.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 data:
   default.conf: |-
     server {
