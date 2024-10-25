@@ -38,6 +38,32 @@ defmodule Console.AI.CronTest do
 
       assert_receive {:event, %PubSub.ServiceInsight{item: {%{id: ^id}, _}}}
     end
+
+    test "it will preserve prior insight ids" do
+      insight = insert(:ai_insight, updated_at: Timex.now() |> Timex.shift(days: -1))
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      service = insert(:service, insight: insight, status: :failed, errors: [%{source: "manifests", error: "some error"}])
+      insert(:service_component,
+        service: service,
+        state: :pending,
+        group: "cert-manager.io",
+        version: "v1",
+        kind: "Certificate",
+        namespace: "ns",
+        name: "name"
+      )
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+
+      Cron.services()
+
+      svc = Console.Repo.preload(refetch(service), [:insight, components: :insight])
+
+      assert svc.insight.text
+      assert svc.insight_id == insight.id
+    end
   end
 
   describe "#stacks/0" do

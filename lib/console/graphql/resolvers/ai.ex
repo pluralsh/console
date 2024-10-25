@@ -15,8 +15,7 @@ defmodule Console.GraphQl.Resolvers.AI do
   def ai_completion(_, _), do: {:error, "need to pass either a raw input or a chat history"}
 
   def ai_suggested_fix(%{insight_id: id}, %{context: %{current_user: user}}) do
-    insight = Repo.get!(AiInsight, id)
-              |> Repo.preload([:service, :stack])
+    insight = Repo.get!(AiInsight, id) |> Repo.preload([:service, :stack])
     with {:ok, insight} <- Policies.allow(insight, user, :write),
       do: Console.AI.Fixer.fix(insight)
   end
