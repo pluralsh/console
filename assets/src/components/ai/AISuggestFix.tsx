@@ -1,7 +1,7 @@
 import { Markdown } from '@pluralsh/design-system'
 import { ReactNode, useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { useAiSuggestedFixQuery } from '../../generated/graphql.ts'
+import { useAiSuggestedFixLazyQuery } from '../../generated/graphql.ts'
 import { GqlError } from '../utils/Alert.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import AIPanel from './AIPanel.tsx'
@@ -13,16 +13,15 @@ interface AISuggestFixProps {
 
 function AISuggestFix({ insightID }: AISuggestFixProps): ReactNode {
   const theme = useTheme()
-  const { loading, data, error, refetch } = useAiSuggestedFixQuery({
+  const [getSuggestion, { loading, data, error }] = useAiSuggestedFixLazyQuery({
     variables: { insightID },
-    fetchPolicy: 'cache-and-network',
   })
 
   const [open, setOpen] = useState(false)
   const showPanel = useCallback(() => {
     setOpen(true)
-    refetch()
-  }, [refetch])
+    getSuggestion()
+  }, [getSuggestion])
 
   if (!insightID) {
     return null
