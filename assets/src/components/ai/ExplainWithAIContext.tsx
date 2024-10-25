@@ -33,7 +33,7 @@ export function ExplainWithAIContextProvider({
   )
 }
 
-export const useExplainWithAIContext = () => {
+const useExplainWithAIContext = () => {
   const ctx = useContext(ExplainWithAIContext)
 
   if (!ctx) {
