@@ -3,14 +3,15 @@ defmodule Console.AI.Fixer.Service do
   use Console.AI.Evidence.Base
   import Console.AI.Fixer.Base
   alias Console.Repo
+  alias Console.AI.Fixer.Parent
   alias Console.Schema.{Service, GitRepository, Cluster}
   alias Console.Deployments.{Services}
 
   def prompt(%Service{} = svc, insight) do
-    svc = Repo.preload(svc, [:cluster, :repository])
+    svc = Repo.preload(svc, [:cluster, :repository, :parent])
     with {:ok, f} <- Services.tarstream(svc),
          {:ok, code} <- code_prompt(f) do
-      ok([
+      Enum.concat([
         {:user, """
           We've found the following insight about a Plural service that is currently in #{svc.status} state:
 
@@ -20,11 +21,17 @@ defmodule Console.AI.Fixer.Service do
           I'll do my best to list all the needed resources below.
         """},
         {:user, svc_details(svc)} | code
-      ])
+      ], Parent.parent_prompt(
+        svc.parent,
+        child: "#{svc.name} service",
+        cr: "ServiceDeployment",
+        cr_additional: " specifying the name #{svc.name} and namespace #{svc.namespace}"
+      ))
+      |> ok()
     end
   end
 
-  defp svc_details(%Service{cluster: %Cluster{name: n, handle: h, distro: d}} = svc) do
+  def svc_details(%Service{cluster: %Cluster{name: n, handle: h, distro: d}} = svc) do
     """
     The service is being deployed to the #{distro(d)} kubernetes cluster named #{n} with a Plural cluster handle #{h}.  In addition, I can list high level details
     about how its manifests are configured and sourced:
@@ -33,7 +40,7 @@ defmodule Console.AI.Fixer.Service do
     """
   end
 
-  defp helm_details(%Service{helm: %Service.Helm{} = h}) do
+  def helm_details(%Service{helm: %Service.Helm{} = h}) do
     """
     The service uses helm-specific configuration as follows:
 
@@ -46,12 +53,12 @@ defmodule Console.AI.Fixer.Service do
     ])}
     """
   end
-  defp helm_details(_), do: nil
+  def helm_details(_), do: nil
 
-  defp git_details(%Service{git: %Service.Git{ref: ref, folder: f}, repository: %GitRepository{url: url}}) do
+  def git_details(%Service{git: %Service.Git{ref: ref, folder: f}, repository: %GitRepository{url: url}}) do
     """
     The service sources manifests from a Git repository hosted at url: #{url}, present at the git reference #{ref} and folder #{f}
     """
   end
-  defp git_details(_), do: nil
+  def git_details(_), do: nil
 end
