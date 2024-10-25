@@ -7,10 +7,9 @@ import (
 	"net/url"
 	"strings"
 
-	"k8s.io/klog/v2"
-
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
+	"k8s.io/klog/v2"
 )
 
 type baseTranslationProxy struct {
@@ -60,7 +59,7 @@ func newBaseTranslationProxy(
 	modifyResponse func(*http.Response) error,
 ) (*baseTranslationProxy, error) {
 	const urlPathSeparator = "/"
-	baseTargetURL, err := url.Parse(fmt.Sprintf("%s", strings.TrimRight(target, urlPathSeparator)))
+	baseTargetURL, err := url.Parse(strings.TrimRight(target, urlPathSeparator))
 	if err != nil {
 		return nil, err
 	}

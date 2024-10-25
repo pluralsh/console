@@ -24,7 +24,7 @@ func init() {
 }
 
 func main() {
-	klog.V(log.LogLevelMinimal).InfoS("Starting AI Proxy", "version", environment.Version, "provider", args.Provider())
+	klog.V(log.LogLevelMinimal).InfoS("Starting AI Proxy", "provider", args.Provider(), "version", environment.Version, "commit", environment.Commit)
 	klog.V(log.LogLevelMinimal).InfoS("Listening and serving HTTP", "address", args.Address())
 	if err := http.ListenAndServe(args.Address(), router); err != nil {
 		klog.ErrorS(err, "Could not run the router")

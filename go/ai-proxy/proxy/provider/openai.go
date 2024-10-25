@@ -4,10 +4,9 @@ import (
 	"net/http"
 	"net/http/httputil"
 
-	"k8s.io/klog/v2"
-
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/api/openai"
+	"k8s.io/klog/v2"
 )
 
 type OpenAIProxy struct {
@@ -29,16 +28,6 @@ func (in *OpenAIProxy) ModifyRequest(r *httputil.ProxyRequest) {
 	}
 }
 
-func (in *OpenAIProxy) modifyRequestBody(r *httputil.ProxyRequest) error {
-	endpoint := r.Out.URL.Path
-	switch endpoint {
-	case openai.EndpointChat:
-		return hijackRequest(r, openai.ToChatCompletionRequest)
-	}
-
-	return nil
-}
-
 func (in *OpenAIProxy) ModifyResponse(r *http.Response) error {
 	err := in.modifyResponseBody(r)
 	if err != nil {
@@ -49,11 +38,21 @@ func (in *OpenAIProxy) ModifyResponse(r *http.Response) error {
 	return nil
 }
 
+func (in *OpenAIProxy) modifyRequestBody(r *httputil.ProxyRequest) error {
+	endpoint := r.Out.URL.Path
+	switch endpoint {
+	case openai.EndpointChat:
+		return replaceRequestBody(r, openai.ToChatCompletionRequest)
+	}
+
+	return nil
+}
+
 func (in *OpenAIProxy) modifyResponseBody(r *http.Response) error {
 	endpoint := r.Request.URL.Path
 	switch endpoint {
 	case openai.EndpointChat:
-		return hijackResponse(r, openai.FromChatCompletionResponse)
+		return replaceResponseBody(r, openai.FromChatCompletionResponse)
 	}
 
 	return nil

@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/samber/lo"
-	"github.com/spf13/pflag"
-	"k8s.io/klog/v2"
-
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/internal/helpers"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
+	"github.com/samber/lo"
+	"github.com/spf13/pflag"
+	"k8s.io/klog/v2"
 )
 
 const (

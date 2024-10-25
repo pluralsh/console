@@ -9,6 +9,7 @@ ENVSUBST ?= $(shell which envsubst)
 HELM ?= $(shell which helm)
 CRDDOCS ?= $(shell which crd-ref-docs)
 GQLGENC ?= $(shell which gqlgenc)
+GOIMPORTS ?= $(shell which goimports)
 
 BINARY_NOT_FOUND_MESSAGE := Run 'make tools' in the 'go' directory to install all required dependencies
 
@@ -64,4 +65,8 @@ endif
 
 ifeq ($(GQLGENC),)
 $(error gqlgenc binary not found. $(BINARY_NOT_FOUND_MESSAGE))
+endif
+
+ifeq ($(GOIMPORTS),)
+$(error goimports binary not found. $(BINARY_NOT_FOUND_MESSAGE))
 endif

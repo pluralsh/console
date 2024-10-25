@@ -8,7 +8,7 @@ import (
 	"net/http/httputil"
 )
 
-func hijackRequest[In any, Out any](r *httputil.ProxyRequest, mapFunc func(In) Out) error {
+func replaceRequestBody[In any, Out any](r *httputil.ProxyRequest, mapFunc func(In) Out) error {
 	b, err := io.ReadAll(r.Out.Body)
 	if err != nil {
 		return err
@@ -32,7 +32,7 @@ func hijackRequest[In any, Out any](r *httputil.ProxyRequest, mapFunc func(In) O
 	return nil
 }
 
-func hijackResponse[In any, Out any](r *http.Response, mapFunc func(In) Out) error {
+func replaceResponseBody[In any, Out any](r *http.Response, mapFunc func(In) Out) error {
 	b, err := io.ReadAll(r.Body)
 	if err != nil {
 		return err
