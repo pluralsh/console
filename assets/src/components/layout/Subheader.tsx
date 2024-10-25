@@ -6,7 +6,7 @@ import {
 } from '@pluralsh/design-system'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import ExplainWithAI from './ExplainWithAI.tsx'
+import ExplainWithAI from '../ai/ExplainWithAI.tsx'
 
 const SubheaderSC = styled.div(({ theme }) => ({
   display: 'flex',
