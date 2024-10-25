@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -181,6 +181,7 @@ export type AiInsight = {
   /** any errors generated when compiling this insight */
   error?: Maybe<Array<Maybe<ServiceError>>>;
   freshness?: Maybe<InsightFreshness>;
+  id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** a deduplication sha for this insight */
   sha?: Maybe<Scalars['String']['output']>;
@@ -916,6 +917,8 @@ export type Cluster = {
   /** internal id of this cluster */
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** an ai insight generated about issues discovered which might impact the health of this cluster */
+  insight?: Maybe<AiInsight>;
   /** whether the deploy operator has been registered for this cluster */
   installed?: Maybe<Scalars['Boolean']['output']>;
   /** the url of the kas server you can access this cluster from */
@@ -1154,6 +1157,14 @@ export type ClusterInfo = {
   version?: Maybe<Scalars['String']['output']>;
 };
 
+export type ClusterInsightComponentAttributes = {
+  group?: InputMaybe<Scalars['String']['input']>;
+  kind: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  version: Scalars['String']['input'];
+};
+
 export type ClusterMetrics = {
   __typename?: 'ClusterMetrics';
   cpu?: Maybe<Array<Maybe<MetricResponse>>>;
@@ -1196,6 +1207,8 @@ export type ClusterNodeMetrics = {
 export type ClusterPing = {
   currentVersion: Scalars['String']['input'];
   distro?: InputMaybe<ClusterDistro>;
+  /** scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval */
+  insightComponents?: InputMaybe<Array<InputMaybe<ClusterInsightComponentAttributes>>>;
   kubeletVersion?: InputMaybe<Scalars['String']['input']>;
 };
 

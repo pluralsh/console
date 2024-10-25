@@ -21,12 +21,12 @@ defmodule Console.Schema.AiInsight do
     timestamps()
   end
 
-  @spec freshness(t()) :: :fast | :slow | :expired
+  @spec freshness(t()) :: :fresh | :stale | :expired
   def freshness(%__MODULE__{} = insight) do
     at = ts(insight)
     cond do
-      Timex.before?(at, expiry(@slow)) -> :expired
-      Timex.before?(at, expiry(@fast)) -> :stale
+      Timex.before?(at, expiry(hours: -1)) -> :expired
+      Timex.before?(at, expiry(@slow)) -> :stale
       true -> :fresh
     end
   end
