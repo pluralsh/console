@@ -33,7 +33,7 @@ export function ExplainWithAIContextProvider({
   )
 }
 
-export const useExplainWithAI = (prompt?: string) => {
+export const useExplainWithAIContext = () => {
   const ctx = useContext(ExplainWithAIContext)
 
   if (!ctx) {
@@ -41,6 +41,13 @@ export const useExplainWithAI = (prompt?: string) => {
       'useExplainWithAIContext() must be used within a ExplainWithAIContext'
     )
   }
+
+  return ctx
+}
+
+export const useExplainWithAI = (prompt?: string) => {
+  const ctx = useExplainWithAIContext()
+
   const { setPrompt } = ctx || {}
 
   useEffect(() => {
@@ -51,13 +58,7 @@ export const useExplainWithAI = (prompt?: string) => {
 }
 
 export const useExplainWithAIPrompt = () => {
-  const ctx = useContext(ExplainWithAIContext)
-
-  if (!ctx) {
-    console.warn(
-      'useExplainWithAIContext() must be used within a ExplainWithAIContext'
-    )
-  }
+  const ctx = useExplainWithAIContext()
 
   return ctx?.prompt
 }
