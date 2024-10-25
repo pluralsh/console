@@ -2,6 +2,11 @@ icon: https://avatars.githubusercontent.com/u/21110084?s=200&v=4
 release_url: https://github.com/coredns/coredns/releases/tag/{vsn}
 helm_repository_url: https://coredns.github.io/helm
 versions:
+- version: 1.11.3
+  kube: ['1.31']
+  requirements: []
+  incompatibilities: []
+  chart_version: 1.32.0
 - version: 1.11.1
   kube: ['1.30']
   requirements: []
