@@ -15,7 +15,8 @@ defmodule Console.Deployments.Policies do
     RunStep,
     RunLog,
     Stack,
-    TerraformState
+    TerraformState,
+    AiInsight
   }
 
   def can?(%User{scopes: [_ | _] = scopes, api: api} = user, res, action) do
@@ -23,6 +24,14 @@ defmodule Console.Deployments.Policies do
     case Console.Users.AccessTokens.scopes_match?(scopes, api, Map.get(res, :id)) do
       true -> can?(%{user | scopes: nil}, res, action)
       false -> {:error, "token scopes not satisfied"}
+    end
+  end
+
+  def can?(user, %AiInsight{} = insight, action) do
+    case Repo.preload(insight, [:stack, :service]) do
+      %{stack: %Stack{} = stack} -> can?(user, stack, action)
+      %{service: %Service{} = svc} -> can?(user, svc, action)
+      _ -> {:error, "forbidden"}
     end
   end
 
@@ -140,6 +149,7 @@ defmodule Console.Deployments.Policies do
 
   def can?(%User{} = user, resource, action),
     do: rbac(resource, user, action)
+
 
   def can?(_, _, _), do: {:error, :forbidden}
 

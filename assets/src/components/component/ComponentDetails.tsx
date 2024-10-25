@@ -153,12 +153,13 @@ export function ComponentDetails({
   )
 
   const filteredDirectory = getDirectory(component?.insight).filter(
-    ({ onlyFor, onlyIfNoError, onlyIfDryRun, prometheus, label }) =>
+    ({ onlyFor, onlyIfNoError, onlyIfDryRun, prometheus, path }) =>
       (!onlyFor || (componentKind && onlyFor.includes(componentKind))) &&
       (!prometheus || !service?.cluster?.id || hasPrometheus) &&
       (!onlyIfNoError || !hasNotFoundError) &&
       (!onlyIfDryRun || (cdView && service?.dryRun)) &&
-      !(label === 'Info' && isUnstructured(componentKind))
+      !(path === 'info' && isUnstructured(componentKind)) &&
+      !(path === 'insights' && !component?.insight)
   )
 
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)

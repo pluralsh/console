@@ -2,6 +2,7 @@ fragment AiInsight on AiInsight {
   text
   summary
   sha
+  freshness
   updatedAt
   insertedAt
   error {
@@ -12,6 +13,7 @@ fragment AiInsight on AiInsight {
 
 fragment AiInsightSummary on AiInsight {
   summary
+  freshness
   updatedAt
 }
 

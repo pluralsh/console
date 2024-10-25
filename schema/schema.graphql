@@ -438,6 +438,12 @@ type RootQueryType {
     "a list of chat prompts to give to the llm"
     chat: [ChatMessage]
   ): String
+
+  "Use the content of an insight and additional context from its associated object to suggest a fix"
+  aiSuggestedFix(
+    "the ai insight you want to suggest a fix for"
+    insightId: ID!
+  ): String
 }
 
 type RootMutationType {
@@ -980,6 +986,7 @@ enum AiProvider {
   OPENAI
   ANTHROPIC
   OLLAMA
+  AZURE
 }
 
 input ProjectAttributes {
@@ -1042,6 +1049,7 @@ input AiSettingsAttributes {
   openai: OpenaiSettingsAttributes
   anthropic: AnthropicSettingsAttributes
   ollama: OllamaAttributes
+  azure: AzureOpenaiAttributes
 }
 
 input OpenaiSettingsAttributes {
@@ -1061,6 +1069,17 @@ input OllamaAttributes {
 
   "An http authorization header to use on calls to the Ollama api"
   authorization: String
+}
+
+input AzureOpenaiAttributes {
+  "the endpoint of your azure openai version, should look like: https:\/\/{endpoint}\/openai\/deployments\/{deployment-id}"
+  endpoint: String!
+
+  "the api version you want to use"
+  apiVersion: String
+
+  "the azure openai access token to use"
+  accessToken: String!
 }
 
 input SmtpSettingsAttributes {
@@ -1187,6 +1206,7 @@ type AiSettings {
   openai: OpenaiSettings
   anthropic: AnthropicSettings
   ollama: OllamaSettings
+  azure: AzureOpenaiSettings
 }
 
 "OpenAI connection information"
@@ -1207,6 +1227,15 @@ type OllamaSettings {
 
   "the url your ollama deployment is hosted on"
   url: String!
+}
+
+"Settings for configuring against Azure OpenAI"
+type AzureOpenaiSettings {
+  "the endpoint of your azure openai version, should look like: https:\/\/{endpoint}\/openai\/deployments\/{deployment-id}"
+  endpoint: String!
+
+  "the api version you want to use"
+  apiVersion: String
 }
 
 type ProjectConnection {
@@ -4325,16 +4354,16 @@ type ClusterMetricsSummary {
   "the cpu available in vcpu"
   cpuAvailable: Float
 
-  "the total cpu in the cluster measured in vcpu"
+  "the total cpu in use in the cluster measured in vcpu"
   cpuTotal: Float
 
   "a percentage cpu utilization of the cluster"
   cpuUsed: Int
 
-  "the total number of megabytes unused in the cluster"
+  "the total number of megabytes available in the cluster"
   memoryAvailable: Float
 
-  "the total number of megabytes available in the cluster"
+  "the total number of megabytes in use in the cluster"
   memoryTotal: Float
 
   "a percentage memory utilization of the cluster"

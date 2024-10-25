@@ -178,7 +178,7 @@ type AISettings struct {
 
 	// Provider defines which of the supported LLM providers should be used.
 	//
-	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA
+	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE
 	// +kubebuilder:default=OPENAI
 	// +kubebuilder:validation:Optional
 	Provider *console.AiProvider `json:"provider,omitempty"`
@@ -197,6 +197,11 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Ollama *OllamaSettings `json:"ollama,omitempty"`
+
+	// Azure holds configuration for using AzureOpenAI to generate LLM insights
+	//
+	// +kubebuilder:validation:Optional
+	Azure *AzureOpenAISettings `json:"azure,omitempty"`
 }
 
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
@@ -207,6 +212,10 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 
 	switch *in.Provider {
 	case console.AiProviderOpenai:
+		if in.OpenAI == nil {
+			return nil, fmt.Errorf("must provide openai configuration to set the provider to OPENAI")
+		}
+
 		token, err := in.OpenAI.Token(ctx, c, namespace)
 		if err != nil {
 			return nil, err
@@ -217,6 +226,10 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Model:       &in.OpenAI.Model,
 		}
 	case console.AiProviderAnthropic:
+		if in.Anthropic == nil {
+			return nil, fmt.Errorf("must provide anthropic configuration to set the provider to ANTHROPIC")
+		}
+
 		token, err := in.Anthropic.Token(ctx, c, namespace)
 		if err != nil {
 			return nil, err
@@ -226,7 +239,26 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AccessToken: &token,
 			Model:       &in.OpenAI.Model,
 		}
+	case console.AiProviderAzure:
+		if in.Azure == nil {
+			return nil, fmt.Errorf("must provide azure openai configuration to set the provider to AZURE")
+		}
+
+		token, err := in.Azure.Token(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.Azure = &console.AzureOpenaiAttributes{
+			Endpoint:    in.Azure.Endpoint,
+			APIVersion:  in.Azure.ApiVersion,
+			AccessToken: token,
+		}
 	case console.AiProviderOllama:
+		if in.Ollama == nil {
+			return nil, fmt.Errorf("must provide ollama configuration to set the provider to OLLAMA")
+		}
+
 		auth, err := in.Ollama.Authorization(ctx, c, namespace)
 		if err != nil {
 			return nil, err
@@ -274,7 +306,33 @@ type OllamaSettings struct {
 	AuthorizationSecretRef *corev1.SecretKeySelector `json:"tokenSecretRef"`
 }
 
+type AzureOpenAISettings struct {
+	// Your Azure OpenAI endpoint, should be formatted like: https://{endpoint}/openai/deployments/{deployment-id}"
+	//
+	// +kubebuilder:validation:Required
+	Endpoint string `json:"endpoint"`
+
+	// The azure openai Data plane - inference api version to use, defaults to 2024-10-01-preview or the latest available
+	//
+	// +kubebuilder:validation:Optional
+	ApiVersion *string `json:"apiVersion,omitempty"`
+
+	// TokenSecretRef is a reference to the local secret holding the token to access
+	// the configured AI provider.
+	//
+	// +kubebuilder:validation:Required
+	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
+}
+
 func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
+	if in == nil {
+		return "", fmt.Errorf("configured ai provider settings cannot be nil")
+	}
+
+	return utils.GetSecretKey(ctx, c, &in.TokenSecretRef, namespace)
+}
+
+func (in *AzureOpenAISettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
 	if in == nil {
 		return "", fmt.Errorf("configured ai provider settings cannot be nil")
 	}
