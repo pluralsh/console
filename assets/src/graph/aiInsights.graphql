@@ -18,3 +18,7 @@ fragment AiInsightSummary on AiInsight {
 query AI($prompt: String!) {
   ai(prompt: $prompt)
 }
+
+#query AISuggestedFix($insightID: String!) {
+#
+#}
