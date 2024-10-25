@@ -75,7 +75,11 @@ export default function AIPanel({
             />
           )}
         </div>
-        <div css={{ flexGrow: 1, overflow: 'auto' }}>{children}</div>
+        <div
+          css={{ flexGrow: 1, overflow: 'auto', padding: theme.spacing.medium }}
+        >
+          {children}
+        </div>
         <div
           css={{
             alignItems: 'center',
