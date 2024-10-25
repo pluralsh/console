@@ -68,5 +68,5 @@ export const useExplainWithAI = (prompt?: string) => {
 export const useExplainWithAIPrompt = () => {
   const ctx = useExplainWithAIContext()
 
-  return preface + '\n' + ctx?.prompt
+  return ctx?.prompt ? preface + '\n' + ctx.prompt : undefined
 }
