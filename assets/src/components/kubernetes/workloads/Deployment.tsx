@@ -54,6 +54,7 @@ import { Kind, Resource, fromResource } from '../common/types'
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
 import { WorkloadStatusChip } from './utils'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'replicasets', label: 'Replica Sets' },
@@ -100,6 +101,8 @@ export default function Deployment(): ReactElement {
   )
 
   const deployment = data?.handleGetDeploymentDetail as DeploymentT
+
+  useExplainWithAI('deployment') // TODO
 
   if (loading) {
     return <LoadingIndicator />

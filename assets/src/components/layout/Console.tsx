@@ -29,6 +29,7 @@ import Sidebar from './Sidebar'
 import Subheader from './Subheader'
 import WithApplicationUpdate from './WithApplicationUpdate'
 import { CloudConsoleWelcomeModal } from './CloudConsoleWelcomeModal'
+import { ExplainWithAIContextProvider } from '../ai/ExplainWithAIContext.tsx'
 
 export default function Console() {
   return (
@@ -44,7 +45,9 @@ export default function Console() {
                       <TerminalThemeProvider>
                         <ShareSecretProvider>
                           <DeploymentSettingsProvider>
-                            <ConsoleContent />
+                            <ExplainWithAIContextProvider>
+                              <ConsoleContent />
+                            </ExplainWithAIContextProvider>
                           </DeploymentSettingsProvider>
                         </ShareSecretProvider>
                       </TerminalThemeProvider>
