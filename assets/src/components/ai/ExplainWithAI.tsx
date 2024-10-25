@@ -9,11 +9,7 @@ export default function ExplainWithAI() {
     <div css={{ marginRight: 66, position: 'relative' }}>
       <AIButton
         active={open}
-        onClick={() => {
-          console.log('x')
-          console.log(open)
-          setOpen(true)
-        }}
+        onClick={() => setOpen(true)}
         width={163}
       >
         Explain with AI
@@ -21,6 +17,7 @@ export default function ExplainWithAI() {
       <AIPanel
         open={open}
         onClose={() => setOpen(false)}
+        showCloseIcon
         header={'AI explain'}
         subheader={'Learn more about the current page with AI'}
       >

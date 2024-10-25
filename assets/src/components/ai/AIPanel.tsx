@@ -12,6 +12,7 @@ import { AIPanelOverlay } from './AIPanelOverlay.tsx'
 export default function AIPanel({
   open,
   onClose,
+  showCloseIcon = false,
   header,
   subheader,
   children,
@@ -19,6 +20,7 @@ export default function AIPanel({
 }: {
   open: boolean
   onClose: () => void
+  showCloseIcon?: boolean
   header: string
   subheader: string
   children: ReactNode
@@ -64,12 +66,14 @@ export default function AIPanel({
               {subheader}
             </div>
           </div>
-          <IconFrame
-            clickable
-            icon={<CloseIcon />}
-            onClick={onClose}
-            tooltip="Close"
-          />
+          {showCloseIcon && (
+            <IconFrame
+              clickable
+              icon={<CloseIcon />}
+              onClick={onClose}
+              tooltip="Close"
+            />
+          )}
         </div>
         <div css={{ flexGrow: 1, overflow: 'auto' }}>{children}</div>
         <div
