@@ -24,6 +24,8 @@ export default function ExplainWithAIButton({
             backgroundClip: 'padding-box, border-box',
             backgroundOrigin: 'border-box',
             border: '1px solid transparent',
+            transitionDuration: '1s',
+            transitionProperty: 'border',
             _hover: {
               backgroundImage: `linear-gradient(${theme.colors['fill-zero-selected']}, ${theme.colors['fill-zero-selected']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`,
               border: '1px solid transparent',
