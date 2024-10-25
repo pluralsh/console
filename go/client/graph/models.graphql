@@ -13,6 +13,10 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
     repository { ... GitRepositoryFragment }
 }
 
+fragment ServiceDeploymentIdFragment on ServiceDeployment {
+    id
+}
+
 fragment ServiceContextFragment on ServiceContext {
     id
     name
@@ -99,14 +103,6 @@ fragment HelmSpecFragment on HelmSpec {
     valuesFiles
 }
 
-fragment TinyClusterFragment on Cluster {
-    id
-    name
-    handle
-    self
-    project {...TinyProjectFragment }
-}
-
 fragment BaseClusterFragment on Cluster {
     id
     name
@@ -160,6 +156,10 @@ fragment ClusterEdgeFragment on ClusterEdge {
 
 fragment ServiceDeploymentEdgeFragment on ServiceDeploymentEdge {
     node { ...ServiceDeploymentBaseFragment }
+}
+
+fragment ServiceDeploymentIdEdgeFragment on ServiceDeploymentEdge {
+    node { ...ServiceDeploymentIdFragment }
 }
 
 fragment GlobalServiceFragment on GlobalService {

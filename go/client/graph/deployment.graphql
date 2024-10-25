@@ -112,6 +112,16 @@ query GetServiceDeployment($id: ID!) {
     }
 }
 
+query GetServiceDeploymentComponents($id: ID!) {
+    serviceDeployment(id: $id) {
+        id
+        components {
+            kind
+            state
+        }
+    }
+}
+
 query GetServiceDeploymentForAgent($id: ID!) {
     serviceDeployment(id: $id) {
         id
@@ -158,15 +168,6 @@ query GetServiceDeploymentForAgent($id: ID!) {
                 annotations
             }
         }
-        components {
-            id
-            namespace
-            name
-            group
-            version
-            kind
-            state
-        }
         revision {
             id
         }
@@ -205,6 +206,15 @@ query PagedClusterServices($after: String, $first: Int, $before: String, $last: 
         pageInfo { ...PageInfoFragment}
         edges {
             ...ServiceDeploymentEdgeFragment
+        }
+    }
+}
+
+query PagedClusterServiceIds($after: String, $first: Int, $before: String, $last: Int){
+    pagedClusterServices(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges {
+            ...ServiceDeploymentIdEdgeFragment
         }
     }
 }
