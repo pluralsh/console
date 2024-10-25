@@ -27,6 +27,7 @@ export default function ExplainWithAIPanel({
       open={open}
       onClose={onClose}
       showCloseIcon
+      showClosePanel={!!data?.aiCompletion}
       header={'AI explain'}
       subheader={'Learn more about the current page with AI'}
     >

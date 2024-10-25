@@ -38,6 +38,7 @@ function AISuggestFix({ insightID }: AISuggestFixProps): ReactNode {
         open={open}
         onClose={() => setOpen(false)}
         showCloseIcon
+        showClosePanel
         header="Suggest a fix"
         subheader="Get a suggested fix based on the insight. AI is prone to mistakes, always test changes before application."
       >

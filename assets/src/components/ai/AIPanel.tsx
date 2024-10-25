@@ -13,6 +13,7 @@ export default function AIPanel({
   open,
   onClose,
   showCloseIcon = false,
+  showClosePanel = false,
   header,
   subheader,
   children,
@@ -21,6 +22,7 @@ export default function AIPanel({
   open: boolean
   onClose: () => void
   showCloseIcon?: boolean
+  showClosePanel?: boolean
   header: string
   subheader: string
   children: ReactNode
@@ -80,23 +82,25 @@ export default function AIPanel({
         >
           {children}
         </div>
-        <div
-          css={{
-            alignItems: 'center',
-            backgroundColor: theme.colors['fill-two'],
-            borderTop: theme.borders.input,
-            display: 'flex',
-            gap: theme.spacing.small,
-            padding: theme.spacing.large,
-          }}
-        >
-          <Button
-            flexGrow={1}
-            onClick={onClose}
+        {showClosePanel && (
+          <div
+            css={{
+              alignItems: 'center',
+              backgroundColor: theme.colors['fill-two'],
+              borderTop: theme.borders.input,
+              display: 'flex',
+              gap: theme.spacing.small,
+              padding: theme.spacing.large,
+            }}
           >
-            Got it, thanks!
-          </Button>
-        </div>
+            <Button
+              flexGrow={1}
+              onClick={onClose}
+            >
+              Got it, thanks!
+            </Button>
+          </div>
+        )}
       </Card>
     </AIPanelOverlay>
   )
