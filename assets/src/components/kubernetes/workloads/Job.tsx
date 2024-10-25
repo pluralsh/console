@@ -42,6 +42,7 @@ import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Jobs'
 import { usePodsColumns } from './Pods'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'conditions', label: 'Conditions' },
@@ -83,6 +84,8 @@ export default function Job(): ReactElement {
   )
 
   const job = data?.handleGetJobDetail as JobT
+
+  useExplainWithAI('Describe Kubernetes Job resource: ' + JSON.stringify(job))
 
   if (loading) {
     return <LoadingIndicator />

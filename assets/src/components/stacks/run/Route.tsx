@@ -11,15 +11,15 @@ import {
   StackRunDetailsFragment,
   useStackRunQuery,
 } from '../../../generated/graphql'
-import { getBreadcrumbs } from '../Stacks'
 import {
-  STACK_RUNS_REL_PATH,
   getStackRunsAbsPath,
   getStacksAbsPath,
+  STACK_RUNS_REL_PATH,
 } from '../../../routes/stacksRoutesConsts'
-import LoadingIndicator from '../../utils/LoadingIndicator'
-import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { ResponsiveLayoutContentContainer } from '../../utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
+import LoadingIndicator from '../../utils/LoadingIndicator'
+import { getBreadcrumbs } from '../Stacks'
 
 import StackRunHeader from './Header'
 import StackRunSidecar from './Sidecar'
@@ -55,6 +55,7 @@ export default function StackRunDetail(): ReactNode {
     variables: { id: runId! },
     skip: !runId,
     pollInterval: 5_000,
+    fetchPolicy: 'cache-and-network',
   })
 
   const stackRun = data?.stackRun

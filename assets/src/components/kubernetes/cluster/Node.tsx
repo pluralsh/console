@@ -50,6 +50,7 @@ import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Nodes'
 import { useEventsColumns } from './Events'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -73,6 +74,8 @@ export default function Node(): ReactElement {
   })
 
   const node = data?.handleGetNodeDetail as NodeT
+
+  useExplainWithAI('Describe Kubernetes Node resource: ' + JSON.stringify(node))
 
   useSetBreadcrumbs(
     useMemo(

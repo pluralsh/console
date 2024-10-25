@@ -70,6 +70,7 @@ import { ShellWithContext } from '../../cluster/containers/ContainerShell'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -113,6 +114,8 @@ export function Pod(): ReactElement {
   )
 
   const pod = data?.handleGetPodDetail as PodT
+
+  useExplainWithAI('Describe Kubernetes Pod resource: ' + JSON.stringify(pod))
 
   if (loading) {
     return <LoadingIndicator />
