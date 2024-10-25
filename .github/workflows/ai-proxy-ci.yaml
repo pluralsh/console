@@ -41,7 +41,7 @@ jobs:
     - run: PATH=$PATH:$GOPATH/bin make build
 
   check:
-    name: Unit tests
+    name: Check
     runs-on: ubuntu-20.04
     defaults:
       run:

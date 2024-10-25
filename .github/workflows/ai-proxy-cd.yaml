@@ -1,11 +1,11 @@
-name: CD / OCI Authentication Sidecar
+name: CD / AI Proxy
 
 on:
   pull_request:
     branches:
       - "master"
     paths:
-      - "go/oci-auth/**"
+      - "go/ai-proxy/**"
   push:
     tags:
     - 'v*.*.*'
@@ -25,40 +25,41 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: go/oci-auth
+        working-directory: go/ai-proxy
     timeout-minutes: 5
     steps:
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-    - uses: actions/setup-go@93397bea11091df50f3d7e59dc26a7711a8bcfbe # v4.1.0
+    - uses: actions/checkout@v4.2.2
+    - uses: actions/setup-go@v5.1.0
       with:
-        go-version-file: go/oci-auth/go.mod
+        go-version-file: go/ai-proxy/go.mod
         cache: true
     - run: go mod download
     - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
     - run: PATH=$PATH:$GOPATH/bin make test
+  
   publish-docker:
-    name: Build and push oci-auth container
+    name: Build and push ai-proxy container
     runs-on: ubuntu-20.04
     defaults:
       run:
         shell: bash
-        working-directory: go/oci-auth
+        working-directory: go/ai-proxy
     needs: [ test ]
     permissions:
       contents: 'read'
       id-token: 'write'
       packages: 'write'
     steps:
-    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+    - uses: actions/checkout@v4.2.2
       with:
         fetch-depth: 0
     - id: meta
       uses: docker/metadata-action@v5
       with:
         images: |
-          ghcr.io/pluralsh/oci-auth
-          gcr.io/pluralsh/oci-auth
-          docker.io/pluralsh/oci-auth
+          ghcr.io/pluralsh/ai-proxy
+          gcr.io/pluralsh/ai-proxy
+          docker.io/pluralsh/ai-proxy
     - uses: docker/login-action@v3
       with:
         registry: ghcr.io
@@ -81,7 +82,7 @@ jobs:
     - uses: docker/build-push-action@v5.1.0
       with:
         context: "./go"
-        file: "./go/oci-auth/Dockerfile"
+        file: "./go/ai-proxy/Dockerfile"
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
