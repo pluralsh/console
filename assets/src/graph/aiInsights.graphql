@@ -21,6 +21,6 @@ query AI($prompt: String!) {
   ai(prompt: $prompt)
 }
 
-#query AISuggestedFix($insightID: String!) {
-#
-#}
+query AISuggestedFix($insightID: ID!) {
+  aiSuggestedFix(insightId: $insightID)
+}

@@ -9054,6 +9054,13 @@ export type AiQueryVariables = Exact<{
 
 export type AiQuery = { __typename?: 'RootQueryType', ai?: string | null };
 
+export type AiSuggestedFixQueryVariables = Exact<{
+  insightID: Scalars['ID']['input'];
+}>;
+
+
+export type AiSuggestedFixQuery = { __typename?: 'RootQueryType', aiSuggestedFix?: string | null };
+
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
 export type FileContentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
@@ -14030,6 +14037,44 @@ export type AiQueryHookResult = ReturnType<typeof useAiQuery>;
 export type AiLazyQueryHookResult = ReturnType<typeof useAiLazyQuery>;
 export type AiSuspenseQueryHookResult = ReturnType<typeof useAiSuspenseQuery>;
 export type AiQueryResult = Apollo.QueryResult<AiQuery, AiQueryVariables>;
+export const AiSuggestedFixDocument = gql`
+    query AISuggestedFix($insightID: ID!) {
+  aiSuggestedFix(insightId: $insightID)
+}
+    `;
+
+/**
+ * __useAiSuggestedFixQuery__
+ *
+ * To run a query within a React component, call `useAiSuggestedFixQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAiSuggestedFixQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAiSuggestedFixQuery({
+ *   variables: {
+ *      insightID: // value for 'insightID'
+ *   },
+ * });
+ */
+export function useAiSuggestedFixQuery(baseOptions: Apollo.QueryHookOptions<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>(AiSuggestedFixDocument, options);
+      }
+export function useAiSuggestedFixLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>(AiSuggestedFixDocument, options);
+        }
+export function useAiSuggestedFixSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>(AiSuggestedFixDocument, options);
+        }
+export type AiSuggestedFixQueryHookResult = ReturnType<typeof useAiSuggestedFixQuery>;
+export type AiSuggestedFixLazyQueryHookResult = ReturnType<typeof useAiSuggestedFixLazyQuery>;
+export type AiSuggestedFixSuspenseQueryHookResult = ReturnType<typeof useAiSuggestedFixSuspenseQuery>;
+export type AiSuggestedFixQueryResult = Apollo.QueryResult<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -23140,6 +23185,7 @@ export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVa
 export const namedOperations = {
   Query: {
     AI: 'AI',
+    AISuggestedFix: 'AISuggestedFix',
     App: 'App',
     AppInfo: 'AppInfo',
     Repository: 'Repository',

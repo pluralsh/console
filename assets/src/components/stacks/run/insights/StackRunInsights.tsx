@@ -36,7 +36,7 @@ export function StackRunInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <AISuggestFix insightID={''} />
+        <AISuggestFix insightID={stackRun?.insight?.sha ?? ''} />
       </Flex>
       <InsightDisplay text={stackRun.insight?.text} />
     </Flex>

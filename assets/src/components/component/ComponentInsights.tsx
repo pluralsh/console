@@ -34,7 +34,7 @@ export function ComponentInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <AISuggestFix insightID={''} />
+        <AISuggestFix insightID={component?.insight?.sha ?? ''} />
       </Flex>
       <InsightDisplay text={component.insight?.text} />
     </Flex>
