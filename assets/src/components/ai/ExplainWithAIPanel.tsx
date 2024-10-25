@@ -2,6 +2,7 @@ import { useAiCompletionQuery } from '../../generated/graphql.ts'
 import AIPanel from './AIPanel.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { Markdown } from '@pluralsh/design-system'
+import { GqlError } from '../utils/Alert.tsx'
 
 const system = `You're a seasoned DevOps engineer with experience in Kubernetes, GitOps and Infrastructure As Code,
 and need to give a concise but clear explanation of your Kubernetes infrastructure. 
@@ -33,7 +34,7 @@ export default function ExplainWithAIPanel({
     >
       {data?.aiCompletion && <Markdown text={data.aiCompletion} />}
       {loading && <LoadingIndicator></LoadingIndicator>}
-      {error && <div>{error.message}</div>}
+      {error && <GqlError error={error} />}
     </AIPanel>
   )
 }
