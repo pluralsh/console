@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import AIButton from './AIButton.tsx'
 import { AIPanelOverlay } from './AIPanelOverlay.tsx'
+import AIPanel from './AIPanel.tsx'
 
 export default function ExplainWithAI() {
   const [open, setOpen] = useState(false)
@@ -22,9 +23,13 @@ export default function ExplainWithAI() {
         open={open}
         close={() => setOpen(false)}
       >
-        <div css={{ backgroundColor: 'blue', flexGrow: 1 }}>
-          AI explain Learn more about the current page with AI
-        </div>
+        <AIPanel
+          header={'AI explain'}
+          subheader={'Learn more about the current page with AI'}
+          onClose={() => setOpen(false)}
+        >
+          <div>...</div>
+        </AIPanel>
       </AIPanelOverlay>
     </div>
   )
