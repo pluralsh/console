@@ -54,6 +54,7 @@ import { Kind, Resource, fromResource } from '../common/types'
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
 import { WorkloadStatusChip } from './utils'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'replicasets', label: 'Replica Sets' },
@@ -100,6 +101,15 @@ export default function Deployment(): ReactElement {
   )
 
   const deployment = data?.handleGetDeploymentDetail as DeploymentT
+
+  useExplainWithAI(
+    "You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to\n" +
+      '  give a concise but clear explanation of issues in your companies kubernetes infrastructure.  The user is not necessarily\n' +
+      "  an expert in the domain, so please provide as much documentation and evidence as is necessary to explain what issue they're\n" +
+      "  facing.  Please provide a clear summary and any details to debug what's going on with the case provided.  You should guide users\n" +
+      '  to implement GitOps best practices, so avoid telling them to manually modify resources via kubectl or helm commands directly, although\n' +
+      '  kubectl commands can be used for gathering further info about the problem.'
+  ) // TODO
 
   if (loading) {
     return <LoadingIndicator />

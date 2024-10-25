@@ -1,36 +1,66 @@
 import { useState } from 'react'
-import AIButton from './AIButton.tsx'
-import { AIPanelOverlay } from './AIPanelOverlay.tsx'
+import AIButton from './ExplainWithAIButton.tsx'
 import AIPanel from './AIPanel.tsx'
+import { useExplainWithAIPrompt } from './ExplainWithAIContext.tsx'
+import { useAiQuery } from '../../generated/graphql.ts'
+import LoadingIndicator from '../utils/LoadingIndicator.tsx'
+import { useTheme } from 'styled-components'
 
 export default function ExplainWithAI() {
+  const theme = useTheme()
   const [open, setOpen] = useState(false)
+  const prompt = useExplainWithAIPrompt()
+
+  if (!prompt) return null
 
   return (
-    <div css={{ marginRight: 66, position: 'relative' }}>
+    <div
+      css={{
+        marginRight: 66,
+        position: 'relative',
+        zIndex: theme.zIndexes.modal,
+      }}
+    >
       <AIButton
         active={open}
-        onClick={() => {
-          console.log('x')
-          console.log(open)
-          setOpen(true)
-        }}
+        onClick={() => setOpen(true)}
         width={163}
       >
         Explain with AI
       </AIButton>
-      <AIPanelOverlay
+      <ExplainWithAIPanel
+        prompt={prompt}
         open={open}
-        close={() => setOpen(false)}
-      >
-        <AIPanel
-          header={'AI explain'}
-          subheader={'Learn more about the current page with AI'}
-          onClose={() => setOpen(false)}
-        >
-          <div>...</div>
-        </AIPanel>
-      </AIPanelOverlay>
+        onClose={() => setOpen(false)}
+      />
     </div>
+  )
+}
+
+function ExplainWithAIPanel({
+  prompt,
+  open,
+  onClose,
+}: {
+  prompt: string
+  open: boolean
+  onClose: () => void
+}) {
+  const { data, loading, error } = useAiQuery({ variables: { prompt } })
+
+  console.error(error)
+
+  return (
+    <AIPanel
+      open={open}
+      onClose={onClose}
+      showCloseIcon
+      header={'AI explain'}
+      subheader={'Learn more about the current page with AI'}
+    >
+      <div>{data?.ai}</div>
+      {loading && <LoadingIndicator></LoadingIndicator>}
+      {error && <div>{error.message}</div>}
+    </AIPanel>
   )
 }
