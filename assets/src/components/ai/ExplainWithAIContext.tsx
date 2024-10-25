@@ -9,14 +9,6 @@ import {
   useState,
 } from 'react'
 
-const preface = `You're a seasoned DevOps engineer with experience in Kubernetes, GitOps and Infrastructure As Code,
-and need to give a concise but clear summary of your companies Kubernetes infrastructure. 
-The user is not necessarily an expert in the domain, so please provide as much documentation
-and evidence as is necessary to explain what issue they're facing if there is any.
-You should guide users to implement GitOps best practices,
-so avoid telling them to manually modify resources via kubectl or helm commands directly,
-although kubectl commands can be used for gathering further info to get better overview.`
-
 type ExplainWithAIContextT = {
   prompt?: string
   setPrompt: Dispatch<SetStateAction<string | undefined>>
@@ -68,5 +60,5 @@ export const useExplainWithAI = (prompt?: string) => {
 export const useExplainWithAIPrompt = () => {
   const ctx = useExplainWithAIContext()
 
-  return ctx?.prompt ? preface + '\n' + ctx.prompt : undefined
+  return ctx?.prompt
 }

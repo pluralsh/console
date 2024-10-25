@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9054,6 +9054,15 @@ export type AiQueryVariables = Exact<{
 
 export type AiQuery = { __typename?: 'RootQueryType', ai?: string | null };
 
+export type AiCompletionQueryVariables = Exact<{
+  system: Scalars['String']['input'];
+  input?: InputMaybe<Scalars['String']['input']>;
+  chat?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
+}>;
+
+
+export type AiCompletionQuery = { __typename?: 'RootQueryType', aiCompletion?: string | null };
+
 export type AiSuggestedFixQueryVariables = Exact<{
   insightID: Scalars['ID']['input'];
 }>;
@@ -14037,6 +14046,46 @@ export type AiQueryHookResult = ReturnType<typeof useAiQuery>;
 export type AiLazyQueryHookResult = ReturnType<typeof useAiLazyQuery>;
 export type AiSuspenseQueryHookResult = ReturnType<typeof useAiSuspenseQuery>;
 export type AiQueryResult = Apollo.QueryResult<AiQuery, AiQueryVariables>;
+export const AiCompletionDocument = gql`
+    query AICompletion($system: String!, $input: String, $chat: [ChatMessage]) {
+  aiCompletion(system: $system, input: $input, chat: $chat)
+}
+    `;
+
+/**
+ * __useAiCompletionQuery__
+ *
+ * To run a query within a React component, call `useAiCompletionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAiCompletionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAiCompletionQuery({
+ *   variables: {
+ *      system: // value for 'system'
+ *      input: // value for 'input'
+ *      chat: // value for 'chat'
+ *   },
+ * });
+ */
+export function useAiCompletionQuery(baseOptions: Apollo.QueryHookOptions<AiCompletionQuery, AiCompletionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AiCompletionQuery, AiCompletionQueryVariables>(AiCompletionDocument, options);
+      }
+export function useAiCompletionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiCompletionQuery, AiCompletionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AiCompletionQuery, AiCompletionQueryVariables>(AiCompletionDocument, options);
+        }
+export function useAiCompletionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiCompletionQuery, AiCompletionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AiCompletionQuery, AiCompletionQueryVariables>(AiCompletionDocument, options);
+        }
+export type AiCompletionQueryHookResult = ReturnType<typeof useAiCompletionQuery>;
+export type AiCompletionLazyQueryHookResult = ReturnType<typeof useAiCompletionLazyQuery>;
+export type AiCompletionSuspenseQueryHookResult = ReturnType<typeof useAiCompletionSuspenseQuery>;
+export type AiCompletionQueryResult = Apollo.QueryResult<AiCompletionQuery, AiCompletionQueryVariables>;
 export const AiSuggestedFixDocument = gql`
     query AISuggestedFix($insightID: ID!) {
   aiSuggestedFix(insightId: $insightID)
@@ -23185,6 +23234,7 @@ export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVa
 export const namedOperations = {
   Query: {
     AI: 'AI',
+    AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
     App: 'App',
     AppInfo: 'AppInfo',

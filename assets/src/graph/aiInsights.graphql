@@ -21,6 +21,10 @@ query AI($prompt: String!) {
   ai(prompt: $prompt)
 }
 
+query AICompletion($system: String!, $input: String, $chat: [ChatMessage]) {
+  aiCompletion(system: $system, input: $input, chat: $chat)
+}
+
 query AISuggestedFix($insightID: ID!) {
   aiSuggestedFix(insightId: $insightID)
 }
