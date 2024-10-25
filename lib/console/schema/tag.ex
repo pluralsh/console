@@ -1,6 +1,6 @@
 defmodule Console.Schema.Tag do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Cluster, Service, Stack, Catalog}
+  alias Console.Schema.{Cluster, Service, Stack, Catalog, Alert}
 
   schema "tags" do
     field :name,  :string
@@ -10,6 +10,7 @@ defmodule Console.Schema.Tag do
     belongs_to :service, Service
     belongs_to :stack,   Stack
     belongs_to :catalog, Catalog
+    belongs_to :alert,   Alert
 
     timestamps()
   end

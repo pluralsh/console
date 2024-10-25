@@ -1,5 +1,3 @@
-import { useState } from 'react'
-import { createColumnHelper } from '@tanstack/react-table'
 import {
   DryRunIcon,
   GearTrainIcon,
@@ -12,36 +10,40 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import { useState } from 'react'
 import { useTheme } from 'styled-components'
 
 import { ServiceDeploymentsRowFragment } from 'generated/graphql'
-import { Edge } from 'utils/graphql'
 import { toDateOrUndef } from 'utils/date'
+import { Edge } from 'utils/graphql'
 import { shortenSha1 } from 'utils/sha'
 
-import { ColWithIcon } from 'components/utils/table/ColWithIcon'
-import { DateTimeCol } from 'components/utils/table/DateTimeCol'
+import { MoreMenu } from 'components/utils/MoreMenu'
 import {
   getClusterIconUrl,
   getProviderIconUrl,
 } from 'components/utils/Provider'
-import { MoreMenu } from 'components/utils/MoreMenu'
+import { ColWithIcon } from 'components/utils/table/ColWithIcon'
+import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 
 import { ProtectBadge } from '../clusters/ProtectBadge'
 
-import { ServicePermissions } from './ServicePermissions'
-import { ServiceStatusChip } from './ServiceStatusChip'
-import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
-import DecoratedName from './DecoratedName'
-import { DeleteService } from './DeleteService'
-import { ServicesTableErrors } from './ServicesTableErrors'
-import { ServiceDeprecations } from './ServiceDeprecations'
+import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
+import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { CreateGlobalService } from './CreateGlobalService'
+import DecoratedName from './DecoratedName'
 import { DeleteGlobalService } from './DeleteGlobalService'
-import { ServiceSettings } from './ServiceSettings'
-import { ServiceUpdateHelmValues } from './ServiceUpdateHelmValues'
+import { DeleteService } from './DeleteService'
 import { DetachService } from './DetachService'
+import { ServiceDeprecations } from './ServiceDeprecations'
+import { ServicePermissions } from './ServicePermissions'
+import { ServiceSettings } from './ServiceSettings'
+import { ServiceStatusChip } from './ServiceStatusChip'
+import { ServiceUpdateHelmValues } from './ServiceUpdateHelmValues'
 import { ServicesResyncDeployment } from './ServicesResyncDeployment'
+import { ServicesRollbackDeployment } from './ServicesRollbackDeployment'
+import { ServicesTableErrors } from './ServicesTableErrors'
 
 const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
@@ -283,6 +285,14 @@ export const ColActions = columnHelper.accessor(({ node }) => node?.id, {
               <GlobeIcon color={theme.colors['icon-light']} />
             </Tooltip>
           )}
+          <AiInsightSummaryIcon
+            navPath={`${getServiceDetailsPath({
+              clusterId: node?.cluster?.id,
+              serviceId: node?.id,
+            })}/insights`}
+            insight={node?.insight}
+            iconFrameType="floating"
+          />
           <ServicesRollbackDeployment
             refetch={refetch}
             serviceDeployment={serviceDeployment}

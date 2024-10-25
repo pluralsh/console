@@ -2,10 +2,22 @@ import moment from 'moment'
 
 const DATE_PATTERN = 'h:mm a'
 
-export function dateFormat(date) {
-  if (date.isSame(moment(), 'day')) return date.format(DATE_PATTERN)
+export function dateFormat(date: string | Date) {
+  if (!date) return null
 
-  return date.format('MMM Do YYYY')
+  if (moment(date).isSame(moment(), 'day'))
+    return moment(date).format(DATE_PATTERN)
+
+  return moment(date).format('MMM Do YYYY')
+}
+
+export function dateTimeFormat(date: string | Date) {
+  if (!date) return null
+
+  if (moment(date).isSame(moment(), 'day'))
+    return moment(date).format(DATE_PATTERN)
+
+  return moment(date).format('MMM Do YYYY, h:mm a')
 }
 
 export function toDateOrUndef(d: unknown) {

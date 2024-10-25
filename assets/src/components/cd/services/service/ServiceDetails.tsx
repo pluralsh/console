@@ -1,3 +1,6 @@
+import { Chip } from '@pluralsh/design-system'
+import capitalize from 'lodash/capitalize'
+import isEmpty from 'lodash/isEmpty'
 import { memo, useContext, useMemo } from 'react'
 import {
   Outlet,
@@ -6,9 +9,6 @@ import {
   useParams,
 } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import { Chip } from '@pluralsh/design-system'
-import capitalize from 'lodash/capitalize'
-import isEmpty from 'lodash/isEmpty'
 
 import {
   ServiceDeploymentDetailsFragment,
@@ -17,18 +17,18 @@ import {
 } from 'generated/graphql'
 import { mapExistingNodes } from 'utils/graphql'
 
-import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
-import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
-import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
-import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
-import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
-import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
+import { getDocsData } from 'components/apps/app/App'
 import {
   DocPageContextProvider,
   useDocPageContext,
 } from 'components/contexts/DocPageContext'
-import { getDocsData } from 'components/apps/app/App'
+import { GqlError } from 'components/utils/Alert'
+import { ResponsiveLayoutContentContainer } from 'components/utils/layout/ResponsiveLayoutContentContainer'
+import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
+import { ResponsiveLayoutSidecarContainer } from 'components/utils/layout/ResponsiveLayoutSidecarContainer'
+import { ResponsiveLayoutSidenavContainer } from 'components/utils/layout/ResponsiveLayoutSidenavContainer'
+import { ResponsiveLayoutSpacer } from 'components/utils/layout/ResponsiveLayoutSpacer'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   SERVICE_COMPONENTS_PATH,
   SERVICE_PARAM_CLUSTER_ID,
@@ -38,9 +38,9 @@ import {
   getServiceDetailsPath,
 } from 'routes/cdRoutesConsts'
 
-import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 import { getClusterBreadcrumbs } from 'components/cd/cluster/Cluster'
 import { POLL_INTERVAL } from 'components/cluster/constants'
+import { Directory, SideNavEntries } from 'components/layout/SideNavEntries'
 
 import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
 
@@ -52,11 +52,14 @@ import ServiceSelector from '../ServiceSelector'
 
 import { useProjectId } from '../../../contexts/ProjectsContext'
 
+import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
 
 type ServiceContextType = {
   docs: ReturnType<typeof getDocsData>
   service: ServiceDeploymentDetailsFragment
+  refetch: () => void
+  loading: boolean
 }
 
 export const useServiceContext = () => useOutletContext<ServiceContextType>()
@@ -139,6 +142,11 @@ export const getDirectory = ({
       label: <ErrorsLabel count={serviceDeployment.errors?.length} />,
       enabled: true,
     },
+    {
+      path: 'insights',
+      label: <InsightsTabLabel insight={serviceDeployment.insight} />,
+      enabled: !!serviceDeployment.insight,
+    },
     { path: 'settings', label: 'Settings', enabled: true },
     { path: 'logs', label: 'Logs', enabled: logsEnabled },
     { path: 'secrets', label: 'Secrets', enabled: true },
@@ -191,7 +199,12 @@ function ServiceDetailsBase() {
     [serviceListData?.serviceDeployments]
   )
 
-  const { data: serviceData, error: serviceError } = useServiceDeploymentQuery({
+  const {
+    data: serviceData,
+    error: serviceError,
+    refetch,
+    loading,
+  } = useServiceDeploymentQuery({
     variables: { id: serviceId },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
@@ -253,6 +266,8 @@ function ServiceDetailsBase() {
               {
                 docs,
                 service: serviceDeployment,
+                refetch,
+                loading,
               } satisfies ServiceContextType
             }
           />

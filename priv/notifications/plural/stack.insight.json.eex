@@ -6,4 +6,4 @@ Here's a brief summary of what we've found:
 
 <%= @text %>
 
-View full details: <%= Console.url("/stacks/#{@stack.id}") %>
+View full details: <%= Console.url("/stacks/#{@stack.id}/insights") %>

@@ -241,6 +241,38 @@ defmodule Console.GraphQl.Deployments.ServiceQueriesTest do
       assert found["namespace"] == "test"
     end
 
+    test "it can fetch alerts for a service" do
+      user = admin_user()
+      cluster = insert(:cluster, handle: "test")
+      repository = insert(:git_repository)
+      {:ok, service} = create_service(cluster, user, [
+        name: "test",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "value"}]
+      ])
+
+      alerts = insert_list(3, :alert, service: service)
+
+      {:ok, %{data: %{"serviceDeployment" => found}}} = run_query("""
+        query Service($cluster: String!, $name: String!) {
+          serviceDeployment(cluster: $cluster, name: $name) {
+            id
+            name
+            namespace
+            alerts(first: 5) { edges { node { id } } }
+          }
+        }
+      """, %{"cluster" => "test", "name" => "test"}, %{current_user: user})
+
+      assert found["id"] == service.id
+      assert found["name"] == "test"
+      assert found["namespace"] == "test"
+      assert from_connection(found["alerts"])
+             |> ids_equal(alerts)
+    end
+
     test "clusters can fetch a services configuration and revisions" do
       user = admin_user()
       cluster = insert(:cluster)

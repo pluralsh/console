@@ -12,10 +12,18 @@ fragment ClusterFragment on Cluster {
     deletedAt
     metadata
     tags { ...ClusterTags }
-    credential { ...ProviderCredentialFragment }
-    provider { ...ClusterProviderFragment }
     nodePools { ...NodePoolFragment }
     status { ...ClusterStatusFragment }
+    project {...TinyProjectFragment }
+
+}
+
+fragment TinyClusterFragment on Cluster {
+    id
+    name
+    handle
+    self
+    deletedAt
     project {...TinyProjectFragment }
 }
 
@@ -62,19 +70,13 @@ fragment NodePoolTaintFragment on Taint {
 
 fragment ClusterStatusFragment on ClusterStatus {
     conditions { ...ClusterConditionFragment }
-    controlPlaneReady
-    failureMessage
-    failureReason
-    phase
 }
 
 fragment ClusterConditionFragment on ClusterCondition {
-    lastTransitionTime
     status
     type
     message
     reason
-    severity
 }
 
 mutation CreateCluster($attributes: ClusterAttributes!) {
@@ -92,13 +94,13 @@ mutation UpdateCluster($id: ID!, $attributes: ClusterUpdateAttributes!) {
 
 mutation DeleteCluster($id: ID!) {
     deleteCluster(id: $id) {
-        ...ClusterFragment
+        id
     }
 }
 
 mutation DetachCluster($id: ID!) {
     detachCluster(id: $id) {
-        ...ClusterFragment
+        id
     }
 }
 
@@ -140,6 +142,12 @@ query ListClusters($cursor: String, $before: String, $last: Int) {
 query GetCluster($id: ID) {
     cluster(id: $id) {
         ...ClusterFragment
+    }
+}
+
+query GetTinyCluster($id: ID) {
+    cluster(id: $id) {
+        ...TinyClusterFragment
     }
 }
 

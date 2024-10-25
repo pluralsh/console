@@ -46,6 +46,8 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :provider,  :ai_provider
     field :openai,    :openai_settings_attributes
     field :anthropic, :anthropic_settings_attributes
+    field :ollama,    :ollama_attributes
+    field :azure,     :azure_openai_attributes
   end
 
   input_object :openai_settings_attributes do
@@ -56,6 +58,18 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :anthropic_settings_attributes do
     field :access_token, :string
     field :model,        :string
+  end
+
+  input_object :ollama_attributes do
+    field :model,         non_null(:string)
+    field :url,           non_null(:string)
+    field :authorization, :string, description: "An http authorization header to use on calls to the Ollama api"
+  end
+
+  input_object :azure_openai_attributes do
+    field :endpoint,     non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
+    field :api_version,  :string, description: "the api version you want to use"
+    field :access_token, non_null(:string), description: "the azure openai access token to use"
   end
 
   input_object :smtp_settings_attributes do
@@ -73,6 +87,11 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :name,        non_null(:string)
     field :description, :string
     field :default,     :boolean
+
+    @desc "list all alerts discovered for this project"
+    connection field :alerts, node_type: :alert do
+      resolve &Deployments.list_alerts/3
+    end
 
     field :read_bindings,   list_of(:policy_binding), resolve: dataloader(Deployments), description: "read policy across this project"
     field :write_bindings,  list_of(:policy_binding), resolve: dataloader(Deployments), description: "write policy across this project"
@@ -139,6 +158,8 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :provider,  :ai_provider
     field :openai,    :openai_settings
     field :anthropic, :anthropic_settings
+    field :ollama,    :ollama_settings
+    field :azure,     :azure_openai_settings
   end
 
   @desc "OpenAI connection information"
@@ -149,6 +170,18 @@ defmodule Console.GraphQl.Deployments.Settings do
   @desc "Anthropic connection information"
   object :anthropic_settings do
     field :model, :string, description: "the anthropic model version to use"
+  end
+
+  @desc "Settings for a self-hosted ollama-based LLM deployment"
+  object :ollama_settings do
+    field :model, non_null(:string)
+    field :url,   non_null(:string), description: "the url your ollama deployment is hosted on"
+  end
+
+  @desc "Settings for configuring against Azure OpenAI"
+  object :azure_openai_settings do
+    field :endpoint,    non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
+    field :api_version, :string, description: "the api version you want to use"
   end
 
   connection node_type: :project

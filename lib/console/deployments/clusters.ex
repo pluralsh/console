@@ -143,6 +143,11 @@ defmodule Console.Deployments.Clusters do
       do: @local_adapter.put({:node_metrics, id}, {:ok, metrics}, ttl: @node_ttl)
   end
 
+  def warm(:cluster_metrics, %Cluster{id: id} = cluster) do
+    with {:ok, metrics} <- fetch_cluster_metrics(cluster),
+      do: @local_adapter.put({:cluster_metrics, id}, {:ok, metrics}, ttl: @node_ttl)
+  end
+
   def warm(:api_discovery, %Cluster{} = cluster), do: api_discovery(cluster)
 
   @doc """
@@ -180,6 +185,23 @@ defmodule Console.Deployments.Clusters do
       {:ok, items}
     else
       _ -> {:ok, []}
+    end
+  end
+
+  @doc """
+  Fetches the node metrics for a cluster, this query is heavily cached for performance
+  """
+  @spec cluster_metrics(Cluster.t) :: {:ok, term} | Console.error
+  @decorate cacheable(cache: @local_adapter, key: {:cluster_metrics, cluster.id}, opts: [ttl: @node_ttl])
+  def cluster_metrics(%Cluster{} = cluster), do: fetch_cluster_metrics(cluster)
+
+  defp fetch_cluster_metrics(%Cluster{pinged_at: nil, self: false}), do: {:ok, nil}
+  defp fetch_cluster_metrics(%Cluster{} = cluster) do
+    with %Kazan.Server{} = server <- control_plane(cluster),
+         _ <- Kube.Utils.save_kubeconfig(server) do
+      Kube.Client.get_metrics_aggregate("global")
+    else
+      _ -> {:ok, nil}
     end
   end
 
@@ -523,6 +545,7 @@ defmodule Console.Deployments.Clusters do
   def ping(attrs, %Cluster{id: id}) do
     attrs = Map.merge(attrs, %{pinged_at: Timex.now(), installed: true})
     get_cluster(id)
+    |> Repo.preload([:insight_components])
     |> Cluster.ping_changeset(attrs)
     |> Repo.update()
     |> notify(:ping)

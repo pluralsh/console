@@ -31,6 +31,10 @@ const directory = [
     label: 'Repositories',
   },
   {
+    path: 'ai-provider',
+    label: 'AI provider',
+  },
+  {
     path: 'agents',
     label: 'Agent config',
   },
@@ -76,7 +80,6 @@ export function GlobalSettings() {
   const headerContent = (
     <TabList
       scrollable
-      paddingBottom="large"
       stateRef={tabStateRef}
       stateProps={{ selectedKey: currentTab?.path }}
     >

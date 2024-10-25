@@ -129,12 +129,14 @@ type AgentMigrationAttributes struct {
 
 // A representation of a LLM-derived insight
 type AiInsight struct {
+	ID string `json:"id"`
 	// a deduplication sha for this insight
 	Sha *string `json:"sha,omitempty"`
 	// the text of this insight
 	Text *string `json:"text,omitempty"`
 	// a shortish summary of this insight
-	Summary *string `json:"summary,omitempty"`
+	Summary   *string           `json:"summary,omitempty"`
+	Freshness *InsightFreshness `json:"freshness,omitempty"`
 	// any errors generated when compiling this insight
 	Error      []*ServiceError `json:"error,omitempty"`
 	InsertedAt *string         `json:"insertedAt,omitempty"`
@@ -143,10 +145,12 @@ type AiInsight struct {
 
 // Settings for configuring access to common LLM providers
 type AiSettings struct {
-	Enabled   *bool              `json:"enabled,omitempty"`
-	Provider  *AiProvider        `json:"provider,omitempty"`
-	Openai    *OpenaiSettings    `json:"openai,omitempty"`
-	Anthropic *AnthropicSettings `json:"anthropic,omitempty"`
+	Enabled   *bool                `json:"enabled,omitempty"`
+	Provider  *AiProvider          `json:"provider,omitempty"`
+	Openai    *OpenaiSettings      `json:"openai,omitempty"`
+	Anthropic *AnthropicSettings   `json:"anthropic,omitempty"`
+	Ollama    *OllamaSettings      `json:"ollama,omitempty"`
+	Azure     *AzureOpenaiSettings `json:"azure,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -154,6 +158,40 @@ type AiSettingsAttributes struct {
 	Provider  *AiProvider                  `json:"provider,omitempty"`
 	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
+	Azure     *AzureOpenaiAttributes       `json:"azure,omitempty"`
+}
+
+type Alert struct {
+	ID          string                   `json:"id"`
+	Provider    ObservabilityWebhookType `json:"provider"`
+	Severity    AlertSeverity            `json:"severity"`
+	State       AlertState               `json:"state"`
+	Title       *string                  `json:"title,omitempty"`
+	Message     *string                  `json:"message,omitempty"`
+	Fingerprint *string                  `json:"fingerprint,omitempty"`
+	Annotations map[string]interface{}   `json:"annotations,omitempty"`
+	URL         *string                  `json:"url,omitempty"`
+	// key/value tags to filter clusters
+	Tags []*Tag `json:"tags,omitempty"`
+	// the cluster this alert was associated with
+	Cluster *Cluster `json:"cluster,omitempty"`
+	// the service this alert was associated with
+	Service *Service `json:"service,omitempty"`
+	// the project this alert was associated with
+	Project    *Project `json:"project,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type AlertConnection struct {
+	PageInfo PageInfo     `json:"pageInfo"`
+	Edges    []*AlertEdge `json:"edges,omitempty"`
+}
+
+type AlertEdge struct {
+	Node   *Alert  `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
 }
 
 // Anthropic connection information
@@ -386,6 +424,23 @@ type AzureCloudSettings struct {
 	Network        *string `json:"network,omitempty"`
 }
 
+type AzureOpenaiAttributes struct {
+	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
+	Endpoint string `json:"endpoint"`
+	// the api version you want to use
+	APIVersion *string `json:"apiVersion,omitempty"`
+	// the azure openai access token to use
+	AccessToken string `json:"accessToken"`
+}
+
+// Settings for configuring against Azure OpenAI
+type AzureOpenaiSettings struct {
+	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
+	Endpoint string `json:"endpoint"`
+	// the api version you want to use
+	APIVersion *string `json:"apiVersion,omitempty"`
+}
+
 type AzureSettingsAttributes struct {
 	TenantID       string `json:"tenantId"`
 	SubscriptionID string `json:"subscriptionId"`
@@ -611,6 +666,12 @@ type Changelog struct {
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
+// A basic AI chat message input, modeled after OpenAI's api model
+type ChatMessage struct {
+	Role    AiRole `json:"role"`
+	Content string `json:"content"`
+}
+
 type CloneAttributes struct {
 	S3AccessKeyID     *string `json:"s3AccessKeyId,omitempty"`
 	S3SecretAccessKey *string `json:"s3SecretAccessKey,omitempty"`
@@ -708,6 +769,8 @@ type Cluster struct {
 	ObjectStore *ObjectStore `json:"objectStore,omitempty"`
 	// the parent of this virtual cluster
 	ParentCluster *Cluster `json:"parentCluster,omitempty"`
+	// an ai insight generated about issues discovered which might impact the health of this cluster
+	Insight *AiInsight `json:"insight,omitempty"`
 	// list cached nodes for a cluster, this can be stale up to 5m
 	Nodes []*Node `json:"nodes,omitempty"`
 	// list the cached node metrics for a cluster, can also be stale up to 5m
@@ -716,6 +779,8 @@ type Cluster struct {
 	PinnedCustomResources []*PinnedCustomResource `json:"pinnedCustomResources,omitempty"`
 	// any upgrade insights provided by your cloud provider that have been discovered by our agent
 	UpgradeInsights []*UpgradeInsight `json:"upgradeInsights,omitempty"`
+	// A summation of the metrics utilization of the current cluster
+	MetricsSummary *ClusterMetricsSummary `json:"metricsSummary,omitempty"`
 	// the status of the cluster as seen from the CAPI operator, since some clusters can be provisioned without CAPI, this can be null
 	Status *ClusterStatus `json:"status,omitempty"`
 	// a relay connection of all revisions of this cluster, these are periodically pruned up to a history limit
@@ -724,6 +789,8 @@ type Cluster struct {
 	PolicyConstraints *PolicyConstraintConnection `json:"policyConstraints,omitempty"`
 	// Computes a list of statistics for OPA constraint violations w/in this cluster
 	ViolationStatistics []*ViolationStatistic `json:"violationStatistics,omitempty"`
+	// list all alerts discovered for this cluster
+	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// Queries logs for a cluster out of loki
 	Logs               []*LogStream        `json:"logs,omitempty"`
 	ClusterMetrics     *ClusterMetrics     `json:"clusterMetrics,omitempty"`
@@ -818,6 +885,14 @@ type ClusterInfo struct {
 	Version    *string `json:"version,omitempty"`
 }
 
+type ClusterInsightComponentAttributes struct {
+	Group     *string `json:"group,omitempty"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      string  `json:"name"`
+}
+
 type ClusterMetrics struct {
 	CPU            []*MetricResponse `json:"cpu,omitempty"`
 	Memory         []*MetricResponse `json:"memory,omitempty"`
@@ -828,6 +903,23 @@ type ClusterMetrics struct {
 	Pods           []*MetricResponse `json:"pods,omitempty"`
 	CPUUsage       []*MetricResponse `json:"cpuUsage,omitempty"`
 	MemoryUsage    []*MetricResponse `json:"memoryUsage,omitempty"`
+}
+
+// A summarization of the core cpu and memory metrics for this cluster
+type ClusterMetricsSummary struct {
+	Nodes *int64 `json:"nodes,omitempty"`
+	// the cpu available in vcpu
+	CPUAvailable *float64 `json:"cpuAvailable,omitempty"`
+	// the total cpu in use in the cluster measured in vcpu
+	CPUTotal *float64 `json:"cpuTotal,omitempty"`
+	// a percentage cpu utilization of the cluster
+	CPUUsed *int64 `json:"cpuUsed,omitempty"`
+	// the total number of megabytes available in the cluster
+	MemoryAvailable *float64 `json:"memoryAvailable,omitempty"`
+	// the total number of megabytes in use in the cluster
+	MemoryTotal *float64 `json:"memoryTotal,omitempty"`
+	// a percentage memory utilization of the cluster
+	MemoryUsed *int64 `json:"memoryUsed,omitempty"`
 }
 
 type ClusterNodeMetrics struct {
@@ -841,6 +933,8 @@ type ClusterPing struct {
 	CurrentVersion string         `json:"currentVersion"`
 	KubeletVersion *string        `json:"kubeletVersion,omitempty"`
 	Distro         *ClusterDistro `json:"distro,omitempty"`
+	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
+	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 }
 
 // a CAPI provider for a cluster, cloud is inferred from name if not provided manually
@@ -2703,6 +2797,34 @@ type ObservabilityProviderEdge struct {
 	Cursor *string                `json:"cursor,omitempty"`
 }
 
+// A webhook receiver for an observability provider like grafana or datadog
+type ObservabilityWebhook struct {
+	ID   string                   `json:"id"`
+	Type ObservabilityWebhookType `json:"type"`
+	Name string                   `json:"name"`
+	// the url for this specific webhook
+	URL        string  `json:"url"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+// input data to persist a webhook receiver for an observability provider like grafana or datadog
+type ObservabilityWebhookAttributes struct {
+	Type   ObservabilityWebhookType `json:"type"`
+	Name   string                   `json:"name"`
+	Secret *string                  `json:"secret,omitempty"`
+}
+
+type ObservabilityWebhookConnection struct {
+	PageInfo PageInfo                    `json:"pageInfo"`
+	Edges    []*ObservabilityWebhookEdge `json:"edges,omitempty"`
+}
+
+type ObservabilityWebhookEdge struct {
+	Node   *ObservabilityWebhook `json:"node,omitempty"`
+	Cursor *string               `json:"cursor,omitempty"`
+}
+
 type ObservableMetric struct {
 	ID         string                 `json:"id"`
 	Identifier string                 `json:"identifier"`
@@ -2897,6 +3019,20 @@ type OidcProviderAttributes struct {
 	Description *string         `json:"description,omitempty"`
 	// the redirect uris oidc is whitelisted to use
 	RedirectUris []*string `json:"redirectUris,omitempty"`
+}
+
+type OllamaAttributes struct {
+	Model string `json:"model"`
+	URL   string `json:"url"`
+	// An http authorization header to use on calls to the Ollama api
+	Authorization *string `json:"authorization,omitempty"`
+}
+
+// Settings for a self-hosted ollama-based LLM deployment
+type OllamaSettings struct {
+	Model string `json:"model"`
+	// the url your ollama deployment is hosted on
+	URL string `json:"url"`
 }
 
 // OpenAI connection information
@@ -3702,6 +3838,8 @@ type Project struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description,omitempty"`
 	Default     *bool   `json:"default,omitempty"`
+	// list all alerts discovered for this project
+	Alerts *AlertConnection `json:"alerts,omitempty"`
 	// read policy across this project
 	ReadBindings []*PolicyBinding `json:"readBindings,omitempty"`
 	// write policy across this project
@@ -4531,7 +4669,9 @@ type ServiceDeployment struct {
 	// an insight explaining the state of this service
 	Insight *AiInsight `json:"insight,omitempty"`
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
-	Revisions        *RevisionConnection      `json:"revisions,omitempty"`
+	Revisions *RevisionConnection `json:"revisions,omitempty"`
+	// list all alerts discovered for this service
+	Alerts           *AlertConnection         `json:"alerts,omitempty"`
 	ComponentMetrics *ServiceComponentMetrics `json:"componentMetrics,omitempty"`
 	// whether this service is editable
 	Editable   *bool   `json:"editable,omitempty"`
@@ -5504,16 +5644,20 @@ type AiProvider string
 const (
 	AiProviderOpenai    AiProvider = "OPENAI"
 	AiProviderAnthropic AiProvider = "ANTHROPIC"
+	AiProviderOllama    AiProvider = "OLLAMA"
+	AiProviderAzure     AiProvider = "AZURE"
 )
 
 var AllAiProvider = []AiProvider{
 	AiProviderOpenai,
 	AiProviderAnthropic,
+	AiProviderOllama,
+	AiProviderAzure,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure:
 		return true
 	}
 	return false
@@ -5537,6 +5681,138 @@ func (e *AiProvider) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AiProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// A role to pass to an LLM, modeled after OpenAI's chat api roles
+type AiRole string
+
+const (
+	AiRoleSystem    AiRole = "SYSTEM"
+	AiRoleAssistant AiRole = "ASSISTANT"
+	AiRoleUser      AiRole = "USER"
+)
+
+var AllAiRole = []AiRole{
+	AiRoleSystem,
+	AiRoleAssistant,
+	AiRoleUser,
+}
+
+func (e AiRole) IsValid() bool {
+	switch e {
+	case AiRoleSystem, AiRoleAssistant, AiRoleUser:
+		return true
+	}
+	return false
+}
+
+func (e AiRole) String() string {
+	return string(e)
+}
+
+func (e *AiRole) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AiRole(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AiRole", str)
+	}
+	return nil
+}
+
+func (e AiRole) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AlertSeverity string
+
+const (
+	AlertSeverityLow       AlertSeverity = "LOW"
+	AlertSeverityMedium    AlertSeverity = "MEDIUM"
+	AlertSeverityHigh      AlertSeverity = "HIGH"
+	AlertSeverityCritical  AlertSeverity = "CRITICAL"
+	AlertSeverityUndefined AlertSeverity = "UNDEFINED"
+)
+
+var AllAlertSeverity = []AlertSeverity{
+	AlertSeverityLow,
+	AlertSeverityMedium,
+	AlertSeverityHigh,
+	AlertSeverityCritical,
+	AlertSeverityUndefined,
+}
+
+func (e AlertSeverity) IsValid() bool {
+	switch e {
+	case AlertSeverityLow, AlertSeverityMedium, AlertSeverityHigh, AlertSeverityCritical, AlertSeverityUndefined:
+		return true
+	}
+	return false
+}
+
+func (e AlertSeverity) String() string {
+	return string(e)
+}
+
+func (e *AlertSeverity) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AlertSeverity(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AlertSeverity", str)
+	}
+	return nil
+}
+
+func (e AlertSeverity) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type AlertState string
+
+const (
+	AlertStateFiring   AlertState = "FIRING"
+	AlertStateResolved AlertState = "RESOLVED"
+)
+
+var AllAlertState = []AlertState{
+	AlertStateFiring,
+	AlertStateResolved,
+}
+
+func (e AlertState) IsValid() bool {
+	switch e {
+	case AlertStateFiring, AlertStateResolved:
+		return true
+	}
+	return false
+}
+
+func (e AlertState) String() string {
+	return string(e)
+}
+
+func (e *AlertState) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AlertState(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AlertState", str)
+	}
+	return nil
+}
+
+func (e AlertState) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -6288,6 +6564,50 @@ func (e HelmAuthProvider) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// enumerable to describe the recency of this insight
+type InsightFreshness string
+
+const (
+	InsightFreshnessFresh   InsightFreshness = "FRESH"
+	InsightFreshnessStale   InsightFreshness = "STALE"
+	InsightFreshnessExpired InsightFreshness = "EXPIRED"
+)
+
+var AllInsightFreshness = []InsightFreshness{
+	InsightFreshnessFresh,
+	InsightFreshnessStale,
+	InsightFreshnessExpired,
+}
+
+func (e InsightFreshness) IsValid() bool {
+	switch e {
+	case InsightFreshnessFresh, InsightFreshnessStale, InsightFreshnessExpired:
+		return true
+	}
+	return false
+}
+
+func (e InsightFreshness) String() string {
+	return string(e)
+}
+
+func (e *InsightFreshness) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = InsightFreshness(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid InsightFreshness", str)
+	}
+	return nil
+}
+
+func (e InsightFreshness) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type MatchStrategy string
 
 const (
@@ -6453,6 +6773,45 @@ func (e *ObservabilityProviderType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ObservabilityProviderType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ObservabilityWebhookType string
+
+const (
+	ObservabilityWebhookTypeGrafana ObservabilityWebhookType = "GRAFANA"
+)
+
+var AllObservabilityWebhookType = []ObservabilityWebhookType{
+	ObservabilityWebhookTypeGrafana,
+}
+
+func (e ObservabilityWebhookType) IsValid() bool {
+	switch e {
+	case ObservabilityWebhookTypeGrafana:
+		return true
+	}
+	return false
+}
+
+func (e ObservabilityWebhookType) String() string {
+	return string(e)
+}
+
+func (e *ObservabilityWebhookType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ObservabilityWebhookType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ObservabilityWebhookType", str)
+	}
+	return nil
+}
+
+func (e ObservabilityWebhookType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

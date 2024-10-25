@@ -11,6 +11,9 @@ fragment StackTiny on InfrastructureStack {
   }
   paused
   status
+  insight {
+    ...AiInsightSummary
+  }
 }
 
 fragment Stack on InfrastructureStack {
@@ -67,6 +70,9 @@ fragment Stack on InfrastructureStack {
     name
     value
   }
+  insight {
+    ...AiInsight
+  }
 }
 
 fragment StackRun on StackRun {
@@ -82,6 +88,79 @@ fragment StackRun on StackRun {
   approver {
     name
     email
+  }
+  insight {
+    ...AiInsight
+  }
+}
+
+fragment ObservableMetric on ObservableMetric {
+  provider {
+    name
+    type
+  }
+  identifier
+}
+
+fragment StackRunDetails on StackRun {
+  id
+  status
+  updatedAt
+  insertedAt
+  type
+  message
+  approval
+  approvedAt
+  approver {
+    ...User
+  }
+  cancellationReason
+  stack {
+    name
+    observableMetrics {
+      ...ObservableMetric
+    }
+  }
+  configuration {
+    ...StackConfiguration
+  }
+  state {
+    ...StackState
+  }
+  repository {
+    ...GitRepository
+  }
+  git {
+    files
+    ref
+    folder
+  }
+  pullRequest {
+    ...PullRequest
+  }
+  output {
+    ...StackOutput
+  }
+  cluster {
+    ...ClusterTiny
+  }
+  environment {
+    ...StackEnvironment
+  }
+  errors {
+    ...ServiceErrors
+  }
+  files {
+    ...StackFile
+  }
+  jobSpec {
+    ...JobGateSpec
+  }
+  steps {
+    ...RunStep
+  }
+  insight {
+    ...AiInsight
   }
 }
 
@@ -299,66 +378,7 @@ query StackRuns(
 
 query StackRun($id: ID!) {
   stackRun(id: $id) {
-    id
-    status
-    updatedAt
-    insertedAt
-    type
-    message
-    approval
-    approvedAt
-    approver {
-      ...User
-    }
-    cancellationReason
-    stack {
-      name
-      observableMetrics {
-        provider {
-          name
-          type
-        }
-        identifier
-      }
-    }
-    configuration {
-      ...StackConfiguration
-    }
-    state {
-      ...StackState
-    }
-    repository {
-      ...GitRepository
-    }
-    git {
-      files
-      ref
-      folder
-    }
-    pullRequest {
-      ...PullRequest
-    }
-    output {
-      ...StackOutput
-    }
-    cluster {
-      ...ClusterTiny
-    }
-    environment {
-      ...StackEnvironment
-    }
-    errors {
-      ...ServiceErrors
-    }
-    files {
-      ...StackFile
-    }
-    jobSpec {
-      ...JobGateSpec
-    }
-    steps {
-      ...RunStep
-    }
+    ...StackRunDetails
   }
 }
 

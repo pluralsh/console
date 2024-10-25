@@ -6,4 +6,4 @@ Here's a brief summary of what we've found:
 
 <%= @text %>
 
-View full details: <%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/components") %>
+View full details: <%= Console.url("/cd/clusters/#{@service.cluster_id}/services/#{@service.id}/insights") %>

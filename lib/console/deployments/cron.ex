@@ -17,7 +17,8 @@ defmodule Console.Deployments.Cron do
     PullRequest,
     RunLog,
     AppNotification,
-    Observer
+    Observer,
+    Alert
   }
   alias Console.Deployments.Pipelines.Discovery
 
@@ -54,11 +55,18 @@ defmodule Console.Deployments.Cron do
     |> Stream.run()
   end
 
+  def prune_alerts() do
+    Logger.info "pruning all expired alerts"
+    Alert.expired()
+    |> Repo.delete_all()
+  end
+
   def cache_warm() do
     Cluster.stream()
     |> Repo.stream(method: :keyset)
     |> Stream.each(fn cluster ->
       Logger.info "warming node caches for cluster"
+      Clusters.warm(:cluster_metrics, cluster)
       Clusters.warm(:nodes, cluster)
       Clusters.warm(:node_metrics, cluster)
       Clusters.warm(:api_discovery, cluster)

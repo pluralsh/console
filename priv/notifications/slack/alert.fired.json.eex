@@ -1,0 +1,26 @@
+{
+    "text": "⏰ An alert has fired in your infrastructure",
+	"blocks": [
+		{
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": <%= Jason.encode!(Console.truncate(@alert.message, 2800)) %>
+            }
+		},
+		{
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View Alert",
+						"emoji": true
+					},
+					"url": "<%= Console.url("/alerts/#{@alert.id}") %>"
+				}
+			]
+		}
+	]
+}

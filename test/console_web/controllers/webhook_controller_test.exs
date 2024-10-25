@@ -61,4 +61,20 @@ defmodule ConsoleWeb.WebhookControllerTest do
       assert_receive {:event, %Console.PubSub.PullRequestCreated{item: %{id: ^id}}}
     end
   end
+
+  describe "#observability/2" do
+    test "it can handle an observability provider webhook", %{conn: conn} do
+      hook = insert(:observability_webhook)
+
+      conn
+      |> put_req_header("authorization", Plug.BasicAuth.encode_basic_auth("plrl", hook.secret))
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/observability/grafana/#{hook.external_id}", String.trim(Console.conf(:grafana_webhook_payload)))
+      |> response(200)
+
+      [_, _] = Console.Repo.all(Console.Schema.Alert)
+
+      assert_receive {:event, %Console.PubSub.AlertCreated{}}
+    end
+  end
 end

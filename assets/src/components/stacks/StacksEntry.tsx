@@ -4,13 +4,18 @@ import { useTheme } from 'styled-components'
 
 import { useNavigate } from 'react-router-dom'
 
-import { TRUNCATE, TRUNCATE_LEFT } from '../utils/truncate'
 import { StackTinyFragment } from '../../generated/graphql'
+import { TRUNCATE, TRUNCATE_LEFT } from '../utils/truncate'
 
-import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
+import {
+  getStacksAbsPath,
+  STACK_INSIGHTS_REL_PATH,
+} from '../../routes/stacksRoutesConsts'
 
-import { StackTypeIcon } from './common/StackTypeIcon'
+import { AiInsightSummaryIcon } from 'components/utils/AiInsights'
 import StackStatusChip from './common/StackStatusChip'
+import { StackTypeIcon } from './common/StackTypeIcon'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 export default function StackEntry({
   stack,
@@ -23,6 +28,7 @@ export default function StackEntry({
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
+  const { ai } = useDeploymentSettings()
 
   return (
     <div
@@ -79,6 +85,12 @@ export default function StackEntry({
         >
           {stack.name}
         </div>
+        {ai?.enabled && (
+          <AiInsightSummaryIcon
+            navPath={`${getStacksAbsPath(stack.id)}/${STACK_INSIGHTS_REL_PATH}`}
+            insight={stack.insight}
+          />
+        )}
         <StackStatusChip
           status={stack.status}
           deleting={!!stack.deletedAt}

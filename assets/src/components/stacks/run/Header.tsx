@@ -1,6 +1,3 @@
-import { ReactNode, useMemo, useRef } from 'react'
-import { useTheme } from 'styled-components'
-import { useLocation, useNavigate } from 'react-router-dom'
 import {
   AppIcon,
   Button,
@@ -11,17 +8,22 @@ import {
   SubTab,
   TabList,
 } from '@pluralsh/design-system'
+import { ReactNode, useMemo, useRef } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useTheme } from 'styled-components'
 
 import { isEmpty } from 'lodash'
 
+import { InsightsTabLabel } from 'components/utils/AiInsights'
 import {
-  StackRun,
+  StackRunDetailsFragment,
   StackStatus,
   useApproveStackRunMutation,
   useRestartStackRunMutation,
   useUpdateStackRunMutation,
 } from '../../../generated/graphql'
 import {
+  STACK_RUNS_INSIGHTS_REL_PATH,
   STACK_RUNS_JOB_REL_PATH,
   STACK_RUNS_OUTPUT_REL_PATH,
   STACK_RUNS_PLAN_REL_PATH,
@@ -30,29 +32,35 @@ import {
   getStackRunsAbsPath,
 } from '../../../routes/stacksRoutesConsts'
 import { LinkTabWrap } from '../../utils/Tabs'
-import { StackTypeIcon } from '../common/StackTypeIcon'
 import { TRUNCATE } from '../../utils/truncate'
+import { StackTypeIcon } from '../common/StackTypeIcon'
 
-const DIRECTORY = [
-  { path: '', label: 'Progress' },
-  { path: STACK_RUNS_REPOSITORY_REL_PATH, label: 'Repository' },
-  {
-    path: STACK_RUNS_STATE_REL_PATH,
-    label: 'State',
-    condition: (s: StackRun) => !isEmpty(s.state?.state),
-  },
-  {
-    path: STACK_RUNS_PLAN_REL_PATH,
-    label: 'Plan',
-    condition: (s: StackRun) => !isEmpty(s.state?.plan),
-  },
-  {
-    path: STACK_RUNS_OUTPUT_REL_PATH,
-    label: 'Output',
-    condition: (s: StackRun) => !isEmpty(s.output),
-  },
-  { path: STACK_RUNS_JOB_REL_PATH, label: 'Job' },
-]
+function getDirectory(stackRun: StackRunDetailsFragment) {
+  return [
+    { path: '', label: 'Progress' },
+    {
+      path: STACK_RUNS_INSIGHTS_REL_PATH,
+      label: <InsightsTabLabel insight={stackRun.insight} />,
+    },
+    { path: STACK_RUNS_REPOSITORY_REL_PATH, label: 'Repository' },
+    {
+      path: STACK_RUNS_STATE_REL_PATH,
+      label: 'State',
+      condition: (s: StackRunDetailsFragment) => !isEmpty(s.state?.state),
+    },
+    {
+      path: STACK_RUNS_PLAN_REL_PATH,
+      label: 'Plan',
+      condition: (s: StackRunDetailsFragment) => !isEmpty(s.state?.plan),
+    },
+    {
+      path: STACK_RUNS_OUTPUT_REL_PATH,
+      label: 'Output',
+      condition: (s: StackRunDetailsFragment) => !isEmpty(s.output),
+    },
+    { path: STACK_RUNS_JOB_REL_PATH, label: 'Job' },
+  ]
+}
 
 const TERMINAL_STATES = [
   StackStatus.Successful,
@@ -61,7 +69,7 @@ const TERMINAL_STATES = [
 ]
 
 interface StackRunHeaderProps {
-  stackRun: StackRun
+  stackRun: StackRunDetailsFragment
   refetch?: Nullable<() => void>
 }
 
@@ -248,14 +256,19 @@ function StackRunHeaderButtons({ stackRun, refetch }): ReactNode {
   )
 }
 
-function StackRunNav({ stackRun }: { stackRun: StackRun }): ReactNode {
+function StackRunNav({
+  stackRun,
+}: {
+  stackRun: StackRunDetailsFragment
+}): ReactNode {
   const { pathname } = useLocation()
   const tabStateRef = useRef<any>(null)
+  const directory = getDirectory(stackRun)
   const currentTab = useMemo(
     () =>
-      DIRECTORY.find((d) => d.path && pathname.includes(d.path)) ??
-      DIRECTORY[0],
-    [pathname]
+      directory.find((d) => d.path && pathname.includes(d.path)) ??
+      directory[0],
+    [directory, pathname]
   )
 
   return (
@@ -267,23 +280,17 @@ function StackRunNav({ stackRun }: { stackRun: StackRun }): ReactNode {
         selectedKey: currentTab?.path,
       }}
     >
-      {DIRECTORY.filter((d) => d.condition?.(stackRun) ?? true).map(
-        ({ label, path }) => (
+      {directory
+        .filter((d) => d.condition?.(stackRun) ?? true)
+        .map(({ label, path }) => (
           <LinkTabWrap
             subTab
             key={path}
-            textValue={label}
             to={path}
           >
-            <SubTab
-              key={path}
-              textValue={label}
-            >
-              {label}
-            </SubTab>
+            <SubTab key={path}>{label}</SubTab>
           </LinkTabWrap>
-        )
-      )}
+        ))}
     </TabList>
   )
 }

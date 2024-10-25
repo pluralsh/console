@@ -20,7 +20,7 @@ import { LinkTabWrap } from 'components/utils/Tabs'
 import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
-import { directory } from 'components/component/directory'
+
 import {
   ArgoRolloutDocument,
   CanaryDocument,
@@ -45,6 +45,7 @@ import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 
 import { isUnstructured } from './ComponentInfo'
 import { PageHeaderContext } from '../cd/ContinuousDeployment.tsx'
+import { getDirectory } from './directory.tsx'
 
 export const kindToQuery = {
   certificate: CertificateDocument,
@@ -60,17 +61,8 @@ export const kindToQuery = {
   rollout: ArgoRolloutDocument,
 } as const
 
-type DetailsComponent = {
-  id: string
-  name: string
-  namespace?: string | null | undefined
-  kind: string
-  version?: string | null | undefined
-  group?: string | null | undefined
-}
-
 export type ComponentDetailsContext = {
-  component: DetailsComponent
+  component: ServiceDeploymentComponentFragment
   refetch: () => void
   data: any
   loading: boolean
@@ -91,7 +83,7 @@ export function ComponentDetails({
   hasPrometheus,
   cdView = false,
 }: {
-  component: DetailsComponent
+  component: ServiceDeploymentComponentFragment
   pathMatchString: string
   cdView?: boolean
   service?: ServiceDeploymentDetailsFragment | null
@@ -160,13 +152,14 @@ export function ComponentDetails({
     [data, error]
   )
 
-  const filteredDirectory = directory.filter(
-    ({ onlyFor, onlyIfNoError, onlyIfDryRun, prometheus, label }) =>
+  const filteredDirectory = getDirectory(component?.insight).filter(
+    ({ onlyFor, onlyIfNoError, onlyIfDryRun, prometheus, path }) =>
       (!onlyFor || (componentKind && onlyFor.includes(componentKind))) &&
       (!prometheus || !service?.cluster?.id || hasPrometheus) &&
       (!onlyIfNoError || !hasNotFoundError) &&
       (!onlyIfDryRun || (cdView && service?.dryRun)) &&
-      !(label === 'Info' && isUnstructured(componentKind))
+      !(path === 'info' && isUnstructured(componentKind)) &&
+      !(path === 'insights' && !component?.insight)
   )
 
   const currentTab = filteredDirectory.find(({ path }) => path === subpath)
@@ -187,7 +180,7 @@ export function ComponentDetails({
     }
   }, [navigate, currentTab, filteredDirectory, service, component, cdView])
 
-  if (!me || loading) return <LoadingIndicator />
+  if (!me || (!data && loading)) return <LoadingIndicator />
 
   return (
     <PageHeaderContext.Provider value={pageHeaderContext}>
@@ -218,7 +211,6 @@ export function ComponentDetails({
                 {filteredDirectory.map(({ label, path }) => (
                   <LinkTabWrap
                     key={path}
-                    textValue={label}
                     to={path}
                     subTab
                   >

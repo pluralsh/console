@@ -1,0 +1,18 @@
+fragment AiInsight on AiInsight {
+  text
+  summary
+  sha
+  freshness
+  updatedAt
+  insertedAt
+  error {
+    message
+    source
+  }
+}
+
+fragment AiInsightSummary on AiInsight {
+  summary
+  freshness
+  updatedAt
+}

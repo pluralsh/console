@@ -1,5 +1,6 @@
 defmodule Console.Schema.AiInsight do
   use Piazza.Ecto.Schema
+  alias Console.Schema.{Service, Stack}
 
   @fast [minutes: -20]
   @slow [minutes: -45]
@@ -14,7 +15,20 @@ defmodule Console.Schema.AiInsight do
       field :message, :string
     end
 
+    has_one :service, Service, foreign_key: :insight_id
+    has_one :stack,   Stack,   foreign_key: :insight_id
+
     timestamps()
+  end
+
+  @spec freshness(t()) :: :fresh | :stale | :expired
+  def freshness(%__MODULE__{} = insight) do
+    at = ts(insight)
+    cond do
+      Timex.before?(at, expiry(hours: -1)) -> :expired
+      Timex.before?(at, expiry(@slow)) -> :stale
+      true -> :fresh
+    end
   end
 
   def expired(query \\ __MODULE__) do

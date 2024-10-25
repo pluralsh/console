@@ -193,10 +193,11 @@ defmodule Console.Deployments.CronTest do
   describe "#cache_warm/0" do
     test "it can warm the cache for all registered clusters" do
       insert_list(3, :cluster)
-      expect(Clusters, :warm, 9, fn
+      expect(Clusters, :warm, 12, fn
         :nodes, _ -> :ok
         :node_metrics, _ -> :ok
         :api_discovery, _ -> :ok
+        :cluster_metrics, _ -> :ok
       end)
 
       :ok = Cron.cache_warm()
@@ -243,6 +244,18 @@ defmodule Console.Deployments.CronTest do
       keep = insert_list(3, :run_log)
 
       Cron.prune_logs()
+
+      for l <- rm, do: refute refetch(l)
+      for l <- keep, do: assert refetch(l)
+    end
+  end
+
+  describe "#prune_alerts/0" do
+    test "it can remove old alerts" do
+      rm = insert_list(3, :alert, inserted_at: Timex.now() |> Timex.shift(days: -3), updated_at: Timex.now() |> Timex.shift(days: -3))
+      keep = insert_list(3, :alert)
+
+      Cron.prune_alerts()
 
       for l <- rm, do: refute refetch(l)
       for l <- keep, do: assert refetch(l)

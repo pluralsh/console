@@ -56,4 +56,57 @@ defmodule Console.Deployments.ObservabilityTest do
       {:error, _} = Observability.delete_provider(provider.id, insert(:user))
     end
   end
+
+  describe "#upsert_webhook/2" do
+    test "it can create a new obs webhook" do
+      {:ok, webhook} = Observability.upsert_webhook(%{
+        type: :grafana,
+        name: "webhook",
+      }, admin_user())
+
+      assert webhook.type == :grafana
+      assert webhook.name == "webhook"
+      assert webhook.external_id
+      assert webhook.secret
+    end
+
+    test "it can update an existing obs webhook" do
+      existing = insert(:observability_webhook)
+      {:ok, webhook} = Observability.upsert_webhook(%{
+        type: :grafana,
+        name: existing.name,
+        secret: "some secret"
+      }, admin_user())
+
+      assert webhook.id == existing.id
+      assert webhook.type == :grafana
+      assert webhook.name == existing.name
+      assert webhook.secret == "some secret"
+    end
+
+    test "nonadmins cannot upsert" do
+      {:error, _} = Observability.upsert_webhook(%{
+        type: :datadog,
+        name: "webhook",
+        credentials: %{datadog: %{app_id: "app", api_key: "api"}}
+      }, insert(:user))
+    end
+  end
+
+  describe "#delete_webhook/2" do
+    test "it can delete a webhook by id" do
+      webhook = insert(:observability_webhook)
+
+      {:ok, deleted} = Observability.delete_webhook(webhook.id, admin_user())
+
+      assert webhook.id == deleted.id
+      refute refetch(deleted)
+    end
+
+    test "nonadmins cannot delete" do
+      webhook = insert(:observability_webhook)
+
+      {:error, _} = Observability.delete_webhook(webhook.id, insert(:user))
+    end
+  end
 end

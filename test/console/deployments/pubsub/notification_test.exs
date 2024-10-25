@@ -198,4 +198,27 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       {:ok, _} = Jason.decode(body)
     end
   end
+
+  describe "AlertCreated" do
+    test "it can generate a slack message" do
+      cluster = insert(:cluster)
+      alert = insert(:alert, cluster: cluster)
+      router = insert(:notification_router, events: ["alert.fired"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router, cluster: cluster)
+
+      me = self()
+      expect(HTTPoison, :post, fn _, body, _ ->
+        send me, {:body, body}
+        {:ok, %HTTPoison.Response{}}
+      end)
+
+      event = %PubSub.AlertCreated{item: alert}
+      :ok = Notifications.handle_event(event)
+
+      assert_receive {:body, body}
+
+      {:ok, _} = Jason.decode(body)
+    end
+  end
 end

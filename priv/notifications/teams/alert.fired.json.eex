@@ -1,0 +1,20 @@
+{
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "0076D7",
+    "summary": "⏰ An alert has fired in your infrastructure",
+    "sections": [{
+        "activityTitle": "⏰ An alert has fired in your infrastructure",
+        "activitySubtitle": "<%= @alert.title %>",
+        "activityText": <%= Jason.encode!(Console.truncate(@alert.message, 2800)) %>,
+        "markdown": true
+    }],
+    "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "Go to URL",
+        "targets": [{
+            "os": "default",
+            "uri": "<%= Console.url("/alerts/#{@alert.id}") %>"
+        }]
+    }]
+}
