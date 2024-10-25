@@ -129,6 +129,7 @@ type AgentMigrationAttributes struct {
 
 // A representation of a LLM-derived insight
 type AiInsight struct {
+	ID string `json:"id"`
 	// a deduplication sha for this insight
 	Sha *string `json:"sha,omitempty"`
 	// the text of this insight
@@ -768,6 +769,8 @@ type Cluster struct {
 	ObjectStore *ObjectStore `json:"objectStore,omitempty"`
 	// the parent of this virtual cluster
 	ParentCluster *Cluster `json:"parentCluster,omitempty"`
+	// an ai insight generated about issues discovered which might impact the health of this cluster
+	Insight *AiInsight `json:"insight,omitempty"`
 	// list cached nodes for a cluster, this can be stale up to 5m
 	Nodes []*Node `json:"nodes,omitempty"`
 	// list the cached node metrics for a cluster, can also be stale up to 5m
@@ -882,6 +885,14 @@ type ClusterInfo struct {
 	Version    *string `json:"version,omitempty"`
 }
 
+type ClusterInsightComponentAttributes struct {
+	Group     *string `json:"group,omitempty"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      string  `json:"name"`
+}
+
 type ClusterMetrics struct {
 	CPU            []*MetricResponse `json:"cpu,omitempty"`
 	Memory         []*MetricResponse `json:"memory,omitempty"`
@@ -922,6 +933,8 @@ type ClusterPing struct {
 	CurrentVersion string         `json:"currentVersion"`
 	KubeletVersion *string        `json:"kubeletVersion,omitempty"`
 	Distro         *ClusterDistro `json:"distro,omitempty"`
+	// scraped k8s objects to use for cluster insights, don't send at all if not w/in the last scrape interval
+	InsightComponents []*ClusterInsightComponentAttributes `json:"insightComponents,omitempty"`
 }
 
 // a CAPI provider for a cluster, cloud is inferred from name if not provided manually

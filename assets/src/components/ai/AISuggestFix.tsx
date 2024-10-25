@@ -1,6 +1,7 @@
+import { Markdown } from '@pluralsh/design-system'
 import { ReactNode, useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { useAiSuggestedFixLazyQuery } from '../../generated/graphql.ts'
+import { useAiSuggestedFixQuery } from '../../generated/graphql.ts'
 import { GqlError } from '../utils/Alert.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import AIPanel from './AIPanel.tsx'
@@ -12,15 +13,16 @@ interface AISuggestFixProps {
 
 function AISuggestFix({ insightID }: AISuggestFixProps): ReactNode {
   const theme = useTheme()
-  const [getSuggestion, { loading, data, error }] = useAiSuggestedFixLazyQuery({
+  const { loading, data, error, refetch } = useAiSuggestedFixQuery({
     variables: { insightID },
+    fetchPolicy: 'cache-and-network',
   })
 
   const [open, setOpen] = useState(false)
   const showPanel = useCallback(() => {
     setOpen(true)
-    getSuggestion()
-  }, [getSuggestion])
+    refetch()
+  }, [refetch])
 
   if (!insightID) {
     return null
@@ -38,12 +40,12 @@ function AISuggestFix({ insightID }: AISuggestFixProps): ReactNode {
         open={open}
         onClose={() => setOpen(false)}
         showCloseIcon
-        showClosePanel
+        showClosePanel={!!data?.aiSuggestedFix}
         header="Suggest a fix"
         subheader="Get a suggested fix based on the insight. AI is prone to mistakes, always test changes before application."
       >
-        <div>{data?.aiSuggestedFix}</div>
-        {loading && !data?.aiSuggestedFix && <LoadingIndicator />}
+        {data?.aiSuggestedFix && <Markdown text={data?.aiSuggestedFix} />}
+        {loading && !data && <LoadingIndicator />}
         {!loading && error && <GqlError error={error} />}
       </AIPanel>
     </div>
