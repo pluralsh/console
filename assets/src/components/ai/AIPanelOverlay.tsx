@@ -1,9 +1,9 @@
-import { ReactNode, useMemo, useRef } from 'react'
-import { AnimatedDiv } from '@pluralsh/design-system'
+import { AnimatedDiv, useResizeObserver } from '@pluralsh/design-system'
+import { ReactNode, RefObject, useMemo, useRef, useState } from 'react'
 import { useTransition } from 'react-spring'
 
-import { useTheme } from 'styled-components'
 import { useClickOutside, useKeyDown } from '@react-hooks-library/core'
+import { useTheme } from 'styled-components'
 
 const getTransitionProps = (open: boolean) => ({
   from: { opacity: 0, scale: `65%` },
@@ -27,6 +27,7 @@ export function AIPanelOverlay({
   const ref = useRef<any>()
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
+  const maxHeight = useOverlayMaxHeight(ref, 32)
 
   useKeyDown(['Escape'], onClose)
   useClickOutside(ref, onClose)
@@ -36,16 +37,17 @@ export function AIPanelOverlay({
       ref={ref}
       css={{
         display: 'flex',
-        minHeight: 240,
+        transition: 'max-height 0.2s ease-in-out',
         pointerEvents: 'none',
         position: 'absolute',
         right: 0,
         top: 32 + theme.spacing.small,
-        width: 480,
+        width: 650,
         zIndex: theme.zIndexes.modal,
         '& > *': { pointerEvents: 'auto' },
       }}
       style={{
+        maxHeight,
         transformOrigin: 'top right',
         ...styles,
       }}
@@ -53,4 +55,21 @@ export function AIPanelOverlay({
       {children}
     </AnimatedDiv>
   ))
+}
+
+function useOverlayMaxHeight(
+  ref: RefObject<HTMLElement>,
+  padding: number,
+  defaultValue: string = '300px'
+) {
+  const [maxHeight, setMaxHeight] = useState(defaultValue)
+
+  useResizeObserver(ref, () => {
+    if (!ref.current) return
+    const rect = ref.current.getBoundingClientRect()
+    console.log(rect)
+    setMaxHeight(`calc(100vh - ${rect.top}px - ${padding}px)`)
+  })
+
+  return maxHeight
 }
