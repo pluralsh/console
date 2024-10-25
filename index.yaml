@@ -4131,4 +4131,15 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/velero-s3-proxy-chart-v0.1.0/velero-s3-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-10-23T20:08:21.042614572Z"
+  webhook-proxy:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2024-10-25T15:04:43.078001856Z"
+    description: A Helm chart for Kubernetes
+    digest: f2e64b81a868e6c9a5909ecc343e6e59ff6dee9986533696c0254533fd2aa52e
+    name: webhook-proxy
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
+    version: 0.1.0
+generated: "2024-10-25T15:04:43.078380196Z"
