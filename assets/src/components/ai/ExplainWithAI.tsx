@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import AIButton from './AIButton.tsx'
-import { AIPanelOverlay } from './AIPanelOverlay.tsx'
+import AIButton from './ExplainWithAIButton.tsx'
 import AIPanel from './AIPanel.tsx'
 
 export default function ExplainWithAI() {
@@ -19,18 +18,14 @@ export default function ExplainWithAI() {
       >
         Explain with AI
       </AIButton>
-      <AIPanelOverlay
+      <AIPanel
         open={open}
-        close={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+        header={'AI explain'}
+        subheader={'Learn more about the current page with AI'}
       >
-        <AIPanel
-          header={'AI explain'}
-          subheader={'Learn more about the current page with AI'}
-          onClose={() => setOpen(false)}
-        >
-          <div>...</div>
-        </AIPanel>
-      </AIPanelOverlay>
+        <div>...</div>
+      </AIPanel>
     </div>
   )
 }

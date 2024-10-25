@@ -3,7 +3,7 @@ import { AiSparkleFilledIcon, Button } from '@pluralsh/design-system'
 import { ReactNode } from 'react'
 import { ButtonProps } from 'honorable'
 
-export default function AIButton({
+export default function ExplainWithAIButton({
   active,
   children,
   ...props

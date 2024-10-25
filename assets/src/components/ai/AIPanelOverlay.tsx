@@ -16,11 +16,11 @@ const getTransitionProps = (open: boolean) => ({
 
 export function AIPanelOverlay({
   open,
-  close,
+  onClose,
   children,
 }: {
   open: boolean
-  close: () => void
+  onClose: () => void
   children: ReactNode
 }) {
   const theme = useTheme()
@@ -28,8 +28,8 @@ export function AIPanelOverlay({
   const transitionProps = useMemo(() => getTransitionProps(open), [open])
   const transitions = useTransition(open ? [true] : [], transitionProps)
 
-  useKeyDown(['Escape'], close)
-  useClickOutside(ref, close)
+  useKeyDown(['Escape'], onClose)
+  useClickOutside(ref, onClose)
 
   return transitions((styles) => (
     <AnimatedDiv
