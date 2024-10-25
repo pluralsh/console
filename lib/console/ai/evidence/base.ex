@@ -134,6 +134,11 @@ defmodule Console.AI.Evidence.Base do
     end
   end
 
+  def compress_and_join(strings, joiner \\ "\n") do
+    Enum.filter(strings, & &1)
+    |> Enum.join(joiner)
+  end
+
   defp build_labels(labels) when map_size(labels) > 0,
     do: Enum.map(labels, fn {k, v} -> "#{k}=#{v}" end)
   defp build_labels(_), do: []

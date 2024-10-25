@@ -91,6 +91,7 @@ export function PrAutomationPermissionsModal({
       header={header}
       open={open}
       onClose={onClose}
+      onOpenAutoFocus={(e) => e.preventDefault()}
       asForm
       formProps={{ onSubmit }}
       css={{ width: 1024, maxWidth: 1024 }}

@@ -2,6 +2,7 @@ fragment AiInsight on AiInsight {
   text
   summary
   sha
+  freshness
   updatedAt
   insertedAt
   error {
@@ -12,9 +13,14 @@ fragment AiInsight on AiInsight {
 
 fragment AiInsightSummary on AiInsight {
   summary
+  freshness
   updatedAt
 }
 
 query AI($prompt: String!) {
   ai(prompt: $prompt)
 }
+
+#query AISuggestedFix($insightID: String!) {
+#
+#}

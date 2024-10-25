@@ -1,19 +1,19 @@
 import {
-  Button,
   Card,
   EmptyState,
   Flex,
   Markdown,
-  ReloadIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+
+import { CaptionP } from 'components/utils/typography/Text'
+import moment from 'moment/moment'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
-
-import { CaptionP } from 'components/utils/typography/Text'
-import { StackOutletContextT, getBreadcrumbs } from '../Stacks'
-import moment from 'moment/moment'
+import { AISuggestFix } from '../../ai/AISuggestFix.tsx'
+import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
+import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
 export function StackInsights() {
   const { stack, refetch, loading } = useOutletContext() as StackOutletContextT
@@ -41,14 +41,11 @@ export function StackInsights() {
           {stack.insight?.updatedAt &&
             `Last updated ${moment(stack.insight?.updatedAt).fromNow()}`}
         </CaptionP>
-        <Button
-          floating
-          startIcon={<ReloadIcon />}
-          onClick={() => refetch?.()}
+        <IconFrameRefreshButton
           loading={loading}
-        >
-          Refresh insights
-        </Button>
+          refetch={refetch}
+        />
+        <AISuggestFix insightID={''} />
       </Flex>
       <InsightDisplay text={stack.insight?.text} />
     </Flex>

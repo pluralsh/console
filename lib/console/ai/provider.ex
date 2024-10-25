@@ -1,6 +1,6 @@
 defmodule Console.AI.Provider do
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
-  alias Console.AI.{OpenAI, Anthropic, Ollama}
+  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure}
 
   @type sender :: :system | :user | :assistant
   @type history :: [{sender, binary}]
@@ -37,6 +37,8 @@ defmodule Console.AI.Provider do
     do: {:ok, Anthropic.new(anthropic)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :ollama, ollama: %{} = ollama}}),
     do: {:ok, Ollama.new(ollama)}
+  defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :azure, azure: %{} = azure}}),
+    do: {:ok, Azure.new(azure)}
   defp client(_), do: {:error, "ai not enabled for this Plural Console instance"}
 
   defp get_preface(opts) do

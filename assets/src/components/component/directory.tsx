@@ -18,13 +18,13 @@ export const getDirectory = (
     onlyIfNoError: true,
   },
   {
-    label: <InsightsTabLabel insight={insight} />,
-    path: 'insights',
-  },
-  {
     label: 'Raw',
     path: 'raw',
     onlyIfNoError: true,
+  },
+  {
+    label: <InsightsTabLabel insight={insight} />,
+    path: 'insights',
   },
   {
     label: 'Metrics',
