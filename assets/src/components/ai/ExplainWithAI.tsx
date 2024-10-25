@@ -25,7 +25,7 @@ export default function ExplainWithAI() {
       >
         Explain with AI
       </AIButton>
-      {prompt && (
+      {open && prompt && (
         <ExplainWithAIPanel
           prompt={prompt}
           open={open}
