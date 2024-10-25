@@ -45,7 +45,7 @@ export function StackInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <AISuggestFix insightID={''} />
+        <AISuggestFix insightID={stack?.insight?.id ?? ''} />
       </Flex>
       <InsightDisplay text={stack.insight?.text} />
     </Flex>

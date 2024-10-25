@@ -65,7 +65,7 @@ export function ServiceInsights() {
             loading={loading}
             refetch={refetch}
           />
-          <AISuggestFix insightID={''} />
+          <AISuggestFix insightID={service?.insight?.id ?? ''} />
         </Flex>
       </Flex>
       <InsightDisplay text={service.insight?.text} />

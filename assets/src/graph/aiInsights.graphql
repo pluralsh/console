@@ -1,4 +1,5 @@
 fragment AiInsight on AiInsight {
+  id
   text
   summary
   sha
@@ -12,6 +13,7 @@ fragment AiInsight on AiInsight {
 }
 
 fragment AiInsightSummary on AiInsight {
+  id
   summary
   freshness
   updatedAt
