@@ -24,6 +24,7 @@ import { NAMESPACE_PARAM } from '../Navigation'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Raw' },
@@ -41,6 +42,8 @@ export default function CustomResource(): ReactElement {
   })
 
   const cr = data?.handleGetCustomResourceObjectDetail
+
+  useExplainWithAI('Describe Kubernetes Custom Resource: ' + JSON.stringify(cr))
 
   useSetBreadcrumbs(
     useMemo(

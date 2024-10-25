@@ -50,6 +50,7 @@ import { Kind } from '../common/types'
 import { getBreadcrumbs } from './ReplicationControllers'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -97,6 +98,10 @@ export default function ReplicationController(): ReactElement {
 
   const rc =
     data?.handleGetReplicationControllerDetail as ReplicationControllerT
+
+  useExplainWithAI(
+    'Describe Kubernetes Replication Controller resource: ' + JSON.stringify(rc)
+  )
 
   if (loading) {
     return <LoadingIndicator />

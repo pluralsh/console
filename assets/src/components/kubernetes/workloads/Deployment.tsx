@@ -103,7 +103,7 @@ export default function Deployment(): ReactElement {
   const deployment = data?.handleGetDeploymentDetail as DeploymentT
 
   useExplainWithAI(
-    'Describe Kubernetes deployment: ' + JSON.stringify(deployment)
+    'Describe Kubernetes Deployment resource: ' + JSON.stringify(deployment)
   )
 
   if (loading) {

@@ -35,6 +35,7 @@ import { FullHeightTableWrap } from '../../utils/layout/FullHeightTableWrap'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Secrets'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Data' },
@@ -55,6 +56,10 @@ export default function Secret(): ReactElement {
   })
 
   const secret = data?.handleGetSecretDetail
+
+  useExplainWithAI(
+    'Describe Kubernetes Config Map resource: ' + JSON.stringify(secret)
+  )
 
   useSetBreadcrumbs(
     useMemo(

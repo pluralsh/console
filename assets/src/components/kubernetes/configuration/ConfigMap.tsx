@@ -26,6 +26,7 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './ConfigMaps'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Data' },
@@ -46,6 +47,10 @@ export default function ConfigMap(): ReactElement {
   })
 
   const cm = data?.handleGetConfigMapDetail
+
+  useExplainWithAI(
+    'Describe Kubernetes Config Map resource: ' + JSON.stringify(cm)
+  )
 
   useSetBreadcrumbs(
     useMemo(
