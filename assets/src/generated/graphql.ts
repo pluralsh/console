@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -853,6 +853,27 @@ export type Changelog = {
   repo: Scalars['String']['output'];
   tool: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type Chat = {
+  __typename?: 'Chat';
+  content: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  role: AiRole;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ChatConnection = {
+  __typename?: 'ChatConnection';
+  edges?: Maybe<Array<Maybe<ChatEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ChatEdge = {
+  __typename?: 'ChatEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<Chat>;
 };
 
 /** A basic AI chat message input, modeled after OpenAI's api model */
@@ -5058,6 +5079,10 @@ export type RootMutationType = {
   approveGate?: Maybe<PipelineGate>;
   approveStackRun?: Maybe<StackRun>;
   cancelBuild?: Maybe<Build>;
+  /** saves a set of messages and generates a new one transactionally */
+  chat?: Maybe<Chat>;
+  /** Wipes your current chat history blank */
+  clearChatHistory?: Maybe<Scalars['Int']['output']>;
   /** clones the spec of the given service to be deployed either into a new namespace or new cluster */
   cloneService?: Maybe<ServiceDeployment>;
   completeStackRun?: Maybe<StackRun>;
@@ -5107,6 +5132,8 @@ export type RootMutationType = {
   deleteAccessToken?: Maybe<AccessToken>;
   deleteCatalog?: Maybe<Catalog>;
   deleteCertificate?: Maybe<Scalars['Boolean']['output']>;
+  /** deletes a chat from a users history */
+  deleteChat?: Maybe<Chat>;
   deleteCluster?: Maybe<Cluster>;
   deleteClusterProvider?: Maybe<ClusterProvider>;
   deleteCustomStackRun?: Maybe<CustomStackRun>;
@@ -5186,6 +5213,8 @@ export type RootMutationType = {
   restorePostgres?: Maybe<Postgresql>;
   /** rewires this service to use the given revision id */
   rollbackService?: Maybe<ServiceDeployment>;
+  /** saves a list of chat messages to your current chat history, can be used at any time */
+  saveChats?: Maybe<Array<Maybe<Chat>>>;
   /** save the manifests in cache to be retrieved by the requesting user */
   saveManifests?: Maybe<Scalars['Boolean']['output']>;
   /** upserts a pipeline with a given name */
@@ -5269,6 +5298,11 @@ export type RootMutationTypeApproveStackRunArgs = {
 
 export type RootMutationTypeCancelBuildArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeChatArgs = {
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
 };
 
 
@@ -5507,6 +5541,11 @@ export type RootMutationTypeDeleteCatalogArgs = {
 export type RootMutationTypeDeleteCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeDeleteChatArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -5864,6 +5903,11 @@ export type RootMutationTypeRollbackServiceArgs = {
 };
 
 
+export type RootMutationTypeSaveChatsArgs = {
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+};
+
+
 export type RootMutationTypeSaveManifestsArgs = {
   id: Scalars['ID']['input'];
   manifests?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
@@ -6182,6 +6226,8 @@ export type RootQueryType = {
   catalog?: Maybe<Catalog>;
   catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
+  /** gets the chat history from prior AI chat sessions */
+  chats?: Maybe<ChatConnection>;
   /** fetches an individual cluster */
   cluster?: Maybe<Cluster>;
   /** list all addons currently resident in the artifacts repo */
@@ -6451,6 +6497,14 @@ export type RootQueryTypeCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeChatsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

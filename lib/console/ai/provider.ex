@@ -23,9 +23,8 @@ defmodule Console.AI.Provider do
 
   def completion(history, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
-    preface = get_preface(opts)
     with {:ok, %mod{} = client} <- client(settings),
-      do: mod.completion(client, [preface | history])
+      do: mod.completion(client, add_preface(history, opts))
   end
 
   def summary(text),
@@ -41,10 +40,11 @@ defmodule Console.AI.Provider do
     do: {:ok, Azure.new(azure)}
   defp client(_), do: {:error, "ai not enabled for this Plural Console instance"}
 
-  defp get_preface(opts) do
+  defp add_preface(history, opts) do
     case opts[:preface] do
-      val when is_binary(val) -> {:system, val}
-      _ -> @preface
+      val when is_binary(val) -> [{:system, val} | history]
+      :ignore -> history
+      _ -> [@preface | history]
     end
   end
 end

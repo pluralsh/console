@@ -1,9 +1,15 @@
 defmodule Console.AI.Cron do
   import Console.Services.Base, only: [handle_notify: 2]
   alias Console.{Repo, PubSub}
-  alias Console.AI.Worker
+  alias Console.AI.{Worker, Chat}
   alias Console.Deployments.Settings
-  alias Console.Schema.{AiInsight, Stack, Service, DeploymentSettings}
+  alias Console.Schema.{
+    AiInsight,
+    Stack,
+    Service,
+    DeploymentSettings,
+    User,
+  }
 
   require Logger
 
@@ -36,6 +42,16 @@ defmodule Console.AI.Cron do
       |> Stream.chunk_every(@chunk)
       |> Stream.map(&batch_insight(PubSub.StackInsight, &1))
       |> Stream.run()
+    end)
+  end
+
+  def chats() do
+    if_enabled(fn ->
+      User.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Flow.from_enumerable(stages: 20)
+      |> Flow.map(&Chat.rollup/1)
+      |> Flow.run()
     end)
   end
 
