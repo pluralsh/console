@@ -63,4 +63,23 @@ defmodule Console.GraphQl.AiQueriesTest do
       """, %{"insightId" => insight.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "chats" do
+    test "it will fetch a users chat history" do
+      user = insert(:user)
+      chats = insert_list(3, :chat, user: user)
+      insert_list(3, :chat)
+
+      {:ok, %{data: %{"chats" => found}}} = run_query("""
+        query {
+          chats(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(chats)
+    end
+  end
 end

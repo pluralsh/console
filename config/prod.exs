@@ -60,7 +60,8 @@ config :console, Console.Cron.Scheduler,
     {"@daily", {Console.Cron.Jobs, :prune_notifications, []}},
     {"@daily", {Console.Cron.Jobs, :prune_audits, []}},
     {"@daily", {Console.Cron.Jobs, :prune_alerts, []}},
-    {"@daily", {Console.AI.Cron, :trim, []}}
+    {"@daily", {Console.AI.Cron, :trim, []}},
+    {"0 0 * * 0", Console.AI.Cron, :chats, []}
   ]
 
 config :console, :watchers, [

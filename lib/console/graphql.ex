@@ -80,6 +80,7 @@ defmodule Console.GraphQl do
     import_fields :webhook_mutations
     import_fields :database_mutations
     import_fields :deployment_mutations
+    import_fields :ai_mutations
   end
 
   subscription do

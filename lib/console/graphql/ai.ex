@@ -22,6 +22,16 @@ defmodule Console.GraphQl.AI do
     field :content, non_null(:string)
   end
 
+  object :chat do
+    field :id,      non_null(:id)
+    field :role,    non_null(:ai_role)
+    field :content, non_null(:string)
+
+    timestamps()
+  end
+
+  connection node_type: :chat
+
   @desc "A representation of a LLM-derived insight"
   object :ai_insight do
     field :id,        non_null(:id)
@@ -51,6 +61,46 @@ defmodule Console.GraphQl.AI do
       arg :insight_id, non_null(:id), description: "the ai insight you want to suggest a fix for"
 
       resolve &AI.ai_suggested_fix/2
+    end
+
+    @desc "gets the chat history from prior AI chat sessions"
+    connection field :chats, node_type: :chat do
+      middleware Authenticated
+
+      resolve &AI.chats/2
+    end
+  end
+
+  object :ai_mutations do
+    @desc "saves a list of chat messages to your current chat history, can be used at any time"
+    field :save_chats, list_of(:chat) do
+      middleware Authenticated
+      arg :messages, list_of(:chat_message)
+
+      resolve &AI.save_chats/2
+    end
+
+    @desc "saves a set of messages and generates a new one transactionally"
+    field :chat, :chat do
+      middleware Authenticated
+      arg :messages, list_of(:chat_message)
+
+      resolve &AI.chat/2
+    end
+
+    @desc "Wipes your current chat history blank"
+    field :clear_chat_history, :integer do
+      middleware Authenticated
+
+      resolve &AI.clear_chats/2
+    end
+
+    @desc "deletes a chat from a users history"
+    field :delete_chat, :chat do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.delete_chat/2
     end
   end
 end

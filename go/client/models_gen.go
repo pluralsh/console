@@ -666,6 +666,24 @@ type Changelog struct {
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
 
+type Chat struct {
+	ID         string  `json:"id"`
+	Role       AiRole  `json:"role"`
+	Content    string  `json:"content"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+type ChatConnection struct {
+	PageInfo PageInfo    `json:"pageInfo"`
+	Edges    []*ChatEdge `json:"edges,omitempty"`
+}
+
+type ChatEdge struct {
+	Node   *Chat   `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
 // A basic AI chat message input, modeled after OpenAI's api model
 type ChatMessage struct {
 	Role    AiRole `json:"role"`
