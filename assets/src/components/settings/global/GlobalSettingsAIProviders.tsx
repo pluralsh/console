@@ -177,6 +177,7 @@ export function AzureSettings({
     <>
       <FormField
         label="API version"
+        hint="The API version you want to use."
         required={enabled}
         flex={1}
       >
@@ -204,6 +205,7 @@ export function AzureSettings({
       </FormField>
       <FormField
         label="Access token"
+        hint="The Azure OpenAI access token to use."
         required={enabled}
         flex={1}
       >
