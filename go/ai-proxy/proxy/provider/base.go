@@ -1,15 +1,23 @@
 package provider
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
+	"github.com/andybalholm/brotli"
+	"k8s.io/klog/v2"
+
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/internal/log"
-	"k8s.io/klog/v2"
+)
+
+const (
+	headerContentEncoding = "Content-Encoding"
 )
 
 type baseTranslationProxy struct {
@@ -41,7 +49,26 @@ func (in *baseTranslationProxy) ModifyRequest(r *httputil.ProxyRequest) {
 		"to", targetURL)
 }
 
-func (in *baseTranslationProxy) ModifyResponse(*http.Response) error {
+func (in *baseTranslationProxy) ModifyResponse(r *http.Response) error {
+	var reader io.Reader
+	contentEncoding := r.Header.Get(headerContentEncoding)
+	if len(contentEncoding) == 0 {
+		return nil
+	}
+
+	switch strings.TrimSpace(contentEncoding) {
+	case "br": // brotli
+		r.Header.Del(headerContentEncoding)
+		reader = brotli.NewReader(r.Body)
+	}
+
+	respBody, err := io.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+
+	r.ContentLength = int64(len(respBody))
+	r.Body = io.NopCloser(bytes.NewReader(respBody))
 	return nil
 }
 

@@ -30,6 +30,10 @@ func (in *OpenAIProxy) ModifyRequest(r *httputil.ProxyRequest) {
 }
 
 func (in *OpenAIProxy) ModifyResponse(r *http.Response) error {
+	if err := in.baseTranslationProxy.ModifyResponse(r); err != nil {
+		return err
+	}
+
 	err := in.modifyResponseBody(r)
 	if err != nil {
 		klog.ErrorS(err, "failed to map request body")
