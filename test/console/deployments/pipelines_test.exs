@@ -673,5 +673,58 @@ defmodule Console.Deployments.PipelinesTest do
       assert promod.id == promo.id
       assert promod.promoted_at
     end
+
+    test "it will block promotion on open, but stale gates" do
+      admin = admin_user()
+      cluster = insert(:cluster)
+      repository = insert(:git_repository)
+
+      pipe = insert(:pipeline)
+      ctx = insert(:pipeline_context, pipeline: pipe)
+      dev = insert(:pipeline_stage, pipeline: pipe, context: ctx)
+      prod = insert(:pipeline_stage, pipeline: pipe)
+      edge = insert(:pipeline_edge, pipeline: pipe, from: dev, to: prod)
+      gate = insert(:pipeline_gate,
+        edge: edge,
+        type: :approval,
+        state: :open,
+        updated_at: Timex.now() |> Timex.shift(hours: -1)
+      )
+
+      {:ok, dev_svc} = create_service(cluster, admin, [
+        name: "dev",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        sha: "test-sha",
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "new-value"}]
+      ])
+      dev_svc = Console.Repo.preload(dev_svc, [:revision])
+
+      {:ok, prod_svc} = create_service(cluster, admin, [
+        name: "prod",
+        namespace: "test",
+        git: %{ref: "master", folder: "k8s"},
+        repository_id: repository.id,
+        configuration: [%{name: "name", value: "value"}, %{name: "other", value: "other-value"}]
+      ])
+
+      insert(:stage_service, stage: dev, service: dev_svc)
+      insert(:stage_service, stage: prod, service: prod_svc)
+      promo = insert(:pipeline_promotion, stage: dev, revised_at: Timex.now(), context: ctx)
+      insert(:promotion_service, promotion: promo, service: dev_svc, revision: dev_svc.revision)
+
+      {:ok, promod} = Pipelines.apply_promotion(promo)
+
+      assert promod.id == promo.id
+      refute promod.promoted_at
+
+      {:ok, _} = Pipelines.approve_gate(gate.id, admin)
+
+      {:ok, promod} = Pipelines.apply_promotion(promo)
+
+      assert promod.id == promo.id
+      assert promod.promoted_at
+    end
   end
 end
