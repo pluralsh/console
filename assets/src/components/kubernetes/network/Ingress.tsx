@@ -41,6 +41,7 @@ import ResourceLink from '../common/ResourceLink'
 
 import { getBreadcrumbs } from './Ingresses'
 import { Endpoints } from './utils'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -62,6 +63,10 @@ export default function Ingress(): ReactElement {
   })
 
   const ingress = data?.handleGetIngressDetail
+
+  useExplainWithAI(
+    'Describe Kubernetes Ingress resource: ' + JSON.stringify(ingress)
+  )
 
   useSetBreadcrumbs(
     useMemo(

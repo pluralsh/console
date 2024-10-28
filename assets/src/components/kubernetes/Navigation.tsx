@@ -114,7 +114,7 @@ export default function Navigation() {
           flexShrink: 1,
           height: '100%',
           width: '100%',
-          overflow: 'hidden',
+          minWidth: 0,
         }}
       >
         <div

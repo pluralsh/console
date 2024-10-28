@@ -19,6 +19,7 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './ClusterRoleBindings'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Subjects' },
@@ -38,6 +39,10 @@ export default function ClusterRoleBinding(): ReactElement {
   })
 
   const crb = data?.handleGetClusterRoleBindingDetail
+
+  useExplainWithAI(
+    'Describe Kubernetes Cluster Role Binding resource: ' + JSON.stringify(crb)
+  )
 
   useSetBreadcrumbs(
     useMemo(

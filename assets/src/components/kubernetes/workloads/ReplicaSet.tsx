@@ -49,6 +49,7 @@ import { Kind } from '../common/types'
 import { getBreadcrumbs } from './ReplicaSets'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -96,6 +97,10 @@ export default function ReplicaSet(): ReactElement {
   )
 
   const rs = data?.handleGetReplicaSetDetail as ReplicaSetT
+
+  useExplainWithAI(
+    'Describe Kubernetes Replica Set resource: ' + JSON.stringify(rs)
+  )
 
   if (loading) {
     return <LoadingIndicator />

@@ -1,4 +1,5 @@
 fragment AiInsight on AiInsight {
+  id
   text
   summary
   sha
@@ -12,7 +13,20 @@ fragment AiInsight on AiInsight {
 }
 
 fragment AiInsightSummary on AiInsight {
+  id
   summary
   freshness
   updatedAt
+}
+
+query AI($prompt: String!) {
+  ai(prompt: $prompt)
+}
+
+query AICompletion($system: String!, $input: String, $chat: [ChatMessage]) {
+  aiCompletion(system: $system, input: $input, chat: $chat)
+}
+
+query AISuggestedFix($insightID: ID!) {
+  aiSuggestedFix(insightId: $insightID)
 }

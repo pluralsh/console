@@ -21,10 +21,16 @@ defmodule Console.GraphQl.AiQueriesTest do
     test "it can generate a suggestion for a fix given an existing insight" do
       user = insert(:user)
       git = insert(:git_repository, url: "https://github.com/pluralsh/deployment-operator.git")
+      parent = insert(:service,
+        repository: git,
+        git: %{ref: "main", folder: "charts/deployment-operator"}
+      )
+
       svc = insert(:service,
         repository: git,
         git: %{ref: "main", folder: "charts/deployment-operator"},
-        write_bindings: [%{user_id: user.id}]
+        write_bindings: [%{user_id: user.id}],
+        parent: parent
       )
       insight = insert(:ai_insight, service: svc)
 
@@ -55,6 +61,25 @@ defmodule Console.GraphQl.AiQueriesTest do
           aiSuggestedFix(insightId: $insightId)
         }
       """, %{"insightId" => insight.id}, %{current_user: insert(:user)})
+    end
+  end
+
+  describe "chats" do
+    test "it will fetch a users chat history" do
+      user = insert(:user)
+      chats = insert_list(3, :chat, user: user)
+      insert_list(3, :chat)
+
+      {:ok, %{data: %{"chats" => found}}} = run_query("""
+        query {
+          chats(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(chats)
     end
   end
 end

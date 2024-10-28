@@ -36,6 +36,7 @@ import { Kind } from '../common/types'
 import { getBreadcrumbs } from './Namespaces'
 import { NamespacePhaseChip } from './utils'
 import { useEventsColumns } from './Events'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'raw', label: 'Raw' },
@@ -55,6 +56,10 @@ export default function Namespace(): ReactElement {
   })
 
   const namespace = data?.handleGetNamespaceDetail
+
+  useExplainWithAI(
+    'Describe Kubernetes Namespace resource: ' + JSON.stringify(namespace)
+  )
 
   useSetBreadcrumbs(
     useMemo(

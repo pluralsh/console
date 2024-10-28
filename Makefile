@@ -23,7 +23,7 @@ find-versions:
 	az aks get-versions --location eastus --output json > k8s-versions/aks.json
 
 
-update-ollama-helm-chart: ## update ollama Helm chart
+pull-ollama-helm-chart: ## update ollama Helm chart
 	helm repo add ollama-helm https://otwld.github.io/ollama-helm/
 	helm repo update
 	rm -rf charts/ollama

@@ -99,7 +99,7 @@ export function DataSelectInputs({
     >
       <IconExpander
         icon={<SearchIcon />}
-        {...(filter && { borderColor: theme.colors['border-primary'] })}
+        active={!!filter}
       >
         <ExpandedInput
           inputValue={filter}
@@ -109,7 +109,7 @@ export function DataSelectInputs({
       {namespaced && (
         <IconExpander
           icon={<FiltersIcon />}
-          {...(namespace && { borderColor: theme.colors['border-primary'] })}
+          active={!!namespace}
         >
           <NamespaceFilter
             namespaces={namespaces}

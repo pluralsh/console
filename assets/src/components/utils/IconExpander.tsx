@@ -1,6 +1,7 @@
 import {
   Accordion,
   AccordionItem,
+  AnimatedDiv,
   CloseIcon,
   IconFrame,
   Input,
@@ -15,20 +16,45 @@ import {
   useState,
 } from 'react'
 import styled, { CSSProperties, useTheme } from 'styled-components'
+import { useTransition } from 'react-spring'
 
 export function IconExpander({
   icon,
+  active,
   hideCloseIcon = false,
   children,
   ...cssProps
 }: {
   icon: ReactElement
+  active?: boolean
   hideCloseIcon?: boolean
   children: ReactNode
 } & CSSProperties) {
   const theme = useTheme()
   // will hold the item's randomly assigned id if open, empty string if closed
   const [openItem, setOpenItem] = useState('')
+  const transitions = useTransition(active && !openItem ? [true] : [], {
+    from: { opacity: 0, scale: `40%` },
+    enter: { opacity: 1, scale: '100%' },
+    leave: { opacity: 0, scale: `40%` },
+    config: { duration: 200 },
+  })
+
+  const indicator = transitions((styles) => (
+    <AnimatedDiv
+      css={{
+        position: 'absolute',
+        right: -4,
+        top: -4,
+        height: 12,
+        width: 12,
+        backgroundColor: theme.colors['border-primary'],
+        borderRadius: '50%',
+        zIndex: 9999,
+      }}
+      style={styles}
+    ></AnimatedDiv>
+  ))
 
   return (
     <div css={{ position: 'relative' }}>
@@ -40,6 +66,7 @@ export function IconExpander({
         css={{
           border: theme.borders['fill-three'],
           overflow: 'hidden',
+          ...(active ? { borderColor: theme.colors['border-primary'] } : {}),
           ...cssProps,
         }}
       >
@@ -60,6 +87,7 @@ export function IconExpander({
           </div>
         </AccordionItem>
       </Accordion>
+      {indicator}
     </div>
   )
 }
