@@ -27,6 +27,4 @@ function FractionalChip({ label, suffix, fraction }: FractionalChipProps) {
   )
 }
 
-FractionalChip.defaultProps = { label: true, suffix: '' }
-
 export default FractionalChip
