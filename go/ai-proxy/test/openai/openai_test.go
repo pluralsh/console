@@ -41,6 +41,8 @@ func TestMain(m *testing.M) {
 		klog.Fatal(err)
 	}
 
+	defer server.Close()
+	defer providerServer.Close()
 	m.Run()
 }
 
