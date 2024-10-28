@@ -13,7 +13,11 @@ import { SelectPropsSingle } from '@pluralsh/design-system/dist/components/Selec
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
-import { AiProvider, AiSettingsAttributes } from 'generated/graphql'
+import {
+  AiProvider,
+  AiSettingsAttributes,
+  useUpdateDeploymentSettingsMutation,
+} from 'generated/graphql'
 import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { produce } from 'immer'
@@ -26,6 +30,7 @@ import {
   OpenAIAnthropicSettings,
   validateAttributes,
 } from './GlobalSettingsAIProviders.tsx'
+import { GqlError } from '../../utils/Alert.tsx'
 
 const updateSettings = produce(
   (
@@ -113,43 +118,30 @@ export function GlobalSettingsAiProvider() {
 
   const [showToast, setShowToast] = useState(false)
 
-  // const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
-  //   variables: {
-  //     attributes: {
-  //       ai: !form.enabled
-  //         ? { enabled: false }
-  //         : {
-  //             enabled: true,
-  //             provider: form.provider,
-  //             ...(form.provider === AiProvider.Openai && {
-  //               openai: {
-  //                 model: form.model === '' ? null : form.model,
-  //                 accessToken: form.accessToken,
-  //               },
-  //             }),
-  //             ...(form.provider === AiProvider.Anthropic && {
-  //               anthropic: {
-  //                 model: form.model === '' ? null : form.model,
-  //                 accessToken: form.accessToken,
-  //               },
-  //             }),
-  //           },
-  //     },
-  //   },
-  //   onCompleted: () => {
-  //     setShowToast(true)
-  //     setForm({
-  //       ...form,
-  //       accessToken: '',
-  //     })
-  //   },
-  // })
-
-  //const allowSubmit = !!form.accessToken || form.enabled !== ai?.enabled
+  const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
+    variables: {
+      attributes: {
+        ai: enabled
+          ? {
+              enabled,
+              provider,
+              ...providerSettings,
+            }
+          : { enabled },
+      },
+    },
+    // onCompleted: () => {
+    //   setShowToast(true)
+    //   setForm({
+    //     ...form,
+    //     accessToken: '',
+    //   })
+    // },
+  })
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
-    // mutation()
+    mutation()
   }
 
   return (
@@ -158,7 +150,7 @@ export function GlobalSettingsAiProvider() {
         forwardedAs="form"
         onSubmit={handleSubmit}
       >
-        {/*{error && <GqlError error={error} />}*/}
+        {error && <GqlError error={error} />}
         <Switch
           checked={enabled}
           onChange={(checked) => setEnabled(checked)}
@@ -196,7 +188,7 @@ export function GlobalSettingsAiProvider() {
           alignSelf="flex-end"
           type="submit"
           disabled={!valid}
-          // loading={loading}
+          loading={loading}
         >
           Save changes
         </Button>
