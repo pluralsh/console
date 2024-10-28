@@ -78,4 +78,4 @@ fix: fmt ## fix issues found by linters
 
 .PHONY: test
 test: fmt vet ## run tests
-	go test $$(go list ./...) -v
+	go test ./test/... -v
