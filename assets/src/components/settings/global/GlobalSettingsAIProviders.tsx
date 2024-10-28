@@ -61,12 +61,12 @@ export function validateAttributes(
     case AiProvider.Anthropic:
       return !!settings.anthropic?.accessToken
     case AiProvider.Ollama:
-      return !!(settings.ollama?.url && settings.ollama.authorization)
+      return !!(settings.ollama?.url && settings.ollama?.authorization)
     case AiProvider.Azure:
       return !!(
         settings.azure?.apiVersion &&
-        settings.azure.endpoint &&
-        settings.azure.accessToken
+        settings.azure?.endpoint &&
+        settings.azure?.accessToken
       )
     default:
       return false
