@@ -130,13 +130,12 @@ export function GlobalSettingsAiProvider() {
           : { enabled },
       },
     },
-    // onCompleted: () => {
-    //   setShowToast(true)
-    //   setForm({
-    //     ...form,
-    //     accessToken: '',
-    //   })
-    // },
+    onCompleted: (data) => {
+      setShowToast(true)
+      updateProviderSettings(
+        initialSettingsAttributes(data?.updateDeploymentSettings?.ai)
+      )
+    },
   })
 
   const handleSubmit = (e: FormEvent) => {
