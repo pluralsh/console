@@ -2,4 +2,3 @@ icon: https://d3g9o9u8re44ak.cloudfront.net/logo/55cad6f2-84cb-49a7-9d60-265f7e4
 git_url: https://github.com/aws/karpenter-provider-aws
 release_url: https://github.com/aws/karpenter-provider-aws/releases/tag/v{vsn}
 helm_repository_url: https://charts.karpenter.sh
-versions:
