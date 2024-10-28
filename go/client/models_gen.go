@@ -670,6 +670,7 @@ type Chat struct {
 	ID         string  `json:"id"`
 	Role       AiRole  `json:"role"`
 	Content    string  `json:"content"`
+	Seq        int64   `json:"seq"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
@@ -789,6 +790,8 @@ type Cluster struct {
 	ParentCluster *Cluster `json:"parentCluster,omitempty"`
 	// an ai insight generated about issues discovered which might impact the health of this cluster
 	Insight *AiInsight `json:"insight,omitempty"`
+	// a set of kubernetes resources used to generate the ai insight for this cluster
+	InsightComponents *ClusterInsightComponent `json:"insightComponents,omitempty"`
 	// list cached nodes for a cluster, this can be stale up to 5m
 	Nodes []*Node `json:"nodes,omitempty"`
 	// list the cached node metrics for a cluster, can also be stale up to 5m
@@ -901,6 +904,18 @@ type ClusterInfo struct {
 	GitVersion *string `json:"gitVersion,omitempty"`
 	Platform   *string `json:"platform,omitempty"`
 	Version    *string `json:"version,omitempty"`
+}
+
+// A kubernetes object used in the course of generating a cluster insight
+type ClusterInsightComponent struct {
+	ID        string  `json:"id"`
+	Group     *string `json:"group,omitempty"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      string  `json:"name"`
+	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
+	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }
 
 type ClusterInsightComponentAttributes struct {

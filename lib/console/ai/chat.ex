@@ -66,9 +66,10 @@ defmodule Console.AI.Chat do
   @doc """
   Clears the chat history for a user
   """
-  @spec clear(User.t) :: {:ok, integer} | Console.error
-  def clear(%User{id: uid}) do
+  @spec clear(User.t, integer | nil) :: {:ok, integer} | Console.error
+  def clear(%User{id: uid}, before \\ nil) do
     Chat.for_user(uid)
+    |> Chat.before(before)
     |> Repo.delete_all()
     |> elem(0)
     |> ok()

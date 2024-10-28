@@ -861,6 +861,7 @@ export type Chat = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   role: AiRole;
+  seq: Scalars['Int']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -940,6 +941,8 @@ export type Cluster = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** an ai insight generated about issues discovered which might impact the health of this cluster */
   insight?: Maybe<AiInsight>;
+  /** a set of kubernetes resources used to generate the ai insight for this cluster */
+  insightComponents?: Maybe<ClusterInsightComponent>;
   /** whether the deploy operator has been registered for this cluster */
   installed?: Maybe<Scalars['Boolean']['output']>;
   /** the url of the kas server you can access this cluster from */
@@ -1176,6 +1179,19 @@ export type ClusterInfo = {
   gitVersion?: Maybe<Scalars['String']['output']>;
   platform?: Maybe<Scalars['String']['output']>;
   version?: Maybe<Scalars['String']['output']>;
+};
+
+/** A kubernetes object used in the course of generating a cluster insight */
+export type ClusterInsightComponent = {
+  __typename?: 'ClusterInsightComponent';
+  group?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  kind: Scalars['String']['output'];
+  name: Scalars['String']['output'];
+  namespace?: Maybe<Scalars['String']['output']>;
+  /** the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly */
+  resource?: Maybe<KubernetesUnstructured>;
+  version: Scalars['String']['output'];
 };
 
 export type ClusterInsightComponentAttributes = {
@@ -5306,6 +5322,11 @@ export type RootMutationTypeChatArgs = {
 };
 
 
+export type RootMutationTypeClearChatHistoryArgs = {
+  before?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootMutationTypeCloneServiceArgs = {
   attributes: ServiceCloneAttributes;
   cluster?: InputMaybe<Scalars['String']['input']>;
@@ -6237,6 +6258,7 @@ export type RootQueryType = {
   clusterGate?: Maybe<PipelineGate>;
   clusterGates?: Maybe<Array<Maybe<PipelineGate>>>;
   clusterInfo?: Maybe<ClusterInfo>;
+  clusterInsightComponent?: Maybe<ClusterInsightComponent>;
   clusterManagedNamespaces?: Maybe<ManagedNamespaceConnection>;
   /** fetches an individual cluster provider */
   clusterProvider?: Maybe<ClusterProvider>;
@@ -6532,6 +6554,11 @@ export type RootQueryTypeClusterBackupsArgs = {
 
 
 export type RootQueryTypeClusterGateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterInsightComponentArgs = {
   id: Scalars['ID']['input'];
 };
 

@@ -66,6 +66,37 @@ defmodule Console.AI.CronTest do
     end
   end
 
+  describe "#clusters/0" do
+    test "it will generate insights for failing components" do
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      cluster = insert(:cluster)
+      insert(:cluster_insight_component,
+        cluster: cluster,
+        group: "cert-manager.io",
+        version: "v1",
+        kind: "Certificate",
+        namespace: "ns",
+        name: "name"
+      )
+      expect(Clusters, :control_plane, fn _ -> %Kazan.Server{} end)
+      expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("ns")} end)
+      expect(Kube.Utils, :run, fn _ -> {:ok, %{items: []}} end)
+      expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)
+
+      Cron.clusters()
+
+      %{id: id} = cluster = Console.Repo.preload(refetch(cluster), [:insight, insight_components: :insight])
+
+      assert cluster.insight.text
+
+      %{insight_components: [component]} = cluster
+
+      assert component.insight.text
+
+      assert_receive {:event, %PubSub.ClusterInsight{item: {%{id: ^id}, _}}}
+    end
+  end
+
   describe "#stacks/0" do
     test "it will gather info from stack runs and generate" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})

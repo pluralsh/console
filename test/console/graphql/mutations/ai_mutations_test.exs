@@ -62,6 +62,25 @@ defmodule Console.GraphQl.AIMutationsTest do
       for c <- ignore,
         do: assert refetch(c)
     end
+
+    test "it will clear chats before a sequence number" do
+      user = insert(:user)
+      chats = insert_list(3, :chat, user: user, seq: 1)
+      ignore1 = insert_list(3, :chat, user: user, seq: 3)
+      ignore2 = insert_list(3, :chat)
+
+      {:ok, %{data: %{"clearChatHistory" => 3}}} = run_query("""
+        mutation {
+          clearChatHistory(before: 2)
+        }
+      """, %{}, %{current_user: user})
+
+      for c <- chats,
+        do: refute refetch(c)
+
+      for c <- ignore1 ++ ignore2,
+        do: assert refetch(c)
+    end
   end
 
   describe "deleteChat" do
