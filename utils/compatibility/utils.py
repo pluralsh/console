@@ -201,7 +201,6 @@ def update_chart_versions(app_name, chart_name=""):
         print_error(f"No Chart versions found for {chart_name}")
         return
 
-    print("Found Entries", chart_versions)
     for chart_entry in chart_versions:
         app_version = chart_entry["appVersion"]
         app_version = app_version.lstrip("v")
