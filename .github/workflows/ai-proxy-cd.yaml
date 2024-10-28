@@ -60,6 +60,10 @@ jobs:
           ghcr.io/pluralsh/ai-proxy
           gcr.io/pluralsh/ai-proxy
           docker.io/pluralsh/ai-proxy
+        tags: |
+          type=semver,pattern={{version}},priority=1000
+          type=sha,priority=800
+          type=ref,event=pr,priority=600
     - uses: docker/login-action@v3
       with:
         registry: ghcr.io
