@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	ollamaapi "github.com/ollama/ollama/api"
@@ -43,7 +44,7 @@ func TestMain(m *testing.M) {
 
 	defer server.Close()
 	defer providerServer.Close()
-	m.Run()
+	os.Exit(m.Run())
 }
 
 func TestOpenAIProxy(t *testing.T) {

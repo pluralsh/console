@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	ollamaapi "github.com/ollama/ollama/api"
@@ -40,7 +41,7 @@ func TestMain(m *testing.M) {
 		klog.Fatal(err)
 	}
 
-	m.Run()
+	os.Exit(m.Run())
 }
 
 func TestOllamaAIProxy(t *testing.T) {
