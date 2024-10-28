@@ -18,11 +18,13 @@ import styled, { CSSProperties, useTheme } from 'styled-components'
 
 export function IconExpander({
   icon,
+  active,
   hideCloseIcon = false,
   children,
   ...cssProps
 }: {
   icon: ReactElement
+  active?: boolean
   hideCloseIcon?: boolean
   children: ReactNode
 } & CSSProperties) {
@@ -40,6 +42,7 @@ export function IconExpander({
         css={{
           border: theme.borders['fill-three'],
           overflow: 'hidden',
+          ...(active ? { borderColor: theme.colors['border-primary'] } : {}),
           ...cssProps,
         }}
       >
