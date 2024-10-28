@@ -3,6 +3,7 @@ module github.com/pluralsh/console/go/ai-proxy
 go 1.22.8
 
 require (
+	github.com/andybalholm/brotli v1.1.1
 	github.com/gorilla/mux v1.8.1
 	github.com/ollama/ollama v0.3.14
 	github.com/pluralsh/polly v0.1.10
@@ -12,7 +13,6 @@ require (
 )
 
 require (
-	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/bytedance/sonic v1.12.3 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
