@@ -8,6 +8,7 @@ from utils import (
     update_compatibility_info,
     update_chart_versions,
     current_kube_version,
+    latest_kube_version,
 )
 
 GITHUB_REPO_URL = "https://github.com/kubernetes-sigs/external-dns"
