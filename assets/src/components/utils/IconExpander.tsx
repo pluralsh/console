@@ -1,9 +1,7 @@
 import {
   Accordion,
   AccordionItem,
-  AiSparkleFilledIcon,
   AnimatedDiv,
-  Button,
   CloseIcon,
   IconFrame,
   Input,
