@@ -24,6 +24,7 @@ import {
   initialSettingsAttributes,
   OllamaSettings,
   OpenAIAnthropicSettings,
+  validateAttributes,
 } from './GlobalSettingsAIProviders.tsx'
 
 const updateSettings = produce(
@@ -104,6 +105,11 @@ export function GlobalSettingsAiProvider() {
       )
       break
   }
+
+  const valid = useMemo(
+    () => validateAttributes(provider, providerSettings),
+    [provider, providerSettings]
+  )
 
   const [showToast, setShowToast] = useState(false)
 
@@ -189,7 +195,7 @@ export function GlobalSettingsAiProvider() {
         <Button
           alignSelf="flex-end"
           type="submit"
-          // disabled={!allowSubmit}
+          disabled={!valid}
           // loading={loading}
         >
           Save changes

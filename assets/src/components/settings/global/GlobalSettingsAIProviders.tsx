@@ -1,4 +1,8 @@
-import { AiSettings, AiSettingsAttributes } from '../../../generated/graphql.ts'
+import {
+  AiProvider,
+  AiSettings,
+  AiSettingsAttributes,
+} from '../../../generated/graphql.ts'
 import { FormField, Input } from '@pluralsh/design-system'
 import { InputRevealer } from '../../cd/providers/InputRevealer.tsx'
 import { useTheme } from 'styled-components'
@@ -45,6 +49,28 @@ export function initialSettingsAttributes(
   }
 
   return {}
+}
+
+export function validateAttributes(
+  provider: AiProvider,
+  settings: Omit<AiSettingsAttributes, 'enabled' | 'provider'>
+): boolean {
+  switch (provider) {
+    case AiProvider.Openai:
+      return !!settings.openai?.accessToken
+    case AiProvider.Anthropic:
+      return !!settings.anthropic?.accessToken
+    case AiProvider.Ollama:
+      return !!(settings.ollama?.url && settings.ollama.authorization)
+    case AiProvider.Azure:
+      return !!(
+        settings.azure?.apiVersion &&
+        settings.azure.endpoint &&
+        settings.azure.accessToken
+      )
+  }
+
+  return false
 }
 
 export function OpenAIAnthropicSettings({
