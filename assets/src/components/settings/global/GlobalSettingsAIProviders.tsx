@@ -68,9 +68,9 @@ export function validateAttributes(
         settings.azure.endpoint &&
         settings.azure.accessToken
       )
+    default:
+      return false
   }
-
-  return false
 }
 
 export function OpenAIAnthropicSettings({
