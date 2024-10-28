@@ -63,6 +63,20 @@ export function IconExpander({
           </div>
         </AccordionItem>
       </Accordion>
+      {active && !openItem && (
+        <div
+          css={{
+            position: 'absolute',
+            right: -4,
+            top: -4,
+            height: 12,
+            width: 12,
+            backgroundColor: theme.colors['border-primary'],
+            borderRadius: '50%',
+            zIndex: 9999,
+          }}
+        ></div>
+      )}
     </div>
   )
 }
