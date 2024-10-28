@@ -11,7 +11,7 @@ The Plural Console is the core control plane of the Plural fleet-management plat
   - driving observer execution
 * Management of terraform/pulumi/general IaC execution, tying into the git management for CD
 * Handling the Pull Request Automation APIs driving self-service workflows w/in Plural
-* Common incident management, including zoom integration and slash commands
+* Notification Routing, allowing for fine grained notification delivery to slack/teams/email targeted by event or affected resource
 * Handling core information gathering and querying for all AI-related functionality w/in Plural
 
 It provides a low-maintainence, all-in-one solution for virtually any devops task that might be associated w/ managing Kubernetes infrastructure, in a package that can be hosted naturally anywhere, whether it be in your own cloud, or on our own infrastructure using Plural Cloud.
@@ -51,7 +51,7 @@ yarn start:cd # or any other yarn target, we often test on different Console ins
 To make changes to the server codebase, you'll want to install elixir on your machine.  For Mac desktops, we do this via asdf, which can be done simply at the root of the repo like so:
 
 ```sh
-asdf instal
+asdf install
 ```
 
 Once elixir is available, all server dependencies are managed via docker-compose, and tests can be run via `mix`, like so:

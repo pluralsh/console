@@ -1007,6 +1007,7 @@ enum AiProvider {
   ANTHROPIC
   OLLAMA
   AZURE
+  BEDROCK
 }
 
 input ProjectAttributes {
@@ -1070,6 +1071,7 @@ input AiSettingsAttributes {
   anthropic: AnthropicSettingsAttributes
   ollama: OllamaAttributes
   azure: AzureOpenaiAttributes
+  bedrock: BedrockAiAttributes
 }
 
 input OpenaiSettingsAttributes {
@@ -1100,6 +1102,17 @@ input AzureOpenaiAttributes {
 
   "the azure openai access token to use"
   accessToken: String!
+}
+
+input BedrockAiAttributes {
+  "the bedrock model id to use"
+  modelId: String!
+
+  "aws access key id to use, you can also use IRSA for self-hosted consoles"
+  accessKeyId: String
+
+  "aws secret access key to use, you can also use IRSA for self-hosted consoles"
+  secretAccessKey: String
 }
 
 input SmtpSettingsAttributes {
@@ -1227,6 +1240,7 @@ type AiSettings {
   anthropic: AnthropicSettings
   ollama: OllamaSettings
   azure: AzureOpenaiSettings
+  bedrock: BedrockAiSettings
 }
 
 "OpenAI connection information"
@@ -1256,6 +1270,15 @@ type AzureOpenaiSettings {
 
   "the api version you want to use"
   apiVersion: String
+}
+
+"Settings for usage of AWS Bedrock for LLMs"
+type BedrockAiSettings {
+  "the bedrock model to use"
+  modelId: String!
+
+  "the aws access key to use, can also use IRSA when console is self-hosted"
+  accessKeyId: String
 }
 
 type ProjectConnection {

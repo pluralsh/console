@@ -202,6 +202,11 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Azure *AzureOpenAISettings `json:"azure,omitempty"`
+
+	// Bedrock holds configuration for using AWS Bedrock to generate LLM insights
+	//
+	// +kubebuilder:validation:Optional
+	Bedrock *BedrockSettings `json:"bedrock,omitempty"`
 }
 
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
@@ -253,6 +258,21 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Endpoint:    in.Azure.Endpoint,
 			APIVersion:  in.Azure.ApiVersion,
 			AccessToken: token,
+		}
+	case console.AiProviderBedrock:
+		if in.Bedrock == nil {
+			return nil, fmt.Errorf("must provide bedrock configuration to set the provider to BEDROCK")
+		}
+
+		secret, err := in.Bedrock.SecretAccessKey(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.Bedrock = &console.BedrockAiAttributes{
+			ModelID:         in.Bedrock.ModelID,
+			AccessKeyID:     in.Bedrock.AccessKeyId,
+			SecretAccessKey: secret,
 		}
 	case console.AiProviderOllama:
 		if in.Ollama == nil {
@@ -324,6 +344,23 @@ type AzureOpenAISettings struct {
 	TokenSecretRef corev1.SecretKeySelector `json:"tokenSecretRef"`
 }
 
+type BedrockSettings struct {
+	// The AWS Bedrock Model ID to use
+	//
+	// +kubebuilder:validation:Required
+	ModelID string `json:"modelId"`
+
+	// An AWS Access Key ID to use, can also use IRSA to acquire credentials
+	//
+	// +kubebuilder:validation:Optional
+	AccessKeyId *string `json:"accessKeyId,omitempty"`
+
+	// An AWS Secret Access Key to use, can also use IRSA to acquire credentials
+	//
+	// +kubebuilder:validation:Optional
+	SecretAccessKeyRef *corev1.SecretKeySelector `json:"secretAccessKeyRef"`
+}
+
 func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
 	if in == nil {
 		return "", fmt.Errorf("configured ai provider settings cannot be nil")
@@ -350,5 +387,18 @@ func (in *OllamaSettings) Authorization(ctx context.Context, c client.Client, na
 	}
 
 	res, err := utils.GetSecretKey(ctx, c, in.AuthorizationSecretRef, namespace)
+	return lo.ToPtr(res), err
+}
+
+func (in *BedrockSettings) SecretAccessKey(ctx context.Context, c client.Client, namespace string) (*string, error) {
+	if in == nil {
+		return nil, fmt.Errorf("configured ollama settings cannot be nil")
+	}
+
+	if in.SecretAccessKeyRef == nil {
+		return nil, nil
+	}
+
+	res, err := utils.GetSecretKey(ctx, c, in.SecretAccessKeyRef, namespace)
 	return lo.ToPtr(res), err
 }

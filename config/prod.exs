@@ -65,6 +65,12 @@ config :console, Console.Cron.Scheduler,
     {"0 0 * * 0", {Console.AI.Cron, :chats, []}}
   ]
 
+config :ex_aws,
+  region: {:system, "AWS_REGION"},
+  secret_access_key: [{:system, "AWS_ACCESS_KEY_ID"}, {:awscli, "profile_name", 30}],
+  access_key_id: [{:system, "AWS_SECRET_ACCESS_KEY"}, {:awscli, "profile_name", 30}],
+  awscli_auth_adapter: ExAws.STS.AuthCache.AssumeRoleWebIdentityAdapter
+
 config :console, :watchers, [
   Console.Watchers.Application,
   # Console.Watchers.Plural,

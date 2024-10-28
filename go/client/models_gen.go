@@ -151,6 +151,7 @@ type AiSettings struct {
 	Anthropic *AnthropicSettings   `json:"anthropic,omitempty"`
 	Ollama    *OllamaSettings      `json:"ollama,omitempty"`
 	Azure     *AzureOpenaiSettings `json:"azure,omitempty"`
+	Bedrock   *BedrockAiSettings   `json:"bedrock,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -160,6 +161,7 @@ type AiSettingsAttributes struct {
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
 	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
 	Azure     *AzureOpenaiAttributes       `json:"azure,omitempty"`
+	Bedrock   *BedrockAiAttributes         `json:"bedrock,omitempty"`
 }
 
 type Alert struct {
@@ -474,6 +476,23 @@ type BackupAttributes struct {
 	TTL              *string                     `json:"ttl,omitempty"`
 	Namespaces       *ResourceSelectorAttributes `json:"namespaces,omitempty"`
 	Resources        *ResourceSelectorAttributes `json:"resources,omitempty"`
+}
+
+type BedrockAiAttributes struct {
+	// the bedrock model id to use
+	ModelID string `json:"modelId"`
+	// aws access key id to use, you can also use IRSA for self-hosted consoles
+	AccessKeyID *string `json:"accessKeyId,omitempty"`
+	// aws secret access key to use, you can also use IRSA for self-hosted consoles
+	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+}
+
+// Settings for usage of AWS Bedrock for LLMs
+type BedrockAiSettings struct {
+	// the bedrock model to use
+	ModelID string `json:"modelId"`
+	// the aws access key to use, can also use IRSA when console is self-hosted
+	AccessKeyID *string `json:"accessKeyId,omitempty"`
 }
 
 type BindingAttributes struct {
@@ -5679,6 +5698,7 @@ const (
 	AiProviderAnthropic AiProvider = "ANTHROPIC"
 	AiProviderOllama    AiProvider = "OLLAMA"
 	AiProviderAzure     AiProvider = "AZURE"
+	AiProviderBedrock   AiProvider = "BEDROCK"
 )
 
 var AllAiProvider = []AiProvider{
@@ -5686,11 +5706,12 @@ var AllAiProvider = []AiProvider{
 	AiProviderAnthropic,
 	AiProviderOllama,
 	AiProviderAzure,
+	AiProviderBedrock,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock:
 		return true
 	}
 	return false
