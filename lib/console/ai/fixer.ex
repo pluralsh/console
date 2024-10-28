@@ -34,7 +34,7 @@ defmodule Console.AI.Fixer do
   def fix(id, %User{} = user) do
     Repo.get!(AiInsight, id)
     |> Repo.preload([:service, :stack])
-    |> allow(user, :write)
+    |> allow(user, :read)
     |> when_ok(&fix/1)
   end
 
