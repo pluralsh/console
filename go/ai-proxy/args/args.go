@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/pluralsh/console/go/ai-proxy/api"
-	"github.com/pluralsh/console/go/ai-proxy/internal/helpers"
-	"github.com/pluralsh/console/go/ai-proxy/internal/log"
 	"github.com/samber/lo"
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
+
+	"github.com/pluralsh/console/go/ai-proxy/api"
+	"github.com/pluralsh/console/go/ai-proxy/internal/helpers"
+	"github.com/pluralsh/console/go/ai-proxy/internal/log"
 )
 
 const (
@@ -22,9 +23,9 @@ const (
 )
 
 var (
-	argProvider      = pflag.String("provider", defaultProvider.String(), "TODO. Defaults to Ollama type API.")
-	argProviderHost  = pflag.String("provider-host", "", "TODO.")
-	argProviderToken = pflag.String("provider-token", helpers.GetPluralEnv(envProviderToken, ""), "TODO.")
+	argProvider      = pflag.String("provider", defaultProvider.String(), "Provider name. Must be one of: ollama, openai. Defaults to 'ollama' type API.")
+	argProviderHost  = pflag.String("provider-host", "", "Provider host address to access the API i.e. https://api.openai.com")
+	argProviderToken = pflag.String("provider-token", helpers.GetPluralEnv(envProviderToken, ""), "Provider token used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_TOKEN env var.")
 	argPort          = pflag.Int("port", defaultPort, "The port to listen on. Defaults to port 8000.")
 	argAddress       = pflag.IP("address", net.ParseIP(defaultAddress), "The IP address to serve on. Defaults to 0.0.0.0 (all interfaces).")
 )

@@ -76,6 +76,16 @@ func FromChatCompletionResponse(in openai.ChatCompletion) ollamaapi.ChatResponse
 	}
 }
 
+func FromErrorResponse(statusCode int) func(response openai.ErrorResponse) ollamaapi.StatusError {
+	return func(in openai.ErrorResponse) ollamaapi.StatusError {
+		return ollamaapi.StatusError{
+			StatusCode:   statusCode,
+			Status:       in.Error.Type,
+			ErrorMessage: in.Error.Message,
+		}
+	}
+}
+
 func toFlatMessage(choices []openai.Choice) ollamaapi.Message {
 	var result ollamaapi.Message
 	if len(choices) == 0 {

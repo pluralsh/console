@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"net/http/httputil"
 
+	"k8s.io/klog/v2"
+
 	"github.com/pluralsh/console/go/ai-proxy/api"
 	"github.com/pluralsh/console/go/ai-proxy/api/openai"
-	"k8s.io/klog/v2"
 )
 
 type OpenAIProxy struct {
@@ -49,6 +50,10 @@ func (in *OpenAIProxy) modifyRequestBody(r *httputil.ProxyRequest) error {
 }
 
 func (in *OpenAIProxy) modifyResponseBody(r *http.Response) error {
+	if r.StatusCode != http.StatusOK {
+		return replaceResponseBody(r, openai.FromErrorResponse(r.StatusCode))
+	}
+
 	endpoint := r.Request.URL.Path
 	switch endpoint {
 	case openai.EndpointChat:
