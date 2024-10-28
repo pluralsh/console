@@ -1,4 +1,4 @@
-package router_test
+package main_test
 
 import (
 	"bytes"
@@ -9,6 +9,8 @@ import (
 	"testing"
 
 	"github.com/spf13/pflag"
+
+	"github.com/pluralsh/console/go/ai-proxy/router"
 )
 
 func init() {
@@ -18,6 +20,10 @@ func init() {
 var (
 	server *httptest.Server
 )
+
+func TestMain(m *testing.M) {
+	server = httptest.NewServer(router.NewRouter(nil))
+}
 
 func createRequest[T any](method string, url string, body T) (*http.Request, error) {
 	bodyBytes, err := json.Marshal(body)
@@ -29,7 +35,7 @@ func createRequest[T any](method string, url string, body T) (*http.Request, err
 }
 
 func TestOpenAIProxy(t *testing.T) {
-	//applicationHandler := router.NewRouter()
+	//applicationHandler := router.NewRouter(nil)
 	//server = httptest.NewServer(applicationHandler)
 	//defer server.Close()
 	//
