@@ -51,6 +51,9 @@ def extract_table_data(table):
             if not ingress_nginx_version:
                 continue
 
+            if "beta" in ingress_nginx_version:
+                continue
+
             version_info = OrderedDict(
                 [
                     ("version", ingress_nginx_version),
