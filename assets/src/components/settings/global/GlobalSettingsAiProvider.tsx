@@ -118,7 +118,7 @@ export function GlobalSettingsAiProvider() {
   }
 
   const valid = useMemo(
-    () => validateAttributes(provider, providerSettings),
+    () => validateAttributes(enabled, provider, providerSettings),
     [provider, providerSettings]
   )
 

@@ -60,9 +60,12 @@ export function initialSettingsAttributes(
 }
 
 export function validateAttributes(
+  enabled: boolean,
   provider: AiProvider,
   settings: Omit<AiSettingsAttributes, 'enabled' | 'provider'>
 ): boolean {
+  if (!enabled) return true
+
   switch (provider) {
     case AiProvider.Openai:
       return !!settings.openai?.accessToken
