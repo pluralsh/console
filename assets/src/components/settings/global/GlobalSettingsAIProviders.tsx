@@ -115,11 +115,11 @@ export function OpenAIAnthropicSettings({
     <>
       <FormField
         label="Model"
+        hint="Leave blank for Plural default."
         flex={1}
       >
         <Input
           disabled={!enabled}
-          placeholder="Leave blank for Plural default"
           value={settings?.model}
           onChange={(e) => {
             updateSettings({ model: e.currentTarget.value })
@@ -134,7 +134,6 @@ export function OpenAIAnthropicSettings({
         <InputRevealer
           css={{ background: theme.colors['fill-two'] }}
           disabled={!enabled}
-          placeholder="Enter access token"
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
             updateSettings({ accessToken: e.currentTarget.value })
@@ -196,7 +195,6 @@ export function OllamaSettings({
         <InputRevealer
           css={{ background: theme.colors['fill-two'] }}
           disabled={!enabled}
-          placeholder="Enter authorization header"
           value={settings?.authorization ?? undefined}
           onChange={(e) => {
             updateSettings({ authorization: e.currentTarget.value })
@@ -259,7 +257,6 @@ export function AzureSettings({
         <InputRevealer
           css={{ background: theme.colors['fill-two'] }}
           disabled={!enabled}
-          placeholder="Enter access token"
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
             updateSettings({ accessToken: e.currentTarget.value })
@@ -294,7 +291,6 @@ export function BedrockSettings({
         <Input
           disabled={!enabled}
           value={settings?.modelId}
-          placeholder="Leave blank for Plural default"
           onChange={(e) => {
             updateSettings({ modelId: e.currentTarget.value })
           }}
@@ -307,7 +303,6 @@ export function BedrockSettings({
       >
         <Input
           disabled={!enabled}
-          placeholder="Enter access key ID"
           value={settings?.accessKeyId}
           onChange={(e) => {
             updateSettings({ accessKeyId: e.currentTarget.value })
@@ -322,7 +317,6 @@ export function BedrockSettings({
         <InputRevealer
           css={{ background: theme.colors['fill-two'] }}
           disabled={!enabled}
-          placeholder="Enter secret access key"
           value={settings?.secretAccessKey ?? undefined}
           onChange={(e) => {
             updateSettings({ secretAccessKey: e.currentTarget.value })
