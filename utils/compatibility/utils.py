@@ -84,7 +84,7 @@ def validate_semver(version_str):
         return version
     except ValueError:
         # Return False for invalid version strings
-        return False
+        return None
 
 
 def latest_kube_version():
