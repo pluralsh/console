@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.AI do
   use Console.GraphQl.Schema.Base
   alias Console.GraphQl.Resolvers.AI
+  alias Console.GraphQl.Resolvers.{User, AI}
 
   @desc "A role to pass to an LLM, modeled after OpenAI's chat api roles"
   enum :ai_role do
@@ -22,16 +23,36 @@ defmodule Console.GraphQl.AI do
     field :content, non_null(:string)
   end
 
+  @desc "basic user-supplied input for creating an AI chat thread"
+  input_object :chat_thread_attributes do
+    field :summary,    non_null(:string)
+    field :summarized, :boolean, description: "controls whether this thread is autosummarized, set true when users explicitly set summary"
+  end
+
   object :chat do
     field :id,      non_null(:id)
     field :role,    non_null(:ai_role)
     field :content, non_null(:string)
     field :seq,     non_null(:integer)
 
+    field :thread,  :chat_thread, resolve: dataloader(AI)
+
+    timestamps()
+  end
+
+  @desc "A list of chat messages around a specific topic created on demand"
+  object :chat_thread do
+    field :id,       non_null(:id)
+    field :summary,  non_null(:string)
+    field :default,  non_null(:boolean)
+
+    field :user,     :user, resolve: dataloader(User)
+
     timestamps()
   end
 
   connection node_type: :chat
+  connection node_type: :chat_thread
 
   @desc "A representation of a LLM-derived insight"
   object :ai_insight do
@@ -82,6 +103,7 @@ defmodule Console.GraphQl.AI do
     @desc "gets the chat history from prior AI chat sessions"
     connection field :chats, node_type: :chat do
       middleware Authenticated
+      arg :thread_id, :id
 
       resolve &AI.chats/2
     end
@@ -92,13 +114,20 @@ defmodule Console.GraphQl.AI do
 
       resolve &AI.resolve_cluster_insight_component/2
     end
+
+    connection field :chat_threads, node_type: :chat_thread do
+      middleware Authenticated
+
+      resolve &AI.threads/2
+    end
   end
 
   object :ai_mutations do
     @desc "saves a list of chat messages to your current chat history, can be used at any time"
     field :save_chats, list_of(:chat) do
       middleware Authenticated
-      arg :messages, list_of(:chat_message)
+      arg :thread_id, :id
+      arg :messages,  list_of(:chat_message)
 
       resolve &AI.save_chats/2
     end
@@ -106,7 +135,8 @@ defmodule Console.GraphQl.AI do
     @desc "saves a set of messages and generates a new one transactionally"
     field :chat, :chat do
       middleware Authenticated
-      arg :messages, list_of(:chat_message)
+      arg :thread_id, :id
+      arg :messages,  list_of(:chat_message)
 
       resolve &AI.chat/2
     end
@@ -114,9 +144,32 @@ defmodule Console.GraphQl.AI do
     @desc "Wipes your current chat history blank"
     field :clear_chat_history, :integer do
       middleware Authenticated
-      arg :before, :integer, description: "deletes all chats with seq less than or equal to this integer"
+      arg :thread_id, :id
+      arg :before,    :integer, description: "deletes all chats with seq less than or equal to this integer"
 
       resolve &AI.clear_chats/2
+    end
+
+    field :create_thread, :chat_thread do
+      middleware Authenticated
+      arg :attributes, non_null(:chat_thread_attributes)
+
+      resolve &AI.create_thread/2
+    end
+
+    field :update_thread, :chat_thread do
+      middleware Authenticated
+      arg :id,         non_null(:id)
+      arg :attributes, non_null(:chat_thread_attributes)
+
+      resolve &AI.update_thread/2
+    end
+
+    field :delete_thread, :chat_thread do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.delete_thread/2
     end
 
     @desc "deletes a chat from a users history"

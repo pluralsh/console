@@ -6,11 +6,13 @@ defmodule Console.AI.Policy do
     User,
     AiInsight,
     Chat,
+    ChatThread,
     Stack,
     Service
   }
 
   def can?(%User{id: id}, %Chat{user_id: id}, _), do: :pass
+  def can?(%User{id: id}, %ChatThread{user_id: id}, _), do: :pass
 
   def can?(user, %AiInsight{} = insight, action) do
     case Repo.preload(insight, [:stack, :service]) do

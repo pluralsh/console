@@ -446,9 +446,11 @@ type RootQueryType {
   ): String
 
   "gets the chat history from prior AI chat sessions"
-  chats(after: String, first: Int, before: String, last: Int): ChatConnection
+  chats(after: String, first: Int, before: String, last: Int, threadId: ID): ChatConnection
 
   clusterInsightComponent(id: ID!): ClusterInsightComponent
+
+  chatThreads(after: String, first: Int, before: String, last: Int): ChatThreadConnection
 }
 
 type RootMutationType {
@@ -896,16 +898,24 @@ type RootMutationType {
   ): Boolean
 
   "saves a list of chat messages to your current chat history, can be used at any time"
-  saveChats(messages: [ChatMessage]): [Chat]
+  saveChats(threadId: ID, messages: [ChatMessage]): [Chat]
 
   "saves a set of messages and generates a new one transactionally"
-  chat(messages: [ChatMessage]): Chat
+  chat(threadId: ID, messages: [ChatMessage]): Chat
 
   "Wipes your current chat history blank"
   clearChatHistory(
+    threadId: ID
+
     "deletes all chats with seq less than or equal to this integer"
     before: Int
   ): Int
+
+  createThread(attributes: ChatThreadAttributes!): ChatThread
+
+  updateThread(id: ID!, attributes: ChatThreadAttributes!): ChatThread
+
+  deleteThread(id: ID!): ChatThread
 
   "deletes a chat from a users history"
   deleteChat(id: ID!): Chat
@@ -5798,11 +5808,30 @@ input ChatMessage {
   content: String!
 }
 
+"basic user-supplied input for creating an AI chat thread"
+input ChatThreadAttributes {
+  summary: String!
+
+  "controls whether this thread is autosummarized, set true when users explicitly set summary"
+  summarized: Boolean
+}
+
 type Chat {
   id: ID!
   role: AiRole!
   content: String!
   seq: Int!
+  thread: ChatThread
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+"A list of chat messages around a specific topic created on demand"
+type ChatThread {
+  id: ID!
+  summary: String!
+  default: Boolean!
+  user: User
   insertedAt: DateTime
   updatedAt: DateTime
 }
@@ -5810,6 +5839,11 @@ type Chat {
 type ChatConnection {
   pageInfo: PageInfo!
   edges: [ChatEdge]
+}
+
+type ChatThreadConnection {
+  pageInfo: PageInfo!
+  edges: [ChatThreadEdge]
 }
 
 "A representation of a LLM-derived insight"
@@ -7770,6 +7804,11 @@ type RunbookExecutionEdge {
 
 type WebhookEdge {
   node: Webhook
+  cursor: String
+}
+
+type ChatThreadEdge {
+  node: ChatThread
   cursor: String
 }
 

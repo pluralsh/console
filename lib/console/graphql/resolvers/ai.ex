@@ -2,14 +2,35 @@ defmodule Console.GraphQl.Resolvers.AI do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.AiInsight
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.{Provider, Fixer}
-  alias Console.Schema.Chat
+  alias Console.Schema.{Chat, ChatThread}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
 
-  def chats(args, %{context: %{current_user: user}}) do
-    Chat.for_user(user.id)
-    |> Chat.ordered()
+  def query(Chat, _), do: Chat
+  def query(ChatThread, _), do: ChatThread
+  def query(_, _), do: AIInsight
+
+  def threads(args, %{context: %{current_user: user}}) do
+    ChatThread.for_user(user.id)
+    |> ChatThread.ordered()
     |> paginate(args)
+  end
+
+  def chats(args, %{context: %{current_user: user}}) do
+    with {:ok, q} <- maybe_thread(args, user) do
+      Chat.ordered(q)
+      |> paginate(args)
+    end
+  end
+
+  defp maybe_thread(%{thread_id: tid}, user) when is_binary(tid) do
+    with {:ok, _} <- ChatSvc.thread_access(tid, user),
+      do: {:ok, Chat.for_thread(tid)}
+  end
+
+  defp maybe_thread(_, user) do
+    thread = ChatSvc.default_thread!(user)
+    {:ok, Chat.for_thread(thread.id)}
   end
 
   def resolve_cluster_insight_component(%{id: id}, %{context: %{current_user: user}}),
@@ -27,17 +48,26 @@ defmodule Console.GraphQl.Resolvers.AI do
   def ai_suggested_fix(%{insight_id: id}, %{context: %{current_user: user}}),
     do: Fixer.fix(id, user)
 
-  def save_chats(%{messages: msgs}, %{context: %{current_user: user}}),
-    do: ChatSvc.save(msgs, user)
+  def save_chats(%{messages: msgs} = args, %{context: %{current_user: user}}),
+    do: ChatSvc.save(msgs, args[:thread_id], user)
 
-  def chat(%{messages: msgs}, %{context: %{current_user: user}}),
-    do: ChatSvc.chat(msgs, user)
+  def chat(%{messages: msgs} = args, %{context: %{current_user: user}}),
+    do: ChatSvc.chat(msgs, args[:thread_id], user)
 
   def clear_chats(args, %{context: %{current_user: user}}),
-    do: ChatSvc.clear(user, args[:before])
+    do: ChatSvc.clear(user, args[:thread_id], args[:before])
 
   def delete_chat(%{id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.delete(id, user)
+
+  def create_thread(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: ChatSvc.create_thread(attrs, user)
+
+  def update_thread(%{attributes: attrs, id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.update_thread(attrs, id, user)
+
+  def delete_thread(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.delete_thread(id, user)
 
   def raw_resource(%{version: v, kind: k, name: n} = comp, _, _) do
     cluster = Console.Repo.preload(comp, [:cluster])
