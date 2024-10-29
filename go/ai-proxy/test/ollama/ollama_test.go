@@ -76,8 +76,8 @@ func TestOllamaAIProxy(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			mockResponseFuck := helpers.MockResponse(tc.Endpoint, wantDataBytes, tc.WantErr, tc.WantStatus)
-			err = mockResponseFuck(handlers)
+			mockResponseFunc := helpers.MockResponse(tc.Endpoint, wantDataBytes, tc.WantErr, tc.WantStatus)
+			err = mockResponseFunc(handlers)
 			if err != nil {
 				t.Fatal(err)
 			}
