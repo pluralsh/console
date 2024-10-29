@@ -193,10 +193,10 @@ export function GlobalSettingsAiProvider() {
         <Button
           alignSelf="flex-end"
           type="submit"
-          disabled={!valid}
+          disabled={!valid || (!ai?.enabled && !enabled)}
           loading={loading}
         >
-          Save
+          Save changes
         </Button>
       </WrapperCardSC>
       {enabled && <InsightsCallout />}
