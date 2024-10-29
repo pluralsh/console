@@ -5,6 +5,7 @@ from utils import (
     fetch_page,
     update_compatibility_info,
     update_chart_versions,
+    validate_semver,
 )
 
 
@@ -48,12 +49,13 @@ def extract_table_data(table):
                 columns[2].get_text(strip=True).split(", ")
             )
 
+            ingress_nginx_version = validate_semver(ingress_nginx_version)
             if not ingress_nginx_version:
                 continue
 
             version_info = OrderedDict(
                 [
-                    ("version", ingress_nginx_version),
+                    ("version", str(ingress_nginx_version)),
                     ("kube", k8s_supported_versions),
                     ("requirements", []),
                     ("incompatibilities", []),
