@@ -44,6 +44,7 @@ export function ServiceInsights() {
       gap="medium"
       overflow="hidden"
       marginBottom={theme.spacing.large}
+      height="100%"
     >
       <Flex
         justify="space-between"
@@ -65,7 +66,7 @@ export function ServiceInsights() {
             loading={loading}
             refetch={refetch}
           />
-          <AISuggestFix insightID={service?.insight?.id ?? ''} />
+          <AISuggestFix insight={service?.insight} />
         </Flex>
       </Flex>
       <InsightDisplay text={service.insight?.text} />

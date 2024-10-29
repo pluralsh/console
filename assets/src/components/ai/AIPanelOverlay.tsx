@@ -67,7 +67,6 @@ function useOverlayMaxHeight(
   useResizeObserver(ref, () => {
     if (!ref.current) return
     const rect = ref.current.getBoundingClientRect()
-    console.log(rect)
     setMaxHeight(`calc(100vh - ${rect.top}px - ${padding}px)`)
   })
 

@@ -29,8 +29,10 @@ export function StackInsights() {
       direction="column"
       gap="medium"
       overflow="hidden"
+      height="100%"
     >
       <Flex
+        align="center"
         justify="flex-end"
         gap="small"
       >
@@ -45,7 +47,7 @@ export function StackInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <AISuggestFix insightID={stack?.insight?.id ?? ''} />
+        <AISuggestFix insight={stack?.insight} />
       </Flex>
       <InsightDisplay text={stack.insight?.text} />
     </Flex>

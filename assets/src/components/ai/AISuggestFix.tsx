@@ -1,20 +1,23 @@
 import { Markdown } from '@pluralsh/design-system'
 import { ReactNode, useCallback, useState } from 'react'
 import { useTheme } from 'styled-components'
-import { useAiSuggestedFixLazyQuery } from '../../generated/graphql.ts'
+import {
+  AiInsight,
+  useAiSuggestedFixLazyQuery,
+} from '../../generated/graphql.ts'
 import { GqlError } from '../utils/Alert.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import AIPanel from './AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 
 interface AISuggestFixProps {
-  insightID: string
+  insight: Nullable<AiInsight>
 }
 
-function AISuggestFix({ insightID }: AISuggestFixProps): ReactNode {
+function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
   const theme = useTheme()
   const [getSuggestion, { loading, data, error }] = useAiSuggestedFixLazyQuery({
-    variables: { insightID },
+    variables: { insightID: insight?.id ?? '' },
   })
 
   const [open, setOpen] = useState(false)
@@ -23,7 +26,7 @@ function AISuggestFix({ insightID }: AISuggestFixProps): ReactNode {
     getSuggestion()
   }, [getSuggestion])
 
-  if (!insightID) {
+  if (!insight || !insight?.text) {
     return null
   }
 

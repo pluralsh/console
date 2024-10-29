@@ -17,9 +17,10 @@ export function ComponentInsights() {
       gap="medium"
       overflow="hidden"
       maxHeight="100%"
+      height="100%"
     >
       <Flex
-        align={'center'}
+        align="center"
         justify="flex-end"
         gap="small"
       >
@@ -34,7 +35,7 @@ export function ComponentInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <AISuggestFix insightID={component?.insight?.id ?? ''} />
+        <AISuggestFix insight={component?.insight} />
       </Flex>
       <InsightDisplay text={component.insight?.text} />
     </Flex>
