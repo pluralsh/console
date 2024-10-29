@@ -600,7 +600,7 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert res["count"] == 9
       assert res["upgradeable"] == 2
       assert res["compliant"] == 5
-      assert res["latest"] == 3
+      assert res["latest"] == 2
     end
   end
 
