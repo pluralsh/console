@@ -1,19 +1,12 @@
 name: CI / AI Proxy
 
 on:
-  push:
-    branches:
-    - "master"
-    paths:
-    - ".github/workflows/ai-proxy-ci.yaml"
-    - "go/ai-proxy/**"
   pull_request:
     branches:
     - "**"
     paths:
     - ".github/workflows/ai-proxy-ci.yaml"
     - "go/ai-proxy/**"
-    - 
 permissions:
   contents: read
   

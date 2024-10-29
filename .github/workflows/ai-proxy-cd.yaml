@@ -8,8 +8,13 @@ on:
       - ".github/workflows/ai-proxy-cd.yaml"
       - "go/ai-proxy/**"
   push:
+    branches:
+      - "master"
+    paths:
+      - ".github/workflows/ai-proxy-cd.yaml"
+      - "go/ai-proxy/**"
     tags:
-    - 'go/ai-proxy/v*.*.*'
+      - 'go/ai-proxy/v*.*.*'
 
 permissions:
   contents: read
@@ -29,14 +34,14 @@ jobs:
         working-directory: go/ai-proxy
     timeout-minutes: 5
     steps:
-    - uses: actions/checkout@v4.2.2
-    - uses: actions/setup-go@v5.1.0
-      with:
-        go-version-file: go/ai-proxy/go.mod
-        cache: true
-    - run: go mod download
-    - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
-    - run: PATH=$PATH:$GOPATH/bin make test
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-go@v5.1.0
+        with:
+          go-version-file: go/ai-proxy/go.mod
+          cache: true
+      - run: go mod download
+      - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
+      - run: PATH=$PATH:$GOPATH/bin make test
   
   publish-docker:
     name: Build and push ai-proxy container
@@ -51,50 +56,50 @@ jobs:
       id-token: 'write'
       packages: 'write'
     steps:
-    - uses: actions/checkout@v4.2.2
-      with:
-        fetch-depth: 0
-    - id: meta
-      uses: docker/metadata-action@v5
-      with:
-        images: |
-          ghcr.io/pluralsh/ai-proxy
-          gcr.io/pluralsh/ai-proxy
-          docker.io/pluralsh/ai-proxy
-        tags: |
-          type=sha
-          type=ref,event=pr
-          type=ref,event=branch
-          type=match,pattern=go/ai-proxy/(v.*),group=1
-    - uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - uses: google-github-actions/auth@v1
-      with:
-        workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
-        service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
-        token_format: 'access_token'
-        create_credentials_file: true
-    - uses: google-github-actions/setup-gcloud@v1.0.1
-    - run: gcloud auth configure-docker -q
-    - uses: docker/login-action@v3
-      with:
-        username: mjgpluralsh
-        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-    - uses: docker/setup-qemu-action@v3
-    - uses: docker/setup-buildx-action@v3.0.0
-    - uses: docker/build-push-action@v5.1.0
-      with:
-        context: "./go/ai-proxy"
-        file: "./go/ai-proxy/Dockerfile"
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        platforms: linux/amd64,linux/arm64
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-        build-args: |
-          GIT_COMMIT=${{ github.sha }}
-          VERSION=${{ steps.meta.outputs.version }}
+      - uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/pluralsh/ai-proxy
+            gcr.io/pluralsh/ai-proxy
+            docker.io/pluralsh/ai-proxy
+          tags: |
+            type=sha
+            type=ref,event=pr
+            type=ref,event=branch
+            type=match,pattern=go/ai-proxy/(v.*),group=1
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: 'projects/${{ secrets.GOOGLE_PROJECT_ID }}/locations/global/workloadIdentityPools/github/providers/github'
+          service_account: 'terraform@pluralsh.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          create_credentials_file: true
+      - uses: google-github-actions/setup-gcloud@v1.0.1
+      - run: gcloud auth configure-docker -q
+      - uses: docker/login-action@v3
+        with:
+          username: mjgpluralsh
+          password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3.0.0
+      - uses: docker/build-push-action@v5.1.0
+        with:
+          context: "./go/ai-proxy"
+          file: "./go/ai-proxy/Dockerfile"
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            VERSION=${{ steps.meta.outputs.version }}
