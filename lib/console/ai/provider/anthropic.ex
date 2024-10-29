@@ -33,7 +33,7 @@ defmodule Console.AI.Anthropic do
     def spec(), do: %__MODULE__{content: [Anthropic.Content.spec()]}
   end
 
-  def new(opts), do: %__MODULE__{access_key: opts.access_key, model: opts.model}
+  def new(opts), do: %__MODULE__{access_key: opts.access_token, model: opts.model}
 
   @doc """
   Generate a anthropic completion from

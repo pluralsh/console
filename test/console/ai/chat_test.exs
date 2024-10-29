@@ -5,7 +5,7 @@ defmodule Console.AI.ChatTest do
 
   describe "#rollup/1" do
     test "it can summarize the expired messages in a user chat" do
-      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
 
       user = insert(:user)
       old = insert_list(3, :chat, user: user, inserted_at: Timex.now() |> Timex.shift(days: -7))
@@ -52,7 +52,7 @@ defmodule Console.AI.ChatTest do
   describe "#chat/2" do
     test "it will persist a set of messages and generate a new one transactionally" do
       user = insert(:user)
-      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
       expect(Console.AI.OpenAI, :completion, fn _, [_, _, _] -> {:ok, "openai completion"} end)
 
       {:ok, next} = Chat.chat([

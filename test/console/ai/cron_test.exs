@@ -10,7 +10,7 @@ defmodule Console.AI.CronTest do
 
   describe "#services/0" do
     test "it will gather info from all service components and generate" do
-      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
       service = insert(:service, status: :failed, errors: [%{source: "manifests", error: "some error"}])
       insert(:service_component,
         service: service,
@@ -79,7 +79,7 @@ defmodule Console.AI.CronTest do
 
     test "it will preserve prior insight ids" do
       insight = insert(:ai_insight, updated_at: Timex.now() |> Timex.shift(days: -1))
-      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
       service = insert(:service, insight: insight, status: :failed, errors: [%{source: "manifests", error: "some error"}])
       insert(:service_component,
         service: service,
@@ -106,7 +106,7 @@ defmodule Console.AI.CronTest do
 
   describe "#clusters/0" do
     test "it will generate insights for failing components" do
-      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
       cluster = insert(:cluster)
       insert(:cluster_insight_component,
         cluster: cluster,
@@ -137,7 +137,7 @@ defmodule Console.AI.CronTest do
 
   describe "#stacks/0" do
     test "it will gather info from stack runs and generate" do
-      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_key: "key"}})
+      deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
       stack = insert(:stack, status: :failed)
       run   = insert(:stack_run, stack: stack)
       step  = insert(:run_step, status: :failed, cmd: "echo", args: ["hello", "work"])
