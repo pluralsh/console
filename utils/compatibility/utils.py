@@ -97,6 +97,12 @@ def latest_kube_version():
         latest = response.text.lstrip("v")
         latest = latest.split(".")
         latest = ".".join(latest[:2])
+        latest = validate_semver(latest)
+
+        if not latest:
+            print_error(f"Invalid Latest K8s Version: {latest}")
+            return latest
+
         print(f"Using Latest kube version: {latest}")
         # Write the value to "../../KUBE_VERSION"
         file_path = "../../KUBE_VERSION"
@@ -105,6 +111,7 @@ def latest_kube_version():
                 file.write(latest)
         except Exception as e:
             print_error(f"Failed to write to {file_path}: {e}")
+
         return latest
     else:
         print_error(
