@@ -69,7 +69,11 @@ export function validateAttributes(
     case AiProvider.Anthropic:
       return !!settings.anthropic?.accessToken
     case AiProvider.Ollama:
-      return !!(settings.ollama?.url && settings.ollama?.authorization)
+      return !!(
+        settings.ollama?.model &&
+        settings.ollama?.url &&
+        settings.ollama?.authorization
+      )
     case AiProvider.Azure:
       return !!(
         settings.azure?.apiVersion &&
@@ -78,7 +82,9 @@ export function validateAttributes(
       )
     case AiProvider.Bedrock:
       return !!(
-        settings.bedrock?.accessKeyId && settings.bedrock?.secretAccessKey
+        settings.bedrock?.modelId &&
+        settings.bedrock?.accessKeyId &&
+        settings.bedrock?.secretAccessKey
       )
     default:
       return false
@@ -153,11 +159,11 @@ export function OllamaSettings({
     <>
       <FormField
         label="Model"
+        required={enabled}
         flex={1}
       >
         <Input
           disabled={!enabled}
-          placeholder="Leave blank for Plural default"
           value={settings?.model}
           onChange={(e) => {
             updateSettings({ model: e.currentTarget.value })
@@ -279,6 +285,7 @@ export function BedrockSettings({
       <FormField
         label="Model ID"
         hint="The Model ID you want to use."
+        required={enabled}
         flex={1}
       >
         <Input
