@@ -581,9 +581,8 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
   describe "upgradeStatistics" do
     test "it can aggregate statuses for all visible clusters" do
       admin = admin_user()
-      insert_list(2, :cluster, current_version: "1.29", pinged_at: Timex.now(), upgrade_plan: %{compatibilities: true, incompatibilities: true, deprecations: true})
-      insert_list(3, :cluster, current_version: "1.30", pinged_at: Timex.now() |> Timex.shift(days: -1))
-      insert_list(2, :cluster, current_version: "1.31", pinged_at: Timex.now() |> Timex.shift(days: -1))
+      insert_list(2, :cluster, current_version: "1.30", pinged_at: Timex.now(), upgrade_plan: %{compatibilities: true, incompatibilities: true, deprecations: true})
+      insert_list(3, :cluster, current_version: "1.31", pinged_at: Timex.now() |> Timex.shift(days: -1))
       insert_list(2, :cluster, current_version: "1.28")
 
       {:ok, %{data: %{"upgradeStatistics" => res}}} = run_query("""
@@ -597,10 +596,10 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
         }
       """, %{}, %{current_user: admin})
 
-      assert res["count"] == 9
+      assert res["count"] == 7
       assert res["upgradeable"] == 2
       assert res["compliant"] == 5
-      assert res["latest"] == 2
+      assert res["latest"] == 3
     end
   end
 
