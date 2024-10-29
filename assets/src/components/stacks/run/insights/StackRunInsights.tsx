@@ -19,9 +19,11 @@ export function StackRunInsights() {
       direction="column"
       gap="medium"
       overflow="hidden"
+      height="100%"
     >
       <Flex
-        justify="space-between"
+        align="center"
+        justify="flex-end"
         gap="small"
         paddingLeft={theme.spacing.medium}
       >
@@ -36,7 +38,7 @@ export function StackRunInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <AISuggestFix insightID={stackRun?.insight?.id ?? ''} />
+        <AISuggestFix insight={stackRun?.insight} />
       </Flex>
       <InsightDisplay text={stackRun.insight?.text} />
     </Flex>
