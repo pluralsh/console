@@ -195,6 +195,7 @@ export type AiInsight = {
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
   Azure = 'AZURE',
+  Bedrock = 'BEDROCK',
   Ollama = 'OLLAMA',
   Openai = 'OPENAI'
 }
@@ -211,6 +212,7 @@ export type AiSettings = {
   __typename?: 'AiSettings';
   anthropic?: Maybe<AnthropicSettings>;
   azure?: Maybe<AzureOpenaiSettings>;
+  bedrock?: Maybe<BedrockAiSettings>;
   enabled?: Maybe<Scalars['Boolean']['output']>;
   ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
@@ -220,6 +222,7 @@ export type AiSettings = {
 export type AiSettingsAttributes = {
   anthropic?: InputMaybe<AnthropicSettingsAttributes>;
   azure?: InputMaybe<AzureOpenaiAttributes>;
+  bedrock?: InputMaybe<BedrockAiAttributes>;
   enabled?: InputMaybe<Scalars['Boolean']['input']>;
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
@@ -627,6 +630,24 @@ export type BackupAttributes = {
   namespaces?: InputMaybe<ResourceSelectorAttributes>;
   resources?: InputMaybe<ResourceSelectorAttributes>;
   ttl?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type BedrockAiAttributes = {
+  /** aws access key id to use, you can also use IRSA for self-hosted consoles */
+  accessKeyId?: InputMaybe<Scalars['String']['input']>;
+  /** the bedrock model id to use */
+  modelId: Scalars['String']['input'];
+  /** aws secret access key to use, you can also use IRSA for self-hosted consoles */
+  secretAccessKey?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Settings for usage of AWS Bedrock for LLMs */
+export type BedrockAiSettings = {
+  __typename?: 'BedrockAiSettings';
+  /** the aws access key to use, can also use IRSA when console is self-hosted */
+  accessKeyId?: Maybe<Scalars['String']['output']>;
+  /** the bedrock model to use */
+  modelId: Scalars['String']['output'];
 };
 
 export type BindingAttributes = {
