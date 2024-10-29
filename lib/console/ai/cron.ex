@@ -7,6 +7,7 @@ defmodule Console.AI.Cron do
     AiInsight,
     Stack,
     Service,
+    Cluster,
     DeploymentSettings,
     User,
   }
@@ -41,6 +42,19 @@ defmodule Console.AI.Cron do
       |> Console.throttle()
       |> Stream.chunk_every(@chunk)
       |> Stream.map(&batch_insight(PubSub.StackInsight, &1))
+      |> Stream.run()
+    end)
+  end
+
+  def clusters() do
+    if_enabled(fn ->
+      Cluster
+      |> Cluster.ordered(asc: :id)
+      |> Cluster.preloaded([:insight, insight_components: [:insight, :cluster]])
+      |> Repo.stream(method: :keyset)
+      |> Console.throttle()
+      |> Stream.chunk_every(@chunk)
+      |> Stream.map(&batch_insight(PubSub.ClusterInsight, &1))
       |> Stream.run()
     end)
   end

@@ -44,6 +44,7 @@ config :console, Console.Cron.Scheduler,
     {"*/10 * * * *", {Console.Deployments.Init, :ensure_secret, []}},
     {"*/5 * * * *", {Console.AI.Cron, :services, []}},
     {"*/5 * * * *", {Console.AI.Cron, :stacks, []}},
+    {"*/5 * * * *", {Console.AI.Cron, :clusters, []}},
     {"0 0 1-31/2 * *", {Console.Deployments.Cron, :backfill_deprecations, []}},
     {"*/10 * * * *", {Console.Deployments.Cron, :backfill_global_services, []}},
     {"*/10 * * * *", {Console.Deployments.Cron, :backfill_managed_namespaces, []}},
@@ -63,6 +64,12 @@ config :console, Console.Cron.Scheduler,
     {"@daily", {Console.AI.Cron, :trim, []}},
     {"0 0 * * 0", {Console.AI.Cron, :chats, []}}
   ]
+
+config :ex_aws,
+  region: {:system, "AWS_REGION"},
+  secret_access_key: [{:system, "AWS_ACCESS_KEY_ID"}, {:awscli, "profile_name", 30}],
+  access_key_id: [{:system, "AWS_SECRET_ACCESS_KEY"}, {:awscli, "profile_name", 30}],
+  awscli_auth_adapter: ExAws.STS.AuthCache.AssumeRoleWebIdentityAdapter
 
 config :console, :watchers, [
   Console.Watchers.Application,

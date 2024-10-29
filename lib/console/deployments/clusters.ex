@@ -21,7 +21,8 @@ defmodule Console.Deployments.Clusters do
     RuntimeService,
     AgentMigration,
     PinnedCustomResource,
-    UpgradeInsight
+    UpgradeInsight,
+    ClusterInsightComponent
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -85,6 +86,11 @@ defmodule Console.Deployments.Clusters do
     |> Repo.exists?()
   end
 
+  def insight_component(id, %User{} = user) do
+    Repo.get!(ClusterInsightComponent, id)
+    |> Repo.preload([:cluster])
+    |> allow(user, :read)
+  end
 
   @doc """
   Downloads the api discovery data for a cluster to be used in dynamic queries

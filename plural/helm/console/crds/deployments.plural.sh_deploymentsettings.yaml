@@ -118,6 +118,41 @@ spec:
                     - endpoint
                     - tokenSecretRef
                     type: object
+                  bedrock:
+                    description: Bedrock holds configuration for using AWS Bedrock
+                      to generate LLM insights
+                    properties:
+                      accessKeyId:
+                        description: An AWS Access Key ID to use, can also use IRSA
+                          to acquire credentials
+                        type: string
+                      modelId:
+                        description: The AWS Bedrock Model ID to use
+                        type: string
+                      secretAccessKeyRef:
+                        description: An AWS Secret Access Key to use, can also use
+                          IRSA to acquire credentials
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    required:
+                    - modelId
+                    type: object
                   enabled:
                     default: false
                     description: Enabled defines whether to enable the AI integration

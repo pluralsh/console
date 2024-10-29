@@ -151,6 +151,7 @@ type AiSettings struct {
 	Anthropic *AnthropicSettings   `json:"anthropic,omitempty"`
 	Ollama    *OllamaSettings      `json:"ollama,omitempty"`
 	Azure     *AzureOpenaiSettings `json:"azure,omitempty"`
+	Bedrock   *BedrockAiSettings   `json:"bedrock,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -160,6 +161,7 @@ type AiSettingsAttributes struct {
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
 	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
 	Azure     *AzureOpenaiAttributes       `json:"azure,omitempty"`
+	Bedrock   *BedrockAiAttributes         `json:"bedrock,omitempty"`
 }
 
 type Alert struct {
@@ -476,6 +478,23 @@ type BackupAttributes struct {
 	Resources        *ResourceSelectorAttributes `json:"resources,omitempty"`
 }
 
+type BedrockAiAttributes struct {
+	// the bedrock model id to use
+	ModelID string `json:"modelId"`
+	// aws access key id to use, you can also use IRSA for self-hosted consoles
+	AccessKeyID *string `json:"accessKeyId,omitempty"`
+	// aws secret access key to use, you can also use IRSA for self-hosted consoles
+	SecretAccessKey *string `json:"secretAccessKey,omitempty"`
+}
+
+// Settings for usage of AWS Bedrock for LLMs
+type BedrockAiSettings struct {
+	// the bedrock model to use
+	ModelID string `json:"modelId"`
+	// the aws access key to use, can also use IRSA when console is self-hosted
+	AccessKeyID *string `json:"accessKeyId,omitempty"`
+}
+
 type BindingAttributes struct {
 	ID      *string `json:"id,omitempty"`
 	UserID  *string `json:"userId,omitempty"`
@@ -670,6 +689,7 @@ type Chat struct {
 	ID         string  `json:"id"`
 	Role       AiRole  `json:"role"`
 	Content    string  `json:"content"`
+	Seq        int64   `json:"seq"`
 	InsertedAt *string `json:"insertedAt,omitempty"`
 	UpdatedAt  *string `json:"updatedAt,omitempty"`
 }
@@ -789,6 +809,8 @@ type Cluster struct {
 	ParentCluster *Cluster `json:"parentCluster,omitempty"`
 	// an ai insight generated about issues discovered which might impact the health of this cluster
 	Insight *AiInsight `json:"insight,omitempty"`
+	// a set of kubernetes resources used to generate the ai insight for this cluster
+	InsightComponents *ClusterInsightComponent `json:"insightComponents,omitempty"`
 	// list cached nodes for a cluster, this can be stale up to 5m
 	Nodes []*Node `json:"nodes,omitempty"`
 	// list the cached node metrics for a cluster, can also be stale up to 5m
@@ -901,6 +923,18 @@ type ClusterInfo struct {
 	GitVersion *string `json:"gitVersion,omitempty"`
 	Platform   *string `json:"platform,omitempty"`
 	Version    *string `json:"version,omitempty"`
+}
+
+// A kubernetes object used in the course of generating a cluster insight
+type ClusterInsightComponent struct {
+	ID        string  `json:"id"`
+	Group     *string `json:"group,omitempty"`
+	Version   string  `json:"version"`
+	Kind      string  `json:"kind"`
+	Namespace *string `json:"namespace,omitempty"`
+	Name      string  `json:"name"`
+	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
+	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }
 
 type ClusterInsightComponentAttributes struct {
@@ -5664,6 +5698,7 @@ const (
 	AiProviderAnthropic AiProvider = "ANTHROPIC"
 	AiProviderOllama    AiProvider = "OLLAMA"
 	AiProviderAzure     AiProvider = "AZURE"
+	AiProviderBedrock   AiProvider = "BEDROCK"
 )
 
 var AllAiProvider = []AiProvider{
@@ -5671,11 +5706,12 @@ var AllAiProvider = []AiProvider{
 	AiProviderAnthropic,
 	AiProviderOllama,
 	AiProviderAzure,
+	AiProviderBedrock,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock:
 		return true
 	}
 	return false

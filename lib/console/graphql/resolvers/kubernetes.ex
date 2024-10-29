@@ -261,7 +261,7 @@ defmodule Console.GraphQl.Resolvers.Kubernetes do
   end
   def raw_resource(_, _), do: {:error, "forbidden"}
 
-  defp get_kind(cluster, g, v, k) do
+  def get_kind(cluster, g, v, k) do
     Clusters.api_discovery(cluster)
     |> Map.get({g, v, k})
     |> case do

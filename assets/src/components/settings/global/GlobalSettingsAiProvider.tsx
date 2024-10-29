@@ -4,72 +4,142 @@ import {
   Card,
   Flex,
   FormField,
-  Input,
   ListBoxItem,
   Select,
   Switch,
   Toast,
 } from '@pluralsh/design-system'
 import { SelectPropsSingle } from '@pluralsh/design-system/dist/components/Select'
-import { InputRevealer } from 'components/cd/providers/InputRevealer'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
-import { GqlError } from 'components/utils/Alert'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
 import {
   AiProvider,
-  AiSettingsFragment,
+  AiSettingsAttributes,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
-import { FormEvent, useState } from 'react'
+import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { produce } from 'immer'
+import { PartialDeep } from 'type-fest'
+import merge from 'lodash/merge'
+import {
+  AzureSettings,
+  BedrockSettings,
+  initialSettingsAttributes,
+  OllamaSettings,
+  OpenAIAnthropicSettings,
+  validateAttributes,
+} from './GlobalSettingsAIProviders.tsx'
+import { GqlError } from '../../utils/Alert.tsx'
+import pick from 'lodash/pick'
 
-type AiForm = {
-  provider: AiProvider
-  model: string | null
-  accessToken: string
-  enabled: boolean
-}
+const updateSettings = produce(
+  (
+    original: Omit<AiSettingsAttributes, 'enabled' | 'provider'>,
+    update: PartialDeep<Omit<AiSettingsAttributes, 'enabled' | 'provider'>>
+  ) => {
+    merge(original, update)
+
+    return original
+  }
+)
 
 export function GlobalSettingsAiProvider() {
   const theme = useTheme()
   const { ai } = useDeploymentSettings()
-  const [form, setForm] = useState<AiForm>(getInitialAiForm(ai))
+  const [enabled, setEnabled] = useState<boolean>(ai?.enabled ?? false)
+  const [provider, setProvider] = useState<AiProvider>(
+    ai?.provider ?? AiProvider.Openai
+  )
+  const [providerSettings, updateProviderSettings] = useReducer(
+    updateSettings,
+    initialSettingsAttributes(ai)
+  )
   const [showToast, setShowToast] = useState(false)
+
+  let settings: ReactNode
+  switch (provider) {
+    case AiProvider.Openai:
+      settings = (
+        <OpenAIAnthropicSettings
+          enabled={enabled}
+          settings={providerSettings.openai}
+          updateSettings={(settings) =>
+            updateProviderSettings({ openai: settings })
+          }
+        />
+      )
+      break
+    case AiProvider.Anthropic:
+      settings = (
+        <OpenAIAnthropicSettings
+          enabled={enabled}
+          settings={providerSettings.anthropic}
+          updateSettings={(settings) =>
+            updateProviderSettings({ anthropic: settings })
+          }
+        />
+      )
+      break
+    case AiProvider.Ollama:
+      settings = (
+        <OllamaSettings
+          enabled={enabled}
+          settings={providerSettings.ollama}
+          updateSettings={(settings) =>
+            updateProviderSettings({ ollama: settings })
+          }
+        />
+      )
+      break
+    case AiProvider.Azure:
+      settings = (
+        <AzureSettings
+          enabled={enabled}
+          settings={providerSettings.azure}
+          updateSettings={(settings) =>
+            updateProviderSettings({ azure: settings })
+          }
+        />
+      )
+      break
+    case AiProvider.Bedrock:
+      settings = (
+        <BedrockSettings
+          enabled={enabled}
+          settings={providerSettings.bedrock}
+          updateSettings={(settings) =>
+            updateProviderSettings({ bedrock: settings })
+          }
+        />
+      )
+      break
+  }
+
+  const valid = useMemo(
+    () => validateAttributes(enabled, provider, providerSettings),
+    [enabled, provider, providerSettings]
+  )
 
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
     variables: {
       attributes: {
-        ai: !form.enabled
-          ? { enabled: false }
-          : {
-              enabled: true,
-              provider: form.provider,
-              ...(form.provider === AiProvider.Openai && {
-                openai: {
-                  model: form.model === '' ? null : form.model,
-                  accessToken: form.accessToken,
-                },
-              }),
-              ...(form.provider === AiProvider.Anthropic && {
-                anthropic: {
-                  model: form.model === '' ? null : form.model,
-                  accessToken: form.accessToken,
-                },
-              }),
-            },
+        ai: {
+          enabled,
+          ...(enabled
+            ? { provider, ...pick(providerSettings, provider.toLowerCase()) }
+            : {}),
+        } satisfies AiSettingsAttributes,
       },
     },
-    onCompleted: () => {
+    onCompleted: (data) => {
       setShowToast(true)
-      setForm({
-        ...form,
-        accessToken: '',
-      })
+      updateProviderSettings(
+        initialSettingsAttributes(data?.updateDeploymentSettings?.ai)
+      )
     },
   })
-
-  const allowSubmit = !!form.accessToken || form.enabled !== ai?.enabled
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -84,75 +154,52 @@ export function GlobalSettingsAiProvider() {
       >
         {error && <GqlError error={error} />}
         <Switch
-          checked={form.enabled}
-          onChange={(checked) =>
-            setForm({
-              ...form,
-              enabled: checked,
-            })
-          }
+          checked={enabled}
+          onChange={(checked) => setEnabled(checked)}
         >
           Enable AI insights
         </Switch>
         <FormField label="AI provider">
           <SelectWithDisable
-            disabled={!form.enabled}
-            selectedKey={form.provider}
-            onSelectionChange={(val) => {
-              setForm({
-                ...form,
-                provider: val as AiProvider,
-              })
+            disabled={!enabled}
+            selectedKey={provider}
+            onSelectionChange={(v) => {
+              setProvider(v as AiProvider)
             }}
           >
             <ListBoxItem
-              key={AiProvider.Openai}
-              label={'OpenAI'}
+              key={AiProvider.Bedrock}
+              label={'Amazon Bedrock'}
             />
             <ListBoxItem
               key={AiProvider.Anthropic}
               label={'Anthropic'}
             />
+            <ListBoxItem
+              key={AiProvider.Azure}
+              label={'Azure AI'}
+            />
+            <ListBoxItem
+              key={AiProvider.Ollama}
+              label={'Ollama'}
+            />
+            <ListBoxItem
+              key={AiProvider.Openai}
+              label={'OpenAI'}
+            />
           </SelectWithDisable>
         </FormField>
-        <Flex gap="large">
-          <FormField
-            label="Model"
-            flex={1}
-          >
-            <Input
-              disabled={!form.enabled}
-              placeholder="Leave blank for Plural default"
-              value={form.model}
-              onChange={(e) => setForm({ ...form, model: e.target.value })}
-            />
-          </FormField>
-          <FormField
-            label="Access token"
-            required={form.enabled}
-            flex={1}
-          >
-            <InputRevealer
-              css={{ background: theme.colors['fill-two'] }}
-              disabled={!form.enabled}
-              placeholder="Enter access token"
-              value={form.accessToken}
-              onChange={(e) =>
-                setForm({ ...form, accessToken: e.target.value })
-              }
-            />
-          </FormField>
-        </Flex>
+        {settings}
         <Button
           alignSelf="flex-end"
           type="submit"
-          disabled={!allowSubmit}
+          disabled={!valid || (!ai?.enabled && !enabled)}
           loading={loading}
         >
           Save changes
         </Button>
       </WrapperCardSC>
-      {form.enabled && <InsightsCallout />}
+      {enabled && <InsightsCallout />}
       <Toast
         severity="success"
         css={{ margin: theme.spacing.large }}
@@ -164,27 +211,6 @@ export function GlobalSettingsAiProvider() {
       </Toast>
     </ScrollablePage>
   )
-}
-
-function getInitialAiForm(ai: Nullable<AiSettingsFragment>): AiForm {
-  const initialForm = { ...defaultForm }
-  initialForm.enabled = ai?.enabled ?? false
-  initialForm.provider = ai?.provider ?? AiProvider.Openai
-
-  if (ai?.provider === AiProvider.Openai) {
-    initialForm.model = ai?.openai?.model ?? ''
-  } else if (ai?.provider === AiProvider.Anthropic) {
-    initialForm.model = ai?.anthropic?.model ?? ''
-  }
-
-  return initialForm
-}
-
-const defaultForm: AiForm = {
-  provider: AiProvider.Openai,
-  model: null,
-  accessToken: '',
-  enabled: false,
 }
 
 const WrapperCardSC = styled(Card)(({ theme }) => ({
