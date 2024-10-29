@@ -8,7 +8,7 @@ on:
       - "go/ai-proxy/**"
   push:
     tags:
-    - 'v*.*.*'
+    - 'go/ai-proxy/v*.*.*'
 
 permissions:
   contents: read
