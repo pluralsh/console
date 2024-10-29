@@ -64,7 +64,7 @@ jobs:
           type=sha
           type=ref,event=pr
           type=ref,event=branch
-          type=semver,pattern={{version}},priority=1000
+          type=match,pattern=go/ai-proxy/(v.*),group=1
     - uses: docker/login-action@v3
       with:
         registry: ghcr.io
