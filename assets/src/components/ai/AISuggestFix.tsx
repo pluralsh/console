@@ -15,7 +15,6 @@ interface AISuggestFixProps {
 }
 
 function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
-  const theme = useTheme()
   const [getSuggestion, { loading, data, error }] = useAiSuggestedFixLazyQuery({
     variables: { insightID: insight?.id ?? '' },
   })
@@ -34,7 +33,6 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
     <div
       css={{
         position: 'relative',
-        zIndex: theme.zIndexes.modal,
       }}
     >
       <AISuggestFixButton onClick={showPanel} />

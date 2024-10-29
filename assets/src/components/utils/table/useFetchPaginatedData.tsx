@@ -69,8 +69,8 @@ export function useFetchPaginatedData<
 
   const queryResult = options.queryHook({
     variables: {
-      ...variables,
       first: options.pageSize ?? DEFAULT_PAGE_SIZE,
+      ...variables,
     },
     errorPolicy: options.errorPolicy,
     fetchPolicy: 'cache-and-network',

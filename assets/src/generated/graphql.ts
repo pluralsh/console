@@ -14367,7 +14367,7 @@ export type AiSuggestedFixLazyQueryHookResult = ReturnType<typeof useAiSuggested
 export type AiSuggestedFixSuspenseQueryHookResult = ReturnType<typeof useAiSuggestedFixSuspenseQuery>;
 export type AiSuggestedFixQueryResult = Apollo.QueryResult<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>;
 export const ChatsDocument = gql`
-    query Chats($first: Int, $last: Int = 30, $after: String, $before: String) {
+    query Chats($first: Int = 100, $last: Int, $after: String, $before: String) {
   chats(first: $first, last: $last, after: $after, before: $before) {
     pageInfo {
       ...PageInfo
