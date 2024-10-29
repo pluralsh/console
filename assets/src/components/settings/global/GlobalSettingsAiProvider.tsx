@@ -32,6 +32,7 @@ import {
   validateAttributes,
 } from './GlobalSettingsAIProviders.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
+import pick from 'lodash/pick'
 
 const updateSettings = produce(
   (
@@ -124,13 +125,12 @@ export function GlobalSettingsAiProvider() {
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
     variables: {
       attributes: {
-        ai: enabled
-          ? {
-              enabled,
-              provider,
-              ...providerSettings,
-            }
-          : { enabled },
+        ai: {
+          enabled,
+          ...(enabled
+            ? { provider, ...pick(providerSettings, provider.toLowerCase()) }
+            : {}),
+        } satisfies AiSettingsAttributes,
       },
     },
     onCompleted: (data) => {
