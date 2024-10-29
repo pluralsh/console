@@ -108,7 +108,7 @@ def latest_kube_version():
         file_path = "../../KUBE_VERSION"
         try:
             with open(file_path, "w") as file:
-                file.write(str(latest))
+                file.write(f"{latest.major}.{latest.minor}")
         except Exception as e:
             print_error(f"Failed to write to {file_path}: {e}")
 
