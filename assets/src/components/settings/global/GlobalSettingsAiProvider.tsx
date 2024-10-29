@@ -196,7 +196,7 @@ export function GlobalSettingsAiProvider() {
           disabled={!valid}
           loading={loading}
         >
-          Save changes
+          Save
         </Button>
       </WrapperCardSC>
       {enabled && <InsightsCallout />}
