@@ -25,6 +25,7 @@ import { PartialDeep } from 'type-fest'
 import merge from 'lodash/merge'
 import {
   AzureSettings,
+  BedrockSettings,
   initialSettingsAttributes,
   OllamaSettings,
   OpenAIAnthropicSettings,
@@ -109,6 +110,17 @@ export function GlobalSettingsAiProvider() {
         />
       )
       break
+    case AiProvider.Bedrock:
+      settings = (
+        <BedrockSettings
+          enabled={enabled}
+          settings={providerSettings.bedrock}
+          updateSettings={(settings) =>
+            updateProviderSettings({ bedrock: settings })
+          }
+        />
+      )
+      break
   }
 
   const valid = useMemo(
@@ -165,20 +177,24 @@ export function GlobalSettingsAiProvider() {
             }}
           >
             <ListBoxItem
-              key={AiProvider.Openai}
-              label={'OpenAI'}
+              key={AiProvider.Bedrock}
+              label={'Amazon Bedrock'}
             />
             <ListBoxItem
               key={AiProvider.Anthropic}
               label={'Anthropic'}
             />
             <ListBoxItem
+              key={AiProvider.Azure}
+              label={'Azure AI'}
+            />
+            <ListBoxItem
               key={AiProvider.Ollama}
               label={'Ollama'}
             />
             <ListBoxItem
-              key={AiProvider.Azure}
-              label={'Azure AI'}
+              key={AiProvider.Openai}
+              label={'OpenAI'}
             />
           </SelectWithDisable>
         </FormField>

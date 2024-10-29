@@ -13,8 +13,8 @@ export function initialSettingsAttributes(
   if (ai?.openai) {
     return {
       openai: {
-        accessToken: '',
         model: ai.openai.model,
+        accessToken: '',
       },
     }
   }
@@ -22,8 +22,8 @@ export function initialSettingsAttributes(
   if (ai?.anthropic) {
     return {
       anthropic: {
-        accessToken: '',
         model: ai.anthropic.model,
+        accessToken: '',
       },
     }
   }
@@ -41,9 +41,19 @@ export function initialSettingsAttributes(
   if (ai?.azure) {
     return {
       azure: {
-        accessToken: '',
         apiVersion: ai.azure.apiVersion,
         endpoint: ai.azure.endpoint,
+        accessToken: '',
+      },
+    }
+  }
+
+  if (ai?.bedrock) {
+    return {
+      bedrock: {
+        modelId: ai.bedrock.modelId,
+        accessKeyId: ai.bedrock.accessKeyId,
+        secretAccessKey: '',
       },
     }
   }
@@ -67,6 +77,10 @@ export function validateAttributes(
         settings.azure?.apiVersion &&
         settings.azure?.endpoint &&
         settings.azure?.accessToken
+      )
+    case AiProvider.Bedrock:
+      return !!(
+        settings.bedrock?.accessKeyId && settings.bedrock?.secretAccessKey
       )
     default:
       return false
@@ -242,6 +256,68 @@ export function AzureSettings({
           value={settings?.accessToken ?? undefined}
           onChange={(e) => {
             updateSettings({ accessToken: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+    </>
+  )
+}
+
+export function BedrockSettings({
+  enabled,
+  settings,
+  updateSettings,
+}: {
+  enabled: boolean
+  settings: AiSettingsAttributes['bedrock']
+  updateSettings: (
+    update: NonNullable<Partial<AiSettingsAttributes['bedrock']>>
+  ) => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <>
+      <FormField
+        label="Model ID"
+        hint="The Model ID you want to use."
+        required={enabled}
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.modelId}
+          placeholder="Leave blank for Plural default"
+          onChange={(e) => {
+            updateSettings({ modelId: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Access key ID"
+        required={enabled}
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.accessKeyId}
+          onChange={(e) => {
+            updateSettings({ accessKeyId: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Secret access key"
+        required={enabled}
+        flex={1}
+      >
+        <InputRevealer
+          css={{ background: theme.colors['fill-two'] }}
+          disabled={!enabled}
+          placeholder="Enter secret access key"
+          value={settings?.secretAccessKey ?? undefined}
+          onChange={(e) => {
+            updateSettings({ secretAccessKey: e.currentTarget.value })
           }}
         />
       </FormField>
