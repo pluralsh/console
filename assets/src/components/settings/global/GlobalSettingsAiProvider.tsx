@@ -46,23 +46,16 @@ const updateSettings = produce(
 
 export function GlobalSettingsAiProvider() {
   const theme = useTheme()
-
   const { ai } = useDeploymentSettings()
-  const initial = useMemo(
-    () => ({
-      enabled: ai?.enabled ?? false,
-      provider: ai?.provider ?? AiProvider.Openai,
-      settings: initialSettingsAttributes(ai),
-    }),
-    [ai]
+  const [enabled, setEnabled] = useState<boolean>(ai?.enabled ?? false)
+  const [provider, setProvider] = useState<AiProvider>(
+    ai?.provider ?? AiProvider.Openai
   )
-
-  const [enabled, setEnabled] = useState<boolean>(initial.enabled)
-  const [provider, setProvider] = useState<AiProvider>(initial.provider)
   const [providerSettings, updateProviderSettings] = useReducer(
     updateSettings,
-    initial.settings
+    initialSettingsAttributes(ai)
   )
+  const [showToast, setShowToast] = useState(false)
 
   let settings: ReactNode
   switch (provider) {
@@ -127,8 +120,6 @@ export function GlobalSettingsAiProvider() {
     () => validateAttributes(provider, providerSettings),
     [provider, providerSettings]
   )
-
-  const [showToast, setShowToast] = useState(false)
 
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
     variables: {

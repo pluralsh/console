@@ -281,7 +281,6 @@ export function BedrockSettings({
       <FormField
         label="Model ID"
         hint="The Model ID you want to use."
-        required={enabled}
         flex={1}
       >
         <Input
@@ -300,6 +299,7 @@ export function BedrockSettings({
       >
         <Input
           disabled={!enabled}
+          placeholder="Enter access key ID"
           value={settings?.accessKeyId}
           onChange={(e) => {
             updateSettings({ accessKeyId: e.currentTarget.value })
