@@ -79,7 +79,7 @@ def validate_semver(version_str):
 
         # Check if prerelease and build are empty
         if version.prerelease or version.build:
-            return False
+            return None
 
         return version
     except ValueError:
