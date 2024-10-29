@@ -1,0 +1,59 @@
+name: CI / AI Proxy
+
+on:
+  push:
+    branches:
+    - "master"
+    paths:
+    - ".github/workflows/ai-proxy-ci.yaml"
+    - "go/ai-proxy/**"
+  pull_request:
+    branches:
+    - "**"
+    paths:
+    - ".github/workflows/ai-proxy-ci.yaml"
+    - "go/ai-proxy/**"
+    - 
+permissions:
+  contents: read
+  
+env:
+  GOPATH: /home/runner/go/
+  GOPROXY: "https://proxy.golang.org"
+  
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/ai-proxy
+    timeout-minutes: 5
+    steps:
+    - uses: actions/checkout@v4.2.2
+    - uses: actions/setup-go@v5.1.0
+      with:
+        go-version-file: go/ai-proxy/go.mod
+        cache: true
+    - run: go mod download
+    - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
+    - run: PATH=$PATH:$GOPATH/bin make build
+
+  check:
+    name: Check
+    runs-on: ubuntu-20.04
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/ai-proxy
+    timeout-minutes: 5
+    steps:
+    - uses: actions/checkout@v4.2.2
+    - uses: actions/setup-go@v5.1.0
+      with:
+        go-version-file: go/ai-proxy/go.mod
+        cache: true
+    - run: go mod download
+    - run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
+    - run: PATH=$PATH:$GOPATH/bin make check
