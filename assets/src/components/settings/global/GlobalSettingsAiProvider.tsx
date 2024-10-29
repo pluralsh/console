@@ -119,7 +119,7 @@ export function GlobalSettingsAiProvider() {
 
   const valid = useMemo(
     () => validateAttributes(enabled, provider, providerSettings),
-    [provider, providerSettings]
+    [enabled, provider, providerSettings]
   )
 
   const [mutation, { loading, error }] = useUpdateDeploymentSettingsMutation({
