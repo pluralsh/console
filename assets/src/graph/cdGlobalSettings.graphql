@@ -18,6 +18,18 @@ fragment AiSettings on AiSettings {
   openai {
     model
   }
+  azure {
+    apiVersion
+    endpoint
+  }
+  ollama {
+    model
+    url
+  }
+  bedrock {
+    modelId
+    accessKeyId
+  }
   enabled
   provider
 }
