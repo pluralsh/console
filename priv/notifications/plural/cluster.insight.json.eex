@@ -1,0 +1,7 @@
+✨ We have a new insight into issues in your <%= @cluster.distro %> cluster <%= @cluster.name %>
+
+Here's a brief summary of what we've found:
+
+<%= @text %>
+
+View full details: <%= Console.url("/cd/clusters/#{@cluster.id}/insights") %>

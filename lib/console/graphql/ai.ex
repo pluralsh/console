@@ -26,6 +26,7 @@ defmodule Console.GraphQl.AI do
     field :id,      non_null(:id)
     field :role,    non_null(:ai_role)
     field :content, non_null(:string)
+    field :seq,     non_null(:integer)
 
     timestamps()
   end
@@ -42,6 +43,21 @@ defmodule Console.GraphQl.AI do
     field :error,     list_of(:service_error), description: "any errors generated when compiling this insight"
 
     timestamps()
+  end
+
+  @desc "A kubernetes object used in the course of generating a cluster insight"
+  object :cluster_insight_component do
+    field :id,        non_null(:id)
+    field :group,     :string
+    field :version,   non_null(:string)
+    field :kind,      non_null(:string)
+    field :namespace, :string
+    field :name,      non_null(:string)
+
+    @desc "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
+    field :resource, :kubernetes_unstructured do
+      resolve &AI.raw_resource/3
+    end
   end
 
   object :ai_queries do
@@ -69,6 +85,13 @@ defmodule Console.GraphQl.AI do
 
       resolve &AI.chats/2
     end
+
+    field :cluster_insight_component, :cluster_insight_component do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.resolve_cluster_insight_component/2
+    end
   end
 
   object :ai_mutations do
@@ -91,6 +114,7 @@ defmodule Console.GraphQl.AI do
     @desc "Wipes your current chat history blank"
     field :clear_chat_history, :integer do
       middleware Authenticated
+      arg :before, :integer, description: "deletes all chats with seq less than or equal to this integer"
 
       resolve &AI.clear_chats/2
     end

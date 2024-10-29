@@ -22,6 +22,10 @@ defmodule Console.Schema.Chat do
     from(c in query, where: c.seq < 0)
   end
 
+  def before(query \\ __MODULE__, seq)
+  def before(query, nil), do: query
+  def before(query, seq) when is_integer(seq), do: from(c in query, where: c.seq <= ^seq)
+
   def summarizable(query \\ __MODULE__) do
     from(c in query, where: c.inserted_at < ^expiry() or c.seq < 0)
   end
@@ -30,7 +34,7 @@ defmodule Console.Schema.Chat do
     from(c in query, where: c.inserted_at < ^expiry())
   end
 
-  def ordered(query \\ __MODULE__, order \\ [asc: :seq]) do
+  def ordered(query \\ __MODULE__, order \\ [asc: :seq, asc: :inserted_at]) do
     from(c in query, order_by: ^order)
   end
 

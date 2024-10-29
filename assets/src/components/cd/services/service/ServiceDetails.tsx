@@ -1,4 +1,4 @@
-import { Chip } from '@pluralsh/design-system'
+import { Chip, Flex } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
 import isEmpty from 'lodash/isEmpty'
 import { memo, useContext, useMemo } from 'react'
@@ -54,6 +54,7 @@ import { useProjectId } from '../../../contexts/ProjectsContext'
 
 import { InsightsTabLabel } from 'components/utils/AiInsights'
 import { ServiceDetailsSidecar } from './ServiceDetailsSidecar'
+import { serviceStatusToSeverity } from '../ServiceStatusChip'
 
 type ServiceContextType = {
   docs: ReturnType<typeof getDocsData>
@@ -119,21 +120,25 @@ export const getDirectory = ({
   if (!serviceDeployment) {
     return []
   }
-  const { name, componentStatus, dryRun } = serviceDeployment
+  const { name, componentStatus, dryRun, status } = serviceDeployment
 
   const healthyDependencies =
     serviceDeployment.dependencies?.filter((dep) => dep?.status === 'HEALTHY')
       .length || 0
   const totalDependencies = serviceDeployment.dependencies?.length || 0
-
   return [
     {
       path: SERVICE_COMPONENTS_PATH,
       label: (
-        <FractionalChip
-          label="Components"
-          fraction={componentStatus}
-        />
+        <Flex gap="small">
+          Components
+          <Chip
+            size="small"
+            severity={serviceStatusToSeverity(status)}
+          >
+            {componentStatus}
+          </Chip>
+        </Flex>
       ),
       enabled: true,
     },

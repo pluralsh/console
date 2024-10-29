@@ -333,7 +333,9 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :restore,          :cluster_restore, resolve: dataloader(Deployments), description: "the active restore for this cluster"
     field :object_store,     :object_store, resolve: dataloader(Deployments), description: "the object store connection bound to this cluster for backup/restore"
     field :parent_cluster,   :cluster, resolve: dataloader(Deployments), description: "the parent of this virtual cluster"
-    field :insight,          :ai_insight, resolve: dataloader(Cluster), description: "an ai insight generated about issues discovered which might impact the health of this cluster"
+    field :insight,          :ai_insight, resolve: dataloader(Deployments), description: "an ai insight generated about issues discovered which might impact the health of this cluster"
+
+    field :insight_components, :cluster_insight_component, resolve: dataloader(Deployments), description: "a set of kubernetes resources used to generate the ai insight for this cluster"
 
     field :nodes, list_of(:node), description: "list cached nodes for a cluster, this can be stale up to 5m",
       resolve: &Deployments.list_nodes/3

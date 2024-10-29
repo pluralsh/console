@@ -44,6 +44,7 @@ config :console, Console.Cron.Scheduler,
     {"*/10 * * * *", {Console.Deployments.Init, :ensure_secret, []}},
     {"*/5 * * * *", {Console.AI.Cron, :services, []}},
     {"*/5 * * * *", {Console.AI.Cron, :stacks, []}},
+    {"*/5 * * * *", {Console.AI.Cron, :clusters, []}},
     {"0 0 1-31/2 * *", {Console.Deployments.Cron, :backfill_deprecations, []}},
     {"*/10 * * * *", {Console.Deployments.Cron, :backfill_global_services, []}},
     {"*/10 * * * *", {Console.Deployments.Cron, :backfill_managed_namespaces, []}},
@@ -61,7 +62,7 @@ config :console, Console.Cron.Scheduler,
     {"@daily", {Console.Cron.Jobs, :prune_audits, []}},
     {"@daily", {Console.Cron.Jobs, :prune_alerts, []}},
     {"@daily", {Console.AI.Cron, :trim, []}},
-    {"0 0 * * 0", Console.AI.Cron, :chats, []}
+    {"0 0 * * 0", {Console.AI.Cron, :chats, []}}
   ]
 
 config :console, :watchers, [

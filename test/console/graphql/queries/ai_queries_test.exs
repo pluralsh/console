@@ -82,4 +82,32 @@ defmodule Console.GraphQl.AiQueriesTest do
              |> ids_equal(chats)
     end
   end
+
+  describe "clusterInsightComponent" do
+    test "it can fetch by id" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      comp = insert(:cluster_insight_component, cluster: cluster)
+
+      {:ok, %{data: %{"clusterInsightComponent" => found}}} = run_query("""
+        query Comp($id: ID!) {
+          clusterInsightComponent(id: $id) { id }
+        }
+      """, %{"id" => comp.id}, %{current_user: user})
+
+      assert found["id"] == comp.id
+    end
+
+    test "it cannot fetch w/o access" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+      comp = insert(:cluster_insight_component, cluster: cluster)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Comp($id: ID!) {
+          clusterInsightComponent(id: $id) { id }
+        }
+      """, %{"id" => comp.id}, %{current_user: user})
+    end
+  end
 end

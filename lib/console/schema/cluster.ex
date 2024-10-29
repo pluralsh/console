@@ -351,6 +351,7 @@ defmodule Console.Schema.Cluster do
     |> cast_assoc(:write_bindings)
     |> cast_assoc(:service_errors)
     |> cast_assoc(:tags)
+    |> cast_assoc(:insight)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:provider_id)
     |> foreign_key_constraint(:credential_id)
