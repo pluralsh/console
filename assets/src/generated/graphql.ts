@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -883,6 +883,7 @@ export type Chat = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   role: AiRole;
   seq: Scalars['Int']['output'];
+  thread?: Maybe<ChatThread>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -902,6 +903,36 @@ export type ChatEdge = {
 export type ChatMessage = {
   content: Scalars['String']['input'];
   role: AiRole;
+};
+
+/** A list of chat messages around a specific topic created on demand */
+export type ChatThread = {
+  __typename?: 'ChatThread';
+  default: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  summary: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+/** basic user-supplied input for creating an AI chat thread */
+export type ChatThreadAttributes = {
+  /** controls whether this thread is autosummarized, set true when users explicitly set summary */
+  summarized?: InputMaybe<Scalars['Boolean']['input']>;
+  summary: Scalars['String']['input'];
+};
+
+export type ChatThreadConnection = {
+  __typename?: 'ChatThreadConnection';
+  edges?: Maybe<Array<Maybe<ChatThreadEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ChatThreadEdge = {
+  __typename?: 'ChatThreadEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ChatThread>;
 };
 
 export type CloneAttributes = {
@@ -5164,6 +5195,7 @@ export type RootMutationType = {
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createStack?: Maybe<InfrastructureStack>;
   createStackDefinition?: Maybe<StackDefinition>;
+  createThread?: Maybe<ChatThread>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -5204,6 +5236,7 @@ export type RootMutationType = {
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteStack?: Maybe<InfrastructureStack>;
   deleteStackDefinition?: Maybe<StackDefinition>;
+  deleteThread?: Maybe<ChatThread>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteVirtualCluster?: Maybe<Cluster>;
@@ -5299,6 +5332,7 @@ export type RootMutationType = {
   updateStack?: Maybe<InfrastructureStack>;
   updateStackDefinition?: Maybe<StackDefinition>;
   updateStackRun?: Maybe<StackRun>;
+  updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
   upsertCatalog?: Maybe<Catalog>;
   upsertHelmRepository?: Maybe<HelmRepository>;
@@ -5340,11 +5374,13 @@ export type RootMutationTypeCancelBuildArgs = {
 
 export type RootMutationTypeChatArgs = {
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type RootMutationTypeClearChatHistoryArgs = {
   before?: InputMaybe<Scalars['Int']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -5560,6 +5596,11 @@ export type RootMutationTypeCreateStackDefinitionArgs = {
 };
 
 
+export type RootMutationTypeCreateThreadArgs = {
+  attributes: ChatThreadAttributes;
+};
+
+
 export type RootMutationTypeCreateUpgradePolicyArgs = {
   attributes: UpgradePolicyAttributes;
 };
@@ -5762,6 +5803,11 @@ export type RootMutationTypeDeleteStackDefinitionArgs = {
 };
 
 
+export type RootMutationTypeDeleteThreadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteUpgradePolicyArgs = {
   id: Scalars['ID']['input'];
 };
@@ -5947,6 +5993,7 @@ export type RootMutationTypeRollbackServiceArgs = {
 
 export type RootMutationTypeSaveChatsArgs = {
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -6192,6 +6239,12 @@ export type RootMutationTypeUpdateStackRunArgs = {
 };
 
 
+export type RootMutationTypeUpdateThreadArgs = {
+  attributes: ChatThreadAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateUserArgs = {
   attributes: UserAttributes;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -6268,6 +6321,7 @@ export type RootQueryType = {
   catalog?: Maybe<Catalog>;
   catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
+  chatThreads?: Maybe<ChatThreadConnection>;
   /** gets the chat history from prior AI chat sessions */
   chats?: Maybe<ChatConnection>;
   /** fetches an individual cluster */
@@ -6543,11 +6597,20 @@ export type RootQueryTypeCertificateArgs = {
 };
 
 
+export type RootQueryTypeChatThreadsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeChatsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

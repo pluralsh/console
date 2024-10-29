@@ -5,7 +5,8 @@ defmodule Console.Schema.User do
     Group,
     AccessToken,
     PolicyBinding,
-    GroupMember
+    GroupMember,
+    Chat
   }
 
   @email_re ~r/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-\.]+\.[a-zA-Z]{2,}$/
@@ -61,6 +62,22 @@ defmodule Console.Schema.User do
 
   def with_emails(query \\ __MODULE__, emails) do
     from(u in query, where: u.email in ^emails)
+  end
+
+  def with_chats(query \\ __MODULE__) do
+    from(u in query,
+      left_join: c in Chat,
+        on: c.user_id == u.id,
+      where: not is_nil(c.id)
+    )
+  end
+
+  def with_expired_chats(query \\ __MODULE__) do
+    from(u in query,
+      left_join: c in ^Chat.expired(),
+        on: c.user_id == u.id,
+      where: not is_nil(c.id)
+    )
   end
 
   def roles(%__MODULE__{role_bindings: roles, group_role_bindings: group_roles}) when is_list(roles) and is_list(group_roles),
