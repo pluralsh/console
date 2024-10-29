@@ -9,7 +9,7 @@ export default function StackCustomRun({ stackId }: { stackId: string }) {
   return (
     <>
       <Button
-        floating
+        secondary
         onClick={() => setIsOpen(true)}
       >
         Custom run

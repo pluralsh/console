@@ -334,18 +334,6 @@ function ChatbotFrame({ onClose, onMin, ...props }: ChatbotFrameProps) {
       />
       <ChatbotHistorySC ref={historyScrollRef}>
         <ul className="content">
-          {/* {testMd.map((msg) => {
-            const role = Role.assistant
-            const name = 'Plural AI'
-
-            return (
-              <ChatMessage
-                content={msg}
-                role={role}
-                name={name}
-              />
-            )
-          })} */}
           {history.map((msg, i) => {
             const { role } = msg
             const name = msg.name
