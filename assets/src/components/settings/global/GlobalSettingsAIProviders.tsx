@@ -10,55 +10,53 @@ import { useTheme } from 'styled-components'
 export function initialSettingsAttributes(
   ai: Nullable<AiSettings>
 ): Omit<AiSettingsAttributes, 'enabled' | 'provider'> {
-  if (ai?.openai) {
-    return {
-      openai: {
-        model: ai.openai.model,
-        accessToken: '',
-      },
-    }
-  }
-
-  if (ai?.anthropic) {
-    return {
-      anthropic: {
-        model: ai.anthropic.model,
-        accessToken: '',
-      },
-    }
-  }
-
-  if (ai?.ollama) {
-    return {
-      ollama: {
-        model: ai.ollama.model,
-        url: ai.ollama.url,
-        authorization: '',
-      },
-    }
-  }
-
-  if (ai?.azure) {
-    return {
-      azure: {
-        apiVersion: ai.azure.apiVersion,
-        endpoint: ai.azure.endpoint,
-        accessToken: '',
-      },
-    }
-  }
-
-  if (ai?.bedrock) {
-    return {
-      bedrock: {
-        modelId: ai.bedrock.modelId,
-        accessKeyId: ai.bedrock.accessKeyId,
-        secretAccessKey: '',
-      },
-    }
-  }
-
-  return {}
+  return ai
+    ? {
+        ...(ai.anthropic
+          ? {
+              anthropic: {
+                model: ai.anthropic.model,
+                accessToken: '',
+              },
+            }
+          : {}),
+        ...(ai.azure
+          ? {
+              azure: {
+                apiVersion: ai.azure.apiVersion,
+                endpoint: ai.azure.endpoint,
+                accessToken: '',
+              },
+            }
+          : {}),
+        ...(ai.bedrock
+          ? {
+              bedrock: {
+                modelId: ai.bedrock.modelId,
+                accessKeyId: ai.bedrock.accessKeyId,
+                secretAccessKey: '',
+              },
+            }
+          : {}),
+        ...(ai.ollama
+          ? {
+              ollama: {
+                model: ai.ollama.model,
+                url: ai.ollama.url,
+                authorization: '',
+              },
+            }
+          : {}),
+        ...(ai.openai
+          ? {
+              openai: {
+                model: ai.openai.model,
+                accessToken: '',
+              },
+            }
+          : {}),
+      }
+    : {}
 }
 
 export function validateAttributes(
