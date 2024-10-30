@@ -52,7 +52,6 @@ def extract_table_data(target_tables):
                 )
                 rows.append(version_info)
 
-    print(rows)
     return rows
 
 
@@ -72,4 +71,4 @@ def scrape():
     else:
         print_error("No compatibility information found.")
 
-    # update_chart_versions(app_name, "base")
+    update_chart_versions(app_name, "base")
