@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9229,6 +9229,8 @@ export type AiInsightSummaryFragment = { __typename?: 'AiInsight', id: string, s
 
 export type ChatFragment = { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null };
 
+export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null };
+
 export type AiQueryVariables = Exact<{
   prompt: Scalars['String']['input'];
 }>;
@@ -9252,7 +9254,7 @@ export type AiSuggestedFixQueryVariables = Exact<{
 
 export type AiSuggestedFixQuery = { __typename?: 'RootQueryType', aiSuggestedFix?: string | null };
 
-export type ChatsQueryVariables = Exact<{
+export type ChatThreadsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
@@ -9260,10 +9262,22 @@ export type ChatsQueryVariables = Exact<{
 }>;
 
 
+export type ChatThreadsQuery = { __typename?: 'RootQueryType', chatThreads?: { __typename?: 'ChatThreadConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatThreadEdge', node?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+
+export type ChatsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
 export type ChatsQuery = { __typename?: 'RootQueryType', chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
 export type ChatMutationVariables = Exact<{
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -9285,10 +9299,33 @@ export type DeleteChatMutation = { __typename?: 'RootMutationType', deleteChat?:
 
 export type SaveChatsMutationVariables = Exact<{
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
 export type SaveChatsMutation = { __typename?: 'RootMutationType', saveChats?: Array<{ __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null> | null };
+
+export type CreateChatThreadMutationVariables = Exact<{
+  attributes: ChatThreadAttributes;
+}>;
+
+
+export type CreateChatThreadMutation = { __typename?: 'RootMutationType', createThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type UpdateChatThreadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  attributes: ChatThreadAttributes;
+}>;
+
+
+export type UpdateChatThreadMutation = { __typename?: 'RootMutationType', updateThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type DeleteChatThreadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null };
 
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
@@ -11374,6 +11411,15 @@ export const ChatFragmentDoc = gql`
   content
   role
   seq
+  insertedAt
+  updatedAt
+}
+    `;
+export const ChatThreadFragmentDoc = gql`
+    fragment ChatThread on ChatThread {
+  id
+  default
+  summary
   insertedAt
   updatedAt
 }
@@ -14368,9 +14414,66 @@ export type AiSuggestedFixQueryHookResult = ReturnType<typeof useAiSuggestedFixQ
 export type AiSuggestedFixLazyQueryHookResult = ReturnType<typeof useAiSuggestedFixLazyQuery>;
 export type AiSuggestedFixSuspenseQueryHookResult = ReturnType<typeof useAiSuggestedFixSuspenseQuery>;
 export type AiSuggestedFixQueryResult = Apollo.QueryResult<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>;
+export const ChatThreadsDocument = gql`
+    query ChatThreads($first: Int = 100, $last: Int, $after: String, $before: String) {
+  chatThreads(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ChatThread
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ChatThreadFragmentDoc}`;
+
+/**
+ * __useChatThreadsQuery__
+ *
+ * To run a query within a React component, call `useChatThreadsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatThreadsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatThreadsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useChatThreadsQuery(baseOptions?: Apollo.QueryHookOptions<ChatThreadsQuery, ChatThreadsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ChatThreadsQuery, ChatThreadsQueryVariables>(ChatThreadsDocument, options);
+      }
+export function useChatThreadsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatThreadsQuery, ChatThreadsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ChatThreadsQuery, ChatThreadsQueryVariables>(ChatThreadsDocument, options);
+        }
+export function useChatThreadsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatThreadsQuery, ChatThreadsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ChatThreadsQuery, ChatThreadsQueryVariables>(ChatThreadsDocument, options);
+        }
+export type ChatThreadsQueryHookResult = ReturnType<typeof useChatThreadsQuery>;
+export type ChatThreadsLazyQueryHookResult = ReturnType<typeof useChatThreadsLazyQuery>;
+export type ChatThreadsSuspenseQueryHookResult = ReturnType<typeof useChatThreadsSuspenseQuery>;
+export type ChatThreadsQueryResult = Apollo.QueryResult<ChatThreadsQuery, ChatThreadsQueryVariables>;
 export const ChatsDocument = gql`
-    query Chats($first: Int = 100, $last: Int, $after: String, $before: String) {
-  chats(first: $first, last: $last, after: $after, before: $before) {
+    query Chats($first: Int = 100, $last: Int, $after: String, $before: String, $threadId: ID) {
+  chats(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    threadId: $threadId
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -14400,6 +14503,7 @@ ${ChatFragmentDoc}`;
  *      last: // value for 'last'
  *      after: // value for 'after'
  *      before: // value for 'before'
+ *      threadId: // value for 'threadId'
  *   },
  * });
  */
@@ -14420,8 +14524,8 @@ export type ChatsLazyQueryHookResult = ReturnType<typeof useChatsLazyQuery>;
 export type ChatsSuspenseQueryHookResult = ReturnType<typeof useChatsSuspenseQuery>;
 export type ChatsQueryResult = Apollo.QueryResult<ChatsQuery, ChatsQueryVariables>;
 export const ChatDocument = gql`
-    mutation Chat($messages: [ChatMessage]) {
-  chat(messages: $messages) {
+    mutation Chat($messages: [ChatMessage], $threadId: ID) {
+  chat(messages: $messages, threadId: $threadId) {
     ...Chat
   }
 }
@@ -14442,6 +14546,7 @@ export type ChatMutationFn = Apollo.MutationFunction<ChatMutation, ChatMutationV
  * const [chatMutation, { data, loading, error }] = useChatMutation({
  *   variables: {
  *      messages: // value for 'messages'
+ *      threadId: // value for 'threadId'
  *   },
  * });
  */
@@ -14517,8 +14622,8 @@ export type DeleteChatMutationHookResult = ReturnType<typeof useDeleteChatMutati
 export type DeleteChatMutationResult = Apollo.MutationResult<DeleteChatMutation>;
 export type DeleteChatMutationOptions = Apollo.BaseMutationOptions<DeleteChatMutation, DeleteChatMutationVariables>;
 export const SaveChatsDocument = gql`
-    mutation SaveChats($messages: [ChatMessage]) {
-  saveChats(messages: $messages) {
+    mutation SaveChats($messages: [ChatMessage], $threadId: ID) {
+  saveChats(messages: $messages, threadId: $threadId) {
     ...Chat
   }
 }
@@ -14539,6 +14644,7 @@ export type SaveChatsMutationFn = Apollo.MutationFunction<SaveChatsMutation, Sav
  * const [saveChatsMutation, { data, loading, error }] = useSaveChatsMutation({
  *   variables: {
  *      messages: // value for 'messages'
+ *      threadId: // value for 'threadId'
  *   },
  * });
  */
@@ -14549,6 +14655,106 @@ export function useSaveChatsMutation(baseOptions?: Apollo.MutationHookOptions<Sa
 export type SaveChatsMutationHookResult = ReturnType<typeof useSaveChatsMutation>;
 export type SaveChatsMutationResult = Apollo.MutationResult<SaveChatsMutation>;
 export type SaveChatsMutationOptions = Apollo.BaseMutationOptions<SaveChatsMutation, SaveChatsMutationVariables>;
+export const CreateChatThreadDocument = gql`
+    mutation CreateChatThread($attributes: ChatThreadAttributes!) {
+  createThread(attributes: $attributes) {
+    ...ChatThread
+  }
+}
+    ${ChatThreadFragmentDoc}`;
+export type CreateChatThreadMutationFn = Apollo.MutationFunction<CreateChatThreadMutation, CreateChatThreadMutationVariables>;
+
+/**
+ * __useCreateChatThreadMutation__
+ *
+ * To run a mutation, you first call `useCreateChatThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateChatThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createChatThreadMutation, { data, loading, error }] = useCreateChatThreadMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useCreateChatThreadMutation(baseOptions?: Apollo.MutationHookOptions<CreateChatThreadMutation, CreateChatThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateChatThreadMutation, CreateChatThreadMutationVariables>(CreateChatThreadDocument, options);
+      }
+export type CreateChatThreadMutationHookResult = ReturnType<typeof useCreateChatThreadMutation>;
+export type CreateChatThreadMutationResult = Apollo.MutationResult<CreateChatThreadMutation>;
+export type CreateChatThreadMutationOptions = Apollo.BaseMutationOptions<CreateChatThreadMutation, CreateChatThreadMutationVariables>;
+export const UpdateChatThreadDocument = gql`
+    mutation UpdateChatThread($id: ID!, $attributes: ChatThreadAttributes!) {
+  updateThread(id: $id, attributes: $attributes) {
+    ...ChatThread
+  }
+}
+    ${ChatThreadFragmentDoc}`;
+export type UpdateChatThreadMutationFn = Apollo.MutationFunction<UpdateChatThreadMutation, UpdateChatThreadMutationVariables>;
+
+/**
+ * __useUpdateChatThreadMutation__
+ *
+ * To run a mutation, you first call `useUpdateChatThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateChatThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateChatThreadMutation, { data, loading, error }] = useUpdateChatThreadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpdateChatThreadMutation(baseOptions?: Apollo.MutationHookOptions<UpdateChatThreadMutation, UpdateChatThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateChatThreadMutation, UpdateChatThreadMutationVariables>(UpdateChatThreadDocument, options);
+      }
+export type UpdateChatThreadMutationHookResult = ReturnType<typeof useUpdateChatThreadMutation>;
+export type UpdateChatThreadMutationResult = Apollo.MutationResult<UpdateChatThreadMutation>;
+export type UpdateChatThreadMutationOptions = Apollo.BaseMutationOptions<UpdateChatThreadMutation, UpdateChatThreadMutationVariables>;
+export const DeleteChatThreadDocument = gql`
+    mutation DeleteChatThread($id: ID!) {
+  deleteThread(id: $id) {
+    ...ChatThread
+  }
+}
+    ${ChatThreadFragmentDoc}`;
+export type DeleteChatThreadMutationFn = Apollo.MutationFunction<DeleteChatThreadMutation, DeleteChatThreadMutationVariables>;
+
+/**
+ * __useDeleteChatThreadMutation__
+ *
+ * To run a mutation, you first call `useDeleteChatThreadMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteChatThreadMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteChatThreadMutation, { data, loading, error }] = useDeleteChatThreadMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteChatThreadMutation(baseOptions?: Apollo.MutationHookOptions<DeleteChatThreadMutation, DeleteChatThreadMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteChatThreadMutation, DeleteChatThreadMutationVariables>(DeleteChatThreadDocument, options);
+      }
+export type DeleteChatThreadMutationHookResult = ReturnType<typeof useDeleteChatThreadMutation>;
+export type DeleteChatThreadMutationResult = Apollo.MutationResult<DeleteChatThreadMutation>;
+export type DeleteChatThreadMutationOptions = Apollo.BaseMutationOptions<DeleteChatThreadMutation, DeleteChatThreadMutationVariables>;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -23661,6 +23867,7 @@ export const namedOperations = {
     AI: 'AI',
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
+    ChatThreads: 'ChatThreads',
     Chats: 'Chats',
     App: 'App',
     AppInfo: 'AppInfo',
@@ -23793,6 +24000,9 @@ export const namedOperations = {
     ClearChatHistory: 'ClearChatHistory',
     DeleteChat: 'DeleteChat',
     SaveChats: 'SaveChats',
+    CreateChatThread: 'CreateChatThread',
+    UpdateChatThread: 'UpdateChatThread',
+    DeleteChatThread: 'DeleteChatThread',
     CreatePrAutomation: 'CreatePrAutomation',
     UpdatePrAutomation: 'UpdatePrAutomation',
     DeletePrAutomation: 'DeletePrAutomation',
@@ -23892,6 +24102,7 @@ export const namedOperations = {
     AiInsight: 'AiInsight',
     AiInsightSummary: 'AiInsightSummary',
     Chat: 'Chat',
+    ChatThread: 'ChatThread',
     CostAnalysis: 'CostAnalysis',
     FileContent: 'FileContent',
     Configuration: 'Configuration',

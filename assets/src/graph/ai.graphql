@@ -28,6 +28,14 @@ fragment Chat on Chat {
   updatedAt
 }
 
+fragment ChatThread on ChatThread {
+  id
+  default
+  summary
+  insertedAt
+  updatedAt
+}
+
 query AI($prompt: String!) {
   ai(prompt: $prompt)
 }
@@ -40,8 +48,38 @@ query AISuggestedFix($insightID: ID!) {
   aiSuggestedFix(insightId: $insightID)
 }
 
-query Chats($first: Int = 100, $last: Int, $after: String, $before: String) {
-  chats(first: $first, last: $last, after: $after, before: $before) {
+query ChatThreads(
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+) {
+  chatThreads(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ChatThread
+      }
+    }
+  }
+}
+
+query Chats(
+  $first: Int = 100
+  $last: Int
+  $after: String
+  $before: String
+  $threadId: ID
+) {
+  chats(
+    first: $first
+    last: $last
+    after: $after
+    before: $before
+    threadId: $threadId
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -53,8 +91,8 @@ query Chats($first: Int = 100, $last: Int, $after: String, $before: String) {
   }
 }
 
-mutation Chat($messages: [ChatMessage]) {
-  chat(messages: $messages) {
+mutation Chat($messages: [ChatMessage], $threadId: ID) {
+  chat(messages: $messages, threadId: $threadId) {
     ...Chat
   }
 }
@@ -69,8 +107,26 @@ mutation DeleteChat($id: ID!) {
   }
 }
 
-mutation SaveChats($messages: [ChatMessage]) {
-  saveChats(messages: $messages) {
+mutation SaveChats($messages: [ChatMessage], $threadId: ID) {
+  saveChats(messages: $messages, threadId: $threadId) {
     ...Chat
+  }
+}
+
+mutation CreateChatThread($attributes: ChatThreadAttributes!) {
+  createThread(attributes: $attributes) {
+    ...ChatThread
+  }
+}
+
+mutation UpdateChatThread($id: ID!, $attributes: ChatThreadAttributes!) {
+  updateThread(id: $id, attributes: $attributes) {
+    ...ChatThread
+  }
+}
+
+mutation DeleteChatThread($id: ID!) {
+  deleteThread(id: $id) {
+    ...ChatThread
   }
 }
