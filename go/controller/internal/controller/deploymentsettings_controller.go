@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/samber/lo"
+	"k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -117,7 +118,7 @@ func (r *DeploymentSettingsReconciler) Reconcile(ctx context.Context, req ctrl.R
 		attr, err := r.genDeploymentSettingsAttr(ctx, settings)
 		if err != nil {
 			utils.MarkCondition(settings.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
-			if goerrors.Is(err, operrors.ErrRetriable) {
+			if goerrors.Is(err, operrors.ErrRetriable) || goerrors.Is(err, operrors.ErrReferenceNotFound) {
 				return requeue, nil
 			}
 			return ctrl.Result{}, err
@@ -173,6 +174,10 @@ func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Con
 	}
 	if settings.Spec.AI != nil {
 		ai, err := settings.Spec.AI.Attributes(ctx, r.Client, settings.Namespace)
+		if errors.IsNotFound(err) {
+			return nil, operrors.ErrReferenceNotFound
+		}
+
 		if err != nil {
 			return nil, err
 		}

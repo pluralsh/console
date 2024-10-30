@@ -74,3 +74,7 @@ mutation SaveChats($messages: [ChatMessage]) {
     ...Chat
   }
 }
+
+mutation ClearChatHistory($before: Int, $threadId: ID) {
+  clearChatHistory(before: $before, threadId: $threadId)
+}

@@ -7,7 +7,7 @@ import ExplainWithAIPanel from './ExplainWithAIPanel.tsx'
 export default function ExplainWithAI() {
   const theme = useTheme()
   const [open, setOpen] = useState(false)
-  const prompt = useExplainWithAIPrompt()
+  const { prompt } = useExplainWithAIContext()
 
   return (
     <div

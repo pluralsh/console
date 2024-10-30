@@ -5,6 +5,8 @@ import {
   Flex,
   FormField,
   ListBoxItem,
+  Radio,
+  RadioGroup,
   Select,
   Switch,
   Toast,
@@ -12,10 +14,15 @@ import {
 import { SelectPropsSingle } from '@pluralsh/design-system/dist/components/Select'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { Body1BoldP, Body2P } from 'components/utils/typography/Text'
+import {
+  Body1BoldP,
+  Body2BoldP,
+  Body2P,
+} from 'components/utils/typography/Text'
 import {
   AiProvider,
   AiSettingsAttributes,
+  useClearChatHistoryMutation,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
 import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
@@ -33,6 +40,10 @@ import {
 } from './GlobalSettingsAIProviders.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import pick from 'lodash/pick'
+import {
+  AIVerbosityLevel,
+  useExplainWithAIContext,
+} from '../../ai/ExplainWithAIContext.tsx'
 
 const updateSettings = produce(
   (
@@ -56,6 +67,7 @@ export function GlobalSettingsAiProvider() {
     updateSettings,
     initialSettingsAttributes(ai)
   )
+  const { verbosityLevel, setVerbosityLevel } = useExplainWithAIContext()
   const [showToast, setShowToast] = useState(false)
 
   let settings: ReactNode
@@ -146,60 +158,116 @@ export function GlobalSettingsAiProvider() {
     mutation()
   }
 
+  const [
+    clearChatHistory,
+    { loading: clearingChatHistory, error: errorClearingChatHistory },
+  ] = useClearChatHistoryMutation()
+
   return (
     <ScrollablePage>
-      <WrapperCardSC
-        forwardedAs="form"
-        onSubmit={handleSubmit}
+      <Flex
+        direction={'column'}
+        gap={'medium'}
       >
-        {error && <GqlError error={error} />}
-        <Switch
-          checked={enabled}
-          onChange={(checked) => setEnabled(checked)}
+        <WrapperCardSC
+          forwardedAs="form"
+          onSubmit={handleSubmit}
         >
-          Enable AI insights
-        </Switch>
-        <FormField label="AI provider">
-          <SelectWithDisable
-            disabled={!enabled}
-            selectedKey={provider}
-            onSelectionChange={(v) => {
-              setProvider(v as AiProvider)
-            }}
+          {error && <GqlError error={error} />}
+          {errorClearingChatHistory && (
+            <GqlError error={errorClearingChatHistory} />
+          )}
+          <Flex justifyContent={'space-between'}>
+            <Switch
+              checked={enabled}
+              onChange={(checked) => setEnabled(checked)}
+            >
+              Enable AI insights
+            </Switch>
+            <Button
+              secondary
+              loading={clearingChatHistory}
+              onClick={() => clearChatHistory()}
+            >
+              Clear chat history
+            </Button>
+          </Flex>
+          <FormField label="AI provider">
+            <SelectWithDisable
+              disabled={!enabled}
+              selectedKey={provider}
+              onSelectionChange={(v) => {
+                setProvider(v as AiProvider)
+              }}
+            >
+              <ListBoxItem
+                key={AiProvider.Bedrock}
+                label={'Amazon Bedrock'}
+              />
+              <ListBoxItem
+                key={AiProvider.Anthropic}
+                label={'Anthropic'}
+              />
+              <ListBoxItem
+                key={AiProvider.Azure}
+                label={'Azure AI'}
+              />
+              <ListBoxItem
+                key={AiProvider.Ollama}
+                label={'Ollama'}
+              />
+              <ListBoxItem
+                key={AiProvider.Openai}
+                label={'OpenAI'}
+              />
+            </SelectWithDisable>
+          </FormField>
+          {settings}
+          <Button
+            alignSelf="flex-end"
+            type="submit"
+            disabled={!valid || (!ai?.enabled && !enabled)}
+            loading={loading}
           >
-            <ListBoxItem
-              key={AiProvider.Bedrock}
-              label={'Amazon Bedrock'}
-            />
-            <ListBoxItem
-              key={AiProvider.Anthropic}
-              label={'Anthropic'}
-            />
-            <ListBoxItem
-              key={AiProvider.Azure}
-              label={'Azure AI'}
-            />
-            <ListBoxItem
-              key={AiProvider.Ollama}
-              label={'Ollama'}
-            />
-            <ListBoxItem
-              key={AiProvider.Openai}
-              label={'OpenAI'}
-            />
-          </SelectWithDisable>
-        </FormField>
-        {settings}
-        <Button
-          alignSelf="flex-end"
-          type="submit"
-          disabled={!valid || (!ai?.enabled && !enabled)}
-          loading={loading}
-        >
-          Save changes
-        </Button>
-      </WrapperCardSC>
-      {enabled && <InsightsCallout />}
+            Save changes
+          </Button>
+        </WrapperCardSC>
+        {enabled && (
+          <>
+            <Card
+              css={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: theme.spacing.small,
+                padding: theme.spacing.xlarge,
+              }}
+            >
+              <Body2BoldP>AI explain length</Body2BoldP>
+              <Body2P>
+                Control the level of depth for the “Explain with AI” feature on
+                some pages. Please note that this is local setting that impacts
+                only your current browser.
+              </Body2P>
+              <RadioGroup
+                value={verbosityLevel}
+                onChange={(v) => setVerbosityLevel(v as AIVerbosityLevel)}
+                css={{
+                  backgroundColor: theme.colors['fill-two'],
+                  borderRadius: theme.borderRadiuses.large,
+                  display: 'flex',
+                  gap: theme.spacing.xxxxxlarge,
+                  padding: theme.spacing.medium,
+                }}
+              >
+                {Object.values(AIVerbosityLevel).map((value) => (
+                  <Radio value={value}>{value}</Radio>
+                ))}
+              </RadioGroup>
+            </Card>
+            <InsightsCallout />
+          </>
+        )}
+      </Flex>
       <Toast
         severity="success"
         css={{ margin: theme.spacing.large }}
@@ -227,7 +295,6 @@ const InsightsCalloutSC = styled.div(({ theme }) => ({
   background: theme.colors['fill-two'],
   borderRadius: theme.borderRadiuses.medium,
   padding: theme.spacing.medium,
-  marginTop: theme.spacing.medium,
   borderLeft: `3px solid ${theme.colors['border-info']}`,
 }))
 
