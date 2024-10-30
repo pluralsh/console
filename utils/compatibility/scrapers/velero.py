@@ -8,7 +8,7 @@ from utils import (
 )
 
 app_name = "velero"
-compatibility_url = "https://plural.sh"
+compatibility_url = "https://velero.io/docs/v1.1.0/support-matrix/"
 
 
 def parse_page(content):

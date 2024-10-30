@@ -1,3 +1,4 @@
+import re
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from utils import (
@@ -5,10 +6,11 @@ from utils import (
     fetch_page,
     update_compatibility_info,
     update_chart_versions,
+    validate_semver,
 )
 
 app_name = "vitess"
-compatibility_url = "https://plural.sh"
+compatibility_url = "https://github.com/planetscale/vitess-operator"
 
 
 def parse_page(content):
@@ -19,11 +21,44 @@ def parse_page(content):
 
 def find_target_tables(sections):
     target_tables = []
+    for section in sections:
+        if section.get_text(strip=True) in [
+            "Compatibility",
+        ]:
+            table = section.find_next("table")
+            if table:
+                target_tables.append(table)
     return target_tables
 
 
 def extract_table_data(target_tables):
     rows = []
+    for row in target_tables[0].find_all("tr")[1:]:  # Skip the header row
+        columns = row.find_all("td")
+
+        # Clean app version
+        app_version = validate_semver(columns[1].text.strip("v.*"))
+
+        # Split kube versions and clean each element
+        kube_versions = columns[2].get_text(strip=True).split(",")
+        kube_versions = [
+            re.sub(
+                r"^\s*(?:v|orv)?(.*?)(?:\.\*)?$", r"\1", version
+            )  # Handle 'v', 'orv' and `.*`
+            for version in kube_versions
+        ]
+
+        if app_version:
+            version_info = OrderedDict(
+                [
+                    ("version", str(app_version)),
+                    ("kube", kube_versions),
+                    ("requirements", []),
+                    ("incompatibilities", []),
+                ]
+            )
+            rows.append(version_info)
+
     return rows
 
 
