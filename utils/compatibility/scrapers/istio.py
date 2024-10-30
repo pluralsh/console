@@ -41,15 +41,7 @@ def extract_table_data(target_tables):
             istio_version = validate_semver(columns[0].text)
             kube_versions = columns[4].text.split(", ")
             is_supported = columns[1].text
-            if istio_version and is_supported == "Yes":
-                # print(
-                #     "🟠  Istio Version",
-                #     istio_version,
-                #     "Kube Versions",
-                #     kube_versions,
-                #     "Is Supported",
-                #     is_supported,
-                # )
+            if istio_version and is_supported.lower() == "yes":
                 version_info = OrderedDict(
                     [
                         ("version", str(istio_version)),

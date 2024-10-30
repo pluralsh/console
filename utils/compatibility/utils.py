@@ -235,6 +235,9 @@ def update_chart_versions(app_name, chart_name=""):
 
 
 def sort_versions(versions):
+    # Ensure all versions are strings before sorting
+    for v in versions:
+        v["version"] = str(v["version"])
     return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
 
 
