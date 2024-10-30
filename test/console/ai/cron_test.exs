@@ -8,6 +8,24 @@ defmodule Console.AI.CronTest do
 
   setup :set_mimic_global
 
+  describe "#trim_threads/0" do
+    test "it will trim threads for users with more than 50" do
+      user = insert(:user)
+      keep = insert_list(52, :chat_thread, user: user)
+      drop = insert_list(3, :chat_thread, user: user, inserted_at: Timex.now() |> Timex.shift(days: -2))
+
+      keep2 = insert_list(3, :chat_thread, user: insert(:user), inserted_at: Timex.now() |> Timex.shift(days: -2))
+
+      Cron.trim_threads()
+
+      for t <- keep ++ keep2,
+        do: assert refetch(t)
+
+      for t <- drop,
+        do: refute refetch(t)
+    end
+  end
+
   describe "#services/0" do
     test "it will gather info from all service components and generate" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})

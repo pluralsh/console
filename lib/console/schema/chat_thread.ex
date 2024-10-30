@@ -2,6 +2,8 @@ defmodule Console.Schema.ChatThread do
   use Piazza.Ecto.Schema
   alias Console.Schema.{User, Chat}
 
+  @max_threads 50
+
   schema "chat_threads" do
     field :summary,    :string
     field :default,    :boolean, default: false
@@ -18,6 +20,23 @@ defmodule Console.Schema.ChatThread do
         on: c.thread_id == t.id,
       where: not is_nil(c.id),
       distinct: true
+    )
+  end
+
+  def prunable(query \\ __MODULE__) do
+    query = with_cte(query, "numbered_threads", as: ^numbered_threads(query))
+    expired = Timex.now() |> Timex.shift(days: -1)
+
+    from(t in query,
+      join: nt in "numbered_threads",
+        on: nt.id == t.id,
+      where: nt.row_number > @max_threads and t.inserted_at <= ^expired
+    )
+  end
+
+  def numbered_threads(query \\ __MODULE__) do
+    from(t in query,
+      select: %{id: t.id, inserted_at: t.inserted_at, row_number: fragment("ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY inserted_at DESC)")}
     )
   end
 

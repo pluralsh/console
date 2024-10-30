@@ -21,6 +21,11 @@ defmodule Console.AI.Cron do
     |> Repo.delete_all()
   end
 
+  def trim_threads() do
+    ChatThread.prunable()
+    |> Repo.delete_all()
+  end
+
   def services() do
     if_enabled(fn ->
       Service.for_statuses([:failed, :stale])
