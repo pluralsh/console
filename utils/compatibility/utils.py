@@ -18,7 +18,7 @@ def print_success(message):
 
 
 def print_warning(message):
-    print(Fore.YELLOW + "⚠️" + Style.RESET_ALL + f" {message}")
+    print(Fore.YELLOW + "⛔️" + Style.RESET_ALL + f" {message}")
 
 
 def fetch_page(url):
