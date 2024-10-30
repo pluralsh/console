@@ -38,8 +38,8 @@ import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
 import { AIPanelOverlay } from './AIPanelOverlay'
+import { ChatbotIconButton } from './ChatbotButton.tsx'
 import ChatbotMarkdown from './ChatbotMarkdown'
-import AIButton from './ExplainWithAIButton.tsx'
 
 export function Chatbot(): ReactNode {
   const theme = useTheme()
@@ -53,18 +53,12 @@ export function Chatbot(): ReactNode {
         position: 'relative',
       }}
     >
-      <AIButton
-        onClick={() => setOpen(true)}
+      <ChatbotIconButton
         active={open}
-        visible={true}
-        startIcon={null}
-        css={{
-          width: 32,
-          height: 32,
-        }}
+        onClick={() => setOpen(true)}
       >
         <ChatIcon />
-      </AIButton>
+      </ChatbotIconButton>
       <ChatbotPanel
         open={open}
         onClose={() => setOpen(false)}

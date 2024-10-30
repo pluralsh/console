@@ -16,6 +16,7 @@ export default function IconFrameRefreshButton({
       type="floating"
       size="large"
       onClick={() => refetch()}
+      background="fill-zero"
       icon={
         loading ? (
           <Spinner

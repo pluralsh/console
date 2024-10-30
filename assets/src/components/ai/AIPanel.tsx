@@ -16,6 +16,7 @@ export default function AIPanel({
   showClosePanel = false,
   header,
   subheader,
+  footer,
   children,
   ...props
 }: {
@@ -25,6 +26,7 @@ export default function AIPanel({
   showClosePanel?: boolean
   header: string
   subheader: string
+  footer?: ReactNode
   children: ReactNode
 } & CardProps) {
   const theme = useTheme()
@@ -91,14 +93,19 @@ export default function AIPanel({
               display: 'flex',
               gap: theme.spacing.small,
               padding: theme.spacing.large,
+              '> *': {
+                flexGrow: 1,
+              },
             }}
           >
             <Button
-              flexGrow={1}
               onClick={onClose}
+              secondary={!!footer}
+              floating={!!footer}
             >
               Got it, thanks!
             </Button>
+            {footer && footer}
           </div>
         )}
       </Card>
