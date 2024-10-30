@@ -713,12 +713,13 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID         string  `json:"id"`
-	Summary    string  `json:"summary"`
-	Default    bool    `json:"default"`
-	User       *User   `json:"user,omitempty"`
-	InsertedAt *string `json:"insertedAt,omitempty"`
-	UpdatedAt  *string `json:"updatedAt,omitempty"`
+	ID         string          `json:"id"`
+	Summary    string          `json:"summary"`
+	Default    bool            `json:"default"`
+	User       *User           `json:"user,omitempty"`
+	Chats      *ChatConnection `json:"chats,omitempty"`
+	InsertedAt *string         `json:"insertedAt,omitempty"`
+	UpdatedAt  *string         `json:"updatedAt,omitempty"`
 }
 
 // basic user-supplied input for creating an AI chat thread

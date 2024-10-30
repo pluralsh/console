@@ -49,6 +49,10 @@ defmodule Console.GraphQl.AI do
 
     field :user,     :user, resolve: dataloader(User)
 
+    connection field :chats, node_type: :chat do
+      resolve &AI.list_chats/3
+    end
+
     timestamps()
   end
 
@@ -99,6 +103,14 @@ defmodule Console.GraphQl.AI do
       arg :insight_id, non_null(:id), description: "the ai insight you want to suggest a fix for"
 
       resolve &AI.ai_suggested_fix/2
+    end
+
+    @desc "gets an individual chat thread, with the ability to sideload chats on top"
+    field :chat_thread, :chat_thread do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.thread/2
     end
 
     @desc "gets the chat history from prior AI chat sessions"

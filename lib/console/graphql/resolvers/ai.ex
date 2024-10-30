@@ -16,11 +16,20 @@ defmodule Console.GraphQl.Resolvers.AI do
     |> paginate(args)
   end
 
+  def thread(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.thread_access(id, user)
+
   def chats(args, %{context: %{current_user: user}}) do
     with {:ok, q} <- maybe_thread(args, user) do
       Chat.ordered(q)
       |> paginate(args)
     end
+  end
+
+  def list_chats(%ChatThread{id: tid}, args, _) do
+    Chat.for_thread(tid)
+    |> Chat.ordered()
+    |> paginate(args)
   end
 
   defp maybe_thread(%{thread_id: tid}, user) when is_binary(tid) do

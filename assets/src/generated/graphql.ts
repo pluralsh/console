@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -908,12 +908,22 @@ export type ChatMessage = {
 /** A list of chat messages around a specific topic created on demand */
 export type ChatThread = {
   __typename?: 'ChatThread';
+  chats?: Maybe<ChatConnection>;
   default: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   summary: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
+};
+
+
+/** A list of chat messages around a specific topic created on demand */
+export type ChatThreadChatsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** basic user-supplied input for creating an AI chat thread */
@@ -6323,6 +6333,8 @@ export type RootQueryType = {
   catalog?: Maybe<Catalog>;
   catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
+  /** gets an individual chat thread, with the ability to sideload chats on top */
+  chatThread?: Maybe<ChatThread>;
   chatThreads?: Maybe<ChatThreadConnection>;
   /** gets the chat history from prior AI chat sessions */
   chats?: Maybe<ChatConnection>;
@@ -6596,6 +6608,11 @@ export type RootQueryTypeCertificateArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeChatThreadArgs = {
+  id: Scalars['ID']['input'];
 };
 
 

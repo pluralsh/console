@@ -445,6 +445,9 @@ type RootQueryType {
     insightId: ID!
   ): String
 
+  "gets an individual chat thread, with the ability to sideload chats on top"
+  chatThread(id: ID!): ChatThread
+
   "gets the chat history from prior AI chat sessions"
   chats(after: String, first: Int, before: String, last: Int, threadId: ID): ChatConnection
 
@@ -5835,6 +5838,7 @@ type ChatThread {
   summary: String!
   default: Boolean!
   user: User
+  chats(after: String, first: Int, before: String, last: Int): ChatConnection
   insertedAt: DateTime
   updatedAt: DateTime
 }
