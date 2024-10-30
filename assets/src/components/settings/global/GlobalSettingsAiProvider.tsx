@@ -22,6 +22,7 @@ import {
 import {
   AiProvider,
   AiSettingsAttributes,
+  useClearChatHistoryMutation,
   useUpdateDeploymentSettingsMutation,
 } from 'generated/graphql'
 import { FormEvent, ReactNode, useMemo, useReducer, useState } from 'react'
@@ -157,6 +158,11 @@ export function GlobalSettingsAiProvider() {
     mutation()
   }
 
+  const [
+    clearChatHistory,
+    { loading: clearingChatHistory, error: errorClearingChatHistory },
+  ] = useClearChatHistoryMutation()
+
   return (
     <ScrollablePage>
       <Flex
@@ -168,12 +174,24 @@ export function GlobalSettingsAiProvider() {
           onSubmit={handleSubmit}
         >
           {error && <GqlError error={error} />}
-          <Switch
-            checked={enabled}
-            onChange={(checked) => setEnabled(checked)}
-          >
-            Enable AI insights
-          </Switch>
+          {errorClearingChatHistory && (
+            <GqlError error={errorClearingChatHistory} />
+          )}
+          <Flex justifyContent={'space-between'}>
+            <Switch
+              checked={enabled}
+              onChange={(checked) => setEnabled(checked)}
+            >
+              Enable AI insights
+            </Switch>
+            <Button
+              secondary
+              loading={clearingChatHistory}
+              onClick={() => clearChatHistory()}
+            >
+              Clear chat history
+            </Button>
+          </Flex>
           <FormField label="AI provider">
             <SelectWithDisable
               disabled={!enabled}
