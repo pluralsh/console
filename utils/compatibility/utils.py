@@ -259,12 +259,59 @@ def ensure_keys(version):
     return version
 
 
+from collections import OrderedDict
+
+
+from collections import OrderedDict
+
+
+from collections import OrderedDict
+
+
+def reduce_versions(versions):
+    reduced_versions = []
+    cur_major = ""
+    cur_minor = ""
+    cur_kube = []
+
+    # Iterate through the versions list in reverse order
+    for data in reversed(versions):
+        version = validate_semver(data["version"])
+        kube = data["kube"]
+
+        # Add to reduced_versions if it's a new major/minor version or kube list changes
+        if (
+            cur_major != version.major
+            or cur_minor != version.minor
+            or cur_kube != kube
+        ):
+            cur_major = version.major
+            cur_minor = version.minor
+            cur_kube = kube
+
+            version_info = OrderedDict(
+                [
+                    ("version", str(version)),
+                    ("kube", kube),
+                    ("requirements", []),
+                    ("incompatibilities", []),
+                ]
+            )
+            reduced_versions.append(version_info)
+
+    # Reverse reduced_versions to maintain original order of versions
+    reduced_versions.reverse()
+
+    return reduced_versions
+
+
 def update_compatibility_info(filepath, new_versions):
     try:
         data = read_yaml(filepath)
         if data:
             new_versions = [ensure_keys(v) for v in new_versions]
             update_versions_data(data, new_versions)
+            data["versions"] = reduce_versions(data["versions"])
         else:
             print_warning("No existing versions found. Writing new data.")
             data = {
