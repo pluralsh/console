@@ -1,6 +1,6 @@
 import {
-  ChatIcon,
   Card,
+  ChatIcon,
   CheckIcon,
   CopyIcon,
   Flex,
@@ -12,19 +12,21 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 
+import * as Dialog from '@radix-ui/react-dialog'
 import {
-  ReactNode,
   ComponentProps,
   ComponentPropsWithRef,
   FormEvent,
   forwardRef,
   KeyboardEvent,
+  ReactNode,
   Ref,
   useCallback,
   useLayoutEffect,
   useRef,
   useState,
 } from 'react'
+import { VisuallyHidden } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
 import { useChatbotContext } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
@@ -37,19 +39,26 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 
 import { textAreaInsert } from 'components/utils/textAreaInsert'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import { AiRole, useChatMutation, useChatsQuery } from 'generated/graphql'
+import {
+  AiRole,
+  ChatThreadFragment,
+  useChatMutation,
+  useChatThreadMessagesQuery,
+} from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import ChatbotMarkdown from './ChatbotMarkdown.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   onClose: () => void
+  currentThread: Nullable<ChatThreadFragment>
 }
 
 export function Chatbot() {
   const theme = useTheme()
-  const { open, setOpen, initialMessage } = useChatbotContext()
+  const { open, setOpen, currentThread } = useChatbotContext()
 
   return (
     <div
@@ -68,7 +77,7 @@ export function Chatbot() {
       <ChatbotPanel
         open={open}
         onClose={() => setOpen(false)}
-        initialMessage={initialMessage}
+        currentThread={currentThread}
       />
     </div>
   )
@@ -89,6 +98,7 @@ export function ChatbotPanel({
         top: theme.spacing.xxxxlarge,
         left: 'unset',
       }}
+      css={{ height: '100%' }}
       open={open}
       onOpenChange={onClose}
     >
@@ -96,11 +106,19 @@ export function ChatbotPanel({
         onClose={onClose}
         {...props}
       />
+      {/* required for accessibility */}
+      <VisuallyHidden>
+        <Dialog.Title>Ask Plural AI</Dialog.Title>
+      </VisuallyHidden>
     </ModalWrapper>
   )
 }
 
-function ChatbotPanelInner({ onClose, ...props }: ChatbotPanelInnerProps) {
+function ChatbotPanelInner({
+  onClose,
+  currentThread,
+  ...props
+}: ChatbotPanelInnerProps) {
   const historyScrollRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const lastMsgRef = useRef<HTMLLIElement>(null)
@@ -112,18 +130,24 @@ function ChatbotPanelInner({ onClose, ...props }: ChatbotPanelInnerProps) {
     historyScrollRef.current?.scrollTo({ top: 9999999999999 })
   }, [historyScrollRef])
 
-  const { data, refetch } = useFetchPaginatedData({
-    queryHook: useChatsQuery,
-    keyPath: ['chats'],
-  })
-
-  const [mutate, { loading: sendingMessage }] = useChatMutation({
-    onCompleted: () => {
-      setNewMessage('')
-      refetch()
-      scrollToBottom()
+  const { data, refetch } = useFetchPaginatedData(
+    {
+      queryHook: useChatThreadMessagesQuery,
+      keyPath: ['chatThread', 'chats'],
     },
-  })
+    {
+      threadId: currentThread?.id ?? '',
+    }
+  )
+
+  const [mutate, { loading: sendingMessage, error: messageError }] =
+    useChatMutation({
+      onCompleted: () => {
+        setNewMessage('')
+        refetch()
+        scrollToBottom()
+      },
+    })
 
   // scroll to bottom and focus input on initial mount
   useLayoutEffect(() => {
@@ -141,10 +165,11 @@ function ChatbotPanelInner({ onClose, ...props }: ChatbotPanelInnerProps) {
       mutate({
         variables: {
           messages: [{ role: AiRole.User, content: newMessage }],
+          threadId: currentThread?.id ?? '',
         },
       })
     },
-    [mutate, newMessage]
+    [mutate, newMessage, currentThread]
   )
 
   return (
@@ -152,10 +177,11 @@ function ChatbotPanelInner({ onClose, ...props }: ChatbotPanelInnerProps) {
       fillLevel={1}
       {...props}
     >
+      {messageError && <GqlError error={messageError} />}
       <ChatbotHeader onClose={onClose} />
       <ChatbotHistorySC ref={historyScrollRef}>
-        {data?.chats?.edges?.map((edge, i) => {
-          const len = data?.chats?.edges?.length || 1
+        {data?.chatThread?.chats?.edges?.map((edge, i) => {
+          const len = data?.chatThread?.chats?.edges?.length || 1
           const ref = i == len - 1 ? lastMsgRef : undefined
           const msg = edge?.node
           if (!msg) return null
@@ -236,7 +262,7 @@ const ChatMessage = forwardRef(
     let finalContent: ReactNode
     let { name } = useLogin()?.me || {}
 
-    if (role === AiRole.Assistant) {
+    if (role === AiRole.Assistant || role === AiRole.System) {
       name = 'Plural AI'
       finalContent = <ChatbotMarkdown text={content} />
     } else {

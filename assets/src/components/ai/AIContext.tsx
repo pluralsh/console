@@ -1,4 +1,9 @@
 import {
+  ChatThreadAttributes,
+  ChatThreadFragment,
+  useCreateChatThreadMutation,
+} from 'generated/graphql.ts'
+import {
   createContext,
   Dispatch,
   ReactNode,
@@ -27,8 +32,8 @@ type ExplainWithAIContextT = {
 type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
-  initialMessage: string
-  setInitialMessage: (message: string) => void
+  currentThread: Nullable<ChatThreadFragment>
+  setCurrentThread: (thread: Nullable<ChatThreadFragment>) => void
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -47,11 +52,12 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
-  const [initialMessage, setInitialMessage] = useState('')
+  const [currentThread, setCurrentThread] =
+    useState<Nullable<ChatThreadFragment>>()
 
   const context = useMemo(
-    () => ({ open, setOpen, initialMessage, setInitialMessage }),
-    [open, setOpen, initialMessage, setInitialMessage]
+    () => ({ open, setOpen, currentThread, setCurrentThread }),
+    [open, setOpen, currentThread, setCurrentThread]
   )
 
   return (
@@ -94,13 +100,23 @@ export function useChatbotContext() {
   return context
 }
 
-export function useLaunchChatbot(test: string) {
-  const { setOpen, setInitialMessage } = useChatbotContext()
-  return () => {
-    if (test) {
-      setInitialMessage(test)
-    }
-    setOpen(true)
+export function useLaunchChatbot() {
+  // will create a new chat thread and launch the chatbot window
+  const { setOpen, setCurrentThread } = useChatbotContext()
+  const [mutation, { loading, error }] = useCreateChatThreadMutation()
+
+  return {
+    launcher: (attributes: ChatThreadAttributes) => {
+      mutation({
+        variables: { attributes },
+        onCompleted: (data) => {
+          setCurrentThread(data.createThread)
+          setOpen(true)
+        },
+      })
+    },
+    loading,
+    error,
   }
 }
 
