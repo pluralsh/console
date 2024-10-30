@@ -47,10 +47,15 @@ defmodule Console.AI.Chat do
   It can create a new chat thread
   """
   @spec create_thread(map, User.t) :: thread_resp
-  def create_thread(attrs, %User{id: uid}) do
-    %ChatThread{user_id: uid}
-    |> ChatThread.changeset(attrs)
-    |> Repo.insert()
+  def create_thread(attrs, %User{id: uid} = user) do
+    start_transaction()
+    |> add_operation(:thread, fn _ ->
+      %ChatThread{user_id: uid}
+      |> ChatThread.changeset(attrs)
+      |> Repo.insert()
+    end)
+    |> maybe_save_messages(attrs, user)
+    |> execute(extract: :thread)
   end
 
   @doc """
@@ -219,6 +224,14 @@ defmodule Console.AI.Chat do
     |> Repo.all()
     |> Enum.each(&backfill_thread/1)
   end
+
+  defp maybe_save_messages(xact, %{messages: [_ | _] = msgs}, user) do
+    Enum.with_index(msgs)
+    |> Enum.reduce(xact, fn {msg, ind}, xact ->
+      add_operation(xact, {:msg, ind}, fn %{thread: %{id: tid}} -> save_message(msg, tid, user) end)
+    end)
+  end
+  defp maybe_save_messages(xact, _, _), do: xact
 
   defp save_message(message, thread_id, %User{id: uid} = user) do
     start_transaction()

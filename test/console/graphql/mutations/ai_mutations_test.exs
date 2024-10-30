@@ -90,6 +90,7 @@ defmodule Console.GraphQl.AIMutationsTest do
 
   describe "createThread" do
     test "it can create a thread for a user" do
+      user = insert(:user)
       {:ok, %{data: %{"createThread" => thread}}} = run_query("""
         mutation Create($attrs: ChatThreadAttributes!) {
           createThread(attributes: $attrs) {
@@ -97,10 +98,23 @@ defmodule Console.GraphQl.AIMutationsTest do
             summary
           }
         }
-      """, %{"attrs" => %{"summary" => "a thread"}}, %{current_user: insert(:user)})
+      """, %{"attrs" => %{
+        "summary" => "a thread",
+        "messages" => [%{"role" => "ASSISTANT", "content" => "blah"}]
+      }}, %{current_user: user})
 
       assert thread["id"]
       assert thread["summary"] == "a thread"
+
+      {:ok, %{data: %{"chats" => chat}}} = run_query("""
+        query Chat($id: ID!) {
+          chats(threadId: $id, first: 5) {
+            edges { node { id content role } }
+          }
+        }
+      """, %{"id" => thread["id"]}, %{current_user: user})
+
+      [%{"role" => "ASSISTANT", "content" => "blah"}] = from_connection(chat)
     end
   end
 

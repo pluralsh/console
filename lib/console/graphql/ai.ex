@@ -27,6 +27,7 @@ defmodule Console.GraphQl.AI do
   input_object :chat_thread_attributes do
     field :summary,    non_null(:string)
     field :summarized, :boolean, description: "controls whether this thread is autosummarized, set true when users explicitly set summary"
+    field :messages,   list_of(:chat_message), description: "a list of messages to add initially when creating this thread"
   end
 
   object :chat do
