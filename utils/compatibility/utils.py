@@ -118,9 +118,9 @@ def latest_kube_version():
 
 
 def current_kube_version():
-    # Read the current kube version from ../../KUBE_VERSION file
+    # Read the current kube version from KUBE_VERSION_FILE
     try:
-        with open("../../KUBE_VERSION", "r") as file:
+        with open(KUBE_VERSION_FILE, "r") as file:
             return file.read().strip()
     except FileNotFoundError:
         print_error("KUBE_VERSION file not found")

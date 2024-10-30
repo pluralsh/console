@@ -5,7 +5,7 @@ from utils import (
     update_compatibility_info,
     update_chart_versions,
     get_github_releases,
-    latest_kube_version,
+    current_kube_version,
     expand_kube_versions,
 )
 
@@ -17,8 +17,7 @@ def scrape():
     # Traefik follows the Kubernetes support policy,
     # and supports at least the latest three minor versions of Kubernetes.
     versions = []
-    kube_latest = latest_kube_version()
-    kube_end = f"{kube_latest.major}.{kube_latest.minor}"
+    kube_end = current_kube_version()
     kube_start = f"1.{int(kube_end.split('.')[1]) - 3}"
     kube_versions = expand_kube_versions(kube_start, kube_end)
 
