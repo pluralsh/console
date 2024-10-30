@@ -3,12 +3,7 @@ import AIPanel from './AIPanel.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { Markdown } from '@pluralsh/design-system'
 import { GqlError } from '../utils/Alert.tsx'
-
-const system = `You're a seasoned DevOps engineer with experience in Kubernetes, GitOps and Infrastructure As Code,
-and need to give a concise but clear explanation of an infrastructure problem that will likely involve either Kubernetes or Terraform. 
-The user is not necessarily an expert in the domain, so please provide as much documentation
-and evidence as is necessary to explain what issue they're facing.  Give a descriptive overview of the resource they are mentioning and any guidance on
-how they can learn more about how it works.`
+import { useExplainWithAIContext } from './ExplainWithAIContext.tsx'
 
 export default function ExplainWithAIPanel({
   prompt,
@@ -19,6 +14,7 @@ export default function ExplainWithAIPanel({
   open: boolean
   onClose: () => void
 }) {
+  const { system } = useExplainWithAIContext()
   const { data, loading, error } = useAiCompletionQuery({
     variables: { system, input: prompt },
   })
