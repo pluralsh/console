@@ -10,9 +10,9 @@ import {
 } from 'react'
 
 export enum AIVerbosityLevel {
-  High = 'HIGH',
-  Medium = 'MEDIUM',
-  Low = 'LOW',
+  High = 'High',
+  Medium = 'Medium',
+  Low = 'Low',
 }
 
 type ExplainWithAIContextT = {
