@@ -1,6 +1,9 @@
-go 1.22.5
+go 1.23.0
+
+toolchain go1.23.2
 
 use (
+	./ai-proxy
 	./client // github.com/pluralsh/console/go/client
 	./controller // github.com/pluralsh/console/go/controller
 	./oci-auth // github.com/pluralsh/console/go/oci-auth

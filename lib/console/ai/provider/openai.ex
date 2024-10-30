@@ -38,7 +38,7 @@ defmodule Console.AI.OpenAI do
     def spec(), do: %__MODULE__{choices: [OpenAI.Choice.spec()]}
   end
 
-  def new(opts), do: %__MODULE__{access_key: opts.access_key, model: opts.model}
+  def new(opts), do: %__MODULE__{access_key: opts.access_token, model: opts.model}
 
   @doc """
   Generate a openai completion from

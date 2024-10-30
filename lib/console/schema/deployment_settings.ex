@@ -59,13 +59,13 @@ defmodule Console.Schema.DeploymentSettings do
       field :provider, AIProvider, default: :openai
 
       embeds_one :openai, OpenAi, on_replace: :update do
-        field :access_key, EncryptedString
-        field :model,      :string
+        field :access_token, EncryptedString
+        field :model,        :string
       end
 
       embeds_one :anthropic, Anthropic, on_replace: :update do
-        field :access_key, EncryptedString
-        field :model,      :string
+        field :access_token, EncryptedString
+        field :model,        :string
       end
 
       embeds_one :ollama, Ollama, on_replace: :update do
@@ -159,7 +159,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_api_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(access_key model)a)
+    |> cast(attrs, ~w(access_token model)a)
   end
 
   defp ollama_changeset(model, attrs) do

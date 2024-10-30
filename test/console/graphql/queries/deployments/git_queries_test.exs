@@ -102,7 +102,7 @@ defmodule Console.GraphQl.Deployments.GitQueriesTest do
         }
       """, %{}, %{current_user: admin_user()})
 
-      [%{"name" => "console", "versions" => [chart | _]} | _] = repo["charts"]
+      %{"console" => %{"versions" => [chart | _]}} = Map.new(repo["charts"], & {&1["name"], &1})
       assert chart["name"] == "console"
       assert chart["version"]
       assert chart["appVersion"]
