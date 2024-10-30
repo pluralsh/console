@@ -883,6 +883,7 @@ export type Chat = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   role: AiRole;
   seq: Scalars['Int']['output'];
+  thread?: Maybe<ChatThread>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
@@ -902,6 +903,36 @@ export type ChatEdge = {
 export type ChatMessage = {
   content: Scalars['String']['input'];
   role: AiRole;
+};
+
+/** A list of chat messages around a specific topic created on demand */
+export type ChatThread = {
+  __typename?: 'ChatThread';
+  default: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  summary: Scalars['String']['output'];
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  user?: Maybe<User>;
+};
+
+/** basic user-supplied input for creating an AI chat thread */
+export type ChatThreadAttributes = {
+  /** controls whether this thread is autosummarized, set true when users explicitly set summary */
+  summarized?: InputMaybe<Scalars['Boolean']['input']>;
+  summary: Scalars['String']['input'];
+};
+
+export type ChatThreadConnection = {
+  __typename?: 'ChatThreadConnection';
+  edges?: Maybe<Array<Maybe<ChatThreadEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ChatThreadEdge = {
+  __typename?: 'ChatThreadEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ChatThread>;
 };
 
 export type CloneAttributes = {
@@ -5164,6 +5195,7 @@ export type RootMutationType = {
   createServiceDeployment?: Maybe<ServiceDeployment>;
   createStack?: Maybe<InfrastructureStack>;
   createStackDefinition?: Maybe<StackDefinition>;
+  createThread?: Maybe<ChatThread>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
   createWebhook?: Maybe<Webhook>;
   deleteAccessToken?: Maybe<AccessToken>;
@@ -5204,6 +5236,7 @@ export type RootMutationType = {
   deleteServiceDeployment?: Maybe<ServiceDeployment>;
   deleteStack?: Maybe<InfrastructureStack>;
   deleteStackDefinition?: Maybe<StackDefinition>;
+  deleteThread?: Maybe<ChatThread>;
   deleteUpgradePolicy?: Maybe<UpgradePolicy>;
   deleteUser?: Maybe<User>;
   deleteVirtualCluster?: Maybe<Cluster>;
@@ -5299,6 +5332,7 @@ export type RootMutationType = {
   updateStack?: Maybe<InfrastructureStack>;
   updateStackDefinition?: Maybe<StackDefinition>;
   updateStackRun?: Maybe<StackRun>;
+  updateThread?: Maybe<ChatThread>;
   updateUser?: Maybe<User>;
   upsertCatalog?: Maybe<Catalog>;
   upsertHelmRepository?: Maybe<HelmRepository>;
@@ -5340,11 +5374,13 @@ export type RootMutationTypeCancelBuildArgs = {
 
 export type RootMutationTypeChatArgs = {
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
 export type RootMutationTypeClearChatHistoryArgs = {
   before?: InputMaybe<Scalars['Int']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -5560,6 +5596,11 @@ export type RootMutationTypeCreateStackDefinitionArgs = {
 };
 
 
+export type RootMutationTypeCreateThreadArgs = {
+  attributes: ChatThreadAttributes;
+};
+
+
 export type RootMutationTypeCreateUpgradePolicyArgs = {
   attributes: UpgradePolicyAttributes;
 };
@@ -5762,6 +5803,11 @@ export type RootMutationTypeDeleteStackDefinitionArgs = {
 };
 
 
+export type RootMutationTypeDeleteThreadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeDeleteUpgradePolicyArgs = {
   id: Scalars['ID']['input'];
 };
@@ -5947,6 +5993,7 @@ export type RootMutationTypeRollbackServiceArgs = {
 
 export type RootMutationTypeSaveChatsArgs = {
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -6192,6 +6239,12 @@ export type RootMutationTypeUpdateStackRunArgs = {
 };
 
 
+export type RootMutationTypeUpdateThreadArgs = {
+  attributes: ChatThreadAttributes;
+  id: Scalars['ID']['input'];
+};
+
+
 export type RootMutationTypeUpdateUserArgs = {
   attributes: UserAttributes;
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -6268,6 +6321,7 @@ export type RootQueryType = {
   catalog?: Maybe<Catalog>;
   catalogs?: Maybe<CatalogConnection>;
   certificate?: Maybe<Certificate>;
+  chatThreads?: Maybe<ChatThreadConnection>;
   /** gets the chat history from prior AI chat sessions */
   chats?: Maybe<ChatConnection>;
   /** fetches an individual cluster */
@@ -6543,11 +6597,20 @@ export type RootQueryTypeCertificateArgs = {
 };
 
 
+export type RootQueryTypeChatThreadsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type RootQueryTypeChatsArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -9184,6 +9247,14 @@ export type AiSuggestedFixQueryVariables = Exact<{
 
 
 export type AiSuggestedFixQuery = { __typename?: 'RootQueryType', aiSuggestedFix?: string | null };
+
+export type ClearChatHistoryMutationVariables = Exact<{
+  before?: InputMaybe<Scalars['Int']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClearChatHistoryMutation = { __typename?: 'RootMutationType', clearChatHistory?: number | null };
 
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
@@ -14253,6 +14324,38 @@ export type AiSuggestedFixQueryHookResult = ReturnType<typeof useAiSuggestedFixQ
 export type AiSuggestedFixLazyQueryHookResult = ReturnType<typeof useAiSuggestedFixLazyQuery>;
 export type AiSuggestedFixSuspenseQueryHookResult = ReturnType<typeof useAiSuggestedFixSuspenseQuery>;
 export type AiSuggestedFixQueryResult = Apollo.QueryResult<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>;
+export const ClearChatHistoryDocument = gql`
+    mutation ClearChatHistory($before: Int, $threadId: ID) {
+  clearChatHistory(before: $before, threadId: $threadId)
+}
+    `;
+export type ClearChatHistoryMutationFn = Apollo.MutationFunction<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>;
+
+/**
+ * __useClearChatHistoryMutation__
+ *
+ * To run a mutation, you first call `useClearChatHistoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useClearChatHistoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [clearChatHistoryMutation, { data, loading, error }] = useClearChatHistoryMutation({
+ *   variables: {
+ *      before: // value for 'before'
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useClearChatHistoryMutation(baseOptions?: Apollo.MutationHookOptions<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>(ClearChatHistoryDocument, options);
+      }
+export type ClearChatHistoryMutationHookResult = ReturnType<typeof useClearChatHistoryMutation>;
+export type ClearChatHistoryMutationResult = Apollo.MutationResult<ClearChatHistoryMutation>;
+export type ClearChatHistoryMutationOptions = Apollo.BaseMutationOptions<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -23492,6 +23595,7 @@ export const namedOperations = {
     Refresh: 'Refresh'
   },
   Mutation: {
+    ClearChatHistory: 'ClearChatHistory',
     CreatePrAutomation: 'CreatePrAutomation',
     UpdatePrAutomation: 'UpdatePrAutomation',
     DeletePrAutomation: 'DeletePrAutomation',

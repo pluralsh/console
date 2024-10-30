@@ -9,7 +9,7 @@ defmodule Console.AI.Cron do
     Service,
     Cluster,
     DeploymentSettings,
-    User,
+    ChatThread
   }
 
   require Logger
@@ -61,10 +61,22 @@ defmodule Console.AI.Cron do
 
   def chats() do
     if_enabled(fn ->
-      User.ordered(asc: :id)
+      ChatThread.with_expired_chats()
+      |> ChatThread.ordered(asc: :id)
       |> Repo.stream(method: :keyset)
       |> Flow.from_enumerable(stages: 20)
       |> Flow.map(&Chat.rollup/1)
+      |> Flow.run()
+    end)
+  end
+
+  def threads() do
+    if_enabled(fn ->
+      ChatThread.unsummarized()
+      |> ChatThread.ordered(asc: :id)
+      |> Repo.stream(method: :keyset)
+      |> Flow.from_enumerable(stages: 20)
+      |> Flow.map(&Chat.summarize/1)
       |> Flow.run()
     end)
   end

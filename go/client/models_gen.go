@@ -686,12 +686,13 @@ type Changelog struct {
 }
 
 type Chat struct {
-	ID         string  `json:"id"`
-	Role       AiRole  `json:"role"`
-	Content    string  `json:"content"`
-	Seq        int64   `json:"seq"`
-	InsertedAt *string `json:"insertedAt,omitempty"`
-	UpdatedAt  *string `json:"updatedAt,omitempty"`
+	ID         string      `json:"id"`
+	Role       AiRole      `json:"role"`
+	Content    string      `json:"content"`
+	Seq        int64       `json:"seq"`
+	Thread     *ChatThread `json:"thread,omitempty"`
+	InsertedAt *string     `json:"insertedAt,omitempty"`
+	UpdatedAt  *string     `json:"updatedAt,omitempty"`
 }
 
 type ChatConnection struct {
@@ -708,6 +709,33 @@ type ChatEdge struct {
 type ChatMessage struct {
 	Role    AiRole `json:"role"`
 	Content string `json:"content"`
+}
+
+// A list of chat messages around a specific topic created on demand
+type ChatThread struct {
+	ID         string  `json:"id"`
+	Summary    string  `json:"summary"`
+	Default    bool    `json:"default"`
+	User       *User   `json:"user,omitempty"`
+	InsertedAt *string `json:"insertedAt,omitempty"`
+	UpdatedAt  *string `json:"updatedAt,omitempty"`
+}
+
+// basic user-supplied input for creating an AI chat thread
+type ChatThreadAttributes struct {
+	Summary string `json:"summary"`
+	// controls whether this thread is autosummarized, set true when users explicitly set summary
+	Summarized *bool `json:"summarized,omitempty"`
+}
+
+type ChatThreadConnection struct {
+	PageInfo PageInfo          `json:"pageInfo"`
+	Edges    []*ChatThreadEdge `json:"edges,omitempty"`
+}
+
+type ChatThreadEdge struct {
+	Node   *ChatThread `json:"node,omitempty"`
+	Cursor *string     `json:"cursor,omitempty"`
 }
 
 type CloneAttributes struct {

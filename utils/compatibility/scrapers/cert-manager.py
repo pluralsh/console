@@ -21,7 +21,6 @@ def find_target_tables(sections):
     for section in sections:
         if section.get_text(strip=True) in [
             "Currently supported releases",
-            "Old releases",
         ]:
             table = section.find_next("table")
             if table:
@@ -57,10 +56,10 @@ def extract_table_data(target_tables):
                     columns[0].get_text(strip=True).rstrip(" LTS") + ".0"
                 )
                 k8s_supported_versions = (
-                    columns[3].get_text(strip=True).split(" → ")
+                    columns[3].get_text(strip=True).split(" / ")[0]
                 )
                 expanded_versions = expand_kube_versions(
-                    " → ".join(k8s_supported_versions)
+                    k8s_supported_versions
                 )
                 version_info = OrderedDict(
                     [

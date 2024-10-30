@@ -708,7 +708,8 @@ defmodule Console.Factory do
     %Schema.Chat{
       role:    :assistant,
       content: "blah",
-      seq:     sequence(:chat, & &1)
+      seq:     sequence(:chat, & &1),
+      thread:  build(:chat_thread)
     }
   end
 
@@ -720,6 +721,13 @@ defmodule Console.Factory do
       namespace: "namespace",
       name: "name",
       cluster: build(:cluster)
+    }
+  end
+
+  def chat_thread_factory do
+    %Schema.ChatThread{
+      user: build(:user),
+      summary: "a chat thread",
     }
   end
 
