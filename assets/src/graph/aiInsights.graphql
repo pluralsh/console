@@ -30,3 +30,7 @@ query AICompletion($system: String!, $input: String, $chat: [ChatMessage]) {
 query AISuggestedFix($insightID: ID!) {
   aiSuggestedFix(insightId: $insightID)
 }
+
+mutation ClearChatHistory($before: Int, $threadId: ID) {
+  clearChatHistory(before: $before, threadId: $threadId)
+}
