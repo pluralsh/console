@@ -5814,6 +5814,9 @@ input ChatThreadAttributes {
 
   "controls whether this thread is autosummarized, set true when users explicitly set summary"
   summarized: Boolean
+
+  "a list of messages to add initially when creating this thread"
+  messages: [ChatMessage]
 }
 
 type Chat {

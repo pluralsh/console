@@ -918,6 +918,8 @@ export type ChatThread = {
 
 /** basic user-supplied input for creating an AI chat thread */
 export type ChatThreadAttributes = {
+  /** a list of messages to add initially when creating this thread */
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   /** controls whether this thread is autosummarized, set true when users explicitly set summary */
   summarized?: InputMaybe<Scalars['Boolean']['input']>;
   summary: Scalars['String']['input'];

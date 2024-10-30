@@ -726,6 +726,8 @@ type ChatThreadAttributes struct {
 	Summary string `json:"summary"`
 	// controls whether this thread is autosummarized, set true when users explicitly set summary
 	Summarized *bool `json:"summarized,omitempty"`
+	// a list of messages to add initially when creating this thread
+	Messages []*ChatMessage `json:"messages,omitempty"`
 }
 
 type ChatThreadConnection struct {
