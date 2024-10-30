@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9248,6 +9248,14 @@ export type AiSuggestedFixQueryVariables = Exact<{
 
 export type AiSuggestedFixQuery = { __typename?: 'RootQueryType', aiSuggestedFix?: string | null };
 
+export type ClearChatHistoryMutationVariables = Exact<{
+  before?: InputMaybe<Scalars['Int']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type ClearChatHistoryMutation = { __typename?: 'RootMutationType', clearChatHistory?: number | null };
+
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
 export type FileContentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
@@ -14316,6 +14324,38 @@ export type AiSuggestedFixQueryHookResult = ReturnType<typeof useAiSuggestedFixQ
 export type AiSuggestedFixLazyQueryHookResult = ReturnType<typeof useAiSuggestedFixLazyQuery>;
 export type AiSuggestedFixSuspenseQueryHookResult = ReturnType<typeof useAiSuggestedFixSuspenseQuery>;
 export type AiSuggestedFixQueryResult = Apollo.QueryResult<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>;
+export const ClearChatHistoryDocument = gql`
+    mutation ClearChatHistory($before: Int, $threadId: ID) {
+  clearChatHistory(before: $before, threadId: $threadId)
+}
+    `;
+export type ClearChatHistoryMutationFn = Apollo.MutationFunction<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>;
+
+/**
+ * __useClearChatHistoryMutation__
+ *
+ * To run a mutation, you first call `useClearChatHistoryMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useClearChatHistoryMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [clearChatHistoryMutation, { data, loading, error }] = useClearChatHistoryMutation({
+ *   variables: {
+ *      before: // value for 'before'
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useClearChatHistoryMutation(baseOptions?: Apollo.MutationHookOptions<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>(ClearChatHistoryDocument, options);
+      }
+export type ClearChatHistoryMutationHookResult = ReturnType<typeof useClearChatHistoryMutation>;
+export type ClearChatHistoryMutationResult = Apollo.MutationResult<ClearChatHistoryMutation>;
+export type ClearChatHistoryMutationOptions = Apollo.BaseMutationOptions<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -23555,6 +23595,7 @@ export const namedOperations = {
     Refresh: 'Refresh'
   },
   Mutation: {
+    ClearChatHistory: 'ClearChatHistory',
     CreatePrAutomation: 'CreatePrAutomation',
     UpdatePrAutomation: 'UpdatePrAutomation',
     DeletePrAutomation: 'DeletePrAutomation',
