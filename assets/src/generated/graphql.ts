@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9281,16 +9281,23 @@ export type ChatThreadsQueryVariables = Exact<{
 
 export type ChatThreadsQuery = { __typename?: 'RootQueryType', chatThreads?: { __typename?: 'ChatThreadConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatThreadEdge', node?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
-export type ChatsQueryVariables = Exact<{
+export type ChatThreadQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type ChatThreadQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type ChatThreadMessagesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
-  threadId?: InputMaybe<Scalars['ID']['input']>;
+  threadId: Scalars['ID']['input'];
 }>;
 
 
-export type ChatsQuery = { __typename?: 'RootQueryType', chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+export type ChatThreadMessagesQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
 
 export type ChatMutationVariables = Exact<{
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
@@ -14482,21 +14489,57 @@ export type ChatThreadsQueryHookResult = ReturnType<typeof useChatThreadsQuery>;
 export type ChatThreadsLazyQueryHookResult = ReturnType<typeof useChatThreadsLazyQuery>;
 export type ChatThreadsSuspenseQueryHookResult = ReturnType<typeof useChatThreadsSuspenseQuery>;
 export type ChatThreadsQueryResult = Apollo.QueryResult<ChatThreadsQuery, ChatThreadsQueryVariables>;
-export const ChatsDocument = gql`
-    query Chats($first: Int = 100, $last: Int, $after: String, $before: String, $threadId: ID) {
-  chats(
-    first: $first
-    last: $last
-    after: $after
-    before: $before
-    threadId: $threadId
-  ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...Chat
+export const ChatThreadDocument = gql`
+    query ChatThread($id: ID!) {
+  chatThread(id: $id) {
+    ...ChatThread
+  }
+}
+    ${ChatThreadFragmentDoc}`;
+
+/**
+ * __useChatThreadQuery__
+ *
+ * To run a query within a React component, call `useChatThreadQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatThreadQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatThreadQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useChatThreadQuery(baseOptions: Apollo.QueryHookOptions<ChatThreadQuery, ChatThreadQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ChatThreadQuery, ChatThreadQueryVariables>(ChatThreadDocument, options);
+      }
+export function useChatThreadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatThreadQuery, ChatThreadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ChatThreadQuery, ChatThreadQueryVariables>(ChatThreadDocument, options);
+        }
+export function useChatThreadSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatThreadQuery, ChatThreadQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ChatThreadQuery, ChatThreadQueryVariables>(ChatThreadDocument, options);
+        }
+export type ChatThreadQueryHookResult = ReturnType<typeof useChatThreadQuery>;
+export type ChatThreadLazyQueryHookResult = ReturnType<typeof useChatThreadLazyQuery>;
+export type ChatThreadSuspenseQueryHookResult = ReturnType<typeof useChatThreadSuspenseQuery>;
+export type ChatThreadQueryResult = Apollo.QueryResult<ChatThreadQuery, ChatThreadQueryVariables>;
+export const ChatThreadMessagesDocument = gql`
+    query ChatThreadMessages($first: Int = 100, $last: Int, $after: String, $before: String, $threadId: ID!) {
+  chatThread(id: $threadId) {
+    chats(first: $first, last: $last, after: $after, before: $before) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...Chat
+        }
       }
     }
   }
@@ -14505,16 +14548,16 @@ export const ChatsDocument = gql`
 ${ChatFragmentDoc}`;
 
 /**
- * __useChatsQuery__
+ * __useChatThreadMessagesQuery__
  *
- * To run a query within a React component, call `useChatsQuery` and pass it any options that fit your needs.
- * When your component renders, `useChatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useChatThreadMessagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatThreadMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useChatsQuery({
+ * const { data, loading, error } = useChatThreadMessagesQuery({
  *   variables: {
  *      first: // value for 'first'
  *      last: // value for 'last'
@@ -14524,22 +14567,22 @@ ${ChatFragmentDoc}`;
  *   },
  * });
  */
-export function useChatsQuery(baseOptions?: Apollo.QueryHookOptions<ChatsQuery, ChatsQueryVariables>) {
+export function useChatThreadMessagesQuery(baseOptions: Apollo.QueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ChatsQuery, ChatsQueryVariables>(ChatsDocument, options);
+        return Apollo.useQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
       }
-export function useChatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatsQuery, ChatsQueryVariables>) {
+export function useChatThreadMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ChatsQuery, ChatsQueryVariables>(ChatsDocument, options);
+          return Apollo.useLazyQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
         }
-export function useChatsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatsQuery, ChatsQueryVariables>) {
+export function useChatThreadMessagesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ChatsQuery, ChatsQueryVariables>(ChatsDocument, options);
+          return Apollo.useSuspenseQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
         }
-export type ChatsQueryHookResult = ReturnType<typeof useChatsQuery>;
-export type ChatsLazyQueryHookResult = ReturnType<typeof useChatsLazyQuery>;
-export type ChatsSuspenseQueryHookResult = ReturnType<typeof useChatsSuspenseQuery>;
-export type ChatsQueryResult = Apollo.QueryResult<ChatsQuery, ChatsQueryVariables>;
+export type ChatThreadMessagesQueryHookResult = ReturnType<typeof useChatThreadMessagesQuery>;
+export type ChatThreadMessagesLazyQueryHookResult = ReturnType<typeof useChatThreadMessagesLazyQuery>;
+export type ChatThreadMessagesSuspenseQueryHookResult = ReturnType<typeof useChatThreadMessagesSuspenseQuery>;
+export type ChatThreadMessagesQueryResult = Apollo.QueryResult<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>;
 export const ChatDocument = gql`
     mutation Chat($messages: [ChatMessage], $threadId: ID) {
   chat(messages: $messages, threadId: $threadId) {
@@ -23885,7 +23928,8 @@ export const namedOperations = {
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
     ChatThreads: 'ChatThreads',
-    Chats: 'Chats',
+    ChatThread: 'ChatThread',
+    ChatThreadMessages: 'ChatThreadMessages',
     App: 'App',
     AppInfo: 'AppInfo',
     Repository: 'Repository',

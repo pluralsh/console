@@ -66,26 +66,28 @@ query ChatThreads(
   }
 }
 
-query Chats(
+query ChatThread($id: ID!) {
+  chatThread(id: $id) {
+    ...ChatThread
+  }
+}
+
+query ChatThreadMessages(
   $first: Int = 100
   $last: Int
   $after: String
   $before: String
-  $threadId: ID
+  $threadId: ID!
 ) {
-  chats(
-    first: $first
-    last: $last
-    after: $after
-    before: $before
-    threadId: $threadId
-  ) {
-    pageInfo {
-      ...PageInfo
-    }
-    edges {
-      node {
-        ...Chat
+  chatThread(id: $threadId) {
+    chats(first: $first, last: $last, after: $after, before: $before) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...Chat
+        }
       }
     }
   }
