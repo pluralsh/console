@@ -8,6 +8,7 @@ import {
   useMemo,
   useState,
 } from 'react'
+import usePersistedState from '../hooks/usePersistedState.tsx'
 
 export enum AIVerbosityLevel {
   High = 'High',
@@ -51,7 +52,10 @@ export function ExplainWithAIContextProvider({
   children: ReactNode
 }) {
   const [prompt, setPrompt] = useState<string | undefined>()
-  const [verbosityLevel, setVerbosityLevel] = useState(AIVerbosityLevel.High)
+  const [verbosityLevel, setVerbosityLevel] = usePersistedState(
+    'plural-ai-verbosity-level',
+    AIVerbosityLevel.High
+  )
 
   const context = useMemo(
     () => ({
