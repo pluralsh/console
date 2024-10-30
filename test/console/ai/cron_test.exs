@@ -156,8 +156,9 @@ defmodule Console.AI.CronTest do
   describe "#stacks/0" do
     test "it will gather info from stack runs and generate" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      stack = insert(:stack, status: :failed)
-      run   = insert(:stack_run, stack: stack)
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      stack = insert(:stack, status: :failed, repository: git)
+      run   = insert(:stack_run, stack: stack, repository: git, git: %{ref: "master", folder: "plural/terraform/aws"})
       step  = insert(:run_step, status: :failed, cmd: "echo", args: ["hello", "work"])
       insert(:run_log, step: step, logs: "blah blah blah")
       expect(Console.AI.OpenAI, :completion, 4, fn _, _ -> {:ok, "openai completion"} end)

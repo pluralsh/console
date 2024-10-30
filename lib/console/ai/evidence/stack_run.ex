@@ -1,6 +1,8 @@
 defimpl Console.AI.Evidence, for: Console.Schema.StackRun do
   use Console.AI.Evidence.Base
+  import Console.AI.Fixer.Base
   alias Console.Repo
+  alias Console.Deployments.Stacks
   alias Console.Schema.{StackRun, RunStep, StackState}
 
   require Logger
@@ -10,6 +12,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.StackRun do
     |> Repo.preload([:logs])
     |> Enum.map(&step_message/1)
     |> Enum.concat(error_messages(run))
+    |> Enum.concat(fetch_code(run))
     |> prepend(plan(run))
     |> prepend(step_description(run))
     |> ok()
@@ -47,4 +50,13 @@ defimpl Console.AI.Evidence, for: Console.Schema.StackRun do
     [{:user, "the terraform run also has an associate terraform plan that could be useful below:\n#{p}"}]
   end
   defp plan(_), do: []
+
+  defp fetch_code(%StackRun{} = run) do
+    with {:ok, f} <- Stacks.tarstream(run),
+         {:ok, msgs} <- code_prompt(f, "I'll also include the relevant terraform code below, listed in the format #{file_fmt()}") do
+      msgs
+    else
+      _ -> []
+    end
+  end
 end
