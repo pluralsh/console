@@ -6,17 +6,19 @@ from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
 
+KUBE_VERSION_FILE = "../../KUBE_VERSION"
+
 
 def print_error(message):
-    print(Fore.RED + "💔 Error:" + Style.RESET_ALL + f" {message}")
+    print(Fore.RED + "💔" + Style.RESET_ALL + f" {message}")
 
 
 def print_success(message):
-    print(Fore.GREEN + "✅ Success:" + Style.RESET_ALL + f" {message}")
+    print(Fore.GREEN + "✅" + Style.RESET_ALL + f" {message}")
 
 
 def print_warning(message):
-    print(Fore.YELLOW + "⚠️ Warning:" + Style.RESET_ALL + f" {message}")
+    print(Fore.YELLOW + "⚠️" + Style.RESET_ALL + f" {message}")
 
 
 def fetch_page(url):
@@ -83,7 +85,7 @@ def validate_semver(version_str):
 
         return version
     except ValueError:
-        # Return False for invalid version strings
+        # Return None for invalid version strings
         return None
 
 
@@ -93,10 +95,7 @@ def latest_kube_version():
     )
     response = requests.get(url)
     if response.status_code == 200:
-        # remove leading whitespaces and the hotfix version e.g. v1.30.2 -> v1.30
         latest = response.text.lstrip("v")
-        latest = latest.split(".")
-        latest = ".".join(latest[:2])
         latest = validate_semver(latest)
 
         if not latest:
@@ -104,13 +103,11 @@ def latest_kube_version():
             return latest
 
         print(f"Using Latest kube version: {latest}")
-        # Write the value to "../../KUBE_VERSION"
-        file_path = "../../KUBE_VERSION"
-        try:
-            with open(file_path, "w") as file:
+        try:  # write latest version to KUBE_VERSION_FILE
+            with open(KUBE_VERSION_FILE, "w") as file:
                 file.write(f"{latest.major}.{latest.minor}")
         except Exception as e:
-            print_error(f"Failed to write to {file_path}: {e}")
+            print_error(f"Failed to write to {KUBE_VERSION_FILE}: {e}")
 
         return latest
     else:
@@ -214,14 +211,9 @@ def update_chart_versions(app_name, chart_name=""):
     if not chart_versions:
         print_error(f"No Chart versions found for {chart_name}")
         return
-
     for chart_entry in chart_versions:
-        app_version = chart_entry["appVersion"]
-        app_version = app_version.lstrip("v")
-
-        chart_version = chart_entry["version"]
-        chart_version = chart_version.lstrip("v")
-
+        app_version = chart_entry.get("appVersion", "").lstrip("v")
+        chart_version = chart_entry.get("version", "").lstrip("v")
         for row in compatibility_yaml["versions"]:
             if row["version"] == app_version:
                 row["chart_version"] = chart_version
@@ -235,6 +227,9 @@ def update_chart_versions(app_name, chart_name=""):
 
 
 def sort_versions(versions):
+    # Ensure all versions are strings before sorting
+    for v in versions:
+        v["version"] = str(v["version"])
     return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
 
 
