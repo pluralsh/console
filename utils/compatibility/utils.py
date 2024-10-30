@@ -214,14 +214,9 @@ def update_chart_versions(app_name, chart_name=""):
     if not chart_versions:
         print_error(f"No Chart versions found for {chart_name}")
         return
-
     for chart_entry in chart_versions:
-        app_version = chart_entry["appVersion"]
-        app_version = app_version.lstrip("v")
-
-        chart_version = chart_entry["version"]
-        chart_version = chart_version.lstrip("v")
-
+        app_version = chart_entry.get("appVersion", "").lstrip("v")
+        chart_version = chart_entry.get("version", "").lstrip("v")
         for row in compatibility_yaml["versions"]:
             if row["version"] == app_version:
                 row["chart_version"] = chart_version
@@ -235,6 +230,9 @@ def update_chart_versions(app_name, chart_name=""):
 
 
 def sort_versions(versions):
+    # Ensure all versions are strings before sorting
+    for v in versions:
+        v["version"] = str(v["version"])
     return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
 
 
