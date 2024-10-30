@@ -3,5 +3,6 @@ defmodule Console.Repo.Migrations.UniqDefaultThread do
 
   def change do
     create unique_index(:chat_threads, [:user_id], where: "\"default\"", name: :chat_threads_user_id_uniq_index)
+    drop unique_index(:chat_sequences, [:user_id])
   end
 end

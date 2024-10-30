@@ -98,7 +98,7 @@ defmodule Console.AI.Chat do
     end)
     |> add_operation(:summarize, fn %{expire: chats} ->
       Enum.sort_by(chats, & &1.seq)
-      |> fit_context_window()
+      |> fit_context_window(@rollup)
       |> Enum.map(fn %{role: r, content: t} -> {r, t} end)
       |> Provider.completion(preface: @rollup)
     end)
@@ -117,7 +117,7 @@ defmodule Console.AI.Chat do
   def summarize(%ChatThread{} = thread) do
     Chat.for_thread(thread.id)
     |> Repo.all()
-    |> fit_context_window()
+    |> fit_context_window(@summary)
     |> Enum.map(fn %Chat{role: r, content: t} -> {r, t} end)
     |> Provider.completion(preface: @summary)
     |> when_ok(fn summary ->
@@ -154,13 +154,13 @@ defmodule Console.AI.Chat do
   Saves a message history, then generates a new assistant-derived messages from there
   """
   @spec chat([map], binary | nil, User.t) :: {:ok, Chat.t} | Console.error
-  def chat(messages, tid \\ nil, %User{id: uid} = user) do
+  def chat(messages, tid \\ nil, %User{} = user) do
     thread_id = tid || default_thread!(user).id
     start_transaction()
     |> add_operation(:access, fn _ -> thread_access(thread_id, user) end)
     |> add_operation(:save, fn _ -> save(messages, thread_id, user) end)
     |> add_operation(:chat, fn _ ->
-      Chat.for_user(uid)
+      Chat.for_thread(thread_id)
       |> Chat.ordered()
       |> Repo.all()
       |> fit_context_window()
@@ -240,8 +240,8 @@ defmodule Console.AI.Chat do
     )
   end
 
-  defp fit_context_window(msgs) do
-    Enum.reduce(msgs, byte_size(@chat), &byte_size(&1.content) + &2)
+  defp fit_context_window(msgs, preface \\ @chat) do
+    Enum.reduce(msgs, byte_size(preface), &byte_size(&1.content) + &2)
     |> trim_messages(msgs)
   end
 

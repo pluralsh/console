@@ -110,8 +110,8 @@ function ChatbotPanelInner({ onClose, ...props }: ChatbotPanelProps) {
       <ChatbotHeader onClose={onClose} />
       <ChatbotHistorySC ref={historyScrollRef}>
         {data?.chats?.edges?.map((edge, i) => {
-          const ref =
-            (i + 1 === data?.chats?.edges?.length ?? 1) ? lastMsgRef : undefined
+          const len = data?.chats?.edges?.length || 1
+          const ref = i == len - 1 ? lastMsgRef : undefined
           const msg = edge?.node
           if (!msg) return null
           return (

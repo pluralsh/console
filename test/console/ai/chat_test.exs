@@ -152,16 +152,28 @@ defmodule Console.AI.ChatTest do
   end
 
   describe "#chat/2" do
-    test "it will persist a set of messages and generate a new one transactionally" do
+    test "it will persist a set of messages and generate a new one transactionally in whatever thread" do
       user = insert(:user)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _] -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, [_, _, _] -> {:ok, "openai completion"} end)
 
       {:ok, next} = Chat.chat([
         %{role: :assistant, content: "blah"},
         %{role: :user, content: "blah blah"}
       ], user)
 
+      assert next.user_id == user.id
+      assert next.role == :assistant
+      assert next.content == "openai completion"
+
+      thread = insert(:chat_thread, user: user)
+
+      {:ok, next} = Chat.chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.thread_id == thread.id
       assert next.user_id == user.id
       assert next.role == :assistant
       assert next.content == "openai completion"

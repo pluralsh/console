@@ -1,6 +1,5 @@
 import { Markdown } from '@pluralsh/design-system'
 import { ReactNode, useCallback, useState } from 'react'
-import { useTheme } from 'styled-components'
 import {
   AiInsight,
   useAiSuggestedFixLazyQuery,
