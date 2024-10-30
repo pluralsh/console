@@ -918,6 +918,8 @@ export type ChatThread = {
 
 /** basic user-supplied input for creating an AI chat thread */
 export type ChatThreadAttributes = {
+  /** a list of messages to add initially when creating this thread */
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   /** controls whether this thread is autosummarized, set true when users explicitly set summary */
   summarized?: InputMaybe<Scalars['Boolean']['input']>;
   summary: Scalars['String']['input'];
@@ -9225,6 +9227,8 @@ export type AiInsightFragment = { __typename?: 'AiInsight', id: string, text?: s
 
 export type AiInsightSummaryFragment = { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null };
 
+export type ChatFragment = { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null };
+
 export type AiQueryVariables = Exact<{
   prompt: Scalars['String']['input'];
 }>;
@@ -9248,13 +9252,43 @@ export type AiSuggestedFixQueryVariables = Exact<{
 
 export type AiSuggestedFixQuery = { __typename?: 'RootQueryType', aiSuggestedFix?: string | null };
 
+export type ChatsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type ChatsQuery = { __typename?: 'RootQueryType', chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
+
+export type ChatMutationVariables = Exact<{
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
+}>;
+
+
+export type ChatMutation = { __typename?: 'RootMutationType', chat?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null };
+
 export type ClearChatHistoryMutationVariables = Exact<{
   before?: InputMaybe<Scalars['Int']['input']>;
-  threadId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
 export type ClearChatHistoryMutation = { __typename?: 'RootMutationType', clearChatHistory?: number | null };
+
+export type DeleteChatMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteChatMutation = { __typename?: 'RootMutationType', deleteChat?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null };
+
+export type SaveChatsMutationVariables = Exact<{
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
+}>;
+
+
+export type SaveChatsMutation = { __typename?: 'RootMutationType', saveChats?: Array<{ __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null> | null };
 
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
@@ -11334,6 +11368,16 @@ export type RefreshQueryVariables = Exact<{
 
 export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
 
+export const ChatFragmentDoc = gql`
+    fragment Chat on Chat {
+  id
+  content
+  role
+  seq
+  insertedAt
+  updatedAt
+}
+    `;
 export const ApplicationSpecFragmentDoc = gql`
     fragment ApplicationSpec on ApplicationSpec {
   descriptor {
@@ -14324,9 +14368,93 @@ export type AiSuggestedFixQueryHookResult = ReturnType<typeof useAiSuggestedFixQ
 export type AiSuggestedFixLazyQueryHookResult = ReturnType<typeof useAiSuggestedFixLazyQuery>;
 export type AiSuggestedFixSuspenseQueryHookResult = ReturnType<typeof useAiSuggestedFixSuspenseQuery>;
 export type AiSuggestedFixQueryResult = Apollo.QueryResult<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>;
+export const ChatsDocument = gql`
+    query Chats($first: Int = 100, $last: Int, $after: String, $before: String) {
+  chats(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Chat
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ChatFragmentDoc}`;
+
+/**
+ * __useChatsQuery__
+ *
+ * To run a query within a React component, call `useChatsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChatsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useChatsQuery(baseOptions?: Apollo.QueryHookOptions<ChatsQuery, ChatsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ChatsQuery, ChatsQueryVariables>(ChatsDocument, options);
+      }
+export function useChatsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatsQuery, ChatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ChatsQuery, ChatsQueryVariables>(ChatsDocument, options);
+        }
+export function useChatsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatsQuery, ChatsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ChatsQuery, ChatsQueryVariables>(ChatsDocument, options);
+        }
+export type ChatsQueryHookResult = ReturnType<typeof useChatsQuery>;
+export type ChatsLazyQueryHookResult = ReturnType<typeof useChatsLazyQuery>;
+export type ChatsSuspenseQueryHookResult = ReturnType<typeof useChatsSuspenseQuery>;
+export type ChatsQueryResult = Apollo.QueryResult<ChatsQuery, ChatsQueryVariables>;
+export const ChatDocument = gql`
+    mutation Chat($messages: [ChatMessage]) {
+  chat(messages: $messages) {
+    ...Chat
+  }
+}
+    ${ChatFragmentDoc}`;
+export type ChatMutationFn = Apollo.MutationFunction<ChatMutation, ChatMutationVariables>;
+
+/**
+ * __useChatMutation__
+ *
+ * To run a mutation, you first call `useChatMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useChatMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [chatMutation, { data, loading, error }] = useChatMutation({
+ *   variables: {
+ *      messages: // value for 'messages'
+ *   },
+ * });
+ */
+export function useChatMutation(baseOptions?: Apollo.MutationHookOptions<ChatMutation, ChatMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<ChatMutation, ChatMutationVariables>(ChatDocument, options);
+      }
+export type ChatMutationHookResult = ReturnType<typeof useChatMutation>;
+export type ChatMutationResult = Apollo.MutationResult<ChatMutation>;
+export type ChatMutationOptions = Apollo.BaseMutationOptions<ChatMutation, ChatMutationVariables>;
 export const ClearChatHistoryDocument = gql`
-    mutation ClearChatHistory($before: Int, $threadId: ID) {
-  clearChatHistory(before: $before, threadId: $threadId)
+    mutation ClearChatHistory($before: Int) {
+  clearChatHistory(before: $before)
 }
     `;
 export type ClearChatHistoryMutationFn = Apollo.MutationFunction<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>;
@@ -14345,7 +14473,6 @@ export type ClearChatHistoryMutationFn = Apollo.MutationFunction<ClearChatHistor
  * const [clearChatHistoryMutation, { data, loading, error }] = useClearChatHistoryMutation({
  *   variables: {
  *      before: // value for 'before'
- *      threadId: // value for 'threadId'
  *   },
  * });
  */
@@ -14356,6 +14483,72 @@ export function useClearChatHistoryMutation(baseOptions?: Apollo.MutationHookOpt
 export type ClearChatHistoryMutationHookResult = ReturnType<typeof useClearChatHistoryMutation>;
 export type ClearChatHistoryMutationResult = Apollo.MutationResult<ClearChatHistoryMutation>;
 export type ClearChatHistoryMutationOptions = Apollo.BaseMutationOptions<ClearChatHistoryMutation, ClearChatHistoryMutationVariables>;
+export const DeleteChatDocument = gql`
+    mutation DeleteChat($id: ID!) {
+  deleteChat(id: $id) {
+    ...Chat
+  }
+}
+    ${ChatFragmentDoc}`;
+export type DeleteChatMutationFn = Apollo.MutationFunction<DeleteChatMutation, DeleteChatMutationVariables>;
+
+/**
+ * __useDeleteChatMutation__
+ *
+ * To run a mutation, you first call `useDeleteChatMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteChatMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteChatMutation, { data, loading, error }] = useDeleteChatMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteChatMutation(baseOptions?: Apollo.MutationHookOptions<DeleteChatMutation, DeleteChatMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteChatMutation, DeleteChatMutationVariables>(DeleteChatDocument, options);
+      }
+export type DeleteChatMutationHookResult = ReturnType<typeof useDeleteChatMutation>;
+export type DeleteChatMutationResult = Apollo.MutationResult<DeleteChatMutation>;
+export type DeleteChatMutationOptions = Apollo.BaseMutationOptions<DeleteChatMutation, DeleteChatMutationVariables>;
+export const SaveChatsDocument = gql`
+    mutation SaveChats($messages: [ChatMessage]) {
+  saveChats(messages: $messages) {
+    ...Chat
+  }
+}
+    ${ChatFragmentDoc}`;
+export type SaveChatsMutationFn = Apollo.MutationFunction<SaveChatsMutation, SaveChatsMutationVariables>;
+
+/**
+ * __useSaveChatsMutation__
+ *
+ * To run a mutation, you first call `useSaveChatsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useSaveChatsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [saveChatsMutation, { data, loading, error }] = useSaveChatsMutation({
+ *   variables: {
+ *      messages: // value for 'messages'
+ *   },
+ * });
+ */
+export function useSaveChatsMutation(baseOptions?: Apollo.MutationHookOptions<SaveChatsMutation, SaveChatsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<SaveChatsMutation, SaveChatsMutationVariables>(SaveChatsDocument, options);
+      }
+export type SaveChatsMutationHookResult = ReturnType<typeof useSaveChatsMutation>;
+export type SaveChatsMutationResult = Apollo.MutationResult<SaveChatsMutation>;
+export type SaveChatsMutationOptions = Apollo.BaseMutationOptions<SaveChatsMutation, SaveChatsMutationVariables>;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -23468,6 +23661,7 @@ export const namedOperations = {
     AI: 'AI',
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
+    Chats: 'Chats',
     App: 'App',
     AppInfo: 'AppInfo',
     Repository: 'Repository',
@@ -23595,7 +23789,10 @@ export const namedOperations = {
     Refresh: 'Refresh'
   },
   Mutation: {
+    Chat: 'Chat',
     ClearChatHistory: 'ClearChatHistory',
+    DeleteChat: 'DeleteChat',
+    SaveChats: 'SaveChats',
     CreatePrAutomation: 'CreatePrAutomation',
     UpdatePrAutomation: 'UpdatePrAutomation',
     DeletePrAutomation: 'DeletePrAutomation',
@@ -23694,6 +23891,7 @@ export const namedOperations = {
   Fragment: {
     AiInsight: 'AiInsight',
     AiInsightSummary: 'AiInsightSummary',
+    Chat: 'Chat',
     CostAnalysis: 'CostAnalysis',
     FileContent: 'FileContent',
     Configuration: 'Configuration',
