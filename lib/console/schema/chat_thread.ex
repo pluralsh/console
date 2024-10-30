@@ -43,6 +43,7 @@ defmodule Console.Schema.ChatThread do
     model
     |> cast(attrs, @valid)
     |> foreign_key_constraint(:user_id)
+    |> unique_constraint(:user_id, name: :chat_threads_user_id_uniq_index)
     |> validate_required([:user_id])
   end
 end

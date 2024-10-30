@@ -68,7 +68,8 @@ defmodule Console.Schema.User do
     from(u in query,
       left_join: c in Chat,
         on: c.user_id == u.id,
-      where: not is_nil(c.id)
+      where: not is_nil(c.id),
+      distinct: true
     )
   end
 
@@ -76,7 +77,8 @@ defmodule Console.Schema.User do
     from(u in query,
       left_join: c in ^Chat.expired(),
         on: c.user_id == u.id,
-      where: not is_nil(c.id)
+      where: not is_nil(c.id),
+      distinct: true
     )
   end
 

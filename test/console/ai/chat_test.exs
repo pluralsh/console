@@ -195,4 +195,17 @@ defmodule Console.AI.ChatTest do
       ], thread.id, user)
     end
   end
+
+  describe "#make_default_thread/1" do
+    test "only one default thread can be created" do
+      user = insert(:user)
+
+      thread = Chat.make_default_thread!(user)
+
+      assert thread.user_id == user.id
+      assert thread.default
+
+      {:error, _} = Chat.create_thread(%{default: true, summary: "blah"}, user)
+    end
+  end
 end
