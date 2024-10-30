@@ -1,40 +1,77 @@
 import {
   Card,
   ChatIcon,
+  CheckIcon,
+  CopyIcon,
   Flex,
   GearTrainIcon,
   IconFrame,
   ProgressBar,
   SendMessageIcon,
+  WrapWithIf,
 } from '@pluralsh/design-system'
+
 import { useLogin } from 'components/contexts'
+import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
 import { usePlatform } from 'components/hooks/usePlatform'
 import { submitForm } from 'components/utils/submitForm'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+
+import { textAreaInsert } from 'components/utils/textAreaInsert'
+import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
+import { AiRole, useChatMutation, useChatsQuery } from 'generated/graphql'
 import {
   ComponentProps,
   ComponentPropsWithRef,
   FormEvent,
+  forwardRef,
   KeyboardEvent,
   ReactNode,
   Ref,
-  forwardRef,
   useCallback,
   useLayoutEffect,
   useRef,
+  useState,
 } from 'react'
-import styled, { useTheme } from 'styled-components'
-
-import { textAreaInsert } from 'components/utils/textAreaInsert'
-
-import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
-
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import { AiRole, useChatMutation, useChatsQuery } from 'generated/graphql'
+import CopyToClipboard from 'react-copy-to-clipboard'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
+import styled, { useTheme } from 'styled-components'
 import { AIPanelOverlay } from './AIPanelOverlay'
 import ChatbotMarkdown from './ChatbotMarkdown'
+import AIButton from './ExplainWithAIButton.tsx'
+
+export function Chatbot(): ReactNode {
+  const theme = useTheme()
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div
+      css={{
+        // custom margin when explain with AI is visible
+        marginRight: theme.spacing.xsmall,
+        position: 'relative',
+      }}
+    >
+      <AIButton
+        onClick={() => setOpen(true)}
+        active={open}
+        visible={true}
+        startIcon={null}
+        css={{
+          width: 32,
+          height: 32,
+        }}
+      >
+        <ChatIcon />
+      </AIButton>
+      <ChatbotPanel
+        open={open}
+        onClose={() => setOpen(false)}
+      />
+    </div>
+  )
+}
 
 type ChatbotPanelProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   onClose: () => void
@@ -93,6 +130,10 @@ function ChatbotPanelInner({ onClose, ...props }: ChatbotPanelProps) {
   const sendMessage = useCallback(
     (e: FormEvent) => {
       e.preventDefault()
+      if (!newMessage) {
+        return
+      }
+
       mutate({
         variables: {
           messages: [{ role: AiRole.User, content: newMessage }],
@@ -215,15 +256,57 @@ const ChatMessage = forwardRef(
         ref={ref}
         {...props}
       >
-        <h6 className="name">
-          {`> `}
-          <NameSC $role={role}>{name}</NameSC>
-        </h6>
+        <Flex gap="xsmall">
+          <h6 className="name">
+            {`> `}
+            <NameSC $role={role}>{name}</NameSC>
+          </h6>
+          <ChatMessageActions content={content} />
+        </Flex>
         {finalContent}
       </ChatMessageSC>
     )
   }
 )
+
+function ChatMessageActions({ content }: { content: string }): ReactNode {
+  const [copied, setCopied] = useState(false)
+
+  const showCopied = () => {
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <>
+      <WrapWithIf
+        condition={!copied}
+        wrapper={
+          <CopyToClipboard
+            text={content}
+            onCopy={showCopied}
+          />
+        }
+      >
+        <IconFrame
+          id="copy"
+          clickable
+          type="floating"
+          size="medium"
+          icon={copied ? <CheckIcon color="icon-success" /> : <CopyIcon />}
+        />
+      </WrapWithIf>
+      {/* TODO: add if delete message will be supported by the API */}
+      {/* <IconFrame */}
+      {/*   id="delete" */}
+      {/*   clickable */}
+      {/*   type="floating" */}
+      {/*   size="medium" */}
+      {/*   icon={<TrashCanIcon color="icon-danger" />} */}
+      {/* /> */}
+    </>
+  )
+}
 
 const ChatbotTextArea = forwardRef(
   (
@@ -279,9 +362,29 @@ const ChatbotHeaderSC = styled.div(({ theme }) => ({
 
 const ChatMessageSC = styled.li(({ theme }) => ({
   ...theme.partials.reset.li,
+  padding: theme.spacing.small,
+
+  '.name': {
+    width: '100%',
+    marginBottom: theme.spacing.medium,
+  },
+
+  '#copy, #delete': {
+    display: 'none',
+  },
+
   '& *': {
     ...theme.partials.text.code,
     fontWeight: (theme.partials.text as any).fontWeight || 'normal',
+  },
+
+  '&:hover': {
+    background: theme.colors['fill-one-hover'],
+    borderRadius: theme.borderRadiuses.large,
+
+    '#copy, #delete': {
+      display: 'inherit',
+    },
   },
 }))
 const NameSC = styled.span<{ $role: AiRole }>(({ theme, $role }) => ({
@@ -309,7 +412,6 @@ const ChatbotHistorySC = styled.ul(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   padding: theme.spacing.medium,
-  rowGap: theme.spacing.medium,
   flexGrow: 1,
   '.progressBar': {
     position: 'absolute',

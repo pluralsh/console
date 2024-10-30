@@ -1,11 +1,3 @@
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { VirtualItem } from '@tanstack/react-virtual'
-import { extendConnection, updateNestedConnection } from 'utils/graphql'
-import {
-  reduceNestedData,
-  useSlicePolling,
-} from 'components/utils/tableFetchHelpers'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   ErrorPolicy,
   OperationVariables,
@@ -13,6 +5,14 @@ import {
   QueryResult,
 } from '@apollo/client'
 import { Table } from '@pluralsh/design-system'
+import { VirtualItem } from '@tanstack/react-virtual'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import {
+  reduceNestedData,
+  useSlicePolling,
+} from 'components/utils/tableFetchHelpers'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
 export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table

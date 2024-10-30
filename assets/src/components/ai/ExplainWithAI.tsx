@@ -1,16 +1,19 @@
 import { useState } from 'react'
+import { useTheme } from 'styled-components'
 import AIButton from './ExplainWithAIButton.tsx'
 import { useExplainWithAIPrompt } from './ExplainWithAIContext.tsx'
 import ExplainWithAIPanel from './ExplainWithAIPanel.tsx'
 
 export default function ExplainWithAI() {
+  const theme = useTheme()
   const [open, setOpen] = useState(false)
   const prompt = useExplainWithAIPrompt()
 
   return (
     <div
       css={{
-        marginRight: 66,
+        // align with top bar search
+        marginRight: theme.spacing.xsmall + 2,
         position: 'relative',
       }}
     >

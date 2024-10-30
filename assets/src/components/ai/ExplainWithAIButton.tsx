@@ -10,11 +10,13 @@ import { useTransition } from 'react-spring'
 
 export default function ExplainWithAIButton({
   active,
+  startIcon = <AiSparkleFilledIcon size={13} />,
   visible,
   children,
   ...props
 }: {
   active?: boolean
+  startIcon?: ReactNode
   visible: boolean
   children: ReactNode
 } & ButtonProps) {
@@ -30,7 +32,7 @@ export default function ExplainWithAIButton({
       <Button
         secondary
         small
-        startIcon={<AiSparkleFilledIcon size={13} />}
+        startIcon={startIcon}
         {...(active
           ? {
               backgroundImage: `linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`,

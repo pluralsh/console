@@ -2,11 +2,9 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   Breadcrumbs,
-  Button,
   IconFrame,
 } from '@pluralsh/design-system'
-import { ChatbotPanel } from 'components/ai/Chatbot.tsx'
-import { useState } from 'react'
+import { Chatbot } from 'components/ai/Chatbot.tsx'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import ExplainWithAI from '../ai/ExplainWithAI.tsx'
@@ -39,7 +37,7 @@ const BreadcrumbsContainerSC = styled.div(({ theme }) => ({
 export default function Subheader() {
   const theme = useTheme()
   const navigate = useNavigate()
-  const [aiChatOpen, setAiChatOpen] = useState(false)
+
   return (
     <SubheaderSC>
       <div css={{ display: 'flex', gap: theme.spacing.small }}>
@@ -64,18 +62,7 @@ export default function Subheader() {
         <Breadcrumbs className="crumbs" />
       </BreadcrumbsContainerSC>
       <ExplainWithAI />
-      <div css={{ position: 'relative' }}>
-        <Button
-          small
-          onClick={() => setAiChatOpen(true)}
-        >
-          Open AI Chat
-        </Button>
-        <ChatbotPanel
-          open={aiChatOpen}
-          onClose={() => setAiChatOpen(false)}
-        />
-      </div>
+      <Chatbot />
     </SubheaderSC>
   )
 }
