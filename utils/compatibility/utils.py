@@ -280,7 +280,7 @@ def reduce_versions(versions):
         kube = data["kube"]
 
         # Add to reduced_versions if it's a new major/minor version or kube list changes
-        if (
+        if version and (
             cur_major != version.major
             or cur_minor != version.minor
             or cur_kube != kube

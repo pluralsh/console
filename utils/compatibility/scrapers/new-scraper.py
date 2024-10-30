@@ -1,5 +1,3 @@
-# scrapers/new-scraper.py
-
 from bs4 import BeautifulSoup
 from collections import OrderedDict
 from utils import (
@@ -9,8 +7,8 @@ from utils import (
     update_chart_versions,
 )
 
-app_name = "new-app"
-compatibility_url = "https://cert-manager.io/docs/releases/"
+app_name = "app"
+compatibility_url = "https://plural.sh"
 
 
 def parse_page(content):
@@ -45,4 +43,4 @@ def scrape():
     else:
         print_error("No compatibility information found.")
 
-    update_chart_versions(app_name)
+    # update_chart_versions(app_name)

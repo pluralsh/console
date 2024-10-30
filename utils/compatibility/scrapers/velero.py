@@ -1,6 +1,5 @@
-# scrapers/cert_manager.py
-
 from bs4 import BeautifulSoup
+from collections import OrderedDict
 from utils import (
     print_error,
     fetch_page,
@@ -8,8 +7,8 @@ from utils import (
     update_chart_versions,
 )
 
-app_name = "argo-rollouts"
-compatibility_url = "https://argoproj.github.io/rollouts/"
+app_name = "velero"
+compatibility_url = "https://plural.sh"
 
 
 def parse_page(content):
@@ -20,13 +19,11 @@ def parse_page(content):
 
 def find_target_tables(sections):
     target_tables = []
-
     return target_tables
 
 
 def extract_table_data(target_tables):
     rows = []
-
     return rows
 
 
