@@ -1,5 +1,5 @@
 defmodule Console.AI.ChatTest do
-  use Console.DataCase, async: false
+  use Console.DataCase, async: true
   alias Console.AI.Chat
   use Mimic
 

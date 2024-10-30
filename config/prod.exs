@@ -21,6 +21,7 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Pipeline,
   Console.Deployments.PubSub.Notifications,
   Console.Deployments.PubSub.Email,
+  Console.AI.PubSub.Consumer
 ]
 
 config :console, Console.Cron.Scheduler,

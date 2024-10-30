@@ -97,7 +97,7 @@ defmodule Console.AI.Cron do
     end)
   end
 
-  defp if_enabled(fun) do
+  def if_enabled(fun) do
     case Settings.cached() do
       %DeploymentSettings{ai: %{enabled: true}} ->
         fun.()
