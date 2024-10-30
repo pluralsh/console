@@ -42,7 +42,7 @@ import { Kind } from '../common/types'
 import { getBreadcrumbs } from './StatefulSets'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },

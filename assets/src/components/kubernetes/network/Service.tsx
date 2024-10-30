@@ -55,7 +55,7 @@ import { Kind } from '../common/types'
 import { getBreadcrumbs } from './Services'
 import { Endpoints, serviceTypeDisplayName } from './utils'
 import { useIngressesColumns } from './Ingresses'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },

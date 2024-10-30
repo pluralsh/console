@@ -1,7 +1,7 @@
 import { Button, ChatIcon } from '@pluralsh/design-system'
 import { ButtonProps } from 'honorable'
 import { Dispatch, ReactNode } from 'react'
-import AIButton from './ExplainWithAIButton.tsx'
+import AIButton from '../ExplainWithAIButton.tsx'
 
 interface ChatbotButtonProps {
   active: boolean

@@ -3,7 +3,7 @@ import AIPanel from './AIPanel.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { Markdown } from '@pluralsh/design-system'
 import { GqlError } from '../utils/Alert.tsx'
-import { useExplainWithAIContext } from './ExplainWithAIContext.tsx'
+import { useExplainWithAIContext } from './AIContext.tsx'
 
 export default function ExplainWithAIPanel({
   prompt,

@@ -50,7 +50,7 @@ import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Nodes'
 import { useEventsColumns } from './Events'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },

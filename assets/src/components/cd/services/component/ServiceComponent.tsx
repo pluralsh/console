@@ -19,7 +19,7 @@ import { GqlError } from 'components/utils/Alert'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 
 import { getServiceComponentsBreadcrumbs } from '../service/ServiceComponents'
-import { useExplainWithAI } from '../../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../../ai/AIContext.tsx'
 
 export const getServiceComponentBreadcrumbs = ({
   service,

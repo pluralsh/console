@@ -11,7 +11,7 @@ import { useParams } from 'react-router-dom'
 import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 import { AISuggestFix } from '../../../ai/AISuggestFix.tsx'
-import { ChatbotWithAIButton } from '../../../ai/ChatbotButton.tsx'
+import { ChatbotWithAIButton } from '../../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import {
   getServiceDetailsBreadcrumbs,

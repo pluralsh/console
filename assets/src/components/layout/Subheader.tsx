@@ -4,7 +4,7 @@ import {
   Breadcrumbs,
   IconFrame,
 } from '@pluralsh/design-system'
-import { Chatbot } from 'components/ai/Chatbot.tsx'
+import { Chatbot } from 'components/ai/chatbot/Chatbot.tsx'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import ExplainWithAI from '../ai/ExplainWithAI.tsx'

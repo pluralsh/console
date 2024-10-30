@@ -8,7 +8,7 @@ import { GqlError } from '../utils/Alert.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import AIPanel from './AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
-import { ChatbotWithAIButton } from './ChatbotButton.tsx'
+import { ChatbotWithAIButton } from './chatbot/ChatbotButton.tsx'
 
 interface AISuggestFixProps {
   insight: Nullable<AiInsight>

@@ -26,7 +26,7 @@ import ResourceLink from '../common/ResourceLink'
 
 import { getBreadcrumbs } from './PersistentVolumeClaims'
 import { PVCStatusChip } from './utils'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [{ path: '', label: 'Raw' }] as const
 

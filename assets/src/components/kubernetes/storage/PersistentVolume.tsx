@@ -26,7 +26,7 @@ import { Kind } from '../common/types'
 
 import { PVStatusChip } from './utils'
 import { getBreadcrumbs } from './PersistentVolumes'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },

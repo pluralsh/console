@@ -1,15 +1,33 @@
 import {
-  Card,
   ChatIcon,
+  Card,
   CheckIcon,
   CopyIcon,
   Flex,
   GearTrainIcon,
   IconFrame,
+  ModalWrapper,
   ProgressBar,
   SendMessageIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
+
+import {
+  ReactNode,
+  ComponentProps,
+  ComponentPropsWithRef,
+  FormEvent,
+  forwardRef,
+  KeyboardEvent,
+  Ref,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
+import styled, { useTheme } from 'styled-components'
+import { useChatbotContext } from '../AIContext.tsx'
+import { ChatbotIconButton } from './ChatbotButton.tsx'
 
 import { useLogin } from 'components/contexts'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
@@ -20,30 +38,18 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { textAreaInsert } from 'components/utils/textAreaInsert'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import { AiRole, useChatMutation, useChatsQuery } from 'generated/graphql'
-import {
-  ComponentProps,
-  ComponentPropsWithRef,
-  FormEvent,
-  forwardRef,
-  KeyboardEvent,
-  ReactNode,
-  Ref,
-  useCallback,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
-import styled, { useTheme } from 'styled-components'
-import { AIPanelOverlay } from './AIPanelOverlay'
-import { ChatbotIconButton } from './ChatbotButton.tsx'
-import ChatbotMarkdown from './ChatbotMarkdown'
+import ChatbotMarkdown from './ChatbotMarkdown.tsx'
 
-export function Chatbot(): ReactNode {
+type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
+  onClose: () => void
+}
+
+export function Chatbot() {
   const theme = useTheme()
-  const [open, setOpen] = useState(false)
+  const { open, setOpen, initialMessage } = useChatbotContext()
 
   return (
     <div
@@ -62,35 +68,39 @@ export function Chatbot(): ReactNode {
       <ChatbotPanel
         open={open}
         onClose={() => setOpen(false)}
+        initialMessage={initialMessage}
       />
     </div>
   )
-}
-
-type ChatbotPanelProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
-  onClose: () => void
 }
 
 export function ChatbotPanel({
   open,
   onClose,
   ...props
-}: { open: boolean } & ChatbotPanelProps) {
+}: { open: boolean } & ChatbotPanelInnerProps) {
+  const theme = useTheme()
   return (
-    <AIPanelOverlay
+    <ModalWrapper
+      // onPointerDownOutside={(e) => e.preventDefault()}
+      overlayStyles={{
+        background: 'none',
+        padding: theme.spacing.medium,
+        top: theme.spacing.xxxxlarge,
+        left: 'unset',
+      }}
       open={open}
-      onClose={onClose}
-      alwaysGrow
+      onOpenChange={onClose}
     >
       <ChatbotPanelInner
         onClose={onClose}
         {...props}
       />
-    </AIPanelOverlay>
+    </ModalWrapper>
   )
 }
 
-function ChatbotPanelInner({ onClose, ...props }: ChatbotPanelProps) {
+function ChatbotPanelInner({ onClose, ...props }: ChatbotPanelInnerProps) {
   const historyScrollRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const lastMsgRef = useRef<HTMLLIElement>(null)
@@ -424,7 +434,8 @@ const ChatbotHistorySC = styled.ul(({ theme }) => ({
 const ChatbotFrameSC = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  width: '100%',
+  height: '100%',
+  width: 560,
   boxShadow: theme.boxShadows.modal,
 }))
 

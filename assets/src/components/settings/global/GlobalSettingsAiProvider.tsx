@@ -43,7 +43,7 @@ import pick from 'lodash/pick'
 import {
   AIVerbosityLevel,
   useExplainWithAIContext,
-} from '../../ai/ExplainWithAIContext.tsx'
+} from '../../ai/AIContext.tsx'
 
 const updateSettings = produce(
   (
