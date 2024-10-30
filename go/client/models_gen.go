@@ -3120,11 +3120,14 @@ type OllamaSettings struct {
 
 // OpenAI connection information
 type OpenaiSettings struct {
+	// the base url to use when querying an OpenAI compatible API, leave blank for OpenAI
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// the openai model version to use
 	Model *string `json:"model,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
+	BaseURL     *string `json:"baseUrl,omitempty"`
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
 }

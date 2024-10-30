@@ -1088,6 +1088,7 @@ input AiSettingsAttributes {
 }
 
 input OpenaiSettingsAttributes {
+  baseUrl: String
   accessToken: String
   model: String
 }
@@ -1258,6 +1259,9 @@ type AiSettings {
 
 "OpenAI connection information"
 type OpenaiSettings {
+  "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
+  baseUrl: String
+
   "the openai model version to use"
   model: String
 }

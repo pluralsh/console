@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -3797,12 +3797,15 @@ export type OllamaSettings = {
 /** OpenAI connection information */
 export type OpenaiSettings = {
   __typename?: 'OpenaiSettings';
+  /** the base url to use when querying an OpenAI compatible API, leave blank for OpenAI */
+  baseUrl?: Maybe<Scalars['String']['output']>;
   /** the openai model version to use */
   model?: Maybe<Scalars['String']['output']>;
 };
 
 export type OpenaiSettingsAttributes = {
   accessToken?: InputMaybe<Scalars['String']['input']>;
+  baseUrl?: InputMaybe<Scalars['String']['input']>;
   model?: InputMaybe<Scalars['String']['input']>;
 };
 
