@@ -101,12 +101,11 @@ export function useChatbotContext() {
 }
 
 export function useLaunchChatbot() {
-  // will create a new chat thread and launch the chatbot window
   const { setOpen, setCurrentThread } = useChatbotContext()
   const [mutation, { loading, error }] = useCreateChatThreadMutation()
 
   return {
-    launcher: (attributes: ChatThreadAttributes) => {
+    createNewThread: (attributes: ChatThreadAttributes) => {
       mutation({
         variables: { attributes },
         onCompleted: (data) => {
@@ -114,6 +113,14 @@ export function useLaunchChatbot() {
           setOpen(true)
         },
       })
+    },
+    goToThread: (thread: ChatThreadFragment) => {
+      setCurrentThread(thread)
+      setOpen(true)
+    },
+    goToThreadList: () => {
+      setCurrentThread(null)
+      setOpen(true)
     },
     loading,
     error,

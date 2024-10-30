@@ -260,7 +260,12 @@ export function GlobalSettingsAiProvider() {
                 }}
               >
                 {Object.values(AIVerbosityLevel).map((value) => (
-                  <Radio value={value}>{value}</Radio>
+                  <Radio
+                    value={value}
+                    key={value}
+                  >
+                    {value}
+                  </Radio>
                 ))}
               </RadioGroup>
             </Card>
