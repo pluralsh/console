@@ -78,4 +78,5 @@ def scrape():
     else:
         print_error("No compatibility information found.")
 
+    # I  believe Vitess removed helm charts
     # update_chart_versions(app_name)
