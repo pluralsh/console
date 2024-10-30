@@ -259,15 +259,6 @@ def ensure_keys(version):
     return version
 
 
-from collections import OrderedDict
-
-
-from collections import OrderedDict
-
-
-from collections import OrderedDict
-
-
 def reduce_versions(versions):
     reduced_versions = []
     cur_major = ""
