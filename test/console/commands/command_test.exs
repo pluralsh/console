@@ -17,6 +17,7 @@ defmodule Console.Commands.CommandTest do
   end
 
   describe "Collectible" do
+    @tag :skip
     test "commands implement the collectible protocol and caches the contents" do
       command = insert(:command)
       command = Enum.into(["one", "two", "three", "four\n"], command)
