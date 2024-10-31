@@ -11,7 +11,10 @@ import { useParams } from 'react-router-dom'
 import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 import { AISuggestFix } from '../../../ai/AISuggestFix.tsx'
-import { ChatWithAIButton } from '../../../ai/chatbot/ChatbotButton.tsx'
+import {
+  ChatWithAIButton,
+  insightMessage,
+} from '../../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import {
   getServiceDetailsBreadcrumbs,
@@ -69,7 +72,7 @@ export function ServiceInsights() {
           />
           <ChatWithAIButton
             floating
-            insight={service?.insight}
+            messages={[insightMessage(service?.insight)]}
           />
           <AISuggestFix insight={service?.insight} />
         </Flex>

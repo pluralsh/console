@@ -2,16 +2,25 @@ import { Markdown } from '@pluralsh/design-system'
 import { ReactNode, useCallback, useState } from 'react'
 import {
   AiInsight,
+  AiRole,
+  ChatMessage,
   useAiSuggestedFixLazyQuery,
 } from '../../generated/graphql.ts'
 import { GqlError } from '../utils/Alert.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import AIPanel from './AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
-import { ChatWithAIButton } from './chatbot/ChatbotButton.tsx'
+import { ChatWithAIButton, insightMessage } from './chatbot/ChatbotButton.tsx'
 
 interface AISuggestFixProps {
   insight: Nullable<AiInsight>
+}
+
+function fixMessage(fix: string): ChatMessage {
+  return {
+    content: `Here is the fix we've come up with so far:\n\n${fix}`,
+    role: AiRole.Assistant,
+  }
 }
 
 function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
@@ -43,7 +52,15 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
         showClosePanel={!!data?.aiSuggestedFix}
         header="Suggest a fix"
         subheader="Get a suggested fix based on the insight. AI is prone to mistakes, always test changes before application."
-        footer={<ChatWithAIButton primary />}
+        footer={
+          <ChatWithAIButton
+            primary
+            messages={[
+              insightMessage(insight),
+              fixMessage(data?.aiSuggestedFix || ''),
+            ]}
+          />
+        }
       >
         {data?.aiSuggestedFix && <Markdown text={data?.aiSuggestedFix} />}
         {loading && !data && <LoadingIndicator />}

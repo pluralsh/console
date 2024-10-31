@@ -5,6 +5,9 @@ import { Dispatch, ReactNode } from 'react'
 import { useChatbot } from '../AIContext.tsx'
 import AIButton from '../ExplainWithAIButton.tsx'
 
+const FIX_PREFACE =
+  "The following is an insight into an issue into the users infrastructrue we'd like to learn more about:"
+
 interface ChatbotButtonProps {
   active: boolean
   onClick: Dispatch<void>
@@ -32,27 +35,29 @@ export function ChatbotIconButton({
   )
 }
 
+export function insightMessage(
+  insight: Nullable<AiInsightFragment>
+): ChatMessage {
+  return {
+    content: `${FIX_PREFACE}\n\n${insight?.text ?? ''}`,
+    role: AiRole.Assistant,
+  }
+}
+
 export function ChatWithAIButton({
-  insight,
+  messages,
   ...props
 }: {
-  insight?: Nullable<AiInsightFragment>
+  messages?: Nullable<ChatMessage[]>
 } & ButtonProps) {
   const { createNewThread, loading } = useChatbot()
 
   const handleClick = () => {
-    const messages: ChatMessage[] = []
-    if (insight) {
-      messages.push({
-        content: insight.summary ?? '',
-        role: AiRole.Assistant,
-      })
-    }
     createNewThread({
       // TODO: update this
       summary: 'Further questions about an insight from Plural AI',
       summarized: false,
-      messages,
+      messages: messages || [],
     })
   }
   return (

@@ -6,7 +6,10 @@ import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { dateTimeFormat } from 'utils/date'
 import { AISuggestFix } from '../../../ai/AISuggestFix.tsx'
-import { ChatWithAIButton } from '../../../ai/chatbot/ChatbotButton.tsx'
+import {
+  ChatWithAIButton,
+  insightMessage,
+} from '../../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackRunOutletContextT } from '../Route.tsx'
 
@@ -41,7 +44,7 @@ export function StackRunInsights() {
         />
         <ChatWithAIButton
           floating
-          insight={stackRun?.insight}
+          messages={[insightMessage(stackRun?.insight)]}
         />
         <AISuggestFix insight={stackRun?.insight} />
       </Flex>
