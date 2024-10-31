@@ -1,9 +1,11 @@
 import {
+  Card,
   CheckIcon,
   CopyIcon,
   EmptyState,
   Flex,
   IconFrame,
+  PluralLogoMark,
   ProgressBar,
   SendMessageIcon,
   Spinner,
@@ -11,6 +13,9 @@ import {
   WrapWithIf,
 } from '@pluralsh/design-system'
 
+import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
+import { usePlatform } from 'components/hooks/usePlatform'
+import { submitForm } from 'components/utils/submitForm'
 import {
   ComponentProps,
   FormEvent,
@@ -24,12 +29,8 @@ import {
   useRef,
   useState,
 } from 'react'
-import styled from 'styled-components'
-
-import { useLogin } from 'components/contexts'
-import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
-import { usePlatform } from 'components/hooks/usePlatform'
-import { submitForm } from 'components/utils/submitForm'
+import styled, { useTheme } from 'styled-components'
+import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
 import { GqlError } from 'components/utils/Alert.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
@@ -165,15 +166,19 @@ const ChatMessage = forwardRef(
     } & ComponentProps<typeof ChatMessageSC>,
     ref: Ref<HTMLLIElement>
   ) => {
+    const theme = useTheme()
+    const [showActions, setShowActions] = useState(false)
     let finalContent: ReactNode
-    let { name } = useLogin()?.me || {}
 
     if (role === AiRole.Assistant || role === AiRole.System) {
-      name = 'Plural AI'
       finalContent = <ChatbotMarkdown text={content} />
     } else {
       finalContent = content.split('\n\n').map((str, i) => (
-        <span key={i}>
+        <Card
+          key={i}
+          css={{ padding: theme.spacing.medium }}
+          fillLevel={2}
+        >
           {str.split('\n').map((line, i, arr) => (
             <div
               key={`${i}-${line}`}
@@ -183,26 +188,29 @@ const ChatMessage = forwardRef(
               {i !== arr.length - 1 ? <br /> : null}
             </div>
           ))}
-        </span>
+        </Card>
       ))
     }
 
     return (
       <ChatMessageSC
+        onMouseEnter={() => setShowActions(true)}
+        onMouseLeave={() => setShowActions(false)}
         ref={ref}
         {...props}
       >
-        <Flex gap="xsmall">
-          <h6 className="name">
-            {`> `}
-            <NameSC $role={role}>{name}</NameSC>
-          </h6>
-          <ChatMessageActions
-            id={id ?? ''}
-            content={content}
-          />
+        <ChatMessageActions
+          id={id ?? ''}
+          content={content}
+          show={showActions}
+        />
+        <Flex
+          gap="medium"
+          justify={role === AiRole.User ? 'flex-end' : 'flex-start'}
+        >
+          {role !== AiRole.User && <PluralAssistantIcon />}
+          <div>{finalContent}</div>
         </Flex>
-        {finalContent}
       </ChatMessageSC>
     )
   }
@@ -211,10 +219,12 @@ const ChatMessage = forwardRef(
 function ChatMessageActions({
   id,
   content,
+  show,
 }: {
   id: string
   content: string
-}): ReactNode {
+  show: boolean
+}) {
   const [copied, setCopied] = useState(false)
 
   const showCopied = () => {
@@ -228,7 +238,7 @@ function ChatMessageActions({
   })
 
   return (
-    <>
+    <ActionsWrapperSC $show={show}>
       <WrapWithIf
         condition={!copied}
         wrapper={
@@ -239,16 +249,16 @@ function ChatMessageActions({
         }
       >
         <IconFrame
-          id="copy"
           clickable
+          tooltip="Copy to clipboard"
           type="floating"
           size="medium"
           icon={copied ? <CheckIcon color="icon-success" /> : <CopyIcon />}
         />
       </WrapWithIf>
       <IconFrame
-        id="delete"
         clickable
+        tooltip="Delete message"
         type="floating"
         size="medium"
         onClick={() => deleteMessage({ variables: { id } })}
@@ -256,7 +266,7 @@ function ChatMessageActions({
           deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-danger" />
         }
       />
-    </>
+    </ActionsWrapperSC>
   )
 }
 
@@ -304,38 +314,25 @@ const ChatbotTextArea = forwardRef(
   }
 )
 
+const ActionsWrapperSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
+  position: 'absolute',
+  top: theme.spacing.small,
+  right: theme.spacing.small,
+  display: 'flex',
+  gap: theme.spacing.xsmall,
+  opacity: $show ? 1 : 0,
+  transition: '0.2s opacity ease',
+  pointerEvents: $show ? 'auto' : 'none',
+}))
+
 const ChatMessageSC = styled.li(({ theme }) => ({
   ...theme.partials.reset.li,
+  position: 'relative',
   padding: theme.spacing.small,
-
-  '.name': {
-    width: '100%',
-    marginBottom: theme.spacing.medium,
-  },
-
-  '#copy, #delete': {
-    display: 'none',
-  },
-
-  '& *': {
-    ...theme.partials.text.code,
-    fontWeight: (theme.partials.text as any).fontWeight || 'normal',
-  },
-
-  '&:hover': {
-    background: theme.colors['fill-one-hover'],
-    borderRadius: theme.borderRadiuses.large,
-
-    '#copy, #delete': {
-      display: 'inherit',
-    },
-  },
-}))
-const NameSC = styled.span<{ $role: AiRole }>(({ theme, $role }) => ({
-  color:
-    $role === AiRole.User
-      ? theme.colors['code-block-mid-blue'] || 'green'
-      : theme.colors['code-block-purple'] || 'green',
+  // '&:hover': {
+  //   background: theme.colors['fill-one-hover'],
+  //   borderRadius: theme.borderRadiuses.large,
+  // },
 }))
 
 const ChatbotLoadingBarSC = styled(ProgressBar)<{ $show: boolean }>(
@@ -361,7 +358,7 @@ const ChatbotMessagesSC = styled.ul<{ $fullscreen: boolean }>(
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    padding: theme.spacing.medium,
+    padding: theme.spacing.xsmall,
     flexGrow: 1,
   })
 )
@@ -405,5 +402,27 @@ const SendMessageButtonSC = styled.button(({ theme }) => ({
   padding: theme.spacing.small,
   '&:hover': {
     backgroundColor: theme.colors['fill-three-selected'],
+  },
+}))
+
+function PluralAssistantIcon() {
+  return (
+    <AssistantIconWrapperSC>
+      <PluralLogoMark
+        width={16}
+        height={16}
+      />
+    </AssistantIconWrapperSC>
+  )
+}
+
+const AssistantIconWrapperSC = styled.div(({ theme }) => ({
+  ...aiGradientBorderStyles(theme, 'fill-two'),
+  width: theme.spacing.xlarge,
+  height: theme.spacing.xlarge,
+  borderRadius: theme.borderRadiuses.large,
+  padding: theme.spacing.xsmall,
+  svg: {
+    transform: 'translateY(-1px) translateX(-1px)',
   },
 }))

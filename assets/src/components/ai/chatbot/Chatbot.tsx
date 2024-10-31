@@ -71,6 +71,7 @@ export function ChatbotPanel({
               left: 'unset',
             }
       }
+      css={{ height: '100%' }}
       open={open}
       onOpenChange={onClose}
     >

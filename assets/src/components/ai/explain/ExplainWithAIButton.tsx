@@ -1,4 +1,4 @@
-import { useTheme } from 'styled-components'
+import { DefaultTheme, useTheme } from 'styled-components'
 import {
   AiSparkleFilledIcon,
   AnimatedDiv,
@@ -35,10 +35,7 @@ export default function ExplainWithAIButton({
         startIcon={startIcon}
         {...(active
           ? {
-              backgroundImage: `linear-gradient(${theme.colors['fill-zero']}, ${theme.colors['fill-zero']}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`,
-              backgroundClip: 'padding-box, border-box',
-              backgroundOrigin: 'border-box',
-              border: '1px solid transparent',
+              ...aiGradientBorderStyles(theme),
               transitionDuration: '1s',
               transitionProperty: 'border',
               _hover: {
@@ -54,3 +51,13 @@ export default function ExplainWithAIButton({
     </AnimatedDiv>
   ))
 }
+
+export const aiGradientBorderStyles = (
+  theme: DefaultTheme,
+  backgroundColor: keyof DefaultTheme['colors'] = 'fill-zero'
+) => ({
+  backgroundImage: `linear-gradient(${theme.colors[backgroundColor]}, ${theme.colors[backgroundColor]}), linear-gradient(to bottom, ${theme.colors.semanticBlue}, ${theme.colors['border-input']})`,
+  backgroundClip: 'padding-box, border-box',
+  backgroundOrigin: 'border-box',
+  border: '1px solid transparent',
+})

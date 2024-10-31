@@ -98,6 +98,49 @@ function MdPre({
 }
 const commonCfg = { shouldForwardProp: () => true }
 
+const MdH1 = styled.h1.withConfig(commonCfg)(({ theme }) => ({
+  ...theme.partials.text.title2,
+  color: theme.colors.text,
+  marginTop: theme.spacing.large,
+  marginBottom: theme.spacing.small,
+  '&:first-of-type': { marginTop: 0 },
+}))
+const MdH2 = styled.h2.withConfig(commonCfg)(({ theme }) => ({
+  ...theme.partials.text.subtitle1,
+  color: theme.colors.text,
+  marginTop: theme.spacing.large,
+  marginBottom: theme.spacing.small,
+  '&:first-of-type': { marginTop: 0 },
+}))
+const MdH3 = styled.h3.withConfig(commonCfg)(({ theme }) => ({
+  ...theme.partials.text.subtitle2,
+  color: theme.colors.text,
+  marginTop: theme.spacing.large,
+  marginBottom: theme.spacing.small,
+  '&:first-of-type': { marginTop: 0 },
+}))
+const MdH4 = styled.h4.withConfig(commonCfg)(({ theme }) => ({
+  ...theme.partials.text.body1Bold,
+  color: theme.colors.text,
+  marginTop: theme.spacing.large,
+  marginBottom: theme.spacing.small,
+  '&:first-of-type': { marginTop: 0 },
+}))
+const MdH5 = styled.h5.withConfig(commonCfg)(({ theme }) => ({
+  ...theme.partials.text.body1Bold,
+  color: theme.colors.text,
+  marginTop: theme.spacing.large,
+  marginBottom: theme.spacing.small,
+  '&:first-of-type': { marginTop: 0 },
+}))
+const MdH6 = styled.h6.withConfig(commonCfg)(({ theme }) => ({
+  ...theme.partials.text.body1Bold,
+  color: theme.colors.text,
+  marginTop: theme.spacing.large,
+  marginBottom: theme.spacing.small,
+  '&:first-of-type': { marginTop: 0 },
+}))
+
 const MdListSC = styled.ul.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.reset.list,
   marginBottom: theme.partials.text.code.lineHeight,
@@ -177,9 +220,30 @@ function ChatbotMarkdown({ text }: MarkdownProps) {
   return useMemo(
     () => (
       <ReactMarkdown
-        allowedElements={['ul', 'ol', 'li', 'p', 'pre', 'code', 'pre', 'a']}
+        allowedElements={[
+          'ul',
+          'ol',
+          'li',
+          'p',
+          'pre',
+          'code',
+          'pre',
+          'a',
+          'h1',
+          'h2',
+          'h3',
+          'h4',
+          'h5',
+          'h6',
+        ]}
         unwrapDisallowed
         components={{
+          h1: MdH1,
+          h2: MdH2,
+          h3: MdH3,
+          h4: MdH4,
+          h5: MdH5,
+          h6: MdH6,
           ul: MdList,
           ol: MdList,
           li: MdLi,
