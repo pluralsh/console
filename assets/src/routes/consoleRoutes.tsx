@@ -1,33 +1,30 @@
-import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
-
-import Builds from 'components/builds/Builds'
+import Apps from 'components/apps/Apps'
 import Build from 'components/builds/build/Build'
 import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
-
+import Builds from 'components/builds/Builds'
+import Home from 'components/home/Home'
+import { AccessTokens } from 'components/profile/AccessTokens'
+import { EmailSettings } from 'components/profile/EmailSettings'
 import MyProfile from 'components/profile/MyProfile'
+import { Permissions } from 'components/profile/Permissions'
 import { Profile } from 'components/profile/Profile'
 import { Security } from 'components/profile/Security'
-import { Permissions } from 'components/profile/Permissions'
-import { AccessTokens } from 'components/profile/AccessTokens'
 import { ProfileVPN } from 'components/profile/VPN'
+import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 
-import Apps from 'components/apps/Apps'
-
-import Home from 'components/home/Home'
-
-import { clusterRoutes } from './clusterRoutes'
+import { aiRoutes } from './aiRoutes.tsx'
 import { appsRoutes } from './appsRoutes'
-import { cdRoutes } from './cdRoutes'
-import { prRoutes } from './prRoutes'
 import { backupsRoutes } from './backupRoutes'
-import { kubernetesRoute } from './kubernetesRoute'
-import { policiesRoutes } from './policiesRoutes'
-import { stacksRoutes } from './stacksRoutes'
-import { settingsRoutes } from './settingsRoutes'
+import { cdRoutes } from './cdRoutes'
+import { clusterRoutes } from './clusterRoutes'
 import { HOME_REL_PATH } from './consoleRoutesConsts'
+import { kubernetesRoutes } from './kubernetesRoute'
+import { policiesRoutes } from './policiesRoutes'
+import { prRoutes } from './prRoutes'
 import { secretsRoutes } from './secretsRoute'
-import { EmailSettings } from 'components/profile/EmailSettings'
+import { settingsRoutes } from './settingsRoutes'
+import { stacksRoutes } from './stacksRoutes'
 
 const buildsRoutes = [
   <Route
@@ -151,7 +148,10 @@ export const consoleComponentRoutes = [
   settingsRoutes,
 
   /* KUBERNETES */
-  kubernetesRoute,
+  kubernetesRoutes,
+
+  /* AI */
+  aiRoutes,
 ].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))
 
 export const consoleRoutes: RouteObject[] = [

@@ -6,6 +6,8 @@ import {
   IconFrame,
   ProgressBar,
   SendMessageIcon,
+  Spinner,
+  TrashCanIcon,
   WrapWithIf,
 } from '@pluralsh/design-system'
 
@@ -37,6 +39,7 @@ import {
   ChatThreadFragment,
   useChatMutation,
   useChatThreadMessagesQuery,
+  useDeleteChatMutation,
 } from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import ChatbotMarkdown from './ChatbotMarkdown.tsx'
@@ -150,6 +153,7 @@ export function ChatbotPanelThread({
 const ChatMessage = forwardRef(
   (
     {
+      id,
       content,
       role,
       ...props
@@ -191,7 +195,10 @@ const ChatMessage = forwardRef(
             {`> `}
             <NameSC $role={role}>{name}</NameSC>
           </h6>
-          <ChatMessageActions content={content} />
+          <ChatMessageActions
+            id={id ?? ''}
+            content={content}
+          />
         </Flex>
         {finalContent}
       </ChatMessageSC>
@@ -199,13 +206,24 @@ const ChatMessage = forwardRef(
   }
 )
 
-function ChatMessageActions({ content }: { content: string }): ReactNode {
+function ChatMessageActions({
+  id,
+  content,
+}: {
+  id: string
+  content: string
+}): ReactNode {
   const [copied, setCopied] = useState(false)
 
   const showCopied = () => {
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
+
+  const [deleteMessage, { loading: deleteLoading }] = useDeleteChatMutation({
+    awaitRefetchQueries: true,
+    refetchQueries: ['ChatThreadMessages'],
+  })
 
   return (
     <>
@@ -226,14 +244,16 @@ function ChatMessageActions({ content }: { content: string }): ReactNode {
           icon={copied ? <CheckIcon color="icon-success" /> : <CopyIcon />}
         />
       </WrapWithIf>
-      {/* TODO: add if delete message will be supported by the API */}
-      {/* <IconFrame */}
-      {/*   id="delete" */}
-      {/*   clickable */}
-      {/*   type="floating" */}
-      {/*   size="medium" */}
-      {/*   icon={<TrashCanIcon color="icon-danger" />} */}
-      {/* /> */}
+      <IconFrame
+        id="delete"
+        clickable
+        type="floating"
+        size="medium"
+        onClick={() => deleteMessage({ variables: { id } })}
+        icon={
+          deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-danger" />
+        }
+      />
     </>
   )
 }
