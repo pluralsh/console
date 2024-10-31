@@ -5824,6 +5824,9 @@ input ChatThreadAttributes {
 
   "a list of messages to add initially when creating this thread"
   messages: [ChatMessage]
+
+  "an ai insight this thread was created from"
+  insightId: ID
 }
 
 type Chat {
@@ -5842,6 +5845,7 @@ type ChatThread {
   summary: String!
   default: Boolean!
   user: User
+  insight: AiInsight
   chats(after: String, first: Int, before: String, last: Int): ChatConnection
   insertedAt: DateTime
   updatedAt: DateTime
@@ -5874,6 +5878,18 @@ type AiInsight {
 
   "any errors generated when compiling this insight"
   error: [ServiceError]
+
+  service: ServiceDeployment
+
+  stack: InfrastructureStack
+
+  cluster: Cluster
+
+  stackRun: StackRun
+
+  serviceComponent: ServiceComponent
+
+  clusterInsightComponent: ClusterInsightComponent
 
   insertedAt: DateTime
 

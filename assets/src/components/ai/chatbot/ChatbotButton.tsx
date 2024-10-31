@@ -46,14 +46,17 @@ export function insightMessage(
 
 export function ChatWithAIButton({
   messages,
+  insightId,
   ...props
 }: {
   messages?: Nullable<ChatMessage[]>
+  insightId?: Nullable<string>
 } & ButtonProps) {
   const { createNewThread, loading } = useChatbot()
 
   const handleClick = () => {
     createNewThread({
+      insightId,
       // TODO: update this
       summary: 'Further questions about an insight from Plural AI',
       summarized: false,

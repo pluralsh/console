@@ -41,6 +41,7 @@ export function ComponentInsights() {
         />
         <ChatWithAIButton
           floating
+          insightId={component?.insight?.id}
           messages={[insightMessage(component?.insight)]}
         />
         <AISuggestFix insight={component?.insight} />
