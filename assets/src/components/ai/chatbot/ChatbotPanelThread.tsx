@@ -30,22 +30,21 @@ import { useLogin } from 'components/contexts'
 import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
 import { usePlatform } from 'components/hooks/usePlatform'
 import { submitForm } from 'components/utils/submitForm'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 
+import { GqlError } from 'components/utils/Alert.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import { textAreaInsert } from 'components/utils/textAreaInsert'
 import {
   AiRole,
   ChatFragment,
   ChatThreadFragment,
   useChatMutation,
-  useChatThreadMessagesQuery,
+  useChatThreadDetailsQuery,
   useDeleteChatMutation,
 } from 'generated/graphql'
+import { isEmpty } from 'lodash'
 import CopyToClipboard from 'react-copy-to-clipboard'
 import ChatbotMarkdown from './ChatbotMarkdown.tsx'
-import { GqlError } from 'components/utils/Alert.tsx'
-import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
-import { isEmpty } from 'lodash'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -66,15 +65,9 @@ export function ChatbotPanelThread({
     historyScrollRef.current?.scrollTo({ top: 9999999999999 })
   }, [historyScrollRef])
 
-  const { data, refetch } = useFetchPaginatedData(
-    {
-      queryHook: useChatThreadMessagesQuery,
-      keyPath: ['chatThread', 'chats'],
-    },
-    {
-      threadId: currentThread.id,
-    }
-  )
+  const { data, refetch } = useChatThreadDetailsQuery({
+    variables: { id: currentThread.id },
+  })
 
   const [mutate, { loading: sendingMessage, error: messageError }] =
     useChatMutation({
@@ -138,6 +131,7 @@ export function ChatbotPanelThread({
       {!detached && (
         <ChatbotFormSC onSubmit={sendMessage}>
           <ChatbotTextArea
+            placeholder="Ask Plural AI"
             ref={inputRef}
             value={newMessage}
             onChange={(e) => {
@@ -226,7 +220,7 @@ function ChatMessageActions({
 
   const [deleteMessage, { loading: deleteLoading }] = useDeleteChatMutation({
     awaitRefetchQueries: true,
-    refetchQueries: ['ChatThreadMessages'],
+    refetchQueries: ['ChatThreadDetails'],
   })
 
   return (
@@ -359,18 +353,6 @@ const ChatbotHistorySC = styled.ul(({ theme }) => ({
   flexDirection: 'column',
   padding: theme.spacing.medium,
   flexGrow: 1,
-  '.progressBar': {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderRadius: 0,
-    height: 2,
-    background: 'none',
-    '.show': {
-      opacity: 1,
-    },
-  },
 }))
 
 const ChatbotFormSC = styled.form(({ theme }) => ({

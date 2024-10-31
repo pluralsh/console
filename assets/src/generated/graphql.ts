@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9308,9 +9308,13 @@ export type AiInsightFragment = { __typename?: 'AiInsight', id: string, text?: s
 
 export type AiInsightSummaryFragment = { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null };
 
+export type AiPinFragment = { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string } | null, thread?: { __typename?: 'ChatThread', id: string } | null };
+
 export type ChatFragment = { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null };
 
-export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null };
+export type ChatThreadTinyFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null };
+
+export type ChatThreadFragment = { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null };
 
 export type AiQueryVariables = Exact<{
   prompt: Scalars['String']['input'];
@@ -9335,6 +9339,16 @@ export type AiSuggestedFixQueryVariables = Exact<{
 
 export type AiSuggestedFixQuery = { __typename?: 'RootQueryType', aiSuggestedFix?: string | null };
 
+export type AiPinsQueryVariables = Exact<{
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type AiPinsQuery = { __typename?: 'RootQueryType', aiPins?: { __typename?: 'AiPinConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AiPinEdge', node?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string } | null, thread?: { __typename?: 'ChatThread', id: string } | null } | null } | null> | null } | null };
+
 export type ChatThreadsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
@@ -9345,23 +9359,26 @@ export type ChatThreadsQueryVariables = Exact<{
 
 export type ChatThreadsQuery = { __typename?: 'RootQueryType', chatThreads?: { __typename?: 'ChatThreadConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatThreadEdge', node?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null };
 
-export type ChatThreadQueryVariables = Exact<{
+export type ChatThreadDetailsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type ChatThreadQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type ChatThreadDetailsQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null };
 
-export type ChatThreadMessagesQueryVariables = Exact<{
-  first?: InputMaybe<Scalars['Int']['input']>;
-  last?: InputMaybe<Scalars['Int']['input']>;
-  after?: InputMaybe<Scalars['String']['input']>;
-  before?: InputMaybe<Scalars['String']['input']>;
-  threadId: Scalars['ID']['input'];
+export type CreateAiPinMutationVariables = Exact<{
+  attributes: AiPinAttributes;
 }>;
 
 
-export type ChatThreadMessagesQuery = { __typename?: 'RootQueryType', chatThread?: { __typename?: 'ChatThread', chats?: { __typename?: 'ChatConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null } | null };
+export type CreateAiPinMutation = { __typename?: 'RootMutationType', createPin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string } | null, thread?: { __typename?: 'ChatThread', id: string } | null } | null };
+
+export type DeleteAiPinMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteAiPinMutation = { __typename?: 'RootMutationType', deletePin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string } | null, thread?: { __typename?: 'ChatThread', id: string } | null } | null };
 
 export type ChatMutationVariables = Exact<{
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
@@ -9398,7 +9415,7 @@ export type CreateChatThreadMutationVariables = Exact<{
 }>;
 
 
-export type CreateChatThreadMutation = { __typename?: 'RootMutationType', createThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type CreateChatThreadMutation = { __typename?: 'RootMutationType', createThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null };
 
 export type UpdateChatThreadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9406,14 +9423,14 @@ export type UpdateChatThreadMutationVariables = Exact<{
 }>;
 
 
-export type UpdateChatThreadMutation = { __typename?: 'RootMutationType', updateThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type UpdateChatThreadMutation = { __typename?: 'RootMutationType', updateThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null };
 
 export type DeleteChatThreadMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null } | null };
+export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null } | null } | null };
 
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
@@ -11493,6 +11510,29 @@ export type RefreshQueryVariables = Exact<{
 
 export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
 
+export const AiPinFragmentDoc = gql`
+    fragment AiPin on AiPin {
+  id
+  name
+  insight {
+    id
+  }
+  thread {
+    id
+  }
+  insertedAt
+  updatedAt
+}
+    `;
+export const ChatThreadTinyFragmentDoc = gql`
+    fragment ChatThreadTiny on ChatThread {
+  id
+  default
+  summary
+  insertedAt
+  updatedAt
+}
+    `;
 export const ChatFragmentDoc = gql`
     fragment Chat on Chat {
   id
@@ -11503,6 +11543,21 @@ export const ChatFragmentDoc = gql`
   updatedAt
 }
     `;
+export const AiInsightFragmentDoc = gql`
+    fragment AiInsight on AiInsight {
+  id
+  text
+  summary
+  sha
+  freshness
+  updatedAt
+  insertedAt
+  error {
+    message
+    source
+  }
+}
+    `;
 export const ChatThreadFragmentDoc = gql`
     fragment ChatThread on ChatThread {
   id
@@ -11510,8 +11565,20 @@ export const ChatThreadFragmentDoc = gql`
   summary
   insertedAt
   updatedAt
+  lastMessageAt
+  chats(first: 100) {
+    edges {
+      node {
+        ...Chat
+      }
+    }
+  }
+  insight {
+    ...AiInsight
+  }
 }
-    `;
+    ${ChatFragmentDoc}
+${AiInsightFragmentDoc}`;
 export const ApplicationSpecFragmentDoc = gql`
     fragment ApplicationSpec on ApplicationSpec {
   descriptor {
@@ -12882,21 +12949,6 @@ export const ApiDeprecationFragmentDoc = gql`
   deprecatedIn
   removedIn
   replacement
-}
-    `;
-export const AiInsightFragmentDoc = gql`
-    fragment AiInsight on AiInsight {
-  id
-  text
-  summary
-  sha
-  freshness
-  updatedAt
-  insertedAt
-  error {
-    message
-    source
-  }
 }
     `;
 export const ServiceDeploymentComponentFragmentDoc = gql`
@@ -14502,6 +14554,57 @@ export type AiSuggestedFixQueryHookResult = ReturnType<typeof useAiSuggestedFixQ
 export type AiSuggestedFixLazyQueryHookResult = ReturnType<typeof useAiSuggestedFixLazyQuery>;
 export type AiSuggestedFixSuspenseQueryHookResult = ReturnType<typeof useAiSuggestedFixSuspenseQuery>;
 export type AiSuggestedFixQueryResult = Apollo.QueryResult<AiSuggestedFixQuery, AiSuggestedFixQueryVariables>;
+export const AiPinsDocument = gql`
+    query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
+  aiPins(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AiPin
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${AiPinFragmentDoc}`;
+
+/**
+ * __useAiPinsQuery__
+ *
+ * To run a query within a React component, call `useAiPinsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAiPinsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAiPinsQuery({
+ *   variables: {
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *   },
+ * });
+ */
+export function useAiPinsQuery(baseOptions?: Apollo.QueryHookOptions<AiPinsQuery, AiPinsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AiPinsQuery, AiPinsQueryVariables>(AiPinsDocument, options);
+      }
+export function useAiPinsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiPinsQuery, AiPinsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AiPinsQuery, AiPinsQueryVariables>(AiPinsDocument, options);
+        }
+export function useAiPinsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiPinsQuery, AiPinsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AiPinsQuery, AiPinsQueryVariables>(AiPinsDocument, options);
+        }
+export type AiPinsQueryHookResult = ReturnType<typeof useAiPinsQuery>;
+export type AiPinsLazyQueryHookResult = ReturnType<typeof useAiPinsLazyQuery>;
+export type AiPinsSuspenseQueryHookResult = ReturnType<typeof useAiPinsSuspenseQuery>;
+export type AiPinsQueryResult = Apollo.QueryResult<AiPinsQuery, AiPinsQueryVariables>;
 export const ChatThreadsDocument = gql`
     query ChatThreads($first: Int = 100, $last: Int, $after: String, $before: String) {
   chatThreads(first: $first, last: $last, after: $after, before: $before) {
@@ -14510,13 +14613,13 @@ export const ChatThreadsDocument = gql`
     }
     edges {
       node {
-        ...ChatThread
+        ...ChatThreadTiny
       }
     }
   }
 }
     ${PageInfoFragmentDoc}
-${ChatThreadFragmentDoc}`;
+${ChatThreadTinyFragmentDoc}`;
 
 /**
  * __useChatThreadsQuery__
@@ -14553,8 +14656,8 @@ export type ChatThreadsQueryHookResult = ReturnType<typeof useChatThreadsQuery>;
 export type ChatThreadsLazyQueryHookResult = ReturnType<typeof useChatThreadsLazyQuery>;
 export type ChatThreadsSuspenseQueryHookResult = ReturnType<typeof useChatThreadsSuspenseQuery>;
 export type ChatThreadsQueryResult = Apollo.QueryResult<ChatThreadsQuery, ChatThreadsQueryVariables>;
-export const ChatThreadDocument = gql`
-    query ChatThread($id: ID!) {
+export const ChatThreadDetailsDocument = gql`
+    query ChatThreadDetails($id: ID!) {
   chatThread(id: $id) {
     ...ChatThread
   }
@@ -14562,91 +14665,103 @@ export const ChatThreadDocument = gql`
     ${ChatThreadFragmentDoc}`;
 
 /**
- * __useChatThreadQuery__
+ * __useChatThreadDetailsQuery__
  *
- * To run a query within a React component, call `useChatThreadQuery` and pass it any options that fit your needs.
- * When your component renders, `useChatThreadQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useChatThreadDetailsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChatThreadDetailsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useChatThreadQuery({
+ * const { data, loading, error } = useChatThreadDetailsQuery({
  *   variables: {
  *      id: // value for 'id'
  *   },
  * });
  */
-export function useChatThreadQuery(baseOptions: Apollo.QueryHookOptions<ChatThreadQuery, ChatThreadQueryVariables>) {
+export function useChatThreadDetailsQuery(baseOptions: Apollo.QueryHookOptions<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ChatThreadQuery, ChatThreadQueryVariables>(ChatThreadDocument, options);
+        return Apollo.useQuery<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>(ChatThreadDetailsDocument, options);
       }
-export function useChatThreadLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatThreadQuery, ChatThreadQueryVariables>) {
+export function useChatThreadDetailsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ChatThreadQuery, ChatThreadQueryVariables>(ChatThreadDocument, options);
+          return Apollo.useLazyQuery<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>(ChatThreadDetailsDocument, options);
         }
-export function useChatThreadSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatThreadQuery, ChatThreadQueryVariables>) {
+export function useChatThreadDetailsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ChatThreadQuery, ChatThreadQueryVariables>(ChatThreadDocument, options);
+          return Apollo.useSuspenseQuery<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>(ChatThreadDetailsDocument, options);
         }
-export type ChatThreadQueryHookResult = ReturnType<typeof useChatThreadQuery>;
-export type ChatThreadLazyQueryHookResult = ReturnType<typeof useChatThreadLazyQuery>;
-export type ChatThreadSuspenseQueryHookResult = ReturnType<typeof useChatThreadSuspenseQuery>;
-export type ChatThreadQueryResult = Apollo.QueryResult<ChatThreadQuery, ChatThreadQueryVariables>;
-export const ChatThreadMessagesDocument = gql`
-    query ChatThreadMessages($first: Int = 100, $last: Int, $after: String, $before: String, $threadId: ID!) {
-  chatThread(id: $threadId) {
-    chats(first: $first, last: $last, after: $after, before: $before) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...Chat
-        }
-      }
-    }
+export type ChatThreadDetailsQueryHookResult = ReturnType<typeof useChatThreadDetailsQuery>;
+export type ChatThreadDetailsLazyQueryHookResult = ReturnType<typeof useChatThreadDetailsLazyQuery>;
+export type ChatThreadDetailsSuspenseQueryHookResult = ReturnType<typeof useChatThreadDetailsSuspenseQuery>;
+export type ChatThreadDetailsQueryResult = Apollo.QueryResult<ChatThreadDetailsQuery, ChatThreadDetailsQueryVariables>;
+export const CreateAiPinDocument = gql`
+    mutation CreateAIPin($attributes: AiPinAttributes!) {
+  createPin(attributes: $attributes) {
+    ...AiPin
   }
 }
-    ${PageInfoFragmentDoc}
-${ChatFragmentDoc}`;
+    ${AiPinFragmentDoc}`;
+export type CreateAiPinMutationFn = Apollo.MutationFunction<CreateAiPinMutation, CreateAiPinMutationVariables>;
 
 /**
- * __useChatThreadMessagesQuery__
+ * __useCreateAiPinMutation__
  *
- * To run a query within a React component, call `useChatThreadMessagesQuery` and pass it any options that fit your needs.
- * When your component renders, `useChatThreadMessagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
+ * To run a mutation, you first call `useCreateAiPinMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateAiPinMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
  *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
  *
  * @example
- * const { data, loading, error } = useChatThreadMessagesQuery({
+ * const [createAiPinMutation, { data, loading, error }] = useCreateAiPinMutation({
  *   variables: {
- *      first: // value for 'first'
- *      last: // value for 'last'
- *      after: // value for 'after'
- *      before: // value for 'before'
- *      threadId: // value for 'threadId'
+ *      attributes: // value for 'attributes'
  *   },
  * });
  */
-export function useChatThreadMessagesQuery(baseOptions: Apollo.QueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
+export function useCreateAiPinMutation(baseOptions?: Apollo.MutationHookOptions<CreateAiPinMutation, CreateAiPinMutationVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
+        return Apollo.useMutation<CreateAiPinMutation, CreateAiPinMutationVariables>(CreateAiPinDocument, options);
       }
-export function useChatThreadMessagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
-        }
-export function useChatThreadMessagesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>(ChatThreadMessagesDocument, options);
-        }
-export type ChatThreadMessagesQueryHookResult = ReturnType<typeof useChatThreadMessagesQuery>;
-export type ChatThreadMessagesLazyQueryHookResult = ReturnType<typeof useChatThreadMessagesLazyQuery>;
-export type ChatThreadMessagesSuspenseQueryHookResult = ReturnType<typeof useChatThreadMessagesSuspenseQuery>;
-export type ChatThreadMessagesQueryResult = Apollo.QueryResult<ChatThreadMessagesQuery, ChatThreadMessagesQueryVariables>;
+export type CreateAiPinMutationHookResult = ReturnType<typeof useCreateAiPinMutation>;
+export type CreateAiPinMutationResult = Apollo.MutationResult<CreateAiPinMutation>;
+export type CreateAiPinMutationOptions = Apollo.BaseMutationOptions<CreateAiPinMutation, CreateAiPinMutationVariables>;
+export const DeleteAiPinDocument = gql`
+    mutation DeleteAIPin($id: ID!) {
+  deletePin(id: $id) {
+    ...AiPin
+  }
+}
+    ${AiPinFragmentDoc}`;
+export type DeleteAiPinMutationFn = Apollo.MutationFunction<DeleteAiPinMutation, DeleteAiPinMutationVariables>;
+
+/**
+ * __useDeleteAiPinMutation__
+ *
+ * To run a mutation, you first call `useDeleteAiPinMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteAiPinMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteAiPinMutation, { data, loading, error }] = useDeleteAiPinMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteAiPinMutation(baseOptions?: Apollo.MutationHookOptions<DeleteAiPinMutation, DeleteAiPinMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteAiPinMutation, DeleteAiPinMutationVariables>(DeleteAiPinDocument, options);
+      }
+export type DeleteAiPinMutationHookResult = ReturnType<typeof useDeleteAiPinMutation>;
+export type DeleteAiPinMutationResult = Apollo.MutationResult<DeleteAiPinMutation>;
+export type DeleteAiPinMutationOptions = Apollo.BaseMutationOptions<DeleteAiPinMutation, DeleteAiPinMutationVariables>;
 export const ChatDocument = gql`
     mutation Chat($messages: [ChatMessage], $threadId: ID) {
   chat(messages: $messages, threadId: $threadId) {
@@ -23991,9 +24106,9 @@ export const namedOperations = {
     AI: 'AI',
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
+    AIPins: 'AIPins',
     ChatThreads: 'ChatThreads',
-    ChatThread: 'ChatThread',
-    ChatThreadMessages: 'ChatThreadMessages',
+    ChatThreadDetails: 'ChatThreadDetails',
     App: 'App',
     AppInfo: 'AppInfo',
     Repository: 'Repository',
@@ -24121,6 +24236,8 @@ export const namedOperations = {
     Refresh: 'Refresh'
   },
   Mutation: {
+    CreateAIPin: 'CreateAIPin',
+    DeleteAIPin: 'DeleteAIPin',
     Chat: 'Chat',
     ClearChatHistory: 'ClearChatHistory',
     DeleteChat: 'DeleteChat',
@@ -24226,7 +24343,9 @@ export const namedOperations = {
   Fragment: {
     AiInsight: 'AiInsight',
     AiInsightSummary: 'AiInsightSummary',
+    AiPin: 'AiPin',
     Chat: 'Chat',
+    ChatThreadTiny: 'ChatThreadTiny',
     ChatThread: 'ChatThread',
     CostAnalysis: 'CostAnalysis',
     FileContent: 'FileContent',

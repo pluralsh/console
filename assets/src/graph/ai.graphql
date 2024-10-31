@@ -19,11 +19,32 @@ fragment AiInsightSummary on AiInsight {
   updatedAt
 }
 
+fragment AiPin on AiPin {
+  id
+  name
+  insight {
+    id
+  }
+  thread {
+    id
+  }
+  insertedAt
+  updatedAt
+}
+
 fragment Chat on Chat {
   id
   content
   role
   seq
+  insertedAt
+  updatedAt
+}
+
+fragment ChatThreadTiny on ChatThread {
+  id
+  default
+  summary
   insertedAt
   updatedAt
 }
@@ -34,6 +55,17 @@ fragment ChatThread on ChatThread {
   summary
   insertedAt
   updatedAt
+  lastMessageAt
+  chats(first: 100) {
+    edges {
+      node {
+        ...Chat
+      }
+    }
+  }
+  insight {
+    ...AiInsight
+  }
 }
 
 query AI($prompt: String!) {
@@ -48,6 +80,19 @@ query AISuggestedFix($insightID: ID!) {
   aiSuggestedFix(insightId: $insightID)
 }
 
+query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
+  aiPins(first: $first, last: $last, after: $after, before: $before) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...AiPin
+      }
+    }
+  }
+}
+
 query ChatThreads(
   $first: Int = 100
   $last: Int
@@ -60,36 +105,27 @@ query ChatThreads(
     }
     edges {
       node {
-        ...ChatThread
+        ...ChatThreadTiny
       }
     }
   }
 }
 
-query ChatThread($id: ID!) {
+query ChatThreadDetails($id: ID!) {
   chatThread(id: $id) {
     ...ChatThread
   }
 }
 
-query ChatThreadMessages(
-  $first: Int = 100
-  $last: Int
-  $after: String
-  $before: String
-  $threadId: ID!
-) {
-  chatThread(id: $threadId) {
-    chats(first: $first, last: $last, after: $after, before: $before) {
-      pageInfo {
-        ...PageInfo
-      }
-      edges {
-        node {
-          ...Chat
-        }
-      }
-    }
+mutation CreateAIPin($attributes: AiPinAttributes!) {
+  createPin(attributes: $attributes) {
+    ...AiPin
+  }
+}
+
+mutation DeleteAIPin($id: ID!) {
+  deletePin(id: $id) {
+    ...AiPin
   }
 }
 
