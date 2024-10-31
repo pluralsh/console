@@ -115,8 +115,8 @@ function getMenuItems({
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
-      text: 'AI',
-      expandedLabel: 'AI',
+      text: 'Plural AI',
+      expandedLabel: 'Plural AI',
       icon: <AiSparkleOutlineIcon />,
       path: `${AI_ABS_PATH}`,
     },

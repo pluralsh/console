@@ -5,12 +5,12 @@ import {
   AiRole,
   ChatMessage,
   useAiSuggestedFixLazyQuery,
-} from '../../generated/graphql.ts'
-import { GqlError } from '../utils/Alert.tsx'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
-import AIPanel from './AIPanel.tsx'
+} from '../../../generated/graphql.ts'
+import { GqlError } from '../../utils/Alert.tsx'
+import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
+import AIPanel from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
-import { ChatWithAIButton, insightMessage } from './chatbot/ChatbotButton.tsx'
+import { ChatWithAIButton, insightMessage } from '../chatbot/ChatbotButton.tsx'
 
 interface AISuggestFixProps {
   insight: Nullable<AiInsight>

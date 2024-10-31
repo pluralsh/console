@@ -11,7 +11,7 @@ import { Body1BoldP } from 'components/utils/typography/Text'
 import { ChatThreadFragment, useChatThreadsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { useChatbot } from '../AIContext'
+import { useChatbot } from './AIContext'
 
 export function ChatbotPanelThreadList() {
   const theme = useTheme()

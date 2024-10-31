@@ -11,7 +11,7 @@ import moment from 'moment/moment'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
-import { AISuggestFix } from '../../ai/AISuggestFix.tsx'
+import { AISuggestFix } from '../../ai/fix/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,

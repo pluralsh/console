@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTheme } from 'styled-components'
 import AIButton from './ExplainWithAIButton.tsx'
-import { useExplainWithAIContext } from './AIContext.tsx'
+import { useExplainWithAIContext } from '../AIContext.tsx'
 import ExplainWithAIPanel from './ExplainWithAIPanel.tsx'
 
 export default function ExplainWithAI() {

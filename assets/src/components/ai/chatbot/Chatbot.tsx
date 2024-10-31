@@ -22,7 +22,7 @@ import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { ChatbotPanelThreadList } from './ChatbotPanelThreadList.tsx'
+import { ChatbotPanelThreadList } from '../AIThreadList.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen?: boolean

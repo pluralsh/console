@@ -5,7 +5,7 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { dateTimeFormat } from 'utils/date'
-import { AISuggestFix } from '../../../ai/AISuggestFix.tsx'
+import { AISuggestFix } from '../../../ai/fix/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
