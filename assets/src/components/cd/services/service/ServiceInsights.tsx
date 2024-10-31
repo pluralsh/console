@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom'
 
 import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
-import { AISuggestFix } from '../../../ai/fix/AISuggestFix.tsx'
+import { AISuggestFix } from '../../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,

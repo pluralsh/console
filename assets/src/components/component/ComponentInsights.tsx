@@ -3,7 +3,7 @@ import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { dateTimeFormat } from 'utils/date'
-import { AISuggestFix } from '../ai/fix/AISuggestFix.tsx'
+import { AISuggestFix } from '../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,

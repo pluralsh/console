@@ -1,4 +1,4 @@
-import { Button, ChatIcon } from '@pluralsh/design-system'
+import { Button, ChatOutlineIcon } from '@pluralsh/design-system'
 import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
 import { ButtonProps } from 'honorable'
 import { Dispatch, ReactNode } from 'react'
@@ -30,7 +30,7 @@ export function ChatbotIconButton({
       }}
       {...props}
     >
-      <ChatIcon />
+      <ChatOutlineIcon />
     </AIButton>
   )
 }
@@ -67,7 +67,7 @@ export function ChatWithAIButton({
     <Button
       loading={loading}
       onClick={handleClick}
-      startIcon={<ChatIcon />}
+      startIcon={<ChatOutlineIcon />}
       {...props}
     >
       Chat with AI

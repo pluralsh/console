@@ -1,5 +1,5 @@
+import { IconFrame, PushPinFilledIcon } from '@pluralsh/design-system'
 import { useState } from 'react'
-import { IconFrame, PushPinIcon } from '@pluralsh/design-system'
 
 import { useIsPinnedResource } from '../Cluster'
 
@@ -25,7 +25,7 @@ export default function PinCustomResourceDefinition({
     crd?.scope && (
       <div onClick={(e) => e.stopPropagation()}>
         <IconFrame
-          icon={<PushPinIcon />}
+          icon={<PushPinFilledIcon />}
           textValue="Pin Custom Resource Definition"
           tooltip
           size="medium"

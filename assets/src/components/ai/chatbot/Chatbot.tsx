@@ -1,6 +1,6 @@
 import {
   Card,
-  ChatIcon,
+  ChatOutlineIcon,
   DropdownArrowIcon,
   ExpandIcon,
   Flex,
@@ -22,7 +22,7 @@ import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { ChatbotPanelThreadList } from '../AIThreadList.tsx'
+import { AIThreadsTable } from '../AIThreadsTable.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen?: boolean
@@ -39,7 +39,7 @@ export function Chatbot() {
         active={open}
         onClick={() => setOpen(true)}
       >
-        <ChatIcon />
+        <ChatOutlineIcon />
       </ChatbotIconButton>
       <ChatbotPanel
         fullscreen={fullscreen}
@@ -105,7 +105,7 @@ function ChatbotPanelInner({
       {currentThread ? (
         <ChatbotPanelThread currentThread={currentThread} />
       ) : (
-        <ChatbotPanelThreadList />
+        <AIThreadsTable />
       )}
     </ChatbotFrameSC>
   )
@@ -121,7 +121,7 @@ function ChatbotHeader({ onClose }: { onClose: () => void }) {
         gap="xsmall"
         align="center"
       >
-        <ChatIcon color={theme.colors['icon-primary']} />
+        <ChatOutlineIcon color={theme.colors['icon-primary']} />
         <Body2BoldP css={{ flex: 1 }}>Ask AI</Body2BoldP>
         <IconFrame
           clickable
