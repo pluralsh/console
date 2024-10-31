@@ -38,7 +38,7 @@ export type FetchPaginatedDataResult<TQueryType> = {
   data: TQueryType | undefined
   loading: boolean
   error: any
-  refetch: () => void
+  refetch: () => Promise<any>
   pageInfo: any
   fetchNextPage: () => void
   setVirtualSlice: (slice: {

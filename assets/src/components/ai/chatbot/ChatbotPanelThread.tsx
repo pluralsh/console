@@ -71,9 +71,9 @@ export function ChatbotPanelThread({
 
   const [mutate, { loading: sendingMessage, error: messageError }] =
     useChatMutation({
-      onCompleted: () => {
+      onCompleted: async () => {
         setNewMessage('')
-        refetch()
+        await refetch()
         //TODO: scroll to bottom should really happen after optimistic cache update
         scrollToBottom()
       },
