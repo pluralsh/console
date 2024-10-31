@@ -198,6 +198,36 @@ export type AiInsight = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
+/** A saved item for future ai-based investigation */
+export type AiPin = {
+  __typename?: 'AiPin';
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  insight?: Maybe<AiInsight>;
+  name?: Maybe<Scalars['String']['output']>;
+  thread?: Maybe<ChatThread>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+/** the items you want to reference in this pin */
+export type AiPinAttributes = {
+  insightId?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type AiPinConnection = {
+  __typename?: 'AiPinConnection';
+  edges?: Maybe<Array<Maybe<AiPinEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type AiPinEdge = {
+  __typename?: 'AiPinEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<AiPin>;
+};
+
 export enum AiProvider {
   Anthropic = 'ANTHROPIC',
   Azure = 'AZURE',
@@ -5200,6 +5230,7 @@ export type RootMutationType = {
   createOidcProvider?: Maybe<OidcProvider>;
   createPeer?: Maybe<WireguardPeer>;
   createPersona?: Maybe<Persona>;
+  createPin?: Maybe<AiPin>;
   createPinnedCustomResource?: Maybe<PinnedCustomResource>;
   /** creates a new pipeline context and binds it to the beginning stage */
   createPipelineContext?: Maybe<PipelineContext>;
@@ -5246,6 +5277,7 @@ export type RootMutationType = {
   deleteOidcProvider?: Maybe<OidcProvider>;
   deletePeer?: Maybe<Scalars['Boolean']['output']>;
   deletePersona?: Maybe<Persona>;
+  deletePin?: Maybe<AiPin>;
   deletePinnedCustomResource?: Maybe<PinnedCustomResource>;
   deletePipeline?: Maybe<Pipeline>;
   deletePod?: Maybe<Pod>;
@@ -5531,6 +5563,11 @@ export type RootMutationTypeCreatePersonaArgs = {
 };
 
 
+export type RootMutationTypeCreatePinArgs = {
+  attributes: AiPinAttributes;
+};
+
+
 export type RootMutationTypeCreatePinnedCustomResourceArgs = {
   attributes: PinnedCustomResourceAttributes;
 };
@@ -5751,6 +5788,11 @@ export type RootMutationTypeDeletePeerArgs = {
 
 
 export type RootMutationTypeDeletePersonaArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeDeletePinArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -6329,6 +6371,7 @@ export type RootQueryType = {
   ai?: Maybe<Scalars['String']['output']>;
   /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
+  aiPins?: Maybe<AiPinConnection>;
   /** Use the content of an insight and additional context from its associated object to suggest a fix */
   aiSuggestedFix?: Maybe<Scalars['String']['output']>;
   appNotifications?: Maybe<AppNotificationConnection>;
@@ -6539,6 +6582,14 @@ export type RootQueryTypeAiCompletionArgs = {
   chat?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   input?: InputMaybe<Scalars['String']['input']>;
   system: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeAiPinsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

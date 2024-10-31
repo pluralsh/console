@@ -149,6 +149,33 @@ type AiInsight struct {
 	UpdatedAt               *string                  `json:"updatedAt,omitempty"`
 }
 
+// A saved item for future ai-based investigation
+type AiPin struct {
+	ID         string      `json:"id"`
+	Name       *string     `json:"name,omitempty"`
+	Insight    *AiInsight  `json:"insight,omitempty"`
+	Thread     *ChatThread `json:"thread,omitempty"`
+	InsertedAt *string     `json:"insertedAt,omitempty"`
+	UpdatedAt  *string     `json:"updatedAt,omitempty"`
+}
+
+// the items you want to reference in this pin
+type AiPinAttributes struct {
+	Name      *string `json:"name,omitempty"`
+	InsightID *string `json:"insightId,omitempty"`
+	ThreadID  *string `json:"threadId,omitempty"`
+}
+
+type AiPinConnection struct {
+	PageInfo PageInfo     `json:"pageInfo"`
+	Edges    []*AiPinEdge `json:"edges,omitempty"`
+}
+
+type AiPinEdge struct {
+	Node   *AiPin  `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
+}
+
 // Settings for configuring access to common LLM providers
 type AiSettings struct {
 	Enabled   *bool                `json:"enabled,omitempty"`
