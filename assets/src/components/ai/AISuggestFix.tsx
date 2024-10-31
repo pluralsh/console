@@ -8,7 +8,7 @@ import { GqlError } from '../utils/Alert.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import AIPanel from './AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
-import { ChatbotWithAIButton } from './chatbot/ChatbotButton.tsx'
+import { ChatWithAIButton } from './chatbot/ChatbotButton.tsx'
 
 interface AISuggestFixProps {
   insight: Nullable<AiInsight>
@@ -43,7 +43,7 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
         showClosePanel={!!data?.aiSuggestedFix}
         header="Suggest a fix"
         subheader="Get a suggested fix based on the insight. AI is prone to mistakes, always test changes before application."
-        footer={<ChatbotWithAIButton primary />}
+        footer={<ChatWithAIButton primary />}
       >
         {data?.aiSuggestedFix && <Markdown text={data?.aiSuggestedFix} />}
         {loading && !data && <LoadingIndicator />}

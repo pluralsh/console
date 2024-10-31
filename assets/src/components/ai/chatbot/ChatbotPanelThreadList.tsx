@@ -11,7 +11,7 @@ import { Body1BoldP } from 'components/utils/typography/Text'
 import { ChatThreadFragment, useChatThreadsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { useLaunchChatbot } from '../AIContext'
+import { useChatbot } from '../AIContext'
 
 export function ChatbotPanelThreadList() {
   const theme = useTheme()
@@ -31,7 +31,7 @@ export function ChatbotPanelThreadList() {
   )
 
   if (error) return <GqlError error={error} />
-  if (!threads) return <LoadingIndicator />
+  if (!data?.chatThreads?.edges) return <LoadingIndicator />
 
   return (
     <FullHeightTableWrap css={{ paddingBottom: theme.spacing.medium }}>
@@ -61,11 +61,16 @@ const ColThread = columnHelper.accessor((thread) => thread, {
   id: 'thread',
   cell: function Cell({ getValue }) {
     const thread = getValue()
-    const { goToThread, loading } = useLaunchChatbot()
+    const { goToThread, loading } = useChatbot()
     return (
       <ThreadEntryWrapperSC>
         <ThreadEntrySC onClick={() => goToThread(thread)}>
-          <Body1BoldP $color="text">{thread.summary}</Body1BoldP>
+          <Body1BoldP
+            $color="text"
+            css={{ flex: 1 }}
+          >
+            {thread.summary}
+          </Body1BoldP>
           {loading ? <Spinner /> : <CaretRightIcon />}
         </ThreadEntrySC>
       </ThreadEntryWrapperSC>
@@ -75,6 +80,7 @@ const ColThread = columnHelper.accessor((thread) => thread, {
 
 const ThreadEntryWrapperSC = styled.div(({ theme }) => ({
   height: '100%',
+  width: '100%',
   padding: theme.spacing.medium,
   paddingBottom: 0,
   background: theme.colors['fill-one'],

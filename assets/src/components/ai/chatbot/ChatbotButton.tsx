@@ -1,6 +1,8 @@
 import { Button, ChatIcon } from '@pluralsh/design-system'
+import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
 import { ButtonProps } from 'honorable'
 import { Dispatch, ReactNode } from 'react'
+import { useChatbot } from '../AIContext.tsx'
 import AIButton from '../ExplainWithAIButton.tsx'
 
 interface ChatbotButtonProps {
@@ -30,13 +32,33 @@ export function ChatbotIconButton({
   )
 }
 
-export function ChatbotWithAIButton({
-  onClick,
+export function ChatWithAIButton({
+  insight,
   ...props
-}: ButtonProps): ReactNode {
+}: {
+  insight?: Nullable<AiInsightFragment>
+} & ButtonProps) {
+  const { createNewThread, loading } = useChatbot()
+
+  const handleClick = () => {
+    const messages: ChatMessage[] = []
+    if (insight) {
+      messages.push({
+        content: insight.summary ?? '',
+        role: AiRole.Assistant,
+      })
+    }
+    createNewThread({
+      // TODO: update this
+      summary: 'Further questions about an insight from Plural AI',
+      summarized: false,
+      messages,
+    })
+  }
   return (
     <Button
-      onClick={onClick}
+      loading={loading}
+      onClick={handleClick}
       startIcon={<ChatIcon />}
       {...props}
     >

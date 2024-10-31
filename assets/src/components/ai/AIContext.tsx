@@ -100,7 +100,7 @@ export function useChatbotContext() {
   return context
 }
 
-export function useLaunchChatbot() {
+export function useChatbot() {
   const { setOpen, setCurrentThread } = useChatbotContext()
   const [mutation, { loading, error }] = useCreateChatThreadMutation()
 

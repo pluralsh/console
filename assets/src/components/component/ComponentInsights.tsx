@@ -4,7 +4,7 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { dateTimeFormat } from 'utils/date'
 import { AISuggestFix } from '../ai/AISuggestFix.tsx'
-import { ChatbotWithAIButton } from '../ai/chatbot/ChatbotButton.tsx'
+import { ChatWithAIButton } from '../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../utils/RefreshIconFrame.tsx'
 import { ComponentDetailsContext } from './ComponentDetails.tsx'
 
@@ -36,10 +36,10 @@ export function ComponentInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <ChatbotWithAIButton
-          secondary
+        <ChatWithAIButton
           floating
-        ></ChatbotWithAIButton>
+          insight={component?.insight}
+        />
         <AISuggestFix insight={component?.insight} />
       </Flex>
       <InsightDisplay text={component.insight?.text} />

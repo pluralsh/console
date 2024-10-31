@@ -12,7 +12,7 @@ import * as Dialog from '@radix-ui/react-dialog'
 import { ComponentPropsWithRef } from 'react'
 import { VisuallyHidden } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
-import { useChatbotContext, useLaunchChatbot } from '../AIContext.tsx'
+import { useChatbotContext, useChatbot } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
@@ -100,7 +100,7 @@ function ChatbotPanelInner({
 function ChatbotHeader({ onClose }: { onClose: () => void }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { goToThreadList } = useLaunchChatbot()
+  const { goToThreadList } = useChatbot()
   return (
     <ChatbotHeaderSC>
       <Flex

@@ -12,7 +12,7 @@ import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
 import { AISuggestFix } from '../../ai/AISuggestFix.tsx'
-import { ChatbotWithAIButton } from '../../ai/chatbot/ChatbotButton.tsx'
+import { ChatWithAIButton } from '../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
@@ -48,7 +48,10 @@ export function StackInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <ChatbotWithAIButton floating></ChatbotWithAIButton>
+        <ChatWithAIButton
+          floating
+          insight={stack?.insight}
+        />
         <AISuggestFix insight={stack?.insight} />
       </Flex>
       <InsightDisplay text={stack.insight?.text} />
