@@ -6,7 +6,7 @@ import { useChatbot } from '../AIContext.tsx'
 import AIButton from '../ExplainWithAIButton.tsx'
 
 const FIX_PREFACE =
-  "The following is an insight into an issue into the users infrastructrue we'd like to learn more about:"
+  "The following is an insight into an issue on the user's infrastructure we'd like to learn more about:"
 
 interface ChatbotButtonProps {
   active: boolean
