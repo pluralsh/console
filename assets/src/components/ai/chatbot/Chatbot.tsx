@@ -1,6 +1,7 @@
 import {
   Card,
   ChatIcon,
+  DropdownArrowIcon,
   ExpandIcon,
   Flex,
   GearTrainIcon,
@@ -20,18 +21,17 @@ import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
-import { ChatbotFullscreen } from './ChatbotFullscreen.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { ChatbotPanelThreadList } from './ChatbotPanelThreadList.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
+  fullscreen?: boolean
   onClose: () => void
   currentThread?: Nullable<ChatThreadFragment>
 }
 
 export function Chatbot() {
-  const { open, setOpen, fullscreen, setFullscreen, currentThread } =
-    useChatbotContext()
+  const { open, setOpen, fullscreen, currentThread } = useChatbotContext()
 
   return (
     <div css={{ position: 'relative' }}>
@@ -42,20 +42,18 @@ export function Chatbot() {
         <ChatIcon />
       </ChatbotIconButton>
       <ChatbotPanel
-        open={open && !fullscreen}
+        fullscreen={fullscreen}
+        open={open}
         onClose={() => setOpen(false)}
         currentThread={currentThread}
       />
-      <ChatbotFullscreen
-        open={open && fullscreen}
-        onClose={() => setFullscreen(false)}
-      ></ChatbotFullscreen>
     </div>
   )
 }
 
 export function ChatbotPanel({
   open,
+  fullscreen = false,
   onClose,
   ...props
 }: {
@@ -64,17 +62,22 @@ export function ChatbotPanel({
   const theme = useTheme()
   return (
     <ModalWrapper
-      overlayStyles={{
-        background: 'none',
-        padding: theme.spacing.medium,
-        top: theme.spacing.xxxxlarge,
-        left: 'unset',
-      }}
-      css={{ height: '100%' }}
+      overlayStyles={
+        fullscreen
+          ? {}
+          : {
+              background: 'none',
+              padding: theme.spacing.medium,
+              top: theme.spacing.xxxxlarge,
+              left: 'unset',
+            }
+      }
+      css={{ width: '100%', height: '100%' }}
       open={open}
       onOpenChange={onClose}
     >
       <ChatbotPanelInner
+        fullscreen={fullscreen}
         onClose={onClose}
         {...props}
       />
@@ -87,12 +90,14 @@ export function ChatbotPanel({
 }
 
 function ChatbotPanelInner({
+  fullscreen,
   onClose,
   currentThread,
   ...props
 }: ChatbotPanelInnerProps) {
   return (
     <ChatbotFrameSC
+      $fullscreen={fullscreen}
       fillLevel={1}
       {...props}
     >
@@ -109,7 +114,7 @@ function ChatbotPanelInner({
 function ChatbotHeader({ onClose }: { onClose: () => void }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { goToThreadList, openFullscreen } = useChatbot()
+  const { goToThreadList, fullscreen, setFullscreen } = useChatbot()
   return (
     <ChatbotHeaderSC>
       <Flex
@@ -137,10 +142,10 @@ function ChatbotHeader({ onClose }: { onClose: () => void }) {
         />
         <IconFrame
           clickable
-          tooltip="Fullscreen view"
-          onClick={openFullscreen}
+          tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+          onClick={() => setFullscreen((prev) => !prev)}
           size="small"
-          icon={<ExpandIcon />}
+          icon={fullscreen ? <DropdownArrowIcon /> : <ExpandIcon />}
         />
         <IconFrame
           clickable
@@ -164,12 +169,14 @@ const ChatbotHeaderSC = styled.div(({ theme }) => ({
   gap: theme.spacing.xxsmall,
 }))
 
-const ChatbotFrameSC = styled(Card)(() => ({
-  display: 'flex',
-  flexDirection: 'column',
-  height: '100%',
-  width: 560,
-}))
+const ChatbotFrameSC = styled(Card)<{ $fullscreen?: boolean }>(
+  ({ $fullscreen }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    width: $fullscreen ? '100%' : 560,
+  })
+)
 
 const LineIcon = (
   <svg

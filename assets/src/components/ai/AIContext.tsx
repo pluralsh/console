@@ -111,7 +111,8 @@ export function useChatbotContext() {
 }
 
 export function useChatbot() {
-  const { setOpen, setCurrentThread, setFullscreen } = useChatbotContext()
+  const { setOpen, setCurrentThread, fullscreen, setFullscreen } =
+    useChatbotContext()
   const [mutation, { loading, error }] = useCreateChatThreadMutation()
 
   return {
@@ -132,9 +133,8 @@ export function useChatbot() {
       setCurrentThread(null)
       setOpen(true)
     },
-    openFullscreen: () => {
-      setFullscreen(true)
-    },
+    fullscreen,
+    setFullscreen,
     loading,
     error,
   }
