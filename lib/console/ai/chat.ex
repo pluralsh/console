@@ -103,6 +103,7 @@ defmodule Console.AI.Chat do
     end)
     |> add_operation(:summarize, fn %{expire: chats} ->
       Enum.sort_by(chats, & &1.seq)
+      |> Enum.concat([%Chat{role: :user, content: "Please summarize the prior chat history in at most one or two paragraphs."}])
       |> fit_context_window(@rollup)
       |> Enum.map(fn %{role: r, content: t} -> {r, t} end)
       |> Provider.completion(preface: @rollup)
@@ -122,6 +123,7 @@ defmodule Console.AI.Chat do
   def summarize(%ChatThread{} = thread) do
     Chat.for_thread(thread.id)
     |> Repo.all()
+    |> Enum.concat([%Chat{role: :user, content: "Please summarize the prior chat history in at most one sentence."}])
     |> fit_context_window(@summary)
     |> Enum.map(fn %Chat{role: r, content: t} -> {r, t} end)
     |> Provider.completion(preface: @summary)

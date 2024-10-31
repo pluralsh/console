@@ -64,7 +64,7 @@ defmodule Console.AI.ChatTest do
       old_other = insert_list(3, :chat, inserted_at: Timex.now() |> Timex.shift(days: -7))
       old_other2 = insert_list(3, :chat, user: user, inserted_at: Timex.now() |> Timex.shift(days: -7))
 
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _] -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _] -> {:ok, "openai completion"} end)
 
       {:ok, summary} = Chat.rollup(thread)
 
@@ -88,7 +88,7 @@ defmodule Console.AI.ChatTest do
       insert_list(3, :chat)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
 
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _] -> {:ok, "ai thread summary"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _] -> {:ok, "ai thread summary"} end)
 
       {:ok, summarized} = Chat.summarize(thread)
 

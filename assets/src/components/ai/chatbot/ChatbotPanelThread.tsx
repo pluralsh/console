@@ -17,6 +17,7 @@ import {
   ReactNode,
   Ref,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -48,6 +49,7 @@ export function ChatbotPanelThread({
 }: {
   currentThread: ChatThreadFragment
 }) {
+  const [loaded, setLoaded] = useState(false)
   const historyScrollRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const lastMsgRef = useRef<HTMLLIElement>(null)
@@ -81,9 +83,15 @@ export function ChatbotPanelThread({
 
   // scroll to bottom and focus input on initial mount
   useLayoutEffect(() => {
-    scrollToBottom()
     inputRef.current?.focus()
-  }, [scrollToBottom])
+  }, [])
+
+  useEffect(() => {
+    if (data?.chatThread && !loaded) {
+      scrollToBottom()
+      setLoaded(true)
+    }
+  }, [data, loaded, scrollToBottom])
 
   const sendMessage = useCallback(
     (e: FormEvent) => {
