@@ -17,6 +17,7 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './IngressClasses'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
@@ -33,6 +34,10 @@ export default function IngressClass(): ReactElement {
   })
 
   const ic = data?.handleGetIngressClass
+
+  useExplainWithAI(
+    'Describe Kubernetes Ingress Class resource: ' + JSON.stringify(ic)
+  )
 
   useSetBreadcrumbs(
     useMemo(

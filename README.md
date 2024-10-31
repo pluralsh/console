@@ -2,16 +2,19 @@
 
 ![Console](assets/public/PluralConsole-background.png)
 
-The Plural Console is the administrative hub of the plural platform.  It has a number of key features:
+The Plural Console is the core control plane of the Plural fleet-management platform.  It has a number of key features:
 
-* Reception of over-the-air application updates
-* Configurable, application-targeted observability
-  - dashboards
-  - logging
-* Common incident management, including zoom integration and slash commands
-* Interactive Runbooks
+* State management for Fleet-scale Continuous Deployment (CD), tying in with https://github.com/pluralsh/deployment-operator.  This includes a number of key concerns
+  - maintaining sharded git caches on top of erlang processes
+  - maintaining sharded helm repo caches like above
+  - driving pipeline execution
+  - driving observer execution
+* Management of terraform/pulumi/general IaC execution, tying into the git management for CD
+* Handling the Pull Request Automation APIs driving self-service workflows w/in Plural
+* Notification Routing, allowing for fine grained notification delivery to slack/teams/email targeted by event or affected resource
+* Handling core information gathering and querying for all AI-related functionality w/in Plural
 
-We strive to make it powerful enough to make you feel like any application you deploy using Plural has an operational profile comparable to a managed service, even without being one.
+It provides a low-maintainence, all-in-one solution for virtually any devops task that might be associated w/ managing Kubernetes infrastructure, in a package that can be hosted naturally anywhere, whether it be in your own cloud, or on our own infrastructure using Plural Cloud.
 
 ## Contributor Program
 
@@ -25,23 +28,27 @@ To be eligible for the upgrade bounty you'll need to submit a PR to this repo wi
 
 It would also be great to ensure the compatibility is tested before submitting a review, that can be done by modifying the file at `lib/console/deployments/compatibilities/table.ex#11` to have the url var point to your fork/branch.  You should then be able to run `mix test` to confirm everything is correct (this does require setting up elixir on your laptop).
 
-To claim the reward, you should get in touch with us on our discord at https://discord.gg/pluralsh and we'll simply need to confirm that you did the work (easy way to do that is linking your discord handle on the relevant PRs) and will give you the bounty you've earned.
+To claim the reward, you should get in touch with us on our discord at https://discord.gg/pluralsh and we'll simply need to confirm that you did the work (easy way to do that is linking your discord handle on the relevant PRs) and we'll give you the bounty you've earned.
 
 ## Development
 
-Console's server side is written in Elixir, and exposes a graphql api. The frontend is in react, all code lives in this single repo and common development tasks can be done using the Makefile at the root of the repo.
+There are three core components in this repo:
 
+* server core - written in elixir, mainly exposing a graphql api
+* react frontend - lives under `/assets` and is bundled in the elixir server docker image to make self-hosting simple
+* `go/*` - a number of golang projects, the main one being `go/controller`, which manages the operator for defining all kubernetes CRDs that control the GitOps experience of using Plural.
 
 ### Developing Web
 To begin developing the web app, install npm & yarn, then run:
 
 ```sh
-cd assets && yarn install && cd -
-make web
+cd assets
+yarn install
+yarn start:cd # or any other yarn target, we often test on different Console instances
 ```
 
 ### Developing Server
-To make changes to the server codebase, you'll want to install elixir on your machine.  For mac desktops, we do this via asdf, which can be done simply at the root of the repo like so:
+To make changes to the server codebase, you'll want to install elixir on your machine.  For Mac desktops, we do this via asdf, which can be done simply at the root of the repo like so:
 
 ```sh
 asdf install
@@ -85,3 +92,5 @@ You can also use the make target in our root Makefile to automate this, eg:
 ```sh
 make reshim
 ```
+
+(this can often become out-of-date, feel free to fix please if that is true)

@@ -48,6 +48,7 @@ import { Kind } from '../common/types'
 import { getBreadcrumbs } from './DaemonSets'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -94,6 +95,10 @@ export default function DaemonSet(): ReactElement {
   )
 
   const daemonSet = data?.handleGetDaemonSetDetail as DaemonSetT
+
+  useExplainWithAI(
+    'Describe Kubernetes Daemon Set resource: ' + JSON.stringify(daemonSet)
+  )
 
   if (loading) {
     return <LoadingIndicator />

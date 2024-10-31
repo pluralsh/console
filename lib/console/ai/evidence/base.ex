@@ -1,6 +1,5 @@
 defmodule Console.AI.Evidence.Base do
   import Console.Services.Base, only: [ok: 1]
-  alias Console.Schema.ServiceComponent
   alias Console.Deployments.Clusters
   alias Console.AI.Evidence.Component.Pod
   alias Kazan.Apis.Core.V1, as: CoreV1
@@ -107,8 +106,8 @@ defmodule Console.AI.Evidence.Base do
   def items_response({:ok, %{items: items}}), do: {:ok, items}
   def items_response(err), do: err
 
-  def component(%ServiceComponent{} = comp),
-    do: "#{comp.group}/#{comp.version} #{comp.kind}#{ns(comp.namespace)} with name #{comp.name}"
+  def component(%{group: g, version: v, kind: k, namespace: n, name: na}),
+    do: "#{g}/#{v} #{k}#{ns(n)} with name #{na}"
 
   def component(%{api_version: api_version, kind: kind, metadata: %{name: n} = meta}) do
     "#{api_version} #{kind} namespace=#{ns(Map.get(meta, :namespace))} name=#{n}"

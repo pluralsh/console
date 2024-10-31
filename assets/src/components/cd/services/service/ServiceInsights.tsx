@@ -1,24 +1,21 @@
-import {
-  Button,
-  Flex,
-  ReloadIcon,
-  useSetBreadcrumbs,
-} from '@pluralsh/design-system'
-import { useMemo } from 'react'
-
-import { CD_REL_PATH } from 'routes/cdRoutesConsts'
-
-import { useParams } from 'react-router-dom'
+import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
 import { CaptionP } from 'components/utils/typography/Text'
+import moment from 'moment/moment'
+import { useMemo } from 'react'
+
+import { useParams } from 'react-router-dom'
+
+import { CD_REL_PATH } from 'routes/cdRoutesConsts'
+import { useTheme } from 'styled-components'
+import { AISuggestFix } from '../../../ai/AISuggestFix.tsx'
+import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
-import { useTheme } from 'styled-components'
-import moment from 'moment/moment'
 
 export function ServiceInsights() {
   const theme = useTheme()
@@ -47,6 +44,7 @@ export function ServiceInsights() {
       gap="medium"
       overflow="hidden"
       marginBottom={theme.spacing.large}
+      height="100%"
     >
       <Flex
         justify="space-between"
@@ -64,14 +62,11 @@ export function ServiceInsights() {
             {service.insight?.updatedAt &&
               `Last updated ${moment(service.insight?.updatedAt).fromNow()}`}
           </CaptionP>
-          <Button
-            floating
-            startIcon={<ReloadIcon />}
-            onClick={() => refetch()}
+          <IconFrameRefreshButton
             loading={loading}
-          >
-            Refresh insights
-          </Button>
+            refetch={refetch}
+          />
+          <AISuggestFix insight={service?.insight} />
         </Flex>
       </Flex>
       <InsightDisplay text={service.insight?.text} />

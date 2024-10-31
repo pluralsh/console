@@ -26,6 +26,7 @@ import { Kind } from '../common/types'
 
 import { PVStatusChip } from './utils'
 import { getBreadcrumbs } from './PersistentVolumes'
+import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -45,6 +46,10 @@ export default function PersistentVolume(): ReactElement {
   })
 
   const pv = data?.handleGetPersistentVolumeDetail
+
+  useExplainWithAI(
+    'Describe Kubernetes Persistent Volume resource: ' + JSON.stringify(pv)
+  )
 
   useSetBreadcrumbs(
     useMemo(

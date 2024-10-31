@@ -1,0 +1,40 @@
+{
+	"text": "✨ *New insights found for issues in cluster <%= @cluster.name %>",
+	"blocks": [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "✨ *New insights generated for your <%= @cluster.distro %> cluster <%= @cluster.name %>:*"
+            }
+        },
+		{
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": "Here's a brief summary of what we've found:\n"
+            }
+		},
+		{
+			"type": "section",
+			"text": {
+                "type": "plain_text",
+                "text": <%= Jason.encode!(Console.truncate(@text, 2800)) %>
+            }
+		},
+        {
+			"type": "actions",
+			"elements": [
+				{
+					"type": "button",
+					"text": {
+						"type": "plain_text",
+						"text": "View The Full Insight Here",
+						"emoji": true
+					},
+					"url": "<%= Console.url("/cd/clusters/#{@cluster.id}/insights") %>"
+				}
+			]
+		}
+	]
+}

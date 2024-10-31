@@ -4,6 +4,8 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
   alias Console.PubSub
   alias Console.Deployments.PubSub.Notifications
 
+  @text ~s[### Follow-Up on Your Network Issue: Reclaiming the `ingress-nginx-controller` LoadBalancer Service\n\nBased on the current state and additional details regarding the pending status of the `ingress-nginx-controller` service in your Kubernetes cluster (`k3s-test`), it's very clear that the service is not progressing because of a missing external load balancer. This is essentially preventing the completion of your Ingress-Nginx controller setup for managing external ingress traffic.\n\nLet's consolidate the issues and steps you've already outlined, and I'll provide additional context and debugging options:\n\n---\n\n### Key Takeaways:\n\n- The `ingress-nginx-controller` service, set as a **`LoadBalancer`**, is responsible for provisioning an external load balancer to direct traffic from outside your Kubernetes cluster to your ingresses.\n- The service is in a **pending** state, meaning it's waiting for external resources — specifically, an external load balancer — but the resource has not yet been allocated.\n \n### To Troubleshoot the LoadBalancer Pending Issue:\n\n#### 1. **Confirm Cluster Environment**:\n - First, **identify if your Kubernetes cluster is running on bare metal, or in a cloud provider** (AWS, GCP, Azure, etc.). This will help you decide the next steps, such as using a cloud-management load balancer like AWS ELB, or deploying something like **MetalLB** in bare-metal environments.\n\n - If your cluster is on a cloud platform:\n - **Verify that the Kubernetes cloud provider configurations (for the service account) are correct and that the cluster has sufficient permissions** to provision LoadBalancers via the cloud provider's API.\n \n - If it's a bare-metal solution:\n - You may need a software-based provisioning tool like **MetalLB** to handle LoadBalancer services. In such cases, ensure MetalLB is installed and configured properly.\n \n _Command to check pods:_ \n ```bash\n kubectl get pods -n metallb-system\n ```\n\n#### 2. **Inspect LoadBalancer Events & Status**:\n - Detailed **events from the service** can provide clues about where provisioning is failing (permissions, inadequate resources, networking issues, etc.).\n \n _Command to view events:_\n ```bash\n kubectl describe service ingress-nginx-controller -n ingress-nginx\n ```\n\n Look for errors indicating that the required resources (like external IP addresses or load balancers) cannot be allocated.\n\n#### 3. **Network Connectivity and Configuration** (Cloud):\n - **Check cloud provider-specific limits** (i.e., how many public IPs or load balancers you can provision), as well as the permissions required by the Kubernetes cluster to request new load balancers. If limits are exceeded or permissions denied, the cloud provider will fail to establish the external LoadBala...]
+
   setup :set_mimic_global
 
   describe "ServiceUpdated" do
@@ -156,7 +158,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
   describe "ServiceInsight" do
     test "it can generate a slack message" do
       svc = insert(:service)
-      insight = insert(:ai_insight, text: ~s[### Follow-Up on Your Network Issue: Reclaiming the `ingress-nginx-controller` LoadBalancer Service\n\nBased on the current state and additional details regarding the pending status of the `ingress-nginx-controller` service in your Kubernetes cluster (`k3s-test`), it's very clear that the service is not progressing because of a missing external load balancer. This is essentially preventing the completion of your Ingress-Nginx controller setup for managing external ingress traffic.\n\nLet's consolidate the issues and steps you've already outlined, and I'll provide additional context and debugging options:\n\n---\n\n### Key Takeaways:\n\n- The `ingress-nginx-controller` service, set as a **`LoadBalancer`**, is responsible for provisioning an external load balancer to direct traffic from outside your Kubernetes cluster to your ingresses.\n- The service is in a **pending** state, meaning it's waiting for external resources — specifically, an external load balancer — but the resource has not yet been allocated.\n \n### To Troubleshoot the LoadBalancer Pending Issue:\n\n#### 1. **Confirm Cluster Environment**:\n - First, **identify if your Kubernetes cluster is running on bare metal, or in a cloud provider** (AWS, GCP, Azure, etc.). This will help you decide the next steps, such as using a cloud-management load balancer like AWS ELB, or deploying something like **MetalLB** in bare-metal environments.\n\n - If your cluster is on a cloud platform:\n - **Verify that the Kubernetes cloud provider configurations (for the service account) are correct and that the cluster has sufficient permissions** to provision LoadBalancers via the cloud provider's API.\n \n - If it's a bare-metal solution:\n - You may need a software-based provisioning tool like **MetalLB** to handle LoadBalancer services. In such cases, ensure MetalLB is installed and configured properly.\n \n _Command to check pods:_ \n ```bash\n kubectl get pods -n metallb-system\n ```\n\n#### 2. **Inspect LoadBalancer Events & Status**:\n - Detailed **events from the service** can provide clues about where provisioning is failing (permissions, inadequate resources, networking issues, etc.).\n \n _Command to view events:_\n ```bash\n kubectl describe service ingress-nginx-controller -n ingress-nginx\n ```\n\n Look for errors indicating that the required resources (like external IP addresses or load balancers) cannot be allocated.\n\n#### 3. **Network Connectivity and Configuration** (Cloud):\n - **Check cloud provider-specific limits** (i.e., how many public IPs or load balancers you can provision), as well as the permissions required by the Kubernetes cluster to request new load balancers. If limits are exceeded or permissions denied, the cloud provider will fail to establish the external LoadBala...])
+      insight = insert(:ai_insight, text: @text)
       router = insert(:notification_router, events: ["service.insight"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, service: svc)
@@ -179,7 +181,7 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
   describe "StackInsight" do
     test "it can generate a slack message" do
       stack = insert(:stack)
-      insight = insert(:ai_insight, text: ~s[### Follow-Up on Your Network Issue: Reclaiming the `ingress-nginx-controller` LoadBalancer Service\n\nBased on the current state and additional details regarding the pending status of the `ingress-nginx-controller` service in your Kubernetes cluster (`k3s-test`), it's very clear that the service is not progressing because of a missing external load balancer. This is essentially preventing the completion of your Ingress-Nginx controller setup for managing external ingress traffic.\n\nLet's consolidate the issues and steps you've already outlined, and I'll provide additional context and debugging options:\n\n---\n\n### Key Takeaways:\n\n- The `ingress-nginx-controller` service, set as a **`LoadBalancer`**, is responsible for provisioning an external load balancer to direct traffic from outside your Kubernetes cluster to your ingresses.\n- The service is in a **pending** state, meaning it's waiting for external resources — specifically, an external load balancer — but the resource has not yet been allocated.\n \n### To Troubleshoot the LoadBalancer Pending Issue:\n\n#### 1. **Confirm Cluster Environment**:\n - First, **identify if your Kubernetes cluster is running on bare metal, or in a cloud provider** (AWS, GCP, Azure, etc.). This will help you decide the next steps, such as using a cloud-management load balancer like AWS ELB, or deploying something like **MetalLB** in bare-metal environments.\n\n - If your cluster is on a cloud platform:\n - **Verify that the Kubernetes cloud provider configurations (for the service account) are correct and that the cluster has sufficient permissions** to provision LoadBalancers via the cloud provider's API.\n \n - If it's a bare-metal solution:\n - You may need a software-based provisioning tool like **MetalLB** to handle LoadBalancer services. In such cases, ensure MetalLB is installed and configured properly.\n \n _Command to check pods:_ \n ```bash\n kubectl get pods -n metallb-system\n ```\n\n#### 2. **Inspect LoadBalancer Events & Status**:\n - Detailed **events from the service** can provide clues about where provisioning is failing (permissions, inadequate resources, networking issues, etc.).\n \n _Command to view events:_\n ```bash\n kubectl describe service ingress-nginx-controller -n ingress-nginx\n ```\n\n Look for errors indicating that the required resources (like external IP addresses or load balancers) cannot be allocated.\n\n#### 3. **Network Connectivity and Configuration** (Cloud):\n - **Check cloud provider-specific limits** (i.e., how many public IPs or load balancers you can provision), as well as the permissions required by the Kubernetes cluster to request new load balancers. If limits are exceeded or permissions denied, the cloud provider will fail to establish the external LoadBala...])
+      insight = insert(:ai_insight, text: @text)
       router = insert(:notification_router, events: ["stack.insight"])
       insert(:router_sink, router: router)
       insert(:router_filter, router: router, stack: stack)
@@ -191,6 +193,29 @@ defmodule Console.Deployments.PubSub.NotificationsTest do
       end)
 
       event = %PubSub.StackInsight{item: {stack, insight}}
+      :ok = Notifications.handle_event(event)
+
+      assert_receive {:body, body}
+
+      {:ok, _} = Jason.decode(body)
+    end
+  end
+
+  describe "ClusterInsight" do
+    test "it can generate a slack message" do
+      cluster = insert(:cluster)
+      insight = insert(:ai_insight, text: @text)
+      router = insert(:notification_router, events: ["cluster.insight"])
+      insert(:router_sink, router: router)
+      insert(:router_filter, router: router, cluster: cluster)
+
+      me = self()
+      expect(HTTPoison, :post, fn _, body, _ ->
+        send me, {:body, body}
+        {:ok, %HTTPoison.Response{}}
+      end)
+
+      event = %PubSub.ClusterInsight{item: {cluster, insight}}
       :ok = Notifications.handle_event(event)
 
       assert_receive {:body, body}

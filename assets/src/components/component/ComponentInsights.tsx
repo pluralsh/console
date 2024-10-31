@@ -1,8 +1,10 @@
-import { Button, Flex, ReloadIcon } from '@pluralsh/design-system'
+import { Flex } from '@pluralsh/design-system'
 import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { dateTimeFormat } from 'utils/date'
+import { AISuggestFix } from '../ai/AISuggestFix.tsx'
+import IconFrameRefreshButton from '../utils/RefreshIconFrame.tsx'
 import { ComponentDetailsContext } from './ComponentDetails.tsx'
 
 export function ComponentInsights() {
@@ -15,10 +17,11 @@ export function ComponentInsights() {
       gap="medium"
       overflow="hidden"
       maxHeight="100%"
+      height="100%"
     >
       <Flex
-        align={'center'}
-        justify="space-between"
+        align="center"
+        justify="flex-end"
         gap="small"
       >
         <CaptionP
@@ -28,14 +31,11 @@ export function ComponentInsights() {
           {component.insight?.updatedAt &&
             `Last updated at ${dateTimeFormat(component.insight?.updatedAt)}`}
         </CaptionP>
-        <Button
-          floating
-          startIcon={<ReloadIcon />}
-          onClick={() => refetch()}
+        <IconFrameRefreshButton
           loading={loading}
-        >
-          Refresh insights
-        </Button>
+          refetch={refetch}
+        />
+        <AISuggestFix insight={component?.insight} />
       </Flex>
       <InsightDisplay text={component.insight?.text} />
     </Flex>

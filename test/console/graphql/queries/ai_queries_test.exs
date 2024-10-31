@@ -63,4 +63,84 @@ defmodule Console.GraphQl.AiQueriesTest do
       """, %{"insightId" => insight.id}, %{current_user: insert(:user)})
     end
   end
+
+  describe "chats" do
+    test "it will fetch a users chat history" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user, default: true)
+      chats = insert_list(3, :chat, user: user, thread: thread)
+      insert_list(3, :chat)
+      insert_list(3, :chat, user: user)
+
+      {:ok, %{data: %{"chats" => found}}} = run_query("""
+        query {
+          chats(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(chats)
+    end
+
+    test "it can fetch by thread id" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      chats = insert_list(3, :chat, user: user, thread: thread)
+
+      {:ok, %{data: %{"chats" => found}}} = run_query("""
+        query Chats($thread: ID!) {
+          chats(threadId: $thread, first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{"thread" => thread.id}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(chats)
+    end
+
+    test "it cannot fetch another users thread" do
+      user = insert(:user)
+      thread = insert(:chat_thread, default: true)
+      insert_list(3, :chat, user: user, thread: thread)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Chats($thread: ID!) {
+          chats(threadId: $thread, first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{"thread" => thread.id}, %{current_user: user})
+    end
+  end
+
+  describe "clusterInsightComponent" do
+    test "it can fetch by id" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      comp = insert(:cluster_insight_component, cluster: cluster)
+
+      {:ok, %{data: %{"clusterInsightComponent" => found}}} = run_query("""
+        query Comp($id: ID!) {
+          clusterInsightComponent(id: $id) { id }
+        }
+      """, %{"id" => comp.id}, %{current_user: user})
+
+      assert found["id"] == comp.id
+    end
+
+    test "it cannot fetch w/o access" do
+      user = insert(:user)
+      cluster = insert(:cluster)
+      comp = insert(:cluster_insight_component, cluster: cluster)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Comp($id: ID!) {
+          clusterInsightComponent(id: $id) { id }
+        }
+      """, %{"id" => comp.id}, %{current_user: user})
+    end
+  end
 end

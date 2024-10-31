@@ -1,5 +1,6 @@
 import yaml
 import requests
+import semantic_version
 
 from collections import OrderedDict
 from colorama import Fore, Style
@@ -42,6 +43,25 @@ def read_yaml(file_path):
     return None
 
 
+# Custom representer for lists containing only strings
+def represent_kube_list(dumper, data):
+    if isinstance(data, list) and all(isinstance(i, str) for i in data):
+        return dumper.represent_sequence(
+            "tag:yaml.org,2002:seq", data, flow_style=True
+        )
+    return dumper.represent_list(data)
+
+
+# Custom representer for OrderedDict
+def represent_ordereddict(dumper, data):
+    return dumper.represent_mapping("tag:yaml.org,2002:map", data.items())
+
+
+# Register custom representers to the YAML Dumper
+yaml.add_representer(list, represent_kube_list)
+yaml.add_representer(OrderedDict, represent_ordereddict)
+
+
 def write_yaml(file_path, data):
     try:
         with open(file_path, "w") as file:
@@ -50,6 +70,21 @@ def write_yaml(file_path, data):
     except Exception as e:
         print_error(f"Failed to write to {file_path}: {e}")
     return False
+
+
+def validate_semver(version_str):
+    try:
+        # Coerce the version string to handle versions like "1.30", "1.27", or "1.2.3"
+        version = semantic_version.Version.coerce(version_str)
+
+        # Check if prerelease and build are empty
+        if version.prerelease or version.build:
+            return None
+
+        return version
+    except ValueError:
+        # Return False for invalid version strings
+        return None
 
 
 def latest_kube_version():
@@ -62,7 +97,21 @@ def latest_kube_version():
         latest = response.text.lstrip("v")
         latest = latest.split(".")
         latest = ".".join(latest[:2])
-        print(f"Latest kube version: {latest}")
+        latest = validate_semver(latest)
+
+        if not latest:
+            print_error(f"Invalid Latest K8s Version: {latest}")
+            return latest
+
+        print(f"Using Latest kube version: {latest}")
+        # Write the value to "../../KUBE_VERSION"
+        file_path = "../../KUBE_VERSION"
+        try:
+            with open(file_path, "w") as file:
+                file.write(f"{latest.major}.{latest.minor}")
+        except Exception as e:
+            print_error(f"Failed to write to {file_path}: {e}")
+
         return latest
     else:
         print_error(
@@ -165,14 +214,9 @@ def update_chart_versions(app_name, chart_name=""):
     if not chart_versions:
         print_error(f"No Chart versions found for {chart_name}")
         return
-
     for chart_entry in chart_versions:
-        app_version = chart_entry["appVersion"]
-        app_version = app_version.lstrip("v")
-
-        chart_version = chart_entry["version"]
-        chart_version = chart_version.lstrip("v")
-
+        app_version = chart_entry.get("appVersion", "").lstrip("v")
+        chart_version = chart_entry.get("version", "").lstrip("v")
         for row in compatibility_yaml["versions"]:
             if row["version"] == app_version:
                 row["chart_version"] = chart_version
@@ -186,6 +230,9 @@ def update_chart_versions(app_name, chart_name=""):
 
 
 def sort_versions(versions):
+    # Ensure all versions are strings before sorting
+    for v in versions:
+        v["version"] = str(v["version"])
     return sorted(versions, key=lambda v: Version(v["version"]), reverse=True)
 
 
@@ -236,29 +283,3 @@ def update_compatibility_info(filepath, new_versions):
             print_error(f"Failed to update compatibility info for {filepath}")
     except Exception as e:
         print_error(f"Failed to update compatibility info: {e}")
-
-
-# Custom YAML representer for lists that contain only strings
-# This is to ensure that lists of strings are represented as flow style
-#  e.g. [a, b, c]
-def represent_kube_list(dumper, data):
-    if isinstance(data, list) and all(isinstance(i, str) for i in data):
-        return dumper.represent_sequence(
-            "tag:yaml.org,2002:seq", data, flow_style=True
-        )
-    return dumper.represent_list(data)
-
-
-# Add the custom representer to the yaml loader
-yaml.add_representer(list, represent_kube_list)
-
-
-# Custom YAML representer for OrderedDict
-# This is to ensure that OrderedDict is represented as a map
-# and in the order of insertion
-def represent_ordereddict(dumper, data):
-    return dumper.represent_mapping("tag:yaml.org,2002:map", data.items())
-
-
-# Add the custom representer to the yaml loader
-yaml.add_representer(OrderedDict, represent_ordereddict)

@@ -2,7 +2,7 @@
 import os
 import importlib
 from colorama import Fore, Style
-from utils import read_yaml, print_error, print_warning
+from utils import read_yaml, print_error, print_warning, latest_kube_version
 
 
 def call_scraper(scraper):
@@ -18,6 +18,7 @@ def call_scraper(scraper):
 
 
 manifestFile = "../../static/compatibilities/manifest.yaml"
+latest_kube_version()
 
 if not os.path.exists(manifestFile):
     print_error(f"Manifest file not found at {manifestFile}")

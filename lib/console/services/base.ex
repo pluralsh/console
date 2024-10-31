@@ -43,7 +43,7 @@ defmodule Console.Services.Base do
 
   def execute(operation, opts \\ [])
   def execute(%Ecto.Multi{} = multi, opts) do
-    with {:ok, result} <- Console.Repo.transaction(multi) do
+    with {:ok, result} <- Console.Repo.transaction(multi, opts) do
       case Map.new(opts) do
         %{extract: operation} -> {:ok, result[operation]}
         _ -> {:ok, result}

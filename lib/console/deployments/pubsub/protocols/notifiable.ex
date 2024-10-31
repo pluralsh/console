@@ -146,6 +146,19 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackInsight 
   def message(_), do: :ok
 end
 
+defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ClusterInsight do
+  alias Console.Deployments.Notifications.Utils
+  alias Console.Schema.AiInsight
+  require Logger
+
+  def message(%{item: {cluster, %AiInsight{text: t} = insight}}) when byte_size(t) > 0 do
+    Utils.deduplicate({:cluster_insight, cluster.id}, fn ->
+      {"cluster.insight", Utils.filters(cluster), %{cluster: cluster, insight: insight, text: Utils.insight(insight)}}
+    end)
+  end
+  def message(_), do: :ok
+end
+
 defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.AlertCreated do
   alias Console.Deployments.Notifications.Utils
 

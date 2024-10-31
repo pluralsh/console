@@ -1,6 +1,6 @@
 defmodule Console.AI.Provider do
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
-  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure}
+  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock}
 
   @type sender :: :system | :user | :assistant
   @type history :: [{sender, binary}]
@@ -23,9 +23,8 @@ defmodule Console.AI.Provider do
 
   def completion(history, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
-    preface = get_preface(opts)
     with {:ok, %mod{} = client} <- client(settings),
-      do: mod.completion(client, [preface | history])
+      do: mod.completion(client, add_preface(history, opts))
   end
 
   def summary(text),
@@ -39,12 +38,15 @@ defmodule Console.AI.Provider do
     do: {:ok, Ollama.new(ollama)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :azure, azure: %{} = azure}}),
     do: {:ok, Azure.new(azure)}
+  defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :bedrock, bedrock: %{} = bedrock}}),
+    do: {:ok, Bedrock.new(bedrock)}
   defp client(_), do: {:error, "ai not enabled for this Plural Console instance"}
 
-  defp get_preface(opts) do
+  defp add_preface(history, opts) do
     case opts[:preface] do
-      val when is_binary(val) -> {:system, val}
-      _ -> @preface
+      val when is_binary(val) -> [{:system, val} | history]
+      :ignore -> history
+      _ -> [@preface | history]
     end
   end
 end

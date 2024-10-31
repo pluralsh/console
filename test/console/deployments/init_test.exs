@@ -57,6 +57,37 @@ defmodule Console.Deployments.InitTest do
       assert res.settings.read_policy_id
       assert res.settings.git_policy_id
       assert res.settings.create_policy_id
+      refute res.settings.ai
+    end
+
+    test "it will set up ollama when cloud" do
+      expect(Console, :byok?, fn -> true end)
+      expect(Console, :cloud?, 3, fn -> true end)
+      insert(:user, bot_name: "console", roles: %{admin: true})
+      {:ok, res} = Init.setup()
+
+      refute res.provider.id
+
+      assert res.deploy_repo.url == Git.deploy_url()
+      assert res.artifacts_repo.url == Git.artifacts_url()
+
+      assert res.cluster.name == Console.conf(:cluster_name)
+      assert res.cluster.self
+
+      assert res.rebind.id == res.cluster.id
+      refute res.rebind.provider_id
+
+      assert res.settings.name == "global"
+      assert res.settings.deployer_repository_id == res.deploy_repo.id
+      assert res.settings.artifact_repository_id == res.artifacts_repo.id
+      assert res.settings.write_policy_id
+      assert res.settings.read_policy_id
+      assert res.settings.git_policy_id
+      assert res.settings.create_policy_id
+
+      assert res.settings.ai.enabled
+      assert res.settings.ai.provider == :ollama
+      assert res.settings.ai.ollama.url == "http://ai-proxy.ai-proxy:8000"
     end
   end
 end

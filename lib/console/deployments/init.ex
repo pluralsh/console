@@ -47,11 +47,11 @@ defmodule Console.Deployments.Init do
       %{provider: provider} -> {:ok, provider}
     end)
     |> add_operation(:settings, fn %{deploy_repo: drepo, artifacts_repo: arepo} ->
-      Settings.create(%{
+      Settings.create(maybe_ai(%{
         name: "global",
         artifact_repository_id: arepo.id,
         deployer_repository_id: drepo.id,
-      })
+      }))
     end)
     |> add_operation(:secret, fn _ -> ensure_secret() end)
     |> execute()
@@ -83,4 +83,16 @@ defmodule Console.Deployments.Init do
   end
 
   defp namespace(), do: System.get_env("NAMESPACE") || "console"
+
+  defp maybe_ai(attrs) do
+    case Console.cloud?() do
+      true ->
+        Map.put(attrs, :ai, %{
+          provider: :ollama,
+          enabled: true,
+          ollama: %{model: "gpt-4o-mini", url: "http://ai-proxy.ai-proxy:8000"}
+        })
+      _ -> attrs
+    end
+  end
 end

@@ -13,7 +13,8 @@ defmodule Console.Services.Users do
     Notification,
     AccessToken,
     Persona,
-    RefreshToken
+    RefreshToken,
+    ChatSequence
   }
   alias Console.Repo
 
@@ -161,6 +162,13 @@ defmodule Console.Services.Users do
   end
 
   def bootstrap_user(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
+
+  def backfill_chats() do
+    Repo.all(User)
+    |> Enum.map(fn %User{id: id} -> %ChatSequence{user_id: id} end)
+    |> Enum.map(&ChatSequence.changeset/1)
+    |> Enum.each(&Repo.insert!/1)
+  end
 
   @spec create_refresh_token(User.t) :: refresh_token_resp
   def create_refresh_token(%User{id: user_id}) do
