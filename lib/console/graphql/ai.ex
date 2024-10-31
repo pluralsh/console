@@ -23,6 +23,13 @@ defmodule Console.GraphQl.AI do
     field :content, non_null(:string)
   end
 
+  @desc "the items you want to reference in this pin"
+  input_object :ai_pin_attributes do
+    field :name,       :string
+    field :insight_id, :id
+    field :thread_id,  :id
+  end
+
   @desc "basic user-supplied input for creating an AI chat thread"
   input_object :chat_thread_attributes do
     field :summary,    non_null(:string)
@@ -58,8 +65,15 @@ defmodule Console.GraphQl.AI do
     timestamps()
   end
 
-  connection node_type: :chat
-  connection node_type: :chat_thread
+  @desc "A saved item for future ai-based investigation"
+  object :ai_pin do
+    field :id,      non_null(:id)
+    field :name,    :string
+    field :insight, :ai_insight, resolve: dataloader(AI)
+    field :thread,  :chat_thread, resolve: dataloader(AI)
+
+    timestamps()
+  end
 
   @desc "A representation of a LLM-derived insight"
   object :ai_insight do
@@ -95,6 +109,10 @@ defmodule Console.GraphQl.AI do
       resolve &AI.raw_resource/3
     end
   end
+
+  connection node_type: :chat
+  connection node_type: :chat_thread
+  connection node_type: :ai_pin
 
   object :ai_queries do
     @desc "General api to query the configured LLM for your console"
@@ -142,6 +160,12 @@ defmodule Console.GraphQl.AI do
       middleware Authenticated
 
       resolve &AI.threads/2
+    end
+
+    connection field :ai_pins, node_type: :ai_pin do
+      middleware Authenticated
+
+      resolve &AI.pins/2
     end
   end
 
@@ -201,6 +225,20 @@ defmodule Console.GraphQl.AI do
       arg :id, non_null(:id)
 
       resolve &AI.delete_chat/2
+    end
+
+    field :create_pin, :ai_pin do
+      middleware Authenticated
+      arg :attributes, non_null(:ai_pin_attributes)
+
+      resolve &AI.create_pin/2
+    end
+
+    field :delete_pin, :ai_pin do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &AI.delete_pin/2
     end
   end
 end

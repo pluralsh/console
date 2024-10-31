@@ -185,4 +185,23 @@ defmodule Console.GraphQl.AiQueriesTest do
       """, %{"id" => comp.id}, %{current_user: user})
     end
   end
+
+  describe "aiPins" do
+    test "it can list a users ai pins" do
+      user = insert(:user)
+      pins = insert_list(3, :ai_pin, user: user)
+      insert_list(2, :ai_pin)
+
+      {:ok, %{data: %{"aiPins" => found}}} = run_query("""
+        query {
+          aiPins(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(pins)
+    end
+  end
 end

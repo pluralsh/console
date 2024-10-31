@@ -8,8 +8,11 @@ defmodule Console.AI.Policy do
     Chat,
     ChatThread,
     Stack,
-    Service
+    Service,
+    AiPin
   }
+
+  def can?(%User{id: id}, %AiPin{user_id: id}, _), do: :pass
 
   def can?(%User{id: id}, %Chat{user_id: id}, _), do: :pass
   def can?(%User{id: id}, %ChatThread{user_id: id}, _), do: :pass

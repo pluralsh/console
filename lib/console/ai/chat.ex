@@ -2,9 +2,16 @@ defmodule Console.AI.Chat do
   use Console.Services.Base
   import Console.AI.Policy
   alias Console.AI.Provider
-  alias Console.Schema.{Chat, ChatThread, ChatSequence, User}
+  alias Console.Schema.{
+    Chat,
+    ChatThread,
+    ChatSequence,
+    User,
+    AiPin
+  }
 
   @type thread_resp :: {:ok, ChatThread.t} | Console.error
+  @type pin_resp :: {:ok, AiPin.t} | Console.error
 
   @context_window 128_000 * 4
 
@@ -27,6 +34,8 @@ defmodule Console.AI.Chat do
 
   def get_thread!(id), do: Repo.get!(ChatThread, id)
 
+  def get_pin!(id), do: Repo.get!(AiPin, id)
+
   def default_thread!(%User{id: user_id} = user) do
     ChatThread.default()
     |> ChatThread.for_user(user_id)
@@ -41,6 +50,26 @@ defmodule Console.AI.Chat do
     %ChatThread{user_id: uid}
     |> ChatThread.changeset(%{default: true, summary: "Your primary chat with Plural AI"})
     |> Repo.insert!()
+  end
+
+  @doc """
+  Pins an ai-related item for future investigation
+  """
+  @spec create_pin(map, User.t) :: pin_resp
+  def create_pin(attrs, %User{id: uid}) do
+    %AiPin{user_id: uid}
+    |> AiPin.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Deletes a users pin
+  """
+  @spec delete_pin(binary, User.t) :: pin_resp
+  def delete_pin(id, %User{} = user) do
+    get_pin!(id)
+    |> allow(user, :delete)
+    |> when_ok(:delete)
   end
 
   @doc """

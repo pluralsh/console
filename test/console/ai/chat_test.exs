@@ -220,4 +220,32 @@ defmodule Console.AI.ChatTest do
       {:error, _} = Chat.create_thread(%{default: true, summary: "blah"}, user)
     end
   end
+
+  describe "#create_pin/2" do
+    test "a user can pin an insight" do
+      user = insert(:user)
+      insight = insert(:ai_insight)
+
+      {:ok, pin} = Chat.create_pin(%{insight_id: insight.id}, user)
+
+      assert pin.user_id == user.id
+      assert pin.insight_id == insight.id
+    end
+  end
+
+  describe "#delete_pin/2" do
+    test "a user can delete their pin" do
+      user = insert(:user)
+      pin = insert(:ai_pin, user: user)
+
+      {:ok, del} = Chat.delete_pin(pin.id, user)
+
+      assert del.id == pin.id
+      refute refetch(pin)
+    end
+
+    test "users cannot delete others' pins" do
+      {:error, _} = Chat.delete_pin(insert(:ai_pin).id, insert(:user))
+    end
+  end
 end

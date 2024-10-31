@@ -185,4 +185,42 @@ defmodule Console.GraphQl.AIMutationsTest do
       """, %{"id" => chat.id}, %{current_user: user})
     end
   end
+
+  describe "createPin" do
+    test "it can create a pin" do
+      user = insert(:user)
+      insight = insert(:ai_insight)
+
+      {:ok, %{data: %{"createPin" => pin}}} = run_query("""
+        mutation Create($attributes: AiPinAttributes!) {
+          createPin(attributes: $attributes) {
+            id
+            insight { id }
+          }
+        }
+      """, %{"attributes" => %{"insightId" => insight.id}}, %{current_user: user})
+
+      assert pin["id"]
+      assert pin["insight"]["id"] == insight.id
+    end
+  end
+
+  describe "deletePin" do
+    test "it can create a pin" do
+      user = insert(:user)
+      pin = insert(:ai_pin, user: user)
+
+      {:ok, %{data: %{"deletePin" => del}}} = run_query("""
+        mutation Create($id: ID!) {
+          deletePin(id: $id) {
+            id
+            insight { id }
+          }
+        }
+      """, %{"id" => pin.id}, %{current_user: user})
+
+      assert del["id"] == pin.id
+      refute refetch(pin)
+    end
+  end
 end
