@@ -29,10 +29,14 @@ function ChatbotFullscreenUnstyled({ open, onClose, ...props }): ReactNode {
           </span>
         </Card>
         <Card className="content">
-          <ChatbotPanelThread
-            currentThread={currentThread}
-            detached={true}
-          />
+          {currentThread ? (
+            <ChatbotPanelThread
+              currentThread={currentThread}
+              detached={true}
+            />
+          ) : (
+            <div>TODO: select thread</div>
+          )}
         </Card>
         <Card className="chat">
           <ChatbotTextArea />
