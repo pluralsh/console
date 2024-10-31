@@ -26,7 +26,7 @@ import { ChatbotPanelThreadList } from './ChatbotPanelThreadList.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   onClose: () => void
-  currentThread: Nullable<ChatThreadFragment>
+  currentThread?: Nullable<ChatThreadFragment>
 }
 
 export function Chatbot() {
@@ -59,8 +59,8 @@ export function ChatbotPanel({
   onClose,
   ...props
 }: {
-  open: boolean & ChatbotPanelInnerProps
-}) {
+  open: boolean
+} & ChatbotPanelInnerProps) {
   const theme = useTheme()
   return (
     <ModalWrapper
