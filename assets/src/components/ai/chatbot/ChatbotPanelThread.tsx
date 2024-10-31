@@ -49,8 +49,10 @@ import { isEmpty } from 'lodash'
 
 export function ChatbotPanelThread({
   currentThread,
+  detached = false,
 }: {
   currentThread: ChatThreadFragment
+  detached?: boolean
 }) {
   const [loaded, setLoaded] = useState(false)
   const historyScrollRef = useRef<HTMLUListElement>(null)
@@ -133,19 +135,21 @@ export function ChatbotPanelThread({
           )
         })}
       </ChatbotHistorySC>
-      <ChatbotFormSC onSubmit={sendMessage}>
-        <ChatbotTextArea
-          ref={inputRef}
-          value={newMessage}
-          onChange={(e) => {
-            setNewMessage(e.currentTarget.value)
-          }}
-        />
-        <ChatbotLoadingBarSC
-          $show={sendingMessage}
-          complete={false}
-        />
-      </ChatbotFormSC>
+      {!detached && (
+        <ChatbotFormSC onSubmit={sendMessage}>
+          <ChatbotTextArea
+            ref={inputRef}
+            value={newMessage}
+            onChange={(e) => {
+              setNewMessage(e.currentTarget.value)
+            }}
+          />
+          <ChatbotLoadingBarSC
+            $show={sendingMessage}
+            complete={false}
+          />
+        </ChatbotFormSC>
+      )}
     </>
   )
 }

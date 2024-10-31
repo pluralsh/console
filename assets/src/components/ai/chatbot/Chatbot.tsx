@@ -1,6 +1,7 @@
 import {
   Card,
   ChatIcon,
+  ExpandIcon,
   Flex,
   GearTrainIcon,
   HistoryIcon,
@@ -9,16 +10,17 @@ import {
 } from '@pluralsh/design-system'
 
 import * as Dialog from '@radix-ui/react-dialog'
-import { ComponentPropsWithRef } from 'react'
-import { VisuallyHidden } from 'react-aria'
-import styled, { useTheme } from 'styled-components'
-import { useChatbotContext, useChatbot } from '../AIContext.tsx'
-import { ChatbotIconButton } from './ChatbotButton.tsx'
 
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
 import { ChatThreadFragment } from 'generated/graphql'
+import { ComponentPropsWithRef } from 'react'
+import { VisuallyHidden } from 'react-aria'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
+import styled, { useTheme } from 'styled-components'
+import { useChatbot, useChatbotContext } from '../AIContext.tsx'
+import { ChatbotIconButton } from './ChatbotButton.tsx'
+import { ChatbotFullscreen } from './ChatbotFullscreen.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { ChatbotPanelThreadList } from './ChatbotPanelThreadList.tsx'
 
@@ -28,7 +30,8 @@ type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
 }
 
 export function Chatbot() {
-  const { open, setOpen, currentThread } = useChatbotContext()
+  const { open, setOpen, fullscreen, setFullscreen, currentThread } =
+    useChatbotContext()
 
   return (
     <div css={{ position: 'relative' }}>
@@ -39,10 +42,14 @@ export function Chatbot() {
         <ChatIcon />
       </ChatbotIconButton>
       <ChatbotPanel
-        open={open}
+        open={open && !fullscreen}
         onClose={() => setOpen(false)}
         currentThread={currentThread}
       />
+      <ChatbotFullscreen
+        open={open && fullscreen}
+        onClose={() => setFullscreen(false)}
+      ></ChatbotFullscreen>
     </div>
   )
 }
@@ -51,7 +58,9 @@ export function ChatbotPanel({
   open,
   onClose,
   ...props
-}: { open: boolean } & ChatbotPanelInnerProps) {
+}: {
+  open: boolean & ChatbotPanelInnerProps
+}) {
   const theme = useTheme()
   return (
     <ModalWrapper
@@ -100,7 +109,7 @@ function ChatbotPanelInner({
 function ChatbotHeader({ onClose }: { onClose: () => void }) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { goToThreadList } = useChatbot()
+  const { goToThreadList, openFullscreen } = useChatbot()
   return (
     <ChatbotHeaderSC>
       <Flex
@@ -125,6 +134,13 @@ function ChatbotHeader({ onClose }: { onClose: () => void }) {
           }}
           size="small"
           icon={<GearTrainIcon />}
+        />
+        <IconFrame
+          clickable
+          tooltip="Fullscreen view"
+          onClick={openFullscreen}
+          size="small"
+          icon={<ExpandIcon />}
         />
         <IconFrame
           clickable

@@ -32,6 +32,8 @@ type ExplainWithAIContextT = {
 type ChatbotContextT = {
   open: boolean
   setOpen: (open: boolean) => void
+  fullscreen: boolean
+  setFullscreen: Dispatch<SetStateAction<boolean>>
   currentThread: Nullable<ChatThreadFragment>
   setCurrentThread: (thread: Nullable<ChatThreadFragment>) => void
 }
@@ -52,12 +54,20 @@ export function AIContextProvider({ children }: { children: ReactNode }) {
 
 function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
+  const [fullscreen, setFullscreen] = useState(false)
   const [currentThread, setCurrentThread] =
     useState<Nullable<ChatThreadFragment>>()
 
   const context = useMemo(
-    () => ({ open, setOpen, currentThread, setCurrentThread }),
-    [open, setOpen, currentThread, setCurrentThread]
+    () => ({
+      open,
+      setOpen,
+      currentThread,
+      setCurrentThread,
+      fullscreen,
+      setFullscreen,
+    }),
+    [open, currentThread, fullscreen]
   )
 
   return (
@@ -101,7 +111,7 @@ export function useChatbotContext() {
 }
 
 export function useChatbot() {
-  const { setOpen, setCurrentThread } = useChatbotContext()
+  const { setOpen, setCurrentThread, setFullscreen } = useChatbotContext()
   const [mutation, { loading, error }] = useCreateChatThreadMutation()
 
   return {
@@ -121,6 +131,9 @@ export function useChatbot() {
     goToThreadList: () => {
       setCurrentThread(null)
       setOpen(true)
+    },
+    openFullscreen: () => {
+      setFullscreen(true)
     },
     loading,
     error,

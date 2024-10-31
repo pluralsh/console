@@ -101,7 +101,7 @@ interface ThreadProps {
 function ThreadUnstyled({ thread, ...props }: ThreadProps): ReactNode {
   const now = moment().utc()
   const updatedAt = moment.utc(thread.updatedAt)
-  const staleAfterHours = 2
+  const staleAfterHours = 24
   const isStale = now.diff(updatedAt, 'hours') > staleAfterHours
   const theme = useTheme()
 
