@@ -44,6 +44,7 @@ export function StackRunInsights() {
         />
         <ChatWithAIButton
           floating
+          insightId={stackRun?.insight?.id}
           messages={[insightMessage(stackRun?.insight)]}
         />
         <AISuggestFix insight={stackRun?.insight} />

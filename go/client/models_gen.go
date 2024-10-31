@@ -138,9 +138,15 @@ type AiInsight struct {
 	Summary   *string           `json:"summary,omitempty"`
 	Freshness *InsightFreshness `json:"freshness,omitempty"`
 	// any errors generated when compiling this insight
-	Error      []*ServiceError `json:"error,omitempty"`
-	InsertedAt *string         `json:"insertedAt,omitempty"`
-	UpdatedAt  *string         `json:"updatedAt,omitempty"`
+	Error                   []*ServiceError          `json:"error,omitempty"`
+	Service                 *ServiceDeployment       `json:"service,omitempty"`
+	Stack                   *InfrastructureStack     `json:"stack,omitempty"`
+	Cluster                 *Cluster                 `json:"cluster,omitempty"`
+	StackRun                *StackRun                `json:"stackRun,omitempty"`
+	ServiceComponent        *ServiceComponent        `json:"serviceComponent,omitempty"`
+	ClusterInsightComponent *ClusterInsightComponent `json:"clusterInsightComponent,omitempty"`
+	InsertedAt              *string                  `json:"insertedAt,omitempty"`
+	UpdatedAt               *string                  `json:"updatedAt,omitempty"`
 }
 
 // Settings for configuring access to common LLM providers
@@ -717,6 +723,7 @@ type ChatThread struct {
 	Summary    string          `json:"summary"`
 	Default    bool            `json:"default"`
 	User       *User           `json:"user,omitempty"`
+	Insight    *AiInsight      `json:"insight,omitempty"`
 	Chats      *ChatConnection `json:"chats,omitempty"`
 	InsertedAt *string         `json:"insertedAt,omitempty"`
 	UpdatedAt  *string         `json:"updatedAt,omitempty"`
@@ -729,6 +736,8 @@ type ChatThreadAttributes struct {
 	Summarized *bool `json:"summarized,omitempty"`
 	// a list of messages to add initially when creating this thread
 	Messages []*ChatMessage `json:"messages,omitempty"`
+	// an ai insight this thread was created from
+	InsightID *string `json:"insightId,omitempty"`
 }
 
 type ChatThreadConnection struct {

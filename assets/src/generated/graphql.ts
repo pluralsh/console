@@ -178,13 +178,19 @@ export type AgentMigrationAttributes = {
 /** A representation of a LLM-derived insight */
 export type AiInsight = {
   __typename?: 'AiInsight';
+  cluster?: Maybe<Cluster>;
+  clusterInsightComponent?: Maybe<ClusterInsightComponent>;
   /** any errors generated when compiling this insight */
   error?: Maybe<Array<Maybe<ServiceError>>>;
   freshness?: Maybe<InsightFreshness>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  service?: Maybe<ServiceDeployment>;
+  serviceComponent?: Maybe<ServiceComponent>;
   /** a deduplication sha for this insight */
   sha?: Maybe<Scalars['String']['output']>;
+  stack?: Maybe<InfrastructureStack>;
+  stackRun?: Maybe<StackRun>;
   /** a shortish summary of this insight */
   summary?: Maybe<Scalars['String']['output']>;
   /** the text of this insight */
@@ -912,6 +918,7 @@ export type ChatThread = {
   default: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  insight?: Maybe<AiInsight>;
   summary: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;
@@ -928,6 +935,8 @@ export type ChatThreadChatsArgs = {
 
 /** basic user-supplied input for creating an AI chat thread */
 export type ChatThreadAttributes = {
+  /** an ai insight this thread was created from */
+  insightId?: InputMaybe<Scalars['ID']['input']>;
   /** a list of messages to add initially when creating this thread */
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   /** controls whether this thread is autosummarized, set true when users explicitly set summary */

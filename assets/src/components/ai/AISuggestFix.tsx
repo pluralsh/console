@@ -55,6 +55,7 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
         footer={
           <ChatWithAIButton
             primary
+            insightId={insight?.id}
             messages={[
               insightMessage(insight),
               fixMessage(data?.aiSuggestedFix || ''),

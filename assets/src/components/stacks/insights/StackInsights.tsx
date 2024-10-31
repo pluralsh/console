@@ -53,6 +53,7 @@ export function StackInsights() {
         />
         <ChatWithAIButton
           floating
+          insightId={stack?.insight?.id}
           messages={[insightMessage(stack?.insight)]}
         />
         <AISuggestFix insight={stack?.insight} />

@@ -72,6 +72,7 @@ export function ServiceInsights() {
           />
           <ChatWithAIButton
             floating
+            insightId={service?.insight?.id}
             messages={[insightMessage(service?.insight)]}
           />
           <AISuggestFix insight={service?.insight} />
