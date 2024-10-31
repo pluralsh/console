@@ -5857,6 +5857,7 @@ type ChatThread {
   id: ID!
   summary: String!
   default: Boolean!
+  lastMessageAt: DateTime
   user: User
   insight: AiInsight
   chats(after: String, first: Int, before: String, last: Int): ChatConnection

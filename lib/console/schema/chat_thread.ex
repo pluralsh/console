@@ -9,6 +9,8 @@ defmodule Console.Schema.ChatThread do
     field :default,    :boolean, default: false
     field :summarized, :boolean, default: false
 
+    field :last_message_at, :utc_datetime_usec
+
     belongs_to :user, User
     belongs_to :insight, AiInsight
 
@@ -57,7 +59,7 @@ defmodule Console.Schema.ChatThread do
     from(t in query, order_by: ^order)
   end
 
-  @valid ~w(summary summarized default user_id insight_id)a
+  @valid ~w(summary last_message_at summarized default user_id insight_id)a
 
   def changeset(model, attrs \\ %{}) do
     model

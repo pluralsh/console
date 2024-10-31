@@ -206,6 +206,10 @@ defmodule Console.AI.Chat do
     |> add_operation(:msg, fn %{chat: c} ->
       save_message(%{role: :assistant, content: c}, thread_id, user)
     end)
+    |> add_operation(:bump, fn %{access: thread} ->
+      ChatThread.changeset(thread, %{last_message_at: Timex.now()})
+      |> Repo.update()
+    end)
     |> execute(extract: :msg, timeout: 300_000)
   end
 
@@ -259,7 +263,9 @@ defmodule Console.AI.Chat do
   defp maybe_save_messages(xact, %{messages: [_ | _] = msgs}, user) do
     Enum.with_index(msgs)
     |> Enum.reduce(xact, fn {msg, ind}, xact ->
-      add_operation(xact, {:msg, ind}, fn %{thread: %{id: tid}} -> save_message(msg, tid, user) end)
+      add_operation(xact, {:msg, ind}, fn %{thread: %{id: tid}} ->
+        save_message(msg, tid, user)
+      end)
     end)
   end
   defp maybe_save_messages(xact, _, _), do: xact

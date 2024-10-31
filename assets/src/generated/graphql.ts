@@ -949,6 +949,7 @@ export type ChatThread = {
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   insight?: Maybe<AiInsight>;
+  lastMessageAt?: Maybe<Scalars['DateTime']['output']>;
   summary: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   user?: Maybe<User>;

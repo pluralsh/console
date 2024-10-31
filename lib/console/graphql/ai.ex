@@ -55,6 +55,8 @@ defmodule Console.GraphQl.AI do
     field :summary,  non_null(:string)
     field :default,  non_null(:boolean)
 
+    field :last_message_at, :datetime
+
     field :user,     :user, resolve: dataloader(User)
     field :insight,  :ai_insight, resolve: dataloader(AI)
 

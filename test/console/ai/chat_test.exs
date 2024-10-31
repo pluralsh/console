@@ -177,6 +177,8 @@ defmodule Console.AI.ChatTest do
       assert next.user_id == user.id
       assert next.role == :assistant
       assert next.content == "openai completion"
+
+      assert refetch(thread).last_message_at
     end
 
     test "it will persist a set of messages and generate a new one transactionally in a thread" do
