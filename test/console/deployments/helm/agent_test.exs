@@ -17,6 +17,20 @@ defmodule Console.Deployments.Helm.AgentTest do
       Process.exit(pid, :kill)
     end
 
+    test "it can handle problem with yaml responses and json content types" do
+      repo = "https://pkgs.tailscale.com/helmcharts"
+      {:ok, pid} = Agent.start(repo)
+
+      {:ok, f, _} = Agent.fetch(pid, "tailscale-operator", "x.x.x")
+
+      files = stream_and_untar(f)
+      assert files["Chart.yaml"]
+
+      assert Console.Deployments.Git.get_helm_repository(repo).health == :pullable
+
+      Process.exit(pid, :kill)
+    end
+
     test "it can handle shitty azure helm repos" do
       repo = "https://raw.githubusercontent.com/Azure/azure-service-operator/main/v2/charts"
       {:ok, pid} = Agent.start(repo)
