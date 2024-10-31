@@ -48,10 +48,10 @@ import ChatbotMarkdown from './ChatbotMarkdown.tsx'
 
 export function ChatbotPanelThread({
   currentThread,
-  detached = false,
+  fullscreen,
 }: {
   currentThread: ChatThreadFragment
-  detached?: boolean
+  fullscreen: boolean
 }) {
   const [loaded, setLoaded] = useState(false)
   const historyScrollRef = useRef<HTMLUListElement>(null)
@@ -115,7 +115,10 @@ export function ChatbotPanelThread({
     <>
       {messageError && <GqlError error={messageError} />}
       {isEmpty(messages) && <EmptyState message="No messages yet." />}
-      <ChatbotHistorySC ref={historyScrollRef}>
+      <ChatbotMessagesSC
+        ref={historyScrollRef}
+        $fullscreen={fullscreen}
+      >
         {messages.map((msg, i) => {
           const len = messages.length
           const ref = i === len - 1 ? lastMsgRef : undefined
@@ -127,23 +130,24 @@ export function ChatbotPanelThread({
             />
           )
         })}
-      </ChatbotHistorySC>
-      {!detached && (
-        <ChatbotFormSC onSubmit={sendMessage}>
-          <ChatbotTextArea
-            placeholder="Ask Plural AI"
-            ref={inputRef}
-            value={newMessage}
-            onChange={(e) => {
-              setNewMessage(e.currentTarget.value)
-            }}
-          />
-          <ChatbotLoadingBarSC
-            $show={sendingMessage}
-            complete={false}
-          />
-        </ChatbotFormSC>
-      )}
+      </ChatbotMessagesSC>
+      <ChatbotFormSC
+        onSubmit={sendMessage}
+        $fullscreen={fullscreen}
+      >
+        <ChatbotTextArea
+          placeholder="Ask Plural AI"
+          ref={inputRef}
+          value={newMessage}
+          onChange={(e) => {
+            setNewMessage(e.currentTarget.value)
+          }}
+        />
+        <ChatbotLoadingBarSC
+          $show={sendingMessage}
+          complete={false}
+        />
+      </ChatbotFormSC>
     </>
   )
 }
@@ -346,26 +350,38 @@ const ChatbotLoadingBarSC = styled(ProgressBar)<{ $show: boolean }>(
   })
 )
 
-const ChatbotHistorySC = styled.ul(({ theme }) => ({
-  ...theme.partials.reset.list,
-  overflowY: 'auto',
-  display: 'flex',
-  flexDirection: 'column',
-  padding: theme.spacing.medium,
-  flexGrow: 1,
-}))
+const ChatbotMessagesSC = styled.ul<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    ...($fullscreen && {
+      borderRadius: theme.borderRadiuses.large,
+      border: theme.borders.input,
+    }),
+    ...theme.partials.reset.list,
+    backgroundColor: theme.colors['fill-one'],
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: theme.spacing.medium,
+    flexGrow: 1,
+  })
+)
 
-const ChatbotFormSC = styled.form(({ theme }) => ({
-  position: 'relative',
-  backgroundColor: theme.colors['fill-two'],
-  padding: theme.spacing.medium,
-  borderTop: theme.borders['fill-two'],
-}))
+const ChatbotFormSC = styled.form<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    ...($fullscreen && {
+      border: theme.borders.input,
+    }),
+    position: 'relative',
+    backgroundColor: $fullscreen
+      ? theme.colors['fill-one']
+      : theme.colors['fill-two'],
+    padding: theme.spacing.medium,
+  })
+)
 
 const ChatbotTextAreaWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   gap: theme.spacing.medium,
-  padding: theme.spacing.small,
   borderRadius: theme.borderRadiuses.large,
   backgroundColor: theme.colors['fill-three'],
   '&:has(textarea:focus)': {
@@ -376,6 +392,7 @@ const ChatbotTextAreaWrapperSC = styled.div(({ theme }) => ({
 const ChatbotTextAreaSC = styled.textarea(({ theme }) => ({
   ...theme.partials.text.body2,
   flex: 1,
+  padding: `${theme.spacing.medium}px 0 0 ${theme.spacing.small}px`,
   backgroundColor: 'transparent',
   border: 'none',
   outline: 'none',

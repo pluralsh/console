@@ -1,13 +1,12 @@
 import {
-  Card,
   ChatOutlineIcon,
-  DropdownArrowIcon,
   ExpandIcon,
   Flex,
   GearTrainIcon,
   HistoryIcon,
   IconFrame,
   ModalWrapper,
+  ShrinkIcon,
 } from '@pluralsh/design-system'
 
 import * as Dialog from '@radix-ui/react-dialog'
@@ -22,16 +21,16 @@ import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { AIThreadsTable } from '../AIThreadsTable.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
-  fullscreen?: boolean
+  fullscreen: boolean
   onClose: () => void
-  currentThread?: Nullable<ChatThreadFragment>
+  currentThread: ChatThreadFragment
 }
 
 export function Chatbot() {
   const { open, setOpen, fullscreen, currentThread } = useChatbotContext()
+  if (!currentThread) return null
 
   return (
     <div css={{ position: 'relative' }}>
@@ -72,7 +71,6 @@ export function ChatbotPanel({
               left: 'unset',
             }
       }
-      css={{ width: '100%', height: '100%' }}
       open={open}
       onOpenChange={onClose}
     >
@@ -98,25 +96,32 @@ function ChatbotPanelInner({
   return (
     <ChatbotFrameSC
       $fullscreen={fullscreen}
-      fillLevel={1}
       {...props}
     >
-      <ChatbotHeader onClose={onClose} />
-      {currentThread ? (
-        <ChatbotPanelThread currentThread={currentThread} />
-      ) : (
-        <AIThreadsTable />
-      )}
+      <ChatbotHeader
+        onClose={onClose}
+        fullscreen={fullscreen}
+      />
+      <ChatbotPanelThread
+        currentThread={currentThread}
+        fullscreen={fullscreen}
+      />
     </ChatbotFrameSC>
   )
 }
 
-function ChatbotHeader({ onClose }: { onClose: () => void }) {
+function ChatbotHeader({
+  onClose,
+  fullscreen,
+}: {
+  onClose: () => void
+  fullscreen: boolean
+}) {
   const theme = useTheme()
   const navigate = useNavigate()
-  const { goToThreadList, fullscreen, setFullscreen } = useChatbot()
+  const { goToThreadList, setFullscreen } = useChatbot()
   return (
-    <ChatbotHeaderSC>
+    <ChatbotHeaderSC $fullscreen={fullscreen}>
       <Flex
         gap="xsmall"
         align="center"
@@ -142,10 +147,9 @@ function ChatbotHeader({ onClose }: { onClose: () => void }) {
         />
         <IconFrame
           clickable
-          tooltip={fullscreen ? 'Exit fullscreen' : 'Fullscreen'}
           onClick={() => setFullscreen((prev) => !prev)}
           size="small"
-          icon={fullscreen ? <DropdownArrowIcon /> : <ExpandIcon />}
+          icon={fullscreen ? <ShrinkIcon /> : <ExpandIcon />}
         />
         <IconFrame
           clickable
@@ -161,20 +165,37 @@ function ChatbotHeader({ onClose }: { onClose: () => void }) {
   )
 }
 
-const ChatbotHeaderSC = styled.div(({ theme }) => ({
-  backgroundColor: theme.colors['fill-two'],
-  padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xxsmall,
-}))
-
-const ChatbotFrameSC = styled(Card)<{ $fullscreen?: boolean }>(
-  ({ $fullscreen }) => ({
+const ChatbotHeaderSC = styled.div<{ $fullscreen: boolean }>(
+  ({ $fullscreen, theme }) => ({
+    ...($fullscreen && {
+      border: theme.borders.input,
+      borderRadius: theme.borderRadiuses.large,
+    }),
+    backgroundColor: $fullscreen
+      ? theme.colors['fill-one']
+      : theme.colors['fill-two'],
+    padding: `${theme.spacing.small}px ${theme.spacing.medium}px`,
     display: 'flex',
     flexDirection: 'column',
+    gap: theme.spacing.xxsmall,
+  })
+)
+
+const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
+  ({ $fullscreen, theme }) => ({
+    ...($fullscreen
+      ? {
+          gap: theme.spacing.medium,
+        }
+      : {
+          border: theme.borders['fill-two'],
+          borderRadius: theme.borderRadiuses.large,
+        }),
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
     height: '100%',
-    width: $fullscreen ? '100%' : 560,
+    width: $fullscreen ? 768 : 560,
   })
 )
 
