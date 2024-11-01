@@ -1,11 +1,14 @@
 defimpl Console.AI.Evidence, for: Console.Schema.Stack do
   use Console.AI.Evidence.Base
   alias Console.AI.Worker
-  alias Console.Deployments.Stacks
-  alias Console.Schema.{AiInsight, Stack}
+  alias Console.Schema.{AiInsight, Stack, StackRun}
 
   def generate(%Stack{} = stack) do
-    Stacks.latest_run(stack.id)
+    StackRun.for_stack(stack.id)
+    |> StackRun.for_status(:failed)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Console.Repo.one()
     |> Worker.generate()
     |> Worker.await()
     |> run_insight()
