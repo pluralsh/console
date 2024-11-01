@@ -1,4 +1,5 @@
 import { LoopingLogo } from '@pluralsh/design-system'
+import { ComponentPropsWithRef } from 'react'
 import styled from 'styled-components'
 
 export const LoadingIndicatorWrap = styled.div(({ theme }) => ({
@@ -9,9 +10,11 @@ export const LoadingIndicatorWrap = styled.div(({ theme }) => ({
   padding: theme.spacing.xlarge,
 }))
 
-export default function LoadingIndicator() {
+export default function LoadingIndicator({
+  ...props
+}: ComponentPropsWithRef<'div'>) {
   return (
-    <LoadingIndicatorWrap>
+    <LoadingIndicatorWrap {...props}>
       <LoopingLogo />
     </LoadingIndicatorWrap>
   )

@@ -10204,6 +10204,7 @@ __metadata:
     country-code-lookup: 0.0.23
     customize-cra: 1.0.0
     cypress: 12.14.0
+    dayjs: 1.11.13
     emoji-mart: 5.5.2
     encrypt-storage: 2.13.2
     escape-carriage: 1.3.1
@@ -11041,7 +11042,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dayjs@npm:^1.10.4":
+"dayjs@npm:1.11.13, dayjs@npm:^1.10.4":
   version: 1.11.13
   resolution: "dayjs@npm:1.11.13"
   checksum: f388db88a6aa93956c1f6121644e783391c7b738b73dbc54485578736565c8931bdfba4bb94e9b1535c6e509c97d5deb918bbe1ae6b34358d994de735055cca9

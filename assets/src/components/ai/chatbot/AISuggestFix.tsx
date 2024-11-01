@@ -1,7 +1,7 @@
 import { Markdown } from '@pluralsh/design-system'
 import { ReactNode, useCallback, useState } from 'react'
 import {
-  AiInsight,
+  AiInsightFragment,
   AiRole,
   ChatMessage,
   useAiSuggestedFixLazyQuery,
@@ -13,7 +13,7 @@ import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
 
 interface AISuggestFixProps {
-  insight: Nullable<AiInsight>
+  insight: Nullable<AiInsightFragment>
 }
 
 function fixMessage(fix: string): ChatMessage {

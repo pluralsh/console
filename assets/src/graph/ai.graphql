@@ -10,6 +10,7 @@ fragment AiInsight on AiInsight {
     message
     source
   }
+  ...AiInsightContext
 }
 
 fragment AiInsightSummary on AiInsight {
@@ -17,6 +18,34 @@ fragment AiInsightSummary on AiInsight {
   summary
   freshness
   updatedAt
+  ...AiInsightContext
+}
+
+fragment AiInsightContext on AiInsight {
+  cluster {
+    id
+    name
+  }
+  clusterInsightComponent {
+    id
+    name
+  }
+  service {
+    id
+    name
+  }
+  serviceComponent {
+    id
+    name
+  }
+  stack {
+    id
+    name
+  }
+  stackRun {
+    id
+    message
+  }
 }
 
 fragment AiPin on AiPin {
@@ -24,9 +53,10 @@ fragment AiPin on AiPin {
   name
   insight {
     id
+    ...AiInsightSummary
   }
   thread {
-    id
+    ...ChatThreadTiny
   }
   insertedAt
   updatedAt
@@ -47,6 +77,10 @@ fragment ChatThreadTiny on ChatThread {
   summary
   insertedAt
   updatedAt
+  lastMessageAt
+  insight {
+    ...AiInsightSummary
+  }
 }
 
 fragment ChatThread on ChatThread {

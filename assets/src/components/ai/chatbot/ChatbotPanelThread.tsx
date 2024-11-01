@@ -54,6 +54,7 @@ export function ChatbotPanelThread({
   currentThread: ChatThreadFragment
   fullscreen: boolean
 }) {
+  const theme = useTheme()
   const [loaded, setLoaded] = useState(false)
   const historyScrollRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -75,7 +76,6 @@ export function ChatbotPanelThread({
       onCompleted: async () => {
         setNewMessage('')
         await refetch()
-        //TODO: scroll to bottom should really happen after optimistic cache update
         scrollToBottom()
       },
     })
@@ -106,7 +106,8 @@ export function ChatbotPanelThread({
     [mutate, newMessage, currentThread]
   )
 
-  if (!data?.chatThread?.chats?.edges) return <LoadingIndicator />
+  if (!data?.chatThread?.chats?.edges)
+    return <LoadingIndicator css={{ background: theme.colors['fill-one'] }} />
 
   const messages = data.chatThread.chats.edges
     .map((edge) => edge?.node)
@@ -143,6 +144,7 @@ export function ChatbotPanelThread({
           onChange={(e) => {
             setNewMessage(e.currentTarget.value)
           }}
+          fullscreen={fullscreen}
         />
         <ChatbotLoadingBarSC
           $show={sendingMessage}
@@ -272,7 +274,11 @@ function ChatMessageActions({
 
 const ChatbotTextArea = forwardRef(
   (
-    { onKeyDown: onKeydownProp, ...props }: ComponentProps<'textarea'>,
+    {
+      onKeyDown: onKeydownProp,
+      fullscreen,
+      ...props
+    }: ComponentProps<'textarea'> & { fullscreen: boolean },
     ref: Ref<HTMLTextAreaElement>
   ) => {
     const { isMac } = usePlatform()
@@ -300,7 +306,7 @@ const ChatbotTextArea = forwardRef(
     )
 
     return (
-      <ChatbotTextAreaWrapperSC>
+      <ChatbotTextAreaWrapperSC $fullscreen={fullscreen}>
         <ChatbotTextAreaSC
           ref={ref}
           {...props}
@@ -329,10 +335,6 @@ const ChatMessageSC = styled.li(({ theme }) => ({
   ...theme.partials.reset.li,
   position: 'relative',
   padding: theme.spacing.small,
-  // '&:hover': {
-  //   background: theme.colors['fill-one-hover'],
-  //   borderRadius: theme.borderRadiuses.large,
-  // },
 }))
 
 const ChatbotLoadingBarSC = styled(ProgressBar)<{ $show: boolean }>(
@@ -369,6 +371,7 @@ const ChatbotFormSC = styled.form<{ $fullscreen: boolean }>(
       border: theme.borders.input,
     }),
     position: 'relative',
+    borderRadius: theme.borderRadiuses.large,
     backgroundColor: $fullscreen
       ? theme.colors['fill-one']
       : theme.colors['fill-two'],
@@ -376,15 +379,19 @@ const ChatbotFormSC = styled.form<{ $fullscreen: boolean }>(
   })
 )
 
-const ChatbotTextAreaWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  gap: theme.spacing.medium,
-  borderRadius: theme.borderRadiuses.large,
-  backgroundColor: theme.colors['fill-three'],
-  '&:has(textarea:focus)': {
-    outline: theme.borders['outline-focused'],
-  },
-}))
+const ChatbotTextAreaWrapperSC = styled.div<{ $fullscreen: boolean }>(
+  ({ theme, $fullscreen }) => ({
+    display: 'flex',
+    gap: theme.spacing.medium,
+    borderRadius: theme.borderRadiuses.large,
+    backgroundColor: $fullscreen
+      ? theme.colors['fill-two']
+      : theme.colors['fill-three'],
+    '&:has(textarea:focus)': {
+      outline: theme.borders['outline-focused'],
+    },
+  })
+)
 
 const ChatbotTextAreaSC = styled.textarea(({ theme }) => ({
   ...theme.partials.text.body2,
