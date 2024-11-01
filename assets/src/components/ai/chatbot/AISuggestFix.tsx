@@ -26,6 +26,7 @@ function fixMessage(fix: string): ChatMessage {
 function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
   const [getSuggestion, { loading, data, error }] = useAiSuggestedFixLazyQuery({
     variables: { insightID: insight?.id ?? '' },
+    fetchPolicy: 'network-only',
   })
 
   const [open, setOpen] = useState(false)

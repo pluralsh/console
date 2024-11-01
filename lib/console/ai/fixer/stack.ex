@@ -4,12 +4,12 @@ defmodule Console.AI.Fixer.Stack do
   import Console.AI.Fixer.Base
   alias Console.Repo
   alias Console.AI.Fixer.Parent
-  alias Console.Schema.{Stack, Service, GitRepository}
+  alias Console.Schema.{Stack, StackRun, Service, GitRepository}
   alias Console.Deployments.{Stacks}
 
   def prompt(%Stack{} = stack, insight) do
     stack = Repo.preload(stack, [:repository, :parent])
-    with {:ok, f} <- Stacks.tarstream(stack),
+    with {:ok, f} <- Stacks.tarstream(last_run(stack)),
          {:ok, code} <- code_prompt(f) do
       Enum.concat([
         {:user, """
@@ -37,5 +37,13 @@ defmodule Console.AI.Fixer.Stack do
 
     In addition, it's sources code from a Git repository hosted at url #{url}, present at the git reference #{ref} and folder #{f}
     """
+  end
+
+  defp last_run(%Stack{} = stack) do
+    StackRun.for_stack(stack.id)
+    |> StackRun.for_status(:failed)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Repo.one()
   end
 end

@@ -47,7 +47,7 @@ export function StackRunInsights() {
           insightId={stackRun?.insight?.id}
           messages={[insightMessage(stackRun?.insight)]}
         />
-        <AISuggestFix insight={stackRun?.insight} />
+        {/* <AISuggestFix insight={stackRun?.insight} /> */}
       </Flex>
       <InsightDisplay text={stackRun.insight?.text} />
     </Flex>
