@@ -30,7 +30,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Stack do
     """}
   end
 
-  defp run_insight(%AiInsight{text: text}) when is_binary(text),
+  defp run_insight({:ok, %AiInsight{text: text}}) when is_binary(text),
     do: [{:user, "the most recent run has the following brief summary of its failing status: #{text}"}]
   defp run_insight(_), do: []
 end
