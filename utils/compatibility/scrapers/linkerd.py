@@ -44,4 +44,4 @@ def scrape():
     else:
         print_error("No compatibility information found.")
 
-    update_chart_versions(app_name, app_name + "2")
+    # update_chart_versions(app_name, app_name + "2")

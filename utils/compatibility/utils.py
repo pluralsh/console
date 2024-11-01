@@ -6,17 +6,19 @@ from collections import OrderedDict
 from colorama import Fore, Style
 from packaging.version import Version
 
+KUBE_VERSION_FILE = "../../KUBE_VERSION"
+
 
 def print_error(message):
-    print(Fore.RED + "💔 Error:" + Style.RESET_ALL + f" {message}")
+    print(Fore.RED + "💔" + Style.RESET_ALL + f" {message}")
 
 
 def print_success(message):
-    print(Fore.GREEN + "✅ Success:" + Style.RESET_ALL + f" {message}")
+    print(Fore.GREEN + "✅" + Style.RESET_ALL + f" {message}")
 
 
 def print_warning(message):
-    print(Fore.YELLOW + "⚠️ Warning:" + Style.RESET_ALL + f" {message}")
+    print(Fore.YELLOW + "⛔️" + Style.RESET_ALL + f" {message}")
 
 
 def fetch_page(url):
@@ -83,7 +85,7 @@ def validate_semver(version_str):
 
         return version
     except ValueError:
-        # Return False for invalid version strings
+        # Return None for invalid version strings
         return None
 
 
@@ -93,10 +95,7 @@ def latest_kube_version():
     )
     response = requests.get(url)
     if response.status_code == 200:
-        # remove leading whitespaces and the hotfix version e.g. v1.30.2 -> v1.30
         latest = response.text.lstrip("v")
-        latest = latest.split(".")
-        latest = ".".join(latest[:2])
         latest = validate_semver(latest)
 
         if not latest:
@@ -104,13 +103,11 @@ def latest_kube_version():
             return latest
 
         print(f"Using Latest kube version: {latest}")
-        # Write the value to "../../KUBE_VERSION"
-        file_path = "../../KUBE_VERSION"
-        try:
-            with open(file_path, "w") as file:
+        try:  # write latest version to KUBE_VERSION_FILE
+            with open(KUBE_VERSION_FILE, "w") as file:
                 file.write(f"{latest.major}.{latest.minor}")
         except Exception as e:
-            print_error(f"Failed to write to {file_path}: {e}")
+            print_error(f"Failed to write to {KUBE_VERSION_FILE}: {e}")
 
         return latest
     else:
@@ -121,9 +118,9 @@ def latest_kube_version():
 
 
 def current_kube_version():
-    # Read the current kube version from ../../KUBE_VERSION file
+    # Read the current kube version from KUBE_VERSION_FILE
     try:
-        with open("../../KUBE_VERSION", "r") as file:
+        with open(KUBE_VERSION_FILE, "r") as file:
             return file.read().strip()
     except FileNotFoundError:
         print_error("KUBE_VERSION file not found")
@@ -262,12 +259,50 @@ def ensure_keys(version):
     return version
 
 
+def reduce_versions(versions):
+    reduced_versions = []
+    cur_major = ""
+    cur_minor = ""
+    cur_kube = []
+
+    # Iterate through the versions list in reverse order
+    for data in reversed(versions):
+        version = validate_semver(data["version"])
+        kube = data["kube"]
+
+        # Add to reduced_versions if it's a new major/minor version or kube list changes
+        if version and (
+            cur_major != version.major
+            or cur_minor != version.minor
+            or cur_kube != kube
+        ):
+            cur_major = version.major
+            cur_minor = version.minor
+            cur_kube = kube
+
+            version_info = OrderedDict(
+                [
+                    ("version", str(version)),
+                    ("kube", kube),
+                    ("requirements", []),
+                    ("incompatibilities", []),
+                ]
+            )
+            reduced_versions.append(version_info)
+
+    # Reverse reduced_versions to maintain original order of versions
+    reduced_versions.reverse()
+
+    return reduced_versions
+
+
 def update_compatibility_info(filepath, new_versions):
     try:
         data = read_yaml(filepath)
         if data:
             new_versions = [ensure_keys(v) for v in new_versions]
             update_versions_data(data, new_versions)
+            data["versions"] = reduce_versions(data["versions"])
         else:
             print_warning("No existing versions found. Writing new data.")
             data = {

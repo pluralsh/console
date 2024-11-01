@@ -43,7 +43,8 @@ versions:
   incompatibilities: []
   chart_version: 2.30.0
 - version: 1.29.1
-  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+    '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.29.1
@@ -63,7 +64,8 @@ versions:
   incompatibilities: []
   chart_version: 2.27.0
 - version: 1.26.1
-  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
+  kube: ['1.31', '1.30', '1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22',
+    '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.26.1
@@ -77,21 +79,11 @@ versions:
   requirements: []
   incompatibilities: []
   chart_version: 2.25.0
-- version: 1.24.1
-  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
-  requirements: []
-  incompatibilities: []
-  chart_version: 2.24.1
 - version: 1.24.0
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []
   incompatibilities: []
   chart_version: 2.24.0
-- version: 1.23.2
-  kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
-  requirements: []
-  incompatibilities: []
-  chart_version: 2.23.2
 - version: 1.23.1
   kube: ['1.29', '1.28', '1.27', '1.26', '1.25', '1.24', '1.23', '1.22', '1.21', '1.20']
   requirements: []

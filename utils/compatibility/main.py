@@ -12,7 +12,7 @@ def call_scraper(scraper):
     except ModuleNotFoundError:
         print_warning(f"No scraper found for {scraper}")
     except AttributeError:
-        print_error(f"Scrape function not found in the scraper for {scraper}")
+        print_error(f"Error While Running the Scraper for {scraper}")
     except Exception as e:
         print_error(f"An unexpected error occurred: {e}")
 
