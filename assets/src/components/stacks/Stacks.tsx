@@ -366,6 +366,7 @@ export default function Stacks() {
               </div>
             </div>
             <KickButton
+              floating
               pulledAt={tinyStack?.repository?.pulledAt}
               kickMutationHook={useKickStackMutation}
               message="Resync"
@@ -391,7 +392,7 @@ export default function Stacks() {
                       }
                     />
                   }
-                  type="floating"
+                  type="secondary"
                 />
               }
             >

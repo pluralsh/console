@@ -731,6 +731,14 @@ defmodule Console.Factory do
     }
   end
 
+  def ai_pin_factory do
+    %Schema.AiPin{
+      name: "my pin",
+      user: build(:user),
+      insight: build(:ai_insight)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

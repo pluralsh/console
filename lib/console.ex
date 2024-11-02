@@ -1,10 +1,21 @@
 defmodule Console do
   require Logger
 
+  @ttl :timer.minutes(30)
+
   @type error :: {:error, term}
 
   def coalesce(nil, val), do: val
   def coalesce(val, _), do: val
+
+  def debounce(scope, fun, opts \\ []) do
+    case conf(:cache_adapter).get({:plrl_debounce, scope}) do
+      nil ->
+        conf(:cache_adapter).put({:plrl_debounce, scope}, opts[:placeholder] || :ok, opts ++ [ttl: @ttl])
+        fun.()
+      res -> res
+    end
+  end
 
   def rate_limit(), do: {"global", :timer.seconds(1), Console.conf(:qps)}
 

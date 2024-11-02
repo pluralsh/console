@@ -21,6 +21,7 @@ config :console, :consumers, [
   Console.Deployments.PubSub.Pipeline,
   Console.Deployments.PubSub.Notifications,
   Console.Deployments.PubSub.Email,
+  Console.AI.PubSub.Consumer
 ]
 
 config :console, Console.Cron.Scheduler,
@@ -63,6 +64,7 @@ config :console, Console.Cron.Scheduler,
     {"@daily", {Console.Cron.Jobs, :prune_audits, []}},
     {"@daily", {Console.Cron.Jobs, :prune_alerts, []}},
     {"@daily", {Console.AI.Cron, :trim, []}},
+    {"@daily", {Console.AI.Cron, :trim_threads, []}},
     {"0 0 * * 0", {Console.AI.Cron, :chats, []}}
   ]
 

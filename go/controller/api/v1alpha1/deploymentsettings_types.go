@@ -228,7 +228,8 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 
 		attr.Openai = &console.OpenaiSettingsAttributes{
 			AccessToken: &token,
-			Model:       &in.OpenAI.Model,
+			Model:       in.OpenAI.Model,
+			BaseURL:     in.OpenAI.BaseUrl,
 		}
 	case console.AiProviderAnthropic:
 		if in.Anthropic == nil {
@@ -241,8 +242,8 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		}
 
 		attr.Anthropic = &console.AnthropicSettingsAttributes{
-			AccessToken: &token,
-			Model:       &in.OpenAI.Model,
+			AccessToken: lo.ToPtr(token),
+			Model:       in.OpenAI.Model,
 		}
 	case console.AiProviderAzure:
 		if in.Azure == nil {
@@ -297,8 +298,13 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 type AIProviderSettings struct {
 	// Model is the LLM model name to use.
 	//
-	// +kubebuilder:validation:Required
-	Model string `json:"model"`
+	// +kubebuilder:validation:Optional
+	Model *string `json:"model,omitempty"`
+
+	// A custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec)
+	//
+	// +kubebuilder:validation:Optional
+	BaseUrl *string `json:"baseUrl,omitempty"`
 
 	// TokenSecretRef is a reference to the local secret holding the token to access
 	// the configured AI provider.

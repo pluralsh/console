@@ -164,7 +164,6 @@ defmodule Console.Deployments.Notifications do
   end
 
   defp url_deliver(url, body) do
-    Logger.info "delivering body: #{body}"
     HTTPoison.post(url, body, [
       {"content-type", "application/json"},
       {"accept", "application/json"}

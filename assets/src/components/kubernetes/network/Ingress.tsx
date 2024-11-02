@@ -41,7 +41,7 @@ import ResourceLink from '../common/ResourceLink'
 
 import { getBreadcrumbs } from './Ingresses'
 import { Endpoints } from './utils'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },

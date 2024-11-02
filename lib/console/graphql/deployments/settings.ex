@@ -52,6 +52,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :openai_settings_attributes do
+    field :base_url,     :string
     field :access_token, :string
     field :model,        :string
   end
@@ -172,7 +173,8 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "OpenAI connection information"
   object :openai_settings do
-    field :model, :string, description: "the openai model version to use"
+    field :base_url, :string, description: "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
+    field :model,    :string, description: "the openai model version to use"
   end
 
   @desc "Anthropic connection information"

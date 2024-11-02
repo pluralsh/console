@@ -2,13 +2,20 @@ defmodule Console.GraphQl.Resolvers.AI do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.AiInsight
   alias Console.AI.Chat, as: ChatSvc
   alias Console.AI.{Provider, Fixer}
-  alias Console.Schema.{Chat, ChatThread}
+  alias Console.Schema.{Chat, ChatThread, AiPin}
   alias Console.Deployments.Clusters
   alias Console.GraphQl.Resolvers.Kubernetes
 
   def query(Chat, _), do: Chat
   def query(ChatThread, _), do: ChatThread
-  def query(_, _), do: AIInsight
+  def query(AiPin, _), do: AiPin
+  def query(_, _), do: AiInsight
+
+  def pins(args, %{context: %{current_user: user}}) do
+    AiPin.for_user(user.id)
+    |> AiPin.ordered()
+    |> paginate(args)
+  end
 
   def threads(args, %{context: %{current_user: user}}) do
     ChatThread.for_user(user.id)
@@ -16,11 +23,20 @@ defmodule Console.GraphQl.Resolvers.AI do
     |> paginate(args)
   end
 
+  def thread(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.thread_access(id, user)
+
   def chats(args, %{context: %{current_user: user}}) do
     with {:ok, q} <- maybe_thread(args, user) do
       Chat.ordered(q)
       |> paginate(args)
     end
+  end
+
+  def list_chats(%ChatThread{id: tid}, args, _) do
+    Chat.for_thread(tid)
+    |> Chat.ordered()
+    |> paginate(args)
   end
 
   defp maybe_thread(%{thread_id: tid}, user) when is_binary(tid) do
@@ -68,6 +84,12 @@ defmodule Console.GraphQl.Resolvers.AI do
 
   def delete_thread(%{id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.delete_thread(id, user)
+
+  def create_pin(%{attributes: attrs}, %{context: %{current_user: user}}),
+    do: ChatSvc.create_pin(attrs, user)
+
+  def delete_pin(%{id: id}, %{context: %{current_user: user}}),
+    do: ChatSvc.delete_pin(id, user)
 
   def raw_resource(%{version: v, kind: k, name: n} = comp, _, _) do
     cluster = Console.Repo.preload(comp, [:cluster])

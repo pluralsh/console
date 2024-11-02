@@ -43,7 +43,7 @@ import pick from 'lodash/pick'
 import {
   AIVerbosityLevel,
   useExplainWithAIContext,
-} from '../../ai/ExplainWithAIContext.tsx'
+} from '../../ai/AIContext.tsx'
 
 const updateSettings = produce(
   (
@@ -260,7 +260,12 @@ export function GlobalSettingsAiProvider() {
                 }}
               >
                 {Object.values(AIVerbosityLevel).map((value) => (
-                  <Radio value={value}>{value}</Radio>
+                  <Radio
+                    value={value}
+                    key={value}
+                  >
+                    {value}
+                  </Radio>
                 ))}
               </RadioGroup>
             </Card>

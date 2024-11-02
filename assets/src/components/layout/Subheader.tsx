@@ -4,9 +4,10 @@ import {
   Breadcrumbs,
   IconFrame,
 } from '@pluralsh/design-system'
+import { Chatbot } from 'components/ai/chatbot/Chatbot.tsx'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
-import ExplainWithAI from '../ai/ExplainWithAI.tsx'
+import ExplainWithAI from '../ai/explain/ExplainWithAI.tsx'
 
 const SubheaderSC = styled.div(({ theme }) => ({
   display: 'flex',
@@ -61,6 +62,7 @@ export default function Subheader() {
         <Breadcrumbs className="crumbs" />
       </BreadcrumbsContainerSC>
       <ExplainWithAI />
+      <Chatbot />
     </SubheaderSC>
   )
 }

@@ -5,7 +5,10 @@ import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { dateTimeFormat } from 'utils/date'
-import { AISuggestFix } from '../../../ai/AISuggestFix.tsx'
+import {
+  ChatWithAIButton,
+  insightMessage,
+} from '../../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import { StackRunOutletContextT } from '../Route.tsx'
 
@@ -38,7 +41,12 @@ export function StackRunInsights() {
           loading={loading}
           refetch={refetch}
         />
-        <AISuggestFix insight={stackRun?.insight} />
+        <ChatWithAIButton
+          floating
+          insightId={stackRun?.insight?.id}
+          messages={[insightMessage(stackRun?.insight)]}
+        />
+        {/* <AISuggestFix insight={stackRun?.insight} /> */}
       </Flex>
       <InsightDisplay text={stackRun.insight?.text} />
     </Flex>

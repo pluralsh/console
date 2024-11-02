@@ -3,7 +3,11 @@ import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { dateTimeFormat } from 'utils/date'
-import { AISuggestFix } from '../ai/AISuggestFix.tsx'
+import { AISuggestFix } from '../ai/chatbot/AISuggestFix.tsx'
+import {
+  ChatWithAIButton,
+  insightMessage,
+} from '../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../utils/RefreshIconFrame.tsx'
 import { ComponentDetailsContext } from './ComponentDetails.tsx'
 
@@ -34,6 +38,11 @@ export function ComponentInsights() {
         <IconFrameRefreshButton
           loading={loading}
           refetch={refetch}
+        />
+        <ChatWithAIButton
+          floating
+          insightId={component?.insight?.id}
+          messages={[insightMessage(component?.insight)]}
         />
         <AISuggestFix insight={component?.insight} />
       </Flex>

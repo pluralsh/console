@@ -10,7 +10,11 @@ import { useParams } from 'react-router-dom'
 
 import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
-import { AISuggestFix } from '../../../ai/AISuggestFix.tsx'
+import { AISuggestFix } from '../../../ai/chatbot/AISuggestFix.tsx'
+import {
+  ChatWithAIButton,
+  insightMessage,
+} from '../../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
 import {
   getServiceDetailsBreadcrumbs,
@@ -65,6 +69,11 @@ export function ServiceInsights() {
           <IconFrameRefreshButton
             loading={loading}
             refetch={refetch}
+          />
+          <ChatWithAIButton
+            floating
+            insightId={service?.insight?.id}
+            messages={[insightMessage(service?.insight)]}
           />
           <AISuggestFix insight={service?.insight} />
         </Flex>

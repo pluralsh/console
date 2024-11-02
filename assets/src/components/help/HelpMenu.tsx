@@ -73,7 +73,7 @@ export function HelpMenu({
       </HelpMenuButton>
       {/* <HelpMenuButton
         startIcon={
-          <ChatIcon
+          <ChatOutlineIcon
             size={16}
             color={theme.colors['icon-primary']}
           />

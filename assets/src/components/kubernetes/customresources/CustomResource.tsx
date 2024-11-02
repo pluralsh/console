@@ -24,7 +24,7 @@ import { NAMESPACE_PARAM } from '../Navigation'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Raw' },

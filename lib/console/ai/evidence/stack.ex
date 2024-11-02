@@ -1,11 +1,14 @@
 defimpl Console.AI.Evidence, for: Console.Schema.Stack do
   use Console.AI.Evidence.Base
   alias Console.AI.Worker
-  alias Console.Deployments.Stacks
-  alias Console.Schema.{AiInsight, Stack}
+  alias Console.Schema.{AiInsight, Stack, StackRun}
 
   def generate(%Stack{} = stack) do
-    Stacks.latest_run(stack.id)
+    StackRun.for_stack(stack.id)
+    |> StackRun.for_status(:failed)
+    |> StackRun.ordered(desc: :id)
+    |> StackRun.limit(1)
+    |> Console.Repo.one()
     |> Worker.generate()
     |> Worker.await()
     |> run_insight()
@@ -30,7 +33,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Stack do
     """}
   end
 
-  defp run_insight(%AiInsight{text: text}) when is_binary(text),
+  defp run_insight({:ok, %AiInsight{text: text}}) when is_binary(text),
     do: [{:user, "the most recent run has the following brief summary of its failing status: #{text}"}]
   defp run_insight(_), do: []
 end

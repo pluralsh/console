@@ -27,7 +27,7 @@
 							"text": ": "
 						},
 						{
-							"type": "link",
+							"type": "text",
 							"url": "<%= @stack_run.repository.url %>\n"
 						},
 						{
@@ -53,7 +53,7 @@
 							"text": ": "
 						},
 						{
-							"type": "link",
+							"type": "text",
 							"url": "<%= @stack_run.git.folder %>"
 						}
 					]

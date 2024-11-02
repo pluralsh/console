@@ -11,7 +11,11 @@ import moment from 'moment/moment'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
-import { AISuggestFix } from '../../ai/AISuggestFix.tsx'
+import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
+import {
+  ChatWithAIButton,
+  insightMessage,
+} from '../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
@@ -46,6 +50,11 @@ export function StackInsights() {
         <IconFrameRefreshButton
           loading={loading}
           refetch={refetch}
+        />
+        <ChatWithAIButton
+          floating
+          insightId={stack?.insight?.id}
+          messages={[insightMessage(stack?.insight)]}
         />
         <AISuggestFix insight={stack?.insight} />
       </Flex>

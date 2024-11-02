@@ -42,7 +42,7 @@ import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Jobs'
 import { usePodsColumns } from './Pods'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'conditions', label: 'Conditions' },

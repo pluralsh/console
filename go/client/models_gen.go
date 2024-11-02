@@ -138,9 +138,42 @@ type AiInsight struct {
 	Summary   *string           `json:"summary,omitempty"`
 	Freshness *InsightFreshness `json:"freshness,omitempty"`
 	// any errors generated when compiling this insight
-	Error      []*ServiceError `json:"error,omitempty"`
-	InsertedAt *string         `json:"insertedAt,omitempty"`
-	UpdatedAt  *string         `json:"updatedAt,omitempty"`
+	Error                   []*ServiceError          `json:"error,omitempty"`
+	Service                 *ServiceDeployment       `json:"service,omitempty"`
+	Stack                   *InfrastructureStack     `json:"stack,omitempty"`
+	Cluster                 *Cluster                 `json:"cluster,omitempty"`
+	StackRun                *StackRun                `json:"stackRun,omitempty"`
+	ServiceComponent        *ServiceComponent        `json:"serviceComponent,omitempty"`
+	ClusterInsightComponent *ClusterInsightComponent `json:"clusterInsightComponent,omitempty"`
+	InsertedAt              *string                  `json:"insertedAt,omitempty"`
+	UpdatedAt               *string                  `json:"updatedAt,omitempty"`
+}
+
+// A saved item for future ai-based investigation
+type AiPin struct {
+	ID         string      `json:"id"`
+	Name       *string     `json:"name,omitempty"`
+	Insight    *AiInsight  `json:"insight,omitempty"`
+	Thread     *ChatThread `json:"thread,omitempty"`
+	InsertedAt *string     `json:"insertedAt,omitempty"`
+	UpdatedAt  *string     `json:"updatedAt,omitempty"`
+}
+
+// the items you want to reference in this pin
+type AiPinAttributes struct {
+	Name      *string `json:"name,omitempty"`
+	InsightID *string `json:"insightId,omitempty"`
+	ThreadID  *string `json:"threadId,omitempty"`
+}
+
+type AiPinConnection struct {
+	PageInfo PageInfo     `json:"pageInfo"`
+	Edges    []*AiPinEdge `json:"edges,omitempty"`
+}
+
+type AiPinEdge struct {
+	Node   *AiPin  `json:"node,omitempty"`
+	Cursor *string `json:"cursor,omitempty"`
 }
 
 // Settings for configuring access to common LLM providers
@@ -713,12 +746,15 @@ type ChatMessage struct {
 
 // A list of chat messages around a specific topic created on demand
 type ChatThread struct {
-	ID         string  `json:"id"`
-	Summary    string  `json:"summary"`
-	Default    bool    `json:"default"`
-	User       *User   `json:"user,omitempty"`
-	InsertedAt *string `json:"insertedAt,omitempty"`
-	UpdatedAt  *string `json:"updatedAt,omitempty"`
+	ID            string          `json:"id"`
+	Summary       string          `json:"summary"`
+	Default       bool            `json:"default"`
+	LastMessageAt *string         `json:"lastMessageAt,omitempty"`
+	User          *User           `json:"user,omitempty"`
+	Insight       *AiInsight      `json:"insight,omitempty"`
+	Chats         *ChatConnection `json:"chats,omitempty"`
+	InsertedAt    *string         `json:"insertedAt,omitempty"`
+	UpdatedAt     *string         `json:"updatedAt,omitempty"`
 }
 
 // basic user-supplied input for creating an AI chat thread
@@ -726,6 +762,10 @@ type ChatThreadAttributes struct {
 	Summary string `json:"summary"`
 	// controls whether this thread is autosummarized, set true when users explicitly set summary
 	Summarized *bool `json:"summarized,omitempty"`
+	// a list of messages to add initially when creating this thread
+	Messages []*ChatMessage `json:"messages,omitempty"`
+	// an ai insight this thread was created from
+	InsightID *string `json:"insightId,omitempty"`
 }
 
 type ChatThreadConnection struct {
@@ -3117,11 +3157,14 @@ type OllamaSettings struct {
 
 // OpenAI connection information
 type OpenaiSettings struct {
+	// the base url to use when querying an OpenAI compatible API, leave blank for OpenAI
+	BaseURL *string `json:"baseUrl,omitempty"`
 	// the openai model version to use
 	Model *string `json:"model,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
+	BaseURL     *string `json:"baseUrl,omitempty"`
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
 }

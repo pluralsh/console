@@ -70,7 +70,7 @@ import { ShellWithContext } from '../../cluster/containers/ContainerShell'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },

@@ -115,20 +115,22 @@ export function useFetchSlice<
 
   const { fetchMore } = queryResult
 
-  return useCallback(() => {
-    fetchMore({
-      variables: { after, first },
-      updateQuery: (prev, { fetchMoreResult }) => {
-        const newConnection = extendConnection(
-          reduceNestedData(keyPath, prev),
-          reduceNestedData(keyPath, fetchMoreResult)[queryKey],
-          queryKey
-        )
+  return useCallback(
+    () =>
+      fetchMore({
+        variables: { after, first },
+        updateQuery: (prev, { fetchMoreResult }) => {
+          const newConnection = extendConnection(
+            reduceNestedData(keyPath, prev),
+            reduceNestedData(keyPath, fetchMoreResult)[queryKey],
+            queryKey
+          )
 
-        return updateNestedConnection(keyPath, prev, newConnection)
-      },
-    })
-  }, [fetchMore, after, first, keyPath, queryKey])
+          return updateNestedConnection(keyPath, prev, newConnection)
+        },
+      }),
+    [fetchMore, after, first, keyPath, queryKey]
+  )
 }
 
 export const reduceNestedData = (path: string[], data: any) =>

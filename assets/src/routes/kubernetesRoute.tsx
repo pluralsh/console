@@ -176,7 +176,7 @@ import {
   WORKLOADS_REL_PATH,
 } from './kubernetesRoutesConsts'
 
-export const kubernetesRoute = (
+export const kubernetesRoutes = (
   <Route
     path={KUBERNETES_ABS_PATH}
     element={<Root />}

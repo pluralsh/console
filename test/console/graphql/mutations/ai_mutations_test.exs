@@ -90,6 +90,7 @@ defmodule Console.GraphQl.AIMutationsTest do
 
   describe "createThread" do
     test "it can create a thread for a user" do
+      user = insert(:user)
       {:ok, %{data: %{"createThread" => thread}}} = run_query("""
         mutation Create($attrs: ChatThreadAttributes!) {
           createThread(attributes: $attrs) {
@@ -97,10 +98,23 @@ defmodule Console.GraphQl.AIMutationsTest do
             summary
           }
         }
-      """, %{"attrs" => %{"summary" => "a thread"}}, %{current_user: insert(:user)})
+      """, %{"attrs" => %{
+        "summary" => "a thread",
+        "messages" => [%{"role" => "ASSISTANT", "content" => "blah"}]
+      }}, %{current_user: user})
 
       assert thread["id"]
       assert thread["summary"] == "a thread"
+
+      {:ok, %{data: %{"chats" => chat}}} = run_query("""
+        query Chat($id: ID!) {
+          chats(threadId: $id, first: 5) {
+            edges { node { id content role } }
+          }
+        }
+      """, %{"id" => thread["id"]}, %{current_user: user})
+
+      [%{"role" => "ASSISTANT", "content" => "blah"}] = from_connection(chat)
     end
   end
 
@@ -169,6 +183,44 @@ defmodule Console.GraphQl.AIMutationsTest do
           deleteChat(id: $id) { id }
         }
       """, %{"id" => chat.id}, %{current_user: user})
+    end
+  end
+
+  describe "createPin" do
+    test "it can create a pin" do
+      user = insert(:user)
+      insight = insert(:ai_insight)
+
+      {:ok, %{data: %{"createPin" => pin}}} = run_query("""
+        mutation Create($attributes: AiPinAttributes!) {
+          createPin(attributes: $attributes) {
+            id
+            insight { id }
+          }
+        }
+      """, %{"attributes" => %{"insightId" => insight.id}}, %{current_user: user})
+
+      assert pin["id"]
+      assert pin["insight"]["id"] == insight.id
+    end
+  end
+
+  describe "deletePin" do
+    test "it can create a pin" do
+      user = insert(:user)
+      pin = insert(:ai_pin, user: user)
+
+      {:ok, %{data: %{"deletePin" => del}}} = run_query("""
+        mutation Create($id: ID!) {
+          deletePin(id: $id) {
+            id
+            insight { id }
+          }
+        }
+      """, %{"id" => pin.id}, %{current_user: user})
+
+      assert del["id"] == pin.id
+      refute refetch(pin)
     end
   end
 end

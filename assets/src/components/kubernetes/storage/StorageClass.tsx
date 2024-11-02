@@ -34,7 +34,7 @@ import {
   colReclaimPolicy,
   colStatus,
 } from './PersistentVolumes'
-import { useExplainWithAI } from '../../ai/ExplainWithAIContext.tsx'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Persistent Volumes' },

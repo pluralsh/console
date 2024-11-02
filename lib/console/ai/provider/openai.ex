@@ -6,7 +6,7 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  defstruct [:access_key, :model]
+  defstruct [:access_key, :model, :base_url]
 
   @type t :: %__MODULE__{}
 
@@ -38,7 +38,7 @@ defmodule Console.AI.OpenAI do
     def spec(), do: %__MODULE__{choices: [OpenAI.Choice.spec()]}
   end
 
-  def new(opts), do: %__MODULE__{access_key: opts.access_token, model: opts.model}
+  def new(opts), do: %__MODULE__{access_key: opts.access_token, model: opts.model, base_url: opts.base_url}
 
   @doc """
   Generate a openai completion from
@@ -54,13 +54,13 @@ defmodule Console.AI.OpenAI do
     end
   end
 
-  defp chat(%__MODULE__{access_key: token, model: model}, history) do
+  defp chat(%__MODULE__{access_key: token, model: model} = openai, history) do
     body = Jason.encode!(%{
       model: model || "gpt-4o-mini",
       messages: history,
     })
 
-    url("/chat/completions")
+    url(openai, "/chat/completions")
     |> HTTPoison.post(body, json_headers(token), @options)
     |> handle_response(CompletionResponse.spec())
   end
@@ -73,7 +73,8 @@ defmodule Console.AI.OpenAI do
   end
   defp handle_response({:error, err}, _), do: {:error, "openai network error: #{Jason.encode!(Map.from_struct(err))}"}
 
-  defp url(path), do: "https://api.openai.com/v1#{path}"
+  defp url(%__MODULE__{base_url: url}, path) when is_binary(url), do: Path.join(url, path)
+  defp url(_, path), do: "https://api.openai.com/v1#{path}"
 
   defp json_headers(token), do: headers([{"Content-Type", "application/json"}], token)
 

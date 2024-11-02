@@ -1,5 +1,5 @@
 defmodule Console.AI.ChatTest do
-  use Console.DataCase, async: false
+  use Console.DataCase, async: true
   alias Console.AI.Chat
   use Mimic
 
@@ -64,7 +64,7 @@ defmodule Console.AI.ChatTest do
       old_other = insert_list(3, :chat, inserted_at: Timex.now() |> Timex.shift(days: -7))
       old_other2 = insert_list(3, :chat, user: user, inserted_at: Timex.now() |> Timex.shift(days: -7))
 
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _] -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _] -> {:ok, "openai completion"} end)
 
       {:ok, summary} = Chat.rollup(thread)
 
@@ -88,7 +88,7 @@ defmodule Console.AI.ChatTest do
       insert_list(3, :chat)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
 
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _] -> {:ok, "ai thread summary"} end)
+      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _, _, _] -> {:ok, "ai thread summary"} end)
 
       {:ok, summarized} = Chat.summarize(thread)
 
@@ -152,10 +152,10 @@ defmodule Console.AI.ChatTest do
   end
 
   describe "#chat/2" do
-    test "it will persist a set of messages and generate a new one transactionally" do
+    test "it will persist a set of messages and generate a new one transactionally in whatever thread" do
       user = insert(:user)
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})
-      expect(Console.AI.OpenAI, :completion, fn _, [_, _, _] -> {:ok, "openai completion"} end)
+      expect(Console.AI.OpenAI, :completion, 2, fn _, [_, _, _] -> {:ok, "openai completion"} end)
 
       {:ok, next} = Chat.chat([
         %{role: :assistant, content: "blah"},
@@ -165,6 +165,20 @@ defmodule Console.AI.ChatTest do
       assert next.user_id == user.id
       assert next.role == :assistant
       assert next.content == "openai completion"
+
+      thread = insert(:chat_thread, user: user)
+
+      {:ok, next} = Chat.chat([
+        %{role: :assistant, content: "blah"},
+        %{role: :user, content: "blah blah"}
+      ], thread.id, user)
+
+      assert next.thread_id == thread.id
+      assert next.user_id == user.id
+      assert next.role == :assistant
+      assert next.content == "openai completion"
+
+      assert refetch(thread).last_message_at
     end
 
     test "it will persist a set of messages and generate a new one transactionally in a thread" do
@@ -193,6 +207,47 @@ defmodule Console.AI.ChatTest do
         %{role: :assistant, content: "blah"},
         %{role: :user, content: "blah blah"}
       ], thread.id, user)
+    end
+  end
+
+  describe "#make_default_thread/1" do
+    test "only one default thread can be created" do
+      user = insert(:user)
+
+      thread = Chat.make_default_thread!(user)
+
+      assert thread.user_id == user.id
+      assert thread.default
+
+      {:error, _} = Chat.create_thread(%{default: true, summary: "blah"}, user)
+    end
+  end
+
+  describe "#create_pin/2" do
+    test "a user can pin an insight" do
+      user = insert(:user)
+      insight = insert(:ai_insight)
+
+      {:ok, pin} = Chat.create_pin(%{insight_id: insight.id}, user)
+
+      assert pin.user_id == user.id
+      assert pin.insight_id == insight.id
+    end
+  end
+
+  describe "#delete_pin/2" do
+    test "a user can delete their pin" do
+      user = insert(:user)
+      pin = insert(:ai_pin, user: user)
+
+      {:ok, del} = Chat.delete_pin(pin.id, user)
+
+      assert del.id == pin.id
+      refute refetch(pin)
+    end
+
+    test "users cannot delete others' pins" do
+      {:error, _} = Chat.delete_pin(insert(:ai_pin).id, insert(:user))
     end
   end
 end

@@ -445,12 +445,17 @@ type RootQueryType {
     insightId: ID!
   ): String
 
+  "gets an individual chat thread, with the ability to sideload chats on top"
+  chatThread(id: ID!): ChatThread
+
   "gets the chat history from prior AI chat sessions"
   chats(after: String, first: Int, before: String, last: Int, threadId: ID): ChatConnection
 
   clusterInsightComponent(id: ID!): ClusterInsightComponent
 
   chatThreads(after: String, first: Int, before: String, last: Int): ChatThreadConnection
+
+  aiPins(after: String, first: Int, before: String, last: Int): AiPinConnection
 }
 
 type RootMutationType {
@@ -919,6 +924,10 @@ type RootMutationType {
 
   "deletes a chat from a users history"
   deleteChat(id: ID!): Chat
+
+  createPin(attributes: AiPinAttributes!): AiPin
+
+  deletePin(id: ID!): AiPin
 }
 
 type RootSubscriptionType {
@@ -1085,6 +1094,7 @@ input AiSettingsAttributes {
 }
 
 input OpenaiSettingsAttributes {
+  baseUrl: String
   accessToken: String
   model: String
 }
@@ -1255,6 +1265,9 @@ type AiSettings {
 
 "OpenAI connection information"
 type OpenaiSettings {
+  "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
+  baseUrl: String
+
   "the openai model version to use"
   model: String
 }
@@ -5808,12 +5821,25 @@ input ChatMessage {
   content: String!
 }
 
+"the items you want to reference in this pin"
+input AiPinAttributes {
+  name: String
+  insightId: ID
+  threadId: ID
+}
+
 "basic user-supplied input for creating an AI chat thread"
 input ChatThreadAttributes {
   summary: String!
 
   "controls whether this thread is autosummarized, set true when users explicitly set summary"
   summarized: Boolean
+
+  "a list of messages to add initially when creating this thread"
+  messages: [ChatMessage]
+
+  "an ai insight this thread was created from"
+  insightId: ID
 }
 
 type Chat {
@@ -5831,19 +5857,22 @@ type ChatThread {
   id: ID!
   summary: String!
   default: Boolean!
+  lastMessageAt: DateTime
   user: User
+  insight: AiInsight
+  chats(after: String, first: Int, before: String, last: Int): ChatConnection
   insertedAt: DateTime
   updatedAt: DateTime
 }
 
-type ChatConnection {
-  pageInfo: PageInfo!
-  edges: [ChatEdge]
-}
-
-type ChatThreadConnection {
-  pageInfo: PageInfo!
-  edges: [ChatThreadEdge]
+"A saved item for future ai-based investigation"
+type AiPin {
+  id: ID!
+  name: String
+  insight: AiInsight
+  thread: ChatThread
+  insertedAt: DateTime
+  updatedAt: DateTime
 }
 
 "A representation of a LLM-derived insight"
@@ -5863,6 +5892,18 @@ type AiInsight {
 
   "any errors generated when compiling this insight"
   error: [ServiceError]
+
+  service: ServiceDeployment
+
+  stack: InfrastructureStack
+
+  cluster: Cluster
+
+  stackRun: StackRun
+
+  serviceComponent: ServiceComponent
+
+  clusterInsightComponent: ClusterInsightComponent
 
   insertedAt: DateTime
 
@@ -5885,6 +5926,21 @@ type ClusterInsightComponent {
 
   "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
   resource: KubernetesUnstructured
+}
+
+type ChatConnection {
+  pageInfo: PageInfo!
+  edges: [ChatEdge]
+}
+
+type ChatThreadConnection {
+  pageInfo: PageInfo!
+  edges: [ChatThreadEdge]
+}
+
+type AiPinConnection {
+  pageInfo: PageInfo!
+  edges: [AiPinEdge]
 }
 
 input CloneAttributes {
@@ -7804,6 +7860,11 @@ type RunbookExecutionEdge {
 
 type WebhookEdge {
   node: Webhook
+  cursor: String
+}
+
+type AiPinEdge {
+  node: AiPin
   cursor: String
 }
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import AIButton from './ExplainWithAIButton.tsx'
-import { useExplainWithAIContext } from './ExplainWithAIContext.tsx'
 import { useTheme } from 'styled-components'
+import AIButton from './ExplainWithAIButton.tsx'
+import { useExplainWithAIContext } from '../AIContext.tsx'
 import ExplainWithAIPanel from './ExplainWithAIPanel.tsx'
 
 export default function ExplainWithAI() {
@@ -12,9 +12,9 @@ export default function ExplainWithAI() {
   return (
     <div
       css={{
-        marginRight: 66,
+        // align with top bar search
+        marginRight: theme.spacing.xsmall + 2,
         position: 'relative',
-        zIndex: theme.zIndexes.modal,
       }}
     >
       <AIButton

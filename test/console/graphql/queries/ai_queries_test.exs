@@ -2,6 +2,48 @@ defmodule Console.GraphQl.AiQueriesTest do
   use Console.DataCase, async: false
   use Mimic
 
+  describe "chatThread" do
+    test "you can view your own threads" do
+      user = insert(:user)
+      thread = insert(:chat_thread, user: user)
+      chats = insert_list(3, :chat, thread: thread)
+      insert_list(4, :chat)
+
+      {:ok, %{data: %{"chatThread" => found}}} = run_query("""
+        query Thread($id: ID!) {
+          chatThread(id: $id) {
+            id
+            chats(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      assert found["id"] == thread.id
+      assert from_connection(found["chats"])
+             |> ids_equal(chats)
+    end
+
+    test "you cannot view other users threads" do
+      user = insert(:user)
+      thread = insert(:chat_thread)
+      insert_list(3, :chat, thread: thread)
+      insert_list(5, :chat)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Thread($id: ID!) {
+          chatThread(id: $id) {
+            id
+            chats(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+    end
+  end
+
   describe "aiCompletion" do
     test "it can generate an ai summary for the given input" do
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
@@ -141,6 +183,25 @@ defmodule Console.GraphQl.AiQueriesTest do
           clusterInsightComponent(id: $id) { id }
         }
       """, %{"id" => comp.id}, %{current_user: user})
+    end
+  end
+
+  describe "aiPins" do
+    test "it can list a users ai pins" do
+      user = insert(:user)
+      pins = insert_list(3, :ai_pin, user: user)
+      insert_list(2, :ai_pin)
+
+      {:ok, %{data: %{"aiPins" => found}}} = run_query("""
+        query {
+          aiPins(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: user})
+
+      assert from_connection(found)
+             |> ids_equal(pins)
     end
   end
 end

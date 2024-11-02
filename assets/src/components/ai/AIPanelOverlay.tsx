@@ -17,10 +17,12 @@ const getTransitionProps = (open: boolean) => ({
 export function AIPanelOverlay({
   open,
   onClose,
+  alwaysGrow = false,
   children,
 }: {
   open: boolean
   onClose: () => void
+  alwaysGrow?: boolean
   children: ReactNode
 }) {
   const theme = useTheme()
@@ -37,17 +39,17 @@ export function AIPanelOverlay({
       ref={ref}
       css={{
         display: 'flex',
-        transition: 'max-height 0.2s ease-in-out',
+        transition: 'max-height 0.2s ease-in-out, height 0.2s ease-in-out',
         pointerEvents: 'none',
         position: 'absolute',
         right: 0,
         top: 32 + theme.spacing.small,
-        width: 650,
+        width: 600,
         zIndex: theme.zIndexes.modal,
         '& > *': { pointerEvents: 'auto' },
       }}
       style={{
-        maxHeight,
+        ...(alwaysGrow ? { height: maxHeight } : { maxHeight }),
         transformOrigin: 'top right',
         ...styles,
       }}

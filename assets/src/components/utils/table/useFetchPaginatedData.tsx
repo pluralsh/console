@@ -1,11 +1,3 @@
-import { ComponentProps, useCallback, useMemo, useState } from 'react'
-import { VirtualItem } from '@tanstack/react-virtual'
-import { extendConnection, updateNestedConnection } from 'utils/graphql'
-import {
-  reduceNestedData,
-  useSlicePolling,
-} from 'components/utils/tableFetchHelpers'
-import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 import {
   ErrorPolicy,
   OperationVariables,
@@ -13,6 +5,14 @@ import {
   QueryResult,
 } from '@apollo/client'
 import { Table } from '@pluralsh/design-system'
+import { VirtualItem } from '@tanstack/react-virtual'
+import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
+import {
+  reduceNestedData,
+  useSlicePolling,
+} from 'components/utils/tableFetchHelpers'
+import { ComponentProps, useCallback, useMemo, useState } from 'react'
+import { extendConnection, updateNestedConnection } from 'utils/graphql'
 
 export const DEFAULT_REACT_VIRTUAL_OPTIONS: ComponentProps<
   typeof Table
@@ -38,7 +38,7 @@ export type FetchPaginatedDataResult<TQueryType> = {
   data: TQueryType | undefined
   loading: boolean
   error: any
-  refetch: () => void
+  refetch: () => Promise<any>
   pageInfo: any
   fetchNextPage: () => void
   setVirtualSlice: (slice: {
@@ -69,8 +69,8 @@ export function useFetchPaginatedData<
 
   const queryResult = options.queryHook({
     variables: {
-      ...variables,
       first: options.pageSize ?? DEFAULT_PAGE_SIZE,
+      ...variables,
     },
     errorPolicy: options.errorPolicy,
     fetchPolicy: 'cache-and-network',

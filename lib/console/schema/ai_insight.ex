@@ -1,6 +1,13 @@
 defmodule Console.Schema.AiInsight do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Service, Stack}
+  alias Console.Schema.{
+    Service,
+    Stack,
+    Cluster,
+    StackRun,
+    ServiceComponent,
+    ClusterInsightComponent
+  }
 
   @fast [minutes: -20]
   @slow [minutes: -45]
@@ -15,8 +22,13 @@ defmodule Console.Schema.AiInsight do
       field :message, :string
     end
 
-    has_one :service, Service, foreign_key: :insight_id
-    has_one :stack,   Stack,   foreign_key: :insight_id
+    has_one :service,   Service, foreign_key: :insight_id
+    has_one :stack,     Stack,   foreign_key: :insight_id
+    has_one :cluster,   Cluster, foreign_key: :insight_id
+    has_one :stack_run, StackRun, foreign_key: :insight_id
+
+    has_one :service_component, ServiceComponent, foreign_key: :insight_id
+    has_one :cluster_insight_component, ClusterInsightComponent, foreign_key: :insight_id
 
     timestamps()
   end

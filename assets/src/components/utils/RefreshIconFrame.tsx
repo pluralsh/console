@@ -13,7 +13,7 @@ export default function IconFrameRefreshButton({
   return (
     <IconFrame
       clickable
-      type="floating"
+      type="secondary"
       size="large"
       onClick={() => refetch()}
       icon={

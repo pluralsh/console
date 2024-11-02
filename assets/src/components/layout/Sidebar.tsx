@@ -25,6 +25,7 @@ import {
   SidebarSection,
   StackIcon,
   WarningShieldIcon,
+  AiSparkleOutlineIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
@@ -43,6 +44,7 @@ import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
 
 import { SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
+import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 
 import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
@@ -111,6 +113,12 @@ function getMenuItems({
       icon: <KubernetesAltIcon />,
       path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
+    },
+    {
+      text: 'Plural AI',
+      expandedLabel: 'Plural AI',
+      icon: <AiSparkleOutlineIcon />,
+      path: `${AI_ABS_PATH}`,
     },
     {
       text: 'Builds',

@@ -8,7 +8,7 @@ defmodule Console.Helm.Interface.HTTP do
   end
 
   def build(%HelmRepository{url: url} = repo) do
-    Req.new(base_url: url)
+    Req.new(base_url: url, decode_body: false)
     |> add_auth(repo)
   end
 

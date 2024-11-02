@@ -1,23 +1,32 @@
 import { Markdown } from '@pluralsh/design-system'
 import { ReactNode, useCallback, useState } from 'react'
-import { useTheme } from 'styled-components'
 import {
-  AiInsight,
+  AiInsightFragment,
+  AiRole,
+  ChatMessage,
   useAiSuggestedFixLazyQuery,
-} from '../../generated/graphql.ts'
-import { GqlError } from '../utils/Alert.tsx'
-import LoadingIndicator from '../utils/LoadingIndicator.tsx'
-import AIPanel from './AIPanel.tsx'
+} from '../../../generated/graphql.ts'
+import { GqlError } from '../../utils/Alert.tsx'
+import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
+import AIPanel from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
+import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
 
 interface AISuggestFixProps {
-  insight: Nullable<AiInsight>
+  insight: Nullable<AiInsightFragment>
+}
+
+function fixMessage(fix: string): ChatMessage {
+  return {
+    content: `Here is the fix we've come up with so far:\n\n${fix}`,
+    role: AiRole.Assistant,
+  }
 }
 
 function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
-  const theme = useTheme()
   const [getSuggestion, { loading, data, error }] = useAiSuggestedFixLazyQuery({
     variables: { insightID: insight?.id ?? '' },
+    fetchPolicy: 'network-only',
   })
 
   const [open, setOpen] = useState(false)
@@ -34,7 +43,6 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
     <div
       css={{
         position: 'relative',
-        zIndex: theme.zIndexes.modal,
       }}
     >
       <AISuggestFixButton onClick={showPanel} />
@@ -45,6 +53,16 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
         showClosePanel={!!data?.aiSuggestedFix}
         header="Suggest a fix"
         subheader="Get a suggested fix based on the insight. AI is prone to mistakes, always test changes before application."
+        footer={
+          <ChatWithAIButton
+            primary
+            insightId={insight?.id}
+            messages={[
+              insightMessage(insight),
+              fixMessage(data?.aiSuggestedFix || ''),
+            ]}
+          />
+        }
       >
         {data?.aiSuggestedFix && <Markdown text={data?.aiSuggestedFix} />}
         {loading && !data && <LoadingIndicator />}
