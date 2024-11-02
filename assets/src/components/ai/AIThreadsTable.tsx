@@ -31,10 +31,10 @@ import {
   useCreateAiPinMutation,
   useDeleteAiPinMutation,
 } from 'generated/graphql'
+import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from './AIContext'
 import { AiThreadsTableActions } from './AiThreadsTableActions'
-import { useMemo } from 'react'
 
 dayjs.extend(relativeTime)
 
@@ -81,7 +81,12 @@ export function AIThreadsTable({
   const reactTableOptions = { meta: { refetch, modal } }
 
   if (error) return <GqlError error={error} />
-  if (!data?.chatThreads?.edges) return <TableSkeleton />
+  if (!data?.chatThreads?.edges)
+    return (
+      <TableSkeleton
+        styles={{ background: theme.colors['fill-one'], height: '100%' }}
+      />
+    )
 
   return (
     <FullHeightTableWrap>
@@ -210,27 +215,28 @@ function AITableRowBase({
         ).fromNow()}
       </CaptionP>
       {!modal && (
-        <Chip severity={isStale ? 'neutral' : 'success'}>
-          {isStale ? 'Stale' : 'Active'}
-        </Chip>
-      )}
-      {!modal && (
-        <IconFrame
-          clickable
-          onClick={(e) => {
-            e.stopPropagation()
-            onClickPin?.()
-          }}
-          icon={
-            pinLoading ? (
-              <Spinner />
-            ) : isPin ? (
-              <PushPinFilledIcon color={theme.colors['icon-info']} />
-            ) : (
-              <PushPinOutlineIcon />
-            )
-          }
-        />
+        <>
+          <Chip severity={isStale ? 'neutral' : 'success'}>
+            {isStale ? 'Stale' : 'Active'}
+          </Chip>
+          <IconFrame
+            clickable
+            onClick={(e) => {
+              e.stopPropagation()
+              if (pinLoading) return
+              onClickPin?.()
+            }}
+            icon={
+              pinLoading ? (
+                <Spinner />
+              ) : isPin ? (
+                <PushPinFilledIcon color={theme.colors['icon-info']} />
+              ) : (
+                <PushPinOutlineIcon />
+              )
+            }
+          />
+        </>
       )}
       <AiThreadsTableActions thread={thread} />
     </ThreadEntrySC>
