@@ -123,7 +123,7 @@ const ThreadRow = threadColumnHelper.accessor((thread) => thread, {
         attributes: {
           threadId: thread.id,
           insightId: thread.insight?.id,
-          name: thread.summary,
+          name: thread.summary.substring(0, 250),
         },
       },
       onCompleted: () => table.options.meta?.refetch?.(),
