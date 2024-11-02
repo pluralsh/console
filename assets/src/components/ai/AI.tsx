@@ -1,11 +1,59 @@
 import { Button, Flex, GearTrainIcon } from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
+import {
+  FetchPaginatedDataResult,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData.tsx'
+import {
+  AiPinFragment,
+  AiPinsQuery,
+  ChatThreadTinyFragment,
+  ChatThreadsQuery,
+  useAiPinsQuery,
+  useChatThreadsQuery,
+} from 'generated/graphql.ts'
+import { useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
-import { AIPinTable } from './AIPinTable.tsx'
+import { AIPinsTable } from './AIPinsTable.tsx'
 import { AIThreadsTable } from './AIThreadsTable.tsx'
 
 export default function AI() {
+  const threadsQuery = useFetchPaginatedData({
+    queryHook: useChatThreadsQuery,
+    keyPath: ['chatThreads'],
+  })
+
+  const pinsQuery = useFetchPaginatedData({
+    queryHook: useAiPinsQuery,
+    keyPath: ['aiPins'],
+  })
+
+  const refetchAll = useCallback(() => {
+    threadsQuery.refetch().then(() => pinsQuery.refetch())
+  }, [threadsQuery, pinsQuery])
+
+  const filteredPins = useMemo(
+    () =>
+      pinsQuery.data?.aiPins?.edges
+        ?.map((edge) => edge?.node)
+        ?.filter((pin): pin is AiPinFragment => Boolean(pin)) ?? [],
+    [pinsQuery.data?.aiPins?.edges]
+  )
+
+  const filteredThreads = useMemo(
+    () =>
+      threadsQuery.data?.chatThreads?.edges
+        ?.map((edge) => edge?.node)
+        ?.filter(
+          (thread) => !filteredPins.some((pin) => pin.thread?.id === thread?.id)
+        )
+        ?.filter((thread): thread is ChatThreadTinyFragment =>
+          Boolean(thread)
+        ) ?? [],
+    [filteredPins, threadsQuery.data?.chatThreads?.edges]
+  )
+
   return (
     <Flex
       direction="column"
@@ -21,8 +69,16 @@ export default function AI() {
         gap="xlarge"
         height="100%"
       >
-        <PinnedSection />
-        <AllThreadsSection />
+        <PinnedSection
+          refetch={refetchAll}
+          filteredPins={filteredPins}
+          pinsQuery={pinsQuery}
+        />
+        <AllThreadsSection
+          refetch={refetchAll}
+          filteredThreads={filteredThreads}
+          threadsQuery={threadsQuery}
+        />
       </Flex>
     </Flex>
   )
@@ -52,7 +108,15 @@ function Header() {
   )
 }
 
-function PinnedSection() {
+function PinnedSection({
+  filteredPins,
+  pinsQuery,
+  refetch,
+}: {
+  filteredPins: AiPinFragment[]
+  pinsQuery: FetchPaginatedDataResult<AiPinsQuery>
+  refetch: () => void
+}) {
   return (
     <Flex
       direction="column"
@@ -65,12 +129,24 @@ function PinnedSection() {
         firstPartialType="subtitle2"
         secondPartialType="body2"
       />
-      <AIPinTable />
+      <AIPinsTable
+        refetch={refetch}
+        filteredPins={filteredPins}
+        pinsQuery={pinsQuery}
+      />
     </Flex>
   )
 }
 
-function AllThreadsSection() {
+function AllThreadsSection({
+  filteredThreads,
+  threadsQuery,
+  refetch,
+}: {
+  filteredThreads: ChatThreadTinyFragment[]
+  threadsQuery: FetchPaginatedDataResult<ChatThreadsQuery>
+  refetch: () => void
+}) {
   return (
     <Flex
       direction="column"
@@ -83,7 +159,11 @@ function AllThreadsSection() {
         first="All threads"
         firstPartialType="subtitle2"
       />
-      <AIThreadsTable />
+      <AIThreadsTable
+        refetch={refetch}
+        filteredThreads={filteredThreads}
+        threadsQuery={threadsQuery}
+      />
     </Flex>
   )
 }
