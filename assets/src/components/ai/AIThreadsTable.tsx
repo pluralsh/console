@@ -31,10 +31,10 @@ import {
   useCreateAiPinMutation,
   useDeleteAiPinMutation,
 } from 'generated/graphql'
+import { useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from './AIContext'
 import { AiThreadsTableActions } from './AiThreadsTableActions'
-import { useMemo } from 'react'
 
 dayjs.extend(relativeTime)
 
@@ -58,7 +58,6 @@ export function AllThreadsTable() {
     <AIThreadsTable
       filteredThreads={filteredThreads}
       threadsQuery={threadsQuery}
-      refetch={threadsQuery.refetch}
       modal
     />
   )
@@ -67,21 +66,24 @@ export function AllThreadsTable() {
 export function AIThreadsTable({
   filteredThreads,
   threadsQuery,
-  refetch,
   modal,
 }: {
   filteredThreads: ChatThreadTinyFragment[]
   threadsQuery: FetchPaginatedDataResult<ChatThreadsQuery>
-  refetch: () => void
   modal?: boolean | null
 }) {
   const theme = useTheme()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     threadsQuery
-  const reactTableOptions = { meta: { refetch, modal } }
+  const reactTableOptions = { meta: { modal } }
 
   if (error) return <GqlError error={error} />
-  if (!data?.chatThreads?.edges) return <TableSkeleton />
+  if (!data?.chatThreads?.edges)
+    return (
+      <TableSkeleton
+        styles={{ background: theme.colors['fill-one'], height: '100%' }}
+      />
+    )
 
   return (
     <FullHeightTableWrap>
@@ -118,7 +120,9 @@ const ThreadRow = threadColumnHelper.accessor((thread) => thread, {
   id: 'thread',
   cell: function Cell({ getValue, table }) {
     const thread = getValue()
-    const [pinThread, { loading: pinLoading }] = useCreateAiPinMutation({
+    const [pinThread, { loading }] = useCreateAiPinMutation({
+      awaitRefetchQueries: true,
+      refetchQueries: ['AIPins', 'ChatThreads'],
       variables: {
         attributes: {
           threadId: thread.id,
@@ -126,13 +130,12 @@ const ThreadRow = threadColumnHelper.accessor((thread) => thread, {
           name: thread.summary.substring(0, 250),
         },
       },
-      onCompleted: () => table.options.meta?.refetch?.(),
     })
     return (
       <AITableRowBase
         item={thread}
         onClickPin={() => pinThread()}
-        pinLoading={pinLoading}
+        pinLoading={loading}
         modal={table.options.meta?.modal || false}
       />
     )
@@ -141,19 +144,20 @@ const ThreadRow = threadColumnHelper.accessor((thread) => thread, {
 
 const PinRow = pinColumnHelper.accessor((pin) => pin, {
   id: 'pin',
-  cell: function Cell({ getValue, table }) {
+  cell: function Cell({ getValue }) {
     const pin = getValue()
-    const [unpinThread, { loading: unpinLoading }] = useDeleteAiPinMutation({
+    const [unpinThread, { loading }] = useDeleteAiPinMutation({
+      awaitRefetchQueries: true,
+      refetchQueries: ['AIPins', 'ChatThreads'],
       variables: {
         id: pin.id,
       },
-      onCompleted: () => table.options.meta?.refetch?.(),
     })
     return (
       <AITableRowBase
         item={pin}
         onClickPin={() => unpinThread()}
-        pinLoading={unpinLoading}
+        pinLoading={loading}
       />
     )
   },
@@ -210,27 +214,28 @@ function AITableRowBase({
         ).fromNow()}
       </CaptionP>
       {!modal && (
-        <Chip severity={isStale ? 'neutral' : 'success'}>
-          {isStale ? 'Stale' : 'Active'}
-        </Chip>
-      )}
-      {!modal && (
-        <IconFrame
-          clickable
-          onClick={(e) => {
-            e.stopPropagation()
-            onClickPin?.()
-          }}
-          icon={
-            pinLoading ? (
-              <Spinner />
-            ) : isPin ? (
-              <PushPinFilledIcon color={theme.colors['icon-info']} />
-            ) : (
-              <PushPinOutlineIcon />
-            )
-          }
-        />
+        <>
+          <Chip severity={isStale ? 'neutral' : 'success'}>
+            {isStale ? 'Stale' : 'Active'}
+          </Chip>
+          <IconFrame
+            clickable
+            onClick={(e) => {
+              e.stopPropagation()
+              if (pinLoading) return
+              onClickPin?.()
+            }}
+            icon={
+              pinLoading ? (
+                <Spinner />
+              ) : isPin ? (
+                <PushPinFilledIcon color={theme.colors['icon-info']} />
+              ) : (
+                <PushPinOutlineIcon />
+              )
+            }
+          />
+        </>
       )}
       <AiThreadsTableActions thread={thread} />
     </ThreadEntrySC>

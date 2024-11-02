@@ -237,13 +237,17 @@ export default function Stacks() {
   }
 
   return (
-    <ResponsiveLayoutPage css={{ paddingBottom: theme.spacing.large }}>
+    <ResponsiveLayoutPage
+      css={{
+        paddingBottom: theme.spacing.large,
+        gap: theme.spacing.xlarge,
+      }}
+    >
       <div
         css={{
           display: 'flex',
           flexDirection: 'column',
           gap: theme.spacing.small,
-          marginRight: theme.spacing.xlarge,
           minWidth: 340,
           width: 340,
         }}
@@ -341,7 +345,14 @@ export default function Stacks() {
       {stackError ? (
         <StackDeletedEmptyState />
       ) : (
-        <div css={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            flex: 1,
+            overflow: 'hidden',
+          }}
+        >
           <div
             css={{
               alignItems: 'start',

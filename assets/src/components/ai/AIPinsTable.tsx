@@ -13,16 +13,13 @@ import { pinTableColumns } from './AIThreadsTable'
 export function AIPinsTable({
   filteredPins,
   pinsQuery,
-  refetch,
 }: {
   filteredPins: AiPinFragment[]
   pinsQuery: FetchPaginatedDataResult<AiPinsQuery>
-  refetch: () => void
 }) {
   const theme = useTheme()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     pinsQuery
-  const reactTableOptions = { meta: { refetch } }
 
   if (error) return <GqlError error={error} />
   if (!data?.aiPins?.edges) return <TableSkeleton />
@@ -40,7 +37,6 @@ export function AIPinsTable({
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-        reactTableOptions={reactTableOptions}
         css={{
           height: '100%',
           overflowX: 'hidden',

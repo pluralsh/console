@@ -103,13 +103,14 @@ function ChatbotPanelInner({
         onClose={onClose}
         fullscreen={fullscreen}
       />
-      {currentThread && (
+      {currentThread ? (
         <ChatbotPanelThread
           currentThread={currentThread}
           fullscreen={fullscreen}
         />
+      ) : (
+        <AllThreadsTable />
       )}
-      {!currentThread && <AllThreadsTable />}
     </ChatbotFrameSC>
   )
 }

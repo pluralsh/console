@@ -1,4 +1,4 @@
-import styled, { keyframes, useTheme } from 'styled-components'
+import styled, { CSSProperties, keyframes, useTheme } from 'styled-components'
 
 const shimmerKeyframes = keyframes`
   0% {
@@ -23,6 +23,14 @@ export function TableSkeleton({
   numRows = 8,
   numColumns = 2,
   centered = false,
+  styles,
+}: {
+  width?: number
+  height?: number
+  numRows?: number
+  numColumns?: number
+  centered?: boolean
+  styles?: CSSProperties
 }) {
   const theme = useTheme()
 
@@ -38,6 +46,7 @@ export function TableSkeleton({
               width: '100%',
             }
           : {}),
+        ...styles,
       }}
     >
       <svg

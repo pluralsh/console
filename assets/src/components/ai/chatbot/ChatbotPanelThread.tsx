@@ -10,6 +10,7 @@ import {
   SendMessageIcon,
   Spinner,
   TrashCanIcon,
+  usePrevious,
   WrapWithIf,
 } from '@pluralsh/design-system'
 
@@ -18,7 +19,6 @@ import { usePlatform } from 'components/hooks/usePlatform'
 import { submitForm } from 'components/utils/submitForm'
 import {
   ComponentProps,
-  FormEvent,
   forwardRef,
   KeyboardEvent,
   ReactNode,
@@ -38,6 +38,8 @@ import { textAreaInsert } from 'components/utils/textAreaInsert'
 import {
   AiRole,
   ChatFragment,
+  ChatThreadDetailsDocument,
+  ChatThreadDetailsQuery,
   ChatThreadFragment,
   useChatMutation,
   useChatThreadDetailsQuery,
@@ -45,6 +47,7 @@ import {
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
 import CopyToClipboard from 'react-copy-to-clipboard'
+import { appendConnectionToEnd, updateCache } from 'utils/graphql.ts'
 import ChatbotMarkdown from './ChatbotMarkdown.tsx'
 
 export function ChatbotPanelThread({
@@ -55,47 +58,61 @@ export function ChatbotPanelThread({
   fullscreen: boolean
 }) {
   const theme = useTheme()
-  const [loaded, setLoaded] = useState(false)
   const historyScrollRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const lastMsgRef = useRef<HTMLLIElement>(null)
-  const [newMessage, setNewMessage] = usePersistedSessionState<string>(
-    'currentAiChatMessage',
-    ''
-  )
   const scrollToBottom = useCallback(() => {
     historyScrollRef.current?.scrollTo({ top: 9999999999999 })
   }, [historyScrollRef])
 
-  const { data, refetch } = useChatThreadDetailsQuery({
+  const { data } = useChatThreadDetailsQuery({
     variables: { id: currentThread.id },
   })
 
   const [mutate, { loading: sendingMessage, error: messageError }] =
     useChatMutation({
-      onCompleted: async () => {
-        setNewMessage('')
-        await refetch()
-        scrollToBottom()
+      awaitRefetchQueries: true,
+      refetchQueries: ['ChatThreadDetails'],
+      optimisticResponse: ({ messages }) => ({
+        chat: {
+          __typename: 'Chat',
+          id: crypto.randomUUID(),
+          content: messages?.[0]?.content ?? '',
+          role: AiRole.User,
+          seq: 0,
+          insertedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      }),
+      update: (cache, { data }) => {
+        updateCache(cache, {
+          query: ChatThreadDetailsDocument,
+          variables: { id: currentThread.id },
+          update: (prev: ChatThreadDetailsQuery) => ({
+            chatThread: appendConnectionToEnd(
+              prev.chatThread,
+              data?.chat,
+              'chats'
+            ),
+          }),
+        })
       },
     })
 
-  // scroll to bottom and focus input on initial mount
+  // focus input on initial mount
   useLayoutEffect(() => {
     inputRef.current?.focus()
   }, [])
 
+  // scroll to the bottom when number of messages increases
+  const length = data?.chatThread?.chats?.edges?.length ?? 0
+  const prevLength = usePrevious(length) ?? 0
   useEffect(() => {
-    if (data?.chatThread && !loaded) {
-      scrollToBottom()
-      setLoaded(true)
-    }
-  }, [data, loaded, scrollToBottom])
+    if (length > prevLength) scrollToBottom()
+  }, [length, prevLength, scrollToBottom])
 
   const sendMessage = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault()
-      if (!newMessage) return
+    (newMessage: string) => {
       mutate({
         variables: {
           messages: [{ role: AiRole.User, content: newMessage }],
@@ -103,7 +120,7 @@ export function ChatbotPanelThread({
         },
       })
     },
-    [mutate, newMessage, currentThread]
+    [mutate, currentThread]
   )
 
   if (!data?.chatThread?.chats?.edges)
@@ -116,11 +133,11 @@ export function ChatbotPanelThread({
   return (
     <>
       {messageError && <GqlError error={messageError} />}
-      {isEmpty(messages) && <EmptyState message="No messages yet." />}
       <ChatbotMessagesSC
         ref={historyScrollRef}
         $fullscreen={fullscreen}
       >
+        {isEmpty(messages) && <EmptyState message="No messages yet." />}
         {messages.map((msg, i) => {
           const len = messages.length
           const ref = i === len - 1 ? lastMsgRef : undefined
@@ -133,24 +150,12 @@ export function ChatbotPanelThread({
           )
         })}
       </ChatbotMessagesSC>
-      <ChatbotFormSC
-        onSubmit={sendMessage}
-        $fullscreen={fullscreen}
-      >
-        <ChatbotTextArea
-          placeholder="Ask Plural AI"
-          ref={inputRef}
-          value={newMessage}
-          onChange={(e) => {
-            setNewMessage(e.currentTarget.value)
-          }}
-          fullscreen={fullscreen}
-        />
-        <ChatbotLoadingBarSC
-          $show={sendingMessage}
-          complete={false}
-        />
-      </ChatbotFormSC>
+      <ChatbotForm
+        sendMessage={sendMessage}
+        isSendingMessage={sendingMessage}
+        ref={inputRef}
+        fullscreen={fullscreen}
+      />
     </>
   )
 }
@@ -263,7 +268,9 @@ function ChatMessageActions({
         tooltip="Delete message"
         type="floating"
         size="medium"
-        onClick={() => deleteMessage({ variables: { id } })}
+        onClick={
+          deleteLoading ? undefined : () => deleteMessage({ variables: { id } })
+        }
         icon={
           deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-danger" />
         }
@@ -272,22 +279,23 @@ function ChatMessageActions({
   )
 }
 
-const ChatbotTextArea = forwardRef(
+const ChatbotForm = forwardRef(
   (
     {
-      onKeyDown: onKeydownProp,
+      sendMessage,
+      isSendingMessage,
       fullscreen,
       ...props
-    }: ComponentProps<'textarea'> & { fullscreen: boolean },
+    }: {
+      sendMessage: (newMessage: string) => void
+      isSendingMessage: boolean
+      fullscreen: boolean
+    } & ComponentProps<'textarea'>,
     ref: Ref<HTMLTextAreaElement>
   ) => {
     const { isMac } = usePlatform()
-
     const onKeyDown = useCallback(
       (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        if (onKeydownProp) {
-          onKeydownProp(e)
-        }
         if (e.key === 'Enter') {
           e.preventDefault()
           let modKeyPressed = e.shiftKey || e.ctrlKey || e.altKey
@@ -302,20 +310,40 @@ const ChatbotTextArea = forwardRef(
           }
         }
       },
-      [isMac, onKeydownProp]
+      [isMac]
+    )
+    const [newMessage, setNewMessage] = usePersistedSessionState<string>(
+      'currentAiChatMessage',
+      ''
     )
 
     return (
-      <ChatbotTextAreaWrapperSC $fullscreen={fullscreen}>
-        <ChatbotTextAreaSC
-          ref={ref}
-          {...props}
-          onKeyDown={onKeyDown}
+      <ChatbotFormSC
+        onSubmit={(e) => {
+          e.preventDefault()
+          sendMessage(newMessage)
+          setNewMessage('')
+        }}
+        $fullscreen={fullscreen}
+      >
+        <ChatbotTextAreaWrapperSC $fullscreen={fullscreen}>
+          <ChatbotTextAreaSC
+            placeholder="Ask Plural AI"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.currentTarget.value)}
+            ref={ref}
+            {...props}
+            onKeyDown={onKeyDown}
+          />
+          <SendMessageButtonSC type="submit">
+            <SendMessageIcon />
+          </SendMessageButtonSC>
+        </ChatbotTextAreaWrapperSC>
+        <ChatbotLoadingBarSC
+          $show={isSendingMessage}
+          complete={false}
         />
-        <SendMessageButtonSC type="submit">
-          <SendMessageIcon />
-        </SendMessageButtonSC>
-      </ChatbotTextAreaWrapperSC>
+      </ChatbotFormSC>
     )
   }
 )
