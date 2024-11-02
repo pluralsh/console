@@ -28,6 +28,7 @@ defmodule Console.Schema.AiPin do
     |> foreign_key_constraint(:user_id)
     |> foreign_key_constraint(:thread_id)
     |> foreign_key_constraint(:insight_id)
+    |> validate_length(:name, max: 255)
     |> validate_required([:user_id])
   end
 end

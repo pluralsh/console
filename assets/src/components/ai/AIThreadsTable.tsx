@@ -17,6 +17,7 @@ import { StackedText } from 'components/utils/table/StackedText'
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   FetchPaginatedDataResult,
+  useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
@@ -26,28 +27,58 @@ import {
   AiPinFragment,
   ChatThreadsQuery,
   ChatThreadTinyFragment,
+  useChatThreadsQuery,
   useCreateAiPinMutation,
   useDeleteAiPinMutation,
 } from 'generated/graphql'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot } from './AIContext'
 import { AiThreadsTableActions } from './AiThreadsTableActions'
+import { useMemo } from 'react'
 
 dayjs.extend(relativeTime)
+
+export function AllThreadsTable() {
+  const threadsQuery = useFetchPaginatedData({
+    queryHook: useChatThreadsQuery,
+    keyPath: ['chatThreads'],
+  })
+
+  const filteredThreads = useMemo(
+    () =>
+      threadsQuery.data?.chatThreads?.edges
+        ?.map((edge) => edge?.node)
+        ?.filter((thread): thread is ChatThreadTinyFragment =>
+          Boolean(thread)
+        ) ?? [],
+    [threadsQuery.data?.chatThreads?.edges]
+  )
+
+  return (
+    <AIThreadsTable
+      filteredThreads={filteredThreads}
+      threadsQuery={threadsQuery}
+      refetch={threadsQuery.refetch}
+      modal
+    />
+  )
+}
 
 export function AIThreadsTable({
   filteredThreads,
   threadsQuery,
   refetch,
+  modal,
 }: {
   filteredThreads: ChatThreadTinyFragment[]
   threadsQuery: FetchPaginatedDataResult<ChatThreadsQuery>
   refetch: () => void
+  modal?: boolean | null
 }) {
   const theme = useTheme()
   const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
     threadsQuery
-  const reactTableOptions = { meta: { refetch } }
+  const reactTableOptions = { meta: { refetch, modal } }
 
   if (error) return <GqlError error={error} />
   if (!data?.chatThreads?.edges) return <TableSkeleton />
@@ -102,6 +133,7 @@ const ThreadRow = threadColumnHelper.accessor((thread) => thread, {
         item={thread}
         onClickPin={() => pinThread()}
         pinLoading={pinLoading}
+        modal={table.options.meta?.modal || false}
       />
     )
   },
@@ -131,10 +163,12 @@ function AITableRowBase({
   item,
   onClickPin,
   pinLoading,
+  modal,
 }: {
   item: ChatThreadTinyFragment | AiPinFragment
   onClickPin?: () => void
   pinLoading?: boolean
+  modal?: boolean | null
 }) {
   const theme = useTheme()
   const { goToThread } = useChatbot()
@@ -171,27 +205,33 @@ function AITableRowBase({
         />
       </Flex>
       <CaptionP css={{ opacity: isStale ? 0.6 : 1 }}>
-        Last updated {dayjs(thread.updatedAt).fromNow()}
+        {dayjs(
+          thread.lastMessageAt || thread.updatedAt || thread.insertedAt
+        ).fromNow()}
       </CaptionP>
-      <Chip severity={isStale ? 'neutral' : 'success'}>
-        {isStale ? 'Stale' : 'Active'}
-      </Chip>
-      <IconFrame
-        clickable
-        onClick={(e) => {
-          e.stopPropagation()
-          onClickPin?.()
-        }}
-        icon={
-          pinLoading ? (
-            <Spinner />
-          ) : isPin ? (
-            <PushPinFilledIcon color={theme.colors['icon-info']} />
-          ) : (
-            <PushPinOutlineIcon />
-          )
-        }
-      />
+      {!modal && (
+        <Chip severity={isStale ? 'neutral' : 'success'}>
+          {isStale ? 'Stale' : 'Active'}
+        </Chip>
+      )}
+      {!modal && (
+        <IconFrame
+          clickable
+          onClick={(e) => {
+            e.stopPropagation()
+            onClickPin?.()
+          }}
+          icon={
+            pinLoading ? (
+              <Spinner />
+            ) : isPin ? (
+              <PushPinFilledIcon color={theme.colors['icon-info']} />
+            ) : (
+              <PushPinOutlineIcon />
+            )
+          }
+        />
+      )}
       <AiThreadsTableActions thread={thread} />
     </ThreadEntrySC>
   )

@@ -21,16 +21,16 @@ import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
+import { AllThreadsTable } from '../AIThreadsTable.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
   onClose: () => void
-  currentThread: ChatThreadFragment
+  currentThread?: Nullable<ChatThreadFragment>
 }
 
 export function Chatbot() {
   const { open, setOpen, fullscreen, currentThread } = useChatbotContext()
-  if (!currentThread) return null
 
   return (
     <div css={{ position: 'relative' }}>
@@ -103,10 +103,13 @@ function ChatbotPanelInner({
         onClose={onClose}
         fullscreen={fullscreen}
       />
-      <ChatbotPanelThread
-        currentThread={currentThread}
-        fullscreen={fullscreen}
-      />
+      {currentThread && (
+        <ChatbotPanelThread
+          currentThread={currentThread}
+          fullscreen={fullscreen}
+        />
+      )}
+      {!currentThread && <AllThreadsTable />}
     </ChatbotFrameSC>
   )
 }
@@ -196,7 +199,7 @@ const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
     flexDirection: 'column',
     overflow: 'hidden',
     height: '100%',
-    width: $fullscreen ? 768 : 560,
+    width: $fullscreen ? '75vw' : 768,
   })
 )
 
