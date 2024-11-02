@@ -12,7 +12,7 @@ import {
   useAiPinsQuery,
   useChatThreadsQuery,
 } from 'generated/graphql.ts'
-import { useCallback, useMemo } from 'react'
+import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 import { AIPinsTable } from './AIPinsTable.tsx'
@@ -28,10 +28,6 @@ export default function AI() {
     queryHook: useAiPinsQuery,
     keyPath: ['aiPins'],
   })
-
-  const refetchAll = useCallback(() => {
-    threadsQuery.refetch().then(() => pinsQuery.refetch())
-  }, [threadsQuery, pinsQuery])
 
   const filteredPins = useMemo(
     () =>
@@ -70,12 +66,10 @@ export default function AI() {
         height="100%"
       >
         <PinnedSection
-          refetch={refetchAll}
           filteredPins={filteredPins}
           pinsQuery={pinsQuery}
         />
         <AllThreadsSection
-          refetch={refetchAll}
           filteredThreads={filteredThreads}
           threadsQuery={threadsQuery}
         />
@@ -111,11 +105,9 @@ function Header() {
 function PinnedSection({
   filteredPins,
   pinsQuery,
-  refetch,
 }: {
   filteredPins: AiPinFragment[]
   pinsQuery: FetchPaginatedDataResult<AiPinsQuery>
-  refetch: () => void
 }) {
   return (
     <Flex
@@ -130,7 +122,6 @@ function PinnedSection({
         secondPartialType="body2"
       />
       <AIPinsTable
-        refetch={refetch}
         filteredPins={filteredPins}
         pinsQuery={pinsQuery}
       />
@@ -141,11 +132,9 @@ function PinnedSection({
 function AllThreadsSection({
   filteredThreads,
   threadsQuery,
-  refetch,
 }: {
   filteredThreads: ChatThreadTinyFragment[]
   threadsQuery: FetchPaginatedDataResult<ChatThreadsQuery>
-  refetch: () => void
 }) {
   return (
     <Flex
@@ -160,7 +149,6 @@ function AllThreadsSection({
         firstPartialType="subtitle2"
       />
       <AIThreadsTable
-        refetch={refetch}
         filteredThreads={filteredThreads}
         threadsQuery={threadsQuery}
       />
