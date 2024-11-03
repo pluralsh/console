@@ -17,8 +17,45 @@ import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
 import { AIPinsTable } from './AIPinsTable.tsx'
 import { AIThreadsTable } from './AIThreadsTable.tsx'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
+import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider.tsx'
 
 export default function AI() {
+  const settings = useDeploymentSettings()
+  if (!settings.ai?.enabled) {
+    return <AiDisabled />
+  }
+
+  return <AIEnabled />
+}
+
+function AiDisabled() {
+  return (
+    <Flex
+      direction="column"
+      gap="medium"
+      padding="large"
+      marginBottom={30}
+      height="100%"
+      overflow="hidden"
+    >
+      <Flex
+        justify="space-between"
+        align="center"
+      >
+        <StackedText
+          first="Plural AI"
+          second="You have yet to enable AI, set everything up below"
+          firstPartialType="subtitle1"
+          secondPartialType="body2"
+        />
+      </Flex>
+      <GlobalSettingsAiProvider />
+    </Flex>
+  )
+}
+
+function AIEnabled() {
   const threadsQuery = useFetchPaginatedData({
     queryHook: useChatThreadsQuery,
     keyPath: ['chatThreads'],

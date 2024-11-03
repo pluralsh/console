@@ -22,6 +22,7 @@ import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { AllThreadsTable } from '../AIThreadsTable.tsx'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
@@ -31,6 +32,11 @@ type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
 
 export function Chatbot() {
   const { open, setOpen, fullscreen, currentThread } = useChatbotContext()
+  const settings = useDeploymentSettings()
+
+  if (!settings.ai?.enabled) {
+    return null
+  }
 
   return (
     <div css={{ position: 'relative' }}>
