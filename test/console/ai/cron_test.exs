@@ -13,6 +13,7 @@ defmodule Console.AI.CronTest do
       user = insert(:user)
       keep = insert_list(52, :chat_thread, user: user)
       drop = insert_list(3, :chat_thread, user: user, inserted_at: Timex.now() |> Timex.shift(days: -2))
+      drop2 = insert_list(2, :chat_thread, last_message_at: Timex.now() |> Timex.shift(days: -30))
 
       keep2 = insert_list(3, :chat_thread, user: insert(:user), inserted_at: Timex.now() |> Timex.shift(days: -2))
 
@@ -21,7 +22,7 @@ defmodule Console.AI.CronTest do
       for t <- keep ++ keep2,
         do: assert refetch(t)
 
-      for t <- drop,
+      for t <- drop ++ drop2,
         do: refute refetch(t)
     end
   end
