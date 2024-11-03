@@ -4,12 +4,12 @@ dependencies:
   version: 0.1.0
 - name: controller
   repository: file://../controller
-  version: 0.0.86
+  version: 0.0.87
 - name: kubernetes-dashboard
   repository: https://kubernetes.github.io/dashboard
   version: 7.6.1
 - name: flux2
   repository: https://fluxcd-community.github.io/helm-charts
   version: 2.11.1
-digest: sha256:c89ed43d35153b831b41bca3b45ef1e1fdd862fb67734892dbec4dc033aa93ed
-generated: "2024-10-23T19:00:54.029333952Z"
+digest: sha256:88627d17f4148a2b9b80efe82aefd5e49689a7b5d5455f5b8d1a8ceb577a3fb8
+generated: "2024-11-03T01:22:45.532657492Z"
