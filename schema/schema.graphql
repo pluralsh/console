@@ -456,6 +456,8 @@ type RootQueryType {
   chatThreads(after: String, first: Int, before: String, last: Int): ChatThreadConnection
 
   aiPins(after: String, first: Int, before: String, last: Int): AiPinConnection
+
+  aiPin(insightId: ID, threadId: ID): AiPin
 }
 
 type RootMutationType {
