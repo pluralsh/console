@@ -15,6 +15,7 @@ fragment AiInsight on AiInsight {
 
 fragment AiInsightSummary on AiInsight {
   id
+  text
   summary
   freshness
   updatedAt

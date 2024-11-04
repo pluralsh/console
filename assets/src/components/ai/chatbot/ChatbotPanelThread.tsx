@@ -166,10 +166,12 @@ const ChatMessage = forwardRef(
       id,
       content,
       role,
+      disableActions,
       ...props
     }: {
       content: string
       role: AiRole
+      disableActions?: boolean
     } & ComponentProps<typeof ChatMessageSC>,
     ref: Ref<HTMLLIElement>
   ) => {
@@ -209,7 +211,7 @@ const ChatMessage = forwardRef(
         <ChatMessageActions
           id={id ?? ''}
           content={content}
-          show={showActions}
+          show={showActions && !disableActions}
         />
         <Flex
           gap="medium"
@@ -461,3 +463,5 @@ const AssistantIconWrapperSC = styled.div(({ theme }) => ({
     transform: 'translateY(-1px) translateX(-1px)',
   },
 }))
+
+export { ChatbotMessagesSC, ChatMessage }

@@ -12,7 +12,7 @@ import {
 import * as Dialog from '@radix-ui/react-dialog'
 
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import { ChatThreadFragment } from 'generated/graphql'
+import { AiInsight, ChatThreadFragment } from 'generated/graphql'
 import { ComponentPropsWithRef } from 'react'
 import { VisuallyHidden } from 'react-aria'
 import { useNavigate } from 'react-router-dom'
@@ -20,6 +20,7 @@ import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
+import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
 import { AllThreadsTable } from '../AIThreadsTable.tsx'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
@@ -28,10 +29,12 @@ type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
   onClose: () => void
   currentThread?: Nullable<ChatThreadFragment>
+  currentInsight?: Nullable<AiInsight>
 }
 
 export function Chatbot() {
-  const { open, setOpen, fullscreen, currentThread } = useChatbotContext()
+  const { open, setOpen, fullscreen, currentThread, currentInsight } =
+    useChatbotContext()
   const settings = useDeploymentSettings()
 
   if (!settings.ai?.enabled) {
@@ -51,6 +54,7 @@ export function Chatbot() {
         open={open}
         onClose={() => setOpen(false)}
         currentThread={currentThread}
+        currentInsight={currentInsight}
       />
     </div>
   )
@@ -98,6 +102,7 @@ function ChatbotPanelInner({
   fullscreen,
   onClose,
   currentThread,
+  currentInsight,
   ...props
 }: ChatbotPanelInnerProps) {
   return (
@@ -112,6 +117,11 @@ function ChatbotPanelInner({
       {currentThread ? (
         <ChatbotPanelThread
           currentThread={currentThread}
+          fullscreen={fullscreen}
+        />
+      ) : currentInsight ? (
+        <ChatbotPanelInsight
+          currentInsight={currentInsight}
           fullscreen={fullscreen}
         />
       ) : (

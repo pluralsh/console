@@ -1,4 +1,5 @@
 import {
+  AiInsight,
   ChatThreadAttributes,
   ChatThreadFragment,
   useCreateChatThreadMutation,
@@ -36,6 +37,8 @@ type ChatbotContextT = {
   setFullscreen: Dispatch<SetStateAction<boolean>>
   currentThread: Nullable<ChatThreadFragment>
   setCurrentThread: (thread: Nullable<ChatThreadFragment>) => void
+  currentInsight: Nullable<AiInsight>
+  setCurrentInsight: Dispatch<SetStateAction<Nullable<AiInsight>>>
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -57,6 +60,7 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [fullscreen, setFullscreen] = useState(false)
   const [currentThread, setCurrentThread] =
     useState<Nullable<ChatThreadFragment>>()
+  const [currentInsight, setCurrentInsight] = useState<Nullable<AiInsight>>()
 
   const context = useMemo(
     () => ({
@@ -66,8 +70,10 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
       setCurrentThread,
       fullscreen,
       setFullscreen,
+      currentInsight,
+      setCurrentInsight,
     }),
-    [open, currentThread, fullscreen]
+    [open, currentThread, fullscreen, currentInsight]
   )
 
   return (
@@ -111,8 +117,13 @@ export function useChatbotContext() {
 }
 
 export function useChatbot() {
-  const { setOpen, setCurrentThread, fullscreen, setFullscreen } =
-    useChatbotContext()
+  const {
+    setOpen,
+    setCurrentThread,
+    fullscreen,
+    setFullscreen,
+    setCurrentInsight,
+  } = useChatbotContext()
   const [mutation, { loading, error }] = useCreateChatThreadMutation()
 
   return {
@@ -127,10 +138,17 @@ export function useChatbot() {
     },
     goToThread: (thread: ChatThreadFragment) => {
       setCurrentThread(thread)
+      setCurrentInsight(null)
+      setOpen(true)
+    },
+    goToInsight: (insight: AiInsight) => {
+      setCurrentThread(null)
+      setCurrentInsight(insight)
       setOpen(true)
     },
     goToThreadList: () => {
       setCurrentThread(null)
+      setCurrentInsight(null)
       setOpen(true)
     },
     fullscreen,

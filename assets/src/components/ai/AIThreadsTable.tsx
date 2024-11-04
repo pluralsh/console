@@ -37,6 +37,7 @@ import {
 } from 'generated/graphql'
 import { Dispatch, ReactElement, ReactNode, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { useChatbot } from './AIContext.tsx'
 import { AiThreadsTableActions } from './AiThreadsTableActions'
 
 dayjs.extend(relativeTime)
@@ -319,6 +320,7 @@ function InsightEntry({
   pinLoading?: boolean
   onClickPin?: Dispatch<void>
 }): ReactNode {
+  const { goToInsight } = useChatbot()
   const theme = useTheme()
   const timestamp = insight.updatedAt || insight.insertedAt || dayjs().toNow()
   const isStale = dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
@@ -330,7 +332,7 @@ function InsightEntry({
 
   return (
     <TableEntry
-      onClick={() => {}}
+      onClick={() => goToInsight(insight)}
       icon={icon}
       title={insight.summary?.substring(0, 250) ?? ''}
       subtitle={getInsightResourceName(insight)}
@@ -362,6 +364,7 @@ function ThreadEntry({
   pinLoading?: boolean
   onClickPin?: Dispatch<void>
 }): ReactNode {
+  const { goToThread } = useChatbot()
   const theme = useTheme()
   const timestamp =
     thread.lastMessageAt ||
@@ -377,7 +380,7 @@ function ThreadEntry({
 
   return (
     <TableEntry
-      onClick={() => {}}
+      onClick={() => goToThread(thread)}
       icon={icon}
       title={thread.summary}
       subtitle={getInsightResourceName(thread.insight)}
