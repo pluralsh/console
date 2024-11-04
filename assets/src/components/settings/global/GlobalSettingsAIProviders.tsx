@@ -51,6 +51,7 @@ export function initialSettingsAttributes(
           ? {
               openai: {
                 model: ai.openai.model,
+
                 accessToken: '',
               },
             }
@@ -94,19 +95,73 @@ export function validateAttributes(
   }
 }
 
-export function OpenAIAnthropicSettings({
+export function OpenAISettings({
   enabled,
   settings,
   updateSettings,
 }: {
   enabled: boolean
-  settings: AiSettingsAttributes['openai'] | AiSettingsAttributes['anthropic']
+  settings: AiSettingsAttributes['openai']
   updateSettings: (
-    update: NonNullable<
-      Partial<
-        AiSettingsAttributes['openai'] | AiSettingsAttributes['anthropic']
+    update: NonNullable<Partial<AiSettingsAttributes['openai']>>
+  ) => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <>
+      <FormField
+        label="Model"
+        hint="Leave blank for Plural default."
+        flex={1}
       >
-    >
+        <Input
+          disabled={!enabled}
+          value={settings?.model}
+          onChange={(e) => {
+            updateSettings({ model: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Base URL"
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.baseUrl}
+          onChange={(e) => {
+            updateSettings({ baseUrl: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Access token"
+        required={enabled}
+        flex={1}
+      >
+        <InputRevealer
+          css={{ background: theme.colors['fill-two'] }}
+          disabled={!enabled}
+          value={settings?.accessToken ?? undefined}
+          onChange={(e) => {
+            updateSettings({ accessToken: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+    </>
+  )
+}
+
+export function AnthropicSettings({
+  enabled,
+  settings,
+  updateSettings,
+}: {
+  enabled: boolean
+  settings: AiSettingsAttributes['anthropic']
+  updateSettings: (
+    update: NonNullable<Partial<AiSettingsAttributes['anthropic']>>
   ) => void
 }) {
   const theme = useTheme()
