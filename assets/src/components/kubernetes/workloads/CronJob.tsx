@@ -47,7 +47,6 @@ import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './CronJobs'
 import { useJobsColumns } from './Jobs'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'jobs', label: 'Jobs' },
@@ -107,10 +106,6 @@ export default function CronJob(): ReactElement {
   )
 
   const cronJob = data?.handleGetCronJobDetail as CronJobT
-
-  useExplainWithAI(
-    'Describe Kubernetes Cron Job resource: ' + JSON.stringify(cronJob)
-  )
 
   if (loading) {
     return <LoadingIndicator />

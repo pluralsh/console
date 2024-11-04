@@ -54,7 +54,6 @@ import { Kind, Resource, fromResource } from '../common/types'
 import { getBreadcrumbs } from './Deployments'
 import { useReplicaSetsColumns } from './ReplicaSets'
 import { WorkloadStatusChip } from './utils'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'replicasets', label: 'Replica Sets' },
@@ -101,10 +100,6 @@ export default function Deployment(): ReactElement {
   )
 
   const deployment = data?.handleGetDeploymentDetail as DeploymentT
-
-  useExplainWithAI(
-    'Describe Kubernetes Deployment resource: ' + JSON.stringify(deployment)
-  )
 
   if (loading) {
     return <LoadingIndicator />

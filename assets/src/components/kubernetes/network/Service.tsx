@@ -55,7 +55,6 @@ import { Kind } from '../common/types'
 import { getBreadcrumbs } from './Services'
 import { Endpoints, serviceTypeDisplayName } from './utils'
 import { useIngressesColumns } from './Ingresses'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -79,10 +78,6 @@ export default function Service(): ReactElement {
   })
 
   const service = data?.handleGetServiceDetail
-
-  useExplainWithAI(
-    'Describe Kubernetes Service resource: ' + JSON.stringify(service)
-  )
 
   useSetBreadcrumbs(
     useMemo(

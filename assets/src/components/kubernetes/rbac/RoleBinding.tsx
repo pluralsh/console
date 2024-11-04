@@ -26,7 +26,6 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './RoleBindings'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Subjects' },
@@ -47,10 +46,6 @@ export default function RoleBinding(): ReactElement {
   })
 
   const rb = data?.handleGetRoleBindingDetail
-
-  useExplainWithAI(
-    'Describe Kubernetes Role Binding resource: ' + JSON.stringify(rb)
-  )
 
   useSetBreadcrumbs(
     useMemo(

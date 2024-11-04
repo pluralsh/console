@@ -29,7 +29,6 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Services'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },
@@ -50,10 +49,6 @@ export default function NetworkPolicy(): ReactElement {
   })
 
   const np = data?.handleGetNetworkPolicyDetail
-
-  useExplainWithAI(
-    'Describe Kubernetes Network Policy resource: ' + JSON.stringify(np)
-  )
 
   useSetBreadcrumbs(
     useMemo(

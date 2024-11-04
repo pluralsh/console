@@ -39,7 +39,6 @@ import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './CustomResourceDefinitions'
 import { CRDEstablishedChip } from './utils'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Objects' },
@@ -60,10 +59,6 @@ export default function CustomResourceDefinition(): ReactElement {
   })
 
   const crd = data?.handleGetCustomResourceDefinitionDetail
-
-  useExplainWithAI(
-    'Describe Kubernetes Custom Resource Definition: ' + JSON.stringify(crd)
-  )
 
   useSetBreadcrumbs(
     useMemo(

@@ -23,7 +23,6 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './Roles'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Policy rules' },
@@ -41,8 +40,6 @@ export default function Role(): ReactElement {
   })
 
   const role = data?.handleGetRoleDetail
-
-  useExplainWithAI('Describe Kubernetes Role resource: ' + JSON.stringify(role))
 
   useSetBreadcrumbs(
     useMemo(
