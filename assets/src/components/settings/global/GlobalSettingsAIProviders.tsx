@@ -51,7 +51,7 @@ export function initialSettingsAttributes(
           ? {
               openai: {
                 model: ai.openai.model,
-
+                baseUrl: ai.openai.baseUrl,
                 accessToken: '',
               },
             }
@@ -125,6 +125,7 @@ export function OpenAISettings({
       </FormField>
       <FormField
         label="Base URL"
+        hint="The base URL to use when querying an OpenAI compatible API. Leave blank for OpenAI."
         flex={1}
       >
         <Input
