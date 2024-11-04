@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -6372,6 +6372,7 @@ export type RootQueryType = {
   ai?: Maybe<Scalars['String']['output']>;
   /** General api to query the configured LLM for your console */
   aiCompletion?: Maybe<Scalars['String']['output']>;
+  aiPin?: Maybe<AiPin>;
   aiPins?: Maybe<AiPinConnection>;
   /** Use the content of an insight and additional context from its associated object to suggest a fix */
   aiSuggestedFix?: Maybe<Scalars['String']['output']>;
@@ -6583,6 +6584,12 @@ export type RootQueryTypeAiCompletionArgs = {
   chat?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   input?: InputMaybe<Scalars['String']['input']>;
   system: Scalars['String']['input'];
+};
+
+
+export type RootQueryTypeAiPinArgs = {
+  insightId?: InputMaybe<Scalars['ID']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

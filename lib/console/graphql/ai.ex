@@ -169,6 +169,14 @@ defmodule Console.GraphQl.AI do
 
       resolve &AI.pins/2
     end
+
+    field :ai_pin, :ai_pin do
+      middleware Authenticated
+      arg :insight_id, :id
+      arg :thread_id,  :id
+
+      resolve &AI.resolve_pin/2
+    end
   end
 
   object :ai_mutations do

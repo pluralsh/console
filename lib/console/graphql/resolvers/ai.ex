@@ -11,6 +11,11 @@ defmodule Console.GraphQl.Resolvers.AI do
   def query(AiPin, _), do: AiPin
   def query(_, _), do: AiInsight
 
+  def resolve_pin(args, %{context: %{current_user: user}}) do
+    args = Enum.filter([user_id: user.id] ++ Map.to_list(args), fn {_, v} -> not is_nil(v) end)
+    {:ok, Console.Repo.get_by!(AiPin, args)}
+  end
+
   def pins(args, %{context: %{current_user: user}}) do
     AiPin.for_user(user.id)
     |> AiPin.ordered()

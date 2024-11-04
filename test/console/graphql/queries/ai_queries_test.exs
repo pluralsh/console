@@ -204,4 +204,38 @@ defmodule Console.GraphQl.AiQueriesTest do
              |> ids_equal(pins)
     end
   end
+
+  describe "aiPin" do
+    test "it can fetch by insight id" do
+      insight = insert(:ai_insight)
+      user = insert(:user)
+      pin = insert(:ai_pin, user: user, insight: insight)
+
+      {:ok, %{data: %{"aiPin" => found}}} = run_query("""
+        query Pin($id: ID!) {
+          aiPin(insightId: $id) {
+            id
+          }
+        }
+      """, %{"id" => insight.id}, %{current_user: user})
+
+      assert found["id"] == pin.id
+    end
+
+    test "it can fetch by thread id" do
+      thread = insert(:chat_thread)
+      user = insert(:user)
+      pin = insert(:ai_pin, user: user, thread: thread)
+
+      {:ok, %{data: %{"aiPin" => found}}} = run_query("""
+        query Pin($id: ID!) {
+          aiPin(threadId: $id) {
+            id
+          }
+        }
+      """, %{"id" => thread.id}, %{current_user: user})
+
+      assert found["id"] == pin.id
+    end
+  end
 end
