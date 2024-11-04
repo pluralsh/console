@@ -35,9 +35,8 @@ import {
   useCreateAiPinMutation,
   useDeleteAiPinMutation,
 } from 'generated/graphql'
-import { Dispatch, ReactNode, useMemo } from 'react'
+import { Dispatch, ReactElement, ReactNode, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { useChatbot } from './AIContext'
 import { AiThreadsTableActions } from './AiThreadsTableActions'
 
 dayjs.extend(relativeTime)
@@ -192,7 +191,7 @@ function AITableRowBase({
 
   return thread ? (
     <ThreadEntry
-      thread={thread}
+      thread={thread!}
       modal={modal}
       isPin={isPin}
       pinLoading={pinLoading}
@@ -201,7 +200,7 @@ function AITableRowBase({
     />
   ) : (
     <InsightEntry
-      insight={insight}
+      insight={insight as AiInsight}
       modal={modal}
       isPin={isPin}
       pinLoading={pinLoading}
@@ -240,21 +239,26 @@ function TableEntry({
   actions,
 }: {
   onClick: Dispatch<void>
-  icon: ReactNode
+  icon: ReactElement
   title: string
-  subtitle?: string
+  subtitle?: Nullable<string>
   timestamp?: string
   stale?: boolean
   onClickPin?: Dispatch<void>
   pinLoading?: boolean
   pinned?: boolean
   actions?: ReactNode
-  modal?: boolean
+  modal?: Nullable<boolean>
 }): ReactNode {
   const theme = useTheme()
 
   return (
-    <TableEntrySC onClick={onClick}>
+    <TableEntrySC
+      onClick={(e) => {
+        e.preventDefault()
+        onClick()
+      }}
+    >
       <Flex
         gap="small"
         flex={1}
@@ -310,13 +314,13 @@ function InsightEntry({
   modal,
 }: {
   insight: AiInsight
-  modal: boolean
+  modal: Nullable<boolean>
   isPin: boolean
   pinLoading?: boolean
   onClickPin?: Dispatch<void>
 }): ReactNode {
   const theme = useTheme()
-  const timestamp = insight.updatedAt || insight.insertedAt
+  const timestamp = insight.updatedAt || insight.insertedAt || dayjs().toNow()
   const isStale = dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
   const icon = isStale ? (
     <AiSparkleOutlineIcon color={theme.colors['icon-light']} />
@@ -328,7 +332,7 @@ function InsightEntry({
     <TableEntry
       onClick={() => {}}
       icon={icon}
-      title={insight.summary?.substring(0, 250)}
+      title={insight.summary?.substring(0, 250) ?? ''}
       subtitle={getInsightResourceName(insight)}
       timestamp={timestamp}
       pinned={isPin}
@@ -351,16 +355,19 @@ function ThreadEntry({
   modal,
   actions,
 }: {
-  thread: ChatThread
-  modal: boolean
-  actions: ReadNode
+  thread: ChatThread | ChatThreadTinyFragment
+  modal: Nullable<boolean>
+  actions: ReactNode
   isPin: boolean
   pinLoading?: boolean
   onClickPin?: Dispatch<void>
 }): ReactNode {
   const theme = useTheme()
   const timestamp =
-    thread.lastMessageAt || thread.updatedAt || thread.insertedAt
+    thread.lastMessageAt ||
+    thread.updatedAt ||
+    thread.insertedAt ||
+    dayjs().toNow()
   const isStale = dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
   const icon = isStale ? (
     <ChatOutlineIcon color={theme.colors['icon-light']} />
