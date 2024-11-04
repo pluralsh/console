@@ -1,11 +1,11 @@
-import { AiInsight, AiRole } from 'generated/graphql'
+import { AiInsightFragment, AiRole } from 'generated/graphql'
 import { ChatbotMessagesSC, ChatMessage } from './ChatbotPanelThread.tsx'
 
 export function ChatbotPanelInsight({
   currentInsight,
   fullscreen,
 }: {
-  currentInsight: AiInsight
+  currentInsight: AiInsightFragment
   fullscreen: boolean
 }) {
   return (

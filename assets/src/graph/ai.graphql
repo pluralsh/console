@@ -15,7 +15,6 @@ fragment AiInsight on AiInsight {
 
 fragment AiInsightSummary on AiInsight {
   id
-  text
   summary
   freshness
   updatedAt
@@ -54,7 +53,7 @@ fragment AiPin on AiPin {
   name
   insight {
     id
-    ...AiInsightSummary
+    ...AiInsight
   }
   thread {
     ...ChatThreadTiny

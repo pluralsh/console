@@ -11,25 +11,25 @@ import {
 
 import * as Dialog from '@radix-ui/react-dialog'
 
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { Body2BoldP, CaptionP } from 'components/utils/typography/Text'
-import { AiInsight, ChatThreadFragment } from 'generated/graphql'
+import { AiInsightFragment, ChatThreadFragment } from 'generated/graphql'
 import { ComponentPropsWithRef } from 'react'
 import { VisuallyHidden } from 'react-aria'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
+import { AllThreadsTable } from '../AIThreadsTable.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { AllThreadsTable } from '../AIThreadsTable.tsx'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
   onClose: () => void
   currentThread?: Nullable<ChatThreadFragment>
-  currentInsight?: Nullable<AiInsight>
+  currentInsight?: Nullable<AiInsightFragment>
 }
 
 export function Chatbot() {

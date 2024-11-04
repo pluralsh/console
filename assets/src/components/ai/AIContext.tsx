@@ -1,5 +1,5 @@
 import {
-  AiInsight,
+  AiInsightSummaryFragment,
   ChatThreadAttributes,
   ChatThreadFragment,
   useCreateChatThreadMutation,
@@ -37,8 +37,10 @@ type ChatbotContextT = {
   setFullscreen: Dispatch<SetStateAction<boolean>>
   currentThread: Nullable<ChatThreadFragment>
   setCurrentThread: (thread: Nullable<ChatThreadFragment>) => void
-  currentInsight: Nullable<AiInsight>
-  setCurrentInsight: Dispatch<SetStateAction<Nullable<AiInsight>>>
+  currentInsight: Nullable<AiInsightSummaryFragment>
+  setCurrentInsight: Dispatch<
+    SetStateAction<Nullable<AiInsightSummaryFragment>>
+  >
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -60,7 +62,8 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [fullscreen, setFullscreen] = useState(false)
   const [currentThread, setCurrentThread] =
     useState<Nullable<ChatThreadFragment>>()
-  const [currentInsight, setCurrentInsight] = useState<Nullable<AiInsight>>()
+  const [currentInsight, setCurrentInsight] =
+    useState<Nullable<AiInsightSummaryFragment>>()
 
   const context = useMemo(
     () => ({
@@ -142,7 +145,7 @@ export function useChatbot() {
       setCurrentInsight(null)
       setOpen(true)
     },
-    goToInsight: (insight: AiInsight) => {
+    goToInsight: (insight: AiInsightSummaryFragment) => {
       setCurrentThread(null)
       setCurrentInsight(insight)
       setOpen(true)

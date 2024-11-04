@@ -25,10 +25,9 @@ import { CaptionP } from 'components/utils/typography/Text'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import {
-  AiInsight,
+  AiInsightFragment,
   AiInsightSummaryFragment,
   AiPinFragment,
-  ChatThread,
   ChatThreadsQuery,
   ChatThreadTinyFragment,
   useChatThreadsQuery,
@@ -185,28 +184,26 @@ function AITableRowBase({
   modal?: boolean | null
 }) {
   const isPin = item.__typename === 'AiPin'
-  const thread = isPin
-    ? (item as AiPinFragment).thread
-    : (item as ChatThreadTinyFragment)
-  const insight = isPin ? (item as AiPinFragment).insight : undefined
+  const isInsight = isPin && !item.thread
+  const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
 
-  return thread ? (
+  return isInsight ? (
+    <InsightEntry
+      insight={item.insight}
+      modal={modal}
+      isPin={isPin}
+      pinLoading={pinLoading}
+      onClickPin={onClickPin}
+    />
+  ) : (
     <ThreadEntry
-      thread={thread!}
+      thread={thread}
       modal={modal}
       isPin={isPin}
       pinLoading={pinLoading}
       onClickPin={onClickPin}
       actions={<AiThreadsTableActions thread={thread} />}
     />
-  ) : (
-    <InsightEntry
-      insight={insight as AiInsight}
-      modal={modal}
-      isPin={isPin}
-      pinLoading={pinLoading}
-      onClickPin={onClickPin}
-    ></InsightEntry>
   )
 }
 
@@ -314,21 +311,23 @@ function InsightEntry({
   onClickPin,
   modal,
 }: {
-  insight: AiInsight
+  insight: Nullable<AiInsightFragment>
   modal: Nullable<boolean>
   isPin: boolean
   pinLoading?: boolean
   onClickPin?: Dispatch<void>
-}): ReactNode {
+}) {
   const { goToInsight } = useChatbot()
   const theme = useTheme()
-  const timestamp = insight.updatedAt || insight.insertedAt || dayjs().toNow()
+  const timestamp = insight?.updatedAt || insight?.insertedAt || dayjs().toNow()
   const isStale = dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
   const icon = isStale ? (
     <AiSparkleOutlineIcon color={theme.colors['icon-light']} />
   ) : (
     <AiSparkleFilledIcon color={theme.colors['icon-info']} />
   )
+
+  if (!insight) return null
 
   return (
     <TableEntry
@@ -345,7 +344,7 @@ function InsightEntry({
       }}
       stale={isStale}
       modal={modal}
-    ></TableEntry>
+    />
   )
 }
 
@@ -357,7 +356,7 @@ function ThreadEntry({
   modal,
   actions,
 }: {
-  thread: ChatThread | ChatThreadTinyFragment
+  thread: Nullable<ChatThreadTinyFragment>
   modal: Nullable<boolean>
   actions: ReactNode
   isPin: boolean
@@ -367,9 +366,9 @@ function ThreadEntry({
   const { goToThread } = useChatbot()
   const theme = useTheme()
   const timestamp =
-    thread.lastMessageAt ||
-    thread.updatedAt ||
-    thread.insertedAt ||
+    thread?.lastMessageAt ||
+    thread?.updatedAt ||
+    thread?.insertedAt ||
     dayjs().toNow()
   const isStale = dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
   const icon = isStale ? (
@@ -377,6 +376,8 @@ function ThreadEntry({
   ) : (
     <ChatFilledIcon color={theme.colors['icon-info']} />
   )
+
+  if (!thread) return null
 
   return (
     <TableEntry
