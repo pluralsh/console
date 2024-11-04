@@ -9,6 +9,7 @@ import moment from 'moment/moment'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
+import { AiInsight } from '../../../generated/graphql.ts'
 import AIPinButton from '../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
 import {
@@ -56,7 +57,7 @@ export function StackInsights() {
             loading={loading}
             refetch={refetch}
           />
-          <AIPinButton insight={stack.insight} />
+          <AIPinButton insight={stack.insight as AiInsight} />
           <ChatWithAIButton
             floating
             insightId={stack?.insight?.id}

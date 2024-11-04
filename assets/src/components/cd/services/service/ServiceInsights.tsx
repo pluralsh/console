@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom'
 
 import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
+import { AiInsight } from '../../../../generated/graphql.ts'
 import AIPinButton from '../../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../../ai/chatbot/AISuggestFix.tsx'
 import {
@@ -70,7 +71,7 @@ export function ServiceInsights() {
             loading={loading}
             refetch={refetch}
           />
-          <AIPinButton insight={service?.insight} />
+          <AIPinButton insight={service?.insight as AiInsight} />
           <ChatWithAIButton
             floating
             insightId={service?.insight?.id}

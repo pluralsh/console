@@ -9,7 +9,6 @@ import {
   AiInsight,
   AiPinEdge,
   ChatThread,
-  CreateAiPinMutation,
   useAiPinsQuery,
   useCreateAiPinMutation,
   useDeleteAiPinMutation,
@@ -17,15 +16,15 @@ import {
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 
 interface AIPinButtonProps {
-  insight?: AiInsight
-  thread?: ChatThread
+  insight?: Nullable<AiInsight>
+  thread?: Nullable<ChatThread>
 }
 
 export default function AIPinButton({
   insight,
   thread,
 }: AIPinButtonProps): ReactNode {
-  const [pinned, setPinned] = useState<AiPinEdge>(null)
+  const [pinned, setPinned] = useState<Nullable<AiPinEdge>>(null)
   const name =
     insight?.text?.substring(0, 250) ?? thread?.summary?.substring(0, 250) ?? ''
   const [createPin, { loading: pinCreating }] = useCreateAiPinMutation({
@@ -41,7 +40,7 @@ export default function AIPinButton({
   })
   const [deletePin, { loading: pinDeleting }] = useDeleteAiPinMutation({
     variables: {
-      id: pinned?.node?.id,
+      id: pinned?.node?.id ?? '',
     },
     awaitRefetchQueries: true,
     refetchQueries: ['AIPins'],
@@ -60,11 +59,11 @@ export default function AIPinButton({
   useEffect(() => {
     if (loading) return
 
-    const pin = pins?.aiPins?.edges?.find(
-      (pin: AiPinEdge) =>
+    const pin: Nullable<AiPinEdge> = pins?.aiPins?.edges?.find(
+      (pin) =>
         (!!thread && pin?.node?.thread?.id === thread?.id) ||
         (!!insight && pin?.node?.insight?.id === insight?.id)
-    )
+    ) as Nullable<AiPinEdge>
 
     if (!pin && pageInfo?.hasNextPage) {
       fetchNextPage()
