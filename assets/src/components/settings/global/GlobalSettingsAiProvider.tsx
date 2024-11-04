@@ -31,11 +31,12 @@ import { produce } from 'immer'
 import { PartialDeep } from 'type-fest'
 import merge from 'lodash/merge'
 import {
+  AnthropicSettings,
   AzureSettings,
   BedrockSettings,
   initialSettingsAttributes,
   OllamaSettings,
-  OpenAIAnthropicSettings,
+  OpenAISettings,
   validateAttributes,
 } from './GlobalSettingsAIProviders.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
@@ -74,7 +75,7 @@ export function GlobalSettingsAiProvider() {
   switch (provider) {
     case AiProvider.Openai:
       settings = (
-        <OpenAIAnthropicSettings
+        <OpenAISettings
           enabled={enabled}
           settings={providerSettings.openai}
           updateSettings={(settings) =>
@@ -85,7 +86,7 @@ export function GlobalSettingsAiProvider() {
       break
     case AiProvider.Anthropic:
       settings = (
-        <OpenAIAnthropicSettings
+        <AnthropicSettings
           enabled={enabled}
           settings={providerSettings.anthropic}
           updateSettings={(settings) =>
