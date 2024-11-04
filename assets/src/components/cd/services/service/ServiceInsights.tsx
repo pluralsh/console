@@ -1,8 +1,6 @@
 import { Flex, useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { InsightDisplay } from 'components/stacks/insights/StackInsights'
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
-import { CaptionP } from 'components/utils/typography/Text'
 import moment from 'moment/moment'
 import { useMemo } from 'react'
 
@@ -10,12 +8,14 @@ import { useParams } from 'react-router-dom'
 
 import { CD_REL_PATH } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
+import AIPinButton from '../../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
 } from '../../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../../utils/RefreshIconFrame.tsx'
+import { StackedText } from '../../../utils/table/StackedText.tsx'
 import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
@@ -54,22 +54,23 @@ export function ServiceInsights() {
         justify="space-between"
         alignItems="center"
       >
-        <ConsolePageTitle heading="Insights" />
+        <StackedText
+          first="Insight"
+          firstPartialType="body1Bold"
+          second={
+            service.insight?.updatedAt &&
+            `Last updated ${moment(service.insight?.updatedAt).fromNow()}`
+          }
+        />
         <Flex
           align="center"
           gap="small"
         >
-          <CaptionP
-            css={{ width: 'max-content' }}
-            $color="text-xlight"
-          >
-            {service.insight?.updatedAt &&
-              `Last updated ${moment(service.insight?.updatedAt).fromNow()}`}
-          </CaptionP>
           <IconFrameRefreshButton
             loading={loading}
             refetch={refetch}
           />
+          <AIPinButton insight={service?.insight} />
           <ChatWithAIButton
             floating
             insightId={service?.insight?.id}
