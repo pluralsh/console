@@ -6,6 +6,8 @@ import moment from 'moment'
 import { useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 import { dateTimeFormat } from 'utils/date'
+import { AiInsight } from '../../../../generated/graphql.ts'
+import AIPinButton from '../../../ai/AIPinButton.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
@@ -55,6 +57,7 @@ export function StackRunInsights() {
             loading={loading}
             refetch={refetch}
           />
+          <AIPinButton insight={stackRun?.insight as AiInsight} />
           <ChatWithAIButton
             floating
             insightId={stackRun?.insight?.id}

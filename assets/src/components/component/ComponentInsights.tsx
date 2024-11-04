@@ -3,6 +3,8 @@ import { InsightDisplay } from 'components/stacks/insights/StackInsights'
 import { CaptionP } from 'components/utils/typography/Text'
 import { useOutletContext } from 'react-router-dom'
 import { dateTimeFormat } from 'utils/date'
+import { AiInsight } from '../../generated/graphql.ts'
+import AIPinButton from '../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
@@ -39,6 +41,7 @@ export function ComponentInsights() {
           loading={loading}
           refetch={refetch}
         />
+        <AIPinButton insight={component?.insight as AiInsight} />
         <ChatWithAIButton
           floating
           insightId={component?.insight?.id}

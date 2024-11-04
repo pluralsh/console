@@ -132,6 +132,7 @@ export function useChatbot() {
         variables: { attributes },
         onCompleted: (data) => {
           setCurrentThread(data.createThread)
+          setCurrentInsight(null)
           setOpen(true)
         },
       })
