@@ -42,7 +42,6 @@ import { Kind } from '../common/types'
 import { getBreadcrumbs } from './StatefulSets'
 import { usePodsColumns } from './Pods'
 import { WorkloadStatusChip } from './utils'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: 'pods', label: 'Pods' },
@@ -88,10 +87,6 @@ export default function StatefulSet(): ReactElement {
   )
 
   const statefulSet = data?.handleGetStatefulSetDetail as StatefulSetT
-
-  useExplainWithAI(
-    'Describe Kubernetes Stateful Set resource: ' + JSON.stringify(statefulSet)
-  )
 
   if (loading) {
     return <LoadingIndicator />

@@ -1,7 +1,8 @@
 import { ReactElement, ReactNode, useMemo, useRef, useState } from 'react'
 import { SubTab, TabList } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { useMatch, useResolvedPath } from 'react-router-dom'
+import { useMatch, useParams, useResolvedPath } from 'react-router-dom'
+import pluralize from 'pluralize'
 
 import { ResponsiveLayoutPage } from '../../utils/layout/ResponsiveLayoutPage'
 import { LinkTabWrap } from '../../utils/Tabs'
@@ -9,6 +10,15 @@ import { ResponsivePageFullWidth } from '../../utils/layout/ResponsivePageFullWi
 import { ResponsiveLayoutSpacer } from '../../utils/layout/ResponsiveLayoutSpacer'
 import { ResponsiveLayoutSidecarContainer } from '../../utils/layout/ResponsiveLayoutSidecarContainer'
 import { PageHeaderContext } from '../../cd/ContinuousDeployment'
+import { getKubernetesAbsPath } from '../../../routes/kubernetesRoutesConsts.tsx'
+import {
+  NamespacedResourceQueryVariables,
+  ResourceQueryVariables,
+  useNamespacedResourceQuery,
+  useResourceQuery,
+} from '../../../generated/graphql-kubernetes.ts'
+import { KubernetesClient } from '../../../helpers/kubernetes.client.ts'
+import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 export interface TabEntry {
   label: string
@@ -36,6 +46,33 @@ export default function ResourceDetails({
   const currentTab = tabs.find(({ path }) => path === (tab ?? ''))
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const pageHeaderContext = useMemo(() => ({ setHeaderContent }), [])
+  const { clusterId, name, namespace, crd } = useParams()
+  const kindPathMatch = useMatch(`${getKubernetesAbsPath(clusterId)}/:kind/*`)
+  const kind = useMemo(
+    () => crd ?? pluralize(kindPathMatch?.params?.kind || '', 1),
+    [crd, kindPathMatch?.params?.kind]
+  )
+
+  const resourceQuery = useMemo(
+    () => (namespace ? useNamespacedResourceQuery : useResourceQuery),
+    [namespace]
+  )
+
+  const { data } = resourceQuery({
+    client: KubernetesClient(clusterId ?? ''),
+    skip: !clusterId || kind === 'secret',
+    fetchPolicy: 'no-cache',
+    variables: { kind, name, namespace } as ResourceQueryVariables &
+      NamespacedResourceQueryVariables,
+  })
+
+  const prompt = useMemo(() => {
+    return data?.handleGetResource?.Object
+      ? `Describe the following Kubernetes ${kind} resource: ${JSON.stringify(data?.handleGetResource?.Object)}`
+      : undefined
+  }, [data?.handleGetResource?.Object, kind])
+
+  useExplainWithAI(prompt)
 
   return (
     <ResponsiveLayoutPage>

@@ -34,7 +34,6 @@ import {
   colReclaimPolicy,
   colStatus,
 } from './PersistentVolumes'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Persistent Volumes' },
@@ -52,10 +51,6 @@ export default function StorageClass(): ReactElement {
   })
 
   const sc = data?.handleGetStorageClass
-
-  useExplainWithAI(
-    'Describe Kubernetes Storage Class resource: ' + JSON.stringify(sc)
-  )
 
   useSetBreadcrumbs(
     useMemo(

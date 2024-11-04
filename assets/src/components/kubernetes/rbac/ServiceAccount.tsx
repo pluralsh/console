@@ -22,7 +22,6 @@ import { useCluster } from '../Cluster'
 import { Kind } from '../common/types'
 
 import { getBreadcrumbs } from './ServiceAccounts'
-import { useExplainWithAI } from '../../ai/AIContext.tsx'
 
 const directory: Array<TabEntry> = [{ path: 'raw', label: 'Raw' }] as const
 
@@ -40,11 +39,6 @@ export default function ServiceAccount(): ReactElement {
   })
 
   const serviceAccount = data?.handleGetServiceAccountDetail
-
-  useExplainWithAI(
-    'Describe Kubernetes Service Account resource: ' +
-      JSON.stringify(serviceAccount)
-  )
 
   useSetBreadcrumbs(
     useMemo(
