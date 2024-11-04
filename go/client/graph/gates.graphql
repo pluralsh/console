@@ -13,6 +13,19 @@ query PagedClusterGates($after: String, $first: Int, $before: String, $last: Int
     }
 }
 
+query PagedClusterGateIDs($after: String, $first: Int, $before: String, $last: Int){
+    pagedClusterGates(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges {
+            ...PipelineGateIDsEdgeFragment
+        }
+    }
+}
+
+fragment PipelineGateIDsEdgeFragment on PipelineGateEdge {
+    node { ...{ id } }
+}
+
 fragment PipelineGateEdgeFragment on PipelineGateEdge {
     node { ...PipelineGateFragment }
 }

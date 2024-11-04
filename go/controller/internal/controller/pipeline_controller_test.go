@@ -229,7 +229,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false, nil)
-			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragment{ID: pipelineConsoleID}, nil)
+			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragmentMinimal{ID: pipelineConsoleID}, nil)
 
 			controllerReconciler := &controller.PipelineReconciler{
 				Client:           k8sClient,
@@ -279,7 +279,7 @@ var _ = Describe("Pipeline Controller", Ordered, func() {
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
 			fakeConsoleClient.On("IsPipelineExisting", mock.AnythingOfType("string")).Return(false, nil)
-			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragment{ID: pipelineConsoleID}, nil)
+			fakeConsoleClient.On("SavePipeline", mock.AnythingOfType("string"), mock.Anything).Return(&gqlclient.PipelineFragmentMinimal{ID: pipelineConsoleID}, nil)
 
 			controllerReconciler := &controller.PipelineReconciler{
 				Client:           k8sClient,

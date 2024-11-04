@@ -191,7 +191,7 @@ func (r *PipelineReconciler) addOrRemoveFinalizer(pipeline *v1alpha1.Pipeline) *
 	return nil
 }
 
-func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeline, attrs console.PipelineAttributes, sha string) (*console.PipelineFragment, error) {
+func (r *PipelineReconciler) sync(ctx context.Context, pipeline *v1alpha1.Pipeline, attrs console.PipelineAttributes, sha string) (*console.PipelineFragmentMinimal, error) {
 	logger := log.FromContext(ctx)
 	exists, err := r.ConsoleClient.IsPipelineExisting(pipeline.Status.GetID())
 	if err != nil {
