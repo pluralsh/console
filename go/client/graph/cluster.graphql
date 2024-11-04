@@ -12,6 +12,7 @@ fragment ClusterFragment on Cluster {
     deletedAt
     metadata
     tags { ...ClusterTags }
+    provider { ...ClusterProviderFragment }
     nodePools { ...NodePoolFragment }
     status { ...ClusterStatusFragment }
     project {...TinyProjectFragment }

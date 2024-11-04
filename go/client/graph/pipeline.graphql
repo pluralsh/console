@@ -6,6 +6,15 @@ fragment PipelineFragment on Pipeline {
     project {...TinyProjectFragment }
 }
 
+fragment PipelineFragmentMinimal on Pipeline {
+    id
+    name
+}
+
+fragment PipelineFragmentId on Pipeline {
+    id
+}
+
 fragment PipelineStageFragment on PipelineStage {
     id
     name
@@ -30,18 +39,18 @@ fragment PipelineEdgeFragment on PipelineEdge {
 
 mutation SavePipeline($name: String!, $attributes: PipelineAttributes!) {
     savePipeline(name: $name, attributes: $attributes) {
-        ...PipelineFragment
+        ...PipelineFragmentMinimal
     }
 }
 
 mutation DeletePipeline($id: ID!) {
     deletePipeline(id: $id) {
-        ...PipelineFragment
+        ... PipelineFragmentId
     }
 }
 
 query GetPipeline($id: ID!) {
-    pipeline(id: $id) { ...PipelineFragment }
+    pipeline(id: $id) { ...PipelineFragmentMinimal }
 }
 
 query GetPipelines($after: String) {

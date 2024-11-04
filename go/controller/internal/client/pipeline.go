@@ -11,7 +11,7 @@ import (
 	internalerror "github.com/pluralsh/console/go/controller/internal/errors"
 )
 
-func (c *client) SavePipeline(name string, attrs console.PipelineAttributes) (*console.PipelineFragment, error) {
+func (c *client) SavePipeline(name string, attrs console.PipelineAttributes) (*console.PipelineFragmentMinimal, error) {
 	response, err := c.consoleClient.SavePipeline(c.ctx, name, attrs)
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func (c *client) SavePipeline(name string, attrs console.PipelineAttributes) (*c
 	return response.SavePipeline, nil
 }
 
-func (c *client) GetPipeline(id string) (*console.PipelineFragment, error) {
+func (c *client) GetPipeline(id string) (*console.PipelineFragmentMinimal, error) {
 	response, err := c.consoleClient.GetPipeline(c.ctx, id)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)
@@ -39,7 +39,7 @@ func (c *client) ListPipelines() (*console.GetPipelines, error) {
 	return c.consoleClient.GetPipelines(c.ctx, nil, nil, nil)
 }
 
-func (c *client) DeletePipeline(id string) (*console.PipelineFragment, error) {
+func (c *client) DeletePipeline(id string) (*console.PipelineFragmentID, error) {
 	response, err := c.consoleClient.DeletePipeline(c.ctx, id)
 	if err != nil {
 		return nil, err
