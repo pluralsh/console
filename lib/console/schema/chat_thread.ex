@@ -4,6 +4,8 @@ defmodule Console.Schema.ChatThread do
 
   @max_threads 50
 
+  @expiry [days: -14]
+
   schema "chat_threads" do
     field :summary,    :string
     field :default,    :boolean, default: false
@@ -29,17 +31,23 @@ defmodule Console.Schema.ChatThread do
   def prunable(query \\ __MODULE__) do
     query = with_cte(query, "numbered_threads", as: ^numbered_threads(query))
     expired = Timex.now() |> Timex.shift(days: -1)
+    too_old = Timex.now() |> Timex.shift(@expiry)
 
     from(t in query,
       join: nt in "numbered_threads",
         on: nt.id == t.id,
-      where: nt.row_number > @max_threads and t.inserted_at <= ^expired
+      where: (nt.row_number > @max_threads and t.inserted_at <= ^expired) or
+             (not is_nil(t.last_message_at) and t.last_message_at < ^too_old)
     )
   end
 
   def numbered_threads(query \\ __MODULE__) do
     from(t in query,
-      select: %{id: t.id, inserted_at: t.inserted_at, row_number: fragment("ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY inserted_at DESC)")}
+      select: %{
+        id: t.id,
+        inserted_at: t.inserted_at,
+        row_number: fragment("ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY inserted_at DESC)")
+      }
     )
   end
 

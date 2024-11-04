@@ -46,6 +46,7 @@ import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { isUnstructured } from './ComponentInfo'
 import { PageHeaderContext } from '../cd/ContinuousDeployment.tsx'
 import { getDirectory } from './directory.tsx'
+import { useExplainWithAI } from 'components/ai/AIContext.tsx'
 
 export const kindToQuery = {
   certificate: CertificateDocument,
@@ -129,6 +130,13 @@ export function ComponentDetails({
       data ? Object.values(data).find((value) => value !== undefined) : null,
     [data]
   )
+
+  useExplainWithAI(
+    value
+      ? `Describe the following kubernetes resource: ${value?.raw}`
+      : undefined
+  )
+
   const subpath = useMatch(`${pathMatchString}/:subpath`)?.params?.subpath || ''
   const outletContext: ComponentDetailsContext = useMemo(
     () => ({
