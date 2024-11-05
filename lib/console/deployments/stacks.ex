@@ -650,16 +650,8 @@ defmodule Console.Deployments.Stacks do
     |> Repo.exists?()
   end
 
-  defp filter(%Stack{id: id}) do
-    StackRun.for_stack(id)
-    |> StackRun.wet()
-  end
-
-  defp filter(%PullRequest{id: id, stack_id: sid}) do
-    StackRun.for_stack(sid)
-    |> StackRun.for_pr(id)
-    |> StackRun.dry()
-  end
+  defp filter(%Stack{id: id}), do: StackRun.for_stack(id)
+  defp filter(%PullRequest{stack_id: sid}), do: StackRun.for_stack(sid)
 
   @doc """
   Checks to see if a stack run can be dequeued (all runs before it have terminated), and marks

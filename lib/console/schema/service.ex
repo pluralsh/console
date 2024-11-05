@@ -19,7 +19,8 @@ defmodule Console.Schema.Service do
     ServiceContextBinding,
     NamespaceInstance,
     ServiceDependency,
-    AiInsight
+    AiInsight,
+    ServiceVuln
   }
 
   defenum Promotion, ignore: 0, proceed: 1, rollback: 2
@@ -141,6 +142,7 @@ defmodule Console.Schema.Service do
     has_one :global_service,     GlobalService
     has_one :namespace_instance, NamespaceInstance
 
+    has_many :vulns,   ServiceVuln
     has_many :imports, ServiceImport, on_replace: :delete
     has_many :errors, ServiceError, on_replace: :delete
     has_many :components, ServiceComponent, on_replace: :delete

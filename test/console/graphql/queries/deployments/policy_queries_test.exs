@@ -1,6 +1,39 @@
 defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
   use Console.DataCase, async: true
 
+  describe "vulnerabilityReports" do
+    test "it can fetch reports for a user" do
+      reports = insert_list(3, :vulnerability_report)
+
+      {:ok, %{data: %{"vulnerabilityReports" => found}}} = run_query("""
+        query {
+          vulnerabilityReports(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(reports)
+    end
+  end
+
+  describe "vulnerabilityReport" do
+    test "it can fetch a vuln report" do
+      user = insert(:user)
+      cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
+      report = insert(:vulnerability_report, cluster: cluster)
+
+      {:ok, %{data: %{"vulnerabilityReport" => vuln}}} = run_query("""
+        query Report($id: ID!) {
+          vulnerabilityReport(id: $id) { id }
+        }
+      """, %{"id" => report.id}, %{current_user: user})
+
+      assert vuln["id"] == report.id
+    end
+  end
+
   describe "cluster" do
     test "it can fetch namespace constraint statistics for a cluster" do
       cluster = insert(:cluster)

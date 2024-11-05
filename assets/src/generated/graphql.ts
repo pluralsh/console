@@ -1959,6 +1959,25 @@ export type CustomStepAttributes = {
   stage?: InputMaybe<StepStage>;
 };
 
+export type Cvss = {
+  __typename?: 'Cvss';
+  v2Score?: Maybe<Scalars['Float']['output']>;
+  v2Vector?: Maybe<Scalars['String']['output']>;
+  v3Score?: Maybe<Scalars['Float']['output']>;
+  v3Vector?: Maybe<Scalars['String']['output']>;
+  v40Score?: Maybe<Scalars['Float']['output']>;
+  v40Vector?: Maybe<Scalars['String']['output']>;
+};
+
+export type CvssAttributes = {
+  v2Score?: InputMaybe<Scalars['Float']['input']>;
+  v2Vector?: InputMaybe<Scalars['String']['input']>;
+  v3Score?: InputMaybe<Scalars['Float']['input']>;
+  v3Vector?: InputMaybe<Scalars['String']['input']>;
+  v40Score?: InputMaybe<Scalars['Float']['input']>;
+  v40Vector?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type DaemonSet = {
   __typename?: 'DaemonSet';
   events?: Maybe<Array<Maybe<Event>>>;
@@ -3231,6 +3250,15 @@ export type NamespaceSpec = {
 export type NamespaceStatus = {
   __typename?: 'NamespaceStatus';
   phase?: Maybe<Scalars['String']['output']>;
+};
+
+export type NamespaceVuln = {
+  __typename?: 'NamespaceVuln';
+  namespace: Scalars['String']['output'];
+};
+
+export type NamespaceVulnAttributes = {
+  namespace: Scalars['String']['input'];
 };
 
 export type NamespacedName = {
@@ -4633,6 +4661,8 @@ export type PrAutomationUpdateSpecAttributes = {
   regexReplacements?: InputMaybe<Array<InputMaybe<RegexReplacementAttributes>>>;
   regexes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   replaceTemplate?: InputMaybe<Scalars['String']['input']>;
+  /** list of yaml overlay operations to apply to a file */
+  yamlOverlays?: InputMaybe<Array<InputMaybe<YamlOverlayAttributes>>>;
   yq?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -4750,6 +4780,7 @@ export type PrUpdateSpec = {
   regexReplacements?: Maybe<Array<Maybe<RegexReplacement>>>;
   regexes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   replaceTemplate?: Maybe<Scalars['String']['output']>;
+  yamlOverlays?: Maybe<Array<Maybe<YamlOverlay>>>;
   yq?: Maybe<Scalars['String']['output']>;
 };
 
@@ -5001,7 +5032,7 @@ export type RegexReplacement = {
   templated?: Maybe<Scalars['Boolean']['output']>;
 };
 
-/** a fully specify regex/replace flow */
+/** a fully specified regex/replace flow */
 export type RegexReplacementAttributes = {
   /** the filename to apply this regex on */
   file: Scalars['String']['input'];
@@ -5400,6 +5431,7 @@ export type RootMutationType = {
   upsertObserver?: Maybe<Observer>;
   upsertPolicyConstraints?: Maybe<Scalars['Int']['output']>;
   upsertVirtualCluster?: Maybe<Cluster>;
+  upsertVulnerabilities?: Maybe<Scalars['Int']['output']>;
 };
 
 
@@ -6364,6 +6396,11 @@ export type RootMutationTypeUpsertVirtualClusterArgs = {
   parentId: Scalars['ID']['input'];
 };
 
+
+export type RootMutationTypeUpsertVulnerabilitiesArgs = {
+  vulnerabilities?: InputMaybe<Array<InputMaybe<VulnerabilityReportAttributes>>>;
+};
+
 export type RootQueryType = {
   __typename?: 'RootQueryType';
   accessToken?: Maybe<AccessToken>;
@@ -6556,6 +6593,8 @@ export type RootQueryType = {
   user?: Maybe<User>;
   users?: Maybe<UserConnection>;
   violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
+  vulnerabilityReport?: Maybe<VulnerabilityReport>;
+  vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
@@ -7592,6 +7631,21 @@ export type RootQueryTypeViolationStatisticsArgs = {
 };
 
 
+export type RootQueryTypeVulnerabilityReportArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeVulnerabilityReportsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type RootQueryTypeWebhooksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -8141,6 +8195,8 @@ export type ServiceDeployment = {
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
   /** semver of this service */
   version: Scalars['String']['output'];
+  /** sideload detected vulnerabilities for this service */
+  vulns?: Maybe<ServiceVuln>;
   /** write policy of this service */
   writeBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
 };
@@ -8358,6 +8414,15 @@ export type ServiceUpdateAttributes = {
   templated?: InputMaybe<Scalars['Boolean']['input']>;
   version?: InputMaybe<Scalars['String']['input']>;
   writeBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
+};
+
+export type ServiceVuln = {
+  __typename?: 'ServiceVuln';
+  service?: Maybe<Service>;
+};
+
+export type ServiceVulnAttributes = {
+  serviceId: Scalars['ID']['input'];
 };
 
 export enum Severity {
@@ -9246,6 +9311,143 @@ export type ViolationStatistic = {
   violations?: Maybe<Scalars['Int']['output']>;
 };
 
+export type VulnArtifact = {
+  __typename?: 'VulnArtifact';
+  digest?: Maybe<Scalars['String']['output']>;
+  mime?: Maybe<Scalars['String']['output']>;
+  registry?: Maybe<Scalars['String']['output']>;
+  repository?: Maybe<Scalars['String']['output']>;
+  tag?: Maybe<Scalars['String']['output']>;
+};
+
+export type VulnArtifactAttributes = {
+  digest?: InputMaybe<Scalars['String']['input']>;
+  mime?: InputMaybe<Scalars['String']['input']>;
+  registry?: InputMaybe<Scalars['String']['input']>;
+  repository?: InputMaybe<Scalars['String']['input']>;
+  tag?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type VulnOs = {
+  __typename?: 'VulnOs';
+  eosl?: Maybe<Scalars['Boolean']['output']>;
+  family?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+};
+
+export type VulnOsAttributes = {
+  eosl?: InputMaybe<Scalars['Boolean']['input']>;
+  family?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export enum VulnSeverity {
+  Critical = 'CRITICAL',
+  High = 'HIGH',
+  Low = 'LOW',
+  Medium = 'MEDIUM',
+  Unknown = 'UNKNOWN'
+}
+
+export type VulnSummary = {
+  __typename?: 'VulnSummary';
+  criticalCount?: Maybe<Scalars['Int']['output']>;
+  highCount?: Maybe<Scalars['Int']['output']>;
+  lowCount?: Maybe<Scalars['Int']['output']>;
+  mediumCount?: Maybe<Scalars['Int']['output']>;
+  noneCount?: Maybe<Scalars['Int']['output']>;
+  unknownCount?: Maybe<Scalars['Int']['output']>;
+};
+
+export type VulnSummaryAttributes = {
+  criticalCount?: InputMaybe<Scalars['Int']['input']>;
+  highCount?: InputMaybe<Scalars['Int']['input']>;
+  lowCount?: InputMaybe<Scalars['Int']['input']>;
+  mediumCount?: InputMaybe<Scalars['Int']['input']>;
+  noneCount?: InputMaybe<Scalars['Int']['input']>;
+  unknownCount?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type Vulnerability = {
+  __typename?: 'Vulnerability';
+  class?: Maybe<Scalars['String']['output']>;
+  cvss?: Maybe<Cvss>;
+  cvssSource?: Maybe<Scalars['String']['output']>;
+  description?: Maybe<Scalars['String']['output']>;
+  fixedVersion?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  installedVersion?: Maybe<Scalars['String']['output']>;
+  lastModifiedDate?: Maybe<Scalars['DateTime']['output']>;
+  links?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
+  packageType?: Maybe<Scalars['String']['output']>;
+  pkgPath?: Maybe<Scalars['String']['output']>;
+  primaryLink?: Maybe<Scalars['String']['output']>;
+  publishedDate?: Maybe<Scalars['DateTime']['output']>;
+  resource?: Maybe<Scalars['String']['output']>;
+  score?: Maybe<Scalars['Float']['output']>;
+  severity?: Maybe<VulnSeverity>;
+  target?: Maybe<Scalars['String']['output']>;
+  title?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type VulnerabilityAttributes = {
+  class?: InputMaybe<Scalars['String']['input']>;
+  cvss?: InputMaybe<CvssAttributes>;
+  cvssSource?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  fixedVersion?: InputMaybe<Scalars['String']['input']>;
+  installedVersion?: InputMaybe<Scalars['String']['input']>;
+  lastModifiedDate?: InputMaybe<Scalars['DateTime']['input']>;
+  links?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  packageType?: InputMaybe<Scalars['String']['input']>;
+  pkgPath?: InputMaybe<Scalars['String']['input']>;
+  primaryLink?: InputMaybe<Scalars['String']['input']>;
+  publishedDate?: InputMaybe<Scalars['DateTime']['input']>;
+  resource?: InputMaybe<Scalars['String']['input']>;
+  score?: InputMaybe<Scalars['Float']['input']>;
+  severity?: InputMaybe<VulnSeverity>;
+  target?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type VulnerabilityReport = {
+  __typename?: 'VulnerabilityReport';
+  artifact?: Maybe<VulnArtifact>;
+  artifactUrl?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  namespaces?: Maybe<Array<Maybe<NamespaceVuln>>>;
+  os?: Maybe<VulnOs>;
+  services?: Maybe<Array<Maybe<ServiceVuln>>>;
+  summary?: Maybe<VulnSummary>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  vulnerabilities?: Maybe<Array<Maybe<Vulnerability>>>;
+};
+
+export type VulnerabilityReportAttributes = {
+  artifact?: InputMaybe<VulnArtifactAttributes>;
+  artifactUrl?: InputMaybe<Scalars['String']['input']>;
+  namespaces?: InputMaybe<Array<InputMaybe<NamespaceVulnAttributes>>>;
+  os?: InputMaybe<VulnOsAttributes>;
+  services?: InputMaybe<Array<InputMaybe<ServiceVulnAttributes>>>;
+  summary?: InputMaybe<VulnSummaryAttributes>;
+  vulnerabilities?: InputMaybe<Array<InputMaybe<VulnerabilityAttributes>>>;
+};
+
+export type VulnerabilityReportConnection = {
+  __typename?: 'VulnerabilityReportConnection';
+  edges?: Maybe<Array<Maybe<VulnerabilityReportEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type VulnerabilityReportEdge = {
+  __typename?: 'VulnerabilityReportEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<VulnerabilityReport>;
+};
+
 export type WaitingState = {
   __typename?: 'WaitingState';
   message?: Maybe<Scalars['String']['output']>;
@@ -9309,6 +9511,25 @@ export type WireguardPeerStatus = {
   __typename?: 'WireguardPeerStatus';
   conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   ready?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** a description of a yaml-merge operation on a file */
+export type YamlOverlay = {
+  __typename?: 'YamlOverlay';
+  /** the filename to apply this yaml overlay on */
+  file: Scalars['String']['output'];
+  /** whether you want to apply liquid templating on the yaml before compiling */
+  templated?: Maybe<Scalars['Boolean']['output']>;
+  yaml: Scalars['String']['output'];
+};
+
+/** a description of a yaml-merge operation on a file */
+export type YamlOverlayAttributes = {
+  /** the filename to apply this yaml overlay on */
+  file: Scalars['String']['input'];
+  /** whether you want to apply liquid templating on the yaml before compiling */
+  templated?: InputMaybe<Scalars['Boolean']['input']>;
+  yaml: Scalars['String']['input'];
 };
 
 export type AiInsightFragment = { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null };

@@ -288,6 +288,10 @@ type PrAutomationUpdateConfiguration struct {
 	// +kubebuilder:validation:Optional
 	RegexReplacements []RegexReplacement `json:"regexReplacements,omitempty"`
 
+	// Replacement via overlaying a yaml structure on an existing yaml file
+	// +kubebuilder:validation:Optional
+	YamlOverlays []YamlOverlay `json:"yamlOverlays,omitempty"`
+
 	// The regexes to apply on each file
 	// +kubebuilder:validation:Optional
 	Regexes []*string `json:"regexes,omitempty"`
@@ -310,6 +314,9 @@ func (in *PrAutomationUpdateConfiguration) Attributes() *console.PrAutomationUpd
 		Regexes: in.Regexes,
 		RegexReplacements: algorithms.Map(in.RegexReplacements, func(rp RegexReplacement) *console.RegexReplacementAttributes {
 			return rp.Attributes()
+		}),
+		YamlOverlays: algorithms.Map(in.YamlOverlays, func(yo YamlOverlay) *console.YamlOverlayAttributes {
+			return yo.Attributes()
 		}),
 		Files:           in.Files,
 		ReplaceTemplate: in.ReplaceTemplate,
@@ -343,6 +350,29 @@ func (in *RegexReplacement) Attributes() *console.RegexReplacementAttributes {
 		Replacement: in.Replacement,
 		File:        in.File,
 		Templated:   in.Templated,
+	}
+}
+
+// YamlOverlay ...
+type YamlOverlay struct {
+	// the file to execute the overlay on
+	// +kubebuilder:validation:Required
+	File string `json:"file"`
+
+	// the (possibly templated) yaml to use as the overlayed yaml blob written to the file
+	// +kubebuilder:validation:Required
+	Yaml string `json:"yaml"`
+
+	// Whether you want to apply templating to the yaml blob before overlaying
+	// +kubebuilder:validation:Optional
+	Templated *bool `json:"templated"`
+}
+
+func (in *YamlOverlay) Attributes() *console.YamlOverlayAttributes {
+	return &console.YamlOverlayAttributes{
+		Yaml:      in.Yaml,
+		File:      in.File,
+		Templated: in.Templated,
 	}
 }
 

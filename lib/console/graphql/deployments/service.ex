@@ -202,6 +202,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :dependencies,   list_of(:service_dependency), resolve: dataloader(Deployments), description: "the dependencies of this service, actualization will not happen until all are HEALTHY"
     field :imports,        list_of(:service_import), resolve: dataloader(Deployments), description: "imports from stack outputs"
     field :insight,        :ai_insight, resolve: dataloader(Deployments), description: "an insight explaining the state of this service"
+    field :vulns,          :service_vuln, resolve: dataloader(Deployments), description: "sideload detected vulnerabilities for this service"
 
     @desc "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
     connection field :revisions, node_type: :revision do

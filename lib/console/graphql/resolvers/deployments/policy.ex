@@ -1,11 +1,25 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Policy do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.{Policy, Clusters}
-  alias Console.Schema.{PolicyConstraint, Cluster}
+  alias Console.Schema.{PolicyConstraint, Cluster, VulnerabilityReport}
+
+  def resolve_vulnerability(%{id: id}, %{context: %{current_user: user}}) do
+    Policy.get_vulnerability(id)
+    |> allow(user, :read)
+  end
 
   def resolve_policy_constraint(%{id: id}, %{context: %{current_user: user}}) do
     Policy.get_constraint(id)
     |> allow(user, :read)
+  end
+
+  def list_vulnerabilities(args, %{context: %{current_user: user}}) do
+    VulnerabilityReport.for_user(user)
+    |> VulnerabilityReport.ordered()
+    |> maybe_search(VulnerabilityReport, args)
+    |> vuln_filters(args)
+    |> VulnerabilityReport.distinct()
+    |> paginate(args)
   end
 
   def list_policy_constraints(args, %{context: %{current_user: user}}) do
@@ -24,19 +38,6 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> apply_filters(args)
     |> PolicyConstraint.distinct()
     |> paginate(args)
-  end
-
-  defp apply_filters(query, args) do
-    Enum.reduce(args, query, fn
-      {:namespace, ns}, q -> PolicyConstraint.for_namespace(q, ns)
-      {:kind, k}, q -> PolicyConstraint.for_kind(q, k)
-      {:kinds, ks}, q -> PolicyConstraint.for_kinds(q, ks)
-      {:violated, v}, q -> PolicyConstraint.with_violations(q, v)
-      {:namespaces, ns}, q ->
-        PolicyConstraint.for_namespaces(q, Enum.filter(ns, & &1), Enum.any?(ns, &is_nil/1))
-      {:clusters, ids}, q -> PolicyConstraint.for_clusters(q, ids)
-      _, q -> q
-    end)
   end
 
   def policy_statistics(%{aggregate: f} = args, %{context: %{current_user: user}}) do
@@ -73,4 +74,27 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
 
   def upsert_policy_constraints(%{constraints: constraints}, %{context: %{cluster: cluster}}),
     do: Policy.upsert_constraints(constraints, cluster)
+
+  def upsert_vulnerabilities(%{vulnerabilities: vulns}, %{context: %{cluster: cluster}}),
+    do: Policy.upsert_vulnerabilities(vulns, cluster)
+
+  defp apply_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:namespace, ns}, q -> PolicyConstraint.for_namespace(q, ns)
+      {:kind, k}, q -> PolicyConstraint.for_kind(q, k)
+      {:kinds, ks}, q -> PolicyConstraint.for_kinds(q, ks)
+      {:violated, v}, q -> PolicyConstraint.with_violations(q, v)
+      {:namespaces, ns}, q ->
+        PolicyConstraint.for_namespaces(q, Enum.filter(ns, & &1), Enum.any?(ns, &is_nil/1))
+      {:clusters, ids}, q -> PolicyConstraint.for_clusters(q, ids)
+      _, q -> q
+    end)
+  end
+
+  defp vuln_filters(query, args) do
+    Enum.reduce(args, query, fn
+      {:clusters, ids}, q -> VulnerabilityReport.for_clusters(q, ids)
+      _, q -> q
+    end)
+  end
 end

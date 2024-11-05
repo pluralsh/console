@@ -534,6 +534,28 @@ spec:
                   replaceTemplate:
                     description: The template to use when replacing a regex
                     type: string
+                  yamlOverlays:
+                    description: Replacement via overlaying a yaml structure on an
+                      existing yaml file
+                    items:
+                      description: YamlOverlay ...
+                      properties:
+                        file:
+                          description: the file to execute the overlay on
+                          type: string
+                        templated:
+                          description: Whether you want to apply templating to the
+                            yaml blob before overlaying
+                          type: boolean
+                        yaml:
+                          description: the (possibly templated) yaml to use as the
+                            overlayed yaml blob written to the file
+                          type: string
+                      required:
+                      - file
+                      - yaml
+                      type: object
+                    type: array
                   yq:
                     description: (Unused so far)
                     type: string
