@@ -112,6 +112,7 @@ export function ColClusterContent({
 export const ColCluster = columnHelper.accessor(({ node }) => node?.name, {
   id: 'cluster',
   header: 'Cluster',
+  enableSorting: true,
   cell: function Cell({ row: { original } }) {
     return <ColClusterContent cluster={original.node} />
   },
