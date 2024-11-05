@@ -22,8 +22,8 @@ import {
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+
+import { MoreMenuTrigger } from 'components/utils/MoreMenu.tsx'
 import {
   AiInsightFragment,
   AiInsightSummaryFragment,
@@ -36,10 +36,9 @@ import {
 } from 'generated/graphql'
 import { Dispatch, ReactElement, ReactNode, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
+import { dayjsExtended as dayjs } from 'utils/datetime.ts'
 import { useChatbot } from './AIContext.tsx'
 import { AiThreadsTableActions } from './AiThreadsTableActions'
-
-dayjs.extend(relativeTime)
 
 export function AllThreadsTable() {
   const threadsQuery = useFetchPaginatedData({
@@ -344,6 +343,12 @@ function InsightEntry({
       }}
       stale={isStale}
       modal={modal}
+      actions={
+        <MoreMenuTrigger
+          disabled
+          css={{ cursor: 'default' }}
+        />
+      }
     />
   )
 }
@@ -357,11 +362,11 @@ function ThreadEntry({
   actions,
 }: {
   thread: Nullable<ChatThreadTinyFragment>
-  modal: Nullable<boolean>
-  actions: ReactNode
   isPin: boolean
   pinLoading?: boolean
   onClickPin?: Dispatch<void>
+  modal: Nullable<boolean>
+  actions: ReactNode
 }): ReactNode {
   const { goToThread } = useChatbot()
   const theme = useTheme()
@@ -395,7 +400,7 @@ function ThreadEntry({
       stale={isStale}
       modal={modal}
       actions={actions}
-    ></TableEntry>
+    />
   )
 }
 

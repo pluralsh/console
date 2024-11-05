@@ -127,6 +127,12 @@ query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
   }
 }
 
+query AIPin($insightId: ID, $threadId: ID) {
+  aiPin(insightId: $insightId, threadId: $threadId) {
+    ...AiPin
+  }
+}
+
 query ChatThreads(
   $first: Int = 100
   $last: Int

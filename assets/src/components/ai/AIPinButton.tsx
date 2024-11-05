@@ -4,77 +4,61 @@ import {
   PushPinOutlineIcon,
   Spinner,
 } from '@pluralsh/design-system'
-import { ReactNode, useEffect, useState } from 'react'
 import {
-  AiInsight,
-  AiPinEdge,
-  ChatThread,
-  useAiPinsQuery,
+  AiInsightFragment,
+  AiPinDocument,
+  ChatThreadTinyFragment,
+  useAiPinQuery,
   useCreateAiPinMutation,
   useDeleteAiPinMutation,
 } from '../../generated/graphql.ts'
-import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
 
 interface AIPinButtonProps {
-  insight?: Nullable<AiInsight>
-  thread?: Nullable<ChatThread>
+  insight?: Nullable<AiInsightFragment>
+  thread?: Nullable<ChatThreadTinyFragment>
 }
 
-export default function AIPinButton({
-  insight,
-  thread,
-}: AIPinButtonProps): ReactNode {
-  const [pinned, setPinned] = useState<Nullable<AiPinEdge>>(null)
+export default function AIPinButton({ insight, thread }: AIPinButtonProps) {
   const name =
     insight?.text?.substring(0, 250) ?? thread?.summary?.substring(0, 250) ?? ''
+  const pinIDs = thread
+    ? { threadId: thread.id }
+    : insight
+      ? { insightId: insight.id }
+      : {}
   const [createPin, { loading: pinCreating }] = useCreateAiPinMutation({
     variables: {
       attributes: {
-        threadId: thread?.id,
-        insightId: insight?.id,
-        name: name,
+        ...pinIDs,
+        name,
       },
     },
     awaitRefetchQueries: true,
-    refetchQueries: ['AIPins'],
+    refetchQueries: [{ query: AiPinDocument, variables: pinIDs }, 'AIPins'],
   })
   const [deletePin, { loading: pinDeleting }] = useDeleteAiPinMutation({
-    variables: {
-      id: pinned?.node?.id ?? '',
-    },
     awaitRefetchQueries: true,
-    refetchQueries: ['AIPins'],
-  })
-  const {
-    data: pins,
-    loading,
-    pageInfo,
-    fetchNextPage,
-  } = useFetchPaginatedData({
-    queryHook: useAiPinsQuery,
-    keyPath: ['aiPins'],
-    pollInterval: 10_000,
+    refetchQueries: [
+      { query: AiPinDocument, variables: pinIDs, errorPolicy: 'all' },
+      'AIPins',
+    ],
   })
 
-  useEffect(() => {
-    if (loading) return
+  const { data: pin } = useAiPinQuery({
+    variables: pinIDs,
+    skip: !thread && !insight,
+  })
 
-    const pin: Nullable<AiPinEdge> = pins?.aiPins?.edges?.find(
-      (pin) =>
-        (!!thread && pin?.node?.thread?.id === thread?.id) ||
-        (!!insight && pin?.node?.insight?.id === insight?.id)
-    ) as Nullable<AiPinEdge>
-
-    if (!pin && pageInfo?.hasNextPage) {
-      fetchNextPage()
-      return
-    }
-
-    setPinned(pin)
-  }, [pins?.aiPins, pageInfo, loading, thread, insight, fetchNextPage])
+  const isPinned = !!pin?.aiPin?.id
 
   if (!insight && !thread) {
     return null
+  }
+
+  const handleClick = () => {
+    if (pinCreating || pinDeleting) return
+    if (isPinned) deletePin({ variables: { id: pin?.aiPin?.id ?? '' } })
+    else createPin()
   }
 
   return (
@@ -82,13 +66,13 @@ export default function AIPinButton({
       clickable
       type="secondary"
       size="large"
-      onClick={!!pinned ? deletePin : createPin}
+      tooltip={isPinned ? 'Unpin' : 'Pin to dashboard'}
+      onClick={handleClick}
       icon={
         pinCreating || pinDeleting ? (
           <Spinner
             css={{
-              width: 16,
-              height: 16,
+              cursor: 'default',
               '&::before': {
                 width: 16,
                 height: 16,
@@ -97,18 +81,13 @@ export default function AIPinButton({
               },
             }}
           />
-        ) : !!pinned ? (
+        ) : isPinned ? (
           <PushPinFilledIcon
-            css={{
-              width: 16,
-            }}
+            color="icon-info"
+            css={{ width: 16 }}
           />
         ) : (
-          <PushPinOutlineIcon
-            css={{
-              width: 16,
-            }}
-          />
+          <PushPinOutlineIcon css={{ width: 16 }} />
         )
       }
     />

@@ -47,10 +47,12 @@ export function insightMessage(
 export function ChatWithAIButton({
   messages,
   insightId,
+  bodyText,
   ...props
 }: {
   messages?: Nullable<ChatMessage[]>
   insightId?: Nullable<string>
+  bodyText?: string
 } & ButtonProps) {
   const { createNewThread, loading } = useChatbot()
 
@@ -70,7 +72,7 @@ export function ChatWithAIButton({
       startIcon={<ChatOutlineIcon />}
       {...props}
     >
-      Chat with AI
+      {bodyText ?? 'Chat with AI'}
     </Button>
   )
 }
