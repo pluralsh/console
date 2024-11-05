@@ -1,4 +1,9 @@
-import { Button, Flex, GearTrainIcon } from '@pluralsh/design-system'
+import {
+  Button,
+  Flex,
+  GearTrainIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { StackedText } from 'components/utils/table/StackedText.tsx'
 import {
   FetchPaginatedDataResult,
@@ -19,14 +24,16 @@ import { AIPinsTable } from './AIPinsTable.tsx'
 import { AIThreadsTable } from './AIThreadsTable.tsx'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider.tsx'
+import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
+
+export const breadcrumbs = [{ label: 'plural ai', url: AI_ABS_PATH }]
 
 export default function AI() {
-  const settings = useDeploymentSettings()
-  if (!settings.ai?.enabled) {
-    return <AiDisabled />
-  }
+  useSetBreadcrumbs(breadcrumbs)
 
-  return <AIEnabled />
+  const settings = useDeploymentSettings()
+
+  return settings.ai?.enabled ? <AIEnabled /> : <AiDisabled />
 }
 
 function AiDisabled() {
@@ -45,7 +52,7 @@ function AiDisabled() {
       >
         <StackedText
           first="Plural AI"
-          second="You have yet to enable AI, set everything up below"
+          second="You have yet to enable AI, set everything up below."
           firstPartialType="subtitle1"
           secondPartialType="body2"
         />
@@ -154,7 +161,7 @@ function PinnedSection({
     >
       <StackedText
         first="Pinned"
-        second="Pin important threads and insights"
+        second="Pin important threads and insights."
         firstPartialType="subtitle2"
         secondPartialType="body2"
       />
