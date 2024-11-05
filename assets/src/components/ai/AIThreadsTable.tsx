@@ -83,7 +83,17 @@ export function AIThreadsTable({
   if (!data?.chatThreads?.edges)
     return (
       <TableSkeleton
-        styles={{ background: theme.colors['fill-one'], height: '100%' }}
+        numColumns={1}
+        centered={true}
+        styles={{
+          background: theme.colors['fill-one'],
+          height: '100%',
+          padding: theme.spacing.medium,
+
+          '> svg': {
+            width: '100%',
+          },
+        }}
       />
     )
 

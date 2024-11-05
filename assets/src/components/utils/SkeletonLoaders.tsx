@@ -1,4 +1,10 @@
-import styled, { CSSProperties, keyframes, useTheme } from 'styled-components'
+import styled, {
+  CSSObject,
+  CSSProperties,
+  keyframes,
+  useTheme,
+} from 'styled-components'
+import { CSSPseudos } from 'styled-components/dist/types'
 
 const shimmerKeyframes = keyframes`
   0% {
@@ -30,7 +36,7 @@ export function TableSkeleton({
   numRows?: number
   numColumns?: number
   centered?: boolean
-  styles?: CSSProperties
+  styles?: CSSProperties | CSSPseudos | CSSObject
 }) {
   const theme = useTheme()
 
