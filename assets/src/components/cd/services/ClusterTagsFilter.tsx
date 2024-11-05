@@ -4,7 +4,7 @@ import {
   TagMultiSelect,
 } from '@pluralsh/design-system'
 import { useThrottle } from 'components/hooks/useThrottle'
-import { Conjunction, TagType, useTagPairsQuery } from 'generated/graphql'
+import { Conjunction, TagType, useTagPairsLazyQuery } from 'generated/graphql'
 import isEqual from 'lodash/isEqual'
 import uniqWith from 'lodash/uniqWith'
 import { type ComponentProps, type Key, useMemo, useState } from 'react'
@@ -29,17 +29,16 @@ export function TagsFilter({
   comboBoxProps?: ComponentProps<typeof TagMultiSelect>['comboBoxProps']
   selectProps?: ComponentProps<typeof TagMultiSelect>['selectProps']
 }) {
+  const [open, setOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
   const throttledInputValue = useThrottle(inputValue, 150)
 
-  const {
-    data: currentData,
-    previousData,
-    loading,
-  } = useTagPairsQuery({
-    fetchPolicy: 'cache-and-network',
-    variables: { q: throttledInputValue, type },
-  })
+  const [getTags, { data: currentData, previousData, loading }] =
+    useTagPairsLazyQuery({
+      fetchPolicy: 'cache-and-network',
+      variables: { q: throttledInputValue, type },
+    })
+
   const data = currentData || previousData
   const searchResults = useMemo(
     () =>
@@ -73,9 +72,16 @@ export function TagsFilter({
             Reset tags
           </ListBoxFooterPlus>
         ),
+        isOpen: open,
+        onOpenChange: (o) => {
+          if (o && !data) getTags()
+          setOpen(o)
+        },
         ...comboBoxProps,
       }}
-      selectProps={selectProps}
+      selectProps={{
+        ...selectProps,
+      }}
       selectedTagKeys={selectedTagKeys}
       setSelectedTagKeys={setSelectedTagKeys}
       inputValue={inputValue}
