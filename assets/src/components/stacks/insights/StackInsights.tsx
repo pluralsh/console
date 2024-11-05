@@ -5,18 +5,19 @@ import {
   Markdown,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-
-import { CaptionP } from 'components/utils/typography/Text'
 import moment from 'moment/moment'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
 import styled from 'styled-components'
+import { AiInsight } from '../../../generated/graphql.ts'
+import AIPinButton from '../../ai/AIPinButton.tsx'
 import { AISuggestFix } from '../../ai/chatbot/AISuggestFix.tsx'
 import {
   ChatWithAIButton,
   insightMessage,
 } from '../../ai/chatbot/ChatbotButton.tsx'
 import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
+import { StackedText } from '../../utils/table/StackedText.tsx'
 import { getBreadcrumbs, StackOutletContextT } from '../Stacks'
 
 export function StackInsights() {
@@ -36,27 +37,34 @@ export function StackInsights() {
       height="100%"
     >
       <Flex
-        align="center"
-        justify="flex-end"
-        gap="small"
+        justify="space-between"
+        alignItems="center"
       >
-        <CaptionP
-          css={{ width: 'max-content' }}
-          $color="text-xlight"
+        <StackedText
+          first="Insight"
+          firstPartialType="body1Bold"
+          second={
+            stack.insight?.updatedAt &&
+            `Last updated ${moment(stack.insight?.updatedAt).fromNow()}`
+          }
+        />
+        <Flex
+          align="center"
+          justify="flex-end"
+          gap="small"
         >
-          {stack.insight?.updatedAt &&
-            `Last updated ${moment(stack.insight?.updatedAt).fromNow()}`}
-        </CaptionP>
-        <IconFrameRefreshButton
-          loading={loading}
-          refetch={refetch}
-        />
-        <ChatWithAIButton
-          floating
-          insightId={stack?.insight?.id}
-          messages={[insightMessage(stack?.insight)]}
-        />
-        <AISuggestFix insight={stack?.insight} />
+          <IconFrameRefreshButton
+            loading={loading}
+            refetch={refetch}
+          />
+          <AIPinButton insight={stack.insight as AiInsight} />
+          <ChatWithAIButton
+            floating
+            insightId={stack?.insight?.id}
+            messages={[insightMessage(stack?.insight)]}
+          />
+          <AISuggestFix insight={stack?.insight} />
+        </Flex>
       </Flex>
       <InsightDisplay text={stack.insight?.text} />
     </Flex>

@@ -1,4 +1,6 @@
 import {
+  AiSparkleFilledIcon,
+  AiSparkleOutlineIcon,
   ChatFilledIcon,
   ChatOutlineIcon,
   Chip,
@@ -20,9 +22,10 @@ import {
   useFetchPaginatedData,
 } from 'components/utils/table/useFetchPaginatedData'
 import { CaptionP } from 'components/utils/typography/Text'
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+
+import { MoreMenuTrigger } from 'components/utils/MoreMenu.tsx'
 import {
+  AiInsightFragment,
   AiInsightSummaryFragment,
   AiPinFragment,
   ChatThreadsQuery,
@@ -31,12 +34,11 @@ import {
   useCreateAiPinMutation,
   useDeleteAiPinMutation,
 } from 'generated/graphql'
-import { useMemo } from 'react'
+import { Dispatch, ReactElement, ReactNode, useMemo } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { useChatbot } from './AIContext'
+import { dayjsExtended as dayjs } from 'utils/datetime.ts'
+import { useChatbot } from './AIContext.tsx'
 import { AiThreadsTableActions } from './AiThreadsTableActions'
-
-dayjs.extend(relativeTime)
 
 export function AllThreadsTable() {
   const threadsQuery = useFetchPaginatedData({
@@ -81,12 +83,28 @@ export function AIThreadsTable({
   if (!data?.chatThreads?.edges)
     return (
       <TableSkeleton
-        styles={{ background: theme.colors['fill-one'], height: '100%' }}
+        numColumns={1}
+        centered={true}
+        styles={{
+          background: theme.colors['fill-one'],
+          height: '100%',
+          padding: theme.spacing.medium,
+
+          '> svg': {
+            width: '100%',
+          },
+        }}
       />
     )
 
   return (
-    <FullHeightTableWrap>
+    <FullHeightTableWrap
+      css={{
+        '& > div': {
+          height: '100%',
+        },
+      }}
+    >
       <Table
         virtualizeRows
         padCells={false}
@@ -174,75 +192,31 @@ function AITableRowBase({
   pinLoading?: boolean
   modal?: boolean | null
 }) {
-  const theme = useTheme()
-  const { goToThread } = useChatbot()
   const isPin = item.__typename === 'AiPin'
-  const thread = isPin
-    ? (item as AiPinFragment).thread
-    : (item as ChatThreadTinyFragment)
-  if (!thread) return <div>handle insight pins</div>
+  const isInsight = isPin && !item.thread
+  const thread = isPin ? item.thread : (item as ChatThreadTinyFragment)
 
-  const isStale = dayjs().isAfter(dayjs(thread.updatedAt).add(24, 'hours'))
-
-  return (
-    <ThreadEntrySC onClick={() => goToThread(thread)}>
-      <Flex
-        gap="small"
-        flex={1}
-      >
-        <IconFrame
-          type="floating"
-          icon={
-            isStale ? (
-              <ChatOutlineIcon color={theme.colors['icon-light']} />
-            ) : (
-              <ChatFilledIcon color={theme.colors['icon-info']} />
-            )
-          }
-        />
-        <StackedText
-          css={{ maxWidth: '450px', color: theme.colors['text'] }}
-          truncate
-          first={thread.summary}
-          second={getInsightResourceName(thread.insight)}
-          firstPartialType="body1Bold"
-        />
-      </Flex>
-      <CaptionP css={{ opacity: isStale ? 0.6 : 1 }}>
-        {dayjs(
-          thread.lastMessageAt || thread.updatedAt || thread.insertedAt
-        ).fromNow()}
-      </CaptionP>
-      {!modal && (
-        <>
-          <Chip severity={isStale ? 'neutral' : 'success'}>
-            {isStale ? 'Stale' : 'Active'}
-          </Chip>
-          <IconFrame
-            clickable
-            onClick={(e) => {
-              e.stopPropagation()
-              if (pinLoading) return
-              onClickPin?.()
-            }}
-            icon={
-              pinLoading ? (
-                <Spinner />
-              ) : isPin ? (
-                <PushPinFilledIcon color={theme.colors['icon-info']} />
-              ) : (
-                <PushPinOutlineIcon />
-              )
-            }
-          />
-        </>
-      )}
-      <AiThreadsTableActions thread={thread} />
-    </ThreadEntrySC>
+  return isInsight ? (
+    <InsightEntry
+      insight={item.insight}
+      modal={modal}
+      isPin={isPin}
+      pinLoading={pinLoading}
+      onClickPin={onClickPin}
+    />
+  ) : (
+    <ThreadEntry
+      thread={thread}
+      modal={modal}
+      isPin={isPin}
+      pinLoading={pinLoading}
+      onClickPin={onClickPin}
+      actions={<AiThreadsTableActions thread={thread} />}
+    />
   )
 }
 
-const ThreadEntrySC = styled.div(({ theme }) => ({
+const TableEntrySC = styled.div(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   gap: theme.spacing.xlarge,
@@ -257,6 +231,188 @@ const ThreadEntrySC = styled.div(({ theme }) => ({
     },
   },
 }))
+
+function TableEntry({
+  onClick,
+  icon,
+  title,
+  subtitle,
+  timestamp,
+  stale,
+  onClickPin,
+  pinLoading,
+  pinned,
+  modal,
+  actions,
+}: {
+  onClick: Dispatch<void>
+  icon: ReactElement
+  title: string
+  subtitle?: Nullable<string>
+  timestamp?: string
+  stale?: boolean
+  onClickPin?: Dispatch<void>
+  pinLoading?: boolean
+  pinned?: boolean
+  actions?: ReactNode
+  modal?: Nullable<boolean>
+}): ReactNode {
+  const theme = useTheme()
+
+  return (
+    <TableEntrySC
+      onClick={(e) => {
+        e.preventDefault()
+        onClick()
+      }}
+    >
+      <Flex
+        gap="small"
+        flex={1}
+      >
+        <IconFrame
+          type="floating"
+          icon={icon}
+        />
+        <StackedText
+          css={{ maxWidth: '450px', color: theme.colors['text'] }}
+          truncate
+          first={title}
+          second={subtitle}
+          firstPartialType="body1Bold"
+        />
+      </Flex>
+      <CaptionP css={{ opacity: stale ? 0.6 : 1 }}>
+        {dayjs(timestamp).fromNow()}
+      </CaptionP>
+      {!modal && (
+        <>
+          <Chip severity={stale ? 'neutral' : 'success'}>
+            {stale ? 'Stale' : 'Active'}
+          </Chip>
+          <IconFrame
+            clickable
+            onClick={(e) => {
+              e.stopPropagation()
+              onClickPin?.()
+            }}
+            icon={
+              pinLoading ? (
+                <Spinner />
+              ) : pinned ? (
+                <PushPinFilledIcon color={theme.colors['icon-info']} />
+              ) : (
+                <PushPinOutlineIcon />
+              )
+            }
+          />
+        </>
+      )}
+      {actions}
+    </TableEntrySC>
+  )
+}
+
+function InsightEntry({
+  insight,
+  isPin,
+  pinLoading,
+  onClickPin,
+  modal,
+}: {
+  insight: Nullable<AiInsightFragment>
+  modal: Nullable<boolean>
+  isPin: boolean
+  pinLoading?: boolean
+  onClickPin?: Dispatch<void>
+}) {
+  const { goToInsight } = useChatbot()
+  const theme = useTheme()
+  const timestamp = insight?.updatedAt || insight?.insertedAt || dayjs().toNow()
+  const isStale = dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
+  const icon = isStale ? (
+    <AiSparkleOutlineIcon color={theme.colors['icon-light']} />
+  ) : (
+    <AiSparkleFilledIcon color={theme.colors['icon-info']} />
+  )
+
+  if (!insight) return null
+
+  return (
+    <TableEntry
+      onClick={() => goToInsight(insight)}
+      icon={icon}
+      title={insight.summary?.substring(0, 250) ?? ''}
+      subtitle={getInsightResourceName(insight)}
+      timestamp={timestamp}
+      pinned={isPin}
+      pinLoading={pinLoading}
+      onClickPin={() => {
+        if (pinLoading) return
+        onClickPin?.()
+      }}
+      stale={isStale}
+      modal={modal}
+      actions={
+        <MoreMenuTrigger
+          disabled
+          css={{ cursor: 'default' }}
+        />
+      }
+    />
+  )
+}
+
+function ThreadEntry({
+  thread,
+  isPin,
+  pinLoading,
+  onClickPin,
+  modal,
+  actions,
+}: {
+  thread: Nullable<ChatThreadTinyFragment>
+  isPin: boolean
+  pinLoading?: boolean
+  onClickPin?: Dispatch<void>
+  modal: Nullable<boolean>
+  actions: ReactNode
+}): ReactNode {
+  const { goToThread } = useChatbot()
+  const theme = useTheme()
+  const timestamp =
+    thread?.lastMessageAt ||
+    thread?.updatedAt ||
+    thread?.insertedAt ||
+    dayjs().toNow()
+  const isStale = dayjs().isAfter(dayjs(timestamp).add(24, 'hours'))
+  const icon = isStale ? (
+    <ChatOutlineIcon color={theme.colors['icon-light']} />
+  ) : (
+    <ChatFilledIcon color={theme.colors['icon-info']} />
+  )
+
+  if (!thread) return null
+
+  return (
+    <TableEntry
+      onClick={() => goToThread(thread)}
+      icon={icon}
+      title={thread.summary}
+      subtitle={getInsightResourceName(thread.insight)}
+      timestamp={timestamp}
+      pinned={isPin}
+      pinLoading={pinLoading}
+      onClickPin={() => {
+        if (pinLoading) return
+        onClickPin?.()
+      }}
+      stale={isStale}
+      modal={modal}
+      actions={actions}
+    />
+  )
+}
 
 export const getInsightResourceName = (
   insight: Nullable<AiInsightSummaryFragment>

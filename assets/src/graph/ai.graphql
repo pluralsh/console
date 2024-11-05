@@ -53,7 +53,7 @@ fragment AiPin on AiPin {
   name
   insight {
     id
-    ...AiInsightSummary
+    ...AiInsight
   }
   thread {
     ...ChatThreadTiny
@@ -124,6 +124,12 @@ query AIPins($first: Int = 100, $last: Int, $after: String, $before: String) {
         ...AiPin
       }
     }
+  }
+}
+
+query AIPin($insightId: ID, $threadId: ID) {
+  aiPin(insightId: $insightId, threadId: $threadId) {
+    ...AiPin
   }
 }
 

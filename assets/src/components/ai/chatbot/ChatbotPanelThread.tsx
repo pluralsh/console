@@ -58,12 +58,14 @@ export function ChatbotPanelThread({
   fullscreen: boolean
 }) {
   const theme = useTheme()
-  const historyScrollRef = useRef<HTMLUListElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
-  const lastMsgRef = useRef<HTMLLIElement>(null)
+  const messageListRef = useRef<HTMLUListElement>(null)
   const scrollToBottom = useCallback(() => {
-    historyScrollRef.current?.scrollTo({ top: 9999999999999 })
-  }, [historyScrollRef])
+    messageListRef.current?.scrollTo({
+      top: messageListRef.current.scrollHeight,
+      behavior: 'smooth',
+    })
+  }, [messageListRef])
 
   const { data } = useChatThreadDetailsQuery({
     variables: { id: currentThread.id },
@@ -134,21 +136,16 @@ export function ChatbotPanelThread({
     <>
       {messageError && <GqlError error={messageError} />}
       <ChatbotMessagesSC
-        ref={historyScrollRef}
+        ref={messageListRef}
         $fullscreen={fullscreen}
       >
         {isEmpty(messages) && <EmptyState message="No messages yet." />}
-        {messages.map((msg, i) => {
-          const len = messages.length
-          const ref = i === len - 1 ? lastMsgRef : undefined
-          return (
-            <ChatMessage
-              key={msg.id}
-              ref={ref}
-              {...msg}
-            />
-          )
-        })}
+        {messages.map((msg) => (
+          <ChatMessage
+            key={msg.id}
+            {...msg}
+          />
+        ))}
       </ChatbotMessagesSC>
       <ChatbotForm
         sendMessage={sendMessage}
@@ -166,10 +163,12 @@ const ChatMessage = forwardRef(
       id,
       content,
       role,
+      disableActions,
       ...props
     }: {
       content: string
       role: AiRole
+      disableActions?: boolean
     } & ComponentProps<typeof ChatMessageSC>,
     ref: Ref<HTMLLIElement>
   ) => {
@@ -209,7 +208,7 @@ const ChatMessage = forwardRef(
         <ChatMessageActions
           id={id ?? ''}
           content={content}
-          show={showActions}
+          show={showActions && !disableActions}
         />
         <Flex
           gap="medium"
@@ -461,3 +460,5 @@ const AssistantIconWrapperSC = styled.div(({ theme }) => ({
     transform: 'translateY(-1px) translateX(-1px)',
   },
 }))
+
+export { ChatbotMessagesSC, ChatMessage }

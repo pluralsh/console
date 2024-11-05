@@ -29,10 +29,12 @@ enum MenuItemKey {
 export function AiThreadsTableActions({
   thread,
 }: {
-  thread: ChatThreadTinyFragment
+  thread: Nullable<ChatThreadTinyFragment>
 }) {
   const [menuKey, setMenuKey] = useState<Nullable<string>>('')
   const { goToThread } = useChatbot()
+
+  if (!thread) return null
 
   const onSelectionChange = (newKey: string) => {
     if (newKey === MenuItemKey.OpenChat) goToThread(thread)

@@ -1,4 +1,5 @@
 import {
+  AiInsightSummaryFragment,
   ChatThreadAttributes,
   ChatThreadFragment,
   useCreateChatThreadMutation,
@@ -36,6 +37,10 @@ type ChatbotContextT = {
   setFullscreen: Dispatch<SetStateAction<boolean>>
   currentThread: Nullable<ChatThreadFragment>
   setCurrentThread: (thread: Nullable<ChatThreadFragment>) => void
+  currentInsight: Nullable<AiInsightSummaryFragment>
+  setCurrentInsight: Dispatch<
+    SetStateAction<Nullable<AiInsightSummaryFragment>>
+  >
 }
 
 const ExplainWithAIContext = createContext<ExplainWithAIContextT | undefined>(
@@ -57,6 +62,8 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
   const [fullscreen, setFullscreen] = useState(false)
   const [currentThread, setCurrentThread] =
     useState<Nullable<ChatThreadFragment>>()
+  const [currentInsight, setCurrentInsight] =
+    useState<Nullable<AiInsightSummaryFragment>>()
 
   const context = useMemo(
     () => ({
@@ -66,8 +73,10 @@ function ChatbotContextProvider({ children }: { children: ReactNode }) {
       setCurrentThread,
       fullscreen,
       setFullscreen,
+      currentInsight,
+      setCurrentInsight,
     }),
-    [open, currentThread, fullscreen]
+    [open, currentThread, fullscreen, currentInsight]
   )
 
   return (
@@ -111,9 +120,15 @@ export function useChatbotContext() {
 }
 
 export function useChatbot() {
-  const { setOpen, setCurrentThread, fullscreen, setFullscreen } =
-    useChatbotContext()
+  const {
+    setOpen,
+    setCurrentThread,
+    fullscreen,
+    setFullscreen,
+    setCurrentInsight,
+  } = useChatbotContext()
   const [mutation, { loading, error }] = useCreateChatThreadMutation()
+  // const navigate = useNavigate()
 
   return {
     createNewThread: (attributes: ChatThreadAttributes) => {
@@ -121,16 +136,27 @@ export function useChatbot() {
         variables: { attributes },
         onCompleted: (data) => {
           setCurrentThread(data.createThread)
+          setCurrentInsight(null)
           setOpen(true)
         },
       })
     },
     goToThread: (thread: ChatThreadFragment) => {
       setCurrentThread(thread)
+      setCurrentInsight(null)
       setOpen(true)
     },
+    goToInsight: (insight: AiInsightSummaryFragment) => {
+      setCurrentThread(null)
+      setCurrentInsight(insight)
+      setOpen(true)
+    },
+    // goToInsightURL: (insight: AiInsightSummaryFragment) => {
+    //   navigate(getInsightURL(insight))
+    // },
     goToThreadList: () => {
       setCurrentThread(null)
+      setCurrentInsight(null)
       setOpen(true)
     },
     fullscreen,
@@ -181,3 +207,7 @@ The user is not necessarily an expert in the domain, so please provide as much d
 and evidence as is necessary to explain what issue they're facing. Give a descriptive overview of the resource they are mentioning
 and any guidance on how they can learn more about how it works.`,
 } as const satisfies Record<AIVerbosityLevel, string>
+
+// function getInsightURL(insightContext: AiInsightContextFragment) {
+//   // TODO
+// }

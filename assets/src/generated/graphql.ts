@@ -9317,7 +9317,7 @@ export type AiInsightSummaryFragment = { __typename?: 'AiInsight', id: string, s
 
 export type AiInsightContextFragment = { __typename?: 'AiInsight', cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null };
 
-export type AiPinFragment = { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null };
+export type AiPinFragment = { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null };
 
 export type ChatFragment = { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -9356,7 +9356,15 @@ export type AiPinsQueryVariables = Exact<{
 }>;
 
 
-export type AiPinsQuery = { __typename?: 'RootQueryType', aiPins?: { __typename?: 'AiPinConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AiPinEdge', node?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null } | null } | null> | null } | null };
+export type AiPinsQuery = { __typename?: 'RootQueryType', aiPins?: { __typename?: 'AiPinConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'AiPinEdge', node?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null } | null } | null> | null } | null };
+
+export type AiPinQueryVariables = Exact<{
+  insightId?: InputMaybe<Scalars['ID']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type AiPinQuery = { __typename?: 'RootQueryType', aiPin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null } | null };
 
 export type ChatThreadsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
@@ -9380,14 +9388,14 @@ export type CreateAiPinMutationVariables = Exact<{
 }>;
 
 
-export type CreateAiPinMutation = { __typename?: 'RootMutationType', createPin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null } | null };
+export type CreateAiPinMutation = { __typename?: 'RootMutationType', createPin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null } | null };
 
 export type DeleteAiPinMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteAiPinMutation = { __typename?: 'RootMutationType', deletePin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null } | null };
+export type DeleteAiPinMutation = { __typename?: 'RootMutationType', deletePin?: { __typename?: 'AiPin', id: string, name?: string | null, insertedAt?: string | null, updatedAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null, thread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null } | null } | null } | null };
 
 export type ChatMutationVariables = Exact<{
   messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
@@ -11547,6 +11555,22 @@ export const AiInsightContextFragmentDoc = gql`
   }
 }
     `;
+export const AiInsightFragmentDoc = gql`
+    fragment AiInsight on AiInsight {
+  id
+  text
+  summary
+  sha
+  freshness
+  updatedAt
+  insertedAt
+  error {
+    message
+    source
+  }
+  ...AiInsightContext
+}
+    ${AiInsightContextFragmentDoc}`;
 export const AiInsightSummaryFragmentDoc = gql`
     fragment AiInsightSummary on AiInsight {
   id
@@ -11575,7 +11599,7 @@ export const AiPinFragmentDoc = gql`
   name
   insight {
     id
-    ...AiInsightSummary
+    ...AiInsight
   }
   thread {
     ...ChatThreadTiny
@@ -11583,7 +11607,7 @@ export const AiPinFragmentDoc = gql`
   insertedAt
   updatedAt
 }
-    ${AiInsightSummaryFragmentDoc}
+    ${AiInsightFragmentDoc}
 ${ChatThreadTinyFragmentDoc}`;
 export const ChatFragmentDoc = gql`
     fragment Chat on Chat {
@@ -11595,22 +11619,6 @@ export const ChatFragmentDoc = gql`
   updatedAt
 }
     `;
-export const AiInsightFragmentDoc = gql`
-    fragment AiInsight on AiInsight {
-  id
-  text
-  summary
-  sha
-  freshness
-  updatedAt
-  insertedAt
-  error {
-    message
-    source
-  }
-  ...AiInsightContext
-}
-    ${AiInsightContextFragmentDoc}`;
 export const ChatThreadFragmentDoc = gql`
     fragment ChatThread on ChatThread {
   id
@@ -14650,6 +14658,47 @@ export type AiPinsQueryHookResult = ReturnType<typeof useAiPinsQuery>;
 export type AiPinsLazyQueryHookResult = ReturnType<typeof useAiPinsLazyQuery>;
 export type AiPinsSuspenseQueryHookResult = ReturnType<typeof useAiPinsSuspenseQuery>;
 export type AiPinsQueryResult = Apollo.QueryResult<AiPinsQuery, AiPinsQueryVariables>;
+export const AiPinDocument = gql`
+    query AIPin($insightId: ID, $threadId: ID) {
+  aiPin(insightId: $insightId, threadId: $threadId) {
+    ...AiPin
+  }
+}
+    ${AiPinFragmentDoc}`;
+
+/**
+ * __useAiPinQuery__
+ *
+ * To run a query within a React component, call `useAiPinQuery` and pass it any options that fit your needs.
+ * When your component renders, `useAiPinQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAiPinQuery({
+ *   variables: {
+ *      insightId: // value for 'insightId'
+ *      threadId: // value for 'threadId'
+ *   },
+ * });
+ */
+export function useAiPinQuery(baseOptions?: Apollo.QueryHookOptions<AiPinQuery, AiPinQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<AiPinQuery, AiPinQueryVariables>(AiPinDocument, options);
+      }
+export function useAiPinLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<AiPinQuery, AiPinQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<AiPinQuery, AiPinQueryVariables>(AiPinDocument, options);
+        }
+export function useAiPinSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<AiPinQuery, AiPinQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<AiPinQuery, AiPinQueryVariables>(AiPinDocument, options);
+        }
+export type AiPinQueryHookResult = ReturnType<typeof useAiPinQuery>;
+export type AiPinLazyQueryHookResult = ReturnType<typeof useAiPinLazyQuery>;
+export type AiPinSuspenseQueryHookResult = ReturnType<typeof useAiPinSuspenseQuery>;
+export type AiPinQueryResult = Apollo.QueryResult<AiPinQuery, AiPinQueryVariables>;
 export const ChatThreadsDocument = gql`
     query ChatThreads($first: Int = 100, $last: Int, $after: String, $before: String) {
   chatThreads(first: $first, last: $last, after: $after, before: $before) {
@@ -24152,6 +24201,7 @@ export const namedOperations = {
     AICompletion: 'AICompletion',
     AISuggestedFix: 'AISuggestedFix',
     AIPins: 'AIPins',
+    AIPin: 'AIPin',
     ChatThreads: 'ChatThreads',
     ChatThreadDetails: 'ChatThreadDetails',
     App: 'App',
