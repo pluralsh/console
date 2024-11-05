@@ -149,10 +149,15 @@ export const ColProvider = columnHelper.accessor(
   }
 )
 
-export const ColHealth = columnHelper.accessor(({ node }) => node, {
+export const ColHealth = columnHelper.accessor(({ node }) => node?.pingedAt, {
   id: 'health',
   header: 'Health',
-  cell: ({ getValue }) => <ClusterHealth cluster={getValue() || undefined} />,
+  enableSorting: true,
+  cell: ({
+    row: {
+      original: { node },
+    },
+  }) => <ClusterHealth cluster={node || undefined} />,
 })
 
 const sortVersionFn: SortingFn<Edge<ClustersRowFragment>> = (
