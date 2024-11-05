@@ -29,7 +29,8 @@ defmodule Console.Deployments.Policies.Rbac do
     SharedSecret,
     Observer,
     Catalog,
-    ClusterInsightComponent
+    ClusterInsightComponent,
+    VulnerabilityReport
   }
 
   def globally_readable(query, %User{roles: %{admin: true}}, _), do: query
@@ -80,6 +81,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def evaluate(%HelmRepository{}, %User{} = user, action),
     do: recurse(Settings.fetch(), user, action)
   def evaluate(%ClusterInsightComponent{} = comp, user, action),
+    do: recurse(comp, user, action, & &1.cluster)
+  def evaluate(%VulnerabilityReport{} = comp, user, action),
     do: recurse(comp, user, action, & &1.cluster)
   def evaluate(%GlobalService{} = global, %User{} = user, action) do
     recurse(global, user, action, fn
@@ -160,6 +163,8 @@ defmodule Console.Deployments.Policies.Rbac do
   def preload(%CustomStackRun{} = pcr),
     do: Repo.preload(pcr, [stack: @stack_preloads])
   def preload(%ClusterInsightComponent{} = comp),
+    do: Repo.preload(comp, [cluster: @top_preloads])
+  def preload(%VulnerabilityReport{} = comp),
     do: Repo.preload(comp, [cluster: @top_preloads])
   def preload(%RunStep{} = pcr),
     do: Repo.preload(pcr, run: [stack: @stack_preloads])

@@ -1575,6 +1575,24 @@ type CustomStepAttributes struct {
 	RequireApproval *bool      `json:"requireApproval,omitempty"`
 }
 
+type Cvss struct {
+	V2Vector  *string  `json:"v2Vector,omitempty"`
+	V3Vector  *string  `json:"v3Vector,omitempty"`
+	V40Vector *string  `json:"v40Vector,omitempty"`
+	V2Score   *float64 `json:"v2Score,omitempty"`
+	V3Score   *float64 `json:"v3Score,omitempty"`
+	V40Score  *float64 `json:"v40Score,omitempty"`
+}
+
+type CvssAttributes struct {
+	V2Vector  *string  `json:"v2Vector,omitempty"`
+	V3Vector  *string  `json:"v3Vector,omitempty"`
+	V40Vector *string  `json:"v40Vector,omitempty"`
+	V2Score   *float64 `json:"v2Score,omitempty"`
+	V3Score   *float64 `json:"v3Score,omitempty"`
+	V40Score  *float64 `json:"v40Score,omitempty"`
+}
+
 type DaemonSet struct {
 	Metadata Metadata        `json:"metadata"`
 	Status   DaemonSetStatus `json:"status"`
@@ -2653,6 +2671,14 @@ type NamespaceSpec struct {
 
 type NamespaceStatus struct {
 	Phase *string `json:"phase,omitempty"`
+}
+
+type NamespaceVuln struct {
+	Namespace string `json:"namespace"`
+}
+
+type NamespaceVulnAttributes struct {
+	Namespace string `json:"namespace"`
 }
 
 type NamespacedName struct {
@@ -4791,6 +4817,8 @@ type ServiceDeployment struct {
 	Imports []*ServiceImport `json:"imports,omitempty"`
 	// an insight explaining the state of this service
 	Insight *AiInsight `json:"insight,omitempty"`
+	// sideload detected vulnerabilities for this service
+	Vulns *ServiceVuln `json:"vulns,omitempty"`
 	// a relay connection of all revisions of this service, these are periodically pruned up to a history limit
 	Revisions *RevisionConnection `json:"revisions,omitempty"`
 	// list all alerts discovered for this service
@@ -4956,6 +4984,14 @@ type ServiceUpdateAttributes struct {
 	ReadBindings    []*PolicyBindingAttributes     `json:"readBindings,omitempty"`
 	WriteBindings   []*PolicyBindingAttributes     `json:"writeBindings,omitempty"`
 	ContextBindings []*ContextBindingAttributes    `json:"contextBindings,omitempty"`
+}
+
+type ServiceVuln struct {
+	Service *Service `json:"service,omitempty"`
+}
+
+type ServiceVulnAttributes struct {
+	ServiceID string `json:"serviceId"`
 }
 
 type SharedSecret struct {
@@ -5712,6 +5748,128 @@ type ViolationStatistic struct {
 	Violations *int64 `json:"violations,omitempty"`
 	// the total number of policy constraints
 	Count *int64 `json:"count,omitempty"`
+}
+
+type VulnArtifact struct {
+	Registry   *string `json:"registry,omitempty"`
+	Repository *string `json:"repository,omitempty"`
+	Digest     *string `json:"digest,omitempty"`
+	Tag        *string `json:"tag,omitempty"`
+	Mime       *string `json:"mime,omitempty"`
+}
+
+type VulnArtifactAttributes struct {
+	Registry   *string `json:"registry,omitempty"`
+	Repository *string `json:"repository,omitempty"`
+	Digest     *string `json:"digest,omitempty"`
+	Tag        *string `json:"tag,omitempty"`
+	Mime       *string `json:"mime,omitempty"`
+}
+
+type VulnOs struct {
+	Eosl   *bool   `json:"eosl,omitempty"`
+	Family *string `json:"family,omitempty"`
+	Name   *string `json:"name,omitempty"`
+}
+
+type VulnOsAttributes struct {
+	Eosl   *bool   `json:"eosl,omitempty"`
+	Family *string `json:"family,omitempty"`
+	Name   *string `json:"name,omitempty"`
+}
+
+type VulnSummary struct {
+	CriticalCount *int64 `json:"criticalCount,omitempty"`
+	HighCount     *int64 `json:"highCount,omitempty"`
+	MediumCount   *int64 `json:"mediumCount,omitempty"`
+	LowCount      *int64 `json:"lowCount,omitempty"`
+	UnknownCount  *int64 `json:"unknownCount,omitempty"`
+	NoneCount     *int64 `json:"noneCount,omitempty"`
+}
+
+type VulnSummaryAttributes struct {
+	CriticalCount *int64 `json:"criticalCount,omitempty"`
+	HighCount     *int64 `json:"highCount,omitempty"`
+	MediumCount   *int64 `json:"mediumCount,omitempty"`
+	LowCount      *int64 `json:"lowCount,omitempty"`
+	UnknownCount  *int64 `json:"unknownCount,omitempty"`
+	NoneCount     *int64 `json:"noneCount,omitempty"`
+}
+
+type Vulnerability struct {
+	ID               string        `json:"id"`
+	Resource         *string       `json:"resource,omitempty"`
+	FixedVersion     *string       `json:"fixedVersion,omitempty"`
+	InstalledVersion *string       `json:"installedVersion,omitempty"`
+	Severity         *VulnSeverity `json:"severity,omitempty"`
+	Score            *float64      `json:"score,omitempty"`
+	Title            *string       `json:"title,omitempty"`
+	Description      *string       `json:"description,omitempty"`
+	CvssSource       *string       `json:"cvssSource,omitempty"`
+	PrimaryLink      *string       `json:"primaryLink,omitempty"`
+	Links            []*string     `json:"links,omitempty"`
+	Target           *string       `json:"target,omitempty"`
+	Class            *string       `json:"class,omitempty"`
+	PackageType      *string       `json:"packageType,omitempty"`
+	PkgPath          *string       `json:"pkgPath,omitempty"`
+	PublishedDate    *string       `json:"publishedDate,omitempty"`
+	LastModifiedDate *string       `json:"lastModifiedDate,omitempty"`
+	Cvss             *Cvss         `json:"cvss,omitempty"`
+	InsertedAt       *string       `json:"insertedAt,omitempty"`
+	UpdatedAt        *string       `json:"updatedAt,omitempty"`
+}
+
+type VulnerabilityAttributes struct {
+	Resource         *string         `json:"resource,omitempty"`
+	FixedVersion     *string         `json:"fixedVersion,omitempty"`
+	InstalledVersion *string         `json:"installedVersion,omitempty"`
+	Severity         *VulnSeverity   `json:"severity,omitempty"`
+	Score            *float64        `json:"score,omitempty"`
+	Title            *string         `json:"title,omitempty"`
+	Description      *string         `json:"description,omitempty"`
+	CvssSource       *string         `json:"cvssSource,omitempty"`
+	PrimaryLink      *string         `json:"primaryLink,omitempty"`
+	Links            []*string       `json:"links,omitempty"`
+	Target           *string         `json:"target,omitempty"`
+	Class            *string         `json:"class,omitempty"`
+	PackageType      *string         `json:"packageType,omitempty"`
+	PkgPath          *string         `json:"pkgPath,omitempty"`
+	PublishedDate    *string         `json:"publishedDate,omitempty"`
+	LastModifiedDate *string         `json:"lastModifiedDate,omitempty"`
+	Cvss             *CvssAttributes `json:"cvss,omitempty"`
+}
+
+type VulnerabilityReport struct {
+	ID              string           `json:"id"`
+	ArtifactURL     *string          `json:"artifactUrl,omitempty"`
+	Os              *VulnOs          `json:"os,omitempty"`
+	Summary         *VulnSummary     `json:"summary,omitempty"`
+	Artifact        *VulnArtifact    `json:"artifact,omitempty"`
+	Vulnerabilities []*Vulnerability `json:"vulnerabilities,omitempty"`
+	Services        []*ServiceVuln   `json:"services,omitempty"`
+	Namespaces      []*NamespaceVuln `json:"namespaces,omitempty"`
+	InsertedAt      *string          `json:"insertedAt,omitempty"`
+	UpdatedAt       *string          `json:"updatedAt,omitempty"`
+}
+
+type VulnerabilityReportAttributes struct {
+	ArtifactURL     *string                    `json:"artifactUrl,omitempty"`
+	Os              *VulnOsAttributes          `json:"os,omitempty"`
+	Summary         *VulnSummaryAttributes     `json:"summary,omitempty"`
+	Artifact        *VulnArtifactAttributes    `json:"artifact,omitempty"`
+	Vulnerabilities []*VulnerabilityAttributes `json:"vulnerabilities,omitempty"`
+	Services        []*ServiceVulnAttributes   `json:"services,omitempty"`
+	Namespaces      []*NamespaceVulnAttributes `json:"namespaces,omitempty"`
+}
+
+type VulnerabilityReportConnection struct {
+	PageInfo PageInfo                   `json:"pageInfo"`
+	Edges    []*VulnerabilityReportEdge `json:"edges,omitempty"`
+}
+
+type VulnerabilityReportEdge struct {
+	Node   *VulnerabilityReport `json:"node,omitempty"`
+	Cursor *string              `json:"cursor,omitempty"`
 }
 
 type WaitingState struct {
@@ -8169,6 +8327,53 @@ func (e *UpgradePolicyType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UpgradePolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type VulnSeverity string
+
+const (
+	VulnSeverityUnknown  VulnSeverity = "UNKNOWN"
+	VulnSeverityLow      VulnSeverity = "LOW"
+	VulnSeverityMedium   VulnSeverity = "MEDIUM"
+	VulnSeverityHigh     VulnSeverity = "HIGH"
+	VulnSeverityCritical VulnSeverity = "CRITICAL"
+)
+
+var AllVulnSeverity = []VulnSeverity{
+	VulnSeverityUnknown,
+	VulnSeverityLow,
+	VulnSeverityMedium,
+	VulnSeverityHigh,
+	VulnSeverityCritical,
+}
+
+func (e VulnSeverity) IsValid() bool {
+	switch e {
+	case VulnSeverityUnknown, VulnSeverityLow, VulnSeverityMedium, VulnSeverityHigh, VulnSeverityCritical:
+		return true
+	}
+	return false
+}
+
+func (e VulnSeverity) String() string {
+	return string(e)
+}
+
+func (e *VulnSeverity) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VulnSeverity(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VulnSeverity", str)
+	}
+	return nil
+}
+
+func (e VulnSeverity) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

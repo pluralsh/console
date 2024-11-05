@@ -63,7 +63,11 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     UpgradeInsight,
     UpgradeInsightDetail,
     Catalog,
-    AiInsight
+    AiInsight,
+    ServiceVuln,
+    NamespaceVuln,
+    VulnerabilityReport,
+    Vulnerability
   }
 
   def query(Project, _), do: Project
@@ -125,6 +129,10 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(UpgradeInsight, _), do: UpgradeInsight
   def query(UpgradeInsightDetail, _), do: UpgradeInsightDetail
   def query(AiInsight, _), do: AiInsight
+  def query(ServiceVuln, _), do: ServiceVuln
+  def query(NamespaceVuln, _), do: NamespaceVuln
+  def query(VulnerabilityReport, _), do: VulnerabilityReport
+  def query(Vulnerability, _), do: Vulnerability
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

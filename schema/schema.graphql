@@ -379,6 +379,8 @@ type RootQueryType {
     after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], clusters: [ID], violated: Boolean, q: String
   ): PolicyConstraintConnection
 
+  vulnerabilityReports(after: String, first: Int, before: String, last: Int, clusters: [ID], q: String): VulnerabilityReportConnection
+
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
 
   policyStatistics(
@@ -386,6 +388,8 @@ type RootQueryType {
   ): [PolicyStatistic]
 
   policyConstraint(id: ID!): PolicyConstraint
+
+  vulnerabilityReport(id: ID!): VulnerabilityReport
 
   managedNamespaces(after: String, first: Int, before: String, last: Int, projectId: ID): ManagedNamespaceConnection
 
@@ -807,6 +811,8 @@ type RootMutationType {
   ): SharedSecret
 
   upsertPolicyConstraints(constraints: [PolicyConstraintAttributes]): Int
+
+  upsertVulnerabilities(vulnerabilities: [VulnerabilityReportAttributes]): Int
 
   createGlobalService(
     serviceId: ID
@@ -2347,6 +2353,14 @@ enum ConstraintEnforcement {
   DRY_RUN
 }
 
+enum VulnSeverity {
+  UNKNOWN
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
 enum PolicyAggregate {
   CLUSTER
   ENFORCEMENT
@@ -2388,6 +2402,76 @@ input ViolationAttributes {
   namespace: String
   name: String
   message: String
+}
+
+input VulnerabilityReportAttributes {
+  artifactUrl: String
+  os: VulnOsAttributes
+  summary: VulnSummaryAttributes
+  artifact: VulnArtifactAttributes
+  vulnerabilities: [VulnerabilityAttributes]
+  services: [ServiceVulnAttributes]
+  namespaces: [NamespaceVulnAttributes]
+}
+
+input VulnOsAttributes {
+  eosl: Boolean
+  family: String
+  name: String
+}
+
+input VulnSummaryAttributes {
+  criticalCount: Int
+  highCount: Int
+  mediumCount: Int
+  lowCount: Int
+  unknownCount: Int
+  noneCount: Int
+}
+
+input VulnArtifactAttributes {
+  registry: String
+  repository: String
+  digest: String
+  tag: String
+  mime: String
+}
+
+input VulnerabilityAttributes {
+  resource: String
+  fixedVersion: String
+  installedVersion: String
+  severity: VulnSeverity
+  score: Float
+  title: String
+  description: String
+  cvssSource: String
+  primaryLink: String
+  links: [String]
+  target: String
+  class: String
+  packageType: String
+  pkgPath: String
+  publishedDate: DateTime
+  lastModifiedDate: DateTime
+  cvss: CvssAttributes
+}
+
+input CvssAttributes {
+  v2Vector: String
+  v3Vector: String
+  v40Vector: String
+  v2Score: Float
+  v3Score: Float
+  v40Score: Float
+}
+
+input ServiceVulnAttributes {
+  serviceId: ID!
+}
+
+input NamespaceVulnAttributes {
+  namespace: String!
 }
 
 "A OPA Gatekeeper Constraint reference"
@@ -2458,9 +2542,90 @@ type Violation {
   updatedAt: DateTime
 }
 
+type VulnerabilityReport {
+  id: ID!
+  artifactUrl: String
+  os: VulnOs
+  summary: VulnSummary
+  artifact: VulnArtifact
+  vulnerabilities: [Vulnerability]
+  services: [ServiceVuln]
+  namespaces: [NamespaceVuln]
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type VulnOs {
+  eosl: Boolean
+  family: String
+  name: String
+}
+
+type VulnSummary {
+  criticalCount: Int
+  highCount: Int
+  mediumCount: Int
+  lowCount: Int
+  unknownCount: Int
+  noneCount: Int
+}
+
+type VulnArtifact {
+  registry: String
+  repository: String
+  digest: String
+  tag: String
+  mime: String
+}
+
+type Vulnerability {
+  id: ID!
+  resource: String
+  fixedVersion: String
+  installedVersion: String
+  severity: VulnSeverity
+  score: Float
+  title: String
+  description: String
+  cvssSource: String
+  primaryLink: String
+  links: [String]
+  target: String
+  class: String
+  packageType: String
+  pkgPath: String
+  publishedDate: DateTime
+  lastModifiedDate: DateTime
+  cvss: Cvss
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
+type Cvss {
+  v2Vector: String
+  v3Vector: String
+  v40Vector: String
+  v2Score: Float
+  v3Score: Float
+  v40Score: Float
+}
+
+type ServiceVuln {
+  service: Service
+}
+
+type NamespaceVuln {
+  namespace: String!
+}
+
 type PolicyConstraintConnection {
   pageInfo: PageInfo!
   edges: [PolicyConstraintEdge]
+}
+
+type VulnerabilityReportConnection {
+  pageInfo: PageInfo!
+  edges: [VulnerabilityReportEdge]
 }
 
 enum SinkType {
@@ -3565,6 +3730,9 @@ type ServiceDeployment {
 
   "an insight explaining the state of this service"
   insight: AiInsight
+
+  "sideload detected vulnerabilities for this service"
+  vulns: ServiceVuln
 
   "a relay connection of all revisions of this service, these are periodically pruned up to a history limit"
   revisions(after: String, first: Int, before: String, last: Int): RevisionConnection
@@ -7997,6 +8165,11 @@ type NotificationRouterEdge {
 
 type NotificationSinkEdge {
   node: NotificationSink
+  cursor: String
+}
+
+type VulnerabilityReportEdge {
+  node: VulnerabilityReport
   cursor: String
 }
 

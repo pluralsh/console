@@ -739,6 +739,19 @@ defmodule Console.Factory do
     }
   end
 
+  def vulnerability_report_factory do
+    %Schema.VulnerabilityReport{
+      artifact_url: "nginx:latest",
+      cluster: build(:cluster)
+    }
+  end
+
+  def vulnerability_factory do
+    %Schema.Vulnerability{
+      report: build(:vulnerability_report)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
