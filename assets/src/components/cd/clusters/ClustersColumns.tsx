@@ -277,31 +277,38 @@ const ColStatusSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
 }))
 
-export const ColStatus = columnHelper.accessor(({ node }) => node, {
-  id: 'status',
-  header: 'Status',
-  meta: {
-    gridTemplate: 'min-content',
-  },
-  cell: ({ table, getValue, row: { original } }) => {
-    const cluster = getValue()
-    const { refetch } = table.options.meta as { refetch?: () => void }
+const numUpgrades = (cluster: Nullable<ClustersRowFragment>) => {
+  let numUpgrades = 3
 
-    return (
-      <ColStatusSC
-        onClick={(e) => {
-          e.stopPropagation()
-        }}
-      >
-        <ClusterUpgrade
-          cluster={cluster}
-          refetch={refetch}
-        />
-        <ClusterConditions cluster={original.node} />
-      </ColStatusSC>
-    )
-  },
-})
+  if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
+  if (!cluster?.upgradePlan?.deprecations) --numUpgrades
+  if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
+
+  return numUpgrades
+}
+
+export const ColStatus = columnHelper.accessor(
+  ({ node }) => numUpgrades(node),
+  {
+    id: 'status',
+    header: 'Status',
+    enableSorting: true,
+    meta: { gridTemplate: 'min-content' },
+    cell: ({ table, row: { original } }) => {
+      const { refetch } = table.options.meta as { refetch?: () => void }
+
+      return (
+        <ColStatusSC onClick={(e) => e.stopPropagation()}>
+          <ClusterUpgrade
+            cluster={original.node}
+            refetch={refetch}
+          />
+          <ClusterConditions cluster={original.node} />
+        </ColStatusSC>
+      )
+    },
+  }
+)
 
 enum MenuItemKey {
   Permissions = 'permissions',
