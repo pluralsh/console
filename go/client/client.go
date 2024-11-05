@@ -153,7 +153,9 @@ type ConsoleClient interface {
 	CreateServiceAccountToken(ctx context.Context, id string, scopes []*ScopeAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateServiceAccountToken, error)
 	ShareSecret(ctx context.Context, attributes SharedSecretAttributes, interceptors ...clientv2.RequestInterceptor) (*ShareSecret, error)
 	ListClusterStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStacks, error)
+	ListClusterStackIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStackIds, error)
 	ListInfrastructureStacks(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListInfrastructureStacks, error)
+	GetStackRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunMinimal, error)
 	GetStackRun(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRun, error)
 	GetStackRunBase(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunBase, error)
 	UpdateStackRun(ctx context.Context, id string, attributes StackRunAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateStackRun, error)
@@ -3263,6 +3265,17 @@ func (t *StackRunEdgeFragment) GetNode() *StackRunFragment {
 	return t.Node
 }
 
+type StackRunIDEdgeFragment struct {
+	Node *StackRunIDFragment "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *StackRunIDEdgeFragment) GetNode() *StackRunIDFragment {
+	if t == nil {
+		t = &StackRunIDEdgeFragment{}
+	}
+	return t.Node
+}
+
 type InfrastructureStackFragment struct {
 	ID            *string                     "json:\"id,omitempty\" graphql:\"id\""
 	Name          string                      "json:\"name\" graphql:\"name\""
@@ -3405,6 +3418,17 @@ func (t *InfrastructureStackFragment) GetVariables() map[string]interface{} {
 		t = &InfrastructureStackFragment{}
 	}
 	return t.Variables
+}
+
+type StackRunIDFragment struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *StackRunIDFragment) GetID() string {
+	if t == nil {
+		t = &StackRunIDFragment{}
+	}
+	return t.ID
 }
 
 type StackRunFragment struct {
@@ -3577,6 +3601,80 @@ func (t *StackRunFragment) GetApprover() *UserFragment {
 		t = &StackRunFragment{}
 	}
 	return t.Approver
+}
+
+type StackRunMinimalFragment struct {
+	ID            string                     "json:\"id\" graphql:\"id\""
+	Type          StackType                  "json:\"type\" graphql:\"type\""
+	Status        StackStatus                "json:\"status\" graphql:\"status\""
+	Approval      *bool                      "json:\"approval,omitempty\" graphql:\"approval\""
+	ApprovedAt    *string                    "json:\"approvedAt,omitempty\" graphql:\"approvedAt\""
+	Tarball       string                     "json:\"tarball\" graphql:\"tarball\""
+	Workdir       *string                    "json:\"workdir,omitempty\" graphql:\"workdir\""
+	ManageState   *bool                      "json:\"manageState,omitempty\" graphql:\"manageState\""
+	JobSpec       *JobSpecFragment           "json:\"jobSpec,omitempty\" graphql:\"jobSpec\""
+	Configuration StackConfigurationFragment "json:\"configuration\" graphql:\"configuration\""
+}
+
+func (t *StackRunMinimalFragment) GetID() string {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return t.ID
+}
+func (t *StackRunMinimalFragment) GetType() *StackType {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return &t.Type
+}
+func (t *StackRunMinimalFragment) GetStatus() *StackStatus {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return &t.Status
+}
+func (t *StackRunMinimalFragment) GetApproval() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return t.Approval
+}
+func (t *StackRunMinimalFragment) GetApprovedAt() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return t.ApprovedAt
+}
+func (t *StackRunMinimalFragment) GetTarball() string {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return t.Tarball
+}
+func (t *StackRunMinimalFragment) GetWorkdir() *string {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return t.Workdir
+}
+func (t *StackRunMinimalFragment) GetManageState() *bool {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return t.ManageState
+}
+func (t *StackRunMinimalFragment) GetJobSpec() *JobSpecFragment {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return t.JobSpec
+}
+func (t *StackRunMinimalFragment) GetConfiguration() *StackConfigurationFragment {
+	if t == nil {
+		t = &StackRunMinimalFragment{}
+	}
+	return &t.Configuration
 }
 
 type StackRunBaseFragment struct {
@@ -5644,6 +5742,42 @@ func (t *StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Container
 func (t *StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
 	if t == nil {
 		t = &StackRunFragment_StackRunBaseFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
+}
+
+type StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
 	}
 	return t.Secret
 }
@@ -10518,6 +10652,24 @@ func (t *ListClusterStacks_ClusterStackRuns) GetEdges() []*StackRunEdgeFragment 
 	return t.Edges
 }
 
+type ListClusterStackIds_ClusterStackRuns struct {
+	PageInfo PageInfoFragment          "json:\"pageInfo\" graphql:\"pageInfo\""
+	Edges    []*StackRunIDEdgeFragment "json:\"edges,omitempty\" graphql:\"edges\""
+}
+
+func (t *ListClusterStackIds_ClusterStackRuns) GetPageInfo() *PageInfoFragment {
+	if t == nil {
+		t = &ListClusterStackIds_ClusterStackRuns{}
+	}
+	return &t.PageInfo
+}
+func (t *ListClusterStackIds_ClusterStackRuns) GetEdges() []*StackRunIDEdgeFragment {
+	if t == nil {
+		t = &ListClusterStackIds_ClusterStackRuns{}
+	}
+	return t.Edges
+}
+
 type ListInfrastructureStacks_InfrastructureStacks_Edges_InfrastructureStackEdgeFragment_Node_InfrastructureStackFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
 	Name  string "json:\"name\" graphql:\"name\""
 	Value string "json:\"value\" graphql:\"value\""
@@ -10570,6 +10722,42 @@ func (t *ListInfrastructureStacks_InfrastructureStacks) GetEdges() []*Infrastruc
 		t = &ListInfrastructureStacks_InfrastructureStacks{}
 	}
 	return t.Edges
+}
+
+type GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env struct {
+	Name  string "json:\"name\" graphql:\"name\""
+	Value string "json:\"value\" graphql:\"value\""
+}
+
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetName() string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Name
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env) GetValue() string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_Env{}
+	}
+	return t.Value
+}
+
+type GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom struct {
+	ConfigMap string "json:\"configMap\" graphql:\"configMap\""
+	Secret    string "json:\"secret\" graphql:\"secret\""
+}
+
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetConfigMap() string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.ConfigMap
+}
+func (t *GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom) GetSecret() string {
+	if t == nil {
+		t = &GetStackRunMinimal_StackRun_StackRunMinimalFragment_JobSpec_JobSpecFragment_Containers_ContainerSpecFragment_EnvFrom{}
+	}
+	return t.Secret
 }
 
 type GetStackRun_StackRun_StackRunFragment_StackRunBaseFragment_StateUrls_Terraform struct {
@@ -13942,6 +14130,17 @@ func (t *ListClusterStacks) GetClusterStackRuns() *ListClusterStacks_ClusterStac
 	return t.ClusterStackRuns
 }
 
+type ListClusterStackIds struct {
+	ClusterStackRuns *ListClusterStackIds_ClusterStackRuns "json:\"clusterStackRuns,omitempty\" graphql:\"clusterStackRuns\""
+}
+
+func (t *ListClusterStackIds) GetClusterStackRuns() *ListClusterStackIds_ClusterStackRuns {
+	if t == nil {
+		t = &ListClusterStackIds{}
+	}
+	return t.ClusterStackRuns
+}
+
 type ListInfrastructureStacks struct {
 	InfrastructureStacks *ListInfrastructureStacks_InfrastructureStacks "json:\"infrastructureStacks,omitempty\" graphql:\"infrastructureStacks\""
 }
@@ -13951,6 +14150,17 @@ func (t *ListInfrastructureStacks) GetInfrastructureStacks() *ListInfrastructure
 		t = &ListInfrastructureStacks{}
 	}
 	return t.InfrastructureStacks
+}
+
+type GetStackRunMinimal struct {
+	StackRun *StackRunMinimalFragment "json:\"stackRun,omitempty\" graphql:\"stackRun\""
+}
+
+func (t *GetStackRunMinimal) GetStackRun() *StackRunMinimalFragment {
+	if t == nil {
+		t = &GetStackRunMinimal{}
+	}
+	return t.StackRun
 }
 
 type GetStackRun struct {
@@ -24370,6 +24580,50 @@ func (c *Client) ListClusterStacks(ctx context.Context, after *string, first *in
 	return &res, nil
 }
 
+const ListClusterStackIdsDocument = `query ListClusterStackIds ($after: String, $first: Int, $before: String, $last: Int) {
+	clusterStackRuns(after: $after, first: $first, before: $before, last: $last) {
+		pageInfo {
+			... PageInfoFragment
+		}
+		edges {
+			... StackRunIdEdgeFragment
+		}
+	}
+}
+fragment PageInfoFragment on PageInfo {
+	hasNextPage
+	endCursor
+}
+fragment StackRunIdEdgeFragment on StackRunEdge {
+	node {
+		... StackRunIdFragment
+	}
+}
+fragment StackRunIdFragment on StackRun {
+	id
+}
+`
+
+func (c *Client) ListClusterStackIds(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterStackIds, error) {
+	vars := map[string]any{
+		"after":  after,
+		"first":  first,
+		"before": before,
+		"last":   last,
+	}
+
+	var res ListClusterStackIds
+	if err := c.Client.Post(ctx, "ListClusterStackIds", ListClusterStackIdsDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListInfrastructureStacksDocument = `query ListInfrastructureStacks ($after: String, $first: Int, $before: String, $last: Int) {
 	infrastructureStacks(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -24571,6 +24825,96 @@ func (c *Client) ListInfrastructureStacks(ctx context.Context, after *string, fi
 
 	var res ListInfrastructureStacks
 	if err := c.Client.Post(ctx, "ListInfrastructureStacks", ListInfrastructureStacksDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetStackRunMinimalDocument = `query GetStackRunMinimal ($id: ID!) {
+	stackRun(id: $id) {
+		... StackRunMinimalFragment
+	}
+}
+fragment StackRunMinimalFragment on StackRun {
+	id
+	type
+	status
+	approval
+	approvedAt
+	tarball
+	workdir
+	manageState
+	jobSpec {
+		... JobSpecFragment
+	}
+	configuration {
+		... StackConfigurationFragment
+	}
+}
+fragment JobSpecFragment on JobGateSpec {
+	namespace
+	raw
+	containers {
+		... ContainerSpecFragment
+	}
+	labels
+	annotations
+	serviceAccount
+	requests {
+		... ContainerResourcesFragment
+	}
+}
+fragment ContainerSpecFragment on ContainerSpec {
+	image
+	args
+	env {
+		name
+		value
+	}
+	envFrom {
+		configMap
+		secret
+	}
+}
+fragment ContainerResourcesFragment on ContainerResources {
+	requests {
+		... ResourceRequestFragment
+	}
+	limits {
+		... ResourceRequestFragment
+	}
+}
+fragment ResourceRequestFragment on ResourceRequest {
+	cpu
+	memory
+}
+fragment StackConfigurationFragment on StackConfiguration {
+	image
+	version
+	tag
+	hooks {
+		... StackHookFragment
+	}
+}
+fragment StackHookFragment on StackHook {
+	cmd
+	args
+	afterStage
+}
+`
+
+func (c *Client) GetStackRunMinimal(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetStackRunMinimal, error) {
+	vars := map[string]any{
+		"id": id,
+	}
+
+	var res GetStackRunMinimal
+	if err := c.Client.Post(ctx, "GetStackRunMinimal", GetStackRunMinimalDocument, &res, vars, interceptors...); err != nil {
 		if c.Client.ParseDataWhenErrors {
 			return &res, err
 		}
@@ -28446,7 +28790,9 @@ var DocumentOperationNames = map[string]string{
 	CreateServiceAccountTokenDocument:                 "CreateServiceAccountToken",
 	ShareSecretDocument:                               "ShareSecret",
 	ListClusterStacksDocument:                         "ListClusterStacks",
+	ListClusterStackIdsDocument:                       "ListClusterStackIds",
 	ListInfrastructureStacksDocument:                  "ListInfrastructureStacks",
+	GetStackRunMinimalDocument:                        "GetStackRunMinimal",
 	GetStackRunDocument:                               "GetStackRun",
 	GetStackRunBaseDocument:                           "GetStackRunBase",
 	UpdateStackRunDocument:                            "UpdateStackRun",
