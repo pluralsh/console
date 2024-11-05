@@ -79,9 +79,7 @@ export function TagsFilter({
         },
         ...comboBoxProps,
       }}
-      selectProps={{
-        ...selectProps,
-      }}
+      selectProps={selectProps}
       selectedTagKeys={selectedTagKeys}
       setSelectedTagKeys={setSelectedTagKeys}
       inputValue={inputValue}
