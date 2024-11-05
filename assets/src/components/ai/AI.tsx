@@ -24,9 +24,8 @@ import { AIPinsTable } from './AIPinsTable.tsx'
 import { AIThreadsTable } from './AIThreadsTable.tsx'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider.tsx'
-import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 
-export const breadcrumbs = [{ label: 'plural ai', url: AI_ABS_PATH }]
+export const breadcrumbs = [{ label: 'plural ai' }]
 
 export default function AI() {
   useSetBreadcrumbs(breadcrumbs)
