@@ -37,6 +37,8 @@ import { ClusterHealth } from './ClusterHealthChip'
 import { ClusterConditions } from './ClusterConditions'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
 import { filesize } from 'filesize'
+import { SortingFn } from '@tanstack/table-core'
+import semver from 'semver'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -110,6 +112,7 @@ export function ColClusterContent({
 export const ColCluster = columnHelper.accessor(({ node }) => node?.name, {
   id: 'cluster',
   header: 'Cluster',
+  enableSorting: true,
   cell: function Cell({ row: { original } }) {
     return <ColClusterContent cluster={original.node} />
   },
@@ -147,44 +150,71 @@ export const ColProvider = columnHelper.accessor(
   }
 )
 
-export const ColHealth = columnHelper.accessor(({ node }) => node, {
+export const ColHealth = columnHelper.accessor(({ node }) => node?.pingedAt, {
   id: 'health',
   header: 'Health',
-  cell: ({ getValue }) => <ClusterHealth cluster={getValue() || undefined} />,
-})
-
-export const ColVersion = columnHelper.accessor(({ node }) => node, {
-  id: 'version',
-  header: 'Version',
-  cell: function Cell({
+  enableSorting: true,
+  cell: ({
     row: {
       original: { node },
     },
-  }) {
-    return (
-      <div>
-        {node?.currentVersion && (
-          <StackedText
-            first={
-              <div css={{ display: 'flex', flexDirection: 'column' }}>
-                <TabularNumbers>
-                  Current: {toNiceVersion(node?.currentVersion)}
-                </TabularNumbers>
-                <TabularNumbers>
-                  {node?.self || !node?.version
-                    ? null
-                    : `Target: ${toNiceVersion(node?.version)}`}
-                </TabularNumbers>
-              </div>
-            }
-            second={`Kubelet: ${toNiceVersion(node?.kubeletVersion)}`}
-          />
-        )}
-        {!node?.currentVersion && <>-</>}
-      </div>
-    )
-  },
+  }) => <ClusterHealth cluster={node || undefined} />,
 })
+
+const sortVersionFn: SortingFn<Edge<ClustersRowFragment>> = (
+  rowA,
+  rowB,
+  _columnId
+) => {
+  const a = semver.coerce(rowA.original.node?.currentVersion)
+  const b = semver.coerce(rowB.original.node?.currentVersion)
+
+  if (!a && !b) return 0
+
+  if (!a) return -1
+
+  if (!b) return 1
+
+  return a.compare(b)
+}
+
+export const ColVersion = columnHelper.accessor(
+  ({ node }) => toNiceVersion(node?.currentVersion),
+  {
+    id: 'version',
+    header: 'Version',
+    enableSorting: true,
+    sortingFn: sortVersionFn,
+    cell: function Cell({
+      row: {
+        original: { node },
+      },
+    }) {
+      return (
+        <div>
+          {node?.currentVersion && (
+            <StackedText
+              first={
+                <div css={{ display: 'flex', flexDirection: 'column' }}>
+                  <TabularNumbers>
+                    Current: {toNiceVersion(node?.currentVersion)}
+                  </TabularNumbers>
+                  <TabularNumbers>
+                    {node?.self || !node?.version
+                      ? null
+                      : `Target: ${toNiceVersion(node?.version)}`}
+                  </TabularNumbers>
+                </div>
+              }
+              second={`Kubelet: ${toNiceVersion(node?.kubeletVersion)}`}
+            />
+          )}
+          {!node?.currentVersion && <>-</>}
+        </div>
+      )
+    },
+  }
+)
 
 const cpuFormat = (cpu: Nullable<number>) => (cpu ? `${cpu} vCPU` : '—')
 
@@ -247,31 +277,38 @@ const ColStatusSC = styled.div(({ theme }) => ({
   gap: theme.spacing.small,
 }))
 
-export const ColStatus = columnHelper.accessor(({ node }) => node, {
-  id: 'status',
-  header: 'Status',
-  meta: {
-    gridTemplate: 'min-content',
-  },
-  cell: ({ table, getValue, row: { original } }) => {
-    const cluster = getValue()
-    const { refetch } = table.options.meta as { refetch?: () => void }
+const numUpgrades = (cluster: Nullable<ClustersRowFragment>) => {
+  let numUpgrades = 3
 
-    return (
-      <ColStatusSC
-        onClick={(e) => {
-          e.stopPropagation()
-        }}
-      >
-        <ClusterUpgrade
-          cluster={cluster}
-          refetch={refetch}
-        />
-        <ClusterConditions cluster={original.node} />
-      </ColStatusSC>
-    )
-  },
-})
+  if (!cluster?.upgradePlan?.compatibilities) --numUpgrades
+  if (!cluster?.upgradePlan?.deprecations) --numUpgrades
+  if (!cluster?.upgradePlan?.incompatibilities) --numUpgrades
+
+  return numUpgrades
+}
+
+export const ColStatus = columnHelper.accessor(
+  ({ node }) => numUpgrades(node),
+  {
+    id: 'status',
+    header: 'Status',
+    enableSorting: true,
+    meta: { gridTemplate: 'min-content' },
+    cell: ({ table, row: { original } }) => {
+      const { refetch } = table.options.meta as { refetch?: () => void }
+
+      return (
+        <ColStatusSC onClick={(e) => e.stopPropagation()}>
+          <ClusterUpgrade
+            cluster={original.node}
+            refetch={refetch}
+          />
+          <ClusterConditions cluster={original.node} />
+        </ColStatusSC>
+      )
+    },
+  }
+)
 
 enum MenuItemKey {
   Permissions = 'permissions',
