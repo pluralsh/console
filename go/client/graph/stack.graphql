@@ -6,6 +6,10 @@ fragment StackRunEdgeFragment on StackRunEdge {
     node { ...StackRunFragment}
 }
 
+fragment StackRunIdEdgeFragment on StackRunEdge {
+    node { ...StackRunIdFragment}
+}
+
 fragment InfrastructureStackFragment on InfrastructureStack {
     id
     name
@@ -29,9 +33,26 @@ fragment InfrastructureStackFragment on InfrastructureStack {
     variables
 }
 
+fragment StackRunIdFragment on StackRun {
+    id
+}
+
 fragment StackRunFragment on StackRun {
     ...StackRunBaseFragment
     approver { ...UserFragment}
+}
+
+fragment StackRunMinimalFragment on StackRun {
+    id
+    type
+    status
+    approval
+    approvedAt
+    tarball
+    workdir
+    manageState
+    jobSpec { ...JobSpecFragment}
+    configuration { ...StackConfigurationFragment}
 }
 
 fragment StackRunBaseFragment on StackRun {
@@ -172,12 +193,27 @@ query ListClusterStacks($after: String, $first: Int, $before: String, $last: Int
     }
 }
 
+query ListClusterStackIds($after: String, $first: Int, $before: String, $last: Int) {
+    clusterStackRuns(after: $after, first: $first, before: $before, last: $last) {
+        pageInfo { ...PageInfoFragment}
+        edges {
+            ...StackRunIdEdgeFragment
+        }
+    }
+}
+
 query ListInfrastructureStacks($after: String, $first: Int, $before: String, $last: Int) {
     infrastructureStacks(after: $after, first: $first, before: $before, last: $last) {
         pageInfo { ...PageInfoFragment}
         edges {
             ...InfrastructureStackEdgeFragment
         }
+    }
+}
+
+query GetStackRunMinimal($id: ID!) {
+    stackRun(id: $id) {
+        ...StackRunMinimalFragment
     }
 }
 
