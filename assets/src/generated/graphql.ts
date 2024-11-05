@@ -4661,6 +4661,8 @@ export type PrAutomationUpdateSpecAttributes = {
   regexReplacements?: InputMaybe<Array<InputMaybe<RegexReplacementAttributes>>>;
   regexes?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   replaceTemplate?: InputMaybe<Scalars['String']['input']>;
+  /** list of yaml overlay operations to apply to a file */
+  yamlOverlays?: InputMaybe<Array<InputMaybe<YamlOverlayAttributes>>>;
   yq?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -4778,6 +4780,7 @@ export type PrUpdateSpec = {
   regexReplacements?: Maybe<Array<Maybe<RegexReplacement>>>;
   regexes?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   replaceTemplate?: Maybe<Scalars['String']['output']>;
+  yamlOverlays?: Maybe<Array<Maybe<YamlOverlay>>>;
   yq?: Maybe<Scalars['String']['output']>;
 };
 
@@ -5029,7 +5032,7 @@ export type RegexReplacement = {
   templated?: Maybe<Scalars['Boolean']['output']>;
 };
 
-/** a fully specify regex/replace flow */
+/** a fully specified regex/replace flow */
 export type RegexReplacementAttributes = {
   /** the filename to apply this regex on */
   file: Scalars['String']['input'];
@@ -9508,6 +9511,25 @@ export type WireguardPeerStatus = {
   __typename?: 'WireguardPeerStatus';
   conditions?: Maybe<Array<Maybe<StatusCondition>>>;
   ready?: Maybe<Scalars['Boolean']['output']>;
+};
+
+/** a description of a yaml-merge operation on a file */
+export type YamlOverlay = {
+  __typename?: 'YamlOverlay';
+  /** the filename to apply this yaml overlay on */
+  file: Scalars['String']['output'];
+  /** whether you want to apply liquid templating on the yaml before compiling */
+  templated?: Maybe<Scalars['Boolean']['output']>;
+  yaml: Scalars['String']['output'];
+};
+
+/** a description of a yaml-merge operation on a file */
+export type YamlOverlayAttributes = {
+  /** the filename to apply this yaml overlay on */
+  file: Scalars['String']['input'];
+  /** whether you want to apply liquid templating on the yaml before compiling */
+  templated?: InputMaybe<Scalars['Boolean']['input']>;
+  yaml: Scalars['String']['input'];
 };
 
 export type AiInsightFragment = { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null } | null };

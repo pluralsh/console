@@ -52,6 +52,12 @@ defmodule Console.Schema.PrAutomation do
         field :file,        :string
         field :templated,   :boolean, default: true
       end
+
+      embeds_many :yaml_overlays, YamlOverlay, on_replace: :delete do
+        field :file,      :string
+        field :yaml,      :string
+        field :templated, :boolean, default: true
+      end
     end
 
     embeds_one :deletes, DeleteSpec, on_replace: :update do
@@ -131,6 +137,7 @@ defmodule Console.Schema.PrAutomation do
     model
     |> cast(attrs, ~w(regexes files yq replace_template match_strategy)a)
     |> cast_embed(:regex_replacements, with: &regex_replacement_cs/2)
+    |> cast_embed(:yaml_overlays, with: &yaml_overlay_cs/2)
   end
 
   defp create_changeset(model, attrs) do
@@ -153,6 +160,10 @@ defmodule Console.Schema.PrAutomation do
 
   defp regex_replacement_cs(model, attrs) do
     cast(model, attrs, ~w(regex replacement file templated)a)
+  end
+
+  defp yaml_overlay_cs(model, attrs) do
+    cast(model, attrs, ~w(yaml file templated)a)
   end
 
   defp confirmation_changeset(model, attrs) do

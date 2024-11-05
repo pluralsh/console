@@ -190,6 +190,8 @@ defmodule Console.GraphQl.Deployments.Git do
     field :regexes,            list_of(:string)
     field :regex_replacements, list_of(:regex_replacement_attributes),
       description: "list of regex scope replacement templates, useful for ANY strategies"
+    field :yaml_overlays,      list_of(:yaml_overlay_attributes),
+      description: "list of yaml overlay operations to apply to a file"
     field :files,              list_of(:string)
     field :replace_template,   :string
     field :yq,                 :string
@@ -208,7 +210,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :folders,   list_of(non_null(:string))
   end
 
-  @desc "a fully specify regex/replace flow"
+  @desc "a fully specified regex/replace flow"
   input_object :regex_replacement_attributes do
     field :regex,       non_null(:string)
     field :replacement, non_null(:string)
@@ -223,6 +225,14 @@ defmodule Console.GraphQl.Deployments.Git do
     field :destination, non_null(:string)
     field :external,    non_null(:boolean),
       description: "whether the source template is sourced from an external git repo bound to this automation"
+  end
+
+  @desc "a description of a yaml-merge operation on a file"
+  input_object :yaml_overlay_attributes do
+    field :file,      non_null(:string), description: "the filename to apply this yaml overlay on"
+    field :yaml,      non_null(:string)
+    field :templated, :boolean,
+      description: "whether you want to apply liquid templating on the yaml before compiling"
   end
 
   @desc "attributes for a pull request pointer record"
@@ -462,10 +472,19 @@ defmodule Console.GraphQl.Deployments.Git do
   object :pr_update_spec do
     field :regexes,            list_of(:string)
     field :regex_replacements, list_of(:regex_replacement)
+    field :yaml_overlays,      list_of(:yaml_overlay)
     field :files,              list_of(:string)
     field :replace_template,   :string
     field :yq,                 :string
     field :match_strategy,     :match_strategy
+  end
+
+  @desc "a description of a yaml-merge operation on a file"
+  object :yaml_overlay do
+    field :yaml, non_null(:string)
+    field :file,        non_null(:string), description: "the filename to apply this yaml overlay on"
+    field :templated,   :boolean,
+      description: "whether you want to apply liquid templating on the yaml before compiling"
   end
 
   @desc "templated files used to add new files to a given pr"

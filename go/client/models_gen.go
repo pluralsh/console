@@ -3880,10 +3880,12 @@ type PrAutomationUpdateSpecAttributes struct {
 	Regexes []*string `json:"regexes,omitempty"`
 	// list of regex scope replacement templates, useful for ANY strategies
 	RegexReplacements []*RegexReplacementAttributes `json:"regexReplacements,omitempty"`
-	Files             []*string                     `json:"files,omitempty"`
-	ReplaceTemplate   *string                       `json:"replaceTemplate,omitempty"`
-	Yq                *string                       `json:"yq,omitempty"`
-	MatchStrategy     *MatchStrategy                `json:"matchStrategy,omitempty"`
+	// list of yaml overlay operations to apply to a file
+	YamlOverlays    []*YamlOverlayAttributes `json:"yamlOverlays,omitempty"`
+	Files           []*string                `json:"files,omitempty"`
+	ReplaceTemplate *string                  `json:"replaceTemplate,omitempty"`
+	Yq              *string                  `json:"yq,omitempty"`
+	MatchStrategy   *MatchStrategy           `json:"matchStrategy,omitempty"`
 }
 
 // a checkbox item to render before creating a pr
@@ -3975,6 +3977,7 @@ type PrTemplateSpec struct {
 type PrUpdateSpec struct {
 	Regexes           []*string           `json:"regexes,omitempty"`
 	RegexReplacements []*RegexReplacement `json:"regexReplacements,omitempty"`
+	YamlOverlays      []*YamlOverlay      `json:"yamlOverlays,omitempty"`
 	Files             []*string           `json:"files,omitempty"`
 	ReplaceTemplate   *string             `json:"replaceTemplate,omitempty"`
 	Yq                *string             `json:"yq,omitempty"`
@@ -4195,7 +4198,7 @@ type RegexReplacement struct {
 	Templated *bool `json:"templated,omitempty"`
 }
 
-// a fully specify regex/replace flow
+// a fully specified regex/replace flow
 type RegexReplacementAttributes struct {
 	Regex       string `json:"regex"`
 	Replacement string `json:"replacement"`
@@ -5918,6 +5921,24 @@ type WireguardPeerSpec struct {
 type WireguardPeerStatus struct {
 	Ready      *bool              `json:"ready,omitempty"`
 	Conditions []*StatusCondition `json:"conditions,omitempty"`
+}
+
+// a description of a yaml-merge operation on a file
+type YamlOverlay struct {
+	Yaml string `json:"yaml"`
+	// the filename to apply this yaml overlay on
+	File string `json:"file"`
+	// whether you want to apply liquid templating on the yaml before compiling
+	Templated *bool `json:"templated,omitempty"`
+}
+
+// a description of a yaml-merge operation on a file
+type YamlOverlayAttributes struct {
+	// the filename to apply this yaml overlay on
+	File string `json:"file"`
+	Yaml string `json:"yaml"`
+	// whether you want to apply liquid templating on the yaml before compiling
+	Templated *bool `json:"templated,omitempty"`
 }
 
 type AiProvider string

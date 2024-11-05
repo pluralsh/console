@@ -5307,6 +5307,9 @@ input PrAutomationUpdateSpecAttributes {
   "list of regex scope replacement templates, useful for ANY strategies"
   regexReplacements: [RegexReplacementAttributes]
 
+  "list of yaml overlay operations to apply to a file"
+  yamlOverlays: [YamlOverlayAttributes]
+
   files: [String]
 
   replaceTemplate: String
@@ -5328,7 +5331,7 @@ input PrAutomationDeleteSpecAttributes {
   folders: [String!]
 }
 
-"a fully specify regex\/replace flow"
+"a fully specified regex\/replace flow"
 input RegexReplacementAttributes {
   regex: String!
 
@@ -5349,6 +5352,17 @@ input PrAutomationTemplateAttributes {
 
   "whether the source template is sourced from an external git repo bound to this automation"
   external: Boolean!
+}
+
+"a description of a yaml-merge operation on a file"
+input YamlOverlayAttributes {
+  "the filename to apply this yaml overlay on"
+  file: String!
+
+  yaml: String!
+
+  "whether you want to apply liquid templating on the yaml before compiling"
+  templated: Boolean
 }
 
 "attributes for a pull request pointer record"
@@ -5663,10 +5677,22 @@ type PrAutomation {
 type PrUpdateSpec {
   regexes: [String]
   regexReplacements: [RegexReplacement]
+  yamlOverlays: [YamlOverlay]
   files: [String]
   replaceTemplate: String
   yq: String
   matchStrategy: MatchStrategy
+}
+
+"a description of a yaml-merge operation on a file"
+type YamlOverlay {
+  yaml: String!
+
+  "the filename to apply this yaml overlay on"
+  file: String!
+
+  "whether you want to apply liquid templating on the yaml before compiling"
+  templated: Boolean
 }
 
 "templated files used to add new files to a given pr"
