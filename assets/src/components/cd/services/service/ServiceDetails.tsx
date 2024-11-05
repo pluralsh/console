@@ -213,6 +213,7 @@ function ServiceDetailsBase() {
     variables: { id: serviceId },
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
+    errorPolicy: 'all',
   })
   const { serviceDeployment } = serviceData || {}
   const docs = useMemo(
@@ -263,7 +264,7 @@ function ServiceDetailsBase() {
       </ResponsiveLayoutSidenavContainer>
       <ResponsiveLayoutSpacer />
       <ResponsiveLayoutContentContainer role="main">
-        {serviceError ? (
+        {!serviceDeployment && serviceError ? (
           <GqlError error={serviceError} />
         ) : serviceDeployment ? (
           <Outlet
