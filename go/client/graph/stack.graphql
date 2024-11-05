@@ -10,6 +10,10 @@ fragment StackRunIdEdgeFragment on StackRunEdge {
     node { ...StackRunIdFragment}
 }
 
+fragment InfrastructureStackIdFragment on InfrastructureStack {
+    id
+}
+
 fragment InfrastructureStackFragment on InfrastructureStack {
     id
     name
@@ -237,7 +241,7 @@ mutation UpdateStackRun($id: ID!, $attributes: StackRunAttributes!) {
 
 mutation ApproveStackRun($id: ID!) {
     approveStackRun(id: $id) {
-        ...StackRunBaseFragment
+        ...StackRunIdFragment
     }
 }
 
@@ -255,13 +259,13 @@ mutation UpdateStack($id: ID!, $attributes: StackAttributes!) {
 
 mutation DetachStack($id: ID!) {
     detachStack(id: $id){
-        ...InfrastructureStackFragment
+        ...InfrastructureStackIdFragment
     }
 }
 
 mutation DeleteStack($id: ID!) {
     deleteStack(id: $id){
-        ...InfrastructureStackFragment
+        ...InfrastructureStackIdFragment
     }
 }
 
@@ -273,7 +277,7 @@ query GetInfrastructureStack($id: ID, $name: String) {
 
 mutation CompletesStackRun($id: ID!, $attributes: StackRunAttributes!) {
     completeStackRun(id: $id, attributes: $attributes) {
-        ...StackRunBaseFragment
+        ...StackRunIdFragment
     }
 }
 
