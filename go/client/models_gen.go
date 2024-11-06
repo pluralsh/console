@@ -997,12 +997,13 @@ type ClusterInfo struct {
 
 // A kubernetes object used in the course of generating a cluster insight
 type ClusterInsightComponent struct {
-	ID        string  `json:"id"`
-	Group     *string `json:"group,omitempty"`
-	Version   string  `json:"version"`
-	Kind      string  `json:"kind"`
-	Namespace *string `json:"namespace,omitempty"`
-	Name      string  `json:"name"`
+	ID        string   `json:"id"`
+	Group     *string  `json:"group,omitempty"`
+	Version   string   `json:"version"`
+	Kind      string   `json:"kind"`
+	Namespace *string  `json:"namespace,omitempty"`
+	Name      string   `json:"name"`
+	Cluster   *Cluster `json:"cluster,omitempty"`
 	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
 	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }

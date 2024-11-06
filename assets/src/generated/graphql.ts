@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -1291,6 +1291,7 @@ export type ClusterInfo = {
 /** A kubernetes object used in the course of generating a cluster insight */
 export type ClusterInsightComponent = {
   __typename?: 'ClusterInsightComponent';
+  cluster?: Maybe<Cluster>;
   group?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   kind: Scalars['String']['output'];
