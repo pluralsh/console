@@ -38,6 +38,7 @@ import {
   OllamaSettings,
   OpenAISettings,
   validateAttributes,
+  VertexSettings,
 } from './GlobalSettingsAIProviders.tsx'
 import { GqlError } from '../../utils/Alert.tsx'
 import pick from 'lodash/pick'
@@ -124,6 +125,17 @@ export function GlobalSettingsAiProvider() {
           settings={providerSettings.bedrock}
           updateSettings={(settings) =>
             updateProviderSettings({ bedrock: settings })
+          }
+        />
+      )
+      break
+    case AiProvider.Vertex:
+      settings = (
+        <VertexSettings
+          enabled={enabled}
+          settings={providerSettings.vertex}
+          updateSettings={(settings) =>
+            updateProviderSettings({ vertex: settings })
           }
         />
       )
@@ -220,6 +232,10 @@ export function GlobalSettingsAiProvider() {
               <ListBoxItem
                 key={AiProvider.Openai}
                 label={'OpenAI'}
+              />
+              <ListBoxItem
+                key={AiProvider.Vertex}
+                label={'Vertex AI'}
               />
             </SelectWithDisable>
           </FormField>

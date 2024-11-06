@@ -56,6 +56,14 @@ export function initialSettingsAttributes(
               },
             }
           : {}),
+        ...(ai.vertex
+          ? {
+              vertex: {
+                model: ai.vertex.model,
+                serviceAccountJson: '',
+              },
+            }
+          : {}),
       }
     : {}
 }
@@ -90,6 +98,8 @@ export function validateAttributes(
         settings.bedrock?.accessKeyId &&
         settings.bedrock?.secretAccessKey
       )
+    case AiProvider.Vertex:
+      return true
     default:
       return false
   }
@@ -376,6 +386,52 @@ export function BedrockSettings({
           value={settings?.secretAccessKey ?? undefined}
           onChange={(e) => {
             updateSettings({ secretAccessKey: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+    </>
+  )
+}
+
+export function VertexSettings({
+  enabled,
+  settings,
+  updateSettings,
+}: {
+  enabled: boolean
+  settings: AiSettingsAttributes['vertex']
+  updateSettings: (
+    update: NonNullable<Partial<AiSettingsAttributes['vertex']>>
+  ) => void
+}) {
+  const theme = useTheme()
+
+  return (
+    <>
+      <FormField
+        label="Model"
+        hint="The Model ID you want to use."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.model}
+          onChange={(e) => {
+            updateSettings({ model: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Service account"
+        hint="Optional service account JSON to authenticate to the GCP Vertex AI APIs."
+        flex={1}
+      >
+        <InputRevealer
+          css={{ background: theme.colors['fill-two'] }}
+          disabled={!enabled}
+          value={settings?.serviceAccountJson ?? undefined}
+          onChange={(e) => {
+            updateSettings({ serviceAccountJson: e.currentTarget.value })
           }}
         />
       </FormField>
