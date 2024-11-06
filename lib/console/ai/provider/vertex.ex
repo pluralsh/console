@@ -45,9 +45,11 @@ defmodule Console.AI.Vertex do
   defp client(%__MODULE__{} = client) do
     case client do
       %__MODULE__{service_account_json: json} when is_binary(json) ->
-        Goth.Token.fetch(source: {:service_account, json})
+        with {:ok, json} <- Jason.decode(json),
+          do: Goth.Token.fetch(source: {:service_account, json})
       _ -> Goth.Token.fetch([])
     end
+    |> goth_error()
   end
 
   defp build_req(history) do
@@ -78,12 +80,6 @@ defmodule Console.AI.Vertex do
     |> Enum.join("\n")
   end
 
-  defp fmt_err({:error, %{} = err}) do
-    err = Poison.encode!(err)
-    Logger.error "vertex ai error: #{err}"
-    err
-  end
-
   defp fmt_err({:error, err}) do
     Logger.error "unknown vertex ai error: #{inspect(err)}"
     "unknown"
@@ -91,4 +87,8 @@ defmodule Console.AI.Vertex do
 
   defp cache?({:ok, _}), do: true
   defp cache?(_), do: false
+
+  defp goth_error({:ok, _} = pass), do: pass
+  defp goth_error(:error), do: {:error, "could not fetch gcp credentials"}
+  defp goth_error({:error, _} = err), do: err
 end
