@@ -30,6 +30,9 @@ fragment AiSettings on AiSettings {
     modelId
     accessKeyId
   }
+  vertex {
+    model
+  }
   enabled
   provider
 }
