@@ -26,10 +26,12 @@ import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsCon
 import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider.tsx'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
 
+export const breadcrumbs = [{ label: 'plural ai' }]
+
 export default function AI() {
   const settings = useDeploymentSettings()
 
-  useSetBreadcrumbs([{ label: 'plural ai' }])
+  useSetBreadcrumbs(breadcrumbs)
 
   return (
     <ResponsivePageFullWidth
