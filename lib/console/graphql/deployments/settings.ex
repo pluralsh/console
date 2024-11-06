@@ -82,7 +82,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :vertex_ai_attributes do
-    field :model,                non_null(:string), description: "the vertex model id to use"
+    field :model,                :string, description: "the vertex model id to use"
     field :service_account_json, :string, description: "optional service account json to auth to the GCP vertex apis"
   end
 

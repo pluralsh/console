@@ -9265,7 +9265,7 @@ export type VersionReference = {
 
 export type VertexAiAttributes = {
   /** the vertex model id to use */
-  model: Scalars['String']['input'];
+  model?: InputMaybe<Scalars['String']['input']>;
   /** optional service account json to auth to the GCP vertex apis */
   serviceAccountJson?: InputMaybe<Scalars['String']['input']>;
 };

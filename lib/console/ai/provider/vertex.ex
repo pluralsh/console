@@ -10,6 +10,7 @@ defmodule Console.AI.Vertex do
 
   @cache_adapter Console.conf(:cache_adapter)
   @ttl :timer.minutes(5)
+  @default_model "gemini-1.5-flash-002"
 
   require Logger
 
@@ -26,7 +27,7 @@ defmodule Console.AI.Vertex do
   def completion(%__MODULE__{model: model} = vertex, messages) do
     with {:ok, %{token: token}} <- client(vertex) do
       V1.Connection.new(token)
-      |> Endpoints.aiplatform_endpoints_generate_content(model, body: build_req(messages))
+      |> Endpoints.aiplatform_endpoints_generate_content(model || @default_model, body: build_req(messages))
       |> case do
         {:ok, %Model.GoogleCloudAiplatformV1GenerateContentResponse{
           candidates: [

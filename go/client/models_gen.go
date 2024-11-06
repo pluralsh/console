@@ -5707,7 +5707,7 @@ type VersionReference struct {
 
 type VertexAiAttributes struct {
 	// the vertex model id to use
-	Model string `json:"model"`
+	Model *string `json:"model,omitempty"`
 	// optional service account json to auth to the GCP vertex apis
 	ServiceAccountJSON *string `json:"serviceAccountJson,omitempty"`
 }

@@ -1147,7 +1147,7 @@ input BedrockAiAttributes {
 
 input VertexAiAttributes {
   "the vertex model id to use"
-  model: String!
+  model: String
 
   "optional service account json to auth to the GCP vertex apis"
   serviceAccountJson: String

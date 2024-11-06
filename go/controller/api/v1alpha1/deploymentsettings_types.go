@@ -389,13 +389,13 @@ type BedrockSettings struct {
 type VertexSettings struct {
 	// The Vertex AI model to use
 	//
-	// +kubebuilder:validation:Required
-	Model string `json:"model"`
+	// +kubebuilder:validation:Optional
+	Model *string `json:"model,omitempty"`
 
 	// An Service Account json file stored w/in a kubernetes secret to use for authentication to GCP
 	//
 	// +kubebuilder:validation:Optional
-	ServiceAccountJsonSecretRef *corev1.SecretKeySelector `json:"serviceAccountJsonSecretRef"`
+	ServiceAccountJsonSecretRef *corev1.SecretKeySelector `json:"serviceAccountJsonSecretRef,omitempty"`
 }
 
 func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
