@@ -61,8 +61,10 @@ export default function Subheader() {
       <BreadcrumbsContainerSC>
         <Breadcrumbs className="crumbs" />
       </BreadcrumbsContainerSC>
-      <ExplainWithAI />
-      <Chatbot />
+      <div css={{ display: 'flex', marginRight: theme.spacing.xxsmall }}>
+        <ExplainWithAI />
+        <Chatbot />
+      </div>
     </SubheaderSC>
   )
 }

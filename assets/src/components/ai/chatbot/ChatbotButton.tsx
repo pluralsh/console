@@ -23,7 +23,7 @@ export function ChatbotIconButton({
       onClick={onClick}
       active={active}
       visible={true}
-      startIcon={<ChatOutlineIcon />}
+      startIcon={<ChatOutlineIcon size={12} />}
       {...props}
     >
       Chat with AI

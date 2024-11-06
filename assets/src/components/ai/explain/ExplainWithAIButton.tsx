@@ -1,6 +1,6 @@
 import { DefaultTheme, useTheme } from 'styled-components'
 import {
-  AiSparkleFilledIcon,
+  AiSparkleOutlineIcon,
   AnimatedDiv,
   Button,
 } from '@pluralsh/design-system'
@@ -10,7 +10,7 @@ import { useTransition } from 'react-spring'
 
 export default function ExplainWithAIButton({
   active,
-  startIcon = <AiSparkleFilledIcon size={13} />,
+  startIcon = <AiSparkleOutlineIcon size={13} />,
   visible,
   children,
   ...props

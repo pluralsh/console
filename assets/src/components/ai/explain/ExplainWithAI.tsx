@@ -25,9 +25,8 @@ export default function ExplainWithAI() {
         active={open}
         visible={!!prompt}
         onClick={() => setOpen(true)}
-        width={163}
       >
-        Explain with AI
+        Explain this page
       </AIButton>
       {open && prompt && (
         <ExplainWithAIPanel
