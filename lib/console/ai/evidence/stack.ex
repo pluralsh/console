@@ -7,6 +7,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.Stack do
     StackRun.for_stack(stack.id)
     |> StackRun.for_status(:failed)
     |> StackRun.ordered(desc: :id)
+    |> StackRun.wet()
     |> StackRun.limit(1)
     |> Console.Repo.one()
     |> Worker.generate()
