@@ -543,6 +543,13 @@ spec:
                         file:
                           description: the file to execute the overlay on
                           type: string
+                        listMerge:
+                          description: How you want list merge to be performed, defaults
+                            to OVERWRITE
+                          enum:
+                          - OVERWRITE
+                          - APPEND
+                          type: string
                         templated:
                           description: Whether you want to apply templating to the
                             yaml blob before overlaying

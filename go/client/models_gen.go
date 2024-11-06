@@ -997,12 +997,13 @@ type ClusterInfo struct {
 
 // A kubernetes object used in the course of generating a cluster insight
 type ClusterInsightComponent struct {
-	ID        string  `json:"id"`
-	Group     *string `json:"group,omitempty"`
-	Version   string  `json:"version"`
-	Kind      string  `json:"kind"`
-	Namespace *string `json:"namespace,omitempty"`
-	Name      string  `json:"name"`
+	ID        string   `json:"id"`
+	Group     *string  `json:"group,omitempty"`
+	Version   string   `json:"version"`
+	Kind      string   `json:"kind"`
+	Namespace *string  `json:"namespace,omitempty"`
+	Name      string   `json:"name"`
+	Cluster   *Cluster `json:"cluster,omitempty"`
 	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
 	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }
@@ -5945,6 +5946,8 @@ type YamlOverlay struct {
 	File string `json:"file"`
 	// whether you want to apply liquid templating on the yaml before compiling
 	Templated *bool `json:"templated,omitempty"`
+	// configure how list merge should be performed
+	ListMerge *ListMerge `json:"listMerge,omitempty"`
 }
 
 // a description of a yaml-merge operation on a file
@@ -5952,6 +5955,8 @@ type YamlOverlayAttributes struct {
 	// the filename to apply this yaml overlay on
 	File string `json:"file"`
 	Yaml string `json:"yaml"`
+	// configure how list merge should be performed
+	ListMerge *ListMerge `json:"listMerge,omitempty"`
 	// whether you want to apply liquid templating on the yaml before compiling
 	Templated *bool `json:"templated,omitempty"`
 }
@@ -6926,6 +6931,47 @@ func (e *InsightFreshness) UnmarshalGQL(v interface{}) error {
 }
 
 func (e InsightFreshness) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ListMerge string
+
+const (
+	ListMergeOverwrite ListMerge = "OVERWRITE"
+	ListMergeAppend    ListMerge = "APPEND"
+)
+
+var AllListMerge = []ListMerge{
+	ListMergeOverwrite,
+	ListMergeAppend,
+}
+
+func (e ListMerge) IsValid() bool {
+	switch e {
+	case ListMergeOverwrite, ListMergeAppend:
+		return true
+	}
+	return false
+}
+
+func (e ListMerge) String() string {
+	return string(e)
+}
+
+func (e *ListMerge) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ListMerge(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ListMerge", str)
+	}
+	return nil
+}
+
+func (e ListMerge) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -1291,6 +1291,7 @@ export type ClusterInfo = {
 /** A kubernetes object used in the course of generating a cluster insight */
 export type ClusterInsightComponent = {
   __typename?: 'ClusterInsightComponent';
+  cluster?: Maybe<Cluster>;
   group?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
   kind: Scalars['String']['output'];
@@ -3047,6 +3048,11 @@ export type LicenseStatus = {
   plan?: Maybe<Scalars['String']['output']>;
   secrets?: Maybe<Scalars['Map']['output']>;
 };
+
+export enum ListMerge {
+  Append = 'APPEND',
+  Overwrite = 'OVERWRITE'
+}
 
 export type LoadBalancerIngressStatus = {
   __typename?: 'LoadBalancerIngressStatus';
@@ -9535,6 +9541,8 @@ export type YamlOverlay = {
   __typename?: 'YamlOverlay';
   /** the filename to apply this yaml overlay on */
   file: Scalars['String']['output'];
+  /** configure how list merge should be performed */
+  listMerge?: Maybe<ListMerge>;
   /** whether you want to apply liquid templating on the yaml before compiling */
   templated?: Maybe<Scalars['Boolean']['output']>;
   yaml: Scalars['String']['output'];
@@ -9544,6 +9552,8 @@ export type YamlOverlay = {
 export type YamlOverlayAttributes = {
   /** the filename to apply this yaml overlay on */
   file: Scalars['String']['input'];
+  /** configure how list merge should be performed */
+  listMerge?: InputMaybe<ListMerge>;
   /** whether you want to apply liquid templating on the yaml before compiling */
   templated?: InputMaybe<Scalars['Boolean']['input']>;
   yaml: Scalars['String']['input'];
