@@ -422,8 +422,8 @@ export function VertexSettings({
         />
       </FormField>
       <FormField
-        label="Service account JSON"
-        hint="Optional service account json to auth to the GCP vertex apis"
+        label="Service account"
+        hint="Optional service account JSON to authenticate to the GCP Vertex AI APIs."
         flex={1}
       >
         <InputRevealer
