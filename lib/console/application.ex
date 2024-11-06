@@ -45,6 +45,7 @@ defmodule Console.Application do
       Console.Cached.Supervisor,
       Console.Watchers.Supervisor,
       Console.Prom.Scraper,
+      Console.AI.GothManager,
       {Bandit, plug: ConsoleWeb.Plugs.MetricsExporter, port: 9090},
       {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [

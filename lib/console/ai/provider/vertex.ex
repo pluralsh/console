@@ -3,13 +3,11 @@ defmodule Console.AI.Vertex do
   Implements our basic llm behaviour against the OpenAI api
   """
   @behaviour Console.AI.Provider
-  use Nebulex.Caching
   alias GoogleApi.AIPlatform.V1
   alias GoogleApi.AIPlatform.V1.Api.Endpoints
   alias GoogleApi.AIPlatform.V1.Model
+  alias Console.AI.GothManager
 
-  @cache_adapter Console.conf(:cache_adapter)
-  @ttl :timer.minutes(5)
   @default_model "gemini-1.5-flash-002"
 
   require Logger
@@ -42,16 +40,11 @@ defmodule Console.AI.Vertex do
     end
   end
 
-  @decorate cacheable(cache: @cache_adapter, key: :vertex_ai, opts: [ttl: @ttl], match: &cache?/1)
-  defp client(%__MODULE__{} = client) do
-    case client do
-      %__MODULE__{service_account_json: json} when is_binary(json) ->
-        with {:ok, json} <- Jason.decode(json),
-          do: Goth.Token.fetch(source: {:service_account, json})
-      _ -> Goth.Token.fetch([])
-    end
-    |> goth_error()
+  defp client(%__MODULE__{service_account_json: json}) when is_binary(json) do
+    with {:ok, json} <- Jason.decode(json),
+      do: GothManager.fetch(source: {:service_account, json})
   end
+  defp client(_), do: GothManager.fetch([])
 
   defp build_req(history) do
     {system, contents} = split(history)
@@ -85,11 +78,4 @@ defmodule Console.AI.Vertex do
     Logger.error "unknown vertex ai error: #{inspect(err)}"
     "unknown"
   end
-
-  defp cache?({:ok, _}), do: true
-  defp cache?(_), do: false
-
-  defp goth_error({:ok, _} = pass), do: pass
-  defp goth_error(:error), do: {:error, "could not fetch gcp credentials"}
-  defp goth_error({:error, _} = err), do: err
 end
