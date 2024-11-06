@@ -233,7 +233,8 @@ export enum AiProvider {
   Azure = 'AZURE',
   Bedrock = 'BEDROCK',
   Ollama = 'OLLAMA',
-  Openai = 'OPENAI'
+  Openai = 'OPENAI',
+  Vertex = 'VERTEX'
 }
 
 /** A role to pass to an LLM, modeled after OpenAI's chat api roles */
@@ -253,6 +254,7 @@ export type AiSettings = {
   ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
   provider?: Maybe<AiProvider>;
+  vertex?: Maybe<VertexAiSettings>;
 };
 
 export type AiSettingsAttributes = {
@@ -263,6 +265,7 @@ export type AiSettingsAttributes = {
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
+  vertex?: InputMaybe<VertexAiAttributes>;
 };
 
 export type Alert = {
@@ -9252,6 +9255,20 @@ export type VersionReference = {
   __typename?: 'VersionReference';
   name: Scalars['String']['output'];
   version: Scalars['String']['output'];
+};
+
+export type VertexAiAttributes = {
+  /** the vertex model id to use */
+  model: Scalars['String']['input'];
+  /** optional service account json to auth to the GCP vertex apis */
+  serviceAccountJson?: InputMaybe<Scalars['String']['input']>;
+};
+
+/** Settings for usage of GCP VertexAI for LLMs */
+export type VertexAiSettings = {
+  __typename?: 'VertexAiSettings';
+  /** the vertex ai model to use */
+  model: Scalars['String']['output'];
 };
 
 export type VerticalPodAutoscaler = {

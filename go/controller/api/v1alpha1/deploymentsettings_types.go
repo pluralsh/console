@@ -178,7 +178,7 @@ type AISettings struct {
 
 	// Provider defines which of the supported LLM providers should be used.
 	//
-	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE
+	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
 	// +kubebuilder:default=OPENAI
 	// +kubebuilder:validation:Optional
 	Provider *console.AiProvider `json:"provider,omitempty"`
@@ -207,6 +207,11 @@ type AISettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Bedrock *BedrockSettings `json:"bedrock,omitempty"`
+
+	// Vertex holds configuration for using GCP VertexAI to generate LLM insights
+	//
+	// +kubebuilder:validation:Optional
+	Vertex *VertexSettings `json:"vertex,omitempty"`
 }
 
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
@@ -259,6 +264,20 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Endpoint:    in.Azure.Endpoint,
 			APIVersion:  in.Azure.ApiVersion,
 			AccessToken: token,
+		}
+	case console.AiProviderVertex:
+		if in.Vertex == nil {
+			return nil, fmt.Errorf("must provide vertex ai configuration to set the provider to VERTEX")
+		}
+
+		json, err := in.Vertex.ServiceAccountJSON(ctx, c, namespace)
+		if err != nil {
+			return nil, err
+		}
+
+		attr.Vertex = &console.VertexAiAttributes{
+			Model:              in.Vertex.Model,
+			ServiceAccountJSON: json,
 		}
 	case console.AiProviderBedrock:
 		if in.Bedrock == nil {
@@ -367,6 +386,18 @@ type BedrockSettings struct {
 	SecretAccessKeyRef *corev1.SecretKeySelector `json:"secretAccessKeyRef"`
 }
 
+type VertexSettings struct {
+	// The Vertex AI model to use
+	//
+	// +kubebuilder:validation:Required
+	Model string `json:"model"`
+
+	// An Service Account json file stored w/in a kubernetes secret to use for authentication to GCP
+	//
+	// +kubebuilder:validation:Optional
+	ServiceAccountJsonSecretRef *corev1.SecretKeySelector `json:"serviceAccountJsonSecretRef"`
+}
+
 func (in *AIProviderSettings) Token(ctx context.Context, c client.Client, namespace string) (string, error) {
 	if in == nil {
 		return "", fmt.Errorf("configured ai provider settings cannot be nil")
@@ -406,5 +437,18 @@ func (in *BedrockSettings) SecretAccessKey(ctx context.Context, c client.Client,
 	}
 
 	res, err := utils.GetSecretKey(ctx, c, in.SecretAccessKeyRef, namespace)
+	return lo.ToPtr(res), err
+}
+
+func (in *VertexSettings) ServiceAccountJSON(ctx context.Context, c client.Client, namespace string) (*string, error) {
+	if in == nil {
+		return nil, fmt.Errorf("configured vertex ai settings cannot be nil")
+	}
+
+	if in.ServiceAccountJsonSecretRef == nil {
+		return nil, nil
+	}
+
+	res, err := utils.GetSecretKey(ctx, c, in.ServiceAccountJsonSecretRef, namespace)
 	return lo.ToPtr(res), err
 }

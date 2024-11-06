@@ -3,7 +3,7 @@ defmodule Console.Schema.DeploymentSettings do
   alias Console.Schema.{PolicyBinding, GitRepository, Gates.JobSpec}
   alias Piazza.Ecto.EncryptedString
 
-  defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4
+  defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -87,6 +87,11 @@ defmodule Console.Schema.DeploymentSettings do
         field :access_key_id,     :string
         field :secret_access_key, EncryptedString
       end
+
+      embeds_one :vertex, Vertex, on_replace: :update do
+        field :service_account_json, EncryptedString
+        field :model, :string
+      end
     end
 
     belongs_to :artifact_repository, GitRepository
@@ -157,6 +162,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:ollama, with: &ollama_changeset/2)
     |> cast_embed(:azure, with: &azure_openai_changeset/2)
     |> cast_embed(:bedrock, with: &bedrock_changeset/2)
+    |> cast_embed(:vertex, with: &vertex_changeset/2)
   end
 
   defp ai_api_changeset(model, attrs) do
@@ -180,5 +186,11 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, ~w(model_id access_key_id secret_access_key)a)
     |> validate_required(~w(model_id)a)
+  end
+
+  defp vertex_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(model service_account_json)a)
+    |> validate_required(~w(model)a)
   end
 end

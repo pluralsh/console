@@ -244,7 +244,40 @@ spec:
                     - ANTHROPIC
                     - OLLAMA
                     - AZURE
+                    - BEDROCK
+                    - VERTEX
                     type: string
+                  vertex:
+                    description: Vertex holds configuration for using GCP VertexAI
+                      to generate LLM insights
+                    properties:
+                      model:
+                        description: The Vertex AI model to use
+                        type: string
+                      serviceAccountJsonSecretRef:
+                        description: An Service Account json file stored w/in a kubernetes
+                          secret to use for authentication to GCP
+                        properties:
+                          key:
+                            description: The key of the secret to select from.  Must
+                              be a valid secret key.
+                            type: string
+                          name:
+                            description: |-
+                              Name of the referent.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                          optional:
+                            description: Specify whether the Secret or its key must
+                              be defined
+                            type: boolean
+                        required:
+                        - key
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    required:
+                    - model
+                    type: object
                 type: object
               bindings:
                 description: Bindings

@@ -185,6 +185,7 @@ type AiSettings struct {
 	Ollama    *OllamaSettings      `json:"ollama,omitempty"`
 	Azure     *AzureOpenaiSettings `json:"azure,omitempty"`
 	Bedrock   *BedrockAiSettings   `json:"bedrock,omitempty"`
+	Vertex    *VertexAiSettings    `json:"vertex,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -195,6 +196,7 @@ type AiSettingsAttributes struct {
 	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
 	Azure     *AzureOpenaiAttributes       `json:"azure,omitempty"`
 	Bedrock   *BedrockAiAttributes         `json:"bedrock,omitempty"`
+	Vertex    *VertexAiAttributes          `json:"vertex,omitempty"`
 }
 
 type Alert struct {
@@ -5702,6 +5704,19 @@ type VersionReference struct {
 	Version string `json:"version"`
 }
 
+type VertexAiAttributes struct {
+	// the vertex model id to use
+	Model string `json:"model"`
+	// optional service account json to auth to the GCP vertex apis
+	ServiceAccountJSON *string `json:"serviceAccountJson,omitempty"`
+}
+
+// Settings for usage of GCP VertexAI for LLMs
+type VertexAiSettings struct {
+	// the vertex ai model to use
+	Model string `json:"model"`
+}
+
 type VerticalPodAutoscaler struct {
 	Metadata Metadata                     `json:"metadata"`
 	Spec     VerticalPodAutoscalerSpec    `json:"spec"`
@@ -5949,6 +5964,7 @@ const (
 	AiProviderOllama    AiProvider = "OLLAMA"
 	AiProviderAzure     AiProvider = "AZURE"
 	AiProviderBedrock   AiProvider = "BEDROCK"
+	AiProviderVertex    AiProvider = "VERTEX"
 )
 
 var AllAiProvider = []AiProvider{
@@ -5957,11 +5973,12 @@ var AllAiProvider = []AiProvider{
 	AiProviderOllama,
 	AiProviderAzure,
 	AiProviderBedrock,
+	AiProviderVertex,
 }
 
 func (e AiProvider) IsValid() bool {
 	switch e {
-	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock:
+	case AiProviderOpenai, AiProviderAnthropic, AiProviderOllama, AiProviderAzure, AiProviderBedrock, AiProviderVertex:
 		return true
 	}
 	return false

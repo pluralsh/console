@@ -1035,6 +1035,7 @@ enum AiProvider {
   OLLAMA
   AZURE
   BEDROCK
+  VERTEX
 }
 
 input ProjectAttributes {
@@ -1099,6 +1100,7 @@ input AiSettingsAttributes {
   ollama: OllamaAttributes
   azure: AzureOpenaiAttributes
   bedrock: BedrockAiAttributes
+  vertex: VertexAiAttributes
 }
 
 input OpenaiSettingsAttributes {
@@ -1141,6 +1143,14 @@ input BedrockAiAttributes {
 
   "aws secret access key to use, you can also use IRSA for self-hosted consoles"
   secretAccessKey: String
+}
+
+input VertexAiAttributes {
+  "the vertex model id to use"
+  model: String!
+
+  "optional service account json to auth to the GCP vertex apis"
+  serviceAccountJson: String
 }
 
 input SmtpSettingsAttributes {
@@ -1269,6 +1279,7 @@ type AiSettings {
   ollama: OllamaSettings
   azure: AzureOpenaiSettings
   bedrock: BedrockAiSettings
+  vertex: VertexAiSettings
 }
 
 "OpenAI connection information"
@@ -1310,6 +1321,12 @@ type BedrockAiSettings {
 
   "the aws access key to use, can also use IRSA when console is self-hosted"
   accessKeyId: String
+}
+
+"Settings for usage of GCP VertexAI for LLMs"
+type VertexAiSettings {
+  "the vertex ai model to use"
+  model: String!
 }
 
 type ProjectConnection {

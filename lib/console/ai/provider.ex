@@ -1,6 +1,6 @@
 defmodule Console.AI.Provider do
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
-  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock}
+  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex}
 
   @type sender :: :system | :user | :assistant
   @type history :: [{sender, binary}]
@@ -40,6 +40,8 @@ defmodule Console.AI.Provider do
     do: {:ok, Azure.new(azure)}
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :bedrock, bedrock: %{} = bedrock}}),
     do: {:ok, Bedrock.new(bedrock)}
+  defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :vertex, vertex: %{} = vertex}}),
+    do: {:ok, Vertex.new(vertex)}
   defp client(_), do: {:error, "ai not enabled for this Plural Console instance"}
 
   defp add_preface(history, opts) do
