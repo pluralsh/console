@@ -360,14 +360,18 @@ query Clusters(
   tags
 }
 
-fragment ClusterTiny on Cluster {
+fragment ClusterMinimal on Cluster {
   id
   name
-  self
   provider {
     cloud
   }
   distro
+}
+
+fragment ClusterTiny on Cluster {
+  ...ClusterMinimal
+  self
   upgradePlan {
     compatibilities
     deprecations

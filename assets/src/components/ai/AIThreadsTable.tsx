@@ -4,12 +4,16 @@ import {
   ChatFilledIcon,
   ChatOutlineIcon,
   Chip,
+  ClusterIcon,
   Flex,
   IconFrame,
+  PeoplePlusIcon,
   PushPinFilledIcon,
   PushPinOutlineIcon,
   Spinner,
   Table,
+  theme,
+  TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
@@ -39,6 +43,7 @@ import styled, { useTheme } from 'styled-components'
 import { dayjsExtended as dayjs } from 'utils/datetime.ts'
 import { useChatbot } from './AIContext.tsx'
 import { AiThreadsTableActions } from './AiThreadsTableActions'
+import { ClusterProviderIcon } from '../utils/Provider.tsx'
 
 export function AllThreadsTable() {
   const threadsQuery = useFetchPaginatedData({
@@ -423,6 +428,29 @@ export const getInsightResourceName = (
   insight?.serviceComponent?.name ||
   insight?.stack?.name ||
   insight?.stackRun?.message
+
+function InsightResourceIcon(
+  insight: Nullable<AiInsightSummaryFragment>
+): ReactNode {
+  if (!!insight?.cluster)
+    return <ClusterProviderIcon cluster={insight.cluster} />
+
+  if (!!insight?.service)
+    return <ClusterProviderIcon cluster={insight.service.cluster} />
+
+  if (!!insight?.serviceComponent)
+    return (
+      <ClusterProviderIcon
+        cluster={insight.serviceComponent.service?.cluster}
+      />
+    )
+
+  //   insight?.clusterInsightComponent?.name ||
+  //   insight?.stack?.name ||
+  //   insight?.stackRun?.message
+
+  return <div>-</div>
+}
 
 export const threadTableColumns = [ThreadRow]
 export const pinTableColumns = [PinRow]
