@@ -1,4 +1,8 @@
-import { AnsibleIcon, StackIcon, TerraformIcon } from '@pluralsh/design-system'
+import {
+  AnsibleIcon,
+  StackIcon,
+  TerraformLogoIcon,
+} from '@pluralsh/design-system'
 import { StackType } from 'generated/graphql'
 
 export function StackTypeIcon({
@@ -20,7 +24,7 @@ export function StackTypeIcon({
       )
     case StackType.Terraform:
       return (
-        <TerraformIcon
+        <TerraformLogoIcon
           size={size}
           color={color}
         />
