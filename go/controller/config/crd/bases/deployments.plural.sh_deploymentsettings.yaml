@@ -251,8 +251,14 @@ spec:
                     description: Vertex holds configuration for using GCP VertexAI
                       to generate LLM insights
                     properties:
+                      location:
+                        description: The GCP region Vertex is queried from
+                        type: string
                       model:
                         description: The Vertex AI model to use
+                        type: string
+                      project:
+                        description: The GCP project you'll be using
                         type: string
                       serviceAccountJsonSecretRef:
                         description: An Service Account json file stored w/in a kubernetes
@@ -275,6 +281,9 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                    required:
+                    - location
+                    - project
                     type: object
                 type: object
               bindings:

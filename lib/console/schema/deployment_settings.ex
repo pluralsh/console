@@ -90,7 +90,9 @@ defmodule Console.Schema.DeploymentSettings do
 
       embeds_one :vertex, Vertex, on_replace: :update do
         field :service_account_json, EncryptedString
-        field :model, :string
+        field :model,                :string
+        field :project,              :string
+        field :location,             :string
       end
     end
 
@@ -190,7 +192,8 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp vertex_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model service_account_json)a)
+    |> cast(attrs, ~w(model service_account_json project location)a)
+    |> validate_required([:project, :location])
     |> validate_change(:service_account_json, fn :service_account_json, json ->
       case Jason.decode(json) do
         {:ok, _} -> []

@@ -65,6 +65,8 @@ export function initialSettingsAttributes(
               vertex: {
                 model: ai.vertex.model,
                 serviceAccountJson: '',
+                project: ai.vertex.project,
+                location: ai.vertex.location,
               },
             }
           : {}),
@@ -103,7 +105,7 @@ export function validateAttributes(
         settings.bedrock?.secretAccessKey
       )
     case AiProvider.Vertex:
-      return true
+      return !!(settings.vertex?.project && settings.vertex?.location)
     default:
       return false
   }
@@ -460,6 +462,32 @@ export function VertexSettings({
           value={settings?.model}
           onChange={(e) => {
             updateSettings({ model: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Project"
+        hint="The GCP Project ID"
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.project}
+          onChange={(e) => {
+            updateSettings({ project: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Location"
+        hint="The GCP Location you're querying from."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.location}
+          onChange={(e) => {
+            updateSettings({ location: e.currentTarget.value })
           }}
         />
       </FormField>

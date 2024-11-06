@@ -5710,12 +5710,20 @@ type VertexAiAttributes struct {
 	Model *string `json:"model,omitempty"`
 	// optional service account json to auth to the GCP vertex apis
 	ServiceAccountJSON *string `json:"serviceAccountJson,omitempty"`
+	// the gcp project id to use
+	Project string `json:"project"`
+	// the gcp region the model is hosted in
+	Location string `json:"location"`
 }
 
 // Settings for usage of GCP VertexAI for LLMs
 type VertexAiSettings struct {
 	// the vertex ai model to use
-	Model string `json:"model"`
+	Model *string `json:"model,omitempty"`
+	// the gcp project id to use
+	Project string `json:"project"`
+	// the gcp region the model
+	Location string `json:"location"`
 }
 
 type VerticalPodAutoscaler struct {

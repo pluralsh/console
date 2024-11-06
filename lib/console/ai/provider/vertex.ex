@@ -12,20 +12,27 @@ defmodule Console.AI.Vertex do
 
   require Logger
 
-  defstruct [:service_account_json, :model]
+  defstruct [:service_account_json, :model, :project, :location]
 
   @type t :: %__MODULE__{}
 
-  def new(opts), do: %__MODULE__{service_account_json: opts.service_account_json, model: opts.model}
+  def new(opts) do
+    %__MODULE__{
+      service_account_json: opts.service_account_json,
+      model: opts.model,
+      project: opts.project,
+      location: opts.location
+    }
+  end
 
   @doc """
   Generate a openai completion from
   """
   @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{model: model} = vertex, messages) do
+  def completion(%__MODULE__{} = vertex, messages) do
     with {:ok, %{token: token}} <- client(vertex) do
       V1.Connection.new(token)
-      |> Endpoints.aiplatform_endpoints_generate_content(model || @default_model, body: build_req(messages))
+      |> Endpoints.aiplatform_endpoints_generate_content(model(vertex), body: build_req(messages))
       |> case do
         {:ok, %Model.GoogleCloudAiplatformV1GenerateContentResponse{
           candidates: [
@@ -39,6 +46,9 @@ defmodule Console.AI.Vertex do
       end
     end
   end
+
+  defp model(%__MODULE__{model: m, project: project, location: location}),
+    do: "projects/#{project}/locations/#{location}/publishers/google/models/#{m || @default_model}"
 
   defp client(%__MODULE__{service_account_json: json}) when is_binary(json) do
     with {:ok, json} <- Jason.decode(json),

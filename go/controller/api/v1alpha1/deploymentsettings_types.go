@@ -278,6 +278,8 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		attr.Vertex = &console.VertexAiAttributes{
 			Model:              in.Vertex.Model,
 			ServiceAccountJSON: json,
+			Project:            in.Vertex.Project,
+			Location:           in.Vertex.Location,
 		}
 	case console.AiProviderBedrock:
 		if in.Bedrock == nil {
@@ -391,6 +393,16 @@ type VertexSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
+
+	// The GCP project you'll be using
+	//
+	// +kubebuilder:validation:Required
+	Project string `json:"project"`
+
+	// The GCP region Vertex is queried from
+	//
+	// +kubebuilder:validation:Required
+	Location string `json:"location"`
 
 	// An Service Account json file stored w/in a kubernetes secret to use for authentication to GCP
 	//
