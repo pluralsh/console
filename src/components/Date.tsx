@@ -1,6 +1,6 @@
 import { Span } from 'honorable'
 
-import moment from 'moment'
+import dayjs from 'dayjs'
 import styled from 'styled-components'
 
 const Wrap = styled.div({
@@ -19,13 +19,13 @@ const T = styled.span(({ theme }) => ({
   whiteSpace: 'nowrap',
 }))
 
-export default function Date({ date }: { date: moment.MomentInput }) {
+export default function Date({ date }: { date: dayjs.ConfigType }) {
   if (!date) return <Span>n/a</Span>
 
   return (
     <Wrap>
-      <D>{moment(date).format('ll')}</D>
-      <T>{moment(date).format('h:mm A')}</T>
+      <D>{dayjs(date).format('MMM D, YYYY')}</D>
+      <T>{dayjs(date).format('h:mm A')}</T>
     </Wrap>
   )
 }

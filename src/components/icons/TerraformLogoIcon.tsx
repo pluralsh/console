@@ -1,21 +1,20 @@
 import createIcon from './createIcon'
 
-export default createIcon(({ size, color }) => (
+export default createIcon(({ size, color, fullColor }) => (
   <svg
     width={size}
-    viewBox="0 0 15 17"
+    height={size}
+    viewBox="0 0 16 17"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
-      d="M14.0529 8.24839L9.73453 10.7393V5.7548L14.0529 3.2586V8.24839Z"
-      fill={color}
-      stroke={color}
-      strokeWidth="0.0549999"
+      d="M10.7065 10.784L15.0799 8.26134V3.20801L10.7065 5.73601V10.784Z"
+      fill={fullColor ? '#4040B2' : color}
     />
     <path
-      d="M4.85333 3.20929L9.22667 5.73729V10.7853L4.85333 8.25996M0 5.44129L4.37333 7.96663V2.91596L0 0.390625M4.85333 13.8653L9.22667 16.3906V11.34L4.85333 8.81463"
-      fill={color}
+      d="M5.85333 3.20832L10.2267 5.73632V10.7843L5.85333 8.25898M1 5.44032L5.37333 7.96565V2.91498L1 0.389648M5.85333 13.8643L10.2267 16.3896V11.339L5.85333 8.81365"
+      fill={fullColor ? '#5C4EE5' : color}
     />
   </svg>
 ))

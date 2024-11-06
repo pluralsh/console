@@ -123,7 +123,6 @@ export type {
 } from './components/AppList'
 export { AppList } from './components/AppList'
 export { default as Slider } from './components/Slider'
-export { default as Layer } from './components/Layer'
 export { Breadcrumbs } from './components/Breadcrumbs'
 export { DatePicker } from './components/DatePicker'
 export { Switch } from './components/Switch'

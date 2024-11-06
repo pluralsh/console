@@ -58,10 +58,11 @@ function ModalWrapperRef(
   )
 }
 
-const ContentSC = styled(Dialog.Content)({
+const ContentSC = styled(Dialog.Content)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   overflow: 'auto',
+  boxShadow: theme.boxShadows.modal,
   '@keyframes popIn': {
     from: { transform: 'scale(0.8)' },
     to: { transform: 'scale(1)' },
@@ -76,7 +77,7 @@ const ContentSC = styled(Dialog.Content)({
   '&[data-state="closed"]': {
     animation: `popOut ${ANIMATION_SPEED} ease-out`,
   },
-})
+}))
 
 const OverlaySC = styled(Dialog.Overlay)(({ theme }) => ({
   display: 'flex',

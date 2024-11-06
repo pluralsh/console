@@ -1,6 +1,6 @@
 import createIcon from './createIcon'
 
-export default createIcon(({ size }) => (
+export default createIcon(({ size, color, fullColor }) => (
   <svg
     width={size}
     height={size}
@@ -23,10 +23,10 @@ export default createIcon(({ size }) => (
         y2="7.00024"
         gradientUnits="userSpaceOnUse"
       >
-        <stop stopColor="#DF6440" />
+        <stop stopColor={fullColor ? '#DF6440' : color} />
         <stop
           offset="1"
-          stopColor="#E9973D"
+          stopColor={fullColor ? '#E9973D' : color}
         />
       </linearGradient>
       <clipPath id="clip0_4976_27653">
