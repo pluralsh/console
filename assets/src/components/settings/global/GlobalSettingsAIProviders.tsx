@@ -1,11 +1,15 @@
+import { FormField, Input } from '@pluralsh/design-system'
+import { FileDrop, FileDropFile } from 'components/utils/FileDrop.tsx'
+import { isEmpty } from 'lodash'
+import { useCallback, useState } from 'react'
+import { DropzoneOptions } from 'react-dropzone'
+import { useTheme } from 'styled-components'
 import {
   AiProvider,
   AiSettings,
   AiSettingsAttributes,
 } from '../../../generated/graphql.ts'
-import { FormField, Input } from '@pluralsh/design-system'
 import { InputRevealer } from '../../cd/providers/InputRevealer.tsx'
-import { useTheme } from 'styled-components'
 
 export function initialSettingsAttributes(
   ai: Nullable<AiSettings>
@@ -393,6 +397,10 @@ export function BedrockSettings({
   )
 }
 
+enum FileError {
+  InvalidFormat = 'Invalid file format. Expected JSON.',
+}
+
 export function VertexSettings({
   enabled,
   settings,
@@ -404,7 +412,41 @@ export function VertexSettings({
     update: NonNullable<Partial<AiSettingsAttributes['vertex']>>
   ) => void
 }) {
-  const theme = useTheme()
+  const [fileName, setFileName] = useState<string | undefined>()
+  const [fileError, setFileError] = useState<FileError>()
+
+  const readFile = useCallback<NonNullable<DropzoneOptions['onDrop']>>(
+    async (files) => {
+      if (isEmpty(files)) {
+        return
+      }
+      const file = files?.[0]
+
+      setFileName(file.name)
+
+      if (file?.type !== 'application/json') {
+        setFileError(FileError.InvalidFormat)
+        updateSettings({ serviceAccountJson: '' })
+
+        return
+      }
+      const content = await file.text()
+
+      try {
+        JSON.parse(content)
+      } catch (_) {
+        setFileError(FileError.InvalidFormat)
+        updateSettings({ serviceAccountJson: '' })
+
+        return
+      }
+
+      setFileError(undefined)
+      updateSettings({ serviceAccountJson: content })
+      setFileName(file.name)
+    },
+    [updateSettings]
+  )
 
   return (
     <>
@@ -423,16 +465,30 @@ export function VertexSettings({
       </FormField>
       <FormField
         label="Service account"
-        hint="Optional service account JSON to authenticate to the GCP Vertex AI APIs."
-        flex={1}
+        error={!!fileError}
+        hint={fileError}
       >
-        <InputRevealer
-          css={{ background: theme.colors['fill-two'] }}
-          disabled={!enabled}
-          value={settings?.serviceAccountJson ?? undefined}
-          onChange={(e) => {
-            updateSettings({ serviceAccountJson: e.currentTarget.value })
+        <FileDrop
+          accept={{ 'application/json': [] }}
+          onDrop={readFile}
+          messages={{
+            default: 'Drop your service account JSON here (optional)',
+            reject: 'File must be JSON format',
           }}
+          error={!!fileError}
+          files={
+            !!fileName && [
+              <FileDropFile
+                key="file"
+                label={fileName}
+                onClear={() => {
+                  setFileName(undefined)
+                  setFileError(undefined)
+                  updateSettings({ serviceAccountJson: '' })
+                }}
+              />,
+            ]
+          }
         />
       </FormField>
     </>
