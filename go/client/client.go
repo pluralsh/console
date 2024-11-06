@@ -189,6 +189,7 @@ type ConsoleClient interface {
 	DeleteUser(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteUser, error)
 	AddGroupMember(ctx context.Context, groupID string, userID string, interceptors ...clientv2.RequestInterceptor) (*AddGroupMember, error)
 	DeleteGroupMember(ctx context.Context, userID string, groupID string, interceptors ...clientv2.RequestInterceptor) (*DeleteGroupMember, error)
+	UpsertVulnerabilities(ctx context.Context, vulnerabilities []*VulnerabilityReportAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertVulnerabilities, error)
 }
 
 type Client struct {
@@ -14213,6 +14214,17 @@ func (t *DeleteGroupMember) GetDeleteGroupMember() *GroupMemberFragment {
 	return t.DeleteGroupMember
 }
 
+type UpsertVulnerabilities struct {
+	UpsertVulnerabilities *int64 "json:\"upsertVulnerabilities,omitempty\" graphql:\"upsertVulnerabilities\""
+}
+
+func (t *UpsertVulnerabilities) GetUpsertVulnerabilities() *int64 {
+	if t == nil {
+		t = &UpsertVulnerabilities{}
+	}
+	return t.UpsertVulnerabilities
+}
+
 const CreateClusterBackupDocument = `mutation CreateClusterBackup ($attributes: BackupAttributes!) {
 	createClusterBackup(attributes: $attributes) {
 		... ClusterBackupFragment
@@ -27521,6 +27533,28 @@ func (c *Client) DeleteGroupMember(ctx context.Context, userID string, groupID s
 	return &res, nil
 }
 
+const UpsertVulnerabilitiesDocument = `mutation UpsertVulnerabilities ($vulnerabilities: [VulnerabilityReportAttributes]) {
+	upsertVulnerabilities(vulnerabilities: $vulnerabilities)
+}
+`
+
+func (c *Client) UpsertVulnerabilities(ctx context.Context, vulnerabilities []*VulnerabilityReportAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertVulnerabilities, error) {
+	vars := map[string]any{
+		"vulnerabilities": vulnerabilities,
+	}
+
+	var res UpsertVulnerabilities
+	if err := c.Client.Post(ctx, "UpsertVulnerabilities", UpsertVulnerabilitiesDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 var DocumentOperationNames = map[string]string{
 	CreateClusterBackupDocument:                       "CreateClusterBackup",
 	GetClusterBackupDocument:                          "GetClusterBackup",
@@ -27701,4 +27735,5 @@ var DocumentOperationNames = map[string]string{
 	DeleteUserDocument:                                "DeleteUser",
 	AddGroupMemberDocument:                            "AddGroupMember",
 	DeleteGroupMemberDocument:                         "DeleteGroupMember",
+	UpsertVulnerabilitiesDocument:                     "UpsertVulnerabilities",
 }
