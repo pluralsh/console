@@ -17,6 +17,7 @@ fragment AiInsightSummary on AiInsight {
   id
   summary
   freshness
+  insertedAt
   updatedAt
   ...AiInsightContext
 }
@@ -61,6 +62,10 @@ fragment AiInsightContext on AiInsight {
     id
     message
     type
+    stack {
+      id
+      name
+    }
   }
 }
 
