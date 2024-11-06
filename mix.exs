@@ -113,6 +113,8 @@ defmodule Console.MixProject do
       {:swarm, "~> 3.0"},
       {:bandit, "~> 1.0"},
       {:yaml_elixir, "~> 2.9"},
+      {:google_api_ai_platform, "~> 0.22.0"},
+      {:goth, "~> 1.4"},
       {:poison, "~> 5.0", override: true},
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},

@@ -49,6 +49,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :ollama,    :ollama_attributes
     field :azure,     :azure_openai_attributes
     field :bedrock,   :bedrock_ai_attributes
+    field :vertex,    :vertex_ai_attributes
   end
 
   input_object :openai_settings_attributes do
@@ -78,6 +79,11 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :model_id,          non_null(:string), description: "the bedrock model id to use"
     field :access_key_id,     :string, description: "aws access key id to use, you can also use IRSA for self-hosted consoles"
     field :secret_access_key, :string, description: "aws secret access key to use, you can also use IRSA for self-hosted consoles"
+  end
+
+  input_object :vertex_ai_attributes do
+    field :model,                non_null(:string), description: "the vertex model id to use"
+    field :service_account_json, :string, description: "optional service account json to auth to the GCP vertex apis"
   end
 
   input_object :smtp_settings_attributes do
@@ -169,6 +175,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :ollama,    :ollama_settings
     field :azure,     :azure_openai_settings
     field :bedrock,   :bedrock_ai_settings
+    field :vertex,    :vertex_ai_settings
   end
 
   @desc "OpenAI connection information"
@@ -198,6 +205,11 @@ defmodule Console.GraphQl.Deployments.Settings do
   object :bedrock_ai_settings do
     field :model_id,   non_null(:string), description: "the bedrock model to use"
     field :access_key_id, :string, description: "the aws access key to use, can also use IRSA when console is self-hosted"
+  end
+
+  @desc "Settings for usage of GCP VertexAI for LLMs"
+  object :vertex_ai_settings do
+    field :model, non_null(:string), description: "the vertex ai model to use"
   end
 
   connection node_type: :project
