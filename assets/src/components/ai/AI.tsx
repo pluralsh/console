@@ -24,15 +24,21 @@ import { AIPinsTable } from './AIPinsTable.tsx'
 import { AIThreadsTable } from './AIThreadsTable.tsx'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider.tsx'
-
-export const breadcrumbs = [{ label: 'plural ai' }]
+import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
 
 export default function AI() {
-  useSetBreadcrumbs(breadcrumbs)
-
   const settings = useDeploymentSettings()
 
-  return settings.ai?.enabled ? <AIEnabled /> : <AiDisabled />
+  useSetBreadcrumbs([{ label: 'plural ai' }])
+
+  return (
+    <ResponsivePageFullWidth
+      noPadding
+      maxContentWidth={1080}
+    >
+      {settings.ai?.enabled ? <AIEnabled /> : <AiDisabled />}
+    </ResponsivePageFullWidth>
+  )
 }
 
 function AiDisabled() {
@@ -40,10 +46,8 @@ function AiDisabled() {
     <Flex
       direction="column"
       gap="medium"
-      padding="large"
-      marginBottom={30}
+      paddingBottom="large"
       height="100%"
-      overflow="hidden"
     >
       <Flex
         justify="space-between"
@@ -97,10 +101,8 @@ function AIEnabled() {
     <Flex
       direction="column"
       gap="medium"
-      padding="large"
-      marginBottom={30}
+      paddingBottom="large"
       height="100%"
-      overflow="hidden"
     >
       <Header />
       <Flex
