@@ -55,10 +55,12 @@ fragment AiInsightContext on AiInsight {
   stack {
     id
     name
+    type
   }
   stackRun {
     id
     message
+    type
   }
 }
 
