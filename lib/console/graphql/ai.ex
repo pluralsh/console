@@ -106,6 +106,8 @@ defmodule Console.GraphQl.AI do
     field :namespace, :string
     field :name,      non_null(:string)
 
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+
     @desc "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
     field :resource, :kubernetes_unstructured do
       resolve &AI.raw_resource/3
