@@ -123,7 +123,7 @@ export function AIThreadsTableEntry({
               ? (insight?.summary?.substring(0, 250) ?? '')
               : thread!.summary
           }
-          second={<TableEntryResource insight={insight} />}
+          second={<TableEntrySubheader insight={insight} />}
           firstPartialType="body1Bold"
         />
       </Flex>
@@ -210,7 +210,7 @@ function TableEntryIcon({
   )
 }
 
-export function TableEntryResource({
+export function TableEntrySubheader({
   insight,
 }: {
   insight: Nullable<AiInsightSummaryFragment>
