@@ -13,6 +13,7 @@ defmodule Console.Schema.PrAutomation do
 
   defenum MatchStrategy, any: 0, all: 1, recursive: 2
   defenum Role, cluster: 0, service: 1, pipeline: 2, update: 3, upgrade: 4
+  defenum ListMerge, overwrite: 0, append: 1
 
   schema "pr_automations" do
     field :identifier,       :string
@@ -54,9 +55,10 @@ defmodule Console.Schema.PrAutomation do
       end
 
       embeds_many :yaml_overlays, YamlOverlay, on_replace: :delete do
-        field :file,      :string
-        field :yaml,      :string
-        field :templated, :boolean, default: true
+        field :file,       :string
+        field :yaml,       :string
+        field :templated,  :boolean,  default: true
+        field :list_merge, ListMerge, default: :append
       end
     end
 
@@ -163,7 +165,7 @@ defmodule Console.Schema.PrAutomation do
   end
 
   defp yaml_overlay_cs(model, attrs) do
-    cast(model, attrs, ~w(yaml file templated)a)
+    cast(model, attrs, ~w(yaml file templated list_merge)a)
   end
 
   defp confirmation_changeset(model, attrs) do

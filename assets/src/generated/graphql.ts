@@ -3049,6 +3049,11 @@ export type LicenseStatus = {
   secrets?: Maybe<Scalars['Map']['output']>;
 };
 
+export enum ListMerge {
+  Append = 'APPEND',
+  Overwrite = 'OVERWRITE'
+}
+
 export type LoadBalancerIngressStatus = {
   __typename?: 'LoadBalancerIngressStatus';
   hostname?: Maybe<Scalars['String']['output']>;
@@ -9536,6 +9541,8 @@ export type YamlOverlay = {
   __typename?: 'YamlOverlay';
   /** the filename to apply this yaml overlay on */
   file: Scalars['String']['output'];
+  /** configure how list merge should be performed */
+  listMerge?: Maybe<ListMerge>;
   /** whether you want to apply liquid templating on the yaml before compiling */
   templated?: Maybe<Scalars['Boolean']['output']>;
   yaml: Scalars['String']['output'];
@@ -9545,6 +9552,8 @@ export type YamlOverlay = {
 export type YamlOverlayAttributes = {
   /** the filename to apply this yaml overlay on */
   file: Scalars['String']['input'];
+  /** configure how list merge should be performed */
+  listMerge?: InputMaybe<ListMerge>;
   /** whether you want to apply liquid templating on the yaml before compiling */
   templated?: InputMaybe<Scalars['Boolean']['input']>;
   yaml: Scalars['String']['input'];

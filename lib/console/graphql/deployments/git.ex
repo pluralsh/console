@@ -16,6 +16,7 @@ defmodule Console.GraphQl.Deployments.Git do
   ecto_enum :git_health, GitRepository.Health
   ecto_enum :scm_type, ScmConnection.Type
   ecto_enum :match_strategy, PrAutomation.MatchStrategy
+  ecto_enum :list_merge, PrAutomation.ListMerge
   ecto_enum :helm_auth_provider, HelmRepository.Provider
   ecto_enum :pr_role, PrAutomation.Role
   ecto_enum :pr_status, PullRequest.Status
@@ -229,9 +230,10 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "a description of a yaml-merge operation on a file"
   input_object :yaml_overlay_attributes do
-    field :file,      non_null(:string), description: "the filename to apply this yaml overlay on"
-    field :yaml,      non_null(:string)
-    field :templated, :boolean,
+    field :file,       non_null(:string), description: "the filename to apply this yaml overlay on"
+    field :yaml,       non_null(:string)
+    field :list_merge, :list_merge, description: "configure how list merge should be performed"
+    field :templated,  :boolean,
       description: "whether you want to apply liquid templating on the yaml before compiling"
   end
 
@@ -485,6 +487,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :file,        non_null(:string), description: "the filename to apply this yaml overlay on"
     field :templated,   :boolean,
       description: "whether you want to apply liquid templating on the yaml before compiling"
+    field :list_merge,  :list_merge, description: "configure how list merge should be performed"
   end
 
   @desc "templated files used to add new files to a given pr"

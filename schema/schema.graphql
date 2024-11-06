@@ -5009,6 +5009,11 @@ enum MatchStrategy {
   RECURSIVE
 }
 
+enum ListMerge {
+  OVERWRITE
+  APPEND
+}
+
 enum HelmAuthProvider {
   BASIC
   BEARER
@@ -5378,6 +5383,9 @@ input YamlOverlayAttributes {
 
   yaml: String!
 
+  "configure how list merge should be performed"
+  listMerge: ListMerge
+
   "whether you want to apply liquid templating on the yaml before compiling"
   templated: Boolean
 }
@@ -5710,6 +5718,9 @@ type YamlOverlay {
 
   "whether you want to apply liquid templating on the yaml before compiling"
   templated: Boolean
+
+  "configure how list merge should be performed"
+  listMerge: ListMerge
 }
 
 "templated files used to add new files to a given pr"

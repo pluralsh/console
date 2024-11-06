@@ -365,7 +365,12 @@ type YamlOverlay struct {
 
 	// Whether you want to apply templating to the yaml blob before overlaying
 	// +kubebuilder:validation:Optional
-	Templated *bool `json:"templated"`
+	Templated *bool `json:"templated,omitempty"`
+
+	// How you want list merge to be performed, defaults to OVERWRITE
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:Enum=OVERWRITE;APPEND
+	ListMerge *console.ListMerge `json:"listMerge,omitempty"`
 }
 
 func (in *YamlOverlay) Attributes() *console.YamlOverlayAttributes {
@@ -373,6 +378,7 @@ func (in *YamlOverlay) Attributes() *console.YamlOverlayAttributes {
 		Yaml:      in.Yaml,
 		File:      in.File,
 		Templated: in.Templated,
+		ListMerge: in.ListMerge,
 	}
 }
 
