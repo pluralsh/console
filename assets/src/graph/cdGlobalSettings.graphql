@@ -32,6 +32,8 @@ fragment AiSettings on AiSettings {
   }
   vertex {
     model
+    project
+    location
   }
   enabled
   provider

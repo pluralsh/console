@@ -1147,10 +1147,16 @@ input BedrockAiAttributes {
 
 input VertexAiAttributes {
   "the vertex model id to use"
-  model: String!
+  model: String
 
   "optional service account json to auth to the GCP vertex apis"
   serviceAccountJson: String
+
+  "the gcp project id to use"
+  project: String!
+
+  "the gcp region the model is hosted in"
+  location: String!
 }
 
 input SmtpSettingsAttributes {
@@ -1326,7 +1332,13 @@ type BedrockAiSettings {
 "Settings for usage of GCP VertexAI for LLMs"
 type VertexAiSettings {
   "the vertex ai model to use"
-  model: String!
+  model: String
+
+  "the gcp project id to use"
+  project: String!
+
+  "the gcp region the model"
+  location: String!
 }
 
 type ProjectConnection {

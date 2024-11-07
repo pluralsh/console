@@ -63,17 +63,25 @@ defmodule Console.Deployments.Helm.AgentCache do
     path = Path.join(cache.dir, "#{chart}.#{vsn}.tgz")
     tmp = Briefly.create!()
     with {:ok, client, url, digest} <- Client.chart(client, cache.index, chart, vsn),
+         {:cache, {_, false}} <- {:cache, check_digest(cache, chart, vsn, digest)},
          {:ok, _} <- Client.download(client, url, File.stream!(tmp)),
-        #  _ <- File.read!(tmp) |> IO.puts(),
          :ok <- Utils.clean_chart(tmp, path, chart),
          line <- Line.new(path, chart, vsn, digest),
          :ok <- File.rm(tmp) do
       cache = %{cache | client: client}
       {:ok, line, put_in(cache.cache[{chart, vsn}], line)}
     else
+      {:cache, {line, true}} -> {:ok, line, cache}
       err ->
         File.rm(tmp)
         err
+    end
+  end
+
+  defp check_digest(%__MODULE__{cache: %{} = cache}, chart, vsn, digest) do
+    case cache[{chart, vsn}] do
+      %Line{digest: ^digest} = line -> {line, true}
+      l -> {l, false}
     end
   end
 

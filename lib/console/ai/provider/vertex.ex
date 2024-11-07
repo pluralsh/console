@@ -3,30 +3,36 @@ defmodule Console.AI.Vertex do
   Implements our basic llm behaviour against the OpenAI api
   """
   @behaviour Console.AI.Provider
-  use Nebulex.Caching
   alias GoogleApi.AIPlatform.V1
   alias GoogleApi.AIPlatform.V1.Api.Endpoints
   alias GoogleApi.AIPlatform.V1.Model
+  alias Console.AI.GothManager
 
-  @cache_adapter Console.conf(:cache_adapter)
-  @ttl :timer.minutes(5)
+  @default_model "gemini-1.5-flash-002"
 
   require Logger
 
-  defstruct [:service_account_json, :model]
+  defstruct [:service_account_json, :model, :project, :location]
 
   @type t :: %__MODULE__{}
 
-  def new(opts), do: %__MODULE__{service_account_json: opts.service_account_json, model: opts.model}
+  def new(opts) do
+    %__MODULE__{
+      service_account_json: opts.service_account_json,
+      model: opts.model,
+      project: opts.project,
+      location: opts.location
+    }
+  end
 
   @doc """
   Generate a openai completion from
   """
   @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
-  def completion(%__MODULE__{model: model} = vertex, messages) do
+  def completion(%__MODULE__{} = vertex, messages) do
     with {:ok, %{token: token}} <- client(vertex) do
       V1.Connection.new(token)
-      |> Endpoints.aiplatform_endpoints_generate_content(model, body: build_req(messages))
+      |> Endpoints.aiplatform_endpoints_generate_content(model(vertex), body: build_req(messages))
       |> case do
         {:ok, %Model.GoogleCloudAiplatformV1GenerateContentResponse{
           candidates: [
@@ -41,14 +47,14 @@ defmodule Console.AI.Vertex do
     end
   end
 
-  @decorate cacheable(cache: @cache_adapter, key: :vertex_ai, opts: [ttl: @ttl], match: &cache?/1)
-  defp client(%__MODULE__{} = client) do
-    case client do
-      %__MODULE__{service_account_json: json} when is_binary(json) ->
-        Goth.Token.fetch(source: {:service_account, json})
-      _ -> Goth.Token.fetch([])
-    end
+  defp model(%__MODULE__{model: m, project: project, location: location}),
+    do: "projects/#{project}/locations/#{location}/publishers/google/models/#{m || @default_model}"
+
+  defp client(%__MODULE__{service_account_json: json}) when is_binary(json) do
+    with {:ok, json} <- Jason.decode(json),
+      do: GothManager.fetch(source: {:service_account, json})
   end
+  defp client(_), do: GothManager.fetch([])
 
   defp build_req(history) do
     {system, contents} = split(history)
@@ -78,17 +84,8 @@ defmodule Console.AI.Vertex do
     |> Enum.join("\n")
   end
 
-  defp fmt_err({:error, %{} = err}) do
-    err = Poison.encode!(err)
-    Logger.error "vertex ai error: #{err}"
-    err
-  end
-
   defp fmt_err({:error, err}) do
     Logger.error "unknown vertex ai error: #{inspect(err)}"
     "unknown"
   end
-
-  defp cache?({:ok, _}), do: true
-  defp cache?(_), do: false
 end

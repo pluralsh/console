@@ -4208,9 +4208,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pluralsh/design-system@npm:3.77.0":
-  version: 3.77.0
-  resolution: "@pluralsh/design-system@npm:3.77.0"
+"@pluralsh/design-system@npm:3.78.0":
+  version: 3.78.0
+  resolution: "@pluralsh/design-system@npm:3.78.0"
   dependencies:
     "@floating-ui/react-dom-interactions": 0.13.3
     "@loomhq/loom-embed": 1.5.0
@@ -4229,11 +4229,11 @@ __metadata:
     babel-plugin-styled-components: 2.1.4
     chroma-js: 2.4.2
     classnames: 2.3.2
+    dayjs: 1.11.13
     highlight.js: 11.9.0
     honorable-recipe-mapper: 0.2.0
     immer: 10.0.3
     lodash-es: 4.17.21
-    moment: 2.29.4
     react-animate-height: 3.2.3
     react-aria: 3.34.3
     react-embed: 3.7.0
@@ -4256,7 +4256,7 @@ __metadata:
     react-dom: ">=18.3.1"
     react-transition-group: ">=4.4.5"
     styled-components: ">=6.1.13"
-  checksum: 935db413d4fa0316030316e396a326b9adfe0257c5c37919e6087d9848da778b22e893cfd58c9bec42d5782729b8591397b3beebf8f2edd48a2d7c91242273b6
+  checksum: 12f1dd6f2e43f664ef6f39d28c353de024171758fa5454f4617e10a1d4cada516d68d2bd8fcac2b0812ff7975af1a9a61b22ef8881910698dbc91cbb84698002
   languageName: node
   linkType: hard
 
@@ -10164,7 +10164,7 @@ __metadata:
     "@nivo/pie": 0.87.0
     "@nivo/radial-bar": 0.87.0
     "@nivo/tooltip": 0.87.0
-    "@pluralsh/design-system": 3.77.0
+    "@pluralsh/design-system": 3.78.0
     "@pluralsh/eslint-config-typescript": 2.5.150
     "@pluralsh/stylelint-config": 2.0.10
     "@react-hooks-library/core": 0.6.0

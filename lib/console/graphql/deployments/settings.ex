@@ -82,8 +82,10 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :vertex_ai_attributes do
-    field :model,                non_null(:string), description: "the vertex model id to use"
+    field :model,                :string, description: "the vertex model id to use"
     field :service_account_json, :string, description: "optional service account json to auth to the GCP vertex apis"
+    field :project,              non_null(:string), description: "the gcp project id to use"
+    field :location,             non_null(:string), description: "the gcp region the model is hosted in"
   end
 
   input_object :smtp_settings_attributes do
@@ -209,7 +211,9 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for usage of GCP VertexAI for LLMs"
   object :vertex_ai_settings do
-    field :model, non_null(:string), description: "the vertex ai model to use"
+    field :model,    :string, description: "the vertex ai model to use"
+    field :project,  non_null(:string), description: "the gcp project id to use"
+    field :location, non_null(:string), description: "the gcp region the model"
   end
 
   connection node_type: :project

@@ -1,11 +1,15 @@
+import { FormField, Input } from '@pluralsh/design-system'
+import { FileDrop, FileDropFile } from 'components/utils/FileDrop.tsx'
+import { isEmpty } from 'lodash'
+import { useCallback, useState } from 'react'
+import { DropzoneOptions } from 'react-dropzone'
+import { useTheme } from 'styled-components'
 import {
   AiProvider,
   AiSettings,
   AiSettingsAttributes,
 } from '../../../generated/graphql.ts'
-import { FormField, Input } from '@pluralsh/design-system'
 import { InputRevealer } from '../../cd/providers/InputRevealer.tsx'
-import { useTheme } from 'styled-components'
 
 export function initialSettingsAttributes(
   ai: Nullable<AiSettings>
@@ -61,6 +65,8 @@ export function initialSettingsAttributes(
               vertex: {
                 model: ai.vertex.model,
                 serviceAccountJson: '',
+                project: ai.vertex.project,
+                location: ai.vertex.location,
               },
             }
           : {}),
@@ -99,7 +105,7 @@ export function validateAttributes(
         settings.bedrock?.secretAccessKey
       )
     case AiProvider.Vertex:
-      return true
+      return !!(settings.vertex?.project && settings.vertex?.location)
     default:
       return false
   }
@@ -393,6 +399,10 @@ export function BedrockSettings({
   )
 }
 
+enum FileError {
+  InvalidFormat = 'Invalid file format. Expected JSON.',
+}
+
 export function VertexSettings({
   enabled,
   settings,
@@ -404,7 +414,41 @@ export function VertexSettings({
     update: NonNullable<Partial<AiSettingsAttributes['vertex']>>
   ) => void
 }) {
-  const theme = useTheme()
+  const [fileName, setFileName] = useState<string | undefined>()
+  const [fileError, setFileError] = useState<FileError>()
+
+  const readFile = useCallback<NonNullable<DropzoneOptions['onDrop']>>(
+    async (files) => {
+      if (isEmpty(files)) {
+        return
+      }
+      const file = files?.[0]
+
+      setFileName(file.name)
+
+      if (file?.type !== 'application/json') {
+        setFileError(FileError.InvalidFormat)
+        updateSettings({ serviceAccountJson: '' })
+
+        return
+      }
+      const content = await file.text()
+
+      try {
+        JSON.parse(content)
+      } catch (_) {
+        setFileError(FileError.InvalidFormat)
+        updateSettings({ serviceAccountJson: '' })
+
+        return
+      }
+
+      setFileError(undefined)
+      updateSettings({ serviceAccountJson: content })
+      setFileName(file.name)
+    },
+    [updateSettings]
+  )
 
   return (
     <>
@@ -422,17 +466,57 @@ export function VertexSettings({
         />
       </FormField>
       <FormField
-        label="Service account"
-        hint="Optional service account JSON to authenticate to the GCP Vertex AI APIs."
+        label="Project"
+        hint="The GCP Project ID"
         flex={1}
       >
-        <InputRevealer
-          css={{ background: theme.colors['fill-two'] }}
+        <Input
           disabled={!enabled}
-          value={settings?.serviceAccountJson ?? undefined}
+          value={settings?.project}
           onChange={(e) => {
-            updateSettings({ serviceAccountJson: e.currentTarget.value })
+            updateSettings({ project: e.currentTarget.value })
           }}
+        />
+      </FormField>
+      <FormField
+        label="Location"
+        hint="The GCP Location you're querying from."
+        flex={1}
+      >
+        <Input
+          disabled={!enabled}
+          value={settings?.location}
+          onChange={(e) => {
+            updateSettings({ location: e.currentTarget.value })
+          }}
+        />
+      </FormField>
+      <FormField
+        label="Service account"
+        error={!!fileError}
+        hint={fileError}
+      >
+        <FileDrop
+          accept={{ 'application/json': [] }}
+          onDrop={readFile}
+          messages={{
+            default: 'Drop your service account JSON here (optional)',
+            reject: 'File must be JSON format',
+          }}
+          error={!!fileError}
+          files={
+            !!fileName && [
+              <FileDropFile
+                key="file"
+                label={fileName}
+                onClear={() => {
+                  setFileName(undefined)
+                  setFileError(undefined)
+                  updateSettings({ serviceAccountJson: '' })
+                }}
+              />,
+            ]
+          }
         />
       </FormField>
     </>
