@@ -114,7 +114,7 @@ defmodule Console.MixProject do
       {:bandit, "~> 1.0"},
       {:yaml_elixir, "~> 2.9"},
       {:google_api_ai_platform, "~> 0.22.0"},
-      {:goth, "~> 1.4", git: "https://github.com/pluralsh/goth.git", branch: "plrl-cleanup"},
+      {:goth, "~> 1.4", git: "https://github.com/pluralsh/goth.git", branch: "plrl-cleanup", commit: "4958159d1e9acec2154590ecacc732ecd58f8312"},
       {:poison, "~> 5.0", override: true},
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},
