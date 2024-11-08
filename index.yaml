@@ -2547,6 +2547,33 @@ entries:
     version: 0.1.1
   console-rapid:
   - apiVersion: v2
+    appVersion: 0.10.37
+    created: "2024-11-08T21:46:30.857834245Z"
+    dependencies:
+    - name: kas
+      repository: file://../../plural/helm/kas
+      version: 0.1.0
+    - condition: controller.enabled
+      name: controller
+      repository: file://../controller
+      version: 0.0.89
+    - alias: dashboard
+      condition: dashboard.enabled
+      name: kubernetes-dashboard
+      repository: https://kubernetes.github.io/dashboard
+      version: 7.10.0
+    - condition: flux2.enabled
+      name: flux2
+      repository: https://fluxcd-community.github.io/helm-charts
+      version: 2.11.1
+    description: rapid channel chart for the plural console (used for testing)
+    digest: 3feeae75e6e919072ffb3adb6f70529e7b2dc1aaa2d85edf621924cf6e182332
+    name: console-rapid
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.68/console-rapid-0.3.68.tgz
+    version: 0.3.68
+  - apiVersion: v2
     appVersion: 0.10.36
     created: "2024-11-08T20:15:54.836878593Z"
     dependencies:
@@ -3300,6 +3327,16 @@ entries:
     - https://github.com/pluralsh/console/releases/download/console-rapid-chart-v0.3.40/console-rapid-0.3.40.tgz
     version: 0.3.40
   controller:
+  - apiVersion: v2
+    appVersion: 0.10.37
+    created: "2024-11-08T21:46:31.076672729Z"
+    description: deploys the deployment operator for plural cd
+    digest: bcb4b9d88a95f3e229a75969c8c12c067db6de77ca4647bca80c05e3853be5c0
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.89/controller-0.0.89.tgz
+    version: 0.0.89
   - apiVersion: v2
     appVersion: 0.10.36
     created: "2024-11-08T20:15:55.022715431Z"
@@ -4255,4 +4292,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-11-08T20:15:55.023216412Z"
+generated: "2024-11-08T21:46:31.077179555Z"
