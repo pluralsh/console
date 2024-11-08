@@ -1,7 +1,7 @@
 defmodule Console.Retrier do
   require Logger
 
-  defstruct [:retry, :res, max: 3, pause: 100]
+  defstruct [:res, retry: 0, max: 3, pause: 100]
 
   def new(opts), do: struct(__MODULE__, opts)
 
@@ -26,5 +26,5 @@ defmodule Console.Retrier do
     end
   end
 
-  defp jitter(pause), do: :rand.uniform(floor(pause / 2)) - :timer.seconds(floor(pause / 4))
+  defp jitter(pause), do: :rand.uniform(floor(pause / 2)) - floor(pause / 4)
 end
