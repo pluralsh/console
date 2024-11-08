@@ -16,9 +16,14 @@ import {
 interface AIPinButtonProps {
   insight?: Nullable<AiInsightFragment>
   thread?: Nullable<ChatThreadTinyFragment>
+  size?: 'medium' | 'large'
 }
 
-export default function AIPinButton({ insight, thread }: AIPinButtonProps) {
+export default function AIPinButton({
+  insight,
+  thread,
+  size = 'large',
+}: AIPinButtonProps) {
   const name =
     insight?.text?.substring(0, 250) ?? thread?.summary?.substring(0, 250) ?? ''
   const pinIDs = thread
@@ -65,7 +70,7 @@ export default function AIPinButton({ insight, thread }: AIPinButtonProps) {
     <IconFrame
       clickable
       type="secondary"
-      size="large"
+      size={size}
       tooltip={isPinned ? 'Unpin' : 'Pin to dashboard'}
       onClick={handleClick}
       icon={

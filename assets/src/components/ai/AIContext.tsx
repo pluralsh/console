@@ -151,13 +151,13 @@ export function useChatbot() {
       setCurrentInsight(insight)
       setOpen(true)
     },
-    // goToInsightURL: (insight: AiInsightSummaryFragment) => {
-    //   navigate(getInsightURL(insight))
-    // },
     goToThreadList: () => {
       setCurrentThread(null)
       setCurrentInsight(null)
       setOpen(true)
+    },
+    closeChatbot: () => {
+      setOpen(false)
     },
     fullscreen,
     setFullscreen,
@@ -207,7 +207,3 @@ The user is not necessarily an expert in the domain, so please provide as much d
 and evidence as is necessary to explain what issue they're facing. Give a descriptive overview of the resource they are mentioning
 and any guidance on how they can learn more about how it works.`,
 } as const satisfies Record<AIVerbosityLevel, string>
-
-// function getInsightURL(insightContext: AiInsightContextFragment) {
-//   // TODO
-// }

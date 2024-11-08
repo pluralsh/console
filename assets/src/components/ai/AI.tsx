@@ -20,19 +20,29 @@ import {
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GLOBAL_SETTINGS_ABS_PATH } from '../../routes/settingsRoutesConst.tsx'
-import { AIPinsTable } from './AIPinsTable.tsx'
-import { AIThreadsTable } from './AIThreadsTable.tsx'
+
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { GlobalSettingsAiProvider } from 'components/settings/global/GlobalSettingsAiProvider.tsx'
+import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap.tsx'
+import { AITable } from './AITable.tsx'
+import { sortThreadsOrPins } from './AITableEntry.tsx'
 
 export const breadcrumbs = [{ label: 'plural ai' }]
 
 export default function AI() {
-  useSetBreadcrumbs(breadcrumbs)
-
   const settings = useDeploymentSettings()
 
-  return settings.ai?.enabled ? <AIEnabled /> : <AiDisabled />
+  useSetBreadcrumbs(breadcrumbs)
+
+  return (
+    <ResponsivePageFullWidth
+      noPadding
+      maxContentWidth={1080}
+    >
+      {settings.ai?.enabled ? <AIEnabled /> : <AiDisabled />}
+    </ResponsivePageFullWidth>
+  )
 }
 
 function AiDisabled() {
@@ -40,10 +50,8 @@ function AiDisabled() {
     <Flex
       direction="column"
       gap="medium"
-      padding="large"
-      marginBottom={30}
+      paddingBottom="large"
       height="100%"
-      overflow="hidden"
     >
       <Flex
         justify="space-between"
@@ -76,6 +84,7 @@ function AIEnabled() {
     () =>
       pinsQuery.data?.aiPins?.edges
         ?.map((edge) => edge?.node)
+        ?.sort(sortThreadsOrPins)
         ?.filter((pin): pin is AiPinFragment => Boolean(pin)) ?? [],
     [pinsQuery.data?.aiPins?.edges]
   )
@@ -84,6 +93,7 @@ function AIEnabled() {
     () =>
       threadsQuery.data?.chatThreads?.edges
         ?.map((edge) => edge?.node)
+        ?.sort(sortThreadsOrPins)
         ?.filter(
           (thread) => !filteredPins.some((pin) => pin.thread?.id === thread?.id)
         )
@@ -97,22 +107,21 @@ function AIEnabled() {
     <Flex
       direction="column"
       gap="medium"
-      padding="large"
-      marginBottom={30}
+      paddingBottom="48px"
       height="100%"
       overflow="hidden"
     >
       <Header />
       <Flex
         direction="column"
-        gap="xlarge"
+        gap="large"
         height="100%"
       >
         <PinnedSection
           filteredPins={filteredPins}
           pinsQuery={pinsQuery}
         />
-        <AllThreadsSection
+        <ThreadsSection
           filteredThreads={filteredThreads}
           threadsQuery={threadsQuery}
         />
@@ -155,24 +164,24 @@ function PinnedSection({
   return (
     <Flex
       direction="column"
-      gap="medium"
+      gap="small"
       maxHeight="40%"
     >
       <StackedText
-        first="Pinned"
-        second="Pin important threads and insights."
+        first="Pins"
         firstPartialType="subtitle2"
-        secondPartialType="body2"
       />
-      <AIPinsTable
-        filteredPins={filteredPins}
-        pinsQuery={pinsQuery}
-      />
+      <FullHeightTableWrap>
+        <AITable
+          query={pinsQuery}
+          rowData={filteredPins}
+        />
+      </FullHeightTableWrap>
     </Flex>
   )
 }
 
-function AllThreadsSection({
+function ThreadsSection({
   filteredThreads,
   threadsQuery,
 }: {
@@ -188,13 +197,15 @@ function AllThreadsSection({
       paddingBottom={36} // this is a magic number to make the table fit
     >
       <StackedText
-        first="All threads"
+        first="Other threads"
         firstPartialType="subtitle2"
       />
-      <AIThreadsTable
-        filteredThreads={filteredThreads}
-        threadsQuery={threadsQuery}
-      />
+      <FullHeightTableWrap>
+        <AITable
+          query={threadsQuery}
+          rowData={filteredThreads}
+        />
+      </FullHeightTableWrap>
     </Flex>
   )
 }

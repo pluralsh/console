@@ -17,6 +17,7 @@ fragment AiInsightSummary on AiInsight {
   id
   summary
   freshness
+  insertedAt
   updatedAt
   ...AiInsightContext
 }
@@ -25,6 +26,10 @@ fragment AiInsightContext on AiInsight {
   cluster {
     id
     name
+    distro
+    provider {
+      cloud
+    }
   }
   clusterInsightComponent {
     id
@@ -33,18 +38,34 @@ fragment AiInsightContext on AiInsight {
   service {
     id
     name
+    cluster {
+      ...ClusterMinimal
+    }
   }
   serviceComponent {
     id
     name
+    service {
+      id
+      name
+      cluster {
+        ...ClusterMinimal
+      }
+    }
   }
   stack {
     id
     name
+    type
   }
   stackRun {
     id
     message
+    type
+    stack {
+      id
+      name
+    }
   }
 }
 
