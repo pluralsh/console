@@ -23,7 +23,7 @@ defmodule Console.AI.Chat do
 
   @summary """
   The following is a chat log about a topic in DevOps, focusing primarily on kubernetes and infrastructure as code issues.  Provide a single sentence
-  easily understandable title for the conversation with at most 10 words. The title should beunderstandable without context of the conversation.
+  easily understandable title for the conversation with at most 8 words. The title should be understandable without context of the conversation.
   """
 
   @chat """
