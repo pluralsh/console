@@ -8,10 +8,12 @@ import { StackType } from 'generated/graphql'
 export function StackTypeIcon({
   stackType,
   size = 16,
+  fullColor = false,
   color,
 }: {
   stackType: Nullable<StackType>
   size?: number
+  fullColor?: boolean
   color?: string
 }) {
   switch (stackType) {
@@ -19,6 +21,7 @@ export function StackTypeIcon({
       return (
         <AnsibleIcon
           size={size}
+          fullColor={fullColor}
           color={color}
         />
       )
@@ -26,6 +29,7 @@ export function StackTypeIcon({
       return (
         <TerraformLogoIcon
           size={size}
+          fullColor={fullColor}
           color={color}
         />
       )
@@ -33,6 +37,7 @@ export function StackTypeIcon({
       return (
         <StackIcon
           size={size}
+          fullColor={fullColor}
           color={color}
         />
       )

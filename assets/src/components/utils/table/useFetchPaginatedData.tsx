@@ -32,6 +32,7 @@ type FetchDataOptions<TQueryType, TVariables extends OperationVariables> = {
   keyPath: string[]
   pollInterval?: number
   errorPolicy?: ErrorPolicy
+  skip?: boolean
 }
 
 export type FetchPaginatedDataResult<TQueryType> = {
@@ -72,6 +73,7 @@ export function useFetchPaginatedData<
       first: options.pageSize ?? DEFAULT_PAGE_SIZE,
       ...variables,
     },
+    skip: options.skip,
     errorPolicy: options.errorPolicy,
     fetchPolicy: 'cache-and-network',
     // Important so loading will be updated on fetchMore to send to Table

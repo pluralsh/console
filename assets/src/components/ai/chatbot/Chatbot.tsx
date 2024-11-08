@@ -3,20 +3,27 @@ import { ChatOutlineIcon, ModalWrapper } from '@pluralsh/design-system'
 import * as Dialog from '@radix-ui/react-dialog'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
-import { AiInsightFragment, ChatThreadFragment } from 'generated/graphql'
-import { ComponentPropsWithRef } from 'react'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap.tsx'
+import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
+import {
+  AiInsightFragment,
+  ChatThreadFragment,
+  useChatThreadsQuery,
+} from 'generated/graphql'
+import { ComponentPropsWithRef, useMemo } from 'react'
 import { VisuallyHidden } from 'react-aria'
 import styled, { useTheme } from 'styled-components'
-import { useChatbotContext } from '../AIContext.tsx'
-import { AllThreadsTable } from '../AIThreadsTable.tsx'
+import { useChatbot, useChatbotContext } from '../AIContext.tsx'
+import { AITable } from '../AITable.tsx'
+import { getInsightPathInfo, sortThreadsOrPins } from '../AITableEntry.tsx'
 import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
+import { useLocation } from 'react-router-dom'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
-  onClose: () => void
   currentThread?: Nullable<ChatThreadFragment>
   currentInsight?: Nullable<AiInsightFragment>
 }
@@ -41,7 +48,6 @@ export function Chatbot() {
       <ChatbotPanel
         fullscreen={fullscreen}
         open={open}
-        onClose={() => setOpen(false)}
         currentThread={currentThread}
         currentInsight={currentInsight}
       />
@@ -52,12 +58,12 @@ export function Chatbot() {
 export function ChatbotPanel({
   open,
   fullscreen = false,
-  onClose,
   ...props
 }: {
   open: boolean
 } & ChatbotPanelInnerProps) {
   const theme = useTheme()
+  const { closeChatbot } = useChatbot()
   return (
     <ModalWrapper
       overlayStyles={
@@ -72,11 +78,10 @@ export function ChatbotPanel({
       }
       css={{ height: '100%' }}
       open={open}
-      onOpenChange={onClose}
+      onOpenChange={closeChatbot}
     >
       <ChatbotPanelInner
         fullscreen={fullscreen}
-        onClose={onClose}
         {...props}
       />
       {/* required for accessibility */}
@@ -89,18 +94,41 @@ export function ChatbotPanel({
 
 function ChatbotPanelInner({
   fullscreen,
-  onClose,
   currentThread,
   currentInsight,
   ...props
 }: ChatbotPanelInnerProps) {
+  const { pathname } = useLocation()
+  const threadsQuery = useFetchPaginatedData({
+    skip: !!currentThread || !!currentInsight,
+    queryHook: useChatThreadsQuery,
+    keyPath: ['chatThreads'],
+  })
+
+  const rows = useMemo(() => {
+    const threads =
+      threadsQuery.data?.chatThreads?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is ChatThreadFragment => Boolean(node))
+        .sort(sortThreadsOrPins) ?? []
+    // move all threads with a "current page" chip to the top
+    const curPageThreads: ChatThreadFragment[] = []
+    const otherThreads: ChatThreadFragment[] = []
+    threads.forEach((thread) => {
+      const insightUrl = getInsightPathInfo(thread.insight).url
+      if (insightUrl && pathname?.includes(insightUrl))
+        curPageThreads.push(thread)
+      else otherThreads.push(thread)
+    })
+    return [...curPageThreads, ...otherThreads]
+  }, [threadsQuery.data, pathname])
+
   return (
     <ChatbotFrameSC
       $fullscreen={fullscreen}
       {...props}
     >
       <ChatbotHeader
-        onClose={onClose}
         fullscreen={fullscreen}
         currentThread={currentThread}
         currentInsight={currentInsight}
@@ -116,7 +144,14 @@ function ChatbotPanelInner({
           fullscreen={fullscreen}
         />
       ) : (
-        <AllThreadsTable />
+        <FullHeightTableWrap>
+          <AITable
+            modal
+            flush={!fullscreen}
+            query={threadsQuery}
+            rowData={rows}
+          />
+        </FullHeightTableWrap>
       )}
     </ChatbotFrameSC>
   )
@@ -126,6 +161,9 @@ const ChatbotFrameSC = styled.div<{ $fullscreen?: boolean }>(
   ({ $fullscreen, theme }) => ({
     ...($fullscreen
       ? {
+          '& > *': {
+            boxShadow: theme.boxShadows.modal,
+          },
           gap: theme.spacing.medium,
         }
       : {

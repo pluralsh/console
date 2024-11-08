@@ -26,7 +26,7 @@ enum MenuItemKey {
   Delete = 'delete',
 }
 
-export function AiThreadsTableActions({
+export function AITableActions({
   thread,
 }: {
   thread: Nullable<ChatThreadTinyFragment>
