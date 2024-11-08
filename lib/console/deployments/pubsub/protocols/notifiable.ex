@@ -36,6 +36,11 @@ defmodule Console.Deployments.Notifications.Utils do
     end
   end
 
+  def nested_dedupe([{scope, opts} | rest], fun) when is_list(opts),
+    do: deduplicate(scope, fn -> nested_dedupe(rest, fun) end, opts)
+  def nested_dedupe([scope | rest], fun), do: deduplicate(scope, fn -> nested_dedupe(rest, fun) end)
+  def nested_dedupe([], fun) when is_function(fun), do: fun.()
+
   def filters(%Service{id: id, cluster_id: cid}), do: [service_id: id, cluster_id: cid]
   def filters(%Cluster{id: id}), do: [cluster_id: id]
   def filters(%Pipeline{id: id}), do: [pipeline_id: id]
@@ -123,8 +128,11 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ServiceInsigh
   alias Console.Schema.AiInsight
   require Logger
 
-  def message(%{item: {svc, %AiInsight{text: t} = insight}}) when byte_size(t) > 0 do
-    Utils.deduplicate({:svc_insight, svc.id}, fn ->
+  def message(%{item: {svc, %AiInsight{text: t, sha: sha} = insight}}) when byte_size(t) > 0 do
+    Utils.nested_dedupe([
+      {{:insight_sha, sha}, [ttl: :timer.hours(24)]},
+      {:svc_insight, svc.id}
+    ], fn ->
       svc = Console.Repo.preload(svc, [:cluster, :repository])
       {"service.insight", Utils.filters(svc), %{service: svc, insight: insight, text: Utils.insight(insight)}}
     end)
@@ -137,8 +145,11 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.StackInsight 
   alias Console.Schema.AiInsight
   require Logger
 
-  def message(%{item: {stack, %AiInsight{text: t} = insight}}) when byte_size(t) > 0 do
-    Utils.deduplicate({:stack_insight, stack.id}, fn ->
+  def message(%{item: {stack, %AiInsight{text: t, sha: sha} = insight}}) when byte_size(t) > 0 do
+    Utils.nested_dedupe([
+      {{:insight_sha, sha}, [ttl: :timer.hours(24)]},
+      {:stack_insight, stack.id}
+    ], fn ->
       stack = Console.Repo.preload(stack, [:cluster, :repository])
       {"stack.insight", Utils.filters(stack), %{stack: stack, insight: insight, text: Utils.insight(insight)}}
     end)
@@ -151,8 +162,11 @@ defimpl Console.Deployments.PubSub.Notifiable, for: Console.PubSub.ClusterInsigh
   alias Console.Schema.AiInsight
   require Logger
 
-  def message(%{item: {cluster, %AiInsight{text: t} = insight}}) when byte_size(t) > 0 do
-    Utils.deduplicate({:cluster_insight, cluster.id}, fn ->
+  def message(%{item: {cluster, %AiInsight{text: t, sha: sha} = insight}}) when byte_size(t) > 0 do
+    Utils.nested_dedupe([
+      {{:insight_sha, sha}, [ttl: :timer.hours(24)]},
+      {:cluster_insight, cluster.id}
+    ], fn ->
       {"cluster.insight", Utils.filters(cluster), %{cluster: cluster, insight: insight, text: Utils.insight(insight)}}
     end)
   end

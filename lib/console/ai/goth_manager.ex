@@ -11,7 +11,11 @@ defmodule Console.AI.GothManager do
     {:ok, %State{}}
   end
 
-  def fetch(creds), do: GenServer.call(__MODULE__, {:fetch, creds})
+  def fetch(creds) do
+    Console.Retrier.retry(fn ->
+      GenServer.call(__MODULE__, {:fetch, creds})
+    end, pause: 50, max: 2)
+  end
 
   def handle_call({:fetch, creds}, _, %State{credentials: creds} = state) do
     {:reply, Goth.fetch(__MODULE__), state}
