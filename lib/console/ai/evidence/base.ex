@@ -59,7 +59,7 @@ defmodule Console.AI.Evidence.Base do
   end
 
   def list_pods(ns, selector) do
-    &CoreV1.list_namespaced_pod!(ns, [label_selector: construct_label_selector(selector)] ++ k8s_page(&1, 500))
+    (fn c -> CoreV1.list_namespaced_pod!(ns, [label_selector: construct_label_selector(selector)] ++ k8s_page(c, 500)) end)
     |> k8s_paginator(fn p -> !ready_condition?(p.status.conditions) end, nil, [])
     |> ok()
   end
@@ -77,9 +77,7 @@ defmodule Console.AI.Evidence.Base do
   def k8s_page(_, limit), do: [limit: limit]
 
   def k8s_paginator(query_fun, filter_fun, continue \\ nil, res \\ []) do
-    query_fun.(continue)
-    |> Kube.Utils.run()
-    |> case do
+    case Kube.Utils.run(query_fun.(continue)) do
       {:ok, %{metadata: %MetaV1.ListMeta{continue: c}, items: items}} when is_binary(c) and is_list(items) ->
         k8s_paginator(query_fun, filter_fun, c, res ++ Enum.filter(items, filter_fun))
       {:ok, %{items: items}} when is_list(items) ->

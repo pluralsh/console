@@ -1,6 +1,7 @@
 defmodule Console.AI.Fixer.Base do
   use Console.AI.Evidence.Base
   alias Console.Deployments.Tar
+  alias Console.Schema.Service
 
   @extension_blacklist ~w(.tgz .png .jpeg .jpg .gz .tar)
 
@@ -9,12 +10,23 @@ defmodule Console.AI.Fixer.Base do
 
   def file_fmt(), do: @format
 
-  def code_prompt(f, preface \\ @preface) do
+  def folder(%Service{git: %Service.Git{folder: folder}}) when is_binary(folder), do: folder
+  def folder(_), do: ""
+
+  def code_prompt(f, subfolder, preface \\ @preface) do
     with {:ok, contents} <- Tar.tar_stream(f) do
-      Enum.filter(contents, fn {p, _} -> Path.extname(p) not in @extension_blacklist end)
-      |> Enum.map(fn {p, content} -> {:user, Jason.encode!(%{file: p, content: content})} end)
+      Enum.filter(contents, & !blacklist(elem(&1, 0)))
+      |> Enum.map(fn {p, content} -> {:user, Jason.encode!(%{file: Path.join(subfolder, p), content: content})} end)
       |> prepend({:user, preface})
       |> ok()
+    end
+  end
+
+  defp blacklist(filename) do
+    cond do
+      String.ends_with?(filename, "values.yaml.static") -> true
+      Path.extname(filename) in @extension_blacklist -> true
+      true -> false
     end
   end
 end
