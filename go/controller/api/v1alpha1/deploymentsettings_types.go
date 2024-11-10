@@ -248,7 +248,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 
 		attr.Anthropic = &console.AnthropicSettingsAttributes{
 			AccessToken: lo.ToPtr(token),
-			Model:       in.OpenAI.Model,
+			Model:       in.Anthropic.Model,
 		}
 	case console.AiProviderAzure:
 		if in.Azure == nil {

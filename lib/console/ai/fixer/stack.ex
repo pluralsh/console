@@ -10,7 +10,7 @@ defmodule Console.AI.Fixer.Stack do
   def prompt(%Stack{} = stack, insight) do
     stack = Repo.preload(stack, [:repository, :parent])
     with {:ok, f} <- Stacks.tarstream(last_run(stack)),
-         {:ok, code} <- code_prompt(f) do
+         {:ok, code} <- code_prompt(f, stack.git.folder) do
       Enum.concat([
         {:user, """
           We've found the following insight about a Plural Stack that is currently in #{stack.status} state:
@@ -22,7 +22,7 @@ defmodule Console.AI.Fixer.Stack do
         """},
         {:user, stack_details(stack)} | code
       ], Parent.parent_prompt(
-        stack.parent,
+        stack,
         child: "#{stack.name} stack",
         cr: "InfrastructureStack",
         cr_additional: " specifying the name #{stack.name}"

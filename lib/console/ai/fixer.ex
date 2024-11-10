@@ -38,5 +38,5 @@ defmodule Console.AI.Fixer do
     |> when_ok(&fix/1)
   end
 
-  defp ask(prompt), do: prompt ++ [{:user, "please provide the most cogent code or configuration change available based on the information I've already provided above to fix this issue.  Be sure the Git repository and full file names that are needed to change."}]
+  defp ask(prompt), do: prompt ++ [{:user, "please provide the most straightforward code or configuration change available based on the information I've already provided above to fix this issue.  Be sure the Git repository and full file names that are needed to change."}]
 end

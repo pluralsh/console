@@ -40,8 +40,7 @@ defmodule Console.AI.Anthropic do
   """
   @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = anthropic, messages) do
-    history = Enum.map(messages, fn {role, msg} -> %{role: anth_role(role), content: msg} end)
-    case chat(anthropic, history) do
+    case chat(anthropic, messages) do
       {:ok, %MessageResponse{content: content}} ->
         {:ok, format_content(content)}
       {:ok, _} -> {:error, "could not generate an ai completion for this context"}
@@ -50,16 +49,21 @@ defmodule Console.AI.Anthropic do
   end
 
   defp chat(%__MODULE__{access_key: token, model: model}, history) do
-    body = Jason.encode!(%{
-      model: model || "claude-3-5-sonnet-20240620",
+    {system, history} = split(history)
+    url("/messages")
+    |> HTTPoison.post(Jason.encode!(%{
+      model: model || "claude-3-5-haiku-latest",
+      system: system,
       messages: history,
       max_tokens: @max_tokens
-    })
-
-    url("/messages")
-    |> HTTPoison.post(body, json_headers(token), @options)
+    }), json_headers(token), @options)
     |> handle_response(MessageResponse.spec())
   end
+
+  defp split([{:system, msg} | rest]), do: {msg, fmt_msgs(rest)}
+  defp split(hist), do: {nil, fmt_msgs(hist)}
+
+  defp fmt_msgs(msgs), do: Enum.map(msgs, fn {role, msg} -> %{role: anth_role(role), content: msg} end)
 
   defp format_content(content) do
     Enum.map(content, fn

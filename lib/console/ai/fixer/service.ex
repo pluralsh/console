@@ -8,9 +8,9 @@ defmodule Console.AI.Fixer.Service do
   alias Console.Deployments.{Services}
 
   def prompt(%Service{} = svc, insight) do
-    svc = Repo.preload(svc, [:cluster, :repository, :parent])
+    svc = Repo.preload(svc, [:cluster, :repository, :parent, owner: :parent])
     with {:ok, f} <- Services.tarstream(svc),
-         {:ok, code} <- code_prompt(f) do
+         {:ok, code} <- code_prompt(f, folder(svc)) do
       Enum.concat([
         {:user, """
           We've found the following insight about a Plural service that is currently in #{svc.status} state:
@@ -18,11 +18,11 @@ defmodule Console.AI.Fixer.Service do
           #{insight}
 
           We'd like you to suggest a simple code or configuration change that can fix the issues identified in that insight.
-          I'll do my best to list all the needed resources below.
+          I'll do my best to list all the needed resources below.  Additional useful context is that Plural templates any file with a `.liquid` extension with the metadata of the cluster, or secrets attached to the service itself.
         """},
         {:user, svc_details(svc)} | code
       ], Parent.parent_prompt(
-        svc.parent,
+        svc,
         child: "#{svc.name} service",
         cr: "ServiceDeployment",
         cr_additional: " specifying the name #{svc.name} and namespace #{svc.namespace}"
