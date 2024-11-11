@@ -3,6 +3,11 @@ git_url: https://github.com/kedacore/keda
 release_url: https://github.com/kedacore/keda/releases/tag/v{vsn}
 helm_repository_url: https://kedacore.github.io/charts
 versions:
+- version: 2.15.0
+  kube: ['1.30', '1.29', '1.28']
+  requirements: []
+  incompatibilities: []
+  chart_version: 2.15.0
 - version: 2.14.0
   kube: ['1.29', '1.28', '1.27']
   requirements: []
