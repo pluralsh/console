@@ -2,6 +2,7 @@ defmodule Console.Deployments.PipelinesTest do
   use Console.DataCase, async: true
   use Mimic
   alias Console.PubSub
+  alias Console.Schema.PipelineContextHistory
   alias Console.Deployments.{Pipelines, Services, Settings}
 
   describe "#upsert/3" do
@@ -265,7 +266,38 @@ defmodule Console.Deployments.PipelinesTest do
 
       assert pr.service_id == svc.id
 
+      assert PipelineContextHistory.for_stage(stage.id) |> Console.Repo.exists?()
+
       assert_receive {:event, %PubSub.PipelineStageUpdated{item: %{id: ^id}}}
+    end
+  end
+
+  describe "#revert_pipeline_context/1" do
+    test "it can revert to the last context in the history" do
+      insert(:user, bot_name: "console", roles: %{admin: true})
+
+      conn = insert(:scm_connection, token: "some-pat")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"}
+      )
+
+      svc = insert(:service)
+      pipe = insert(:pipeline, name: "my-pipeline")
+      ctx = insert(:pipeline_context, context: %{some: "context"})
+      dev = insert(:pipeline_stage, pipeline: pipe, name: "dev", applied_context: build(:pipeline_context))
+      ss = insert(:stage_service, service: svc, stage: dev)
+      insert(:promotion_criteria, stage_service: ss, pr_automation: pra)
+
+      insert(:pipeline_context_history, stage: dev, context: dev.applied_context)
+      insert(:pipeline_context_history, stage: dev, context: ctx, inserted_at: Timex.now() |> Timex.shift(days: -1))
+      expect(Console.Deployments.Pr.Dispatcher, :create, fn _, _, %{"some" => "context"} -> {:ok, %{title: "some", url: "url"}} end)
+
+      {:ok, _} = Pipelines.revert_pipeline_context(dev)
+
+      assert refetch(dev).applied_context_id == ctx.id
     end
   end
 

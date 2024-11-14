@@ -18,6 +18,7 @@ defmodule Console.Deployments.Pipelines do
     PromotionCriteria,
     PromotionService,
     PipelineContext,
+    PipelineContextHistory,
     PipelinePullRequest,
     User,
     Revision,
@@ -174,9 +175,39 @@ defmodule Console.Deployments.Pipelines do
       PipelineStage.changeset(stage, %{applied_context_id: ctx.id, errors: []})
       |> Repo.update()
     end)
-    |> execute()
+    |> add_operation(:hist, fn %{stg: %{id: stage_id, applied_context_id: ctx_id}} ->
+      %PipelineContextHistory{}
+      |> PipelineContextHistory.changeset(%{stage_id: stage_id, context_id: ctx_id})
+      |> Repo.insert()
+    end)
+    |> execute(timeout: 60_000)
     |> notify(:context)
   end
+
+  @doc """
+  Reverts a pipeline context to the last in the stages history
+  """
+  @spec revert_pipeline_context(PipelineStage.t) :: {:ok, map} | Console.error
+  def revert_pipeline_context(%PipelineStage{applied_context_id: ctx_id} = stage) when is_binary(ctx_id) do
+    PipelineContextHistory.last_context(stage.id, ctx_id)
+    |> Console.Repo.one()
+    |> case do
+      %PipelineContextHistory{context_id: ctx_id} ->
+        start_transaction()
+        |> add_operation(:bind, fn _ -> create_context_binding(ctx_id, stage) end)
+        |> add_operation(:apply, fn %{bind: stage} -> apply_pipeline_context(stage) end)
+        |> execute(extract: :apply, timeout: 60_000)
+      _ ->
+        {:error, "no prior context"}
+    end
+  end
+
+  def revert_pipeline_context(stg_id) when is_binary(stg_id) do
+    Console.Repo.get!(PipelineStage, stg_id)
+    |> revert_pipeline_context()
+  end
+
+  def revert_pipeline_context(_), do: {:error, "you cannot revert this stage"}
 
   defp build_pr_context(ctx, %StageService{service: svc}, %PipelineStage{} = stage) do
     Map.put(ctx, "pipeline", %{

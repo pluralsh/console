@@ -4144,6 +4144,28 @@ export type PipelineContextEdge = {
   node?: Maybe<PipelineContext>;
 };
 
+/** A record of a prior pipeline context attached to a stage */
+export type PipelineContextHistory = {
+  __typename?: 'PipelineContextHistory';
+  context?: Maybe<PipelineContext>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  stage?: Maybe<PipelineStage>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PipelineContextHistoryConnection = {
+  __typename?: 'PipelineContextHistoryConnection';
+  edges?: Maybe<Array<Maybe<PipelineContextHistoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PipelineContextHistoryEdge = {
+  __typename?: 'PipelineContextHistoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PipelineContextHistory>;
+};
+
 export type PipelineEdge = {
   __typename?: 'PipelineEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -4243,6 +4265,7 @@ export type PipelineStage = {
   __typename?: 'PipelineStage';
   /** the context that is to be applied to this stage for PR promotions */
   context?: Maybe<PipelineContext>;
+  contextHistory?: Maybe<PipelineContextHistoryConnection>;
   /** the errors for this stage */
   errors?: Maybe<Array<Maybe<ServiceError>>>;
   id: Scalars['ID']['output'];
@@ -4254,6 +4277,15 @@ export type PipelineStage = {
   /** the services within this stage */
   services?: Maybe<Array<Maybe<StageService>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+/** a pipeline stage, has a list of services and potentially a promotion which might be pending */
+export type PipelineStageContextHistoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** specification of a stage of a pipeline */

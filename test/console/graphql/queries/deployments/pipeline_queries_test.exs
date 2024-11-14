@@ -91,6 +91,31 @@ defmodule Console.GraphQl.Deployments.PipelineQueriesTest do
       assert from_connection(found["contexts"])
              |> ids_equal(hist)
     end
+
+    test "it can fetch pipeline context history w/in a pipeline stage" do
+      user = insert(:user)
+      pipe = insert(:pipeline, read_bindings: [%{user_id: user.id}])
+      stage = insert(:pipeline_stage, pipeline: pipe)
+      hists = insert_list(2, :pipeline_context_history, stage: stage)
+
+      {:ok, %{data: %{"pipeline" => found}}} = run_query("""
+        query Pipe($id: ID!) {
+          pipeline(id: $id) {
+            id
+            stages {
+              contextHistory(first: 5) {
+                edges { node { id } }
+              }
+            }
+          }
+        }
+      """, %{"id" => pipe.id}, %{current_user: user})
+
+      assert found["id"] == pipe.id
+      [%{"contextHistory" => found}] = found["stages"]
+      assert from_connection(found)
+             |> ids_equal(hists)
+    end
   end
 
   describe "pipelineGate" do

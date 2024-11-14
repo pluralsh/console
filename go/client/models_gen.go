@@ -3412,6 +3412,25 @@ type PipelineContextEdge struct {
 	Cursor *string          `json:"cursor,omitempty"`
 }
 
+// A record of a prior pipeline context attached to a stage
+type PipelineContextHistory struct {
+	ID         string           `json:"id"`
+	Stage      *PipelineStage   `json:"stage,omitempty"`
+	Context    *PipelineContext `json:"context,omitempty"`
+	InsertedAt *string          `json:"insertedAt,omitempty"`
+	UpdatedAt  *string          `json:"updatedAt,omitempty"`
+}
+
+type PipelineContextHistoryConnection struct {
+	PageInfo PageInfo                      `json:"pageInfo"`
+	Edges    []*PipelineContextHistoryEdge `json:"edges,omitempty"`
+}
+
+type PipelineContextHistoryEdge struct {
+	Node   *PipelineContextHistory `json:"node,omitempty"`
+	Cursor *string                 `json:"cursor,omitempty"`
+}
+
 type PipelineEdge struct {
 	Node   *Pipeline `json:"node,omitempty"`
 	Cursor *string   `json:"cursor,omitempty"`
@@ -3512,9 +3531,10 @@ type PipelineStage struct {
 	// the context that is to be applied to this stage for PR promotions
 	Context *PipelineContext `json:"context,omitempty"`
 	// a promotion which might be outstanding for this stage
-	Promotion  *PipelinePromotion `json:"promotion,omitempty"`
-	InsertedAt *string            `json:"insertedAt,omitempty"`
-	UpdatedAt  *string            `json:"updatedAt,omitempty"`
+	Promotion      *PipelinePromotion                `json:"promotion,omitempty"`
+	ContextHistory *PipelineContextHistoryConnection `json:"contextHistory,omitempty"`
+	InsertedAt     *string                           `json:"insertedAt,omitempty"`
+	UpdatedAt      *string                           `json:"updatedAt,omitempty"`
 }
 
 // specification of a stage of a pipeline

@@ -3213,6 +3213,8 @@ type PipelineStage {
   "a promotion which might be outstanding for this stage"
   promotion: PipelinePromotion
 
+  contextHistory(after: String, first: Int, before: String, last: Int): PipelineContextHistoryConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -3426,6 +3428,15 @@ type PipelinePullRequest {
   pullRequest: PullRequest
 }
 
+"A record of a prior pipeline context attached to a stage"
+type PipelineContextHistory {
+  id: ID!
+  stage: PipelineStage
+  context: PipelineContext
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type PipelineConnection {
   pageInfo: PageInfo!
   edges: [PipelineEdge]
@@ -3439,6 +3450,11 @@ type PipelineGateConnection {
 type PipelineContextConnection {
   pageInfo: PageInfo!
   edges: [PipelineContextEdge]
+}
+
+type PipelineContextHistoryConnection {
+  pageInfo: PageInfo!
+  edges: [PipelineContextHistoryEdge]
 }
 
 enum ComponentState {
@@ -8188,6 +8204,11 @@ type RevisionEdge {
 
 type ServiceDeploymentEdge {
   node: ServiceDeployment
+  cursor: String
+}
+
+type PipelineContextHistoryEdge {
+  node: PipelineContextHistory
   cursor: String
 }
 

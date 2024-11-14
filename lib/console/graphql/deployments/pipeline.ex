@@ -182,6 +182,10 @@ defmodule Console.GraphQl.Deployments.Pipeline do
       description: "a promotion which might be outstanding for this stage",
       resolve: dataloader(Deployments)
 
+    connection field :context_history, node_type: :pipeline_context_history do
+      resolve &Deployments.pipeline_context_history/3
+    end
+
     timestamps()
   end
 
@@ -333,9 +337,19 @@ defmodule Console.GraphQl.Deployments.Pipeline do
     field :pull_request, :pull_request, resolve: dataloader(Deployments)
   end
 
+  @desc "A record of a prior pipeline context attached to a stage"
+  object :pipeline_context_history do
+    field :id,      non_null(:id)
+    field :stage,   :pipeline_stage, resolve: dataloader(Deployments)
+    field :context, :pipeline_context, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
   connection node_type: :pipeline
   connection node_type: :pipeline_gate
   connection node_type: :pipeline_context
+  connection node_type: :pipeline_context_history
 
   delta :pipeline
 

@@ -22,6 +22,9 @@ defmodule Console.Deployments.Pipelines.StageWorker do
   def context(shard, %PipelineStage{} = stage),
     do: GenServer.call(name(shard), {:context, stage}, 60_000)
 
+  def revert(shard, %PipelineStage{} = stage),
+    do: GenServer.call(name(shard), {:revert, stage}, 60_000)
+
   def name(shard), do: {:via, Registry, {Supervisor.registry(), {:stage, :shard, shard}}}
 
   def handle_call({:context, stage}, _, state) do
@@ -33,6 +36,19 @@ defmodule Console.Deployments.Pipelines.StageWorker do
       {:error, err} ->
         Logger.info "failed to apply stage context #{stage.id} reason: #{inspect(err)}"
         Pipelines.add_stage_error(stage, "context", "Failed to apply stage context with error: #{format_error(err)}")
+        {:reply, :error, state}
+    end
+  end
+
+  def handle_call({:revert, stage}, _, state) do
+    Logger.info "starting to revert context for stage #{stage.id} (#{stage.name})"
+    case Pipelines.revert_pipeline_context(refetch(stage)) do
+      {:ok, _} ->
+        Logger.info "stage #{stage.id} context reverted successfully"
+        {:reply, :ok, state}
+      {:error, err} ->
+        Logger.info "failed to revert stage context #{stage.id} reason: #{inspect(err)}"
+        Pipelines.add_stage_error(stage, "revert", "Failed to apply stage context with error: #{format_error(err)}")
         {:reply, :error, state}
     end
   end
