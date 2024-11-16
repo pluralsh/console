@@ -126,6 +126,17 @@ spec:
                           description: A regex to match string-valued configuration
                             items
                           type: string
+                        uniqBy:
+                          description: How to determine uniquenss for this field
+                          properties:
+                            scope:
+                              enum:
+                              - PROJECT
+                              - CLUSTER
+                              type: string
+                          required:
+                          - scope
+                          type: object
                       type: object
                     values:
                       items:

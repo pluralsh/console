@@ -100,10 +100,14 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.PipelineStageUpdated do
 end
 
 defimpl Console.PubSub.Recurse, for: [Console.PubSub.PullRequestCreated, Console.PubSub.PullRequestUpdated] do
-  alias Console.{Schema.PullRequest, Deployments.Stacks}
+  alias Console.Schema.{PullRequest, Stack}
+  alias Console.Deployments.{Stacks, Git.Discovery}
 
-  def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id),
-    do: Stacks.poll(pr)
+  def process(%{item: %PullRequest{stack_id: id} = pr}) when is_binary(id) do
+    with %PullRequest{stack: %Stack{} = stack} = pr <- Console.Repo.preload(pr, [stack: :repository]),
+         _ <- Discovery.kick(stack.repository),
+      do: Stacks.poll(pr)
+  end
   def process(_), do: :ok
 end
 

@@ -12,21 +12,22 @@ defmodule Console.GraphQl.Deployments.Git do
     Observer
   }
 
-  ecto_enum :auth_method, GitRepository.AuthMethod
-  ecto_enum :git_health, GitRepository.Health
-  ecto_enum :scm_type, ScmConnection.Type
-  ecto_enum :match_strategy, PrAutomation.MatchStrategy
-  ecto_enum :list_merge, PrAutomation.ListMerge
-  ecto_enum :helm_auth_provider, HelmRepository.Provider
-  ecto_enum :pr_role, PrAutomation.Role
-  ecto_enum :pr_status, PullRequest.Status
-  ecto_enum :configuration_type, Configuration.Type
-  ecto_enum :operation, Configuration.Condition.Operation
-  ecto_enum :observer_action_type, Observer.Action
-  ecto_enum :observer_target_type, Observer.TargetType
+  ecto_enum :auth_method,              GitRepository.AuthMethod
+  ecto_enum :git_health,               GitRepository.Health
+  ecto_enum :scm_type,                 ScmConnection.Type
+  ecto_enum :match_strategy,           PrAutomation.MatchStrategy
+  ecto_enum :list_merge,               PrAutomation.ListMerge
+  ecto_enum :helm_auth_provider,       HelmRepository.Provider
+  ecto_enum :pr_role,                  PrAutomation.Role
+  ecto_enum :pr_status,                PullRequest.Status
+  ecto_enum :configuration_type,       Configuration.Type
+  ecto_enum :operation,                Configuration.Condition.Operation
+  ecto_enum :validation_uniq_scope,    Configuration.UniqScope
+  ecto_enum :observer_action_type,     Observer.Action
+  ecto_enum :observer_target_type,     Observer.TargetType
   ecto_enum :observer_git_target_type, Observer.GitTargetType
-  ecto_enum :observer_target_order, Observer.TargetOrder
-  ecto_enum :observer_status, Observer.Status
+  ecto_enum :observer_target_order,    Observer.TargetOrder
+  ecto_enum :observer_status,          Observer.Status
 
   input_object :catalog_attributes do
     field :name,           non_null(:string)
@@ -182,8 +183,14 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "Validations to apply to this configuration entry prior to PR creation"
   input_object :configuration_validation_attributes do
-    field :regex, :string, description: "regex a string value should match"
-    field :json,  :boolean, description: "whether the string is json encoded"
+    field :regex,    :string, description: "regex a string value should match"
+    field :json,     :boolean, description: "whether the string is json encoded"
+    field :uniq_by,  :uniq_by_attributes, description: "configuration for name uniqueness"
+  end
+
+  @desc "How to enforce uniqueness for a field"
+  input_object :uniq_by_attributes do
+    field :scope, non_null(:validation_uniq_scope), description: "the scope this name is uniq w/in"
   end
 
   @desc "The operations to be performed on the files w/in the pr"
@@ -570,7 +577,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :type,  non_null(:scm_type)
     field :owner, non_null(:string)
 
-    field :url, non_null(:string),
+    field :url,   non_null(:string),
       description: "the url for this specific webhook",
       resolve: fn hook, _, _ -> {:ok, ScmWebhook.url(hook)} end
 
@@ -583,9 +590,9 @@ defmodule Console.GraphQl.Deployments.Git do
 
   @desc "A representation to a service which configures renovate for a scm connection"
   object :dependency_management_service do
-    field :id, non_null(:id)
+    field :id,         non_null(:id)
     field :connection, :scm_connection, resolve: dataloader(Deployments)
-    field :service, :service_deployment, resolve: dataloader(Deployments)
+    field :service,    :service_deployment, resolve: dataloader(Deployments)
 
     timestamps()
   end

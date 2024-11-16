@@ -1373,6 +1373,8 @@ type ConfigurationValidationAttributes struct {
 	Regex *string `json:"regex,omitempty"`
 	// whether the string is json encoded
 	JSON *bool `json:"json,omitempty"`
+	// configuration for name uniqueness
+	UniqBy *UniqByAttributes `json:"uniqBy,omitempty"`
 }
 
 type ConsoleConfiguration struct {
@@ -5541,6 +5543,12 @@ type TerraformStateUrls struct {
 	Unlock *string `json:"unlock,omitempty"`
 }
 
+// How to enforce uniqueness for a field
+type UniqByAttributes struct {
+	// the scope this name is uniq w/in
+	Scope ValidationUniqScope `json:"scope"`
+}
+
 type UpgradeInsight struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -8439,6 +8447,47 @@ func (e *UpgradePolicyType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UpgradePolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ValidationUniqScope string
+
+const (
+	ValidationUniqScopeProject ValidationUniqScope = "PROJECT"
+	ValidationUniqScopeCluster ValidationUniqScope = "CLUSTER"
+)
+
+var AllValidationUniqScope = []ValidationUniqScope{
+	ValidationUniqScopeProject,
+	ValidationUniqScopeCluster,
+}
+
+func (e ValidationUniqScope) IsValid() bool {
+	switch e {
+	case ValidationUniqScopeProject, ValidationUniqScopeCluster:
+		return true
+	}
+	return false
+}
+
+func (e ValidationUniqScope) String() string {
+	return string(e)
+}
+
+func (e *ValidationUniqScope) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ValidationUniqScope(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ValidationUniqScope", str)
+	}
+	return nil
+}
+
+func (e ValidationUniqScope) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

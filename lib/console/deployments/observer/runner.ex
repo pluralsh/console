@@ -15,7 +15,7 @@ defmodule Console.Deployments.Observer.Runner do
       {:poll, {:error, err}} -> add_error(observer, "poll", err)
       {:act, {:error, err}} -> add_error(observer, "action", err)
       err ->
-        Logger.error "unknown observer error: #{err}"
+        Logger.error "unknown observer error: #{inspect(err)}"
     end
   end
 

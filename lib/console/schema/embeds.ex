@@ -100,6 +100,8 @@ defmodule Console.Schema.Configuration do
     password: 7,
     enum: 8
 
+  defenum UniqScope, project: 0, cluster: 1
+
   defmodule Condition do
     use Piazza.Ecto.Schema
 
@@ -135,6 +137,10 @@ defmodule Console.Schema.Configuration do
     embeds_one :validation, Validation, on_replace: :update do
       field :regex, :string
       field :json,  :boolean
+
+      embeds_one :uniq_by, Uniq, on_replace: :update do
+        field :scope, UniqScope
+      end
     end
   end
 
@@ -149,5 +155,11 @@ defmodule Console.Schema.Configuration do
   defp validation_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(regex json)a)
+    |> cast_embed(:uniq_by, with: &uniq_changeset/2)
+  end
+
+  defp uniq_changeset(model, attrs) do
+    cast(model, attrs, ~w(scope)a)
+    |> validate_required(~w(scope)a)
   end
 end

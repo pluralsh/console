@@ -1723,6 +1723,8 @@ export type ConfigurationValidationAttributes = {
   json?: InputMaybe<Scalars['Boolean']['input']>;
   /** regex a string value should match */
   regex?: InputMaybe<Scalars['String']['input']>;
+  /** configuration for name uniqueness */
+  uniqBy?: InputMaybe<UniqByAttributes>;
 };
 
 export enum Conjunction {
@@ -9085,6 +9087,12 @@ export enum Tool {
   Terraform = 'TERRAFORM'
 }
 
+/** How to enforce uniqueness for a field */
+export type UniqByAttributes = {
+  /** the scope this name is uniq w/in */
+  scope: ValidationUniqScope;
+};
+
 export type UpgradeInsight = {
   __typename?: 'UpgradeInsight';
   /** longform description of this insight */
@@ -9287,6 +9295,11 @@ export type UserRoles = {
   __typename?: 'UserRoles';
   admin?: Maybe<Scalars['Boolean']['output']>;
 };
+
+export enum ValidationUniqScope {
+  Cluster = 'CLUSTER',
+  Project = 'PROJECT'
+}
 
 /** a shortform reference to an addon by version */
 export type VersionReference = {

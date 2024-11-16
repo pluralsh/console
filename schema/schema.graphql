@@ -5087,6 +5087,11 @@ enum Operation {
   SUFFIX
 }
 
+enum ValidationUniqScope {
+  PROJECT
+  CLUSTER
+}
+
 enum ObserverActionType {
   PIPELINE
   PR
@@ -5348,6 +5353,15 @@ input ConfigurationValidationAttributes {
 
   "whether the string is json encoded"
   json: Boolean
+
+  "configuration for name uniqueness"
+  uniqBy: UniqByAttributes
+}
+
+"How to enforce uniqueness for a field"
+input UniqByAttributes {
+  "the scope this name is uniq w\/in"
+  scope: ValidationUniqScope!
 }
 
 "The operations to be performed on the files w\/in the pr"
