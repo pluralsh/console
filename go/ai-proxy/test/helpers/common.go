@@ -16,7 +16,7 @@ import (
 )
 
 func SetupServer() (*httptest.Server, error) {
-	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderToken())
+	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
 	if err != nil {
 		return nil, err
 	}

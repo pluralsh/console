@@ -5,6 +5,7 @@ import (
 
 	"github.com/pluralsh/console/go/ai-proxy/api/ollama"
 	"github.com/pluralsh/console/go/ai-proxy/api/openai"
+	"github.com/pluralsh/console/go/ai-proxy/api/vertex"
 )
 
 type Provider string
@@ -21,6 +22,8 @@ func ToProvider(s string) (Provider, error) {
 		return ProviderOpenAI, nil
 	case ProviderAnthropic.String():
 		return ProviderAnthropic, nil
+	case ProviderVertex.String():
+		return ProviderVertex, nil
 	}
 
 	return "", fmt.Errorf("invalid provider: %s", s)
@@ -30,6 +33,7 @@ const (
 	ProviderOpenAI    Provider = "openai"
 	ProviderAnthropic Provider = "anthropic"
 	ProviderOllama    Provider = "ollama"
+	ProviderVertex    Provider = "vertex"
 )
 
 type OllamaAPI string
@@ -40,6 +44,9 @@ var (
 	ollamaToOpenAI ProviderAPIMapping = map[string]string{
 		ollama.EndpointChat: openai.EndpointChat,
 	}
+	ollamaToVertex ProviderAPIMapping = map[string]string{
+		ollama.EndpointChat: vertex.EndpointChat,
+	}
 )
 
 func ToProviderAPIPath(target Provider, path string) string {
@@ -48,6 +55,13 @@ func ToProviderAPIPath(target Provider, path string) string {
 		return path
 	case ProviderOpenAI:
 		targetPath, exists := ollamaToOpenAI[path]
+		if !exists {
+			panic(fmt.Sprintf("path %s not registered for provider %s", path, target))
+		}
+
+		return targetPath
+	case ProviderVertex:
+		targetPath, exists := ollamaToVertex[path]
 		if !exists {
 			panic(fmt.Sprintf("path %s not registered for provider %s", path, target))
 		}

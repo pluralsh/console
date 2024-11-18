@@ -16,7 +16,7 @@ import (
 func main() {
 	klog.V(log.LogLevelMinimal).InfoS("Starting AI Proxy", "provider", args.Provider(), "version", environment.Version, "commit", environment.Commit)
 
-	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderToken())
+	p, err := proxy.NewOllamaTranslationProxy(args.Provider(), args.ProviderHost(), args.ProviderCredentials())
 	if err != nil {
 		klog.ErrorS(err, "Could not create proxy")
 		os.Exit(1)

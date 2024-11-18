@@ -7,12 +7,14 @@ import (
 	"github.com/pluralsh/console/go/ai-proxy/proxy/provider"
 )
 
-func NewOllamaTranslationProxy(p api.Provider, host string, token string) (api.TranslationProxy, error) {
+func NewOllamaTranslationProxy(p api.Provider, host string, credentials string) (api.TranslationProxy, error) {
 	switch p {
 	case api.ProviderOllama:
 		return provider.NewOllamaProxy(host)
 	case api.ProviderOpenAI:
-		return provider.NewOpenAIProxy(host, token)
+		return provider.NewOpenAIProxy(host, credentials)
+	case api.ProviderVertex:
+		return provider.NewVertexProxy(host, credentials)
 	case api.ProviderAnthropic:
 		return nil, fmt.Errorf("unsupported provider: %s", p)
 	}

@@ -2,11 +2,13 @@ package provider
 
 import (
 	"bytes"
+	"compress/gzip"
 	"fmt"
 	"io"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 
 	"github.com/andybalholm/brotli"
@@ -24,6 +26,7 @@ type baseTranslationProxy struct {
 	baseTargetURL *url.URL
 	proxy         *httputil.ReverseProxy
 	provider      api.Provider
+	mapping       func(string) string
 }
 
 func (in *baseTranslationProxy) Proxy() http.HandlerFunc {
@@ -60,6 +63,9 @@ func (in *baseTranslationProxy) ModifyResponse(r *http.Response) error {
 	case "br": // brotli
 		r.Header.Del(headerContentEncoding)
 		reader = brotli.NewReader(r.Body)
+	case "gzip": // gzip
+		r.Header.Del(headerContentEncoding)
+		reader, _ = gzip.NewReader(r.Body)
 	}
 
 	respBody, err := io.ReadAll(reader)
@@ -73,9 +79,14 @@ func (in *baseTranslationProxy) ModifyResponse(r *http.Response) error {
 }
 
 func (in *baseTranslationProxy) targetURL(path string) string {
+	path = api.ToProviderAPIPath(in.provider, path)
+	if in.mapping != nil {
+		path = os.Expand(path, in.mapping)
+	}
+
 	return fmt.Sprintf("%s%s",
 		in.baseTargetURL.String(),
-		api.ToProviderAPIPath(in.provider, path),
+		path,
 	)
 }
 
@@ -84,6 +95,7 @@ func newBaseTranslationProxy(
 	provider api.Provider,
 	modifyRequest func(*httputil.ProxyRequest),
 	modifyResponse func(*http.Response) error,
+	mapping func(string) string,
 ) (*baseTranslationProxy, error) {
 	const urlPathSeparator = "/"
 	baseTargetURL, err := url.Parse(strings.TrimRight(target, urlPathSeparator))
@@ -98,6 +110,7 @@ func newBaseTranslationProxy(
 			ModifyResponse: modifyResponse,
 		},
 		provider,
+		mapping,
 	}
 	if modifyRequest == nil {
 		baseProxy.proxy.Rewrite = baseProxy.ModifyRequest

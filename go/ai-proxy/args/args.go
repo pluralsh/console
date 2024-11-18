@@ -15,7 +15,8 @@ import (
 )
 
 const (
-	envProviderToken = "PROVIDER_TOKEN"
+	envProviderToken          = "PROVIDER_TOKEN"
+	envProviderServiceAccount = "PROVIDER_SERVICE_ACCOUNT"
 
 	defaultPort     = 8000
 	defaultProvider = api.ProviderOllama
@@ -23,11 +24,12 @@ const (
 )
 
 var (
-	argProvider      = pflag.String("provider", defaultProvider.String(), "Provider name. Must be one of: ollama, openai. Defaults to 'ollama' type API.")
-	argProviderHost  = pflag.String("provider-host", "", "Provider host address to access the API i.e. https://api.openai.com")
-	argProviderToken = pflag.String("provider-token", helpers.GetPluralEnv(envProviderToken, ""), "Provider token used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_TOKEN env var.")
-	argPort          = pflag.Int("port", defaultPort, "The port to listen on. Defaults to port 8000.")
-	argAddress       = pflag.IP("address", net.ParseIP(defaultAddress), "The IP address to serve on. Defaults to 0.0.0.0 (all interfaces).")
+	argProvider               = pflag.String("provider", defaultProvider.String(), "Provider name. Must be one of: ollama, openai, vertex. Defaults to 'ollama' type API.")
+	argProviderHost           = pflag.String("provider-host", "", "Provider host address to access the API i.e. https://api.openai.com")
+	argProviderToken          = pflag.String("provider-token", helpers.GetPluralEnv(envProviderToken, ""), "Provider token used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_TOKEN env var.")
+	argProviderServiceAccount = pflag.String("provider-service-account", helpers.GetPluralEnv(envProviderServiceAccount, ""), "Provider service account file used to connect to the API if needed. Can be overridden via PLRL_PROVIDER_SERVICE_ACCOUNT env var.")
+	argPort                   = pflag.Int("port", defaultPort, "The port to listen on. Defaults to port 8000.")
+	argAddress                = pflag.IP("address", net.ParseIP(defaultAddress), "The IP address to serve on. Defaults to 0.0.0.0 (all interfaces).")
 )
 
 func init() {
@@ -68,12 +70,20 @@ func ProviderHost() string {
 	return *argProviderHost
 }
 
-func ProviderToken() string {
-	if len(*argProviderToken) == 0 && Provider() != defaultProvider {
-		panic(fmt.Errorf("provider secret is required"))
+func ProviderCredentials() string {
+	if len(*argProviderToken) > 0 && Provider() == api.ProviderOpenAI {
+		return *argProviderToken
 	}
 
-	return *argProviderToken
+	if len(*argProviderServiceAccount) > 0 && Provider() == api.ProviderVertex {
+		return *argProviderServiceAccount
+	}
+
+	if Provider() == defaultProvider {
+		return ""
+	}
+
+	panic(fmt.Errorf("provider credentials must be provided when %s provider is used", Provider()))
 }
 
 func Address() string {
