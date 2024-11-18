@@ -1,35 +1,26 @@
 import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import styled, { useTheme } from 'styled-components'
-
-import { useIsManager, useLogin } from 'components/contexts'
-
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
-
+import { useIsManager } from 'components/contexts'
 import { ClusterOverviewCard } from './clusteroverview/ClusterOverviewCard'
-// import { MonthlyClusterCostsCard } from './MonthlyClusterCostsCard'
 import { DeploymentsCard } from './deployments/DeploymentsCard'
-
 import { ConstraintViolationsCard } from './managerview/violations/ConstraintViolationsCard'
 import { PrCard } from './pullrequests/PrCard'
+
+export const HOME_CARD_MAX_HEIGHT = '330px'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export default function Home() {
   useSetBreadcrumbs(breadcrumbs)
   const theme = useTheme()
-  const name = useLogin().me?.name
   const isManager = useIsManager()
 
   return (
     <ResponsivePageFullWidth
-      style={{ paddingTop: 0 }}
+      noPadding
       maxContentWidth={1440}
     >
-      <ConsolePageTitle
-        headingProps={{ title2: false, title1: true }}
-        heading={`Welcome${name ? `, ${name.split(' ')[0]}` : ''}!`}
-      />
       <HomeContentWrapperSC>
         <ClusterOverviewCard />
         {isManager && <ConstraintViolationsCard />}
@@ -47,7 +38,6 @@ export default function Home() {
           <PrCard />
           <DeploymentsCard />
         </div>
-        {/* <MonthlyClusterCostsCard /> */}
       </HomeContentWrapperSC>
     </ResponsivePageFullWidth>
   )
@@ -56,7 +46,6 @@ export default function Home() {
 const HomeContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
-  gap: theme.spacing.xlarge,
-  marginTop: theme.spacing.large,
+  gap: theme.spacing.large,
   paddingBottom: theme.spacing.xxlarge,
 }))

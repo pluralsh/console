@@ -1,5 +1,3 @@
-import { H1 } from 'honorable'
-
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
 import { GqlError } from 'components/utils/Alert'
 import {
@@ -15,7 +13,7 @@ import { PoliciesTable } from 'components/policies/PoliciesTable'
 
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 
-import { HomeCard } from '../../HomeCard'
+import { HOME_CARD_MAX_HEIGHT } from '../../Home'
 
 import { ConstraintViolationsChart } from './ConstraintViolationsChart'
 
@@ -48,38 +46,33 @@ export function ConstraintViolationsCard() {
   }
 
   return (
-    <HomeCard>
+    <div
+      css={{
+        display: 'flex',
+        gap: theme.spacing.large,
+        maxHeight: HOME_CARD_MAX_HEIGHT,
+      }}
+    >
+      <ConstraintViolationsChart data={chartData} />
       <div
         css={{
           display: 'flex',
-          height: '100%',
+          width: '100%',
         }}
       >
-        <div css={{ minWidth: 'fit-content', padding: theme.spacing.xlarge }}>
-          <H1 title2>Constraint Violations</H1>
-          <ConstraintViolationsChart data={chartData} />
-        </div>
-        <div
-          css={{
-            display: 'flex',
-            width: '100%',
-            padding: theme.spacing.medium,
-          }}
-        >
-          {!tableData ? (
-            <TableSkeleton centered />
-          ) : (
-            <PoliciesTable
-              caret
-              data={tableData}
-              refetch={refetch}
-              fetchNextPage={fetchNextPage}
-              loading={loading}
-              setVirtualSlice={setVirtualSlice}
-            />
-          )}
-        </div>
+        {!tableData ? (
+          <TableSkeleton centered />
+        ) : (
+          <PoliciesTable
+            caret
+            data={tableData}
+            refetch={refetch}
+            fetchNextPage={fetchNextPage}
+            loading={loading}
+            setVirtualSlice={setVirtualSlice}
+          />
+        )}
       </div>
-    </HomeCard>
+    </div>
   )
 }
