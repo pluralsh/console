@@ -123,7 +123,7 @@ export function AITableEntry({
           <Chip severity={isStale ? 'neutral' : 'success'}>
             {isStale ? 'Stale' : 'Active'}
           </Chip>
-          {hidePins !== false && (
+          {!hidePins && (
             <IconFrame
               clickable
               onClick={(e) => {
