@@ -80,7 +80,7 @@ func (in *VertexProxy) modifyResponseBody(r *http.Response) error {
 }
 
 func NewVertexProxy(target, serviceAccount string) (api.TranslationProxy, error) {
-	credentials, err := google.CredentialsFromJSON(context.Background(), []byte(serviceAccount), "test")
+	credentials, err := google.CredentialsFromJSON(context.Background(), []byte(serviceAccount), "https://www.googleapis.com/auth/cloud-platform.read-only")
 	if err != nil {
 		return nil, err
 	}
