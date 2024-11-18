@@ -37,6 +37,7 @@ export function AiThreads() {
       <AITable
         query={threadsQuery}
         rowData={threads}
+        hidePins
         css={{
           border: 'none',
           borderTopLeftRadius: 0,

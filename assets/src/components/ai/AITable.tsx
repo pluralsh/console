@@ -20,18 +20,20 @@ import { TableProps } from '@pluralsh/design-system/dist/components/Table'
 
 export function AITable({
   modal = false,
+  hidePins = false,
   query,
   rowData,
   ...props
 }: {
   modal?: boolean
+  hidePins?: boolean
   query: FetchPaginatedDataResult<AiPinsQuery | ChatThreadsQuery>
   rowData: AiPinFragment[] | ChatThreadTinyFragment[]
 } & Omit<TableProps, 'data' | 'columns'>) {
   const theme = useTheme()
 
   const reactTableOptions = {
-    meta: { modal },
+    meta: { modal, hidePins },
   }
 
   if (query.error) return <GqlError error={query.error} />
@@ -107,12 +109,14 @@ const TableRow = columnHelper.accessor((item) => item, {
         id: item.id,
       },
     })
+
     return (
       <AITableEntry
         item={item}
         onClickPin={() => (isPin ? unpinThread() : pinThread())}
         pinLoading={pinLoading || unpinLoading}
         modal={table.options.meta?.modal}
+        hidePins={table.options.meta?.hidePins}
       />
     )
   },

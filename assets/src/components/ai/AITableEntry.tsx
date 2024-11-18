@@ -61,12 +61,14 @@ export function AITableEntry({
   onClickPin,
   pinLoading,
   modal,
+  hidePins,
   ...props
 }: {
   item: ChatThreadTinyFragment | AiPinFragment
   onClickPin?: () => void
   pinLoading?: boolean
   modal?: boolean | null
+  hidePins?: boolean | null
 } & ComponentProps<'div'>) {
   const theme = useTheme()
   const { pathname } = useLocation()
@@ -121,23 +123,25 @@ export function AITableEntry({
           <Chip severity={isStale ? 'neutral' : 'success'}>
             {isStale ? 'Stale' : 'Active'}
           </Chip>
-          <IconFrame
-            clickable
-            onClick={(e) => {
-              e.stopPropagation()
-              if (pinLoading) return
-              onClickPin?.()
-            }}
-            icon={
-              pinLoading ? (
-                <Spinner />
-              ) : isPin ? (
-                <PushPinFilledIcon color={theme.colors['icon-info']} />
-              ) : (
-                <PushPinOutlineIcon />
-              )
-            }
-          />
+          {hidePins !== false && (
+            <IconFrame
+              clickable
+              onClick={(e) => {
+                e.stopPropagation()
+                if (pinLoading) return
+                onClickPin?.()
+              }}
+              icon={
+                pinLoading ? (
+                  <Spinner />
+                ) : isPin ? (
+                  <PushPinFilledIcon color={theme.colors['icon-info']} />
+                ) : (
+                  <PushPinOutlineIcon />
+                )
+              }
+            />
+          )}
         </>
       )}
       {isInsight ? (
