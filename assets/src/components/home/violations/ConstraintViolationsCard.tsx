@@ -32,9 +32,7 @@ export function ConstraintViolationsCard() {
   })
 
   const { data: chartData, error: chartError } = usePolicyStatisticsQuery({
-    variables: {
-      aggregate: PolicyAggregate.Cluster,
-    },
+    variables: { aggregate: PolicyAggregate.Cluster },
     pollInterval: POLL_INTERVAL,
   })
 

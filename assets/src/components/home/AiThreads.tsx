@@ -8,6 +8,7 @@ import {
 } from '../../generated/graphql.ts'
 import { useMemo } from 'react'
 import { sortThreadsOrPins } from '../ai/AITableEntry.tsx'
+import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 
 export function AiThreads() {
   const threadsQuery = useFetchPaginatedData({
@@ -30,6 +31,7 @@ export function AiThreads() {
     <HomeCard
       title="Most recent AI threads"
       icon={<AiSparkleOutlineIcon />}
+      link={AI_ABS_PATH}
       noPadding
     >
       <AITable

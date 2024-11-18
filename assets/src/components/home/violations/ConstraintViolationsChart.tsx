@@ -13,6 +13,7 @@ import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 import { CustomLegend } from '../CustomLegend'
 import { HomeCard } from '../HomeCard.tsx'
 import { WarningShieldIcon } from '@pluralsh/design-system'
+import { POLICIES_ABS_PATH } from '../../../routes/policiesRoutesConsts.tsx'
 
 const CHART_SIZE = 240
 
@@ -39,7 +40,7 @@ export function ConstraintViolationsChart({
   return (
     <HomeCard
       icon={<WarningShieldIcon />}
-      title="Constraint Violations"
+      title="Policy overview"
       tooltip={
         <div>
           {legendData.map((legend, index) => (
@@ -50,6 +51,7 @@ export function ConstraintViolationsChart({
           ))}
         </div>
       }
+      link={POLICIES_ABS_PATH}
     >
       <RadialBar
         colors={(item) => chartColors[item.data.color]}

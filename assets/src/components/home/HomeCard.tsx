@@ -1,6 +1,13 @@
 import { ReactElement, ReactNode } from 'react'
 import { useTheme } from 'styled-components'
-import { Card, InfoOutlineIcon, Tooltip } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Card,
+  IconFrame,
+  InfoOutlineIcon,
+  Tooltip,
+} from '@pluralsh/design-system'
+import { useNavigate } from 'react-router-dom'
 
 export const HOME_CARD_MAX_HEIGHT = 330
 const HOME_CARD_HEADER_HEIGHT = 48
@@ -10,16 +17,19 @@ export function HomeCard({
   icon,
   title,
   tooltip,
+  link,
   noPadding = false,
   children,
 }: {
   icon?: ReactElement
   title: string
   tooltip?: ReactNode
+  link?: string
   noPadding?: boolean
   children: ReactNode
 }) {
   const theme = useTheme()
+  const navigate = useNavigate()
 
   return (
     <Card
@@ -38,7 +48,7 @@ export function HomeCard({
           borderTopRightRadius: theme.borderRadiuses.large,
           backgroundColor: theme.colors['fill-two'],
           display: 'flex',
-          gap: theme.spacing.medium,
+          gap: theme.spacing.small,
           height: HOME_CARD_HEADER_HEIGHT,
           padding: theme.spacing.medium,
           overflow: 'hidden',
@@ -60,6 +70,13 @@ export function HomeCard({
               <InfoOutlineIcon />
             </div>
           </Tooltip>
+        )}
+        {link && (
+          <IconFrame
+            clickable
+            onClick={() => navigate(link)}
+            icon={<ArrowTopRightIcon />}
+          />
         )}
       </div>
       <div
