@@ -21,7 +21,8 @@ podAnnotations: {}
 
 migrator: {}
 
-console: {}
+console:
+  additionalContainers: ~
 
 secrets:
   cluster_name: test

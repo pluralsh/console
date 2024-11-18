@@ -48,6 +48,9 @@ spec:
             mountPath: /shared
       {{- end }}
       containers:
+      {{ if .Values.console.additionalContainers }}
+      {{ toYaml .Values.console.additionalContainers | nindent 6 }}
+      {{ end }}
       - name: auth
         {{ if .Values.console.containerSecurityContext }}
         securityContext:
