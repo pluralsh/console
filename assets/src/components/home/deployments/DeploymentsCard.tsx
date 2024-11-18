@@ -44,7 +44,13 @@ export function DeploymentsCard() {
   const numDeployments = data?.serviceDeployments?.edges?.length
 
   return (
-    <div>
+    <div
+      css={{
+        '@media (min-width: 1168px)': {
+          width: '50%',
+        },
+      }}
+    >
       <OverlineH1
         css={{
           color: theme.colors['text-xlight'],

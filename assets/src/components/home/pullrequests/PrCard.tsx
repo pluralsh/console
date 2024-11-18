@@ -32,7 +32,13 @@ export function PrCard() {
     numPrs === 1 ? `1 PR needs action` : `${numPrs} PRs need action`
 
   return (
-    <div>
+    <div
+      css={{
+        '@media (min-width: 1168px)': {
+          width: '50%',
+        },
+      }}
+    >
       <OverlineH1
         css={{
           color: theme.colors['text-xlight'],
