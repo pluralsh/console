@@ -41,8 +41,8 @@ export function ConstraintViolationsChart({
         colors={(item) => chartColors[item.data.color]}
         endAngle={360}
         cornerRadius={5}
-        padAngle={1}
-        padding={0.6}
+        padAngle={2}
+        padding={0.5}
         innerRadius={0.4}
         tooltip={(props) => (
           <ChartTooltip

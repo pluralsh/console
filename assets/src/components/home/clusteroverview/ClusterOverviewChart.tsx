@@ -44,9 +44,9 @@ export function ClusterOverviewChart({
         colors={(item) => chartColors[item.data.color]}
         endAngle={360}
         cornerRadius={5}
-        padAngle={1}
-        padding={0.6}
-        innerRadius={0.4}
+        padAngle={2}
+        padding={0.3}
+        innerRadius={0.35}
         tooltip={(props) => (
           <ChartTooltip
             color={props.bar.color}
