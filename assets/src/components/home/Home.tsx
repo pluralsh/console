@@ -4,10 +4,9 @@ import styled, { useTheme } from 'styled-components'
 import { useIsManager } from 'components/contexts'
 import { ClusterOverviewCard } from './clusteroverview/ClusterOverviewCard'
 import { DeploymentsCard } from './deployments/DeploymentsCard'
-import { ConstraintViolationsCard } from './managerview/violations/ConstraintViolationsCard'
+import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
 import { PrCard } from './pullrequests/PrCard'
-
-export const HOME_CARD_MAX_HEIGHT = '330px'
+import { AiThreads } from './AiThreads.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
@@ -23,6 +22,7 @@ export default function Home() {
     >
       <HomeContentWrapperSC>
         <ClusterOverviewCard />
+        <AiThreads />
         {isManager && <ConstraintViolationsCard />}
         <div
           css={{
@@ -47,5 +47,5 @@ const HomeContentWrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
-  paddingBottom: theme.spacing.xxlarge,
+  paddingBottom: theme.spacing.large,
 }))

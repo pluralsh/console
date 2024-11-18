@@ -11,7 +11,7 @@ import { GqlError } from 'components/utils/Alert'
 import pluralize from 'pluralize'
 
 import { Title2H1 } from '../../utils/typography/Text'
-import { HOME_CARD_MAX_HEIGHT } from '../Home'
+import { HOME_CARD_MAX_HEIGHT } from '../HomeCard'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 

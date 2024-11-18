@@ -2,15 +2,19 @@ import { ReactElement, ReactNode } from 'react'
 import { useTheme } from 'styled-components'
 import { Card, InfoOutlineIcon, Tooltip } from '@pluralsh/design-system'
 
+export const HOME_CARD_MAX_HEIGHT = '330px'
+
 export function HomeCard({
   icon,
   title,
   tooltip,
+  noPadding = false,
   children,
 }: {
   icon?: ReactElement
   title: string
   tooltip?: ReactNode
+  noPadding?: boolean
   children: ReactNode
 }) {
   const theme = useTheme()
@@ -21,6 +25,7 @@ export function HomeCard({
         border: theme.borders['fill-two'],
         display: 'flex',
         flexDirection: 'column',
+        maxHeight: HOME_CARD_MAX_HEIGHT,
       }}
     >
       <div
@@ -56,11 +61,9 @@ export function HomeCard({
       </div>
       <div
         css={{
-          alignItems: 'center',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
-          padding: theme.spacing.large,
+          padding: noPadding ? undefined : theme.spacing.large,
         }}
       >
         {children}

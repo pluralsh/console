@@ -10,8 +10,8 @@ import { useMemo } from 'react'
 
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
-import { CustomLegend } from '../../CustomLegend'
-import { HomeCard } from '../../HomeCard.tsx'
+import { CustomLegend } from '../CustomLegend'
+import { HomeCard } from '../HomeCard.tsx'
 import { WarningShieldIcon } from '@pluralsh/design-system'
 
 const CHART_SIZE = 240
@@ -92,12 +92,12 @@ const useChartData = (
         data: [
           {
             color: 'red',
-            x: 'With Violations',
+            x: 'With violations',
             y: numWithViolations,
           },
           {
             color: 'green',
-            x: 'Without Violations',
+            x: 'Without violations',
             y: numWithoutViolations || 0,
           },
         ],

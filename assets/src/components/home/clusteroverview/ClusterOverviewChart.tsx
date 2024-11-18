@@ -91,12 +91,12 @@ const useChartData = (
           { color: 'blue', x: 'Latest', y: latest || 0 },
           {
             color: 'purple',
-            x: 'Version Compliant',
+            x: 'Version compliant',
             y: (compliant || 0) - (latest || 0),
           },
           {
             color: 'yellow',
-            x: 'Not Version Compliant',
+            x: 'Not version compliant',
             y: (count || 0) - (compliant || 0),
           },
         ],
@@ -107,7 +107,7 @@ const useChartData = (
           { color: 'green', x: 'Upgradeable', y: upgradeable || 0 },
           {
             color: 'red',
-            x: 'Not Upgradeable',
+            x: 'Not upgradeable',
             y: (count || 0) - (upgradeable || 0),
           },
         ],

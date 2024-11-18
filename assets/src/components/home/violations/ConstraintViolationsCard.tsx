@@ -13,7 +13,7 @@ import { PoliciesTable } from 'components/policies/PoliciesTable'
 
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 
-import { HOME_CARD_MAX_HEIGHT } from '../../Home'
+import { HOME_CARD_MAX_HEIGHT } from '../HomeCard'
 
 import { ConstraintViolationsChart } from './ConstraintViolationsChart'
 

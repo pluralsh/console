@@ -35,6 +35,7 @@ export function AITable({
   }
 
   if (query.error) return <GqlError error={query.error} />
+
   if (!query.data)
     return (
       <TableSkeleton

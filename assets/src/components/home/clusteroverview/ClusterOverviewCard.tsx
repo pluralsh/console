@@ -8,7 +8,7 @@ import { useClustersQuery, useUpgradeStatisticsQuery } from 'generated/graphql'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
-import { HOME_CARD_MAX_HEIGHT } from '../Home'
+import { HOME_CARD_MAX_HEIGHT } from '../HomeCard'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
