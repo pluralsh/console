@@ -22,7 +22,10 @@ export default function Home() {
   const isManager = useIsManager()
 
   return (
-    <ResponsivePageFullWidth style={{ paddingTop: 0 }}>
+    <ResponsivePageFullWidth
+      style={{ paddingTop: 0 }}
+      maxContentWidth={1440}
+    >
       <ConsolePageTitle
         headingProps={{ title2: false, title1: true }}
         heading={`Welcome${name ? `, ${name.split(' ')[0]}` : ''}!`}
