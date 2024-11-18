@@ -39,7 +39,6 @@ export function AiThreads() {
           border: 'none',
           borderTopLeftRadius: 0,
           borderTopRightRadius: 0,
-          width: '100%',
         }}
       />
     </HomeCard>
