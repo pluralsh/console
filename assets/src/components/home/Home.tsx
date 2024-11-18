@@ -1,6 +1,6 @@
 import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import styled from 'styled-components'
+import styled, { useTheme } from 'styled-components'
 
 import { useIsManager, useLogin } from 'components/contexts'
 
@@ -17,6 +17,7 @@ const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export default function Home() {
   useSetBreadcrumbs(breadcrumbs)
+  const theme = useTheme()
   const name = useLogin().me?.name
   const isManager = useIsManager()
 
@@ -29,8 +30,20 @@ export default function Home() {
       <HomeContentWrapperSC>
         <ClusterOverviewCard />
         {isManager && <ConstraintViolationsCard />}
-        <PrCard />
-        <DeploymentsCard />
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+
+            '@media (min-width: 1168px)': {
+              flexDirection: 'row',
+            },
+          }}
+        >
+          <PrCard />
+          <DeploymentsCard />
+        </div>
         {/* <MonthlyClusterCostsCard /> */}
       </HomeContentWrapperSC>
     </ResponsivePageFullWidth>
