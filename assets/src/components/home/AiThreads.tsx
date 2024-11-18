@@ -1,4 +1,4 @@
-import { HomeCard } from './HomeCard.tsx'
+import { HOME_CARD_CONTENT_HEIGHT, HomeCard } from './HomeCard.tsx'
 import { AiSparkleOutlineIcon } from '@pluralsh/design-system'
 import { AITable } from '../ai/AITable.tsx'
 import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
@@ -42,6 +42,7 @@ export function AiThreads() {
           border: 'none',
           borderTopLeftRadius: 0,
           borderTopRightRadius: 0,
+          maxHeight: HOME_CARD_CONTENT_HEIGHT,
         }}
       />
     </HomeCard>
