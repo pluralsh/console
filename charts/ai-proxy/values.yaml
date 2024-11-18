@@ -14,13 +14,14 @@ image:
   tag: "v1.0.0"
 
 config:
-  # One of: ollama, openai
+  # One of: ollama, openai, vertex
   provider: openai
   # Provider API URL
   providerHost: https://api.openai.com
 
 secrets:
-  token: changeme
+  token: ~
+  serviceAccount: ~
 
 # AI Proxy container args
 # Note: It can override config.provider and config.providerHost
