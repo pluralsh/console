@@ -41,7 +41,8 @@ config :console,
   git_ssh_key: :pass,
   cache_adapter: Console.TestCache,
   local_cache: Console.TestCache,
-  grafana_dns: "grafana.example.com"
+  grafana_dns: "grafana.example.com",
+  prom_plugins: []
 
 config :console, :login_link,
   key: "test-key",

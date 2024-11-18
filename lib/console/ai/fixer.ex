@@ -9,6 +9,12 @@ defmodule Console.AI.Fixer do
   alias Console.AI.Fixer.Stack, as: StackFixer
   alias Console.AI.Provider
 
+  @prompt """
+  Please provide the most straightforward code or configuration change available based on the information I've already provided above to fix this issue.
+
+  Be sure to explicitly state the Git repository and full file names that are needed to change, alongside the complete content of the files that need to be modified.
+  """
+
   @callback prompt(struct, binary) :: {:ok, Provider.history} | Console.error
 
   @doc """
@@ -38,5 +44,5 @@ defmodule Console.AI.Fixer do
     |> when_ok(&fix/1)
   end
 
-  defp ask(prompt), do: prompt ++ [{:user, "please provide the most straightforward code or configuration change available based on the information I've already provided above to fix this issue.  Be sure the Git repository and full file names that are needed to change."}]
+  defp ask(prompt), do: prompt ++ [{:user, @prompt}]
 end

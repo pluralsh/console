@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Statistics do
-  alias Console.Prom.Metrics
+  import Console.Prom.Plugin, only: [metric_scope: 1]
   alias Console.Schema.{Cluster, Service}
 
   def compile() do
@@ -12,7 +12,8 @@ defmodule Console.Deployments.Statistics do
     |> Console.Repo.one()
     |> case do
       %{unhealthy: h, count: c} ->
-        Metrics.cluster(c, h)
+        :telemetry.execute(metric_scope(:cluster_count), %{total: c}, %{})
+        :telemetry.execute(metric_scope(:unhealthy_cluster_count), %{total: h}, %{})
       _ -> :ok
     end
   end
@@ -22,7 +23,8 @@ defmodule Console.Deployments.Statistics do
     |> Console.Repo.one()
     |> case do
       %{unhealthy: h, count: c} ->
-        Metrics.service(c, h)
+        :telemetry.execute(metric_scope(:service_count), %{total: c}, %{})
+        :telemetry.execute(metric_scope(:failed_service_count), %{total: h}, %{})
       _ -> :ok
     end
   end

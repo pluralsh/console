@@ -1,5 +1,5 @@
 defmodule Console.Deployments.Git.Statistics do
-  alias Console.Prom.Metrics
+  import Console.Prom.Plugin, only: [metric_scope: 1]
 
   def disk() do
     {count, size} =
@@ -10,6 +10,7 @@ defmodule Console.Deployments.Git.Statistics do
         {count + dc, size + ds}
       end)
 
-    Metrics.filecache(count, size)
+    :telemetry.execute(metric_scope(:file_count), %{total: count}, %{})
+    :telemetry.execute(metric_scope(:file_size), %{total: size}, %{})
   end
 end
