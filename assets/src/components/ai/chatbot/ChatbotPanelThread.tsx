@@ -1,40 +1,17 @@
-import {
-  Card,
-  CheckIcon,
-  CopyIcon,
-  EmptyState,
-  Flex,
-  IconFrame,
-  PluralLogoMark,
-  ProgressBar,
-  SendMessageIcon,
-  Spinner,
-  TrashCanIcon,
-  usePrevious,
-  WrapWithIf,
-} from '@pluralsh/design-system'
+import { EmptyState, usePrevious } from '@pluralsh/design-system'
 
-import usePersistedSessionState from 'components/hooks/usePersistedSessionState'
-import { usePlatform } from 'components/hooks/usePlatform'
-import { submitForm } from 'components/utils/submitForm'
 import {
-  ComponentProps,
-  forwardRef,
-  KeyboardEvent,
   ReactNode,
   Ref,
   useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
 } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
 import { GqlError } from 'components/utils/Alert.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
-import { textAreaInsert } from 'components/utils/textAreaInsert'
 import {
   AiRole,
   ChatFragment,
@@ -43,12 +20,16 @@ import {
   ChatThreadFragment,
   useChatMutation,
   useChatThreadDetailsQuery,
-  useDeleteChatMutation,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
-import CopyToClipboard from 'react-copy-to-clipboard'
 import { appendConnectionToEnd, updateCache } from 'utils/graphql.ts'
-import ChatbotMarkdown from './ChatbotMarkdown.tsx'
+import {
+  GeneratingResponseMessage,
+  SendMessageForm,
+} from './ChatbotSendMessageForm.tsx'
+import { ChatMessage } from './ChatMessage.tsx'
+import { useCanScroll } from 'components/hooks/useCanScroll.ts'
+import { mergeRefs } from 'react-merge-refs'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -131,13 +112,12 @@ export function ChatbotPanelThread({
   const messages = data.chatThread.chats.edges
     .map((edge) => edge?.node)
     .filter((msg): msg is ChatFragment => Boolean(msg))
-
   return (
     <>
       {messageError && <GqlError error={messageError} />}
-      <ChatbotMessagesSC
-        ref={messageListRef}
-        $fullscreen={fullscreen}
+      <ChatbotMessagesWrapper
+        messageListRef={messageListRef}
+        fullscreen={fullscreen}
       >
         {isEmpty(messages) && <EmptyState message="No messages yet." />}
         {messages.map((msg) => (
@@ -146,10 +126,10 @@ export function ChatbotPanelThread({
             {...msg}
           />
         ))}
-      </ChatbotMessagesSC>
-      <ChatbotForm
+        {sendingMessage && <GeneratingResponseMessage />}
+      </ChatbotMessagesWrapper>
+      <SendMessageForm
         sendMessage={sendMessage}
-        isSendingMessage={sendingMessage}
         ref={inputRef}
         fullscreen={fullscreen}
       />
@@ -157,308 +137,72 @@ export function ChatbotPanelThread({
   )
 }
 
-const ChatMessage = forwardRef(
-  (
-    {
-      id,
-      content,
-      role,
-      disableActions,
-      ...props
-    }: {
-      content: string
-      role: AiRole
-      disableActions?: boolean
-    } & ComponentProps<typeof ChatMessageSC>,
-    ref: Ref<HTMLLIElement>
-  ) => {
-    const theme = useTheme()
-    const [showActions, setShowActions] = useState(false)
-    let finalContent: ReactNode
-
-    if (role === AiRole.Assistant || role === AiRole.System) {
-      finalContent = <ChatbotMarkdown text={content} />
-    } else {
-      finalContent = content.split('\n\n').map((str, i) => (
-        <Card
-          key={i}
-          css={{ padding: theme.spacing.medium }}
-          fillLevel={2}
-        >
-          {str.split('\n').map((line, i, arr) => (
-            <div
-              key={`${i}-${line}`}
-              css={{ display: 'contents' }}
-            >
-              {line}
-              {i !== arr.length - 1 ? <br /> : null}
-            </div>
-          ))}
-        </Card>
-      ))
-    }
-
-    return (
-      <ChatMessageSC
-        onMouseEnter={() => setShowActions(true)}
-        onMouseLeave={() => setShowActions(false)}
-        ref={ref}
-        {...props}
-      >
-        <ChatMessageActions
-          id={id ?? ''}
-          content={content}
-          show={showActions && !disableActions}
-        />
-        <Flex
-          gap="medium"
-          justify={role === AiRole.User ? 'flex-end' : 'flex-start'}
-        >
-          {role !== AiRole.User && <PluralAssistantIcon />}
-          <div>{finalContent}</div>
-        </Flex>
-      </ChatMessageSC>
-    )
-  }
-)
-
-function ChatMessageActions({
-  id,
-  content,
-  show,
+export const ChatbotMessagesWrapper = ({
+  fullscreen,
+  messageListRef,
+  children,
 }: {
-  id: string
-  content: string
-  show: boolean
-}) {
-  const [copied, setCopied] = useState(false)
+  fullscreen: boolean
+  messageListRef?: Ref<HTMLUListElement>
+  children: ReactNode
+}) => {
+  const internalRef = useRef<HTMLUListElement>(null)
+  const combinedRef = mergeRefs([messageListRef, internalRef])
 
-  const showCopied = () => {
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const [deleteMessage, { loading: deleteLoading }] = useDeleteChatMutation({
-    awaitRefetchQueries: true,
-    refetchQueries: ['ChatThreadDetails'],
-  })
+  const { canScrollDown, canScrollUp } = useCanScroll(internalRef)
 
   return (
-    <ActionsWrapperSC $show={show}>
-      <WrapWithIf
-        condition={!copied}
-        wrapper={
-          <CopyToClipboard
-            text={content}
-            onCopy={showCopied}
-          />
-        }
-      >
-        <IconFrame
-          clickable
-          tooltip="Copy to clipboard"
-          type="floating"
-          size="medium"
-          icon={copied ? <CheckIcon color="icon-success" /> : <CopyIcon />}
-        />
-      </WrapWithIf>
-      <IconFrame
-        clickable
-        tooltip="Delete message"
-        type="floating"
-        size="medium"
-        onClick={
-          deleteLoading ? undefined : () => deleteMessage({ variables: { id } })
-        }
-        icon={
-          deleteLoading ? <Spinner /> : <TrashCanIcon color="icon-danger" />
-        }
+    <ChatbotMessagesWrapperSC $fullscreen={fullscreen}>
+      <ScrollGradientSC
+        $show={canScrollUp}
+        $position="top"
       />
-    </ActionsWrapperSC>
+      <ScrollGradientSC
+        $show={canScrollDown}
+        $position="bottom"
+      />
+      <ChatbotMessagesListSC ref={combinedRef}>
+        {children}
+      </ChatbotMessagesListSC>
+    </ChatbotMessagesWrapperSC>
   )
 }
 
-const ChatbotForm = forwardRef(
-  (
-    {
-      sendMessage,
-      isSendingMessage,
-      fullscreen,
-      ...props
-    }: {
-      sendMessage: (newMessage: string) => void
-      isSendingMessage: boolean
-      fullscreen: boolean
-    } & ComponentProps<'textarea'>,
-    ref: Ref<HTMLTextAreaElement>
-  ) => {
-    const { isMac } = usePlatform()
-    const onKeyDown = useCallback(
-      (e: KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter') {
-          e.preventDefault()
-          let modKeyPressed = e.shiftKey || e.ctrlKey || e.altKey
-
-          if (isMac) {
-            modKeyPressed = modKeyPressed || e.metaKey
-          }
-          if (modKeyPressed) {
-            textAreaInsert(e.currentTarget, '\n')
-          } else {
-            submitForm(e.currentTarget?.form)
-          }
-        }
-      },
-      [isMac]
-    )
-    const [newMessage, setNewMessage] = usePersistedSessionState<string>(
-      'currentAiChatMessage',
-      ''
-    )
-
-    return (
-      <ChatbotFormSC
-        onSubmit={(e) => {
-          e.preventDefault()
-          sendMessage(newMessage)
-          setNewMessage('')
-        }}
-        $fullscreen={fullscreen}
-      >
-        <ChatbotTextAreaWrapperSC $fullscreen={fullscreen}>
-          <ChatbotTextAreaSC
-            placeholder="Ask Plural AI"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.currentTarget.value)}
-            ref={ref}
-            {...props}
-            onKeyDown={onKeyDown}
-          />
-          <SendMessageButtonSC type="submit">
-            <SendMessageIcon />
-          </SendMessageButtonSC>
-        </ChatbotTextAreaWrapperSC>
-        <ChatbotLoadingBarSC
-          $show={isSendingMessage}
-          complete={false}
-        />
-      </ChatbotFormSC>
-    )
-  }
-)
-
-const ActionsWrapperSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
-  position: 'absolute',
-  top: theme.spacing.small,
-  right: theme.spacing.small,
-  display: 'flex',
-  gap: theme.spacing.xsmall,
-  opacity: $show ? 1 : 0,
-  transition: '0.2s opacity ease',
-  pointerEvents: $show ? 'auto' : 'none',
-}))
-
-const ChatMessageSC = styled.li(({ theme }) => ({
-  ...theme.partials.reset.li,
-  position: 'relative',
-  padding: theme.spacing.small,
-}))
-
-const ChatbotLoadingBarSC = styled(ProgressBar)<{ $show: boolean }>(
-  ({ theme, $show }) => ({
-    position: 'absolute',
-    top: -theme.borderWidths.default,
-    left: 0,
-    right: 0,
-    height: theme.borderWidths.default,
-    transition: '0.2s opacity ease',
-    opacity: $show ? 1 : 0,
-  })
-)
-
-const ChatbotMessagesSC = styled.ul<{ $fullscreen: boolean }>(
+const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
   ({ theme, $fullscreen }) => ({
+    position: 'relative',
     ...($fullscreen && {
       borderRadius: theme.borderRadiuses.large,
       border: theme.borders.input,
     }),
-    ...theme.partials.reset.list,
-    backgroundColor: theme.colors['fill-one'],
-    overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    padding: theme.spacing.xsmall,
-    flexGrow: 1,
+    backgroundColor: theme.colors['fill-one'],
+    overflow: 'hidden',
+    padding: `0 ${theme.spacing.xsmall}px`,
+    flex: 1,
   })
 )
 
-const ChatbotFormSC = styled.form<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    ...($fullscreen && {
-      border: theme.borders.input,
-    }),
-    position: 'relative',
-    borderRadius: theme.borderRadiuses.large,
-    backgroundColor: $fullscreen
-      ? theme.colors['fill-one']
-      : theme.colors['fill-two'],
-    padding: theme.spacing.medium,
-  })
-)
-
-const ChatbotTextAreaWrapperSC = styled.div<{ $fullscreen: boolean }>(
-  ({ theme, $fullscreen }) => ({
-    display: 'flex',
-    gap: theme.spacing.medium,
-    borderRadius: theme.borderRadiuses.large,
-    backgroundColor: $fullscreen
-      ? theme.colors['fill-two']
-      : theme.colors['fill-three'],
-    '&:has(textarea:focus)': {
-      outline: theme.borders['outline-focused'],
-    },
-  })
-)
-
-const ChatbotTextAreaSC = styled.textarea(({ theme }) => ({
-  ...theme.partials.text.body2,
-  flex: 1,
-  padding: `${theme.spacing.medium}px 0 0 ${theme.spacing.small}px`,
-  backgroundColor: 'transparent',
-  border: 'none',
-  outline: 'none',
-  resize: 'none',
-  color: theme.colors.text,
-}))
-
-const SendMessageButtonSC = styled.button(({ theme }) => ({
-  ...theme.partials.reset.button,
-  padding: theme.spacing.small,
-  '&:hover': {
-    backgroundColor: theme.colors['fill-three-selected'],
-  },
-}))
-
-function PluralAssistantIcon() {
-  return (
-    <AssistantIconWrapperSC>
-      <PluralLogoMark
-        width={16}
-        height={16}
-      />
-    </AssistantIconWrapperSC>
-  )
-}
-
-const AssistantIconWrapperSC = styled.div(({ theme }) => ({
-  ...aiGradientBorderStyles(theme, 'fill-two'),
-  width: theme.spacing.xlarge,
-  height: theme.spacing.xlarge,
-  borderRadius: theme.borderRadiuses.large,
+const ChatbotMessagesListSC = styled.ul(({ theme }) => ({
+  ...theme.partials.reset.list,
+  scrollbarWidth: 'none',
+  overflowY: 'auto',
   padding: theme.spacing.xsmall,
-  svg: {
-    transform: 'translateY(-1px) translateX(-1px)',
-  },
 }))
 
-export { ChatbotMessagesSC, ChatMessage }
+const ScrollGradientSC = styled.div<{
+  $show?: boolean
+  $position: 'top' | 'bottom'
+}>(({ theme, $show = true, $position }) => ({
+  position: 'absolute',
+  opacity: $show ? 1 : 0,
+  zIndex: 1,
+  [$position]: '0',
+  transition: 'opacity 0.16s ease-in-out',
+  left: 0,
+  right: 0,
+  height: theme.spacing.xxlarge,
+  background: `linear-gradient(${$position === 'top' ? '180deg' : '0deg'}, rgba(42, 46, 55, 0.90) 0%, rgba(42, 46, 55, 0.20) 75%, transparent 100%)`,
+  pointerEvents: 'none',
+}))
