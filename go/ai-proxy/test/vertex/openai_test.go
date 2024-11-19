@@ -20,7 +20,7 @@ import (
 
 func init() {
 	_ = pflag.Set("provider", "vertex")
-	_ = pflag.Set("provider-host", "localhost:8080")
+	_ = pflag.Set("provider-host", "localhost:8082")
 	_ = pflag.Set("provider-service-account", "{\"type\":\"service_account\",\"project_id\":\"test\",\"private_key_id\":\"test\",\"private_key\":\"test\",\"client_email\":\"vertex@test.iam.gserviceaccount.com\",\"client_id\":\"12345\",\"auth_uri\":\"https://accounts.google.com/o/oauth2/auth\",\"token_uri\":\"https://oauth2.googleapis.com/token\",\"auth_provider_x509_cert_url\":\"https://www.googleapis.com/oauth2/v1/certs\",\"client_x509_cert_url\":\"https://www.googleapis.com/robot/v1/metadata/x509/vertex%40test.iam.gserviceaccount.com\",\"universe_domain\":\"googleapis.com\"}")
 	_ = os.Setenv(vertex.EnvLocation, "us-central1")
 	_ = os.Setenv(vertex.EnvProjectID, "test")
