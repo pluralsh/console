@@ -624,6 +624,8 @@ export type AzureOpenaiAttributes = {
   apiVersion?: InputMaybe<Scalars['String']['input']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
   endpoint: Scalars['String']['input'];
+  /** the exact model you wish to use */
+  model?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Settings for configuring against Azure OpenAI */
@@ -9309,6 +9311,8 @@ export type VersionReference = {
 };
 
 export type VertexAiAttributes = {
+  /** custom vertexai endpoint if for dedicated customer deployments */
+  endpoint?: InputMaybe<Scalars['String']['input']>;
   /** the gcp region the model is hosted in */
   location: Scalars['String']['input'];
   /** the vertex model id to use */

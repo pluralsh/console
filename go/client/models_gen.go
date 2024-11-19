@@ -466,6 +466,8 @@ type AzureOpenaiAttributes struct {
 	Endpoint string `json:"endpoint"`
 	// the api version you want to use
 	APIVersion *string `json:"apiVersion,omitempty"`
+	// the exact model you wish to use
+	Model *string `json:"model,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
 }
@@ -5738,6 +5740,8 @@ type VertexAiAttributes struct {
 	Model *string `json:"model,omitempty"`
 	// optional service account json to auth to the GCP vertex apis
 	ServiceAccountJSON *string `json:"serviceAccountJson,omitempty"`
+	// custom vertexai endpoint if for dedicated customer deployments
+	Endpoint *string `json:"endpoint,omitempty"`
 	// the gcp project id to use
 	Project string `json:"project"`
 	// the gcp region the model is hosted in

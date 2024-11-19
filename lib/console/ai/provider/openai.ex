@@ -6,7 +6,11 @@ defmodule Console.AI.OpenAI do
 
   require Logger
 
-  defstruct [:access_key, :model, :base_url]
+  @model "gpt-4o-mini"
+
+  def default_model(), do: @model
+
+  defstruct [:access_key, :model, :base_url, :params]
 
   @type t :: %__MODULE__{}
 
@@ -73,8 +77,10 @@ defmodule Console.AI.OpenAI do
   end
   defp handle_response({:error, err}, _), do: {:error, "openai network error: #{Jason.encode!(Map.from_struct(err))}"}
 
-  defp url(%__MODULE__{base_url: url}, path) when is_binary(url), do: Path.join(url, path)
-  defp url(_, path), do: "https://api.openai.com/v1#{path}"
+  defp url(%__MODULE__{base_url: url} = c, path) when is_binary(url), do: with_params(c, Path.join(url, path))
+  defp url(c, path), do: with_params(c, "https://api.openai.com/v1#{path}")
+
+  defp with_params(%__MODULE__{params: params}, p) when is_map(params), do: "#{p}&#{URI.encode_query(params)}"
 
   defp json_headers(token), do: headers([{"Content-Type", "application/json"}], token)
 

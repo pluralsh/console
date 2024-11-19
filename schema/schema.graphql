@@ -1130,6 +1130,9 @@ input AzureOpenaiAttributes {
   "the api version you want to use"
   apiVersion: String
 
+  "the exact model you wish to use"
+  model: String
+
   "the azure openai access token to use"
   accessToken: String!
 }
@@ -1151,6 +1154,9 @@ input VertexAiAttributes {
 
   "optional service account json to auth to the GCP vertex apis"
   serviceAccountJson: String
+
+  "custom vertexai endpoint if for dedicated customer deployments"
+  endpoint: String
 
   "the gcp project id to use"
   project: String!

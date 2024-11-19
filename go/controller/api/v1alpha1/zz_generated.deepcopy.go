@@ -117,6 +117,11 @@ func (in *AzureOpenAISettings) DeepCopyInto(out *AzureOpenAISettings) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.Model != nil {
+		in, out := &in.Model, &out.Model
+		*out = new(string)
+		**out = **in
+	}
 	in.TokenSecretRef.DeepCopyInto(&out.TokenSecretRef)
 }
 
@@ -5252,6 +5257,11 @@ func (in *VertexSettings) DeepCopyInto(out *VertexSettings) {
 	*out = *in
 	if in.Model != nil {
 		in, out := &in.Model, &out.Model
+		*out = new(string)
+		**out = **in
+	}
+	if in.Endpoint != nil {
+		in, out := &in.Endpoint, &out.Endpoint
 		*out = new(string)
 		**out = **in
 	}

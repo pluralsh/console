@@ -79,6 +79,7 @@ defmodule Console.Schema.DeploymentSettings do
       embeds_one :azure, Azure, on_replace: :update do
         field :api_version, :string
         field :endpoint,    :string
+        field :model,       :string
         field :access_key,  EncryptedString
       end
 
@@ -92,6 +93,7 @@ defmodule Console.Schema.DeploymentSettings do
         field :service_account_json, EncryptedString
         field :model,                :string
         field :project,              :string
+        field :endpoint,             :string
         field :location,             :string
       end
     end
@@ -180,8 +182,8 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp azure_openai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(endpoint api_version access_token)a)
-    |> validate_required(~w(url model)a)
+    |> cast(attrs, ~w(endpoint api_version access_token model)a)
+    |> validate_required(~w(access_token endpoint)a)
   end
 
   defp bedrock_changeset(model, attrs) do
@@ -192,7 +194,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp vertex_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model service_account_json project location)a)
+    |> cast(attrs, ~w(model service_account_json project location endpoint)a)
     |> validate_required([:project, :location])
     |> validate_change(:service_account_json, fn :service_account_json, json ->
       case Jason.decode(json) do

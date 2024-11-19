@@ -96,6 +96,10 @@ spec:
                         description: 'Your Azure OpenAI endpoint, should be formatted
                           like: https://{endpoint}/openai/deployments/{deployment-id}"'
                         type: string
+                      model:
+                        description: The OpenAi Model you wish to use.  If not specified,
+                          Plural will provide a default
+                        type: string
                       tokenSecretRef:
                         description: |-
                           TokenSecretRef is a reference to the local secret holding the token to access
@@ -251,6 +255,9 @@ spec:
                     description: Vertex holds configuration for using GCP VertexAI
                       to generate LLM insights
                     properties:
+                      endpoint:
+                        description: A custom endpoint for self-deployed models
+                        type: string
                       location:
                         description: The GCP region Vertex is queried from
                         type: string
