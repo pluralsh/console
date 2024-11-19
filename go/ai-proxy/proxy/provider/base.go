@@ -26,7 +26,9 @@ type baseTranslationProxy struct {
 	baseTargetURL *url.URL
 	proxy         *httputil.ReverseProxy
 	provider      api.Provider
-	mapping       func(string) string
+	// mapping is a request path mapping function that can expand env variables in a path
+	// with a custom values. See os.Expand mapping func for more information.
+	mapping func(string) string
 }
 
 func (in *baseTranslationProxy) Proxy() http.HandlerFunc {
@@ -52,7 +54,7 @@ func (in *baseTranslationProxy) ModifyRequest(r *httputil.ProxyRequest) {
 		"to", targetURL)
 }
 
-func (in *baseTranslationProxy) ModifyResponse(r *http.Response) error {
+func (in *baseTranslationProxy) ModifyResponse(r *http.Response) (err error) {
 	var reader io.Reader
 	contentEncoding := r.Header.Get(headerContentEncoding)
 	if len(contentEncoding) == 0 {
@@ -65,7 +67,10 @@ func (in *baseTranslationProxy) ModifyResponse(r *http.Response) error {
 		reader = brotli.NewReader(r.Body)
 	case "gzip": // gzip
 		r.Header.Del(headerContentEncoding)
-		reader, _ = gzip.NewReader(r.Body)
+		reader, err = gzip.NewReader(r.Body)
+		if err != nil {
+			return err
+		}
 	}
 
 	respBody, err := io.ReadAll(reader)

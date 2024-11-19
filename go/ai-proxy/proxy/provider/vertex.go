@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -18,8 +19,7 @@ import (
 type VertexProxy struct {
 	*baseTranslationProxy
 
-	serviceAccount string
-	source         oauth2.TokenSource
+	source oauth2.TokenSource
 }
 
 func (in *VertexProxy) ModifyRequest(r *httputil.ProxyRequest) {
@@ -85,25 +85,23 @@ func NewVertexProxy(target, serviceAccount string) (api.TranslationProxy, error)
 		return nil, err
 	}
 
-	proxy := &VertexProxy{serviceAccount: serviceAccount, source: credentials.TokenSource}
+	location := os.Getenv(vertex.EnvLocation)
+	projectID := credentials.ProjectID
+	if len(projectID) == 0 {
+		projectID = os.Getenv(vertex.EnvProjectID)
+	}
+
+	if len(location) == 0 || len(projectID) == 0 {
+		return nil, fmt.Errorf("one of %s, %s environment variables not set", vertex.EnvLocation, vertex.EnvProjectID)
+	}
+
+	proxy := &VertexProxy{source: credentials.TokenSource}
 	mapping := func(s string) string {
 		switch s {
 		case vertex.EnvProjectID:
-			if len(credentials.ProjectID) > 0 {
-				return credentials.ProjectID
-			}
-
-			if _, exists := os.LookupEnv(s); !exists {
-				klog.Errorf("%s env var required but not found", vertex.EnvProjectID)
-			}
-
-			return os.Getenv(s)
+			return projectID
 		case vertex.EnvLocation:
-			if _, exists := os.LookupEnv(s); !exists {
-				klog.Errorf("%s env var required but not found", vertex.EnvLocation)
-			}
-
-			return os.Getenv(s)
+			return location
 		}
 
 		return s
