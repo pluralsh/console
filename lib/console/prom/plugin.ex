@@ -75,7 +75,7 @@ defmodule Console.Prom.Plugin do
       poll_rate,
       {Console.Deployments.Git.Statistics, :disk, []},
       [
-        # Capture the total memory allocated to the entire Erlang VM (or BEAM for short)
+        # Capture the total number of files and disk utilization from console file caches
         last_value(
           [:local, :cache, :file, :count],
           event_name: metric_scope(:file_count),
