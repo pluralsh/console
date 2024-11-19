@@ -8,7 +8,7 @@ import (
 type Endpoint string
 
 const (
-	EndpointChat = "/v1beta1/projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/openapi/chat/completions"
+	EndpointChat = "/v1/projects/${PROJECT_ID}/locations/${LOCATION}/endpoints/openapi/chat/completions"
 	EnvProjectID = "PROJECT_ID"
 	EnvLocation  = "LOCATION"
 )
