@@ -9,7 +9,7 @@ type OllamaProxy struct {
 }
 
 func NewOllamaProxy(host string) (api.TranslationProxy, error) {
-	base, err := newBaseTranslationProxy(host, api.ProviderOllama, nil, nil)
+	base, err := newBaseTranslationProxy(host, api.ProviderOllama, nil, nil, nil)
 	if err != nil {
 		return nil, err
 	}

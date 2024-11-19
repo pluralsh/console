@@ -36,7 +36,7 @@ func (in *OpenAIProxy) ModifyResponse(r *http.Response) error {
 
 	err := in.modifyResponseBody(r)
 	if err != nil {
-		klog.ErrorS(err, "failed to map request body")
+		klog.ErrorS(err, "failed to map response body")
 		return err
 	}
 
@@ -69,7 +69,7 @@ func (in *OpenAIProxy) modifyResponseBody(r *http.Response) error {
 
 func NewOpenAIProxy(target, token string) (api.TranslationProxy, error) {
 	proxy := &OpenAIProxy{token: token}
-	base, err := newBaseTranslationProxy(target, api.ProviderOpenAI, proxy.ModifyRequest, proxy.ModifyResponse)
+	base, err := newBaseTranslationProxy(target, api.ProviderOpenAI, proxy.ModifyRequest, proxy.ModifyResponse, nil)
 	if err != nil {
 		return nil, err
 	}

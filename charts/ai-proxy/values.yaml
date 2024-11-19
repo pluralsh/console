@@ -11,16 +11,17 @@ image:
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "v1.0.0"
+  tag: ~
 
 config:
-  # One of: ollama, openai
+  # One of: ollama, openai, vertex
   provider: openai
   # Provider API URL
   providerHost: https://api.openai.com
 
 secrets:
-  token: changeme
+  token: ~
+  serviceAccount: ~
 
 # AI Proxy container args
 # Note: It can override config.provider and config.providerHost
