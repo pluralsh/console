@@ -9,8 +9,6 @@ import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import {
   ColCluster,
   ColErrors,
-  ColLastActivity,
-  ColRepo,
   ColServiceDeployment,
   ColStatus,
 } from 'components/cd/services/ServicesColumns'
@@ -61,8 +59,6 @@ export function DeploymentsTable({
 const deploymentsColumns = [
   ColServiceDeployment,
   ColCluster,
-  ColRepo,
-  ColLastActivity,
   ColStatus,
   ColErrors,
 ]

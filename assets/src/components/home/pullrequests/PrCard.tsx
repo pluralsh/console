@@ -3,11 +3,13 @@ import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedD
 import { usePullRequestsQuery } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 
-import { Title2H1 } from '../../utils/typography/Text'
+import { OverlineH1 } from '../../utils/typography/Text'
 
 import { PrTable } from './PrTable'
+import { useTheme } from 'styled-components'
 
 export function PrCard() {
+  const theme = useTheme()
   const {
     data,
     loading,
@@ -30,8 +32,21 @@ export function PrCard() {
     numPrs === 1 ? `1 PR needs action` : `${numPrs} PRs need action`
 
   return (
-    <div>
-      <Title2H1>{headerText}</Title2H1>
+    <div
+      css={{
+        '@media (min-width: 1168px)': {
+          width: '50%',
+        },
+      }}
+    >
+      <OverlineH1
+        css={{
+          color: theme.colors['text-xlight'],
+          marginBottom: theme.spacing.small,
+        }}
+      >
+        {headerText}
+      </OverlineH1>
       <PrTable
         data={data?.pullRequests?.edges}
         emptyStateProps={{ message: 'No open PRs' }}

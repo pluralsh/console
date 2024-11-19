@@ -5,15 +5,17 @@ import {
   createCenteredMetric,
 } from 'components/utils/RadialBarChart'
 import { PolicyStatisticsQuery } from 'generated/graphql'
-import styled from 'styled-components'
 
 import { useMemo } from 'react'
 
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
-import { CustomLegend } from '../../CustomLegend'
+import { CustomLegend } from '../CustomLegend'
+import { HomeCard } from '../HomeCard.tsx'
+import { WarningShieldIcon } from '@pluralsh/design-system'
+import { POLICIES_ABS_PATH } from '../../../routes/policiesRoutesConsts.tsx'
 
-const CHART_SIZE = 275
+const CHART_SIZE = 240
 
 export function ConstraintViolationsChart({
   data,
@@ -36,13 +38,27 @@ export function ConstraintViolationsChart({
   )
 
   return (
-    <ViewWrapperSC>
+    <HomeCard
+      icon={<WarningShieldIcon />}
+      title="Policy overview"
+      tooltip={
+        <div>
+          {legendData.map((legend, index) => (
+            <CustomLegend
+              key={index}
+              data={legend}
+            />
+          ))}
+        </div>
+      }
+      link={POLICIES_ABS_PATH}
+    >
       <RadialBar
         colors={(item) => chartColors[item.data.color]}
         endAngle={360}
         cornerRadius={5}
-        padAngle={1}
-        padding={0.6}
+        padAngle={2}
+        padding={0.5}
         innerRadius={0.4}
         tooltip={(props) => (
           <ChartTooltip
@@ -56,22 +72,9 @@ export function ConstraintViolationsChart({
         height={CHART_SIZE}
         width={CHART_SIZE}
       />
-      {legendData.map((legend, index) => (
-        <CustomLegend
-          key={index}
-          data={legend}
-        />
-      ))}
-    </ViewWrapperSC>
+    </HomeCard>
   )
 }
-
-const ViewWrapperSC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  height: '100%',
-})
 
 const useChartData = (
   data: PolicyStatisticsQuery,
@@ -91,12 +94,12 @@ const useChartData = (
         data: [
           {
             color: 'red',
-            x: 'With Violations',
+            x: 'With violations',
             y: numWithViolations,
           },
           {
             color: 'green',
-            x: 'Without Violations',
+            x: 'Without violations',
             y: numWithoutViolations || 0,
           },
         ],

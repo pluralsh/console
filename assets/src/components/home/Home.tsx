@@ -1,46 +1,49 @@
 import { Breadcrumb, useSetBreadcrumbs } from '@pluralsh/design-system'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-import styled from 'styled-components'
-
-import { useIsManager, useLogin } from 'components/contexts'
-
-import ConsolePageTitle from 'components/utils/layout/ConsolePageTitle'
-
+import { useTheme } from 'styled-components'
+import { useIsManager } from 'components/contexts'
 import { ClusterOverviewCard } from './clusteroverview/ClusterOverviewCard'
-// import { MonthlyClusterCostsCard } from './MonthlyClusterCostsCard'
 import { DeploymentsCard } from './deployments/DeploymentsCard'
-
-import { ConstraintViolationsCard } from './managerview/violations/ConstraintViolationsCard'
+import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
 import { PrCard } from './pullrequests/PrCard'
+import { AiThreads } from './AiThreads.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
 export default function Home() {
-  useSetBreadcrumbs(breadcrumbs)
-  const name = useLogin().me?.name
+  const theme = useTheme()
   const isManager = useIsManager()
 
+  useSetBreadcrumbs(breadcrumbs)
+
   return (
-    <ResponsivePageFullWidth style={{ paddingTop: 0 }}>
-      <ConsolePageTitle
-        headingProps={{ title2: false, title1: true }}
-        heading={`Welcome${name ? `, ${name.split(' ')[0]}` : ''}!`}
-      />
-      <HomeContentWrapperSC>
+    <ResponsivePageFullWidth maxContentWidth={1440}>
+      <div
+        css={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: theme.spacing.large,
+          paddingBottom: theme.spacing.large,
+        }}
+      >
         <ClusterOverviewCard />
+        <AiThreads />
         {isManager && <ConstraintViolationsCard />}
-        <PrCard />
-        <DeploymentsCard />
-        {/* <MonthlyClusterCostsCard /> */}
-      </HomeContentWrapperSC>
+        <div
+          css={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: theme.spacing.large,
+
+            '@media (min-width: 1168px)': {
+              flexDirection: 'row',
+            },
+          }}
+        >
+          <PrCard />
+          <DeploymentsCard />
+        </div>
+      </div>
     </ResponsivePageFullWidth>
   )
 }
-
-const HomeContentWrapperSC = styled.div(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: theme.spacing.xlarge,
-  marginTop: theme.spacing.large,
-  paddingBottom: theme.spacing.xxlarge,
-}))

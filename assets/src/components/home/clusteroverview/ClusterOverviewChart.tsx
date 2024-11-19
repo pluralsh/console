@@ -5,15 +5,16 @@ import {
   createCenteredMetric,
 } from 'components/utils/RadialBarChart'
 import { UpgradeStatisticsQuery } from 'generated/graphql'
-import styled from 'styled-components'
 
 import { useMemo } from 'react'
 
 import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 
 import { CustomLegend } from '../CustomLegend'
+import { HomeCard } from '../HomeCard.tsx'
+import { ClusterIcon } from '@pluralsh/design-system'
 
-const CHART_SIZE = 275
+const CHART_SIZE = 240
 
 export function ClusterOverviewChart({
   data,
@@ -39,14 +40,27 @@ export function ClusterOverviewChart({
   )
 
   return (
-    <ViewWrapperSC>
+    <HomeCard
+      icon={<ClusterIcon />}
+      title="Cluster Overview"
+      tooltip={
+        <div>
+          {legendData.map((legend, index) => (
+            <CustomLegend
+              key={index}
+              data={legend}
+            />
+          ))}
+        </div>
+      }
+    >
       <RadialBar
         colors={(item) => chartColors[item.data.color]}
         endAngle={360}
         cornerRadius={5}
-        padAngle={1}
-        padding={0.6}
-        innerRadius={0.4}
+        padAngle={2}
+        padding={0.3}
+        innerRadius={0.35}
         tooltip={(props) => (
           <ChartTooltip
             color={props.bar.color}
@@ -59,22 +73,9 @@ export function ClusterOverviewChart({
         height={CHART_SIZE}
         width={CHART_SIZE}
       />
-      {legendData.map((legend, index) => (
-        <CustomLegend
-          key={index}
-          data={legend}
-        />
-      ))}
-    </ViewWrapperSC>
+    </HomeCard>
   )
 }
-
-const ViewWrapperSC = styled.div({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  height: '100%',
-})
 
 const useChartData = (
   data: UpgradeStatisticsQuery,
@@ -90,12 +91,12 @@ const useChartData = (
           { color: 'blue', x: 'Latest', y: latest || 0 },
           {
             color: 'purple',
-            x: 'Version Compliant',
+            x: 'Version compliant',
             y: (compliant || 0) - (latest || 0),
           },
           {
             color: 'yellow',
-            x: 'Not Version Compliant',
+            x: 'Not version compliant',
             y: (count || 0) - (compliant || 0),
           },
         ],
@@ -106,7 +107,7 @@ const useChartData = (
           { color: 'green', x: 'Upgradeable', y: upgradeable || 0 },
           {
             color: 'red',
-            x: 'Not Upgradeable',
+            x: 'Not upgradeable',
             y: (count || 0) - (upgradeable || 0),
           },
         ],

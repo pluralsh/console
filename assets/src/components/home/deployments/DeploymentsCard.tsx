@@ -10,14 +10,16 @@ import {
 import { GqlError } from 'components/utils/Alert'
 import pluralize from 'pluralize'
 
-import { Title2H1 } from '../../utils/typography/Text'
+import { OverlineH1 } from '../../utils/typography/Text'
 import { HOME_CARD_MAX_HEIGHT } from '../HomeCard'
 
 import { useProjectId } from '../../contexts/ProjectsContext'
 
 import { DeploymentsTable } from './DeploymentsTable'
+import { useTheme } from 'styled-components'
 
 export function DeploymentsCard() {
+  const theme = useTheme()
   const projectId = useProjectId()
   const {
     data,
@@ -42,11 +44,22 @@ export function DeploymentsCard() {
   const numDeployments = data?.serviceDeployments?.edges?.length
 
   return (
-    <div>
-      <Title2H1>
+    <div
+      css={{
+        '@media (min-width: 1168px)': {
+          width: '50%',
+        },
+      }}
+    >
+      <OverlineH1
+        css={{
+          color: theme.colors['text-xlight'],
+          marginBottom: theme.spacing.small,
+        }}
+      >
         {numDeployments} {pluralize('deployment', numDeployments)} creating
         errors
-      </Title2H1>
+      </OverlineH1>
       <DeploymentsTable
         data={data?.serviceDeployments?.edges}
         emptyStateProps={{ message: 'All services healthy!' }}

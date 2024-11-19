@@ -64,12 +64,17 @@ export const createCenteredMetric = (val, label, { fontSize = 25 } = {}) =>
     return (
       <g transform={`translate(${center[0]},${center[1] + 1})`}>
         <text
-          fill={theme.colors['text-light']}
+          fill={theme.colors['text']}
           x="0"
           y="0"
           textAnchor="middle"
           dominantBaseline="alphabetic"
-          style={{ ...theme.partials.text.h4, display: 'block', fontSize: 27 }}
+          style={{
+            ...theme.partials.text.h4,
+            display: 'block',
+            fontFamily: 'monospace',
+            fontSize: 27,
+          }}
         >
           {displayVal}
           {showPercent && <tspan fontSize={percentFontSize}>%</tspan>}
