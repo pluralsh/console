@@ -16,6 +16,10 @@ import (
 	"github.com/pluralsh/console/go/ai-proxy/api/vertex"
 )
 
+const (
+	scope = "https://www.googleapis.com/auth/cloud-platform.read-only"
+)
+
 type VertexProxy struct {
 	*baseTranslationProxy
 
@@ -31,7 +35,7 @@ func (in *VertexProxy) ModifyRequest(r *httputil.ProxyRequest) {
 		return
 	}
 
-	r.Out.Header.Add("Authorization", "Bearer "+token.AccessToken)
+	token.SetAuthHeader(r.Out)
 	r.SetXForwarded()
 
 	err = in.modifyRequestBody(r)
@@ -80,7 +84,7 @@ func (in *VertexProxy) modifyResponseBody(r *http.Response) error {
 }
 
 func NewVertexProxy(target, serviceAccount string) (api.TranslationProxy, error) {
-	credentials, err := google.CredentialsFromJSON(context.Background(), []byte(serviceAccount), "https://www.googleapis.com/auth/cloud-platform.read-only")
+	credentials, err := google.CredentialsFromJSON(context.Background(), []byte(serviceAccount), scope)
 	if err != nil {
 		return nil, err
 	}
