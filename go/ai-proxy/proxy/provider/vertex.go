@@ -76,7 +76,7 @@ func (in *VertexProxy) modifyResponseBody(r *http.Response) error {
 
 	endpoint := r.Request.URL.Path
 	switch endpoint {
-	case vertex.EndpointChat:
+	case os.Expand(vertex.EndpointChat, in.mapping):
 		return replaceResponseBody(r, openai.FromChatCompletionResponse)
 	}
 
