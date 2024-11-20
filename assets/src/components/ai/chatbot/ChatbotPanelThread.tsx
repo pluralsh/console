@@ -1,15 +1,9 @@
 import { EmptyState, usePrevious } from '@pluralsh/design-system'
 
-import {
-  ReactNode,
-  Ref,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-} from 'react'
+import { ReactNode, Ref, useCallback, useEffect, useRef } from 'react'
 import styled, { useTheme } from 'styled-components'
 
+import { useCanScroll } from 'components/hooks/useCanScroll.ts'
 import { GqlError } from 'components/utils/Alert.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import {
@@ -22,14 +16,13 @@ import {
   useChatThreadDetailsQuery,
 } from 'generated/graphql'
 import { isEmpty } from 'lodash'
+import { mergeRefs } from 'react-merge-refs'
 import { appendConnectionToEnd, updateCache } from 'utils/graphql.ts'
 import {
   GeneratingResponseMessage,
   SendMessageForm,
 } from './ChatbotSendMessageForm.tsx'
 import { ChatMessage } from './ChatMessage.tsx'
-import { useCanScroll } from 'components/hooks/useCanScroll.ts'
-import { mergeRefs } from 'react-merge-refs'
 
 export function ChatbotPanelThread({
   currentThread,
@@ -39,7 +32,6 @@ export function ChatbotPanelThread({
   fullscreen: boolean
 }) {
   const theme = useTheme()
-  const inputRef = useRef<HTMLTextAreaElement>(null)
   const messageListRef = useRef<HTMLUListElement>(null)
   const scrollToBottom = useCallback(() => {
     messageListRef.current?.scrollTo({
@@ -81,11 +73,6 @@ export function ChatbotPanelThread({
         })
       },
     })
-
-  // focus input on initial mount
-  useLayoutEffect(() => {
-    inputRef.current?.focus()
-  }, [])
 
   // scroll to the bottom when number of messages increases
   const length = data?.chatThread?.chats?.edges?.length ?? 0
@@ -130,7 +117,6 @@ export function ChatbotPanelThread({
       </ChatbotMessagesWrapper>
       <SendMessageForm
         sendMessage={sendMessage}
-        ref={inputRef}
         fullscreen={fullscreen}
       />
     </>
