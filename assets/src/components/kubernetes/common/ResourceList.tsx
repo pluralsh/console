@@ -4,7 +4,6 @@ import type {
   QueryResult,
 } from '@apollo/client/react/types/types'
 import { Table } from '@pluralsh/design-system'
-import styled from 'styled-components'
 import { useNavigate } from 'react-router-dom'
 import { Row, SortingState, TableOptions } from '@tanstack/react-table'
 
@@ -33,38 +32,7 @@ import {
   usePageInfo,
   useSortedTableOptions,
 } from './utils'
-
-const SKELETON_ITEMS = 10
-
-const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({
-  '@keyframes moving-gradient': {
-    '0%': { backgroundPosition: '-250px 0' },
-    '100%': { backgroundPosition: '250px 0' },
-  },
-
-  maxWidth: '400px',
-  width: '100%',
-
-  span: {
-    borderRadius: theme.borderRadiuses.medium,
-    maxWidth: '400px',
-    width: 'unset',
-    minWidth: '150px',
-    display: 'block',
-    height: '12px',
-    background: `linear-gradient(to right, ${theme.colors.border} 20%, ${theme.colors['border-fill-two']} 50%, ${theme.colors.border} 80%)`,
-    backgroundSize: '500px 100px',
-    animation: 'moving-gradient 2s infinite linear forwards',
-  },
-}))
-
-function SkeletonUnstyled({ ...props }): ReactElement {
-  return (
-    <div {...props}>
-      <span />
-    </div>
-  )
-}
+import { TableSkeleton } from '../../utils/SkeletonLoaders.tsx'
 
 interface ResourceListProps<
   TResourceList,
@@ -128,24 +96,10 @@ export function ResourceList<
   const resourceList = data?.[queryName] as TResourceList
   const isLoading = loading && !resourceList
   const items = useMemo(
-    () =>
-      isLoading
-        ? Array(SKELETON_ITEMS).fill({})
-        : ((resourceList?.[itemsKey] as Array<TResource>) ?? []),
-    [isLoading, itemsKey, resourceList]
+    () => (resourceList?.[itemsKey] as Array<TResource>) ?? [],
+    [itemsKey, resourceList]
   )
   const { page, hasNextPage } = usePageInfo(items, resourceList?.listMeta)
-
-  const columnsData = useMemo(
-    () =>
-      isLoading
-        ? columns.map((col) => ({
-            ...col,
-            cell: <Skeleton />,
-          }))
-        : columns,
-    [isLoading, columns]
-  )
 
   const fetchNextPage = useCallback(() => {
     if (!hasNextPage) return
@@ -160,13 +114,22 @@ export function ResourceList<
     setNamespaced(namespaced)
   }, [setNamespaced, namespaced])
 
+  if (isLoading) {
+    return (
+      <TableSkeleton
+        numColumns={6}
+        centered
+      />
+    )
+  }
+
   return (
     <>
       <ErrorToast errors={resourceList?.errors} />
       <FullHeightTableWrap>
         <Table
           data={items}
-          columns={columnsData}
+          columns={columns}
           hasNextPage={hasNextPage}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}
