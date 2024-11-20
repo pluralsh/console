@@ -1,11 +1,8 @@
 defmodule Console.Application do
   use Application
-  alias Console.Prom.Setup
 
   def start(_type, _args) do
     topologies = Application.get_env(:libcluster, :topologies)
-    Setup.setup()
-    Setup.attach()
 
     children = [
       %{
@@ -44,9 +41,8 @@ defmodule Console.Application do
       {Absinthe.Subscription, ConsoleWeb.Endpoint},
       Console.Cached.Supervisor,
       Console.Watchers.Supervisor,
-      Console.Prom.Scraper,
       Console.AI.GothManager,
-      {Bandit, plug: ConsoleWeb.Plugs.MetricsExporter, port: 9090},
+      Console.PromEx,
       {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown

@@ -15,21 +15,36 @@ end
 
 defimpl Console.Deployments.PubSub.Pipelineable, for: Console.PubSub.ServiceComponentsUpdated do
   require Logger
-  def pipe(%{item: %{status: :healthy, updated_at: uat} = svc}) do
+  alias Console.Schema.Service
+
+  def pipe(%{item: %{status: s} = svc}) when s in ~w(healthy failed)a do
     Logger.info "Kicking any pipelines associated with #{svc.id}"
-    recent = Timex.now()
-             |> Timex.shift(minutes: -2)
-             |> Timex.before?(uat)
-    if recent do
-      case Console.Repo.preload(svc, [stage_services: :stage]) do
-        %{stage_services: [_ | _] = ss} -> Enum.map(ss, & &1.stage)
-        _ -> :ok
-      end
+    if recent?(svc) do
+      stages(svc)
+      |> handle_status(s)
     else
       Logger.info "Service #{svc.id} has no recent updates"
     end
   end
   def pipe(_), do: :ok
+
+  defp handle_status([], _), do: :ok
+  defp handle_status(stages, :healthy), do: stages
+  defp handle_status(stages, :failed), do: Enum.map(stages, & {:revert, &1})
+
+  defp recent?(%Service{updated_at: nil}), do: true
+  defp recent?(%Service{updated_at: uat}) do
+    Timex.now()
+    |> Timex.shift(minutes: -2)
+    |> Timex.before?(uat)
+  end
+
+  defp stages(%Service{} = svc) do
+    case Console.Repo.preload(svc, [stage_services: :stage]) do
+      %{stage_services: [_ | _] = ss} -> Enum.map(ss, & &1.stage)
+      _ -> []
+    end
+  end
 end
 
 defimpl Console.Deployments.PubSub.Pipelineable, for: [Console.PubSub.PipelineGateApproved, Console.PubSub.PipelineGateUpdated] do

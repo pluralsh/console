@@ -352,6 +352,31 @@ defmodule Console.Deployments.GitTest do
       assert err =~ "does not match regex"
     end
 
+    test "it will reject a pull request for name duplication" do
+      user = insert(:user)
+      conn = insert(:scm_connection, token: "some-pat")
+      insert(:project, name: "bogus")
+      pra = insert(:pr_automation,
+        identifier: "pluralsh/console",
+        cluster: build(:cluster),
+        connection: conn,
+        updates: %{regexes: ["regex"], match_strategy: :any, files: ["file.yaml"], replace_template: "replace"},
+        write_bindings: [%{user_id: user.id}],
+        create_bindings: [%{user_id: user.id}],
+        configuration: [
+          %{name: "first", type: :int},
+          %{name: "second", type: :string, validation: %{uniq_by: %{scope: :project}}}
+        ]
+      )
+
+      {:error, err} = Git.create_pull_request(%{
+        "first" => 10,
+        "second" => "bogus"
+      }, pra.id, "pr-test", user)
+
+      assert err =~ "there is already a project with name"
+    end
+
     test "it will reject a pull request w/ empty string configs" do
       user = insert(:user)
       conn = insert(:scm_connection, token: "some-pat")

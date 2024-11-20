@@ -752,6 +752,13 @@ defmodule Console.Factory do
     }
   end
 
+  def pipeline_context_history_factory do
+    %Schema.PipelineContextHistory{
+      stage: build(:pipeline_stage),
+      context: build(:pipeline_context)
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)

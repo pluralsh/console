@@ -82,6 +82,16 @@ config :console, :watchers, [
   Console.Watchers.Postgres,
 ]
 
+config :console, Console.PromEx,
+  metrics_server: [
+    port: 9090,
+    path: "/metrics", # This is an optional setting and will default to `"/metrics"`
+    protocol: :http, # This is an optional setting and will default to `:http`
+    pool_size: 5, # This is an optional setting and will default to `5`
+    cowboy_opts: [], # This is an optional setting and will default to `[]`
+    auth_strategy: :none # This is an optional and will default to `:none`
+  ]
+
 config :console,
   prometheus: "http://monitoring-prometheus.monitoring:9090",
   loki: "http://monitoring-loki.monitoring:3100"

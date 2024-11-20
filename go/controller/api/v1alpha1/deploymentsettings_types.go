@@ -263,6 +263,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		attr.Azure = &console.AzureOpenaiAttributes{
 			Endpoint:    in.Azure.Endpoint,
 			APIVersion:  in.Azure.ApiVersion,
+			Model:       in.Azure.Model,
 			AccessToken: token,
 		}
 	case console.AiProviderVertex:
@@ -280,6 +281,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			ServiceAccountJSON: json,
 			Project:            in.Vertex.Project,
 			Location:           in.Vertex.Location,
+			Endpoint:           in.Vertex.Endpoint,
 		}
 	case console.AiProviderBedrock:
 		if in.Bedrock == nil {
@@ -364,6 +366,11 @@ type AzureOpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	ApiVersion *string `json:"apiVersion,omitempty"`
 
+	// The OpenAi Model you wish to use.  If not specified, Plural will provide a default
+	//
+	// +kubebuilder:validation:Optional
+	Model *string `json:"model,omitempty"`
+
 	// TokenSecretRef is a reference to the local secret holding the token to access
 	// the configured AI provider.
 	//
@@ -403,6 +410,11 @@ type VertexSettings struct {
 	//
 	// +kubebuilder:validation:Required
 	Location string `json:"location"`
+
+	// A custom endpoint for self-deployed models
+	//
+	// +kubebuilder:validation:Optional
+	Endpoint *string `json:"endpoint,omitempty"`
 
 	// An Service Account json file stored w/in a kubernetes secret to use for authentication to GCP
 	//

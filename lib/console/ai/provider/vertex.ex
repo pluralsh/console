@@ -3,16 +3,14 @@ defmodule Console.AI.Vertex do
   Implements our basic llm behaviour against the OpenAI api
   """
   @behaviour Console.AI.Provider
-  alias GoogleApi.AIPlatform.V1
-  alias GoogleApi.AIPlatform.V1.Api.Endpoints
-  alias GoogleApi.AIPlatform.V1.Model
   alias Console.AI.GothManager
+  alias Console.AI.OpenAI
 
   @default_model "gemini-1.5-flash-002"
 
   require Logger
 
-  defstruct [:service_account_json, :model, :project, :location]
+  defstruct [:service_account_json, :model, :project, :location, :endpoint]
 
   @type t :: %__MODULE__{}
 
@@ -21,7 +19,8 @@ defmodule Console.AI.Vertex do
       service_account_json: opts.service_account_json,
       model: opts.model,
       project: opts.project,
-      location: opts.location
+      location: opts.location,
+      endpoint: opts.endpoint
     }
   end
 
@@ -31,24 +30,21 @@ defmodule Console.AI.Vertex do
   @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = vertex, messages) do
     with {:ok, %{token: token}} <- client(vertex) do
-      V1.Connection.new(token)
-      |> Endpoints.aiplatform_endpoints_generate_content(model(vertex), body: build_req(messages))
-      |> case do
-        {:ok, %Model.GoogleCloudAiplatformV1GenerateContentResponse{
-          candidates: [
-            %Model.GoogleCloudAiplatformV1Candidate{
-              content: %Model.GoogleCloudAiplatformV1Content{parts: parts}
-            } | _
-          ]
-        }} -> {:ok, fmt_msg(parts)}
-        err ->
-          {:error, "vertex ai error: #{fmt_err(err)}"}
-      end
+      OpenAI.new(base_url: openai_url(vertex), access_token: token, model: openai_model(vertex))
+      |> OpenAI.completion(messages)
     end
   end
 
-  defp model(%__MODULE__{model: m, project: project, location: location}),
-    do: "projects/#{project}/locations/#{location}/publishers/google/models/#{m || @default_model}"
+  defp openai_url(%__MODULE__{project: p, location: l} = c),
+    do: "https://#{l}-aiplatform.googleapis.com/v1beta1/projects/#{p}/locations/#{l}/endpoints/#{ep(c)}"
+
+  defp openai_model(%__MODULE__{model: m}) when is_binary(m) do
+    case String.contains?(m, "/") do
+      true -> m
+      false -> "google/#{m}"
+    end
+  end
+  defp openai_model(_), do: "google/#{@default_model}"
 
   defp client(%__MODULE__{service_account_json: json}) when is_binary(json) do
     with {:ok, json} <- Jason.decode(json),
@@ -56,36 +52,6 @@ defmodule Console.AI.Vertex do
   end
   defp client(_), do: GothManager.fetch([])
 
-  defp build_req(history) do
-    {system, contents} = split(history)
-    %Model.GoogleCloudAiplatformV1GenerateContentRequest{
-      contents: contents,
-      systemInstruction: system
-    }
-  end
-
-  defp split([{:system, msg} | rest]), do: {to_msg({:system, msg}), Enum.map(rest, &to_msg/1)}
-  defp split(hist), do: {nil, Enum.map(hist, &to_msg/1)}
-
-  defp to_msg({role, msg}) do
-    %Model.GoogleCloudAiplatformV1Content{role: to_role(role), parts: [
-      %Model.GoogleCloudAiplatformV1Part{text: msg}
-    ]}
-  end
-
-  defp to_role(:user), do: "user"
-  defp to_role(_), do: "model"
-
-  defp fmt_msg(parts) do
-    Enum.map(parts, fn
-      %Model.GoogleCloudAiplatformV1Part{text: msg} when is_binary(msg) -> msg
-      _ -> ""
-    end)
-    |> Enum.join("\n")
-  end
-
-  defp fmt_err({:error, err}) do
-    Logger.error "unknown vertex ai error: #{inspect(err)}"
-    "unknown"
-  end
+  defp ep(%__MODULE__{endpoint: endpoint}) when is_binary(endpoint), do: endpoint
+  defp ep(_), do: "openapi"
 end

@@ -72,6 +72,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :azure_openai_attributes do
     field :endpoint,     non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
     field :api_version,  :string, description: "the api version you want to use"
+    field :model,        :string, description: "the exact model you wish to use"
     field :access_token, non_null(:string), description: "the azure openai access token to use"
   end
 
@@ -84,6 +85,7 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :vertex_ai_attributes do
     field :model,                :string, description: "the vertex model id to use"
     field :service_account_json, :string, description: "optional service account json to auth to the GCP vertex apis"
+    field :endpoint,             :string, description: "custom vertexai endpoint if for dedicated customer deployments"
     field :project,              non_null(:string), description: "the gcp project id to use"
     field :location,             non_null(:string), description: "the gcp region the model is hosted in"
   end

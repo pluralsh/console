@@ -99,6 +99,7 @@ defmodule Console.GraphQl do
     import_fields :build_subscriptions
     import_fields :user_subscriptions
     import_fields :stack_subscriptions
+    import_fields :ai_subscriptions
   end
 
   def safe_resolver(fun) do

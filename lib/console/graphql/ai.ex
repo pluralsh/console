@@ -1,5 +1,6 @@
 defmodule Console.GraphQl.AI do
   use Console.GraphQl.Schema.Base
+  alias Console.AI.Stream
   alias Console.GraphQl.Resolvers.AI
   alias Console.GraphQl.Resolvers.{User, AI, Deployments}
 
@@ -251,6 +252,23 @@ defmodule Console.GraphQl.AI do
       arg :id, non_null(:id)
 
       resolve &AI.delete_pin/2
+    end
+  end
+
+  object :ai_subscriptions do
+    @desc "streams chunks of ai text for a given parent scope"
+    field :ai_stream, :string do
+      middleware Authenticated
+      arg :insight_id, :id, description: "the insight id to use when streaming a fix suggestion"
+      arg :thread_id,  :id, description: "the thread id for streaming a chat suggestion"
+
+      config fn
+        %{insight_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
+          {:ok, topic: Stream.topic(:inssight, id, user)}
+        %{thread_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
+          {:ok, topic: Stream.topic(:thread, id, user)}
+        _, _ -> {:error, "no id provided for this subscription"}
+      end
     end
   end
 end

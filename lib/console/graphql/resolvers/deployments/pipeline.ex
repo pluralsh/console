@@ -1,7 +1,12 @@
 defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
   use Console.GraphQl.Resolvers.Deployments.Base
   alias Console.Deployments.{Pipelines}
-  alias Console.Schema.{Pipeline, PipelineGate, PipelineContext}
+  alias Console.Schema.{
+    Pipeline,
+    PipelineGate,
+    PipelineContext,
+    PipelineContextHistory
+  }
 
   def list_pipelines(args, %{context: %{current_user: user}}) do
     Pipeline.for_user(user)
@@ -23,6 +28,12 @@ defmodule Console.GraphQl.Resolvers.Deployments.Pipeline do
   def pipeline_contexts(%{id: id}, args, _) do
     PipelineContext.for_pipeline(id)
     |> PipelineContext.ordered()
+    |> paginate(args)
+  end
+
+  def pipeline_context_history(%{id: id}, args, _) do
+    PipelineContextHistory.for_stage(id)
+    |> PipelineContextHistory.ordered()
     |> paginate(args)
   end
 

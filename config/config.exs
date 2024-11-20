@@ -60,6 +60,7 @@ config :console,
   kas_dns: "https://kas.example.com",
   qps: 1_000,
   nowatchers: false,
+  prom_plugins: [Console.Prom.Plugin],
   jwt_pub_key: or_nil.(File.read("config/pubkey.pem"))
 
 config :logger, :console,
@@ -128,5 +129,12 @@ config :tzdata, :autoupdate, :disabled
 
 config :console, Console.Mailer,
   adapter: Bamboo.SMTPAdapter
+
+config :console, Console.PromEx,
+  disabled: false,
+  manual_metrics_start_delay: :no_delay,
+  drop_metrics_groups: [],
+  grafana: :disabled,
+  metrics_server: :disabled
 
 import_config "#{Mix.env()}.exs"

@@ -940,11 +940,25 @@ type RootMutationType {
 
 type RootSubscriptionType {
   applicationDelta: ApplicationDelta
+
   podDelta: PodDelta
+
   buildDelta(buildId: ID): BuildDelta
+
   commandDelta(buildId: ID!): CommandDelta
+
   notificationDelta: NotificationDelta
+
   runLogsDelta(stepId: ID!): RunLogsDelta
+
+  "streams chunks of ai text for a given parent scope"
+  aiStream(
+    "the insight id to use when streaming a fix suggestion"
+    insightId: ID
+
+    "the thread id for streaming a chat suggestion"
+    threadId: ID
+  ): String
 }
 
 input PolicyBindingAttributes {
@@ -1130,6 +1144,9 @@ input AzureOpenaiAttributes {
   "the api version you want to use"
   apiVersion: String
 
+  "the exact model you wish to use"
+  model: String
+
   "the azure openai access token to use"
   accessToken: String!
 }
@@ -1151,6 +1168,9 @@ input VertexAiAttributes {
 
   "optional service account json to auth to the GCP vertex apis"
   serviceAccountJson: String
+
+  "custom vertexai endpoint if for dedicated customer deployments"
+  endpoint: String
 
   "the gcp project id to use"
   project: String!
@@ -3213,6 +3233,8 @@ type PipelineStage {
   "a promotion which might be outstanding for this stage"
   promotion: PipelinePromotion
 
+  contextHistory(after: String, first: Int, before: String, last: Int): PipelineContextHistoryConnection
+
   insertedAt: DateTime
 
   updatedAt: DateTime
@@ -3426,6 +3448,15 @@ type PipelinePullRequest {
   pullRequest: PullRequest
 }
 
+"A record of a prior pipeline context attached to a stage"
+type PipelineContextHistory {
+  id: ID!
+  stage: PipelineStage
+  context: PipelineContext
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type PipelineConnection {
   pageInfo: PageInfo!
   edges: [PipelineEdge]
@@ -3439,6 +3470,11 @@ type PipelineGateConnection {
 type PipelineContextConnection {
   pageInfo: PageInfo!
   edges: [PipelineContextEdge]
+}
+
+type PipelineContextHistoryConnection {
+  pageInfo: PageInfo!
+  edges: [PipelineContextHistoryEdge]
 }
 
 enum ComponentState {
@@ -5071,6 +5107,11 @@ enum Operation {
   SUFFIX
 }
 
+enum ValidationUniqScope {
+  PROJECT
+  CLUSTER
+}
+
 enum ObserverActionType {
   PIPELINE
   PR
@@ -5332,6 +5373,15 @@ input ConfigurationValidationAttributes {
 
   "whether the string is json encoded"
   json: Boolean
+
+  "configuration for name uniqueness"
+  uniqBy: UniqByAttributes
+}
+
+"How to enforce uniqueness for a field"
+input UniqByAttributes {
+  "the scope this name is uniq w\/in"
+  scope: ValidationUniqScope!
 }
 
 "The operations to be performed on the files w\/in the pr"
@@ -8188,6 +8238,11 @@ type RevisionEdge {
 
 type ServiceDeploymentEdge {
   node: ServiceDeployment
+  cursor: String
+}
+
+type PipelineContextHistoryEdge {
+  node: PipelineContextHistory
   cursor: String
 }
 

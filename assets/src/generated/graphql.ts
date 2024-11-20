@@ -624,6 +624,8 @@ export type AzureOpenaiAttributes = {
   apiVersion?: InputMaybe<Scalars['String']['input']>;
   /** the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id} */
   endpoint: Scalars['String']['input'];
+  /** the exact model you wish to use */
+  model?: InputMaybe<Scalars['String']['input']>;
 };
 
 /** Settings for configuring against Azure OpenAI */
@@ -1723,6 +1725,8 @@ export type ConfigurationValidationAttributes = {
   json?: InputMaybe<Scalars['Boolean']['input']>;
   /** regex a string value should match */
   regex?: InputMaybe<Scalars['String']['input']>;
+  /** configuration for name uniqueness */
+  uniqBy?: InputMaybe<UniqByAttributes>;
 };
 
 export enum Conjunction {
@@ -4144,6 +4148,28 @@ export type PipelineContextEdge = {
   node?: Maybe<PipelineContext>;
 };
 
+/** A record of a prior pipeline context attached to a stage */
+export type PipelineContextHistory = {
+  __typename?: 'PipelineContextHistory';
+  context?: Maybe<PipelineContext>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  stage?: Maybe<PipelineStage>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type PipelineContextHistoryConnection = {
+  __typename?: 'PipelineContextHistoryConnection';
+  edges?: Maybe<Array<Maybe<PipelineContextHistoryEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type PipelineContextHistoryEdge = {
+  __typename?: 'PipelineContextHistoryEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<PipelineContextHistory>;
+};
+
 export type PipelineEdge = {
   __typename?: 'PipelineEdge';
   cursor?: Maybe<Scalars['String']['output']>;
@@ -4243,6 +4269,7 @@ export type PipelineStage = {
   __typename?: 'PipelineStage';
   /** the context that is to be applied to this stage for PR promotions */
   context?: Maybe<PipelineContext>;
+  contextHistory?: Maybe<PipelineContextHistoryConnection>;
   /** the errors for this stage */
   errors?: Maybe<Array<Maybe<ServiceError>>>;
   id: Scalars['ID']['output'];
@@ -4254,6 +4281,15 @@ export type PipelineStage = {
   /** the services within this stage */
   services?: Maybe<Array<Maybe<StageService>>>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+/** a pipeline stage, has a list of services and potentially a promotion which might be pending */
+export type PipelineStageContextHistoryArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 /** specification of a stage of a pipeline */
@@ -7669,12 +7705,20 @@ export type RootQueryTypeWireguardPeerArgs = {
 
 export type RootSubscriptionType = {
   __typename?: 'RootSubscriptionType';
+  /** streams chunks of ai text for a given parent scope */
+  aiStream?: Maybe<Scalars['String']['output']>;
   applicationDelta?: Maybe<ApplicationDelta>;
   buildDelta?: Maybe<BuildDelta>;
   commandDelta?: Maybe<CommandDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
+};
+
+
+export type RootSubscriptionTypeAiStreamArgs = {
+  insightId?: InputMaybe<Scalars['ID']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -9053,6 +9097,12 @@ export enum Tool {
   Terraform = 'TERRAFORM'
 }
 
+/** How to enforce uniqueness for a field */
+export type UniqByAttributes = {
+  /** the scope this name is uniq w/in */
+  scope: ValidationUniqScope;
+};
+
 export type UpgradeInsight = {
   __typename?: 'UpgradeInsight';
   /** longform description of this insight */
@@ -9256,6 +9306,11 @@ export type UserRoles = {
   admin?: Maybe<Scalars['Boolean']['output']>;
 };
 
+export enum ValidationUniqScope {
+  Cluster = 'CLUSTER',
+  Project = 'PROJECT'
+}
+
 /** a shortform reference to an addon by version */
 export type VersionReference = {
   __typename?: 'VersionReference';
@@ -9264,6 +9319,8 @@ export type VersionReference = {
 };
 
 export type VertexAiAttributes = {
+  /** custom vertexai endpoint if for dedicated customer deployments */
+  endpoint?: InputMaybe<Scalars['String']['input']>;
   /** the gcp region the model is hosted in */
   location: Scalars['String']['input'];
   /** the vertex model id to use */

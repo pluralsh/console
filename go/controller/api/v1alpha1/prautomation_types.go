@@ -456,6 +456,24 @@ type PrAutomationConfigurationValidation struct {
 	// Whether the string value is supposed to be json-encoded
 	// +kubebuilder:validation:Optional
 	Json *bool `json:"json,omitempty"`
+
+	// How to determine uniquenss for this field
+	// +kubebuilder:validation:Optional
+	UniqBy *PrAutomationUniqBy `json:"uniqBy,omitempty"`
+}
+
+type PrAutomationUniqBy struct {
+	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Enum=PROJECT;CLUSTER
+	Scope console.ValidationUniqScope `json:"scope"`
+}
+
+func (in *PrAutomationUniqBy) Attributes() *console.UniqByAttributes {
+	if in == nil {
+		return nil
+	}
+
+	return &console.UniqByAttributes{Scope: in.Scope}
 }
 
 func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttributes {
@@ -473,8 +491,9 @@ func (in *PrAutomationConfiguration) Attributes() *console.PrConfigurationAttrib
 
 	if in.Validation != nil {
 		conf.Validation = &console.ConfigurationValidationAttributes{
-			Regex: in.Validation.Regex,
-			JSON:  in.Validation.Json,
+			Regex:  in.Validation.Regex,
+			JSON:   in.Validation.Json,
+			UniqBy: in.Validation.UniqBy.Attributes(),
 		}
 	}
 

@@ -466,6 +466,8 @@ type AzureOpenaiAttributes struct {
 	Endpoint string `json:"endpoint"`
 	// the api version you want to use
 	APIVersion *string `json:"apiVersion,omitempty"`
+	// the exact model you wish to use
+	Model *string `json:"model,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
 }
@@ -1373,6 +1375,8 @@ type ConfigurationValidationAttributes struct {
 	Regex *string `json:"regex,omitempty"`
 	// whether the string is json encoded
 	JSON *bool `json:"json,omitempty"`
+	// configuration for name uniqueness
+	UniqBy *UniqByAttributes `json:"uniqBy,omitempty"`
 }
 
 type ConsoleConfiguration struct {
@@ -3412,6 +3416,25 @@ type PipelineContextEdge struct {
 	Cursor *string          `json:"cursor,omitempty"`
 }
 
+// A record of a prior pipeline context attached to a stage
+type PipelineContextHistory struct {
+	ID         string           `json:"id"`
+	Stage      *PipelineStage   `json:"stage,omitempty"`
+	Context    *PipelineContext `json:"context,omitempty"`
+	InsertedAt *string          `json:"insertedAt,omitempty"`
+	UpdatedAt  *string          `json:"updatedAt,omitempty"`
+}
+
+type PipelineContextHistoryConnection struct {
+	PageInfo PageInfo                      `json:"pageInfo"`
+	Edges    []*PipelineContextHistoryEdge `json:"edges,omitempty"`
+}
+
+type PipelineContextHistoryEdge struct {
+	Node   *PipelineContextHistory `json:"node,omitempty"`
+	Cursor *string                 `json:"cursor,omitempty"`
+}
+
 type PipelineEdge struct {
 	Node   *Pipeline `json:"node,omitempty"`
 	Cursor *string   `json:"cursor,omitempty"`
@@ -3512,9 +3535,10 @@ type PipelineStage struct {
 	// the context that is to be applied to this stage for PR promotions
 	Context *PipelineContext `json:"context,omitempty"`
 	// a promotion which might be outstanding for this stage
-	Promotion  *PipelinePromotion `json:"promotion,omitempty"`
-	InsertedAt *string            `json:"insertedAt,omitempty"`
-	UpdatedAt  *string            `json:"updatedAt,omitempty"`
+	Promotion      *PipelinePromotion                `json:"promotion,omitempty"`
+	ContextHistory *PipelineContextHistoryConnection `json:"contextHistory,omitempty"`
+	InsertedAt     *string                           `json:"insertedAt,omitempty"`
+	UpdatedAt      *string                           `json:"updatedAt,omitempty"`
 }
 
 // specification of a stage of a pipeline
@@ -5521,6 +5545,12 @@ type TerraformStateUrls struct {
 	Unlock *string `json:"unlock,omitempty"`
 }
 
+// How to enforce uniqueness for a field
+type UniqByAttributes struct {
+	// the scope this name is uniq w/in
+	Scope ValidationUniqScope `json:"scope"`
+}
+
 type UpgradeInsight struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
@@ -5710,6 +5740,8 @@ type VertexAiAttributes struct {
 	Model *string `json:"model,omitempty"`
 	// optional service account json to auth to the GCP vertex apis
 	ServiceAccountJSON *string `json:"serviceAccountJson,omitempty"`
+	// custom vertexai endpoint if for dedicated customer deployments
+	Endpoint *string `json:"endpoint,omitempty"`
 	// the gcp project id to use
 	Project string `json:"project"`
 	// the gcp region the model is hosted in
@@ -8419,6 +8451,47 @@ func (e *UpgradePolicyType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e UpgradePolicyType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ValidationUniqScope string
+
+const (
+	ValidationUniqScopeProject ValidationUniqScope = "PROJECT"
+	ValidationUniqScopeCluster ValidationUniqScope = "CLUSTER"
+)
+
+var AllValidationUniqScope = []ValidationUniqScope{
+	ValidationUniqScopeProject,
+	ValidationUniqScopeCluster,
+}
+
+func (e ValidationUniqScope) IsValid() bool {
+	switch e {
+	case ValidationUniqScopeProject, ValidationUniqScopeCluster:
+		return true
+	}
+	return false
+}
+
+func (e ValidationUniqScope) String() string {
+	return string(e)
+}
+
+func (e *ValidationUniqScope) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ValidationUniqScope(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ValidationUniqScope", str)
+	}
+	return nil
+}
+
+func (e ValidationUniqScope) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

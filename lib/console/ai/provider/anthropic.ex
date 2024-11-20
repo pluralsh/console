@@ -52,7 +52,7 @@ defmodule Console.AI.Anthropic do
     {system, history} = split(history)
     url("/messages")
     |> HTTPoison.post(Jason.encode!(%{
-      model: model || "claude-3-5-haiku-latest",
+      model: model || "claude-3-5-sonnet-latest",
       system: system,
       messages: history,
       max_tokens: @max_tokens

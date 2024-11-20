@@ -18,6 +18,9 @@ spec:
       {{- toYaml .Values.migrator.securityContext | nindent 8 }}
       {{ end }}
       containers:
+      {{ if .Values.console.additionalContainers }}
+      {{ toYaml .Values.console.additionalContainers | nindent 6 }}
+      {{ end }}
       - name: migrator
         {{ if .Values.migrator.containerSecurityContext }}
         securityContext:
