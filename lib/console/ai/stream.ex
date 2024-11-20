@@ -12,7 +12,7 @@ defmodule Console.AI.Stream do
   def publish(%__MODULE__{topic: topic}, chunk) when is_binary(topic) do
     Absinthe.Subscription.publish(
       ConsoleWeb.Endpoint,
-      chunk,
+      %{content: chunk},
       [ai_stream: topic]
     )
   end

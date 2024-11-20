@@ -115,6 +115,10 @@ defmodule Console.GraphQl.AI do
     end
   end
 
+  object :ai_delta do
+    field :content, non_null(:string)
+  end
+
   connection node_type: :chat
   connection node_type: :chat_thread
   connection node_type: :ai_pin
@@ -257,14 +261,13 @@ defmodule Console.GraphQl.AI do
 
   object :ai_subscriptions do
     @desc "streams chunks of ai text for a given parent scope"
-    field :ai_stream, :string do
-      middleware Authenticated
+    field :ai_stream, :ai_delta do
       arg :insight_id, :id, description: "the insight id to use when streaming a fix suggestion"
       arg :thread_id,  :id, description: "the thread id for streaming a chat suggestion"
 
       config fn
         %{insight_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
-          {:ok, topic: Stream.topic(:inssight, id, user)}
+          {:ok, topic: Stream.topic(:insight, id, user)}
         %{thread_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:thread, id, user)}
         _, _ -> {:error, "no id provided for this subscription"}
