@@ -16,7 +16,7 @@ import {
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { AITableEntry } from './AITableEntry.tsx'
-import { TableProps } from '@pluralsh/design-system/dist/components/Table'
+import { TableProps } from '@pluralsh/design-system/dist/components/table/Table'
 
 export function AITable({
   modal = false,
