@@ -958,7 +958,7 @@ type RootSubscriptionType {
 
     "the thread id for streaming a chat suggestion"
     threadId: ID
-  ): String
+  ): AiDelta
 }
 
 input PolicyBindingAttributes {
@@ -6214,6 +6214,10 @@ type ClusterInsightComponent {
 
   "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
   resource: KubernetesUnstructured
+}
+
+type AiDelta {
+  content: String!
 }
 
 type ChatConnection {

@@ -175,6 +175,11 @@ export type AgentMigrationAttributes = {
   ref?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type AiDelta = {
+  __typename?: 'AiDelta';
+  content: Scalars['String']['output'];
+};
+
 /** A representation of a LLM-derived insight */
 export type AiInsight = {
   __typename?: 'AiInsight';
@@ -7706,7 +7711,7 @@ export type RootQueryTypeWireguardPeerArgs = {
 export type RootSubscriptionType = {
   __typename?: 'RootSubscriptionType';
   /** streams chunks of ai text for a given parent scope */
-  aiStream?: Maybe<Scalars['String']['output']>;
+  aiStream?: Maybe<AiDelta>;
   applicationDelta?: Maybe<ApplicationDelta>;
   buildDelta?: Maybe<BuildDelta>;
   commandDelta?: Maybe<CommandDelta>;

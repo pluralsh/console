@@ -127,6 +127,10 @@ type AgentMigrationAttributes struct {
 	Configuration *string `json:"configuration,omitempty"`
 }
 
+type AiDelta struct {
+	Content string `json:"content"`
+}
+
 // A representation of a LLM-derived insight
 type AiInsight struct {
 	ID string `json:"id"`
