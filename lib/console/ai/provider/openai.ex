@@ -69,7 +69,7 @@ defmodule Console.AI.OpenAI do
   end
 
   defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream} = openai, history) do
-    Stream.OpenAI.stream(fn ->
+    Stream.Exec.openai(fn ->
       body = Jason.encode!(%{
         model: model || "gpt-4o-mini",
         messages: history,
