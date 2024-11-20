@@ -7705,12 +7705,20 @@ export type RootQueryTypeWireguardPeerArgs = {
 
 export type RootSubscriptionType = {
   __typename?: 'RootSubscriptionType';
+  /** streams chunks of ai text for a given parent scope */
+  aiStream?: Maybe<Scalars['String']['output']>;
   applicationDelta?: Maybe<ApplicationDelta>;
   buildDelta?: Maybe<BuildDelta>;
   commandDelta?: Maybe<CommandDelta>;
   notificationDelta?: Maybe<NotificationDelta>;
   podDelta?: Maybe<PodDelta>;
   runLogsDelta?: Maybe<RunLogsDelta>;
+};
+
+
+export type RootSubscriptionTypeAiStreamArgs = {
+  insightId?: InputMaybe<Scalars['ID']['input']>;
+  threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

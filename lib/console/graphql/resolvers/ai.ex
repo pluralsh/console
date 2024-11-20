@@ -1,6 +1,7 @@
 defmodule Console.GraphQl.Resolvers.AI do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.AiInsight
   alias Console.AI.Chat, as: ChatSvc
+  alias Console.AI.Stream
   alias Console.AI.{Provider, Fixer}
   alias Console.Schema.{Chat, ChatThread, AiPin}
   alias Console.Deployments.Clusters
@@ -66,14 +67,22 @@ defmodule Console.GraphQl.Resolvers.AI do
   end
   def ai_completion(_, _), do: {:error, "need to pass either a raw input or a chat history"}
 
-  def ai_suggested_fix(%{insight_id: id}, %{context: %{current_user: user}}),
-    do: Fixer.fix(id, user)
+  def ai_suggested_fix(%{insight_id: id}, %{context: %{current_user: user}}) do
+    Stream.topic(:insight, id, user)
+    |> Stream.enable()
+
+    Fixer.fix(id, user)
+  end
 
   def save_chats(%{messages: msgs} = args, %{context: %{current_user: user}}),
     do: ChatSvc.save(msgs, args[:thread_id], user)
 
-  def chat(%{messages: msgs} = args, %{context: %{current_user: user}}),
-    do: ChatSvc.chat(msgs, args[:thread_id], user)
+  def chat(%{messages: msgs} = args, %{context: %{current_user: user}}) do
+    Stream.topic(:thread, args[:thread_id], user)
+    |> Stream.enable()
+
+    ChatSvc.chat(msgs, args[:thread_id], user)
+  end
 
   def clear_chats(args, %{context: %{current_user: user}}),
     do: ChatSvc.clear(user, args[:thread_id], args[:before])

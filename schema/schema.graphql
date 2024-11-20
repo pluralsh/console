@@ -940,11 +940,25 @@ type RootMutationType {
 
 type RootSubscriptionType {
   applicationDelta: ApplicationDelta
+
   podDelta: PodDelta
+
   buildDelta(buildId: ID): BuildDelta
+
   commandDelta(buildId: ID!): CommandDelta
+
   notificationDelta: NotificationDelta
+
   runLogsDelta(stepId: ID!): RunLogsDelta
+
+  "streams chunks of ai text for a given parent scope"
+  aiStream(
+    "the insight id to use when streaming a fix suggestion"
+    insightId: ID
+
+    "the thread id for streaming a chat suggestion"
+    threadId: ID
+  ): String
 }
 
 input PolicyBindingAttributes {
