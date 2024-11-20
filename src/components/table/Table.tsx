@@ -1,10 +1,7 @@
 import { Div, type DivProps } from 'honorable'
 import {
-  type CSSProperties,
-  type ComponentProps,
   Fragment,
   type MouseEvent,
-  type MutableRefObject,
   type Ref,
   forwardRef,
   useCallback,
@@ -17,7 +14,6 @@ import type {
   ColumnDef,
   FilterFn,
   Row,
-  SortDirection,
   TableOptions,
 } from '@tanstack/react-table'
 import {
@@ -31,24 +27,32 @@ import {
 import { rankItem } from '@tanstack/match-sorter-utils'
 import type { VirtualItem } from '@tanstack/react-virtual'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import styled, { useTheme } from 'styled-components'
+import { useTheme } from 'styled-components'
 import { isEmpty, isNil } from 'lodash-es'
 
-import usePrevious from '../hooks/usePrevious'
-import { InfoOutlineIcon, Tooltip } from '../index'
+import { type FillLevel, InfoOutlineIcon, Tooltip } from '../../index'
+import Button from '../Button'
+import CaretUpIcon from '../icons/CaretUpIcon'
+import EmptyState, { type EmptyStateProps } from '../EmptyState'
+import { Spinner } from '../Spinner'
 
-import Button from './Button'
-import CaretUpIcon from './icons/CaretUpIcon'
-import ArrowRightIcon from './icons/ArrowRightIcon'
-import { FillLevelProvider } from './contexts/FillLevelContext'
-import EmptyState, { type EmptyStateProps } from './EmptyState'
-import { Spinner } from './Spinner'
+import { tableFillLevelToBg, tableFillLevelToBorderColor } from './colors'
+import { FillerRows } from './FillerRows'
+import { useIsScrolling, useOnVirtualSliceChange } from './hooks'
+import { SortIndicator } from './SortIndicator'
+import { T } from './T'
+import { Tbody } from './Tbody'
+import { Td, TdExpand, TdLoading } from './Td'
+import { Th } from './Th'
+import { Thead } from './Thead'
+import { Tr } from './Tr'
 
 export type TableProps = DivProps & {
   data: any[]
   columns: any[]
   hideHeader?: boolean
   padCells?: boolean
+  fillLevel?: TableFillLevel
   rowBg?: 'base' | 'raised' | 'stripes'
   highlightedRowId?: string
   getRowCanExpand?: any
@@ -68,13 +72,12 @@ export type TableProps = DivProps & {
   hasNextPage?: boolean
   fetchNextPage?: () => void
   isFetchingNextPage?: boolean
-  onVirtualSliceChange?: (slice: {
-    start: VirtualItem | undefined
-    end: VirtualItem | undefined
-  }) => void
+  onVirtualSliceChange?: (slice: VirtualSlice) => void
 }
 
-type VirtualSlice = {
+export type TableFillLevel = Exclude<FillLevel, 3>
+
+export type VirtualSlice = {
   start: VirtualItem | undefined
   end: VirtualItem | undefined
 }
@@ -94,241 +97,6 @@ function getGridTemplateCols(columnDefs: ColumnDef<unknown>[] = []): string {
     )
     .join(' ')
 }
-
-const T = styled.table<{ $gridTemplateColumns: string }>(
-  ({ theme, $gridTemplateColumns }) => ({
-    gridTemplateColumns: $gridTemplateColumns,
-    backgroundColor: theme.colors['fill-one'],
-    borderSpacing: 0,
-    display: 'grid',
-    borderCollapse: 'collapse',
-    minWidth: '100%',
-    width: '100%',
-    ...theme.partials.text.body2LooseLineHeight,
-  })
-)
-
-const TheadUnstyled = forwardRef<
-  HTMLTableSectionElement,
-  ComponentProps<'thead'>
->((props, ref) => (
-  <FillLevelProvider value={2}>
-    <thead
-      {...props}
-      ref={ref}
-    />
-  </FillLevelProvider>
-))
-
-const Thead = styled(TheadUnstyled)(({ theme }) => ({
-  display: 'contents',
-  position: 'sticky',
-  top: 0,
-  zIndex: 3,
-  backgroundColor: theme.colors['fill-two'],
-}))
-
-const TbodyUnstyled = forwardRef<
-  HTMLTableSectionElement,
-  ComponentProps<'tbody'>
->((props, ref) => (
-  <FillLevelProvider value={1}>
-    <tbody
-      ref={ref}
-      {...props}
-    />
-  </FillLevelProvider>
-))
-
-const Tbody = styled(TbodyUnstyled)(({ theme }) => ({
-  display: 'contents',
-  backgroundColor: theme.colors['fill-one'],
-}))
-
-const Tr = styled.tr<{
-  $highlighted?: boolean
-  $selected?: boolean
-  $selectable?: boolean
-  $clickable?: boolean
-  $raised?: boolean
-}>(
-  ({
-    theme,
-    $clickable: clickable = false,
-    $raised: raised = false,
-    $selectable: selectable = false,
-    $selected: selected = false,
-    $highlighted: highlighted = false,
-  }) => ({
-    display: 'contents',
-    backgroundColor: highlighted
-      ? theme.colors['fill-two']
-      : selected
-      ? theme.colors['fill-zero-hover']
-      : raised || (selectable && !selected)
-      ? theme.colors['fill-zero-selected']
-      : theme.colors['fill-zero'],
-
-    ...(clickable && {
-      cursor: 'pointer',
-
-      // highlight when hovered, but don't highlight if a child button is hovered
-      '&:not(:has(button:hover)):hover': {
-        backgroundColor: selectable
-          ? selected
-            ? theme.colors['fill-zero-hover']
-            : theme.colors['fill-zero-selected']
-          : theme.colors['fill-zero-hover'],
-      },
-    }),
-  })
-)
-
-const Th = styled.th<{
-  $stickyColumn: boolean
-  $highlight?: boolean
-  $cursor?: CSSProperties['cursor']
-  $hideHeader?: boolean
-}>(
-  ({
-    theme,
-    $stickyColumn: stickyColumn,
-    $highlight: highlight,
-    $cursor: cursor,
-    $hideHeader: hideHeader,
-  }) => ({
-    padding: 0,
-    position: 'sticky',
-    top: 0,
-    zIndex: 4,
-    '.thOuterWrap': {
-      alignItems: 'center',
-      display: hideHeader ? 'none' : 'flex',
-      position: 'relative',
-      backgroundColor: highlight
-        ? theme.colors['fill-two']
-        : theme.colors['fill-one'],
-      zIndex: 4,
-      borderBottom: theme.borders.default,
-      color: theme.colors.text,
-      height: 48,
-      minHeight: 48,
-      whiteSpace: 'nowrap',
-      padding: '0 12px',
-      textAlign: 'left',
-      ...(cursor ? { cursor } : {}),
-      '.thSortIndicatorWrap': {
-        display: 'flex',
-        gap: theme.spacing.xsmall,
-      },
-    },
-    '&:last-child': {
-      /* Hackery to hide unpredictable visible gap between columns */
-      zIndex: 3,
-      '&::before': {
-        content: '""',
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        bottom: 0,
-        width: 10000,
-        backgroundColor: theme.colors['fill-two'],
-        borderBottom: hideHeader ? 'none' : theme.borders.default,
-      },
-    },
-    '&:first-child': {
-      ...(stickyColumn
-        ? {
-            backgroundColor: 'inherit',
-            position: 'sticky',
-            left: 0,
-            zIndex: 5,
-            '.thOuterWrap': {
-              boxShadow: theme.boxShadows.slight,
-              zIndex: 5,
-            },
-          }
-        : {}),
-    },
-  })
-)
-
-// TODO: Set vertical align to top for tall cells (~3 lines of text or more). See ENG-683.
-const Td = styled.td<{
-  $firstRow?: boolean
-  $loose?: boolean
-  $padCells?: boolean
-  $stickyColumn: boolean
-  $highlight?: boolean
-  $truncateColumn: boolean
-  $center?: boolean
-}>(
-  ({
-    theme,
-    $firstRow: firstRow,
-    $loose: loose,
-    $padCells: padCells,
-    $stickyColumn: stickyColumn,
-    $highlight: highlight,
-    $truncateColumn: truncateColumn = false,
-    $center: center,
-  }) => ({
-    ...theme.partials.text.body2LooseLineHeight,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: center ? 'center' : 'flex-start',
-    height: 'auto',
-    minHeight: 52,
-
-    backgroundColor: highlight ? theme.colors['fill-two'] : 'inherit',
-    borderTop: firstRow ? '' : theme.borders.default,
-    color: theme.colors['text-light'],
-
-    padding: padCells ? (loose ? '16px 12px' : '8px 12px') : 0,
-    '&:first-child': stickyColumn
-      ? {
-          boxShadow: theme.boxShadows.slight,
-          position: 'sticky',
-          left: 0,
-          zIndex: 1,
-        }
-      : {},
-    ...(truncateColumn
-      ? {
-          '*': {
-            width: '100%',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          },
-        }
-      : {}),
-  })
-)
-
-const TdExpand = styled.td(({ theme }) => ({
-  '&:last-child': {
-    gridColumn: '2 / -1',
-  },
-  backgroundColor: 'inherit',
-  color: theme.colors['text-light'],
-  height: 'auto',
-  minHeight: 52,
-  padding: '16px 12px',
-}))
-
-const TdLoading = styled(Td)(({ theme }) => ({
-  display: 'flex',
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'center',
-  gridColumn: '1 / -1',
-  textAlign: 'center',
-  gap: theme.spacing.xsmall,
-  color: theme.colors['text-xlight'],
-  minHeight: theme.spacing.large * 2 + theme.spacing.xlarge,
-}))
 
 function isRow<T>(row: Row<T> | VirtualItem): row is Row<T> {
   return typeof (row as Row<T>).getVisibleCells === 'function'
@@ -354,175 +122,6 @@ const defaultGlobalFilterFn: FilterFn<any> = (
   return itemRank.passed
 }
 
-const sortDirToIcon = {
-  asc: (
-    <ArrowRightIcon
-      size={12}
-      transform="rotate(-90deg)"
-    />
-  ),
-  desc: (
-    <ArrowRightIcon
-      size={12}
-      transform="rotate(90deg)"
-    />
-  ),
-}
-
-function SortIndicator({
-  direction = false,
-}: {
-  direction: false | SortDirection
-}) {
-  if (!direction) return null
-
-  return sortDirToIcon[direction]
-}
-
-function FillerRow({
-  columns,
-  height,
-  index,
-  stickyColumn,
-  selectable,
-  ...props
-}: {
-  columns: unknown[]
-  height: number
-  index: number
-  stickyColumn: boolean
-  selectable?: boolean
-}) {
-  return (
-    <Tr
-      aria-hidden="true"
-      $raised={index % 2 === 1}
-      $selected={false}
-      $selectable={selectable}
-    >
-      <Td
-        aria-hidden="true"
-        $stickyColumn={stickyColumn}
-        style={{
-          height,
-          minHeight: height,
-          maxHeight: height,
-          padding: 0,
-          gridColumn: '1 / -1',
-        }}
-        colSpan={columns.length}
-        $truncateColumn={false}
-        $center={false}
-        {...props}
-      />
-    </Tr>
-  )
-}
-
-function FillerRows({
-  rows,
-  height,
-  position,
-  ...props
-}: {
-  rows: Row<unknown>[] | VirtualItem[]
-  columns: unknown[]
-  height: number
-  position: 'top' | 'bottom'
-  stickyColumn: boolean
-  clickable?: boolean
-  selectable?: boolean
-}) {
-  return (
-    <>
-      <FillerRow
-        height={position === 'top' ? 0 : height}
-        index={
-          position === 'top'
-            ? rows[0].index - 2
-            : rows[rows.length - 1].index + 1
-        }
-        {...props}
-      />
-      <FillerRow
-        height={position === 'top' ? height : 0}
-        index={
-          position === 'top'
-            ? rows[0].index - 1
-            : rows[rows.length - 1].index + 2
-        }
-        {...props}
-      />
-    </>
-  )
-}
-
-function useIsScrolling(
-  ref: MutableRefObject<HTMLElement>,
-  {
-    onIsScrollingChange: onScrollingChange,
-    restDelay = 350,
-  }: { onIsScrollingChange: (isScrolling: boolean) => void; restDelay?: number }
-) {
-  const [isScrolling, setIsScrolling] = useState(false)
-  const timeout = useRef<number | null>(null)
-
-  useEffect(() => {
-    onScrollingChange?.(isScrolling)
-  }, [isScrolling, onScrollingChange])
-
-  useEffect(() => {
-    if (ref.current) {
-      const el = ref.current
-
-      const scrollHandler = () => {
-        setIsScrolling(true)
-        window.clearTimeout(timeout.current)
-        timeout.current = window.setTimeout(() => {
-          setIsScrolling(false)
-        }, restDelay)
-      }
-
-      el.addEventListener('scroll', scrollHandler, { passive: true })
-
-      return () => {
-        el.removeEventListener('scroll', scrollHandler)
-      }
-    }
-  }, [ref, restDelay])
-}
-
-function useOnVirtualSliceChange({
-  virtualRows,
-  virtualizeRows,
-  onVirtualSliceChange,
-}: {
-  virtualRows: VirtualItem[]
-  virtualizeRows: boolean
-  onVirtualSliceChange: (slice: VirtualSlice) => void
-}) {
-  const sliceStartRow = virtualRows[0]
-  const sliceEndRow: VirtualItem = virtualRows[virtualRows.length - 1]
-  const prevSliceStartRow = usePrevious(virtualRows[0])
-  const prevSliceEndRow = usePrevious(virtualRows[virtualRows.length - 1])
-
-  useEffect(() => {
-    if (
-      virtualizeRows &&
-      (prevSliceEndRow !== sliceEndRow || prevSliceStartRow !== sliceStartRow)
-    ) {
-      onVirtualSliceChange?.({ start: sliceStartRow, end: sliceEndRow })
-    }
-  }, [
-    sliceStartRow,
-    sliceEndRow,
-    virtualizeRows,
-    onVirtualSliceChange,
-    prevSliceEndRow,
-    prevSliceStartRow,
-  ])
-}
-
 function TableRef(
   {
     data,
@@ -532,6 +131,7 @@ function TableRef(
     renderExpanded,
     loose = false,
     padCells = true,
+    fillLevel = 0,
     rowBg = 'stripes',
     stickyColumn = false,
     scrollTopMargin = 500,
@@ -693,8 +293,10 @@ function TableRef(
       ref={forwardRef}
     >
       <Div
-        backgroundColor="fill-two"
-        border={flush ? 'none' : '1px solid border-fill-two'}
+        backgroundColor={tableFillLevelToBg[fillLevel]}
+        border={
+          flush ? 'none' : `1px solid ${tableFillLevelToBorderColor[fillLevel]}`
+        }
         borderRadius={
           flush
             ? `0 0 ${theme.borderRadiuses.large}px ${theme.borderRadiuses.large}px`
@@ -711,10 +313,14 @@ function TableRef(
         <T $gridTemplateColumns={gridTemplateColumns}>
           <Thead>
             {headerGroups.map((headerGroup) => (
-              <Tr key={headerGroup.id}>
+              <Tr
+                key={headerGroup.id}
+                $fillLevel={fillLevel}
+              >
                 {headerGroup.headers.map((header) => (
                   <Th
                     key={header.id}
+                    $fillLevel={fillLevel}
                     $hideHeader={hideHeader}
                     $stickyColumn={stickyColumn}
                     $highlight={header.column.columnDef?.meta?.highlight}
@@ -764,6 +370,7 @@ function TableRef(
                 position="top"
                 stickyColumn={stickyColumn}
                 clickable={!!onRowClick}
+                fillLevel={fillLevel}
               />
             )}
             {rows.map((maybeRow) => {
@@ -783,6 +390,7 @@ function TableRef(
                   <Tr
                     key={key}
                     onClick={(e) => onRowClick?.(e, row)}
+                    $fillLevel={fillLevel}
                     $raised={raised}
                     $highlighted={row?.id === highlightedRowId}
                     $selectable={row?.getCanSelect() ?? false}
@@ -797,6 +405,7 @@ function TableRef(
                     {isNil(row) && isLoaderRow ? (
                       <TdLoading
                         key={i}
+                        $fillLevel={fillLevel}
                         $firstRow={i === 0}
                         $padCells={padCells}
                         $loose={loose}
@@ -812,6 +421,7 @@ function TableRef(
                       row?.getVisibleCells().map((cell) => (
                         <Td
                           key={cell.id}
+                          $fillLevel={fillLevel}
                           $firstRow={i === 0}
                           $padCells={padCells}
                           $loose={loose}
@@ -831,7 +441,10 @@ function TableRef(
                     )}
                   </Tr>
                   {row?.getIsExpanded() && (
-                    <Tr $raised={i % 2 === 1}>
+                    <Tr
+                      $fillLevel={fillLevel}
+                      $raised={i % 2 === 1}
+                    >
                       <TdExpand />
                       <TdExpand colSpan={row.getVisibleCells().length - 1}>
                         {renderExpanded({ row })}
@@ -848,6 +461,7 @@ function TableRef(
                 height={paddingBottom}
                 position="bottom"
                 stickyColumn={stickyColumn}
+                fillLevel={fillLevel}
               />
             )}
           </Tbody>
@@ -855,7 +469,6 @@ function TableRef(
         {isEmpty(rows) && (
           <EmptyState
             message="No results match your query"
-            style={{ background: theme.colors['fill-zero-hover'] }}
             {...emptyStateProps}
           />
         )}

@@ -359,14 +359,25 @@ const extremeLengthData = Array(200)
 
 export const Default = Template.bind({})
 Default.args = {
+  fillLevel: 0,
   width: '900px',
   height: '400px',
   data: repeatedData,
   columns,
 }
 
+export const Empty = Template.bind({})
+Empty.args = {
+  fillLevel: 0,
+  width: '900px',
+  height: '400px',
+  data: [],
+  columns,
+}
+
 export const Highlighted = Template.bind({})
 Highlighted.args = {
+  fillLevel: 0,
   width: '900px',
   height: '400px',
   data: repeatedData,
@@ -396,6 +407,7 @@ Highlighted.args = {
 
 export const VirtualizedRows = Template.bind({})
 VirtualizedRows.args = {
+  fillLevel: 0,
   virtualizeRows: true,
   width: '900px',
   height: '400px',
@@ -405,6 +417,7 @@ VirtualizedRows.args = {
 
 export const PagedData = PagedTemplate.bind({})
 PagedData.args = {
+  fillLevel: 0,
   pageSize: 30,
   width: '900px',
   height: '400px',
@@ -415,6 +428,7 @@ PagedData.args = {
 export const Loose = Template.bind({})
 
 Loose.args = {
+  fillLevel: 0,
   width: '900px',
   height: '400px',
   data: repeatedData,
@@ -425,6 +439,7 @@ Loose.args = {
 export const Clickable = Template.bind({})
 
 Clickable.args = {
+  fillLevel: 0,
   width: '900px',
   height: '400px',
   data: repeatedData,
@@ -435,6 +450,7 @@ Clickable.args = {
 export const StickyColumn = Template.bind({})
 
 StickyColumn.args = {
+  fillLevel: 0,
   width: '400px',
   height: '400px',
   data: repeatedData,
@@ -445,6 +461,7 @@ StickyColumn.args = {
 export const Expandable = Template.bind({})
 
 Expandable.args = {
+  fillLevel: 0,
   width: '900px',
   height: '400px',
   data: repeatedData,
@@ -457,6 +474,7 @@ Expandable.args = {
 
 export const FilterableAndSortable = FilterableTemplate.bind({})
 FilterableAndSortable.args = {
+  fillLevel: 0,
   virtualizeRows: true,
   emptyStateProps: {
     message: 'No results match your query',
@@ -470,6 +488,7 @@ FilterableAndSortable.args = {
 export const Selectable = SelectableTemplate.bind({})
 
 Selectable.args = {
+  fillLevel: 0,
   width: '900px',
   height: '400px',
   data: repeatedData,

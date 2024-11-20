@@ -63,7 +63,7 @@ export { default as Tab } from './components/Tab'
 export type { TabListStateProps, TabBaseProps } from './components/TabList'
 export { TabList } from './components/TabList'
 export { default as TabPanel } from './components/TabPanel'
-export { default as Table } from './components/Table'
+export { default as Table } from './components/table/Table'
 export { default as TipCarousel } from './components/TipCarousel'
 export {
   type ValidationResponse,
