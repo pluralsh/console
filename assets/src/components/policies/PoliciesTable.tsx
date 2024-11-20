@@ -21,6 +21,7 @@ import {
   ColPolicyName,
   ColViolations,
 } from './PoliciesColumns'
+import { TableFillLevel } from '@pluralsh/design-system/dist/components/table/Table'
 
 const columns = [ColPolicyName, ColCluster, ColViolations, ColDescription]
 const columnsWithActions = [
@@ -40,6 +41,7 @@ export function PoliciesTable({
   loading,
   setVirtualSlice,
   resetFilters,
+  fillLevel,
 }: {
   caret?: boolean
   setRefetch?: (refetch: () => () => void) => void
@@ -49,6 +51,7 @@ export function PoliciesTable({
   loading: boolean
   setVirtualSlice: any
   resetFilters?: () => void
+  fillLevel?: TableFillLevel
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -83,6 +86,7 @@ export function PoliciesTable({
         <FullHeightTableWrap>
           <Table
             virtualizeRows
+            fillLevel={fillLevel}
             data={data?.policyConstraints?.edges || []}
             columns={caret ? columnsWithActions : columns}
             css={{

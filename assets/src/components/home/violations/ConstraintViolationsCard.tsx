@@ -63,6 +63,7 @@ export function ConstraintViolationsCard() {
         ) : (
           <PoliciesTable
             caret
+            fillLevel={1}
             data={tableData}
             refetch={refetch}
             fetchNextPage={fetchNextPage}
