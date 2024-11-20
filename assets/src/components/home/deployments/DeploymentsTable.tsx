@@ -36,6 +36,7 @@ export function DeploymentsTable({
   return (
     <Table
       loose
+      fillLevel={1}
       data={data}
       columns={deploymentsColumns}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}

@@ -34,6 +34,7 @@ export function ClusterOverViewTable({
   return (
     <Table
       loose
+      fillLevel={1}
       data={data}
       columns={clusterOverviewColumns}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}

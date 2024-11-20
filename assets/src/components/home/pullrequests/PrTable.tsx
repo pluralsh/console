@@ -38,6 +38,7 @@ export function PrTable({
   return (
     <Table
       loose
+      fillLevel={1}
       data={data}
       columns={columns}
       reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
