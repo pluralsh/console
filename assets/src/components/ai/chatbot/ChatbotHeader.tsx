@@ -104,8 +104,11 @@ const WrapperSC = styled.div<{ $fullscreen: boolean }>(
       ? {
           border: theme.borders.input,
           borderRadius: theme.borderRadiuses.large,
+          background: theme.colors['fill-one'],
         }
-      : {}),
-    background: theme.colors['fill-one'],
+      : {
+          background: theme.colors['fill-two'],
+          borderBottom: theme.borders['fill-two'],
+        }),
   })
 )

@@ -1,5 +1,6 @@
 import { AiInsightFragment, AiRole } from 'generated/graphql'
-import { ChatbotMessagesSC, ChatMessage } from './ChatbotPanelThread.tsx'
+import { ChatbotMessagesWrapper } from './ChatbotPanelThread.tsx'
+import { ChatMessage } from './ChatMessage'
 
 export function ChatbotPanelInsight({
   currentInsight,
@@ -9,13 +10,13 @@ export function ChatbotPanelInsight({
   fullscreen: boolean
 }) {
   return (
-    <ChatbotMessagesSC $fullscreen={fullscreen}>
+    <ChatbotMessagesWrapper fullscreen={fullscreen}>
       <ChatMessage
         key={currentInsight.id}
         role={AiRole.Assistant}
         content={currentInsight.text ?? ''}
         disableActions={true}
       />
-    </ChatbotMessagesSC>
+    </ChatbotMessagesWrapper>
   )
 }
