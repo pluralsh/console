@@ -126,10 +126,7 @@ export function ResourceList<
   })
 
   const resourceList = data?.[queryName] as TResourceList
-  const isLoading = useMemo(
-    () => loading && !resourceList,
-    [loading, resourceList]
-  )
+  const isLoading = loading && !resourceList
   const items = useMemo(
     () =>
       isLoading
