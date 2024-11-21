@@ -6217,6 +6217,7 @@ type ClusterInsightComponent {
 }
 
 type AiDelta {
+  seq: Int!
   content: String!
 }
 

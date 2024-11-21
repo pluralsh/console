@@ -128,6 +128,7 @@ type AgentMigrationAttributes struct {
 }
 
 type AiDelta struct {
+	Seq     int64  `json:"seq"`
 	Content string `json:"content"`
 }
 
