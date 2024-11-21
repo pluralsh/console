@@ -6673,6 +6673,7 @@ export type RootQueryTypeAiArgs = {
 export type RootQueryTypeAiCompletionArgs = {
   chat?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
   input?: InputMaybe<Scalars['String']['input']>;
+  scopeId?: InputMaybe<Scalars['String']['input']>;
   system: Scalars['String']['input'];
 };
 
@@ -7724,6 +7725,7 @@ export type RootSubscriptionType = {
 
 export type RootSubscriptionTypeAiStreamArgs = {
   insightId?: InputMaybe<Scalars['ID']['input']>;
+  scopeId?: InputMaybe<Scalars['String']['input']>;
   threadId?: InputMaybe<Scalars['ID']['input']>;
 };
 

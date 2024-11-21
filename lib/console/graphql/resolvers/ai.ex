@@ -61,7 +61,12 @@ defmodule Console.GraphQl.Resolvers.AI do
   def ai_completion(%{system: system, input: input}, _) when is_binary(input),
     do: Provider.completion([{:user, input}], preface: system)
 
-  def ai_completion(%{system: system, chat: chat}, _) when is_list(chat) do
+  def ai_completion(%{system: system, chat: chat} = args, %{context: %{current_user: user}}) when is_list(chat) do
+    if is_binary(args[:scope_id]) do
+      Stream.topic(:freeform, args[:scope_id], user)
+      |> Stream.enable()
+    end
+
     Enum.map(chat, fn %{role: r, content: c} -> {r, c} end)
     |> Provider.completion(preface: system)
   end

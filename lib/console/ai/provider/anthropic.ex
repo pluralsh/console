@@ -4,9 +4,13 @@ defmodule Console.AI.Anthropic do
   """
   @behaviour Console.AI.Provider
 
+  alias Console.AI.Stream
+
   require Logger
 
-  defstruct [:access_key, :model]
+  @default_model "claude-3-5-sonnet-latest"
+
+  defstruct [:access_key, :model, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -33,7 +37,7 @@ defmodule Console.AI.Anthropic do
     def spec(), do: %__MODULE__{content: [Anthropic.Content.spec()]}
   end
 
-  def new(opts), do: %__MODULE__{access_key: opts.access_token, model: opts.model}
+  def new(opts), do: %__MODULE__{access_key: opts.access_token, model: opts.model, stream: Stream.stream()}
 
   @doc """
   Generate a anthropic completion from
@@ -48,11 +52,25 @@ defmodule Console.AI.Anthropic do
     end
   end
 
+  defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream}, history) do
+    Stream.Exec.anthropic(fn ->
+      {system, history} = split(history)
+      url("/messages")
+      |> HTTPoison.post(Jason.encode!(%{
+        model: model || @default_model,
+        system: system,
+        messages: history,
+        max_tokens: @max_tokens,
+        stream: true
+      }), json_headers(token), [stream_to: self(), async: :once] ++ @options)
+    end, stream)
+  end
+
   defp chat(%__MODULE__{access_key: token, model: model}, history) do
     {system, history} = split(history)
     url("/messages")
     |> HTTPoison.post(Jason.encode!(%{
-      model: model || "claude-3-5-sonnet-latest",
+      model: model || @default_model,
       system: system,
       messages: history,
       max_tokens: @max_tokens
