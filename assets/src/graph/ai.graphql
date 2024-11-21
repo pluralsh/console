@@ -127,8 +127,13 @@ query AI($prompt: String!) {
   ai(prompt: $prompt)
 }
 
-query AICompletion($system: String!, $input: String, $chat: [ChatMessage]) {
-  aiCompletion(system: $system, input: $input, chat: $chat)
+query AICompletion(
+  $system: String!
+  $input: String
+  $chat: [ChatMessage]
+  $scopeId: String
+) {
+  aiCompletion(system: $system, input: $input, chat: $chat, scopeId: $scopeId)
 }
 
 query AISuggestedFix($insightID: ID!) {
@@ -230,8 +235,8 @@ mutation DeleteChatThread($id: ID!) {
   }
 }
 
-subscription AIChatStream($threadId: ID, $insightId: ID) {
-  aiStream(threadId: $threadId, insightId: $insightId) {
+subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String) {
+  aiStream(threadId: $threadId, insightId: $insightId, scopeId: $scopeId) {
     seq
     content
   }

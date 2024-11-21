@@ -58,14 +58,25 @@ defmodule Console.GraphQl.Resolvers.AI do
   def resolve_cluster_insight_component(%{id: id}, %{context: %{current_user: user}}),
     do: Clusters.insight_component(id, user)
 
-  def ai_completion(%{system: system, input: input}, _) when is_binary(input),
-    do: Provider.completion([{:user, input}], preface: system)
+  def ai_completion(%{system: system, input: input} = args, %{context: %{current_user: user}}) when is_binary(input) do
+    maybe_stream(args, user)
+    Provider.completion([{:user, input}], preface: system)
+  end
 
-  def ai_completion(%{system: system, chat: chat}, _) when is_list(chat) do
+  def ai_completion(%{system: system, chat: chat} = args, %{context: %{current_user: user}}) when is_list(chat) do
+    maybe_stream(args, user)
+
     Enum.map(chat, fn %{role: r, content: c} -> {r, c} end)
     |> Provider.completion(preface: system)
   end
   def ai_completion(_, _), do: {:error, "need to pass either a raw input or a chat history"}
+
+  defp maybe_stream(args, user) do
+    if is_binary(args[:scope_id]) do
+      Stream.topic(:freeform, args[:scope_id], user)
+      |> Stream.enable()
+    end
+  end
 
   def ai_suggested_fix(%{insight_id: id}, %{context: %{current_user: user}}) do
     Stream.topic(:insight, id, user)

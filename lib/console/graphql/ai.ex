@@ -128,9 +128,10 @@ defmodule Console.GraphQl.AI do
     @desc "General api to query the configured LLM for your console"
     field :ai_completion, :string do
       middleware Authenticated
-      arg :system, non_null(:string), description: "the initial system prompt to use for this completion"
-      arg :input,  :string, description: "the actual user-provided prompt to give to the underlying LLM"
-      arg :chat,   list_of(:chat_message), description: "a list of chat prompts to give to the llm"
+      arg :system,   non_null(:string), description: "the initial system prompt to use for this completion"
+      arg :input,    :string, description: "the actual user-provided prompt to give to the underlying LLM"
+      arg :chat,     list_of(:chat_message), description: "a list of chat prompts to give to the llm"
+      arg :scope_id, :string, description: "a scope id to use when streaming responses back to the client"
 
       resolve &AI.ai_completion/2
     end
@@ -265,12 +266,15 @@ defmodule Console.GraphQl.AI do
     field :ai_stream, :ai_delta do
       arg :insight_id, :id, description: "the insight id to use when streaming a fix suggestion"
       arg :thread_id,  :id, description: "the thread id for streaming a chat suggestion"
+      arg :scope_id,   :string, description: "an arbitrary scope id to use for explain w/ ai"
 
       config fn
         %{insight_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:insight, id, user)}
         %{thread_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
           {:ok, topic: Stream.topic(:thread, id, user)}
+        %{scope_id: id}, %{context: %{current_user: user}} when is_binary(id) ->
+          {:ok, topic: Stream.topic(:freeform, id, user)}
         _, _ -> {:error, "no id provided for this subscription"}
       end
     end

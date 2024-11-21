@@ -441,6 +441,9 @@ type RootQueryType {
 
     "a list of chat prompts to give to the llm"
     chat: [ChatMessage]
+
+    "a scope id to use when streaming responses back to the client"
+    scopeId: String
   ): String
 
   "Use the content of an insight and additional context from its associated object to suggest a fix"
@@ -958,6 +961,9 @@ type RootSubscriptionType {
 
     "the thread id for streaming a chat suggestion"
     threadId: ID
+
+    "an arbitrary scope id to use for explain w\/ ai"
+    scopeId: String
   ): AiDelta
 }
 

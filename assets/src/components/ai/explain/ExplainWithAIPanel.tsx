@@ -4,11 +4,13 @@ import {
   useAiCompletionQuery,
 } from '../../../generated/graphql.ts'
 import AIPanel from '../AIPanel.tsx'
-import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import { Markdown } from '@pluralsh/design-system'
 import { GqlError } from '../../utils/Alert.tsx'
 import { useExplainWithAIContext } from '../AIContext.tsx'
 import { ChatWithAIButton } from '../chatbot/ChatbotButton.tsx'
+import { uniqueId } from 'lodash'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { Loading } from '../chatbot/AISuggestFix.tsx'
 
 function explainMsg(msg: string): ChatMessage {
   return {
@@ -26,13 +28,25 @@ export default function ExplainWithAIPanel({
   open: boolean
   onClose: () => void
 }) {
+  const scopeId = useMemo(() => uniqueId(), [])
+  const ref = useRef<HTMLDivElement>(null)
+  const [streaming, setStreaming] = useState<boolean>(false)
+  const scrollToBottom = useCallback(() => {
+    ref.current?.scrollTo({
+      top: ref.current.scrollHeight,
+      behavior: 'smooth',
+    })
+  }, [ref])
+
   const { system } = useExplainWithAIContext()
   const { data, loading, error } = useAiCompletionQuery({
-    variables: { system, input: prompt },
+    variables: { system, input: prompt, scopeId },
+    onCompleted: () => streaming && scrollToBottom(),
   })
 
   return (
     <AIPanel
+      ref={ref}
       open={open}
       onClose={onClose}
       showCloseIcon
@@ -49,7 +63,13 @@ export default function ExplainWithAIPanel({
       }
     >
       {data?.aiCompletion && <Markdown text={data.aiCompletion} />}
-      {loading && <LoadingIndicator></LoadingIndicator>}
+      {loading && (
+        <Loading
+          setStreaming={setStreaming}
+          scrollToBottom={scrollToBottom}
+          scopeId={scopeId}
+        />
+      )}
       {error && <GqlError error={error} />}
     </AIPanel>
   )

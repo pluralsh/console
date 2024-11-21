@@ -4,8 +4,14 @@ defmodule Console.AI.Stream.Exec do
 
   def openai(fun, %AIStream{} = stream), do: exec(fun, stream, &handle_openai/1)
 
+  def anthropic(fun, %AIStream{} = stream), do: exec(fun, stream, &handle_anthropic/1)
+
   defp handle_openai(%{"choices" => [%{"delta" => %{"content" => c}} | _]}) when is_binary(c), do: c
   defp handle_openai(_), do: :pass
+
+  defp handle_anthropic(%{"type" => "content_block_start", "content_block" => %{"text" => t}}) when is_binary(t), do: t
+  defp handle_anthropic(%{"type" => "content_block_delta", "delta" => %{"text" => t}}) when is_binary(t), do: t
+  defp handle_anthropic(_), do: :pass
 
   defp exec(fun, %AIStream{} = stream, reducer) when is_function(reducer, 1) do
     build_stream(fun)

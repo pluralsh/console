@@ -32,18 +32,20 @@ function fixMessage(fix: string): ChatMessage {
   }
 }
 
-function Loading({
+export function Loading({
   insightId,
+  scopeId,
   scrollToBottom,
   setStreaming,
 }: {
-  insightId: string
+  insightId?: string
+  scopeId?: string
   scrollToBottom: () => void
   setStreaming: Dispatch<SetStateAction<boolean>>
 }): ReactNode {
   const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
   useAiChatStreamSubscription({
-    variables: { insightId },
+    variables: { insightId, scopeId },
     onData: ({ data: { data } }) => {
       setStreaming(true)
       if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom()
