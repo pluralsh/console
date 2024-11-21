@@ -229,3 +229,10 @@ mutation DeleteChatThread($id: ID!) {
     ...ChatThread
   }
 }
+
+subscription AIChatStream($threadId: ID, $insightId: ID) {
+  aiStream(threadId: $threadId, insightId: $insightId) {
+    seq
+    content
+  }
+}

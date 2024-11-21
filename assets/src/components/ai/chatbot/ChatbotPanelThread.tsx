@@ -1,17 +1,19 @@
 import { EmptyState, usePrevious } from '@pluralsh/design-system'
 
-import { ReactNode, Ref, useCallback, useEffect, useRef } from 'react'
+import { ReactNode, Ref, useCallback, useEffect, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 
 import { useCanScroll } from 'components/hooks/useCanScroll.ts'
 import { GqlError } from 'components/utils/Alert.tsx'
 import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
 import {
+  AiDelta,
   AiRole,
   ChatFragment,
   ChatThreadDetailsDocument,
   ChatThreadDetailsQuery,
   ChatThreadFragment,
+  useAiChatStreamSubscription,
   useChatMutation,
   useChatThreadDetailsQuery,
 } from 'generated/graphql'
@@ -32,6 +34,7 @@ export function ChatbotPanelThread({
   fullscreen: boolean
 }) {
   const theme = useTheme()
+  const [streaming, setStreaming] = useState<boolean>(false)
   const messageListRef = useRef<HTMLUListElement>(null)
   const scrollToBottom = useCallback(() => {
     messageListRef.current?.scrollTo({
@@ -39,6 +42,22 @@ export function ChatbotPanelThread({
       behavior: 'smooth',
     })
   }, [messageListRef])
+
+  const [streamedMessage, setStreamedMessage] = useState<AiDelta[]>([])
+  useAiChatStreamSubscription({
+    variables: { threadId: currentThread.id },
+    onData: ({ data: { data } }) => {
+      setStreaming(true)
+      if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom()
+      setStreamedMessage((streamedMessage) => [
+        ...streamedMessage,
+        {
+          seq: data?.aiStream?.seq ?? 0,
+          content: data?.aiStream?.content ?? '',
+        },
+      ])
+    },
+  })
 
   const { data } = useChatThreadDetailsQuery({
     variables: { id: currentThread.id },
@@ -59,6 +78,7 @@ export function ChatbotPanelThread({
           updatedAt: new Date().toISOString(),
         },
       }),
+      onCompleted: () => streaming && scrollToBottom(),
       update: (cache, { data }) => {
         updateCache(cache, {
           query: ChatThreadDetailsDocument,
@@ -78,7 +98,10 @@ export function ChatbotPanelThread({
   const length = data?.chatThread?.chats?.edges?.length ?? 0
   const prevLength = usePrevious(length) ?? 0
   useEffect(() => {
-    if (length > prevLength) scrollToBottom()
+    if (length > prevLength) {
+      scrollToBottom()
+      setStreamedMessage([])
+    }
   }, [length, prevLength, scrollToBottom])
 
   const sendMessage = useCallback(
@@ -95,7 +118,6 @@ export function ChatbotPanelThread({
 
   if (!data?.chatThread?.chats?.edges)
     return <LoadingIndicator css={{ background: theme.colors['fill-one'] }} />
-
   const messages = data.chatThread.chats.edges
     .map((edge) => edge?.node)
     .filter((msg): msg is ChatFragment => Boolean(msg))
@@ -113,7 +135,19 @@ export function ChatbotPanelThread({
             {...msg}
           />
         ))}
-        {sendingMessage && <GeneratingResponseMessage />}
+        {sendingMessage &&
+          (streamedMessage.length ? (
+            <ChatMessage
+              disableActions
+              role={AiRole.Assistant}
+              content={streamedMessage
+                .sort((a, b) => a.seq - b.seq)
+                .map((delta) => delta.content)
+                .join('')}
+            />
+          ) : (
+            <GeneratingResponseMessage />
+          ))}
       </ChatbotMessagesWrapper>
       <SendMessageForm
         sendMessage={sendMessage}

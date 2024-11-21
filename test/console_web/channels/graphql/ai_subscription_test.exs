@@ -17,7 +17,7 @@ defmodule ConsoleWeb.GraphQl.AISubscriptionTest do
       assert_reply(ref, :ok, %{subscriptionId: _})
 
       stream = %Stream{topic: Stream.topic(:thread, thread.id, user)}
-      Stream.publish(stream, %{content: "something", seq: 1})
+      Stream.publish(stream, "something", 1)
       assert_push("subscription:data", %{result: %{data: %{"aiStream" => %{"content" => "something"}}}})
     end
   end

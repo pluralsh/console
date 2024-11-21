@@ -9768,6 +9768,14 @@ export type DeleteChatThreadMutationVariables = Exact<{
 
 export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
 
+export type AiChatStreamSubscriptionVariables = Exact<{
+  threadId?: InputMaybe<Scalars['ID']['input']>;
+  insightId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type AiChatStreamSubscription = { __typename?: 'RootSubscriptionType', aiStream?: { __typename?: 'AiDelta', seq: number, content: string } | null };
+
 export type CostAnalysisFragment = { __typename?: 'CostAnalysis', minutes?: number | null, cpuCost?: number | null, pvCost?: number | null, ramCost?: number | null, totalCost?: number | null };
 
 export type FileContentFragment = { __typename?: 'FileContent', content?: string | null, path?: string | null };
@@ -15440,6 +15448,38 @@ export function useDeleteChatThreadMutation(baseOptions?: Apollo.MutationHookOpt
 export type DeleteChatThreadMutationHookResult = ReturnType<typeof useDeleteChatThreadMutation>;
 export type DeleteChatThreadMutationResult = Apollo.MutationResult<DeleteChatThreadMutation>;
 export type DeleteChatThreadMutationOptions = Apollo.BaseMutationOptions<DeleteChatThreadMutation, DeleteChatThreadMutationVariables>;
+export const AiChatStreamDocument = gql`
+    subscription AIChatStream($threadId: ID, $insightId: ID) {
+  aiStream(threadId: $threadId, insightId: $insightId) {
+    seq
+    content
+  }
+}
+    `;
+
+/**
+ * __useAiChatStreamSubscription__
+ *
+ * To run a query within a React component, call `useAiChatStreamSubscription` and pass it any options that fit your needs.
+ * When your component renders, `useAiChatStreamSubscription` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the subscription, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useAiChatStreamSubscription({
+ *   variables: {
+ *      threadId: // value for 'threadId'
+ *      insightId: // value for 'insightId'
+ *   },
+ * });
+ */
+export function useAiChatStreamSubscription(baseOptions?: Apollo.SubscriptionHookOptions<AiChatStreamSubscription, AiChatStreamSubscriptionVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useSubscription<AiChatStreamSubscription, AiChatStreamSubscriptionVariables>(AiChatStreamDocument, options);
+      }
+export type AiChatStreamSubscriptionHookResult = ReturnType<typeof useAiChatStreamSubscription>;
+export type AiChatStreamSubscriptionResult = Apollo.SubscriptionResult<AiChatStreamSubscription>;
 export const AppDocument = gql`
     query App($name: String!) {
   application(name: $name) {
@@ -24785,6 +24825,7 @@ export const namedOperations = {
     Logout: 'Logout'
   },
   Subscription: {
+    AIChatStream: 'AIChatStream',
     LogsDelta: 'LogsDelta'
   },
   Fragment: {
