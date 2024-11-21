@@ -34,6 +34,7 @@ export function ChatbotPanelThread({
   fullscreen: boolean
 }) {
   const theme = useTheme()
+  const [streaming, setStreaming] = useState<boolean>(false)
   const messageListRef = useRef<HTMLUListElement>(null)
   const scrollToBottom = useCallback(() => {
     messageListRef.current?.scrollTo({
@@ -46,6 +47,7 @@ export function ChatbotPanelThread({
   useAiChatStreamSubscription({
     variables: { threadId: currentThread.id },
     onData: ({ data: { data } }) => {
+      setStreaming(true)
       if ((data?.aiStream?.seq ?? 1) % 120 === 0) scrollToBottom()
       setStreamedMessage((streamedMessage) => [
         ...streamedMessage,
@@ -76,6 +78,7 @@ export function ChatbotPanelThread({
           updatedAt: new Date().toISOString(),
         },
       }),
+      onCompleted: () => streaming && scrollToBottom(),
       update: (cache, { data }) => {
         updateCache(cache, {
           query: ChatThreadDetailsDocument,
@@ -133,7 +136,7 @@ export function ChatbotPanelThread({
           />
         ))}
         {sendingMessage &&
-          (streamedMessage ? (
+          (streamedMessage.length ? (
             <ChatMessage
               disableActions
               role={AiRole.Assistant}
