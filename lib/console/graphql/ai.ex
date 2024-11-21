@@ -116,6 +116,7 @@ defmodule Console.GraphQl.AI do
   end
 
   object :ai_delta do
+    field :seq,     non_null(:integer)
     field :content, non_null(:string)
   end
 

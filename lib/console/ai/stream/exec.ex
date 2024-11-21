@@ -8,16 +8,18 @@ defmodule Console.AI.Stream.Exec do
   defp handle_openai(_), do: :pass
 
   defp exec(fun, %AIStream{} = stream, reducer) when is_function(reducer, 1) do
-    Enum.reduce_while(build_stream(fun), [], fn
-      %AIStream.SSE.Event{data: data}, acc ->
+    build_stream(fun)
+    |> Stream.with_index()
+    |> Enum.reduce_while([], fn
+      {%AIStream.SSE.Event{data: data}, ind}, acc ->
         case reducer.(data) do
           c when is_binary(c) ->
-            AIStream.publish(stream, c)
+            AIStream.publish(stream, %{content: c, seq: ind})
             {:cont, [c | acc]}
           _ -> {:cont, acc}
         end
 
-      {:error, error}, _ -> {:halt, {:error, "ai service error: #{inspect(error)}"}}
+      {{:error, error}, _}, _ -> {:halt, {:error, "ai service error: #{inspect(error)}"}}
 
       _, acc -> {:cont, acc}
     end)

@@ -178,6 +178,7 @@ export type AgentMigrationAttributes = {
 export type AiDelta = {
   __typename?: 'AiDelta';
   content: Scalars['String']['output'];
+  seq: Scalars['Int']['output'];
 };
 
 /** A representation of a LLM-derived insight */
