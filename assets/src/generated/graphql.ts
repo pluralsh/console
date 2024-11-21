@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9657,6 +9657,7 @@ export type AiCompletionQueryVariables = Exact<{
   system: Scalars['String']['input'];
   input?: InputMaybe<Scalars['String']['input']>;
   chat?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
+  scopeId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -9773,6 +9774,7 @@ export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', delete
 export type AiChatStreamSubscriptionVariables = Exact<{
   threadId?: InputMaybe<Scalars['ID']['input']>;
   insightId?: InputMaybe<Scalars['ID']['input']>;
+  scopeId?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -14892,8 +14894,8 @@ export type AiLazyQueryHookResult = ReturnType<typeof useAiLazyQuery>;
 export type AiSuspenseQueryHookResult = ReturnType<typeof useAiSuspenseQuery>;
 export type AiQueryResult = Apollo.QueryResult<AiQuery, AiQueryVariables>;
 export const AiCompletionDocument = gql`
-    query AICompletion($system: String!, $input: String, $chat: [ChatMessage]) {
-  aiCompletion(system: $system, input: $input, chat: $chat)
+    query AICompletion($system: String!, $input: String, $chat: [ChatMessage], $scopeId: String) {
+  aiCompletion(system: $system, input: $input, chat: $chat, scopeId: $scopeId)
 }
     `;
 
@@ -14912,6 +14914,7 @@ export const AiCompletionDocument = gql`
  *      system: // value for 'system'
  *      input: // value for 'input'
  *      chat: // value for 'chat'
+ *      scopeId: // value for 'scopeId'
  *   },
  * });
  */
@@ -15451,8 +15454,8 @@ export type DeleteChatThreadMutationHookResult = ReturnType<typeof useDeleteChat
 export type DeleteChatThreadMutationResult = Apollo.MutationResult<DeleteChatThreadMutation>;
 export type DeleteChatThreadMutationOptions = Apollo.BaseMutationOptions<DeleteChatThreadMutation, DeleteChatThreadMutationVariables>;
 export const AiChatStreamDocument = gql`
-    subscription AIChatStream($threadId: ID, $insightId: ID) {
-  aiStream(threadId: $threadId, insightId: $insightId) {
+    subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String) {
+  aiStream(threadId: $threadId, insightId: $insightId, scopeId: $scopeId) {
     seq
     content
   }
@@ -15473,6 +15476,7 @@ export const AiChatStreamDocument = gql`
  *   variables: {
  *      threadId: // value for 'threadId'
  *      insightId: // value for 'insightId'
+ *      scopeId: // value for 'scopeId'
  *   },
  * });
  */
