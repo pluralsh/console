@@ -7,7 +7,6 @@ import {
   ColStatus,
   ColTitle,
 } from 'components/pr/queue/PrQueueColumns'
-import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
@@ -29,10 +28,6 @@ export function PrTable({
 } & Omit<ComponentProps<typeof Table>, 'data' | 'columns'>) {
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
     meta: { refetch },
-  }
-
-  if (!data) {
-    return <TableSkeleton />
   }
 
   return (

@@ -32,7 +32,6 @@ import {
   usePageInfo,
   useSortedTableOptions,
 } from './utils'
-import { TableSkeleton } from '../../utils/SkeletonLoaders.tsx'
 
 interface ResourceListProps<
   TResourceList,
@@ -114,15 +113,6 @@ export function ResourceList<
     setNamespaced(namespaced)
   }, [setNamespaced, namespaced])
 
-  if (isLoading) {
-    return (
-      <TableSkeleton
-        numColumns={6}
-        centered
-      />
-    )
-  }
-
   return (
     <>
       <ErrorToast errors={resourceList?.errors} />
@@ -130,6 +120,7 @@ export function ResourceList<
         <Table
           data={items}
           columns={columns}
+          loading={isLoading}
           hasNextPage={hasNextPage}
           fetchNextPage={fetchNextPage}
           isFetchingNextPage={loading}

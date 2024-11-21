@@ -57,7 +57,8 @@ export function ClusterOverviewCard() {
     >
       <ClusterOverviewChart data={chartData} />
       <ClusterOverViewTable
-        data={tableData?.clusters?.edges}
+        data={tableData?.clusters?.edges ?? []}
+        loading={!tableData && loading}
         refetch={refetch}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}

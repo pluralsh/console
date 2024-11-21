@@ -61,7 +61,9 @@ export function DeploymentsCard() {
         errors
       </OverlineH1>
       <DeploymentsTable
-        data={data?.serviceDeployments?.edges}
+        data={data?.serviceDeployments?.edges ?? []}
+        loading={!data && loading}
+        loadingSkeletonRows={3}
         emptyStateProps={{ message: 'All services healthy!' }}
         refetch={refetch}
         virtualizeRows

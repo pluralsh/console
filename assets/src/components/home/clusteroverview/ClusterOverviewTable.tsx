@@ -7,7 +7,6 @@ import {
   columnHelper,
 } from 'components/cd/clusters/ClustersColumns'
 import { TableCaretLink } from 'components/cluster/TableElements'
-import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 import { ComponentProps } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
@@ -25,10 +24,6 @@ export function ClusterOverViewTable({
   const navigate = useNavigate()
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
     meta: { refetch },
-  }
-
-  if (!data) {
-    return <TableSkeleton centered />
   }
 
   return (
