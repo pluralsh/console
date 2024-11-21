@@ -4,7 +4,7 @@ defmodule Console.AI.PubSub.Consumer do
     max_demand: 10
   import Console.Services.Base, only: [handle_notify: 2]
   alias Console.PubSub
-  alias Console.Schema.{AiInsight, Service, Stack}
+  alias Console.Schema.{AiInsight, Service, Stack, StackState}
   alias Console.AI.{PubSub.Insightful, Cron}
   require Logger
 
@@ -19,11 +19,13 @@ defmodule Console.AI.PubSub.Consumer do
   end
 
   def maybe_send_event({:ok, insight} = res) do
-    case Console.Repo.preload(insight, [:stack, :service]) do
+    case Console.Repo.preload(insight, [:stack, :service, :stack_state]) do
       %AiInsight{service: %Service{} = svc} ->
         handle_notify(PubSub.ServiceInsight, {svc, insight})
       %AiInsight{stack: %Stack{} = stack} ->
         handle_notify(PubSub.StackInsight, {stack, insight})
+      %AiInsight{stack_state: %StackState{} = state} ->
+        handle_notify(PubSub.StackStateInsight, {state, insight})
       _ -> :ok
     end
     res

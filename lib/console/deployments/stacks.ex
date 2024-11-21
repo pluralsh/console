@@ -21,7 +21,8 @@ defmodule Console.Deployments.Stacks do
     ScmConnection,
     CustomStackRun,
     StackDefinition,
-    StackCron
+    StackCron,
+    AiInsight
   }
 
   @preloads [:environment, :files, :observable_metrics, :cron, :tags, :read_bindings, :write_bindings]
@@ -260,8 +261,17 @@ defmodule Console.Deployments.Stacks do
   Posts a review comment for a completed pr stack run if possible
   """
   def post_comment(%StackRun{} = run) do
-    run = Repo.preload(run, [:pull_request, :state, stack: :connection])
+    run = Repo.preload(run, [:pull_request, stack: :connection, state: :insight])
     case {run, scm_connection(run)}  do
+      {%StackRun{
+        id: id,
+        stack_id: stack_id,
+        status: :successful,
+        state: %StackState{insight: %AiInsight{} = insight},
+        pull_request: %PullRequest{} = pr
+      }, %ScmConnection{} = conn} ->
+        url = Console.url("/stacks/#{stack_id}/runs/#{id}")
+        Dispatcher.review(conn, pr, pr_blob("insight", insight: insight, link: url))
       {%StackRun{
         id: id,
         stack_id: stack_id,
@@ -341,7 +351,9 @@ defmodule Console.Deployments.Stacks do
   defp sync_stack_status(_), do: {:ok, %{}}
 
   defp add_stack_state(attrs, %{} = state) do
-    state = Console.clean(state) |> Map.delete(:run_id)
+    state =
+      Console.clean(state)
+      |> Map.drop(~w(run_id insight)a)
     Map.put(attrs, :state, state)
   end
   defp add_stack_state(attrs, _), do: attrs

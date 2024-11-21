@@ -414,6 +414,21 @@ defmodule Console.Deployments.PubSub.RecurseTest do
     end
   end
 
+  describe "StackStateInsight" do
+    test "it can send a message on a stack plan insight" do
+      insight = insert(:ai_insight)
+      stack   = insert(:stack, connection: build(:scm_connection))
+      pr      = insert(:pull_request, url: "https://github.com/pluralsh/console/pull/10")
+      run     = insert(:stack_run, status: :successful, stack: stack, pull_request: pr)
+      state   = insert(:stack_state, insight: insight, run: run)
+
+      expect(Tentacat.Pulls.Reviews, :create, fn _, _, _, _, _ -> {:ok, %{"id" => "id"}, :ok} end)
+
+      event = %PubSub.StackStateInsight{item: {state, insight}}
+      Recurse.handle_event(event)
+    end
+  end
+
   describe "StackRunCompleted" do
     test "it can dequeue a stack run" do
       stack = insert(:stack)

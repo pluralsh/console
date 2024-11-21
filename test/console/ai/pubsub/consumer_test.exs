@@ -85,3 +85,52 @@ defmodule Console.AI.PubSub.ConsumerTest do
     end
   end
 end
+
+defmodule Console.AI.PubSub.ConsumerSyncTest do
+  use Console.DataCase, async: false
+  use Mimic
+  alias Console.AI.PubSub.Consumer
+  alias Console.PubSub
+
+  setup do
+    {:ok, settings: deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "key"}})}
+  end
+
+  describe "StackRunUpdated" do
+    test "it will figure out what a terraform plan does" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      stack = insert(:stack, repository: git)
+      run   = insert(:stack_run, status: :pending_approval, stack: stack, repository: git, git: %{ref: "master", folder: "plural/terraform/aws"})
+      state = insert(:stack_state, run: run, plan: "some large plan")
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+
+      event = %PubSub.StackRunUpdated{item: run}
+      {:ok, res} = Consumer.handle_event(event)
+
+      assert res.id == refetch(state).insight_id
+      assert res.text == "openai completion"
+    end
+
+    test "it will figure out what a terraform plan does for pr runs too" do
+      git = insert(:git_repository, url: "https://github.com/pluralsh/console.git")
+      stack = insert(:stack, repository: git)
+      run   = insert(:stack_run,
+        status: :successful,
+        stack: stack,
+        repository: git,
+        git: %{ref: "master", folder: "plural/terraform/aws"},
+        pull_request: insert(:pull_request)
+      )
+      state = insert(:stack_state, run: run, plan: "some large plan")
+      expect(Console.AI.OpenAI, :completion, 2, fn _, _ -> {:ok, "openai completion"} end)
+
+      event = %PubSub.StackRunUpdated{item: run}
+      {:ok, res} = Consumer.handle_event(event)
+
+      assert res.id == refetch(state).insight_id
+      assert res.text == "openai completion"
+
+      assert_receive {:event, %PubSub.StackStateInsight{item: {_, ^res}}}
+    end
+  end
+end

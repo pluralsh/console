@@ -53,7 +53,7 @@ defimpl Console.AI.Evidence, for: Console.Schema.StackRun do
 
   defp fetch_code(%StackRun{} = run) do
     with {:ok, f} <- Stacks.tarstream(run),
-         {:ok, msgs} <- code_prompt(f, run.git.folder, "I'll also include the relevant terraform code below, listed in the format #{file_fmt()}") do
+         {:ok, msgs} <- code_prompt(f, run.git.folder, "I'll also include the relevant #{run.type} code below, listed in the format #{file_fmt()}") do
       msgs
     else
       _ -> []

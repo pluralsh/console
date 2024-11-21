@@ -141,6 +141,19 @@ defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunUpdated do
   def process(_), do: :ok
 end
 
+defimpl Console.PubSub.Recurse, for: Console.PubSub.StackStateInsight do
+  alias Console.Schema.{StackRun, PullRequest, StackState, AiInsight}
+  alias Console.Deployments.Stacks
+
+  def process(%@for{item: {%StackState{} = state, _}}) do
+    case Console.Repo.preload(state, [run: [:pull_request, state: :insight]]) do
+      %StackState{run: %StackRun{pull_request: %PullRequest{}, state: %StackState{insight: %AiInsight{}}} = run} ->
+        Stacks.post_comment(run)
+      _ -> :ok
+    end
+  end
+end
+
 defimpl Console.PubSub.Recurse, for: Console.PubSub.StackRunCreated do
   alias Console.Schema.{Stack, StackRun, PullRequest}
   alias Console.Deployments.Stacks

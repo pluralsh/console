@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -197,6 +197,7 @@ export type AiInsight = {
   sha?: Maybe<Scalars['String']['output']>;
   stack?: Maybe<InfrastructureStack>;
   stackRun?: Maybe<StackRun>;
+  stackState?: Maybe<StackState>;
   /** a shortish summary of this insight */
   summary?: Maybe<Scalars['String']['output']>;
   /** the text of this insight */
@@ -8858,8 +8859,12 @@ export type StackSettingsAttributes = {
 export type StackState = {
   __typename?: 'StackState';
   id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** an insight explaining the state of this stack state, eg the terraform plan it represents */
+  insight?: Maybe<AiInsight>;
   plan?: Maybe<Scalars['String']['output']>;
   state?: Maybe<Array<Maybe<StackStateResource>>>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
 
 export type StackStateAttributes = {

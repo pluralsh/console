@@ -2037,8 +2037,17 @@ type StackFile {
 
 type StackState {
   id: ID!
+
   plan: String
+
   state: [StackStateResource]
+
+  "an insight explaining the state of this stack state, eg the terraform plan it represents"
+  insight: AiInsight
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
 }
 
 type StackStateResource {
@@ -6194,6 +6203,8 @@ type AiInsight {
   stackRun: StackRun
 
   serviceComponent: ServiceComponent
+
+  stackState: StackState
 
   clusterInsightComponent: ClusterInsightComponent
 

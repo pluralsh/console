@@ -31,6 +31,14 @@ defmodule Console.GraphQl.Resolvers.Deployments.Stack do
     |> paginate(args)
   end
 
+  def safe_stack_outputs(_, outputs, %{context: %{cluster: %{}}}), do: outputs
+  def safe_stack_outputs(parent, outputs, %{context: %{current_user: user}}) do
+    case allow(parent, user, :write) do
+      {:ok, _} -> outputs
+      _ -> Enum.filter(outputs, & ! &1.secret)
+    end
+  end
+
   defp stack_filters(query, args) do
     Enum.reduce(args, query, fn
       {:project_id, id}, q -> Stack.for_project(q, id)
