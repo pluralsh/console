@@ -48,7 +48,9 @@ export function PrCard() {
         {headerText}
       </OverlineH1>
       <PrTable
-        data={data?.pullRequests?.edges}
+        loading={!data && loading}
+        loadingSkeletonRows={3}
+        data={data?.pullRequests?.edges ?? []}
         emptyStateProps={{ message: 'No open PRs' }}
         refetch={refetch}
         virtualizeRows

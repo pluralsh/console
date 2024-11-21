@@ -104,18 +104,10 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
   return (
     <svg
       width={`${276 * scale}`}
-      height={`${314 * scale}`}
-      viewBox="0 0 276 314"
+      height={`${276 * scale}`}
+      viewBox="0 0 276 276"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <rect
-        x="30"
-        y="302"
-        width="217"
-        height="12"
-        rx="4"
-        fill="url(#paint0)"
-      />
       <path
         d="M0 138C0 61.7847 61.7848 0 138 0C214.215 0 276 61.7847 276 138C276 214.215 214.215 276 138 276C61.7847 276 0 214.215 0 138ZM253.202 138C253.202 74.3755 201.625 22.7976 138 22.7976C74.3755 22.7976 22.7976 74.3755 22.7976 138C22.7976 201.625 74.3755 253.202 138 253.202C201.625 253.202 253.202 201.625 253.202 138Z"
         fill="url(#paint1)"
@@ -129,22 +121,6 @@ export function ChartSkeleton({ scale = 1 }: { scale?: number }) {
         fill="url(#paint2)"
       />
       <defs>
-        <LinearGradient
-          id="paint0"
-          x1="30"
-          y1="308"
-          x2="247"
-          y2="308"
-        >
-          <stop
-            offset="0%"
-            stopColor="#2D3037"
-          />
-          <stop
-            offset="100%"
-            stopColor="#393C44"
-          />
-        </LinearGradient>
         <LinearGradient
           id="paint1"
           x1="276"

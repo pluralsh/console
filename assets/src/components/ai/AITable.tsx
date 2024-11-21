@@ -42,11 +42,12 @@ export function AITable({
     return (
       <TableSkeleton
         numColumns={1}
+        height={70}
         centered={true}
         styles={{
           background: theme.colors['fill-one'],
           height: '100%',
-          padding: theme.spacing.medium,
+          padding: theme.spacing.xlarge,
           '> svg': {
             width: '100%',
           },

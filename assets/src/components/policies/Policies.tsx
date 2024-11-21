@@ -7,7 +7,6 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { GqlError } from 'components/utils/Alert'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { usePolicyConstraintsQuery } from 'generated/graphql'
 import { useRef, useState } from 'react'
@@ -82,8 +81,6 @@ export function Policies() {
 
   if (error) return <GqlError error={error} />
 
-  if (!data) return <LoadingIndicator />
-
   return (
     <PoliciesContainer>
       <div className="filter">
@@ -136,10 +133,10 @@ export function Policies() {
       <div className="table">
         <FullHeightTableWrap>
           <PoliciesTable
-            data={data || []}
+            data={data}
+            loading={loading}
             refetch={refetch}
             fetchNextPage={fetchNextPage}
-            loading={loading}
             setVirtualSlice={setVirtualSlice}
             resetFilters={() => {
               setSelectedKinds([])

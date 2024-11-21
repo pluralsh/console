@@ -28,12 +28,8 @@ export function ConstraintViolationsChart({
   }
   const { chartData, legendData } = useChartData(data || {}, chartColors)
 
-  if (!data?.policyStatistics) {
-    return <ChartSkeleton scale={0.75} />
-  }
-
   const CenterLabel = createCenteredMetric(
-    `${getPercentCompliance(data)}%`,
+    `${data ? getPercentCompliance(data) : '-'}%`,
     `Compliance`
   )
 
@@ -53,25 +49,29 @@ export function ConstraintViolationsChart({
       }
       link={POLICIES_ABS_PATH}
     >
-      <RadialBar
-        colors={(item) => chartColors[item.data.color]}
-        endAngle={360}
-        cornerRadius={5}
-        padAngle={2}
-        padding={0.5}
-        innerRadius={0.4}
-        tooltip={(props) => (
-          <ChartTooltip
-            color={props.bar.color}
-            value={props.bar.formattedValue}
-            label={props.bar.category}
-          />
-        )}
-        layers={['bars', CenterLabel]}
-        data={chartData}
-        height={CHART_SIZE}
-        width={CHART_SIZE}
-      />
+      {data?.policyStatistics ? (
+        <RadialBar
+          colors={(item) => chartColors[item.data.color]}
+          endAngle={360}
+          cornerRadius={5}
+          padAngle={2}
+          padding={0.5}
+          innerRadius={0.4}
+          tooltip={(props) => (
+            <ChartTooltip
+              color={props.bar.color}
+              value={props.bar.formattedValue}
+              label={props.bar.category}
+            />
+          )}
+          layers={['bars', CenterLabel]}
+          data={chartData}
+          height={CHART_SIZE}
+          width={CHART_SIZE}
+        />
+      ) : (
+        <ChartSkeleton scale={0.87} />
+      )}
     </HomeCard>
   )
 }

@@ -12,7 +12,6 @@ import {
   ColServiceDeployment,
   ColStatus,
 } from 'components/cd/services/ServicesColumns'
-import { TableSkeleton } from 'components/utils/SkeletonLoaders'
 
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
@@ -27,10 +26,6 @@ export function DeploymentsTable({
   const navigate = useNavigate()
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] = {
     meta: { refetch },
-  }
-
-  if (!data) {
-    return <TableSkeleton centered />
   }
 
   return (

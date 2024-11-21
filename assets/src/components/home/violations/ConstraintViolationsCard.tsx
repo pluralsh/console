@@ -11,8 +11,6 @@ import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
 import { PoliciesTable } from 'components/policies/PoliciesTable'
 
-import { TableSkeleton } from 'components/utils/SkeletonLoaders'
-
 import { HOME_CARD_MAX_HEIGHT } from '../HomeCard'
 
 import { ConstraintViolationsChart } from './ConstraintViolationsChart'
@@ -58,19 +56,15 @@ export function ConstraintViolationsCard() {
           width: '100%',
         }}
       >
-        {!tableData ? (
-          <TableSkeleton centered />
-        ) : (
-          <PoliciesTable
-            caret
-            fillLevel={1}
-            data={tableData}
-            refetch={refetch}
-            fetchNextPage={fetchNextPage}
-            loading={loading}
-            setVirtualSlice={setVirtualSlice}
-          />
-        )}
+        <PoliciesTable
+          caret
+          fillLevel={1}
+          data={tableData}
+          loading={loading}
+          refetch={refetch}
+          fetchNextPage={fetchNextPage}
+          setVirtualSlice={setVirtualSlice}
+        />
       </div>
     </div>
   )
