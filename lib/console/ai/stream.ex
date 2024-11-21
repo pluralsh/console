@@ -9,10 +9,10 @@ defmodule Console.AI.Stream do
 
   def stream(), do: Process.get(@stream)
 
-  def publish(%__MODULE__{topic: topic}, delta) when is_binary(topic) do
+  def publish(%__MODULE__{topic: topic}, c, ind) when is_binary(topic) do
     Absinthe.Subscription.publish(
       ConsoleWeb.Endpoint,
-      delta,
+      %{content: c, seq: ind},
       [ai_stream: topic]
     )
   end
