@@ -39,6 +39,7 @@ import { Spinner } from '../Spinner'
 import { tableFillLevelToBg, tableFillLevelToBorderColor } from './colors'
 import { FillerRows } from './FillerRows'
 import { useIsScrolling, useOnVirtualSliceChange } from './hooks'
+import { Skeleton } from './Skeleton'
 import { SortIndicator } from './SortIndicator'
 import { T } from './T'
 import { Tbody } from './Tbody'
@@ -50,6 +51,8 @@ import { Tr } from './Tr'
 export type TableProps = DivProps & {
   data: any[]
   columns: any[]
+  loading?: boolean
+  loadingSkeletonRows?: number
   hideHeader?: boolean
   padCells?: boolean
   fillLevel?: TableFillLevel
@@ -126,6 +129,8 @@ function TableRef(
   {
     data,
     columns,
+    loading = false,
+    loadingSkeletonRows = 10,
     hideHeader = false,
     getRowCanExpand,
     renderExpanded,
@@ -260,9 +265,20 @@ function TableRef(
   const headerGroups = useMemo(() => table.getHeaderGroups(), [table])
 
   const rows = virtualizeRows ? virtualRows : tableRows
+
+  const skeletonRows = useMemo(
+    () => Array(loadingSkeletonRows).fill({}),
+    [loadingSkeletonRows]
+  )
+
   const gridTemplateColumns = useMemo(
     () => fixedGridTemplateColumns ?? getGridTemplateCols(columns),
     [columns, fixedGridTemplateColumns]
+  )
+
+  const isRaised = useCallback(
+    (i: number) => rowBg === 'raised' || (rowBg === 'stripes' && i % 2 === 1),
+    [rowBg]
   )
 
   useEffect(() => {
@@ -362,111 +378,139 @@ function TableRef(
             ))}
           </Thead>
           <Tbody>
-            {paddingTop > 0 && (
-              <FillerRows
-                columns={columns}
-                rows={rows}
-                height={paddingTop}
-                position="top"
-                stickyColumn={stickyColumn}
-                clickable={!!onRowClick}
-                fillLevel={fillLevel}
-              />
-            )}
-            {rows.map((maybeRow) => {
-              const i = maybeRow.index
-              const isLoaderRow = i > tableRows.length - 1
-              const row: Row<unknown> | null = isRow(maybeRow)
-                ? maybeRow
-                : isLoaderRow
-                ? null
-                : tableRows[maybeRow.index]
-              const key = row?.id ?? maybeRow.index
-              const raised =
-                rowBg === 'raised' || (rowBg === 'stripes' && i % 2 === 1)
-
-              return (
-                <Fragment key={key}>
+            {loading ? (
+              <>
+                {skeletonRows.map((_, i) => (
                   <Tr
-                    key={key}
-                    onClick={(e) => onRowClick?.(e, row)}
+                    key={i}
                     $fillLevel={fillLevel}
-                    $raised={raised}
-                    $highlighted={row?.id === highlightedRowId}
-                    $selectable={row?.getCanSelect() ?? false}
-                    $selected={row?.getIsSelected() ?? false}
-                    $clickable={!!onRowClick}
-                    // data-index is required for virtual scrolling to work
-                    data-index={row?.index}
-                    {...(virtualizeRows
-                      ? { ref: rowVirtualizer.measureElement }
-                      : {})}
+                    $raised={isRaised(i)}
                   >
-                    {isNil(row) && isLoaderRow ? (
-                      <TdLoading
-                        key={i}
+                    {columns.map((_, j) => (
+                      <Td
+                        key={j}
                         $fillLevel={fillLevel}
                         $firstRow={i === 0}
                         $padCells={padCells}
                         $loose={loose}
                         $stickyColumn={stickyColumn}
                         $truncateColumn={false}
-                        $center={false}
-                        colSpan={columns.length}
                       >
-                        <div>Loading</div>
-                        <Spinner color={theme.colors['text-xlight']} />
-                      </TdLoading>
-                    ) : (
-                      row?.getVisibleCells().map((cell) => (
-                        <Td
-                          key={cell.id}
-                          $fillLevel={fillLevel}
-                          $firstRow={i === 0}
-                          $padCells={padCells}
-                          $loose={loose}
-                          $stickyColumn={stickyColumn}
-                          $highlight={cell.column?.columnDef?.meta?.highlight}
-                          $truncateColumn={
-                            cell.column?.columnDef?.meta?.truncate
-                          }
-                          $center={cell.column?.columnDef?.meta?.center}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext()
-                          )}
-                        </Td>
-                      ))
-                    )}
+                        <Skeleton />
+                      </Td>
+                    ))}
                   </Tr>
-                  {row?.getIsExpanded() && (
-                    <Tr
-                      $fillLevel={fillLevel}
-                      $raised={i % 2 === 1}
-                    >
-                      <TdExpand />
-                      <TdExpand colSpan={row.getVisibleCells().length - 1}>
-                        {renderExpanded({ row })}
-                      </TdExpand>
-                    </Tr>
-                  )}
-                </Fragment>
-              )
-            })}
-            {paddingBottom > 0 && (
-              <FillerRows
-                rows={rows}
-                columns={columns}
-                height={paddingBottom}
-                position="bottom"
-                stickyColumn={stickyColumn}
-                fillLevel={fillLevel}
-              />
+                ))}
+              </>
+            ) : (
+              <>
+                {paddingTop > 0 && (
+                  <FillerRows
+                    columns={columns}
+                    rows={rows}
+                    height={paddingTop}
+                    position="top"
+                    stickyColumn={stickyColumn}
+                    clickable={!!onRowClick}
+                    fillLevel={fillLevel}
+                  />
+                )}
+                {rows.map((maybeRow) => {
+                  const i = maybeRow.index
+                  const isLoaderRow = i > tableRows.length - 1
+                  const row: Row<unknown> | null = isRow(maybeRow)
+                    ? maybeRow
+                    : isLoaderRow
+                    ? null
+                    : tableRows[maybeRow.index]
+                  const key = row?.id ?? maybeRow.index
+
+                  return (
+                    <Fragment key={key}>
+                      <Tr
+                        key={key}
+                        onClick={(e) => onRowClick?.(e, row)}
+                        $fillLevel={fillLevel}
+                        $raised={isRaised(i)}
+                        $highlighted={row?.id === highlightedRowId}
+                        $selectable={row?.getCanSelect() ?? false}
+                        $selected={row?.getIsSelected() ?? false}
+                        $clickable={!!onRowClick}
+                        // data-index is required for virtual scrolling to work
+                        data-index={row?.index}
+                        {...(virtualizeRows
+                          ? { ref: rowVirtualizer.measureElement }
+                          : {})}
+                      >
+                        {isNil(row) && isLoaderRow ? (
+                          <TdLoading
+                            key={i}
+                            $fillLevel={fillLevel}
+                            $firstRow={i === 0}
+                            $padCells={padCells}
+                            $loose={loose}
+                            $stickyColumn={stickyColumn}
+                            $truncateColumn={false}
+                            $center={false}
+                            colSpan={columns.length}
+                          >
+                            <div>Loading</div>
+                            <Spinner color={theme.colors['text-xlight']} />
+                          </TdLoading>
+                        ) : (
+                          row?.getVisibleCells().map((cell) => (
+                            <Td
+                              key={cell.id}
+                              $fillLevel={fillLevel}
+                              $firstRow={i === 0}
+                              $padCells={padCells}
+                              $loose={loose}
+                              $stickyColumn={stickyColumn}
+                              $highlight={
+                                cell.column?.columnDef?.meta?.highlight
+                              }
+                              $truncateColumn={
+                                cell.column?.columnDef?.meta?.truncate
+                              }
+                              $center={cell.column?.columnDef?.meta?.center}
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </Td>
+                          ))
+                        )}
+                      </Tr>
+                      {row?.getIsExpanded() && (
+                        <Tr
+                          $fillLevel={fillLevel}
+                          $raised={i % 2 === 1}
+                        >
+                          <TdExpand />
+                          <TdExpand colSpan={row.getVisibleCells().length - 1}>
+                            {renderExpanded({ row })}
+                          </TdExpand>
+                        </Tr>
+                      )}
+                    </Fragment>
+                  )
+                })}
+                {paddingBottom > 0 && (
+                  <FillerRows
+                    rows={rows}
+                    columns={columns}
+                    height={paddingBottom}
+                    position="bottom"
+                    stickyColumn={stickyColumn}
+                    fillLevel={fillLevel}
+                  />
+                )}
+              </>
             )}
           </Tbody>
         </T>
-        {isEmpty(rows) && (
+        {isEmpty(rows) && !loading && (
           <EmptyState
             message="No results match your query"
             {...emptyStateProps}

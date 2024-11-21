@@ -375,6 +375,16 @@ Empty.args = {
   columns,
 }
 
+export const Loading = Template.bind({})
+Loading.args = {
+  fillLevel: 0,
+  width: '900px',
+  height: '400px',
+  data: [],
+  columns,
+  loading: true,
+}
+
 export const Highlighted = Template.bind({})
 Highlighted.args = {
   fillLevel: 0,
