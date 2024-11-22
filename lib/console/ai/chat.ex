@@ -22,8 +22,7 @@ defmodule Console.AI.Chat do
   """
 
   @summary """
-  The following is a chat log about a topic in DevOps, focusing primarily on kubernetes and infrastructure as code issues.  Provide a single-phrase,
-  easily understandable title for the conversation with at most 6 words.
+  The following is a chat log about a topic in DevOps, focusing primarily on kubernetes and infrastructure as code issues.  Please take the text provided and turn it into a highly readable and intuitive 5 word or less summary.
   """
 
   @chat """
