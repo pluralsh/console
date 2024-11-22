@@ -26,8 +26,34 @@ defimpl Console.AI.PubSub.Insightful, for: Console.PubSub.ServiceUpdated do
   def resource(_), do: :ok
 end
 
+defimpl Console.AI.PubSub.Insightful, for: Console.PubSub.StackRunUpdated do
+  alias Console.Schema.{StackRun, StackState}
+
+  def resource(%@for{item: %StackRun{status: :pending_approval} = run}),
+    do: get_state(run)
+  def resource(%@for{item: %StackRun{status: :successful, pull_request_id: id} = run}) when is_binary(id),
+    do: get_state(run)
+  def resource(_), do: :ok
+
+  defp get_state(run) do
+    case Console.Repo.preload(run, [:state]) do
+      %StackRun{state: %StackState{plan: p} = state} when is_binary(p) and byte_size(p) > 0 ->
+        {:ok, state}
+      _ -> :ok
+    end
+  end
+end
+
 defimpl Console.AI.PubSub.Insightful, for: Console.PubSub.StackRunCompleted do
-  alias Console.Schema.StackRun
+  alias Console.Schema.{StackState, StackRun}
+
+  def resource(%@for{item: %StackRun{status: :successful, pull_request_id: id} = run}) when is_binary(id) do
+    case Console.Repo.preload(run, [:state]) do
+      %StackRun{state: %StackState{plan: p} = state} when is_binary(p) and byte_size(p) > 0 ->
+        {:ok, state}
+      _ -> :ok
+    end
+  end
   def resource(%@for{item: %StackRun{status: :failed} = run}), do: {:ok, run}
   def resource(_), do: :ok
 end

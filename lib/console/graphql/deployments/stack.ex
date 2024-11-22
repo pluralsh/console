@@ -167,7 +167,9 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :observable_metrics, list_of(:observable_metric), resolve: dataloader(Deployments), description: "a list of metrics to poll to determine if a stack run should be cancelled"
 
     field :delete_run, :stack_run, resolve: dataloader(Deployments), description: "the run that physically destroys the stack"
-    field :output,     list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
+    field :output,     list_of(:stack_output),
+      resolve: filter_loader(dataloader(Deployments), &Deployments.safe_stack_outputs/3),
+      description: "the most recent output for this stack"
     field :state,      :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
 
     field :project,    :project,            resolve: dataloader(Deployments), description: "The project this stack belongs to"
@@ -276,7 +278,9 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :environment, list_of(:stack_environment), resolve: dataloader(Deployments), description: "environment variables for this stack"
 
     field :stack,   :infrastructure_stack, resolve: dataloader(Deployments), description: "the stack attached to this run"
-    field :output,  list_of(:stack_output), resolve: dataloader(Deployments), description: "the most recent output for this stack"
+    field :output,  list_of(:stack_output),
+      resolve: filter_loader(dataloader(Deployments), &Deployments.safe_stack_outputs/3),
+      description: "the most recent output for this stack"
     field :state,   :stack_state, resolve: dataloader(Deployments), description: "the most recent state of this stack"
     field :errors,  list_of(:service_error),
       resolve: dataloader(Deployments),
@@ -332,6 +336,11 @@ defmodule Console.GraphQl.Deployments.Stack do
     field :id,    non_null(:id)
     field :plan,  :string
     field :state, list_of(:stack_state_resource)
+
+    field :insight, :ai_insight, resolve: dataloader(Deployments),
+      description: "an insight explaining the state of this stack state, eg the terraform plan it represents"
+
+    timestamps()
   end
 
   object :stack_state_resource do

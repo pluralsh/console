@@ -122,7 +122,14 @@ defmodule Console.GraphQl.Schema.Base do
     end
   end
 
-  def safe_resolver(fun) do
+  def filter_loader(dataloader, func) when is_function(dataloader, 3) and is_function(func, 3) do
+    fn parent, args, res ->
+      with {:ok, result} <- dataloader.(parent, args, res),
+        do: {:ok, func.(parent, result, res)}
+    end
+  end
+
+  def safe_resolver(fun) when is_function(fun, 2) do
     fn args, ctx ->
       try do
         case fun.(args, ctx) do

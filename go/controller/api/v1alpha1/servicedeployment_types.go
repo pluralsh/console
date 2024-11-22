@@ -160,6 +160,11 @@ type ServiceSpec struct {
 	// ConfigurationRef is a secret reference which should contain service configuration.
 	// +kubebuilder:validation:Optional
 	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
+
+	// Configuration is a set of non-secret configuration to apply for lightweight templating of manifests in this service
+	// +kubebuilder:validation:Optional
+	Configuration map[string]string `json:"configuration,omitempty"`
+
 	// Bindings contain read and write policies of this cluster
 	// +kubebuilder:validation:Optional
 	Bindings *Bindings `json:"bindings,omitempty"`

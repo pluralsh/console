@@ -5,6 +5,7 @@ defmodule Console.Schema.AiInsight do
     Stack,
     Cluster,
     StackRun,
+    StackState,
     ServiceComponent,
     ClusterInsightComponent
   }
@@ -22,10 +23,11 @@ defmodule Console.Schema.AiInsight do
       field :message, :string
     end
 
-    has_one :service,   Service, foreign_key: :insight_id
-    has_one :stack,     Stack,   foreign_key: :insight_id
-    has_one :cluster,   Cluster, foreign_key: :insight_id
-    has_one :stack_run, StackRun, foreign_key: :insight_id
+    has_one :service,     Service,    foreign_key: :insight_id
+    has_one :stack,       Stack,      foreign_key: :insight_id
+    has_one :cluster,     Cluster,    foreign_key: :insight_id
+    has_one :stack_run,   StackRun,   foreign_key: :insight_id
+    has_one :stack_state, StackState, foreign_key: :insight_id
 
     has_one :service_component, ServiceComponent, foreign_key: :insight_id
     has_one :cluster_insight_component, ClusterInsightComponent, foreign_key: :insight_id

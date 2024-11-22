@@ -73,5 +73,6 @@ defmodule Console.PubSub.AppNotificationCreated, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ServiceInsight, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.StackInsight, do: use Piazza.PubSub.Event
 defmodule Console.PubSub.ClusterInsight, do: use Piazza.PubSub.Event
+defmodule Console.PubSub.StackStateInsight, do: use Piazza.PubSub.Event
 
 defmodule Console.PubSub.AlertCreated, do: use Piazza.PubSub.Event

@@ -149,6 +149,7 @@ type AiInsight struct {
 	Cluster                 *Cluster                 `json:"cluster,omitempty"`
 	StackRun                *StackRun                `json:"stackRun,omitempty"`
 	ServiceComponent        *ServiceComponent        `json:"serviceComponent,omitempty"`
+	StackState              *StackState              `json:"stackState,omitempty"`
 	ClusterInsightComponent *ClusterInsightComponent `json:"clusterInsightComponent,omitempty"`
 	InsertedAt              *string                  `json:"insertedAt,omitempty"`
 	UpdatedAt               *string                  `json:"updatedAt,omitempty"`
@@ -5369,6 +5370,10 @@ type StackState struct {
 	ID    string                `json:"id"`
 	Plan  *string               `json:"plan,omitempty"`
 	State []*StackStateResource `json:"state,omitempty"`
+	// an insight explaining the state of this stack state, eg the terraform plan it represents
+	Insight    *AiInsight `json:"insight,omitempty"`
+	InsertedAt *string    `json:"insertedAt,omitempty"`
+	UpdatedAt  *string    `json:"updatedAt,omitempty"`
 }
 
 type StackStateAttributes struct {

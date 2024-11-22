@@ -1,6 +1,6 @@
 defmodule Console.Schema.StackState do
   use Piazza.Ecto.Schema
-  alias Console.Schema.{Stack, StackRun}
+  alias Console.Schema.{Stack, StackRun, AiInsight}
 
   schema "stack_states" do
     field :plan, :binary
@@ -13,8 +13,9 @@ defmodule Console.Schema.StackState do
       field :links,         {:array, :string}
     end
 
-    belongs_to :stack, Stack
-    belongs_to :run,   StackRun
+    belongs_to :stack,   Stack
+    belongs_to :run,     StackRun
+    belongs_to :insight, AiInsight, on_replace: :update
 
     timestamps()
   end
@@ -24,8 +25,12 @@ defmodule Console.Schema.StackState do
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
+    |> cast_assoc(:insight)
     |> unique_constraint(:run_id)
     |> unique_constraint(:stack_id)
+    |> foreign_key_constraint(:insight_id)
+    |> foreign_key_constraint(:stack_id)
+    |> foreign_key_constraint(:run_id)
     |> cast_embed(:state, with: &state_changeset/2)
   end
 

@@ -297,6 +297,20 @@ func (r *ServiceReconciler) genServiceAttributes(ctx context.Context, service *v
 		}
 	}
 
+	if len(service.Spec.Configuration) > 0 {
+		if attr.Configuration == nil {
+			attr.Configuration = make([]*console.ConfigAttributes, 0)
+		}
+
+		for k, v := range service.Spec.Configuration {
+			value := v
+			attr.Configuration = append(attr.Configuration, &console.ConfigAttributes{
+				Name:  k,
+				Value: lo.ToPtr(value),
+			})
+		}
+	}
+
 	for _, contextName := range service.Spec.Contexts {
 		sc, err := r.ConsoleClient.GetServiceContext(contextName)
 		if err != nil {

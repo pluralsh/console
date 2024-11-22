@@ -92,8 +92,9 @@ defmodule Console.GraphQl.AI do
     field :cluster,           :cluster,              resolve: dataloader(Deployments)
     field :stack_run,         :stack_run,            resolve: dataloader(Deployments)
     field :service_component, :service_component,    resolve: dataloader(Deployments)
+    field :stack_state,       :stack_state,          resolve: dataloader(Deployments)
 
-    field :cluster_insight_component, :cluster_insight_component,    resolve: dataloader(Deployments)
+    field :cluster_insight_component, :cluster_insight_component, resolve: dataloader(Deployments)
 
     timestamps()
   end
