@@ -127,7 +127,7 @@ defmodule Console.Deployments.Git.Cache do
   end
 
   defp new_line(cache, repo, sha, path, filter) do
-    with {:ok, _} <- git(repo, "checkout", [sha]),
+    with {:ok, _} <- git(repo, "checkout", ["-f", sha]),
          {:ok, msg} <- msg(repo),
          {:ok, f} <- tarball(cache, sha, path, filter),
       do: {:ok, Line.new(f, sha, msg)}

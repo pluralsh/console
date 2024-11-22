@@ -4733,6 +4733,13 @@ func (in *ServiceSpec) DeepCopyInto(out *ServiceSpec) {
 		*out = new(v1.SecretReference)
 		**out = **in
 	}
+	if in.Configuration != nil {
+		in, out := &in.Configuration, &out.Configuration
+		*out = make(map[string]string, len(*in))
+		for key, val := range *in {
+			(*out)[key] = val
+		}
+	}
 	if in.Bindings != nil {
 		in, out := &in.Bindings, &out.Bindings
 		*out = new(Bindings)
