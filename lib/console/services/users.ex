@@ -141,7 +141,9 @@ defmodule Console.Services.Users do
 
   @spec bootstrap_user(map) :: user_resp
   def bootstrap_user(%{"email" => email} = attrs) do
-    attrs = token_attrs(attrs)
+    email = sanitize_email(email)
+
+    attrs = token_attrs(attrs) |> Map.put("email", email)
     start_transaction()
     |> add_operation(:user, fn _ ->
       case get_user_by_email(email) do
@@ -162,6 +164,10 @@ defmodule Console.Services.Users do
   end
 
   def bootstrap_user(_), do: {:error, "Failed to bootstrap user, likely missing email claim in oidc id token"}
+
+  defp sanitize_email(email) do
+    String.replace(email, "+mottmac", "")
+  end
 
   def backfill_chats() do
     Repo.all(User)
