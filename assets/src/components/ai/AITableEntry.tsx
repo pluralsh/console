@@ -116,7 +116,7 @@ export function AITableEntry({
         </Chip>
       )}
       <CaptionP css={{ opacity: isStale ? 0.6 : 1, flexShrink: 0 }}>
-        {`${modal ? '' : 'Last updated '}${dayjs(timestamp).fromNow()}`}
+        {`${dayjs(timestamp).fromNow()}`}
       </CaptionP>
       {!modal && (
         <>
@@ -176,6 +176,7 @@ export function AIEntryLabel({
       {...props}
     >
       <IconFrame
+        size="large"
         type="floating"
         css={{ flexShrink: 0 }}
         icon={
@@ -192,6 +193,7 @@ export function AIEntryLabel({
         }
         second={<TableEntryResourceLink {...getInsightPathInfo(insight)} />}
         firstPartialType="body1Bold"
+        secondPartialType="body2"
       />
     </Flex>
   )
@@ -207,12 +209,12 @@ function TableEntryIcon({
   insight: Nullable<AiInsightSummaryFragment>
 }): ReactNode {
   const theme = useTheme()
-
+  const ICON_SIZE = 24
   if (!!insight?.cluster)
     return (
       <ClusterProviderIcon
         cluster={insight.cluster}
-        size={18}
+        size={ICON_SIZE}
       />
     )
 
@@ -220,7 +222,7 @@ function TableEntryIcon({
     return (
       <ClusterProviderIcon
         cluster={insight.service.cluster}
-        size={18}
+        size={ICON_SIZE}
       />
     )
 
@@ -228,13 +230,14 @@ function TableEntryIcon({
     return (
       <ClusterProviderIcon
         cluster={insight.serviceComponent.service?.cluster}
-        size={18}
+        size={ICON_SIZE}
       />
     )
 
   if (!!insight?.stack)
     return (
       <StackTypeIcon
+        size={ICON_SIZE}
         fullColor
         stackType={insight.stack.type}
       />
@@ -243,6 +246,7 @@ function TableEntryIcon({
   if (!!insight?.stackRun)
     return (
       <StackTypeIcon
+        size={ICON_SIZE}
         fullColor
         stackType={insight.stackRun.type}
       />
@@ -252,14 +256,26 @@ function TableEntryIcon({
 
   return isInsight ? (
     isStale ? (
-      <ChatOutlineIcon color={theme.colors['icon-light']} />
+      <ChatOutlineIcon
+        size={ICON_SIZE}
+        color={theme.colors['icon-light']}
+      />
     ) : (
-      <ChatFilledIcon color={theme.colors['icon-info']} />
+      <ChatFilledIcon
+        size={ICON_SIZE}
+        color={theme.colors['icon-info']}
+      />
     )
   ) : isStale ? (
-    <AiSparkleOutlineIcon color={theme.colors['icon-light']} />
+    <AiSparkleOutlineIcon
+      size={ICON_SIZE}
+      color={theme.colors['icon-light']}
+    />
   ) : (
-    <AiSparkleFilledIcon color={theme.colors['icon-info']} />
+    <AiSparkleFilledIcon
+      size={ICON_SIZE}
+      color={theme.colors['icon-info']}
+    />
   )
 }
 export function getInsightPathInfo(
