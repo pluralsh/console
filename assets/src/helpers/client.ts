@@ -52,6 +52,22 @@ export function buildClient(gqlUrl, wsUrl, fetchToken) {
     },
   })
 
+  socket.onClose((e) => {
+    console.log('reconnecting closed socket', e)
+    if (socket.closeWasClean) {
+      socket.reconnectTimer.scheduleTimeout()
+    }
+  })
+
+  setInterval(() => {
+    if (socket.transport.readyState == WebSocket.CLOSED) {
+      console.log('found dead websocket, attempting a reconnect')
+      socket.reconnectTimer.scheduleTimeout()
+    }
+  }, 10000)
+
+  window.addEventListener('pageshow', () => socket.connect())
+
   const absintheSocket = AbsintheSocket.create(socket)
 
   const socketLink = createAbsintheSocketLink(absintheSocket)
