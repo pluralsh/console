@@ -195,8 +195,18 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 	}
 
+	if exists {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+		status, err := r.ConsoleClient.GetStackStatus(ctx, *stack.Status.ID)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
+		if status.Status == console.StackStatusSuccessful {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+
+		}
+	}
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return RequeueAfter(requeueAfterInfrastructureStack), nil
 }
@@ -215,7 +225,7 @@ func (r *InfrastructureStackReconciler) isAlreadyExists(ctx context.Context, sta
 		return false, nil
 	}
 
-	_, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
+	_, err := r.ConsoleClient.GetStackId(ctx, stack.Status.GetID())
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil
