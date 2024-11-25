@@ -107,6 +107,8 @@ type ConsoleClient interface {
 	CreateNamespace(ctx context.Context, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
 	UpdateNamespace(ctx context.Context, id string, attributes console.ManagedNamespaceAttributes) (*console.ManagedNamespaceFragment, error)
 	GetStack(ctx context.Context, id string) (*console.InfrastructureStackFragment, error)
+	GetStackById(ctx context.Context, id string) (*console.InfrastructureStackIDFragment, error)
+	GetStackStatus(ctx context.Context, id string) (*console.InfrastructureStackStatusFragment, error)
 	DeleteStack(ctx context.Context, id string) error
 	CreateStack(ctx context.Context, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)
 	UpdateStack(ctx context.Context, id string, attributes console.StackAttributes) (*console.InfrastructureStackFragment, error)

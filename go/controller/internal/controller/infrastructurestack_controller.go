@@ -195,10 +195,27 @@ func (r *InfrastructureStackReconciler) Reconcile(ctx context.Context, req ctrl.
 		}
 	}
 
+	if err := r.setReadyCondition(ctx, stack, exists); err != nil {
+		return ctrl.Result{}, err
+	}
 	utils.MarkCondition(stack.SetCondition, v1alpha1.SynchronizedConditionType, v1.ConditionTrue, v1alpha1.SynchronizedConditionReason, "")
-	utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 
 	return RequeueAfter(requeueAfterInfrastructureStack), nil
+}
+
+func (r *InfrastructureStackReconciler) setReadyCondition(ctx context.Context, stack *v1alpha1.InfrastructureStack, exists bool) error {
+	if exists {
+		utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.ReadyConditionReason, "")
+		status, err := r.ConsoleClient.GetStackStatus(ctx, *stack.Status.ID)
+		if err != nil {
+			return err
+		}
+		if status.Status == console.StackStatusSuccessful {
+			utils.MarkCondition(stack.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
+
+		}
+	}
+	return nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
@@ -215,7 +232,7 @@ func (r *InfrastructureStackReconciler) isAlreadyExists(ctx context.Context, sta
 		return false, nil
 	}
 
-	_, err := r.ConsoleClient.GetStack(ctx, stack.Status.GetID())
+	_, err := r.ConsoleClient.GetStackById(ctx, stack.Status.GetID())
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil

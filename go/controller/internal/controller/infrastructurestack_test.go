@@ -3,14 +3,12 @@ package controller_test
 import (
 	"context"
 
-	batchv1 "k8s.io/api/batch/v1"
-
-	"github.com/pluralsh/console/go/controller/internal/credentials"
-
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/pluralsh/console/go/controller/internal/credentials"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/mock"
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -179,7 +177,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 						},
 						{
 							Type:   v1alpha1.ReadyConditionType.String(),
-							Status: metav1.ConditionTrue,
+							Status: metav1.ConditionFalse,
 							Reason: v1alpha1.ReadyConditionReason.String(),
 						},
 						{
@@ -282,8 +280,11 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetStack", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("GetStackById", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("UpdateStack", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("GetStackStatus", mock.Anything, mock.Anything).Return(&gqlclient.InfrastructureStackStatusFragment{
+				Status: gqlclient.StackStatusSuccessful,
+			}, nil)
 
 			reconciler := &controller.InfrastructureStackReconciler{
 				Client:           k8sClient,

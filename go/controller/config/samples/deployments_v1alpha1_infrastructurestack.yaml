@@ -38,7 +38,7 @@ spec:
   detach: true
   type: TERRAFORM
   configuration:
-    version: "sha-ae2663f-terraform-1.8.2"
+    version: "0.4.41-terraform-1.8.2"
     image: "ghcr.io/pluralsh/harness"
   repositoryRef:
     name: tf-hello

@@ -165,6 +165,8 @@ type ConsoleClient interface {
 	DetachStack(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DetachStack, error)
 	DeleteStack(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteStack, error)
 	GetInfrastructureStack(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStack, error)
+	GetInfrastructureStackID(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStackID, error)
+	GetInfrastructureStackStatus(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStackStatus, error)
 	CompletesStackRun(ctx context.Context, id string, attributes StackRunAttributes, interceptors ...clientv2.RequestInterceptor) (*CompletesStackRun, error)
 	AddStackRunLogs(ctx context.Context, id string, attributes RunLogAttributes, interceptors ...clientv2.RequestInterceptor) (*AddStackRunLogs, error)
 	UpdateStackRunStep(ctx context.Context, id string, attributes RunStepAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateStackRunStep, error)
@@ -3286,6 +3288,17 @@ func (t *InfrastructureStackIDFragment) GetID() *string {
 		t = &InfrastructureStackIDFragment{}
 	}
 	return t.ID
+}
+
+type InfrastructureStackStatusFragment struct {
+	Status StackStatus "json:\"status\" graphql:\"status\""
+}
+
+func (t *InfrastructureStackStatusFragment) GetStatus() *StackStatus {
+	if t == nil {
+		t = &InfrastructureStackStatusFragment{}
+	}
+	return &t.Status
 }
 
 type InfrastructureStackFragment struct {
@@ -13946,6 +13959,28 @@ type GetInfrastructureStack struct {
 func (t *GetInfrastructureStack) GetInfrastructureStack() *InfrastructureStackFragment {
 	if t == nil {
 		t = &GetInfrastructureStack{}
+	}
+	return t.InfrastructureStack
+}
+
+type GetInfrastructureStackID struct {
+	InfrastructureStack *InfrastructureStackIDFragment "json:\"infrastructureStack,omitempty\" graphql:\"infrastructureStack\""
+}
+
+func (t *GetInfrastructureStackID) GetInfrastructureStack() *InfrastructureStackIDFragment {
+	if t == nil {
+		t = &GetInfrastructureStackID{}
+	}
+	return t.InfrastructureStack
+}
+
+type GetInfrastructureStackStatus struct {
+	InfrastructureStack *InfrastructureStackStatusFragment "json:\"infrastructureStack,omitempty\" graphql:\"infrastructureStack\""
+}
+
+func (t *GetInfrastructureStackStatus) GetInfrastructureStack() *InfrastructureStackStatusFragment {
+	if t == nil {
+		t = &GetInfrastructureStackStatus{}
 	}
 	return t.InfrastructureStack
 }
@@ -26094,6 +26129,62 @@ func (c *Client) GetInfrastructureStack(ctx context.Context, id *string, name *s
 	return &res, nil
 }
 
+const GetInfrastructureStackIDDocument = `query GetInfrastructureStackId ($id: ID, $name: String) {
+	infrastructureStack(id: $id, name: $name) {
+		... InfrastructureStackIdFragment
+	}
+}
+fragment InfrastructureStackIdFragment on InfrastructureStack {
+	id
+}
+`
+
+func (c *Client) GetInfrastructureStackID(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStackID, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetInfrastructureStackID
+	if err := c.Client.Post(ctx, "GetInfrastructureStackId", GetInfrastructureStackIDDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetInfrastructureStackStatusDocument = `query GetInfrastructureStackStatus ($id: ID, $name: String) {
+	infrastructureStack(id: $id, name: $name) {
+		... InfrastructureStackStatusFragment
+	}
+}
+fragment InfrastructureStackStatusFragment on InfrastructureStack {
+	status
+}
+`
+
+func (c *Client) GetInfrastructureStackStatus(ctx context.Context, id *string, name *string, interceptors ...clientv2.RequestInterceptor) (*GetInfrastructureStackStatus, error) {
+	vars := map[string]any{
+		"id":   id,
+		"name": name,
+	}
+
+	var res GetInfrastructureStackStatus
+	if err := c.Client.Post(ctx, "GetInfrastructureStackStatus", GetInfrastructureStackStatusDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const CompletesStackRunDocument = `mutation CompletesStackRun ($id: ID!, $attributes: StackRunAttributes!) {
 	completeStackRun(id: $id, attributes: $attributes) {
 		... StackRunIdFragment
@@ -27711,6 +27802,8 @@ var DocumentOperationNames = map[string]string{
 	DetachStackDocument:                               "DetachStack",
 	DeleteStackDocument:                               "DeleteStack",
 	GetInfrastructureStackDocument:                    "GetInfrastructureStack",
+	GetInfrastructureStackIDDocument:                  "GetInfrastructureStackId",
+	GetInfrastructureStackStatusDocument:              "GetInfrastructureStackStatus",
 	CompletesStackRunDocument:                         "CompletesStackRun",
 	AddStackRunLogsDocument:                           "AddStackRunLogs",
 	UpdateStackRunStepDocument:                        "UpdateStackRunStep",

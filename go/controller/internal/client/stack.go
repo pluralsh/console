@@ -27,6 +27,36 @@ func (c *client) GetStack(ctx context.Context, id string) (*console.Infrastructu
 	return response.InfrastructureStack, err
 }
 
+func (c *client) GetStackById(ctx context.Context, id string) (*console.InfrastructureStackIDFragment, error) {
+	response, err := c.consoleClient.GetInfrastructureStackID(ctx, lo.ToPtr(id), nil)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.InfrastructureStack == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.InfrastructureStack, err
+}
+
+func (c *client) GetStackStatus(ctx context.Context, id string) (*console.InfrastructureStackStatusFragment, error) {
+	response, err := c.consoleClient.GetInfrastructureStackStatus(ctx, lo.ToPtr(id), nil)
+	if internalerror.IsNotFound(err) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if err == nil && (response == nil || response.InfrastructureStack == nil) {
+		return nil, errors.NewNotFound(schema.GroupResource{}, id)
+	}
+	if response == nil {
+		return nil, err
+	}
+
+	return response.InfrastructureStack, err
+}
+
 func (c *client) DeleteStack(ctx context.Context, id string) error {
 	_, err := c.consoleClient.DeleteStack(ctx, id)
 	return err
