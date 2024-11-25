@@ -27,7 +27,7 @@ func (c *client) GetStack(ctx context.Context, id string) (*console.Infrastructu
 	return response.InfrastructureStack, err
 }
 
-func (c *client) GetStackId(ctx context.Context, id string) (*console.InfrastructureStackIDFragment, error) {
+func (c *client) GetStackById(ctx context.Context, id string) (*console.InfrastructureStackIDFragment, error) {
 	response, err := c.consoleClient.GetInfrastructureStackID(ctx, lo.ToPtr(id), nil)
 	if internalerror.IsNotFound(err) {
 		return nil, errors.NewNotFound(schema.GroupResource{}, id)

@@ -232,7 +232,7 @@ func (r *InfrastructureStackReconciler) isAlreadyExists(ctx context.Context, sta
 		return false, nil
 	}
 
-	_, err := r.ConsoleClient.GetStackId(ctx, stack.Status.GetID())
+	_, err := r.ConsoleClient.GetStackById(ctx, stack.Status.GetID())
 	if err != nil {
 		if errors.IsNotFound(err) {
 			return false, nil

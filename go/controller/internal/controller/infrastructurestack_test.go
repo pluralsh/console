@@ -280,7 +280,7 @@ var _ = Describe("Infrastructure Stack Controller", Ordered, func() {
 
 			fakeConsoleClient := mocks.NewConsoleClientMock(mocks.TestingT)
 			fakeConsoleClient.On("UseCredentials", mock.Anything, mock.Anything).Return("", nil)
-			fakeConsoleClient.On("GetStackId", mock.Anything, mock.Anything).Return(nil, nil)
+			fakeConsoleClient.On("GetStackById", mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("UpdateStack", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
 			fakeConsoleClient.On("GetStackStatus", mock.Anything, mock.Anything).Return(&gqlclient.InfrastructureStackStatusFragment{
 				Status: gqlclient.StackStatusSuccessful,

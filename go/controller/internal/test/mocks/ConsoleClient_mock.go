@@ -4208,6 +4208,65 @@ func (_c *ConsoleClientMock_GetStack_Call) RunAndReturn(run func(context.Context
 	return _c
 }
 
+// GetStackById provides a mock function with given fields: ctx, id
+func (_m *ConsoleClientMock) GetStackById(ctx context.Context, id string) (*client.InfrastructureStackIDFragment, error) {
+	ret := _m.Called(ctx, id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStackById")
+	}
+
+	var r0 *client.InfrastructureStackIDFragment
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.InfrastructureStackIDFragment, error)); ok {
+		return rf(ctx, id)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string) *client.InfrastructureStackIDFragment); ok {
+		r0 = rf(ctx, id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*client.InfrastructureStackIDFragment)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ConsoleClientMock_GetStackById_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetStackById'
+type ConsoleClientMock_GetStackById_Call struct {
+	*mock.Call
+}
+
+// GetStackById is a helper method to define mock.On call
+//   - ctx context.Context
+//   - id string
+func (_e *ConsoleClientMock_Expecter) GetStackById(ctx interface{}, id interface{}) *ConsoleClientMock_GetStackById_Call {
+	return &ConsoleClientMock_GetStackById_Call{Call: _e.mock.On("GetStackById", ctx, id)}
+}
+
+func (_c *ConsoleClientMock_GetStackById_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetStackById_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetStackById_Call) Return(_a0 *client.InfrastructureStackIDFragment, _a1 error) *ConsoleClientMock_GetStackById_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *ConsoleClientMock_GetStackById_Call) RunAndReturn(run func(context.Context, string) (*client.InfrastructureStackIDFragment, error)) *ConsoleClientMock_GetStackById_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetStackDefinition provides a mock function with given fields: ctx, id
 func (_m *ConsoleClientMock) GetStackDefinition(ctx context.Context, id string) (*client.StackDefinitionFragment, error) {
 	ret := _m.Called(ctx, id)
@@ -4263,65 +4322,6 @@ func (_c *ConsoleClientMock_GetStackDefinition_Call) Return(_a0 *client.StackDef
 }
 
 func (_c *ConsoleClientMock_GetStackDefinition_Call) RunAndReturn(run func(context.Context, string) (*client.StackDefinitionFragment, error)) *ConsoleClientMock_GetStackDefinition_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetStackId provides a mock function with given fields: ctx, id
-func (_m *ConsoleClientMock) GetStackId(ctx context.Context, id string) (*client.InfrastructureStackIDFragment, error) {
-	ret := _m.Called(ctx, id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetStackId")
-	}
-
-	var r0 *client.InfrastructureStackIDFragment
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*client.InfrastructureStackIDFragment, error)); ok {
-		return rf(ctx, id)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *client.InfrastructureStackIDFragment); ok {
-		r0 = rf(ctx, id)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*client.InfrastructureStackIDFragment)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
-		r1 = rf(ctx, id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// ConsoleClientMock_GetStackId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetStackId'
-type ConsoleClientMock_GetStackId_Call struct {
-	*mock.Call
-}
-
-// GetStackId is a helper method to define mock.On call
-//   - ctx context.Context
-//   - id string
-func (_e *ConsoleClientMock_Expecter) GetStackId(ctx interface{}, id interface{}) *ConsoleClientMock_GetStackId_Call {
-	return &ConsoleClientMock_GetStackId_Call{Call: _e.mock.On("GetStackId", ctx, id)}
-}
-
-func (_c *ConsoleClientMock_GetStackId_Call) Run(run func(ctx context.Context, id string)) *ConsoleClientMock_GetStackId_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
-	})
-	return _c
-}
-
-func (_c *ConsoleClientMock_GetStackId_Call) Return(_a0 *client.InfrastructureStackIDFragment, _a1 error) *ConsoleClientMock_GetStackId_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *ConsoleClientMock_GetStackId_Call) RunAndReturn(run func(context.Context, string) (*client.InfrastructureStackIDFragment, error)) *ConsoleClientMock_GetStackId_Call {
 	_c.Call.Return(run)
 	return _c
 }
