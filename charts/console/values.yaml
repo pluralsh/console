@@ -19,7 +19,8 @@ homeDir: /root
 podLabels: {}
 podAnnotations: {}
 
-migrator: {}
+migrator:
+  command: ["/opt/app/bin/console",  "migrate"]
 
 console:
   additionalContainers: ~

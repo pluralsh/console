@@ -50,7 +50,17 @@ defmodule Console.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      releases: [
+        console: [
+          include_executables_for: [:unix],
+          runtime_config_path: "rel/runtime.exs",
+          applications: [
+            runtime_tools: :permanent,
+            console: :permanent
+          ]
+        ]
+      ]
     ]
   end
 
@@ -70,7 +80,6 @@ defmodule Console.MixProject do
     [
       {:ecto, "~> 3.9.0", override: true},
       {:ex_machina, "~> 2.3", only: :test},
-      {:distillery, "~> 2.1"},
       {:libcluster, "~> 3.2"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_sts, "~> 2.3.0"},
