@@ -56,7 +56,7 @@ export function GlobalServiceFields({
           label="Select cluster provider"
           selectedKey={providerId}
           onSelectionChange={(key) => {
-            setClusterProviderId(key)
+            setClusterProviderId(key as string)
           }}
           clusterProviders={clusterProviders}
         />

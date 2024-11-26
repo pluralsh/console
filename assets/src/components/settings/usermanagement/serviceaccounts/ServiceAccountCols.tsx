@@ -1,8 +1,12 @@
-import { UserType } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import UserInfo from 'components/utils/UserInfo'
 
-const columnHelper = createColumnHelper<UserType>()
+const columnHelper = createColumnHelper<{
+  name?: string
+  email?: string
+  imageUrl?: string
+}>()
+
 const ColInfo = columnHelper.accessor((user) => user, {
   id: 'info',
   cell: function Cell({ getValue }) {

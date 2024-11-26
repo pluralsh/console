@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react'
+import { ComponentProps, ReactElement, useState } from 'react'
 import {
   ArrowTopRightIcon,
   Chip,
@@ -6,7 +6,6 @@ import {
   IconFrame,
   ListBoxItem,
   TrashCanIcon,
-  Severity,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
@@ -89,7 +88,7 @@ export const ColTitle = columnHelper.accessor(({ node }) => node?.title, {
 export function PrStatusChip({ status }: { status?: PrStatus | null }) {
   if (!status) return null
 
-  let severity: Severity = 'neutral'
+  let severity: ComponentProps<typeof Chip>['severity'] = 'neutral'
 
   switch (status) {
     case PrStatus.Open:
