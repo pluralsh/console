@@ -75,11 +75,11 @@ config :ex_aws,
   awscli_auth_adapter: ExAws.STS.AuthCache.AssumeRoleWebIdentityAdapter
 
 config :console, :watchers, [
-  Console.Watchers.Application,
+  # Console.Watchers.Application,
   # Console.Watchers.Plural,
   Console.Watchers.Upgrade,
-  Console.Watchers.Pod,
-  Console.Watchers.Postgres,
+  # Console.Watchers.Pod,
+  # Console.Watchers.Postgres,
 ]
 
 config :console, Console.PromEx,

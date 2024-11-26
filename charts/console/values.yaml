@@ -14,7 +14,7 @@ disableAdditionalVolumes: false
 
 replicaCount: 2
 
-homeDir: /root
+homeDir: /home/console
 
 podLabels: {}
 podAnnotations: {}

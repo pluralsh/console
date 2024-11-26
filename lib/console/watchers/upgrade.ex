@@ -1,14 +1,14 @@
 defmodule Console.Watchers.Upgrade do
   use Console.Watchers.Base, state: [:upgrades, :queue_id, :target, :last]
-  import Console.Services.Base, only: [
-    start_transaction: 0,
-    add_operation: 3,
-    execute: 1
-  ]
+  # import Console.Services.Base, only: [
+  #   start_transaction: 0,
+  #   add_operation: 3,
+  #   execute: 1
+  # ]
   alias Console.Clustering.Info
   alias Console.Deployments.Services
   alias Console.Plural.{Upgrades, Socket}
-  alias Console.Watchers.{Handlers, Plural}
+  alias Console.Watchers.Plural
 
   @poll_interval 60 * 1000
   @resource_interval :timer.minutes(60)
@@ -74,23 +74,23 @@ defmodule Console.Watchers.Upgrade do
     end
   end
 
-  def handle_info(:next, %{upgrades: upgrades} = state) do
-    with {:ok, %{"id" => id} = result} <- Socket.do_push(upgrades, "next", %{}),
-         true <- Console.Bootstrapper.git_enabled?() do
-      start_transaction()
-      |> add_operation(:build, fn _ -> Handlers.Upgrade.create_build(result) end)
-      |> add_operation(:ack, fn _ -> Socket.do_push(upgrades, "ack", %{"id" => id}) end)
-      |> execute()
-      |> case do
-        {:ok, _} -> {:noreply, %{state | last: id}}
-        _ -> {:noreply, state} # add some retry logic?
-      end
-    else
-      error ->
-        Logger.info "Failed to deliver upgrade: #{inspect(error)}"
-        {:noreply, state}
-    end
-  end
+  # def handle_info(:next, %{upgrades: upgrades} = state) do
+  #   with {:ok, %{"id" => id} = result} <- Socket.do_push(upgrades, "next", %{}),
+  #        true <- Console.Bootstrapper.git_enabled?() do
+  #     start_transaction()
+  #     |> add_operation(:build, fn _ -> Handlers.Upgrade.create_build(result) end)
+  #     |> add_operation(:ack, fn _ -> Socket.do_push(upgrades, "ack", %{"id" => id}) end)
+  #     |> execute()
+  #     |> case do
+  #       {:ok, _} -> {:noreply, %{state | last: id}}
+  #       _ -> {:noreply, state} # add some retry logic?
+  #     end
+  #   else
+  #     error ->
+  #       Logger.info "Failed to deliver upgrade: #{inspect(error)}"
+  #       {:noreply, state}
+  #   end
+  # end
 
   def handle_info(:svcs, %{upgrades: nil} = state), do: {:noreply, state}
   def handle_info(:svcs, %{upgrades: upgrades} = state) do
