@@ -6,6 +6,8 @@ import styled, { type CSSObject, useTheme } from 'styled-components'
 
 import { FocusScope } from '@radix-ui/react-focus-scope'
 
+import { VisuallyHidden } from 'react-aria'
+
 import WrapWithIf from './WrapWithIf'
 
 const ANIMATION_SPEED = '150ms'
@@ -18,7 +20,14 @@ export type ModalWrapperProps = {
 } & Dialog.DialogContentProps
 
 function ModalWrapperRef(
-  { open, onOpenChange, overlayStyles, children, ...props }: ModalWrapperProps,
+  {
+    open,
+    onOpenChange,
+    overlayStyles,
+    title,
+    children,
+    ...props
+  }: ModalWrapperProps,
   ref: any
 ) {
   const theme = useTheme()
@@ -49,6 +58,9 @@ function ModalWrapperRef(
               ref={ref}
               {...props}
             >
+              <VisuallyHidden>
+                <Dialog.Title>{title}</Dialog.Title>
+              </VisuallyHidden>
               {children}
             </ContentSC>
           </WrapWithIf>

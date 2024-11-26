@@ -4,7 +4,11 @@ import 'styled-components'
 import { type styledTheme } from '../theme'
 
 // Allow css prop on html elements
-import type {} from 'styled-components/cssprop'
+declare module 'react' {
+  interface Attributes {
+    css?: CSSProp | undefined
+  }
+}
 
 type StyledTheme = typeof styledTheme
 

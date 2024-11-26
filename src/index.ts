@@ -2,6 +2,7 @@ export { Avatar } from 'honorable'
 
 // Icons
 export * from './icons'
+export type { IconProps } from './components/icons/createIcon'
 
 // PluralLogos
 export * from './plural-logos'
@@ -17,7 +18,7 @@ export { default as Card } from './components/Card'
 export type { CalloutProps } from './components/Callout'
 export { default as Callout } from './components/Callout'
 export { default as Checkbox } from './components/Checkbox'
-export { default as Chip } from './components/Chip'
+export { default as Chip, type ChipProps } from './components/Chip'
 export { default as ChipList } from './components/ChipList'
 export { default as Code } from './components/Code'
 export { default as CodeEditor } from './components/CodeEditor'
@@ -63,7 +64,7 @@ export { default as Tab } from './components/Tab'
 export type { TabListStateProps, TabBaseProps } from './components/TabList'
 export { TabList } from './components/TabList'
 export { default as TabPanel } from './components/TabPanel'
-export { default as Table } from './components/table/Table'
+export { default as Table, type TableProps } from './components/table/Table'
 export { default as TipCarousel } from './components/TipCarousel'
 export {
   type ValidationResponse,
@@ -72,7 +73,13 @@ export {
 export type { TooltipProps } from './components/Tooltip'
 export { default as Tooltip } from './components/Tooltip'
 export { default as FormTitle } from './components/FormTitle'
-export { default as Sidebar, SIDEBAR_WIDTH } from './components/Sidebar'
+export {
+  default as Sidebar,
+  SIDEBAR_WIDTH,
+  useSidebar,
+  type SidebarLayout,
+  type SidebarVariant,
+} from './components/Sidebar'
 export { default as SidebarSection } from './components/SidebarSection'
 export { default as SidebarExpandButton } from './components/SidebarExpandButton'
 export {
@@ -176,3 +183,21 @@ export { default as GlobalStyle } from './GlobalStyle'
 // Utils
 export { default as scrollIntoContainerView } from './utils/scrollIntoContainerView'
 export * from './utils/urls'
+
+// Markdoc
+export type { MarkdocContextValue } from './markdoc/MarkdocContext'
+export {
+  useMarkdocContext,
+  MarkdocContextProvider,
+} from './markdoc/MarkdocContext'
+export { getSchema as getRuntimeSchema } from './markdoc/runtimeSchema'
+export {
+  default as collectHeadings,
+  type MarkdocHeading,
+} from './markdoc/utils/collectHeadings'
+export { getMdContent } from './markdoc/utils/getMdContent'
+export * as markdocConfig from './markdoc/config'
+export * as markdocFunctions from './markdoc/functions'
+export * as markdocNodes from './markdoc/nodes'
+export * as markdocTags from './markdoc/tags'
+export * as markdocComponents from './markdoc/components'

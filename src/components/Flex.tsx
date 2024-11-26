@@ -82,7 +82,7 @@ function FlexRef(
         $gap: gap,
         $padding: padding,
       }}
-      style={{ ...otherProps }}
+      css={{ ...otherProps }}
     >
       {children}
     </FlexSC>

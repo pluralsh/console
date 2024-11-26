@@ -2,19 +2,26 @@
   "name": "@pluralsh/design-system",
   "version": "0.1.0",
   "description": "Pluralsh Design System",
-  "main": "dist/index.js",
-  "type": "module",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.es.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.es.js",
+      "require": "./dist/index.cjs.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
-    "dist/**/*",
-    "src/**/*"
+    "dist"
   ],
   "scripts": {
     "start": "storybook dev -p 6006",
-    "build:storybook": "yarn clean && storybook build && yarn build:fix:storybook",
+    "build:storybook": "yarn build && storybook build && yarn build:fix:storybook",
     "build:fix:storybook": "perl -pi -w -e 's/%40/@/g;' storybook-static/index.html",
     "storybook:serve-static": "yarn build:storybook && http-server storybook-static",
-    "build": "npx tsc --declaration",
-    "build:watch": "npx tsc --declaration --watch",
+    "build": "rimraf dist && tsc --noEmit && vite build",
+    "build:watch": "rimraf dist && vite build --watch",
     "clean": "rimraf storybook-static dist",
     "test": "vitest --run",
     "test:watch": "vitest",
@@ -45,7 +52,6 @@
     "@tanstack/match-sorter-utils": "8.8.4",
     "@tanstack/react-table": "8.20.5",
     "@tanstack/react-virtual": "3.0.1",
-    "babel-plugin-styled-components": "2.1.4",
     "chroma-js": "2.4.2",
     "classnames": "2.3.2",
     "dayjs": "1.11.13",
@@ -97,6 +103,7 @@
     "@vitest/coverage-v8": "1.0.4",
     "@vitest/ui": "1.0.4",
     "babel-loader": "9.1.3",
+    "babel-plugin-styled-components": "2.1.4",
     "conventional-changelog-conventionalcommits": "6.1.0",
     "eslint": "8.55.0",
     "eslint-config-prettier": "9.1.0",
@@ -126,6 +133,7 @@
     "styled-components": "6.1.13",
     "typescript": "5.6.2",
     "vite": "5.4.8",
+    "vite-plugin-dts": "4.3.0",
     "vitest": "2.1.2"
   },
   "peerDependencies": {

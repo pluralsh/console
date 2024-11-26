@@ -10,10 +10,6 @@ import {
 
 import styled, { useTheme } from 'styled-components'
 
-import { VisuallyHidden } from 'react-aria'
-
-import * as Dialog from '@radix-ui/react-dialog'
-
 import { type ColorKey, type Nullable, type SeverityExt } from '../types'
 
 import Card from './Card'
@@ -173,6 +169,7 @@ function ModalRef(
       ref={ref}
       open={open}
       onOpenChange={triggerClose}
+      title={typeof header === 'string' ? header : 'Dialog'}
       {...props}
     >
       <ModalSC
@@ -186,9 +183,6 @@ function ModalRef(
           $scrollable={scrollable}
           $hasActions={!!actions}
         >
-          <VisuallyHidden>
-            <Dialog.Title>{header}</Dialog.Title>
-          </VisuallyHidden>
           {!!header && (
             <ModalHeaderWrapSC ref={ref}>
               {HeaderIcon && (
