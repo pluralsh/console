@@ -10,8 +10,8 @@ import {
   Markdown,
   Modal,
   Stepper,
+  Input2,
 } from '@pluralsh/design-system'
-import Input2 from '@pluralsh/design-system/dist/components/Input2'
 import { ComponentProps, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTheme } from 'styled-components'

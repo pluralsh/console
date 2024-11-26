@@ -1,12 +1,16 @@
-import { Chip, ChipList, Sidecar, SidecarItem } from '@pluralsh/design-system'
+import {
+  Chip,
+  ChipList,
+  Sidecar,
+  SidecarItem,
+  ChipProps,
+} from '@pluralsh/design-system'
 import { ColumnHelper, SortingState, TableOptions } from '@tanstack/react-table'
 import { dump } from 'js-yaml'
 import { capitalize } from 'lodash'
 import uniqWith from 'lodash/uniqWith'
 import moment from 'moment/moment'
 import { ReactNode, useMemo, useState } from 'react'
-
-import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {

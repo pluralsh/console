@@ -1,6 +1,5 @@
 import { ComponentProps } from 'react'
-import { Chip } from '@pluralsh/design-system'
-import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
+import { Chip, ChipProps } from '@pluralsh/design-system'
 import capitalize from 'lodash/capitalize'
 
 import { StackStatus } from '../../../generated/graphql'

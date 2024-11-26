@@ -11,9 +11,9 @@ import {
   SearchIcon,
   Select,
   useSetBreadcrumbs,
+  ListBoxFooterProps,
 } from '@pluralsh/design-system'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ListBoxFooterProps } from '@pluralsh/design-system/dist/components/ListBoxItem'
 import styled, { useTheme } from 'styled-components'
 import {
   DatabaseTableRowFragment,

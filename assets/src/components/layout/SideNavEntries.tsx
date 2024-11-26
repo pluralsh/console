@@ -1,4 +1,5 @@
 import {
+  MarkdocHeading,
   TreeNav,
   TreeNavEntry,
   WrapWithIf,
@@ -9,7 +10,6 @@ import isEmpty from 'lodash/isEmpty'
 import { useDocPageContext } from 'components/contexts/DocPageContext'
 import { ReactNode } from 'react'
 import { SetOptional } from 'type-fest'
-import { MarkdocHeading } from '@pluralsh/design-system/dist/markdoc/utils/collectHeadings'
 
 export type DirectoryEntry = {
   enabled?: boolean

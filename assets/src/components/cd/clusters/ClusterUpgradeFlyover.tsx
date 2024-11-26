@@ -12,6 +12,8 @@ import {
   TabList,
   Table,
   WarningIcon,
+  IconProps,
+  ChipProps,
 } from '@pluralsh/design-system'
 import {
   ClustersRowFragment,
@@ -22,9 +24,7 @@ import {
 import isEmpty from 'lodash/isEmpty'
 import { ComponentType, useRef, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { Row } from '@tanstack/react-table'
-import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 import { GqlError } from '../../utils/Alert'
 

@@ -1,4 +1,4 @@
-import { Table } from '@pluralsh/design-system'
+import { Table, TableProps } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { GqlError } from 'components/utils/Alert'
 import { TableSkeleton } from 'components/utils/SkeletonLoaders'
@@ -16,7 +16,6 @@ import {
 } from 'generated/graphql'
 import { useTheme } from 'styled-components'
 import { AITableEntry } from './AITableEntry.tsx'
-import { TableProps } from '@pluralsh/design-system/dist/components/table/Table'
 
 export function AITable({
   modal = false,

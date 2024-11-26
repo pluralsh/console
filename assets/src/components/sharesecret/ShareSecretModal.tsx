@@ -6,8 +6,8 @@ import {
   Modal,
   ReturnIcon,
   Toast,
+  LayerPositionType,
 } from '@pluralsh/design-system'
-import { LayerPositionType } from '@pluralsh/design-system/dist/components/Layer'
 import {
   Dispatch,
   SetStateAction,

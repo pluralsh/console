@@ -6,6 +6,7 @@ import {
   IconFrame,
   ListBoxItem,
   TrashCanIcon,
+  Severity,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import styled, { useTheme } from 'styled-components'
@@ -22,8 +23,6 @@ import { Edge } from 'utils/graphql'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
-
-import { Severity } from '@pluralsh/design-system/dist/types'
 
 import DecoratedName from '../../cd/services/DecoratedName'
 import { ProtectBadge } from '../../cd/clusters/ProtectBadge'

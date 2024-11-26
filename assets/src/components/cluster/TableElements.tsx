@@ -3,6 +3,7 @@ import {
   CaretRightIcon,
   Chip,
   IconFrame,
+  ChipProps,
 } from '@pluralsh/design-system'
 import { SortingFn } from '@tanstack/table-core'
 import { UnstyledLink } from 'components/utils/Link'
@@ -18,8 +19,6 @@ import {
   readinessToLabel,
   readinessToSeverity,
 } from 'utils/status'
-
-import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 import { roundToTwoPlaces } from './utils'
 

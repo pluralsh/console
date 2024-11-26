@@ -19,8 +19,8 @@ import {
   WarningShieldIcon,
   setThemeColorMode,
   useThemeColorMode,
+  IconProps,
 } from '@pluralsh/design-system'
-import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
 import { ComponentType, useMemo } from 'react'

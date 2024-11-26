@@ -1,7 +1,5 @@
 import { ChatOutlineIcon, ModalWrapper } from '@pluralsh/design-system'
 
-import * as Dialog from '@radix-ui/react-dialog'
-
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap.tsx'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData.tsx'
@@ -11,7 +9,7 @@ import {
   useChatThreadsQuery,
 } from 'generated/graphql'
 import { ComponentPropsWithRef, useMemo } from 'react'
-import { VisuallyHidden } from 'react-aria'
+import { useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { useChatbot, useChatbotContext } from '../AIContext.tsx'
 import { AITable } from '../AITable.tsx'
@@ -20,7 +18,6 @@ import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { useLocation } from 'react-router-dom'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
@@ -79,15 +76,12 @@ export function ChatbotPanel({
       css={{ height: '100%' }}
       open={open}
       onOpenChange={closeChatbot}
+      title="Ask Plural AI"
     >
       <ChatbotPanelInner
         fullscreen={fullscreen}
         {...props}
       />
-      {/* required for accessibility */}
-      <VisuallyHidden>
-        <Dialog.Title>Ask Plural AI</Dialog.Title>
-      </VisuallyHidden>
     </ModalWrapper>
   )
 }

@@ -1,4 +1,4 @@
-import { UserType } from '@pluralsh/design-system/dist/types'
+import { UserType } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import UserInfo from 'components/utils/UserInfo'
 

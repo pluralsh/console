@@ -4,10 +4,10 @@ import {
   Flex,
   ValidatedInput,
   useSetBreadcrumbs,
+  ValidationResponse,
 } from '@pluralsh/design-system'
 import { useState } from 'react'
 
-import { ValidationResponse } from '@pluralsh/design-system/dist/components/ValidatedInput'
 import { useLogin } from 'components/contexts'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import { isEmpty } from 'lodash'

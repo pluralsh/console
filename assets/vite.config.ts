@@ -66,4 +66,17 @@ export default defineConfig({
       },
     },
   },
+  resolve: {
+    preserveSymlinks: true,
+    dedupe: [
+      'styled-components',
+      'honorable',
+      'honorable-theme-default',
+      'react',
+      'react-dom',
+      '@emotion/react',
+      '@emotion/styled',
+      'react-transition-group',
+    ],
+  },
 })

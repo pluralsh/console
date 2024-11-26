@@ -7,8 +7,8 @@ import {
   Input,
   Modal,
   Switch,
+  Input2,
 } from '@pluralsh/design-system'
-import Input2 from '@pluralsh/design-system/dist/components/Input2'
 import { useTheme } from 'styled-components'
 import pick from 'lodash/pick'
 

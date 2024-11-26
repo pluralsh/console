@@ -10,8 +10,8 @@ import {
   Select,
   Switch,
   Toast,
+  SelectPropsSingle,
 } from '@pluralsh/design-system'
-import { SelectPropsSingle } from '@pluralsh/design-system/dist/components/Select'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import {
