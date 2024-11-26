@@ -196,10 +196,10 @@ dashboard:
     containers:
       resources:
         requests:
-          cpu: 500m
-          memory: 500Mi
+          cpu: 250m
+          memory: 250Mi
         limits:
-          cpu: 2
+          cpu: 1
           memory: 2Gi
       args:
       - --act-as-proxy
