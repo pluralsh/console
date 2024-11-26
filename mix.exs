@@ -50,7 +50,17 @@ defmodule Console.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      aliases: aliases()
+      aliases: aliases(),
+      releases: [
+        console: [
+          include_executables_for: [:unix],
+          runtime_config_path: "rel/runtime.exs",
+          applications: [
+            runtime_tools: :permanent,
+            console: :permanent
+          ]
+        ]
+      ]
     ]
   end
 
@@ -70,7 +80,6 @@ defmodule Console.MixProject do
     [
       {:ecto, "~> 3.9.0", override: true},
       {:ex_machina, "~> 2.3", only: :test},
-      {:distillery, "~> 2.1"},
       {:libcluster, "~> 3.2"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_sts, "~> 2.3.0"},
@@ -105,7 +114,6 @@ defmodule Console.MixProject do
       {:uniq, "~> 0.4"},
       {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.8", only: [:dev, :test]},
-      {:porcelain, "~> 2.0"},
       {:absinthe, "~> 1.7.5"},
       {:absinthe_relay, "~> 1.5.2"},
       {:absinthe_plug, "~> 1.5", git: "https://github.com/absinthe-graphql/absinthe_plug.git", commit: "3a984cc341ebb32c79e7ae58b4ebd116d5c62f9e", override: true},
@@ -115,7 +123,6 @@ defmodule Console.MixProject do
       {:timex, "~> 3.7"},
       {:quantum, "~> 3.0"},
       {:swarm, "~> 3.0"},
-      {:bandit, "~> 1.0"},
       {:yaml_elixir, "~> 2.9"},
       {:google_api_ai_platform, "~> 0.22.0"},
       {:goth, "~> 1.4", git: "https://github.com/pluralsh/goth.git", branch: "plrl-cleanup", commit: "4958159d1e9acec2154590ecacc732ecd58f8312"},
@@ -140,7 +147,7 @@ defmodule Console.MixProject do
       {:deep_merge, "~> 1.0"},
       {:ymlr, "~> 2.0"},
       {:remote_ip, "~> 0.2.0"},
-      {:erlsom, "~> 1.4"},
+      {:erlsom, "~> 1.5.1"},
       {:inflex, "~> 2.0.0"},
       {:websockex, "~> 0.4.3"},
       {:briefly, "~> 0.5.0"},

@@ -69,7 +69,7 @@ defmodule Console.Services.UsersTest do
       assert user.roles.admin
 
       group = Users.get_group_by_name("general")
-      assert group.description == "synced from Plural"
+      assert group.description == "synced from your OpenId Connect provider by Plural"
 
       assert Users.get_group_member(group.id, user.id)
     end
@@ -88,7 +88,7 @@ defmodule Console.Services.UsersTest do
       assert user.roles.admin
 
       group = Users.get_group_by_name("general")
-      assert group.description == "synced from Plural"
+      assert group.description == "synced from your OpenId Connect provider by Plural"
 
       assert Users.get_group_member(group.id, user.id)
 
@@ -122,7 +122,7 @@ defmodule Console.Services.UsersTest do
       assert user.roles.admin
 
       group = Users.get_group_by_name("general")
-      assert group.description == "synced from Plural"
+      assert group.description == "synced from your OpenId Connect provider by Plural"
 
       assert Users.get_group_member(group.id, user.id)
     end

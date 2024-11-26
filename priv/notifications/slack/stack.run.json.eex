@@ -6,7 +6,7 @@
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "🚀 *The <%= @stack_run.stack.name %> stack has an updated run* "
+                "text": "🚀 *The <%= @stack_run.stack.name %> stack has an updated run*"
             }
         },
 		{
@@ -28,7 +28,7 @@
 						},
 						{
 							"type": "text",
-							"url": "<%= @stack_run.repository.url %>\n"
+							"text": "<%= @stack_run.repository.url %>\n"
 						},
 						{
 							"type": "text",
@@ -54,7 +54,7 @@
 						},
 						{
 							"type": "text",
-							"url": "<%= @stack_run.git.folder %>"
+							"text": "<%= @stack_run.git.folder %>"
 						}
 					]
 				}

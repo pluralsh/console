@@ -128,6 +128,11 @@ defmodule Console.Schema.PrAutomation do
     |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)
     |> validate_required([:name, :title, :message, :connection_id])
     |> unique_constraint(:name)
+    |> foreign_key_constraint(:promotion_criteria,
+      name: :promotion_criteria,
+      match: :prefix,
+      message: "Cannot delete due to a pipeline requiring this pr automation"
+    )
     |> foreign_key_constraint(:cluster_id)
     |> foreign_key_constraint(:service_id)
     |> foreign_key_constraint(:connection_id)

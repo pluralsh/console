@@ -54,13 +54,7 @@ RUN ls -al
 
 COPY --from=node /app/build ./priv/static
 
-RUN \
-  mkdir -p /opt/built && \
-  mix distillery.release --name ${APP_NAME} && \
-  cp _build/${MIX_ENV}/rel/${APP_NAME}/releases/*/${APP_NAME}.tar.gz /opt/built && \
-  cd /opt/built && \
-  tar -xzf ${APP_NAME}.tar.gz && \
-  rm ${APP_NAME}.tar.gz
+RUN mix release
 
 FROM alpine:3.17.1 as tools
 
@@ -93,11 +87,7 @@ RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-ba
     chmod +x /usr/local/bin/terraform
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM erlang:24.3.4.6-alpine
-
-ARG CLOUD_SDK_VERSION=273.0.0
-ENV CLOUD_SDK_VERSION=$CLOUD_SDK_VERSION
-ENV PATH /google-cloud-sdk/bin:$PATH
+FROM alpine:latest
 
 COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
@@ -106,8 +96,6 @@ COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
 
 RUN apk --no-cache add \
         ca-certificates \
-        python3 \
-        py3-pip \
         # py-crcmod \
         curl \
         bash \
@@ -117,8 +105,7 @@ RUN apk --no-cache add \
         git \
         gnupg
 
-RUN apk add --no-cache --update --virtual=build gcc musl-dev python3-dev libffi-dev openssl-dev cargo make && \
-    pip3 install --no-cache-dir --prefer-binary azure-cli && \
+RUN apk add --no-cache --update --virtual=build gcc musl-dev libffi-dev openssl-dev make && \
     apk del build
 
 # The name of your application/release (required)
@@ -129,7 +116,8 @@ ENV REPLACE_OS_VARS=true \
     APP_NAME=${APP_NAME} \
     GIT_ASKPASS=/opt/app/bin/.git-askpass \
     SSH_ASKPASS=/opt/app/bin/.ssh-askpass \
-    GIT_COMMIT=${GIT_COMMIT}
+    GIT_COMMIT=${GIT_COMMIT} \
+    MIX_ENV=prod
 
 WORKDIR /opt/app
 
@@ -157,6 +145,6 @@ ENV GIT_SSH_COMMAND="ssh -i /root/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o
   SSH_ASKPASS_REQUIRE=force \
   DISPLAY=1
 
-COPY --from=builder /opt/built .
+COPY --from=builder /opt/app/_build/prod/rel/console .
 
-CMD trap 'exit' INT; eval $(ssh-agent -s); /opt/app/bin/${APP_NAME} foreground
+CMD trap 'exit' INT; eval $(ssh-agent -s); /opt/app/bin/console start

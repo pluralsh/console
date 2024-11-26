@@ -27,7 +27,8 @@ spec:
         {{- toYaml .Values.migrator.containerSecurityContext | nindent 10 }}
         {{ end }}
         image: "{{ .Values.global.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-        command: ["/opt/app/bin/console",  "migrate"]
+        command: 
+        {{ toYaml .Values.migrator.command | nindent 10 }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         envFrom:
         - secretRef:
