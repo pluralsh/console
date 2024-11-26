@@ -99,7 +99,7 @@ defmodule Console.Deployments.Helm.Agent do
     |> case do
       {:ok, repo} -> {:ok, repo}
       err ->
-        Logger.warn "failed to update helm repository: #{inspect(err)}"
+        Logger.warning "failed to update helm repository: #{inspect(err)}"
         {:ok, repo}
     end
   end

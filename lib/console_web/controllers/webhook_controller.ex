@@ -2,7 +2,6 @@ defmodule ConsoleWeb.WebhookController do
   use ConsoleWeb, :controller
   alias Console.Services.{Builds, Users}
   alias Console.Schema.{ScmWebhook, Cluster, ObservabilityWebhook}
-  alias Console.Deployments.Pr.Dispatcher
   alias Console.Deployments.{Git, Clusters, Observability}
 
   require Logger
@@ -23,9 +22,8 @@ defmodule ConsoleWeb.WebhookController do
   def scm(conn, %{"id" => id}) do
     with %ScmWebhook{} = hook <- Git.get_scm_webhook_by_ext_id(id),
          :ok <- verify(conn, hook),
-         {:ok, url, params} <- Dispatcher.pr(hook, conn.body_params),
-         {:ok, _} <- Git.upsert_pull_request(params, url) do
-      json(conn, %{ignored: false, message: "updated pull request"})
+         {:ok, resp} <- Git.Webhooks.webhook(hook, conn.body_params) do
+      json(conn, resp)
     else
       :reject -> send_resp(conn, 403, "Forbidden")
       err ->

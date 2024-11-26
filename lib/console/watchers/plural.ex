@@ -1,10 +1,10 @@
 defmodule Console.Watchers.Plural do
-  @socket_name Application.get_env(:console, :socket)
+  @socket_name Application.compile_env(:console, :socket)
 
   def worker() do
     {token, endpoint} = plural_config()
     socket_opts = [
-      url: "wss://#{endpoint}/socket/websocket",
+      url: "wss://#{endpoint}/socket/websocket?token=#",
       params: %{token: token}
     ]
 
@@ -14,11 +14,10 @@ defmodule Console.Watchers.Plural do
   def start_wss() do
     {token, endpoint} = plural_config()
     socket_opts = [
-      url: "wss://#{endpoint}/socket/websocket",
-      params: %{token: token}
+      uri: "wss://#{endpoint}/socket/websocket?token=#{token}",
     ]
 
-    PhoenixClient.Socket.start_link(socket_opts, [name: @socket_name, id: @socket_name])
+    Console.Plural.Socket.start_link(socket_opts)
   end
 
   defp plural_config() do

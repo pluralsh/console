@@ -118,7 +118,7 @@ end
 
 ssl_opts = case get_env("PGROOTSSLCERT") do
   cert when is_binary(cert) and byte_size(cert) > 0 -> [cacertfile: cert]
-  _ -> []
+  _ -> [verify: :verify_none]
 end
 
 if get_env("POSTGRES_URL") do
@@ -134,6 +134,7 @@ else
     password: get_env("POSTGRES_PASSWORD"),
     hostname: get_env("DBHOST") || "console-postgresql",
     ssl: String.to_existing_atom(get_env("DBSSL") || "false"),
+    ssl_opts: [verify: :verify_none],
     pool_size: 10
 end
 

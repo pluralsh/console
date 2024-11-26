@@ -49,7 +49,7 @@ defmodule Console.Deployments.Compatibilities.Table do
         case fetch_addon(url, name) do
           {:ok, addon} -> KeyValueSet.put!(table, name, addon)
           _ ->
-            Logger.warn "failed to fetch addon #{name}, will retry on next poll"
+            Logger.warning "failed to fetch addon #{name}, will retry on next poll"
             table
         end
       end)

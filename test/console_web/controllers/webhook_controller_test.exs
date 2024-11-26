@@ -19,6 +19,51 @@ defmodule ConsoleWeb.WebhookControllerTest do
   end
 
   describe "#scm/2" do
+    test "it can handle group memberships", %{conn: conn} do
+      hook = insert(:scm_webhook, type: :github)
+      group = insert(:group, name: "some-org:some-group")
+      user = insert(:user)
+
+      payload = Jason.encode!(%{
+        "action" => "membership",
+        "organization" => %{"name" => "some-org"},
+        "team" => %{"name" => "some-group"},
+        "member" => %{"email" => user.email}
+      })
+      hmac = :crypto.mac(:hmac, :sha256, hook.hmac, payload)
+             |> Base.encode16(case: :lower)
+
+      conn
+      |> put_req_header("x-hub-signature-256", "sha256=#{hmac}")
+      |> put_req_header("content-type", "application/json")
+      |> post("/ext/v1/webhooks/github/#{hook.external_id}", payload)
+      |> response(200)
+
+      assert Console.Services.Users.get_group_member(group.id, user.id)
+    end
+
+    test "it will ignore if the group membership if the group isn't precreated", %{conn: conn} do
+      hook = insert(:scm_webhook, type: :github)
+      insert(:user)
+
+      payload = Jason.encode!(%{
+        "action" => "membership",
+        "organization" => %{"name" => "some-org"},
+        "team" => %{"name" => "some-group"}
+      })
+      hmac = :crypto.mac(:hmac, :sha256, hook.hmac, payload)
+             |> Base.encode16(case: :lower)
+
+      result =
+        conn
+        |> put_req_header("x-hub-signature-256", "sha256=#{hmac}")
+        |> put_req_header("content-type", "application/json")
+        |> post("/ext/v1/webhooks/github/#{hook.external_id}", payload)
+        |> json_response(200)
+
+      assert result["ignored"]
+    end
+
     test "it can process a github pr webhook", %{conn: conn} do
       hook = insert(:scm_webhook)
       pr = insert(:pull_request)

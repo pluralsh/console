@@ -197,6 +197,7 @@ defmodule Console.Schema.Cluster do
     owned = Service.for_owner(global_id)
     from(c in query,
       left_join: s in subquery(owned),
+        on: s.cluster_id == c.id,
       where: is_nil(s.id),
       distinct: true
     )

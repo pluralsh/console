@@ -5,6 +5,7 @@ config :console, Console.Repo,
   password: "postgres",
   database: "watchman_test",
   hostname: "localhost",
+  queue_target: 1000,
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :console, ConsoleWeb.Endpoint,

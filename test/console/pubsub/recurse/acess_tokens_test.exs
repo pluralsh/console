@@ -3,11 +3,6 @@ defmodule Console.PubSub.Fanout.AccessTokenTest do
   use Mimic
   alias Console.PubSub
 
-  setup do
-    Application.ensure_all_started(:swarm)
-    :ok
-  end
-
   describe "AccessTokenUsage" do
     test "it can post a message about the meeting" do
       token = insert(:access_token)

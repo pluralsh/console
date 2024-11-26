@@ -47,7 +47,7 @@ defmodule Console.Cached.Kubernetes do
       {:noreply, %{state | pid: pid, table: table}}
     else
       err ->
-        Logger.warn "failed to start #{model} watcher for cache: #{inspect(err)}"
+        Logger.warning "failed to start #{model} watcher for cache: #{inspect(err)}"
         Process.send_after(self(), {:start, request}, :timer.seconds(120))
         {:noreply, state}
     end

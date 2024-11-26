@@ -5,7 +5,6 @@ defmodule Console.Deployer do
   alias Kazan.Apis.Batch.V1, as: BatchV1
   alias Kazan.Watcher
   alias Console.Bootstrapper
-  alias Console.Deployer.Dedicated
   alias Console.Commands.Command
   alias Console.Services.{Builds, Users, LeaderElection}
   alias Console.Schema.Build
@@ -105,9 +104,9 @@ defmodule Console.Deployer do
 
   def handle_call(:ping, _, state), do: {:reply, :pong, state}
 
-  def handle_call(:cancel, _, %State{job: %BatchV1.Job{} = job} = state) do
+  def handle_call(:cancel, _, %State{job: %BatchV1.Job{}} = state) do
     Logger.info "cancelling build job"
-    Dedicated.cancel_job(job)
+    # Dedicated.cancel_job(job)
     {:reply, :ok, state}
   end
 
@@ -168,20 +167,6 @@ defmodule Console.Deployer do
     Logger.info "build k8s job deleted, cancelling"
     Builds.cancel(build)
     flush_job(state)
-  end
-
-  def handle_info(%Watcher.Event{object: %BatchV1.Job{} = job}, %State{build: build, pid: pid} = state) do
-    Logger.info "Found k8s job update: #{inspect(job)}"
-    case Console.Deployer.Dedicated.job_status(job) do
-      :running ->
-        Logger.info "job still running, ignoring for now"
-        {:noreply, state}
-      :done ->
-        Logger.info "job completed, unblocking deployer #{inspect(self())}, job watcher: #{inspect(pid)}"
-        Builds.cancel(build)
-        Watcher.stop_watch(pid)
-        flush_job(state)
-    end
   end
 
   def handle_info({:DOWN, ref, :process, _, _}, %State{ref: ref, build: build} = state) do

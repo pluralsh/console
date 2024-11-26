@@ -10,6 +10,7 @@ defmodule Console.GraphQl.Helpers do
 
   def resolve_changeset(%{} = changes) do
     Enum.flat_map(changes, fn
+      {_, v} when is_list(v) -> Enum.flat_map(v, &resolve_changeset/1)
       {_, %Ecto.Changeset{} = cs} -> resolve_changeset(cs)
       _ -> []
     end)

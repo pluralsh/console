@@ -1,16 +1,7 @@
 defmodule Console.Deployer.Operations do
   alias Console.Schema.Build
   alias Console.Commands.{Plural}
-  alias Console.Services.Builds
   alias Console.Plural.Context
-  alias Console.Deployer.Dedicated
-
-  def perform(_, %Build{type: :dedicated, id: id} = build) do
-    with {:ok, job} <- Dedicated.create_job(id),
-         {:ok, build} <- Builds.add_job_name(build, job.metadata.name),
-         {:ok, build} <- Builds.running(build),
-      do: Dedicated.watch_job(build.job_name)
-  end
 
   def perform(storage, %Build{repository: repo, type: :bounce} = build) do
     with_build(build, [

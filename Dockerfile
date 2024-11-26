@@ -1,3 +1,8 @@
+ARG ELIXIR_VERSION=1.16.3
+ARG OTP_VERSION=26.2.5.5
+ARG DEBIAN_VERSION=bullseye-20241111
+ARG RUNNER_IMAGE=debian:${DEBIAN_VERSION}-slim
+
 FROM node:16.16-alpine3.15 as node
 
 WORKDIR /app
@@ -17,7 +22,7 @@ ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY}
 
 RUN yarn run build
 
-FROM bitwalker/alpine-elixir:1.13.4 AS builder
+FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}-slim AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -35,11 +40,7 @@ ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
 WORKDIR /opt/app
 
 # This step installs all the build tools we'll need
-RUN apk update --allow-untrusted && \
-  apk upgrade --no-cache && \
-  apk add --no-cache \
-    git \
-    build-base && \
+RUN apt-get update -y && apt-get install -y git build-essential && \
   mix local.rebar --force && \
   mix local.hex --force
 
@@ -56,57 +57,53 @@ COPY --from=node /app/build ./priv/static
 
 RUN mix release
 
-FROM alpine:3.17.1 as tools
+FROM ${RUNNER_IMAGE} as tools
 
 ARG TARGETARCH=amd64
 
 # renovate: datasource=github-releases depName=helm/helm
-ENV HELM_VERSION=v3.10.3
+# ENV HELM_VERSION=v3.16.3
 
 # renovate: datasource=github-releases depName=hashicorp/terraform
-ENV TERRAFORM_VERSION=v1.2.9
+# ENV TERRAFORM_VERSION=v1.9.8
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
 ENV CLI_VERSION=v0.10.1
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
-ENV KUBECTL_VERSION=v1.25.5
+# ENV KUBECTL_VERSION=v1.31.3
 
-RUN apk add --update --no-cache curl ca-certificates unzip wget openssl build-base && \
-    curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
-    mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
-    wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION/v/}/terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip && \
-    unzip terraform_${TERRAFORM_VERSION/v/}_linux_${TARGETARCH}.zip -d /usr/local/bin && \
-    curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION/v/}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
-    mv plural /usr/local/bin/plural && \
-    curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
-    mv kubectl /usr/local/bin/kubectl && \
-    chmod +x /usr/local/bin/kubectl && \
-    chmod +x /usr/local/bin/plural && \
-    chmod +x /usr/local/bin/helm && \
-    chmod +x /usr/local/bin/terraform
+RUN apt-get update -y && apt-get install -y curl wget unzip
+RUN curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION#v}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
+  mv plural /usr/local/bin/plural && \
+  # curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
+  # mv linux-${TARGETARCH}/helm /usr/local/bin/helm && \
+  # wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION#v}/terraform_${TERRAFORM_VERSION#v}_linux_${TARGETARCH}.zip && \
+  # unzip terraform_${TERRAFORM_VERSION#v}_linux_${TARGETARCH}.zip -d /usr/local/bin && \
+  # curl -LO https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/${TARGETARCH}/kubectl && \
+  # mv kubectl /usr/local/bin/kubectl && \
+  # chmod +x /usr/local/bin/kubectl && \
+  # chmod +x /usr/local/bin/helm && \
+  # chmod +x /usr/local/bin/terraform
+  chmod +x /usr/local/bin/plural
 
 # From this line onwards, we're in a new image, which will be the image used in production
-FROM alpine:latest
+FROM ${RUNNER_IMAGE}
 
 COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
-COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
-COPY --from=tools /usr/local/bin/terraform /usr/local/bin/terraform
-COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
+# COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
+# COPY --from=tools /usr/local/bin/terraform /usr/local/bin/terraform
+# COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
 
-RUN apk --no-cache add \
-        ca-certificates \
-        # py-crcmod \
-        curl \
-        bash \
-        libc6-compat \
-        openssh-client \
-        openssl-dev \
-        git \
-        gnupg
+RUN apt-get update -y && \
+  apt-get install -y libstdc++6 openssl openssh-server libncurses5 locales ca-certificates git gnupg bash \
+  && apt-get clean && rm -f /var/lib/apt/lists/*_*
 
-RUN apk add --no-cache --update --virtual=build gcc musl-dev libffi-dev openssl-dev make && \
-    apk del build
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
 # The name of your application/release (required)
 ARG APP_NAME=console
@@ -121,8 +118,8 @@ ENV REPLACE_OS_VARS=true \
 
 WORKDIR /opt/app
 
-RUN addgroup -S --gid 10001 app
-RUN adduser -u 10001 -S console -G app
+RUN addgroup --gid 10001 app
+RUN adduser --uid 10001 --gid 10001 console
 RUN chown console:app /opt/app
 
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
@@ -147,4 +144,4 @@ ENV GIT_SSH_COMMAND="ssh -i /root/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o
 
 COPY --from=builder /opt/app/_build/prod/rel/console .
 
-CMD trap 'exit' INT; eval $(ssh-agent -s); /opt/app/bin/console start
+CMD /opt/app/bin/console start

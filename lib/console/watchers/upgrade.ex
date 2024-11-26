@@ -7,11 +7,9 @@ defmodule Console.Watchers.Upgrade do
   ]
   alias Console.Clustering.Info
   alias Console.Deployments.Services
-  alias PhoenixClient.{Channel, Message}
-  alias Console.Plural.Upgrades
+  alias Console.Plural.{Upgrades, Socket}
   alias Console.Watchers.{Handlers, Plural}
 
-  @socket_name Application.get_env(:console, :socket)
   @poll_interval 60 * 1000
   @resource_interval :timer.minutes(60)
 
@@ -42,7 +40,6 @@ defmodule Console.Watchers.Upgrade do
         Process.send_after(self(), :connect, 1000)
         {:ok, _pid} = Plural.start_wss()
         {:ok, ref} = :timer.send_interval(@poll_interval, :next)
-        # {:ok, _} = :timer.send_interval(@resource_interval, :usage)
         {:ok, _} = :timer.send_interval(@resource_interval, :svcs)
         {:noreply, %{state | queue_id: id, timer: ref}}
       err ->
@@ -66,10 +63,10 @@ defmodule Console.Watchers.Upgrade do
 
   def handle_info(:connect, state) do
     Logger.info "Joining upgrade queue channel"
-    with {:ok, _, upgrade} <- Channel.join(@socket_name, "queues:#{state.queue_id}") do
-      send self(), :next
-      {:noreply, %{state | upgrades: upgrade}}
-    else
+    case Socket.do_join("queues:#{state.queue_id}") do
+      :ok ->
+        send self(), :next
+        {:noreply, %{state | upgrades: "queues:#{state.queue_id}"}}
       error ->
         Logger.error "Failed to join upgrade room: #{inspect(error)}"
         Process.send_after(self(), :connect, 1000)
@@ -78,11 +75,11 @@ defmodule Console.Watchers.Upgrade do
   end
 
   def handle_info(:next, %{upgrades: upgrades} = state) do
-    with {:ok, %{"id" => id} = result} <- Channel.push(upgrades, "next", %{}),
+    with {:ok, %{"id" => id} = result} <- Socket.do_push(upgrades, "next", %{}),
          true <- Console.Bootstrapper.git_enabled?() do
       start_transaction()
       |> add_operation(:build, fn _ -> Handlers.Upgrade.create_build(result) end)
-      |> add_operation(:ack, fn _ -> Channel.push(upgrades, "ack", %{"id" => id}) end)
+      |> add_operation(:ack, fn _ -> Socket.do_push(upgrades, "ack", %{"id" => id}) end)
       |> execute()
       |> case do
         {:ok, _} -> {:noreply, %{state | last: id}}
@@ -100,7 +97,7 @@ defmodule Console.Watchers.Upgrade do
     with {:leader, true} <- {:leader, Console.Deployer.leader?()},
          {:ok, summary} <- Info.fetch() do
       svcs = Services.count()
-      Channel.push(upgrades, "usage", Map.put(summary, :services, svcs))
+      Socket.do_push(upgrades, "usage", Map.put(summary, :services, svcs))
       {:noreply, state}
     else
       err ->
@@ -114,27 +111,13 @@ defmodule Console.Watchers.Upgrade do
     Logger.info "Collecting resource usage"
     with true <- Console.Deployer.leader?(),
          {:ok, summary} <- Info.fetch() do
-      Channel.push(upgrades, "usage", summary)
+      Socket.do_push(upgrades, "usage", summary)
       {:noreply, state}
     else
       err ->
         Logger.info "Did not report usage because of #{inspect(err)}"
         {:noreply, state}
     end
-  end
-
-  def handle_info(%Message{event: "more", payload: %{"target" => id}}, state) do
-    if is_nil(state.last) || id > state.last do
-      send self(), :next
-    end
-
-    {:noreply, %{state | target: id}}
-  end
-
-  def handle_info(%Message{event: "phx_error", payload: %{reason: {:remote, :closed}}}, state) do
-    Logger.info "Remote closed, reconnecting"
-    Process.send_after(self(), :connect, 1000)
-    {:noreply, state}
   end
 
   def handle_info(_, state), do: {:noreply, state}

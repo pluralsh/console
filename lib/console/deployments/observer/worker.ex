@@ -40,7 +40,7 @@ defmodule Console.Deployments.Observer.Worker do
         Logger.info "cannot run observer #{observer.name} yet, next run at #{inspect(observer.next_run_at)}"
         {:noreply, state}
       {:error, err} ->
-        Logger.warn "failed to run observer #{observer.name}, error: #{inspect(err)}"
+        Logger.warning "failed to run observer #{observer.name}, error: #{inspect(err)}"
         {:noreply, state}
     end
   end

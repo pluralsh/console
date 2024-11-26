@@ -56,7 +56,7 @@ defmodule Console.Deployments.Stacks.Worker do
     Enum.find_value(metrics, fn metric ->
       case Provider.query(metric) do
         {:error, {:client, err}} ->
-          Logger.warn "failed to query metric #{metric.identifier}: #{inspect(err)}"
+          Logger.warning "failed to query metric #{metric.identifier}: #{inspect(err)}"
           nil
         {:error, _} = error -> error
         :ok -> nil

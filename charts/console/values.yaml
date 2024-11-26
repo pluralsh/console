@@ -20,7 +20,7 @@ podLabels: {}
 podAnnotations: {}
 
 migrator:
-  command: ["/opt/app/bin/console",  "migrate"]
+  command: ["/opt/app/bin/migrate"]
 
 console:
   additionalContainers: ~

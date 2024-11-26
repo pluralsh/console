@@ -255,7 +255,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
       user = insert(:user)
       role = insert(:role, repositories: ["*"], permissions: %{operate: true})
       insert(:role_binding, role: role, user: user)
-      expect(Kazan, :run, fn _ -> {:ok, certificate("certificate")} end)
+      expect(Kube.Client, :get_certificate, fn _, _ -> {:ok, certificate("certificate")} end)
 
       {:ok, %{data: %{"certificate" => certificate}}} = run_query("""
         query Cron($name: String!) {
