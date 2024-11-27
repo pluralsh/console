@@ -24,6 +24,18 @@ export const authlessClient = new ApolloClient({
   cache: new InMemoryCache(),
 })
 
+function getSplitLink(socket, httpLink, authLink, errorLink, retryLink) {
+  const absintheSocket = AbsintheSocket.create(socket)
+  const socketLink = createAbsintheSocketLink(absintheSocket)
+  const gqlLink = errorLink.concat(httpLink)
+
+  return split(
+    (operation) => hasSubscription(operation.query),
+    socketLink,
+    authLink.concat(retryLink).concat(gqlLink)
+  )
+}
+
 export function buildClient(gqlUrl, wsUrl, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
@@ -52,30 +64,7 @@ export function buildClient(gqlUrl, wsUrl, fetchToken) {
     },
   })
 
-  socket.onClose((e) => {
-    console.log('reconnecting closed socket', e)
-    if (socket.closeWasClean) {
-      socket.reconnectTimer.scheduleTimeout()
-    }
-  })
-
-  setInterval(() => {
-    if (!socket.conn) {
-      console.log('found dead websocket, attempting a reconnect')
-      socket.connect()
-    }
-  }, 10000)
-
-  const absintheSocket = AbsintheSocket.create(socket)
-
-  const socketLink = createAbsintheSocketLink(absintheSocket)
-  const gqlLink = errorLink.concat(httpLink)
-
-  const splitLink = split(
-    (operation) => hasSubscription(operation.query),
-    socketLink,
-    authLink.concat(retryLink).concat(gqlLink)
-  )
+  let splitLink = getSplitLink(socket, httpLink, authLink, errorLink, retryLink)
 
   const client = new ApolloClient({
     // @ts-ignore
@@ -97,6 +86,24 @@ export function buildClient(gqlUrl, wsUrl, fetchToken) {
       },
     }),
   })
+
+  socket.onClose((e) => {
+    console.log('reconnecting closed socket', e)
+    socket.connect()
+    splitLink = getSplitLink(socket, httpLink, authLink, errorLink, retryLink)
+    // @ts-ignore
+    client.setLink(splitLink)
+  })
+
+  setInterval(() => {
+    if (!socket.conn) {
+      console.log('found dead websocket, attempting a reconnect')
+      socket.connect()
+      splitLink = getSplitLink(socket, httpLink, authLink, errorLink, retryLink)
+      // @ts-ignore
+      client.setLink(splitLink)
+    }
+  }, 10000)
 
   return { client, socket }
 }
