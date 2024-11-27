@@ -7,7 +7,6 @@ import {
   ReturnIcon,
   Toast,
 } from '@pluralsh/design-system'
-import { LayerPositionType } from '@pluralsh/design-system/dist/components/Layer'
 import {
   Dispatch,
   SetStateAction,
@@ -198,7 +197,7 @@ export default function ShareSecretModal({
       </Modal>
       {toast && (
         <Toast
-          position={'bottom' as LayerPositionType}
+          position={'bottom'}
           onClose={() => setToast(false)}
           margin="large"
           severity="success"

@@ -5,11 +5,9 @@ import {
   StackRunCanceledIcon,
   StackRunPausedIcon,
   StackRunPendingIcon,
+  ChipProps,
+  IconProps,
 } from '@pluralsh/design-system'
-
-import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
-
-import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 
 import { StackStatus } from '../../../generated/graphql'
 

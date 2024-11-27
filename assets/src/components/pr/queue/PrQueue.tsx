@@ -4,9 +4,9 @@ import {
   SearchIcon,
   Table,
   useSetBreadcrumbs,
+  Input2,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import Input2 from '@pluralsh/design-system/dist/components/Input2'
 
 import { usePullRequestsQuery } from 'generated/graphql'
 

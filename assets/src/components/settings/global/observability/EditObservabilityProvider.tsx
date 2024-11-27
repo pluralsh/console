@@ -1,6 +1,5 @@
 import { type ComponentProps, useCallback } from 'react'
-import { Button, FormField, Modal } from '@pluralsh/design-system'
-import Input2 from '@pluralsh/design-system/dist/components/Input2'
+import { Button, FormField, Modal, Input2 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
 import {

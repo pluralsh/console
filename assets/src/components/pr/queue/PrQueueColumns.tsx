@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react'
+import { ComponentProps, ReactElement, useState } from 'react'
 import {
   ArrowTopRightIcon,
   Chip,
@@ -22,8 +22,6 @@ import { Edge } from 'utils/graphql'
 import { MoreMenu } from 'components/utils/MoreMenu'
 import { DateTimeCol } from 'components/utils/table/DateTimeCol'
 import { ColClusterContent } from 'components/cd/clusters/ClustersColumns'
-
-import { Severity } from '@pluralsh/design-system/dist/types'
 
 import DecoratedName from '../../cd/services/DecoratedName'
 import { ProtectBadge } from '../../cd/clusters/ProtectBadge'
@@ -90,7 +88,7 @@ export const ColTitle = columnHelper.accessor(({ node }) => node?.title, {
 export function PrStatusChip({ status }: { status?: PrStatus | null }) {
   if (!status) return null
 
-  let severity: Severity = 'neutral'
+  let severity: ComponentProps<typeof Chip>['severity'] = 'neutral'
 
   switch (status) {
     case PrStatus.Open:

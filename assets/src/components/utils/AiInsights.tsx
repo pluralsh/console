@@ -5,8 +5,8 @@ import {
   IconFrame,
   IconFrameProps,
   Tooltip,
+  IconProps,
 } from '@pluralsh/design-system'
-import { IconProps } from '@pluralsh/design-system/dist/components/icons/createIcon'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { AiInsightSummaryFragment, InsightFreshness } from 'generated/graphql'
 import { useNavigate } from 'react-router-dom'

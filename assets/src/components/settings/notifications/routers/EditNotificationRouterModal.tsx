@@ -11,11 +11,9 @@ import {
   FormField,
   ListBoxItem,
   Table,
+  markdocComponents as Components,
 } from '@pluralsh/design-system'
-import {
-  List,
-  ListItem,
-} from '@pluralsh/design-system/dist/markdoc/components/List'
+
 import { isEmpty, isEqual } from 'lodash'
 import { useTheme } from 'styled-components'
 
@@ -182,11 +180,11 @@ function EditNotificationRouterModalBase({
         }}
       >
         <FormField label="Events">
-          <List>
+          <Components.List>
             {events.map((event) => (
-              <ListItem key={event}>{event}</ListItem>
+              <Components.ListItem key={event}>{event}</Components.ListItem>
             ))}
-          </List>
+          </Components.List>
         </FormField>
         <RouterSinksTable
           sinks={state.sinks || []}

@@ -3,9 +3,8 @@ import {
   CaretLeftIcon,
   IconFrame,
   IconFrameProps,
+  useSidebar,
 } from '@pluralsh/design-system'
-
-import { useSidebar } from '@pluralsh/design-system/dist/components/Sidebar'
 
 import { useTheme } from 'styled-components'
 

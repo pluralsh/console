@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
-import { Toast } from '@pluralsh/design-system'
-import { MarkdocContextProvider } from '@pluralsh/design-system/dist/markdoc/MarkdocContext'
+import { MarkdocContextProvider, Toast } from '@pluralsh/design-system'
+
 import BillingSubscriptionProvider from 'components/billing/BillingSubscriptionProvider'
 import BreadcrumbsProvider from 'components/contexts/BreadcrumbsProvider'
 import ConsoleNavContextProvider from 'components/contexts/NavigationContext'

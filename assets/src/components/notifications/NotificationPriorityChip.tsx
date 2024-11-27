@@ -1,5 +1,9 @@
-import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
-import { Chip, ErrorIcon, WarningIcon } from '@pluralsh/design-system'
+import {
+  ChipProps,
+  Chip,
+  ErrorIcon,
+  WarningIcon,
+} from '@pluralsh/design-system'
 import { ComponentProps, ReactElement } from 'react'
 import capitalize from 'lodash/capitalize'
 

@@ -1,6 +1,6 @@
-import { getMdContent } from '@pluralsh/design-system/dist/markdoc'
 import { type RenderableTreeNode, renderers } from '@markdoc/markdoc'
 
+import { getMdContent } from '@pluralsh/design-system'
 import { components, config } from 'markdoc/mdSchema'
 import React from 'react'
 

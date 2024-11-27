@@ -1,7 +1,6 @@
-import { ListBoxItem, Select } from '@pluralsh/design-system'
+import { ListBoxItem, Select, SelectPropsSingle } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 import ProviderIcon, { getProviderIconUrl } from 'components/utils/Provider'
-import { SelectProps } from '@pluralsh/design-system/dist/components/Select'
 
 import { ReactNode } from 'react'
 
@@ -14,7 +13,7 @@ export function ClusterProviderSelect({
   clusterProviders: (Pick<ClusterProvider, 'name' | 'id' | 'cloud'> & {
     icon?: ReactNode
   })[]
-} & Omit<SelectProps, 'children' | 'selectionMode'>) {
+} & Omit<SelectPropsSingle, 'children' | 'selectionMode'>) {
   const theme = useTheme()
 
   const selectedProvider = clusterProviders.find(

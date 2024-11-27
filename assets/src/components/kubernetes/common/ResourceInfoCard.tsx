@@ -1,10 +1,4 @@
 import {
-  FillLevel,
-  FillLevelProvider,
-  toFillLevel,
-  useFillLevel,
-} from '@pluralsh/design-system/src/components/contexts/FillLevelContext'
-import {
   ComponentProps,
   PropsWithChildren,
   ReactElement,
@@ -13,7 +7,15 @@ import {
 } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { isNullish } from '@apollo/client/cache/inmemory/helpers'
-import { Card, CheckIcon, CloseIcon } from '@pluralsh/design-system'
+import {
+  Card,
+  CheckIcon,
+  CloseIcon,
+  FillLevel,
+  FillLevelProvider,
+  toFillLevel,
+  useFillLevel,
+} from '@pluralsh/design-system'
 import isArray from 'lodash/isArray'
 
 const Skeleton = styled(SkeletonUnstyled)(({ theme }) => ({

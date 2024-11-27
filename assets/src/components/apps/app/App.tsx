@@ -6,6 +6,8 @@ import {
   TreeNav,
   TreeNavEntry,
   WrapWithIf,
+  collectHeadings,
+  getMdContent,
   getBarePathFromPath,
   removeTrailingSlashes,
 } from '@pluralsh/design-system'
@@ -21,10 +23,7 @@ import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPa
 import { Application, FileContent, useRepositoryQuery } from 'generated/graphql'
 import { GqlError } from 'components/utils/Alert'
 import capitalize from 'lodash/capitalize'
-import {
-  collectHeadings,
-  getMdContent,
-} from '@pluralsh/design-system/dist/markdoc'
+
 import { useTheme } from 'styled-components'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import isEmpty from 'lodash/isEmpty'

@@ -1,11 +1,15 @@
-import { Chip, ErrorIcon, Modal, Tooltip } from '@pluralsh/design-system'
+import {
+  Chip,
+  ErrorIcon,
+  Modal,
+  Tooltip,
+  ChipProps,
+} from '@pluralsh/design-system'
 import isEmpty from 'lodash/isEmpty'
 import { ComponentProps, useState } from 'react'
 import pluralize from 'pluralize'
 
 import { ServiceDeploymentsRowFragment, ServiceError } from 'generated/graphql'
-
-import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 import { ServiceErrorsTable } from './service/ServiceErrors'
 

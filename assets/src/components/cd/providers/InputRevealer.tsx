@@ -1,9 +1,13 @@
 // TODO: Move into design system
-import { EyeClosedIcon, EyeIcon, IconFrame } from '@pluralsh/design-system'
-import Input2 from '@pluralsh/design-system/dist/components/Input2'
+import {
+  EyeClosedIcon,
+  EyeIcon,
+  IconFrame,
+  Input2,
+} from '@pluralsh/design-system'
 
-import styled from 'styled-components'
 import { ComponentProps, useState } from 'react'
+import styled from 'styled-components'
 
 const IconFrameStyled = styled(IconFrame)(({ theme }) => ({
   marginRight: -theme.spacing.medium + 3,

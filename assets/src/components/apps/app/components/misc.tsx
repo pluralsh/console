@@ -10,10 +10,10 @@ import {
   NetworkInterfaceIcon,
   PadlockLockedIcon,
   VolumesIcon,
+  ChipProps,
 } from '@pluralsh/design-system'
 import { ComponentState } from 'generated/graphql'
 import { ComponentProps } from 'react'
-import { ChipProps } from '@pluralsh/design-system/dist/components/Chip'
 
 export const statusToBorder = {
   [Readiness.Ready]: '',
