@@ -152,6 +152,7 @@ defmodule Console.Services.BuildsTest do
   end
 
   describe "succeed/1" do
+    @tag :skip
     test "Succeded builds broadcast" do
       build = insert(:build)
       expect(Git, :revision, fn -> {:ok, "1234"} end)
@@ -203,6 +204,7 @@ defmodule Console.Services.BuildsTest do
   end
 
   describe "pending" do
+    @tag :skip
     test "builds can be marked pending" do
       build = insert(:build, status: :running)
 

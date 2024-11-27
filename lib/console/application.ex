@@ -20,6 +20,7 @@ defmodule Console.Application do
       Console.Plural.Config,
       Console.Features,
       Console.Cron.Scheduler,
+      {Registry, [keys: :unique, name: Console.Buffer.Base.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Git.Agent.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Pipelines.Supervisor.registry()]},
       {Registry, [keys: :unique, name: Console.Deployments.Stacks.Worker.registry()]},
@@ -36,7 +37,6 @@ defmodule Console.Application do
       Console.Deployments.Deprecations.Table,
       Console.Deployments.Compatibilities.Table,
       Console.Buffers.Supervisor,
-      # Console.Commands.Configuration,
       Console.Bootstrapper,
       {Absinthe.Subscription, ConsoleWeb.Endpoint},
       Console.Cached.Supervisor,
@@ -46,7 +46,7 @@ defmodule Console.Application do
       {OpenIDConnect.Worker, Application.get_env(:console, :oidc_providers)},
     ] ++ consumers() ++ [
       Piazza.GracefulShutdown
-    ] ++ deployer()
+    ]
 
     opts = [strategy: :one_for_one, name: Console.Supervisor]
     Supervisor.start_link(children, opts)
@@ -59,12 +59,12 @@ defmodule Console.Application do
 
   defp consumers(), do: Console.conf(:consumers) || []
 
-  defp deployer() do
-    case {Console.conf(:build_id), Console.byok?()} do
-      {build_id, _} when is_binary(build_id) ->
-        [{Console.Runner.Harakiri, [Console.storage(), build_id]}]
-      {_, false} -> [Console.Deployer]
-      _ -> []
-    end
-  end
+  # defp deployer() do
+  #   case {Console.conf(:build_id), Console.byok?()} do
+  #     {build_id, _} when is_binary(build_id) ->
+  #       [{Console.Runner.Harakiri, [Console.storage(), build_id]}]
+  #     {_, false} -> [Console.Deployer]
+  #     _ -> []
+  #   end
+  # end
 end

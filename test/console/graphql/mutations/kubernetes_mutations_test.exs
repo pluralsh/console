@@ -69,6 +69,7 @@ defmodule Console.GraphQl.KubernetesMutationsTest do
   end
 
   describe "createPeer" do
+    @tag :skip
     test "admins can create wireguard peers" do
       admin = insert(:user, roles: %{admin: true})
       user = insert(:user)

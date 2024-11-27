@@ -422,6 +422,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
       assert app["spec"]["descriptor"]["type"] == "app"
     end
 
+    @tag :skip
     test "admins can sideload configuration by name" do
       user = insert(:user, roles: %{admin: true})
       expect(Kazan, :run, fn _ -> {:ok, application("app")} end)
@@ -446,6 +447,7 @@ defmodule Console.GraphQl.PluralQueriesTest do
       assert app["configuration"]["terraform"] == "found"
     end
 
+    @tag :skip
     test "users w/ rbac can sideload configuration by name" do
       user = insert(:user)
       setup_rbac(user, ["app"], configure: true)

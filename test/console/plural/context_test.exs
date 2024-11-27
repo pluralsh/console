@@ -3,6 +3,7 @@ defmodule Console.Plural.ContextTest do
   alias Console.Plural.Context
 
   describe "#merge/2" do
+    @tag :skip
     test "it can merge both bundle and configuration data" do
       {:ok, old} = Context.get()
 

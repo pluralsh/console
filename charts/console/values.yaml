@@ -14,13 +14,13 @@ disableAdditionalVolumes: false
 
 replicaCount: 2
 
-homeDir: /root
+homeDir: /home/console
 
 podLabels: {}
 podAnnotations: {}
 
 migrator:
-  command: ["/opt/app/bin/console",  "migrate"]
+  command: ["/opt/app/bin/migrate"]
 
 console:
   additionalContainers: ~

@@ -216,6 +216,31 @@ defmodule Console.Services.Users do
     |> Repo.update()
   end
 
+  @spec add_github_team_member(binary, binary, binary) :: group_member_resp
+  def add_github_team_member(email, org, team) do
+    group = "#{org}:#{team}"
+    start_transaction()
+    |> add_operation(:user, fn _ ->
+      case get_user_by_email(email) do
+        %User{} = u -> {:ok, u}
+        _ -> {:error, "user not found"}
+      end
+    end)
+    |> add_operation(:group, fn _ ->
+      case get_group_by_name(group) do
+        %Group{} = group -> {:ok, group}
+        nil -> {:error, "group #{group} not found"}
+      end
+    end)
+    |> add_operation(:member, fn %{user: u, group: g} ->
+      case get_group_member(g.id, u.id) do
+        %GroupMember{} = m -> {:ok, m}
+        nil -> create_group_member(%{user_id: u.id}, g.id)
+      end
+    end)
+    |> execute(extract: :member)
+  end
+
   @spec create_access_token(User.t) :: token_resp
   def create_access_token(args \\ %{}, %User{id: id}) do
     %AccessToken{user_id: id}

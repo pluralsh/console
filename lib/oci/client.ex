@@ -123,7 +123,7 @@ defmodule Console.OCI.Client do
 
   defp handle_error({:ok, %Req.Response{body: body}}), do: {:error, "OCI error: #{inspect(body)}"}
   defp handle_error(err) do
-    Logger.warn "oci client error: #{inspect(err)}"
+    Logger.warning "oci client error: #{inspect(err)}"
     {:error, "oci client error"}
   end
 end

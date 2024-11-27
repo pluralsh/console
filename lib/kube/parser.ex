@@ -18,6 +18,8 @@ defmodule Kube.Parser do
     model = prepare(model, module) |> Macro.escape()
 
     quote do
+      unquote(submodels)
+
       defmodule unquote(module) do
         @behaviour Kazan.Model
 
@@ -51,8 +53,6 @@ defmodule Kube.Parser do
 
         defmodellist unquote(kind), unquote(group), unquote(version), unquote(module)
       end
-
-      unquote(submodels)
     end
   end
 
@@ -63,6 +63,8 @@ defmodule Kube.Parser do
     props = Map.keys(props)
 
     quote do
+      unquote(submodels)
+
       defmodule unquote(current_module) do
         @behaviour Kazan.Model
 
@@ -81,8 +83,6 @@ defmodule Kube.Parser do
 
         defoverridable Kazan.Model
       end
-
-      unquote(submodels)
     end
   end
 

@@ -2,8 +2,7 @@ defmodule Console.GraphQl.Kubernetes.Base do
   alias Kazan.Models.Apimachinery.Meta.V1, as: MetaV1
 
   def encode(%{__struct__: struct} = model) do
-    model = prune(model)
-    {:ok, data} = struct.encode(model)
+    {:ok, data} = prune(model) |> struct.encode()
     Jason.encode(data)
   end
 

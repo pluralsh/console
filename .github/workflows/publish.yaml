@@ -169,11 +169,6 @@ jobs:
       # - name: update controller rbac
       #   working-directory: controller
       #   run: make chart-rbac
-      - name: push chart
-        uses: pluralsh/chart-releaser@v0.1.3
-        with:
-          path: ./plural/helm/console
-          release: ${{github.ref_name}}
       - name: push byok chart
         uses: pluralsh/chart-releaser@v0.1.3
         with:

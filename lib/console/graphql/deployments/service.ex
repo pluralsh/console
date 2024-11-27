@@ -438,7 +438,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :cluster, :string, description: "the handle of the cluster for this service"
       arg :name,    :string
 
-      safe_resolve &Deployments.resolve_service/2
+      resolve &Deployments.resolve_service/2
     end
   end
 
@@ -452,7 +452,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :sha,         :string
       arg :errors,      list_of(:service_error_attributes)
 
-      safe_resolve &Deployments.update_service_components/2
+      resolve &Deployments.update_service_components/2
     end
 
     @desc "save the manifests in cache to be retrieved by the requesting user"
@@ -461,7 +461,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :id, non_null(:id)
       arg :manifests, list_of(:string)
 
-      safe_resolve &Deployments.save_manifests/2
+      resolve &Deployments.save_manifests/2
     end
   end
 
@@ -475,7 +475,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :project_id, :id, description: "a project to filter services w/in"
       arg :cluster,    :string, description: "the handle of the cluster for this service"
 
-      safe_resolve &Deployments.list_services/2
+      resolve &Deployments.list_services/2
     end
 
     @desc "Renders a filtered list of services and all their descendents returned as a paginated connection"
@@ -487,7 +487,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :errored,    :boolean
       arg :project_id, :id, description: "a project to filter services w/in"
 
-      safe_resolve &Deployments.service_tree/2
+      resolve &Deployments.service_tree/2
     end
 
     field :service_statuses, list_of(:service_status_count) do
@@ -497,14 +497,14 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :status,     :service_deployment_status
       arg :project_id, :id
 
-      safe_resolve &Deployments.service_statuses/2
+      resolve &Deployments.service_statuses/2
     end
 
     field :service_context, :service_context do
       middleware Authenticated
       arg :name, non_null(:string)
 
-      safe_resolve &Deployments.resolve_service_context/2
+      resolve &Deployments.resolve_service_context/2
     end
 
     @desc "renders a full hierarchy of resources recursively owned by this component (useful for CRD views)"
@@ -541,7 +541,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :cluster,    :string, description: "the handle of the cluster for this service"
       arg :attributes, non_null(:service_deployment_attributes)
 
-      safe_resolve &Deployments.create_service/2
+      resolve &Deployments.create_service/2
     end
 
     field :update_service_deployment, :service_deployment do
@@ -553,14 +553,14 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :name,       :string
       arg :attributes, non_null(:service_update_attributes)
 
-      safe_resolve &Deployments.update_service/2
+      resolve &Deployments.update_service/2
     end
 
     field :delete_service_deployment, :service_deployment do
       middleware Authenticated
       arg :id, non_null(:id)
 
-      safe_resolve &Deployments.delete_service/2
+      resolve &Deployments.delete_service/2
     end
 
     @desc "removes a service from storage, but bypasses waiting for the agent to fully drain it from its hosting cluster"
@@ -568,7 +568,7 @@ defmodule Console.GraphQl.Deployments.Service do
       middleware Authenticated
       arg :id, non_null(:id)
 
-      safe_resolve &Deployments.detach_service/2
+      resolve &Deployments.detach_service/2
     end
 
     @desc "merges configuration for a service"
@@ -588,7 +588,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :name,        :string
       arg :revision_id, non_null(:id)
 
-      safe_resolve &Deployments.rollback/2
+      resolve &Deployments.rollback/2
     end
 
     @desc "clones the spec of the given service to be deployed either into a new namespace or new cluster"
@@ -600,7 +600,7 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :cluster_id, non_null(:id)
       arg :attributes, non_null(:service_clone_attributes)
 
-      safe_resolve &Deployments.clone_service/2
+      resolve &Deployments.clone_service/2
     end
 
     field :kick_service, :service_deployment do
@@ -635,14 +635,14 @@ defmodule Console.GraphQl.Deployments.Service do
       arg :name,       non_null(:string)
       arg :attributes, non_null(:service_context_attributes)
 
-      safe_resolve &Deployments.save_service_context/2
+      resolve &Deployments.save_service_context/2
     end
 
     field :delete_service_context, :service_context do
       middleware Authenticated
       arg :id, non_null(:id)
 
-      safe_resolve &Deployments.delete_service_context/2
+      resolve &Deployments.delete_service_context/2
     end
   end
 

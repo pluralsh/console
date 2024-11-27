@@ -75,6 +75,7 @@ config :console, Console.Guardian,
   secret_key: "console_secret" # this gets overwritten in release config
 
 config :console, Console.Repo,
+  queue_target: 1000,
   migration_timestamps: [type: :utc_datetime_usec]
 
 config :libcluster, :topologies, []

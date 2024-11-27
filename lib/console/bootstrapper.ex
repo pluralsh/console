@@ -20,9 +20,9 @@ defmodule Console.Bootstrapper do
 
     write_token_file!()
 
-    if Console.conf(:initialize) && !Console.byok?() do
-      send self(), :init
-    end
+    # if Console.conf(:initialize) && !Console.byok?() do
+    #   send self(), :init
+    # end
     {:ok, table} = KeyValueSet.new(name: @table, read_concurrency: true, ordered: true)
     # send self(), :cluster
     {:ok, %State{storage: Console.storage(), ref: make_ref(), table: table}}

@@ -63,7 +63,7 @@ push: ## push to gcr
 	docker push $(DKR_HOST)/console/$(APP_NAME):$(APP_VSN)
 
 reshim: ## reshims erlang into asdf
-	cp -r /opt/homebrew/opt/erlang@24/lib/erlang ~/.asdf/installs/erlang/$(ERLANG_VERSION)
+	cp -r /opt/homebrew/opt/erlang@26/lib/erlang ~/.asdf/installs/erlang/$(ERLANG_VERSION)
 	asdf reshim erlang $(ERLANG_VERSION)
 
 deploy: ## deploy artifacts to plural
