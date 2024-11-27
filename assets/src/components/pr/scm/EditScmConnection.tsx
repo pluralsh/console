@@ -71,7 +71,6 @@ function EditScmConnectionModalBase({
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
-
       if (allowSubmit) {
         const attributes = {
           name,
@@ -80,7 +79,9 @@ function EditScmConnectionModalBase({
           baseUrl: formState.baseUrl || '',
           username: formState.username || '',
           ...(!formState.token ? {} : { token: formState.token }),
-          ...(!formState.github ? {} : { github: formState.github }),
+          ...(formState.github && type === ScmType.Github
+            ? { github: formState.github }
+            : {}),
           ...(!formState.signingPrivateKey
             ? {}
             : { signingPrivateKey: formState.signingPrivateKey }),
