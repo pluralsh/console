@@ -56,6 +56,7 @@ import HelpLauncher from '../help/HelpLauncher'
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 import { CATALOG_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
+import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts.tsx'
 
 type MenuItem = {
   text: string
@@ -85,13 +86,13 @@ function getMenuItems({
       text: 'Home',
       expandedLabel: 'Home',
       icon: <HomeIcon />,
-      path: CATALOG_ABS_PATH,
+      path: HOME_ABS_PATH,
     },
     {
       text: 'Service catalog',
       expandedLabel: 'Service catalog',
       icon: <CatalogIcon />,
-      path: '/catalog',
+      path: CATALOG_ABS_PATH,
     },
     {
       text: 'Apps',
