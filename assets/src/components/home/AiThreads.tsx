@@ -11,10 +11,10 @@ import { sortThreadsOrPins } from '../ai/AITableEntry.tsx'
 import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 
 export function AiThreads() {
-  const threadsQuery = useFetchPaginatedData({
-    queryHook: useChatThreadsQuery,
-    keyPath: ['chatThreads'],
-  })
+  const threadsQuery = useFetchPaginatedData(
+    { queryHook: useChatThreadsQuery, keyPath: ['chatThreads'] },
+    { first: 3 }
+  )
 
   const threads = useMemo(
     () =>
@@ -44,6 +44,7 @@ export function AiThreads() {
           borderTopRightRadius: 0,
           maxHeight: HOME_CARD_CONTENT_HEIGHT,
         }}
+        hasNextPage={false} // Prevent from loading more items than on the first page.
       />
     </HomeCard>
   )
