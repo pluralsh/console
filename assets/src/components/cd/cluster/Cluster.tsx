@@ -71,7 +71,7 @@ const directory = [
   { path: CLUSTER_PRS_REL_PATH, label: 'PRs' },
 ] as const
 
-const sharedMenuItems = (cluster: ClusterFragment): Array<MoreMenuItem> => [
+const getSharedMenuItems = (cluster: ClusterFragment): Array<MoreMenuItem> => [
   {
     key: 'permissions',
     label: 'Permissions',
@@ -151,16 +151,16 @@ export default function Cluster() {
 
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [menuKey, setMenuKey] = useState<string>('')
-  const defaultMenuItems = useMemo(
-    () => (cluster ? sharedMenuItems(cluster) : []),
+  const sharedMenuItems = useMemo(
+    () => (cluster ? getSharedMenuItems(cluster) : []),
     [cluster]
   )
   const [moreMenuItems, setMoreMenuItems] =
-    useState<Array<MoreMenuItem>>(defaultMenuItems)
+    useState<Array<MoreMenuItem>>(sharedMenuItems)
   const setMoreMenuItemsWrapper = useCallback(
     (items: Array<MoreMenuItem>) =>
-      setMoreMenuItems([...defaultMenuItems, ...items]),
-    [defaultMenuItems]
+      setMoreMenuItems([...sharedMenuItems, ...items]),
+    [sharedMenuItems]
   )
 
   const pageHeaderContext = useMemo(
@@ -183,10 +183,7 @@ export default function Cluster() {
   )
 
   useSetBreadcrumbs(crumbs)
-
-  useEffect(() => {
-    setMoreMenuItems(defaultMenuItems)
-  }, [defaultMenuItems, tab])
+  useEffect(() => setMoreMenuItems(sharedMenuItems), [sharedMenuItems, tab])
 
   if (!cluster) return <LoadingIndicator />
 
@@ -273,6 +270,9 @@ export default function Cluster() {
                   }
                   css={{
                     backgroundColor: theme.colors['fill-two'],
+                    '&:hover:not(:disabled)': {
+                      backgroundColor: theme.colors['fill-two-hover'],
+                    },
                   }}
                 />
               }
