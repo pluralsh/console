@@ -26,6 +26,7 @@ import {
   StackIcon,
   WarningShieldIcon,
   AiSparkleOutlineIcon,
+  CatalogIcon,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
@@ -54,6 +55,7 @@ import HelpLauncher from '../help/HelpLauncher'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
+import { CATALOG_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 
 type MenuItem = {
   text: string
@@ -83,7 +85,13 @@ function getMenuItems({
       text: 'Home',
       expandedLabel: 'Home',
       icon: <HomeIcon />,
-      path: '/home',
+      path: CATALOG_ABS_PATH,
+    },
+    {
+      text: 'Service catalog',
+      expandedLabel: 'Service catalog',
+      icon: <CatalogIcon />,
+      path: '/catalog',
     },
     {
       text: 'Apps',
