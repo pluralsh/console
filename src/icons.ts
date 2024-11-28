@@ -9,6 +9,7 @@ export { default as ArchitectureIcon } from './components/icons/ArchitectureIcon
 export { default as ArrowLeftIcon } from './components/icons/ArrowLeftIcon'
 export { default as ArrowRightIcon } from './components/icons/ArrowRightIcon'
 export { default as ArrowRightLeftIcon } from './components/icons/ArrowRightLeftIcon'
+export { default as CatalogIcon } from './components/icons/CatalogIcon'
 export { default as ArrowTopRightIcon } from './components/icons/ArrowTopRightIcon'
 export { default as AwsLogoIcon } from './components/icons/AwsLogoIcon'
 export { default as AzureLogoIcon } from './components/icons/AzureLogoIcon'

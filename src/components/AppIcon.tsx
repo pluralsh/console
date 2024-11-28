@@ -52,7 +52,7 @@ const parentFillLevelToHue = {
 } as const satisfies Record<FillLevel, AppIconHue>
 
 const sizeToWidth = {
-  xxsmall: 32,
+  xxsmall: 36,
   xsmall: 48,
   small: 64,
   medium: 96,
@@ -61,7 +61,7 @@ const sizeToWidth = {
 } as const satisfies Record<AppIconSize, number>
 
 const sizeToIconWidth = {
-  xxsmall: 16,
+  xxsmall: 20,
   xsmall: 32,
   small: 48,
   medium: 64,
