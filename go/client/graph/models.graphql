@@ -7,6 +7,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
     name
     namespace
     version
+    status
     kustomize {...KustomizeFragment}
     git { ...GitRefFragment }
     helm { ...HelmSpecFragment }

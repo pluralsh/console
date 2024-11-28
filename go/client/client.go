@@ -1049,14 +1049,15 @@ func (t *KustomizeFragment) GetPath() string {
 }
 
 type ServiceDeploymentBaseFragment struct {
-	ID         string                 "json:\"id\" graphql:\"id\""
-	Name       string                 "json:\"name\" graphql:\"name\""
-	Namespace  string                 "json:\"namespace\" graphql:\"namespace\""
-	Version    string                 "json:\"version\" graphql:\"version\""
-	Kustomize  *KustomizeFragment     "json:\"kustomize,omitempty\" graphql:\"kustomize\""
-	Git        *GitRefFragment        "json:\"git,omitempty\" graphql:\"git\""
-	Helm       *HelmSpecFragment      "json:\"helm,omitempty\" graphql:\"helm\""
-	Repository *GitRepositoryFragment "json:\"repository,omitempty\" graphql:\"repository\""
+	ID         string                  "json:\"id\" graphql:\"id\""
+	Name       string                  "json:\"name\" graphql:\"name\""
+	Namespace  string                  "json:\"namespace\" graphql:\"namespace\""
+	Version    string                  "json:\"version\" graphql:\"version\""
+	Status     ServiceDeploymentStatus "json:\"status\" graphql:\"status\""
+	Kustomize  *KustomizeFragment      "json:\"kustomize,omitempty\" graphql:\"kustomize\""
+	Git        *GitRefFragment         "json:\"git,omitempty\" graphql:\"git\""
+	Helm       *HelmSpecFragment       "json:\"helm,omitempty\" graphql:\"helm\""
+	Repository *GitRepositoryFragment  "json:\"repository,omitempty\" graphql:\"repository\""
 }
 
 func (t *ServiceDeploymentBaseFragment) GetID() string {
@@ -1082,6 +1083,12 @@ func (t *ServiceDeploymentBaseFragment) GetVersion() string {
 		t = &ServiceDeploymentBaseFragment{}
 	}
 	return t.Version
+}
+func (t *ServiceDeploymentBaseFragment) GetStatus() *ServiceDeploymentStatus {
+	if t == nil {
+		t = &ServiceDeploymentBaseFragment{}
+	}
+	return &t.Status
 }
 func (t *ServiceDeploymentBaseFragment) GetKustomize() *KustomizeFragment {
 	if t == nil {
@@ -1174,6 +1181,7 @@ type ServiceDeploymentFragment struct {
 	Name          string                                     "json:\"name\" graphql:\"name\""
 	Namespace     string                                     "json:\"namespace\" graphql:\"namespace\""
 	Version       string                                     "json:\"version\" graphql:\"version\""
+	Status        ServiceDeploymentStatus                    "json:\"status\" graphql:\"status\""
 	Kustomize     *KustomizeFragment                         "json:\"kustomize,omitempty\" graphql:\"kustomize\""
 	Git           *GitRefFragment                            "json:\"git,omitempty\" graphql:\"git\""
 	Helm          *HelmSpecFragment                          "json:\"helm,omitempty\" graphql:\"helm\""
@@ -1211,6 +1219,12 @@ func (t *ServiceDeploymentFragment) GetVersion() string {
 		t = &ServiceDeploymentFragment{}
 	}
 	return t.Version
+}
+func (t *ServiceDeploymentFragment) GetStatus() *ServiceDeploymentStatus {
+	if t == nil {
+		t = &ServiceDeploymentFragment{}
+	}
+	return &t.Status
 }
 func (t *ServiceDeploymentFragment) GetKustomize() *KustomizeFragment {
 	if t == nil {
@@ -1294,6 +1308,7 @@ type ServiceDeploymentExtended struct {
 	Name          string                                                               "json:\"name\" graphql:\"name\""
 	Namespace     string                                                               "json:\"namespace\" graphql:\"namespace\""
 	Version       string                                                               "json:\"version\" graphql:\"version\""
+	Status        ServiceDeploymentStatus                                              "json:\"status\" graphql:\"status\""
 	Kustomize     *KustomizeFragment                                                   "json:\"kustomize,omitempty\" graphql:\"kustomize\""
 	Git           *GitRefFragment                                                      "json:\"git,omitempty\" graphql:\"git\""
 	Helm          *HelmSpecFragment                                                    "json:\"helm,omitempty\" graphql:\"helm\""
@@ -1355,6 +1370,12 @@ func (t *ServiceDeploymentExtended) GetVersion() string {
 		t = &ServiceDeploymentExtended{}
 	}
 	return t.Version
+}
+func (t *ServiceDeploymentExtended) GetStatus() *ServiceDeploymentStatus {
+	if t == nil {
+		t = &ServiceDeploymentExtended{}
+	}
+	return &t.Status
 }
 func (t *ServiceDeploymentExtended) GetKustomize() *KustomizeFragment {
 	if t == nil {
@@ -14778,6 +14799,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -14957,6 +14979,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -15152,6 +15175,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -15266,6 +15290,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -15381,6 +15406,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -15583,6 +15609,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -15764,6 +15791,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -16007,6 +16035,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -16187,6 +16216,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -16333,6 +16363,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -16447,6 +16478,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -16510,6 +16542,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -16598,6 +16631,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -16794,6 +16828,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -17268,6 +17303,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -17452,6 +17488,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -17536,6 +17573,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -17627,6 +17665,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -17818,6 +17857,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -18002,6 +18042,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -18087,6 +18128,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -18180,6 +18222,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -18274,6 +18317,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -18366,6 +18410,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -18461,6 +18506,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -18821,6 +18867,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -19114,6 +19161,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -19179,6 +19227,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -19256,6 +19305,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -19370,6 +19420,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -19798,6 +19849,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -19981,6 +20033,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -23252,6 +23305,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
@@ -23801,6 +23855,7 @@ fragment ServiceDeploymentBaseFragment on ServiceDeployment {
 	name
 	namespace
 	version
+	status
 	kustomize {
 		... KustomizeFragment
 	}
