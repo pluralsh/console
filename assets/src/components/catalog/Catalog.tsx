@@ -1,4 +1,11 @@
-import { CatalogCard, useSetBreadcrumbs } from '@pluralsh/design-system'
+import {
+  Button,
+  CatalogCard,
+  FiltersIcon,
+  Input,
+  MagnifyingGlassIcon,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
 import { CatalogFragment } from '../../generated/graphql.ts'
 import { useTheme } from 'styled-components'
@@ -9,7 +16,7 @@ const catalogs = Array(5)
   .fill([
     {
       id: '0',
-      name: 'Service catalog',
+      name: 'Base catalog',
       author: 'Plural',
       description:
         'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
@@ -17,7 +24,7 @@ const catalogs = Array(5)
     },
     {
       id: '1',
-      name: 'Service catalog',
+      name: 'Base catalog',
       author: 'Plural',
       description:
         'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
@@ -46,6 +53,35 @@ export function Catalog() {
       noPadding
       maxContentWidth={1280}
     >
+      <div
+        css={{
+          alignItems: 'center',
+          display: 'flex',
+          gap: theme.spacing.large,
+          justifyContent: 'space-between',
+          marginBottom: theme.spacing.medium,
+        }}
+      >
+        <div css={{ ...theme.partials.text.subtitle1 }}>Service catalogs</div>
+        <div
+          css={{
+            display: 'flex',
+            gap: theme.spacing.medium,
+          }}
+        >
+          <Input
+            placeholder="Search PR bundles"
+            startIcon={<MagnifyingGlassIcon />}
+            width={320}
+          />
+          <Button
+            secondary
+            startIcon={<FiltersIcon />}
+          >
+            Filters
+          </Button>
+        </div>
+      </div>
       <div
         css={{
           display: 'grid',
