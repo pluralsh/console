@@ -1,13 +1,11 @@
 import { Button, PersonIcon } from '@pluralsh/design-system'
-import { ComponentProps, ReactNode, useState } from 'react'
-
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import {
   ClusterFragment,
   ClustersRowFragment,
   useClusterBindingsQuery,
 } from 'generated/graphql'
-
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { ComponentProps, ReactNode, useState } from 'react'
 
 import { PermissionsIdType, PermissionsModal } from '../utils/PermissionsModal'
 

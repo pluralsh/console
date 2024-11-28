@@ -1,31 +1,30 @@
-import { Outlet, useMatch, useParams } from 'react-router-dom'
-
-import { useMemo, useRef } from 'react'
 import {
+  DeploymentIcon,
   ListIcon,
   NetworkInterfaceIcon,
-  SubTab,
-  TabList,
 } from '@pluralsh/design-system'
-
+import { useEffect, useMemo } from 'react'
+import { Outlet, useMatch, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
-import { LinkTabWrap } from '../../utils/Tabs'
 import {
   CLUSTER_SERVICES_PATH,
   getClusterDetailsPath,
 } from '../../../routes/cdRoutesConsts'
-import { useSetPageHeaderContent } from '../ContinuousDeployment'
-
-import { DeployService } from '../services/deployModal/DeployService'
-
+import ButtonGroup from '../../utils/ButtonGroup.tsx'
+import { ModalMountTransition } from '../../utils/ModalMountTransition.tsx'
+import {
+  usePageHeaderContext,
+  useSetPageHeaderContent,
+} from '../ContinuousDeployment'
+import { DeployServiceModal } from '../services/deployModal/DeployService'
 import { ServicesContextT } from '../services/Services'
 
 import { useClusterContext } from './Cluster'
 
 const directory = [
-  { path: '', label: 'Table', icon: <ListIcon /> },
-  { path: 'tree', label: 'Tree', icon: <NetworkInterfaceIcon /> },
+  { path: '', icon: <ListIcon /> },
+  { path: 'tree', icon: <NetworkInterfaceIcon /> },
 ]
 
 export default function ClusterServices() {
@@ -35,14 +34,14 @@ export default function ClusterServices() {
     `${getClusterDetailsPath({ clusterId })}/${CLUSTER_SERVICES_PATH}/:tab`
   )
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
-  const tabStateRef = useRef<any>(null)
 
   const {
     cluster,
     refetchServices: refetch,
     setRefetchServices: setRefetch,
   } = useClusterContext()
+
+  const { setMoreMenuItems, menuKey, setMenuKey } = usePageHeaderContext()
 
   useSetPageHeaderContent(
     useMemo(
@@ -54,50 +53,46 @@ export default function ClusterServices() {
             gap: theme.spacing.small,
           }}
         >
-          <TabList
-            margin={1}
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
-          >
-            {directory.map(({ path, label, icon }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`${getClusterDetailsPath({
-                  clusterId,
-                })}/${CLUSTER_SERVICES_PATH}/${path}`}
-              >
-                <SubTab
-                  key={path}
-                  textValue={label}
-                  css={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: theme.spacing.small,
-                  }}
-                >
-                  {icon} {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
-          <DeployService
-            refetch={refetch}
-            cluster={cluster}
+          <ButtonGroup
+            directory={directory}
+            toPath={(path) =>
+              `${getClusterDetailsPath({ clusterId })}/${CLUSTER_SERVICES_PATH}/${path}`
+            }
+            tab={tab}
           />
         </div>
       ),
-      [cluster, clusterId, currentTab?.path, refetch, theme.spacing.small]
+      [clusterId, tab, theme.spacing.small]
     )
   )
+
+  useEffect(() => {
+    setMoreMenuItems?.([
+      {
+        key: 'deploy',
+        label: 'Deploy Service',
+        icon: <DeploymentIcon />,
+        enabled: true,
+      },
+    ])
+  }, [setMoreMenuItems])
+
   const context = useMemo(
     () => ({ setRefetch, clusterId }) as ServicesContextT,
     [setRefetch, clusterId]
   )
 
-  return <Outlet context={context} />
+  return (
+    <>
+      <Outlet context={context} />
+      <ModalMountTransition open={menuKey === 'deploy'}>
+        <DeployServiceModal
+          cluster={cluster}
+          refetch={refetch}
+          open={menuKey === 'deploy'}
+          onClose={() => setMenuKey?.('')}
+        />
+      </ModalMountTransition>
+    </>
+  )
 }

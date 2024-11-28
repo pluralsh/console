@@ -1,5 +1,10 @@
-import type { Breadcrumb } from '@pluralsh/design-system'
 import {
+  Breadcrumb,
+  GearTrainIcon,
+  IconFrame,
+  ListBoxItem,
+  MoreIcon,
+  PersonIcon,
   SubTab,
   TabList,
   TabPanel,
@@ -9,7 +14,16 @@ import {
 import { useLogsEnabled } from 'components/contexts/DeploymentSettingsContext'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
+import { isFunction } from 'lodash'
+import {
+  ReactNode,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import {
   Outlet,
   useMatch,
@@ -19,7 +33,6 @@ import {
 } from 'react-router-dom'
 import {
   CD_ABS_PATH,
-  CLUSTERS_REL_PATH,
   CLUSTER_ABS_PATH,
   CLUSTER_ADDONS_REL_PATH,
   CLUSTER_LOGS_PATH,
@@ -30,16 +43,22 @@ import {
   CLUSTER_PRS_REL_PATH,
   CLUSTER_SERVICES_PATH,
   CLUSTER_VCLUSTERS_REL_PATH,
+  CLUSTERS_REL_PATH,
 } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
 
 import { ClusterFragment, useClusterQuery } from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { CD_BASE_CRUMBS, PageHeaderContext } from '../ContinuousDeployment'
+import { MoreMenu } from '../../utils/MoreMenu.tsx'
+import {
+  CD_BASE_CRUMBS,
+  MoreMenuItem,
+  PageHeaderContext,
+} from '../ContinuousDeployment'
 import ClusterSelector from '../utils/ClusterSelector'
 
-import ClusterPermissions from './ClusterPermissions'
-import ClusterSettings from './ClusterSettings'
+import { ClusterPermissionsModal } from './ClusterPermissions'
+import { ClusterSettingsModal } from './ClusterSettings.tsx'
 
 const directory = [
   { path: CLUSTER_SERVICES_PATH, label: 'Services' },
@@ -51,6 +70,21 @@ const directory = [
   { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
   { path: CLUSTER_PRS_REL_PATH, label: 'PRs' },
 ] as const
+
+const sharedMenuItems = (cluster: ClusterFragment): Array<MoreMenuItem> => [
+  {
+    key: 'permissions',
+    label: 'Permissions',
+    icon: <PersonIcon />,
+    enabled: true,
+  },
+  {
+    key: 'settings',
+    label: 'Settings',
+    icon: <GearTrainIcon />,
+    enabled: !cluster.self,
+  },
+]
 
 const POLL_INTERVAL = 10 * 1000
 
@@ -116,12 +150,27 @@ export default function Cluster() {
   const cluster = data?.cluster
 
   const [headerContent, setHeaderContent] = useState<ReactNode>()
+  const [menuKey, setMenuKey] = useState<string>('')
+  const defaultMenuItems = useMemo(
+    () => (cluster ? sharedMenuItems(cluster) : []),
+    [cluster]
+  )
+  const [moreMenuItems, setMoreMenuItems] =
+    useState<Array<MoreMenuItem>>(defaultMenuItems)
+  const setMoreMenuItemsWrapper = useCallback(
+    (items: Array<MoreMenuItem>) =>
+      setMoreMenuItems([...defaultMenuItems, ...items]),
+    [defaultMenuItems]
+  )
 
   const pageHeaderContext = useMemo(
     () => ({
       setHeaderContent,
+      setMoreMenuItems: setMoreMenuItemsWrapper,
+      menuKey,
+      setMenuKey,
     }),
-    []
+    [menuKey, setMoreMenuItemsWrapper]
   )
 
   const crumbs: Breadcrumb[] = useMemo(
@@ -134,6 +183,10 @@ export default function Cluster() {
   )
 
   useSetBreadcrumbs(crumbs)
+
+  useEffect(() => {
+    setMoreMenuItems(defaultMenuItems)
+  }, [defaultMenuItems, tab])
 
   if (!cluster) return <LoadingIndicator />
 
@@ -204,8 +257,51 @@ export default function Cluster() {
             }}
           >
             {headerContent}
-            <ClusterPermissions cluster={cluster} />
-            {!cluster.self && <ClusterSettings cluster={cluster} />}
+            <MoreMenu
+              onSelectionChange={(newKey: string) => setMenuKey(newKey)}
+              triggerButton={
+                <IconFrame
+                  textValue="Menu"
+                  clickable
+                  size="large"
+                  type="secondary"
+                  icon={
+                    <MoreIcon
+                      width={16}
+                      color={theme.colors['icon-light']}
+                    />
+                  }
+                  css={{
+                    backgroundColor: theme.colors['fill-two'],
+                  }}
+                />
+              }
+            >
+              {moreMenuItems.map((item) => {
+                const enabled = isFunction(item.enabled)
+                  ? item.enabled()
+                  : item.enabled
+
+                return enabled ? (
+                  <ListBoxItem
+                    key={item.key}
+                    leftContent={item.icon}
+                    label={item.label}
+                    textValue={item.label}
+                  ></ListBoxItem>
+                ) : undefined
+              })}
+            </MoreMenu>
+            <ClusterPermissionsModal
+              cluster={cluster!}
+              open={menuKey === 'permissions'}
+              onClose={() => setMenuKey('')}
+            />
+            <ClusterSettingsModal
+              cluster={cluster!}
+              open={menuKey === 'settings'}
+              onClose={() => setMenuKey('')}
+            />
           </div>
         </>
       }
