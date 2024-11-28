@@ -27,7 +27,7 @@ defmodule Console.Deployments.GitTest do
       }, user)
 
       assert git.url == "git@github.com:pluralsh/console.git"
-      assert git.private_key == "invalid-key\n"
+      assert git.private_key == "invalid-key\n\n"
 
       {:ok, git} = Git.create_repository(%{
         url: "https://github.com/pluralsh/test-repo.git",
@@ -35,7 +35,7 @@ defmodule Console.Deployments.GitTest do
       }, user)
 
       assert git.url == "https://github.com/pluralsh/test-repo.git"
-      assert git.private_key == "invalid-key\n"
+      assert git.private_key == "invalid-key\n\n"
 
       assert_receive {:event, %PubSub.GitRepositoryCreated{item: ^git}}
     end
