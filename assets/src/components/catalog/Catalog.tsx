@@ -4,13 +4,11 @@ import {
   FiltersIcon,
   Input,
   MagnifyingGlassIcon,
-  Tooltip,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
 import { CatalogFragment } from '../../generated/graphql.ts'
 import { useTheme } from 'styled-components'
-import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 
 export const breadcrumbs = [{ label: 'service catalog' }]
 
@@ -76,29 +74,12 @@ export function Catalog() {
             startIcon={<MagnifyingGlassIcon color="icon-light" />}
             width={320}
           />
-          <Tooltip
-            portal
-            strategy={'fixed'}
-            label={
-              <div
-                css={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  gap: theme.spacing.medium,
-                }}
-              >
-                asd
-                <CommandPaletteShortcuts shortcuts={['Asd']} />
-              </div>
-            }
+          <Button
+            secondary
+            startIcon={<FiltersIcon />}
           >
-            <Button
-              secondary
-              startIcon={<FiltersIcon />}
-            >
-              Filters
-            </Button>
-          </Tooltip>
+            Filters
+          </Button>
         </div>
       </div>
       <div
