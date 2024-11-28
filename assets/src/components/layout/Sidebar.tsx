@@ -27,6 +27,7 @@ import {
   WarningShieldIcon,
   AiSparkleOutlineIcon,
   CatalogIcon,
+  Tooltip,
 } from '@pluralsh/design-system'
 import { Link, useLocation } from 'react-router-dom'
 import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
@@ -343,29 +344,32 @@ export default function Sidebar() {
           border="none"
         >
           {menuItems.map((item, i) => (
-            <SidebarItem
-              key={i}
-              clickable
-              tooltip={
+            <Tooltip
+              label={
                 <div
                   css={{
                     alignItems: 'center',
                     display: 'flex',
-                    gap: theme.spacing.medium,
+                    gap: theme.spacing.small,
                   }}
                 >
-                  {item.text}
+                  {item.expandedLabel}
                   <CommandPaletteShortcuts shortcuts={item.hotkeys} />
                 </div>
               }
-              className={`sidebar-${item.text}`}
-              active={isActive(item)}
-              as={Link}
-              to={item.path}
-              expandedLabel={item.expandedLabel}
             >
-              {item.icon}
-            </SidebarItem>
+              <SidebarItem
+                key={i}
+                clickable
+                className={`sidebar-${item.text}`}
+                active={isActive(item)}
+                as={Link}
+                to={item.path}
+                expandedLabel={item.expandedLabel}
+              >
+                {item.icon}
+              </SidebarItem>
+            </Tooltip>
           ))}
           <Flex grow={1} />
           <SidebarExpandButton />
