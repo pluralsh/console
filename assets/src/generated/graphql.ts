@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -10068,6 +10068,40 @@ export type CreateBuildMutationVariables = Exact<{
 
 export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
+export type CatalogFragment = { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null };
+
+export type CatalogsQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type CatalogsQuery = { __typename?: 'RootQueryType', catalogs?: { __typename?: 'CatalogConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CatalogEdge', node?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null } | null> | null } | null };
+
+export type CatalogQueryVariables = Exact<{
+  id?: InputMaybe<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type CatalogQuery = { __typename?: 'RootQueryType', catalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null };
+
+export type UpsertCatalogMutationVariables = Exact<{
+  attributes?: InputMaybe<CatalogAttributes>;
+}>;
+
+
+export type UpsertCatalogMutation = { __typename?: 'RootMutationType', upsertCatalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null };
+
+export type DeleteCatalogMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type DeleteCatalogMutation = { __typename?: 'RootMutationType', deleteCatalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null };
+
 export type ClusterNodeFragment = { __typename?: 'Node', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } };
 
 export type ClusterConditionFragment = { __typename?: 'ClusterCondition', lastTransitionTime?: string | null, message?: string | null, reason?: string | null, severity?: string | null, status?: string | null, type?: string | null };
@@ -12316,6 +12350,17 @@ export const PageInfoFragmentDoc = gql`
   endCursor
   hasPreviousPage
   startCursor
+}
+    `;
+export const CatalogFragmentDoc = gql`
+    fragment Catalog on Catalog {
+  id
+  name
+  author
+  description
+  category
+  icon
+  darkIcon
 }
     `;
 export const InsightClientInfoFragmentDoc = gql`
@@ -16746,6 +16791,164 @@ export function useCreateBuildMutation(baseOptions?: Apollo.MutationHookOptions<
 export type CreateBuildMutationHookResult = ReturnType<typeof useCreateBuildMutation>;
 export type CreateBuildMutationResult = Apollo.MutationResult<CreateBuildMutation>;
 export type CreateBuildMutationOptions = Apollo.BaseMutationOptions<CreateBuildMutation, CreateBuildMutationVariables>;
+export const CatalogsDocument = gql`
+    query Catalogs($after: String, $before: String, $first: Int, $last: Int) {
+  catalogs(after: $after, before: $before, first: $first, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Catalog
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${CatalogFragmentDoc}`;
+
+/**
+ * __useCatalogsQuery__
+ *
+ * To run a query within a React component, call `useCatalogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCatalogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCatalogsQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      before: // value for 'before'
+ *      first: // value for 'first'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useCatalogsQuery(baseOptions?: Apollo.QueryHookOptions<CatalogsQuery, CatalogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CatalogsQuery, CatalogsQueryVariables>(CatalogsDocument, options);
+      }
+export function useCatalogsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CatalogsQuery, CatalogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CatalogsQuery, CatalogsQueryVariables>(CatalogsDocument, options);
+        }
+export function useCatalogsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CatalogsQuery, CatalogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CatalogsQuery, CatalogsQueryVariables>(CatalogsDocument, options);
+        }
+export type CatalogsQueryHookResult = ReturnType<typeof useCatalogsQuery>;
+export type CatalogsLazyQueryHookResult = ReturnType<typeof useCatalogsLazyQuery>;
+export type CatalogsSuspenseQueryHookResult = ReturnType<typeof useCatalogsSuspenseQuery>;
+export type CatalogsQueryResult = Apollo.QueryResult<CatalogsQuery, CatalogsQueryVariables>;
+export const CatalogDocument = gql`
+    query Catalog($id: ID, $name: String) {
+  catalog(id: $id, name: $name) {
+    ...Catalog
+  }
+}
+    ${CatalogFragmentDoc}`;
+
+/**
+ * __useCatalogQuery__
+ *
+ * To run a query within a React component, call `useCatalogQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCatalogQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCatalogQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      name: // value for 'name'
+ *   },
+ * });
+ */
+export function useCatalogQuery(baseOptions?: Apollo.QueryHookOptions<CatalogQuery, CatalogQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CatalogQuery, CatalogQueryVariables>(CatalogDocument, options);
+      }
+export function useCatalogLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CatalogQuery, CatalogQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CatalogQuery, CatalogQueryVariables>(CatalogDocument, options);
+        }
+export function useCatalogSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CatalogQuery, CatalogQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CatalogQuery, CatalogQueryVariables>(CatalogDocument, options);
+        }
+export type CatalogQueryHookResult = ReturnType<typeof useCatalogQuery>;
+export type CatalogLazyQueryHookResult = ReturnType<typeof useCatalogLazyQuery>;
+export type CatalogSuspenseQueryHookResult = ReturnType<typeof useCatalogSuspenseQuery>;
+export type CatalogQueryResult = Apollo.QueryResult<CatalogQuery, CatalogQueryVariables>;
+export const UpsertCatalogDocument = gql`
+    mutation UpsertCatalog($attributes: CatalogAttributes) {
+  upsertCatalog(attributes: $attributes) {
+    ...Catalog
+  }
+}
+    ${CatalogFragmentDoc}`;
+export type UpsertCatalogMutationFn = Apollo.MutationFunction<UpsertCatalogMutation, UpsertCatalogMutationVariables>;
+
+/**
+ * __useUpsertCatalogMutation__
+ *
+ * To run a mutation, you first call `useUpsertCatalogMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpsertCatalogMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [upsertCatalogMutation, { data, loading, error }] = useUpsertCatalogMutation({
+ *   variables: {
+ *      attributes: // value for 'attributes'
+ *   },
+ * });
+ */
+export function useUpsertCatalogMutation(baseOptions?: Apollo.MutationHookOptions<UpsertCatalogMutation, UpsertCatalogMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpsertCatalogMutation, UpsertCatalogMutationVariables>(UpsertCatalogDocument, options);
+      }
+export type UpsertCatalogMutationHookResult = ReturnType<typeof useUpsertCatalogMutation>;
+export type UpsertCatalogMutationResult = Apollo.MutationResult<UpsertCatalogMutation>;
+export type UpsertCatalogMutationOptions = Apollo.BaseMutationOptions<UpsertCatalogMutation, UpsertCatalogMutationVariables>;
+export const DeleteCatalogDocument = gql`
+    mutation DeleteCatalog($id: ID!) {
+  deleteCatalog(id: $id) {
+    ...Catalog
+  }
+}
+    ${CatalogFragmentDoc}`;
+export type DeleteCatalogMutationFn = Apollo.MutationFunction<DeleteCatalogMutation, DeleteCatalogMutationVariables>;
+
+/**
+ * __useDeleteCatalogMutation__
+ *
+ * To run a mutation, you first call `useDeleteCatalogMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteCatalogMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteCatalogMutation, { data, loading, error }] = useDeleteCatalogMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteCatalogMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCatalogMutation, DeleteCatalogMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteCatalogMutation, DeleteCatalogMutationVariables>(DeleteCatalogDocument, options);
+      }
+export type DeleteCatalogMutationHookResult = ReturnType<typeof useDeleteCatalogMutation>;
+export type DeleteCatalogMutationResult = Apollo.MutationResult<DeleteCatalogMutation>;
+export type DeleteCatalogMutationOptions = Apollo.BaseMutationOptions<DeleteCatalogMutation, DeleteCatalogMutationVariables>;
 export const ClustersDocument = gql`
     query Clusters($first: Int, $after: String, $q: String, $healthy: Boolean, $tagQuery: TagQuery, $projectId: ID) {
   clusters(
@@ -24621,6 +24824,8 @@ export const namedOperations = {
     ClusterBackups: 'ClusterBackups',
     ClusterRestores: 'ClusterRestores',
     PluralContext: 'PluralContext',
+    Catalogs: 'Catalogs',
+    Catalog: 'Catalog',
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     VClusters: 'VClusters',
@@ -24760,6 +24965,8 @@ export const namedOperations = {
     DelinkBackups: 'DelinkBackups',
     CreateClusterRestore: 'CreateClusterRestore',
     CreateBuild: 'CreateBuild',
+    UpsertCatalog: 'UpsertCatalog',
+    DeleteCatalog: 'DeleteCatalog',
     UpdateClusterBindings: 'UpdateClusterBindings',
     UpdateCluster: 'UpdateCluster',
     CreateCluster: 'CreateCluster',
@@ -24866,6 +25073,7 @@ export const namedOperations = {
     ClusterBackup: 'ClusterBackup',
     ClusterRestore: 'ClusterRestore',
     PageInfo: 'PageInfo',
+    Catalog: 'Catalog',
     ClusterNode: 'ClusterNode',
     ClusterCondition: 'ClusterCondition',
     Taint: 'Taint',

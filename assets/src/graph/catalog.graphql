@@ -1,0 +1,40 @@
+fragment Catalog on Catalog {
+  id
+  name
+  author
+  description
+  category
+  icon
+  darkIcon
+}
+
+query Catalogs($after: String, $before: String, $first: Int, $last: Int) {
+  catalogs(after: $after, before: $before, first: $first, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...Catalog
+      }
+    }
+  }
+}
+
+query Catalog($id: ID, $name: String) {
+  catalog(id: $id, name: $name) {
+    ...Catalog
+  }
+}
+
+mutation UpsertCatalog($attributes: CatalogAttributes) {
+  upsertCatalog(attributes: $attributes) {
+    ...Catalog
+  }
+}
+
+mutation DeleteCatalog($id: ID!) {
+  deleteCatalog(id: $id) {
+    ...Catalog
+  }
+}
