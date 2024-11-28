@@ -71,7 +71,7 @@ export function Catalog() {
         >
           <Input
             placeholder="Search PR bundles"
-            startIcon={<MagnifyingGlassIcon />}
+            startIcon={<MagnifyingGlassIcon color="icon-light" />}
             width={320}
           />
           <Button
