@@ -57,6 +57,7 @@ import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 import { CATALOG_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts.tsx'
+import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 
 type MenuItem = {
   text: string
@@ -64,11 +65,13 @@ type MenuItem = {
   path: string
   pathRegexp?: RegExp
   ignoreRegexp?: RegExp
+  hotkeys?: string[]
   plural?: boolean
   enabled?: boolean
   expandedLabel: string
 }
 
+// Keep hotkeys in sync with assets/src/components/commandpalette/commands.ts.
 function getMenuItems({
   isCDEnabled,
   cdPath,
@@ -87,12 +90,14 @@ function getMenuItems({
       expandedLabel: 'Home',
       icon: <HomeIcon />,
       path: HOME_ABS_PATH,
+      hotkeys: ['shift H', '1'],
     },
     {
       text: 'Service catalog',
       expandedLabel: 'Service catalog',
       icon: <CatalogIcon />,
       path: CATALOG_ABS_PATH,
+      hotkeys: ['2'],
     },
     {
       text: 'Apps',
@@ -109,12 +114,14 @@ function getMenuItems({
       path: cdPath,
       pathRegexp: /^(\/cd)|(\/cd\/.*)$/,
       ignoreRegexp: /^\/cd\/settings.*$/,
+      hotkeys: ['shift C', '3'],
     },
     {
       text: 'Stacks',
       expandedLabel: 'Stacks',
       icon: <StackIcon />,
       path: getStacksAbsPath(''),
+      hotkeys: ['shift S', '4'],
     },
     {
       text: 'Kubernetes',
@@ -122,12 +129,14 @@ function getMenuItems({
       icon: <KubernetesAltIcon />,
       path: `/${KUBERNETES_ROOT_PATH}`,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
+      hotkeys: ['shift K', '5'],
     },
     {
       text: 'Plural AI',
       expandedLabel: 'Plural AI',
       icon: <AiSparkleOutlineIcon />,
       path: `${AI_ABS_PATH}`,
+      hotkeys: ['shift A', '6'],
     },
     {
       text: 'Builds',
@@ -153,7 +162,7 @@ function getMenuItems({
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
     {
-      text: 'PR',
+      text: 'PRs',
       expandedLabel: 'Pull requests',
       icon: <PrOpenIcon />,
       path: PR_DEFAULT_ABS_PATH,
@@ -161,6 +170,7 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.pullRequests),
+      hotkeys: ['shift P', '7'],
     },
     {
       text: 'Policies',
@@ -168,6 +178,7 @@ function getMenuItems({
       icon: <WarningShieldIcon />,
       path: POLICIES_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
+      hotkeys: ['shift L', '8'],
     },
     {
       text: 'Database management',
@@ -194,6 +205,7 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.backups),
+      hotkeys: ['shift B', '9'],
     },
     {
       text: 'Settings',
@@ -203,6 +215,7 @@ function getMenuItems({
       enabled:
         isCDEnabled &&
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
+      hotkeys: ['0'],
     },
   ].filter((item) => item.enabled !== false && (!item.plural || !isByok))
 }
@@ -333,7 +346,18 @@ export default function Sidebar() {
             <SidebarItem
               key={i}
               clickable
-              tooltip={item.text}
+              tooltip={
+                <div
+                  css={{
+                    alignItems: 'center',
+                    display: 'flex',
+                    gap: theme.spacing.medium,
+                  }}
+                >
+                  {item.text}
+                  <CommandPaletteShortcuts shortcuts={item.hotkeys} />
+                </div>
+              }
               className={`sidebar-${item.text}`}
               active={isActive(item)}
               as={Link}
