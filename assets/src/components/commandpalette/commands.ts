@@ -1,6 +1,5 @@
 import {
   ArrowTopRightIcon,
-  BellIcon,
   ClusterIcon,
   DocumentIcon,
   EyeIcon,
@@ -20,6 +19,8 @@ import {
   setThemeColorMode,
   useThemeColorMode,
   IconProps,
+  CatalogIcon,
+  AiSparkleOutlineIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
@@ -43,7 +44,6 @@ import {
   PR_AUTOMATIONS_ABS_PATH,
 } from '../../routes/prRoutesConsts'
 import {
-  NOTIFICATIONS_ABS_PATH,
   SETTINGS_ABS_PATH,
   USER_MANAGEMENT_ABS_PATH,
 } from '../../routes/settingsRoutesConst'
@@ -51,6 +51,8 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
+import { CATALOG_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
+import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 
 type CommandGroup = {
   commands: Command[]
@@ -141,60 +143,67 @@ export function useCommands(): CommandGroup[] {
             autoFocus: true,
           },
           {
+            label: 'Service catalog',
+            icon: CatalogIcon,
+            callback: () => navigate(CATALOG_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['2'],
+          },
+          {
             label: 'Continuous Deployment (CD)',
             icon: GitPullIcon,
             callback: () => navigate(CD_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift C', '2'],
+            hotkeys: ['shift C', '3'],
           },
           {
             label: 'Stacks',
             icon: StackIcon,
             callback: () => navigate(STACKS_ROOT_PATH),
             deps: [navigate],
-            hotkeys: ['shift S', '3'],
+            hotkeys: ['shift S', '4'],
           },
           {
             label: 'Kubernetes Dashboard',
             icon: KubernetesAltIcon,
             callback: () => navigate(KUBERNETES_ROOT_PATH),
             deps: [navigate],
-            hotkeys: ['shift K', '4'],
+            hotkeys: ['shift K', '5'],
+          },
+          {
+            label: 'Plural AI',
+            icon: AiSparkleOutlineIcon,
+            callback: () => navigate(AI_ABS_PATH),
+            deps: [navigate],
+            hotkeys: ['shift A', '6'],
           },
           {
             label: "Pull Requests (PR's)",
             icon: PrOpenIcon,
             callback: () => navigate(PR_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift P', '5'],
+            hotkeys: ['shift P', '7'],
           },
           {
             label: 'Policies',
             icon: WarningShieldIcon,
             callback: () => navigate(POLICIES_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift L', '6'],
+            hotkeys: ['shift L', '8'],
           },
           {
             label: 'Backups',
             icon: HistoryIcon,
             callback: () => navigate(BACKUPS_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift B', '7'],
-          },
-          {
-            label: 'Notifications',
-            icon: BellIcon,
-            callback: () => navigate(NOTIFICATIONS_ABS_PATH),
-            deps: [navigate],
-            hotkeys: ['shift N', '8'],
+            hotkeys: ['shift B', '9'],
           },
           {
             label: 'Settings',
             icon: GearTrainIcon,
             callback: () => navigate(SETTINGS_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift A', '9'],
+            hotkeys: ['0'],
           },
         ],
       },
