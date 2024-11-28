@@ -18,7 +18,7 @@ dependencies:
     repository: https://kubernetes.github.io/dashboard
     condition: dashboard.enabled
   - name: flux2
-    version: 2.11.1
+    version: 2.14.0
     repository: https://fluxcd-community.github.io/helm-charts
     condition: flux2.enabled
 type: application
