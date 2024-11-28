@@ -150,7 +150,7 @@ export function useCommands(): CommandGroup[] {
             hotkeys: ['2'],
           },
           {
-            label: 'Continuous Deployment (CD)',
+            label: 'Continuous deployment (CD)',
             icon: GitPullIcon,
             callback: () => navigate(CD_ABS_PATH),
             deps: [navigate],
@@ -178,7 +178,7 @@ export function useCommands(): CommandGroup[] {
             hotkeys: ['shift A', '6'],
           },
           {
-            label: "Pull Requests (PR's)",
+            label: "Pull requests (PR's)",
             icon: PrOpenIcon,
             callback: () => navigate(PR_ABS_PATH),
             deps: [navigate],

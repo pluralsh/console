@@ -154,7 +154,7 @@ function getMenuItems({
     },
     {
       text: 'PR',
-      expandedLabel: 'PRs',
+      expandedLabel: 'Pull requests',
       icon: <PrOpenIcon />,
       path: PR_DEFAULT_ABS_PATH,
       pathRegexp: /^(\/pr)|(\/pr\/.*)$/,
