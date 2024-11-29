@@ -14,6 +14,7 @@ import {
   getCatalogAbsPath,
 } from '../../routes/catalogRoutesConsts.tsx'
 import { useNavigate } from 'react-router-dom'
+import { catalogImageUrl } from './common.ts'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },
@@ -23,6 +24,7 @@ const catalogs = Array(5)
   .fill([
     {
       id: '0',
+      icon: `/cluster-distros/eks-dark.svg`,
       name: 'Base catalog',
       author: 'Plural',
       description:
@@ -97,15 +99,18 @@ export function Catalogs() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
         }}
       >
-        {catalogs?.map(({ id, name, author, description, category }) => (
-          <CatalogCard
-            name={name}
-            author={author}
-            description={description}
-            category={category}
-            onClick={() => navigate(getCatalogAbsPath(id))}
-          />
-        ))}
+        {catalogs?.map(
+          ({ id, name, author, description, category, icon, darkIcon }) => (
+            <CatalogCard
+              imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
+              name={name}
+              author={author}
+              description={description}
+              category={category}
+              onClick={() => navigate(getCatalogAbsPath(id))}
+            />
+          )
+        )}
       </div>
     </ResponsivePageFullWidth>
   )
