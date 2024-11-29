@@ -1,7 +1,7 @@
 import {
   Button,
-  Card,
   CatalogCard,
+  CloseIcon,
   FiltersIcon,
   Flex,
   Input,
@@ -18,8 +18,9 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { catalogImageUrl } from './common.ts'
 import Fuse from 'fuse.js'
-import { useMemo, useState } from 'react'
-import { chain } from 'lodash'
+import { useCallback, useMemo, useState } from 'react'
+import { chain, isEmpty } from 'lodash'
+import { CatalogsFilters } from './CatalogsFilters.tsx'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },
@@ -67,6 +68,8 @@ export function Catalogs() {
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [filtersVisible, setFitlersVisible] = useState(true) // todo
+  const [authorFilters, setAuthorFilters] = useState<string[]>([])
+  const [categoryFilters, setCategoryFilters] = useState<string[]>([])
 
   // const { data } = useFetchPaginatedData({
   //   queryHook: useCatalogsQuery,
@@ -96,10 +99,20 @@ export function Catalogs() {
     []
   )
 
+  const resetFilters = useCallback(() => {
+    setAuthorFilters([])
+    setCategoryFilters([])
+  }, [setAuthorFilters, setCategoryFilters])
+
+  const hasActiveSearch = !!query
+  const hasActiveFilters = !isEmpty(authorFilters) || !isEmpty(categoryFilters)
+
   const filteredCatalogs = useMemo(() => {
     const fuse = new Fuse(catalogs, searchOptions)
-    return query ? fuse.search(query).map(({ item }) => item) : catalogs
-  }, [query])
+    return hasActiveSearch
+      ? fuse.search(query).map(({ item }) => item)
+      : catalogs
+  }, [hasActiveSearch, query])
 
   useSetBreadcrumbs(breadcrumbs)
 
@@ -145,11 +158,15 @@ export function Catalogs() {
                 width={320}
               />
               <Button
-                onClick={() => setFitlersVisible(!filtersVisible)}
+                onClick={() =>
+                  hasActiveFilters
+                    ? resetFilters()
+                    : setFitlersVisible(!filtersVisible)
+                }
                 secondary
-                startIcon={<FiltersIcon />}
+                startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
               >
-                Filters
+                {hasActiveFilters ? 'Reset filters' : 'Filters'}
               </Button>
             </div>
           </div>
@@ -176,20 +193,14 @@ export function Catalogs() {
           </div>
         </Flex>
         {filtersVisible && (
-          <Card width={220}>
-            Authors
-            {authors.map(({ key, items }) => (
-              <div>
-                {key} ({items})
-              </div>
-            ))}
-            Categories
-            {categories.map(({ key, items }) => (
-              <div>
-                {key} ({items})
-              </div>
-            ))}
-          </Card>
+          <CatalogsFilters
+            authors={authors}
+            authorFilters={authorFilters}
+            setAuthorFilters={setAuthorFilters}
+            categories={categories}
+            categoryFilters={categoryFilters}
+            setCategoryFilters={setCategoryFilters}
+          ></CatalogsFilters>
         )}
       </Flex>
     </ResponsivePageFullWidth>
