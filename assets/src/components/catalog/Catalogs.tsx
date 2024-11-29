@@ -151,6 +151,7 @@ export function Catalogs() {
               gap: theme.spacing.large,
               justifyContent: 'space-between',
               marginBottom: theme.spacing.medium,
+              paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
             }}
           >
             <div css={{ ...theme.partials.text.subtitle1 }}>
@@ -191,6 +192,7 @@ export function Catalogs() {
                 gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
                 overflow: 'auto',
                 paddingBottom: theme.spacing.large,
+                paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
               }}
             >
               {resultCatalogs?.map(
