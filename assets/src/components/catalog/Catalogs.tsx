@@ -15,10 +15,18 @@ import {
 } from '../../routes/catalogRoutesConsts.tsx'
 import { useNavigate } from 'react-router-dom'
 import { catalogImageUrl } from './common.ts'
+import Fuse from 'fuse.js'
+import { useMemo, useState } from 'react'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },
 ]
+
+// TODO: Replace with server-side search once it will be available.
+const searchOptions = {
+  keys: ['name', 'description'],
+  threshold: 0.25,
+}
 
 const catalogs = Array(5)
   .fill([
@@ -45,6 +53,7 @@ const catalogs = Array(5)
 export function Catalogs() {
   const theme = useTheme()
   const navigate = useNavigate()
+  const [query, setQuery] = useState('')
 
   // const { data } = useFetchPaginatedData({
   //   queryHook: useCatalogsQuery,
@@ -55,6 +64,11 @@ export function Catalogs() {
   //   () => mapExistingNodes(data?.catalogs),
   //   [data?.catalogs]
   // )
+
+  const filteredCatalogs = useMemo(() => {
+    const fuse = new Fuse(catalogs, searchOptions)
+    return query ? fuse.search(query).map(({ item }) => item) : catalogs
+  }, [query])
 
   useSetBreadcrumbs(breadcrumbs)
 
@@ -80,6 +94,9 @@ export function Catalogs() {
           }}
         >
           <Input
+            value={query}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+            showClearButton
             placeholder="Search PR bundles"
             startIcon={<MagnifyingGlassIcon color="icon-light" />}
             width={320}
@@ -99,7 +116,7 @@ export function Catalogs() {
           gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
         }}
       >
-        {catalogs?.map(
+        {filteredCatalogs?.map(
           ({ id, name, author, description, category, icon, darkIcon }) => (
             <CatalogCard
               imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
