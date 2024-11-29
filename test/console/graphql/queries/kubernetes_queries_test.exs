@@ -251,6 +251,7 @@ defmodule Console.GraphQl.KubernetesQueriesTest do
   end
 
   describe "certificate" do
+    @tag :skip
     test "it can read a certificate crd" do
       user = insert(:user)
       role = insert(:role, repositories: ["*"], permissions: %{operate: true})

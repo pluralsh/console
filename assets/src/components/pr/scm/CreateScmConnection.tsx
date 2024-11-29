@@ -5,6 +5,7 @@ import { useTheme } from 'styled-components'
 import {
   ScmConnectionAttributes,
   ScmConnectionsDocument,
+  ScmType,
   useCreateScmConnectionMutation,
 } from 'generated/graphql'
 import { appendConnection, updateCache } from 'utils/graphql'
@@ -67,8 +68,8 @@ export function CreateScmConnectionModal({
       if (allowSubmit) {
         const attributes: ScmConnectionAttributes = {
           name,
-          ...(token !== '' ? { token } : { github }),
           type,
+          ...(token === '' && type === ScmType.Github ? { github } : { token }),
           apiUrl: formState.apiUrl || null,
           baseUrl: formState.baseUrl || null,
           username: formState.username || null,
