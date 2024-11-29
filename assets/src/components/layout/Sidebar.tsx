@@ -56,7 +56,7 @@ import HelpLauncher from '../help/HelpLauncher'
 
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
-import { CATALOG_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
+import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 
@@ -97,7 +97,7 @@ function getMenuItems({
       text: 'Service catalog',
       expandedLabel: 'Service catalog',
       icon: <CatalogIcon />,
-      path: CATALOG_ABS_PATH,
+      path: CATALOGS_ABS_PATH,
       hotkeys: ['2'],
     },
     {

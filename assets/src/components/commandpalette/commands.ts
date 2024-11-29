@@ -51,7 +51,7 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
-import { CATALOG_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
+import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 
 type CommandGroup = {
@@ -145,7 +145,7 @@ export function useCommands(): CommandGroup[] {
           {
             label: 'Service catalog',
             icon: CatalogIcon,
-            callback: () => navigate(CATALOG_ABS_PATH),
+            callback: () => navigate(CATALOGS_ABS_PATH),
             deps: [navigate],
             hotkeys: ['2'],
           },
