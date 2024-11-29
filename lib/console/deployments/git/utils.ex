@@ -3,8 +3,7 @@ defmodule Console.Deployments.Git.Utils do
 
   def validate_private_key(cs, field) do
     case get_change(cs, field) do
-      key when is_binary(key) ->
-        put_change(cs, field, normalize_pk(key))
+      key when is_binary(key) -> put_change(cs, field, normalize_pk(key))
       _ -> cs
     end
     |> validate_change(field, fn _, val ->

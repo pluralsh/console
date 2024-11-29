@@ -132,7 +132,7 @@ defmodule Console.MixProject do
       {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "ef2050c547ab74c283ef02397925d48637bd67a1"},
       {:comeonin, "~> 5.1.2"},
       {:argon2_elixir, "~> 2.0"},
-      {:guardian, "~> 1.2.1"},
+      {:guardian, "~> 2.3"},
       {:accessible, "~> 0.3.0"},
       {:httpoison, "~> 1.7", override: true},
       {:nebulex, "~> 2.6"},

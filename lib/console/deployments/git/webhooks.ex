@@ -12,7 +12,6 @@ defmodule Console.Deployments.Git.Webhooks do
       "organization" => %{"name" => org},
       "team" => %{"name" => team}
     }) do
-    IO.inspect("here")
     with {:ok, _} <- Users.add_github_team_member(email, org, team),
       do: {:ok, %{ignored: false, message: "added #{email} to team #{org}:#{team}"}}
   end
