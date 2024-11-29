@@ -45,19 +45,15 @@ function MarkdocCallout({
   )
 }
 
-const StyledCallout = styled(MarkdocCallout)`
-  ${({ theme }) => ({
-    marginTop: theme.spacing.xlarge,
-    marginBottom: theme.spacing.xlarge,
-    color: theme.colors['text-light'],
-  })}
+const StyledCallout = styled(MarkdocCallout)(({ theme }) => ({
+  marginTop: theme.spacing.xlarge,
+  marginBottom: theme.spacing.xlarge,
+  color: theme.colors['text-light'],
 
-  ${Paragraph}, ${ListItem} {
-    ${({ theme }) => ({
-      ...theme.partials.text.body2,
-      color: theme.colors['text-light'],
-    })}
-  }
-`
+  [`${Paragraph}, ${ListItem}`]: {
+    ...theme.partials.text.body2,
+    color: theme.colors['text-light'],
+  },
+}))
 
 export default StyledCallout
