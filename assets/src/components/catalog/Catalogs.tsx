@@ -188,7 +188,10 @@ export function Catalogs() {
                 </Button>
               </div>
             </div>
-            <Flex gap="medium">
+            <Flex
+              gap="medium"
+              overflow={'hidden'}
+            >
               {!isEmpty(resultCatalogs) ? (
                 <div
                   css={{
