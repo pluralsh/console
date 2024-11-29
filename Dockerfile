@@ -91,21 +91,18 @@ RUN curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSI
 FROM ${RUNNER_IMAGE}
 
 COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
-# COPY --from=tools /usr/local/bin/helm /usr/local/bin/helm
-# COPY --from=tools /usr/local/bin/terraform /usr/local/bin/terraform
-# COPY --from=tools /usr/local/bin/kubectl /usr/local/bin/kubectl
 
-RUN apt-get update -y && \
-  apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates git gnupg bash \
-  && apt-get clean && rm -f /var/lib/apt/lists/*_*
+WORKDIR /opt/app
 
-RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
+RUN  echo "deb http://deb.debian.org/debian bullseye-backports main" >/etc/apt/sources.list.d/bullseye-backports.list && \
+  apt-get update -y && \
+  apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates git-man/bullseye-backports git/bullseye-backports gnupg bash && \
+  apt-get clean && rm -f /var/lib/apt/lists/*_* && \
+  sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && \
+  addgroup --gid 10001 app && \
+  adduser --home /home/console --uid 10001 --gid 10001 console && \
+  chown console:app /opt/app
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
-
-# The name of your application/release (required)
 ARG APP_NAME=console
 ARG GIT_COMMIT
 
@@ -114,24 +111,20 @@ ENV REPLACE_OS_VARS=true \
     GIT_ASKPASS=/opt/app/bin/.git-askpass \
     SSH_ASKPASS=/opt/app/bin/.ssh-askpass \
     GIT_COMMIT=${GIT_COMMIT} \
-    MIX_ENV=prod
+    MIX_ENV=prod \
+    LANG=en_US.UTF-8 \
+    LANGUAGE=en_US:en \
+    LC_ALL=en_US.UTF-8 \
+    GIT_SSH_COMMAND="ssh -i /home/console/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet" \
+    SSH_ASKPASS_REQUIRE=force \
+    DISPLAY=1
 
-WORKDIR /opt/app
-
-RUN addgroup --gid 10001 app
-RUN adduser --home /home/console --uid 10001 --gid 10001 console
-RUN chown console:app /opt/app
-
-# add common repos to known hosts
 COPY bin /opt/app/bin
-RUN chmod +x /opt/app/bin/.git-askpass && \ 
-      chmod +x /opt/app/bin/.ssh-askpass && \
-      chown console:app /opt/app/bin/.ssh-askpass && \
-      chown console:app /opt/app/bin/.git-askpass
 
-ENV GIT_SSH_COMMAND="ssh -i /root/.ssh/id_rsa -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=quiet" \
-  SSH_ASKPASS_REQUIRE=force \
-  DISPLAY=1
+RUN chmod +x /opt/app/bin/.git-askpass && \ 
+  chmod +x /opt/app/bin/.ssh-askpass && \
+  chown console:app /opt/app/bin/.ssh-askpass && \
+  chown console:app /opt/app/bin/.git-askpass
 
 COPY --from=builder /opt/app/_build/prod/rel/console .
 

@@ -118,7 +118,7 @@ defmodule Console.MixProject do
       {:absinthe_relay, "~> 1.5.2"},
       {:absinthe_plug, "~> 1.5", git: "https://github.com/absinthe-graphql/absinthe_plug.git", commit: "3a984cc341ebb32c79e7ae58b4ebd116d5c62f9e", override: true},
       {:absinthe_phoenix, "~> 2.0"},
-      {:dataloader, "~> 1.0.6"},
+      {:dataloader, "~> 2.0"},
       {:cors_plug, "~> 2.0"},
       {:timex, "~> 3.7"},
       {:quantum, "~> 3.0"},
@@ -157,11 +157,12 @@ defmodule Console.MixProject do
       {:bamboo_smtp, "~> 4.1.0"},
       {:bamboo, "~> 2.3", override: true},
       {:hut, "~> 1.3", manager: :rebar3, override: true},
+      {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
 
       # if using the Mint adapter:
       {:castore, "~> 0.1.7"},
-      {:req, "~> 0.4.14", override: true},
-      {:mint, "~> 1.4.0", override: true},
+      {:req, "~> 0.5", override: true},
+      {:mint, "~> 1.6", override: true},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},
       {:elixpath, "~> 0.1.1", git: "https://github.com/mtannaan/elixpath.git"},
       {:mimic, "~> 1.10", only: :test},
