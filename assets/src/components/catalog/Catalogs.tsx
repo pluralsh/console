@@ -1,7 +1,9 @@
 import {
   Button,
+  Card,
   CatalogCard,
   FiltersIcon,
+  Flex,
   Input,
   MagnifyingGlassIcon,
   useSetBreadcrumbs,
@@ -54,6 +56,7 @@ export function Catalogs() {
   const theme = useTheme()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
+  const [filtersVisible, setFitlersVisible] = useState(true) // todo
 
   // const { data } = useFetchPaginatedData({
   //   queryHook: useCatalogsQuery,
@@ -77,58 +80,73 @@ export function Catalogs() {
       noPadding
       maxContentWidth={1280}
     >
-      <div
-        css={{
-          alignItems: 'center',
-          display: 'flex',
-          gap: theme.spacing.large,
-          justifyContent: 'space-between',
-          marginBottom: theme.spacing.medium,
-        }}
+      <Flex
+        gap="medium"
+        height="100%"
+        paddingBottom={theme.spacing.large}
       >
-        <div css={{ ...theme.partials.text.subtitle1 }}>Service catalogs</div>
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.medium,
-          }}
+        <Flex
+          direction="column"
+          grow={1}
         >
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
-            showClearButton
-            placeholder="Search PR bundles"
-            startIcon={<MagnifyingGlassIcon color="icon-light" />}
-            width={320}
-          />
-          <Button
-            secondary
-            startIcon={<FiltersIcon />}
+          <div
+            css={{
+              alignItems: 'center',
+              display: 'flex',
+              gap: theme.spacing.large,
+              justifyContent: 'space-between',
+              marginBottom: theme.spacing.medium,
+            }}
           >
-            Filters
-          </Button>
-        </div>
-      </div>
-      <div
-        css={{
-          display: 'grid',
-          gap: theme.spacing.medium,
-          gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
-        }}
-      >
-        {filteredCatalogs?.map(
-          ({ id, name, author, description, category, icon, darkIcon }) => (
-            <CatalogCard
-              imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
-              name={name}
-              author={author}
-              description={description}
-              category={category}
-              onClick={() => navigate(getCatalogAbsPath(id))}
-            />
-          )
-        )}
-      </div>
+            <div css={{ ...theme.partials.text.subtitle1 }}>
+              Service catalogs
+            </div>
+            <div
+              css={{
+                display: 'flex',
+                gap: theme.spacing.medium,
+              }}
+            >
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.currentTarget.value)}
+                showClearButton
+                placeholder="Search PR bundles"
+                startIcon={<MagnifyingGlassIcon color="icon-light" />}
+                width={320}
+              />
+              <Button
+                onClick={() => setFitlersVisible(!filtersVisible)}
+                secondary
+                startIcon={<FiltersIcon />}
+              >
+                Filters
+              </Button>
+            </div>
+          </div>
+          <div
+            css={{
+              display: 'grid',
+              gap: theme.spacing.medium,
+              gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
+            }}
+          >
+            {filteredCatalogs?.map(
+              ({ id, name, author, description, category, icon, darkIcon }) => (
+                <CatalogCard
+                  imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
+                  name={name}
+                  author={author}
+                  description={description}
+                  category={category}
+                  onClick={() => navigate(getCatalogAbsPath(id))}
+                />
+              )
+            )}
+          </div>
+        </Flex>
+        {filtersVisible && <Card width={220}>...</Card>}
+      </Flex>
     </ResponsivePageFullWidth>
   )
 }
