@@ -10,7 +10,6 @@ import {
   MagnifyingGlassIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { ResponsivePageFullWidth } from '../utils/layout/ResponsivePageFullWidth.tsx'
 import { CatalogFragment } from '../../generated/graphql.ts'
 import { useTheme } from 'styled-components'
 import {
@@ -23,6 +22,9 @@ import Fuse from 'fuse.js'
 import { useCallback, useMemo, useState } from 'react'
 import { chain, isEmpty } from 'lodash'
 import { CatalogsFilters } from './CatalogsFilters.tsx'
+import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
+import { ScrollablePage } from '../utils/layout/ScrollablePage.tsx'
+import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer.tsx'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },
@@ -131,121 +133,140 @@ export function Catalogs() {
   useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <ResponsivePageFullWidth
-      maxContentWidth={1280}
-      scrollable={false}
-      noPadding
-    >
-      <Flex
-        gap="medium"
-        height="100%"
+    <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
+      <ScrollablePage
+        scrollable={false}
+        fullWidth
+        noPadding
+        maxContentWidth={theme.breakpoints.desktop}
       >
-        <Flex
-          direction="column"
-          grow={1}
-        >
-          <div
-            css={{
-              alignItems: 'center',
-              display: 'flex',
-              gap: theme.spacing.large,
-              justifyContent: 'space-between',
-              marginBottom: theme.spacing.medium,
-              paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
-            }}
+        <Flex height="100%">
+          <Flex
+            direction="column"
+            grow={1}
           >
-            <div css={{ ...theme.partials.text.subtitle1 }}>
-              Service catalogs
-            </div>
             <div
               css={{
+                alignItems: 'center',
                 display: 'flex',
-                gap: theme.spacing.medium,
-              }}
-            >
-              <Input
-                value={query}
-                onChange={(e) => setQuery(e.currentTarget.value)}
-                showClearButton
-                placeholder="Search PR bundles"
-                startIcon={<MagnifyingGlassIcon color="icon-light" />}
-                width={320}
-              />
-              <Button
-                onClick={() =>
-                  hasActiveFilters
-                    ? resetFilters()
-                    : setFitlersVisible(!filtersVisible)
-                }
-                secondary
-                startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
-                backgroundColor={
-                  hasActiveFilters ? 'fill-zero-selected' : undefined
-                }
-              >
-                {hasActiveFilters ? 'Reset filters' : 'Filters'}
-              </Button>
-            </div>
-          </div>
-          {!isEmpty(resultCatalogs) ? (
-            <div
-              css={{
-                display: 'grid',
-                gap: theme.spacing.medium,
-                gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
-                overflow: 'auto',
-                paddingBottom: theme.spacing.large,
+                gap: theme.spacing.large,
+                justifyContent: 'space-between',
+                marginBottom: theme.spacing.medium,
                 paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
               }}
             >
-              {resultCatalogs?.map(
-                ({
-                  id,
-                  name,
-                  author,
-                  description,
-                  category,
-                  icon,
-                  darkIcon,
-                }) => (
-                  <CatalogCard
-                    imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
-                    name={name}
-                    author={author}
-                    description={description}
-                    category={category}
-                    onClick={() => navigate(getCatalogAbsPath(id))}
-                  />
-                )
-              )}
-            </div>
-          ) : (
-            <Card css={{ height: '100%', padding: theme.spacing.xxlarge }}>
-              <EmptyState message="There are no results with these filters.">
+              <div css={{ ...theme.partials.text.subtitle1 }}>
+                Service catalogs
+              </div>
+              <div
+                css={{
+                  display: 'flex',
+                  gap: theme.spacing.medium,
+                }}
+              >
+                <Input
+                  value={query}
+                  onChange={(e) => setQuery(e.currentTarget.value)}
+                  showClearButton
+                  placeholder="Search PR bundles"
+                  startIcon={<MagnifyingGlassIcon color="icon-light" />}
+                  width={320}
+                />
                 <Button
+                  onClick={() =>
+                    hasActiveFilters
+                      ? resetFilters()
+                      : setFitlersVisible(!filtersVisible)
+                  }
                   secondary
-                  onClick={() => {
-                    resetFilters()
-                    setQuery('')
+                  startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
+                  backgroundColor={
+                    hasActiveFilters ? 'fill-zero-selected' : undefined
+                  }
+                >
+                  {hasActiveFilters ? 'Reset filters' : 'Filters'}
+                </Button>
+              </div>
+            </div>
+            <Flex gap="medium">
+              {!isEmpty(resultCatalogs) ? (
+                <div
+                  css={{
+                    display: 'grid',
+                    gap: theme.spacing.medium,
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
+                    flexGrow: 1,
+                    overflow: 'auto',
+                    paddingBottom: theme.spacing.large,
+                    paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
                   }}
                 >
-                  Reset filers
-                </Button>
-              </EmptyState>
-            </Card>
+                  {resultCatalogs?.map(
+                    ({
+                      id,
+                      name,
+                      author,
+                      description,
+                      category,
+                      icon,
+                      darkIcon,
+                    }) => (
+                      <CatalogCard
+                        imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
+                        name={name}
+                        author={author}
+                        description={description}
+                        category={category}
+                        onClick={() => navigate(getCatalogAbsPath(id))}
+                      />
+                    )
+                  )}
+                </div>
+              ) : (
+                <Card css={{ height: '100%', padding: theme.spacing.xxlarge }}>
+                  <EmptyState message="There are no results with these filters.">
+                    <Button
+                      secondary
+                      onClick={() => {
+                        resetFilters()
+                        setQuery('')
+                      }}
+                    >
+                      Reset filers
+                    </Button>
+                  </EmptyState>
+                </Card>
+              )}
+              {filtersVisible && (
+                <div
+                  css={{ [`@media (min-width: 1280px)`]: { display: 'none' } }}
+                >
+                  <CatalogsFilters
+                    authors={authors}
+                    authorFilters={authorFilters}
+                    setAuthorFilters={setAuthorFilters}
+                    categories={categories}
+                    categoryFilters={categoryFilters}
+                    setCategoryFilters={setCategoryFilters}
+                  />
+                </div>
+              )}
+            </Flex>
+          </Flex>
+          {filtersVisible && (
+            <ResponsiveLayoutSidecarContainer>
+              <CatalogsFilters
+                authors={authors}
+                authorFilters={authorFilters}
+                setAuthorFilters={setAuthorFilters}
+                categories={categories}
+                categoryFilters={categoryFilters}
+                setCategoryFilters={setCategoryFilters}
+              />
+            </ResponsiveLayoutSidecarContainer>
           )}
         </Flex>
-        {filtersVisible && (
-          <CatalogsFilters
-            authors={authors}
-            authorFilters={authorFilters}
-            setAuthorFilters={setAuthorFilters}
-            categories={categories}
-            categoryFilters={categoryFilters}
-            setCategoryFilters={setCategoryFilters}
-          ></CatalogsFilters>
-        )}
-      </Flex>
-    </ResponsivePageFullWidth>
+      </ScrollablePage>
+    </ResponsiveLayoutPage>
   )
 }
