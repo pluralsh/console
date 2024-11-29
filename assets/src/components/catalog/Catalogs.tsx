@@ -1,7 +1,9 @@
 import {
   Button,
+  Card,
   CatalogCard,
   CloseIcon,
+  EmptyState,
   FiltersIcon,
   Flex,
   Input,
@@ -107,12 +109,24 @@ export function Catalogs() {
   const hasActiveSearch = !!query
   const hasActiveFilters = !isEmpty(authorFilters) || !isEmpty(categoryFilters)
 
-  const filteredCatalogs = useMemo(() => {
-    const fuse = new Fuse(catalogs, searchOptions)
+  const resultCatalogs = useMemo(() => {
+    const filteredCatalogs = catalogs.filter(({ author, category }) => {
+      if (!isEmpty(authorFilters) && !authorFilters.includes(author)) {
+        return false
+      }
+
+      if (!isEmpty(categoryFilters) && !categoryFilters.includes(category)) {
+        return false
+      }
+
+      return true
+    })
+
+    const fuse = new Fuse(filteredCatalogs, searchOptions)
     return hasActiveSearch
       ? fuse.search(query).map(({ item }) => item)
-      : catalogs
-  }, [hasActiveSearch, query])
+      : filteredCatalogs
+  }, [authorFilters, categoryFilters, hasActiveSearch, query])
 
   useSetBreadcrumbs(breadcrumbs)
 
@@ -170,27 +184,51 @@ export function Catalogs() {
               </Button>
             </div>
           </div>
-          <div
-            css={{
-              display: 'grid',
-              gap: theme.spacing.medium,
-              gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
-              overflow: 'auto',
-            }}
-          >
-            {filteredCatalogs?.map(
-              ({ id, name, author, description, category, icon, darkIcon }) => (
-                <CatalogCard
-                  imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
-                  name={name}
-                  author={author}
-                  description={description}
-                  category={category}
-                  onClick={() => navigate(getCatalogAbsPath(id))}
-                />
-              )
-            )}
-          </div>
+          {!isEmpty(resultCatalogs) ? (
+            <div
+              css={{
+                display: 'grid',
+                gap: theme.spacing.medium,
+                gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
+                overflow: 'auto',
+              }}
+            >
+              {resultCatalogs?.map(
+                ({
+                  id,
+                  name,
+                  author,
+                  description,
+                  category,
+                  icon,
+                  darkIcon,
+                }) => (
+                  <CatalogCard
+                    imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
+                    name={name}
+                    author={author}
+                    description={description}
+                    category={category}
+                    onClick={() => navigate(getCatalogAbsPath(id))}
+                  />
+                )
+              )}
+            </div>
+          ) : (
+            <Card css={{ height: '100%', padding: theme.spacing.xxlarge }}>
+              <EmptyState message="There are no results with these filters.">
+                <Button
+                  secondary
+                  onClick={() => {
+                    resetFilters()
+                    setQuery('')
+                  }}
+                >
+                  Reset filers
+                </Button>
+              </EmptyState>
+            </Card>
+          )}
         </Flex>
         {filtersVisible && (
           <CatalogsFilters
