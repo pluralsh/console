@@ -179,6 +179,9 @@ export function Catalogs() {
                 }
                 secondary
                 startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
+                backgroundColor={
+                  hasActiveFilters ? 'fill-zero-selected' : undefined
+                }
               >
                 {hasActiveFilters ? 'Reset filters' : 'Filters'}
               </Button>
