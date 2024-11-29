@@ -28,15 +28,9 @@ export function Catalog() {
   const theme = useTheme()
   const id = '0'
 
-  // const { data } = useFetchPaginatedData({
-  //   queryHook: useCatalogsQuery,
-  //   keyPath: ['catalogs'],
-  // })
+  // const { data } = useCatalogQuery({ variables: { id } })
   //
-  // const catalogs = useMemo(
-  //   () => mapExistingNodes(data?.catalogs),
-  //   [data?.catalogs]
-  // )
+  // const catalog = data?.catalog
 
   useSetBreadcrumbs(
     useMemo(() => [...breadcrumbs, { label: catalog.name ?? id }], [id])
