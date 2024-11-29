@@ -139,7 +139,7 @@ defmodule Console.MixProject do
       {:shards, "~> 1.0"},      #=> For using :shards as backend
       {:decorator, "~> 1.3"},   #=> For using Caching Annotations
       {:telemetry, "~> 1.0"},
-      {:apq, "~> 1.2"},
+      {:apq, "~> 2.0"},
       {:evel, "~> 0.1"},
       {:deep_merge, "~> 1.0"},
       {:ymlr, "~> 2.0"},
