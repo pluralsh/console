@@ -26,6 +26,7 @@ export const CLUSTER_ABS_PATH = `${CD_ABS_PATH}/${CLUSTER_REL_PATH}` as const
 export const CLUSTER_SERVICES_PATH = 'services' as const
 export const CLUSTER_NODES_PATH = 'nodes' as const
 export const CLUSTER_PODS_PATH = 'pods' as const
+export const CLUSTER_INSIGHTS_PATH = 'insights' as const
 export const CLUSTER_METADATA_PATH = 'metadata' as const
 export const CLUSTER_ADDONS_REL_PATH = 'addons' as const
 export const CLUSTER_ADDONS_PARAM_ID = 'addOnId' as const

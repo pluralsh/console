@@ -35,6 +35,7 @@ import {
   CD_ABS_PATH,
   CLUSTER_ABS_PATH,
   CLUSTER_ADDONS_REL_PATH,
+  CLUSTER_INSIGHTS_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
@@ -64,6 +65,7 @@ const directory = [
   { path: CLUSTER_SERVICES_PATH, label: 'Services' },
   { path: CLUSTER_NODES_PATH, label: 'Nodes' },
   { path: CLUSTER_PODS_PATH, label: 'Pods' },
+  { path: CLUSTER_INSIGHTS_PATH, label: 'Insights' },
   { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
   { path: CLUSTER_VCLUSTERS_REL_PATH, label: 'VClusters', vclusters: true },
   { path: CLUSTER_LOGS_PATH, label: 'Logs', logs: true },
@@ -141,7 +143,11 @@ export default function Cluster() {
 
   const currentTab = directory.find(({ path }) => path === tab)
 
-  const { data, refetch: refetchCluster } = useClusterQuery({
+  const {
+    data,
+    refetch: refetchCluster,
+    loading: clusterLoading,
+  } = useClusterQuery({
     variables: { id: clusterId || '' },
     fetchPolicy: 'cache-and-network',
     pollInterval: POLL_INTERVAL,
@@ -316,6 +322,7 @@ export default function Cluster() {
               context={
                 {
                   cluster,
+                  clusterLoading,
                   refetch: refetchCluster,
                   refetchServices,
                   setRefetchServices,
@@ -331,6 +338,7 @@ export default function Cluster() {
 
 type ClusterContextType = {
   cluster: ClusterFragment
+  clusterLoading: boolean
   refetch: () => void
   refetchServices: () => void
   setRefetchServices: (refetch: () => () => void) => void
