@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import { catalogImageUrl } from './common.ts'
 import Fuse from 'fuse.js'
 import { useMemo, useState } from 'react'
+import { chain } from 'lodash'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },
@@ -30,7 +31,8 @@ const searchOptions = {
   threshold: 0.25,
 }
 
-const catalogs = Array(5)
+// TODO: Use real data.
+const catalogs = Array(10)
   .fill([
     {
       id: '0',
@@ -44,7 +46,15 @@ const catalogs = Array(5)
     {
       id: '1',
       name: 'Base catalog',
-      author: 'Plural',
+      author: 'Google',
+      description:
+        'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
+      category: 'Data',
+    },
+    {
+      id: '2',
+      name: 'Base catalog',
+      author: 'Microsoft',
       description:
         'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
       category: 'Data',
@@ -68,6 +78,24 @@ export function Catalogs() {
   //   [data?.catalogs]
   // )
 
+  const authors = useMemo(
+    () =>
+      chain(catalogs)
+        .groupBy('author')
+        .map((value, key) => ({ key, items: value.length }))
+        .value(),
+    []
+  )
+
+  const categories = useMemo(
+    () =>
+      chain(catalogs)
+        .groupBy('category')
+        .map((value, key) => ({ key, items: value.length }))
+        .value(),
+    []
+  )
+
   const filteredCatalogs = useMemo(() => {
     const fuse = new Fuse(catalogs, searchOptions)
     return query ? fuse.search(query).map(({ item }) => item) : catalogs
@@ -77,8 +105,9 @@ export function Catalogs() {
 
   return (
     <ResponsivePageFullWidth
-      noPadding
       maxContentWidth={1280}
+      scrollable={false}
+      noPadding
     >
       <Flex
         gap="medium"
@@ -129,6 +158,7 @@ export function Catalogs() {
               display: 'grid',
               gap: theme.spacing.medium,
               gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
+              overflow: 'auto',
             }}
           >
             {filteredCatalogs?.map(
@@ -145,7 +175,22 @@ export function Catalogs() {
             )}
           </div>
         </Flex>
-        {filtersVisible && <Card width={220}>...</Card>}
+        {filtersVisible && (
+          <Card width={220}>
+            Authors
+            {authors.map(({ key, items }) => (
+              <div>
+                {key} ({items})
+              </div>
+            ))}
+            Categories
+            {categories.map(({ key, items }) => (
+              <div>
+                {key} ({items})
+              </div>
+            ))}
+          </Card>
+        )}
       </Flex>
     </ResponsivePageFullWidth>
   )
