@@ -109,7 +109,7 @@ function CatalogCardRef(
           {(category || tags?.length > 0) && (
             <Flex
               alignItems="start"
-              gap="large"
+              gap="small"
               justifyContent={category ? 'space-between' : 'end'}
               marginTop={theme.spacing.medium}
             >
@@ -118,6 +118,7 @@ function CatalogCardRef(
                   size="small"
                   border="none"
                   fillLevel={3}
+                  truncateWidth={70}
                 >
                   {category}
                 </Chip>
@@ -128,8 +129,7 @@ function CatalogCardRef(
                 fillLevel={3}
                 values={tags ?? []}
                 limit={1}
-                truncateWidth={100}
-                wrap="nowrap"
+                truncateWidth={70}
                 emptyState={null}
               />
             </Flex>

@@ -1,15 +1,13 @@
-import { Flex, type FlexBaseProps, Span } from 'honorable'
 import isEmpty from 'lodash-es/isEmpty'
 import {
   type ComponentProps,
   type Dispatch,
   type ReactElement,
-  useState,
+  useCallback,
 } from 'react'
 
-import { HamburgerMenuCollapseIcon } from '../icons'
-
 import Chip, { type ChipProps } from './Chip'
+import Flex from './Flex'
 
 type TransformFn<TValue> = (
   value: TValue
@@ -19,7 +17,6 @@ export type ChipListProps<TValue> = {
   values: TValue[]
   transformValue?: TransformFn<TValue>
   limit: number
-  wrap?: Pick<FlexBaseProps, 'wrap'>
   emptyState?: JSX.Element | null
   onClickCondition?: (value: TValue) => boolean
   onClick?: Dispatch<TValue>
@@ -29,60 +26,51 @@ function ChipList<TValue = string>({
   values = [],
   transformValue,
   limit = 4,
-  wrap = 'wrap',
   emptyState,
   onClickCondition,
   onClick,
   ...props
 }: ChipListProps<TValue>): ReactElement {
-  const [collapsed, setCollapsed] = useState(true)
+  const chip = useCallback(
+    (v: TValue, i: number) => {
+      const clickable = onClickCondition?.(v) ?? false
+
+      return (
+        <Chip
+          key={(v as any).key || i}
+          clickable={clickable}
+          onClick={() => clickable && onClick(v)}
+          {...props}
+        >
+          {transformValue ? transformValue(v) : `${v}`}
+        </Chip>
+      )
+    },
+    [onClick, onClickCondition, props, transformValue]
+  )
 
   return (
     <Flex
       gap="xsmall"
-      wrap={wrap}
+      wrap="wrap"
     >
       {isEmpty(values) &&
-        (emptyState !== undefined ? (
-          emptyState
-        ) : (
-          <Span body2>There is nothing to display here.</Span>
-        ))}
-      {values.slice(0, collapsed ? limit : undefined).map((v, i) => {
-        const clickable = onClickCondition?.(v) ?? false
-
-        return (
-          <Chip
-            key={(v as any).key || i}
-            clickable={clickable}
-            onClick={() => clickable && onClick(v)}
-            {...props}
-          >
-            {transformValue ? transformValue(v) : `${v}`}
-          </Chip>
-        )
-      })}
+        (emptyState !== undefined
+          ? emptyState
+          : 'There is nothing to display here.')}
+      {values.slice(0, limit).map(chip)}
       {values.length > limit && (
-        <>
-          {collapsed && (
-            <Chip
-              onClick={() => setCollapsed(false)}
-              {...props}
-              clickable
+        <Chip
+          {...props}
+          tooltip={
+            <Flex
+              gap="xsmall"
+              wrap="wrap"
             >
-              {`+${values.length - limit}`}
-            </Chip>
-          )}
-          {!collapsed && (
-            <Chip
-              onClick={() => setCollapsed(true)}
-              {...props}
-              clickable
-            >
-              <HamburgerMenuCollapseIcon />
-            </Chip>
-          )}
-        </>
+              {values.slice(limit, values.length).map(chip)}
+            </Flex>
+          }
+        >{`+${values.length - limit}`}</Chip>
       )}
     </Flex>
   )
