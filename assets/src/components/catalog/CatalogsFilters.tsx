@@ -25,6 +25,7 @@ export function CatalogsFilters({
   return (
     <Accordion
       type="multiple"
+      marginBottom={'large'}
       width={220}
     >
       <CatalogsFiltersGroup

@@ -139,7 +139,6 @@ export function Catalogs() {
       <Flex
         gap="medium"
         height="100%"
-        paddingBottom={theme.spacing.large}
       >
         <Flex
           direction="column"
@@ -191,6 +190,7 @@ export function Catalogs() {
                 gap: theme.spacing.medium,
                 gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
                 overflow: 'auto',
+                paddingBottom: theme.spacing.large,
               }}
             >
               {resultCatalogs?.map(
