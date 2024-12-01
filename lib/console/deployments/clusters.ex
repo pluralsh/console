@@ -29,7 +29,7 @@ defmodule Console.Deployments.Clusters do
 
   @cache_adapter Console.conf(:cache_adapter)
   @local_adapter Console.conf(:local_cache)
-  @node_ttl :timer.minutes(30)
+  @node_ttl :timer.hours(6)
   @readme_ttl :timer.hours(2)
 
   @type cluster_resp :: {:ok, Cluster.t} | Console.error
