@@ -131,7 +131,7 @@ export function Catalogs() {
   useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <ResponsiveLayoutPage css={{ flexDirection: 'column', flexGrow: 1 }}>
+    <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
       <div
         css={{
           alignSelf: 'center',
@@ -140,7 +140,7 @@ export function Catalogs() {
           width: '100%',
 
           [`@media (min-width: 1833px)`]: {
-            maxWidth: theme.breakpoints.desktop + theme.spacing.large + 220, // Area increased by filter panel and spacing size.
+            maxWidth: theme.breakpoints.desktop + theme.spacing.large + 220, // Increased by filter panel and spacing size.
           },
         }}
       >
