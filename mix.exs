@@ -155,12 +155,11 @@ defmodule Console.MixProject do
       {:bamboo_phoenix, "~> 1.0"},
       {:slipstream, "~> 1.0"},
       {:bamboo_smtp, "~> 4.2"},
+      {:bamboo_mua, "~> 0.2"},
+      {:castore, "~> 1.0", override: true},
       {:bamboo, "~> 2.3", override: true},
       {:hut, "~> 1.3", manager: :rebar3, override: true},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
-
-      # if using the Mint adapter:
-      {:castore, "~> 0.1.7"},
       {:req, "~> 0.5", override: true},
       {:mint, "~> 1.6", override: true},
       {:botanist, "~> 0.1.0", git: "https://github.com/michaeljguarino/botanist.git", branch: "ecto3"},

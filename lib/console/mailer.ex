@@ -34,7 +34,12 @@ defmodule Console.Mailer do
     end
   end
 
-  defp smtp(%DeploymentSettings.SMTP{user: u, password: p, server: s, port: port, ssl: ssl}) do
-    %{username: u, password: p, server: s, port: port, ssl: ssl, auth: :always}
+  def smtp(%DeploymentSettings.SMTP{user: u, password: p, server: s, port: port, ssl: ssl}) do
+    %{
+      protocol: (if ssl, do: :ssl, else: :tcp),
+      auth: [username: u, password: p],
+      port: port,
+      host: s
+    }
   end
 end

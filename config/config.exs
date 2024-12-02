@@ -129,7 +129,7 @@ config :libring,
 config :tzdata, :autoupdate, :disabled
 
 config :console, Console.Mailer,
-  adapter: Bamboo.SMTPAdapter
+  adapter: Bamboo.Mua
 
 config :console, Console.PromEx,
   disabled: false,
