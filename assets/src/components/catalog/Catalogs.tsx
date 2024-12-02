@@ -1,7 +1,6 @@
 import {
   Button,
   Card,
-  CatalogCard,
   CloseIcon,
   EmptyState,
   FiltersIcon,
@@ -12,17 +11,13 @@ import {
 } from '@pluralsh/design-system'
 import { CatalogFragment } from '../../generated/graphql.ts'
 import { useTheme } from 'styled-components'
-import {
-  CATALOGS_ABS_PATH,
-  getCatalogAbsPath,
-} from '../../routes/catalogRoutesConsts.tsx'
-import { useNavigate } from 'react-router-dom'
-import { catalogImageUrl } from './common.ts'
+import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import Fuse from 'fuse.js'
 import { useCallback, useMemo, useState } from 'react'
 import { chain, isEmpty } from 'lodash'
 import { CatalogsFilters } from './CatalogsFilters.tsx'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
+import { CatalogsGrid } from './CatalogsGrid.tsx'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },
@@ -35,7 +30,7 @@ const searchOptions = {
 }
 
 // TODO: Use real data.
-const catalogs = Array(10)
+export const catalogs = Array(10)
   .fill([
     {
       id: '0',
@@ -67,7 +62,6 @@ const catalogs = Array(10)
 
 export function Catalogs() {
   const theme = useTheme()
-  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [filtersVisible, setFiltersVisible] = useState(false)
   const [authorFilters, setAuthorFilters] = useState<string[]>([])
@@ -196,54 +190,26 @@ export function Catalogs() {
               gap="medium"
               overflow={'hidden'}
             >
-              {!isEmpty(resultCatalogs) ? (
-                <div
-                  css={{
-                    display: 'grid',
-                    gap: theme.spacing.medium,
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
-                    flexGrow: 1,
-                    overflow: 'auto',
-                    paddingBottom: theme.spacing.large,
-                    paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
-                  }}
-                >
-                  {resultCatalogs?.map(
-                    ({
-                      id,
-                      name,
-                      author,
-                      description,
-                      category,
-                      icon,
-                      darkIcon,
-                    }) => (
-                      <CatalogCard
-                        imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
-                        name={name}
-                        author={author}
-                        description={description}
-                        category={category}
-                        onClick={() => navigate(getCatalogAbsPath(id))}
-                      />
-                    )
-                  )}
-                </div>
-              ) : (
-                <Card css={{ height: '100%', padding: theme.spacing.xxlarge }}>
-                  <EmptyState message="There are no results with these filters.">
-                    <Button
-                      secondary
-                      onClick={() => {
-                        resetFilters()
-                        setQuery('')
-                      }}
-                    >
-                      Reset filers
-                    </Button>
-                  </EmptyState>
-                </Card>
-              )}
+              <CatalogsGrid
+                catalogs={resultCatalogs}
+                emptyState={
+                  <Card
+                    css={{ height: '100%', padding: theme.spacing.xxlarge }}
+                  >
+                    <EmptyState message="There are no results with these filters.">
+                      <Button
+                        secondary
+                        onClick={() => {
+                          resetFilters()
+                          setQuery('')
+                        }}
+                      >
+                        Reset filers
+                      </Button>
+                    </EmptyState>
+                  </Card>
+                }
+              />
             </Flex>
           </Flex>
           {filtersVisible && (
