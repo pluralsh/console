@@ -52,6 +52,10 @@ defmodule Console.AI.Anthropic do
     end
   end
 
+  def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
+
+  def tools?(), do: false
+
   defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream}, history) do
     Stream.Exec.anthropic(fn ->
       {system, history} = split(history)

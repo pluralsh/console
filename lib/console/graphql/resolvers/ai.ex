@@ -85,6 +85,9 @@ defmodule Console.GraphQl.Resolvers.AI do
     Fixer.fix(id, user)
   end
 
+  def fix_pr(%{insight_id: id}, %{context: %{current_user: user}}),
+    do: Fixer.pr(id, user)
+
   def save_chats(%{messages: msgs} = args, %{context: %{current_user: user}}),
     do: ChatSvc.save(msgs, args[:thread_id], user)
 

@@ -1,9 +1,11 @@
 defmodule Console.AI.Provider do
+  import Console.Services.Base, only: [ok: 1]
   alias Console.Schema.{DeploymentSettings, DeploymentSettings.AI}
-  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex}
+  alias Console.AI.{OpenAI, Anthropic, Ollama, Azure, Bedrock, Vertex, Tool}
 
   @type sender :: :system | :user | :assistant
   @type history :: [{sender, binary}]
+  @type tool_result :: [Tool.t]
 
   @preface {:system, """
   You're a seasoned devops engineer with experience in Kubernetes, GitOps and Infrastructure As Code, and need to
@@ -20,10 +22,21 @@ defmodule Console.AI.Provider do
 
   @callback completion(struct, history) :: {:ok, binary} | {:error, binary}
 
+  @callback tool_call(struct, history, [atom]) :: {:ok, binary | [tool_result]} | {:error, binary}
+
+  @callback tools?() :: boolean
+
   def completion(history, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
     with {:ok, %mod{} = client} <- client(settings),
       do: mod.completion(client, add_preface(history, opts))
+  end
+
+  def tool_call(history, tools, opts \\ []) do
+    settings = Console.Deployments.Settings.cached()
+    with {:ok, %mod{} = client} <- client(settings),
+         {:ok, result} <- mod.tool_call(client, add_preface(history, opts), tools),
+      do: handle_tool_calls(result, tools)
   end
 
   def summary(text),
@@ -42,6 +55,25 @@ defmodule Console.AI.Provider do
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :vertex, vertex: %{} = vertex}}),
     do: {:ok, Vertex.new(vertex)}
   defp client(_), do: {:error, "ai not enabled for this Plural Console instance"}
+
+  defp handle_tool_calls([arg | _] = calls, tools) when is_map(arg) do
+    tools_by_name = Map.new(tools, & {"#{&1.name()}", &1})
+    Enum.filter(calls, & Map.get(tools_by_name, &1.name))
+    |> Enum.map(fn %Tool{name: n, arguments: args} ->
+      tool = tools_by_name[n]
+      with {:ok, struct} <- Tool.validate(tool, args),
+           {:ok, result} <- tool.implement(struct) do
+        %{tool.name() => %{result: result}}
+      else
+        {:error, res} when is_binary(res) -> %{tool.name() => %{error: res}}
+        {:error, [r | _] = errs} when is_binary(r) ->
+          %{tool.name() => %{error: Enum.join(errs, "\n")}}
+        err -> raise ArgumentError, message: "unknown tool error: #{inspect(err)}"
+      end
+    end)
+    |> ok()
+  end
+  defp handle_tool_calls(res, _) when is_binary(res), do: {:ok, res}
 
   defp add_preface(history, opts) do
     case opts[:preface] do

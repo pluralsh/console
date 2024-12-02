@@ -939,6 +939,8 @@ type RootMutationType {
   createPin(attributes: AiPinAttributes!): AiPin
 
   deletePin(id: ID!): AiPin
+
+  aiFixPr(insightId: ID!): PullRequest
 }
 
 type RootSubscriptionType {
@@ -1114,6 +1116,7 @@ input StackSettingsAttributes {
 
 input AiSettingsAttributes {
   enabled: Boolean
+  tools: ToolConfigAttributes
   provider: AiProvider
   openai: OpenaiSettingsAttributes
   anthropic: AnthropicSettingsAttributes
@@ -1121,6 +1124,15 @@ input AiSettingsAttributes {
   azure: AzureOpenaiAttributes
   bedrock: BedrockAiAttributes
   vertex: VertexAiAttributes
+}
+
+input ToolConfigAttributes {
+  createPr: CreatePrConfigAttributes
+}
+
+input CreatePrConfigAttributes {
+  "a scm connection id to use for pr automations"
+  connectionId: ID
 }
 
 input OpenaiSettingsAttributes {
@@ -5268,6 +5280,8 @@ input ScmConnectionAttributes {
 
   github: GithubAppAttributes
 
+  default: Boolean
+
   "a ssh private key to be used for commit signing"
   signingPrivateKey: String
 }
@@ -5693,6 +5707,8 @@ type ScmConnection {
   name: String!
 
   type: ScmType!
+
+  default: Boolean
 
   username: String
 

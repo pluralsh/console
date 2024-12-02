@@ -1,0 +1,46 @@
+{
+    "type": "object",
+    "properties": {
+        "repo_url": {
+            "type": "string",
+            "description": "The HTTPS url for the git repository you'll create a PR in"
+        },
+        "branch_name": {
+            "type": "string",
+            "description": "A reasonable and concise branch name for this PR"
+        },
+        "commit_message": {
+            "type": "string",
+            "description": "The commit message to use for this PR"
+        },
+        "pr_title": {
+            "type": "string",
+            "description": "The title for this PR"
+        },
+        "pr_description": {
+            "type": "string",
+            "description": "A longer-form description body for this PR, should allow users to understand the context and implications of the change"
+        },
+        "file_updates": {
+            "type": "array",
+            "description": "A list of files to update in this PR",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "file_name": {
+                      "description": "the relative file path name for this update",
+                      "type": "string"
+                    },
+                    "content": {
+                        "description": "the full file content for this file",
+                        "type": "string"
+                    }
+                },
+                "required": ["file_name", "content"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": ["repo_url", "branch_name", "file_updates", "commit_message", "pr_body", "pr_description"],
+    "additionalProperties": false
+}

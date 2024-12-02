@@ -310,5 +310,7 @@ defmodule Console do
 
   def jitter(seconds), do: :rand.uniform(seconds * 2) - seconds
 
+  def priv_file!(name), do: Path.join([:code.priv_dir(:console), name]) |> File.read!()
+
   def storage, do: Console.Storage.Git
 end

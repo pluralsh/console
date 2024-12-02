@@ -58,6 +58,12 @@ defmodule Console.Schema.DeploymentSettings do
       field :enabled, :boolean, default: false
       field :provider, AIProvider, default: :openai
 
+      embeds_one :tools, ToolsConfig, on_replace: :update do
+        embeds_one :create_pr, PrToolConfig, on_replace: :update do
+          field :connection_id, :string
+        end
+      end
+
       embeds_one :openai, OpenAi, on_replace: :update do
         field :base_url,     :string
         field :access_token, EncryptedString
@@ -161,6 +167,7 @@ defmodule Console.Schema.DeploymentSettings do
   defp ai_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(enabled provider)a)
+    |> cast_embed(:tools, with: &tool_config_changeset/2)
     |> cast_embed(:openai, with: &ai_api_changeset/2)
     |> cast_embed(:anthropic, with: &ai_api_changeset/2)
     |> cast_embed(:ollama, with: &ollama_changeset/2)
@@ -202,5 +209,17 @@ defmodule Console.Schema.DeploymentSettings do
         _ -> [service_account_json: "is not valid json"]
       end
     end)
+  end
+
+  defp tool_config_changeset(model, attrs) do
+    model
+    |> cast(attrs, [])
+    |> cast_embed(:create_pr, with: &create_pr_changeset/2)
+  end
+
+  defp create_pr_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:connection_id])
+    |> validate_required([:connection_id])
   end
 end

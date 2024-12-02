@@ -32,4 +32,17 @@ defmodule Console.AI.Azure do
     |> Map.put(:model, model || OpenAI.default_model())
     |> OpenAI.completion(messages)
   end
+
+  @doc """
+  Generate a openai completion from the azure openai credentials chain
+  """
+  @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
+  def tool_call(%__MODULE__{api_version: vsn, model: model} = azure, messages, tools) do
+    OpenAI.new(azure)
+    |> Map.put(:params, %{"api-version" => vsn || @api_vsn})
+    |> Map.put(:model, model || OpenAI.default_model())
+    |> OpenAI.tool_call(messages, tools)
+  end
+
+  def tools?(), do: true
 end

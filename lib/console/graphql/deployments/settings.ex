@@ -43,6 +43,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   input_object :ai_settings_attributes do
     field :enabled,   :boolean
+    field :tools,     :tool_config_attributes
     field :provider,  :ai_provider
     field :openai,    :openai_settings_attributes
     field :anthropic, :anthropic_settings_attributes
@@ -50,6 +51,14 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :azure,     :azure_openai_attributes
     field :bedrock,   :bedrock_ai_attributes
     field :vertex,    :vertex_ai_attributes
+  end
+
+  input_object :tool_config_attributes do
+    field :create_pr, :create_pr_config_attributes
+  end
+
+  input_object :create_pr_config_attributes do
+    field :connection_id, :id, description: "a scm connection id to use for pr automations"
   end
 
   input_object :openai_settings_attributes do

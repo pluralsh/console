@@ -50,6 +50,11 @@ defmodule Console.Deployments.Git do
   def get_scm_connection(id), do: Repo.get(ScmConnection, id)
   def get_scm_connection!(id), do: Repo.get!(ScmConnection, id)
 
+  def default_scm_connection() do
+    ScmConnection.default()
+    |> Repo.one()
+  end
+
   def get_scm_connection_by_name(name), do: Repo.get_by(ScmConnection, name: name)
 
   @decorate cacheable(cache: @cache, key: {:scm_webhook, id}, opts: [ttl: @ttl])

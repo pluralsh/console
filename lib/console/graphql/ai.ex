@@ -260,6 +260,13 @@ defmodule Console.GraphQl.AI do
 
       resolve &AI.delete_pin/2
     end
+
+    field :ai_fix_pr, :pull_request do
+      middleware Authenticated
+      arg :insight_id, non_null(:id)
+
+      resolve &AI.fix_pr/2
+    end
   end
 
   object :ai_subscriptions do

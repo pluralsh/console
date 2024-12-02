@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -272,6 +272,7 @@ export type AiSettingsAttributes = {
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
+  tools?: InputMaybe<ToolConfigAttributes>;
   vertex?: InputMaybe<VertexAiAttributes>;
 };
 
@@ -1886,6 +1887,11 @@ export type CostAnalysis = {
   ramEfficiency?: Maybe<Scalars['Float']['output']>;
   sharedCost?: Maybe<Scalars['Float']['output']>;
   totalCost?: Maybe<Scalars['Float']['output']>;
+};
+
+export type CreatePrConfigAttributes = {
+  /** a scm connection id to use for pr automations */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type CronJob = {
@@ -5280,6 +5286,7 @@ export type RollingUpdate = {
 export type RootMutationType = {
   __typename?: 'RootMutationType';
   addRunLogs?: Maybe<RunLogs>;
+  aiFixPr?: Maybe<PullRequest>;
   approveBuild?: Maybe<Build>;
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
@@ -5490,6 +5497,11 @@ export type RootMutationType = {
 export type RootMutationTypeAddRunLogsArgs = {
   attributes: RunLogAttributes;
   stepId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeAiFixPrArgs = {
+  insightId: Scalars['ID']['input'];
 };
 
 
@@ -7979,6 +7991,7 @@ export type ScmConnection = {
   apiUrl?: Maybe<Scalars['String']['output']>;
   /** base url for git clones for self-hosted versions */
   baseUrl?: Maybe<Scalars['String']['output']>;
+  default?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
@@ -7991,6 +8004,7 @@ export type ScmConnection = {
 export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
+  default?: InputMaybe<Scalars['Boolean']['input']>;
   github?: InputMaybe<GithubAppAttributes>;
   name: Scalars['String']['input'];
   /** the owning entity in this scm provider, eg a github organization */
@@ -9109,6 +9123,10 @@ export enum Tool {
   Helm = 'HELM',
   Terraform = 'TERRAFORM'
 }
+
+export type ToolConfigAttributes = {
+  createPr?: InputMaybe<CreatePrConfigAttributes>;
+};
 
 /** How to enforce uniqueness for a field */
 export type UniqByAttributes = {

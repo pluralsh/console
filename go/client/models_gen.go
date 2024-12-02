@@ -196,6 +196,7 @@ type AiSettings struct {
 
 type AiSettingsAttributes struct {
 	Enabled   *bool                        `json:"enabled,omitempty"`
+	Tools     *ToolConfigAttributes        `json:"tools,omitempty"`
 	Provider  *AiProvider                  `json:"provider,omitempty"`
 	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
@@ -1508,6 +1509,11 @@ type CostAnalysis struct {
 	RAMEfficiency *float64 `json:"ramEfficiency,omitempty"`
 	TotalCost     *float64 `json:"totalCost,omitempty"`
 	SharedCost    *float64 `json:"sharedCost,omitempty"`
+}
+
+type CreatePrConfigAttributes struct {
+	// a scm connection id to use for pr automations
+	ConnectionID *string `json:"connectionId,omitempty"`
 }
 
 type CronJob struct {
@@ -4601,6 +4607,7 @@ type ScmConnection struct {
 	ID       string  `json:"id"`
 	Name     string  `json:"name"`
 	Type     ScmType `json:"type"`
+	Default  *bool   `json:"default,omitempty"`
 	Username *string `json:"username,omitempty"`
 	// base url for git clones for self-hosted versions
 	BaseURL *string `json:"baseUrl,omitempty"`
@@ -4621,6 +4628,7 @@ type ScmConnectionAttributes struct {
 	BaseURL  *string              `json:"baseUrl,omitempty"`
 	APIURL   *string              `json:"apiUrl,omitempty"`
 	Github   *GithubAppAttributes `json:"github,omitempty"`
+	Default  *bool                `json:"default,omitempty"`
 	// a ssh private key to be used for commit signing
 	SigningPrivateKey *string `json:"signingPrivateKey,omitempty"`
 }
@@ -5553,6 +5561,10 @@ type TerraformStateUrls struct {
 	Lock *string `json:"lock,omitempty"`
 	// POST url to unlock state
 	Unlock *string `json:"unlock,omitempty"`
+}
+
+type ToolConfigAttributes struct {
+	CreatePr *CreatePrConfigAttributes `json:"createPr,omitempty"`
 }
 
 // How to enforce uniqueness for a field
