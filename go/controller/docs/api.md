@@ -1938,7 +1938,7 @@ _Appears in:_
 | `icon` _string_ | An icon url to annotate this pr automation |  | Optional: {} <br /> |
 | `darkIcon` _string_ | An darkmode icon url to annotate this pr automation |  | Optional: {} <br /> |
 | `documentation` _string_ | Documentation ... |  | Optional: {} <br /> |
-| `identifier` _string_ | Identifier is a string referencing the repository, i.e. for GitHub it would be "<organization>/<repositoryName>" |  | Optional: {} <br /> |
+| `identifier` _string_ | Identifier is a string referencing the repository, i.e. for GitHub it would be "organization/repositoryName" |  | Optional: {} <br /> |
 | `message` _string_ | Message the commit message this pr will incorporate |  | Optional: {} <br /> |
 | `name` _string_ | Name name of the automation in the console api (defaults to metadata.name) |  | Optional: {} <br /> |
 | `title` _string_ | Title the title of the generated pr |  | Optional: {} <br /> |

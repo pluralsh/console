@@ -141,7 +141,7 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Documentation *string `json:"documentation,omitempty"`
 
-	// Identifier is a string referencing the repository, i.e. for GitHub it would be "<organization>/<repositoryName>"
+	// Identifier is a string referencing the repository, i.e. for GitHub it would be "organization/repositoryName"
 	// +kubebuilder:validation:Optional
 	Identifier *string `json:"identifier,omitempty"`
 
