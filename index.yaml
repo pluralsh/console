@@ -3642,6 +3642,16 @@ entries:
   controller:
   - apiVersion: v2
     appVersion: 0.10.41
+    created: "2024-12-02T20:08:41.21293766Z"
+    description: deploys the deployment operator for plural cd
+    digest: cd292f0c743ba7490136c63f4974a1ec6ff0ee024ee3445b88233f3d92338da1
+    name: controller
+    type: application
+    urls:
+    - https://github.com/pluralsh/console/releases/download/controller-chart-v0.0.94/controller-0.0.94.tgz
+    version: 0.0.94
+  - apiVersion: v2
+    appVersion: 0.10.41
     created: "2024-12-02T03:15:14.210594884Z"
     description: deploys the deployment operator for plural cd
     digest: 865237d99647a4b86c0d0cc3afeb07f6fa799ab392c8195e116604aacc5bfc21
@@ -4645,4 +4655,4 @@ entries:
     urls:
     - https://github.com/pluralsh/console/releases/download/webhook-proxy-chart-v0.1.0/webhook-proxy-0.1.0.tgz
     version: 0.1.0
-generated: "2024-12-02T03:42:37.757916683Z"
+generated: "2024-12-02T20:08:41.213473533Z"
