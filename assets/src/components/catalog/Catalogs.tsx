@@ -23,8 +23,6 @@ import { useCallback, useMemo, useState } from 'react'
 import { chain, isEmpty } from 'lodash'
 import { CatalogsFilters } from './CatalogsFilters.tsx'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
-import { ScrollablePage } from '../utils/layout/ScrollablePage.tsx'
-import { ResponsiveLayoutSidecarContainer } from '../utils/layout/ResponsiveLayoutSidecarContainer.tsx'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },
@@ -133,12 +131,18 @@ export function Catalogs() {
   useSetBreadcrumbs(breadcrumbs)
 
   return (
-    <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
-      <ScrollablePage
-        scrollable={false}
-        fullWidth
-        noPadding
-        maxContentWidth={theme.breakpoints.desktop}
+    <ResponsiveLayoutPage css={{ flexDirection: 'column', flexGrow: 1 }}>
+      <div
+        css={{
+          alignSelf: 'center',
+          maxWidth: theme.breakpoints.desktop,
+          overflow: 'hidden',
+          width: '100%',
+
+          [`@media (min-width: 1833px)`]: {
+            maxWidth: theme.breakpoints.desktop + theme.spacing.large + 220, // Area increased by filter panel and spacing size.
+          },
+        }}
       >
         <Flex height="100%">
           <Flex
@@ -240,36 +244,20 @@ export function Catalogs() {
                   </EmptyState>
                 </Card>
               )}
-              {filtersVisible && (
-                <div
-                  css={{ [`@media (min-width: 1280px)`]: { display: 'none' } }}
-                >
-                  <CatalogsFilters
-                    authors={authors}
-                    authorFilters={authorFilters}
-                    setAuthorFilters={setAuthorFilters}
-                    categories={categories}
-                    categoryFilters={categoryFilters}
-                    setCategoryFilters={setCategoryFilters}
-                  />
-                </div>
-              )}
             </Flex>
           </Flex>
           {filtersVisible && (
-            <ResponsiveLayoutSidecarContainer>
-              <CatalogsFilters
-                authors={authors}
-                authorFilters={authorFilters}
-                setAuthorFilters={setAuthorFilters}
-                categories={categories}
-                categoryFilters={categoryFilters}
-                setCategoryFilters={setCategoryFilters}
-              />
-            </ResponsiveLayoutSidecarContainer>
+            <CatalogsFilters
+              authors={authors}
+              authorFilters={authorFilters}
+              setAuthorFilters={setAuthorFilters}
+              categories={categories}
+              categoryFilters={categoryFilters}
+              setCategoryFilters={setCategoryFilters}
+            />
           )}
         </Flex>
-      </ScrollablePage>
+      </div>
     </ResponsiveLayoutPage>
   )
 }
