@@ -203,11 +203,6 @@ fragment ClustersRow on Cluster {
       url
     }
   }
-  status {
-    conditions {
-      ...ClusterCondition
-    }
-  }
   version
   kubeletVersion
   tags {

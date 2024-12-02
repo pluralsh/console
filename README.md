@@ -74,23 +74,8 @@ make install-git-hooks
 If `asdf install` fails with `cannot find required auxiliary files: install-sh config.guess config.sub` then run:
 
 ```sh
-brew install autoconf@2.69 && \
-brew link --overwrite autoconf@2.69 && \
+brew install autoconf
 autoconf -V
 ```
 
-For Mac Machines, if unable to download Erlang via `asdf` (this is very common, and it might be worthwhile to just get erlang from homebrew) then run:
-
-```sh
-brew install erlang@24
-cp -r /opt/homebrew/opt/erlang@24/lib/erlang ~/.asdf/installs/erlang/24.3.4.16 # this exact version will drift a lot, as long as its erlang 24 it's good
-asdf reshim erlang 24.3.4.16
-```
-
-You can also use the make target in our root Makefile to automate this, eg:
-
-```sh
-make reshim
-```
-
-(this can often become out-of-date, feel free to fix please if that is true)
+You can read more here: https://github.com/asdf-vm/asdf-erlang?tab=readme-ov-file#osx
