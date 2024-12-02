@@ -39,7 +39,6 @@ export function HomeCard({
         display: 'flex',
         flexDirection: 'column',
         maxHeight: HOME_CARD_MAX_HEIGHT,
-        overflow: 'hidden',
       }}
     >
       <div

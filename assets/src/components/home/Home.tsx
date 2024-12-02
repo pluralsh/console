@@ -7,7 +7,7 @@ import { DeploymentsCard } from './deployments/DeploymentsCard'
 import { ConstraintViolationsCard } from './violations/ConstraintViolationsCard'
 import { PrCard } from './pullrequests/PrCard'
 import { AiThreads } from './AiThreads.tsx'
-import { ServiceCatalog } from './ServiceCatalog.tsx'
+import { ServiceCatalogs } from './ServiceCatalog.tsx'
 
 const breadcrumbs: Breadcrumb[] = [{ label: 'home', url: '/' }]
 
@@ -28,7 +28,7 @@ export default function Home() {
         }}
       >
         <ClusterOverviewCard />
-        <ServiceCatalog />
+        <ServiceCatalogs />
         <AiThreads />
         {isManager && <ConstraintViolationsCard />}
         <div
