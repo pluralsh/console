@@ -69,7 +69,7 @@ export function Catalogs() {
   const theme = useTheme()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
-  const [filtersVisible, setFitlersVisible] = useState(true) // todo
+  const [filtersVisible, setFiltersVisible] = useState(false)
   const [authorFilters, setAuthorFilters] = useState<string[]>([])
   const [categoryFilters, setCategoryFilters] = useState<string[]>([])
 
@@ -180,7 +180,7 @@ export function Catalogs() {
                   onClick={() =>
                     hasActiveFilters
                       ? resetFilters()
-                      : setFitlersVisible(!filtersVisible)
+                      : setFiltersVisible(!filtersVisible)
                   }
                   secondary
                   startIcon={hasActiveFilters ? <CloseIcon /> : <FiltersIcon />}
