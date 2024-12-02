@@ -154,7 +154,7 @@ defmodule Console.MixProject do
       {:x509, "~> 0.8.5"},
       {:bamboo_phoenix, "~> 1.0"},
       {:slipstream, "~> 1.0"},
-      {:bamboo_smtp, "~> 4.1.0"},
+      {:bamboo_smtp, "~> 4.2"},
       {:bamboo, "~> 2.3", override: true},
       {:hut, "~> 1.3", manager: :rebar3, override: true},
       {:ex_doc, "~> 0.16", only: :dev, runtime: false, override: true},
