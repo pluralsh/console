@@ -154,7 +154,7 @@ export function Catalogs() {
               }}
             >
               <div css={{ ...theme.partials.text.subtitle1 }}>
-                Service catalogs
+                Service catalog
               </div>
               <div
                 css={{

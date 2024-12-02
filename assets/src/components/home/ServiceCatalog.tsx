@@ -28,7 +28,7 @@ export function ServiceCatalogs() {
     >
       <div
         css={{
-          padding: theme.spacing.large,
+          padding: theme.spacing.medium,
           overflow: 'auto',
           height: HOME_CARD_CONTENT_HEIGHT,
         }}
