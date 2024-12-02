@@ -52,7 +52,8 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `model` _string_ | Model is the LLM model name to use. |  | Required: {} <br /> |
+| `model` _string_ | Model is the LLM model name to use. |  | Optional: {} <br /> |
+| `baseUrl` _string_ | A custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: {} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: {} <br /> |
 
 
@@ -70,11 +71,52 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled defines whether to enable the AI integration or not. | false | Optional: {} <br /> |
-| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC] <br />Optional: {} <br /> |
+| `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
 | `openAI` _[AIProviderSettings](#aiprovidersettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: {} <br /> |
 | `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: {} <br /> |
+| `ollama` _[OllamaSettings](#ollamasettings)_ | Ollama holds configuration for a self-hosted Ollama deployment, more details available at https://github.com/ollama/ollama |  | Optional: {} <br /> |
+| `azure` _[AzureOpenAISettings](#azureopenaisettings)_ | Azure holds configuration for using AzureOpenAI to generate LLM insights |  | Optional: {} <br /> |
+| `bedrock` _[BedrockSettings](#bedrocksettings)_ | Bedrock holds configuration for using AWS Bedrock to generate LLM insights |  | Optional: {} <br /> |
+| `vertex` _[VertexSettings](#vertexsettings)_ | Vertex holds configuration for using GCP VertexAI to generate LLM insights |  | Optional: {} <br /> |
 
 
+
+
+#### AzureOpenAISettings
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `endpoint` _string_ | Your Azure OpenAI endpoint, should be formatted like: https://{endpoint}/openai/deployments/{deployment-id}" |  | Required: {} <br /> |
+| `apiVersion` _string_ | The azure openai Data plane - inference api version to use, defaults to 2024-10-01-preview or the latest available |  | Optional: {} <br /> |
+| `model` _string_ | The OpenAi Model you wish to use.  If not specified, Plural will provide a default |  | Optional: {} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: {} <br /> |
+
+
+#### BedrockSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `modelId` _string_ | The AWS Bedrock Model ID to use |  | Required: {} <br /> |
+| `accessKeyId` _string_ | An AWS Access Key ID to use, can also use IRSA to acquire credentials |  | Optional: {} <br /> |
+| `secretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | An AWS Secret Access Key to use, can also use IRSA to acquire credentials |  | Optional: {} <br /> |
 
 
 #### Binding
@@ -1545,6 +1587,24 @@ _Appears in:_
 | `git` _[ObserverGit](#observergit)_ |  |  | Optional: {} <br /> |
 
 
+#### OllamaSettings
+
+
+
+Settings for configuring a self-hosted Ollama LLM, more details at https://github.com/ollama/ollama
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `url` _string_ | URL is the url this model is queryable on |  | Required: {} <br /> |
+| `model` _string_ | Model is the Ollama model to use when querying the /chat api |  | Required: {} <br /> |
+| `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header<br />to send to your ollama api in case authorization is required (eg for an instance hosted on a public network) |  | Optional: {} <br /> |
+
+
 #### Pipeline
 
 
@@ -1805,6 +1865,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `regex` _string_ | A regex to match string-valued configuration items |  | Optional: {} <br /> |
 | `json` _boolean_ | Whether the string value is supposed to be json-encoded |  | Optional: {} <br /> |
+| `uniqBy` _[PrAutomationUniqBy](#prautomationuniqby)_ | How to determine uniquenss for this field |  | Optional: {} <br /> |
 
 
 #### PrAutomationConfirmation
@@ -1877,7 +1938,7 @@ _Appears in:_
 | `icon` _string_ | An icon url to annotate this pr automation |  | Optional: {} <br /> |
 | `darkIcon` _string_ | An darkmode icon url to annotate this pr automation |  | Optional: {} <br /> |
 | `documentation` _string_ | Documentation ... |  | Optional: {} <br /> |
-| `identifier` _string_ | Identifier is a string referencing the repository, i.e. for GitHub it would be "<organization>/<repositoryName>" |  | Optional: {} <br /> |
+| `identifier` _string_ | Identifier is a string referencing the repository, i.e. for GitHub it would be "organization/repositoryName" |  | Optional: {} <br /> |
 | `message` _string_ | Message the commit message this pr will incorporate |  | Optional: {} <br /> |
 | `name` _string_ | Name name of the automation in the console api (defaults to metadata.name) |  | Optional: {} <br /> |
 | `title` _string_ | Title the title of the generated pr |  | Optional: {} <br /> |
@@ -1948,6 +2009,22 @@ _Appears in:_
 | `context` _[RawExtension](https://pkg.go.dev/k8s.io/apimachinery/pkg/runtime#RawExtension)_ | Context is a [PrAutomation] configuration context |  | Optional: {} <br /> |
 
 
+#### PrAutomationUniqBy
+
+
+
+
+
+
+
+_Appears in:_
+- [PrAutomationConfigurationValidation](#prautomationconfigurationvalidation)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `scope` _[ValidationUniqScope](#validationuniqscope)_ |  |  | Enum: [PROJECT CLUSTER] <br />Required: {} <br /> |
+
+
 #### PrAutomationUpdateConfiguration
 
 
@@ -1964,6 +2041,7 @@ _Appears in:_
 | `files` _string array_ | Files to update |  | Optional: {} <br /> |
 | `matchStrategy` _[MatchStrategy](#matchstrategy)_ | MatchStrategy, see enum for behavior |  | Optional: {} <br /> |
 | `regexReplacements` _[RegexReplacement](#regexreplacement) array_ | Full regex + replacement structs in case there is different behavior per regex |  | Optional: {} <br /> |
+| `yamlOverlays` _[YamlOverlay](#yamloverlay) array_ | Replacement via overlaying a yaml structure on an existing yaml file |  | Optional: {} <br /> |
 | `regexes` _string array_ | The regexes to apply on each file |  | Optional: {} <br /> |
 | `replaceTemplate` _string_ | The template to use when replacing a regex |  | Optional: {} <br /> |
 | `yq` _string_ | (Unused so far) |  | Optional: {} <br /> |
@@ -2350,6 +2428,7 @@ _Appears in:_
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Optional: {} <br /> |
 | `clusterRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ |  |  | Required: {} <br /> |
 | `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain service configuration. |  | Optional: {} <br /> |
+| `configuration` _object (keys:string, values:string)_ | Configuration is a set of non-secret configuration to apply for lightweight templating of manifests in this service |  | Optional: {} <br /> |
 | `bindings` _[Bindings](#bindings)_ | Bindings contain read and write policies of this cluster |  | Optional: {} <br /> |
 | `dependencies` _[ServiceDependency](#servicedependency) array_ | Dependencies contain dependent services |  | Optional: {} <br /> |
 | `contexts` _string array_ | Contexts contain dependent service context names |  | Optional: {} <br /> |
@@ -2636,5 +2715,44 @@ TaintEffect is the effect for a Kubernetes taint.
 _Appears in:_
 - [Taint](#taint)
 
+
+
+#### VertexSettings
+
+
+
+
+
+
+
+_Appears in:_
+- [AISettings](#aisettings)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `model` _string_ | The Vertex AI model to use |  | Optional: {} <br /> |
+| `project` _string_ | The GCP project you'll be using |  | Required: {} <br /> |
+| `location` _string_ | The GCP region Vertex is queried from |  | Required: {} <br /> |
+| `endpoint` _string_ | A custom endpoint for self-deployed models |  | Optional: {} <br /> |
+| `serviceAccountJsonSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | An Service Account json file stored w/in a kubernetes secret to use for authentication to GCP |  | Optional: {} <br /> |
+
+
+#### YamlOverlay
+
+
+
+YamlOverlay ...
+
+
+
+_Appears in:_
+- [PrAutomationUpdateConfiguration](#prautomationupdateconfiguration)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `file` _string_ | the file to execute the overlay on |  | Required: {} <br /> |
+| `yaml` _string_ | the (possibly templated) yaml to use as the overlayed yaml blob written to the file |  | Required: {} <br /> |
+| `templated` _boolean_ | Whether you want to apply templating to the yaml blob before overlaying |  | Optional: {} <br /> |
+| `listMerge` _[ListMerge](#listmerge)_ | How you want list merge to be performed, defaults to OVERWRITE |  | Enum: [OVERWRITE APPEND] <br />Optional: {} <br /> |
 
 
