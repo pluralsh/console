@@ -10,7 +10,7 @@ import {
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { breadcrumbs } from './Catalogs.tsx'
 import { StackedText } from '../utils/table/StackedText.tsx'
 import { catalogImageUrl } from './common.ts'
@@ -22,10 +22,12 @@ import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { GqlError } from '../utils/Alert.tsx'
 
 import { CatalogPRAutomations } from './CatalogPRAutomations.tsx'
+import { CatalogPermissions } from './CatalogPermissions.tsx'
 
 export function Catalog() {
   const theme = useTheme()
   const id = useParams()[CATALOG_PARAM_ID] as string
+  const [permissionsOpen, setPermissionsOpen] = useState(false)
 
   const { data, error } = useCatalogQuery({ variables: { id } })
 
@@ -101,9 +103,15 @@ export function Catalog() {
                 <Button
                   secondary
                   startIcon={<PersonIcon />}
+                  onClick={() => setPermissionsOpen(true)}
                 >
                   Permissions
                 </Button>
+                <CatalogPermissions
+                  catalog={catalog}
+                  open={permissionsOpen}
+                  onClose={() => setPermissionsOpen(false)}
+                />
               </div>
             </div>
             <CatalogPRAutomations catalogId={id} />
