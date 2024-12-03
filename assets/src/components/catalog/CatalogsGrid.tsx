@@ -12,10 +12,12 @@ const fetchMargin = 50
 export function CatalogsGrid({
   catalogs,
   emptyState,
+  height,
   onBottomReached,
 }: {
   catalogs: CatalogFragment[]
   emptyState?: ReactNode
+  height?: number
   onBottomReached?: () => void
 }) {
   const theme = useTheme()
@@ -45,6 +47,8 @@ export function CatalogsGrid({
         overflowY: 'auto',
         paddingBottom: theme.spacing.large,
         paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
+        padding: theme.spacing.medium,
+        height,
       }}
       onScrollCapture={(e) => handleBottomReached(e?.target as HTMLDivElement)}
     >

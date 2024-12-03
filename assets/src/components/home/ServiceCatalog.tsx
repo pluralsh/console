@@ -14,10 +14,11 @@ import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 export function ServiceCatalogs() {
   const theme = useTheme()
 
-  const { data, error, loading } = useFetchPaginatedData({
-    queryHook: useCatalogsQuery,
-    keyPath: ['catalogs'],
-  })
+  const { data, error, loading, pageInfo, fetchNextPage } =
+    useFetchPaginatedData({
+      queryHook: useCatalogsQuery,
+      keyPath: ['catalogs'],
+    })
 
   const catalogs = useMemo(
     () => mapExistingNodes(data?.catalogs),
@@ -35,23 +36,19 @@ export function ServiceCatalogs() {
       link={CATALOGS_ABS_PATH}
       noPadding
     >
-      <div
-        css={{
-          padding: theme.spacing.medium,
-          overflow: 'auto',
-          height: HOME_CARD_CONTENT_HEIGHT,
+      <CatalogsGrid
+        catalogs={catalogs}
+        onBottomReached={() => {
+          if (!loading && pageInfo?.hasNextPage) fetchNextPage()
         }}
-      >
-        <CatalogsGrid
-          catalogs={catalogs}
-          emptyState={
-            <EmptyState
-              message="There are no catalogs available."
-              css={{ marginTop: theme.spacing.xxlarge }}
-            ></EmptyState>
-          }
-        />
-      </div>
+        height={HOME_CARD_CONTENT_HEIGHT}
+        emptyState={
+          <EmptyState
+            message="There are no catalogs available."
+            css={{ marginTop: theme.spacing.xxlarge }}
+          ></EmptyState>
+        }
+      />
     </HomeCard>
   )
 }
