@@ -55,7 +55,7 @@ defmodule Console.AI.FixerTest do
 
       deployment_settings(ai: %{enabled: true, provider: :openai, openai: %{access_token: "secret"}})
 
-      {:ok, pr} = Fixer.pr(insight.id, user)
+      {:ok, pr} = Fixer.pr(insight.id, [], user)
 
       assert pr.url == "https://github.com/pr/url"
     end

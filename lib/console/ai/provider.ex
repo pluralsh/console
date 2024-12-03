@@ -26,6 +26,15 @@ defmodule Console.AI.Provider do
 
   @callback tools?() :: boolean
 
+  def tools?() do
+    Console.Deployments.Settings.cached()
+    |> client()
+    |> case do
+      {:ok, %mod{}} -> mod.tools?()
+      _ -> false
+    end
+  end
+
   def completion(history, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
     with {:ok, %mod{} = client} <- client(settings),

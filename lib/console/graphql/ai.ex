@@ -108,7 +108,8 @@ defmodule Console.GraphQl.AI do
     field :namespace, :string
     field :name,      non_null(:string)
 
-    field :cluster, :cluster, resolve: dataloader(Deployments)
+    field :cluster, :cluster,    resolve: dataloader(Deployments)
+    field :insight, :ai_insight, resolve: dataloader(Deployments)
 
     @desc "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
     field :resource, :kubernetes_unstructured do
@@ -264,6 +265,7 @@ defmodule Console.GraphQl.AI do
     field :ai_fix_pr, :pull_request do
       middleware Authenticated
       arg :insight_id, non_null(:id)
+      arg :messages,   list_of(:chat_message)
 
       resolve &AI.fix_pr/2
     end

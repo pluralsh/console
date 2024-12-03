@@ -181,14 +181,15 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for configuring access to common LLM providers"
   object :ai_settings do
-    field :enabled,   :boolean
-    field :provider,  :ai_provider
-    field :openai,    :openai_settings
-    field :anthropic, :anthropic_settings
-    field :ollama,    :ollama_settings
-    field :azure,     :azure_openai_settings
-    field :bedrock,   :bedrock_ai_settings
-    field :vertex,    :vertex_ai_settings
+    field :enabled,       :boolean
+    field :tools_enabled, :boolean, resolve: fn _, _, _ -> {:ok, Console.AI.Provider.tools?()} end
+    field :provider,      :ai_provider
+    field :openai,        :openai_settings
+    field :anthropic,     :anthropic_settings
+    field :ollama,        :ollama_settings
+    field :azure,         :azure_openai_settings
+    field :bedrock,       :bedrock_ai_settings
+    field :vertex,        :vertex_ai_settings
   end
 
   @desc "OpenAI connection information"

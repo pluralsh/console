@@ -16,7 +16,7 @@ defmodule Console.AI.Fixer do
   """
 
   @tool """
-  Please provide the appropriate create_pr function call to spawn a Pull Request to fix the issue described above.  The code change should be the most direct
+  Please spawn a Pull Request to fix the issue described above.  The code change should be the most direct
   and straightforward way to fix the issue described, avoid any extraneous changes or modifying files not listed.
   """
 
@@ -41,34 +41,34 @@ defmodule Console.AI.Fixer do
   @doc """
   Generate a fix recommendation from an ai insight struct
   """
-  @spec pr(AiInsight.t) :: {:ok, PullRequest.t} | Console.error
-  def pr(%AiInsight{service: %Service{} = svc, text: text}) do
-    with {:ok, prompt} <- ServiceFixer.prompt(svc, text) do
-      Provider.tool_call(ask(prompt, @tool), [Pr])
-      |> handle_tool_call(%{service_id: svc.id})
-    end
+  @spec pr(AiInsight.t, Provider.history) :: {:ok, PullRequest.t} | Console.error
+  def pr(%AiInsight{service: %Service{} = svc, text: text}, history) do
+    pr_prompt(text, "service", history)
+    |> ask(@tool)
+    |> Provider.tool_call([Pr])
+    |> handle_tool_call(%{service_id: svc.id})
   end
 
-  def pr(%AiInsight{stack: %Stack{} = stack, text: text}) do
-    with {:ok, prompt} <- StackFixer.prompt(stack, text) do
-      Provider.tool_call(ask(prompt, @tool), [Pr])
-      |> handle_tool_call(%{stack_id: stack.id})
-    end
+  def pr(%AiInsight{stack: %Stack{} = stack, text: text}, history) do
+    pr_prompt(text, "stack", history)
+    |> ask(@tool)
+    |> Provider.tool_call([Pr])
+    |> handle_tool_call(%{stack_id: stack.id})
   end
 
-  def pr(_), do: {:error, "ai fix recommendations not supported for this insight"}
+  def pr(_, _), do: {:error, "ai fix recommendations not supported for this insight"}
 
   @doc """
   Spawns a pr given a fix recommendation
   """
-  @spec pr(binary, User.t) :: {:ok, PullRequest.t} | Console.error
-  def pr(id, %User{} = user) do
+  @spec pr(binary, Provider.history, User.t) :: {:ok, PullRequest.t} | Console.error
+  def pr(id, history, %User{} = user) do
     Console.AI.Tool.set_actor(user)
 
     Repo.get!(AiInsight, id)
     |> Repo.preload([:service, :stack])
     |> allow(user, :read)
-    |> when_ok(&pr/1)
+    |> when_ok(&pr(&1, history))
   end
 
   @doc """
@@ -92,4 +92,16 @@ defmodule Console.AI.Fixer do
   defp handle_tool_call(err, _), do: err
 
   defp ask(prompt, task \\ @prompt), do: prompt ++ [{:user, task}]
+
+  defp pr_prompt(insight, scope, history) when is_list(history) do
+    [
+      {:user, """
+      We've found an issue with a failing Plural #{scope}:
+
+      #{insight}
+
+      We've also found the appropriate fix. I'll list it below:
+      """} | history
+    ]
+  end
 end

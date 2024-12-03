@@ -184,14 +184,15 @@ type AiPinEdge struct {
 
 // Settings for configuring access to common LLM providers
 type AiSettings struct {
-	Enabled   *bool                `json:"enabled,omitempty"`
-	Provider  *AiProvider          `json:"provider,omitempty"`
-	Openai    *OpenaiSettings      `json:"openai,omitempty"`
-	Anthropic *AnthropicSettings   `json:"anthropic,omitempty"`
-	Ollama    *OllamaSettings      `json:"ollama,omitempty"`
-	Azure     *AzureOpenaiSettings `json:"azure,omitempty"`
-	Bedrock   *BedrockAiSettings   `json:"bedrock,omitempty"`
-	Vertex    *VertexAiSettings    `json:"vertex,omitempty"`
+	Enabled      *bool                `json:"enabled,omitempty"`
+	ToolsEnabled *bool                `json:"toolsEnabled,omitempty"`
+	Provider     *AiProvider          `json:"provider,omitempty"`
+	Openai       *OpenaiSettings      `json:"openai,omitempty"`
+	Anthropic    *AnthropicSettings   `json:"anthropic,omitempty"`
+	Ollama       *OllamaSettings      `json:"ollama,omitempty"`
+	Azure        *AzureOpenaiSettings `json:"azure,omitempty"`
+	Bedrock      *BedrockAiSettings   `json:"bedrock,omitempty"`
+	Vertex       *VertexAiSettings    `json:"vertex,omitempty"`
 }
 
 type AiSettingsAttributes struct {
@@ -1006,13 +1007,14 @@ type ClusterInfo struct {
 
 // A kubernetes object used in the course of generating a cluster insight
 type ClusterInsightComponent struct {
-	ID        string   `json:"id"`
-	Group     *string  `json:"group,omitempty"`
-	Version   string   `json:"version"`
-	Kind      string   `json:"kind"`
-	Namespace *string  `json:"namespace,omitempty"`
-	Name      string   `json:"name"`
-	Cluster   *Cluster `json:"cluster,omitempty"`
+	ID        string     `json:"id"`
+	Group     *string    `json:"group,omitempty"`
+	Version   string     `json:"version"`
+	Kind      string     `json:"kind"`
+	Namespace *string    `json:"namespace,omitempty"`
+	Name      string     `json:"name"`
+	Cluster   *Cluster   `json:"cluster,omitempty"`
+	Insight   *AiInsight `json:"insight,omitempty"`
 	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
 	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }

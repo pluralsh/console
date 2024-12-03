@@ -1,4 +1,4 @@
-import { Markdown } from '@pluralsh/design-system'
+import { Button, Markdown, PrOpenIcon, Toast } from '@pluralsh/design-system'
 import {
   Dispatch,
   ReactNode,
@@ -13,6 +13,7 @@ import {
   AiRole,
   ChatMessage,
   useAiChatStreamSubscription,
+  useAiFixPrMutation,
   useAiSuggestedFixLazyQuery,
 } from '../../../generated/graphql.ts'
 import { GqlError } from '../../utils/Alert.tsx'
@@ -20,6 +21,8 @@ import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import AIPanel from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
+import { A } from 'honorable'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 
 interface AISuggestFixProps {
   insight: Nullable<AiInsightFragment>
@@ -73,7 +76,57 @@ export function Loading({
   )
 }
 
+function FixPr({
+  insightId,
+  fix,
+}: {
+  insightId: string
+  fix: string
+}): ReactNode {
+  const [mutation, { data, loading, error }] = useAiFixPrMutation({
+    variables: { insightId, messages: [{ role: AiRole.User, content: fix }] },
+  })
+
+  return (
+    <>
+      {data?.aiFixPr && (
+        <Toast
+          severity="info"
+          position="bottom-left"
+          heading="PR Created!"
+        >
+          <A
+            href={data?.aiFixPr?.url}
+            target="_blank"
+            style={{ textDecoration: 'none' }}
+            color="action-link-inline"
+          >
+            {data?.aiFixPr?.url}
+          </A>
+        </Toast>
+      )}
+      {error && (
+        <Toast
+          severity="danger"
+          position="bottom-left"
+          heading="PR Creation Failed"
+        >
+          {error.message}
+        </Toast>
+      )}
+      <Button
+        startIcon={<PrOpenIcon />}
+        onClick={mutation}
+        loading={loading}
+      >
+        Open PR
+      </Button>
+    </>
+  )
+}
+
 function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
+  const settings = useDeploymentSettings()
   const ref = useRef<HTMLDivElement>(null)
   const [streaming, setStreaming] = useState<boolean>(false)
   const scrollToBottom = useCallback(() => {
@@ -99,6 +152,18 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
     return null
   }
 
+  const tools = !!settings.ai?.toolsEnabled
+  const chatButton = (
+    <ChatWithAIButton
+      secondary={tools}
+      insightId={insight?.id}
+      messages={[
+        insightMessage(insight),
+        fixMessage(data?.aiSuggestedFix || ''),
+      ]}
+    />
+  )
+
   return (
     <div
       css={{
@@ -114,15 +179,16 @@ function AISuggestFix({ insight }: AISuggestFixProps): ReactNode {
         showClosePanel={!!data?.aiSuggestedFix}
         header="Suggest a fix"
         subheader="Get a suggested fix based on the insight. AI is prone to mistakes, always test changes before application."
+        secondaryButton={tools ? chatButton : null}
         footer={
-          <ChatWithAIButton
-            primary
-            insightId={insight?.id}
-            messages={[
-              insightMessage(insight),
-              fixMessage(data?.aiSuggestedFix || ''),
-            ]}
-          />
+          tools && insight && data?.aiSuggestedFix ? (
+            <FixPr
+              insightId={insight.id}
+              fix={data.aiSuggestedFix}
+            />
+          ) : (
+            chatButton
+          )
         }
       >
         {data?.aiSuggestedFix && <Markdown text={data?.aiSuggestedFix} />}
