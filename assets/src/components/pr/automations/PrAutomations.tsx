@@ -24,6 +24,7 @@ import {
 } from 'components/utils/table/useFetchPaginatedData'
 
 import { columns } from './PrAutomationsColumns'
+import { mapExistingNodes } from '../../../utils/graphql.ts'
 
 const DOCS_URL = 'https://docs.plural.sh/deployments/pr/crds'
 
@@ -52,6 +53,11 @@ export default function AutomationPr() {
     queryHook: usePrAutomationsQuery,
     keyPath: ['prAutomations'],
   })
+
+  const prAutomations = useMemo(
+    () => mapExistingNodes(data?.prAutomations),
+    [data?.prAutomations]
+  )
 
   useSetPageHeaderContent(
     useMemo(
@@ -92,7 +98,7 @@ export default function AutomationPr() {
           columns={columns}
           reactTableOptions={{ meta: { refetch } }}
           reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-          data={data?.prAutomations?.edges || []}
+          data={prAutomations}
           virtualizeRows
           hasNextPage={pageInfo?.hasNextPage}
           fetchNextPage={fetchNextPage}

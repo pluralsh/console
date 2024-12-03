@@ -4,11 +4,11 @@ import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from '../utils/table/useFetchPaginatedData.tsx'
-import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap.tsx'
-import { usePrAutomationsQuery } from '../../generated/graphql.ts'
+import { usePrAutomationsQuery } from 'generated/graphql'
 import { useMemo } from 'react'
 import { mapExistingNodes } from '../../utils/graphql.ts'
-import { GqlError } from '../utils/Alert.tsx'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import { GqlError } from 'components/utils/Alert'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 
 export function CatalogPRAutomations({ catalogId }: { catalogId: string }) {
@@ -46,6 +46,7 @@ export function CatalogPRAutomations({ catalogId }: { catalogId: string }) {
         fetchNextPage={fetchNextPage}
         isFetchingNextPage={loading}
         onVirtualSliceChange={setVirtualSlice}
+        emptyStateProps={{ message: 'No PR automations found.' }}
         css={{
           maxHeight: 'unset',
           height: '100%',

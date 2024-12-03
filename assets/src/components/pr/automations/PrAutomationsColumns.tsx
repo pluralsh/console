@@ -19,7 +19,6 @@ import {
   useDeletePrAutomationMutation,
 } from 'generated/graphql'
 
-import { Edge } from 'utils/graphql'
 import { Confirm } from 'components/utils/Confirm'
 import { TruncateStart } from 'components/utils/table/Truncate'
 import { MoreMenu } from 'components/utils/MoreMenu'
@@ -38,16 +37,16 @@ enum MenuItemKey {
   CreatePr = 'create-pr',
 }
 
-export const columnHelper = createColumnHelper<Edge<PrAutomationFragment>>()
+export const columnHelper = createColumnHelper<PrAutomationFragment>()
 
-const ColName = columnHelper.accessor(({ node }) => node?.name, {
+const ColName = columnHelper.accessor(({ name }) => name, {
   id: 'name',
   header: 'Automation name',
   cell: ({ getValue }) => getValue(),
 })
 
 const ColDocumentation = columnHelper.accessor(
-  ({ node }) => node?.documentation,
+  ({ documentation }) => documentation,
   {
     id: 'documentation',
     header: 'Documentation',
@@ -56,7 +55,7 @@ const ColDocumentation = columnHelper.accessor(
   }
 )
 
-const ColRepo = columnHelper.accessor(({ node }) => node?.identifier, {
+const ColRepo = columnHelper.accessor(({ identifier }) => identifier, {
   id: 'repoUrl',
   header: 'Repo',
   meta: { truncate: true },
@@ -105,11 +104,11 @@ export function DynamicRoleIcon({ role }: { role: Nullable<PrRole> }) {
   )
 }
 
-const ColRole = columnHelper.accessor(({ node }) => node?.cluster?.name, {
+const ColRole = columnHelper.accessor(({ cluster }) => cluster?.name, {
   id: 'role',
   header: 'Role',
   cell: function Cell({ row }) {
-    const { role, cluster } = row.original.node || {}
+    const { role, cluster } = row.original || {}
     const label = roleToLabel[role || ''] || roleToLabel['']
 
     if (!role) return null
@@ -177,7 +176,7 @@ export function DeletePrAutomationModal({
   )
 }
 
-export const ColActions = columnHelper.accessor(({ node }) => node, {
+export const ColActions = columnHelper.accessor((node) => node, {
   id: 'actions',
   header: '',
   cell: function Cell({ table, getValue }) {
