@@ -29,6 +29,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   """
   @callback review(conn :: ScmConnection.t, pr :: PullRequest.t, message :: binary) :: {:ok, binary} | Console.error
 
+
   @doc """
   Fully creates a pr against the working dispatcher implementation
   """
@@ -71,7 +72,7 @@ defmodule Console.Deployments.Pr.Dispatcher do
   end
   defp external_git(_), do: {:ok, nil}
 
-  defp dispatcher(%{type: :github}), do: Github
-  defp dispatcher(%{type: :gitlab}), do: Gitlab
-  defp dispatcher(%{type: :bitbucket}), do: BitBucket
+  def dispatcher(%{type: :github}), do: Github
+  def dispatcher(%{type: :gitlab}), do: Gitlab
+  def dispatcher(%{type: :bitbucket}), do: BitBucket
 end

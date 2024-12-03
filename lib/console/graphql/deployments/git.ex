@@ -105,6 +105,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :base_url,            :string
     field :api_url,             :string
     field :github,              :github_app_attributes
+    field :default,             :boolean
     field :signing_private_key, :string, description: "a ssh private key to be used for commit signing"
   end
 
@@ -420,6 +421,7 @@ defmodule Console.GraphQl.Deployments.Git do
     field :id,       non_null(:id)
     field :name,     non_null(:string)
     field :type,     non_null(:scm_type)
+    field :default,  :boolean
     field :username, :string
     field :base_url, :string, description: "base url for git clones for self-hosted versions"
     field :api_url,  :string, description: "base url for HTTP apis for self-hosted versions if different from base url"

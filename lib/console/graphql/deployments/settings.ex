@@ -43,6 +43,7 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   input_object :ai_settings_attributes do
     field :enabled,   :boolean
+    field :tools,     :tool_config_attributes
     field :provider,  :ai_provider
     field :openai,    :openai_settings_attributes
     field :anthropic, :anthropic_settings_attributes
@@ -50,6 +51,14 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :azure,     :azure_openai_attributes
     field :bedrock,   :bedrock_ai_attributes
     field :vertex,    :vertex_ai_attributes
+  end
+
+  input_object :tool_config_attributes do
+    field :create_pr, :create_pr_config_attributes
+  end
+
+  input_object :create_pr_config_attributes do
+    field :connection_id, :id, description: "a scm connection id to use for pr automations"
   end
 
   input_object :openai_settings_attributes do
@@ -172,14 +181,15 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "Settings for configuring access to common LLM providers"
   object :ai_settings do
-    field :enabled,   :boolean
-    field :provider,  :ai_provider
-    field :openai,    :openai_settings
-    field :anthropic, :anthropic_settings
-    field :ollama,    :ollama_settings
-    field :azure,     :azure_openai_settings
-    field :bedrock,   :bedrock_ai_settings
-    field :vertex,    :vertex_ai_settings
+    field :enabled,       :boolean
+    field :tools_enabled, :boolean, resolve: fn _, _, _ -> {:ok, Console.AI.Provider.tools?()} end
+    field :provider,      :ai_provider
+    field :openai,        :openai_settings
+    field :anthropic,     :anthropic_settings
+    field :ollama,        :ollama_settings
+    field :azure,         :azure_openai_settings
+    field :bedrock,       :bedrock_ai_settings
+    field :vertex,        :vertex_ai_settings
   end
 
   @desc "OpenAI connection information"

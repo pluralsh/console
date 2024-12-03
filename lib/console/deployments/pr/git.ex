@@ -38,6 +38,22 @@ defmodule Console.Deployments.Pr.Git do
     end
   end
 
+  def slug(%ScmConnection{} = conn, url) do
+    case Regex.scan(~r[^#{url(conn)}/(.*)\.git$], url) do
+      [[_, slug] | _] -> {:ok, slug}
+      _ -> {:error, "could not determine repo slug from #{url}"}
+    end
+  end
+
+  def to_http(conn, "ssh://" <> rest), do: to_http(conn, rest)
+  def to_http(%ScmConnection{} = conn, "git@" <> _ = url) do
+    case String.split(url, ":") do
+      [_ | rest] -> Path.join(url(conn), Enum.join(rest, ""))
+      _ -> url
+    end
+  end
+  def to_http(_, "https://" <> _ = url), do: url
+
   defp backfill_token(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
     with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk),
       do: {:ok, %{conn | token: token}}
@@ -45,6 +61,12 @@ defmodule Console.Deployments.Pr.Git do
   defp backfill_token(%ScmConnection{} = conn), do: {:ok, conn}
 
   defp url(%ScmConnection{username: nil} = conn, id), do: url(%{conn | username: "apikey"}, id)
+
+  defp url(%ScmConnection{username: username}, "https://" <> _ = url) do
+    uri = URI.parse(url)
+    URI.to_string(%{uri | userinfo: username})
+  end
+
   defp url(%ScmConnection{username: username} = conn, id) do
     base = url(conn)
     uri = URI.parse("#{base}/#{id}.git")

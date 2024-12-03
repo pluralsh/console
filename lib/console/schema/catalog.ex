@@ -56,4 +56,12 @@ defmodule Console.Schema.Catalog do
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)
   end
+
+  def rbac_changeset(model, attrs \\ %{}) do
+    model
+    |> cast(attrs, [])
+    |> cast_assoc(:read_bindings)
+    |> cast_assoc(:write_bindings)
+    |> cast_assoc(:create_bindings)
+  end
 end

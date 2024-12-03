@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -261,6 +261,7 @@ export type AiSettings = {
   ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
   provider?: Maybe<AiProvider>;
+  toolsEnabled?: Maybe<Scalars['Boolean']['output']>;
   vertex?: Maybe<VertexAiSettings>;
 };
 
@@ -272,6 +273,7 @@ export type AiSettingsAttributes = {
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
+  tools?: InputMaybe<ToolConfigAttributes>;
   vertex?: InputMaybe<VertexAiAttributes>;
 };
 
@@ -1058,7 +1060,7 @@ export type Cluster = {
   /** an ai insight generated about issues discovered which might impact the health of this cluster */
   insight?: Maybe<AiInsight>;
   /** a set of kubernetes resources used to generate the ai insight for this cluster */
-  insightComponents?: Maybe<ClusterInsightComponent>;
+  insightComponents?: Maybe<Array<Maybe<ClusterInsightComponent>>>;
   /** whether the deploy operator has been registered for this cluster */
   installed?: Maybe<Scalars['Boolean']['output']>;
   /** the url of the kas server you can access this cluster from */
@@ -1303,6 +1305,7 @@ export type ClusterInsightComponent = {
   cluster?: Maybe<Cluster>;
   group?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  insight?: Maybe<AiInsight>;
   kind: Scalars['String']['output'];
   name: Scalars['String']['output'];
   namespace?: Maybe<Scalars['String']['output']>;
@@ -1886,6 +1889,11 @@ export type CostAnalysis = {
   ramEfficiency?: Maybe<Scalars['Float']['output']>;
   sharedCost?: Maybe<Scalars['Float']['output']>;
   totalCost?: Maybe<Scalars['Float']['output']>;
+};
+
+export type CreatePrConfigAttributes = {
+  /** a scm connection id to use for pr automations */
+  connectionId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type CronJob = {
@@ -5280,6 +5288,7 @@ export type RollingUpdate = {
 export type RootMutationType = {
   __typename?: 'RootMutationType';
   addRunLogs?: Maybe<RunLogs>;
+  aiFixPr?: Maybe<PullRequest>;
   approveBuild?: Maybe<Build>;
   /** approves an approval pipeline gate */
   approveGate?: Maybe<PipelineGate>;
@@ -5490,6 +5499,12 @@ export type RootMutationType = {
 export type RootMutationTypeAddRunLogsArgs = {
   attributes: RunLogAttributes;
   stepId: Scalars['ID']['input'];
+};
+
+
+export type RootMutationTypeAiFixPrArgs = {
+  insightId: Scalars['ID']['input'];
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>>>;
 };
 
 
@@ -6316,6 +6331,7 @@ export type RootMutationTypeUpdatePullRequestArgs = {
 
 
 export type RootMutationTypeUpdateRbacArgs = {
+  catalogId?: InputMaybe<Scalars['ID']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   pipelineId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;
@@ -7979,6 +7995,7 @@ export type ScmConnection = {
   apiUrl?: Maybe<Scalars['String']['output']>;
   /** base url for git clones for self-hosted versions */
   baseUrl?: Maybe<Scalars['String']['output']>;
+  default?: Maybe<Scalars['Boolean']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   name: Scalars['String']['output'];
@@ -7991,6 +8008,7 @@ export type ScmConnection = {
 export type ScmConnectionAttributes = {
   apiUrl?: InputMaybe<Scalars['String']['input']>;
   baseUrl?: InputMaybe<Scalars['String']['input']>;
+  default?: InputMaybe<Scalars['Boolean']['input']>;
   github?: InputMaybe<GithubAppAttributes>;
   name: Scalars['String']['input'];
   /** the owning entity in this scm provider, eg a github organization */
@@ -9110,6 +9128,10 @@ export enum Tool {
   Terraform = 'TERRAFORM'
 }
 
+export type ToolConfigAttributes = {
+  createPr?: InputMaybe<CreatePrConfigAttributes>;
+};
+
 /** How to enforce uniqueness for a field */
 export type UniqByAttributes = {
   /** the scope this name is uniq w/in */
@@ -9775,6 +9797,14 @@ export type DeleteChatThreadMutationVariables = Exact<{
 
 
 export type DeleteChatThreadMutation = { __typename?: 'RootMutationType', deleteThread?: { __typename?: 'ChatThread', id: string, default: boolean, summary: string, insertedAt?: string | null, updatedAt?: string | null, lastMessageAt?: string | null, chats?: { __typename?: 'ChatConnection', edges?: Array<{ __typename?: 'ChatEdge', node?: { __typename?: 'Chat', id: string, content: string, role: AiRole, seq: number, insertedAt?: string | null, updatedAt?: string | null } | null } | null> | null } | null, insight?: { __typename?: 'AiInsight', id: string, text?: string | null, summary?: string | null, sha?: string | null, freshness?: InsightFreshness | null, updatedAt?: string | null, insertedAt?: string | null, error?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null };
+
+export type AiFixPrMutationVariables = Exact<{
+  insightId: Scalars['ID']['input'];
+  messages?: InputMaybe<Array<InputMaybe<ChatMessage>> | InputMaybe<ChatMessage>>;
+}>;
+
+
+export type AiFixPrMutation = { __typename?: 'RootMutationType', aiFixPr?: { __typename?: 'PullRequest', id: string, title?: string | null, url: string, labels?: Array<string | null> | null, creator?: string | null, status?: PrStatus | null, insertedAt?: string | null, updatedAt?: string | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, deletedAt?: string | null } | null, cluster?: { __typename?: 'Cluster', handle?: string | null, protect?: boolean | null, deletedAt?: string | null, version?: string | null, currentVersion?: string | null, self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null };
 
 export type AiChatStreamSubscriptionVariables = Exact<{
   threadId?: InputMaybe<Scalars['ID']['input']>;
@@ -10455,21 +10485,21 @@ export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: stri
 
 export type SmtpSettingsFragment = { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean };
 
-export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null };
+export type AiSettingsFragment = { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null };
 
-export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type DeploymentSettingsFragment = { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type UpdateDeploymentSettingsMutationVariables = Exact<{
   attributes: DeploymentSettingsAttributes;
 }>;
 
 
-export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type UpdateDeploymentSettingsMutation = { __typename?: 'RootMutationType', updateDeploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type DeploymentSettingsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type DeploymentSettingsQuery = { __typename?: 'RootQueryType', deploymentSettings?: { __typename?: 'DeploymentSettings', id: string, name: string, enabled: boolean, selfManaged?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, agentHelmValues?: string | null, lokiConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, prometheusConnection?: { __typename?: 'HttpConnection', host: string, user?: string | null } | null, artifactRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, deployerRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, smtp?: { __typename?: 'SmtpSettings', server: string, port: number, sender: string, user: string, ssl: boolean } | null, ai?: { __typename?: 'AiSettings', enabled?: boolean | null, toolsEnabled?: boolean | null, provider?: AiProvider | null, anthropic?: { __typename?: 'AnthropicSettings', model?: string | null } | null, openai?: { __typename?: 'OpenaiSettings', model?: string | null } | null, azure?: { __typename?: 'AzureOpenaiSettings', apiVersion?: string | null, endpoint: string } | null, ollama?: { __typename?: 'OllamaSettings', model: string, url: string } | null, bedrock?: { __typename?: 'BedrockAiSettings', modelId: string, accessKeyId?: string | null } | null, vertex?: { __typename?: 'VertexAiSettings', model?: string | null, project: string, location: string } | null } | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, gitBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type ObservabilityProviderFragment = { __typename?: 'ObservabilityProvider', id: string, name: string, type: ObservabilityProviderType, insertedAt?: string | null, updatedAt?: string | null };
 
@@ -12712,6 +12742,7 @@ export const AiSettingsFragmentDoc = gql`
     location
   }
   enabled
+  toolsEnabled
   provider
 }
     `;
@@ -15452,6 +15483,40 @@ export function useDeleteChatThreadMutation(baseOptions?: Apollo.MutationHookOpt
 export type DeleteChatThreadMutationHookResult = ReturnType<typeof useDeleteChatThreadMutation>;
 export type DeleteChatThreadMutationResult = Apollo.MutationResult<DeleteChatThreadMutation>;
 export type DeleteChatThreadMutationOptions = Apollo.BaseMutationOptions<DeleteChatThreadMutation, DeleteChatThreadMutationVariables>;
+export const AiFixPrDocument = gql`
+    mutation AiFixPr($insightId: ID!, $messages: [ChatMessage]) {
+  aiFixPr(insightId: $insightId, messages: $messages) {
+    ...PullRequest
+  }
+}
+    ${PullRequestFragmentDoc}`;
+export type AiFixPrMutationFn = Apollo.MutationFunction<AiFixPrMutation, AiFixPrMutationVariables>;
+
+/**
+ * __useAiFixPrMutation__
+ *
+ * To run a mutation, you first call `useAiFixPrMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAiFixPrMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [aiFixPrMutation, { data, loading, error }] = useAiFixPrMutation({
+ *   variables: {
+ *      insightId: // value for 'insightId'
+ *      messages: // value for 'messages'
+ *   },
+ * });
+ */
+export function useAiFixPrMutation(baseOptions?: Apollo.MutationHookOptions<AiFixPrMutation, AiFixPrMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AiFixPrMutation, AiFixPrMutationVariables>(AiFixPrDocument, options);
+      }
+export type AiFixPrMutationHookResult = ReturnType<typeof useAiFixPrMutation>;
+export type AiFixPrMutationResult = Apollo.MutationResult<AiFixPrMutation>;
+export type AiFixPrMutationOptions = Apollo.BaseMutationOptions<AiFixPrMutation, AiFixPrMutationVariables>;
 export const AiChatStreamDocument = gql`
     subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String) {
   aiStream(threadId: $threadId, insightId: $insightId, scopeId: $scopeId) {
@@ -24737,6 +24802,7 @@ export const namedOperations = {
     CreateChatThread: 'CreateChatThread',
     UpdateChatThread: 'UpdateChatThread',
     DeleteChatThread: 'DeleteChatThread',
+    AiFixPr: 'AiFixPr',
     CreatePrAutomation: 'CreatePrAutomation',
     UpdatePrAutomation: 'UpdatePrAutomation',
     DeletePrAutomation: 'DeletePrAutomation',

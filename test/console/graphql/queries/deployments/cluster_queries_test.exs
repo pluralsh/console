@@ -138,6 +138,23 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
       assert found["id"] == cluster.id
     end
 
+    test "it can sideload insight components" do
+      cluster = insert(:cluster)
+      components = insert_list(3, :cluster_insight_component, cluster: cluster)
+
+      {:ok, %{data: %{"cluster" => found}}} = run_query("""
+        query cluster($id: ID!) {
+          cluster(id: $id) {
+            id
+            insightComponents { id }
+          }
+        }
+      """, %{"id" => cluster.id}, %{current_user: admin_user()})
+
+      assert found["id"] == cluster.id
+      assert ids_equal(found["insightComponents"], components)
+    end
+
     test "writers can query deploy tokens" do
       user = insert(:user)
       cluster = insert(:cluster, write_bindings: [%{user_id: user.id}])
