@@ -9846,6 +9846,7 @@ export type PrConfirmationFragment = { __typename?: 'PrConfirmation', text?: str
 export type PrAutomationsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   after?: InputMaybe<Scalars['String']['input']>;
+  catalogId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -15749,8 +15750,8 @@ export type AuditMetricsLazyQueryHookResult = ReturnType<typeof useAuditMetricsL
 export type AuditMetricsSuspenseQueryHookResult = ReturnType<typeof useAuditMetricsSuspenseQuery>;
 export type AuditMetricsQueryResult = Apollo.QueryResult<AuditMetricsQuery, AuditMetricsQueryVariables>;
 export const PrAutomationsDocument = gql`
-    query PrAutomations($first: Int = 100, $after: String) {
-  prAutomations(first: $first, after: $after) {
+    query PrAutomations($first: Int = 100, $after: String, $catalogId: ID) {
+  prAutomations(first: $first, after: $after, catalogId: $catalogId) {
     pageInfo {
       ...PageInfo
     }
@@ -15778,6 +15779,7 @@ ${PrAutomationFragmentDoc}`;
  *   variables: {
  *      first: // value for 'first'
  *      after: // value for 'after'
+ *      catalogId: // value for 'catalogId'
  *   },
  * });
  */
