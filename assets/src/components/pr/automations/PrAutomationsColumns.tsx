@@ -1,13 +1,16 @@
 import { ComponentProps, ReactElement, useState } from 'react'
 import {
+  AppIcon,
   Button,
   ClusterIcon,
   DeploymentIcon,
+  Flex,
   IconFrame,
   ListBoxItem,
   PeopleIcon,
   PipelineIcon,
   PrOpenIcon,
+  PrQueueIcon,
   TrashCanIcon,
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -42,7 +45,18 @@ export const columnHelper = createColumnHelper<PrAutomationFragment>()
 const ColName = columnHelper.accessor(({ name }) => name, {
   id: 'name',
   header: 'Automation name',
-  cell: ({ getValue }) => getValue(),
+  cell: ({ getValue }) => (
+    <Flex
+      alignItems={'center'}
+      gap={'xsmall'}
+    >
+      <AppIcon
+        size="xxsmall"
+        icon={<PrQueueIcon size={16} />}
+      />
+      {getValue()}
+    </Flex>
+  ),
 })
 
 const ColDocumentation = columnHelper.accessor(
@@ -50,7 +64,6 @@ const ColDocumentation = columnHelper.accessor(
   {
     id: 'documentation',
     header: 'Documentation',
-    meta: { truncate: true },
     cell: ({ getValue }) => getValue(),
   }
 )
@@ -206,7 +219,7 @@ export const ColActions = columnHelper.accessor((node) => node, {
             setMenuKey(MenuItemKey.CreatePr)
           }}
         >
-          Create a PR
+          Create PR
         </Button>
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
