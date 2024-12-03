@@ -76,11 +76,15 @@ fragment ClusterInsightComponent on ClusterInsightComponent {
   namespace
   group
   version
-  resource {
-    raw
-  }
   insight {
     ...AiInsight
+  }
+}
+
+fragment ClusterInsightComponentDetail on ClusterInsightComponent {
+  ...ClusterInsightComponent
+  resource {
+    raw
   }
 }
 
@@ -195,6 +199,12 @@ query ChatThreads(
 query ChatThreadDetails($id: ID!) {
   chatThread(id: $id) {
     ...ChatThread
+  }
+}
+
+query ClusterInsightComponent($id: ID!) {
+  clusterInsightComponent(id: $id) {
+    ...ClusterInsightComponentDetail
   }
 }
 

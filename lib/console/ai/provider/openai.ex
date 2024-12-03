@@ -12,7 +12,7 @@ defmodule Console.AI.OpenAI do
 
   def default_model(), do: @model
 
-  defstruct [:access_key, :model, :base_url, :params, :stream]
+  defstruct [:access_key, :model, :tool_model, :base_url, :params, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -57,6 +57,7 @@ defmodule Console.AI.OpenAI do
     %__MODULE__{
       access_key: opts.access_token,
       model: opts.model,
+      tool_model: opts.tool_model,
       base_url: opts.base_url,
       stream: Stream.stream()
     }
@@ -82,8 +83,9 @@ defmodule Console.AI.OpenAI do
   """
   @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = openai, messages, tools) do
-    history = Enum.map(messages, fn {role, msg} -> %{role: role, content: msg} end)
-    case chat(%{openai | stream: nil}, history, tools) do
+    model = tool_model(openai)
+    history = Enum.map(messages, fn {role, msg} -> %{role: tool_role(role, model), content: msg} end)
+    case chat(%{openai | stream: nil, model: model}, history, tools) do
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{tool_calls: [_ | _] = calls}} | _]}} ->
         {:ok, gen_tools(calls)}
       {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
@@ -147,6 +149,11 @@ defmodule Console.AI.OpenAI do
     end)
     |> Enum.filter(& &1)
   end
+
+  defp tool_role(:system, "o1-" <> _), do: :user
+  defp tool_role(r, _), do: r
+
+  defp tool_model(%__MODULE__{model: m, tool_model: tm}), do: tm || m || "gpt-4o"
 
   defp tool_args(tool) do
     %{

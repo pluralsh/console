@@ -235,6 +235,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			AccessToken: &token,
 			Model:       in.OpenAI.Model,
 			BaseURL:     in.OpenAI.BaseUrl,
+			ToolModel:   in.OpenAI.ToolModel,
 		}
 	case console.AiProviderAnthropic:
 		if in.Anthropic == nil {
@@ -249,6 +250,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		attr.Anthropic = &console.AnthropicSettingsAttributes{
 			AccessToken: lo.ToPtr(token),
 			Model:       in.Anthropic.Model,
+			ToolModel:   in.Anthropic.ToolModel,
 		}
 	case console.AiProviderAzure:
 		if in.Azure == nil {
@@ -264,6 +266,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 			Endpoint:    in.Azure.Endpoint,
 			APIVersion:  in.Azure.ApiVersion,
 			Model:       in.Azure.Model,
+			ToolModel:   in.Azure.ToolModel,
 			AccessToken: token,
 		}
 	case console.AiProviderVertex:
@@ -295,6 +298,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 
 		attr.Bedrock = &console.BedrockAiAttributes{
 			ModelID:         in.Bedrock.ModelID,
+			ToolModelID:     in.Bedrock.ToolModelId,
 			AccessKeyID:     in.Bedrock.AccessKeyId,
 			SecretAccessKey: secret,
 		}
@@ -311,6 +315,7 @@ func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace
 		attr.Ollama = &console.OllamaAttributes{
 			URL:           in.Ollama.URL,
 			Model:         in.Ollama.Model,
+			ToolModel:     in.Ollama.ToolModel,
 			Authorization: auth,
 		}
 	}
@@ -323,6 +328,11 @@ type AIProviderSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
+
+	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	//
+	// +kubebuilder:validation:Optional
+	ToolModel *string `json:"toolModel,omitempty"`
 
 	// A custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec)
 	//
@@ -348,6 +358,11 @@ type OllamaSettings struct {
 	// +kubebuilder:validation:Required
 	Model string `json:"model"`
 
+	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	//
+	// +kubebuilder:validation:Optional
+	ToolModel *string `json:"toolModel,omitempty"`
+
 	// TokenSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header
 	// to send to your ollama api in case authorization is required (eg for an instance hosted on a public network)
 	//
@@ -371,6 +386,11 @@ type AzureOpenAISettings struct {
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
 
+	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	//
+	// +kubebuilder:validation:Optional
+	ToolModel *string `json:"toolModel,omitempty"`
+
 	// TokenSecretRef is a reference to the local secret holding the token to access
 	// the configured AI provider.
 	//
@@ -383,6 +403,11 @@ type BedrockSettings struct {
 	//
 	// +kubebuilder:validation:Required
 	ModelID string `json:"modelId"`
+
+	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	//
+	// +kubebuilder:validation:Optional
+	ToolModelId *string `json:"toolModelId,omitempty"`
 
 	// An AWS Access Key ID to use, can also use IRSA to acquire credentials
 	//
@@ -400,6 +425,11 @@ type VertexSettings struct {
 	//
 	// +kubebuilder:validation:Optional
 	Model *string `json:"model,omitempty"`
+
+	// Model to use for tool calling, which is less frequent and often requires more advanced reasoning
+	//
+	// +kubebuilder:validation:Optional
+	ToolModel *string `json:"toolModel,omitempty"`
 
 	// The GCP project you'll be using
 	//

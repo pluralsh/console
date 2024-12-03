@@ -19,7 +19,7 @@
         },
         "pr_description": {
             "type": "string",
-            "description": "A longer-form description body for this PR, should allow users to understand the context and implications of the change"
+            "description": "A longer-form description body for this PR, should allow users to understand the context and implications of the change.  The expected format should include a Summary section, a Changes Made section and a Rationale section to explain the PR to reviewers."
         },
         "file_updates": {
             "type": "array",

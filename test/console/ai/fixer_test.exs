@@ -6,14 +6,14 @@ defmodule Console.AI.FixerTest do
   describe "#pr/2" do
     test "it can spawn a fix pr" do
       insert(:scm_connection, token: "some-pat", default: true)
-      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "pr-test"} ->
+      expect(Tentacat.Pulls, :create, fn _, "pluralsh", "console", %{head: "plrl/ai/pr-test" <> _} ->
         {:ok, %{"html_url" => "https://github.com/pr/url"}, %HTTPoison.Response{}}
       end)
-      expect(Console.Deployments.Pr.Git, :setup, fn conn, "https://github.com/pluralsh/console.git", "pr-test" ->
+      expect(Console.Deployments.Pr.Git, :setup, fn conn, "https://github.com/pluralsh/console.git", "plrl/ai/pr-test" <> _ ->
         {:ok, %{conn | dir: Briefly.create!(directory: true)}}
       end)
       expect(Console.Deployments.Pr.Git, :commit, fn _, _ -> {:ok, ""} end)
-      expect(Console.Deployments.Pr.Git, :push, fn _, "pr-test" -> {:ok, ""} end)
+      expect(Console.Deployments.Pr.Git, :push, fn _, "plrl/ai/pr-test" <> _ -> {:ok, ""} end)
       expect(File, :write, fn _, "first" -> :ok end)
       expect(File, :write, fn _, "second" -> :ok end)
       expect(HTTPoison, :post, fn _, _, _, _ ->

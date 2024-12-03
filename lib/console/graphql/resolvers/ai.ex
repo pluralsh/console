@@ -120,14 +120,14 @@ defmodule Console.GraphQl.Resolvers.AI do
   def delete_pin(%{id: id}, %{context: %{current_user: user}}),
     do: ChatSvc.delete_pin(id, user)
 
-  def raw_resource(%{version: v, kind: k, name: n} = comp, _, _) do
-    cluster = Console.Repo.preload(comp, [:cluster])
-    Kube.Utils.save_kubeconfig(cluster)
+  def raw_resource(%{version: v, kind: k, name: n, group: g} = comp, _, _) do
+    %{cluster: cluster} = comp = Console.Repo.preload(comp, [:cluster])
+    Clusters.control_plane(cluster) |> Kube.Utils.save_kubeconfig()
 
-    kind = Kubernetes.get_kind(cluster, comp.group, v, k)
-    path = Kube.Client.Base.path(comp.group, v, kind, comp.namespace, n)
+    kind = Kubernetes.get_kind(cluster, g, v, k)
+    path = Kube.Client.Base.path(g, v, kind, comp.namespace, n)
     with {:ok, res} <- Kube.Client.raw(path) do
-      {:ok, %{raw: res, kind: k, version: v, group: comp.group, metadata: Kube.Utils.raw_meta(res)}}
+      {:ok, %{raw: res, kind: k, version: v, group: g, metadata: Kube.Utils.raw_meta(res)}}
     end
   end
 end

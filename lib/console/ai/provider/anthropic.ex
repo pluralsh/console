@@ -10,7 +10,7 @@ defmodule Console.AI.Anthropic do
 
   @default_model "claude-3-5-sonnet-latest"
 
-  defstruct [:access_key, :model, :stream]
+  defstruct [:access_key, :model, :tool_model, :stream]
 
   @type t :: %__MODULE__{}
 
@@ -37,7 +37,14 @@ defmodule Console.AI.Anthropic do
     def spec(), do: %__MODULE__{content: [Anthropic.Content.spec()]}
   end
 
-  def new(opts), do: %__MODULE__{access_key: opts.access_token, model: opts.model, stream: Stream.stream()}
+  def new(opts) do
+    %__MODULE__{
+      access_key: opts.access_token,
+      model: opts.model,
+      tool_model: opts.tool_model,
+      stream: Stream.stream()
+    }
+  end
 
   @doc """
   Generate a anthropic completion from

@@ -6,7 +6,7 @@ defmodule Console.AI.Bedrock do
 
   require Logger
 
-  defstruct [:model_id, :access_key_id, :secret_access_key]
+  defstruct [:model_id, :tool_model_id, :access_key_id, :secret_access_key]
 
   @type t :: %__MODULE__{}
 
@@ -15,6 +15,7 @@ defmodule Console.AI.Bedrock do
   def new(opts) do
     %__MODULE__{
       model_id: opts.model_id,
+      tool_model_id: opts.tool_model_id,
       access_key_id: opts.access_key_id,
       secret_access_key: opts.secret_access_key
     }

@@ -45,14 +45,16 @@ defmodule Console.Deployments.Pr.Git do
     end
   end
 
-  def to_http(conn, "ssh://" <> rest), do: to_http(conn, rest)
-  def to_http(%ScmConnection{} = conn, "git@" <> _ = url) do
+  def to_http(conn, url), do: "#{String.trim_trailing(_to_http(conn, url), ".git")}.git"
+
+  defp _to_http(conn, "ssh://" <> rest), do: _to_http(conn, rest)
+  defp _to_http(%ScmConnection{} = conn, "git@" <> _ = url) do
     case String.split(url, ":") do
       [_ | rest] -> Path.join(url(conn), Enum.join(rest, ""))
       _ -> url
     end
   end
-  def to_http(_, "https://" <> _ = url), do: url
+  defp _to_http(_, "https://" <> _ = url), do: url
 
   defp backfill_token(%ScmConnection{api_url: api_url, base_url: url, github: %{app_id: app_id, installation_id: inst_id, private_key: pk}} = conn) when is_binary(pk) do
     with {:ok, token} <- Github.app_token(api_url || url, app_id, inst_id, pk),

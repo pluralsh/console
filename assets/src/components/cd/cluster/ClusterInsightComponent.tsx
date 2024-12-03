@@ -6,6 +6,7 @@ import { stringify } from 'yaml'
 import {
   AiInsight,
   ClusterInsightComponent as ClusterInsightComponentAPI,
+  useClusterInsightComponentQuery,
 } from '../../../generated/graphql.ts'
 import {
   CLUSTER_ABS_PATH,
@@ -26,6 +27,8 @@ import {
   useSetNavigationContent,
 } from './ClusterInsights.tsx'
 import { ComponentEntry } from './ClusterInsightsComponents.tsx'
+import LoadingIndicator from 'components/utils/LoadingIndicator.tsx'
+import { GqlError } from 'components/utils/Alert.tsx'
 
 export default function ClusterInsightComponent(): ReactNode {
   const theme = useTheme()
@@ -33,9 +36,11 @@ export default function ClusterInsightComponent(): ReactNode {
   const id =
     useMatch(`${CLUSTER_ABS_PATH}/${CLUSTER_INSIGHTS_PATH}/components/:id`)
       ?.params?.id || ''
-  const component = cluster.insightComponents?.find(
-    (cmp) => cmp?.id === id
-  ) as ClusterInsightComponentAPI
+  const { data, loading, error } = useClusterInsightComponentQuery({
+    variables: { id },
+  })
+
+  const component = data?.clusterInsightComponent
   const [showRaw, setShowRaw] = useState(false)
 
   useSetNavigationContent(
@@ -67,7 +72,7 @@ export default function ClusterInsightComponent(): ReactNode {
             {cluster?.name}
           </BasicLink>
           <ComponentEntry
-            component={component}
+            component={component as Nullable<ClusterInsightComponentAPI>}
             icon={null}
           />
         </Flex>
@@ -101,6 +106,19 @@ export default function ClusterInsightComponent(): ReactNode {
       [showRaw, clusterLoading, refetch, component?.insight]
     )
   )
+
+  if (error) {
+    return (
+      <GqlError
+        error={error}
+        header="Error loading insight component"
+      />
+    )
+  }
+
+  if (loading) {
+    return <LoadingIndicator />
+  }
 
   return (
     <>

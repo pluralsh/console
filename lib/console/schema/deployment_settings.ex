@@ -68,16 +68,19 @@ defmodule Console.Schema.DeploymentSettings do
         field :base_url,     :string
         field :access_token, EncryptedString
         field :model,        :string
+        field :tool_model,   :string
       end
 
       embeds_one :anthropic, Anthropic, on_replace: :update do
         field :base_url,     :string
         field :access_token, EncryptedString
         field :model,        :string
+        field :tool_model,   :string
       end
 
       embeds_one :ollama, Ollama, on_replace: :update do
         field :model,         :string
+        field :tool_model,    :string
         field :url,           :string
         field :authorization, EncryptedString
       end
@@ -86,11 +89,13 @@ defmodule Console.Schema.DeploymentSettings do
         field :api_version, :string
         field :endpoint,    :string
         field :model,       :string
+        field :tool_model,  :string
         field :access_key,  EncryptedString
       end
 
       embeds_one :bedrock, Bedrock, on_replace: :update do
         field :model_id,          :string
+        field :tool_model_id,     :string
         field :access_key_id,     :string
         field :secret_access_key, EncryptedString
       end
@@ -98,6 +103,7 @@ defmodule Console.Schema.DeploymentSettings do
       embeds_one :vertex, Vertex, on_replace: :update do
         field :service_account_json, EncryptedString
         field :model,                :string
+        field :tool_model,           :string
         field :project,              :string
         field :endpoint,             :string
         field :location,             :string
@@ -178,30 +184,30 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_api_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(access_token model base_url)a)
+    |> cast(attrs, ~w(access_token model tool_model base_url)a)
   end
 
   defp ollama_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(url model authorization)a)
+    |> cast(attrs, ~w(url model tool_model authorization)a)
     |> validate_required(~w(url model)a)
   end
 
   defp azure_openai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(endpoint api_version access_token model)a)
+    |> cast(attrs, ~w(endpoint api_version access_token tool_model model)a)
     |> validate_required(~w(access_token endpoint)a)
   end
 
   defp bedrock_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model_id access_key_id secret_access_key)a)
+    |> cast(attrs, ~w(model_id tool_model_id access_key_id secret_access_key)a)
     |> validate_required(~w(model_id)a)
   end
 
   defp vertex_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(model service_account_json project location endpoint)a)
+    |> cast(attrs, ~w(model tool_model service_account_json project location endpoint)a)
     |> validate_required([:project, :location])
     |> validate_change(:service_account_json, fn :service_account_json, json ->
       case Jason.decode(json) do

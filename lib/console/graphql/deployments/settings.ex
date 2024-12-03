@@ -65,15 +65,18 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :base_url,     :string
     field :access_token, :string
     field :model,        :string
+    field :tool_model,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
   end
 
   input_object :anthropic_settings_attributes do
     field :access_token, :string
     field :model,        :string
+    field :tool_model,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
   end
 
   input_object :ollama_attributes do
     field :model,         non_null(:string)
+    field :tool_model,    :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :url,           non_null(:string)
     field :authorization, :string, description: "An http authorization header to use on calls to the Ollama api"
   end
@@ -82,17 +85,20 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :endpoint,     non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
     field :api_version,  :string, description: "the api version you want to use"
     field :model,        :string, description: "the exact model you wish to use"
+    field :tool_model,   :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :access_token, non_null(:string), description: "the azure openai access token to use"
   end
 
   input_object :bedrock_ai_attributes do
     field :model_id,          non_null(:string), description: "the bedrock model id to use"
+    field :tool_model_id,     :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :access_key_id,     :string, description: "aws access key id to use, you can also use IRSA for self-hosted consoles"
     field :secret_access_key, :string, description: "aws secret access key to use, you can also use IRSA for self-hosted consoles"
   end
 
   input_object :vertex_ai_attributes do
     field :model,                :string, description: "the vertex model id to use"
+    field :tool_model,           :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :service_account_json, :string, description: "optional service account json to auth to the GCP vertex apis"
     field :endpoint,             :string, description: "custom vertexai endpoint if for dedicated customer deployments"
     field :project,              non_null(:string), description: "the gcp project id to use"
@@ -194,38 +200,45 @@ defmodule Console.GraphQl.Deployments.Settings do
 
   @desc "OpenAI connection information"
   object :openai_settings do
-    field :base_url, :string, description: "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
-    field :model,    :string, description: "the openai model version to use"
+    field :base_url,   :string, description: "the base url to use when querying an OpenAI compatible API, leave blank for OpenAI"
+    field :model,      :string, description: "the openai model version to use"
+    field :tool_model, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
   end
 
   @desc "Anthropic connection information"
   object :anthropic_settings do
-    field :model, :string, description: "the anthropic model version to use"
+    field :model,      :string, description: "the anthropic model version to use"
+    field :tool_model, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
   end
 
   @desc "Settings for a self-hosted ollama-based LLM deployment"
   object :ollama_settings do
-    field :model, non_null(:string)
-    field :url,   non_null(:string), description: "the url your ollama deployment is hosted on"
+    field :model,      non_null(:string)
+    field :tool_model, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :url,        non_null(:string), description: "the url your ollama deployment is hosted on"
   end
 
   @desc "Settings for configuring against Azure OpenAI"
   object :azure_openai_settings do
     field :endpoint,    non_null(:string), description: "the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}"
+    field :model,       :string
+    field :tool_model,  :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :api_version, :string, description: "the api version you want to use"
   end
 
   @desc "Settings for usage of AWS Bedrock for LLMs"
   object :bedrock_ai_settings do
-    field :model_id,   non_null(:string), description: "the bedrock model to use"
+    field :model_id,      non_null(:string), description: "the bedrock model to use"
+    field :tool_model_id, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :access_key_id, :string, description: "the aws access key to use, can also use IRSA when console is self-hosted"
   end
 
   @desc "Settings for usage of GCP VertexAI for LLMs"
   object :vertex_ai_settings do
-    field :model,    :string, description: "the vertex ai model to use"
-    field :project,  non_null(:string), description: "the gcp project id to use"
-    field :location, non_null(:string), description: "the gcp region the model"
+    field :model,      :string, description: "the vertex ai model to use"
+    field :tool_model, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
+    field :project,    non_null(:string), description: "the gcp project id to use"
+    field :location,   non_null(:string), description: "the gcp region the model"
   end
 
   connection node_type: :project
