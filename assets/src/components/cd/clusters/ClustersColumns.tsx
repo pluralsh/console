@@ -34,7 +34,6 @@ import { DetachClusterModal } from '../providers/DetachCluster'
 
 import ClusterUpgrade from './ClusterUpgrade'
 import { ClusterHealth } from './ClusterHealthChip'
-import { ClusterConditions } from './ClusterConditions'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
 import { filesize } from 'filesize'
 import { SortingFn } from '@tanstack/table-core'
@@ -303,7 +302,6 @@ export const ColStatus = columnHelper.accessor(
             cluster={original.node}
             refetch={refetch}
           />
-          <ClusterConditions cluster={original.node} />
         </ColStatusSC>
       )
     },

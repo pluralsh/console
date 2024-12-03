@@ -7,9 +7,9 @@ defmodule Console.Deployments.Pr.Utils do
 
   @ansi_code ~r/\x1b\[[0-9;]*m/
 
-  @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural Stacks?: ([[:alnum:]_\-]+)/]
-  @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/Plural Services?: ([[:alnum:]_\/\-]+)/]
-  @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/Plural Clusters?: ([[:alnum:]_\-]+)/]
+  @stack_regex [~r/plrl\/stacks?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(stacks?:([[:alnum:]_\-]*)\)/, ~r/Plural Stacks?:\s+([[:alnum:]_\-]+)/]
+  @svc_regex [~r/plrl\/svcs?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(services?:([[:alnum:]_\-\/]*)\)/, ~r/Plural Services?:\s+([[:alnum:]_\/\-]+)/]
+  @cluster_regex [~r/plrl\/clusters?\/([[:alnum:]_\-]+)\/?/, ~r/plrl\(clusters?:([[:alnum:]_\-]*)\)/, ~r/Plural Clusters?:\s+([[:alnum:]_\-]+)/]
 
   def filter_ansi(text), do: String.replace(text, @ansi_code, "")
 

@@ -1,16 +1,15 @@
-import { type ComponentProps, useCallback, useState } from 'react'
 import {
   Accordion,
   AccordionItem,
   Button,
   FormField,
-  Input,
+  Input2,
   Modal,
   Switch,
-  Input2,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
 import pick from 'lodash/pick'
+import { type ComponentProps, useCallback, useState } from 'react'
+import { useTheme } from 'styled-components'
 
 import {
   GithubAppAttributes,
@@ -20,17 +19,17 @@ import {
   useUpdateScmConnectionMutation,
 } from 'generated/graphql'
 
-import { useUpdateState } from 'components/hooks/useUpdateState'
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { InputRevealer } from 'components/cd/providers/InputRevealer'
+import { useUpdateState } from 'components/hooks/useUpdateState'
 import { GqlError } from 'components/utils/Alert'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { ApolloError } from '@apollo/client'
 
 import SshKeyUpload from 'components/cd/utils/SshKeyUpload'
 
-import GitProviderSelect from './GitProviderSelect'
 import { DEFAULT_ATTRIBUTES } from './CreateScmConnection'
+import GitProviderSelect from './GitProviderSelect'
 
 function EditScmConnectionModalBase({
   open,
@@ -71,7 +70,6 @@ function EditScmConnectionModalBase({
   const onSubmit = useCallback(
     (e) => {
       e.preventDefault()
-
       if (allowSubmit) {
         const attributes = {
           name,
@@ -80,7 +78,9 @@ function EditScmConnectionModalBase({
           baseUrl: formState.baseUrl || '',
           username: formState.username || '',
           ...(!formState.token ? {} : { token: formState.token }),
-          ...(!formState.github ? {} : { github: formState.github }),
+          ...(formState.github && type === ScmType.Github
+            ? { github: formState.github }
+            : {}),
           ...(!formState.signingPrivateKey
             ? {}
             : { signingPrivateKey: formState.signingPrivateKey }),
@@ -258,15 +258,14 @@ export function ScmConnectionForm({
                 onChange={(e) => updateFormState({ username: e.target.value })}
               />
             </FormField>
-            <FormField label="Signing private key">
-              <Input
-                value={formState.signingPrivateKey ?? ''}
-                onChange={(e) =>
-                  updateFormState({ signingPrivateKey: e.target.value })
-                }
-                multiline
-              />
-            </FormField>
+            <SshKeyUpload
+              label="Signing private key"
+              required={false}
+              privateKey={formState.signingPrivateKey ?? ''}
+              setPrivateKey={(key) =>
+                updateFormState({ signingPrivateKey: key })
+              }
+            />
           </div>
         </AccordionItem>
       </Accordion>

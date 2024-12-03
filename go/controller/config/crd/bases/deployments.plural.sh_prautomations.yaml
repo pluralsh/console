@@ -307,7 +307,7 @@ spec:
                 type: string
               identifier:
                 description: Identifier is a string referencing the repository, i.e.
-                  for GitHub it would be "<organization>/<repositoryName>"
+                  for GitHub it would be "organization/repositoryName"
                 type: string
               message:
                 description: Message the commit message this pr will incorporate

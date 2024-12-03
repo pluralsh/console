@@ -193,9 +193,8 @@ defmodule Console.Deployments.CronTest do
   describe "#cache_warm/0" do
     test "it can warm the cache for all registered clusters" do
       insert_list(3, :cluster)
-      expect(Clusters, :warm, 12, fn
+      expect(Clusters, :warm, 9, fn
         :nodes, _ -> :ok
-        :node_metrics, _ -> :ok
         :api_discovery, _ -> :ok
         :cluster_metrics, _ -> :ok
       end)

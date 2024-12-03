@@ -10,9 +10,13 @@ import { isEmpty } from 'lodash'
 function SshKeyUpload({
   privateKey,
   setPrivateKey,
+  label,
+  required = true,
 }: {
   privateKey?: Nullable<string>
   setPrivateKey: (value: Nullable<string>) => void
+  label?: string
+  required?: boolean
 }) {
   const [fileName, setFileName] = useState<string | undefined>()
   const [fileError, setFileError] = useState<Nullable<string>>()
@@ -52,8 +56,8 @@ function SshKeyUpload({
 
   return (
     <FormField
-      label="Private key"
-      required
+      label={label ?? 'Private key'}
+      required={required}
       error={!!fileError}
       hint={fileError}
       caption={

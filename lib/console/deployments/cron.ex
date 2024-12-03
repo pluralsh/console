@@ -69,7 +69,6 @@ defmodule Console.Deployments.Cron do
       try do
         Clusters.warm(:cluster_metrics, cluster)
         Clusters.warm(:nodes, cluster)
-        Clusters.warm(:node_metrics, cluster)
         Clusters.warm(:api_discovery, cluster)
       rescue
         e ->
