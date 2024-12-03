@@ -40,7 +40,10 @@ import ServiceDependencies from 'components/cd/services/service/ServiceDependenc
 import ComponentMetadata from 'components/component/ComponentMetadata'
 
 import Cluster from '../components/cd/cluster/Cluster'
-import ClusterInsights from '../components/cd/cluster/ClusterInsights.tsx'
+import ClusterInsights, {
+  ClusterInsightsSummary,
+} from '../components/cd/cluster/ClusterInsights.tsx'
+import ClusterInsightsComponents from '../components/cd/cluster/ClusterInsightsComponents.tsx'
 import ClusterServices from '../components/cd/cluster/ClusterServices'
 import ClusterNodes from '../components/cd/cluster/ClusterNodes'
 import ClusterPods from '../components/cd/cluster/ClusterPods'
@@ -125,6 +128,8 @@ import {
   SERVICE_PRS_PATH,
   SERVICE_REL_PATH,
   CLUSTER_INSIGHTS_PATH,
+  CLUSTER_INSIGHTS_SUMMARY_PATH,
+  CLUSTER_INSIGHTS_COMPONENTS_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
 import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
@@ -336,7 +341,25 @@ const clusterDetailsRoutes = [
     <Route
       path={CLUSTER_INSIGHTS_PATH}
       element={<ClusterInsights />}
-    />
+    >
+      <Route
+        index
+        element={
+          <Navigate
+            replace
+            to={CLUSTER_INSIGHTS_SUMMARY_PATH}
+          />
+        }
+      />
+      <Route
+        path={CLUSTER_INSIGHTS_SUMMARY_PATH}
+        element={<ClusterInsightsSummary />}
+      />
+      <Route
+        path={CLUSTER_INSIGHTS_COMPONENTS_PATH}
+        element={<ClusterInsightsComponents />}
+      />
+    </Route>
     <Route
       path={CLUSTER_METADATA_PATH}
       element={<ClusterMetadata />}

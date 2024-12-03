@@ -333,6 +333,9 @@ fragment Cluster on Cluster {
   insight {
     ...AiInsight
   }
+  #  insightComponents {
+  #    ...ClusterInsightComponent
+  #  }
 }
 
 query Clusters(

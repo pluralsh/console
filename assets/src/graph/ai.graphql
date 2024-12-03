@@ -69,6 +69,27 @@ fragment AiInsightContext on AiInsight {
   }
 }
 
+fragment ClusterInsightComponent on ClusterInsightComponent {
+  id
+  kind
+  name
+  namespace
+  group
+  version
+  resource {
+    kind
+    group
+    version
+    raw
+    metadata {
+      uid
+      name
+      namespace
+      creationTimestamp
+    }
+  }
+}
+
 fragment AiPin on AiPin {
   id
   name
