@@ -43,9 +43,7 @@ export const columnHelper = createColumnHelper<Edge<PrAutomationFragment>>()
 const ColName = columnHelper.accessor(({ node }) => node?.name, {
   id: 'name',
   header: 'Automation name',
-  cell: function Cell({ getValue }) {
-    return <>{getValue()}</>
-  },
+  cell: ({ getValue }) => getValue(),
 })
 
 const ColDocumentation = columnHelper.accessor(
@@ -54,9 +52,7 @@ const ColDocumentation = columnHelper.accessor(
     id: 'documentation',
     header: 'Documentation',
     meta: { truncate: true },
-    cell: function Cell({ getValue }) {
-      return <>{getValue()}</>
-    },
+    cell: ({ getValue }) => getValue(),
   }
 )
 
@@ -64,9 +60,7 @@ const ColRepo = columnHelper.accessor(({ node }) => node?.identifier, {
   id: 'repoUrl',
   header: 'Repo',
   meta: { truncate: true },
-  cell: function Cell({ getValue }) {
-    return <TruncateStart>{getValue()}</TruncateStart>
-  },
+  cell: ({ getValue }) => <TruncateStart>{getValue()}</TruncateStart>,
 })
 
 const ColRoleSC = styled.div(({ theme }) => ({

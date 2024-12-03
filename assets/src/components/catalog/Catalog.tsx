@@ -7,7 +7,6 @@ import {
   PrQueueIcon,
   Sidecar,
   SidecarItem,
-  Table,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
@@ -16,21 +15,13 @@ import { breadcrumbs } from './Catalogs.tsx'
 import { StackedText } from '../utils/table/StackedText.tsx'
 import { catalogImageUrl } from './common.ts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
-import {
-  useCatalogQuery,
-  usePrAutomationsQuery,
-} from '../../generated/graphql.ts'
+import { useCatalogQuery } from '../../generated/graphql.ts'
 import { CATALOG_PARAM_ID } from '../../routes/catalogRoutesConsts.tsx'
 import { useParams } from 'react-router-dom'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { GqlError } from '../utils/Alert.tsx'
-import {
-  DEFAULT_REACT_VIRTUAL_OPTIONS,
-  useFetchPaginatedData,
-} from '../utils/table/useFetchPaginatedData.tsx'
-import { mapExistingNodes } from '../../utils/graphql.ts'
-import { columns } from '../pr/automations/PrAutomationsColumns.tsx'
-import { FullHeightTableWrap } from '../utils/layout/FullHeightTableWrap.tsx'
+
+import { CatalogPRAutomations } from './CatalogPRAutomations.tsx'
 
 export function Catalog() {
   const theme = useTheme()
@@ -39,30 +30,6 @@ export function Catalog() {
   const { data, error } = useCatalogQuery({ variables: { id } })
 
   const catalog = data?.catalog
-
-  const {
-    data: prAutomationsData,
-    loading,
-    error: prAutomationsError,
-    refetch,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData(
-    {
-      queryHook: usePrAutomationsQuery,
-      keyPath: ['prAutomations'],
-      skip: !id,
-    },
-    {
-      catalogId: id,
-    }
-  )
-
-  const prAutomations = useMemo(
-    () => mapExistingNodes(prAutomationsData?.prAutomations),
-    [prAutomationsData?.prAutomations]
-  )
 
   useSetBreadcrumbs(
     useMemo(
@@ -73,9 +40,7 @@ export function Catalog() {
 
   if (error) return <GqlError error={error} />
 
-  if (prAutomationsError) return <GqlError error={prAutomationsError} />
-
-  if (!catalog || (!prAutomations && loading)) return <LoadingIndicator />
+  if (!catalog) return <LoadingIndicator />
 
   return (
     <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
@@ -141,23 +106,7 @@ export function Catalog() {
                 </Button>
               </div>
             </div>
-            <FullHeightTableWrap>
-              <Table
-                columns={columns}
-                reactTableOptions={{ meta: { refetch } }}
-                reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
-                data={prAutomations || []}
-                virtualizeRows
-                hasNextPage={pageInfo?.hasNextPage}
-                fetchNextPage={fetchNextPage}
-                isFetchingNextPage={loading}
-                onVirtualSliceChange={setVirtualSlice}
-                css={{
-                  maxHeight: 'unset',
-                  height: '100%',
-                }}
-              />
-            </FullHeightTableWrap>
+            <CatalogPRAutomations catalogId={id} />
           </Flex>
           <Sidecar
             height={'fit-content'}
