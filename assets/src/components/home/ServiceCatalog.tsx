@@ -41,13 +41,16 @@ export function ServiceCatalogs() {
         onBottomReached={() => {
           if (!loading && pageInfo?.hasNextPage) fetchNextPage()
         }}
-        height={HOME_CARD_CONTENT_HEIGHT}
         emptyState={
           <EmptyState
             message="There are no catalogs available."
             css={{ marginTop: theme.spacing.xxlarge }}
-          ></EmptyState>
+          />
         }
+        styles={{
+          height: HOME_CARD_CONTENT_HEIGHT,
+          padding: theme.spacing.medium,
+        }}
       />
     </HomeCard>
   )

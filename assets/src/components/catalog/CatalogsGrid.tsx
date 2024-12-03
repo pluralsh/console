@@ -1,6 +1,6 @@
 import { CatalogCard } from '@pluralsh/design-system'
 import { CatalogFragment } from '../../generated/graphql.ts'
-import { useTheme } from 'styled-components'
+import { CSSProperties, useTheme } from 'styled-components'
 import { getCatalogAbsPath } from '../../routes/catalogRoutesConsts.tsx'
 import { useNavigate } from 'react-router-dom'
 import { catalogImageUrl } from './common.ts'
@@ -12,13 +12,13 @@ const fetchMargin = 50
 export function CatalogsGrid({
   catalogs,
   emptyState,
-  height,
   onBottomReached,
+  styles,
 }: {
   catalogs: CatalogFragment[]
   emptyState?: ReactNode
-  height?: number
   onBottomReached?: () => void
+  styles?: CSSProperties
 }) {
   const theme = useTheme()
   const navigate = useNavigate()
@@ -47,8 +47,7 @@ export function CatalogsGrid({
         overflowY: 'auto',
         paddingBottom: theme.spacing.large,
         paddingRight: theme.spacing.xxsmall, // Additional space between scrollbar and cards.
-        padding: theme.spacing.medium,
-        height,
+        ...styles,
       }}
       onScrollCapture={(e) => handleBottomReached(e?.target as HTMLDivElement)}
     >
