@@ -9,7 +9,7 @@ import {
   MagnifyingGlassIcon,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { CatalogFragment } from '../../generated/graphql.ts'
+import { useCatalogsQuery } from '../../generated/graphql.ts'
 import { useTheme } from 'styled-components'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import Fuse from 'fuse.js'
@@ -18,6 +18,10 @@ import { chain, isEmpty } from 'lodash'
 import { CatalogsFilters } from './CatalogsFilters.tsx'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
 import { CatalogsGrid } from './CatalogsGrid.tsx'
+import { GqlError } from '../utils/Alert.tsx'
+import LoadingIndicator from '../utils/LoadingIndicator.tsx'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
+import { mapExistingNodes } from '../../utils/graphql.ts'
 
 export const breadcrumbs = [
   { label: 'service catalog', url: CATALOGS_ABS_PATH },
@@ -29,37 +33,6 @@ const searchOptions = {
   threshold: 0.25,
 }
 
-// TODO: Use real data.
-export const catalogs = Array(10)
-  .fill([
-    {
-      id: '0',
-      icon: `/cluster-distros/eks-dark.svg`,
-      name: 'Base catalog',
-      author: 'Plural',
-      description:
-        'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-      category: 'Messaging',
-    },
-    {
-      id: '1',
-      name: 'Base catalog',
-      author: 'Google',
-      description:
-        'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-      category: 'Data',
-    },
-    {
-      id: '2',
-      name: 'Base catalog',
-      author: 'Microsoft',
-      description:
-        'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-      category: 'Data',
-    },
-  ] satisfies CatalogFragment[])
-  .flat()
-
 export function Catalogs() {
   const theme = useTheme()
   const [query, setQuery] = useState('')
@@ -67,15 +40,15 @@ export function Catalogs() {
   const [authorFilters, setAuthorFilters] = useState<string[]>([])
   const [categoryFilters, setCategoryFilters] = useState<string[]>([])
 
-  // const { data } = useFetchPaginatedData({
-  //   queryHook: useCatalogsQuery,
-  //   keyPath: ['catalogs'],
-  // })
-  //
-  // const catalogs = useMemo(
-  //   () => mapExistingNodes(data?.catalogs),
-  //   [data?.catalogs]
-  // )
+  const { data, error, loading } = useFetchPaginatedData({
+    queryHook: useCatalogsQuery,
+    keyPath: ['catalogs'],
+  })
+
+  const catalogs = useMemo(
+    () => mapExistingNodes(data?.catalogs),
+    [data?.catalogs]
+  )
 
   const authors = useMemo(
     () =>
@@ -83,7 +56,7 @@ export function Catalogs() {
         .groupBy('author')
         .map((value, key) => ({ key, items: value.length }))
         .value(),
-    []
+    [catalogs]
   )
 
   const categories = useMemo(
@@ -92,7 +65,7 @@ export function Catalogs() {
         .groupBy('category')
         .map((value, key) => ({ key, items: value.length }))
         .value(),
-    []
+    [catalogs]
   )
 
   const resetFilters = useCallback(() => {
@@ -105,11 +78,17 @@ export function Catalogs() {
 
   const resultCatalogs = useMemo(() => {
     const filteredCatalogs = catalogs.filter(({ author, category }) => {
-      if (!isEmpty(authorFilters) && !authorFilters.includes(author)) {
+      if (
+        !isEmpty(authorFilters) &&
+        (!author || !authorFilters.includes(author))
+      ) {
         return false
       }
 
-      if (!isEmpty(categoryFilters) && !categoryFilters.includes(category)) {
+      if (
+        !isEmpty(categoryFilters) &&
+        (!category || !categoryFilters.includes(category))
+      ) {
         return false
       }
 
@@ -120,9 +99,13 @@ export function Catalogs() {
     return hasActiveSearch
       ? fuse.search(query).map(({ item }) => item)
       : filteredCatalogs
-  }, [authorFilters, categoryFilters, hasActiveSearch, query])
+  }, [authorFilters, catalogs, categoryFilters, hasActiveSearch, query])
 
   useSetBreadcrumbs(breadcrumbs)
+
+  if (error) return <GqlError error={error} />
+
+  if (!catalogs && loading) return <LoadingIndicator />
 
   return (
     <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
@@ -194,18 +177,29 @@ export function Catalogs() {
                 catalogs={resultCatalogs}
                 emptyState={
                   <Card
-                    css={{ height: '100%', padding: theme.spacing.xxlarge }}
+                    css={{
+                      flexGrow: 1,
+                      padding: theme.spacing.xxlarge,
+                    }}
                   >
-                    <EmptyState message="There are no results with these filters.">
-                      <Button
-                        secondary
-                        onClick={() => {
-                          resetFilters()
-                          setQuery('')
-                        }}
-                      >
-                        Reset filers
-                      </Button>
+                    <EmptyState
+                      message={
+                        hasActiveFilters || hasActiveSearch
+                          ? 'There are no results with these filters.'
+                          : 'There are no catalogs available.'
+                      }
+                    >
+                      {(hasActiveFilters || hasActiveSearch) && (
+                        <Button
+                          secondary
+                          onClick={() => {
+                            resetFilters()
+                            setQuery('')
+                          }}
+                        >
+                          Reset filers
+                        </Button>
+                      )}
                     </EmptyState>
                   </Card>
                 }

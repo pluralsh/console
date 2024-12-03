@@ -1,23 +1,32 @@
 import { HOME_CARD_CONTENT_HEIGHT, HomeCard } from './HomeCard.tsx'
-import { CatalogIcon } from '@pluralsh/design-system'
+import { CatalogIcon, EmptyState } from '@pluralsh/design-system'
 
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import { CatalogsGrid } from '../catalog/CatalogsGrid.tsx'
-import { catalogs } from '../catalog/Catalogs.tsx'
 import { useTheme } from 'styled-components'
+import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData.tsx'
+import { useCatalogsQuery } from '../../generated/graphql.ts'
+import { useMemo } from 'react'
+import { mapExistingNodes } from '../../utils/graphql.ts'
+import { GqlError } from '../utils/Alert.tsx'
+import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 
 export function ServiceCatalogs() {
   const theme = useTheme()
 
-  // const { data } = useFetchPaginatedData({
-  //   queryHook: useCatalogsQuery,
-  //   keyPath: ['catalogs'],
-  // })
-  //
-  // const catalogs = useMemo(
-  //   () => mapExistingNodes(data?.catalogs),
-  //   [data?.catalogs]
-  // )
+  const { data, error, loading } = useFetchPaginatedData({
+    queryHook: useCatalogsQuery,
+    keyPath: ['catalogs'],
+  })
+
+  const catalogs = useMemo(
+    () => mapExistingNodes(data?.catalogs),
+    [data?.catalogs]
+  )
+
+  if (error) return <GqlError error={error} />
+
+  if (!catalogs && loading) return <LoadingIndicator />
 
   return (
     <HomeCard
@@ -33,7 +42,15 @@ export function ServiceCatalogs() {
           height: HOME_CARD_CONTENT_HEIGHT,
         }}
       >
-        <CatalogsGrid catalogs={catalogs} />
+        <CatalogsGrid
+          catalogs={catalogs}
+          emptyState={
+            <EmptyState
+              message="There are no catalogs available."
+              css={{ marginTop: theme.spacing.xxlarge }}
+            ></EmptyState>
+          }
+        />
       </div>
     </HomeCard>
   )

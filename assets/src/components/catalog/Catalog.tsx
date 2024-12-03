@@ -9,35 +9,36 @@ import {
   SidecarItem,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { CatalogFragment } from '../../generated/graphql.ts'
 import { useTheme } from 'styled-components'
 import { useMemo } from 'react'
 import { breadcrumbs } from './Catalogs.tsx'
 import { StackedText } from '../utils/table/StackedText.tsx'
 import { catalogImageUrl } from './common.ts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
-
-const catalog: CatalogFragment = {
-  id: '0',
-  icon: `/cluster-distros/eks-dark.svg`,
-  name: 'Base catalog',
-  author: 'Plural',
-  description:
-    'The new open-source standard to sync data from applications, APIs & databases. One click deploys for data scientists and developers.',
-  category: 'Messaging',
-}
+import { useCatalogQuery } from '../../generated/graphql.ts'
+import { CATALOG_PARAM_ID } from '../../routes/catalogRoutesConsts.tsx'
+import { useParams } from 'react-router-dom'
+import LoadingIndicator from '../utils/LoadingIndicator.tsx'
+import { GqlError } from '../utils/Alert.tsx'
 
 export function Catalog() {
   const theme = useTheme()
-  const id = '0'
+  const id = useParams()[CATALOG_PARAM_ID] as string
 
-  // const { data } = useCatalogQuery({ variables: { id } })
-  //
-  // const catalog = data?.catalog
+  const { data, error } = useCatalogQuery({ variables: { id } })
+
+  const catalog = data?.catalog
 
   useSetBreadcrumbs(
-    useMemo(() => [...breadcrumbs, { label: catalog.name ?? id }], [id])
+    useMemo(
+      () => [...breadcrumbs, { label: catalog?.name ?? id }],
+      [catalog?.name, id]
+    )
   )
+
+  if (error) return <GqlError error={error} />
+
+  if (!catalog) return <LoadingIndicator />
 
   return (
     <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
