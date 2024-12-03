@@ -10071,6 +10071,8 @@ export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild
 
 export type CatalogFragment = { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null };
 
+export type CatalogBindingsFragment = { __typename?: 'Catalog', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+
 export type CatalogsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
@@ -10088,6 +10090,13 @@ export type CatalogQueryVariables = Exact<{
 
 
 export type CatalogQuery = { __typename?: 'RootQueryType', catalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null };
+
+export type CatalogBindingsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type CatalogBindingsQuery = { __typename?: 'RootQueryType', catalog?: { __typename?: 'Catalog', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type UpsertCatalogMutationVariables = Exact<{
   attributes?: InputMaybe<CatalogAttributes>;
@@ -12364,6 +12373,16 @@ export const CatalogFragmentDoc = gql`
   darkIcon
 }
     `;
+export const CatalogBindingsFragmentDoc = gql`
+    fragment CatalogBindings on Catalog {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+    ${PolicyBindingFragmentDoc}`;
 export const InsightClientInfoFragmentDoc = gql`
     fragment InsightClientInfo on InsightClientInfo {
   userAgent
@@ -16879,6 +16898,46 @@ export type CatalogQueryHookResult = ReturnType<typeof useCatalogQuery>;
 export type CatalogLazyQueryHookResult = ReturnType<typeof useCatalogLazyQuery>;
 export type CatalogSuspenseQueryHookResult = ReturnType<typeof useCatalogSuspenseQuery>;
 export type CatalogQueryResult = Apollo.QueryResult<CatalogQuery, CatalogQueryVariables>;
+export const CatalogBindingsDocument = gql`
+    query CatalogBindings($id: ID!) {
+  catalog(id: $id) {
+    ...CatalogBindings
+  }
+}
+    ${CatalogBindingsFragmentDoc}`;
+
+/**
+ * __useCatalogBindingsQuery__
+ *
+ * To run a query within a React component, call `useCatalogBindingsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCatalogBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCatalogBindingsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useCatalogBindingsQuery(baseOptions: Apollo.QueryHookOptions<CatalogBindingsQuery, CatalogBindingsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CatalogBindingsQuery, CatalogBindingsQueryVariables>(CatalogBindingsDocument, options);
+      }
+export function useCatalogBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CatalogBindingsQuery, CatalogBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CatalogBindingsQuery, CatalogBindingsQueryVariables>(CatalogBindingsDocument, options);
+        }
+export function useCatalogBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CatalogBindingsQuery, CatalogBindingsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<CatalogBindingsQuery, CatalogBindingsQueryVariables>(CatalogBindingsDocument, options);
+        }
+export type CatalogBindingsQueryHookResult = ReturnType<typeof useCatalogBindingsQuery>;
+export type CatalogBindingsLazyQueryHookResult = ReturnType<typeof useCatalogBindingsLazyQuery>;
+export type CatalogBindingsSuspenseQueryHookResult = ReturnType<typeof useCatalogBindingsSuspenseQuery>;
+export type CatalogBindingsQueryResult = Apollo.QueryResult<CatalogBindingsQuery, CatalogBindingsQueryVariables>;
 export const UpsertCatalogDocument = gql`
     mutation UpsertCatalog($attributes: CatalogAttributes) {
   upsertCatalog(attributes: $attributes) {
@@ -24822,6 +24881,7 @@ export const namedOperations = {
     PluralContext: 'PluralContext',
     Catalogs: 'Catalogs',
     Catalog: 'Catalog',
+    CatalogBindings: 'CatalogBindings',
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     VClusters: 'VClusters',
@@ -25070,6 +25130,7 @@ export const namedOperations = {
     ClusterRestore: 'ClusterRestore',
     PageInfo: 'PageInfo',
     Catalog: 'Catalog',
+    CatalogBindings: 'CatalogBindings',
     ClusterNode: 'ClusterNode',
     ClusterCondition: 'ClusterCondition',
     Taint: 'Taint',

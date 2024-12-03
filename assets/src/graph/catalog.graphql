@@ -8,6 +8,15 @@ fragment Catalog on Catalog {
   darkIcon
 }
 
+fragment CatalogBindings on Catalog {
+  readBindings {
+    ...PolicyBinding
+  }
+  writeBindings {
+    ...PolicyBinding
+  }
+}
+
 query Catalogs($after: String, $before: String, $first: Int, $last: Int) {
   catalogs(after: $after, before: $before, first: $first, last: $last) {
     pageInfo {
@@ -24,6 +33,12 @@ query Catalogs($after: String, $before: String, $first: Int, $last: Int) {
 query Catalog($id: ID, $name: String) {
   catalog(id: $id, name: $name) {
     ...Catalog
+  }
+}
+
+query CatalogBindings($id: ID!) {
+  catalog(id: $id) {
+    ...CatalogBindings
   }
 }
 
