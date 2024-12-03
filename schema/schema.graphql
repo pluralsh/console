@@ -910,7 +910,7 @@ type RootMutationType {
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
-    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID
+    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID
   ): Boolean
 
   "saves a list of chat messages to your current chat history, can be used at any time"
@@ -4604,7 +4604,7 @@ type Cluster {
   insight: AiInsight
 
   "a set of kubernetes resources used to generate the ai insight for this cluster"
-  insightComponents: ClusterInsightComponent
+  insightComponents: [ClusterInsightComponent]
 
   "list cached nodes for a cluster, this can be stale up to 5m"
   nodes: [Node]

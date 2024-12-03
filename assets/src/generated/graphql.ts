@@ -1060,7 +1060,7 @@ export type Cluster = {
   /** an ai insight generated about issues discovered which might impact the health of this cluster */
   insight?: Maybe<AiInsight>;
   /** a set of kubernetes resources used to generate the ai insight for this cluster */
-  insightComponents?: Maybe<ClusterInsightComponent>;
+  insightComponents?: Maybe<Array<Maybe<ClusterInsightComponent>>>;
   /** whether the deploy operator has been registered for this cluster */
   installed?: Maybe<Scalars['Boolean']['output']>;
   /** the url of the kas server you can access this cluster from */
@@ -6331,6 +6331,7 @@ export type RootMutationTypeUpdatePullRequestArgs = {
 
 
 export type RootMutationTypeUpdateRbacArgs = {
+  catalogId?: InputMaybe<Scalars['ID']['input']>;
   clusterId?: InputMaybe<Scalars['ID']['input']>;
   pipelineId?: InputMaybe<Scalars['ID']['input']>;
   projectId?: InputMaybe<Scalars['ID']['input']>;

@@ -890,7 +890,7 @@ type Cluster struct {
 	// an ai insight generated about issues discovered which might impact the health of this cluster
 	Insight *AiInsight `json:"insight,omitempty"`
 	// a set of kubernetes resources used to generate the ai insight for this cluster
-	InsightComponents *ClusterInsightComponent `json:"insightComponents,omitempty"`
+	InsightComponents []*ClusterInsightComponent `json:"insightComponents,omitempty"`
 	// list cached nodes for a cluster, this can be stale up to 5m
 	Nodes []*Node `json:"nodes,omitempty"`
 	// list the cached node metrics for a cluster, can also be stale up to 5m

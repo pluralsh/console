@@ -2,7 +2,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   use Console.GraphQl.Resolvers.Base, model: Console.Schema.Cluster
   import Console.Deployments.Policies, only: [allow: 3]
   import Console.GraphQl.Resolvers.Deployments.Base
-  alias Console.Deployments.{Clusters, Services, Pipelines, AddOns, Stacks, Settings}
+  alias Console.Deployments.{Clusters, Services, Pipelines, AddOns, Stacks, Settings, Git}
   alias Console.Schema.{
     Cluster,
     ClusterNodePool,
@@ -207,5 +207,6 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   defp rbac_args(%{service_id: id}) when is_binary(id), do: {&Services.rbac/3, id}
   defp rbac_args(%{pipeline_id: id}) when is_binary(id), do: {&Pipelines.rbac/3, id}
   defp rbac_args(%{stack_id: id}) when is_binary(id), do: {&Stacks.rbac/3, id}
+  defp rbac_args(%{catalog_id: id}) when is_binary(id), do: {&Git.catalog_rbac/3, id}
   defp rbac_args(%{project_id: id}) when is_binary(id), do: {&Settings.project_rbac/3, id}
 end
