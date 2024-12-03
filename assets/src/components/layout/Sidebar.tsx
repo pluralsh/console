@@ -345,6 +345,7 @@ export default function Sidebar() {
         >
           {menuItems.map((item, i) => (
             <Tooltip
+              key={i}
               label={
                 <div
                   css={{
@@ -359,7 +360,6 @@ export default function Sidebar() {
               }
             >
               <SidebarItem
-                key={i}
                 clickable
                 className={`sidebar-${item.text}`}
                 active={isActive(item)}
