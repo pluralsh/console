@@ -20,6 +20,7 @@ import { CATALOG_PARAM_ID } from '../../routes/catalogRoutesConsts.tsx'
 import { useParams } from 'react-router-dom'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { GqlError } from '../utils/Alert.tsx'
+import { meta } from 'eslint-plugin-react/lib/rules/jsx-props-no-spread-multi'
 
 export function Catalog() {
   const theme = useTheme()
@@ -107,18 +108,21 @@ export function Catalog() {
             <div>...</div>
           </Flex>
           <Sidecar
+            height={'fit-content'}
             marginLeft={'large'}
             width={220}
           >
             <SidecarItem heading="Author">{catalog.author}</SidecarItem>
-            <SidecarItem heading="Category">
-              <Chip
-                border="none"
-                size="small"
-              >
-                {catalog.category}
-              </Chip>
-            </SidecarItem>
+            {catalog.category && (
+              <SidecarItem heading="Category">
+                <Chip
+                  border="none"
+                  size="small"
+                >
+                  {catalog.category}
+                </Chip>
+              </SidecarItem>
+            )}
           </Sidecar>
         </Flex>
       </div>
