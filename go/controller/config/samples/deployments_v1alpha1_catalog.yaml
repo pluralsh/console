@@ -2,11 +2,245 @@ apiVersion: deployments.plural.sh/v1alpha1
 kind: Catalog
 metadata:
   labels:
-    app.kubernetes.io/name: catalog
+    app.kubernetes.io/name: catalog-a
     app.kubernetes.io/instance: catalog-sample
     app.kubernetes.io/part-of: controller
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: controller
-  name: catalog-sample
+  name: catalog-a
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-b
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-b
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-c
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-c
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-d
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-d
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-e
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-e
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-f
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-f
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-g
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-g
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-h
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-h
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-i
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-i
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-j
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-j
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-k
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-k
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-l
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-l
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-m
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-m
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-n
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-n
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-o
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-o
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-o
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-o
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-p
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-p
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-q
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-q
+spec:
+  author: test@plural.sh
+---
+apiVersion: deployments.plural.sh/v1alpha1
+kind: Catalog
+metadata:
+  labels:
+    app.kubernetes.io/name: catalog-r
+    app.kubernetes.io/instance: catalog-sample
+    app.kubernetes.io/part-of: controller
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: controller
+  name: catalog-r
 spec:
   author: test@plural.sh
