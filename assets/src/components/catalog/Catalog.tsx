@@ -20,7 +20,6 @@ import { CATALOG_PARAM_ID } from '../../routes/catalogRoutesConsts.tsx'
 import { useParams } from 'react-router-dom'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { GqlError } from '../utils/Alert.tsx'
-import { meta } from 'eslint-plugin-react/lib/rules/jsx-props-no-spread-multi'
 
 export function Catalog() {
   const theme = useTheme()
