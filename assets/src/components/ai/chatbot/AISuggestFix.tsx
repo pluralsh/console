@@ -4,9 +4,11 @@ import {
   ReactNode,
   SetStateAction,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from 'react'
+import { useTheme } from 'styled-components'
 import {
   AiDelta,
   AiInsightFragment,
@@ -21,7 +23,6 @@ import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import AIPanel from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
-import { A } from 'honorable'
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 
 interface AISuggestFixProps {
@@ -86,29 +87,43 @@ function FixPr({
   const [mutation, { data, loading, error }] = useAiFixPrMutation({
     variables: { insightId, messages: [{ role: AiRole.User, content: fix }] },
   })
+  const theme = useTheme()
+
+  // TEMP FIX, implement permanent solution in DS
+  const successToastRef = useRef<HTMLDivElement>(null)
+  const errorToastRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (successToastRef.current) successToastRef.current.style.zIndex = '10000'
+    if (errorToastRef.current) errorToastRef.current.style.zIndex = '10000'
+  }, [data?.aiFixPr])
 
   return (
     <>
       {data?.aiFixPr && (
         <Toast
+          ref={successToastRef}
           severity="info"
-          position="bottom-left"
+          position="top-right"
+          margin="large"
           heading="PR Created!"
         >
-          <A
+          <a
             href={data?.aiFixPr?.url}
             target="_blank"
-            style={{ textDecoration: 'none' }}
-            color="action-link-inline"
+            rel="noreferrer"
+            style={{ textDecoration: 'none', cursor: 'pointer' }}
+            color={theme.colors['action-link-inline']}
           >
             {data?.aiFixPr?.url}
-          </A>
+          </a>
         </Toast>
       )}
       {error && (
         <Toast
+          ref={errorToastRef}
           severity="danger"
-          position="bottom-left"
+          position="top-right"
+          margin="large"
           heading="PR Creation Failed"
         >
           {error.message}
