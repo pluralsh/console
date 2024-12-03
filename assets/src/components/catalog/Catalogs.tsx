@@ -40,10 +40,11 @@ export function Catalogs() {
   const [authorFilters, setAuthorFilters] = useState<string[]>([])
   const [categoryFilters, setCategoryFilters] = useState<string[]>([])
 
-  const { data, error, loading } = useFetchPaginatedData({
-    queryHook: useCatalogsQuery,
-    keyPath: ['catalogs'],
-  })
+  const { data, error, loading, pageInfo, fetchNextPage } =
+    useFetchPaginatedData({
+      queryHook: useCatalogsQuery,
+      keyPath: ['catalogs'],
+    })
 
   const catalogs = useMemo(
     () => mapExistingNodes(data?.catalogs),
@@ -175,6 +176,9 @@ export function Catalogs() {
             >
               <CatalogsGrid
                 catalogs={resultCatalogs}
+                onBottomReached={() => {
+                  if (!loading && pageInfo?.hasNextPage) fetchNextPage()
+                }}
                 emptyState={
                   <Card
                     css={{
