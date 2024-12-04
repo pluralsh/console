@@ -102,7 +102,7 @@ jobs:
         with:
           files: go/controller/docs/**
           since_last_remote_commit: true
-      - run: git diff --name-only HEAD^1 HEAD
+      - run: git diff
       - name: Fail if CRD docs are outdated
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         env:
