@@ -24,6 +24,27 @@ export const authlessClient = new ApolloClient({
   cache: new InMemoryCache(),
 })
 
+function maybeReconnect(socket, absintheSocket) {
+  console.log('socket reconnect attempt', socket)
+  if (socket.connectionState() === 'closed') {
+    console.log('found dead websocket, attempting a reconnect')
+    if (!socket.conn) {
+      console.log('connecting websocket transport')
+      socket.connect()
+    } else if (socket.conn?.readyState === WebSocket.CLOSED) {
+      console.log('handling closed websocket')
+      socket.reconnectTimer.reset()
+      socket.reconnectTimer.scheduleTimeout()
+    }
+
+    absintheSocket.channel.rejoin()
+    absintheSocket.channel.rejoinTimer.scheduleTimeout()
+    return
+  }
+
+  console.log('socket not dead, ignoring')
+}
+
 export function buildClient(gqlUrl, wsUrl, fetchToken) {
   const httpLink = createLink({ uri: gqlUrl, fetch: customFetch })
 
@@ -52,24 +73,7 @@ export function buildClient(gqlUrl, wsUrl, fetchToken) {
     },
   })
 
-  socket.onClose((e) => {
-    console.log('reconnecting closed socket', e)
-    if (socket.closeWasClean) {
-      socket.reconnectTimer.scheduleTimeout()
-    }
-  })
-
-  setInterval(() => {
-    if (socket.transport.readyState == WebSocket.CLOSED) {
-      console.log('found dead websocket, attempting a reconnect')
-      socket.reconnectTimer.scheduleTimeout()
-    }
-  }, 10000)
-
-  window.addEventListener('pageshow', () => socket.connect())
-
   const absintheSocket = AbsintheSocket.create(socket)
-
   const socketLink = createAbsintheSocketLink(absintheSocket)
   const gqlLink = errorLink.concat(httpLink)
 
@@ -99,6 +103,9 @@ export function buildClient(gqlUrl, wsUrl, fetchToken) {
       },
     }),
   })
+
+  socket.onClose(() => maybeReconnect(socket, absintheSocket))
+  setInterval(() => maybeReconnect(socket, absintheSocket), 10000)
 
   return { client, socket }
 }

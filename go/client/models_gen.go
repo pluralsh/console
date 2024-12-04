@@ -184,18 +184,20 @@ type AiPinEdge struct {
 
 // Settings for configuring access to common LLM providers
 type AiSettings struct {
-	Enabled   *bool                `json:"enabled,omitempty"`
-	Provider  *AiProvider          `json:"provider,omitempty"`
-	Openai    *OpenaiSettings      `json:"openai,omitempty"`
-	Anthropic *AnthropicSettings   `json:"anthropic,omitempty"`
-	Ollama    *OllamaSettings      `json:"ollama,omitempty"`
-	Azure     *AzureOpenaiSettings `json:"azure,omitempty"`
-	Bedrock   *BedrockAiSettings   `json:"bedrock,omitempty"`
-	Vertex    *VertexAiSettings    `json:"vertex,omitempty"`
+	Enabled      *bool                `json:"enabled,omitempty"`
+	ToolsEnabled *bool                `json:"toolsEnabled,omitempty"`
+	Provider     *AiProvider          `json:"provider,omitempty"`
+	Openai       *OpenaiSettings      `json:"openai,omitempty"`
+	Anthropic    *AnthropicSettings   `json:"anthropic,omitempty"`
+	Ollama       *OllamaSettings      `json:"ollama,omitempty"`
+	Azure        *AzureOpenaiSettings `json:"azure,omitempty"`
+	Bedrock      *BedrockAiSettings   `json:"bedrock,omitempty"`
+	Vertex       *VertexAiSettings    `json:"vertex,omitempty"`
 }
 
 type AiSettingsAttributes struct {
 	Enabled   *bool                        `json:"enabled,omitempty"`
+	Tools     *ToolConfigAttributes        `json:"tools,omitempty"`
 	Provider  *AiProvider                  `json:"provider,omitempty"`
 	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
 	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
@@ -888,7 +890,7 @@ type Cluster struct {
 	// an ai insight generated about issues discovered which might impact the health of this cluster
 	Insight *AiInsight `json:"insight,omitempty"`
 	// a set of kubernetes resources used to generate the ai insight for this cluster
-	InsightComponents *ClusterInsightComponent `json:"insightComponents,omitempty"`
+	InsightComponents []*ClusterInsightComponent `json:"insightComponents,omitempty"`
 	// list cached nodes for a cluster, this can be stale up to 5m
 	Nodes []*Node `json:"nodes,omitempty"`
 	// list the cached node metrics for a cluster, can also be stale up to 5m
@@ -1005,13 +1007,14 @@ type ClusterInfo struct {
 
 // A kubernetes object used in the course of generating a cluster insight
 type ClusterInsightComponent struct {
-	ID        string   `json:"id"`
-	Group     *string  `json:"group,omitempty"`
-	Version   string   `json:"version"`
-	Kind      string   `json:"kind"`
-	Namespace *string  `json:"namespace,omitempty"`
-	Name      string   `json:"name"`
-	Cluster   *Cluster `json:"cluster,omitempty"`
+	ID        string     `json:"id"`
+	Group     *string    `json:"group,omitempty"`
+	Version   string     `json:"version"`
+	Kind      string     `json:"kind"`
+	Namespace *string    `json:"namespace,omitempty"`
+	Name      string     `json:"name"`
+	Cluster   *Cluster   `json:"cluster,omitempty"`
+	Insight   *AiInsight `json:"insight,omitempty"`
 	// the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly
 	Resource *KubernetesUnstructured `json:"resource,omitempty"`
 }
@@ -1508,6 +1511,11 @@ type CostAnalysis struct {
 	RAMEfficiency *float64 `json:"ramEfficiency,omitempty"`
 	TotalCost     *float64 `json:"totalCost,omitempty"`
 	SharedCost    *float64 `json:"sharedCost,omitempty"`
+}
+
+type CreatePrConfigAttributes struct {
+	// a scm connection id to use for pr automations
+	ConnectionID *string `json:"connectionId,omitempty"`
 }
 
 type CronJob struct {
@@ -4601,6 +4609,7 @@ type ScmConnection struct {
 	ID       string  `json:"id"`
 	Name     string  `json:"name"`
 	Type     ScmType `json:"type"`
+	Default  *bool   `json:"default,omitempty"`
 	Username *string `json:"username,omitempty"`
 	// base url for git clones for self-hosted versions
 	BaseURL *string `json:"baseUrl,omitempty"`
@@ -4621,6 +4630,7 @@ type ScmConnectionAttributes struct {
 	BaseURL  *string              `json:"baseUrl,omitempty"`
 	APIURL   *string              `json:"apiUrl,omitempty"`
 	Github   *GithubAppAttributes `json:"github,omitempty"`
+	Default  *bool                `json:"default,omitempty"`
 	// a ssh private key to be used for commit signing
 	SigningPrivateKey *string `json:"signingPrivateKey,omitempty"`
 }
@@ -5553,6 +5563,10 @@ type TerraformStateUrls struct {
 	Lock *string `json:"lock,omitempty"`
 	// POST url to unlock state
 	Unlock *string `json:"unlock,omitempty"`
+}
+
+type ToolConfigAttributes struct {
+	CreatePr *CreatePrConfigAttributes `json:"createPr,omitempty"`
 }
 
 // How to enforce uniqueness for a field

@@ -166,11 +166,15 @@ defmodule Console.GraphQl.AiQueriesTest do
 
       {:ok, %{data: %{"clusterInsightComponent" => found}}} = run_query("""
         query Comp($id: ID!) {
-          clusterInsightComponent(id: $id) { id }
+          clusterInsightComponent(id: $id) {
+            id
+            cluster { id }
+          }
         }
       """, %{"id" => comp.id}, %{current_user: user})
 
       assert found["id"] == comp.id
+      assert found["cluster"]["id"] == comp.cluster_id
     end
 
     test "it cannot fetch w/o access" do

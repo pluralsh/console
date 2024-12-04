@@ -256,6 +256,12 @@ mutation DeleteChatThread($id: ID!) {
   }
 }
 
+mutation AiFixPr($insightId: ID!, $messages: [ChatMessage]) {
+  aiFixPr(insightId: $insightId, messages: $messages) {
+    ...PullRequest
+  }
+}
+
 subscription AIChatStream($threadId: ID, $insightId: ID, $scopeId: String) {
   aiStream(threadId: $threadId, insightId: $insightId, scopeId: $scopeId) {
     seq

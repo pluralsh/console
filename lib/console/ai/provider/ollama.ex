@@ -48,6 +48,10 @@ defmodule Console.AI.Ollama do
     end
   end
 
+  def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
+
+  def tools?(), do: false
+
   defp chat(%__MODULE__{url: url, model: model} = ollama, history) do
     body = Jason.encode!(%{
       model: model,

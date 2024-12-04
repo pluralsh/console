@@ -36,6 +36,10 @@ defmodule Console.AI.Bedrock do
     |> handle_response()
   end
 
+  def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
+
+  def tools?(), do: false
+
   defp build_req([{:system, system} | rest]) do
     %{
       system: [%{text: system}],

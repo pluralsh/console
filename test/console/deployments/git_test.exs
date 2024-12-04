@@ -27,7 +27,7 @@ defmodule Console.Deployments.GitTest do
       }, user)
 
       assert git.url == "git@github.com:pluralsh/console.git"
-      assert git.private_key == "invalid-key\n"
+      assert git.private_key == "invalid-key\n\n"
 
       {:ok, git} = Git.create_repository(%{
         url: "https://github.com/pluralsh/test-repo.git",
@@ -35,7 +35,7 @@ defmodule Console.Deployments.GitTest do
       }, user)
 
       assert git.url == "https://github.com/pluralsh/test-repo.git"
-      assert git.private_key == "invalid-key\n"
+      assert git.private_key == "invalid-key\n\n"
 
       assert_receive {:event, %PubSub.GitRepositoryCreated{item: ^git}}
     end
@@ -113,11 +113,19 @@ defmodule Console.Deployments.GitTest do
       admin = admin_user()
       scm = insert(:scm_connection)
 
-      {:ok, conn} = Git.update_scm_connection(%{type: :github, token: "pat-asdfa"}, scm.id, admin)
+      {:ok, priv} = ExPublicKey.generate_key()
+      {:ok, priv_string} = ExPublicKey.pem_encode(priv)
+
+      {:ok, conn} = Git.update_scm_connection(%{
+        type: :github,
+        token: "pat-asdfa",
+        signing_private_key: priv_string
+      }, scm.id, admin)
 
       assert conn.id == scm.id
       assert conn.type == :github
       assert conn.token == "pat-asdfa"
+      assert conn.signing_private_key == priv_string
     end
 
     test "nonadmins cannot update" do

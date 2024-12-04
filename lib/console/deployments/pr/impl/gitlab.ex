@@ -9,15 +9,14 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
     def new(host, token), do: {:ok, %__MODULE__{host: host, token: token}}
 
     def headers(%__MODULE__{token: token}) do
-      [{"Authorization", "Bearer #{token}"}, {"Content-Type", "application/json"}]
+      [{"PRIVATE-TOKEN", token}, {"Content-Type", "application/json"}]
     end
   end
 
   def create(%PrAutomation{} = pr, branch, ctx) do
     with {:ok, conn} <- connection(pr),
          {:ok, title, body} <- description(pr, ctx) do
-      id = URI.encode(pr.identifier)
-      post(conn, "/api/v4/projects/#{id}/merge_requests", %{
+      post(conn, "/api/v4/projects/#{uri_encode(pr.identifier)}/merge_requests", %{
         source_branch: branch,
         target_branch: pr.branch || "master",
         title: title,
@@ -34,7 +33,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
 
   def webhook(%ScmConnection{} = conn, %ScmWebhook{owner: owner, hmac: hmac} = hook) do
     with {:ok, conn} <- connection(conn) do
-      post(conn, "/api/v4/groups/#{URI.encode(owner)}/hooks", %{
+      post(conn, "/api/v4/groups/#{uri_encode(owner)}/hooks", %{
         url: ScmWebhook.url(hook),
         merge_requests_events: true,
         token: hmac,
@@ -62,7 +61,7 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
   def review(conn, %PullRequest{url: url}, body) do
     with {:ok, group, number} <- get_pull_id(url),
          {:ok, conn} <- connection(conn) do
-      case post(conn, Path.join(["/api/v4/projects", "#{URI.encode(group)}", "merge_requests", number]), %{
+      case post(conn, Path.join(["/api/v4/projects", "#{uri_encode(group)}", "merge_requests", number]), %{
         body: filter_ansi(body)
       }) do
         {:ok, %{"id" => id}} -> {:ok, "#{id}"}
@@ -103,4 +102,6 @@ defmodule Console.Deployments.Pr.Impl.Gitlab do
       _ -> {:error, "could not parse gitlab url"}
     end
   end
+
+  defp uri_encode(str), do: URI.encode(str, & &1 != ?/ and URI.char_unescaped?(&1))
 end

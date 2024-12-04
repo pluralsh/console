@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "controller.fullname" . }}-controller-manager
+  name: {{ include "controller.fullname" . }}-controller
   labels:
     app.kubernetes.io/component: manager
     app.kubernetes.io/part-of: plural-deployment-controller

@@ -35,6 +35,19 @@ defmodule Console.AI.Vertex do
     end
   end
 
+  @doc """
+  Generate a openai completion from the azure openai credentials chain
+  """
+  @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
+  def tool_call(%__MODULE__{} = vertex, messages, tools) do
+    with {:ok, %{token: token}} <- client(vertex) do
+      OpenAI.new(base_url: openai_url(vertex), access_token: token, model: openai_model(vertex))
+      |> OpenAI.tool_call(messages, tools)
+    end
+  end
+
+  def tools?(), do: true
+
   defp openai_url(%__MODULE__{project: p, location: l} = c),
     do: "https://#{l}-aiplatform.googleapis.com/v1beta1/projects/#{p}/locations/#{l}/endpoints/#{ep(c)}"
 

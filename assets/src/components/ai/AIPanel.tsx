@@ -20,6 +20,7 @@ const AIPanel = forwardRef(
       subheader,
       footer,
       children,
+      secondaryButton,
       ...props
     }: {
       open: boolean
@@ -31,6 +32,7 @@ const AIPanel = forwardRef(
       subheader: string
       footer?: ReactNode
       children: ReactNode
+      secondaryButton?: ReactNode
     } & CardProps,
     ref: Ref<HTMLDivElement>
   ) => {
@@ -108,13 +110,15 @@ const AIPanel = forwardRef(
                 },
               }}
             >
-              <Button
-                onClick={onClose}
-                secondary={!!footer}
-                floating={!!footer}
-              >
-                Got it, thanks!
-              </Button>
+              {secondaryButton || (
+                <Button
+                  onClick={onClose}
+                  secondary={!!footer}
+                  floating={!!footer}
+                >
+                  Got it, thanks!
+                </Button>
+              )}
               {footer && footer}
             </div>
           )}

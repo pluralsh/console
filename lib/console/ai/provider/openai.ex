@@ -18,10 +18,19 @@ defmodule Console.AI.OpenAI do
 
   @options [recv_timeout: :infinity, timeout: :infinity]
 
-  defmodule Message do
+  defmodule ToolCall do
     @type t :: %__MODULE__{}
 
-    defstruct [:role, :content, :name]
+    defstruct [:id, :type, :function]
+  end
+
+  defmodule Message do
+    alias Console.AI.OpenAI
+    @type t :: %__MODULE__{tool_calls: [OpenAI.ToolCall.t]}
+
+    defstruct [:role, :content, :name, :tool_calls]
+
+    def spec(), do: %__MODULE__{tool_calls: [%OpenAI.ToolCall{}]}
   end
 
   defmodule Choice do
@@ -31,7 +40,7 @@ defmodule Console.AI.OpenAI do
 
     defstruct [:text, :index, :logprobs, :message]
 
-    def spec(), do: %__MODULE__{message: %OpenAI.Message{}}
+    def spec(), do: %__MODULE__{message: OpenAI.Message.spec()}
   end
 
   defmodule CompletionResponse do
@@ -54,7 +63,7 @@ defmodule Console.AI.OpenAI do
   end
 
   @doc """
-  Generate a openai completion from
+  Generate a openai completion
   """
   @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = openai, messages) do
@@ -67,6 +76,25 @@ defmodule Console.AI.OpenAI do
       error -> error
     end
   end
+
+  @doc """
+  Calls an openai tool call interface w/ strict mode
+  """
+  @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
+  def tool_call(%__MODULE__{} = openai, messages, tools) do
+    history = Enum.map(messages, fn {role, msg} -> %{role: role, content: msg} end)
+    case chat(%{openai | stream: nil}, history, tools) do
+      {:ok, %CompletionResponse{choices: [%Choice{message: %Message{tool_calls: [_ | _] = calls}} | _]}} ->
+        {:ok, gen_tools(calls)}
+      {:ok, %CompletionResponse{choices: [%Choice{message: %Message{content: content}} | _]}} ->
+        {:ok, content}
+      {:ok, content} when is_binary(content) -> {:ok, content}
+      {:ok, _} -> {:error, "could not generate an ai completion for this context"}
+      error -> error
+    end
+  end
+
+  def tools?(), do: true
 
   defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream} = openai, history) do
     Stream.Exec.openai(fn ->
@@ -81,11 +109,12 @@ defmodule Console.AI.OpenAI do
     end, stream)
   end
 
-  defp chat(%__MODULE__{access_key: token, model: model} = openai, history) do
-    body = Jason.encode!(%{
+  defp chat(%__MODULE__{access_key: token, model: model} = openai, history, tools \\ nil) do
+    body = Console.drop_nils(%{
       model: model || "gpt-4o-mini",
       messages: history,
-    })
+      tools: tools && Enum.map(tools, &tool_args(&1)),
+    }) |> Jason.encode!()
 
     url(openai, "/chat/completions")
     |> HTTPoison.post(body, json_headers(token), @options)
@@ -109,4 +138,24 @@ defmodule Console.AI.OpenAI do
   defp json_headers(token), do: headers([{"Content-Type", "application/json"}], token)
 
   defp headers(headers, token), do: [{"Authorization", "Bearer #{token}"} | headers]
+
+  defp gen_tools(calls) do
+    Enum.map(calls, fn
+      %ToolCall{function: %{"name" => n, "arguments" => args}} ->
+        %Console.AI.Tool{name: n, arguments: Jason.decode!(args)}
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+  end
+
+  defp tool_args(tool) do
+    %{
+      type: :function,
+      function: %{
+        name: tool.name(),
+        description: tool.description(),
+        parameters: tool.json_schema()
+      }
+    }
+  end
 end

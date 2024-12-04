@@ -1,26 +1,22 @@
 import {
   Card,
-  Chip,
   ChipList,
   Code,
   IconFrame,
   SidecarItem,
-  Tooltip,
-  WrapWithIf,
 } from '@pluralsh/design-system'
 import styled, { useTheme } from 'styled-components'
 import moment from 'moment/moment'
 import isEmpty from 'lodash/isEmpty'
 import { Link } from 'react-router-dom'
 
-import { ClusterFragment, ClusterStatus } from 'generated/graphql'
+import { ClusterFragment } from 'generated/graphql'
 import { nextSupportedVersion, toNiceVersion } from 'utils/semver'
 
 import { TooltipTime } from 'components/utils/TooltipTime'
 
 import { SubTitle } from '../../utils/SubTitle'
 import ClusterUpgrade from '../clusters/ClusterUpgrade'
-import { ClusterConditions } from '../clusters/ClusterConditions'
 import { getServiceDetailsPath } from '../../../routes/cdRoutesConsts'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { ClusterProviderIcon } from '../../utils/Provider'
@@ -45,7 +41,6 @@ function MetadataCard({
     cluster?.version,
     cluster?.provider?.supportedVersions
   )
-  const status = cluster?.status
   const renderTag = (tag) => `${tag.name}${tag.value ? `: ${tag.value}` : ''}`
 
   return (
@@ -104,27 +99,6 @@ function MetadataCard({
               '-'
             )}
           </MetadataPropSC>
-          {status && (
-            <>
-              <MetadataPropSC heading="Conditions">
-                {!isEmpty(status?.conditions) ? (
-                  <ClusterConditions cluster={cluster} />
-                ) : (
-                  '-'
-                )}
-              </MetadataPropSC>
-              <MetadataPropSC heading="Control plane">
-                <Chip
-                  severity={status?.controlPlaneReady ? 'success' : 'warning'}
-                >
-                  {status?.controlPlaneReady ? 'Ready' : 'Not ready'}
-                </Chip>
-              </MetadataPropSC>
-              <MetadataPropSC heading="Status">
-                <ClusterStatusChip status={status} />
-              </MetadataPropSC>
-            </>
-          )}
           <MetadataPropSC heading="Last pinged">
             {cluster?.pingedAt ? (
               <TooltipTime
@@ -154,52 +128,6 @@ function MetadataCard({
         <Code language="json">{formatJson(cluster.metadata)}</Code>
       )}
     </Card>
-  )
-}
-
-function ClusterStatusChip({
-  status,
-}: {
-  status: Nullable<
-    Pick<ClusterStatus, 'phase' | 'failureMessage' | 'failureReason'>
-  >
-}) {
-  const theme = useTheme()
-  const { failureMessage, failureReason, phase } = status || {}
-
-  return (
-    <WrapWithIf
-      condition={!!failureMessage || !!failureReason}
-      wrapper={
-        <Tooltip
-          label={
-            <div
-              css={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: theme.spacing.xxsmall,
-                maxWidth: 300,
-              }}
-            >
-              {failureReason && <p>Reason: {failureReason}</p>}
-              {failureMessage && <p>{failureMessage}</p>}
-            </div>
-          }
-        />
-      }
-    >
-      <Chip
-        severity={
-          phase?.toLowerCase() === 'provisioned'
-            ? 'success'
-            : failureReason || failureMessage
-              ? 'danger'
-              : 'neutral'
-        }
-      >
-        {phase || 'Unknown'}
-      </Chip>
-    </WrapWithIf>
   )
 }
 

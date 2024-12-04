@@ -38,7 +38,6 @@ import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { DetachClusterModal } from '../providers/DetachCluster'
 import { ClusterConditions } from './ClusterConditions'
 import { ClusterHealth } from './ClusterHealthChip'
-
 import ClusterUpgrade from './ClusterUpgrade'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
 
@@ -305,7 +304,6 @@ export const ColStatus = columnHelper.accessor(
             cluster={original.node}
             refetch={refetch}
           />
-          <ClusterConditions cluster={original.node} />
         </ColStatusSC>
       )
     },

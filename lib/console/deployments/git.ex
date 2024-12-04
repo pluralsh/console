@@ -50,6 +50,11 @@ defmodule Console.Deployments.Git do
   def get_scm_connection(id), do: Repo.get(ScmConnection, id)
   def get_scm_connection!(id), do: Repo.get!(ScmConnection, id)
 
+  def default_scm_connection() do
+    ScmConnection.default()
+    |> Repo.one()
+  end
+
   def get_scm_connection_by_name(name), do: Repo.get_by(ScmConnection, name: name)
 
   @decorate cacheable(cache: @cache, key: {:scm_webhook, id}, opts: [ttl: @ttl])
@@ -417,7 +422,7 @@ defmodule Console.Deployments.Git do
   @spec upsert_catalog(map, User.t) :: catalog_resp
   def upsert_catalog(%{name: name} = attrs, %User{} = user) do
     case get_catalog_by_name(name) do
-      %Catalog{} = catalog -> Repo.preload(catalog, [:read_bindings, :write_bindings])
+      %Catalog{} = catalog -> Repo.preload(catalog, [:read_bindings, :write_bindings, :create_bindings])
       nil -> %Catalog{project_id: attrs[:project_id] || Settings.default_project!().id}
     end
     |> allow(user, :write)
@@ -433,6 +438,18 @@ defmodule Console.Deployments.Git do
     get_catalog!(id)
     |> allow(user, :write)
     |> when_ok(:delete)
+  end
+
+  @doc """
+  modifies rbac settings for this stack
+  """
+  @spec catalog_rbac(map, binary, User.t) :: catalog_resp
+  def catalog_rbac(attrs, cat_id, %User{} = user) do
+    get_catalog!(cat_id)
+    |> Repo.preload([:read_bindings, :write_bindings, :create_bindings])
+    |> allow(user, :write)
+    |> when_ok(&Catalog.rbac_changeset(&1, attrs))
+    |> when_ok(:update)
   end
 
   @doc """

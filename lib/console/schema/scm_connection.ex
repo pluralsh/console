@@ -7,6 +7,7 @@ defmodule Console.Schema.ScmConnection do
 
   schema "scm_connections" do
     field :name,     :string
+    field :default,  :boolean
     field :type,     Type
     field :base_url, :string
     field :api_url,  :string
@@ -27,17 +28,20 @@ defmodule Console.Schema.ScmConnection do
     timestamps()
   end
 
+  def default(query \\ __MODULE__), do: from(scm in query, where: scm.default)
+
   def ordered(query \\ __MODULE__, order \\ [asc: :name]) do
     from(scm in query, order_by: ^order)
   end
 
-  @valid ~w(name type base_url api_url username token signing_private_key)a
+  @valid ~w(name default type base_url api_url username token signing_private_key)a
 
   def changeset(model, attrs \\ %{}) do
     model
     |> cast(attrs, @valid)
     |> cast_embed(:github, with: &github_changeset/2)
     |> unique_constraint(:name)
+    |> unique_constraint(:default, message: "only one scm connection can be marked default at once")
     |> validate_required([:name, :type])
     |> validate_private_key(:signing_private_key)
   end

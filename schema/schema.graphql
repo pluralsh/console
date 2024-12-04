@@ -910,7 +910,7 @@ type RootMutationType {
 
   "a reusable mutation for updating rbac settings on core services"
   updateRbac(
-    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID
+    rbac: RbacAttributes!, serviceId: ID, clusterId: ID, providerId: ID, pipelineId: ID, stackId: ID, projectId: ID, catalogId: ID
   ): Boolean
 
   "saves a list of chat messages to your current chat history, can be used at any time"
@@ -939,6 +939,8 @@ type RootMutationType {
   createPin(attributes: AiPinAttributes!): AiPin
 
   deletePin(id: ID!): AiPin
+
+  aiFixPr(insightId: ID!, messages: [ChatMessage]): PullRequest
 }
 
 type RootSubscriptionType {
@@ -1114,6 +1116,7 @@ input StackSettingsAttributes {
 
 input AiSettingsAttributes {
   enabled: Boolean
+  tools: ToolConfigAttributes
   provider: AiProvider
   openai: OpenaiSettingsAttributes
   anthropic: AnthropicSettingsAttributes
@@ -1121,6 +1124,15 @@ input AiSettingsAttributes {
   azure: AzureOpenaiAttributes
   bedrock: BedrockAiAttributes
   vertex: VertexAiAttributes
+}
+
+input ToolConfigAttributes {
+  createPr: CreatePrConfigAttributes
+}
+
+input CreatePrConfigAttributes {
+  "a scm connection id to use for pr automations"
+  connectionId: ID
 }
 
 input OpenaiSettingsAttributes {
@@ -1305,6 +1317,7 @@ type SmtpSettings {
 "Settings for configuring access to common LLM providers"
 type AiSettings {
   enabled: Boolean
+  toolsEnabled: Boolean
   provider: AiProvider
   openai: OpenaiSettings
   anthropic: AnthropicSettings
@@ -4591,7 +4604,7 @@ type Cluster {
   insight: AiInsight
 
   "a set of kubernetes resources used to generate the ai insight for this cluster"
-  insightComponents: ClusterInsightComponent
+  insightComponents: [ClusterInsightComponent]
 
   "list cached nodes for a cluster, this can be stale up to 5m"
   nodes: [Node]
@@ -5268,6 +5281,8 @@ input ScmConnectionAttributes {
 
   github: GithubAppAttributes
 
+  default: Boolean
+
   "a ssh private key to be used for commit signing"
   signingPrivateKey: String
 }
@@ -5693,6 +5708,8 @@ type ScmConnection {
   name: String!
 
   type: ScmType!
+
+  default: Boolean
 
   username: String
 
@@ -6228,6 +6245,8 @@ type ClusterInsightComponent {
   name: String!
 
   cluster: Cluster
+
+  insight: AiInsight
 
   "the raw kubernetes resource itself, this is an expensive fetch and should be used sparingly"
   resource: KubernetesUnstructured
