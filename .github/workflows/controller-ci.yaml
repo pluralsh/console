@@ -83,6 +83,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 2
       - name: Set up Go
         uses: actions/setup-go@v4.1.0
         with:
@@ -92,7 +94,7 @@ jobs:
         run: go mod download
       - name: Download tools
         run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
-      - name: Test
+      - name: Regenerate docs
         run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs
       - name: Get changed files in the docs folder
         id: changed-files-specific
@@ -100,6 +102,7 @@ jobs:
         with:
           files: go/controller/docs/**
           since_last_remote_commit: true
+      - run: git diff --name-only HEAD^1 HEAD
       - name: Fail if CRD docs are outdated
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         env:
