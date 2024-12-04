@@ -9,6 +9,9 @@ fragment Catalog on Catalog {
 }
 
 fragment CatalogBindings on Catalog {
+  createBindings {
+    ...PolicyBinding
+  }
   readBindings {
     ...PolicyBinding
   }
