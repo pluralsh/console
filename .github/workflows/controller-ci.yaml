@@ -73,3 +73,34 @@ jobs:
           version: v1.61.0
           working-directory: go/controller
           args: --timeout=30m
+  verify-docs:
+    name: Verify docs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/controller
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go/controller/go.mod
+          cache: true
+      - name: Download dependencies
+        run: go mod download
+      - name: Download tools
+        run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
+      - name: Regenerate docs
+        run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs
+      - name: Check git diff
+        run: |
+          git --no-pager diff
+          
+          if [[ $(git --no-pager diff | head -c1 | wc -c) -ne 0 ]]; then
+            echo -e "\nCRD docs are outdated. Please run 'make codegen-crd-docs' and commit the changes."
+            exit 1;
+          else
+            echo -e "\nCRD docs are up-to-date."
+          fi
