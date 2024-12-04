@@ -1,13 +1,12 @@
-import { Button, PersonIcon } from '@pluralsh/design-system'
-import { ComponentProps, ReactNode, useState } from 'react'
-
+import { Button, PersonIcon, ModalWrapper } from '@pluralsh/design-system'
+import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import {
   ClusterFragment,
   ClustersRowFragment,
   useClusterBindingsQuery,
 } from 'generated/graphql'
-
-import { ModalMountTransition } from 'components/utils/ModalMountTransition'
+import { ComponentProps, ReactNode, useState } from 'react'
+import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 
 import { PermissionsIdType, PermissionsModal } from '../utils/PermissionsModal'
 
@@ -32,7 +31,14 @@ function ClusterPermissionsModalInner({
   const bindings = data?.cluster
 
   if (!bindings) {
-    return null
+    return (
+      <ModalWrapper
+        open={props.open}
+        css={{ overflow: 'hidden' }}
+      >
+        <LoadingIndicator />
+      </ModalWrapper>
+    )
   }
 
   return (
@@ -57,6 +63,7 @@ export function ClusterPermissionsModal(
     </ModalMountTransition>
   )
 }
+
 export default function ClusterPermissions({ cluster }: { cluster: Cluster }) {
   const [isOpen, setIsOpen] = useState(false)
 

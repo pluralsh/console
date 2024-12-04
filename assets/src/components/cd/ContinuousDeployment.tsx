@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  Dispatch,
 } from 'react'
 import { Outlet, useMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -63,15 +64,38 @@ export const useSetPageScrollable = (scrollable: boolean) => {
   }, [scrollable, setScrollable])
 }
 
-export const PageHeaderContext = createContext<
-  | {
-      setHeaderContent: (content: ReactNode) => void
-    }
-  | undefined
->(undefined)
+export interface MoreMenuItem {
+  key: string
+  icon: ReactNode
+  label: string
+  enabled: boolean | (() => boolean)
+}
+
+export interface HeaderContext {
+  setHeaderContent: Dispatch<ReactNode>
+  setMoreMenuItems?: Dispatch<Array<MoreMenuItem>>
+  menuKey?: string
+  setMenuKey?: Dispatch<string>
+}
+
+export const PageHeaderContext = createContext<HeaderContext | undefined>(
+  undefined
+)
 
 export function PageHeaderProvider(props) {
   return <PageHeaderContext.Provider {...props} />
+}
+
+export const usePageHeaderContext = (): HeaderContext => {
+  const ctx = useContext(PageHeaderContext)
+
+  if (!ctx) {
+    throw new Error(
+      'usePageHeaderContext() must be used within PageHeaderContext'
+    )
+  }
+
+  return ctx
 }
 
 export const useSetPageHeaderContent = (headerContent?: ReactNode) => {

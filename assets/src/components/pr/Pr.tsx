@@ -76,6 +76,7 @@ export default function Pr() {
           }}
         >
           <TabList
+            scrollable
             stateRef={tabStateRef}
             stateProps={{
               orientation: 'horizontal',
@@ -98,7 +99,7 @@ export default function Pr() {
               </LinkTabWrap>
             ))}
           </TabList>
-          {headerContent}
+          <div css={{ minWidth: 'fit-content' }}>{headerContent}</div>
         </div>
       }
     >

@@ -1,33 +1,31 @@
-import { Dispatch, SetStateAction, useMemo, useRef, useState } from 'react'
 import {
   ListIcon,
   NetworkInterfaceIcon,
-  SubTab,
-  TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
-import { useTheme } from 'styled-components'
+import { Dispatch, SetStateAction, useMemo, useState } from 'react'
+
+import { Outlet, useMatch } from 'react-router-dom'
 
 import {
   CD_ABS_PATH,
   CD_REL_PATH,
   SERVICES_REL_PATH,
 } from 'routes/cdRoutesConsts'
-
-import { Outlet, useMatch } from 'react-router-dom'
-
-import {
-  CD_BASE_CRUMBS,
-  useSetPageHeaderContent,
-} from '../ContinuousDeployment'
-
-import { LinkTabWrap } from '../../utils/Tabs'
+import { useTheme } from 'styled-components'
 
 import {
   Maybe,
   ServiceDeploymentStatus,
   ServiceStatusCountFragment,
 } from '../../../generated/graphql'
+import ButtonGroup from '../../utils/ButtonGroup.tsx'
+
+import {
+  CD_BASE_CRUMBS,
+  useSetPageHeaderContent,
+} from '../ContinuousDeployment'
+import { DeployService } from './deployModal/DeployService'
 
 import {
   ColActions,
@@ -39,7 +37,6 @@ import {
   ColServiceDeployment,
   ColStatus,
 } from './ServicesColumns'
-import { DeployService } from './deployModal/DeployService'
 import { StatusTabKey } from './ServicesFilters'
 
 export const columns = [
@@ -78,16 +75,14 @@ export type ServicesContextT = {
 }
 
 const directory = [
-  { path: '', label: 'Table', icon: <ListIcon /> },
-  { path: 'tree', label: 'Tree', icon: <NetworkInterfaceIcon /> },
+  { path: '', icon: <ListIcon /> },
+  { path: 'tree', icon: <NetworkInterfaceIcon /> },
 ]
 
 export default function Services() {
   const theme = useTheme()
   const pathMatch = useMatch(`${CD_ABS_PATH}/${SERVICES_REL_PATH}/:tab`)
   const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
-  const tabStateRef = useRef<any>(null)
   const [refetch, setRefetch] = useState(() => () => {})
 
   useSetBreadcrumbs(
@@ -113,39 +108,15 @@ export default function Services() {
             gap: theme.spacing.small,
           }}
         >
-          <TabList
-            margin={1}
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
-          >
-            {directory.map(({ path, label, icon }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`/${CD_REL_PATH}/${SERVICES_REL_PATH}/${path}`}
-              >
-                <SubTab
-                  key={path}
-                  textValue={label}
-                  css={{
-                    alignItems: 'center',
-                    display: 'flex',
-                    gap: theme.spacing.small,
-                  }}
-                >
-                  {icon} {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
+          <ButtonGroup
+            directory={directory}
+            toPath={(path) => `/${CD_REL_PATH}/${SERVICES_REL_PATH}/${path}`}
+            tab={tab}
+          />
           <DeployService refetch={refetch} />
         </div>
       ),
-      [currentTab?.path, refetch, theme.spacing.small]
+      [refetch, tab, theme.spacing.small]
     )
   )
 

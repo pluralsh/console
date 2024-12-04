@@ -216,6 +216,9 @@ fragment ClustersRow on Cluster {
     incompatibilities
   }
   virtual
+  insight {
+    ...AiInsightSummary
+  }
 }
 
 fragment ClusterMetricsFragment on Cluster {
@@ -321,6 +324,12 @@ fragment Cluster on Cluster {
   }
   parentCluster {
     ...ClustersRow
+  }
+  insight {
+    ...AiInsight
+  }
+  insightComponents {
+    ...ClusterInsightComponent
   }
 }
 

@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   Chip,
   GearTrainIcon,
@@ -8,36 +7,38 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { Link } from 'react-router-dom'
-import styled, { useTheme } from 'styled-components'
 import { createColumnHelper } from '@tanstack/react-table'
-
-import { Cluster, ClustersRowFragment } from 'generated/graphql'
-
-import { isUpgrading, toNiceVersion } from 'utils/semver'
-import { Edge } from 'utils/graphql'
-import { getProviderName } from 'components/utils/Provider'
+import { SortingFn } from '@tanstack/table-core'
+import { UsageBar } from 'components/cluster/nodes/UsageBar'
+import { TableText, TabularNumbers } from 'components/cluster/TableElements'
 import {
   DistroProviderIconFrame,
   getClusterDistroName,
 } from 'components/utils/ClusterDistro'
 import { MoreMenu } from 'components/utils/MoreMenu'
-import { BasicLink } from 'components/utils/typography/BasicLink'
+import { getProviderName } from 'components/utils/Provider'
 import { StackedText } from 'components/utils/table/StackedText'
-import { UsageBar } from 'components/cluster/nodes/UsageBar'
-import { TableText, TabularNumbers } from 'components/cluster/TableElements'
+import { BasicLink } from 'components/utils/typography/BasicLink'
+import { filesize } from 'filesize'
 
-import { DeleteClusterModal } from '../providers/DeleteCluster'
+import { Cluster, ClustersRowFragment } from 'generated/graphql'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import semver from 'semver'
+import styled, { useTheme } from 'styled-components'
+import { Edge } from 'utils/graphql'
+
+import { isUpgrading, toNiceVersion } from 'utils/semver'
+import { getClusterDetailsPath } from '../../../routes/cdRoutesConsts.tsx'
+import { AiInsightSummaryIcon } from '../../utils/AiInsights.tsx'
 import { ClusterPermissionsModal } from '../cluster/ClusterPermissions'
 import { ClusterSettingsModal } from '../cluster/ClusterSettings'
-import { DetachClusterModal } from '../providers/DetachCluster'
 
-import ClusterUpgrade from './ClusterUpgrade'
+import { DeleteClusterModal } from '../providers/DeleteCluster'
+import { DetachClusterModal } from '../providers/DetachCluster'
 import { ClusterHealth } from './ClusterHealthChip'
+import ClusterUpgrade from './ClusterUpgrade'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
-import { filesize } from 'filesize'
-import { SortingFn } from '@tanstack/table-core'
-import semver from 'semver'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 
@@ -350,6 +351,12 @@ export const ColActions = columnHelper.accessor(({ node }) => node, {
         onClick={(e) => e.stopPropagation()}
         css={{ alignItems: 'center', alignSelf: 'end', display: 'flex' }}
       >
+        <AiInsightSummaryIcon
+          navPath={`${getClusterDetailsPath({
+            clusterId: cluster.id,
+          })}/insights`}
+          insight={cluster.insight}
+        />
         <MoreMenu onSelectionChange={(newKey) => setMenuKey(newKey)}>
           <ListBoxItem
             key={MenuItemKey.Permissions}

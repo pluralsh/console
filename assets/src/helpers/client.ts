@@ -25,14 +25,14 @@ export const authlessClient = new ApolloClient({
 })
 
 function maybeReconnect(socket, absintheSocket) {
-  console.log('socket reconnect attempt', socket)
+  console.warn('socket reconnect attempt', socket)
   if (socket.connectionState() === 'closed') {
-    console.log('found dead websocket, attempting a reconnect')
+    console.warn('found dead websocket, attempting a reconnect')
     if (!socket.conn) {
-      console.log('connecting websocket transport')
+      console.warn('connecting websocket transport')
       socket.connect()
     } else if (socket.conn?.readyState === WebSocket.CLOSED) {
-      console.log('handling closed websocket')
+      console.warn('handling closed websocket')
       socket.reconnectTimer.reset()
       socket.reconnectTimer.scheduleTimeout()
     }
@@ -42,7 +42,7 @@ function maybeReconnect(socket, absintheSocket) {
     return
   }
 
-  console.log('socket not dead, ignoring')
+  console.warn('socket not dead, ignoring')
 }
 
 export function buildClient(gqlUrl, wsUrl, fetchToken) {

@@ -1,99 +1,107 @@
+import ClusterLogs from 'components/cd/cluster/ClusterLogs'
+import Clusters from 'components/cd/clusters/Clusters'
 import ContinuousDeployment, {
   useDefaultCDPath,
 } from 'components/cd/ContinuousDeployment'
-import Clusters from 'components/cd/clusters/Clusters'
-import Repositories from 'components/cd/repos/Repositories'
-import Services from 'components/cd/services/Services'
-import { Navigate, Outlet, Route } from 'react-router-dom'
-
-import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
-
-import ServiceComponent from 'components/cd/services/component/ServiceComponent'
-import ServiceDetails from 'components/cd/services/service/ServiceDetails'
-import ServiceDocs from 'components/cd/services/service/ServiceDocs'
-import ServiceComponents from 'components/cd/services/service/ServiceComponents'
-import ServiceErrors from 'components/cd/services/service/ServiceErrors'
-import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
-import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
-import ServiceSettings from 'components/cd/services/service/ServiceSettings'
-import ServiceHelm from 'components/cd/services/service/ServiceHelm'
-import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
-
-import ComponentInfo from 'components/component/ComponentInfo'
-import ComponentEvents from 'components/component/ComponentEvents'
-import ComponentRaw from 'components/component/ComponentRaw'
-import ComponentMetrics from 'components/component/ComponentMetrics'
-import ComponentTree from 'components/component/ComponentTree'
-
-import Pipelines from 'components/cd/pipelines/Pipelines'
-
-import ServiceLogs from 'components/cd/services/service/ServiceLogs'
-
-import ClusterLogs from 'components/cd/cluster/ClusterLogs'
 
 import GlobalServices from 'components/cd/globalServices/GlobalService'
 
 import Namespaces from 'components/cd/namespaces/Namespaces'
 
+import Pipelines from 'components/cd/pipelines/Pipelines'
+import Repositories from 'components/cd/repos/Repositories'
+
+import ServiceComponent from 'components/cd/services/component/ServiceComponent'
+import ServiceComponents from 'components/cd/services/service/ServiceComponents'
+
 import ServiceDependencies from 'components/cd/services/service/ServiceDependencies'
+import ServiceDetails from 'components/cd/services/service/ServiceDetails'
+import ServiceDocs from 'components/cd/services/service/ServiceDocs'
+import ServiceDryRun from 'components/cd/services/service/ServiceDryRun'
+import ServiceErrors from 'components/cd/services/service/ServiceErrors'
+import ServiceHelm from 'components/cd/services/service/ServiceHelm'
+import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
+
+import ServiceLogs from 'components/cd/services/service/ServiceLogs'
+import ServiceRevisions from 'components/cd/services/service/ServiceRevisions'
+import ServiceSecrets from 'components/cd/services/service/ServiceSecrets'
+import ServiceSettings from 'components/cd/services/service/ServiceSettings'
+import Services from 'components/cd/services/Services'
+
+import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
+import ComponentEvents from 'components/component/ComponentEvents'
+
+import ComponentInfo from 'components/component/ComponentInfo'
+import { ComponentInsights } from 'components/component/ComponentInsights'
 
 import ComponentMetadata from 'components/component/ComponentMetadata'
-
-import Cluster from '../components/cd/cluster/Cluster'
-import ClusterServices from '../components/cd/cluster/ClusterServices'
-import ClusterNodes from '../components/cd/cluster/ClusterNodes'
-import ClusterPods from '../components/cd/cluster/ClusterPods'
-import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
+import ComponentMetrics from 'components/component/ComponentMetrics'
+import ComponentRaw from 'components/component/ComponentRaw'
+import ComponentTree from 'components/component/ComponentTree'
+import { Navigate, Outlet, Route } from 'react-router-dom'
 import ClusterAddOnCompatibility from '../components/cd/cluster/addon/ClusterAddOnCompatibility'
 import ClusterAddOnReadme from '../components/cd/cluster/addon/ClusterAddOnReadme'
 import ClusterAddOnReleases from '../components/cd/cluster/addon/ClusterAddOnReleases'
 
+import Cluster from '../components/cd/cluster/Cluster'
+import ClusterAddOns from '../components/cd/cluster/ClusterAddOns'
+import ClusterInsightComponent from '../components/cd/cluster/ClusterInsightComponent.tsx'
+import ClusterInsights, {
+  ClusterInsightsSummary,
+} from '../components/cd/cluster/ClusterInsights.tsx'
+import ClusterInsightsComponents from '../components/cd/cluster/ClusterInsightsComponents.tsx'
+import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
+import ClusterNodes from '../components/cd/cluster/ClusterNodes'
+import ClusterPods from '../components/cd/cluster/ClusterPods'
+
+import ClusterPRs from '../components/cd/cluster/ClusterPRs'
+import ClusterServices from '../components/cd/cluster/ClusterServices'
+
 import Node from '../components/cd/cluster/node/Node'
-import NodeInfo from '../components/cd/cluster/node/NodeInfo'
 import NodeEvents from '../components/cd/cluster/node/NodeEvents'
-import NodeRaw from '../components/cd/cluster/node/NodeRaw'
+import NodeInfo from '../components/cd/cluster/node/NodeInfo'
 import NodeMetadata from '../components/cd/cluster/node/NodeMetadata'
+import NodeRaw from '../components/cd/cluster/node/NodeRaw'
+import Logs from '../components/cd/cluster/pod/logs/Logs'
 
 import Pod from '../components/cd/cluster/pod/Pod'
 import PodInfo from '../components/cd/cluster/pod/PodInfo'
-import ClusterMetadata from '../components/cd/cluster/ClusterMetadata'
-import PodRaw from '../components/cluster/pods/PodRaw'
-import PodEvents from '../components/cluster/pods/PodEvents'
-import Logs from '../components/cd/cluster/pod/logs/Logs'
 import PodShell from '../components/cd/cluster/pod/PodShell'
 
-import ServicePod from '../components/cd/services/service/pod/Pod'
+import VClusters from '../components/cd/cluster/VClusters'
 
-import ComponentDryRun from '../components/component/ComponentDryRun'
+import GlobalService from '../components/cd/globalServices/details/GlobalService'
 
 import GlobalServiceInfo from '../components/cd/globalServices/details/GlobalServiceInfo'
 
 import { GlobalServiceServices } from '../components/cd/globalServices/details/GlobalServiceServices'
 
-import GlobalService from '../components/cd/globalServices/details/GlobalService'
+import ManagedNamespace from '../components/cd/namespaces/details/ManagedNamespace'
 
 import ManagedNamespaceInfo from '../components/cd/namespaces/details/ManagedNamespaceInfo'
 
 import { ManagedNamespaceServices } from '../components/cd/namespaces/details/ManagedNamespaceServices'
 
-import ManagedNamespace from '../components/cd/namespaces/details/ManagedNamespace'
+import Observers from '../components/cd/observers/Observers'
 
-import ServicesTree from '../components/cd/services/ServicesTree'
-
-import ServicesTable from '../components/cd/services/ServicesTable'
-
-import ClusterPRs from '../components/cd/cluster/ClusterPRs'
+import ServicePod from '../components/cd/services/service/pod/Pod'
 
 import ServicePRs from '../components/cd/services/service/ServicePRs'
 
-import Observers from '../components/cd/observers/Observers'
+import ServicesTable from '../components/cd/services/ServicesTable'
 
-import VClusters from '../components/cd/cluster/VClusters'
+import ServicesTree from '../components/cd/services/ServicesTree'
+import PodEvents from '../components/cluster/pods/PodEvents'
+import PodRaw from '../components/cluster/pods/PodRaw'
+
+import ComponentDryRun from '../components/component/ComponentDryRun'
 
 import {
   CD_REL_PATH,
-  CLUSTERS_REL_PATH,
   CLUSTER_ADDONS_REL_PATH,
+  CLUSTER_INSIGHTS_COMPONENTS_PATH,
+  CLUSTER_INSIGHTS_PATH,
+  CLUSTER_INSIGHTS_SUMMARY_PATH,
   CLUSTER_LOGS_PATH,
   CLUSTER_METADATA_PATH,
   CLUSTER_NODES_PATH,
@@ -102,31 +110,31 @@ import {
   CLUSTER_REL_PATH,
   CLUSTER_SERVICES_PATH,
   CLUSTER_VCLUSTERS_REL_PATH,
-  GLOBAL_SERVICES_REL_PATH,
+  CLUSTERS_REL_PATH,
+  COMPONENT_PARAM_ID,
   GLOBAL_SERVICE_INFO_PATH,
   GLOBAL_SERVICE_PARAM_ID,
   GLOBAL_SERVICE_SERVICES_PATH,
-  NAMESPACES_PARAM_ID,
-  NAMESPACES_REL_PATH,
+  GLOBAL_SERVICES_REL_PATH,
   NAMESPACE_INFO_PATH,
   NAMESPACE_SERVICES_PATH,
+  NAMESPACES_PARAM_ID,
+  NAMESPACES_REL_PATH,
   NODE_REL_PATH,
   OBSERVERS_REL_PATH,
   PIPELINES_REL_PATH,
   POD_REL_PATH,
   REPOS_REL_PATH,
-  SERVICES_REL_PATH,
-  SERVICES_TREE_REL_PATH,
-  SERVICE_COMPONENTS_PATH,
   SERVICE_COMPONENT_PATH_MATCHER_REL,
+  SERVICE_COMPONENTS_PATH,
   SERVICE_PARAM_CLUSTER_ID,
   SERVICE_POD_REL_PATH,
   SERVICE_PRS_PATH,
   SERVICE_REL_PATH,
+  SERVICES_REL_PATH,
+  SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
-import { ServiceInsights } from 'components/cd/services/service/ServiceInsights'
-import { ComponentInsights } from 'components/component/ComponentInsights'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()
@@ -331,6 +339,24 @@ const clusterDetailsRoutes = [
       path={CLUSTER_PODS_PATH}
       element={<ClusterPods />}
     />
+    <Route
+      path={CLUSTER_INSIGHTS_PATH}
+      element={<ClusterInsights />}
+    >
+      <Route
+        index
+        path={CLUSTER_INSIGHTS_SUMMARY_PATH}
+        element={<ClusterInsightsSummary />}
+      />
+      <Route
+        path={CLUSTER_INSIGHTS_COMPONENTS_PATH}
+        element={<ClusterInsightsComponents />}
+      />
+      <Route
+        path={`${CLUSTER_INSIGHTS_COMPONENTS_PATH}/:${COMPONENT_PARAM_ID}`}
+        element={<ClusterInsightComponent />}
+      />
+    </Route>
     <Route
       path={CLUSTER_METADATA_PATH}
       element={<ClusterMetadata />}
