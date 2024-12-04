@@ -125,7 +125,7 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	Addon *string `json:"addon,omitempty"`
 
-	// The base branch this pr will be based on (defaults to the repo's main branch)
+	// The base branch this pr will be based on (defaults to the repo's main branch) test
 	// +kubebuilder:validation:Optional
 	Branch *string `json:"branch,omitempty"`
 
