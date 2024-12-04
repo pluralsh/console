@@ -1,8 +1,17 @@
 import { Flex, SubTab, TabList } from '@pluralsh/design-system'
-import { ReactNode, Suspense, useRef } from 'react'
-import { Outlet, useMatch } from 'react-router-dom'
+import {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  Suspense,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
+import { Outlet, useMatch, useOutletContext } from 'react-router-dom'
 import { useTheme } from 'styled-components'
-import { AiInsight } from '../../../generated/graphql.ts'
+import { AiInsight, ClusterFragment } from '../../../generated/graphql.ts'
 import {
   CLUSTER_ABS_PATH,
   CLUSTER_INSIGHTS_COMPONENTS_PATH,
@@ -21,10 +30,15 @@ import IconFrameRefreshButton from '../../utils/RefreshIconFrame.tsx'
 import { LinkTabWrap } from '../../utils/Tabs.tsx'
 import { useClusterContext } from './Cluster.tsx'
 
-const DIRECTORY = [
+const DIRECTORY: Array<DirectoryEntry> = [
   { path: CLUSTER_INSIGHTS_SUMMARY_PATH, label: 'Insight summary' },
   { path: CLUSTER_INSIGHTS_COMPONENTS_PATH, label: 'Component insights' },
 ]
+
+interface DirectoryEntry {
+  path: string
+  label?: string
+}
 
 export default function ClusterInsights(): ReactNode {
   const theme = useTheme()
@@ -34,6 +48,9 @@ export default function ClusterInsights(): ReactNode {
     useMatch(`${CLUSTER_ABS_PATH}/${CLUSTER_INSIGHTS_PATH}/:tab/*`)?.params
       ?.tab || ''
   const currentTab = DIRECTORY.find(({ path }) => path === tab)
+
+  const [navigationContent, setNavigationContent] = useState<ReactNode>()
+  const [actionContent, setActionContent] = useState<ReactNode>()
 
   return (
     <Flex
@@ -47,33 +64,69 @@ export default function ClusterInsights(): ReactNode {
         justify="space-between"
         alignItems="center"
       >
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: currentTab?.path,
-          }}
-        >
-          {DIRECTORY.map(({ path, label }) => (
-            <LinkTabWrap
-              subTab
-              key={path}
-              textValue={label}
-              to={path}
-            >
-              <SubTab
-                key={path}
-                textValue={label}
-              >
-                {label}
-              </SubTab>
-            </LinkTabWrap>
-          ))}
-        </TabList>
         <Flex
           align="center"
           gap="small"
         >
+          {navigationContent ? (
+            navigationContent
+          ) : (
+            <TabList
+              stateRef={tabStateRef}
+              stateProps={{
+                orientation: 'horizontal',
+                selectedKey: currentTab?.path,
+              }}
+            >
+              {DIRECTORY.map(({ path, label }) => (
+                <LinkTabWrap
+                  subTab
+                  key={path}
+                  textValue={label}
+                  to={path}
+                >
+                  <SubTab
+                    key={path}
+                    textValue={label}
+                  >
+                    {label}
+                  </SubTab>
+                </LinkTabWrap>
+              ))}
+            </TabList>
+          )}
+        </Flex>
+        <Flex
+          align="center"
+          gap="small"
+        >
+          {actionContent}
+        </Flex>
+      </Flex>
+      <Suspense fallback={<LoadingIndicator />}>
+        <Outlet
+          context={
+            {
+              cluster,
+              clusterLoading,
+              refetch,
+              setNavigationContent,
+              setActionContent,
+            } as ClusterInsightsContextType
+          }
+        />
+      </Suspense>
+    </Flex>
+  )
+}
+
+export function ClusterInsightsSummary(): ReactNode {
+  const { cluster, refetch, clusterLoading } = useClusterContext()
+
+  useSetActionContent(
+    useMemo(
+      () => (
+        <>
           <IconFrameRefreshButton
             loading={clusterLoading}
             refetch={refetch}
@@ -85,25 +138,63 @@ export default function ClusterInsights(): ReactNode {
             messages={[insightMessage(cluster?.insight)]}
           />
           <AISuggestFix insight={cluster?.insight} />
-        </Flex>
-      </Flex>
-      <Suspense fallback={<LoadingIndicator />}>
-        <Outlet
-          context={{
-            cluster,
-            //     clusterLoading,
-            //     refetch: refetchCluster,
-            //     refetchServices,
-            //     setRefetchServices,
-          }}
-        />
-      </Suspense>
-    </Flex>
+        </>
+      ),
+      [cluster?.insight, clusterLoading, refetch]
+    )
   )
-}
-
-export function ClusterInsightsSummary(): ReactNode {
-  const { cluster } = useClusterContext()
 
   return <InsightDisplay text={cluster.insight?.text} />
+}
+
+type ClusterInsightsContextType = {
+  cluster: ClusterFragment
+  clusterLoading: boolean
+  refetch: () => void
+  setNavigationContent: Dispatch<SetStateAction<Nullable<ReactNode>>>
+  setActionContent: Dispatch<SetStateAction<Nullable<ReactNode>>>
+}
+
+export function useClusterInsightsContext() {
+  return useOutletContext<ClusterInsightsContextType>()
+}
+
+export function useSetNavigationContent(node?: ReactNode) {
+  const ctx = useClusterInsightsContext()
+
+  if (!ctx) {
+    throw new Error(
+      'useSetDirectory() must be used within a ClusterInsightsContext'
+    )
+  }
+
+  const { setNavigationContent } = ctx
+
+  useLayoutEffect(() => {
+    setNavigationContent?.(node)
+
+    return () => {
+      setNavigationContent?.(null)
+    }
+  }, [node, setNavigationContent])
+}
+
+export function useSetActionContent(node?: ReactNode) {
+  const ctx = useClusterInsightsContext()
+
+  if (!ctx) {
+    throw new Error(
+      'useSetDirectory() must be used within a ClusterInsightsContext'
+    )
+  }
+
+  const { setActionContent } = ctx
+
+  useLayoutEffect(() => {
+    setActionContent?.(node)
+
+    return () => {
+      setActionContent?.(null)
+    }
+  }, [node, setActionContent])
 }

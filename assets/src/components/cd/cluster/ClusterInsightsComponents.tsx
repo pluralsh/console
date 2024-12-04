@@ -1,38 +1,19 @@
-import {
-  AiSparkleFilledIcon,
-  ComponentsIcon,
-  Flex,
-  IconFrame,
-  Table,
-} from '@pluralsh/design-system'
-import { createColumnHelper } from '@tanstack/react-table'
+import { ComponentsIcon, Flex, IconFrame, Table } from '@pluralsh/design-system'
+import { createColumnHelper, type Row } from '@tanstack/react-table'
 import { ReactNode } from 'react'
+import { useNavigate } from 'react-router'
 import { useTheme } from 'styled-components'
-import { ClusterInsightComponent } from '../../../generated/graphql.ts'
+import { ClusterInsightComponent as ClusterInsightComponentAPI } from '../../../generated/graphql.ts'
+import { AiInsightSummaryIcon } from '../../utils/AiInsights.tsx'
 import { StackedText } from '../../utils/table/StackedText.tsx'
 import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData.tsx'
+import { useClusterInsightsContext } from './ClusterInsights.tsx'
 
 export default function ClusterInsightsComponents(): ReactNode {
-  // const { cluster } = useClusterContext()
+  const { cluster } = useClusterInsightsContext()
   const theme = useTheme()
-  const data = [
-    {
-      id: 'id-1',
-      name: 'plrl-agent-gate-operator-binding',
-      namespace: 'plrl-deploy-operator',
-      kind: 'ClusterRoleBinding',
-      group: 'rbac.authorization.k8s.io',
-      version: 'v1',
-    } as ClusterInsightComponent,
-    {
-      id: 'id-2',
-      name: 'kubernetes-dashboard',
-      namespace: 'plrl-console',
-      kind: 'Deployment',
-      group: 'apps',
-      version: 'v1',
-    } as ClusterInsightComponent,
-  ]
+  const navigate = useNavigate()
+  const data = cluster.insightComponents as Array<ClusterInsightComponentAPI>
 
   return (
     <Table
@@ -48,11 +29,14 @@ export default function ClusterInsightsComponents(): ReactNode {
         border: theme.borders['fill-one'],
       }}
       emptyStateProps={{ message: 'No entries found.' }}
+      onRowClick={(_e, { original }: Row<ClusterInsightComponentAPI>) =>
+        navigate(original.id)
+      }
     />
   )
 }
 
-const columnHelper = createColumnHelper<ClusterInsightComponent>()
+const columnHelper = createColumnHelper<ClusterInsightComponentAPI>()
 
 const TableRow = columnHelper.accessor((item) => item, {
   id: 'row',
@@ -78,36 +62,58 @@ const TableRow = columnHelper.accessor((item) => item, {
           },
         }}
       >
-        <Flex
-          alignItems="center"
-          gap="small"
-          flex={1}
-        >
-          <IconFrame
-            size="large"
-            css={{ flexShrink: 0 }}
-            icon={<ComponentsIcon />}
-          />
-          <StackedText
-            first={
-              <div>
-                <span>{insight.namespace}</span>
-                <span>&nbsp;&#62;&nbsp;</span>
-                <span
-                  css={{
-                    color: theme.colors.text,
-                    ...theme.partials.text.body2Bold,
-                  }}
-                >
-                  {insight.name}
-                </span>
-              </div>
-            }
-            second={`${insight.group}/${insight.kind}`}
-          ></StackedText>
-        </Flex>
-        <IconFrame icon={<AiSparkleFilledIcon color="icon-info" />} />
+        <ComponentEntry component={insight} />
+        <AiInsightSummaryIcon insight={insight.insight} />
       </div>
     )
   },
 })
+
+export function ComponentEntry({
+  component,
+  icon = <ComponentsIcon />,
+}: {
+  component: Nullable<ClusterInsightComponentAPI>
+  icon?: Nullable<ReactNode>
+}): ReactNode {
+  const theme = useTheme()
+
+  return component ? (
+    <Flex
+      alignItems="center"
+      gap="small"
+      flex={1}
+    >
+      {icon && (
+        <IconFrame
+          size="large"
+          css={{ flexShrink: 0 }}
+          icon={<ComponentsIcon />}
+        />
+      )}
+      <StackedText
+        first={
+          <div>
+            <span
+              css={{
+                color: theme.colors['text-light'],
+              }}
+            >
+              {component.namespace}
+            </span>
+            <span>&nbsp;&#62;&nbsp;</span>
+            <span
+              css={{
+                color: theme.colors.text,
+                ...theme.partials.text.body2Bold,
+              }}
+            >
+              {component.name}
+            </span>
+          </div>
+        }
+        second={`${component.group}/${component.kind}`}
+      ></StackedText>
+    </Flex>
+  ) : undefined
+}

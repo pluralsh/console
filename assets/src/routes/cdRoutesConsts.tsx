@@ -27,7 +27,7 @@ export const CLUSTER_SERVICES_PATH = 'services' as const
 export const CLUSTER_NODES_PATH = 'nodes' as const
 export const CLUSTER_PODS_PATH = 'pods' as const
 export const CLUSTER_INSIGHTS_PATH = 'insights' as const
-export const CLUSTER_INSIGHTS_SUMMARY_PATH = 'summary' as const
+export const CLUSTER_INSIGHTS_SUMMARY_PATH = '' as const
 export const CLUSTER_INSIGHTS_COMPONENTS_PATH = 'components' as const
 export const CLUSTER_METADATA_PATH = 'metadata' as const
 export const CLUSTER_ADDONS_REL_PATH = 'addons' as const
@@ -116,6 +116,32 @@ export const NAMESPACES_ABS_PATH = `${CD_ABS_PATH}/${NAMESPACES_REL_PATH}`
 export const NAMESPACES_PARAM_ID = 'namespaceId' as const
 export const NAMESPACE_INFO_PATH = 'info' as const
 export const NAMESPACE_SERVICES_PATH = 'services' as const
+
+export const INSIGHTS_COMPONENTS_REL_PATH = getInsightsComponentsDetailsPath({
+  isRelative: false,
+  clusterId: `${CLUSTER_PARAM_ID}`,
+  componentId: `:${COMPONENT_PARAM_ID}?`,
+})
+export const INSIGHTS_COMPONENTS_ABS_PATH = getInsightsComponentsDetailsPath({
+  isRelative: true,
+  clusterId: `${CLUSTER_PARAM_ID}`,
+  componentId: `:${COMPONENT_PARAM_ID}?`,
+})
+
+export function getInsightsComponentsDetailsPath({
+  clusterId,
+  componentId,
+  isRelative = false,
+}: {
+  clusterId: string
+  componentId: string
+  isRelative: boolean
+}): string {
+  return `${getClusterDetailsPath({
+    clusterId,
+    isRelative,
+  })}/${CLUSTER_INSIGHTS_PATH}/${encodeSlashes(componentId || '')}`
+}
 
 export function getClusterDetailsPath({
   clusterId,

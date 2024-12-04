@@ -77,16 +77,10 @@ fragment ClusterInsightComponent on ClusterInsightComponent {
   group
   version
   resource {
-    kind
-    group
-    version
     raw
-    metadata {
-      uid
-      name
-      namespace
-      creationTimestamp
-    }
+  }
+  insight {
+    ...AiInsight
   }
 }
 
