@@ -73,3 +73,33 @@ jobs:
           version: v1.61.0
           working-directory: go/controller
           args: --timeout=30m
+  verify-docs:
+    name: Verify docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.1.1
+      - name: Set up Go
+        uses: actions/setup-go@v4.1.0
+        with:
+          go-version-file: go/controller/go.mod
+          cache: true
+      - name: Download dependencies
+        run: go mod download
+      - name: Download tools
+        run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
+      - name: Test
+        run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v45
+        with:
+          files: go/controller/docs/**
+      - name: Check if CRD docs are up to date
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        env:
+          ALL_CHANGED_FILES: ${{ steps.changed-files-specific.outputs.all_changed_files }}
+        run: |
+          echo "One or more files in the docs folder has changed. Please run make codegen-crd-docs and commit the changes."
+          echo "List all the files that have changed: $ALL_CHANGED_FILES"
+          exit 1
