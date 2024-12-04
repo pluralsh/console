@@ -102,5 +102,5 @@ jobs:
             echo -e "\nCRD docs are outdated. Please run 'make codegen-crd-docs' and commit the changes."
             exit 1;
           else
-            echo -e "CRD docs are up-to-date."
+            echo -e "\nCRD docs are up-to-date."
           fi
