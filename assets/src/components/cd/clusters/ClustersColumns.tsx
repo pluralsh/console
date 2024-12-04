@@ -36,7 +36,6 @@ import { ClusterSettingsModal } from '../cluster/ClusterSettings'
 
 import { DeleteClusterModal } from '../providers/DeleteCluster'
 import { DetachClusterModal } from '../providers/DetachCluster'
-import { ClusterConditions } from './ClusterConditions'
 import { ClusterHealth } from './ClusterHealthChip'
 import ClusterUpgrade from './ClusterUpgrade'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
