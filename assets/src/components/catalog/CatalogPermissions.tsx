@@ -79,13 +79,12 @@ export function CatalogPermissionsModal({
     [writeBindings]
   )
 
-  const [mutation, { loading: mutationLoading, error: mutationError }] =
-    useUpsertCatalogMutation({
-      onCompleted: () => {
-        refetch?.()
-        onClose()
-      },
-    })
+  const [mutation, { loading, error }] = useUpsertCatalogMutation({
+    onCompleted: () => {
+      refetch?.()
+      onClose()
+    },
+  })
   const allowSubmit = readBindings && writeBindings
 
   const onSubmit = useCallback(
@@ -99,6 +98,7 @@ export function CatalogPermissionsModal({
           attributes: {
             name: catalog.name,
             author: catalog.author ?? '',
+            category: catalog.category,
             createBindings: createBindings
               ?.filter(isNonNullable)
               .map(bindingToBindingAttributes),
@@ -115,8 +115,7 @@ export function CatalogPermissionsModal({
     [
       allowSubmit,
       mutation,
-      catalog.name,
-      catalog.author,
+      catalog,
       createBindings,
       readBindings,
       writeBindings,
@@ -146,7 +145,7 @@ export function CatalogPermissionsModal({
           <Button
             type="submit"
             disabled={!allowSubmit}
-            loading={mutationLoading}
+            loading={loading}
             primary
           >
             Save
@@ -220,7 +219,7 @@ export function CatalogPermissionsModal({
             </div>
           </div>
         )}
-        {mutationError && <GqlError error={mutationError} />}
+        {error && <GqlError error={error} />}
       </div>
     </Modal>
   )
