@@ -117,32 +117,6 @@ export const NAMESPACES_PARAM_ID = 'namespaceId' as const
 export const NAMESPACE_INFO_PATH = 'info' as const
 export const NAMESPACE_SERVICES_PATH = 'services' as const
 
-export const INSIGHTS_COMPONENTS_REL_PATH = getInsightsComponentsDetailsPath({
-  isRelative: false,
-  clusterId: `${CLUSTER_PARAM_ID}`,
-  componentId: `:${COMPONENT_PARAM_ID}?`,
-})
-export const INSIGHTS_COMPONENTS_ABS_PATH = getInsightsComponentsDetailsPath({
-  isRelative: true,
-  clusterId: `${CLUSTER_PARAM_ID}`,
-  componentId: `:${COMPONENT_PARAM_ID}?`,
-})
-
-export function getInsightsComponentsDetailsPath({
-  clusterId,
-  componentId,
-  isRelative = false,
-}: {
-  clusterId: string
-  componentId: string
-  isRelative: boolean
-}): string {
-  return `${getClusterDetailsPath({
-    clusterId,
-    isRelative,
-  })}/${CLUSTER_INSIGHTS_PATH}/${encodeSlashes(componentId || '')}`
-}
-
 export function getClusterDetailsPath({
   clusterId,
   isRelative = false,
