@@ -99,6 +99,7 @@ jobs:
         uses: tj-actions/changed-files@v45
         with:
           files: go/controller/docs/**
+          since_last_remote_commit: true
       - name: Fail if CRD docs are outdated
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         env:
