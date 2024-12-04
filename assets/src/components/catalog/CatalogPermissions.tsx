@@ -1,17 +1,8 @@
-import {
-  ComponentProps,
-  FormEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from 'react'
-import { Permissions, PermissionsModal } from '../cd/utils/PermissionsModal.tsx'
+import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { Permissions } from '../cd/utils/PermissionsModal.tsx'
 import {
   CatalogFragment,
-  PolicyBindingFragment,
   UpsertCatalogMutationVariables,
-  useCatalogBindingsQuery,
   useUpsertCatalogMutation,
 } from '../../generated/graphql.ts'
 import { ModalMountTransition } from '../utils/ModalMountTransition.tsx'
@@ -25,96 +16,69 @@ import { StepBody } from '../cd/ModalAlt.tsx'
 import LoadingIndicator from '../utils/LoadingIndicator.tsx'
 import { GqlError } from '../utils/Alert.tsx'
 
-export function CatalogPermissions(
-  props: ComponentProps<typeof CatalogPermissionsModalWrapper>
-) {
-  return (
-    <ModalMountTransition open={props.open}>
-      <CatalogPermissionsModalWrapper {...props} />
-    </ModalMountTransition>
-  )
-}
-
-function CatalogPermissionsModalWrapper({
+export function CatalogPermissions({
   catalog,
-  ...props
-}: Omit<
-  ComponentProps<typeof PermissionsModal>,
-  'bindings' | 'id' | 'type' | 'header'
-> & {
-  catalog: CatalogFragment
-}) {
-  const { data, refetch } = useCatalogBindingsQuery({
-    variables: { id: catalog.id },
-    fetchPolicy: 'no-cache',
-    skip: !catalog.id || !props.open,
-  })
-
-  const bindings = data?.catalog
-
-  if (!bindings) {
-    return null
-  }
-
-  return (
-    <CatalogPermissionsModal
-      catalog={catalog}
-      bindings={bindings}
-      refetch={refetch}
-      {...props}
-    />
-  )
-}
-
-export function CatalogPermissionsModal({
-  catalog,
-  bindings,
   open,
   onClose,
   refetch,
 }: {
   catalog: CatalogFragment
-  bindings: {
-    createBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
-    readBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
-    writeBindings?: Nullable<Nullable<PolicyBindingFragment>[]>
-  }
+  open: boolean
+  onClose: () => void
+  refetch?: () => void
+}) {
+  return (
+    <ModalMountTransition open={open}>
+      <CatalogPermissionsModal
+        catalog={catalog}
+        refetch={refetch}
+        open={open}
+        onClose={onClose}
+      />
+    </ModalMountTransition>
+  )
+}
+
+export function CatalogPermissionsModal({
+  catalog,
+  open,
+  onClose,
+  refetch,
+}: {
+  catalog: CatalogFragment
   open: boolean
   onClose: () => void
   refetch?: () => void
 }) {
   const theme = useTheme()
 
-  const [createBindings, setCreateBindings] = useState(bindings.createBindings)
-  const [readBindings, setReadBindings] = useState(bindings.readBindings)
-  const [writeBindings, setWriteBindings] = useState(bindings.writeBindings)
+  const [createBindings, setCreateBindings] = useState(catalog.createBindings)
+  const [readBindings, setReadBindings] = useState(catalog.readBindings)
+  const [writeBindings, setWriteBindings] = useState(catalog.writeBindings)
 
-  useEffect(() => {
-    setCreateBindings(bindings.createBindings)
-  }, [bindings.createBindings])
-
-  useEffect(() => {
-    setReadBindings(bindings.readBindings)
-  }, [bindings.readBindings])
-
-  useEffect(() => {
-    setWriteBindings(bindings.writeBindings)
-  }, [bindings.writeBindings])
+  useEffect(
+    () => setCreateBindings(catalog.createBindings),
+    [catalog.createBindings]
+  )
+  useEffect(() => setReadBindings(catalog.readBindings), [catalog.readBindings])
+  useEffect(
+    () => setWriteBindings(catalog.writeBindings),
+    [catalog.writeBindings]
+  )
 
   const uniqueCreateBindings = useMemo(
     () => uniqWith(createBindings, isEqual),
     [createBindings]
   )
-
   const uniqueReadBindings = useMemo(
     () => uniqWith(readBindings, isEqual),
     [readBindings]
   )
-
   const uniqueWriteBindings = useMemo(
     () => uniqWith(writeBindings, isEqual),
     [writeBindings]
   )
+
   const [mutation, { loading: mutationLoading, error: mutationError }] =
     useUpsertCatalogMutation({
       onCompleted: () => {
@@ -219,7 +183,7 @@ export function CatalogPermissionsModal({
             <b> {catalog.name}</b> catalog
           </StepBody>
         </div>
-        {!bindings ? (
+        {!catalog ? (
           <LoadingIndicator />
         ) : (
           <div css={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr' }}>

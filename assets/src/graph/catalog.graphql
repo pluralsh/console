@@ -6,9 +6,6 @@ fragment Catalog on Catalog {
   category
   icon
   darkIcon
-}
-
-fragment CatalogBindings on Catalog {
   createBindings {
     ...PolicyBinding
   }
@@ -36,12 +33,6 @@ query Catalogs($after: String, $before: String, $first: Int, $last: Int) {
 query Catalog($id: ID, $name: String) {
   catalog(id: $id, name: $name) {
     ...Catalog
-  }
-}
-
-query CatalogBindings($id: ID!) {
-  catalog(id: $id) {
-    ...CatalogBindings
   }
 }
 

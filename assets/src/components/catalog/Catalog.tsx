@@ -29,7 +29,7 @@ export function Catalog() {
   const id = useParams()[CATALOG_PARAM_ID] as string
   const [permissionsOpen, setPermissionsOpen] = useState(false)
 
-  const { data, error } = useCatalogQuery({ variables: { id } })
+  const { data, refetch, error } = useCatalogQuery({ variables: { id } })
 
   const catalog = data?.catalog
 
@@ -109,6 +109,7 @@ export function Catalog() {
                 </Button>
                 <CatalogPermissions
                   catalog={catalog}
+                  refetch={refetch}
                   open={permissionsOpen}
                   onClose={() => setPermissionsOpen(false)}
                 />

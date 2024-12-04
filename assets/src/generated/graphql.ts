@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -10069,9 +10069,7 @@ export type CreateBuildMutationVariables = Exact<{
 
 export type CreateBuildMutation = { __typename?: 'RootMutationType', createBuild?: { __typename?: 'Build', id: string } | null };
 
-export type CatalogFragment = { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null };
-
-export type CatalogBindingsFragment = { __typename?: 'Catalog', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
+export type CatalogFragment = { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null };
 
 export type CatalogsQueryVariables = Exact<{
   after?: InputMaybe<Scalars['String']['input']>;
@@ -10081,7 +10079,7 @@ export type CatalogsQueryVariables = Exact<{
 }>;
 
 
-export type CatalogsQuery = { __typename?: 'RootQueryType', catalogs?: { __typename?: 'CatalogConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CatalogEdge', node?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null } | null> | null } | null };
+export type CatalogsQuery = { __typename?: 'RootQueryType', catalogs?: { __typename?: 'CatalogConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'CatalogEdge', node?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null } | null> | null } | null };
 
 export type CatalogQueryVariables = Exact<{
   id?: InputMaybe<Scalars['ID']['input']>;
@@ -10089,28 +10087,21 @@ export type CatalogQueryVariables = Exact<{
 }>;
 
 
-export type CatalogQuery = { __typename?: 'RootQueryType', catalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null };
-
-export type CatalogBindingsQueryVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type CatalogBindingsQuery = { __typename?: 'RootQueryType', catalog?: { __typename?: 'Catalog', readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
+export type CatalogQuery = { __typename?: 'RootQueryType', catalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type UpsertCatalogMutationVariables = Exact<{
   attributes?: InputMaybe<CatalogAttributes>;
 }>;
 
 
-export type UpsertCatalogMutation = { __typename?: 'RootMutationType', upsertCatalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null };
+export type UpsertCatalogMutation = { __typename?: 'RootMutationType', upsertCatalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type DeleteCatalogMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
 
 
-export type DeleteCatalogMutation = { __typename?: 'RootMutationType', deleteCatalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null } | null };
+export type DeleteCatalogMutation = { __typename?: 'RootMutationType', deleteCatalog?: { __typename?: 'Catalog', id: string, name: string, author?: string | null, description?: string | null, category?: string | null, icon?: string | null, darkIcon?: string | null, createBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, readBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, writeBindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null } | null };
 
 export type ClusterNodeFragment = { __typename?: 'Node', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'NodeStatus', phase?: string | null, allocatable?: Record<string, unknown> | null, capacity?: Record<string, unknown> | null, conditions?: Array<{ __typename?: 'NodeCondition', type?: string | null, status?: string | null, message?: string | null } | null> | null }, spec: { __typename?: 'NodeSpec', podCidr?: string | null, providerId?: string | null } };
 
@@ -12371,10 +12362,9 @@ export const CatalogFragmentDoc = gql`
   category
   icon
   darkIcon
-}
-    `;
-export const CatalogBindingsFragmentDoc = gql`
-    fragment CatalogBindings on Catalog {
+  createBindings {
+    ...PolicyBinding
+  }
   readBindings {
     ...PolicyBinding
   }
@@ -16898,46 +16888,6 @@ export type CatalogQueryHookResult = ReturnType<typeof useCatalogQuery>;
 export type CatalogLazyQueryHookResult = ReturnType<typeof useCatalogLazyQuery>;
 export type CatalogSuspenseQueryHookResult = ReturnType<typeof useCatalogSuspenseQuery>;
 export type CatalogQueryResult = Apollo.QueryResult<CatalogQuery, CatalogQueryVariables>;
-export const CatalogBindingsDocument = gql`
-    query CatalogBindings($id: ID!) {
-  catalog(id: $id) {
-    ...CatalogBindings
-  }
-}
-    ${CatalogBindingsFragmentDoc}`;
-
-/**
- * __useCatalogBindingsQuery__
- *
- * To run a query within a React component, call `useCatalogBindingsQuery` and pass it any options that fit your needs.
- * When your component renders, `useCatalogBindingsQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useCatalogBindingsQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useCatalogBindingsQuery(baseOptions: Apollo.QueryHookOptions<CatalogBindingsQuery, CatalogBindingsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<CatalogBindingsQuery, CatalogBindingsQueryVariables>(CatalogBindingsDocument, options);
-      }
-export function useCatalogBindingsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CatalogBindingsQuery, CatalogBindingsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<CatalogBindingsQuery, CatalogBindingsQueryVariables>(CatalogBindingsDocument, options);
-        }
-export function useCatalogBindingsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<CatalogBindingsQuery, CatalogBindingsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useSuspenseQuery<CatalogBindingsQuery, CatalogBindingsQueryVariables>(CatalogBindingsDocument, options);
-        }
-export type CatalogBindingsQueryHookResult = ReturnType<typeof useCatalogBindingsQuery>;
-export type CatalogBindingsLazyQueryHookResult = ReturnType<typeof useCatalogBindingsLazyQuery>;
-export type CatalogBindingsSuspenseQueryHookResult = ReturnType<typeof useCatalogBindingsSuspenseQuery>;
-export type CatalogBindingsQueryResult = Apollo.QueryResult<CatalogBindingsQuery, CatalogBindingsQueryVariables>;
 export const UpsertCatalogDocument = gql`
     mutation UpsertCatalog($attributes: CatalogAttributes) {
   upsertCatalog(attributes: $attributes) {
@@ -24881,7 +24831,6 @@ export const namedOperations = {
     PluralContext: 'PluralContext',
     Catalogs: 'Catalogs',
     Catalog: 'Catalog',
-    CatalogBindings: 'CatalogBindings',
     Clusters: 'Clusters',
     ClustersTiny: 'ClustersTiny',
     VClusters: 'VClusters',
@@ -25130,7 +25079,6 @@ export const namedOperations = {
     ClusterRestore: 'ClusterRestore',
     PageInfo: 'PageInfo',
     Catalog: 'Catalog',
-    CatalogBindings: 'CatalogBindings',
     ClusterNode: 'ClusterNode',
     ClusterCondition: 'ClusterCondition',
     Taint: 'Taint',
