@@ -98,12 +98,10 @@ jobs:
         id: diff
         run: |
           git --no-pager diff
-          if [[ $(git --no-pager diff | head -c1 | wc -c) -ne 0 ]]; then exit 1; fi
-      - name: Fail if CRD docs are outdated
-        if: steps.changed-files-specific.outputs.any_changed == 'true'
-        env:
-          CHANGED_FILES: ${{ steps.changed-files-specific.outputs.all_changed_files }}
-        run: |
-          echo "CRD docs are outdated. Please run `make codegen-crd-docs` and commit the changes."
-          echo "Changed files: $CHANGED_FILES"
-          exit 1
+          
+          if [[ $(git --no-pager diff | head -c1 | wc -c) -ne 0 ]]; then
+            echo "CRD docs are outdated. Please run `make codegen-crd-docs` and commit the changes."
+            exit 1;
+          else
+            echo "CRD docs are up-to-date."
+          fi
