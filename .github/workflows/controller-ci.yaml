@@ -82,11 +82,9 @@ jobs:
         working-directory: go/controller
     steps:
       - name: Checkout
-        uses: actions/checkout@v4.1.1
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v4.1.0
+        uses: actions/setup-go@v4
         with:
           go-version-file: go/controller/go.mod
           cache: true
@@ -96,13 +94,11 @@ jobs:
         run: PATH=$PATH:$GOPATH/bin make --directory=.. tools
       - name: Regenerate docs
         run: PATH=$PATH:$GOPATH/bin make codegen-crd-docs
-      - name: Get changed files in the docs folder
-        id: changed-files-specific
-        uses: tj-actions/changed-files@v45
-        with:
-          files: go/controller/docs/**
-          since_last_remote_commit: true
-      - run: git diff
+      - name: Check git diff
+        id: diff
+        run: |
+          git --no-pager diff
+          if [[ $(git --no-pager diff | head -c1 | wc -c) -ne 0 ]]; then exit 1; fi
       - name: Fail if CRD docs are outdated
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         env:
