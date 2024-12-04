@@ -113,6 +113,7 @@ export function Catalogs() {
       <div
         css={{
           alignSelf: 'center',
+          height: '100%',
           maxWidth: theme.breakpoints.desktop,
           overflow: 'hidden',
           width: '100%',
@@ -122,7 +123,10 @@ export function Catalogs() {
           },
         }}
       >
-        <Flex height="100%">
+        <Flex
+          height="100%"
+          overflow={'hidden'}
+        >
           <Flex
             direction="column"
             grow={1}
@@ -173,6 +177,8 @@ export function Catalogs() {
             <Flex
               gap="medium"
               overflow={'hidden'}
+              paddingBottom={theme.spacing.large}
+              {...(isEmpty(resultCatalogs) ? { height: '100%' } : {})}
             >
               <CatalogsGrid
                 catalogs={resultCatalogs}
