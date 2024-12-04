@@ -1,4 +1,4 @@
-import { Code, Flex, IconFrame, Switch } from '@pluralsh/design-system'
+import { Code, Divider, Flex, IconFrame, Switch } from '@pluralsh/design-system'
 import { ReactNode, useMemo, useState } from 'react'
 import { Link, useMatch } from 'react-router-dom'
 import { useTheme } from 'styled-components'
@@ -72,7 +72,7 @@ export default function ClusterInsightComponent(): ReactNode {
           />
         </Flex>
       ),
-      [cluster, component, theme.partials.text.overline]
+      [cluster, component, theme]
     )
   )
 
@@ -103,27 +103,30 @@ export default function ClusterInsightComponent(): ReactNode {
   )
 
   return (
-    <div
-      css={{
-        display: 'flex',
-        gap: theme.spacing.medium,
-        height: '100%',
-        minHeight: 0,
-        width: '100%',
+    <>
+      <Divider backgroundColor={theme.colors.border} />
+      <div
+        css={{
+          display: 'flex',
+          gap: theme.spacing.medium,
+          height: '100%',
+          minHeight: 0,
+          width: '100%',
 
-        ...(showRaw
-          ? {
-              '> div': {
-                width: '50%',
-              },
-            }
-          : {}),
-      }}
-    >
-      <InsightDisplay text={component?.insight?.text} />
-      {showRaw && (
-        <Code language="yaml">{stringify(component?.resource?.raw)}</Code>
-      )}
-    </div>
+          ...(showRaw
+            ? {
+                '> div': {
+                  width: '50%',
+                },
+              }
+            : {}),
+        }}
+      >
+        <InsightDisplay text={component?.insight?.text} />
+        {showRaw && (
+          <Code language="yaml">{stringify(component?.resource?.raw)}</Code>
+        )}
+      </div>
+    </>
   )
 }
