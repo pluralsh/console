@@ -76,6 +76,10 @@ jobs:
   verify-docs:
     name: Verify docs
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: go/controller
     steps:
       - name: Checkout
         uses: actions/checkout@v4.1.1
