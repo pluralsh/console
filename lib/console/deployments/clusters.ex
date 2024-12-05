@@ -549,13 +549,22 @@ defmodule Console.Deployments.Clusters do
   """
   @spec ping(map, Cluster.t) :: cluster_resp
   def ping(attrs, %Cluster{id: id}) do
+    cluster = get_cluster(id)
+              |> Repo.preload([:insight_components])
     attrs = Map.merge(attrs, %{pinged_at: Timex.now(), installed: true})
-    get_cluster(id)
-    |> Repo.preload([:insight_components])
-    |> Cluster.ping_changeset(attrs)
+
+    cluster
+    |> Cluster.ping_changeset(stabilize_insight_components(attrs, cluster))
     |> Repo.update()
     |> notify(:ping)
   end
+
+  defp stabilize_insight_components(%{insight_components: [_ | _] = new} = attrs, %Cluster{insight_components: existing}) do
+    key = fn %{group: g, version: v, kind: k, name: n} = attrs -> {g, v, k, Map.get(attrs, :namespace), n} end
+    by_key = Map.new(existing, & {key.(&1), &1.id})
+    Map.put(attrs, :insight_components, Enum.map(new, &Map.put(&1, :id, by_key[key.(&1)])))
+  end
+  defp stabilize_insight_components(attrs, _), do: attrs
 
   @doc """
   Marks a cluster to be deleted, with hard deletes following a successful drain

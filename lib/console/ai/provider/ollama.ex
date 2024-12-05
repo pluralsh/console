@@ -6,7 +6,7 @@ defmodule Console.AI.Ollama do
 
   require Logger
 
-  defstruct [:url, :model, :authorization]
+  defstruct [:url, :model, :tool_model, :authorization]
 
   @type t :: %__MODULE__{}
 
@@ -32,7 +32,14 @@ defmodule Console.AI.Ollama do
     def spec(), do: %__MODULE__{message: [Ollama.Message.spec()]}
   end
 
-  def new(opts), do: %__MODULE__{url: opts.url, model: opts.model, authorization: opts.authorization}
+  def new(opts) do
+    %__MODULE__{
+      url: opts.url,
+      model: opts.model,
+      tool_model: opts.tool_model,
+      authorization: opts.authorization
+    }
+  end
 
   @doc """
   Generate a anthropic completion from

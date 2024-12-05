@@ -162,19 +162,22 @@ defmodule Console.GraphQl.AiQueriesTest do
     test "it can fetch by id" do
       user = insert(:user)
       cluster = insert(:cluster, read_bindings: [%{user_id: user.id}])
-      comp = insert(:cluster_insight_component, cluster: cluster)
+      insight = insert(:ai_insight)
+      comp = insert(:cluster_insight_component, insight: insight, cluster: cluster)
 
       {:ok, %{data: %{"clusterInsightComponent" => found}}} = run_query("""
         query Comp($id: ID!) {
           clusterInsightComponent(id: $id) {
             id
             cluster { id }
+            insight { id }
           }
         }
       """, %{"id" => comp.id}, %{current_user: user})
 
       assert found["id"] == comp.id
       assert found["cluster"]["id"] == comp.cluster_id
+      assert found["insight"]["id"] == insight.id
     end
 
     test "it cannot fetch w/o access" do

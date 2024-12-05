@@ -27,6 +27,9 @@ defmodule Console.AI.Evidence.Base do
   def prepend(list, l) when is_list(l), do: l ++ list
   def prepend(list, msg), do: [msg | list]
 
+  def append(list, l) when is_list(l), do: list ++ l
+  def append(list, msg), do: list ++ [msg]
+
   def distro(:byok), do: "vanilla"
   def distro(distro), do: distro
 

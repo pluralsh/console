@@ -81,6 +81,10 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      toolModel:
+                        description: Model to use for tool calling, which is less
+                          frequent and often requires more advanced reasoning
+                        type: string
                     required:
                     - tokenSecretRef
                     type: object
@@ -122,6 +126,10 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      toolModel:
+                        description: Model to use for tool calling, which is less
+                          frequent and often requires more advanced reasoning
+                        type: string
                     required:
                     - endpoint
                     - tokenSecretRef
@@ -158,6 +166,10 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      toolModelId:
+                        description: Model to use for tool calling, which is less
+                          frequent and often requires more advanced reasoning
+                        type: string
                     required:
                     - modelId
                     type: object
@@ -196,6 +208,10 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      toolModel:
+                        description: Model to use for tool calling, which is less
+                          frequent and often requires more advanced reasoning
+                        type: string
                       url:
                         description: URL is the url this model is queryable on
                         type: string
@@ -236,6 +252,10 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      toolModel:
+                        description: Model to use for tool calling, which is less
+                          frequent and often requires more advanced reasoning
+                        type: string
                     required:
                     - tokenSecretRef
                     type: object
@@ -288,6 +308,10 @@ spec:
                         - key
                         type: object
                         x-kubernetes-map-type: atomic
+                      toolModel:
+                        description: Model to use for tool calling, which is less
+                          frequent and often requires more advanced reasoning
+                        type: string
                     required:
                     - location
                     - project
