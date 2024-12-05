@@ -1,45 +1,33 @@
-import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router'
+import { Table } from '@pluralsh/design-system'
 import type { Row } from '@tanstack/react-table'
+
+import { GqlError } from 'components/utils/Alert'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
+  ServiceDeployment,
   type ServiceDeploymentsRowFragment,
   useGetGlobalServiceServicesQuery,
 } from 'generated/graphql'
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { GqlError } from 'components/utils/Alert'
-import { useOutletContext } from 'react-router-dom'
-import { useMemo } from 'react'
-
-import { columns } from 'components/cd/services/Services'
 
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from '../../../utils/table/useFetchPaginatedData'
+import { columns } from './columns'
 
-import { useSetPageScrollable } from '../../ContinuousDeployment'
+interface GlobalServiceServicesProps {
+  globalServiceID: string
+}
 
-import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
-
-export function GlobalServiceServices() {
+export function GlobalServiceServices({
+  globalServiceID,
+}: GlobalServiceServicesProps) {
   const navigate = useNavigate()
-  const { globalServiceId, globalService } =
-    useOutletContext<GlobalServiceContextT>()
-
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...getBreadcrumbs(globalServiceId, globalService),
-        { label: 'services' },
-      ],
-      [globalServiceId, globalService]
-    )
-  )
-
-  useSetPageScrollable(false)
 
   const {
     data,
@@ -54,13 +42,18 @@ export function GlobalServiceServices() {
       queryHook: useGetGlobalServiceServicesQuery,
       keyPath: ['globalService', 'services'],
     },
-    { serviceId: globalServiceId }
+    { serviceId: globalServiceID }
   )
 
-  const services = data?.globalService?.services?.edges
+  const services = useMemo(
+    () =>
+      data?.globalService?.services?.edges?.map(
+        (edge) => edge?.node as ServiceDeployment
+      ),
+    [data?.globalService?.services?.edges]
+  )
 
   if (error) return <GqlError error={error} />
-
   if (!data) return <LoadingIndicator />
 
   return (

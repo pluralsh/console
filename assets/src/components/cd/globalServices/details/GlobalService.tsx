@@ -3,121 +3,44 @@ import {
   ListBoxItem,
   ReloadIcon,
   Select,
-  SubTab,
-  TabList,
-  TabPanel,
 } from '@pluralsh/design-system'
-import { ReactNode, Suspense, useMemo, useRef, useState } from 'react'
-
+import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   GlobalServiceFragment,
   useGetGlobalServiceQuery,
   useGlobalServicesQuery,
   useSyncGlobalServiceMutation,
 } from 'generated/graphql'
-import {
-  CD_REL_PATH,
-  GLOBAL_SERVICES_REL_PATH,
-  GLOBAL_SERVICE_INFO_PATH,
-  GLOBAL_SERVICE_PARAM_ID,
-  GLOBAL_SERVICE_SERVICES_PATH,
-} from 'routes/cdRoutesConsts'
-
-import {
-  Outlet,
-  useLocation,
-  useMatch,
-  useNavigate,
-  useParams,
-} from 'react-router-dom'
-
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
-
+import { ReactNode, useMemo } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { GLOBAL_SERVICE_PARAM_ID } from 'routes/cdRoutesConsts'
 import { useTheme } from 'styled-components'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-
-import {
-  CD_BASE_CRUMBS,
-  PageHeaderContext,
-  PageScrollableContext,
-} from '../../ContinuousDeployment'
-
-import { LinkTabWrap } from '../../../utils/Tabs'
-
-import { PluralErrorBoundary } from '../../PluralErrorBoundary'
-import KickButton from '../../../utils/KickButton'
-import { GqlError } from '../../../utils/Alert'
-import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
-import { useProjectId } from '../../../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../../../utils/graphql'
+import { useProjectId } from '../../../contexts/ProjectsContext'
+import { GqlError } from '../../../utils/Alert'
 import { DistroProviderIcon } from '../../../utils/ClusterDistro'
+import KickButton from '../../../utils/KickButton'
+import { ResponsiveLayoutContentContainer } from '../../../utils/layout/ResponsiveLayoutContentContainer.tsx'
+import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage.tsx'
+import { ResponsiveLayoutSidecarContainer } from '../../../utils/layout/ResponsiveLayoutSidecarContainer.tsx'
+import { ResponsiveLayoutSpacer } from '../../../utils/layout/ResponsiveLayoutSpacer.tsx'
+import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { TRUNCATE } from '../../../utils/truncate'
-
-export type GlobalServiceContextT = {
-  globalServiceId: string
-  globalService: Nullable<GlobalServiceFragment>
-  refetch: () => void
-}
-
-export const getBreadcrumbs = (
-  globalServiceId: string,
-  globalService: Nullable<GlobalServiceFragment>
-) => [
-  ...CD_BASE_CRUMBS,
-  {
-    label: 'global services',
-    url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}`,
-  },
-  {
-    label: globalService?.name || globalServiceId,
-    url: `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${globalServiceId}`,
-  },
-]
-
-const directory = [
-  { path: GLOBAL_SERVICE_INFO_PATH, label: 'Info' },
-  { path: GLOBAL_SERVICE_SERVICES_PATH, label: 'Services' },
-] as const
+import { PluralErrorBoundary } from '../../PluralErrorBoundary'
+import { GlobalServiceServices } from './GlobalServiceServices.tsx'
+import GlobalServiceSidecar from './GlobalServiceSidecar.tsx'
 
 export default function GlobalService() {
   const theme = useTheme()
-  const navigate = useNavigate()
   const projectId = useProjectId()
-  const [headerContent, setHeaderContent] = useState<ReactNode>()
-  const [scrollable, setScrollable] = useState(false)
-
-  const pageScrollableContext = useMemo(
-    () => ({
-      setScrollable,
-    }),
-    []
-  )
-  const pageHeaderContext = useMemo(
-    () => ({
-      setHeaderContent,
-    }),
-    []
-  )
-
-  const { pathname } = useLocation()
   const globalServiceId = useParams()[GLOBAL_SERVICE_PARAM_ID] ?? ''
-  const pathRoot = `/${CD_REL_PATH}/${GLOBAL_SERVICES_REL_PATH}/${globalServiceId}`
-  const tabStateRef = useRef<any>(null)
-  const pathMatch = useMatch(`${pathRoot}/:tab/*`)
-  const tab = pathMatch?.params?.tab || ''
-  const currentTab = directory.find(({ path }) => path === tab)
 
-  const { data, error, refetch } = useGetGlobalServiceQuery({
+  const { data, error } = useGetGlobalServiceQuery({
     variables: { serviceId: globalServiceId },
   })
 
   const globalService = data?.globalService
-
-  const globalServiceContext: GlobalServiceContextT = useMemo(
-    () => ({ globalServiceId, globalService, refetch }),
-    [globalService, globalServiceId, refetch]
-  )
 
   const { data: globalServicesData, error: globalServicesError } =
     useFetchPaginatedData(
@@ -133,15 +56,13 @@ export default function GlobalService() {
     [globalServicesData?.globalServices]
   )
 
-  if (error) return <GqlError error={error} />
-
-  if (globalServicesError) return <GqlError error={globalServicesError} />
-
+  if (error || globalServicesError)
+    return <GqlError error={error ?? globalServicesError} />
   if (!globalService || !globalServices) return <LoadingIndicator />
 
   return (
     <ResponsivePageFullWidth
-      scrollable={scrollable}
+      scrollable={false}
       headingContent={
         <div
           css={{
@@ -153,47 +74,18 @@ export default function GlobalService() {
             marginBottom: theme.spacing.xsmall,
           }}
         >
-          <div css={{ display: 'flex', gap: theme.spacing.small }}>
-            <div css={{ minWidth: 320 }}>
-              <Select
-                titleContent={
-                  globalService?.distro ? (
-                    <DistroProviderIcon
-                      distro={globalService.distro}
-                      provider={globalService.provider?.name}
-                      size={16}
-                    />
-                  ) : (
-                    <GlobeIcon size={16} />
-                  )
-                }
-                onSelectionChange={(id) =>
-                  navigate(pathname.replace(globalServiceId, id as string))
-                }
-                selectedKey={globalServiceId}
-              >
-                {globalServices.map((gs) => (
-                  <ListBoxItem
-                    key={gs?.id}
-                    label={
-                      <div css={{ ...TRUNCATE, maxWidth: 210 }}>{gs?.name}</div>
-                    }
-                    textValue={gs?.name}
-                    leftContent={
-                      gs?.distro ? (
-                        <DistroProviderIcon
-                          distro={gs.distro}
-                          provider={gs.provider?.name}
-                          size={16}
-                        />
-                      ) : (
-                        <GlobeIcon size={16} />
-                      )
-                    }
-                  />
-                ))}
-              </Select>
-            </div>
+          <div
+            css={{
+              display: 'flex',
+              gap: theme.spacing.small,
+              justifyContent: 'space-between',
+              width: '100%',
+            }}
+          >
+            <GlobalServiceSelect
+              selectedGlobalService={globalService}
+              globalServices={globalServices}
+            />
             <KickButton
               secondary
               startIcon={<ReloadIcon />}
@@ -202,48 +94,82 @@ export default function GlobalService() {
               tooltipMessage="Sync this service now instead of at the next poll interval"
               variables={{ id: globalServiceId }}
             />
-            {headerContent}
           </div>
-          <TabList
-            stateRef={tabStateRef}
-            stateProps={{
-              orientation: 'horizontal',
-              selectedKey: currentTab?.path,
-            }}
-          >
-            {directory.map(({ label, path }) => (
-              <LinkTabWrap
-                subTab
-                key={path}
-                textValue={label}
-                to={`${pathRoot}/${path}`}
-              >
-                <SubTab
-                  key={path}
-                  textValue={label}
-                >
-                  {label}
-                </SubTab>
-              </LinkTabWrap>
-            ))}
-          </TabList>
         </div>
       }
     >
       <PluralErrorBoundary>
-        <TabPanel
-          css={{ height: '100%' }}
-          stateRef={tabStateRef}
-        >
-          <PageHeaderContext.Provider value={pageHeaderContext}>
-            <PageScrollableContext.Provider value={pageScrollableContext}>
-              <Suspense fallback={<LoadingIndicator />}>
-                <Outlet context={globalServiceContext} />
-              </Suspense>
-            </PageScrollableContext.Provider>
-          </PageHeaderContext.Provider>
-        </TabPanel>
+        <ResponsiveLayoutPage css={{ padding: 0 }}>
+          <ResponsiveLayoutSpacer />
+          <ResponsiveLayoutContentContainer>
+            <GlobalServiceServices globalServiceID={globalServiceId} />
+          </ResponsiveLayoutContentContainer>
+          <ResponsiveLayoutSpacer />
+          <ResponsiveLayoutSidecarContainer
+            css={{
+              gap: theme.spacing.medium,
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <GlobalServiceSidecar globalService={globalService} />
+          </ResponsiveLayoutSidecarContainer>
+        </ResponsiveLayoutPage>
       </PluralErrorBoundary>
     </ResponsivePageFullWidth>
+  )
+}
+
+interface GlobalServiceSelectProps {
+  selectedGlobalService: GlobalServiceFragment
+  globalServices: Array<GlobalServiceFragment>
+}
+
+function GlobalServiceSelect({
+  selectedGlobalService,
+  globalServices,
+}: GlobalServiceSelectProps): ReactNode {
+  const navigate = useNavigate()
+  const { pathname } = useLocation()
+
+  return (
+    <div css={{ minWidth: 320 }}>
+      <Select
+        titleContent={
+          selectedGlobalService?.distro ? (
+            <DistroProviderIcon
+              distro={selectedGlobalService.distro}
+              provider={selectedGlobalService.provider?.name}
+              size={16}
+            />
+          ) : (
+            <GlobeIcon size={16} />
+          )
+        }
+        onSelectionChange={(id) =>
+          navigate(pathname.replace(selectedGlobalService?.id, id as string))
+        }
+        selectedKey={selectedGlobalService?.id}
+      >
+        {globalServices.map((gs) => (
+          <ListBoxItem
+            key={gs?.id}
+            label={<div css={{ ...TRUNCATE, maxWidth: 210 }}>{gs?.name}</div>}
+            textValue={gs?.name}
+            leftContent={
+              gs?.distro ? (
+                <DistroProviderIcon
+                  distro={gs.distro}
+                  provider={gs.provider?.name}
+                  size={16}
+                />
+              ) : (
+                <GlobeIcon size={16} />
+              )
+            }
+          />
+        ))}
+      </Select>
+    </div>
   )
 }
