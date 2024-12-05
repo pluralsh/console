@@ -70,7 +70,7 @@ export function AITable({
       css={{
         height: '100%',
         overflowX: 'hidden',
-        border: theme.borders['fill-one'],
+        border: theme.borders['fill-two'],
       }}
       emptyStateProps={{ message: 'No entries found.' }}
       {...props}

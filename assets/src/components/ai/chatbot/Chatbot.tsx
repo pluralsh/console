@@ -92,6 +92,7 @@ function ChatbotPanelInner({
   currentInsight,
   ...props
 }: ChatbotPanelInnerProps) {
+  const theme = useTheme()
   const { pathname } = useLocation()
   const threadsQuery = useFetchPaginatedData({
     skip: !!currentThread || !!currentInsight,
@@ -138,7 +139,9 @@ function ChatbotPanelInner({
           fullscreen={fullscreen}
         />
       ) : (
-        <FullHeightTableWrap>
+        <FullHeightTableWrap
+          css={{ backgroundColor: theme.colors['fill-one'] }}
+        >
           <AITable
             modal
             flush={!fullscreen}
