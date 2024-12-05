@@ -1,4 +1,11 @@
-import { type Ref, forwardRef, useCallback, useEffect, useState } from 'react'
+import {
+  type ComponentProps,
+  type Ref,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react'
 
 import { type Severity } from '../types'
 import { type Extends } from '../utils/ts-utils'
@@ -15,6 +22,7 @@ type ToastProps = {
   onCloseComplete?: () => void
   show?: boolean
   severity?: ToastSeverity
+  layerProps?: ComponentProps<'div'>
 } & BannerProps
 
 const defaults = {
@@ -35,6 +43,7 @@ const Toast = forwardRef(
       severity = defaults.severity,
       children,
       show = true,
+      layerProps,
       ...props
     }: ToastProps,
     ref: Ref<any>
@@ -67,6 +76,7 @@ const Toast = forwardRef(
 
     return (
       <Layer
+        modal
         open={open}
         position={position}
         onClose={() => {
@@ -76,6 +86,7 @@ const Toast = forwardRef(
           onCloseComplete()
         }}
         ref={ref}
+        {...layerProps}
       >
         <Banner
           onClose={() => setOpen(false)}

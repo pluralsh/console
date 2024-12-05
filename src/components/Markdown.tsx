@@ -1,4 +1,3 @@
-import { Div } from 'honorable'
 import { Children, useMemo } from 'react'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
@@ -6,6 +5,8 @@ import remarkGfm from 'remark-gfm'
 import styled, { useTheme } from 'styled-components'
 
 import { isExternalUrl, removeTrailingSlashes } from '../utils/urls'
+
+import { styledTheme } from '../theme'
 
 import MultilineCode from './Code'
 import InlineCode from './InlineCode'
@@ -43,6 +44,7 @@ function getLastStringChild(children: any, depth = 0): any {
 }
 
 function MarkdownPreformatted({ children, ...props }: any) {
+  const theme = useTheme()
   let lang
 
   const className = children?.[0]?.props?.className
@@ -53,104 +55,143 @@ function MarkdownPreformatted({ children, ...props }: any) {
   const stringChild = getLastStringChild(children) || ''
 
   return (
-    <Div mb={1}>
-      <MultilineCode
-        language={lang}
-        {...props}
-      >
-        {stringChild}
-      </MultilineCode>
-    </Div>
+    <MultilineCode
+      css={{
+        marginTop: theme.spacing.xxsmall,
+        'h1 + &, h2 + &, h3 + &, h4 + &, h5 + &, h6 + &': {
+          marginTop: theme.spacing.medium,
+        },
+      }}
+      language={lang}
+      {...props}
+    >
+      {stringChild}
+    </MultilineCode>
   )
 }
 const commonCfg = { shouldForwardProp: () => true }
+const spacingReset = {
+  padding: 0,
+  margin: 0,
+  'hr + &': {
+    paddingTop: styledTheme.spacing.medium,
+  },
+}
 
 const MdBlockquote = styled.blockquote.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   position: 'relative',
   ...theme.partials.text.body1,
   color: theme.colors['text-light'],
-  margin: 0,
+  paddingTop: theme.spacing.small,
   marginLeft: theme.spacing.xlarge - 1,
-  borderLeft: `2px solid ${theme.colors.border}`,
-  padding: '0',
-  paddingLeft: theme.spacing.xlarge - 1,
   boxShadow: 'none',
   '& p': {
+    borderLeft: `2px solid ${theme.colors.border}`,
+    paddingLeft: theme.spacing.xlarge - 1,
     ...theme.partials.text.body1,
     color: theme.colors['text-light'],
   },
 }))
 const MdUl = styled.ul.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   paddingLeft: theme.spacing.xlarge,
-  marginBottom: theme.spacing.small,
+  paddingTop: theme.spacing.medium,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  'ul &, ol &': {
+    paddingTop: theme.spacing.xxsmall,
+    gap: theme.spacing.xxsmall,
+  },
 }))
 const MdOl = styled.ol.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   paddingLeft: theme.spacing.xlarge,
-  marginBottom: theme.spacing.small,
+  paddingTop: theme.spacing.medium,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: theme.spacing.xsmall,
+  'ul &, ol &': {
+    paddingTop: theme.spacing.xxsmall,
+    gap: theme.spacing.xxsmall,
+  },
 }))
 const MdLi = styled.li.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   ...theme.partials.text.body2LooseLineHeight,
-  marginTop: theme.spacing.xxsmall,
+  color: theme.colors['text-light'],
 }))
 const MdH1 = styled.h1.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   ...theme.partials.text.title2,
   color: theme.colors.text,
-  marginTop: theme.spacing.large,
-  marginBottom: theme.spacing.small,
-  '&:first-of-type': { marginTop: 0 },
+  margin: 0,
+  paddingTop: theme.spacing.xlarge,
+  '&:first-child': { paddingTop: 0 },
 }))
 const MdH2 = styled.h2.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   ...theme.partials.text.subtitle1,
   color: theme.colors.text,
-  marginTop: theme.spacing.large,
-  marginBottom: theme.spacing.small,
-  '&:first-of-type': { marginTop: 0 },
+  margin: 0,
+  paddingTop: theme.spacing.xlarge,
+  '&:first-child': { paddingTop: 0 },
 }))
 const MdH3 = styled.h3.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   ...theme.partials.text.subtitle2,
   color: theme.colors.text,
-  marginTop: theme.spacing.large,
-  marginBottom: theme.spacing.small,
-  '&:first-of-type': { marginTop: 0 },
+  paddingTop: theme.spacing.xlarge,
+  '&:first-child': { paddingTop: 0 },
 }))
 const MdH4 = styled.h4.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   ...theme.partials.text.body1Bold,
   color: theme.colors.text,
-  marginTop: theme.spacing.large,
-  marginBottom: theme.spacing.small,
-  '&:first-of-type': { marginTop: 0 },
+  paddingTop: theme.spacing.large,
+  '&:first-child': { paddingTop: 0 },
 }))
 const MdH5 = styled.h5.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   ...theme.partials.text.body1Bold,
   color: theme.colors.text,
-  marginTop: theme.spacing.large,
-  marginBottom: theme.spacing.small,
-  '&:first-of-type': { marginTop: 0 },
+  paddingTop: theme.spacing.large,
+  '&:first-child': { paddingTop: 0 },
 }))
 const MdH6 = styled.h6.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   ...theme.partials.text.body1Bold,
   color: theme.colors.text,
-  marginTop: theme.spacing.large,
-  marginBottom: theme.spacing.small,
-  '&:first-of-type': { marginTop: 0 },
+  paddingTop: theme.spacing.large,
+  '&:first-child': { paddingTop: 0 },
 }))
 const MdImg = styled.img(() => ({ display: 'inline', maxWidth: '100%' }))
 const MdP = styled.p.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   ...theme.partials.text.body2LooseLineHeight,
-  marginBottom: theme.spacing.medium,
+  color: theme.colors['text-light'],
+  paddingTop: theme.spacing.large,
+  'h1 + &, h2 + &, h3 + &, h4 + &, h5 + &, h6 + &': {
+    paddingTop: theme.spacing.small,
+  },
+  '&:first-child': { paddingTop: 0 },
 }))
 const MdDiv = styled.div.withConfig(commonCfg)(({ theme }) => ({
   ...theme.partials.text.body2LooseLineHeight,
   marginBottom: theme.spacing.medium,
 }))
 const MdA = styled.a.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   display: 'inline',
   ...theme.partials.text.inlineLink,
 }))
 const MdSpan = styled.span.withConfig(commonCfg)((_p) => ({
+  ...spacingReset,
   verticalAlign: 'bottom',
 }))
 const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({
+  ...spacingReset,
   '&::before': {
     content: '""',
     display: 'table',
@@ -163,8 +204,7 @@ const MdHr = styled.hr.withConfig(commonCfg)(({ theme }) => ({
   height: '1px',
   backgroundColor: theme.colors.border,
   border: 0,
-  padding: 0,
-  margin: `${theme.spacing.xlarge}px ${theme.spacing.large}px`,
+  margin: `${theme.spacing.medium}px ${theme.spacing.large}px 0`,
 }))
 
 function MarkdownImage({
@@ -257,10 +297,7 @@ function Markdown({ text, gitUrl, mainBranch }: MarkdownProps) {
           }),
           span: render({ component: MdSpan }),
           code: render({ component: InlineCode }),
-          pre: render({
-            component: MarkdownPreformatted,
-            props: { marginBottom: 'medium' },
-          }),
+          pre: render({ component: MarkdownPreformatted }),
           hr: render({ component: MdHr }),
         }}
       >

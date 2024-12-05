@@ -1,5 +1,10 @@
+// this is deprecated and only still used internally for the Toast component (since it's probably more work than it's worth to migrate)
+// anything else that needs similar functionality should use a ModalWrapper
+import { type UseTransitionProps, useTransition } from '@react-spring/web'
 import { useOutsideClick } from 'honorable'
+import { isNil } from 'lodash-es'
 import {
+  type ComponentProps,
   type MutableRefObject,
   type PropsWithChildren,
   forwardRef,
@@ -9,8 +14,6 @@ import {
   useState,
 } from 'react'
 import { createPortal } from 'react-dom'
-import { type UseTransitionProps, useTransition } from '@react-spring/web'
-import { isNil } from 'lodash-es'
 import styled, { useTheme } from 'styled-components'
 
 import usePrevious from '../hooks/usePrevious'
@@ -158,6 +161,7 @@ function LayerRef(
     onClose,
     onCloseComplete,
     open,
+    wrapperProps,
   }: PropsWithChildren<{
     open: boolean
     position: LayerPositionType
@@ -167,6 +171,7 @@ function LayerRef(
     onClose?: () => void | null | undefined
     onCloseComplete?: () => void | null | undefined
     onClickOutside?: () => void | null | undefined
+    wrapperProps?: ComponentProps<'div'>
   }>,
   ref: MutableRefObject<HTMLDivElement>
 ) {
@@ -292,6 +297,7 @@ function LayerRef(
     <LayerWrapper
       $position={position}
       $margin={margin}
+      {...wrapperProps}
     >
       {transitions((styles) => (
         <AnimatedDiv
@@ -299,7 +305,7 @@ function LayerRef(
           ref={finalRef}
           style={{
             ...styles,
-            ...(modal ? { zIndex: theme.zIndexes.modal } : {}),
+            ...(modal ? { zIndex: theme.zIndexes.toast } : {}),
           }}
         >
           {children}
