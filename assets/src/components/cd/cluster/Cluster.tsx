@@ -60,18 +60,23 @@ import ClusterSelector from '../utils/ClusterSelector'
 
 import { ClusterPermissionsModal } from './ClusterPermissions'
 import { ClusterSettingsModal } from './ClusterSettings.tsx'
+import { InsightsTabLabel } from 'components/utils/AiInsights.tsx'
 
-const directory = [
-  { path: CLUSTER_SERVICES_PATH, label: 'Services' },
-  { path: CLUSTER_NODES_PATH, label: 'Nodes' },
-  { path: CLUSTER_PODS_PATH, label: 'Pods' },
-  { path: CLUSTER_INSIGHTS_PATH, label: 'Insights' },
-  { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
-  { path: CLUSTER_VCLUSTERS_REL_PATH, label: 'VClusters', vclusters: true },
-  { path: CLUSTER_LOGS_PATH, label: 'Logs', logs: true },
-  { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
-  { path: CLUSTER_PRS_REL_PATH, label: 'PRs' },
-] as const
+const getDirectory = ({ cluster }: { cluster: Nullable<ClusterFragment> }) =>
+  [
+    { path: CLUSTER_SERVICES_PATH, label: 'Services' },
+    { path: CLUSTER_NODES_PATH, label: 'Nodes' },
+    { path: CLUSTER_PODS_PATH, label: 'Pods' },
+    {
+      path: CLUSTER_INSIGHTS_PATH,
+      label: <InsightsTabLabel insight={cluster?.insight} />,
+    },
+    { path: CLUSTER_METADATA_PATH, label: 'Metadata' },
+    { path: CLUSTER_VCLUSTERS_REL_PATH, label: 'VClusters', vclusters: true },
+    { path: CLUSTER_LOGS_PATH, label: 'Logs', logs: true },
+    { path: CLUSTER_ADDONS_REL_PATH, label: 'Add-ons' },
+    { path: CLUSTER_PRS_REL_PATH, label: 'PRs' },
+  ] as const
 
 const getSharedMenuItems = (cluster: ClusterFragment): Array<MoreMenuItem> => [
   {
@@ -141,8 +146,6 @@ export default function Cluster() {
   const [refetchServices, setRefetchServices] = useState(() => () => {})
   const logsEnabled = useLogsEnabled()
 
-  const currentTab = directory.find(({ path }) => path === tab)
-
   const {
     data,
     refetch: refetchCluster,
@@ -154,6 +157,8 @@ export default function Cluster() {
   })
 
   const cluster = data?.cluster
+  const directory = getDirectory({ cluster })
+  const currentTab = directory.find(({ path }) => path === tab)
 
   const [headerContent, setHeaderContent] = useState<ReactNode>()
   const [menuKey, setMenuKey] = useState<string>('')
@@ -234,18 +239,12 @@ export default function Cluster() {
                   css={{ minWidth: 'fit-content' }}
                   subTab
                   key={path}
-                  textValue={label}
                   to={`${CLUSTER_ABS_PATH}/${path}`.replace(
                     `:${CLUSTER_PARAM_ID}`,
                     clusterId ?? ''
                   )}
                 >
-                  <SubTab
-                    key={path}
-                    textValue={label}
-                  >
-                    {label}
-                  </SubTab>
+                  <SubTab key={path}>{label}</SubTab>
                 </LinkTabWrap>
               ))}
           </TabList>
