@@ -43,5 +43,12 @@ func (in *PrAutomationReconciler) attributes(ctx context.Context, pra *v1alpha1.
 		return nil, err
 	}
 
-	return pra.Attributes(clusterID, serviceID, connectionID, repositoryID, projectID), nil
+	catalogID, err := helper.IDFromRef(pra.Spec.CatalogRef, &v1alpha1.Catalog{})
+	if err != nil {
+		return nil, err
+	}
+
+	attrs := pra.Attributes(clusterID, serviceID, connectionID, repositoryID, projectID)
+	attrs.CatalogID = catalogID
+	return attrs, nil
 }

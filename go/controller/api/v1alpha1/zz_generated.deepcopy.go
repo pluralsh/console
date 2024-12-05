@@ -72,6 +72,11 @@ func (in *AISettings) DeepCopyInto(out *AISettings) {
 		*out = new(client.AiProvider)
 		**out = **in
 	}
+	if in.ToolProvider != nil {
+		in, out := &in.ToolProvider, &out.ToolProvider
+		*out = new(client.AiProvider)
+		**out = **in
+	}
 	if in.OpenAI != nil {
 		in, out := &in.OpenAI, &out.OpenAI
 		*out = new(AIProviderSettings)
@@ -3814,6 +3819,11 @@ func (in *PrAutomationSpec) DeepCopyInto(out *PrAutomationSpec) {
 	}
 	if in.ProjectRef != nil {
 		in, out := &in.ProjectRef, &out.ProjectRef
+		*out = new(v1.ObjectReference)
+		**out = **in
+	}
+	if in.CatalogRef != nil {
+		in, out := &in.CatalogRef, &out.CatalogRef
 		*out = new(v1.ObjectReference)
 		**out = **in
 	}

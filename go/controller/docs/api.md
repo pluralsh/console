@@ -73,6 +73,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `enabled` _boolean_ | Enabled defines whether to enable the AI integration or not. | false | Optional: {} <br /> |
 | `provider` _[AiProvider](#aiprovider)_ | Provider defines which of the supported LLM providers should be used. | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
+| `toolProvider` _[AiProvider](#aiprovider)_ | Provider to use for tool calling, in case you want to use a different LLM more optimized to those tasks | OPENAI | Enum: [OPENAI ANTHROPIC OLLAMA AZURE BEDROCK VERTEX] <br />Optional: {} <br /> |
 | `openAI` _[AIProviderSettings](#aiprovidersettings)_ | OpenAI holds the OpenAI provider configuration. |  | Optional: {} <br /> |
 | `anthropic` _[AIProviderSettings](#aiprovidersettings)_ | Anthropic holds the Anthropic provider configuration. |  | Optional: {} <br /> |
 | `ollama` _[OllamaSettings](#ollamasettings)_ | Ollama holds configuration for a self-hosted Ollama deployment, more details available at https://github.com/ollama/ollama |  | Optional: {} <br /> |
@@ -1951,6 +1952,7 @@ _Appears in:_
 | `repositoryRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | RepositoryRef the repository this automation uses. |  | Optional: {} <br /> |
 | `serviceRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ServiceRef the service this PR acts on. |  | Optional: {} <br /> |
 | `projectRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | ProjectRef the project this automation belongs to. |  | Optional: {} <br /> |
+| `catalogRef` _[ObjectReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectreference-v1-core)_ | CatalogRef the catalog this automation will belong to |  | Optional: {} <br /> |
 | `bindings` _[PrAutomationBindings](#prautomationbindings)_ | Bindings contain read and write policies of pr automation |  | Optional: {} <br /> |
 | `configuration` _[PrAutomationConfiguration](#prautomationconfiguration) array_ | Configuration self-service configuration for the UI wizard generating this PR |  | Optional: {} <br /> |
 | `confirmation` _[PrAutomationConfirmation](#prautomationconfirmation)_ | Additional details to verify all prerequisites are satisfied before generating this pr |  | Optional: {} <br /> |

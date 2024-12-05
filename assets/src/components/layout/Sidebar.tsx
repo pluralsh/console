@@ -94,13 +94,6 @@ function getMenuItems({
       hotkeys: ['shift H', '1'],
     },
     {
-      text: 'Service catalog',
-      expandedLabel: 'Service catalog',
-      icon: <CatalogIcon />,
-      path: CATALOGS_ABS_PATH,
-      hotkeys: ['2'],
-    },
-    {
       text: 'Apps',
       expandedLabel: 'Apps',
       icon: <AppsIcon />,
@@ -138,6 +131,13 @@ function getMenuItems({
       icon: <AiSparkleOutlineIcon />,
       path: `${AI_ABS_PATH}`,
       hotkeys: ['shift A', '6'],
+    },
+    {
+      text: 'Service catalog',
+      expandedLabel: 'Service catalog',
+      icon: <CatalogIcon />,
+      path: CATALOGS_ABS_PATH,
+      hotkeys: ['2'],
     },
     {
       text: 'Builds',

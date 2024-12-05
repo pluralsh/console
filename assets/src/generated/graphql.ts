@@ -261,6 +261,8 @@ export type AiSettings = {
   ollama?: Maybe<OllamaSettings>;
   openai?: Maybe<OpenaiSettings>;
   provider?: Maybe<AiProvider>;
+  /** ai provider to use with tool calls */
+  toolProvider?: Maybe<AiProvider>;
   toolsEnabled?: Maybe<Scalars['Boolean']['output']>;
   vertex?: Maybe<VertexAiSettings>;
 };
@@ -273,6 +275,8 @@ export type AiSettingsAttributes = {
   ollama?: InputMaybe<OllamaAttributes>;
   openai?: InputMaybe<OpenaiSettingsAttributes>;
   provider?: InputMaybe<AiProvider>;
+  /** ai provider to use with tool calls */
+  toolProvider?: InputMaybe<AiProvider>;
   tools?: InputMaybe<ToolConfigAttributes>;
   vertex?: InputMaybe<VertexAiAttributes>;
 };
@@ -6684,6 +6688,7 @@ export type RootQueryType = {
   violationStatistics?: Maybe<Array<Maybe<ViolationStatistic>>>;
   vulnerabilityReport?: Maybe<VulnerabilityReport>;
   vulnerabilityReports?: Maybe<VulnerabilityReportConnection>;
+  vulnerabilityStatistics?: Maybe<Array<Maybe<VulnerabilityStatistic>>>;
   webhooks?: Maybe<WebhookConnection>;
   wireguardPeer?: Maybe<WireguardPeer>;
   wireguardPeers?: Maybe<Array<Maybe<WireguardPeer>>>;
@@ -7731,7 +7736,16 @@ export type RootQueryTypeVulnerabilityReportsArgs = {
   before?: InputMaybe<Scalars['String']['input']>;
   clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
   first?: InputMaybe<Scalars['Int']['input']>;
+  grade?: InputMaybe<VulnReportGrade>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
+  q?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type RootQueryTypeVulnerabilityStatisticsArgs = {
+  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>>>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>>>;
   q?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -9489,6 +9503,14 @@ export type VulnOsAttributes = {
   name?: InputMaybe<Scalars['String']['input']>;
 };
 
+export enum VulnReportGrade {
+  A = 'A',
+  B = 'B',
+  C = 'C',
+  D = 'D',
+  F = 'F'
+}
+
 export enum VulnSeverity {
   Critical = 'CRITICAL',
   High = 'HIGH',
@@ -9594,6 +9616,12 @@ export type VulnerabilityReportEdge = {
   __typename?: 'VulnerabilityReportEdge';
   cursor?: Maybe<Scalars['String']['output']>;
   node?: Maybe<VulnerabilityReport>;
+};
+
+export type VulnerabilityStatistic = {
+  __typename?: 'VulnerabilityStatistic';
+  count: Scalars['Int']['output'];
+  grade: VulnReportGrade;
 };
 
 export type WaitingState = {

@@ -184,9 +184,11 @@ type AiPinEdge struct {
 
 // Settings for configuring access to common LLM providers
 type AiSettings struct {
-	Enabled      *bool                `json:"enabled,omitempty"`
-	ToolsEnabled *bool                `json:"toolsEnabled,omitempty"`
-	Provider     *AiProvider          `json:"provider,omitempty"`
+	Enabled      *bool       `json:"enabled,omitempty"`
+	ToolsEnabled *bool       `json:"toolsEnabled,omitempty"`
+	Provider     *AiProvider `json:"provider,omitempty"`
+	// ai provider to use with tool calls
+	ToolProvider *AiProvider          `json:"toolProvider,omitempty"`
 	Openai       *OpenaiSettings      `json:"openai,omitempty"`
 	Anthropic    *AnthropicSettings   `json:"anthropic,omitempty"`
 	Ollama       *OllamaSettings      `json:"ollama,omitempty"`
@@ -196,15 +198,17 @@ type AiSettings struct {
 }
 
 type AiSettingsAttributes struct {
-	Enabled   *bool                        `json:"enabled,omitempty"`
-	Tools     *ToolConfigAttributes        `json:"tools,omitempty"`
-	Provider  *AiProvider                  `json:"provider,omitempty"`
-	Openai    *OpenaiSettingsAttributes    `json:"openai,omitempty"`
-	Anthropic *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
-	Ollama    *OllamaAttributes            `json:"ollama,omitempty"`
-	Azure     *AzureOpenaiAttributes       `json:"azure,omitempty"`
-	Bedrock   *BedrockAiAttributes         `json:"bedrock,omitempty"`
-	Vertex    *VertexAiAttributes          `json:"vertex,omitempty"`
+	Enabled  *bool                 `json:"enabled,omitempty"`
+	Tools    *ToolConfigAttributes `json:"tools,omitempty"`
+	Provider *AiProvider           `json:"provider,omitempty"`
+	// ai provider to use with tool calls
+	ToolProvider *AiProvider                  `json:"toolProvider,omitempty"`
+	Openai       *OpenaiSettingsAttributes    `json:"openai,omitempty"`
+	Anthropic    *AnthropicSettingsAttributes `json:"anthropic,omitempty"`
+	Ollama       *OllamaAttributes            `json:"ollama,omitempty"`
+	Azure        *AzureOpenaiAttributes       `json:"azure,omitempty"`
+	Bedrock      *BedrockAiAttributes         `json:"bedrock,omitempty"`
+	Vertex       *VertexAiAttributes          `json:"vertex,omitempty"`
 }
 
 type Alert struct {
@@ -5980,6 +5984,11 @@ type VulnerabilityReportEdge struct {
 	Cursor *string              `json:"cursor,omitempty"`
 }
 
+type VulnerabilityStatistic struct {
+	Grade VulnReportGrade `json:"grade"`
+	Count int64           `json:"count"`
+}
+
 type WaitingState struct {
 	Message *string `json:"message,omitempty"`
 	Reason  *string `json:"reason,omitempty"`
@@ -8541,6 +8550,53 @@ func (e *ValidationUniqScope) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ValidationUniqScope) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type VulnReportGrade string
+
+const (
+	VulnReportGradeA VulnReportGrade = "A"
+	VulnReportGradeB VulnReportGrade = "B"
+	VulnReportGradeC VulnReportGrade = "C"
+	VulnReportGradeD VulnReportGrade = "D"
+	VulnReportGradeF VulnReportGrade = "F"
+)
+
+var AllVulnReportGrade = []VulnReportGrade{
+	VulnReportGradeA,
+	VulnReportGradeB,
+	VulnReportGradeC,
+	VulnReportGradeD,
+	VulnReportGradeF,
+}
+
+func (e VulnReportGrade) IsValid() bool {
+	switch e {
+	case VulnReportGradeA, VulnReportGradeB, VulnReportGradeC, VulnReportGradeD, VulnReportGradeF:
+		return true
+	}
+	return false
+}
+
+func (e VulnReportGrade) String() string {
+	return string(e)
+}
+
+func (e *VulnReportGrade) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VulnReportGrade(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VulnReportGrade", str)
+	}
+	return nil
+}
+
+func (e VulnReportGrade) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
