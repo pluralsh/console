@@ -25,6 +25,7 @@ import { prRoutes } from './prRoutes'
 import { secretsRoutes } from './secretsRoute'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
+import { catalogRoutes } from './catalogRoutes.tsx'
 
 const buildsRoutes = [
   <Route
@@ -117,40 +118,18 @@ const incidentsRoutes = [
 ] */
 
 export const consoleComponentRoutes = [
-  /* APPS */
+  ...catalogRoutes,
   ...appsRoutes,
-
-  /* CLUSTER */
   ...clusterRoutes,
-
-  /* STACKS */
   ...stacksRoutes,
-
-  /* INCIDENTS */
   // ...incidentsRoutes,
-
-  /* POLICIES */
   ...policiesRoutes,
-
-  /* BUILDS */
   ...buildsRoutes,
-
-  /* BACKUPS */
   ...backupsRoutes,
-
-  /* PROFILE */
   ...profileRoutes,
-
-  /* CONTINUOUS DEPLOYMENT */
   ...cdRoutes,
-
-  /* SETTINGS */
   settingsRoutes,
-
-  /* KUBERNETES */
   kubernetesRoutes,
-
-  /* AI */
   aiRoutes,
 ].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))
 

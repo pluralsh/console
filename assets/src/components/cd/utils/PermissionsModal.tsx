@@ -38,7 +38,7 @@ export function Permissions({
 }: {
   bindings?: (PolicyBindingFragment | null | undefined)[] | null | undefined
   setBindings: any
-  permissionType: 'read' | 'write'
+  permissionType: 'read' | 'write' | 'create'
   forLabel: string | undefined
 }) {
   return (

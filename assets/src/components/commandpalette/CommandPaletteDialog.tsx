@@ -73,7 +73,7 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
           color: theme.colors['text-xlight'],
         },
 
-        '.kbd': {
+        kbd: {
           backgroundColor: theme.colors['fill-two'],
           border: theme.borders['fill-two'],
         },
@@ -86,7 +86,7 @@ export const Wrapper = styled(ModalWrapper)(({ theme }) => ({
             color: theme.colors['text-light'],
           },
 
-          '.kbd': {
+          kbd: {
             backgroundColor: theme.colors['fill-three'],
             border: theme.borders['fill-three'],
           },

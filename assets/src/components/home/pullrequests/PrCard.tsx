@@ -51,7 +51,7 @@ export function PrCard() {
         loading={!data && loading}
         loadingSkeletonRows={3}
         data={data?.pullRequests?.edges ?? []}
-        emptyStateProps={{ message: 'No open PRs' }}
+        emptyStateProps={{ message: 'No open PRs.' }}
         refetch={refetch}
         virtualizeRows
         hasNextPage={pageInfo?.hasNextPage}
