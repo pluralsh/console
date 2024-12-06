@@ -491,6 +491,14 @@ defmodule Console.GraphQl.Users do
       safe_resolve &User.create_invite/2
     end
 
+    field :create_user, :user do
+      middleware Authenticated
+      middleware AdminRequired
+      arg :attributes, non_null(:user_attributes)
+
+      resolve &User.create_user/2
+    end
+
     field :create_service_account, :user do
       middleware Authenticated
       middleware AdminRequired

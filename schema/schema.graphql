@@ -494,6 +494,8 @@ type RootMutationType {
 
   createInvite(attributes: InviteAttributes!): Invite
 
+  createUser(attributes: UserAttributes!): User
+
   createServiceAccount(attributes: ServiceAccountAttributes!): User
 
   updateServiceAccount(id: ID!, attributes: ServiceAccountAttributes!): User

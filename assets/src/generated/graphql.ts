@@ -5370,6 +5370,7 @@ export type RootMutationType = {
   createStackDefinition?: Maybe<StackDefinition>;
   createThread?: Maybe<ChatThread>;
   createUpgradePolicy?: Maybe<UpgradePolicy>;
+  createUser?: Maybe<User>;
   createWebhook?: Maybe<Webhook>;
   deleteAccessToken?: Maybe<AccessToken>;
   deleteCatalog?: Maybe<Catalog>;
@@ -5789,6 +5790,11 @@ export type RootMutationTypeCreateThreadArgs = {
 
 export type RootMutationTypeCreateUpgradePolicyArgs = {
   attributes: UpgradePolicyAttributes;
+};
+
+
+export type RootMutationTypeCreateUserArgs = {
+  attributes: UserAttributes;
 };
 
 
