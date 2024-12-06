@@ -6,6 +6,7 @@ import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   ServiceDeployment,
+  ServiceDeploymentEdge,
   type ServiceDeploymentsRowFragment,
   useGetGlobalServiceServicesQuery,
 } from 'generated/graphql'
@@ -21,36 +22,34 @@ import {
 import { columns } from './columns'
 
 interface GlobalServiceServicesProps {
+  seedService: ServiceDeployment
   globalServiceID: string
 }
 
 export function GlobalServiceServices({
+  seedService,
   globalServiceID,
 }: GlobalServiceServicesProps) {
   const navigate = useNavigate()
 
-  const {
-    data,
-    loading,
-    refetch,
-    error,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData(
-    {
-      queryHook: useGetGlobalServiceServicesQuery,
-      keyPath: ['globalService', 'services'],
-    },
-    { serviceId: globalServiceID }
-  )
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: useGetGlobalServiceServicesQuery,
+        keyPath: ['globalService', 'services'],
+      },
+      { serviceId: globalServiceID }
+    )
 
   const services = useMemo(
     () =>
-      data?.globalService?.services?.edges?.map(
-        (edge) => edge?.node as ServiceDeployment
+      (seedService
+        ? [{ node: seedService } as ServiceDeploymentEdge]
+        : []
+      ).concat(
+        data?.globalService?.services?.edges as Array<ServiceDeploymentEdge>
       ),
-    [data?.globalService?.services?.edges]
+    [data?.globalService?.services?.edges, seedService]
   )
 
   if (error) return <GqlError error={error} />
@@ -81,7 +80,7 @@ export function GlobalServiceServices({
             })
           )
         }
-        reactTableOptions={{ meta: { refetch } }}
+        reactTableOptions={{ meta: { seedServiceID: seedService?.id } }}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         emptyStateProps={{ message: 'No services found.' }}
       />

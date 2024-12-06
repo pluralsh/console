@@ -8,6 +8,7 @@ import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageF
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   GlobalServiceFragment,
+  ServiceDeployment,
   useGetGlobalServiceQuery,
   useGlobalServicesQuery,
   useSyncGlobalServiceMutation,
@@ -102,7 +103,10 @@ export default function GlobalService() {
         <ResponsiveLayoutPage css={{ padding: 0 }}>
           <ResponsiveLayoutSpacer />
           <ResponsiveLayoutContentContainer>
-            <GlobalServiceServices globalServiceID={globalServiceId} />
+            <GlobalServiceServices
+              globalServiceID={globalServiceId}
+              seedService={globalService?.service as ServiceDeployment}
+            />
           </ResponsiveLayoutContentContainer>
           <ResponsiveLayoutSpacer />
           <ResponsiveLayoutSidecarContainer

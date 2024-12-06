@@ -1,58 +1,34 @@
-import { GlobeIcon, IconFrame } from '@pluralsh/design-system'
-import { AccessorFnColumnDef, createColumnHelper } from '@tanstack/react-table'
-import { useTheme } from 'styled-components'
-import { ServiceDeployment } from '../../../../generated/graphql.ts'
-import { DistroProviderIcon } from '../../../utils/ClusterDistro.tsx'
+import { Chip } from '@pluralsh/design-system'
+import { createColumnHelper } from '@tanstack/react-table'
+import { ServiceDeploymentsRowFragment } from '../../../../generated/graphql.ts'
+import { Edge } from '../../../../utils/graphql.ts'
 import DecoratedName from '../../services/DecoratedName.tsx'
+import {
+  ColCluster,
+  ColLastActivity,
+  ColStatus,
+} from '../../services/ServicesColumns.tsx'
 
-const columnHelper = createColumnHelper<ServiceDeployment>()
+const columnHelper = createColumnHelper<Edge<ServiceDeploymentsRowFragment>>()
 
-const ColOwnedService = columnHelper.accessor((row) => row, {
-  id: 'owned',
-  header: 'Owned service',
-  cell: function Cell({ getValue }) {
-    const service = getValue()
-    return service && <DecoratedName>{service.name}</DecoratedName>
-  },
-})
-
-const ColDistribution = columnHelper.accessor((row) => row, {
-  id: 'distribution',
-  header: 'Distribution',
-  cell: function Cell({ getValue }) {
-    const service = getValue()
-    const theme = useTheme()
+const ColDeployment = columnHelper.accessor(({ node }) => node, {
+  id: 'deployment',
+  header: 'Deployment',
+  cell: function Cell({ getValue, table }) {
+    const serviceDeployment = getValue()
+    const id = table.options.meta?.seedServiceID
 
     return (
-      <div
-        css={{
-          ...theme.partials.text.body2,
-          display: 'flex',
-          alignItems: 'center',
-          gap: theme.spacing.small,
-        }}
-      >
-        <IconFrame
-          size="small"
-          type="secondary"
-          icon={
-            service?.cluster ? (
-              <DistroProviderIcon
-                distro={service?.cluster.distro}
-                provider={service?.cluster.provider?.name}
-                size={16}
-              />
-            ) : (
-              <GlobeIcon size={16} />
-            )
-          }
-        />
-        {service?.cluster?.distro || 'All distribution'}
-      </div>
+      serviceDeployment && (
+        <DecoratedName deletedAt={serviceDeployment.deletedAt}>
+          {serviceDeployment.name}
+          {serviceDeployment.id === id && (
+            <Chip size="small">Seed service</Chip>
+          )}
+        </DecoratedName>
+      )
     )
   },
 })
 
-export const columns: Array<
-  AccessorFnColumnDef<ServiceDeployment, ServiceDeployment>
-> = [ColOwnedService, ColDistribution]
+export const columns = [ColDeployment, ColCluster, ColLastActivity, ColStatus]

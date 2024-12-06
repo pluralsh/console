@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -10491,7 +10491,7 @@ export type UpdateGitRepositoryMutationVariables = Exact<{
 
 export type UpdateGitRepositoryMutation = { __typename?: 'RootMutationType', updateGitRepository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null };
 
-export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null };
+export type GlobalServiceFragment = { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null };
 
 export type ServiceTemplateWithoutConfigurationFragment = { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null };
 
@@ -10503,7 +10503,7 @@ export type CreateGlobalServiceMutationVariables = Exact<{
 }>;
 
 
-export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
+export type CreateGlobalServiceMutation = { __typename?: 'RootMutationType', createGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
 
 export type UpdateGlobalServiceMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -10527,14 +10527,14 @@ export type GlobalServicesQueryVariables = Exact<{
 }>;
 
 
-export type GlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null } | null> | null } | null };
+export type GlobalServicesQuery = { __typename?: 'RootQueryType', globalServices?: { __typename?: 'GlobalServiceConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'GlobalServiceEdge', node?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null } | null> | null } | null };
 
 export type GetGlobalServiceQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
 }>;
 
 
-export type GetGlobalServiceQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
+export type GetGlobalServiceQuery = { __typename?: 'RootQueryType', globalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
 
 export type GetGlobalServiceServicesQueryVariables = Exact<{
   serviceId: Scalars['ID']['input'];
@@ -10550,7 +10550,7 @@ export type SyncGlobalServiceMutationVariables = Exact<{
 }>;
 
 
-export type SyncGlobalServiceMutation = { __typename?: 'RootMutationType', syncGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
+export type SyncGlobalServiceMutation = { __typename?: 'RootMutationType', syncGlobalService?: { __typename?: 'GlobalService', id: string, distro?: ClusterDistro | null, name: string, reparent?: boolean | null, insertedAt?: string | null, updatedAt?: string | null, project?: { __typename?: 'Project', id: string, name: string, default?: boolean | null, description?: string | null } | null, cascade?: { __typename?: 'Cascade', delete?: boolean | null, detach?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', id: string, name: string, cloud: string, namespace: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, protect?: boolean | null, promotion?: ServicePromotion | null, message?: string | null, insertedAt?: string | null, updatedAt?: string | null, deletedAt?: string | null, componentStatus?: string | null, status: ServiceDeploymentStatus, dryRun?: boolean | null, git?: { __typename?: 'GitRef', ref: string, folder: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, version?: string | null, url?: string | null, repository?: { __typename?: 'ObjectReference', namespace?: string | null, name?: string | null } | null } | null, cluster?: { __typename?: 'Cluster', id: string, name: string, handle?: string | null, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', name: string, cloud: string } | null } | null, helmRepository?: { __typename?: 'FluxHelmRepository', spec: { __typename?: 'HelmRepositorySpec', url: string }, status?: { __typename?: 'HelmRepositoryStatus', ready?: boolean | null, message?: string | null } | null } | null, repository?: { __typename?: 'GitRepository', id: string, url: string } | null, errors?: Array<{ __typename?: 'ServiceError', message: string, source: string } | null> | null, components?: Array<{ __typename?: 'ServiceComponent', apiDeprecations?: Array<{ __typename?: 'ApiDeprecation', blocking?: boolean | null } | null> | null } | null> | null, globalService?: { __typename?: 'GlobalService', id: string, name: string } | null, insight?: { __typename?: 'AiInsight', id: string, summary?: string | null, freshness?: InsightFreshness | null, insertedAt?: string | null, updatedAt?: string | null, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null, clusterInsightComponent?: { __typename?: 'ClusterInsightComponent', id: string, name: string } | null, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null, serviceComponent?: { __typename?: 'ServiceComponent', id: string, name: string, service?: { __typename?: 'ServiceDeployment', id: string, name: string, cluster?: { __typename?: 'Cluster', id: string, name: string, distro?: ClusterDistro | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string, type: StackType } | null, stackRun?: { __typename?: 'StackRun', id: string, message?: string | null, type: StackType, stack?: { __typename?: 'InfrastructureStack', id?: string | null, name: string } | null } | null } | null } | null, tags?: Array<{ __typename?: 'Tag', name: string, value: string } | null> | null, template?: { __typename?: 'ServiceTemplate', contexts?: Array<string | null> | null, name?: string | null, namespace?: string | null, repositoryId?: string | null, templated?: boolean | null, git?: { __typename?: 'GitRef', folder: string, ref: string } | null, helm?: { __typename?: 'HelmSpec', chart?: string | null, valuesFiles?: Array<string | null> | null, version?: string | null, repository?: { __typename?: 'ObjectReference', name?: string | null, namespace?: string | null } | null, set?: Array<{ __typename?: 'HelmValue', name: string, value: string } | null> | null } | null, kustomize?: { __typename?: 'Kustomize', path: string } | null, repository?: { __typename?: 'GitRepository', id: string, url: string, health?: GitHealth | null, authMethod?: AuthMethod | null, editable?: boolean | null, error?: string | null, insertedAt?: string | null, pulledAt?: string | null, updatedAt?: string | null, urlFormat?: string | null, httpsPath?: string | null } | null, syncConfig?: { __typename?: 'SyncConfig', createNamespace?: boolean | null, namespaceMetadata?: { __typename?: 'NamespaceMetadata', annotations?: Record<string, unknown> | null, labels?: Record<string, unknown> | null } | null } | null } | null, parent?: { __typename?: 'ServiceDeployment', id: string, name: string } | null } | null };
 
 export type HttpConnectionFragment = { __typename?: 'HttpConnection', host: string, user?: string | null };
 
@@ -12717,6 +12717,73 @@ export const ProjectTinyFragmentDoc = gql`
   description
 }
     `;
+export const ServiceDeploymentsRowFragmentDoc = gql`
+    fragment ServiceDeploymentsRow on ServiceDeployment {
+  id
+  name
+  protect
+  promotion
+  message
+  git {
+    ref
+    folder
+  }
+  helm {
+    chart
+    version
+    url
+    repository {
+      namespace
+      name
+    }
+  }
+  cluster {
+    id
+    name
+    handle
+    provider {
+      name
+      cloud
+    }
+    distro
+  }
+  helmRepository {
+    spec {
+      url
+    }
+    status {
+      ready
+      message
+    }
+  }
+  repository {
+    id
+    url
+  }
+  insertedAt
+  updatedAt
+  deletedAt
+  componentStatus
+  status
+  errors {
+    message
+    source
+  }
+  components {
+    apiDeprecations {
+      blocking
+    }
+  }
+  globalService {
+    id
+    name
+  }
+  dryRun
+  insight {
+    ...AiInsightSummary
+  }
+}
+    ${AiInsightSummaryFragmentDoc}`;
 export const GitRepositoryFragmentDoc = gql`
     fragment GitRepository on GitRepository {
   id
@@ -12791,11 +12858,7 @@ export const GlobalServiceFragmentDoc = gql`
   }
   reparent
   service {
-    id
-    name
-    cluster {
-      id
-    }
+    ...ServiceDeploymentsRow
   }
   tags {
     name
@@ -12812,6 +12875,7 @@ export const GlobalServiceFragmentDoc = gql`
   updatedAt
 }
     ${ProjectTinyFragmentDoc}
+${ServiceDeploymentsRowFragmentDoc}
 ${ServiceTemplateWithoutConfigurationFragmentDoc}`;
 export const HttpConnectionFragmentDoc = gql`
     fragment HttpConnection on HttpConnection {
@@ -14077,73 +14141,6 @@ export const NodeFragmentDoc = gql`
     ${MetadataFragmentDoc}
 ${PodFragmentDoc}
 ${EventFragmentDoc}`;
-export const ServiceDeploymentsRowFragmentDoc = gql`
-    fragment ServiceDeploymentsRow on ServiceDeployment {
-  id
-  name
-  protect
-  promotion
-  message
-  git {
-    ref
-    folder
-  }
-  helm {
-    chart
-    version
-    url
-    repository {
-      namespace
-      name
-    }
-  }
-  cluster {
-    id
-    name
-    handle
-    provider {
-      name
-      cloud
-    }
-    distro
-  }
-  helmRepository {
-    spec {
-      url
-    }
-    status {
-      ready
-      message
-    }
-  }
-  repository {
-    id
-    url
-  }
-  insertedAt
-  updatedAt
-  deletedAt
-  componentStatus
-  status
-  errors {
-    message
-    source
-  }
-  components {
-    apiDeprecations {
-      blocking
-    }
-  }
-  globalService {
-    id
-    name
-  }
-  dryRun
-  insight {
-    ...AiInsightSummary
-  }
-}
-    ${AiInsightSummaryFragmentDoc}`;
 export const ServiceDeploymentDetailsFragmentDoc = gql`
     fragment ServiceDeploymentDetails on ServiceDeployment {
   ...ServiceDeploymentsRow
