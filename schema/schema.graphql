@@ -379,7 +379,9 @@ type RootQueryType {
     after: String, first: Int, before: String, last: Int, kind: String, namespace: String, kinds: [String], namespaces: [String], clusters: [ID], violated: Boolean, q: String
   ): PolicyConstraintConnection
 
-  vulnerabilityReports(after: String, first: Int, before: String, last: Int, clusters: [ID], q: String): VulnerabilityReportConnection
+  vulnerabilityReports(
+    after: String, first: Int, before: String, last: Int, clusters: [ID], namespaces: [String], q: String, grade: VulnReportGrade
+  ): VulnerabilityReportConnection
 
   violationStatistics(field: ConstraintViolationField!): [ViolationStatistic]
 
@@ -390,6 +392,8 @@ type RootQueryType {
   policyConstraint(id: ID!): PolicyConstraint
 
   vulnerabilityReport(id: ID!): VulnerabilityReport
+
+  vulnerabilityStatistics(clusters: [ID], namespaces: [String], q: String): [VulnerabilityStatistic]
 
   managedNamespaces(after: String, first: Int, before: String, last: Int, projectId: ID): ManagedNamespaceConnection
 
@@ -489,6 +493,8 @@ type RootMutationType {
   oauthCallback(code: String!, redirect: String): User
 
   createInvite(attributes: InviteAttributes!): Invite
+
+  createUser(attributes: UserAttributes!): User
 
   createServiceAccount(attributes: ServiceAccountAttributes!): User
 
@@ -1116,13 +1122,24 @@ input StackSettingsAttributes {
 
 input AiSettingsAttributes {
   enabled: Boolean
+
   tools: ToolConfigAttributes
+
   provider: AiProvider
+
+  "ai provider to use with tool calls"
+  toolProvider: AiProvider
+
   openai: OpenaiSettingsAttributes
+
   anthropic: AnthropicSettingsAttributes
+
   ollama: OllamaAttributes
+
   azure: AzureOpenaiAttributes
+
   bedrock: BedrockAiAttributes
+
   vertex: VertexAiAttributes
 }
 
@@ -1338,13 +1355,24 @@ type SmtpSettings {
 "Settings for configuring access to common LLM providers"
 type AiSettings {
   enabled: Boolean
+
   toolsEnabled: Boolean
+
   provider: AiProvider
+
+  "ai provider to use with tool calls"
+  toolProvider: AiProvider
+
   openai: OpenaiSettings
+
   anthropic: AnthropicSettings
+
   ollama: OllamaSettings
+
   azure: AzureOpenaiSettings
+
   bedrock: BedrockAiSettings
+
   vertex: VertexAiSettings
 }
 
@@ -2479,6 +2507,14 @@ enum VulnSeverity {
   CRITICAL
 }
 
+enum VulnReportGrade {
+  A
+  B
+  C
+  D
+  F
+}
+
 enum PolicyAggregate {
   CLUSTER
   ENFORCEMENT
@@ -2734,6 +2770,11 @@ type ServiceVuln {
 
 type NamespaceVuln {
   namespace: String!
+}
+
+type VulnerabilityStatistic {
+  grade: VulnReportGrade!
+  count: Int!
 }
 
 type PolicyConstraintConnection {

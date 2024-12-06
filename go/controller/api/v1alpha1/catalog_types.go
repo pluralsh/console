@@ -129,3 +129,17 @@ func (c *Catalog) Diff(hasher Hasher) (changed bool, sha string, err error) {
 
 	return !c.Status.IsSHAEqual(currentSha), currentSha, nil
 }
+
+// ConsoleID implements [PluralResource] interface
+func (in *Catalog) ConsoleID() *string {
+	return in.Status.ID
+}
+
+// ConsoleName implements [PluralResource] interface
+func (in *Catalog) ConsoleName() string {
+	if in.Spec.Name != nil {
+		return *in.Spec.Name
+	}
+
+	return in.Name
+}

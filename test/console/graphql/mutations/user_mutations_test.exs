@@ -24,6 +24,35 @@ defmodule Console.GraphQl.UserMutationsTest do
     end
   end
 
+  describe "createUser" do
+    test "admins can create users" do
+      {:ok, %{data: %{"createUser" => user}}} = run_query("""
+        mutation Create($attrs: UserAttributes!) {
+          createUser(attributes: $attrs) {
+            id
+            email
+          }
+        }
+      """, %{"attrs" => %{"email" => "someone@example.com", "name" => "Some User"}}, %{current_user: admin_user()})
+
+      assert user["email"] == "someone@example.com"
+    end
+
+    test "nonadmins cannot create users" do
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        mutation Create($attrs: UserAttributes!) {
+          createUser(attributes: $attrs) {
+            id
+            email
+          }
+        }
+      """, %{"attrs" => %{
+        "email" => "someone@example.com",
+        "name" => "Some User"
+      }}, %{current_user: insert(:user)})
+    end
+  end
+
   describe "logout" do
     test "it will wipe refresh tokens" do
       user = insert(:user)

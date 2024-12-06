@@ -250,6 +250,11 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :namespace, non_null(:string)
   end
 
+  object :vulnerability_statistic do
+    field :grade, non_null(:vuln_report_grade)
+    field :count, non_null(:integer)
+  end
+
   connection node_type: :policy_constraint
   connection node_type: :vulnerability_report
 
@@ -269,8 +274,10 @@ defmodule Console.GraphQl.Deployments.Policy do
 
     connection field :vulnerability_reports, node_type: :vulnerability_report do
       middleware Authenticated
-      arg :clusters, list_of(:id)
-      arg :q,        :string
+      arg :clusters,   list_of(:id)
+      arg :namespaces, list_of(:string)
+      arg :q,          :string
+      arg :grade,      :vuln_report_grade
 
       resolve &Deployments.list_vulnerabilities/2
     end
@@ -307,6 +314,15 @@ defmodule Console.GraphQl.Deployments.Policy do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_vulnerability/2
+    end
+
+    field :vulnerability_statistics, list_of(:vulnerability_statistic) do
+      middleware Authenticated
+      arg :clusters,   list_of(:id)
+      arg :namespaces, list_of(:string)
+      arg :q,          :string
+
+      resolve &Deployments.vulnerability_statistics/2
     end
   end
 

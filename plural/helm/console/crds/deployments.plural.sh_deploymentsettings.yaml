@@ -271,6 +271,17 @@ spec:
                     - BEDROCK
                     - VERTEX
                     type: string
+                  toolProvider:
+                    description: Provider to use for tool calling, in case you want
+                      to use a different LLM more optimized to those tasks
+                    enum:
+                    - OPENAI
+                    - ANTHROPIC
+                    - OLLAMA
+                    - AZURE
+                    - BEDROCK
+                    - VERTEX
+                    type: string
                   vertex:
                     description: Vertex holds configuration for using GCP VertexAI
                       to generate LLM insights

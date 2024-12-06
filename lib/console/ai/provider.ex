@@ -28,7 +28,7 @@ defmodule Console.AI.Provider do
 
   def tools?() do
     Console.Deployments.Settings.cached()
-    |> client()
+    |> tool_client()
     |> case do
       {:ok, %mod{}} -> mod.tools?()
       _ -> false
@@ -43,13 +43,16 @@ defmodule Console.AI.Provider do
 
   def tool_call(history, tools, opts \\ []) do
     settings = Console.Deployments.Settings.cached()
-    with {:ok, %mod{} = client} <- client(settings),
+    with {:ok, %mod{} = client} <- tool_client(settings),
          {:ok, result} <- mod.tool_call(client, add_preface(history, opts), tools),
       do: handle_tool_calls(result, tools)
   end
 
-  def summary(text),
-    do: completion([{:user, text}], preface: @summary)
+  def summary(text), do: completion([{:user, text}], preface: @summary)
+
+  defp tool_client(%DeploymentSettings{ai: %AI{tool_provider: p}} = settings) when not is_nil(p),
+    do: client(put_in(settings.ai.provider, p))
+  defp tool_client(settings), do: client(settings)
 
   defp client(%DeploymentSettings{ai: %AI{enabled: true, provider: :openai, openai: %{} = openai}}),
     do: {:ok, OpenAI.new(openai)}
