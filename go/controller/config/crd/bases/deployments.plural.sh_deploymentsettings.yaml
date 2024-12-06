@@ -272,7 +272,6 @@ spec:
                     - VERTEX
                     type: string
                   toolProvider:
-                    default: OPENAI
                     description: Provider to use for tool calling, in case you want
                       to use a different LLM more optimized to those tasks
                     enum:

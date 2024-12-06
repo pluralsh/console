@@ -48,8 +48,7 @@ defmodule Console.AI.Provider do
       do: handle_tool_calls(result, tools)
   end
 
-  def summary(text),
-    do: completion([{:user, text}], preface: @summary)
+  def summary(text), do: completion([{:user, text}], preface: @summary)
 
   defp tool_client(%DeploymentSettings{ai: %AI{tool_provider: p}} = settings) when not is_nil(p),
     do: client(put_in(settings.ai.provider, p))

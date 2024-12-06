@@ -186,7 +186,6 @@ type AISettings struct {
 	// Provider to use for tool calling, in case you want to use a different LLM more optimized to those tasks
 	//
 	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
-	// +kubebuilder:default=OPENAI
 	// +kubebuilder:validation:Optional
 	ToolProvider *console.AiProvider `json:"toolProvider,omitempty"`
 
