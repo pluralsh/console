@@ -26,6 +26,7 @@ export function ClusterHealth({
 
   return (
     <ClusterHealthChip
+      cluster={cluster}
       pingedAt={cluster.pingedAt}
       size={size}
     />
@@ -33,9 +34,11 @@ export function ClusterHealth({
 }
 
 function ClusterHealthChip({
+  cluster,
   pingedAt,
   size = 'medium',
 }: {
+  cluster?: ClustersRowFragment
   pingedAt?: string | null
   size?: 'small' | 'medium' | 'large'
 }) {
@@ -49,7 +52,8 @@ function ClusterHealthChip({
 
   const pinged = pingedAt !== null
   const healthy =
-    pingedAt && now.clone().subtract(10, 'minutes').isBefore(pingedAt)
+    cluster?.healthy ||
+    (pingedAt && now.clone().subtract(10, 'minutes').isBefore(pingedAt))
 
   return (
     <TooltipTime

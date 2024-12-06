@@ -4622,6 +4622,9 @@ type Cluster {
   "Checklist of tasks to complete to safely upgrade this cluster"
   upgradePlan: ClusterUpgradePlan
 
+  "Whether this cluster was recently pinged"
+  healthy: Boolean
+
   "the url of the kas server you can access this cluster from"
   kasUrl: String
 

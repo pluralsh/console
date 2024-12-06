@@ -6,6 +6,9 @@ import DecoratedName from '../../services/DecoratedName.tsx'
 import {
   ColCluster,
   ColLastActivity,
+  ColRef,
+  ColRepo,
+  ColErrors,
   ColStatus,
 } from '../../services/ServicesColumns.tsx'
 
@@ -31,4 +34,12 @@ const ColDeployment = columnHelper.accessor(({ node }) => node, {
   },
 })
 
-export const columns = [ColDeployment, ColCluster, ColLastActivity, ColStatus]
+export const columns = [
+  ColDeployment,
+  ColCluster,
+  ColRepo,
+  ColRef,
+  ColLastActivity,
+  ColStatus,
+  ColErrors,
+]

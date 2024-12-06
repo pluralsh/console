@@ -864,6 +864,8 @@ type Cluster struct {
 	Settings *CloudSettings `json:"settings,omitempty"`
 	// Checklist of tasks to complete to safely upgrade this cluster
 	UpgradePlan *ClusterUpgradePlan `json:"upgradePlan,omitempty"`
+	// Whether this cluster was recently pinged
+	Healthy *bool `json:"healthy,omitempty"`
 	// the url of the kas server you can access this cluster from
 	KasURL *string `json:"kasUrl,omitempty"`
 	// the url this clusters deployment operator will use for gql requests
