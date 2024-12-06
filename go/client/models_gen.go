@@ -243,11 +243,15 @@ type AlertEdge struct {
 type AnthropicSettings struct {
 	// the anthropic model version to use
 	Model *string `json:"model,omitempty"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 }
 
 type AnthropicSettingsAttributes struct {
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 }
 
 // a representation of a kubernetes api deprecation
@@ -476,6 +480,8 @@ type AzureOpenaiAttributes struct {
 	APIVersion *string `json:"apiVersion,omitempty"`
 	// the exact model you wish to use
 	Model *string `json:"model,omitempty"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 	// the azure openai access token to use
 	AccessToken string `json:"accessToken"`
 }
@@ -483,7 +489,10 @@ type AzureOpenaiAttributes struct {
 // Settings for configuring against Azure OpenAI
 type AzureOpenaiSettings struct {
 	// the endpoint of your azure openai version, should look like: https://{endpoint}/openai/deployments/{deployment-id}
-	Endpoint string `json:"endpoint"`
+	Endpoint string  `json:"endpoint"`
+	Model    *string `json:"model,omitempty"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 	// the api version you want to use
 	APIVersion *string `json:"apiVersion,omitempty"`
 }
@@ -526,6 +535,8 @@ type BackupAttributes struct {
 type BedrockAiAttributes struct {
 	// the bedrock model id to use
 	ModelID string `json:"modelId"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModelID *string `json:"toolModelId,omitempty"`
 	// aws access key id to use, you can also use IRSA for self-hosted consoles
 	AccessKeyID *string `json:"accessKeyId,omitempty"`
 	// aws secret access key to use, you can also use IRSA for self-hosted consoles
@@ -536,6 +547,8 @@ type BedrockAiAttributes struct {
 type BedrockAiSettings struct {
 	// the bedrock model to use
 	ModelID string `json:"modelId"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModelID *string `json:"toolModelId,omitempty"`
 	// the aws access key to use, can also use IRSA when console is self-hosted
 	AccessKeyID *string `json:"accessKeyId,omitempty"`
 }
@@ -3190,7 +3203,9 @@ type OidcProviderAttributes struct {
 
 type OllamaAttributes struct {
 	Model string `json:"model"`
-	URL   string `json:"url"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
+	URL       string  `json:"url"`
 	// An http authorization header to use on calls to the Ollama api
 	Authorization *string `json:"authorization,omitempty"`
 }
@@ -3198,6 +3213,8 @@ type OllamaAttributes struct {
 // Settings for a self-hosted ollama-based LLM deployment
 type OllamaSettings struct {
 	Model string `json:"model"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 	// the url your ollama deployment is hosted on
 	URL string `json:"url"`
 }
@@ -3208,12 +3225,16 @@ type OpenaiSettings struct {
 	BaseURL *string `json:"baseUrl,omitempty"`
 	// the openai model version to use
 	Model *string `json:"model,omitempty"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 }
 
 type OpenaiSettingsAttributes struct {
 	BaseURL     *string `json:"baseUrl,omitempty"`
 	AccessToken *string `json:"accessToken,omitempty"`
 	Model       *string `json:"model,omitempty"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 }
 
 type OverlayUpdate struct {
@@ -5762,6 +5783,8 @@ type VersionReference struct {
 type VertexAiAttributes struct {
 	// the vertex model id to use
 	Model *string `json:"model,omitempty"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 	// optional service account json to auth to the GCP vertex apis
 	ServiceAccountJSON *string `json:"serviceAccountJson,omitempty"`
 	// custom vertexai endpoint if for dedicated customer deployments
@@ -5776,6 +5799,8 @@ type VertexAiAttributes struct {
 type VertexAiSettings struct {
 	// the vertex ai model to use
 	Model *string `json:"model,omitempty"`
+	// the model to use for tool calls, which are less frequent and require more complex reasoning
+	ToolModel *string `json:"toolModel,omitempty"`
 	// the gcp project id to use
 	Project string `json:"project"`
 	// the gcp region the model

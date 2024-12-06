@@ -1,4 +1,8 @@
-import { ChatOutlineIcon, ModalWrapper } from '@pluralsh/design-system'
+import {
+  ChatOutlineIcon,
+  FillLevelProvider,
+  ModalWrapper,
+} from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap.tsx'
@@ -118,36 +122,38 @@ function ChatbotPanelInner({
   }, [threadsQuery.data, pathname])
 
   return (
-    <ChatbotFrameSC
-      $fullscreen={fullscreen}
-      {...props}
-    >
-      <ChatbotHeader
-        fullscreen={fullscreen}
-        currentThread={currentThread}
-        currentInsight={currentInsight}
-      />
-      {currentThread ? (
-        <ChatbotPanelThread
+    <FillLevelProvider value={1}>
+      <ChatbotFrameSC
+        $fullscreen={fullscreen}
+        {...props}
+      >
+        <ChatbotHeader
+          fullscreen={fullscreen}
           currentThread={currentThread}
-          fullscreen={fullscreen}
-        />
-      ) : currentInsight ? (
-        <ChatbotPanelInsight
           currentInsight={currentInsight}
-          fullscreen={fullscreen}
         />
-      ) : (
-        <FullHeightTableWrap>
-          <AITable
-            modal
-            flush={!fullscreen}
-            query={threadsQuery}
-            rowData={rows}
+        {currentThread ? (
+          <ChatbotPanelThread
+            currentThread={currentThread}
+            fullscreen={fullscreen}
           />
-        </FullHeightTableWrap>
-      )}
-    </ChatbotFrameSC>
+        ) : currentInsight ? (
+          <ChatbotPanelInsight
+            currentInsight={currentInsight}
+            fullscreen={fullscreen}
+          />
+        ) : (
+          <FullHeightTableWrap>
+            <AITable
+              modal
+              flush={!fullscreen}
+              query={threadsQuery}
+              rowData={rows}
+            />
+          </FullHeightTableWrap>
+        )}
+      </ChatbotFrameSC>
+    </FillLevelProvider>
   )
 }
 

@@ -1137,17 +1137,29 @@ input CreatePrConfigAttributes {
 
 input OpenaiSettingsAttributes {
   baseUrl: String
+
   accessToken: String
+
   model: String
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
 }
 
 input AnthropicSettingsAttributes {
   accessToken: String
+
   model: String
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
 }
 
 input OllamaAttributes {
   model: String!
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
 
   url: String!
 
@@ -1165,6 +1177,9 @@ input AzureOpenaiAttributes {
   "the exact model you wish to use"
   model: String
 
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
+
   "the azure openai access token to use"
   accessToken: String!
 }
@@ -1172,6 +1187,9 @@ input AzureOpenaiAttributes {
 input BedrockAiAttributes {
   "the bedrock model id to use"
   modelId: String!
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModelId: String
 
   "aws access key id to use, you can also use IRSA for self-hosted consoles"
   accessKeyId: String
@@ -1183,6 +1201,9 @@ input BedrockAiAttributes {
 input VertexAiAttributes {
   "the vertex model id to use"
   model: String
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
 
   "optional service account json to auth to the GCP vertex apis"
   serviceAccountJson: String
@@ -1334,17 +1355,26 @@ type OpenaiSettings {
 
   "the openai model version to use"
   model: String
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
 }
 
 "Anthropic connection information"
 type AnthropicSettings {
   "the anthropic model version to use"
   model: String
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
 }
 
 "Settings for a self-hosted ollama-based LLM deployment"
 type OllamaSettings {
   model: String!
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
 
   "the url your ollama deployment is hosted on"
   url: String!
@@ -1355,6 +1385,11 @@ type AzureOpenaiSettings {
   "the endpoint of your azure openai version, should look like: https:\/\/{endpoint}\/openai\/deployments\/{deployment-id}"
   endpoint: String!
 
+  model: String
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
+
   "the api version you want to use"
   apiVersion: String
 }
@@ -1364,6 +1399,9 @@ type BedrockAiSettings {
   "the bedrock model to use"
   modelId: String!
 
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModelId: String
+
   "the aws access key to use, can also use IRSA when console is self-hosted"
   accessKeyId: String
 }
@@ -1372,6 +1410,9 @@ type BedrockAiSettings {
 type VertexAiSettings {
   "the vertex ai model to use"
   model: String
+
+  "the model to use for tool calls, which are less frequent and require more complex reasoning"
+  toolModel: String
 
   "the gcp project id to use"
   project: String!

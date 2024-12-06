@@ -1,14 +1,19 @@
-import { Button, Markdown, PrOpenIcon, Toast } from '@pluralsh/design-system'
+import {
+  Button,
+  LinkoutIcon,
+  Markdown,
+  PrOpenIcon,
+  Toast,
+} from '@pluralsh/design-system'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import {
   Dispatch,
   ReactNode,
   SetStateAction,
   useCallback,
-  useEffect,
   useRef,
   useState,
 } from 'react'
-import { useTheme } from 'styled-components'
 import {
   AiDelta,
   AiInsightFragment,
@@ -23,7 +28,6 @@ import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import AIPanel from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 
 interface AISuggestFixProps {
   insight: Nullable<AiInsightFragment>
@@ -87,40 +91,11 @@ function FixPr({
   const [mutation, { data, loading, error }] = useAiFixPrMutation({
     variables: { insightId, messages: [{ role: AiRole.User, content: fix }] },
   })
-  const theme = useTheme()
-
-  // TEMP FIX, implement permanent solution in DS
-  const successToastRef = useRef<HTMLDivElement>(null)
-  const errorToastRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (successToastRef.current) successToastRef.current.style.zIndex = '10000'
-    if (errorToastRef.current) errorToastRef.current.style.zIndex = '10000'
-  }, [data?.aiFixPr])
 
   return (
     <>
-      {data?.aiFixPr && (
-        <Toast
-          ref={successToastRef}
-          severity="info"
-          position="top-right"
-          margin="large"
-          heading="PR Created!"
-        >
-          <a
-            href={data?.aiFixPr?.url}
-            target="_blank"
-            rel="noreferrer"
-            style={{ textDecoration: 'none', cursor: 'pointer' }}
-            color={theme.colors['action-link-inline']}
-          >
-            {data?.aiFixPr?.url}
-          </a>
-        </Toast>
-      )}
       {error && (
         <Toast
-          ref={errorToastRef}
           severity="danger"
           position="top-right"
           margin="large"
@@ -129,13 +104,27 @@ function FixPr({
           {error.message}
         </Toast>
       )}
-      <Button
-        startIcon={<PrOpenIcon />}
-        onClick={mutation}
-        loading={loading}
-      >
-        Open PR
-      </Button>
+      {data?.aiFixPr ? (
+        <Button
+          primary
+          type="button"
+          endIcon={<LinkoutIcon />}
+          as="a"
+          href={data?.aiFixPr?.url}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View PR
+        </Button>
+      ) : (
+        <Button
+          startIcon={<PrOpenIcon />}
+          onClick={mutation}
+          loading={loading}
+        >
+          Create PR
+        </Button>
+      )}
     </>
   )
 }

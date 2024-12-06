@@ -35,6 +35,7 @@ defmodule Console.AI.Tools.Pr do
   def description(), do: "Creates a pull request or merge request against a configured Source Control Management provider"
 
   def implement(%__MODULE__{repo_url: url, branch_name: branch, commit_message: msg} = pr) do
+    branch = "plrl/ai/#{branch}-#{Console.rand_alphanum(6)}"
     with {:conn, %ScmConnection{} = conn} <- {:conn, Tool.scm_connection()},
          conn <- %{conn | author: Tool.actor()},
          url = to_http(conn, url),
@@ -43,7 +44,7 @@ defmodule Console.AI.Tools.Pr do
          {:ok, _} <- commit(conn, msg),
          {:ok, _} <- push(conn, branch),
          {:ok, identifier} <- slug(conn, url),
-         impl <- Dispatcher.dispatcher(conn) do
+         impl = Dispatcher.dispatcher(conn) do
       impl.create(%PrAutomation{
         connection: conn,
         title: pr.pr_title,

@@ -53,6 +53,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `model` _string_ | Model is the LLM model name to use. |  | Optional: {} <br /> |
+| `toolModel` _string_ | Model to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: {} <br /> |
 | `baseUrl` _string_ | A custom base url to use, for reimplementations of the same API scheme (for instance Together.ai uses the OpenAI API spec) |  | Optional: {} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: {} <br /> |
 
@@ -98,6 +99,7 @@ _Appears in:_
 | `endpoint` _string_ | Your Azure OpenAI endpoint, should be formatted like: https://{endpoint}/openai/deployments/{deployment-id}" |  | Required: {} <br /> |
 | `apiVersion` _string_ | The azure openai Data plane - inference api version to use, defaults to 2024-10-01-preview or the latest available |  | Optional: {} <br /> |
 | `model` _string_ | The OpenAi Model you wish to use.  If not specified, Plural will provide a default |  | Optional: {} <br /> |
+| `toolModel` _string_ | Model to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: {} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the token to access<br />the configured AI provider. |  | Required: {} <br /> |
 
 
@@ -115,6 +117,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `modelId` _string_ | The AWS Bedrock Model ID to use |  | Required: {} <br /> |
+| `toolModelId` _string_ | Model to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: {} <br /> |
 | `accessKeyId` _string_ | An AWS Access Key ID to use, can also use IRSA to acquire credentials |  | Optional: {} <br /> |
 | `secretAccessKeyRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | An AWS Secret Access Key to use, can also use IRSA to acquire credentials |  | Optional: {} <br /> |
 
@@ -1602,6 +1605,7 @@ _Appears in:_
 | --- | --- | --- | --- |
 | `url` _string_ | URL is the url this model is queryable on |  | Required: {} <br /> |
 | `model` _string_ | Model is the Ollama model to use when querying the /chat api |  | Required: {} <br /> |
+| `toolModel` _string_ | Model to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: {} <br /> |
 | `tokenSecretRef` _[SecretKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretkeyselector-v1-core)_ | TokenSecretRef is a reference to the local secret holding the contents of a HTTP Authorization header<br />to send to your ollama api in case authorization is required (eg for an instance hosted on a public network) |  | Optional: {} <br /> |
 
 
@@ -2731,6 +2735,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `model` _string_ | The Vertex AI model to use |  | Optional: {} <br /> |
+| `toolModel` _string_ | Model to use for tool calling, which is less frequent and often requires more advanced reasoning |  | Optional: {} <br /> |
 | `project` _string_ | The GCP project you'll be using |  | Required: {} <br /> |
 | `location` _string_ | The GCP region Vertex is queried from |  | Required: {} <br /> |
 | `endpoint` _string_ | A custom endpoint for self-deployed models |  | Optional: {} <br /> |
