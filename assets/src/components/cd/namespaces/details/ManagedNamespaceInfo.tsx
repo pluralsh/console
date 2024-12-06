@@ -1,4 +1,3 @@
-import { useTheme } from 'styled-components'
 import {
   AppIcon,
   Card,
@@ -10,13 +9,14 @@ import {
 } from '@pluralsh/design-system'
 import { useMemo } from 'react'
 import { useOutletContext } from 'react-router-dom'
-
-import { useSetPageScrollable } from '../../ContinuousDeployment'
-import { getDistroProviderIconUrl } from '../../../utils/ClusterDistro'
+import { useTheme } from 'styled-components'
 import { deepOmitKey } from '../../../../utils/deepOmitKey'
-import { PropCard } from '../../globalServices/details/GlobalServiceInfo'
+import { getDistroProviderIconUrl } from '../../../utils/ClusterDistro'
 
-import { ManagedNamespaceContextT, getBreadcrumbs } from './ManagedNamespace'
+import PropCard from '../../../utils/PropCard.tsx'
+import { useSetPageScrollable } from '../../ContinuousDeployment'
+
+import { getBreadcrumbs, ManagedNamespaceContextT } from './ManagedNamespace'
 
 export default function ManagedNamespaceInfo() {
   const theme = useTheme()
