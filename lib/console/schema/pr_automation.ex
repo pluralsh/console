@@ -126,7 +126,6 @@ defmodule Console.Schema.PrAutomation do
     |> cast_assoc(:create_bindings)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:create_policy_id, &Ecto.UUID.generate/0)
-    |> validate_required([:name, :title, :message, :connection_id])
     |> unique_constraint(:name)
     |> foreign_key_constraint(:promotion_criteria,
       name: :promotion_criteria,
@@ -138,6 +137,7 @@ defmodule Console.Schema.PrAutomation do
     |> foreign_key_constraint(:connection_id)
     |> foreign_key_constraint(:project_id)
     |> foreign_key_constraint(:catalog_id)
+    |> validate_required([:name, :title, :message, :connection_id])
   end
 
   defp update_changeset(model, attrs) do
