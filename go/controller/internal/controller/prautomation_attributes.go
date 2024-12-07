@@ -12,7 +12,7 @@ import (
 	"github.com/pluralsh/console/go/controller/internal/utils"
 )
 
-func (in *PrAutomationReconciler) attributes(ctx context.Context, pra *v1alpha1.PrAutomation) (*console.PrAutomationAttributes, error) {
+func (in *PrAutomationReconciler) Attributes(ctx context.Context, pra *v1alpha1.PrAutomation) (*console.PrAutomationAttributes, error) {
 	helper := utils.NewConsoleHelper(ctx, in.ConsoleClient, in.Client)
 
 	clusterID, err := helper.IDFromRef(pra.Spec.ClusterRef, &v1alpha1.Cluster{})

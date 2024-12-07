@@ -167,17 +167,24 @@ defmodule Console.GraphQl.Deployments.GitMutationsTest do
   describe "updatePrAutomation" do
     test "it will create a new scm connection" do
       pr = insert(:pr_automation)
+      catalog = insert(:catalog)
+
       {:ok, %{data: %{"updatePrAutomation" => updated}}} = run_query("""
         mutation Create($id: ID!, $attrs: PrAutomationAttributes!) {
           updatePrAutomation(id: $id, attributes: $attrs) {
             id
             name
+            catalog { id }
           }
         }
-      """, %{"attrs" => %{"name" => "test"}, "id" => pr.id}, %{current_user: admin_user()})
+      """, %{"id" => pr.id, "attrs" => %{
+        "name" => "test",
+        "catalogId" => catalog.id
+      }}, %{current_user: admin_user()})
 
       assert updated["id"] == pr.id
       assert updated["name"] == "test"
+      assert updated["catalog"]["id"] == catalog.id
     end
   end
 

@@ -144,6 +144,13 @@ defmodule Console.Schema.Cluster do
     timestamps()
   end
 
+  def healthy?(%__MODULE__{pinged_at: nil}), do: false
+  def healthy?(%__MODULE__{pinged_at: pinged}) do
+    Timex.now()
+    |> Timex.shift(minutes: -20)
+    |> Timex.before?(pinged)
+  end
+
   defp upgrade_plan_fields(), do: __MODULE__.UpgradePlan.__schema__(:fields) -- [:id]
 
   def search(query \\ __MODULE__, sq) do
