@@ -11,7 +11,6 @@ import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 import { aiRoutes } from './aiRoutes.tsx'
 import { backupsRoutes } from './backupRoutes'
 import { cdRoutes } from './cdRoutes'
-import { HOME_REL_PATH } from './consoleRoutesConsts'
 import { kubernetesRoutes } from './kubernetesRoute'
 import { policiesRoutes } from './policiesRoutes'
 import { prRoutes } from './prRoutes'
@@ -79,7 +78,7 @@ export const consoleRoutes: RouteObject[] = [
     element: <Routes>{consoleComponentRoutes}</Routes>,
   },
   {
-    path: HOME_REL_PATH,
+    index: true,
     element: <Home />,
   },
   ...secretsRoutes,

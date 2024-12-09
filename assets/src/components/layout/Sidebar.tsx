@@ -51,7 +51,6 @@ import HelpLauncher from '../help/HelpLauncher'
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
-import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 
 type MenuItem = {
@@ -81,7 +80,7 @@ function getMenuItems({
       text: 'Home',
       expandedLabel: 'Home',
       icon: <HomeIcon />,
-      path: HOME_ABS_PATH,
+      path: '/',
       hotkeys: ['shift H', '1'],
     },
     {
