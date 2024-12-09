@@ -2,7 +2,7 @@ import { useOutletContext } from 'react-router-dom'
 import { stringify } from 'yaml'
 import { Pod } from 'generated/graphql'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { RawPageCode } from '../../../cluster/RawPageCode.tsx'
+import { RawPageCode } from '../../../utils/RawPageCode.tsx'
 
 // It's used by multiple routes.
 export default function PodRaw() {

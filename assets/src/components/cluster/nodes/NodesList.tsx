@@ -31,8 +31,7 @@ import {
   numishSort,
 } from '../TableElements'
 import { DELETE_NODE } from '../queries'
-
-import { UsageBar } from './UsageBar'
+import { UsageBar } from '../../utils/UsageBar.tsx'
 
 type Capacity = { memory?: string; cpu?: string }
 

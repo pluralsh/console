@@ -1,4 +1,5 @@
 import {
+  Chip,
   CollapseIcon,
   IconFrame,
   Prop,
@@ -11,7 +12,7 @@ import { UnstyledLink } from 'components/utils/Link'
 import { filesize } from 'filesize'
 import { Container, ContainerStatus, Maybe, Port } from 'generated/graphql'
 import { Flex, Span } from 'honorable'
-import { ComponentProps, useMemo } from 'react'
+import { ComponentProps, CSSProperties, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
 import { cpuParser, memoryParser } from 'utils/kubernetes'
@@ -20,16 +21,17 @@ import {
   ReadinessT,
   containerStatusToReadiness,
   readinessToLabel,
+  readinessToSeverity,
+  readinessToContainerLabel,
 } from 'utils/status'
 
 import { Overline } from 'components/cd/utils/PermissionsModal.tsx'
 import moment from 'moment/moment'
-import {
-  ContainerStatusChip,
-  TABLE_HEIGHT,
-  TableText,
-  Usage,
-} from '../../../cluster/TableElements.tsx'
+import { TableText, Usage } from '../../../cluster/TableElements.tsx'
+
+export const TABLE_HEIGHT = {
+  maxHeight: 'clamp(390px, calc(100vh - 260px), 1000px)',
+} satisfies CSSProperties
 
 type ContainerTableRow = {
   name?: string
@@ -47,6 +49,7 @@ type ContainerTableRow = {
   status?: ContainerStatus
   readiness: ReadinessT
 }
+
 export const columnHelper = createColumnHelper<ContainerTableRow>()
 
 export const ColStatus = columnHelper.accessor(
@@ -55,7 +58,9 @@ export const ColStatus = columnHelper.accessor(
     id: 'status',
     cell: ({ row: { original } }) => (
       <div>
-        <ContainerStatusChip readiness={original?.readiness} />
+        <Chip severity={readinessToSeverity[original?.readiness]}>
+          {readinessToContainerLabel[original?.readiness]}
+        </Chip>
       </div>
     ),
     header: 'Status',

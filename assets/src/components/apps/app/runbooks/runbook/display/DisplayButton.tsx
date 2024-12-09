@@ -1,15 +1,22 @@
 import { Banner, Button } from '@pluralsh/design-system'
 import { ApolloError } from 'apollo-boost'
-import { useContext, useState } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { useMutation } from '@apollo/client'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { legacyUrl } from 'helpers/url'
-
-import { ActionPortal } from '../Runbook'
+import { Portal } from 'react-portal'
 
 import { DisplayContext } from '../RunbookDisplay'
 import { EXECUTE_RUNBOOK } from '../../queries'
+
+export const ActionContext = createContext<any>({})
+
+function ActionPortal({ children }) {
+  const { ref } = useContext(ActionContext)
+
+  return <Portal node={ref}>{children}</Portal>
+}
 
 function getButton({ primary, key, ...props }: any) {
   return (

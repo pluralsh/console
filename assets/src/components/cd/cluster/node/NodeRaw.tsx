@@ -3,8 +3,8 @@ import { stringify } from 'yaml'
 import { Flex } from 'honorable'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { RawPageCode } from '../../../cluster/RawPageCode'
 import { Node } from '../../../../generated/graphql'
+import { RawPageCode } from '../../../utils/RawPageCode.tsx'
 
 export default function NodeRaw() {
   const { node } = useOutletContext() as { node: Node }

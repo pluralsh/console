@@ -9,7 +9,6 @@ import {
 } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { SortingFn } from '@tanstack/table-core'
-import { UsageBar } from 'components/cluster/nodes/UsageBar'
 import { TableText, TabularNumbers } from 'components/cluster/TableElements'
 import {
   DistroProviderIconFrame,
@@ -39,6 +38,7 @@ import { DetachClusterModal } from '../providers/DetachCluster'
 import { ClusterHealth } from './ClusterHealthChip'
 import ClusterUpgrade from './ClusterUpgrade'
 import { DynamicClusterIcon } from './DynamicClusterIcon'
+import { UsageBar } from '../../utils/UsageBar.tsx'
 
 export const columnHelper = createColumnHelper<Edge<ClustersRowFragment>>()
 

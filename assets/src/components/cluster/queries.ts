@@ -2,10 +2,8 @@ import { gql } from 'apollo-boost'
 
 import {
   ConfigurationOverlayFragment,
-  EventFragment,
   JobFragment,
   NodeFragment,
-  NodeMetricFragment,
   PodFragment,
   VerticalPodAutoscalerFragment,
 } from 'components/graphql/kubernetes'
@@ -35,60 +33,6 @@ export const DELETE_NODE = gql`
     }
   }
   ${NodeFragment}
-`
-
-export const NODES_Q = gql`
-  query {
-    nodes {
-      ...NodeFragment
-    }
-    nodeMetrics {
-      ...NodeMetricFragment
-    }
-  }
-  ${NodeFragment}
-  ${NodeMetricFragment}
-`
-
-export const NODE_Q = gql`
-  query Node($name: String!) {
-    node(name: $name) {
-      ...NodeFragment
-      raw
-      pods {
-        ...PodFragment
-      }
-      events {
-        ...EventFragment
-      }
-    }
-    nodeMetric(name: $name) {
-      ...NodeMetricFragment
-    }
-  }
-  ${NodeFragment}
-  ${PodFragment}
-  ${EventFragment}
-  ${NodeMetricFragment}
-`
-
-export const NODE_EVENTS_Q = gql`
-  query NodeEvents($name: String!) {
-    node(name: $name) {
-      events {
-        ...EventFragment
-      }
-    }
-  }
-  ${EventFragment}
-`
-
-export const NODE_RAW_Q = gql`
-  query NodeRaw($name: String!) {
-    node(name: $name) {
-      raw
-    }
-  }
 `
 
 export const SCALING_RECOMMENDATION = gql`
