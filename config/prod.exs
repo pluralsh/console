@@ -65,6 +65,7 @@ config :console, Console.Cron.Scheduler,
     {"@daily", {Console.Cron.Jobs, :prune_alerts, []}},
     {"@daily", {Console.AI.Cron, :trim, []}},
     {"@daily", {Console.AI.Cron, :trim_threads, []}},
+    {"@daily", {Console.Cost.Loader, :load, []}},
     {"0 0 * * 0", {Console.AI.Cron, :chats, []}}
   ]
 

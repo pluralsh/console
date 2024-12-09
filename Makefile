@@ -43,6 +43,13 @@ docker-push-ollama: ## push ollama image
 download-deprecations:
 	curl -L https://raw.githubusercontent.com/FairwindsOps/pluto/refs/heads/master/versions.yaml --output static/versions.yml
 
+download-cost:
+	curl -L https://raw.githubusercontent.com/opencost/opencost/refs/heads/develop/configs/alibaba.json --output priv/cost/alibaba.json
+	curl -L https://raw.githubusercontent.com/opencost/opencost/refs/heads/develop/configs/aws.json --output priv/cost/aws.json
+	curl -L https://raw.githubusercontent.com/opencost/opencost/refs/heads/develop/configs/azure.json --output priv/cost/azure.json
+	curl -L https://raw.githubusercontent.com/opencost/opencost/refs/heads/develop/configs/gcp.json --output priv/cost/gcp.json
+	curl -L https://raw.githubusercontent.com/opencost/opencost/refs/heads/develop/configs/oracle.json --output priv/cost/oracle.json
+
 build: ## Build the Docker image
 	docker build --build-arg GIT_COMMIT=$(GIT_COMMIT) \
 		--build-arg TARGETARCH=$(TARGETARCH) \
@@ -72,8 +79,10 @@ deploy: ## deploy artifacts to plural
 secrets: ## dir to manage random secret
 	mkdir secrets
 
+data: ## dir for test sqlite data
+	mkdir data
 
-testup: secrets ## sets up dependent services for test
+testup: secrets data ## sets up dependent services for test
 	docker compose up -d
 
 testdown: ## tear down test dependencies

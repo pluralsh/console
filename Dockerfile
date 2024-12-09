@@ -101,7 +101,8 @@ RUN  echo "deb http://deb.debian.org/debian bullseye-backports main" >/etc/apt/s
   sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && \
   addgroup --gid 10001 app && \
   adduser --home /home/console --uid 10001 --gid 10001 console && \
-  chown console:app /opt/app
+  chown console:app /opt/app && \
+  mkdir -p /opt/app/data
 
 ARG APP_NAME=console
 ARG GIT_COMMIT

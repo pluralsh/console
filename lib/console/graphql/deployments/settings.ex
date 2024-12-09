@@ -23,6 +23,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :smtp, :smtp_settings_attributes, description: "configuration for smtp message delivery"
 
     field :ai, :ai_settings_attributes, description: "configuration for LLM provider clients"
+    field :cost, :cost_settings_attributes, description: "settings for cost management functionality"
 
     field :read_bindings,          list_of(:policy_binding_attributes)
     field :write_bindings,         list_of(:policy_binding_attributes)
@@ -39,6 +40,13 @@ defmodule Console.GraphQl.Deployments.Settings do
   input_object :stack_settings_attributes do
     field :job_spec,      :gate_job_attributes
     field :connection_id, :id
+  end
+
+  @desc "Settings for cost management"
+  input_object :cost_settings_attributes do
+    field :enabled,                  :boolean
+    field :recommendation_threshold, :integer, description: "the percentage change needed to generate a recommendation, default 30%"
+    field :recommendation_cushion,   :integer, description: "the percentage change needed to generate a recommendation, default 20%"
   end
 
   input_object :ai_settings_attributes do
@@ -145,6 +153,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :stacks,                :stack_settings, description: "global settings for stack configuration"
     field :smtp,                  :smtp_settings, description: "smtp server configuration for email notifications"
     field :ai,                    :ai_settings, description: "settings for LLM provider clients"
+    field :cost,                  :cost_settings, description: "settings for cost management"
 
     field :agent_vsn, non_null(:string), description: "The console's expected agent version",
       resolve: fn _, _, _ -> {:ok, Settings.agent_vsn()} end
@@ -184,6 +193,13 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :sender,   non_null(:string)
     field :user,     non_null(:string)
     field :ssl,      non_null(:boolean)
+  end
+
+  @desc "Settings for cost management"
+  object :cost_settings do
+    field :enabled, :boolean
+    field :recommendation_threshold, :integer, description: "the percentage change needed to generate a recommendation, default 30%"
+    field :recommendation_cushion, :integer, description: "the percentage cushion above baseline usage to give when generation recommendations, default 20%"
   end
 
   @desc "Settings for configuring access to common LLM providers"

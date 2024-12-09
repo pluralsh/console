@@ -103,6 +103,38 @@ defmodule Console.Deployments.GitTest do
       assert conn.token == "pat-asdfa"
     end
 
+    test "github accepts app auth" do
+      admin = admin_user()
+
+      {:ok, priv} = ExPublicKey.generate_key()
+      {:ok, priv_string} = ExPublicKey.pem_encode(priv)
+
+      {:ok, _} = Git.create_scm_connection(%{
+        type: :github,
+        name: "github",
+        github: %{app_id: "1234", installation_id: "4353", private_key: priv_string}
+      }, admin)
+    end
+
+    test "non-github requires a token" do
+      admin = admin_user()
+
+      {:ok, priv} = ExPublicKey.generate_key()
+      {:ok, priv_string} = ExPublicKey.pem_encode(priv)
+
+      {:error, _} = Git.create_scm_connection(%{
+        type: :gitlab,
+        name: "gitlab",
+        github: %{app_id: "1234", installation_id: "4353", private_key: priv_string}
+      }, admin)
+    end
+
+    test "github requires either a token or app auth" do
+      admin = admin_user()
+
+      {:error, _} = Git.create_scm_connection(%{type: :github, name: "github"}, admin)
+    end
+
     test "nonadmins cannot create" do
       {:error, _} = Git.create_scm_connection(%{type: :github, name: "github", token: "pat-asdfa"}, insert(:user))
     end

@@ -1372,6 +1372,35 @@ export type ClusterMetricsSummary = {
   nodes?: Maybe<Scalars['Int']['output']>;
 };
 
+export type ClusterNamespaceUsage = {
+  __typename?: 'ClusterNamespaceUsage';
+  cluster?: Maybe<Cluster>;
+  cpu?: Maybe<Scalars['Float']['output']>;
+  cpuCost?: Maybe<Scalars['Int']['output']>;
+  /** the amount of cpu utilized */
+  cpuUtil?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the amount of memory utilized */
+  memUtil?: Maybe<Scalars['Float']['output']>;
+  memory?: Maybe<Scalars['Float']['output']>;
+  memoryCost?: Maybe<Scalars['Int']['output']>;
+  namespace?: Maybe<Scalars['String']['output']>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClusterNamespaceUsageConnection = {
+  __typename?: 'ClusterNamespaceUsageConnection';
+  edges?: Maybe<Array<Maybe<ClusterNamespaceUsageEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterNamespaceUsageEdge = {
+  __typename?: 'ClusterNamespaceUsageEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterNamespaceUsage>;
+};
+
 export type ClusterNodeMetrics = {
   __typename?: 'ClusterNodeMetrics';
   cpu?: Maybe<Array<Maybe<MetricResponse>>>;
@@ -1496,6 +1525,34 @@ export type ClusterRevisionEdge = {
   node?: Maybe<ClusterRevision>;
 };
 
+export type ClusterScalingRecommendation = {
+  __typename?: 'ClusterScalingRecommendation';
+  cluster?: Maybe<Cluster>;
+  container?: Maybe<Scalars['String']['output']>;
+  cpuRecommendation?: Maybe<Scalars['Float']['output']>;
+  cpuRequest?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  memoryRecommendation?: Maybe<Scalars['Float']['output']>;
+  memoryRequest?: Maybe<Scalars['Float']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  namespace?: Maybe<Scalars['String']['output']>;
+  type?: Maybe<ScalingRecommendationType>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+export type ClusterScalingRecommendationConnection = {
+  __typename?: 'ClusterScalingRecommendationConnection';
+  edges?: Maybe<Array<Maybe<ClusterScalingRecommendationEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterScalingRecommendationEdge = {
+  __typename?: 'ClusterScalingRecommendationEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterScalingRecommendation>;
+};
+
 export type ClusterServiceAttributes = {
   git: GitRefAttributes;
   id: Scalars['ID']['input'];
@@ -1565,6 +1622,52 @@ export type ClusterUpgradePlan = {
   deprecations?: Maybe<Scalars['Boolean']['output']>;
   /** whether mutual api incompatibilities with all addons and kubernetes have been satisfied */
   incompatibilities?: Maybe<Scalars['Boolean']['output']>;
+};
+
+export type ClusterUsage = {
+  __typename?: 'ClusterUsage';
+  cluster?: Maybe<Cluster>;
+  cpu?: Maybe<Scalars['Float']['output']>;
+  cpuCost?: Maybe<Scalars['Int']['output']>;
+  /** the amount of cpu utilized */
+  cpuUtil?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  /** the amount of memory utilized */
+  memUtil?: Maybe<Scalars['Float']['output']>;
+  memory?: Maybe<Scalars['Float']['output']>;
+  memoryCost?: Maybe<Scalars['Int']['output']>;
+  namespaces?: Maybe<ClusterNamespaceUsageConnection>;
+  recommendations?: Maybe<ClusterScalingRecommendationConnection>;
+  updatedAt?: Maybe<Scalars['DateTime']['output']>;
+};
+
+
+export type ClusterUsageNamespacesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type ClusterUsageRecommendationsArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type ClusterUsageConnection = {
+  __typename?: 'ClusterUsageConnection';
+  edges?: Maybe<Array<Maybe<ClusterUsageEdge>>>;
+  pageInfo: PageInfo;
+};
+
+export type ClusterUsageEdge = {
+  __typename?: 'ClusterUsageEdge';
+  cursor?: Maybe<Scalars['String']['output']>;
+  node?: Maybe<ClusterUsage>;
 };
 
 export type Command = {
@@ -1910,6 +2013,25 @@ export type CostAnalysis = {
   totalCost?: Maybe<Scalars['Float']['output']>;
 };
 
+/** Settings for cost management */
+export type CostSettings = {
+  __typename?: 'CostSettings';
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** the percentage cushion above baseline usage to give when generation recommendations, default 20% */
+  recommendationCushion?: Maybe<Scalars['Int']['output']>;
+  /** the percentage change needed to generate a recommendation, default 30% */
+  recommendationThreshold?: Maybe<Scalars['Int']['output']>;
+};
+
+/** Settings for cost management */
+export type CostSettingsAttributes = {
+  enabled?: InputMaybe<Scalars['Boolean']['input']>;
+  /** the percentage change needed to generate a recommendation, default 20% */
+  recommendationCushion?: InputMaybe<Scalars['Int']['input']>;
+  /** the percentage change needed to generate a recommendation, default 30% */
+  recommendationThreshold?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type CreatePrConfigAttributes = {
   /** a scm connection id to use for pr automations */
   connectionId?: InputMaybe<Scalars['ID']['input']>;
@@ -2139,6 +2261,8 @@ export type DeploymentSettings = {
   artifactRepository?: Maybe<GitRepository>;
   /** your compliant k8s version */
   compliantK8sVsn: Scalars['String']['output'];
+  /** settings for cost management */
+  cost?: Maybe<CostSettings>;
   /** policy for creation of new objects */
   createBindings?: Maybe<Array<Maybe<PolicyBinding>>>;
   /** the repo to fetch the deploy operators manifests from */
@@ -2175,6 +2299,8 @@ export type DeploymentSettingsAttributes = {
   /** configuration for LLM provider clients */
   ai?: InputMaybe<AiSettingsAttributes>;
   artifactRepositoryId?: InputMaybe<Scalars['ID']['input']>;
+  /** settings for cost management functionality */
+  cost?: InputMaybe<CostSettingsAttributes>;
   createBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
   deployerRepositoryId?: InputMaybe<Scalars['ID']['input']>;
   gitBindings?: InputMaybe<Array<InputMaybe<PolicyBindingAttributes>>>;
@@ -6555,6 +6681,8 @@ export type RootQueryType = {
   clusterStackRuns?: Maybe<StackRunConnection>;
   /** gets summary information for all healthy/unhealthy clusters in your fleet */
   clusterStatuses?: Maybe<Array<Maybe<ClusterStatusInfo>>>;
+  clusterUsage?: Maybe<ClusterUsage>;
+  clusterUsages?: Maybe<ClusterUsageConnection>;
   /** a relay connection of all clusters visible to the current user */
   clusters?: Maybe<ClusterConnection>;
   /** renders a full hierarchy of resources recursively owned by this component (useful for CRD views) */
@@ -6928,6 +7056,19 @@ export type RootQueryTypeClusterStatusesArgs = {
   projectId?: InputMaybe<Scalars['ID']['input']>;
   q?: InputMaybe<Scalars['String']['input']>;
   tag?: InputMaybe<TagInput>;
+};
+
+
+export type RootQueryTypeClusterUsageArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type RootQueryTypeClusterUsagesArgs = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -8030,6 +8171,13 @@ export type S3StoreAttributes = {
   region?: InputMaybe<Scalars['String']['input']>;
   secretAccessKey: Scalars['String']['input'];
 };
+
+export enum ScalingRecommendationType {
+  Daemonset = 'DAEMONSET',
+  Deployment = 'DEPLOYMENT',
+  Rollout = 'ROLLOUT',
+  Statefulset = 'STATEFULSET'
+}
 
 /** an object representing the means to connect to SCM apis */
 export type ScmConnection = {
