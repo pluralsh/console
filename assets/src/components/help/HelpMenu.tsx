@@ -71,19 +71,6 @@ export function HelpMenu({
       >
         Search docs
       </HelpMenuButton>
-      {/* <HelpMenuButton
-        startIcon={
-          <ChatOutlineIcon
-            size={16}
-            color={theme.colors['icon-primary']}
-          />
-        }
-        onClick={() => {
-          changeState(HelpMenuState.chatBot)
-        }}
-      >
-        Ask Plural AI
-      </HelpMenuButton> */}
     </HelpMenuSC>
   )
 }

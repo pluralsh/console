@@ -14,7 +14,6 @@ import SubscriptionContext from 'components/contexts/SubscriptionContext'
 import { useSetBreadcrumbs } from '@pluralsh/design-system'
 
 import { RootQueryType, User } from '../../../../generated/graphql'
-import { SHORT_POLL_INTERVAL } from '../../../cluster/constants'
 import { ResponsivePageFullWidth } from '../../../utils/layout/ResponsivePageFullWidth'
 import VPNClientList from '../../../vpn/VPNClientList'
 import {
@@ -31,6 +30,8 @@ import { WireguardPeers } from '../../../vpn/graphql/queries'
 import { getUserManagementBreadcrumbs } from '../UserManagement'
 
 import { VPNHeaderActions } from './VPNHeaderActions'
+
+const SHORT_POLL_INTERVAL = 3 * 1000
 
 const breadcrumbs = getUserManagementBreadcrumbs('vpn')
 

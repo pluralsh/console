@@ -10,16 +10,6 @@ export const LogStreamFragment = gql`
   }
 `
 
-export const MetricResponseFragment = gql`
-  fragment MetricResponseFragment on MetricResponse {
-    metric
-    values {
-      timestamp
-      value
-    }
-  }
-`
-
 export const LOGS_Q = gql`
   query Logs($query: String!, $start: Long, $limit: Int!) {
     logs(query: $query, start: $start, limit: $limit) {
