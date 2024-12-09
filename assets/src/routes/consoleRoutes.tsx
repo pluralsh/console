@@ -11,7 +11,7 @@ import { aiRoutes } from './aiRoutes.tsx'
 import { backupsRoutes } from './backupRoutes'
 import { cdRoutes } from './cdRoutes'
 import { kubernetesRoutes } from './kubernetesRoute'
-import { policiesRoutes } from './policiesRoutes'
+import { securityRoutes } from './securityRoutes'
 import { prRoutes } from './prRoutes'
 import { secretsRoutes } from './secretsRoute'
 import { settingsRoutes } from './settingsRoutes'
@@ -58,7 +58,8 @@ const profileRoutes = [
 export const consoleComponentRoutes = [
   ...catalogRoutes,
   ...stacksRoutes,
-  ...policiesRoutes,
+  // ...incidentsRoutes,
+  ...securityRoutes,
   ...backupsRoutes,
   ...profileRoutes,
   ...cdRoutes,

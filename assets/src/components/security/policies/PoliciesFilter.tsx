@@ -14,9 +14,9 @@ import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
 import { useDebounce } from '@react-hooks-library/core'
 
-import { useProjectId } from '../contexts/ProjectsContext'
-import { mapExistingNodes } from '../../utils/graphql'
-import { useFetchPaginatedData } from '../utils/table/useFetchPaginatedData'
+import { useProjectId } from '../../contexts/ProjectsContext'
+import { mapExistingNodes } from '../../../utils/graphql'
+import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 const FETCH_MARGIN = 30
 
