@@ -1,4 +1,3 @@
-import Apps from 'components/apps/Apps'
 import Build from 'components/builds/build/Build'
 import Changelog from 'components/builds/build/changelog/Changelog'
 import Progress from 'components/builds/build/progress/Progress'
@@ -14,7 +13,6 @@ import { ProfileVPN } from 'components/profile/VPN'
 import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 
 import { aiRoutes } from './aiRoutes.tsx'
-import { appsRoutes } from './appsRoutes'
 import { backupsRoutes } from './backupRoutes'
 import { cdRoutes } from './cdRoutes'
 import { clusterRoutes } from './clusterRoutes'
@@ -119,7 +117,6 @@ const incidentsRoutes = [
 
 export const consoleComponentRoutes = [
   ...catalogRoutes,
-  ...appsRoutes,
   ...clusterRoutes,
   ...stacksRoutes,
   // ...incidentsRoutes,
@@ -141,18 +138,10 @@ export const consoleRoutes: RouteObject[] = [
   },
 
   // ----- New object-based routes -----
-  // Index
-  { index: true, element: <Apps /> },
-
-  // HOME
   {
     path: HOME_REL_PATH,
     element: <Home />,
   },
-
-  // SECRETS
   ...secretsRoutes,
-
-  // PR QUEUE
   ...prRoutes,
 ]
