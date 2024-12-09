@@ -95,31 +95,10 @@ const profileRoutes = [
   </Route>,
 ]
 
-/*
-const incidentsRoutes = [
-  <Route
-    path="incident/:incidentId"
-    element={(
-      <PluralApi>
-        <Incident editing={undefined} />
-      </PluralApi>
-    )}
-  />,
-  <Route
-    path="incidents"
-    element={(
-      <PluralApi>
-        <Incidents />
-      </PluralApi>
-    )}
-  />,
-] */
-
 export const consoleComponentRoutes = [
   ...catalogRoutes,
   ...clusterRoutes,
   ...stacksRoutes,
-  // ...incidentsRoutes,
   ...policiesRoutes,
   ...buildsRoutes,
   ...backupsRoutes,
@@ -131,13 +110,10 @@ export const consoleComponentRoutes = [
 ].map((route, idx) => ({ ...route, key: route.props.path ?? idx }))
 
 export const consoleRoutes: RouteObject[] = [
-  // ----- Old-style component-based routes -----
   {
     path: '*',
     element: <Routes>{consoleComponentRoutes}</Routes>,
   },
-
-  // ----- New object-based routes -----
   {
     path: HOME_REL_PATH,
     element: <Home />,

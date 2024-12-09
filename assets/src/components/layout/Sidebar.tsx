@@ -179,16 +179,6 @@ function getMenuItems({
       plural: true,
       path: `/${DB_MANAGEMENT_PATH}`,
     },
-    // ...(isSandbox
-    //   ? []
-    //   : [
-    //       {
-    //         text: 'Incidents',
-    //         icon: <SirenIcon />,
-    //         path: '/incidents',
-    //         sandboxed: true,
-    //       },
-    //     ]),
     {
       text: 'Backups',
       expandedLabel: 'Backups',
