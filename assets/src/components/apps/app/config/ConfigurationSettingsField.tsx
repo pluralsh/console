@@ -6,7 +6,15 @@ import { Flex } from 'honorable'
 
 import { deepFetch } from '../../../../utils/graphql'
 
-import { convertType } from '../runbooks/runbook/display/misc'
+function convertType(val, type) {
+  if (!type) return val
+
+  if (type === 'int') return parseInt(val)
+  if (type === 'float') return parseFloat(val)
+  if (type === 'bool') return val === 'true'
+
+  return val
+}
 
 function ConfigurationSettingsInput({ value = '', setValue }) {
   return (

@@ -15,15 +15,6 @@ import {
 import { ComponentState } from 'generated/graphql'
 import { ComponentProps } from 'react'
 
-export const statusToBorder = {
-  [Readiness.Ready]: '',
-  [Readiness.Running]: '',
-  [Readiness.InProgress]: 'border-warning',
-  [Readiness.Failed]: 'border-error',
-  [Readiness.Complete]: '',
-  [Readiness.Completed]: '',
-} as const satisfies Record<ReadinessT, string>
-
 export const statusToSeverity = {
   [Readiness.Ready]: 'success',
   [Readiness.Running]: 'success',

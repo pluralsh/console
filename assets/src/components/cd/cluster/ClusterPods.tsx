@@ -32,11 +32,11 @@ import {
   useClusterPodsQuery,
 } from '../../../generated/graphql'
 import LoadingIndicator from '../../utils/LoadingIndicator'
-import { columnHelper } from '../../cluster/nodes/NodesList'
 import { TableCaretLink } from '../../cluster/TableElements'
 import { getPodDetailsPath } from '../../../routes/cdRoutesConsts'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 import { NamespaceListFooter } from '../../utils/NamespaceListFooter'
+import { columnHelper } from './ClusterNodes.tsx'
 
 const POLL_INTERVAL = 10 * 1000
 

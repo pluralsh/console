@@ -5,7 +5,7 @@ import { useTheme } from 'styled-components'
 
 import { ComponentState } from 'generated/graphql'
 import ComponentCard, { type Component } from './ComponentCard'
-import { compareComponents } from './Components'
+import { compareComponents } from './Components.tsx'
 
 export function ComponentList<C extends Component>({
   components,
