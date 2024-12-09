@@ -5,12 +5,12 @@ import {
   PrOpenIcon,
   Toast,
 } from '@pluralsh/design-system'
+import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import {
   Dispatch,
   ReactNode,
   SetStateAction,
   useCallback,
-  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -28,7 +28,6 @@ import LoadingIndicator from '../../utils/LoadingIndicator.tsx'
 import AIPanel from '../AIPanel.tsx'
 import { AISuggestFixButton } from './AISuggestFixButton.tsx'
 import { ChatWithAIButton, insightMessage } from './ChatbotButton.tsx'
-import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 
 interface AISuggestFixProps {
   insight: Nullable<AiInsightFragment>
@@ -93,17 +92,10 @@ function FixPr({
     variables: { insightId, messages: [{ role: AiRole.User, content: fix }] },
   })
 
-  // TEMP FIX, implement permanent solution in DS
-  const errorToastRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (errorToastRef.current) errorToastRef.current.style.zIndex = '10000'
-  }, [data?.aiFixPr])
-
   return (
     <>
       {error && (
         <Toast
-          ref={errorToastRef}
           severity="danger"
           position="top-right"
           margin="large"

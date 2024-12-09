@@ -42,15 +42,16 @@ defmodule Console.GraphQl.Deployments.Settings do
   end
 
   input_object :ai_settings_attributes do
-    field :enabled,   :boolean
-    field :tools,     :tool_config_attributes
-    field :provider,  :ai_provider
-    field :openai,    :openai_settings_attributes
-    field :anthropic, :anthropic_settings_attributes
-    field :ollama,    :ollama_attributes
-    field :azure,     :azure_openai_attributes
-    field :bedrock,   :bedrock_ai_attributes
-    field :vertex,    :vertex_ai_attributes
+    field :enabled,       :boolean
+    field :tools,         :tool_config_attributes
+    field :provider,      :ai_provider
+    field :tool_provider, :ai_provider, description: "ai provider to use with tool calls"
+    field :openai,        :openai_settings_attributes
+    field :anthropic,     :anthropic_settings_attributes
+    field :ollama,        :ollama_attributes
+    field :azure,         :azure_openai_attributes
+    field :bedrock,       :bedrock_ai_attributes
+    field :vertex,        :vertex_ai_attributes
   end
 
   input_object :tool_config_attributes do
@@ -190,6 +191,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :enabled,       :boolean
     field :tools_enabled, :boolean, resolve: fn _, _, _ -> {:ok, Console.AI.Provider.tools?()} end
     field :provider,      :ai_provider
+    field :tool_provider, :ai_provider, description: "ai provider to use with tool calls"
     field :openai,        :openai_settings
     field :anthropic,     :anthropic_settings
     field :ollama,        :ollama_settings

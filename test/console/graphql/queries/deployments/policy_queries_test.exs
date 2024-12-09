@@ -18,6 +18,32 @@ defmodule Console.GraphQl.Deployments.PolicyQueriesTest do
     end
   end
 
+  describe "vulnerabilityStatistics" do
+    test "it can count vulns by grade" do
+      insert_list(3, :vulnerability_report, grade: :f)
+      insert_list(2, :vulnerability_report, grade: :d)
+      insert_list(1, :vulnerability_report, grade: :c)
+      insert_list(2, :vulnerability_report, grade: :b)
+      insert_list(3, :vulnerability_report, grade: :a)
+
+      {:ok, %{data: %{"vulnerabilityStatistics" => found}}} = run_query("""
+        query {
+          vulnerabilityStatistics {
+            grade
+            count
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      by_grade = Map.new(found, & {&1["grade"], &1["count"]})
+      assert by_grade["F"] == 3
+      assert by_grade["D"] == 2
+      assert by_grade["C"] == 1
+      assert by_grade["B"] == 2
+      assert by_grade["A"] == 3
+    end
+  end
+
   describe "vulnerabilityReport" do
     test "it can fetch a vuln report" do
       user = insert(:user)

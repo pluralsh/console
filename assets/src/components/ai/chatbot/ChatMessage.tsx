@@ -4,6 +4,7 @@ import {
   CopyIcon,
   Flex,
   IconFrame,
+  Markdown,
   PluralLogoMark,
   Spinner,
   TrashCanIcon,
@@ -16,7 +17,6 @@ import { aiGradientBorderStyles } from '../explain/ExplainWithAIButton'
 
 import { AiRole, useDeleteChatMutation } from 'generated/graphql'
 import CopyToClipboard from 'react-copy-to-clipboard'
-import ChatbotMarkdown from './ChatbotMarkdown.tsx'
 
 export const ChatMessage = forwardRef(
   (
@@ -33,14 +33,14 @@ export const ChatMessage = forwardRef(
       disableActions?: boolean
       contentStyles?: CSSObject
     } & ComponentProps<typeof ChatMessageSC>,
-    ref: Ref<HTMLLIElement>
+    ref: Ref<HTMLDivElement>
   ) => {
     const theme = useTheme()
     const [showActions, setShowActions] = useState(false)
     let finalContent: ReactNode
 
     if (role === AiRole.Assistant || role === AiRole.System) {
-      finalContent = <ChatbotMarkdown text={content} />
+      finalContent = <Markdown text={content} />
     } else {
       finalContent = content.split('\n\n').map((str, i) => (
         <Card
@@ -78,7 +78,9 @@ export const ChatMessage = forwardRef(
           justify={role === AiRole.User ? 'flex-end' : 'flex-start'}
         >
           {role !== AiRole.User && <PluralAssistantIcon />}
-          <div css={contentStyles}>{finalContent}</div>
+          <div css={{ overflow: 'hidden', ...contentStyles }}>
+            {finalContent}
+          </div>
         </Flex>
       </ChatMessageSC>
     )
@@ -152,8 +154,7 @@ const ActionsWrapperSC = styled.div<{ $show: boolean }>(({ theme, $show }) => ({
   pointerEvents: $show ? 'auto' : 'none',
 }))
 
-const ChatMessageSC = styled.li(({ theme }) => ({
-  ...theme.partials.reset.li,
+const ChatMessageSC = styled.div(({ theme }) => ({
   position: 'relative',
   padding: theme.spacing.small,
 }))

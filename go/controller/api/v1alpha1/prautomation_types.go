@@ -177,6 +177,10 @@ type PrAutomationSpec struct {
 	// +kubebuilder:validation:Optional
 	ProjectRef *corev1.ObjectReference `json:"projectRef,omitempty"`
 
+	// CatalogRef the catalog this automation will belong to
+	// +kubebuilder:validation:Optional
+	CatalogRef *corev1.ObjectReference `json:"catalogRef,omitempty"`
+
 	// Bindings contain read and write policies of pr automation
 	// +kubebuilder:validation:Optional
 	Bindings *PrAutomationBindings `json:"bindings,omitempty"`

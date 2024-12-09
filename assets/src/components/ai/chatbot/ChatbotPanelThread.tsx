@@ -35,7 +35,7 @@ export function ChatbotPanelThread({
 }) {
   const theme = useTheme()
   const [streaming, setStreaming] = useState<boolean>(false)
-  const messageListRef = useRef<HTMLUListElement>(null)
+  const messageListRef = useRef<HTMLDivElement>(null)
   const scrollToBottom = useCallback(() => {
     messageListRef.current?.scrollTo({
       top: messageListRef.current.scrollHeight,
@@ -163,10 +163,10 @@ export const ChatbotMessagesWrapper = ({
   children,
 }: {
   fullscreen: boolean
-  messageListRef?: Ref<HTMLUListElement>
+  messageListRef?: Ref<HTMLDivElement>
   children: ReactNode
 }) => {
-  const internalRef = useRef<HTMLUListElement>(null)
+  const internalRef = useRef<HTMLDivElement>(null)
   const combinedRef = mergeRefs([messageListRef, internalRef])
 
   const { canScrollDown, canScrollUp } = useCanScroll(internalRef)
@@ -204,7 +204,7 @@ const ChatbotMessagesWrapperSC = styled.div<{ $fullscreen: boolean }>(
   })
 )
 
-const ChatbotMessagesListSC = styled.ul(({ theme }) => ({
+const ChatbotMessagesListSC = styled.div(({ theme }) => ({
   ...theme.partials.reset.list,
   scrollbarWidth: 'none',
   overflowY: 'auto',
