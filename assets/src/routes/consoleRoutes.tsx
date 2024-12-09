@@ -20,7 +20,7 @@ import { cdRoutes } from './cdRoutes'
 import { clusterRoutes } from './clusterRoutes'
 import { HOME_REL_PATH } from './consoleRoutesConsts'
 import { kubernetesRoutes } from './kubernetesRoute'
-import { policiesRoutes } from './policiesRoutes'
+import { securityRoutes } from './securityRoutes'
 import { prRoutes } from './prRoutes'
 import { secretsRoutes } from './secretsRoute'
 import { settingsRoutes } from './settingsRoutes'
@@ -123,7 +123,7 @@ export const consoleComponentRoutes = [
   ...clusterRoutes,
   ...stacksRoutes,
   // ...incidentsRoutes,
-  ...policiesRoutes,
+  ...securityRoutes,
   ...buildsRoutes,
   ...backupsRoutes,
   ...profileRoutes,

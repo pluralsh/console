@@ -1,24 +1,49 @@
-import { Chip, ErrorIcon, Sidecar, SidecarItem } from '@pluralsh/design-system'
+import {
+  Chip,
+  EmptyState,
+  ErrorIcon,
+  Sidecar,
+  SidecarItem,
+  useSetBreadcrumbs,
+} from '@pluralsh/design-system'
 import { Body1P, Title2H1 } from 'components/utils/typography/Text'
-import { PolicyConstraintQuery } from 'generated/graphql'
 import { A } from 'honorable'
 import moment from 'moment'
-import { Link } from 'react-router-dom'
+import { Link, useOutletContext } from 'react-router-dom'
 import { getClusterDetailsPath } from 'routes/cdRoutesConsts'
 
 import { useTheme } from 'styled-components'
 
-import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
+import { ScrollablePage } from '../../../../utils/layout/ScrollablePage'
+import { PolicyContextType } from '../Policy'
+import { useMemo } from 'react'
+import {
+  POLICIES_REL_PATH,
+  POLICIES_ABS_PATH,
+  POLICIES_DETAILS_PATH,
+  SECURITY_ABS_PATH,
+  SECURITY_REL_PATH,
+} from 'routes/securityRoutesConsts'
 
-function PolicyDetails({
-  policy,
-}: {
-  policy?: PolicyConstraintQuery['policyConstraint']
-}) {
+function PolicyDetails() {
   const theme = useTheme()
 
+  const { policy } = useOutletContext<PolicyContextType>()
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        { label: `${SECURITY_REL_PATH}`, url: `${SECURITY_ABS_PATH}}` },
+        { label: POLICIES_REL_PATH, url: `${POLICIES_ABS_PATH}` },
+        { label: policy?.name || '' },
+        { label: POLICIES_DETAILS_PATH },
+      ],
+      [policy?.name]
+    )
+  )
+
   if (!policy) {
-    return null
+    return <EmptyState message="Policy details not found" />
   }
   const { name, cluster, violationCount, insertedAt, updatedAt, object } =
     policy
