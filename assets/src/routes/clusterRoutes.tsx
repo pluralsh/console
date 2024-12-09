@@ -14,8 +14,6 @@ import NodeMetadata from 'components/cluster/nodes/NodeMetadata'
 import Container from 'components/cluster/containers/Container'
 import ContainerShell from 'components/cluster/containers/ContainerShell'
 import ContainerMetadata from 'components/cluster/containers/ContainerMetadata'
-import DatabaseManagement from 'components/db-management/DatabaseManagement'
-import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 
 import PodRaw from '../components/cluster/pods/PodRaw'
 
@@ -100,12 +98,5 @@ export const clusterRoutes = [
     loader={async ({ params: { namespace, name, container } }) => {
       redirect(`/pods/${namespace}/${name}/shell/${container}`)
     }}
-  />,
-
-  /* Database Management */
-  <Route
-    path={`${DB_MANAGEMENT_PATH}/:namespace?`}
-    index
-    element={<DatabaseManagement />}
   />,
 ]

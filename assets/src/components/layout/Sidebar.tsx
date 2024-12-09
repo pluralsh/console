@@ -5,7 +5,6 @@ import {
   ArrowTopRightIcon,
   BellIcon,
   Sidebar as DSSidebar,
-  DatabaseIcon,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
@@ -37,7 +36,6 @@ import styled, { useTheme } from 'styled-components'
 
 import { PersonaConfigurationFragment } from 'generated/graphql'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
-import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
@@ -163,13 +161,6 @@ function getMenuItems({
       path: POLICIES_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
       hotkeys: ['shift L', '8'],
-    },
-    {
-      text: 'Database management',
-      expandedLabel: 'Databases',
-      icon: <DatabaseIcon />,
-      plural: true,
-      path: `/${DB_MANAGEMENT_PATH}`,
     },
     {
       text: 'Backups',
