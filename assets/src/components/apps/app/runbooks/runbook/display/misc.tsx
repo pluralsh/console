@@ -1,30 +1,6 @@
-import { useContext } from 'react'
-
 import jp from 'jsonpath'
-import { cpuFormat } from 'utils/kubernetes'
-
-import { filesize } from 'filesize'
 
 import { deepFetch } from 'utils/graphql'
-
-import { DisplayContext } from '../RunbookDisplay'
-
-import { DisplayAttachment } from './DisplayAttachment'
-import { DisplayBox } from './DisplayBox'
-import { DisplayButton } from './DisplayButton'
-import { DisplayGraph } from './DisplayGraph'
-import { DisplayImage } from './DisplayImage'
-import DisplayInput from './DisplayInput'
-import { DisplayLink } from './DisplayLink'
-import { DisplayMarkdown } from './DisplayMarkdown'
-import { DisplayTable } from './DisplayTable'
-import { DisplayText } from './DisplayText'
-
-function ValueFrom(props) {
-  const display = useContext(DisplayContext)
-
-  return valueFrom(props, display)
-}
 
 export function valueFrom(
   { attributes: { datasource, path, doc } },
@@ -47,49 +23,7 @@ export function convertType(val, type) {
   return val
 }
 
-export function recurse(children, theme?) {
-  if (!children) return null
-
-  return children.map((c, i) => parse(c, i, theme))
-}
-
-export function parse(struct, index, theme) {
-  const props = { ...struct, key: index, theme }
-
-  switch (struct._type) {
-    case 'box':
-      return <DisplayBox {...props} />
-    case 'attachment':
-      return <DisplayAttachment {...props} />
-    case 'text':
-      return <DisplayText {...props} />
-    case 'markdown':
-      return <DisplayMarkdown {...props} />
-    case 'image':
-      return <DisplayImage {...props} />
-    case 'link':
-      return <DisplayLink {...props} />
-    case 'input':
-      return <DisplayInput {...props} />
-    case 'button':
-      return <DisplayButton {...props} />
-    case 'valueFrom':
-      return <ValueFrom {...props} />
-    case 'timeseries':
-      return <DisplayGraph {...props} />
-    case 'table':
-      return <DisplayTable {...props} />
-    default:
-      return null
-  }
-}
-
 export const query = (object, path) => jp.query(object, `$.${path}`)[0]
-
-export const ValueFormats = {
-  cpu: cpuFormat,
-  memory: filesize,
-}
 
 export function extract(data, doc) {
   if (!doc) return data
