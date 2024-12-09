@@ -6,7 +6,10 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     Cluster,
     ClusterProvider,
     ClusterRevision,
-    PinnedCustomResource
+    PinnedCustomResource,
+    ClusterUsage,
+    ClusterNamespaceUsage,
+    ClusterScalingRecommendation
   }
 
   def resolve_cluster(_, %{context: %{cluster: cluster}}), do: {:ok, cluster}
@@ -90,6 +93,33 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> PinnedCustomResource.ordered()
     |> Console.Repo.all()
     |> ok()
+  end
+
+  def resolve_cluster_usage(%{id: id}, %{context: %{current_user: user}}) do
+    %{cluster: cluster} = usage = Clusters.get_cluster_usage!(id)
+    with {:ok, _} <- allow(cluster, user, :read),
+      do: {:ok, usage}
+  end
+
+  def list_cluster_usage(args, %{context: %{current_user: user}}) do
+    ClusterUsage.for_user(user)
+    |> ClusterUsage.ordered()
+    |> ClusterUsage.preloaded()
+    |> paginate(args)
+  end
+
+  def list_namespace_usage(%ClusterUsage{cluster_id: cluster_id}, args, _) do
+    ClusterNamespaceUsage.for_cluster(cluster_id)
+    |> ClusterNamespaceUsage.ordered()
+    |> ClusterNamespaceUsage.preloaded()
+    |> paginate(args)
+  end
+
+  def list_scaling_recommendations(%ClusterUsage{cluster_id: cluster_id}, args, _) do
+    ClusterScalingRecommendation.for_cluster(cluster_id)
+    |> ClusterScalingRecommendation.ordered()
+    |> ClusterScalingRecommendation.preloaded()
+    |> paginate(args)
   end
 
   def runtime_services(cluster, _, _), do: {:ok, Clusters.runtime_services(cluster)}

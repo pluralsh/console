@@ -1075,6 +1075,32 @@ type ClusterMetricsSummary struct {
 	MemoryUsed *int64 `json:"memoryUsed,omitempty"`
 }
 
+type ClusterNamespaceUsage struct {
+	ID        string   `json:"id"`
+	Namespace *string  `json:"namespace,omitempty"`
+	CPU       *float64 `json:"cpu,omitempty"`
+	Memory    *float64 `json:"memory,omitempty"`
+	// the amount of cpu utilized
+	CPUUtil *float64 `json:"cpuUtil,omitempty"`
+	// the amount of memory utilized
+	MemUtil    *float64 `json:"memUtil,omitempty"`
+	CPUCost    *int64   `json:"cpuCost,omitempty"`
+	MemoryCost *int64   `json:"memoryCost,omitempty"`
+	Cluster    *Cluster `json:"cluster,omitempty"`
+	InsertedAt *string  `json:"insertedAt,omitempty"`
+	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+}
+
+type ClusterNamespaceUsageConnection struct {
+	PageInfo PageInfo                     `json:"pageInfo"`
+	Edges    []*ClusterNamespaceUsageEdge `json:"edges,omitempty"`
+}
+
+type ClusterNamespaceUsageEdge struct {
+	Node   *ClusterNamespaceUsage `json:"node,omitempty"`
+	Cursor *string                `json:"cursor,omitempty"`
+}
+
 type ClusterNodeMetrics struct {
 	CPU         []*MetricResponse `json:"cpu,omitempty"`
 	Memory      []*MetricResponse `json:"memory,omitempty"`
@@ -1183,6 +1209,31 @@ type ClusterRevisionEdge struct {
 	Cursor *string          `json:"cursor,omitempty"`
 }
 
+type ClusterScalingRecommendation struct {
+	ID                   string                     `json:"id"`
+	Type                 *ScalingRecommendationType `json:"type,omitempty"`
+	Namespace            *string                    `json:"namespace,omitempty"`
+	Name                 *string                    `json:"name,omitempty"`
+	Container            *string                    `json:"container,omitempty"`
+	MemoryRequest        *float64                   `json:"memoryRequest,omitempty"`
+	CPURequest           *float64                   `json:"cpuRequest,omitempty"`
+	MemoryRecommendation *float64                   `json:"memoryRecommendation,omitempty"`
+	CPURecommendation    *float64                   `json:"cpuRecommendation,omitempty"`
+	Cluster              *Cluster                   `json:"cluster,omitempty"`
+	InsertedAt           *string                    `json:"insertedAt,omitempty"`
+	UpdatedAt            *string                    `json:"updatedAt,omitempty"`
+}
+
+type ClusterScalingRecommendationConnection struct {
+	PageInfo PageInfo                            `json:"pageInfo"`
+	Edges    []*ClusterScalingRecommendationEdge `json:"edges,omitempty"`
+}
+
+type ClusterScalingRecommendationEdge struct {
+	Node   *ClusterScalingRecommendation `json:"node,omitempty"`
+	Cursor *string                       `json:"cursor,omitempty"`
+}
+
 type ClusterServiceAttributes struct {
 	ID           string           `json:"id"`
 	RepositoryID *string          `json:"repositoryId,omitempty"`
@@ -1248,6 +1299,33 @@ type ClusterUpgradePlan struct {
 	Incompatibilities *bool `json:"incompatibilities,omitempty"`
 	// whether all api deprecations have been cleared for the target version
 	Deprecations *bool `json:"deprecations,omitempty"`
+}
+
+type ClusterUsage struct {
+	ID     string   `json:"id"`
+	CPU    *float64 `json:"cpu,omitempty"`
+	Memory *float64 `json:"memory,omitempty"`
+	// the amount of cpu utilized
+	CPUUtil *float64 `json:"cpuUtil,omitempty"`
+	// the amount of memory utilized
+	MemUtil         *float64                                `json:"memUtil,omitempty"`
+	CPUCost         *int64                                  `json:"cpuCost,omitempty"`
+	MemoryCost      *int64                                  `json:"memoryCost,omitempty"`
+	Cluster         *Cluster                                `json:"cluster,omitempty"`
+	Namespaces      *ClusterNamespaceUsageConnection        `json:"namespaces,omitempty"`
+	Recommendations *ClusterScalingRecommendationConnection `json:"recommendations,omitempty"`
+	InsertedAt      *string                                 `json:"insertedAt,omitempty"`
+	UpdatedAt       *string                                 `json:"updatedAt,omitempty"`
+}
+
+type ClusterUsageConnection struct {
+	PageInfo PageInfo            `json:"pageInfo"`
+	Edges    []*ClusterUsageEdge `json:"edges,omitempty"`
+}
+
+type ClusterUsageEdge struct {
+	Node   *ClusterUsage `json:"node,omitempty"`
+	Cursor *string       `json:"cursor,omitempty"`
 }
 
 type Command struct {
@@ -1532,6 +1610,24 @@ type CostAnalysis struct {
 	SharedCost    *float64 `json:"sharedCost,omitempty"`
 }
 
+// Settings for cost management
+type CostSettings struct {
+	Enabled *bool `json:"enabled,omitempty"`
+	// the percentage change needed to generate a recommendation, default 30%
+	RecommendationThreshold *int64 `json:"recommendationThreshold,omitempty"`
+	// the percentage cushion above baseline usage to give when generation recommendations, default 20%
+	RecommendationCushion *int64 `json:"recommendationCushion,omitempty"`
+}
+
+// Settings for cost management
+type CostSettingsAttributes struct {
+	Enabled *bool `json:"enabled,omitempty"`
+	// the percentage change needed to generate a recommendation, default 30%
+	RecommendationThreshold *int64 `json:"recommendationThreshold,omitempty"`
+	// the percentage change needed to generate a recommendation, default 20%
+	RecommendationCushion *int64 `json:"recommendationCushion,omitempty"`
+}
+
 type CreatePrConfigAttributes struct {
 	// a scm connection id to use for pr automations
 	ConnectionID *string `json:"connectionId,omitempty"`
@@ -1742,6 +1838,8 @@ type DeploymentSettings struct {
 	SMTP *SMTPSettings `json:"smtp,omitempty"`
 	// settings for LLM provider clients
 	Ai *AiSettings `json:"ai,omitempty"`
+	// settings for cost management
+	Cost *CostSettings `json:"cost,omitempty"`
 	// The console's expected agent version
 	AgentVsn string `json:"agentVsn"`
 	// the latest known k8s version
@@ -1778,7 +1876,9 @@ type DeploymentSettingsAttributes struct {
 	// configuration for smtp message delivery
 	SMTP *SMTPSettingsAttributes `json:"smtp,omitempty"`
 	// configuration for LLM provider clients
-	Ai             *AiSettingsAttributes      `json:"ai,omitempty"`
+	Ai *AiSettingsAttributes `json:"ai,omitempty"`
+	// settings for cost management functionality
+	Cost           *CostSettingsAttributes    `json:"cost,omitempty"`
 	ReadBindings   []*PolicyBindingAttributes `json:"readBindings,omitempty"`
 	WriteBindings  []*PolicyBindingAttributes `json:"writeBindings,omitempty"`
 	GitBindings    []*PolicyBindingAttributes `json:"gitBindings,omitempty"`
@@ -7883,6 +7983,51 @@ func (e *RestoreStatus) UnmarshalGQL(v interface{}) error {
 }
 
 func (e RestoreStatus) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ScalingRecommendationType string
+
+const (
+	ScalingRecommendationTypeDeployment  ScalingRecommendationType = "DEPLOYMENT"
+	ScalingRecommendationTypeStatefulset ScalingRecommendationType = "STATEFULSET"
+	ScalingRecommendationTypeDaemonset   ScalingRecommendationType = "DAEMONSET"
+	ScalingRecommendationTypeRollout     ScalingRecommendationType = "ROLLOUT"
+)
+
+var AllScalingRecommendationType = []ScalingRecommendationType{
+	ScalingRecommendationTypeDeployment,
+	ScalingRecommendationTypeStatefulset,
+	ScalingRecommendationTypeDaemonset,
+	ScalingRecommendationTypeRollout,
+}
+
+func (e ScalingRecommendationType) IsValid() bool {
+	switch e {
+	case ScalingRecommendationTypeDeployment, ScalingRecommendationTypeStatefulset, ScalingRecommendationTypeDaemonset, ScalingRecommendationTypeRollout:
+		return true
+	}
+	return false
+}
+
+func (e ScalingRecommendationType) String() string {
+	return string(e)
+}
+
+func (e *ScalingRecommendationType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ScalingRecommendationType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ScalingRecommendationType", str)
+	}
+	return nil
+}
+
+func (e ScalingRecommendationType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

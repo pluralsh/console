@@ -9,8 +9,10 @@ defmodule Console.Application do
         id: :pg,
         start: {:pg, :start_link, []}
       },
+      {Ecto.Migrator, [repos: [Console.LocalRepo], log_migrator_sql: true]},
       Console.PubSub.Broadcaster,
       Console.Repo,
+      Console.LocalRepo,
       {Phoenix.PubSub, [name: Console.PubSub, adapter: Phoenix.PubSub.PG2]},
       Console.Cache,
       Console.ReplicatedCache,

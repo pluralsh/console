@@ -22,7 +22,8 @@ defmodule Console.Deployments.Clusters do
     AgentMigration,
     PinnedCustomResource,
     UpgradeInsight,
-    ClusterInsightComponent
+    ClusterInsightComponent,
+    ClusterUsage
   }
   alias Console.Deployments.Compatibilities
   require Logger
@@ -68,6 +69,8 @@ defmodule Console.Deployments.Clusters do
   def get_cluster_by_handle(handle), do: Console.Repo.get_by(Cluster, handle: handle)
 
   def get_cluster_by_handle!(handle), do: Console.Repo.get_by!(Cluster, handle: handle)
+
+  def get_cluster_usage!(id), do: Repo.get!(ClusterUsage, id) |> Repo.preload([:cluster])
 
   def get_runtime_service(id) do
     Console.Repo.get(RuntimeService, id)

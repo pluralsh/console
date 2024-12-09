@@ -673,4 +673,49 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
              |> ids_equal([t1, t3])
     end
   end
+
+  describe "clusterUsages" do
+    test "it can list usage information for clusters" do
+      clusters = insert_list(3, :cluster_usage)
+
+      {:ok, %{data: %{"clusterUsages" => found}}} = run_query("""
+        query {
+          clusterUsages(first: 5) {
+            edges { node { id } }
+          }
+        }
+      """, %{}, %{current_user: admin_user()})
+
+      assert from_connection(found)
+             |> ids_equal(clusters)
+    end
+  end
+
+  describe "clusterUsage" do
+    test "it can fetch a cluster by usage" do
+      usage = insert(:cluster_usage)
+      nsu = insert_list(4, :cluster_namespace_usage, cluster: usage.cluster)
+      sr = insert_list(3, :cluster_scaling_recommendation, cluster: usage.cluster)
+
+      {:ok, %{data: %{"clusterUsage" => found}}} = run_query("""
+        query Usage($id: ID!) {
+          clusterUsage(id: $id) {
+            id
+            namespaces(first: 5) {
+              edges { node { id } }
+            }
+            recommendations(first: 5) {
+              edges { node { id } }
+            }
+          }
+        }
+      """, %{"id" => usage.id}, %{current_user: admin_user()})
+
+      assert found["id"] == usage.id
+      assert from_connection(found["namespaces"])
+             |> ids_equal(nsu)
+      assert from_connection(found["recommendations"])
+             |> ids_equal(sr)
+    end
+  end
 end

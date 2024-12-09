@@ -54,6 +54,12 @@ defmodule Console.Schema.DeploymentSettings do
       field :ssl,      :boolean
     end
 
+    embeds_one :cost, Cost, on_replace: :update do
+      field :enabled, :boolean
+      field :recommendation_threshold, :integer
+      field :recommendation_cushion,   :integer
+    end
+
     embeds_one :ai, AI, on_replace: :update do
       field :enabled,       :boolean, default: false
       field :provider,      AIProvider, default: :openai
@@ -152,6 +158,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:ai, with: &ai_changeset/2)
     |> cast_embed(:smtp, with: &smtp_changeset/2)
     |> cast_embed(:stacks, with: &stacks_changeset/2)
+    |> cast_embed(:cost, with: &cost_changeset/2)
     |> change_markers(agent_helm_values: :helm_changed, agent_version: :version_changed)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
@@ -228,5 +235,10 @@ defmodule Console.Schema.DeploymentSettings do
     model
     |> cast(attrs, [:connection_id])
     |> validate_required([:connection_id])
+  end
+
+  defp cost_changeset(model, attrs) do
+    model
+    |> cast(attrs, ~w(enabled recommendation_threshold recommendation_cushion)a)
   end
 end

@@ -8,6 +8,10 @@ config :console, Console.Repo,
   queue_target: 1000,
   pool: Ecto.Adapters.SQL.Sandbox
 
+config :console, Console.LocalRepo,
+  adapter: Ecto.Adapters.SQLite3,
+  database: "data/local.db"
+
 config :console, ConsoleWeb.Endpoint,
   http: [port: 4002],
   server: false
