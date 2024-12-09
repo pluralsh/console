@@ -12,8 +12,6 @@ import {
 } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { randomId } from 'kbar/lib/utils'
-
 import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import {
   SetupRenovateMutationVariables,
@@ -138,7 +136,7 @@ function SetupDependencyAutomationForm({
         (scm) => scm!.node!.id === scmConnectionID
       )
 
-      return `dependency-automation-${scm?.node?.name ?? randomId()}`
+      return `dependency-automation-${scm?.node?.name ?? Math.random().toString(36).substring(2, 9)}`
     },
     [scmConnections?.edges]
   )

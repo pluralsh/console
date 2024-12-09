@@ -1,10 +1,8 @@
-import humanizeDuration from 'humanize-duration'
-import moment, { Moment } from 'moment-timezone'
+import moment from 'moment-timezone'
 
 export const MINUTE_TO_SECONDS = 60
 export const HOUR_TO_SECONDS = MINUTE_TO_SECONDS * 60
 export const DAY_TO_SECONDS = HOUR_TO_SECONDS * 24
-export const SECOND_TO_MILLISECONDS = 1000
 
 export const DURATIONS = [
   {
@@ -62,25 +60,3 @@ moment.defineLocale(MOMENT_LOCALE_MIN_REL_TIME, {
 })
 // defineLocale() also sets global locale, so reset locale to default
 moment.locale(MOMENT_LOCALE_DEFAULT)
-
-export function fromNowMin(m: Moment, arg?: Parameters<Moment['fromNow']>[0]) {
-  return m.locale(MOMENT_LOCALE_MIN_REL_TIME).fromNow(arg)
-}
-
-export function humanizeDur(
-  ms: number,
-  options: { unitLimit?: number; relative?: boolean } & Parameters<
-    typeof humanizeDuration
-  >[1] = {}
-) {
-  options = { unitLimit: 2, round: true, relative: false, ...options }
-  const { unitLimit, relative, ...opts } = options
-  const dur = humanizeDuration(ms, opts)
-  const delim = options.delimiter || ', '
-
-  let ret = dur.split(delim).slice(0, unitLimit).join(delim)
-
-  if (relative) ret += ' ago'
-
-  return ret
-}
