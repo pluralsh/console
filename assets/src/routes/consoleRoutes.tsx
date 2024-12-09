@@ -1,7 +1,3 @@
-import Build from 'components/builds/build/Build'
-import Changelog from 'components/builds/build/changelog/Changelog'
-import Progress from 'components/builds/build/progress/Progress'
-import Builds from 'components/builds/Builds'
 import Home from 'components/home/Home'
 import { AccessTokens } from 'components/profile/AccessTokens'
 import { EmailSettings } from 'components/profile/EmailSettings'
@@ -24,35 +20,6 @@ import { secretsRoutes } from './secretsRoute'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
 import { catalogRoutes } from './catalogRoutes.tsx'
-
-const buildsRoutes = [
-  <Route
-    path="builds"
-    element={<Builds />}
-  />,
-  <Route
-    path="builds/:buildId"
-    element={<Build />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to="progress"
-        />
-      }
-    />
-    <Route
-      path="progress"
-      element={<Progress />}
-    />
-    <Route
-      path="changelog"
-      element={<Changelog />}
-    />
-  </Route>,
-]
 
 const profileRoutes = [
   <Route
@@ -100,7 +67,6 @@ export const consoleComponentRoutes = [
   ...clusterRoutes,
   ...stacksRoutes,
   ...policiesRoutes,
-  ...buildsRoutes,
   ...backupsRoutes,
   ...profileRoutes,
   ...cdRoutes,

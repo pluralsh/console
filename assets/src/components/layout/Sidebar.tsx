@@ -4,7 +4,6 @@ import {
   ApiIcon,
   ArrowTopRightIcon,
   BellIcon,
-  BuildIcon,
   Sidebar as DSSidebar,
   DatabaseIcon,
   GearTrainIcon,
@@ -129,13 +128,6 @@ function getMenuItems({
       icon: <CatalogIcon />,
       path: CATALOGS_ABS_PATH,
       hotkeys: ['6'],
-    },
-    {
-      text: 'Builds',
-      expandedLabel: 'Builds',
-      icon: <BuildIcon />,
-      plural: true,
-      path: '/builds',
     },
     {
       text: 'Nodes',

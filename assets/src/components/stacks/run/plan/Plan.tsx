@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { useOutletContext } from 'react-router-dom'
 
-import CommandLog from 'components/builds/build/progress/CommandLog'
+import CommandLog from '../../../utils/CommandLog.tsx'
 import { Card } from '@pluralsh/design-system'
 
 import { StackRunOutletContextT } from '../Route.tsx'
