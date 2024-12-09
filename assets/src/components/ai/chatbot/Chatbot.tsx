@@ -22,7 +22,6 @@ import { ChatbotIconButton } from './ChatbotButton.tsx'
 import { ChatbotHeader } from './ChatbotHeader.tsx'
 import { ChatbotPanelInsight } from './ChatbotPanelInsight.tsx'
 import { ChatbotPanelThread } from './ChatbotPanelThread.tsx'
-import { HOME_CARD_CONTENT_HEIGHT } from '../../home/HomeCard.tsx'
 
 type ChatbotPanelInnerProps = ComponentPropsWithRef<typeof ChatbotFrameSC> & {
   fullscreen: boolean
@@ -157,7 +156,6 @@ function ChatbotPanelInner({
                 border: 'none',
                 borderBottom: theme.borders['fill-two'],
                 borderRadius: 0,
-                maxHeight: HOME_CARD_CONTENT_HEIGHT,
               }}
             />
           </FullHeightTableWrap>
