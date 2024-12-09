@@ -2,6 +2,10 @@ import Config
 import System, only: [get_env: 1, get_env: 2]
 import Console, only: [is_set: 1]
 
+config :console, Console.LocalRepo,
+  adapter: Ecto.Adapters.SQLite3,
+  database: "/opt/app/data/local.db"
+
 config :arc,
   storage: Arc.Storage.GCS,
   bucket: get_env("GCS_BUCKET")
@@ -14,6 +18,7 @@ config :piazza_core, aes_key: get_env("AES_KEY")
 if get_env("PLURAL_CLIENT_ID") do
   config :console,
     plural_login: true
+
   config :console, :oidc_providers,
     plural: [
       discovery_document_uri: get_env("PLURAL_DISCOVERY_URL") || "https://oidc.plural.sh/.well-known/openid-configuration",

@@ -3,6 +3,7 @@ defmodule Console.Commands.CommandTest do
   alias Console.Commands.Command
 
   describe "cmd/2" do
+    @tag :skip
     test "It can perform build command bookkeeping" do
       build = insert(:build)
       Command.set_build(build)

@@ -79,6 +79,7 @@ defmodule Console.MixProject do
   defp deps do
     [
       {:ecto, "~> 3.12.0", override: true},
+      {:ecto_explain, "~> 0.1.2"},
       {:ex_machina, "~> 2.8", only: :test},
       {:libcluster, "~> 3.4"},
       {:ex_aws, "~> 2.1"},
@@ -94,6 +95,7 @@ defmodule Console.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.12.0"},
+      {:ecto_sqlite3, "~> 0.17"},
       {:yajwt, "~> 1.4"},
       {:joken, "~> 2.6"},
       {:mdex, "~> 0.1"},
@@ -130,8 +132,9 @@ defmodule Console.MixProject do
       {:ets, "~> 0.9"},
       {:reverse_proxy_plug, "~> 1.2.1"},
       {:kazan, "~> 0.11", github: "michaeljguarino/kazan", ref: "ef2050c547ab74c283ef02397925d48637bd67a1"},
-      {:comeonin, "~> 5.1.2"},
-      {:argon2_elixir, "~> 2.0"},
+      {:comeonin, "~> 5.3"},
+      {:argon2_elixir, "~> 4.0"},
+      {:nimble_parsec, "~> 1.4", override: true},
       {:guardian, "~> 2.3"},
       {:accessible, "~> 0.3.0"},
       {:httpoison, "~> 1.7", override: true},

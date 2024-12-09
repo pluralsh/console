@@ -138,7 +138,7 @@ defmodule Console.Schema.User do
   end
 
   defp hash_password(%Ecto.Changeset{valid?: true, changes: %{password: password}} = changeset) do
-    change(changeset, Argon2.add_hash(password))
+    put_change(changeset, :password_hash, Argon2.hash_pwd_salt(password))
   end
   defp hash_password(changeset), do: changeset
 end

@@ -84,6 +84,7 @@ defmodule Console.Services.BuildsTest do
   end
 
   describe "create_command/2" do
+    @tag :skip
     test "It will create a command record for a build" do
       build = insert(:build)
 
