@@ -69,13 +69,11 @@ type MenuItem = {
 function getMenuItems({
   isCDEnabled,
   cdPath,
-  isByok,
   personaConfig,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
   cdPath: string
-  isByok: boolean
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
   return [
@@ -163,7 +161,7 @@ function getMenuItems({
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
       hotkeys: ['0'],
     },
-  ].filter((item) => item.enabled !== false && !isByok)
+  ].filter((item) => item.enabled !== false)
 }
 
 function isActiveMenuItem(
@@ -230,16 +228,9 @@ export default function Sidebar() {
         isSandbox: !!configuration?.isSandbox,
         isCDEnabled,
         cdPath: defaultCDPath,
-        isByok: !!configuration?.byok,
         personaConfig: personaConfiguration,
       }),
-    [
-      personaConfiguration,
-      configuration?.isSandbox,
-      configuration?.byok,
-      isCDEnabled,
-      defaultCDPath,
-    ]
+    [personaConfiguration, configuration?.isSandbox, isCDEnabled, defaultCDPath]
   )
 
   const [mutation] = useMutation(MARK_READ, {
