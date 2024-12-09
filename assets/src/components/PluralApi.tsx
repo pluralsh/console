@@ -17,14 +17,7 @@ export function PluralApi({ children }) {
   const { client, socket } = useMemo(() => {
     if (!token) return undefined
     if (!!token && !!API_CACHE[token]) return API_CACHE[token]
-    const res = buildClient(
-      PLURAL_GQL,
-      PLURAL_WSS,
-      // () => {
-      //   window.location = '/'
-      // },
-      () => token
-    )
+    const res = buildClient(PLURAL_GQL, PLURAL_WSS, () => token)
 
     API_CACHE[token] = res
 
