@@ -17,11 +17,7 @@ fragment GlobalService on GlobalService {
   }
   reparent
   service {
-    id
-    name
-    cluster {
-      id
-    }
+    ...ServiceDeploymentsRow
   }
   tags {
     name

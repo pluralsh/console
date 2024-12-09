@@ -59,7 +59,6 @@ var _ = Describe("PR Automation Controller", func() {
 							Name: scmConnectionName,
 						},
 					})
-					_, prAutomationHash, _ = generatedPrAutomation.Diff(utils.HashObject)
 
 					prAutomationObjectKey = types.NamespacedName{Name: prAutomationName}
 				)
@@ -104,10 +103,13 @@ var _ = Describe("PR Automation Controller", func() {
 
 					prAutomation := &v1alpha1.PrAutomation{}
 					err = k8sClient.Get(ctx, prAutomationObjectKey, prAutomation)
+					attrs, _ := controllerReconciler.Attributes(ctx, prAutomation)
+					sha, _ := utils.HashObject(attrs)
+
 					Expect(err).NotTo(HaveOccurred())
 					Expect(common.SanitizeStatusConditions(prAutomation.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 						ID:  lo.ToPtr(prAutomationConsoleID),
-						SHA: lo.ToPtr(prAutomationHash),
+						SHA: lo.ToPtr(sha),
 						Conditions: []metav1.Condition{
 							{
 								Type:   v1alpha1.ReadyConditionType.String(),
@@ -181,7 +183,6 @@ var _ = Describe("PR Automation Controller", func() {
 							Namespace: clusterNamespace,
 						},
 					})
-					_, prAutomationHash, _ = generatedPrAutomation.Diff(utils.HashObject)
 
 					prAutomationObjectKey = types.NamespacedName{Name: prAutomationName}
 				)
@@ -239,10 +240,14 @@ var _ = Describe("PR Automation Controller", func() {
 
 					prAutomation := &v1alpha1.PrAutomation{}
 					err = k8sClient.Get(ctx, prAutomationObjectKey, prAutomation)
+
+					attrs, _ := controllerReconciler.Attributes(ctx, prAutomation)
+					sha, _ := utils.HashObject(attrs)
+
 					Expect(err).NotTo(HaveOccurred())
 					Expect(common.SanitizeStatusConditions(prAutomation.Status)).To(Equal(common.SanitizeStatusConditions(v1alpha1.Status{
 						ID:  lo.ToPtr(prAutomationConsoleID),
-						SHA: lo.ToPtr(prAutomationHash),
+						SHA: lo.ToPtr(sha),
 						Conditions: []metav1.Condition{
 							{
 								Type:   v1alpha1.ReadyConditionType.String(),

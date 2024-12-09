@@ -55,8 +55,9 @@ defmodule Console.Schema.DeploymentSettings do
     end
 
     embeds_one :ai, AI, on_replace: :update do
-      field :enabled, :boolean, default: false
-      field :provider, AIProvider, default: :openai
+      field :enabled,       :boolean, default: false
+      field :provider,      AIProvider, default: :openai
+      field :tool_provider, AIProvider
 
       embeds_one :tools, ToolsConfig, on_replace: :update do
         embeds_one :create_pr, PrToolConfig, on_replace: :update do
@@ -172,7 +173,7 @@ defmodule Console.Schema.DeploymentSettings do
 
   defp ai_changeset(model, attrs) do
     model
-    |> cast(attrs, ~w(enabled provider)a)
+    |> cast(attrs, ~w(enabled provider tool_provider)a)
     |> cast_embed(:tools, with: &tool_config_changeset/2)
     |> cast_embed(:openai, with: &ai_api_changeset/2)
     |> cast_embed(:anthropic, with: &ai_api_changeset/2)

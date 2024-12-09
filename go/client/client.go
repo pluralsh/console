@@ -188,6 +188,7 @@ type ConsoleClient interface {
 	DeleteAccessToken(ctx context.Context, token string, interceptors ...clientv2.RequestInterceptor) (*DeleteAccessToken, error)
 	SaveUpgradeInsights(ctx context.Context, insights []*UpgradeInsightAttributes, interceptors ...clientv2.RequestInterceptor) (*SaveUpgradeInsights, error)
 	GetUser(ctx context.Context, email string, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
+	CreateUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateUser, error)
 	UpdateUser(ctx context.Context, id *string, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*UpdateUser, error)
 	DeleteUser(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*DeleteUser, error)
 	AddGroupMember(ctx context.Context, groupID string, userID string, interceptors ...clientv2.RequestInterceptor) (*AddGroupMember, error)
@@ -14238,6 +14239,17 @@ func (t *GetUser) GetUser() *UserFragment {
 	return t.User
 }
 
+type CreateUser struct {
+	CreateUser *UserFragment "json:\"createUser,omitempty\" graphql:\"createUser\""
+}
+
+func (t *CreateUser) GetCreateUser() *UserFragment {
+	if t == nil {
+		t = &CreateUser{}
+	}
+	return t.CreateUser
+}
+
 type UpdateUser struct {
 	UpdateUser *UserFragment "json:\"updateUser,omitempty\" graphql:\"updateUser\""
 }
@@ -27594,6 +27606,35 @@ func (c *Client) GetUser(ctx context.Context, email string, interceptors ...clie
 	return &res, nil
 }
 
+const CreateUserDocument = `mutation CreateUser ($attributes: UserAttributes!) {
+	createUser(attributes: $attributes) {
+		... UserFragment
+	}
+}
+fragment UserFragment on User {
+	name
+	id
+	email
+}
+`
+
+func (c *Client) CreateUser(ctx context.Context, attributes UserAttributes, interceptors ...clientv2.RequestInterceptor) (*CreateUser, error) {
+	vars := map[string]any{
+		"attributes": attributes,
+	}
+
+	var res CreateUser
+	if err := c.Client.Post(ctx, "CreateUser", CreateUserDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const UpdateUserDocument = `mutation UpdateUser ($id: ID, $attributes: UserAttributes!) {
 	updateUser(id: $id, attributes: $attributes) {
 		... UserFragment
@@ -27922,6 +27963,7 @@ var DocumentOperationNames = map[string]string{
 	DeleteAccessTokenDocument:                         "DeleteAccessToken",
 	SaveUpgradeInsightsDocument:                       "SaveUpgradeInsights",
 	GetUserDocument:                                   "GetUser",
+	CreateUserDocument:                                "CreateUser",
 	UpdateUserDocument:                                "UpdateUser",
 	DeleteUserDocument:                                "DeleteUser",
 	AddGroupMemberDocument:                            "AddGroupMember",

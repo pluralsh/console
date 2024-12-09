@@ -302,6 +302,10 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :settings,        :cloud_settings, description: "the cloud settings for this cluster (for instance its aws region)"
     field :upgrade_plan,    :cluster_upgrade_plan, description: "Checklist of tasks to complete to safely upgrade this cluster"
 
+    field :healthy, :boolean, description: "Whether this cluster was recently pinged", resolve: fn
+      cluster, _, _ -> {:ok, Cluster.healthy?(cluster)}
+    end
+
     field :kas_url, :string, description: "the url of the kas server you can access this cluster from", resolve: fn
       _, _, _ -> {:ok, Console.Deployments.Clusters.kas_proxy_url()}
     end

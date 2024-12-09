@@ -4,6 +4,12 @@ query GetUser($email: String!) {
     }
 }
 
+mutation CreateUser($attributes: UserAttributes!) {
+    createUser(attributes: $attributes) {
+        ...UserFragment
+    }
+}
+
 mutation UpdateUser($id: ID, $attributes: UserAttributes!) {
     updateUser(id: $id, attributes: $attributes) {
         ...UserFragment

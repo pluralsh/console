@@ -194,6 +194,9 @@ defmodule Console.GraphQl.Resolvers.User do
   def update_user(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Users.update_user(attrs, user)
 
+  def create_user(%{attributes: attrs}, _),
+    do: Users.create_user(attrs)
+
   def delete_user(%{id: id}, %{context: %{current_user: user}}),
     do: Users.delete_user(id, user)
 

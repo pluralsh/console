@@ -1,66 +1,58 @@
-import { Table, useSetBreadcrumbs } from '@pluralsh/design-system'
-import { useNavigate } from 'react-router'
+import { Table } from '@pluralsh/design-system'
 import type { Row } from '@tanstack/react-table'
+
+import { GqlError } from 'components/utils/Alert'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
+  ServiceDeployment,
+  ServiceDeploymentEdge,
   type ServiceDeploymentsRowFragment,
   useGetGlobalServiceServicesQuery,
 } from 'generated/graphql'
+import { useMemo } from 'react'
+import { useNavigate } from 'react-router'
 import { getServiceDetailsPath } from 'routes/cdRoutesConsts'
 import { Edge } from 'utils/graphql'
-import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import LoadingIndicator from 'components/utils/LoadingIndicator'
-import { GqlError } from 'components/utils/Alert'
-import { useOutletContext } from 'react-router-dom'
-import { useMemo } from 'react'
-
-import { columns } from 'components/cd/services/Services'
 
 import {
   DEFAULT_REACT_VIRTUAL_OPTIONS,
   useFetchPaginatedData,
 } from '../../../utils/table/useFetchPaginatedData'
+import { columns } from './columns'
 
-import { useSetPageScrollable } from '../../ContinuousDeployment'
+interface GlobalServiceServicesProps {
+  seedService: ServiceDeployment
+  globalServiceID: string
+}
 
-import { GlobalServiceContextT, getBreadcrumbs } from './GlobalService'
-
-export function GlobalServiceServices() {
+export function GlobalServiceServices({
+  seedService,
+  globalServiceID,
+}: GlobalServiceServicesProps) {
   const navigate = useNavigate()
-  const { globalServiceId, globalService } =
-    useOutletContext<GlobalServiceContextT>()
 
-  useSetBreadcrumbs(
-    useMemo(
-      () => [
-        ...getBreadcrumbs(globalServiceId, globalService),
-        { label: 'services' },
-      ],
-      [globalServiceId, globalService]
+  const { data, loading, error, pageInfo, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: useGetGlobalServiceServicesQuery,
+        keyPath: ['globalService', 'services'],
+      },
+      { serviceId: globalServiceID }
     )
+
+  const services = useMemo(
+    () =>
+      (seedService
+        ? [{ node: seedService } as ServiceDeploymentEdge]
+        : []
+      ).concat(
+        data?.globalService?.services?.edges as Array<ServiceDeploymentEdge>
+      ),
+    [data?.globalService?.services?.edges, seedService]
   )
-
-  useSetPageScrollable(false)
-
-  const {
-    data,
-    loading,
-    refetch,
-    error,
-    pageInfo,
-    fetchNextPage,
-    setVirtualSlice,
-  } = useFetchPaginatedData(
-    {
-      queryHook: useGetGlobalServiceServicesQuery,
-      keyPath: ['globalService', 'services'],
-    },
-    { serviceId: globalServiceId }
-  )
-
-  const services = data?.globalService?.services?.edges
 
   if (error) return <GqlError error={error} />
-
   if (!data) return <LoadingIndicator />
 
   return (
@@ -88,7 +80,7 @@ export function GlobalServiceServices() {
             })
           )
         }
-        reactTableOptions={{ meta: { refetch } }}
+        reactTableOptions={{ meta: { seedServiceID: seedService?.id } }}
         reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
         emptyStateProps={{ message: 'No services found.' }}
       />

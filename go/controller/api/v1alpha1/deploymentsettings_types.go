@@ -183,6 +183,12 @@ type AISettings struct {
 	// +kubebuilder:validation:Optional
 	Provider *console.AiProvider `json:"provider,omitempty"`
 
+	// Provider to use for tool calling, in case you want to use a different LLM more optimized to those tasks
+	//
+	// +kubebuilder:validation:Enum=OPENAI;ANTHROPIC;OLLAMA;AZURE;BEDROCK;VERTEX
+	// +kubebuilder:validation:Optional
+	ToolProvider *console.AiProvider `json:"toolProvider,omitempty"`
+
 	// OpenAI holds the OpenAI provider configuration.
 	//
 	// +kubebuilder:validation:Optional
@@ -216,8 +222,9 @@ type AISettings struct {
 
 func (in *AISettings) Attributes(ctx context.Context, c client.Client, namespace string) (*console.AiSettingsAttributes, error) {
 	attr := &console.AiSettingsAttributes{
-		Enabled:  in.Enabled,
-		Provider: in.Provider,
+		Enabled:      in.Enabled,
+		Provider:     in.Provider,
+		ToolProvider: in.ToolProvider,
 	}
 
 	switch *in.Provider {

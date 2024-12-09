@@ -171,6 +171,7 @@ fragment ClustersRow on Cluster {
   currentVersion
   id
   self
+  healthy
   protect
   name
   handle

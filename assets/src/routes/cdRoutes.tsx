@@ -72,10 +72,6 @@ import VClusters from '../components/cd/cluster/VClusters'
 
 import GlobalService from '../components/cd/globalServices/details/GlobalService'
 
-import GlobalServiceInfo from '../components/cd/globalServices/details/GlobalServiceInfo'
-
-import { GlobalServiceServices } from '../components/cd/globalServices/details/GlobalServiceServices'
-
 import ManagedNamespace from '../components/cd/namespaces/details/ManagedNamespace'
 
 import ManagedNamespaceInfo from '../components/cd/namespaces/details/ManagedNamespaceInfo'
@@ -112,9 +108,7 @@ import {
   CLUSTER_VCLUSTERS_REL_PATH,
   CLUSTERS_REL_PATH,
   COMPONENT_PARAM_ID,
-  GLOBAL_SERVICE_INFO_PATH,
   GLOBAL_SERVICE_PARAM_ID,
-  GLOBAL_SERVICE_SERVICES_PATH,
   GLOBAL_SERVICES_REL_PATH,
   NAMESPACE_INFO_PATH,
   NAMESPACE_SERVICES_PATH,
@@ -257,25 +251,7 @@ const globalServiceRoutes = (
   <Route
     path={`${GLOBAL_SERVICES_REL_PATH}/:${GLOBAL_SERVICE_PARAM_ID}`}
     element={<GlobalService />}
-  >
-    <Route
-      index
-      element={
-        <Navigate
-          replace
-          to={GLOBAL_SERVICE_INFO_PATH}
-        />
-      }
-    />
-    <Route
-      path={GLOBAL_SERVICE_INFO_PATH}
-      element={<GlobalServiceInfo />}
-    />
-    <Route
-      path={GLOBAL_SERVICE_SERVICES_PATH}
-      element={<GlobalServiceServices />}
-    />
-  </Route>
+  />
 )
 
 const namespacesRoutes = (

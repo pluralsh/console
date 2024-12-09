@@ -17,11 +17,11 @@ import {
 } from '../../../routes/cdRoutesConsts'
 import { toNiceVersion } from '../../../utils/semver'
 import { GqlError } from '../../utils/Alert'
+import PropCard from '../../utils/PropCard.tsx'
 import { LinkTabWrap } from '../../utils/Tabs'
 import { getClusterKubeVersion } from '../clusters/runtime/RuntimeServices'
 
 import { POLL_INTERVAL, useSetPageHeaderContent } from '../ContinuousDeployment'
-import { PropCard } from '../globalServices/details/GlobalServiceInfo'
 import { useClusterContext } from './Cluster'
 
 import ClusterAddOnsEntry from './ClusterAddOnsEntry'

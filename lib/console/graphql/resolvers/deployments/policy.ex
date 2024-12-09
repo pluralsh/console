@@ -62,6 +62,15 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
     |> ok()
   end
 
+  def vulnerability_statistics(args, %{context: %{current_user: user}}) do
+    VulnerabilityReport.for_user(user)
+    |> maybe_search(VulnerabilityReport, args)
+    |> vuln_filters(args)
+    |> VulnerabilityReport.grades()
+    |> Console.Repo.all()
+    |> ok()
+  end
+
   def fetch_constraint(%{ref: %{name: name, kind: kind}, cluster_id: cluster_id}, _, _) do
     path = Kube.Client.Base.path("constraints.gatekeeper.sh", "v1beta1", String.downcase(kind), nil, name)
     with %Cluster{} = cluster <- Clusters.get_cluster(cluster_id),
@@ -93,7 +102,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Policy do
 
   defp vuln_filters(query, args) do
     Enum.reduce(args, query, fn
-      {:clusters, ids}, q -> VulnerabilityReport.for_clusters(q, ids)
+      {:clusters, [_ | _] = ids}, q -> VulnerabilityReport.for_clusters(q, ids)
+      {:grade, g}, q when not is_nil(g) -> VulnerabilityReport.for_grade(q, g)
+      {:namespaces, [_ | _] = ns}, q -> VulnerabilityReport.for_namespaces(q, ns)
       _, q -> q
     end)
   end

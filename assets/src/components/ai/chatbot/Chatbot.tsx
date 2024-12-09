@@ -1,4 +1,8 @@
-import { ChatOutlineIcon, ModalWrapper } from '@pluralsh/design-system'
+import {
+  ChatOutlineIcon,
+  FillLevelProvider,
+  ModalWrapper,
+} from '@pluralsh/design-system'
 
 import { useDeploymentSettings } from 'components/contexts/DeploymentSettingsContext.tsx'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap.tsx'
@@ -120,44 +124,46 @@ function ChatbotPanelInner({
   }, [threadsQuery.data, pathname])
 
   return (
-    <ChatbotFrameSC
-      $fullscreen={fullscreen}
-      {...props}
-    >
-      <ChatbotHeader
-        fullscreen={fullscreen}
-        currentThread={currentThread}
-        currentInsight={currentInsight}
-      />
-      {currentThread ? (
-        <ChatbotPanelThread
+    <FillLevelProvider value={1}>
+      <ChatbotFrameSC
+        $fullscreen={fullscreen}
+        {...props}
+      >
+        <ChatbotHeader
+          fullscreen={fullscreen}
           currentThread={currentThread}
-          fullscreen={fullscreen}
-        />
-      ) : currentInsight ? (
-        <ChatbotPanelInsight
           currentInsight={currentInsight}
-          fullscreen={fullscreen}
         />
-      ) : (
-        <FullHeightTableWrap
-          css={{ backgroundColor: theme.colors['fill-one'] }}
-        >
-          <AITable
-            modal
-            flush={!fullscreen}
-            query={threadsQuery}
-            rowData={rows}
-            css={{
-              border: 'none',
-              borderBottom: theme.borders['fill-two'],
-              borderRadius: 0,
-              maxHeight: HOME_CARD_CONTENT_HEIGHT,
-            }}
+        {currentThread ? (
+          <ChatbotPanelThread
+            currentThread={currentThread}
+            fullscreen={fullscreen}
           />
-        </FullHeightTableWrap>
-      )}
-    </ChatbotFrameSC>
+        ) : currentInsight ? (
+          <ChatbotPanelInsight
+            currentInsight={currentInsight}
+            fullscreen={fullscreen}
+          />
+        ) : (
+          <FullHeightTableWrap
+            css={{ backgroundColor: theme.colors['fill-one'] }}
+          >
+            <AITable
+              modal
+              flush={!fullscreen}
+              query={threadsQuery}
+              rowData={rows}
+              css={{
+                border: 'none',
+                borderBottom: theme.borders['fill-two'],
+                borderRadius: 0,
+                maxHeight: HOME_CARD_CONTENT_HEIGHT,
+              }}
+            />
+          </FullHeightTableWrap>
+        )}
+      </ChatbotFrameSC>
+    </FillLevelProvider>
   )
 }
 

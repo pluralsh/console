@@ -77,16 +77,8 @@ func (in *PrAutomationReconciler) Reconcile(ctx context.Context, req reconcile.R
 		return *result, err
 	}
 
-	// Get PrAutomation SHA that can be saved back in the status to check for changes
-	changed, sha, err := prAutomation.Diff(utils.HashObject)
-	if err != nil {
-		logger.Error(err, "unable to calculate prAutomation SHA")
-		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
-		return ctrl.Result{}, err
-	}
-
 	// Sync PrAutomation CRD with the Console API
-	apiPrAutomation, err := in.sync(ctx, prAutomation, changed)
+	apiPrAutomation, sha, err := in.sync(ctx, prAutomation)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			utils.MarkCondition(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, metav1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, notFoundOrReadyError)
@@ -150,37 +142,50 @@ func (in *PrAutomationReconciler) addOrRemoveFinalizer(ctx context.Context, prAu
 	return nil, nil
 }
 
-func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alpha1.PrAutomation, changed bool) (*console.PrAutomationFragment, error) {
+func (in *PrAutomationReconciler) sync(ctx context.Context, prAutomation *v1alpha1.PrAutomation) (pra *console.PrAutomationFragment, sha string, err error) {
 	logger := log.FromContext(ctx)
 	exists, err := in.ConsoleClient.IsPrAutomationExistsByName(ctx, prAutomation.ConsoleName())
 	if err != nil {
-		return nil, err
+		return pra, sha, err
 	}
 
 	if exists && !prAutomation.Status.HasID() {
-		return nil, nil
+		return pra, sha, err
 	}
-	if err := in.ensure(prAutomation); err != nil {
-		return nil, err
+
+	if err = in.ensure(prAutomation); err != nil {
+		return pra, sha, err
 	}
-	attributes, err := in.attributes(ctx, prAutomation)
+
+	attributes, err := in.Attributes(ctx, prAutomation)
 	if err != nil {
-		return nil, err
+		return pra, sha, err
+	}
+
+	// Get PrAutomation SHA that can be saved back in the status to check for changes
+	sha, err = utils.HashObject(attributes)
+	if err != nil {
+		logger.Error(err, "unable to calculate prAutomation SHA")
+		utils.MarkFalse(prAutomation.SetCondition, v1alpha1.SynchronizedConditionType, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return pra, sha, err
 	}
 
 	// Update only if PrAutomation has changed
-	if changed && exists {
+	if prAutomation.Status.SHA != nil && *prAutomation.Status.SHA != sha && exists {
 		logger.Info("Updating PR automation")
-		return in.ConsoleClient.UpdatePrAutomation(ctx, prAutomation.Status.GetID(), *attributes)
+		pra, err = in.ConsoleClient.UpdatePrAutomation(ctx, prAutomation.Status.GetID(), *attributes)
+		return pra, sha, err
 	}
 
 	// Read the PrAutomation from Console API if it already exists
 	if exists {
-		return in.ConsoleClient.GetPrAutomation(ctx, prAutomation.Status.GetID())
+		pra, err = in.ConsoleClient.GetPrAutomation(ctx, prAutomation.Status.GetID())
+		return pra, sha, err
 	}
 
 	logger.Info("Creating PR automation")
-	return in.ConsoleClient.CreatePrAutomation(ctx, *attributes)
+	pra, err = in.ConsoleClient.CreatePrAutomation(ctx, *attributes)
+	return pra, sha, err
 }
 
 func (in *PrAutomationReconciler) updateReadyCondition(prAutomation *v1alpha1.PrAutomation) {

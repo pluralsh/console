@@ -22,7 +22,7 @@ defmodule Console.AI.Anthropic do
   defmodule Content do
     @type t :: %__MODULE__{}
 
-    defstruct [:text, :type]
+    defstruct [:text, :type, :name, :input]
 
     def spec(), do: %__MODULE__{}
   end
@@ -59,9 +59,18 @@ defmodule Console.AI.Anthropic do
     end
   end
 
-  def tool_call(_, _, _), do: {:error, "tool calling not implemented for this provider"}
+  def tool_call(anthropic, messages, tools) do
+    case chat(anthropic, messages, tools) do
+      {:ok, %MessageResponse{content: [%Content{type: "tool_use"}] = tools}} ->
+        {:ok, gen_tools(tools)}
+      {:ok, %MessageResponse{content: content}} ->
+        {:ok, format_content(content)}
+      {:ok, _} -> {:error, "could not generate an ai completion for this context"}
+      error -> error
+    end
+  end
 
-  def tools?(), do: false
+  def tools?(), do: true
 
   defp chat(%__MODULE__{access_key: token, model: model, stream: %Stream{} = stream}, history) do
     Stream.Exec.anthropic(fn ->
@@ -77,15 +86,17 @@ defmodule Console.AI.Anthropic do
     end, stream)
   end
 
-  defp chat(%__MODULE__{access_key: token, model: model}, history) do
+  defp chat(%__MODULE__{access_key: token, model: model}, history, tools \\ nil) do
     {system, history} = split(history)
     url("/messages")
-    |> HTTPoison.post(Jason.encode!(%{
+    |> HTTPoison.post(Jason.encode!(Console.drop_nils(%{
       model: model || @default_model,
       system: system,
       messages: history,
-      max_tokens: @max_tokens
-    }), json_headers(token), @options)
+      max_tokens: @max_tokens,
+      tool_choice: (if is_list(tools), do: %{tool_choice: :any}, else: nil),
+      tools: (if is_list(tools), do: Enum.map(tools, &tool_args/1), else: nil)
+    })), json_headers(token), @options)
     |> handle_response(MessageResponse.spec())
   end
 
@@ -118,4 +129,21 @@ defmodule Console.AI.Anthropic do
   defp json_headers(token), do: headers(@base_headers, token)
 
   defp headers(headers, token), do: [{"x-api-key", token} | headers]
+
+  defp gen_tools(calls) do
+    Enum.map(calls, fn
+      %Content{type: "tool_use", name: n, input: args} ->
+        %Console.AI.Tool{name: n, arguments: args}
+      _ -> nil
+    end)
+    |> Enum.filter(& &1)
+  end
+
+  defp tool_args(tool) do
+    %{
+      name: tool.name(),
+      description: tool.description(),
+      input_schema: tool.json_schema()
+    }
+  end
 end
