@@ -68,7 +68,7 @@ ARG TARGETARCH=amd64
 # ENV TERRAFORM_VERSION=v1.9.8
 
 # renovate: datasource=github-releases depName=pluralsh/plural-cli
-ENV CLI_VERSION=v0.10.1
+ENV CLI_VERSION=v0.10.2
 
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 # ENV KUBECTL_VERSION=v1.31.3
@@ -131,4 +131,4 @@ COPY --from=builder /opt/app/_build/prod/rel/console .
 
 USER console
 
-CMD /opt/app/bin/console start
+CMD mkdir -p /tmp/sqlite; /opt/app/bin/console start

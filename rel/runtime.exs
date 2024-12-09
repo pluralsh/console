@@ -4,7 +4,7 @@ import Console, only: [is_set: 1]
 
 config :console, Console.LocalRepo,
   adapter: Ecto.Adapters.SQLite3,
-  database: "/opt/app/data/local.db"
+  database: "/tmp/sqlite/local.db"
 
 config :arc,
   storage: Arc.Storage.GCS,

@@ -6,7 +6,7 @@ defmodule Console.Schema.ServiceImport do
     belongs_to :service, Service
     belongs_to :stack,   Stack
 
-    has_many :output, through: [:stack, :output]
+    has_many :outputs, through: [:stack, :output]
 
     timestamps()
   end

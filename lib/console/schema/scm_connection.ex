@@ -44,6 +44,7 @@ defmodule Console.Schema.ScmConnection do
     |> unique_constraint(:default, message: "only one scm connection can be marked default at once")
     |> validate_required([:name, :type])
     |> validate_private_key(:signing_private_key)
+    |> validate_credentials()
   end
 
   defp github_changeset(model, attrs) do
@@ -51,5 +52,14 @@ defmodule Console.Schema.ScmConnection do
     |> cast(attrs, ~w(app_id installation_id private_key)a)
     |> validate_required(~w(app_id installation_id private_key)a)
     |> validate_private_key(:private_key)
+  end
+
+  defp validate_credentials(cs) do
+    case {get_field(cs, :token), get_field(cs, :type), get_field(cs, :github)} do
+      {nil, :github, %{}} -> cs
+      {nil, :github, nil} -> add_error(cs, :token, "Must provide either an access token or github app auth for github SCM connections")
+      {nil, type, _} -> add_error(cs, :token, "Must provide an access token for #{type} scm connections")
+      _ -> cs
+    end
   end
 end
