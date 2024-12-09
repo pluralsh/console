@@ -2,7 +2,6 @@ import { GITHUB_LINK } from 'utils/constants'
 
 import {
   ApiIcon,
-  AppsIcon,
   ArrowTopRightIcon,
   BellIcon,
   BuildIcon,
@@ -92,14 +91,6 @@ function getMenuItems({
       icon: <HomeIcon />,
       path: HOME_ABS_PATH,
       hotkeys: ['shift H', '1'],
-    },
-    {
-      text: 'Apps',
-      expandedLabel: 'Apps',
-      icon: <AppsIcon />,
-      path: '/',
-      plural: true,
-      pathRegexp: /^\/(apps)/,
     },
     {
       text: 'Continuous deployment',
