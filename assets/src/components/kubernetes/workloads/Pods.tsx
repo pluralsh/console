@@ -24,13 +24,13 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import { useCluster } from '../Cluster'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
-import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { Kind } from '../common/types'
 import ResourceLink from '../common/ResourceLink'
 import { UsageText } from '../../cluster/TableElements'
 
 import { WorkloadImages, toReadiness } from './utils'
 import { getWorkloadsBreadcrumbs } from './Workloads'
+import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getWorkloadsBreadcrumbs(cluster),
@@ -47,22 +47,6 @@ const colImages = columnHelper.accessor((pod) => pod?.containerImages, {
   header: 'Images',
   cell: ({ getValue }) => <WorkloadImages images={getValue()} />,
 })
-
-// TODO: Remove?
-// const colStatus = columnHelper.accessor((pod) => pod, {
-//   id: 'status',
-//   header: 'Status',
-//   cell: ({ getValue }) => {
-//     const { status, warnings } = getValue()
-//
-//     return (
-//       <PodStatusChip
-//         status={status}
-//         warnings={warnings}
-//       />
-//     )
-//   },
-// })
 
 const colNode = columnHelper.accessor((pod) => pod?.nodeName, {
   id: 'node',

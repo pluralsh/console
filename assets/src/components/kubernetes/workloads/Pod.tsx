@@ -57,7 +57,6 @@ import {
 } from '../../../routes/kubernetesRoutesConsts'
 import ResourceOwner from '../common/ResourceOwner'
 import { NAMESPACE_PARAM } from '../Navigation'
-import { ContainerStatusT } from '../../cluster/pods/PodsList'
 import { ContainerStatuses } from '../../cluster/ContainerStatuses'
 import { useCluster } from '../Cluster'
 import ImagePullSecrets from '../common/ImagePullSecrets'
@@ -70,6 +69,7 @@ import { ShellWithContext } from '../../cluster/containers/ContainerShell'
 
 import { getBreadcrumbs } from './Pods'
 import { toReadiness } from './utils'
+import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 
 const directory: Array<TabEntry> = [
   { path: '', label: 'Info' },

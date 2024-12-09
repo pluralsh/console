@@ -9,15 +9,10 @@ import {
 } from 'react'
 import { Link, Outlet, useMatch, useNavigate } from 'react-router-dom'
 import { useQuery } from '@apollo/client'
-import {
-  POLL_INTERVAL,
-  ScalingType,
-  ScalingTypes,
-} from 'components/cluster/constants'
+import { POLL_INTERVAL } from 'components/cluster/constants'
 import { LoginContext } from 'components/contexts'
 import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import { LinkTabWrap } from 'components/utils/Tabs'
-import { ScalingRecommenderModal } from 'components/cluster/ScalingRecommender'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { ViewLogsButton } from 'components/component/ViewLogsButton'
 
@@ -118,10 +113,6 @@ export function ComponentDetails({
     pollInterval: POLL_INTERVAL,
     fetchPolicy: 'cache-and-network',
   })
-
-  const kind: ScalingType =
-    ScalingTypes[(componentKind ?? '')?.toUpperCase()] ??
-    ScalingTypes.DEPLOYMENT
 
   // To avoid mapping between component types and fields of data returned by API
   // we are picking first available value from API object for now.
@@ -238,12 +229,6 @@ export function ComponentDetails({
                     View service
                   </Button>
                 )}
-
-              <ScalingRecommenderModal
-                kind={kind}
-                componentName={componentName}
-                namespace={component.namespace || ''}
-              />
               {!service?.id && (
                 <ViewLogsButton
                   metadata={value?.metadata}

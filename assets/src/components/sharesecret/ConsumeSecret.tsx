@@ -10,7 +10,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import { useConsumeSecretMutation } from '../../generated/graphql'
-import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts'
 import { InputRevealer } from '../cd/providers/InputRevealer'
 import { Overline } from '../cd/utils/PermissionsModal'
 import { Body2BoldP } from '../utils/typography/Text'
@@ -81,7 +80,7 @@ export default function ConsumeSecret() {
                 secondary
                 small
                 startIcon={<ReturnIcon />}
-                onClick={() => navigate(HOME_ABS_PATH)}
+                onClick={() => navigate('/')}
                 width="fit-content"
               >
                 Back home

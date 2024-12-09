@@ -5,7 +5,6 @@ import { isNull } from 'lodash'
 import { Card } from '@pluralsh/design-system'
 import { useTheme } from 'styled-components'
 
-import { getPodResources } from '../pods/getPodResources'
 import { getAllContainersFromPods } from '../utils'
 import { GaugeWrap, ResourceGauge } from '../Gauges'
 import { useDeploymentSettings } from '../../contexts/DeploymentSettingsContext'
@@ -15,6 +14,7 @@ import LoadingIndicator from '../../utils/LoadingIndicator'
 import { SubTitle } from '../../utils/SubTitle'
 
 import { SaturationGraphs } from './SaturationGraphs'
+import { getPodResources } from '../../cd/cluster/pod/getPodResources.tsx'
 
 export function NodeGraphs({
   name,

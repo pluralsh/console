@@ -16,7 +16,11 @@ export class GQLInterceptor {
   ])
 
   static setup(): void {
-    cy.intercept(GQLInterceptor._method, GQLInterceptor._endpoint, GQLInterceptor._routeHandler)
+    cy.intercept(
+      GQLInterceptor._method,
+      GQLInterceptor._endpoint,
+      GQLInterceptor._routeHandler
+    )
   }
 
   private static _routeHandler(req: CyHttpMessages.IncomingHttpRequest): void {
@@ -31,9 +35,13 @@ export class GQLInterceptor {
     }
   }
 
-  private static _responseHandler(handler: GQLResponseHandler): (res: CyHttpMessages.IncomingResponse) => void {
+  private static _responseHandler(
+    handler: GQLResponseHandler
+  ): (res: CyHttpMessages.IncomingResponse) => void {
     return (res: CyHttpMessages.IncomingResponse) => {
-      const { body: { data } } = res
+      const {
+        body: { data },
+      } = res
 
       handler.handle(data)
     }
@@ -45,7 +53,10 @@ export class GQLInterceptor {
 
   static wait(op: Array<GQLOperation>, timeout?: number): void
 
-  static wait(op: GQLOperation | Array<GQLOperation>, timeoutOrCb?: number | Dispatch<Interception>): void {
+  static wait(
+    op: GQLOperation | Array<GQLOperation>,
+    timeoutOrCb?: number | Dispatch<Interception>
+  ): void {
     const handler = (o: GQLOperation): void => {
       const alias = `@${o}`
 

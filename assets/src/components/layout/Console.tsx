@@ -14,7 +14,6 @@ import { DeploymentSettingsProvider } from 'components/contexts/DeploymentSettin
 import { useLogin } from 'components/contexts'
 
 import { PluralProvider } from '../contexts/PluralContext'
-import { InstallationsProvider } from '../Installations'
 import { EnsureLogin } from '../login/Login'
 import TerminalThemeProvider from '../terminal/TerminalThemeProvider'
 import { CursorPositionProvider } from '../utils/CursorPosition'
@@ -38,23 +37,21 @@ export default function Console() {
         <ConsoleNavContextProvider>
           <EnsureLogin>
             <ProjectsProvider>
-              <InstallationsProvider>
-                <PluralProvider>
-                  <BillingSubscriptionProvider>
-                    <BreadcrumbsProvider>
-                      <TerminalThemeProvider>
-                        <ShareSecretProvider>
-                          <DeploymentSettingsProvider>
-                            <AIContextProvider>
-                              <ConsoleContent />
-                            </AIContextProvider>
-                          </DeploymentSettingsProvider>
-                        </ShareSecretProvider>
-                      </TerminalThemeProvider>
-                    </BreadcrumbsProvider>
-                  </BillingSubscriptionProvider>
-                </PluralProvider>
-              </InstallationsProvider>
+              <PluralProvider>
+                <BillingSubscriptionProvider>
+                  <BreadcrumbsProvider>
+                    <TerminalThemeProvider>
+                      <ShareSecretProvider>
+                        <DeploymentSettingsProvider>
+                          <AIContextProvider>
+                            <ConsoleContent />
+                          </AIContextProvider>
+                        </DeploymentSettingsProvider>
+                      </ShareSecretProvider>
+                    </TerminalThemeProvider>
+                  </BreadcrumbsProvider>
+                </BillingSubscriptionProvider>
+              </PluralProvider>
             </ProjectsProvider>
           </EnsureLogin>
         </ConsoleNavContextProvider>

@@ -1,13 +1,9 @@
 import { GITHUB_LINK } from 'utils/constants'
 
 import {
-  ApiIcon,
-  AppsIcon,
   ArrowTopRightIcon,
   BellIcon,
-  BuildIcon,
   Sidebar as DSSidebar,
-  DatabaseIcon,
   GearTrainIcon,
   GitHubLogoIcon,
   GitPullIcon,
@@ -18,7 +14,6 @@ import {
   PersonIcon,
   PrOpenIcon,
   ScrollIcon,
-  ServersIcon,
   SidebarExpandButton,
   SidebarExpandWrapper,
   SidebarItem,
@@ -39,7 +34,6 @@ import styled, { useTheme } from 'styled-components'
 
 import { PersonaConfigurationFragment } from 'generated/graphql'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
-import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
@@ -57,7 +51,6 @@ import HelpLauncher from '../help/HelpLauncher'
 import { MARK_READ } from './queries'
 import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
-import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
 
 type MenuItem = {
@@ -67,7 +60,6 @@ type MenuItem = {
   pathRegexp?: RegExp
   ignoreRegexp?: RegExp
   hotkeys?: string[]
-  plural?: boolean
   enabled?: boolean
   expandedLabel: string
 }
@@ -76,13 +68,11 @@ type MenuItem = {
 function getMenuItems({
   isCDEnabled,
   cdPath,
-  isByok,
   personaConfig,
 }: {
   isSandbox: boolean
   isCDEnabled: boolean
   cdPath: string
-  isByok: boolean
   personaConfig: Nullable<PersonaConfigurationFragment>
 }): MenuItem[] {
   return [
@@ -90,16 +80,8 @@ function getMenuItems({
       text: 'Home',
       expandedLabel: 'Home',
       icon: <HomeIcon />,
-      path: HOME_ABS_PATH,
-      hotkeys: ['shift H', '1'],
-    },
-    {
-      text: 'Apps',
-      expandedLabel: 'Apps',
-      icon: <AppsIcon />,
       path: '/',
-      plural: true,
-      pathRegexp: /^\/(apps)/,
+      hotkeys: ['shift H', '1'],
     },
     {
       text: 'Continuous deployment',
@@ -140,29 +122,6 @@ function getMenuItems({
       hotkeys: ['6'],
     },
     {
-      text: 'Builds',
-      expandedLabel: 'Builds',
-      icon: <BuildIcon />,
-      plural: true,
-      path: '/builds',
-    },
-    {
-      text: 'Nodes',
-      expandedLabel: 'Nodes',
-      icon: <ServersIcon />,
-      path: '/nodes',
-      plural: true,
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-    },
-    {
-      text: 'Pods',
-      expandedLabel: 'Pods',
-      icon: <ApiIcon />,
-      path: '/pods',
-      plural: true,
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-    },
-    {
       text: 'PRs',
       expandedLabel: 'Pull requests',
       icon: <PrOpenIcon />,
@@ -181,23 +140,6 @@ function getMenuItems({
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
       hotkeys: ['shift L', '8'],
     },
-    {
-      text: 'Database management',
-      expandedLabel: 'Databases',
-      icon: <DatabaseIcon />,
-      plural: true,
-      path: `/${DB_MANAGEMENT_PATH}`,
-    },
-    // ...(isSandbox
-    //   ? []
-    //   : [
-    //       {
-    //         text: 'Incidents',
-    //         icon: <SirenIcon />,
-    //         path: '/incidents',
-    //         sandboxed: true,
-    //       },
-    //     ]),
     {
       text: 'Backups',
       expandedLabel: 'Backups',
@@ -218,7 +160,7 @@ function getMenuItems({
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
       hotkeys: ['0'],
     },
-  ].filter((item) => item.enabled !== false && (!item.plural || !isByok))
+  ].filter((item) => item.enabled !== false)
 }
 
 function isActiveMenuItem(
@@ -285,16 +227,9 @@ export default function Sidebar() {
         isSandbox: !!configuration?.isSandbox,
         isCDEnabled,
         cdPath: defaultCDPath,
-        isByok: !!configuration?.byok,
         personaConfig: personaConfiguration,
       }),
-    [
-      personaConfiguration,
-      configuration?.isSandbox,
-      configuration?.byok,
-      isCDEnabled,
-      defaultCDPath,
-    ]
+    [personaConfiguration, configuration?.isSandbox, isCDEnabled, defaultCDPath]
   )
 
   const [mutation] = useMutation(MARK_READ, {

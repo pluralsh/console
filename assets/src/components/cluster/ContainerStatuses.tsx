@@ -4,8 +4,7 @@ import styled from 'styled-components'
 import { Readiness, ReadinessT, readinessToContainerLabel } from 'utils/status'
 
 import { ReactElement } from 'react'
-
-import { ContainerStatusT } from './pods/PodsList'
+import { ContainerStatusT } from '../cd/cluster/pod/PodsList.tsx'
 
 const iconBaseProps = {
   borderRadius: 3,

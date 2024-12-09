@@ -13,7 +13,7 @@ import {
   ColRestarts,
   PodWithId,
   PodsList,
-} from 'components/cluster/pods/PodsList'
+} from 'components/cd/cluster/pod/PodsList'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'

@@ -293,7 +293,7 @@ export default function Cluster() {
                     leftContent={item.icon}
                     label={item.label}
                     textValue={item.label}
-                  ></ListBoxItem>
+                  />
                 ) : undefined
               })}
             </MoreMenu>

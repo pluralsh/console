@@ -1,11 +1,22 @@
 import { useMemo } from 'react'
 import { Div } from 'honorable'
 
-import { format } from 'components/apps/app/dashboards/dashboard/misc'
 import { Graph } from 'components/utils/Graph'
 
 import { MetricResult } from '../../../generated/graphql'
 import { datum } from '../utils'
+import { filesize } from 'filesize'
+
+function format(value: number | null | undefined, format: string) {
+  switch (format) {
+    case 'bytes':
+      return filesize(value ?? 0)
+    case 'percent':
+      return `${Math.round((value ?? 0) * 10000) / 100}%`
+    default:
+      return value
+  }
+}
 
 export function SaturationGraphs({
   cpuTotal,

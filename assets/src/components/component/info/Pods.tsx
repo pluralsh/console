@@ -1,14 +1,3 @@
-import {
-  ColContainers,
-  ColCpuReservation,
-  ColCreation,
-  ColDelete,
-  ColImages,
-  ColMemoryReservation,
-  ColName,
-  ColRestarts,
-  PodsList,
-} from 'components/cluster/pods/PodsList'
 import { useOutletContext, useParams } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
@@ -20,6 +9,17 @@ import {
 import { ComponentDetailsContext } from '../ComponentDetails'
 
 import { InfoSectionH2 } from './common'
+import {
+  ColContainers,
+  ColCpuReservation,
+  ColCreation,
+  ColDelete,
+  ColImages,
+  ColMemoryReservation,
+  ColName,
+  ColRestarts,
+  PodsList,
+} from '../../cd/cluster/pod/PodsList.tsx'
 
 const columns = [
   ColName,

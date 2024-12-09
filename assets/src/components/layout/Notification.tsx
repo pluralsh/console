@@ -1,27 +1,12 @@
-import {
-  Accordion,
-  AccordionItem,
-  AppIcon,
-  Button,
-} from '@pluralsh/design-system'
-import { getIcon, hasIcons } from 'components/apps/misc'
-import { InstallationContext } from 'components/Installations'
+import { Accordion, AccordionItem } from '@pluralsh/design-system'
 import { Flex, P } from 'honorable'
 import moment from 'moment'
-import { useContext, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useTheme } from 'styled-components'
 
 import NotificationSeverity from './NotificationSeverity'
 
-export default function Notification({ notification, closePanel }: any) {
+export default function Notification({ notification }: any) {
   const theme = useTheme()
-  const navigate = useNavigate()
-  const { applications } = useContext<any>(InstallationContext)
-  const app = useMemo(
-    () => applications.find(({ name }) => name === notification.repository),
-    [applications, notification]
-  )
   const { title, description, severity, seenAt } = notification
 
   return (
@@ -38,13 +23,6 @@ export default function Notification({ notification, closePanel }: any) {
             width="100%"
             marginRight={theme.spacing.small}
           >
-            {hasIcons(app) && (
-              <AppIcon
-                url={getIcon(app, theme.mode)}
-                hue="lighter"
-                size="xxsmall"
-              />
-            )}
             <div>
               <P
                 body2
@@ -80,17 +58,6 @@ export default function Notification({ notification, closePanel }: any) {
           >
             {description}
           </P>
-          <div>
-            <Button
-              onClick={() => {
-                closePanel()
-                navigate(`/apps/${app.name}`)
-              }}
-              secondary
-            >
-              Go to {app.name}
-            </Button>
-          </div>
         </Flex>
       </AccordionItem>
     </Accordion>

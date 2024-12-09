@@ -1,4 +1,4 @@
-import { CardProps, Chip, ChipList } from '@pluralsh/design-system'
+import { CardProps, ChipList } from '@pluralsh/design-system'
 import { Div, Flex } from 'honorable'
 import { ReactNode } from 'react'
 import type { LabelPair, Maybe, Metadata as MetadataT } from 'generated/graphql'
@@ -32,15 +32,6 @@ export function LabelsAnnotationsRow({
         {children}
       </Flex>
     </div>
-  )
-}
-
-export function LabelsAnnotationsTag({ name, value }: LabelPair) {
-  return (
-    <Chip size="small">
-      {name}
-      {value && `: ${value}`}
-    </Chip>
   )
 }
 

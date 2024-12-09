@@ -15,17 +15,6 @@ export const MetadataFragment = gql`
   }
 `
 
-export const EventFragment = gql`
-  fragment EventFragment on Event {
-    action
-    lastTimestamp
-    count
-    message
-    reason
-    type
-  }
-`
-
 export const ContainerStatus = gql`
   fragment ContainerStatus on ContainerStatus {
     restartCount
@@ -76,46 +65,6 @@ export const Container = gql`
   ${ResourcesFragment}
 `
 
-export const PodMiniFragment = gql`
-  fragment PodMiniFragment on Pod {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      phase
-      podIp
-      reason
-      containerStatuses {
-        ...ContainerStatus
-      }
-      initContainerStatuses {
-        ...ContainerStatus
-      }
-      conditions {
-        lastProbeTime
-        lastTransitionTime
-        message
-        reason
-        status
-        type
-      }
-    }
-    spec {
-      nodeName
-      serviceAccountName
-      containers {
-        ...Container
-      }
-      initContainers {
-        ...Container
-      }
-    }
-  }
-  ${Container}
-  ${ContainerStatus}
-  ${MetadataFragment}
-`
-
 export const PodFragment = gql`
   fragment PodFragment on Pod {
     metadata {
@@ -155,84 +104,6 @@ export const PodFragment = gql`
   ${Container}
   ${ContainerStatus}
   ${MetadataFragment}
-`
-
-export const DeploymentFragment = gql`
-  fragment DeploymentFragment on Deployment {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      availableReplicas
-      replicas
-      unavailableReplicas
-    }
-    spec {
-      replicas
-      strategy {
-        type
-      }
-    }
-    raw
-  }
-  ${MetadataFragment}
-`
-
-export const StatefulSetFragment = gql`
-  fragment StatefulSetFragment on StatefulSet {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      replicas
-      currentReplicas
-      readyReplicas
-      updatedReplicas
-    }
-    spec {
-      replicas
-      serviceName
-    }
-    raw
-  }
-  ${MetadataFragment}
-`
-
-export const NodeFragment = gql`
-  fragment NodeFragment on Node {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      phase
-      allocatable
-      capacity
-      conditions {
-        type
-        status
-        message
-      }
-    }
-    spec {
-      podCidr
-      providerId
-    }
-  }
-  ${MetadataFragment}
-`
-
-export const NodeMetricFragment = gql`
-  fragment NodeMetricFragment on NodeMetric {
-    metadata {
-      ...MetadataFragment
-    }
-    usage {
-      cpu
-      memory
-    }
-    timestamp
-    window
-  }
 `
 
 export const JobStatus = gql`
@@ -284,57 +155,4 @@ export const LogFilterFragment = gql`
     }
   }
   ${MetadataFragment}
-`
-
-export const ConfigurationOverlayFragment = gql`
-  fragment ConfigurationOverlayFragment on ConfigurationOverlay {
-    metadata {
-      ...MetadataFragment
-    }
-    spec {
-      name
-      folder
-      subfolder
-      documentation
-      inputType
-      inputValues
-      updates {
-        path
-      }
-    }
-  }
-  ${MetadataFragment}
-`
-
-export const ContainerResourcesFragment = gql`
-  fragment ContainerResourcesFragment on ContainerResources {
-    cpu
-    memory
-  }
-`
-
-export const VerticalPodAutoscalerFragment = gql`
-  fragment VerticalPodAutoscalerFragment on VerticalPodAutoscaler {
-    metadata {
-      ...MetadataFragment
-    }
-    status {
-      recommendation {
-        containerRecommendations {
-          containerName
-          lowerBound {
-            ...ContainerResourcesFragment
-          }
-          upperBound {
-            ...ContainerResourcesFragment
-          }
-          uncappedTarget {
-            ...ContainerResourcesFragment
-          }
-        }
-      }
-    }
-  }
-  ${MetadataFragment}
-  ${ContainerResourcesFragment}
 `

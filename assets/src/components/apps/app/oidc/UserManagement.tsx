@@ -1,17 +1,10 @@
-import { Button, Card, useSetBreadcrumbs } from '@pluralsh/design-system'
+import { Button } from '@pluralsh/design-system'
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation } from '@apollo/client'
 import { Flex, P } from 'honorable'
 import sortBy from 'lodash/sortBy'
 import uniqBy from 'lodash/uniqBy'
-
-import { PluralApi } from 'components/PluralApi'
 import { useNavBlocker } from 'components/hooks/useNavBlocker'
-
-import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-
-import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { GqlError } from 'components/utils/Alert'
 
@@ -21,12 +14,7 @@ import {
   UserSuggestion,
 } from '../../../utils/BindingInput'
 
-import {
-  INSTALLATION,
-  SEARCH_GROUPS,
-  SEARCH_USERS,
-  UPDATE_PROVIDER,
-} from './queries'
+import { SEARCH_GROUPS, SEARCH_USERS, UPDATE_PROVIDER } from './queries'
 
 const sanitize = ({ id, user, group }) => ({
   id,
@@ -218,72 +206,5 @@ export function UserManagementCard({
         </Flex>
       </Flex>
     </>
-  )
-}
-
-function UserManagementContent() {
-  const { appName } = useParams()
-  const { data, error } = useQuery(INSTALLATION, {
-    variables: { name: appName },
-    fetchPolicy: 'cache-and-network',
-  })
-
-  if (error) {
-    return (
-      <GqlError
-        error={error}
-        header="Could not find provider"
-      />
-    )
-  }
-
-  if (!data) return <LoadingIndicator />
-
-  const { installation } = data
-
-  return installation && installation.oidcProvider ? (
-    <Card
-      paddingHorizontal={100}
-      paddingVertical="large"
-      maxHeight="100%"
-      overflowY="auto"
-    >
-      <UserManagementCard
-        id={installation.id}
-        provider={installation.oidcProvider}
-      />
-    </Card>
-  ) : (
-    <Flex
-      maxHeight="100%"
-      overflowY="auto"
-    >
-      No OIDC provider configured.
-    </Flex>
-  )
-}
-
-export default function UserManagement() {
-  const { appName } = useParams()
-  const breadcrumbs = useMemo(
-    () => [
-      { label: 'apps', url: '/' },
-      { label: appName ?? '', url: `/apps/${appName}` },
-      { label: 'user management', url: `/apps/${appName}/oidc` },
-    ],
-    [appName]
-  )
-
-  useSetBreadcrumbs(breadcrumbs)
-
-  return (
-    <ScrollablePage
-      scrollable={false}
-      heading="OpenID User management"
-    >
-      <PluralApi>
-        <UserManagementContent />
-      </PluralApi>
-    </ScrollablePage>
   )
 }

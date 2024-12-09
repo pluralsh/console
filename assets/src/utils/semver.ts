@@ -6,10 +6,6 @@ import { Maybe } from '../generated/graphql'
 
 import { isNonNullable } from './isNonNullable'
 
-export function canUpgrade(version: string) {
-  return !version || semver.lt(version, '1.29.0')
-}
-
 export function isUpgrading(
   version?: Maybe<string>,
   currentVersion?: Maybe<string>

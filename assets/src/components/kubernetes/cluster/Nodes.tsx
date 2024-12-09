@@ -22,7 +22,6 @@ import {
 } from '../../../generated/graphql-kubernetes'
 import { ResourceReadyChip, useDefaultColumns } from '../common/utils'
 import { ResourceList } from '../common/ResourceList'
-import { UsageBar } from '../../cluster/nodes/UsageBar'
 import { Usage } from '../../cluster/TableElements'
 import { KubernetesClusterFragment } from '../../../generated/graphql'
 import {
@@ -36,6 +35,7 @@ import { Confirm } from '../../utils/Confirm'
 import { KubernetesClient } from '../../../helpers/kubernetes.client'
 
 import { getClusterBreadcrumbs } from './Cluster'
+import { UsageBar } from '../../utils/UsageBar.tsx'
 
 export const getBreadcrumbs = (cluster?: Maybe<KubernetesClusterFragment>) => [
   ...getClusterBreadcrumbs(cluster),

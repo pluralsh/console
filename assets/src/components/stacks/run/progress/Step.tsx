@@ -22,7 +22,7 @@ import {
   StepStatus,
   useLogsDeltaSubscription,
 } from '../../../../generated/graphql'
-import CommandLog from '../../../builds/build/progress/CommandLog'
+import CommandLog from '../../../utils/CommandLog.tsx'
 
 interface StepProps {
   step: RunStep

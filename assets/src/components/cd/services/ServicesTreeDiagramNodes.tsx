@@ -45,15 +45,12 @@ import { ModalMountTransition } from '../../utils/ModalMountTransition'
 import { InlineLink } from '../../utils/typography/InlineLink'
 import { OverlineH1 } from '../../utils/typography/Text'
 import { ColWithIcon } from '../../utils/table/ColWithIcon'
-import {
-  ComponentIcon,
-  ComponentStateChip,
-} from '../../apps/app/components/misc'
 
 import KickButton from '../../utils/KickButton'
 
 import { ServiceStatusChip } from './ServiceStatusChip'
 import { ServicesTableErrors } from './ServicesTableErrors'
+import { ComponentIcon, ComponentStateChip } from './service/component/misc.tsx'
 
 export const ServiceNodeType = 'plural-services-tree-service-node'
 export const GlobalServiceNodeType = 'plural-services-tree-global-service-node'

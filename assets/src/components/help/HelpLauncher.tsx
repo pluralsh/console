@@ -68,15 +68,6 @@ const HELP_LAUNCH_EVENT_TYPE = 'pluralHelpLaunchEvent'
 
 type HelpLaunchEventProps = { menu: HelpMenuState }
 type HelpLaunchEvent = CustomEvent<HelpLaunchEventProps>
-const HelpLaunchEvent = CustomEvent<HelpLaunchEventProps>
-
-export function launchHelp(section: HelpMenuState) {
-  const event = new HelpLaunchEvent(HELP_LAUNCH_EVENT_TYPE, {
-    detail: { menu: section },
-  })
-
-  window.dispatchEvent(event)
-}
 
 function useLaunchEventListener(cb: (menu: HelpMenuState) => void) {
   useCustomEventListener<HelpLaunchEvent>(

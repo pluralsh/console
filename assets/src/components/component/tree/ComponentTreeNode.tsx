@@ -11,7 +11,6 @@ import isEmpty from 'lodash/isEmpty'
 
 import { useNodeEdges } from 'components/hooks/reactFlowHooks'
 import { TreeNodeMeta } from 'components/component/tree/getTreeNodesAndEdges'
-import { ComponentIcon } from 'components/apps/app/components/misc'
 import { TRUNCATE } from 'components/utils/truncate'
 
 import { Link, useParams } from 'react-router-dom'
@@ -24,6 +23,7 @@ import { CLUSTER_PARAM_ID } from 'routes/cdRoutesConsts'
 
 import { RawYaml } from '../ComponentRaw'
 import { NodeBaseCard, NodeHandle } from '../../utils/reactflow/nodes'
+import { ComponentIcon } from '../../cd/services/service/component/misc.tsx'
 
 export function ComponentTreeNode({
   id,

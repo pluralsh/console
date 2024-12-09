@@ -7,12 +7,10 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
-  useId,
   useMemo,
   useReducer,
 } from 'react'
-import { AnimatedDiv, useUnmount } from '@pluralsh/design-system'
+import { AnimatedDiv } from '@pluralsh/design-system'
 import { produce } from 'immer'
 
 const getTransitionProps = (isOpen: boolean) => ({
@@ -99,22 +97,4 @@ export function OverlayContextProvider(
       value={value}
     />
   )
-}
-
-export const useContentOverlay = (show: boolean) => {
-  const id = useId()
-  const overlayCtx = useContext(OverlayContext)
-
-  if (!overlayCtx) {
-    throw Error(
-      'useContentOverlay() must be used inside an <OverlayContextProvider />'
-    )
-  }
-  useEffect(() => {
-    overlayCtx.setShowOverlay(id, show)
-  }, [id, overlayCtx, show])
-
-  useUnmount(() => {
-    overlayCtx.setShowOverlay(id, false)
-  })
 }

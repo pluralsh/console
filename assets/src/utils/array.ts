@@ -4,17 +4,6 @@ export function* reverse<T>(array: T[], mapper: (val: T) => T = (i) => i) {
   }
 }
 
-export function* lookahead<T extends object, R>(
-  array: T[],
-  mapper: (val: T, nextVal: T) => R
-) {
-  const len = array.length
-
-  for (let i = 0; i < len; i++) {
-    yield mapper(array[i], array[i + 1] || {})
-  }
-}
-
 export function* chunk<T>(array: T[], chunkSize: number) {
   let i
   const len = array.length
@@ -36,23 +25,6 @@ export function* pairwise<T>(iterable: Iterable<T>): Generator<[T, T], void> {
     a = b
     b = iterator.next()
   }
-}
-
-export function groupBy<T extends { id?: any }>(
-  list: Iterable<T>,
-  key: (val: T) => string = (i: T) => i.id
-) {
-  const grouped: Record<string, T[]> = {}
-
-  for (const item of list) {
-    const k = key(item)
-    const group = grouped[k] || []
-
-    group.push(item)
-    grouped[k] = group
-  }
-
-  return grouped
 }
 
 export function trimSuffix(str: string, suff: string) {

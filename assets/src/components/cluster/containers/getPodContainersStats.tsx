@@ -1,7 +1,6 @@
 import { Pod } from 'generated/graphql'
 import { Readiness, containerStatusToReadiness } from 'utils/status'
-
-import { ContainerStatusT } from '../pods/PodsList'
+import { ContainerStatusT } from '../../cd/cluster/pod/PodsList.tsx'
 
 function getAllContainerStatuses({
   containerStatuses,
