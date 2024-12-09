@@ -1,15 +1,10 @@
 import { Button, ToolIcon, Tooltip } from '@pluralsh/design-system'
-import { useContext, useRef, useState } from 'react'
+import { useContext, useState } from 'react'
 import { Div, Flex } from 'honorable'
-import { useParams } from 'react-router-dom'
 
 import TerminalThemeSelector from 'components/terminal/TerminalThemeSelector'
 
-import {
-  ShellContext,
-  TerminalActions,
-  TerminalScreen,
-} from '../../terminal/Terminal'
+import { ShellContext, TerminalScreen } from '../../terminal/Terminal'
 
 import { CODELINE_HEIGHT, ShellCommandEditor } from './ShellCommandEditor'
 
@@ -95,20 +90,5 @@ export function ShellWithContext({
         header={`Connecting to pod ${name} using ${command}...`}
       />
     </Flex>
-  )
-}
-
-export default function Shell() {
-  const ref = useRef<TerminalActions>({ handleResetSize: () => {} })
-  const { name = '', namespace = '', container = '' } = useParams()
-
-  return (
-    <ShellContext.Provider value={ref}>
-      <ShellWithContext
-        name={name}
-        namespace={namespace}
-        container={container}
-      />
-    </ShellContext.Provider>
   )
 }

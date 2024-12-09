@@ -22,14 +22,14 @@ import {
   readinessToLabel,
 } from 'utils/status'
 
+import { Overline } from 'components/cd/utils/PermissionsModal.tsx'
+import moment from 'moment/moment'
 import {
   ContainerStatusChip,
   TABLE_HEIGHT,
   TableText,
   Usage,
-} from '../TableElements'
-import { Overline } from '../../cd/utils/PermissionsModal.tsx'
-import moment from 'moment/moment'
+} from '../../../cluster/TableElements.tsx'
 
 type ContainerTableRow = {
   name?: string
@@ -289,7 +289,7 @@ function toTableData(
   }
 }
 
-export function ContainersList({
+export function PodContainers({
   containers,
   containerStatuses,
   initContainers,

@@ -11,7 +11,6 @@ import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 import { aiRoutes } from './aiRoutes.tsx'
 import { backupsRoutes } from './backupRoutes'
 import { cdRoutes } from './cdRoutes'
-import { clusterRoutes } from './clusterRoutes'
 import { HOME_REL_PATH } from './consoleRoutesConsts'
 import { kubernetesRoutes } from './kubernetesRoute'
 import { policiesRoutes } from './policiesRoutes'
@@ -64,7 +63,6 @@ const profileRoutes = [
 
 export const consoleComponentRoutes = [
   ...catalogRoutes,
-  ...clusterRoutes,
   ...stacksRoutes,
   ...policiesRoutes,
   ...backupsRoutes,

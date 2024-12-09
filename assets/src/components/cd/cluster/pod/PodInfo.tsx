@@ -5,6 +5,11 @@ import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
 import { Button, LogsIcon } from '@pluralsh/design-system'
 
 import { SubTitle } from '../../../utils/SubTitle'
+
+import { Readiness } from '../../../../utils/status'
+import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
+import { PodConditions } from './PodConditions.tsx'
+import { PodMetadata } from './PodMetadata.tsx'
 import {
   ColCpuReservation,
   ColImage,
@@ -12,15 +17,11 @@ import {
   ColName,
   ColPorts,
   ColStatus,
-  ContainersList,
   ShellLink,
   columnHelper,
   ColExpander,
-} from '../../../cluster/containers/ContainersList'
-import { Readiness } from '../../../../utils/status'
-import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
-import { PodConditions } from './PodConditions.tsx'
-import { PodMetadata } from './PodMetadata.tsx'
+  PodContainers,
+} from './PodContainers.tsx'
 
 export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) =>
   (statuses || []).reduce(
@@ -115,7 +116,7 @@ export default function PodInfo() {
       >
         <section>
           <SubTitle>Containers</SubTitle>
-          <ContainersList
+          <PodContainers
             containers={containers}
             containerStatuses={containerStatuses}
             initContainers={initContainers}

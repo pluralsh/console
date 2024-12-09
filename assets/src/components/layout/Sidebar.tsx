@@ -14,7 +14,6 @@ import {
   PersonIcon,
   PrOpenIcon,
   ScrollIcon,
-  ServersIcon,
   SidebarExpandButton,
   SidebarExpandWrapper,
   SidebarItem,
@@ -62,7 +61,6 @@ type MenuItem = {
   pathRegexp?: RegExp
   ignoreRegexp?: RegExp
   hotkeys?: string[]
-  plural?: boolean
   enabled?: boolean
   expandedLabel: string
 }
@@ -127,14 +125,6 @@ function getMenuItems({
       hotkeys: ['6'],
     },
     {
-      text: 'Nodes',
-      expandedLabel: 'Nodes',
-      icon: <ServersIcon />,
-      path: '/nodes',
-      plural: true,
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-    },
-    {
       text: 'PRs',
       expandedLabel: 'Pull requests',
       icon: <PrOpenIcon />,
@@ -173,7 +163,7 @@ function getMenuItems({
         !!(personaConfig?.all || personaConfig?.sidebar?.settings),
       hotkeys: ['0'],
     },
-  ].filter((item) => item.enabled !== false && (!item.plural || !isByok))
+  ].filter((item) => item.enabled !== false && !isByok)
 }
 
 function isActiveMenuItem(
