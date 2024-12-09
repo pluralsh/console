@@ -48,7 +48,7 @@ export function ServiceCatalogs() {
           />
         }
         styles={{
-          height: HOME_CARD_CONTENT_HEIGHT,
+          maxHeight: HOME_CARD_CONTENT_HEIGHT,
           padding: theme.spacing.medium,
         }}
       />
