@@ -265,16 +265,24 @@ def reduce_versions(versions):
     cur_minor = ""
     cur_kube = []
 
-    # Iterate through the versions list in reverse order
-    for data in reversed(versions):
+    # Sort versions to ensure the latest version is last
+    versions = sort_versions(versions)
+
+    for i, data in enumerate(versions):
         version = validate_semver(data["version"])
         kube = data["kube"]
 
-        # Add to reduced_versions if it's a new major/minor version or kube list changes
+        # Always add the latest version (last in the list)
+        is_latest_version = i == len(versions) - 1
+
+        # Add to reduced_versions if:
+        # - It's a new major version
+        # - OR if the minor version changes AND kube list changes
+        # - OR it's the latest version
         if version and (
             cur_major != version.major
-            or cur_minor != version.minor
-            or cur_kube != kube
+            or (cur_minor != version.minor and cur_kube != kube)
+            or is_latest_version
         ):
             cur_major = version.major
             cur_minor = version.minor
@@ -284,14 +292,13 @@ def reduce_versions(versions):
                 [
                     ("version", str(version)),
                     ("kube", kube),
-                    ("requirements", []),
-                    ("incompatibilities", []),
+                    ("requirements", data.get("requirements", [])),
+                    ("incompatibilities", data.get("incompatibilities", [])),
                 ]
             )
-            reduced_versions.append(version_info)
-
-    # Reverse reduced_versions to maintain original order of versions
-    reduced_versions.reverse()
+            # Avoid duplicates of the latest version
+            if version_info not in reduced_versions:
+                reduced_versions.append(version_info)
 
     return reduced_versions
 
