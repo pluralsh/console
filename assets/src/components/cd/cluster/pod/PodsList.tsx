@@ -4,7 +4,7 @@ import {
   Tooltip,
   TrashCanIcon,
 } from '@pluralsh/design-system'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Row, createColumnHelper } from '@tanstack/react-table'
 import {
   ComponentProps,
@@ -25,26 +25,19 @@ import { useMutation } from '@apollo/client'
 
 import { TruncateStart } from 'components/utils/table/Truncate'
 
-import { InlineLink } from 'components/utils/typography/InlineLink'
-
 import { getKubernetesAbsPath } from 'routes/kubernetesRoutesConsts'
-
 import {
   LabelWithIcon,
+  numishSort,
   TableCaretLink,
   TableText,
   Usage,
-  numishSort,
-} from '../TableElements'
-import { DELETE_POD } from '../queries'
-
-import { getPodContainersStats } from '../containers/getPodContainersStats'
-
-import { ContainerStatuses } from '../ContainerStatuses'
-
-import { DateTimeCol } from '../../utils/table/DateTimeCol'
-
-import { getPodResources } from './getPodResources'
+} from '../../../cluster/TableElements.tsx'
+import { DateTimeCol } from '../../../utils/table/DateTimeCol.tsx'
+import { ContainerStatuses } from '../../../cluster/ContainerStatuses.tsx'
+import { getPodResources } from './getPodResources.tsx'
+import { getPodContainersStats } from '../../../cluster/containers/getPodContainersStats.tsx'
+import { DELETE_POD } from '../../../cluster/queries.ts'
 
 export const PODS_TABLE_MAX_HEIGHT = '256px'
 
@@ -158,27 +151,6 @@ export const ColCreation = columnHelper.accessor(
     cell: ({ getValue }) => <DateTimeCol date={getValue()} />,
   }
 )
-
-export const ColNodeName = columnHelper.accessor((pod) => pod.nodeName, {
-  id: 'nodeName',
-  enableSorting: true,
-  cell: ({ row: { original }, ...props }) => (
-    <TableText>
-      <Tooltip
-        label={original.nodeName}
-        placement="top-start"
-      >
-        <InlineLink
-          as={Link}
-          to={`/nodes/${original.nodeName}`}
-        >
-          {props.getValue()}
-        </InlineLink>
-      </Tooltip>
-    </TableText>
-  ),
-  header: 'Node name',
-})
 
 export const ColMemoryReservation = columnHelper.accessor(
   (row) => row.memory.requests,

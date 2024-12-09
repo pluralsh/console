@@ -1,12 +1,9 @@
 import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { Flex } from 'honorable'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
-import { Pod } from 'generated/graphql'
-import { statusesToRecord } from 'components/cluster/pods/PodInfo'
+import { ContainerStatus, Maybe, Pod } from 'generated/graphql'
 import { Button, LogsIcon } from '@pluralsh/design-system'
 
-import PodConditions from '../../../cluster/pods/PodConditions'
-import Metadata from '../../../cluster/pods/PodMetadata'
 import { SubTitle } from '../../../utils/SubTitle'
 import {
   ColCpuReservation,
@@ -22,6 +19,19 @@ import {
 } from '../../../cluster/containers/ContainersList'
 import { Readiness } from '../../../../utils/status'
 import { getServicePodDetailsPath } from '../../../../routes/cdRoutesConsts'
+import { PodConditions } from './PodConditions.tsx'
+import { PodMetadata } from './PodMetadata.tsx'
+
+export const statusesToRecord = (statuses?: Maybe<Maybe<ContainerStatus>[]>) =>
+  (statuses || []).reduce(
+    (acc, container) => ({
+      ...acc,
+      ...(typeof container?.name === 'string'
+        ? { [container.name]: container }
+        : {}),
+    }),
+    {} as Record<string, Maybe<ContainerStatus>>
+  )
 
 function ViewLogsButton() {
   return (
@@ -124,7 +134,7 @@ export default function PodInfo() {
         </section>
         <section>
           <SubTitle>Metadata</SubTitle>
-          <Metadata pod={pod} />
+          <PodMetadata pod={pod} />
         </section>
       </Flex>
     </ScrollablePage>

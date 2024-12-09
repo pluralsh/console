@@ -32,7 +32,7 @@ import { LinkTabWrap } from 'components/utils/Tabs'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
 import { POLL_INTERVAL } from '../constants'
-import { statusesToRecord } from '../pods/PodInfo'
+import { statusesToRecord } from '../../cd/cluster/pod/PodInfo.tsx'
 
 const DIRECTORY = [
   { path: '', label: 'Cloud shell' },

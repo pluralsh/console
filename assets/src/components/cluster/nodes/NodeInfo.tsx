@@ -13,7 +13,7 @@ import {
   ColName,
   ColRestarts,
   PodsList,
-} from '../pods/PodsList'
+} from '../../cd/cluster/pod/PodsList'
 import { NODE_Q } from '../queries'
 import { SubTitle } from '../../utils/SubTitle'
 

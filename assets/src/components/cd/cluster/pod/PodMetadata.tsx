@@ -7,7 +7,7 @@ import { LabelPairsSection } from 'components/utils/LabelPairsSection'
 
 import { useTheme } from 'styled-components'
 
-export default function Metadata({ pod }: { pod: Pod }) {
+export function PodMetadata({ pod }: { pod: Pod }) {
   const theme = useTheme()
   const { labels, annotations } = pod.metadata
 

@@ -3,8 +3,7 @@ import Fuse from 'fuse.js'
 import { ComboBox, ListBoxItem } from '@pluralsh/design-system'
 
 import { useTheme } from 'styled-components'
-
-import { NamespaceListFooter } from '../../cluster/pods/Pods'
+import { NamespaceListFooter } from '../../utils/NamespaceListFooter.tsx'
 
 export function NamespaceFilter({
   namespaces,

@@ -1,15 +1,12 @@
 import { gql } from 'apollo-boost'
 
-import { MetricResponseFragment } from 'components/graphql/dashboards'
 import {
   ConfigurationOverlayFragment,
   EventFragment,
   JobFragment,
-  MetadataFragment,
   NodeFragment,
   NodeMetricFragment,
   PodFragment,
-  PodMiniFragment,
   VerticalPodAutoscalerFragment,
 } from 'components/graphql/kubernetes'
 
@@ -92,112 +89,6 @@ export const NODE_RAW_Q = gql`
       raw
     }
   }
-`
-
-export const NODE_METRICS_Q = gql`
-  query Metrics(
-    $cpuRequests: String!
-    $cpuLimits: String!
-    $memRequests: String!
-    $memLimits: String!
-    $pods: String!
-    $clusterId: ID
-    $offset: Int
-  ) {
-    cpuRequests: metric(
-      clusterId: $clusterId
-      query: $cpuRequests
-      offset: $offset
-    ) {
-      ...MetricResponseFragment
-    }
-    cpuLimits: metric(
-      clusterId: $clusterId
-      query: $cpuLimits
-      offset: $offset
-    ) {
-      ...MetricResponseFragment
-    }
-    memRequests: metric(
-      clusterId: $clusterId
-      query: $memRequests
-      offset: $offset
-    ) {
-      ...MetricResponseFragment
-    }
-    memLimits: metric(
-      clusterId: $clusterId
-      query: $memLimits
-      offset: $offset
-    ) {
-      ...MetricResponseFragment
-    }
-    pods: metric(clusterId: $clusterId, query: $pods, offset: $offset) {
-      ...MetricResponseFragment
-    }
-  }
-  ${MetricResponseFragment}
-`
-
-export const CLUSTER_SATURATION = gql`
-  query Metrics(
-    $cpuUtilization: String!
-    $memUtilization: String!
-    $clusterId: ID
-    $offset: Int
-  ) {
-    cpuUtilization: metric(
-      clusterId: $clusterId
-      query: $cpuUtilization
-      offset: $offset
-    ) {
-      ...MetricResponseFragment
-    }
-    memUtilization: metric(
-      clusterId: $clusterId
-      query: $memUtilization
-      offset: $offset
-    ) {
-      ...MetricResponseFragment
-    }
-  }
-  ${MetricResponseFragment}
-`
-
-export const PODS_Q = gql`
-  query Pods($namespaces: [String]) {
-    cachedPods(namespaces: $namespaces) {
-      ...PodMiniFragment
-    }
-    namespaces {
-      metadata {
-        ...MetadataFragment
-      }
-    }
-    applications {
-      name
-      spec {
-        descriptor {
-          type
-          icons
-        }
-      }
-    }
-  }
-  ${PodMiniFragment}
-  ${MetadataFragment}
-`
-
-export const PODS_SUB = gql`
-  subscription PodsSub {
-    podDelta {
-      payload {
-        ...PodFragment
-      }
-      delta
-    }
-  }
-  ${PodFragment}
 `
 
 export const SCALING_RECOMMENDATION = gql`

@@ -1,11 +1,6 @@
 import { Route, redirect } from 'react-router-dom'
 
 import NodeInfo from 'components/cluster/nodes/NodeInfo'
-import Pods from 'components/cluster/pods/Pods'
-import Pod from 'components/cluster/pods/Pod'
-import PodInfo from 'components/cluster/pods/PodInfo'
-import PodEvents from 'components/cluster/pods/PodEvents'
-import PodLogs from 'components/cluster/pods/PodLogs'
 import Node from 'components/cluster/nodes/Node'
 import Nodes from 'components/cluster/nodes/Nodes'
 import NodeEvents from 'components/cluster/nodes/NodeEvents'
@@ -15,39 +10,7 @@ import Container from 'components/cluster/containers/Container'
 import ContainerShell from 'components/cluster/containers/ContainerShell'
 import ContainerMetadata from 'components/cluster/containers/ContainerMetadata'
 
-import PodRaw from '../components/cluster/pods/PodRaw'
-
 export const clusterRoutes = [
-  /* Pods */
-  <Route
-    path="pods/:namespace?"
-    index
-    element={<Pods />}
-  />,
-
-  /* Pod Details */
-  <Route
-    path="pods/:namespace/:name"
-    element={<Pod />}
-  >
-    <Route
-      index
-      element={<PodInfo />}
-    />
-    <Route
-      path="events"
-      element={<PodEvents />}
-    />
-    <Route
-      path="raw"
-      element={<PodRaw />}
-    />
-    <Route
-      path="logs"
-      element={<PodLogs />}
-    />
-  </Route>,
-
   /* Nodes */
   <Route
     path="nodes"

@@ -1,12 +1,12 @@
+import {
+  Maybe,
+  PodCondition as PodConditionT,
+} from '../../../../generated/graphql.ts'
+import isEmpty from 'lodash/isEmpty'
 import { Table } from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
-
-import { Maybe, PodCondition as PodConditionT } from 'generated/graphql'
-import isEmpty from 'lodash/isEmpty'
-
-import { DateTimeCol } from 'components/utils/table/DateTimeCol'
-
-import { TableText } from '../TableElements'
+import { DateTimeCol } from '../../../utils/table/DateTimeCol.tsx'
+import { TableText } from '../../../cluster/TableElements.tsx'
 
 const COLUMN_HELPER = createColumnHelper<PodConditionT>()
 
@@ -40,7 +40,7 @@ const columns = [
   }),
 ]
 
-export default function PodConditions({
+export function PodConditions({
   conditions,
 }: {
   conditions?: Maybe<PodConditionT>[]

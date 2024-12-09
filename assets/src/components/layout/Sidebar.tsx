@@ -1,7 +1,6 @@
 import { GITHUB_LINK } from 'utils/constants'
 
 import {
-  ApiIcon,
   ArrowTopRightIcon,
   BellIcon,
   Sidebar as DSSidebar,
@@ -132,14 +131,6 @@ function getMenuItems({
       expandedLabel: 'Nodes',
       icon: <ServersIcon />,
       path: '/nodes',
-      plural: true,
-      enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-    },
-    {
-      text: 'Pods',
-      expandedLabel: 'Pods',
-      icon: <ApiIcon />,
-      path: '/pods',
       plural: true,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
     },
