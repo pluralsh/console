@@ -259,6 +259,10 @@ type RootQueryType {
   "fetch an individual runtime service for more thorough detail views"
   runtimeService(id: ID!): RuntimeService
 
+  clusterUsages(after: String, first: Int, before: String, last: Int): ClusterUsageConnection
+
+  clusterUsage(id: ID!): ClusterUsage
+
   serviceDeployments(
     after: String
 
@@ -1096,6 +1100,9 @@ input DeploymentSettingsAttributes {
   "configuration for LLM provider clients"
   ai: AiSettingsAttributes
 
+  "settings for cost management functionality"
+  cost: CostSettingsAttributes
+
   readBindings: [PolicyBindingAttributes]
 
   writeBindings: [PolicyBindingAttributes]
@@ -1118,6 +1125,17 @@ input HttpConnectionAttributes {
 input StackSettingsAttributes {
   jobSpec: GateJobAttributes
   connectionId: ID
+}
+
+"Settings for cost management"
+input CostSettingsAttributes {
+  enabled: Boolean
+
+  "the percentage change needed to generate a recommendation, default 30%"
+  recommendationThreshold: Int
+
+  "the percentage change needed to generate a recommendation, default 20%"
+  recommendationCushion: Int
 }
 
 input AiSettingsAttributes {
@@ -1298,6 +1316,9 @@ type DeploymentSettings {
   "settings for LLM provider clients"
   ai: AiSettings
 
+  "settings for cost management"
+  cost: CostSettings
+
   "The console's expected agent version"
   agentVsn: String!
 
@@ -1350,6 +1371,17 @@ type SmtpSettings {
   sender: String!
   user: String!
   ssl: Boolean!
+}
+
+"Settings for cost management"
+type CostSettings {
+  enabled: Boolean
+
+  "the percentage change needed to generate a recommendation, default 30%"
+  recommendationThreshold: Int
+
+  "the percentage cushion above baseline usage to give when generation recommendations, default 20%"
+  recommendationCushion: Int
 }
 
 "Settings for configuring access to common LLM providers"
@@ -4215,6 +4247,13 @@ enum UpgradeInsightStatus {
   WARNING
 }
 
+enum ScalingRecommendationType {
+  DEPLOYMENT
+  STATEFULSET
+  DAEMONSET
+  ROLLOUT
+}
+
 enum Conjunction {
   AND
   OR
@@ -5128,6 +5167,75 @@ type InsightClientInfo {
   lastRequestAt: DateTime
 }
 
+type ClusterUsage {
+  id: ID!
+
+  cpu: Float
+
+  memory: Float
+
+  "the amount of cpu utilized"
+  cpuUtil: Float
+
+  "the amount of memory utilized"
+  memUtil: Float
+
+  cpuCost: Int
+
+  memoryCost: Int
+
+  cluster: Cluster
+
+  namespaces(after: String, first: Int, before: String, last: Int): ClusterNamespaceUsageConnection
+
+  recommendations(after: String, first: Int, before: String, last: Int): ClusterScalingRecommendationConnection
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ClusterNamespaceUsage {
+  id: ID!
+
+  namespace: String
+
+  cpu: Float
+
+  memory: Float
+
+  "the amount of cpu utilized"
+  cpuUtil: Float
+
+  "the amount of memory utilized"
+  memUtil: Float
+
+  cpuCost: Int
+
+  memoryCost: Int
+
+  cluster: Cluster
+
+  insertedAt: DateTime
+
+  updatedAt: DateTime
+}
+
+type ClusterScalingRecommendation {
+  id: ID!
+  type: ScalingRecommendationType
+  namespace: String
+  name: String
+  container: String
+  memoryRequest: Float
+  cpuRequest: Float
+  memoryRecommendation: Float
+  cpuRecommendation: Float
+  cluster: Cluster
+  insertedAt: DateTime
+  updatedAt: DateTime
+}
+
 type ClusterConnection {
   pageInfo: PageInfo!
   edges: [ClusterEdge]
@@ -5146,6 +5254,21 @@ type ClusterRevisionConnection {
 type TagConnection {
   pageInfo: PageInfo!
   edges: [TagEdge]
+}
+
+type ClusterUsageConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterUsageEdge]
+}
+
+type ClusterNamespaceUsageConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterNamespaceUsageEdge]
+}
+
+type ClusterScalingRecommendationConnection {
+  pageInfo: PageInfo!
+  edges: [ClusterScalingRecommendationEdge]
 }
 
 enum AuthMethod {
@@ -8334,6 +8457,21 @@ type HelmRepositoryEdge {
 
 type GitRepositoryEdge {
   node: GitRepository
+  cursor: String
+}
+
+type ClusterScalingRecommendationEdge {
+  node: ClusterScalingRecommendation
+  cursor: String
+}
+
+type ClusterNamespaceUsageEdge {
+  node: ClusterNamespaceUsage
+  cursor: String
+}
+
+type ClusterUsageEdge {
+  node: ClusterUsage
   cursor: String
 }
 

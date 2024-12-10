@@ -76,6 +76,10 @@ export const consoleRoutes: RouteObject[] = [
     index: true,
     element: <Home />,
   },
+  {
+    path: 'home',
+    element: <Home />,
+  },
   ...secretsRoutes,
   ...prRoutes,
 ]

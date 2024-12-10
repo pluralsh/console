@@ -42,4 +42,6 @@ yalc.lock
 
 secrets/
 
+data/
+
 # config/pubkey.pem

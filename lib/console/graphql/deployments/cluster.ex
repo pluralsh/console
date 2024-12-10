@@ -6,6 +6,7 @@ defmodule Console.GraphQl.Deployments.Cluster do
 
   ecto_enum :cluster_distro, Cluster.Distro
   ecto_enum :upgrade_insight_status, Console.Schema.UpgradeInsight.Status
+  ecto_enum :scaling_recommendation_type, Console.Schema.ClusterScalingRecommendation.Type
 
   enum :conjunction do
     value :and
@@ -701,10 +702,69 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :last_request_at, :datetime
   end
 
+  object :cluster_usage do
+    field :id,        non_null(:id)
+    field :cpu,       :float
+    field :memory,    :float
+    field :cpu_util,  :float, description: "the amount of cpu utilized"
+    field :mem_util,  :float, description: "the amount of memory utilized"
+
+    field :cpu_cost,     :integer, resolve: fn u, _, _ -> {:ok, Console.Cost.Model.resolve(u, :cpu)} end
+    field :memory_cost,  :integer, resolve: fn u, _, _ -> {:ok, Console.Cost.Model.resolve(u, :memory)} end
+
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+
+    connection field :namespaces, node_type: :cluster_namespace_usage do
+      resolve &Deployments.list_namespace_usage/3
+    end
+
+    connection field :recommendations, node_type: :cluster_scaling_recommendation do
+      resolve &Deployments.list_scaling_recommendations/3
+    end
+
+    timestamps()
+  end
+
+  object :cluster_namespace_usage do
+    field :id,        non_null(:id)
+    field :namespace, :string
+    field :cpu,       :float
+    field :memory,    :float
+    field :cpu_util,  :float, description: "the amount of cpu utilized"
+    field :mem_util,  :float, description: "the amount of memory utilized"
+
+    field :cpu_cost,     :integer, resolve: fn u, _, _ -> {:ok, Console.Cost.Model.resolve(u, :cpu)} end
+    field :memory_cost,  :integer, resolve: fn u, _, _ -> {:ok, Console.Cost.Model.resolve(u, :memory)} end
+
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
+  object :cluster_scaling_recommendation do
+    field :id,        non_null(:id)
+    field :type,      :scaling_recommendation_type
+    field :namespace, :string
+    field :name,      :string
+    field :container, :string
+
+    field :memory_request,        :float
+    field :cpu_request,           :float
+    field :memory_recommendation, :float
+    field :cpu_recommendation,    :float
+
+    field :cluster, :cluster, resolve: dataloader(Deployments)
+
+    timestamps()
+  end
+
   connection node_type: :cluster
   connection node_type: :cluster_provider
   connection node_type: :cluster_revision
   connection node_type: :tag
+  connection node_type: :cluster_usage
+  connection node_type: :cluster_namespace_usage
+  connection node_type: :cluster_scaling_recommendation
 
   delta :cluster
   delta :cluster_provider
@@ -859,6 +919,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :id, non_null(:id)
 
       resolve &Deployments.resolve_runtime_service/2
+    end
+
+    connection field :cluster_usages, node_type: :cluster_usage do
+      middleware Authenticated
+
+      resolve &Deployments.list_cluster_usage/2
+    end
+
+    field :cluster_usage, :cluster_usage do
+      middleware Authenticated
+      arg :id, non_null(:id)
+
+      resolve &Deployments.resolve_cluster_usage/2
     end
   end
 

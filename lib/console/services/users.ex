@@ -452,8 +452,8 @@ defmodule Console.Services.Users do
   defp read_timestamp(_), do: :read_timestamp
 
   defp validate_password(%User{deleted_at: nil} = user, pwd) do
-    case Argon2.check_pass(user, pwd) do
-      {:ok, user} -> {:ok, user}
+    case Argon2.verify_pass(pwd, user.password_hash) do
+      true -> {:ok, user}
       _ -> {:error, :invalid_password}
     end
   end

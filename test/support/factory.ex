@@ -759,6 +759,41 @@ defmodule Console.Factory do
     }
   end
 
+  def cluster_usage_factory do
+    %Schema.ClusterUsage{
+      cluster: build(:cluster),
+      cpu: 100,
+      memory: 100,
+      cpu_util: 50,
+      memory_util: 50
+    }
+  end
+
+  def cluster_namespace_usage_factory do
+    %Schema.ClusterNamespaceUsage{
+      cluster: build(:cluster),
+      namespace: sequence(:cnu, & "ns-#{&1}"),
+      cpu: 100,
+      memory: 100,
+      cpu_util: 50,
+      memory_util: 50
+    }
+  end
+
+  def cluster_scaling_recommendation_factory do
+    %Schema.ClusterScalingRecommendation{
+      cluster: build(:cluster),
+      namespace: sequence(:cnu, & "ns-#{&1}"),
+      type: :deployment,
+      name: "example",
+      container: "nginx",
+      cpu_request: 100,
+      memory_request: 100,
+      cpu_recommendation: 50,
+      memory_recommendation: 50
+    }
+  end
+
   def setup_rbac(user, repos \\ ["*"], perms) do
     role = insert(:role, repositories: repos, permissions: Map.new(perms))
     insert(:role_binding, role: role, user: user)
