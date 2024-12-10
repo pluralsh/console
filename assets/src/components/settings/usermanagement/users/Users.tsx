@@ -6,7 +6,6 @@ import { SettingsPageHeader } from 'components/settings/Settings'
 
 import { getUserManagementBreadcrumbs } from '../UserManagement'
 
-import { OIDCInvite } from './OIDCInvite'
 import UserInvite from './UserInvite'
 import UsersList from './UsersList'
 
@@ -20,13 +19,10 @@ export default function Users() {
   return (
     <>
       <SettingsPageHeader heading="Users">
-        {configuration?.pluralLogin ? (
-          <OIDCInvite />
-        ) : (
-          !configuration?.externalOidc && <UserInvite />
+        {!configuration?.pluralLogin && !configuration?.externalOidc && (
+          <UserInvite />
         )}
       </SettingsPageHeader>
-
       <UsersList />
     </>
   )

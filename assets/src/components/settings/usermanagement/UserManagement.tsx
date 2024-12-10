@@ -22,11 +22,6 @@ const getDirectory = (
   { path: 'personas', label: 'Personas', enabled: true },
   { path: 'webhooks', label: 'Webhooks', enabled: !configuration?.byok },
   {
-    path: 'vpn',
-    label: 'VPN clients',
-    enabled: configuration?.vpnEnabled ?? false,
-  },
-  {
     path: 'email',
     label: 'Email settings',
     enabled: me?.roles?.admin && configuration?.gitStatus?.cloned,

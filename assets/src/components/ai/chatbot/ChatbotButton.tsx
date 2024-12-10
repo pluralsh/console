@@ -1,9 +1,9 @@
 import { Button, ChatOutlineIcon } from '@pluralsh/design-system'
 import { AiInsightFragment, AiRole, ChatMessage } from 'generated/graphql.ts'
-import { ButtonProps } from 'honorable'
 import { Dispatch, ReactNode } from 'react'
 import { useChatbot } from '../AIContext.tsx'
 import AIButton from '../explain/ExplainWithAIButton.tsx'
+import { ButtonProps } from 'honorable'
 
 const FIX_PREFACE =
   "The following is an insight into an issue on the user's infrastructure we'd like to learn more about:"

@@ -11,17 +11,12 @@ import { LoginContext } from 'components/contexts'
 import { ResponsiveLayoutPage } from 'components/utils/layout/ResponsiveLayoutPage'
 import { useTheme } from 'styled-components'
 
-const getDirectory = (_, configuration) => [
-  { path: 'me', label: 'Profile', enabled: true },
-  { path: 'email-settings', label: 'Email settings', enabled: true },
-  { path: 'security', label: 'Security', enabled: true },
-  { path: 'permissions', label: 'Permissions', enabled: true },
-  { path: 'access-tokens', label: 'Access tokens', enabled: true },
-  {
-    path: 'vpn',
-    label: 'VPN clients',
-    enabled: configuration?.vpnEnabled ?? false,
-  },
+const directory = [
+  { path: 'me', label: 'Profile' },
+  { path: 'email-settings', label: 'Email settings' },
+  { path: 'security', label: 'Security' },
+  { path: 'permissions', label: 'Permissions' },
+  { path: 'access-tokens', label: 'Access tokens' },
 ]
 
 export const PROFILE_BREADCRUMBS = [{ label: 'profile', url: '/profile' }]
@@ -29,12 +24,9 @@ export const PROFILE_BREADCRUMBS = [{ label: 'profile', url: '/profile' }]
 export default function MyProfile() {
   const theme = useTheme()
   const tabStateRef = useRef<any>(null)
-  const { me, configuration } = useContext<any>(LoginContext)
+  const { me } = useContext<any>(LoginContext)
   const { pathname } = useLocation()
   const pathPrefix = '/profile'
-  const directory = getDirectory(me, configuration).filter(
-    ({ enabled }) => enabled
-  )
 
   if (!me) return null
 

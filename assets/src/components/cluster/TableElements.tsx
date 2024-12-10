@@ -9,13 +9,12 @@ import { SortingFn } from '@tanstack/table-core'
 import { UnstyledLink } from 'components/utils/Link'
 import { Maybe } from 'generated/graphql'
 import { Flex } from 'honorable'
-import { CSSProperties, ComponentProps, ReactNode } from 'react'
+import { ComponentProps, ReactNode } from 'react'
 import styled, { useTheme } from 'styled-components'
 import {
   PhaseT,
   phaseToSeverity,
   ReadinessT,
-  readinessToContainerLabel,
   readinessToLabel,
   readinessToSeverity,
 } from 'utils/status'
@@ -56,14 +55,6 @@ export const CaptionText = styled.span(({ theme }) => ({
   ...theme.partials.text.caption,
   color: theme.colors['text-xlight'],
 }))
-
-export const ContainerStatusChip = styled(
-  ({ readiness }: { readiness: ReadinessT }) => (
-    <Chip severity={readinessToSeverity[readiness]}>
-      {readinessToContainerLabel[readiness]}
-    </Chip>
-  )
-)((_) => ({}))
 
 export const PhaseChip = styled(
   ({ phase, ...props }: { phase: PhaseT } & ChipProps) => (
@@ -181,7 +172,3 @@ export function LabelWithIcon({
 export const TabularNumbers = styled.span(() => ({
   fontVariantNumeric: 'tabular-nums',
 }))
-
-export const TABLE_HEIGHT = {
-  maxHeight: 'clamp(390px, calc(100vh - 260px), 1000px)',
-} satisfies CSSProperties

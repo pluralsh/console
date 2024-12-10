@@ -18,7 +18,6 @@ import Settings from 'components/settings/Settings'
 
 import EmailSettings from 'components/settings/usermanagement/email/EmailSettings'
 import Roles from 'components/settings/usermanagement/roles/Roles'
-import { AccountVPN } from 'components/settings/usermanagement/vpn/VPN'
 import { Webhooks } from 'components/settings/usermanagement/webhooks/Webhooks'
 
 import Observability from 'components/settings/global/observability/Observability'
@@ -88,10 +87,6 @@ const userManagementRoutes = (
     <Route
       path="webhooks"
       element={<Webhooks />}
-    />
-    <Route
-      path="vpn"
-      element={<AccountVPN />}
     />
     <Route
       path="email-settings"

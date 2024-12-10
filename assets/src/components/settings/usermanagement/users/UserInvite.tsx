@@ -7,13 +7,11 @@ import {
 } from '@pluralsh/design-system'
 import { useCallback, useState } from 'react'
 
-import { useMutation } from '@apollo/client'
-
 import { apiHost } from 'utils/hostname'
 
 import { GqlError } from '../../../utils/Alert'
 
-import { CREATE_INVITE } from './queries'
+import { useCreateInviteMutation } from '../../../../generated/graphql.ts'
 
 export const inviteLink = (invite) =>
   `https://${apiHost()}/invite/${invite.secureId}`
@@ -22,7 +20,7 @@ export default function UserInvite() {
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [invite, setInvite] = useState<any>(null)
-  const [mutation, { loading, error, reset }] = useMutation(CREATE_INVITE, {
+  const [mutation, { loading, error, reset }] = useCreateInviteMutation({
     variables: { attributes: { email } },
     onCompleted: (data) => setInvite(data?.createInvite),
   })

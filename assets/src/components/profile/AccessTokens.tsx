@@ -1,6 +1,7 @@
 import {
   CopyIcon,
   EmptyState,
+  Flex,
   IconFrame,
   InfoIcon,
   ListIcon,
@@ -303,31 +304,27 @@ export function AccessTokens() {
   )
 
   const headingContent = (
-    <SettingsPageHeader heading="Access tokens">
-      <div
-        css={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexGrow: 1,
-        }}
-      >
-        <Tooltip
-          width={315}
-          label={TOOLTIP}
-        >
-          <InfoIcon />
-        </Tooltip>
-        {!isEmpty(tokensList) && (
-          <Button
-            secondary
-            onClick={() => setOpen(true)}
+    <SettingsPageHeader
+      heading={
+        <Flex gap="small">
+          Access tokens
+          <Tooltip
+            width={315}
+            label={TOOLTIP}
           >
-            Create access token
-          </Button>
-        )}
-      </div>
+            <InfoIcon />
+          </Tooltip>
+        </Flex>
+      }
+    >
+      {!isEmpty(tokensList) && (
+        <Button
+          secondary
+          onClick={() => setOpen(true)}
+        >
+          Create access token
+        </Button>
+      )}
     </SettingsPageHeader>
   )
 

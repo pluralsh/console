@@ -36,7 +36,6 @@ import {
   SERVICES_REL_PATH,
   getClusterDetailsPath,
 } from '../../routes/cdRoutesConsts'
-import { HOME_ABS_PATH } from '../../routes/consoleRoutesConsts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { POLICIES_ABS_PATH } from '../../routes/policiesRoutesConsts'
 import {
@@ -137,7 +136,7 @@ export function useCommands(): CommandGroup[] {
           {
             label: 'Home',
             icon: HomeIcon,
-            callback: () => navigate(HOME_ABS_PATH),
+            callback: () => navigate('/'),
             deps: [navigate],
             hotkeys: ['shift H', '1'],
             autoFocus: true,

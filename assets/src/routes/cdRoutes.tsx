@@ -87,8 +87,6 @@ import ServicePRs from '../components/cd/services/service/ServicePRs'
 import ServicesTable from '../components/cd/services/ServicesTable'
 
 import ServicesTree from '../components/cd/services/ServicesTree'
-import PodEvents from '../components/cluster/pods/PodEvents'
-import PodRaw from '../components/cluster/pods/PodRaw'
 
 import ComponentDryRun from '../components/component/ComponentDryRun'
 
@@ -129,6 +127,8 @@ import {
   SERVICES_TREE_REL_PATH,
 } from './cdRoutesConsts'
 import { pipelineRoutes } from './pipelineRoutes'
+import PodEvents from '../components/cd/cluster/pod/PodEvents.tsx'
+import PodRaw from '../components/cd/cluster/pod/PodRaw.tsx'
 
 function CDRootRedirect() {
   const defaultCDPath = useDefaultCDPath()

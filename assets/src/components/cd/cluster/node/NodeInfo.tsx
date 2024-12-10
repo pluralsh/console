@@ -16,7 +16,7 @@ import {
   ColRestarts,
   PodWithId,
   PodsList,
-} from '../../../cluster/pods/PodsList'
+} from 'components/cd/cluster/pod/PodsList'
 import {
   NODE_PARAM_CLUSTER,
   NODE_PARAM_NAME,

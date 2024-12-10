@@ -47,7 +47,6 @@ fragment AvailableFeatures on AvailableFeatures {
   cd
   databaseManagement
   userManagement
-  vpn
 }
 
 fragment Manifest on PluralManifest {
@@ -57,6 +56,30 @@ fragment Manifest on PluralManifest {
   }
   cluster
   bucketPrefix
+}
+
+fragment Account on Account {
+  grandfatheredUntil
+  delinquentAt
+  availableFeatures {
+    audits
+    userManagement
+    databaseManagement
+  }
+  subscription {
+    id
+    plan {
+      id
+      name
+      period
+    }
+  }
+}
+
+query Subscription {
+  account {
+    ...Account
+  }
 }
 
 query Me {
@@ -74,7 +97,6 @@ query Me {
     gitCommit
   }
   configuration {
-    vpnEnabled
     gitCommit
     isDemoProject
     isSandbox
@@ -122,9 +144,15 @@ query SearchUsers($q: String, $cursor: String) {
   }
 }
 
-mutation UpdateUser($attributes: UserAttributes!) {
-  updateUser(attributes: $attributes) {
+mutation UpdateUser($id: ID, $attributes: UserAttributes!) {
+  updateUser(id: $id, attributes: $attributes) {
     ...User
+  }
+}
+
+mutation CreateInvite($attributes: InviteAttributes!) {
+  createInvite(attributes: $attributes) {
+    ...Invite
   }
 }
 

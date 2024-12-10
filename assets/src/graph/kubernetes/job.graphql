@@ -24,3 +24,9 @@ query Job($name: String!, $namespace: String!, $serviceId: ID) {
     }
   }
 }
+
+mutation DeleteJob($name: String!, $namespace: String!) {
+  deleteJob(name: $name, namespace: $namespace) {
+    ...Job
+  }
+}

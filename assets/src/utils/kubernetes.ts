@@ -1,7 +1,4 @@
-import { isString } from 'lodash'
-
 import { memoryParser as mParser } from 'kubernetes-resource-parser'
-import { filesize } from 'filesize'
 
 const MULTIPLES = {
   m: 1000,
@@ -34,24 +31,4 @@ export function memoryParser(value: string | null | undefined) {
   }
 
   return nanToUndef(mParser(value))
-}
-
-export function cpuFormat(value?: string | number | null) {
-  if (value === undefined || value === null) {
-    return ''
-  }
-  value = isString(value) ? parseFloat(value) : value
-  if (value < 1 / MULTIPLES.n) {
-    return `${value * MULTIPLES.n}n`
-  }
-
-  if (value < 1 / MULTIPLES.m) {
-    return `${value * MULTIPLES.m}m`
-  }
-
-  return value.toPrecision(2)
-}
-
-export function memoryFormat(value?: number | null | undefined) {
-  return filesize(value ?? 0, { base: 2 })
 }

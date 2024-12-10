@@ -21,14 +21,9 @@ import {
 } from 'routes/cdRoutesConsts'
 import { isNonNullable } from 'utils/isNonNullable'
 
-import {
-  ComponentStateFilter,
-  useComponentKindSelect,
-} from 'components/apps/app/components/Components'
 import { ScrollablePage } from 'components/utils/layout/ScrollablePage'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 
-import { ComponentList } from 'components/apps/app/components/ComponentList'
 import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 
 import { countDeprecations } from './deprecationUtils'
@@ -37,6 +32,11 @@ import {
   getServiceDetailsBreadcrumbs,
   useServiceContext,
 } from './ServiceDetails'
+import { ComponentList } from './component/ComponentList.tsx'
+import {
+  ComponentStateFilter,
+  useComponentKindSelect,
+} from './component/Components.tsx'
 
 export const getServiceComponentsBreadcrumbs = ({
   service,

@@ -87,6 +87,7 @@ export const InsightDisplay = ({ text }: { text: Nullable<string> }) => {
 }
 
 const InsightWrapperCardSC = styled(Card)(({ theme }) => ({
+  flexGrow: 1,
   padding: theme.spacing.medium,
   overflow: 'auto',
 }))
