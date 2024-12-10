@@ -147,9 +147,15 @@ query SearchUsers($q: String, $cursor: String) {
   }
 }
 
-mutation UpdateUser($attributes: UserAttributes!) {
-  updateUser(attributes: $attributes) {
+mutation UpdateUser($id: ID, $attributes: UserAttributes!) {
+  updateUser(id: $id, attributes: $attributes) {
     ...User
+  }
+}
+
+mutation CreateInvite($attributes: InviteAttributes!) {
+  createInvite(attributes: $attributes) {
+    ...Invite
   }
 }
 

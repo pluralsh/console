@@ -1,4 +1,3 @@
-import { useMutation } from '@apollo/client'
 import { useCallback, useContext, useState } from 'react'
 import { LoginContext } from 'components/contexts'
 import { Chip, Switch } from '@pluralsh/design-system'
@@ -9,21 +8,22 @@ import { Confirm } from 'components/utils/Confirm'
 import UserInfo from '../../../utils/UserInfo'
 import { Permissions, hasRbac } from '../misc'
 
-import { EDIT_USER } from './queries'
+import { useUpdateUserMutation } from '../../../../generated/graphql.ts'
 
 export function User({ user }: any) {
   const theme = useTheme()
   const { me } = useContext(LoginContext)
-  const [mutation, { loading, error }] = useMutation<any>(EDIT_USER, {
-    variables: { id: user.id },
+  const [mutation, { loading, error }] = useUpdateUserMutation({
     onCompleted: () => setConfirm(false),
   })
   const editable = !!me?.roles?.admin || hasRbac(me as any, Permissions.USERS)
   const isAdmin = !!user.roles?.admin
   const setAdmin = useCallback(
     () =>
-      mutation({ variables: { attributes: { roles: { admin: !isAdmin } } } }),
-    [mutation, isAdmin]
+      mutation({
+        variables: { id: user.id, attributes: { roles: { admin: !isAdmin } } },
+      }),
+    [mutation, user.id, isAdmin]
   )
   const [confirm, setConfirm] = useState(false)
 
