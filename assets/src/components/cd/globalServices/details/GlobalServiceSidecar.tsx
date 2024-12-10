@@ -3,6 +3,7 @@ import {
   Button,
   Chip,
   ChipList,
+  Flex,
   GlobeIcon,
   IconFrame,
   PlusIcon,
@@ -34,7 +35,10 @@ export default function GlobalServiceSidecar({
   const [viewTemplate, setViewTemplate] = useState<boolean>(false)
 
   return (
-    <>
+    <Flex
+      direction={'column'}
+      gap={'medium'}
+    >
       <Sidecar heading="Source">
         <SidecarItem heading="Type">
           <Chip>{globalService?.service ? 'Seed service' : 'Template'}</Chip>
@@ -153,6 +157,6 @@ export default function GlobalServiceSidecar({
         open={viewTemplate}
         onClose={() => setViewTemplate(false)}
       />
-    </>
+    </Flex>
   )
 }

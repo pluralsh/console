@@ -1,10 +1,10 @@
 import {
+  Flex,
   GlobeIcon,
   ListBoxItem,
   ReloadIcon,
   Select,
 } from '@pluralsh/design-system'
-import { ResponsivePageFullWidth } from 'components/utils/layout/ResponsivePageFullWidth'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import {
   GlobalServiceFragment,
@@ -22,15 +22,13 @@ import { useProjectId } from '../../../contexts/ProjectsContext'
 import { GqlError } from '../../../utils/Alert'
 import { DistroProviderIcon } from '../../../utils/ClusterDistro'
 import KickButton from '../../../utils/KickButton'
-import { ResponsiveLayoutContentContainer } from '../../../utils/layout/ResponsiveLayoutContentContainer.tsx'
-import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage.tsx'
-import { ResponsiveLayoutSidecarContainer } from '../../../utils/layout/ResponsiveLayoutSidecarContainer.tsx'
-import { ResponsiveLayoutSpacer } from '../../../utils/layout/ResponsiveLayoutSpacer.tsx'
+
 import { useFetchPaginatedData } from '../../../utils/table/useFetchPaginatedData'
 import { TRUNCATE } from '../../../utils/truncate'
 import { PluralErrorBoundary } from '../../PluralErrorBoundary'
 import { GlobalServiceServices } from './GlobalServiceServices.tsx'
 import GlobalServiceSidecar from './GlobalServiceSidecar.tsx'
+import { ResponsiveLayoutPage } from '../../../utils/layout/ResponsiveLayoutPage.tsx'
 
 export default function GlobalService() {
   const theme = useTheme()
@@ -62,65 +60,54 @@ export default function GlobalService() {
   if (!globalService || !globalServices) return <LoadingIndicator />
 
   return (
-    <ResponsivePageFullWidth
-      scrollable={false}
-      headingContent={
-        <div
-          css={{
-            display: 'flex',
-            gap: theme.spacing.large,
-            flexGrow: 1,
-            width: '100%',
-            justifyContent: 'space-between',
-            marginBottom: theme.spacing.xsmall,
-          }}
-        >
-          <div
-            css={{
-              display: 'flex',
-              gap: theme.spacing.small,
-              justifyContent: 'space-between',
-              width: '100%',
-            }}
-          >
-            <GlobalServiceSelect
-              selectedGlobalService={globalService}
-              globalServices={globalServices}
-            />
-            <KickButton
-              secondary
-              startIcon={<ReloadIcon />}
-              kickMutationHook={useSyncGlobalServiceMutation}
-              message="Resync"
-              tooltipMessage="Sync this service now instead of at the next poll interval"
-              variables={{ id: globalServiceId }}
-            />
-          </div>
-        </div>
-      }
-    >
-      <PluralErrorBoundary>
-        <ResponsiveLayoutPage css={{ padding: 0 }}>
-          <ResponsiveLayoutSpacer />
-          <ResponsiveLayoutContentContainer>
-            <GlobalServiceServices
-              globalServiceID={globalServiceId}
-              seedService={globalService?.service as ServiceDeployment}
-            />
-          </ResponsiveLayoutContentContainer>
-          <ResponsiveLayoutSpacer />
-          <ResponsiveLayoutSidecarContainer
-            css={{
-              gap: theme.spacing.medium,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <GlobalServiceSidecar globalService={globalService} />
-          </ResponsiveLayoutSidecarContainer>
-        </ResponsiveLayoutPage>
-      </PluralErrorBoundary>
-    </ResponsivePageFullWidth>
+    <ResponsiveLayoutPage css={{ flexDirection: 'column' }}>
+      <div
+        css={{
+          alignSelf: 'center',
+          height: '100%',
+          maxWidth: theme.breakpoints.desktop,
+          overflow: 'hidden',
+          width: '100%',
+
+          [`@media (min-width: 1833px)`]: {
+            maxWidth: theme.breakpoints.desktop + theme.spacing.large + 220, // Increased by sidecar and spacing size.
+          },
+        }}
+      >
+        <PluralErrorBoundary>
+          <Flex gap={'large'}>
+            <Flex
+              direction={'column'}
+              gap={'large'}
+            >
+              <GlobalServiceSelect
+                selectedGlobalService={globalService}
+                globalServices={globalServices}
+              />
+              <GlobalServiceServices
+                globalServiceID={globalServiceId}
+                seedService={globalService?.service as ServiceDeployment}
+              />
+            </Flex>
+            <Flex
+              align={'flex-end'}
+              direction={'column'}
+              gap={'large'}
+            >
+              <KickButton
+                secondary
+                startIcon={<ReloadIcon />}
+                kickMutationHook={useSyncGlobalServiceMutation}
+                message="Resync"
+                tooltipMessage="Sync this service now instead of at the next poll interval"
+                variables={{ id: globalServiceId }}
+              />
+              <GlobalServiceSidecar globalService={globalService} />
+            </Flex>
+          </Flex>
+        </PluralErrorBoundary>
+      </div>
+    </ResponsiveLayoutPage>
   )
 }
 
@@ -137,7 +124,7 @@ function GlobalServiceSelect({
   const { pathname } = useLocation()
 
   return (
-    <div css={{ minWidth: 320 }}>
+    <div css={{ width: 320 }}>
       <Select
         titleContent={
           selectedGlobalService?.distro ? (
