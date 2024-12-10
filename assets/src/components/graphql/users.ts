@@ -162,32 +162,6 @@ export const UPDATE_USER = gql`
   ${UserFragment}
 `
 
-export const USERS_Q = gql`
-  query Users($cursor: String) {
-    users(first: 20, after: $cursor) {
-      pageInfo {
-        hasNextPage
-        endCursor
-      }
-      edges {
-        node {
-          ...UserFragment
-        }
-      }
-    }
-  }
-  ${UserFragment}
-`
-
-export const INVITE_USER = gql`
-  mutation InviteUser($email: String) {
-    createInvite(attributes: { email: $email }) {
-      ...InviteFragment
-    }
-  }
-  ${InviteFragment}
-`
-
 export const INVITE_Q = gql`
   query Invite($id: String!) {
     invite(id: $id) {
