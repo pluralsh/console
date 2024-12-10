@@ -1,5 +1,4 @@
 import { ReactNode, useMemo } from 'react'
-import { useQuery } from '@apollo/client'
 import moment from 'moment'
 import SubscriptionContext, {
   SubscriptionContextType,
@@ -7,7 +6,7 @@ import SubscriptionContext, {
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import styled from 'styled-components'
 
-import { SUBSCRIPTION_QUERY } from './queries'
+import { useSubscriptionQuery } from '../../generated/graphql.ts'
 
 const Error = styled.div({ textAlign: 'center' })
 
@@ -18,7 +17,7 @@ type BillingSubscriptionProviderPropsType = {
 export default function BillingSubscriptionProvider({
   children,
 }: BillingSubscriptionProviderPropsType) {
-  const { data, loading, error, refetch } = useQuery(SUBSCRIPTION_QUERY, {
+  const { data, loading, error, refetch } = useSubscriptionQuery({
     fetchPolicy: 'network-only',
     pollInterval: 60_000,
   })

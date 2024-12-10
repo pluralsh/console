@@ -1,14 +1,14 @@
 import {
-  Account,
+  AccountFragment,
   AvailableFeatures,
   PluralSubscription,
 } from 'generated/graphql'
 import { createContext } from 'react'
 
 export type SubscriptionContextType = {
-  account?: Account
-  availableFeatures?: AvailableFeatures
-  subscription?: PluralSubscription
+  account?: Nullable<AccountFragment>
+  availableFeatures?: Nullable<AvailableFeatures>
+  subscription?: Nullable<PluralSubscription>
   isPaidPlan: boolean
   isProPlan: boolean
   isEnterprisePlan: boolean

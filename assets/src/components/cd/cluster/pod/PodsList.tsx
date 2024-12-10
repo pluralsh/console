@@ -17,11 +17,15 @@ import {
 import { filesize } from 'filesize'
 import { isEmpty } from 'lodash'
 
-import type { Application, Maybe, Pod } from 'generated/graphql'
+import {
+  Application,
+  Maybe,
+  Pod,
+  useDeletePodMutation,
+} from 'generated/graphql'
 import { ReadinessT } from 'utils/status'
 
 import { Confirm } from 'components/utils/Confirm'
-import { useMutation } from '@apollo/client'
 
 import { TruncateStart } from 'components/utils/table/Truncate'
 
@@ -37,7 +41,6 @@ import { DateTimeCol } from '../../../utils/table/DateTimeCol.tsx'
 import { ContainerStatuses } from '../../../cluster/ContainerStatuses.tsx'
 import { getPodResources } from './getPodResources.tsx'
 import { getPodContainersStats } from '../../../cluster/containers/getPodContainersStats.tsx'
-import { DELETE_POD } from '../../../cluster/queries.ts'
 
 export const PODS_TABLE_MAX_HEIGHT = '256px'
 
@@ -54,7 +57,7 @@ function DeletePod({
 }) {
   const [confirm, setConfirm] = useState(false)
 
-  const [mutation, { loading }] = useMutation(DELETE_POD, {
+  const [mutation, { loading }] = useDeletePodMutation({
     variables: { name, namespace, serviceId },
     onCompleted: () => {
       setConfirm(false)

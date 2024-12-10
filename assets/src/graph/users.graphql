@@ -59,6 +59,31 @@ fragment Manifest on PluralManifest {
   bucketPrefix
 }
 
+fragment Account on Account {
+  grandfatheredUntil
+  delinquentAt
+  availableFeatures {
+    audits
+    userManagement
+    databaseManagement
+    vpn
+  }
+  subscription {
+    id
+    plan {
+      id
+      name
+      period
+    }
+  }
+}
+
+query Subscription {
+  account {
+    ...Account
+  }
+}
+
 query Me {
   me {
     ...User

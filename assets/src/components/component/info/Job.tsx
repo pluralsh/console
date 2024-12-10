@@ -1,15 +1,14 @@
 import { IconFrame, TrashCanIcon } from '@pluralsh/design-system'
-import { DELETE_JOB } from 'components/cluster/queries'
 import { Confirm } from 'components/utils/Confirm'
 import { useState } from 'react'
-import { useMutation } from '@apollo/client'
 import { useOutletContext } from 'react-router-dom'
 
 import { InfoSection, PaddedCard, PropWideBold } from './common'
+import { useDeleteJobMutation } from '../../../generated/graphql.ts'
 
 export function DeleteJob({ name, namespace, refetch }) {
   const [confirm, setConfirm] = useState(false)
-  const [mutation, { loading }] = useMutation(DELETE_JOB, {
+  const [mutation, { loading }] = useDeleteJobMutation({
     variables: { name, namespace },
     onCompleted: () => {
       setConfirm(false)

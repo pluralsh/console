@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -11326,6 +11326,14 @@ export type JobQueryVariables = Exact<{
 
 export type JobQuery = { __typename?: 'RootQueryType', job?: { __typename?: 'Job', raw: string, events?: Array<{ __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null } | null> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null };
 
+export type DeleteJobMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+}>;
+
+
+export type DeleteJobMutation = { __typename?: 'RootMutationType', deleteJob?: { __typename?: 'Job', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'JobStatus', active?: number | null, completionTime?: string | null, succeeded?: number | null, failed?: number | null, startTime?: string | null }, spec: { __typename?: 'JobSpec', backoffLimit?: number | null, parallelism?: number | null, activeDeadlineSeconds?: number | null }, pods?: Array<{ __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null> | null } | null };
+
 export type MetadataFragment = { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null };
 
 export type EventFragment = { __typename?: 'Event', action?: string | null, lastTimestamp?: string | null, count?: number | null, message?: string | null, reason?: string | null, type?: string | null };
@@ -11398,6 +11406,15 @@ export type PodLogsQueryVariables = Exact<{
 
 
 export type PodLogsQuery = { __typename?: 'RootQueryType', pod?: { __typename?: 'Pod', logs?: Array<string | null> | null } | null };
+
+export type DeletePodMutationVariables = Exact<{
+  name: Scalars['String']['input'];
+  namespace: Scalars['String']['input'];
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type DeletePodMutation = { __typename?: 'RootMutationType', deletePod?: { __typename?: 'Pod', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'PodStatus', phase?: string | null, podIp?: string | null, reason?: string | null, containerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, initContainerStatuses?: Array<{ __typename?: 'ContainerStatus', restartCount?: number | null, ready?: boolean | null, name?: string | null, state?: { __typename?: 'ContainerState', running?: { __typename?: 'RunningState', startedAt?: string | null } | null, terminated?: { __typename?: 'TerminatedState', exitCode?: number | null, message?: string | null, reason?: string | null } | null, waiting?: { __typename?: 'WaitingState', message?: string | null, reason?: string | null } | null } | null } | null> | null, conditions?: Array<{ __typename?: 'PodCondition', lastProbeTime?: string | null, lastTransitionTime?: string | null, message?: string | null, reason?: string | null, status?: string | null, type?: string | null } | null> | null }, spec: { __typename?: 'PodSpec', nodeName?: string | null, serviceAccountName?: string | null, containers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null, initContainers?: Array<{ __typename?: 'Container', name?: string | null, image?: string | null, ports?: Array<{ __typename?: 'Port', containerPort?: number | null, protocol?: string | null } | null> | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null } | null> | null } } | null };
 
 export type ServiceFragment = { __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null }, status: { __typename?: 'ServiceStatus', loadBalancer?: { __typename?: 'LoadBalancerStatus', ingress?: Array<{ __typename?: 'LoadBalancerIngressStatus', ip?: string | null } | null> | null } | null }, spec: { __typename?: 'ServiceSpec', type?: string | null, clusterIp?: string | null, ports?: Array<{ __typename?: 'ServicePort', name?: string | null, protocol?: string | null, port?: number | null, targetPort?: string | null } | null> | null } };
 
@@ -11959,6 +11976,13 @@ export type RoleFragment = { __typename?: 'Role', id: string, name: string, desc
 export type AvailableFeaturesFragment = { __typename?: 'AvailableFeatures', audits?: boolean | null, cd?: boolean | null, databaseManagement?: boolean | null, userManagement?: boolean | null, vpn?: boolean | null };
 
 export type ManifestFragment = { __typename?: 'PluralManifest', cluster?: string | null, bucketPrefix?: string | null, network?: { __typename?: 'ManifestNetwork', pluralDns?: boolean | null, subdomain?: string | null } | null };
+
+export type AccountFragment = { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null, vpn?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null };
+
+export type SubscriptionQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type SubscriptionQuery = { __typename?: 'RootQueryType', account?: { __typename?: 'Account', grandfatheredUntil?: string | null, delinquentAt?: string | null, availableFeatures?: { __typename?: 'AvailableFeatures', audits?: boolean | null, userManagement?: boolean | null, databaseManagement?: boolean | null, vpn?: boolean | null } | null, subscription?: { __typename?: 'PluralSubscription', id?: string | null, plan?: { __typename?: 'Plan', id?: string | null, name?: string | null, period?: string | null } | null } | null } | null };
 
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -15033,6 +15057,26 @@ export const ManifestFragmentDoc = gql`
   }
   cluster
   bucketPrefix
+}
+    `;
+export const AccountFragmentDoc = gql`
+    fragment Account on Account {
+  grandfatheredUntil
+  delinquentAt
+  availableFeatures {
+    audits
+    userManagement
+    databaseManagement
+    vpn
+  }
+  subscription {
+    id
+    plan {
+      id
+      name
+      period
+    }
+  }
 }
     `;
 export const RefreshTokenFragmentDoc = gql`
@@ -22013,6 +22057,40 @@ export type JobQueryHookResult = ReturnType<typeof useJobQuery>;
 export type JobLazyQueryHookResult = ReturnType<typeof useJobLazyQuery>;
 export type JobSuspenseQueryHookResult = ReturnType<typeof useJobSuspenseQuery>;
 export type JobQueryResult = Apollo.QueryResult<JobQuery, JobQueryVariables>;
+export const DeleteJobDocument = gql`
+    mutation DeleteJob($name: String!, $namespace: String!) {
+  deleteJob(name: $name, namespace: $namespace) {
+    ...Job
+  }
+}
+    ${JobFragmentDoc}`;
+export type DeleteJobMutationFn = Apollo.MutationFunction<DeleteJobMutation, DeleteJobMutationVariables>;
+
+/**
+ * __useDeleteJobMutation__
+ *
+ * To run a mutation, you first call `useDeleteJobMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteJobMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteJobMutation, { data, loading, error }] = useDeleteJobMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *   },
+ * });
+ */
+export function useDeleteJobMutation(baseOptions?: Apollo.MutationHookOptions<DeleteJobMutation, DeleteJobMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteJobMutation, DeleteJobMutationVariables>(DeleteJobDocument, options);
+      }
+export type DeleteJobMutationHookResult = ReturnType<typeof useDeleteJobMutation>;
+export type DeleteJobMutationResult = Apollo.MutationResult<DeleteJobMutation>;
+export type DeleteJobMutationOptions = Apollo.BaseMutationOptions<DeleteJobMutation, DeleteJobMutationVariables>;
 export const NodeDocument = gql`
     query Node($name: String!, $clusterId: ID) {
   node(name: $name, clusterId: $clusterId) {
@@ -22239,6 +22317,41 @@ export type PodLogsQueryHookResult = ReturnType<typeof usePodLogsQuery>;
 export type PodLogsLazyQueryHookResult = ReturnType<typeof usePodLogsLazyQuery>;
 export type PodLogsSuspenseQueryHookResult = ReturnType<typeof usePodLogsSuspenseQuery>;
 export type PodLogsQueryResult = Apollo.QueryResult<PodLogsQuery, PodLogsQueryVariables>;
+export const DeletePodDocument = gql`
+    mutation DeletePod($name: String!, $namespace: String!, $serviceId: ID) {
+  deletePod(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Pod
+  }
+}
+    ${PodFragmentDoc}`;
+export type DeletePodMutationFn = Apollo.MutationFunction<DeletePodMutation, DeletePodMutationVariables>;
+
+/**
+ * __useDeletePodMutation__
+ *
+ * To run a mutation, you first call `useDeletePodMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeletePodMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deletePodMutation, { data, loading, error }] = useDeletePodMutation({
+ *   variables: {
+ *      name: // value for 'name'
+ *      namespace: // value for 'namespace'
+ *      serviceId: // value for 'serviceId'
+ *   },
+ * });
+ */
+export function useDeletePodMutation(baseOptions?: Apollo.MutationHookOptions<DeletePodMutation, DeletePodMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeletePodMutation, DeletePodMutationVariables>(DeletePodDocument, options);
+      }
+export type DeletePodMutationHookResult = ReturnType<typeof useDeletePodMutation>;
+export type DeletePodMutationResult = Apollo.MutationResult<DeletePodMutation>;
+export type DeletePodMutationOptions = Apollo.BaseMutationOptions<DeletePodMutation, DeletePodMutationVariables>;
 export const ServiceDocument = gql`
     query Service($name: String!, $namespace: String!, $serviceId: ID) {
   service(name: $name, namespace: $namespace, serviceId: $serviceId) {
@@ -24737,6 +24850,45 @@ export function useConsumeSecretMutation(baseOptions?: Apollo.MutationHookOption
 export type ConsumeSecretMutationHookResult = ReturnType<typeof useConsumeSecretMutation>;
 export type ConsumeSecretMutationResult = Apollo.MutationResult<ConsumeSecretMutation>;
 export type ConsumeSecretMutationOptions = Apollo.BaseMutationOptions<ConsumeSecretMutation, ConsumeSecretMutationVariables>;
+export const SubscriptionDocument = gql`
+    query Subscription {
+  account {
+    ...Account
+  }
+}
+    ${AccountFragmentDoc}`;
+
+/**
+ * __useSubscriptionQuery__
+ *
+ * To run a query within a React component, call `useSubscriptionQuery` and pass it any options that fit your needs.
+ * When your component renders, `useSubscriptionQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useSubscriptionQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useSubscriptionQuery(baseOptions?: Apollo.QueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+      }
+export function useSubscriptionLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+        }
+export function useSubscriptionSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<SubscriptionQuery, SubscriptionQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<SubscriptionQuery, SubscriptionQueryVariables>(SubscriptionDocument, options);
+        }
+export type SubscriptionQueryHookResult = ReturnType<typeof useSubscriptionQuery>;
+export type SubscriptionLazyQueryHookResult = ReturnType<typeof useSubscriptionLazyQuery>;
+export type SubscriptionSuspenseQueryHookResult = ReturnType<typeof useSubscriptionSuspenseQuery>;
+export type SubscriptionQueryResult = Apollo.QueryResult<SubscriptionQuery, SubscriptionQueryVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -25147,6 +25299,7 @@ export const namedOperations = {
     CustomStackRuns: 'CustomStackRuns',
     AccessTokens: 'AccessTokens',
     TokenAudits: 'TokenAudits',
+    Subscription: 'Subscription',
     Me: 'Me',
     Users: 'Users',
     SearchUsers: 'SearchUsers',
@@ -25227,6 +25380,8 @@ export const namedOperations = {
     DeleteGroup: 'DeleteGroup',
     PinCustomResource: 'PinCustomResource',
     UnpinCustomResource: 'UnpinCustomResource',
+    DeleteJob: 'DeleteJob',
+    DeletePod: 'DeletePod',
     UpsertNotificationRouter: 'UpsertNotificationRouter',
     DeleteNotificationRouter: 'DeleteNotificationRouter',
     UpsertNotificationSink: 'UpsertNotificationSink',
@@ -25435,6 +25590,7 @@ export const namedOperations = {
     Role: 'Role',
     AvailableFeatures: 'AvailableFeatures',
     Manifest: 'Manifest',
+    Account: 'Account',
     RefreshToken: 'RefreshToken'
   }
 }

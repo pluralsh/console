@@ -33,3 +33,9 @@ query PodLogs(
     logs(container: $container, sinceSeconds: $sinceSeconds)
   }
 }
+
+mutation DeletePod($name: String!, $namespace: String!, $serviceId: ID) {
+  deletePod(name: $name, namespace: $namespace, serviceId: $serviceId) {
+    ...Pod
+  }
+}
