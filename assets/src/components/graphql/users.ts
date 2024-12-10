@@ -121,7 +121,6 @@ export const ME_Q = gql`
     }
     configuration {
       byok
-      vpnEnabled
       gitCommit
       isDemoProject
       isSandbox

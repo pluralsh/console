@@ -47,7 +47,6 @@ fragment AvailableFeatures on AvailableFeatures {
   cd
   databaseManagement
   userManagement
-  vpn
 }
 
 fragment Manifest on PluralManifest {
@@ -66,7 +65,6 @@ fragment Account on Account {
     audits
     userManagement
     databaseManagement
-    vpn
   }
   subscription {
     id
@@ -99,7 +97,6 @@ query Me {
     gitCommit
   }
   configuration {
-    vpnEnabled
     gitCommit
     isDemoProject
     isSandbox

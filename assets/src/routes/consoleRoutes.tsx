@@ -5,7 +5,6 @@ import MyProfile from 'components/profile/MyProfile'
 import { Permissions } from 'components/profile/Permissions'
 import { Profile } from 'components/profile/Profile'
 import { Security } from 'components/profile/Security'
-import { ProfileVPN } from 'components/profile/VPN'
 import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 
 import { aiRoutes } from './aiRoutes.tsx'
@@ -48,10 +47,6 @@ const profileRoutes = [
     <Route
       path="permissions"
       element={<Permissions />}
-    />
-    <Route
-      path="vpn"
-      element={<ProfileVPN />}
     />
     <Route
       path="access-tokens"
