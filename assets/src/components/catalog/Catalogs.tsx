@@ -54,6 +54,7 @@ export function Catalogs() {
   const authors = useMemo(
     () =>
       chain(catalogs)
+        .filter(({ author }) => !!author)
         .groupBy('author')
         .map((value, key) => ({ key, items: value.length }))
         .value(),
@@ -63,6 +64,7 @@ export function Catalogs() {
   const categories = useMemo(
     () =>
       chain(catalogs)
+        .filter(({ category }) => !!category)
         .groupBy('category')
         .map((value, key) => ({ key, items: value.length }))
         .value(),
