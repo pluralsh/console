@@ -33,16 +33,6 @@ export function usePolicyChartsData(filters: {
     })
   const enforcementStats = enforcementRes.data || enforcementRes.previousData
 
-  const { error: installedStatsError, ...installedRes } =
-    usePolicyStatisticsQuery({
-      variables: {
-        aggregate: PolicyAggregate.Installed,
-        ...filters,
-      },
-      pollInterval: POLL_INTERVAL,
-    })
-  const installedStats = installedRes.data || installedRes.previousData
-
   const clusterPolicyChartData: PieChartData | null = useMemo(
     () =>
       !clusterPolicyStats?.policyStatistics
@@ -114,43 +104,11 @@ export function usePolicyChartsData(filters: {
       theme.colors.semanticYellow,
     ]
   )
-  const installedChartData: PieChartData | null = useMemo(
-    () =>
-      !installedStats?.policyStatistics
-        ? null
-        : [
-            {
-              id: 'uninstalled',
-              label: 'uninstalled',
-              color: theme.colors.semanticRedLight,
-              value:
-                installedStats?.policyStatistics?.find(
-                  (stat) => stat?.aggregate === 'uninstalled'
-                )?.count ?? 0,
-            },
-            {
-              id: 'installed',
-              label: 'installed',
-              color: theme.colors.semanticGreen,
-              value:
-                installedStats?.policyStatistics?.find(
-                  (stat) => stat?.aggregate === 'installed'
-                )?.count ?? 0,
-            },
-          ],
-    [
-      installedStats?.policyStatistics,
-      theme.colors.semanticGreen,
-      theme.colors.semanticRedLight,
-    ]
-  )
 
   return {
     clusterPolicyChartData,
     enforcementChartData,
-    installedChartData,
     clusterPolicyStatsError,
     enforcementStatsError,
-    installedStatsError,
   }
 }
