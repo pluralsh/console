@@ -5,17 +5,13 @@ import {
   Flex,
   Input,
 } from '@pluralsh/design-system'
-import {
-  ConstraintViolationField,
-  useClustersQuery,
-  useViolationStatisticsQuery,
-} from 'generated/graphql'
+import { useDebounce } from '@react-hooks-library/core'
+import { useClustersQuery, ViolationStatisticsQuery } from 'generated/graphql'
 import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import styled, { useTheme } from 'styled-components'
-import { useDebounce } from '@react-hooks-library/core'
 
-import { useProjectId } from '../../contexts/ProjectsContext'
 import { mapExistingNodes } from '../../../utils/graphql'
+import { useProjectId } from '../../contexts/ProjectsContext'
 import { useFetchPaginatedData } from '../../utils/table/useFetchPaginatedData'
 
 const FETCH_MARGIN = 30
@@ -27,6 +23,8 @@ function PoliciesFilter({
   setSelectedNamespaces,
   selectedClusters,
   setSelectedClusters,
+  kindsData,
+  namespacesData,
 }: {
   selectedKinds: (string | null)[]
   setSelectedKinds: Dispatch<SetStateAction<(string | null)[]>>
@@ -34,22 +32,13 @@ function PoliciesFilter({
   setSelectedNamespaces: Dispatch<SetStateAction<(string | null)[]>>
   selectedClusters: (string | null)[]
   setSelectedClusters: Dispatch<SetStateAction<(string | null)[]>>
+  kindsData?: ViolationStatisticsQuery
+  namespacesData?: ViolationStatisticsQuery
 }) {
   const theme = useTheme()
   const projectId = useProjectId()
   const [searchString, setSearchString] = useState('')
   const debouncedSearchString = useDebounce(searchString, 100)
-
-  const { data: kindsData } = useViolationStatisticsQuery({
-    variables: {
-      field: ConstraintViolationField.Kind,
-    },
-  })
-  const { data: namespacesData } = useViolationStatisticsQuery({
-    variables: {
-      field: ConstraintViolationField.Namespace,
-    },
-  })
 
   const {
     data: clustersData,
@@ -104,7 +93,7 @@ function PoliciesFilter({
     })
   }
 
-  const fetchMoreOnBottomReached = useCallback(
+  const fetchMoreClustersOnBottomReached = useCallback(
     (element?: HTMLDivElement | undefined) => {
       if (!element) return
 
@@ -125,49 +114,61 @@ function PoliciesFilter({
     <Accordion
       defaultValue={[clusterLabel, kindLabel, namespaceLabel]}
       type="multiple"
-      css={{ overflow: 'auto' }}
+      css={{
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+      }}
     >
       <AccordionItem
         trigger={clusterLabel}
         value={clusterLabel}
+        css={{ overflow: 'hidden' }}
       >
-        <Input
-          placeholder="Filter clusters"
-          marginBottom={theme.spacing.small}
-          value={searchString}
-          onChange={(e) => setSearchString?.(e.currentTarget.value)}
-        />
-        <div
-          css={{ minHeight: 56, maxHeight: 200, overflowY: 'auto' }}
-          onScrollCapture={(e) =>
-            fetchMoreOnBottomReached(e?.target as HTMLDivElement)
-          }
+        <Flex
+          direction="column"
+          height="100%"
+          gap="small"
         >
-          {[{ id: null, name: 'No cluster' }, ...clusters].map((cluster) => (
-            <Checkbox
-              small
-              key={cluster.id}
-              name={clusterLabel}
-              value={cluster.id}
-              checked={selectedClusters.includes(cluster.id)}
-              onChange={({ target: { checked } }: any) => {
-                handleCheckboxChange(setSelectedClusters, cluster.id, checked)
-              }}
-            >
-              {cluster.name}
-            </Checkbox>
-          ))}
-        </div>
+          <Input
+            minHeight="fit-content"
+            placeholder="Filter clusters"
+            value={searchString}
+            onChange={(e) => setSearchString?.(e.currentTarget.value)}
+          />
+          <div
+            css={{ overflowY: 'auto' }}
+            onScrollCapture={(e) =>
+              fetchMoreClustersOnBottomReached(e?.target as HTMLDivElement)
+            }
+          >
+            {[{ id: null, name: 'No cluster' }, ...clusters].map((cluster) => (
+              <Checkbox
+                small
+                key={cluster.id}
+                name={clusterLabel}
+                value={cluster.id}
+                checked={selectedClusters.includes(cluster.id)}
+                onChange={({ target: { checked } }: any) => {
+                  handleCheckboxChange(setSelectedClusters, cluster.id, checked)
+                }}
+              >
+                {cluster.name}
+              </Checkbox>
+            ))}
+          </div>
+        </Flex>
       </AccordionItem>
       <AccordionItem
         trigger={kindLabel}
         value={kindLabel}
         css={{
+          overflow: 'hidden',
           borderTop: theme.borders.default,
           borderBottom: theme.borders.default,
         }}
       >
-        <Flex flexDirection="column">
+        <div css={{ height: '100%', overflowY: 'auto' }}>
           <Checkbox
             small
             name={kindLabel}
@@ -195,13 +196,14 @@ function PoliciesFilter({
               </Checkbox>
             </CheckboxWrapperSC>
           ))}
-        </Flex>
+        </div>
       </AccordionItem>
       <AccordionItem
         trigger={namespaceLabel}
         value={namespaceLabel}
+        css={{ overflow: 'hidden' }}
       >
-        <Flex flexDirection="column">
+        <div css={{ height: '100%', overflowY: 'auto' }}>
           <Checkbox
             small
             name={namespaceLabel}
@@ -233,7 +235,7 @@ function PoliciesFilter({
               </Checkbox>
             </CheckboxWrapperSC>
           ))}
-        </Flex>
+        </div>
       </AccordionItem>
     </Accordion>
   )

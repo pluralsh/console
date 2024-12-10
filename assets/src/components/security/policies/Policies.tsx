@@ -1,32 +1,43 @@
 import {
-  Breadcrumb,
+  FillLevelProvider,
+  Flex,
   Input,
   SearchIcon,
   SubTab,
-  TabList,
   useSetBreadcrumbs,
 } from '@pluralsh/design-system'
+import { useDebounce } from '@react-hooks-library/core'
 import { GqlError } from 'components/utils/Alert'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
-import { usePolicyConstraintsQuery } from 'generated/graphql'
-import { useRef, useState } from 'react'
-import { POLICIES_REL_PATH } from 'routes/securityRoutesConsts'
-import styled from 'styled-components'
 import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
-import { Overline } from 'components/cd/utils/PermissionsModal'
-import { useDebounce } from '@react-hooks-library/core'
+import {
+  ConstraintViolationField,
+  usePolicyConstraintsQuery,
+  useViolationStatisticsQuery,
+} from 'generated/graphql'
+import { useMemo, useState } from 'react'
+import {
+  POLICIES_ABS_PATH,
+  POLICIES_REL_PATH,
+  SECURITY_ABS_PATH,
+  SECURITY_REL_PATH,
+} from 'routes/securityRoutesConsts'
+import styled from 'styled-components'
 
+import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
 import { PoliciesViolationsGauge } from './PoliciesViolationsGauge'
+import { AggregatedPolicyStatsChip } from './policy/AggregatedPolicyStatsChip'
 
-const breadcrumbs: Breadcrumb[] = [
-  { label: `${POLICIES_REL_PATH}`, url: `/${POLICIES_REL_PATH}` },
+const breadcrumbs = [
+  { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
+  { label: POLICIES_REL_PATH, url: POLICIES_ABS_PATH },
 ]
 
 export const POLL_INTERVAL = 10_000
 
-enum ViolationFilter {
+export enum ViolationFilter {
   All = 'All',
   Passing = 'Passing',
   Violated = 'Violated',
@@ -45,7 +56,7 @@ const violatedParam = (filter: ViolationFilter) => {
 }
 
 export function Policies() {
-  const tabStateRef = useRef<any>(null)
+  useSetBreadcrumbs(breadcrumbs)
   const [searchString, setSearchString] = useState('')
   const [violationFilter, setViolationFilter] = useState(ViolationFilter.All)
   const [selectedKinds, setSelectedKinds] = useState<(string | null)[]>([])
@@ -68,23 +79,72 @@ export function Policies() {
 
   const { data, loading, error, refetch, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
-      {
-        queryHook: usePolicyConstraintsQuery,
-        keyPath: ['policyConstraints'],
-      },
+      { queryHook: usePolicyConstraintsQuery, keyPath: ['policyConstraints'] },
       policyQFilters
     )
-
   const policies = data?.policyConstraints?.edges
 
-  useSetBreadcrumbs(breadcrumbs)
+  const { data: kindsData } = useViolationStatisticsQuery({
+    variables: { field: ConstraintViolationField.Kind },
+  })
+  const { data: namespacesData } = useViolationStatisticsQuery({
+    variables: { field: ConstraintViolationField.Namespace },
+  })
+
+  const header = useMemo(
+    () => (
+      <Flex gap="large">
+        <Input
+          placeholder="Search policies"
+          startIcon={<SearchIcon />}
+          value={searchString}
+          width="320px"
+          onChange={(e) => {
+            setSearchString?.(e.currentTarget.value)
+          }}
+        />
+        <FillLevelProvider value={1}>
+          <Flex>
+            {Object.values(ViolationFilter)?.map((label) => (
+              <SubTab
+                key={label}
+                textValue={label}
+                active={violationFilter === label}
+                onClick={() => {
+                  setViolationFilter(label as ViolationFilter)
+                }}
+              >
+                <Flex gap="small">
+                  {label}
+                  <AggregatedPolicyStatsChip
+                    violationFilter={label as ViolationFilter}
+                    kindsData={kindsData}
+                    namespacesData={namespacesData}
+                  />
+                </Flex>
+              </SubTab>
+            ))}
+          </Flex>
+        </FillLevelProvider>
+      </Flex>
+    ),
+    [kindsData, namespacesData, searchString, violationFilter]
+  )
+
+  useSetPageHeaderContent(header)
 
   if (error) return <GqlError error={error} />
 
   return (
     <PoliciesContainer>
-      <div className="filter">
-        <Overline>Filters</Overline>
+      <div
+        css={{
+          gridArea: 'filter',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         <PoliciesFilter
           selectedNamespaces={selectedNamespaces}
           setSelectedNamespaces={setSelectedNamespaces}
@@ -92,45 +152,16 @@ export function Policies() {
           setSelectedKinds={setSelectedKinds}
           selectedClusters={selectedClusters}
           setSelectedClusters={setSelectedClusters}
+          kindsData={kindsData}
+          namespacesData={namespacesData}
         />
       </div>
-      <div className="search">
-        <Input
-          placeholder="Search policies"
-          startIcon={<SearchIcon />}
-          value={searchString}
-          onChange={(e) => {
-            setSearchString?.(e.currentTarget.value)
-          }}
-          flexGrow={0.5}
-        />
-        <TabList
-          stateRef={tabStateRef}
-          stateProps={{
-            orientation: 'horizontal',
-            selectedKey: violationFilter,
-            onSelectionChange: (key) => {
-              setViolationFilter(key as ViolationFilter)
-            },
-          }}
-        >
-          {Object.values(ViolationFilter)?.map((label) => (
-            <SubTab
-              key={label}
-              textValue={label}
-              className="statusTab"
-            >
-              {label}
-            </SubTab>
-          ))}
-        </TabList>
-      </div>
-      <div className="violations">
+      <div css={{ gridArea: 'violations' }}>
         {policies && policies?.length > 0 && (
           <PoliciesViolationsGauge filters={policyQFilters} />
         )}
       </div>
-      <div className="table">
+      <div css={{ gridArea: 'table', overflow: 'hidden' }}>
         <FullHeightTableWrap>
           <PoliciesTable
             data={data}
@@ -152,38 +183,12 @@ export function Policies() {
 
 const PoliciesContainer = styled.div(({ theme }) => ({
   display: 'grid',
-  height: '100%',
-  overflowY: 'auto',
-  padding: theme.spacing.large,
+  overflow: 'hidden',
   gridTemplateColumns: 'auto 250px',
-  gridTemplateRows: 'auto auto 1fr',
-  gap: '16px 16px',
+  gridTemplateRows: 'auto 1fr',
+  gap: `${theme.spacing.medium}px ${theme.spacing.large}px`,
   gridTemplateAreas: `
-    "search filter"
     "violations filter"
     "table filter"
   `,
-  '.title': {
-    gridArea: 'title',
-  },
-  '.filter': {
-    gridArea: 'filter',
-    minWidth: 'fit-content',
-    overflow: 'hidden auto',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: theme.spacing.small,
-  },
-  '.search': {
-    display: 'flex',
-    justifyContent: 'space-between',
-    gridArea: 'search',
-  },
-  '.violations': {
-    gridArea: 'violations',
-  },
-  '.table': {
-    gridArea: 'table',
-    overflow: 'auto',
-  },
 }))
