@@ -13,7 +13,7 @@ import { ChartSkeleton } from 'components/utils/SkeletonLoaders'
 import { CustomLegend } from '../CustomLegend'
 import { HomeCard } from '../HomeCard.tsx'
 import { WarningShieldIcon } from '@pluralsh/design-system'
-import { POLICIES_ABS_PATH } from '../../../routes/policiesRoutesConsts.tsx'
+import { POLICIES_ABS_PATH } from '../../../routes/securityRoutesConsts.tsx'
 
 const CHART_SIZE = 240
 
