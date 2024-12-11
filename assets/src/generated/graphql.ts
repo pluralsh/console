@@ -8689,7 +8689,7 @@ export type ServiceUpdateAttributes = {
 
 export type ServiceVuln = {
   __typename?: 'ServiceVuln';
-  service?: Maybe<Service>;
+  service?: Maybe<ServiceDeployment>;
 };
 
 export type ServiceVulnAttributes = {

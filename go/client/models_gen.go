@@ -5160,7 +5160,7 @@ type ServiceUpdateAttributes struct {
 }
 
 type ServiceVuln struct {
-	Service *Service `json:"service,omitempty"`
+	Service *ServiceDeployment `json:"service,omitempty"`
 }
 
 type ServiceVulnAttributes struct {

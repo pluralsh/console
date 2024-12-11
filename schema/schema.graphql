@@ -2798,7 +2798,7 @@ type Cvss {
 }
 
 type ServiceVuln {
-  service: Service
+  service: ServiceDeployment
 }
 
 type NamespaceVuln {

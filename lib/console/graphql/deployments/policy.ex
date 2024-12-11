@@ -244,7 +244,7 @@ defmodule Console.GraphQl.Deployments.Policy do
   end
 
   object :service_vuln do
-    field :service, :service, resolve: dataloader(Deployments)
+    field :service, :service_deployment, resolve: dataloader(Deployments)
   end
 
   object :namespace_vuln do
