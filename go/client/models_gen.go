@@ -3934,7 +3934,7 @@ type PostgresqlStatus struct {
 type PrAutomation struct {
 	ID string `json:"id"`
 	// string id for a repository, eg for github, this is {organization}/{repository-name}
-	Identifier string `json:"identifier"`
+	Identifier *string `json:"identifier,omitempty"`
 	// the name for this automation
 	Name string `json:"name"`
 	// An enum describing the high-level responsibility of this pr, eg creating a cluster or service, or upgrading a cluster
@@ -5160,7 +5160,7 @@ type ServiceUpdateAttributes struct {
 }
 
 type ServiceVuln struct {
-	Service *Service `json:"service,omitempty"`
+	Service *ServiceDeployment `json:"service,omitempty"`
 }
 
 type ServiceVulnAttributes struct {
@@ -6059,6 +6059,7 @@ type VulnerabilityReport struct {
 	Os              *VulnOs          `json:"os,omitempty"`
 	Summary         *VulnSummary     `json:"summary,omitempty"`
 	Artifact        *VulnArtifact    `json:"artifact,omitempty"`
+	Grade           *VulnReportGrade `json:"grade,omitempty"`
 	Vulnerabilities []*Vulnerability `json:"vulnerabilities,omitempty"`
 	Services        []*ServiceVuln   `json:"services,omitempty"`
 	Namespaces      []*NamespaceVuln `json:"namespaces,omitempty"`

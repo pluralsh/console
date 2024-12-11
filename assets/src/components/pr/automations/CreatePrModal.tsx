@@ -68,7 +68,9 @@ function CreatePrModalBase({
     )
   )
   const [branch, setBranch] = useState<string>('')
-  const [identifier, setIdentifier] = useState<string>(prAutomation.identifier)
+  const [identifier, setIdentifier] = useState<string>(
+    prAutomation.identifier ?? ''
+  )
   const [successPr, setSuccessPr] = useState<PullRequestFragment>()
 
   const theme = useTheme()
