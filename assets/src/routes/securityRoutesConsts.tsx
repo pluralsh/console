@@ -23,10 +23,20 @@ export function getPolicyPath({
   return `${POLICIES_ABS_PATH}/${policyId}/${tab}`
 }
 
+export function getVulnerabilityReportsPath({
+  clusterId,
+}: {
+  clusterId: string | null | undefined
+}) {
+  return `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId ?? ''}`
+}
+
 export function getVulnerabilityReportDetailsPath({
+  clusterId,
   vulnerabilityReportId,
 }: {
-  vulnerabilityReportId: string | null | undefined
+  clusterId: string
+  vulnerabilityReportId: string
 }) {
-  return `${VULNERABILITY_REPORTS_ABS_PATH}/report/${vulnerabilityReportId}`
+  return `${VULNERABILITY_REPORTS_ABS_PATH}/${clusterId}/report/${vulnerabilityReportId}`
 }

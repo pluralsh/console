@@ -11,6 +11,7 @@ import { getVulnerabilityReportDetailsPath } from 'routes/securityRoutesConsts'
 import { useTheme } from 'styled-components'
 import { Edge } from 'utils/graphql'
 import { gradeToSeverityMap } from './VulnReports'
+import { useParams } from 'react-router-dom'
 
 const columnHelper = createColumnHelper<Edge<VulnerabilityReportTinyFragment>>()
 
@@ -161,13 +162,18 @@ export const ColActions = columnHelper.display({
   meta: {
     gridTemplate: 'minmax(auto, 80px)',
   },
-  cell: ({ row: { original } }) => (
-    <TableCaretLink
-      css={{ alignSelf: 'end' }}
-      to={getVulnerabilityReportDetailsPath({
-        vulnerabilityReportId: original?.node?.id,
-      })}
-      textValue={`View details`}
-    />
-  ),
+  cell: function Cell({ row: { original } }) {
+    const { clusterId = '' } = useParams()
+    const vulnerabilityReportId = original?.node?.id ?? ''
+    return (
+      <TableCaretLink
+        css={{ alignSelf: 'end' }}
+        to={getVulnerabilityReportDetailsPath({
+          clusterId,
+          vulnerabilityReportId,
+        })}
+        textValue={`View details`}
+      />
+    )
+  },
 })

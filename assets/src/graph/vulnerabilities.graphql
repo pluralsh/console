@@ -39,6 +39,8 @@ fragment Vulnerability on Vulnerability {
   packageType
   pkgPath
   publishedDate
+  installedVersion
+  fixedVersion
   lastModifiedDate
   cvss {
     v2Score
@@ -48,6 +50,10 @@ fragment Vulnerability on Vulnerability {
     v40Score
     v40Vector
   }
+  cvssSource
+  resource
+  insertedAt
+  updatedAt
 }
 
 fragment VulnerabilityStatistic on VulnerabilityStatistic {

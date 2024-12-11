@@ -14,6 +14,7 @@ import {
   POLICY_PARAM_ID,
   SECURITY_REL_PATH,
   VULNERABILITY_REPORT_PARAM_ID,
+  VULNERABILITY_REPORTS_ABS_PATH,
   VULNERABILITY_REPORTS_REL_PATH,
 } from './securityRoutesConsts'
 import PolicyDetails from 'components/security/policies/policy/details/PolicyDetails'
@@ -70,9 +71,9 @@ export const securityRoutes = [
         element={<VulnerabilityReports />}
       />
     </Route>
-    <Route
-      path={`${VULNERABILITY_REPORTS_REL_PATH}/report/:${VULNERABILITY_REPORT_PARAM_ID}`}
-      element={<VulnerabilityReportDetails />}
-    />
   </Route>,
+  <Route
+    path={`${VULNERABILITY_REPORTS_ABS_PATH}/${KUBERNETES_PARAM_CLUSTER}/report/:${VULNERABILITY_REPORT_PARAM_ID}`}
+    element={<VulnerabilityReportDetails />}
+  />,
 ]

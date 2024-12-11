@@ -3,11 +3,8 @@ import { GITHUB_LINK } from 'utils/constants'
 import { useMutation } from '@apollo/client'
 import {
   AiSparkleOutlineIcon,
-  ApiIcon,
-  AppsIcon,
   ArrowTopRightIcon,
   BellIcon,
-  BuildIcon,
   CatalogIcon,
   Sidebar as DSSidebar,
   GearTrainIcon,
@@ -37,7 +34,6 @@ import { updateCache } from 'utils/graphql'
 
 import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
-import { DB_MANAGEMENT_PATH } from 'components/db-management/constants'
 import { PersonaConfigurationFragment } from 'generated/graphql'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
 

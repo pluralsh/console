@@ -12281,9 +12281,9 @@ export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typenam
 
 export type VulnerabilityReportTinyFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
 
-export type VulnerabilityReportFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, lastModifiedDate?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
+export type VulnerabilityReportFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
 
-export type VulnerabilityFragment = { __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, lastModifiedDate?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null };
+export type VulnerabilityFragment = { __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null };
 
 export type VulnerabilityStatisticFragment = { __typename?: 'VulnerabilityStatistic', count: number, grade: VulnReportGrade };
 
@@ -12304,7 +12304,7 @@ export type VulnerabilityReportQueryVariables = Exact<{
 }>;
 
 
-export type VulnerabilityReportQuery = { __typename?: 'RootQueryType', vulnerabilityReport?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, lastModifiedDate?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null };
+export type VulnerabilityReportQuery = { __typename?: 'RootQueryType', vulnerabilityReport?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, installedVersion?: string | null, fixedVersion?: string | null, lastModifiedDate?: string | null, cvssSource?: string | null, resource?: string | null, insertedAt?: string | null, updatedAt?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null };
 
 export type VulnerabilityStatisticsQueryVariables = Exact<{
   clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
@@ -15412,6 +15412,8 @@ export const VulnerabilityFragmentDoc = gql`
   packageType
   pkgPath
   publishedDate
+  installedVersion
+  fixedVersion
   lastModifiedDate
   cvss {
     v2Score
@@ -15421,6 +15423,10 @@ export const VulnerabilityFragmentDoc = gql`
     v40Score
     v40Vector
   }
+  cvssSource
+  resource
+  insertedAt
+  updatedAt
 }
     `;
 export const VulnerabilityReportFragmentDoc = gql`

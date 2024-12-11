@@ -70,6 +70,7 @@ export const ColStatus = columnHelper.accessor(
 export const ColExpander = {
   id: 'expander',
   header: () => {},
+  meta: { gridTemplate: 'min-content' },
   cell: ({ row }) =>
     row.getCanExpand() && (
       <CollapseIcon

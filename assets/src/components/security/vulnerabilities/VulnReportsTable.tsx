@@ -9,7 +9,7 @@ import {
   useVulnerabilityReportsQuery,
   VulnReportGrade,
 } from 'generated/graphql'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { getVulnerabilityReportDetailsPath } from 'routes/securityRoutesConsts'
 import {
   ColActions,
@@ -29,6 +29,7 @@ export function VulneratbilityReportsTable({
   selectedNamespaces?: string[]
   selectedGrade?: VulnReportGrade
 }) {
+  const { clusterId = '' } = useParams()
   const navigate = useNavigate()
   const { data, loading, error, fetchNextPage, setVirtualSlice } =
     useFetchPaginatedData(
@@ -56,6 +57,7 @@ export function VulneratbilityReportsTable({
         onRowClick={(_e, row) => {
           navigate(
             getVulnerabilityReportDetailsPath({
+              clusterId,
               vulnerabilityReportId: row.original.node?.id,
             })
           )
