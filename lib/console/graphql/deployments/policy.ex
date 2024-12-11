@@ -176,10 +176,11 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :os,           :vuln_os
     field :summary,      :vuln_summary
     field :artifact,     :vuln_artifact
+    field :grade,        :vuln_report_grade
 
-    field :vulnerabilities, list_of(:vulnerability)
-    field :services,        list_of(:service_vuln)
-    field :namespaces,      list_of(:namespace_vuln)
+    field :vulnerabilities, list_of(:vulnerability), resolve: dataloader(Deployments)
+    field :services,        list_of(:service_vuln), resolve: dataloader(Deployments)
+    field :namespaces,      list_of(:namespace_vuln), resolve: dataloader(Deployments)
 
     timestamps()
   end

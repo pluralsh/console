@@ -2008,7 +2008,7 @@ type PrAutomationFragment struct {
 	Title      string  "json:\"title\" graphql:\"title\""
 	Addon      *string "json:\"addon,omitempty\" graphql:\"addon\""
 	Message    string  "json:\"message\" graphql:\"message\""
-	Identifier string  "json:\"identifier\" graphql:\"identifier\""
+	Identifier *string "json:\"identifier,omitempty\" graphql:\"identifier\""
 	InsertedAt *string "json:\"insertedAt,omitempty\" graphql:\"insertedAt\""
 	UpdatedAt  *string "json:\"updatedAt,omitempty\" graphql:\"updatedAt\""
 }
@@ -2043,7 +2043,7 @@ func (t *PrAutomationFragment) GetMessage() string {
 	}
 	return t.Message
 }
-func (t *PrAutomationFragment) GetIdentifier() string {
+func (t *PrAutomationFragment) GetIdentifier() *string {
 	if t == nil {
 		t = &PrAutomationFragment{}
 	}

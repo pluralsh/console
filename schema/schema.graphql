@@ -2734,6 +2734,7 @@ type VulnerabilityReport {
   os: VulnOs
   summary: VulnSummary
   artifact: VulnArtifact
+  grade: VulnReportGrade
   vulnerabilities: [Vulnerability]
   services: [ServiceVuln]
   namespaces: [NamespaceVuln]
@@ -5937,7 +5938,7 @@ type PrAutomation {
   id: ID!
 
   "string id for a repository, eg for github, this is {organization}\/{repository-name}"
-  identifier: String!
+  identifier: String
 
   "the name for this automation"
   name: String!
