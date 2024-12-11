@@ -42,7 +42,7 @@ export function CatalogsGrid({
       css={{
         display: 'grid',
         gap: theme.spacing.medium,
-        gridTemplateColumns: 'repeat(auto-fit, minmax(256px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(256px, 1fr))',
         flexGrow: 1,
         overflowY: 'auto',
         paddingBottom: theme.spacing.large,
