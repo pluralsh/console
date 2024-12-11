@@ -1,6 +1,6 @@
+import { isEmpty } from 'lodash'
 import { createContext, useContext, useEffect, useMemo } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { isEmpty } from 'lodash'
 
 import { useTheme } from 'styled-components'
 
@@ -12,13 +12,12 @@ import {
   PinnedCustomResourceFragment,
   useKubernetesClustersQuery,
 } from '../../generated/graphql'
-import { mapExistingNodes } from '../../utils/graphql'
-import { getWorkloadsAbsPath } from '../../routes/kubernetesRoutesConsts'
 import { useNamespacesQuery } from '../../generated/graphql-kubernetes'
 import { KubernetesClient } from '../../helpers/kubernetes.client'
-import LoadingIndicator from '../utils/LoadingIndicator'
-import { GqlError } from '../utils/Alert'
+import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
+import { GqlError } from '../utils/Alert'
+import LoadingIndicator from '../utils/LoadingIndicator'
 
 import { LAST_SELECTED_CLUSTER_KEY } from './Navigation'
 
@@ -144,7 +143,7 @@ export default function Cluster() {
           ? mgmtCluster?.id
           : clusters[0].id
 
-      navigate(getWorkloadsAbsPath(redirectId) + search, {
+      navigate(`${redirectId}${search}`, {
         replace: true,
       })
     }

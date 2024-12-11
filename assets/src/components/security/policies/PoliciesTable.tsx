@@ -55,14 +55,7 @@ export function PoliciesTable({
   }, [refetch, setRefetch])
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(
-      () => ({
-        meta: {
-          refetch,
-        },
-      }),
-      [refetch]
-    )
+    useMemo(() => ({ meta: { refetch } }), [refetch])
 
   return (
     <div

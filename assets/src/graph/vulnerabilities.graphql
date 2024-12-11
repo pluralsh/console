@@ -1,0 +1,99 @@
+fragment VulnerabilityReportTiny on VulnerabilityReport {
+  id
+  artifactUrl
+  services {
+    service {
+      name
+    }
+  }
+  namespaces {
+    namespace
+  }
+  summary {
+    criticalCount
+    highCount
+    mediumCount
+    lowCount
+    unknownCount
+    noneCount
+  }
+}
+
+fragment VulnerabilityReport on VulnerabilityReport {
+  ...VulnerabilityReportTiny
+  vulnerabilities {
+    ...Vulnerability
+  }
+}
+
+fragment Vulnerability on Vulnerability {
+  id
+  title
+  description
+  severity
+  score
+  primaryLink
+  links
+  target
+  class
+  packageType
+  pkgPath
+  publishedDate
+  lastModifiedDate
+  cvss {
+    v2Score
+    v2Vector
+    v3Score
+    v3Vector
+    v40Score
+    v40Vector
+  }
+}
+
+fragment VulnerabilityStatistic on VulnerabilityStatistic {
+  count
+  grade
+}
+
+query VulnerabilityReports(
+  $clusters: [ID]
+  $namespaces: [String]
+  $q: String
+  $grade: VulnReportGrade
+  $first: Int
+  $after: String
+) {
+  vulnerabilityReports(
+    clusters: $clusters
+    namespaces: $namespaces
+    q: $q
+    grade: $grade
+    first: $first
+    after: $after
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...VulnerabilityReportTiny
+      }
+    }
+  }
+}
+
+query VulnerabilityReport($id: ID!) {
+  vulnerabilityReport(id: $id) {
+    ...VulnerabilityReport
+  }
+}
+
+query VulnerabilityStatistics(
+  $clusters: [ID]
+  $namespaces: [String]
+  $q: String
+) {
+  vulnerabilityStatistics(clusters: $clusters, namespaces: $namespaces, q: $q) {
+    ...VulnerabilityStatistic
+  }
+}

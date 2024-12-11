@@ -53,9 +53,12 @@ export function Security() {
 
 const WrapperSC = styled.div(({ theme }) => ({
   height: '100%',
+  width: '100%',
   overflow: 'hidden',
   display: 'flex',
   flexDirection: 'column',
+  margin: 'auto',
+  maxWidth: 1280,
   gap: theme.spacing.large,
   padding: `${theme.spacing.large}px ${theme.spacing.xxlarge}px`,
 }))

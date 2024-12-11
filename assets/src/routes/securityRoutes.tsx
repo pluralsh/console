@@ -3,8 +3,8 @@ import { Navigate, Route } from 'react-router-dom'
 import { Policies } from 'components/security/policies/Policies'
 import Policy from 'components/security/policies/policy/Policy'
 import { Security } from 'components/security/Security'
-import { VulnerabilityReports } from 'components/security/vulnerabilities/VulnerabilityReports'
-import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnerabilityReportDetails'
+import { VulnerabilityReports } from 'components/security/vulnerabilities/VulnReports'
+import { VulnerabilityReportDetails } from 'components/security/vulnerabilities/VulnReportDetails'
 
 import {
   POLICIES_ABS_PATH,
@@ -18,6 +18,8 @@ import {
 } from './securityRoutesConsts'
 import PolicyDetails from 'components/security/policies/policy/details/PolicyDetails'
 import PolicyAffectedResources from 'components/security/policies/policy/affectedResources/PolicyAffectedResources'
+import { KUBERNETES_PARAM_CLUSTER } from './kubernetesRoutesConsts'
+import Cluster from 'components/kubernetes/Cluster'
 
 export const securityRoutes = [
   <Route
@@ -60,11 +62,16 @@ export const securityRoutes = [
       />
     </Route>
     <Route
-      path={`${VULNERABILITY_REPORTS_REL_PATH}`}
-      element={<VulnerabilityReports />}
-    />
+      path={`${VULNERABILITY_REPORTS_REL_PATH}/${KUBERNETES_PARAM_CLUSTER}`}
+      element={<Cluster />}
+    >
+      <Route
+        index
+        element={<VulnerabilityReports />}
+      />
+    </Route>
     <Route
-      path={`${VULNERABILITY_REPORTS_REL_PATH}/:${VULNERABILITY_REPORT_PARAM_ID}`}
+      path={`${VULNERABILITY_REPORTS_REL_PATH}/report/:${VULNERABILITY_REPORT_PARAM_ID}`}
       element={<VulnerabilityReportDetails />}
     />
   </Route>,

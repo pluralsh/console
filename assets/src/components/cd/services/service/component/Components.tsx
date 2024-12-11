@@ -17,7 +17,7 @@ const FilterFooterInner = styled(ListBoxFooter)(({ theme }) => ({
   color: theme.colors['text-primary-accent'],
 }))
 
-function FilterFooter({ allSelected = true, ...props }) {
+export function FilterFooter({ allSelected = true, ...props }) {
   return (
     <FilterFooterInner
       leftContent={<ComponentsIcon />}

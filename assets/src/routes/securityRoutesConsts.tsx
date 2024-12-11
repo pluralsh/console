@@ -28,5 +28,5 @@ export function getVulnerabilityReportDetailsPath({
 }: {
   vulnerabilityReportId: string | null | undefined
 }) {
-  return `${VULNERABILITY_REPORTS_ABS_PATH}/${vulnerabilityReportId}`
+  return `${VULNERABILITY_REPORTS_ABS_PATH}/report/${vulnerabilityReportId}`
 }

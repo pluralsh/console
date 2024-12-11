@@ -28,7 +28,6 @@ import { useSetPageHeaderContent } from 'components/cd/ContinuousDeployment'
 import PoliciesFilter from './PoliciesFilter'
 import { PoliciesTable } from './PoliciesTable'
 import { PoliciesViolationsGauge } from './PoliciesViolationsGauge'
-import { AggregatedPolicyStatsChip } from './policy/AggregatedPolicyStatsChip'
 
 const breadcrumbs = [
   { label: SECURITY_REL_PATH, url: SECURITY_ABS_PATH },
@@ -116,11 +115,12 @@ export function Policies() {
               >
                 <Flex gap="small">
                   {label}
-                  <AggregatedPolicyStatsChip
+                  {/* TODO: add back when back end supports */}
+                  {/* <AggregatedPolicyStatsChip
                     violationFilter={label as ViolationFilter}
                     kindsData={kindsData}
                     namespacesData={namespacesData}
-                  />
+                  /> */}
                 </Flex>
               </SubTab>
             ))}
@@ -128,7 +128,7 @@ export function Policies() {
         </FillLevelProvider>
       </Flex>
     ),
-    [kindsData, namespacesData, searchString, violationFilter]
+    [searchString, violationFilter]
   )
 
   useSetPageHeaderContent(header)

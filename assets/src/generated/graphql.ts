@@ -1,4 +1,4 @@
- 
+/* eslint-disable */
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -12279,6 +12279,42 @@ export type RefreshQueryVariables = Exact<{
 
 export type RefreshQuery = { __typename?: 'RootQueryType', refresh?: { __typename?: 'User', jwt?: string | null, id: string, pluralId?: string | null, name: string, email: string, profile?: string | null, backgroundColor?: string | null, readTimestamp?: string | null, emailSettings?: { __typename?: 'EmailSettings', digest?: boolean | null } | null, roles?: { __typename?: 'UserRoles', admin?: boolean | null } | null, personas?: Array<{ __typename?: 'Persona', id: string, name: string, description?: string | null, bindings?: Array<{ __typename?: 'PolicyBinding', id?: string | null, user?: { __typename?: 'User', id: string, name: string, email: string } | null, group?: { __typename?: 'Group', id: string, name: string } | null } | null> | null, configuration?: { __typename?: 'PersonaConfiguration', all?: boolean | null, deployments?: { __typename?: 'PersonaDeployment', addOns?: boolean | null, clusters?: boolean | null, pipelines?: boolean | null, providers?: boolean | null, repositories?: boolean | null, services?: boolean | null } | null, home?: { __typename?: 'PersonaHome', manager?: boolean | null, security?: boolean | null } | null, sidebar?: { __typename?: 'PersonaSidebar', audits?: boolean | null, kubernetes?: boolean | null, pullRequests?: boolean | null, settings?: boolean | null, backups?: boolean | null, stacks?: boolean | null } | null } | null } | null> | null } | null };
 
+export type VulnerabilityReportTinyFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
+
+export type VulnerabilityReportFragment = { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, lastModifiedDate?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null };
+
+export type VulnerabilityFragment = { __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, lastModifiedDate?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null };
+
+export type VulnerabilityStatisticFragment = { __typename?: 'VulnerabilityStatistic', count: number, grade: VulnReportGrade };
+
+export type VulnerabilityReportsQueryVariables = Exact<{
+  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  grade?: InputMaybe<VulnReportGrade>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type VulnerabilityReportsQuery = { __typename?: 'RootQueryType', vulnerabilityReports?: { __typename?: 'VulnerabilityReportConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'VulnerabilityReportEdge', node?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null } | null> | null } | null };
+
+export type VulnerabilityReportQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type VulnerabilityReportQuery = { __typename?: 'RootQueryType', vulnerabilityReport?: { __typename?: 'VulnerabilityReport', id: string, artifactUrl?: string | null, vulnerabilities?: Array<{ __typename?: 'Vulnerability', id: string, title?: string | null, description?: string | null, severity?: VulnSeverity | null, score?: number | null, primaryLink?: string | null, links?: Array<string | null> | null, target?: string | null, class?: string | null, packageType?: string | null, pkgPath?: string | null, publishedDate?: string | null, lastModifiedDate?: string | null, cvss?: { __typename?: 'Cvss', v2Score?: number | null, v2Vector?: string | null, v3Score?: number | null, v3Vector?: string | null, v40Score?: number | null, v40Vector?: string | null } | null } | null> | null, services?: Array<{ __typename?: 'ServiceVuln', service?: { __typename?: 'ServiceDeployment', name: string } | null } | null> | null, namespaces?: Array<{ __typename?: 'NamespaceVuln', namespace: string } | null> | null, summary?: { __typename?: 'VulnSummary', criticalCount?: number | null, highCount?: number | null, mediumCount?: number | null, lowCount?: number | null, unknownCount?: number | null, noneCount?: number | null } | null } | null };
+
+export type VulnerabilityStatisticsQueryVariables = Exact<{
+  clusters?: InputMaybe<Array<InputMaybe<Scalars['ID']['input']>> | InputMaybe<Scalars['ID']['input']>>;
+  namespaces?: InputMaybe<Array<InputMaybe<Scalars['String']['input']>> | InputMaybe<Scalars['String']['input']>>;
+  q?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type VulnerabilityStatisticsQuery = { __typename?: 'RootQueryType', vulnerabilityStatistics?: Array<{ __typename?: 'VulnerabilityStatistic', count: number, grade: VulnReportGrade } | null> | null };
+
 export const ClusterMinimalFragmentDoc = gql`
     fragment ClusterMinimal on Cluster {
   id
@@ -15338,6 +15374,68 @@ export const RefreshTokenFragmentDoc = gql`
   token
   insertedAt
   updatedAt
+}
+    `;
+export const VulnerabilityReportTinyFragmentDoc = gql`
+    fragment VulnerabilityReportTiny on VulnerabilityReport {
+  id
+  artifactUrl
+  services {
+    service {
+      name
+    }
+  }
+  namespaces {
+    namespace
+  }
+  summary {
+    criticalCount
+    highCount
+    mediumCount
+    lowCount
+    unknownCount
+    noneCount
+  }
+}
+    `;
+export const VulnerabilityFragmentDoc = gql`
+    fragment Vulnerability on Vulnerability {
+  id
+  title
+  description
+  severity
+  score
+  primaryLink
+  links
+  target
+  class
+  packageType
+  pkgPath
+  publishedDate
+  lastModifiedDate
+  cvss {
+    v2Score
+    v2Vector
+    v3Score
+    v3Vector
+    v40Score
+    v40Vector
+  }
+}
+    `;
+export const VulnerabilityReportFragmentDoc = gql`
+    fragment VulnerabilityReport on VulnerabilityReport {
+  ...VulnerabilityReportTiny
+  vulnerabilities {
+    ...Vulnerability
+  }
+}
+    ${VulnerabilityReportTinyFragmentDoc}
+${VulnerabilityFragmentDoc}`;
+export const VulnerabilityStatisticFragmentDoc = gql`
+    fragment VulnerabilityStatistic on VulnerabilityStatistic {
+  count
+  grade
 }
     `;
 export const AiDocument = gql`
@@ -25452,6 +25550,148 @@ export type RefreshQueryHookResult = ReturnType<typeof useRefreshQuery>;
 export type RefreshLazyQueryHookResult = ReturnType<typeof useRefreshLazyQuery>;
 export type RefreshSuspenseQueryHookResult = ReturnType<typeof useRefreshSuspenseQuery>;
 export type RefreshQueryResult = Apollo.QueryResult<RefreshQuery, RefreshQueryVariables>;
+export const VulnerabilityReportsDocument = gql`
+    query VulnerabilityReports($clusters: [ID], $namespaces: [String], $q: String, $grade: VulnReportGrade, $first: Int, $after: String) {
+  vulnerabilityReports(
+    clusters: $clusters
+    namespaces: $namespaces
+    q: $q
+    grade: $grade
+    first: $first
+    after: $after
+  ) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...VulnerabilityReportTiny
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${VulnerabilityReportTinyFragmentDoc}`;
+
+/**
+ * __useVulnerabilityReportsQuery__
+ *
+ * To run a query within a React component, call `useVulnerabilityReportsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVulnerabilityReportsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVulnerabilityReportsQuery({
+ *   variables: {
+ *      clusters: // value for 'clusters'
+ *      namespaces: // value for 'namespaces'
+ *      q: // value for 'q'
+ *      grade: // value for 'grade'
+ *      first: // value for 'first'
+ *      after: // value for 'after'
+ *   },
+ * });
+ */
+export function useVulnerabilityReportsQuery(baseOptions?: Apollo.QueryHookOptions<VulnerabilityReportsQuery, VulnerabilityReportsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<VulnerabilityReportsQuery, VulnerabilityReportsQueryVariables>(VulnerabilityReportsDocument, options);
+      }
+export function useVulnerabilityReportsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<VulnerabilityReportsQuery, VulnerabilityReportsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<VulnerabilityReportsQuery, VulnerabilityReportsQueryVariables>(VulnerabilityReportsDocument, options);
+        }
+export function useVulnerabilityReportsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<VulnerabilityReportsQuery, VulnerabilityReportsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<VulnerabilityReportsQuery, VulnerabilityReportsQueryVariables>(VulnerabilityReportsDocument, options);
+        }
+export type VulnerabilityReportsQueryHookResult = ReturnType<typeof useVulnerabilityReportsQuery>;
+export type VulnerabilityReportsLazyQueryHookResult = ReturnType<typeof useVulnerabilityReportsLazyQuery>;
+export type VulnerabilityReportsSuspenseQueryHookResult = ReturnType<typeof useVulnerabilityReportsSuspenseQuery>;
+export type VulnerabilityReportsQueryResult = Apollo.QueryResult<VulnerabilityReportsQuery, VulnerabilityReportsQueryVariables>;
+export const VulnerabilityReportDocument = gql`
+    query VulnerabilityReport($id: ID!) {
+  vulnerabilityReport(id: $id) {
+    ...VulnerabilityReport
+  }
+}
+    ${VulnerabilityReportFragmentDoc}`;
+
+/**
+ * __useVulnerabilityReportQuery__
+ *
+ * To run a query within a React component, call `useVulnerabilityReportQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVulnerabilityReportQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVulnerabilityReportQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useVulnerabilityReportQuery(baseOptions: Apollo.QueryHookOptions<VulnerabilityReportQuery, VulnerabilityReportQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<VulnerabilityReportQuery, VulnerabilityReportQueryVariables>(VulnerabilityReportDocument, options);
+      }
+export function useVulnerabilityReportLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<VulnerabilityReportQuery, VulnerabilityReportQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<VulnerabilityReportQuery, VulnerabilityReportQueryVariables>(VulnerabilityReportDocument, options);
+        }
+export function useVulnerabilityReportSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<VulnerabilityReportQuery, VulnerabilityReportQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<VulnerabilityReportQuery, VulnerabilityReportQueryVariables>(VulnerabilityReportDocument, options);
+        }
+export type VulnerabilityReportQueryHookResult = ReturnType<typeof useVulnerabilityReportQuery>;
+export type VulnerabilityReportLazyQueryHookResult = ReturnType<typeof useVulnerabilityReportLazyQuery>;
+export type VulnerabilityReportSuspenseQueryHookResult = ReturnType<typeof useVulnerabilityReportSuspenseQuery>;
+export type VulnerabilityReportQueryResult = Apollo.QueryResult<VulnerabilityReportQuery, VulnerabilityReportQueryVariables>;
+export const VulnerabilityStatisticsDocument = gql`
+    query VulnerabilityStatistics($clusters: [ID], $namespaces: [String], $q: String) {
+  vulnerabilityStatistics(clusters: $clusters, namespaces: $namespaces, q: $q) {
+    ...VulnerabilityStatistic
+  }
+}
+    ${VulnerabilityStatisticFragmentDoc}`;
+
+/**
+ * __useVulnerabilityStatisticsQuery__
+ *
+ * To run a query within a React component, call `useVulnerabilityStatisticsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVulnerabilityStatisticsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVulnerabilityStatisticsQuery({
+ *   variables: {
+ *      clusters: // value for 'clusters'
+ *      namespaces: // value for 'namespaces'
+ *      q: // value for 'q'
+ *   },
+ * });
+ */
+export function useVulnerabilityStatisticsQuery(baseOptions?: Apollo.QueryHookOptions<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>(VulnerabilityStatisticsDocument, options);
+      }
+export function useVulnerabilityStatisticsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>(VulnerabilityStatisticsDocument, options);
+        }
+export function useVulnerabilityStatisticsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>(VulnerabilityStatisticsDocument, options);
+        }
+export type VulnerabilityStatisticsQueryHookResult = ReturnType<typeof useVulnerabilityStatisticsQuery>;
+export type VulnerabilityStatisticsLazyQueryHookResult = ReturnType<typeof useVulnerabilityStatisticsLazyQuery>;
+export type VulnerabilityStatisticsSuspenseQueryHookResult = ReturnType<typeof useVulnerabilityStatisticsSuspenseQuery>;
+export type VulnerabilityStatisticsQueryResult = Apollo.QueryResult<VulnerabilityStatisticsQuery, VulnerabilityStatisticsQueryVariables>;
 export const namedOperations = {
   Query: {
     AI: 'AI',
@@ -25589,7 +25829,10 @@ export const namedOperations = {
     Me: 'Me',
     Users: 'Users',
     SearchUsers: 'SearchUsers',
-    Refresh: 'Refresh'
+    Refresh: 'Refresh',
+    VulnerabilityReports: 'VulnerabilityReports',
+    VulnerabilityReport: 'VulnerabilityReport',
+    VulnerabilityStatistics: 'VulnerabilityStatistics'
   },
   Mutation: {
     CreateAIPin: 'CreateAIPin',
@@ -25878,6 +26121,10 @@ export const namedOperations = {
     AvailableFeatures: 'AvailableFeatures',
     Manifest: 'Manifest',
     Account: 'Account',
-    RefreshToken: 'RefreshToken'
+    RefreshToken: 'RefreshToken',
+    VulnerabilityReportTiny: 'VulnerabilityReportTiny',
+    VulnerabilityReport: 'VulnerabilityReport',
+    Vulnerability: 'Vulnerability',
+    VulnerabilityStatistic: 'VulnerabilityStatistic'
   }
 }
