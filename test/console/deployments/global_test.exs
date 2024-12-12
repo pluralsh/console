@@ -11,6 +11,8 @@ defmodule Console.Deployments.GlobalTest do
       {:ok, global} = Global.create(%{name: "test", tags: [%{name: "name", value: "value"}]}, svc.id, user)
 
       assert global.service_id == svc.id
+      assert global.cascade.delete
+
       [tag] = global.tags
       assert tag.name == "name"
       assert tag.value == "value"

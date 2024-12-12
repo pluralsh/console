@@ -170,6 +170,15 @@ defmodule Console.Schema.Stack do
 
   def stream(query \\ __MODULE__), do: ordered(query, asc: :id)
 
+  def stats(query \\ __MODULE__) do
+    from(s in query,
+      select: %{
+        unhealthy: count(fragment("CASE WHEN ? = 4 THEN ? ELSE null END", s.status, s.id), :distinct),
+        count: count(s.id, :distinct)
+      }
+    )
+  end
+
   @valid ~w(name type paused actor_id parent_id variables definition_id workdir manage_state status approval project_id connection_id repository_id cluster_id)a
   @immutable ~w(project_id)a
 

@@ -38,7 +38,7 @@ defmodule Console.Deployments.Global do
     start_transaction()
     |> add_operation(:global, fn _ ->
       %GlobalService{service_id: service_id}
-      |> GlobalService.changeset(attrs)
+      |> GlobalService.changeset(Map.put_new(attrs, :cascade, %{delete: true}))
       |> allow(user, :write)
       |> when_ok(:insert)
     end)
@@ -98,13 +98,13 @@ defmodule Console.Deployments.Global do
       |> allow(user, :write)
     end)
     |> add_operation(:cascade, fn
-      %{global: %GlobalService{cascade: %GlobalService.Cascade{delete: true}}} ->
-        Service.for_owner(global_id)
-        |> Repo.update_all(set: [deleted_at: Timex.now()])
-        |> ok()
       %{global: %GlobalService{cascade: %GlobalService.Cascade{detach: true}}} ->
         Service.for_owner(global_id)
         |> Repo.delete_all()
+        |> ok()
+      %{global: %GlobalService{cascade: %GlobalService.Cascade{delete: true}}} ->
+        Service.for_owner(global_id)
+        |> Repo.update_all(set: [deleted_at: Timex.now()])
         |> ok()
       %{global: _} ->
         Service.for_owner(global_id)

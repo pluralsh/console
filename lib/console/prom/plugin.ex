@@ -65,6 +65,18 @@ defmodule Console.Prom.Plugin do
           description: "The total number of services managed by this instance.",
           measurement: :total
         ),
+        last_value(
+          [:stack, :count],
+          event_name: metric_scope(:stack_count),
+          description: "The total number of stacks managed by this instance.",
+          measurement: :total
+        ),
+        last_value(
+          [:failed, :stack, :count],
+          event_name: metric_scope(:failed_stack_count),
+          description: "The total number of stacks managed by this instance.",
+          measurement: :total
+        ),
       ]
     )
   end
