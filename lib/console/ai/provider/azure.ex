@@ -7,7 +7,7 @@ defmodule Console.AI.Azure do
 
   require Logger
 
-  defstruct [:access_key, :api_version, :base_url, :model, :tool_model]
+  defstruct [:access_token, :api_version, :base_url, :model, :tool_model]
 
   @api_vsn "2024-10-01-preview"
 
@@ -15,7 +15,7 @@ defmodule Console.AI.Azure do
 
   def new(opts) do
     %__MODULE__{
-      access_key: opts.access_key,
+      access_token: opts.access_key,
       api_version: opts.api_version,
       model: opts.model,
       tool_model: opts.tool_model,
