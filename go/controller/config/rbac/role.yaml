@@ -32,6 +32,7 @@ rules:
   - clusters
   - customstackruns
   - deploymentsettings
+  - generatedsecrets
   - gitrepositories
   - globalservices
   - helmrepositories
@@ -70,6 +71,7 @@ rules:
   - clusters/finalizers
   - customstackruns/finalizers
   - deploymentsettings/finalizers
+  - generatedsecrets/finalizers
   - gitrepositories/finalizers
   - globalservices/finalizers
   - helmrepositories/finalizers
@@ -102,6 +104,7 @@ rules:
   - clusters/status
   - customstackruns/status
   - deploymentsettings/status
+  - generatedsecrets/status
   - gitrepositories/status
   - globalservices/status
   - helmrepositories/status
