@@ -13,7 +13,6 @@ import { useTheme } from 'styled-components'
 import { useMemo, useState } from 'react'
 import { breadcrumbs } from './Catalogs.tsx'
 import { StackedText } from '../utils/table/StackedText.tsx'
-import { iconUrl } from './common.ts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
 import { useCatalogQuery } from '../../generated/graphql.ts'
 import { CATALOG_PARAM_ID } from '../../routes/catalogRoutesConsts.tsx'
@@ -23,6 +22,7 @@ import { GqlError } from '../utils/Alert.tsx'
 
 import { CatalogPRAutomations } from './CatalogPRAutomations.tsx'
 import { CatalogPermissions } from './CatalogPermissions.tsx'
+import { iconUrl } from '../../utils/icon.ts'
 
 export function Catalog() {
   const theme = useTheme()
