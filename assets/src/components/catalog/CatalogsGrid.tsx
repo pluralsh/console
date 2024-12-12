@@ -3,9 +3,9 @@ import { CatalogFragment } from '../../generated/graphql.ts'
 import { CSSProperties, useTheme } from 'styled-components'
 import { getCatalogAbsPath } from '../../routes/catalogRoutesConsts.tsx'
 import { useNavigate } from 'react-router-dom'
-import { catalogImageUrl } from './common.ts'
 import { ReactNode, useCallback } from 'react'
 import { isEmpty } from 'lodash'
+import { iconUrl } from '../../utils/icon.ts'
 
 const fetchMargin = 50
 
@@ -55,7 +55,7 @@ export function CatalogsGrid({
         ({ id, name, author, description, category, icon, darkIcon }) => (
           <CatalogCard
             key={id}
-            imageUrl={catalogImageUrl(icon, darkIcon, theme.mode)}
+            imageUrl={iconUrl(icon, darkIcon, theme.mode)}
             name={name}
             author={author ?? undefined}
             description={description ?? undefined}

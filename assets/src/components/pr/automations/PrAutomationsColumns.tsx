@@ -33,6 +33,7 @@ import { ModalMountTransition } from 'components/utils/ModalMountTransition'
 import { PrAutomationPermissionsModal } from 'components/pr/automations/PrAutomationPermissionsModal'
 
 import { CreatePrModal } from './CreatePrModal'
+import { iconUrl } from '../../../utils/icon.ts'
 
 enum MenuItemKey {
   Permissions = 'permissions',
@@ -42,21 +43,30 @@ enum MenuItemKey {
 
 export const columnHelper = createColumnHelper<PrAutomationFragment>()
 
-const ColName = columnHelper.accessor(({ name }) => name, {
+const ColName = columnHelper.accessor(() => null, {
   id: 'name',
   header: 'Automation name',
-  cell: ({ getValue }) => (
-    <Flex
-      alignItems={'center'}
-      gap={'xsmall'}
-    >
-      <AppIcon
-        size="xxsmall"
-        icon={<PrQueueIcon size={16} />}
-      />
-      {getValue()}
-    </Flex>
-  ),
+  cell: function Cell({
+    row: {
+      original: { name, icon, darkIcon },
+    },
+  }) {
+    const theme = useTheme()
+
+    return (
+      <Flex
+        alignItems={'center'}
+        gap={'xsmall'}
+      >
+        <AppIcon
+          size="xxsmall"
+          url={iconUrl(icon, darkIcon, theme.mode)}
+          icon={<PrQueueIcon size={16} />}
+        />
+        {name}
+      </Flex>
+    )
+  },
 })
 
 const ColDocumentation = columnHelper.accessor(
