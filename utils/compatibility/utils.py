@@ -268,12 +268,9 @@ def reduce_versions(versions):
     # Sort versions to ensure the latest version is last
     versions = sort_versions(versions)
 
-    for i, data in enumerate(versions):
+    for i, data in reversed(list(enumerate(versions))):
         version = validate_semver(data["version"])
         kube = data["kube"]
-
-        # Always add the latest version (last in the list)
-        is_latest_version = i == len(versions) - 1
 
         # Add to reduced_versions if:
         # - It's a new major version
@@ -281,12 +278,13 @@ def reduce_versions(versions):
         # - OR it's the latest version
         if version and (
             cur_major != version.major
-            or (cur_minor != version.minor and cur_kube != kube)
-            or is_latest_version
+            # or cur_minor != version.minor
+            or cur_kube != set(kube)
+            or i == 0 # actually latest version
         ):
             cur_major = version.major
             cur_minor = version.minor
-            cur_kube = kube
+            cur_kube = set(kube)
 
             version_info = OrderedDict(
                 [
@@ -296,11 +294,10 @@ def reduce_versions(versions):
                     ("incompatibilities", data.get("incompatibilities", [])),
                 ]
             )
-            # Avoid duplicates of the latest version
-            if version_info not in reduced_versions:
-                reduced_versions.append(version_info)
 
-    return reduced_versions
+            reduced_versions.append(version_info)
+
+    return list(reversed(reduced_versions))
 
 
 def update_compatibility_info(filepath, new_versions):
