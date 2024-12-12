@@ -13,7 +13,7 @@ import { useTheme } from 'styled-components'
 import { useMemo, useState } from 'react'
 import { breadcrumbs } from './Catalogs.tsx'
 import { StackedText } from '../utils/table/StackedText.tsx'
-import { catalogImageUrl } from './common.ts'
+import { iconUrl } from './common.ts'
 import { ResponsiveLayoutPage } from '../utils/layout/ResponsiveLayoutPage.tsx'
 import { useCatalogQuery } from '../../generated/graphql.ts'
 import { CATALOG_PARAM_ID } from '../../routes/catalogRoutesConsts.tsx'
@@ -80,11 +80,7 @@ export function Catalog() {
               >
                 <AppIcon
                   size="xsmall"
-                  url={catalogImageUrl(
-                    catalog.icon,
-                    catalog.darkIcon,
-                    theme.mode
-                  )}
+                  url={iconUrl(catalog.icon, catalog.darkIcon, theme.mode)}
                   icon={<PrQueueIcon size={32} />}
                 />
                 <StackedText

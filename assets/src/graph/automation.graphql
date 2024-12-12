@@ -1,6 +1,8 @@
 fragment PrAutomation on PrAutomation {
   id
   name
+  icon
+  darkIcon
   documentation
   addon
   identifier
