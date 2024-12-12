@@ -31,12 +31,12 @@ defmodule Console.AI.Vertex do
   @spec completion(t(), Console.AI.Provider.history) :: {:ok, binary} | Console.error
   def completion(%__MODULE__{} = vertex, messages) do
     with {:ok, %{token: token}} <- client(vertex) do
-      OpenAI.new(
+      OpenAI.new(%{
         base_url: openai_url(vertex),
         access_token: token,
         model: openai_model(vertex),
         tool_model: openai_model(vertex)
-      )
+      })
       |> OpenAI.completion(messages)
     end
   end
@@ -47,12 +47,12 @@ defmodule Console.AI.Vertex do
   @spec tool_call(t(), Console.AI.Provider.history, [atom]) :: {:ok, binary} | {:ok, [Console.AI.Tool.t]} | Console.error
   def tool_call(%__MODULE__{} = vertex, messages, tools) do
     with {:ok, %{token: token}} <- client(vertex) do
-      OpenAI.new(
+      OpenAI.new(%{
         base_url: openai_url(vertex),
         access_token: token,
         model: openai_model(vertex),
         tool_model: openai_model(vertex)
-      )
+      })
       |> OpenAI.tool_call(messages, tools)
     end
   end

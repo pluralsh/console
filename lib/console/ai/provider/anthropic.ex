@@ -54,13 +54,14 @@ defmodule Console.AI.Anthropic do
     case chat(anthropic, messages) do
       {:ok, %MessageResponse{content: content}} ->
         {:ok, format_content(content)}
+      {:ok, content} when is_binary(content) -> {:ok, content}
       {:ok, _} -> {:error, "could not generate an ai completion for this context"}
       error -> error
     end
   end
 
   def tool_call(anthropic, messages, tools) do
-    case chat(anthropic, messages, tools) do
+    case chat(%{anthropic | stream: nil}, messages, tools) do
       {:ok, %MessageResponse{content: [%Content{type: "tool_use"}] = tools}} ->
         {:ok, gen_tools(tools)}
       {:ok, %MessageResponse{content: content}} ->
