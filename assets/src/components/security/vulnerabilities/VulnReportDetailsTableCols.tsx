@@ -2,7 +2,7 @@ import { ArrowTopRightIcon, Chip, ChipProps } from '@pluralsh/design-system'
 import { createColumnHelper, Row } from '@tanstack/react-table'
 import { VulnerabilityFragment, VulnSeverity } from 'generated/graphql'
 import { useTheme } from 'styled-components'
-import { VulnerabilityDetail } from './VulnDetailExpanded'
+import { VulnDetailExpanded } from './VulnDetailExpanded'
 
 const columnHelper = createColumnHelper<VulnerabilityFragment>()
 
@@ -109,7 +109,7 @@ export function VulnerabilityExpansionPanel({
 
   return (
     <div css={{ maxWidth: 920 }}>
-      <VulnerabilityDetail v={vulnerability} />
+      <VulnDetailExpanded v={vulnerability} />
     </div>
   )
 }

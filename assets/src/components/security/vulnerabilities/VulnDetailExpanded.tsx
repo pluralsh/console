@@ -4,7 +4,7 @@ import styled, { useTheme } from 'styled-components'
 import { Overline } from 'components/cd/utils/PermissionsModal'
 import { StackedText } from 'components/utils/table/StackedText'
 import { Body2BoldP } from 'components/utils/typography/Text'
-import { VulnerabilityFragment } from 'generated/graphql'
+import { CvssBundle, VulnerabilityFragment } from 'generated/graphql'
 
 const AttackVector = {
   PHYSICAL: 'PHYSICAL',
@@ -13,14 +13,13 @@ const AttackVector = {
   NETWORK: 'NETWORK',
 }
 
-export function VulnerabilityDetail({ v }: { v: VulnerabilityFragment }) {
-  // @ts-ignore
-  v = mockVulnerability
+export function VulnDetailExpanded({ v }: { v: VulnerabilityFragment }) {
   const theme = useTheme()
   if (!v.title && !v.description && !v.cvssSource && !v.score && !v.cvss) {
     return <VulnerabilityDetailSC>No details available.</VulnerabilityDetailSC>
   }
 
+  console.log('v', v)
   return (
     <VulnerabilityDetailSC>
       <StackedText
@@ -30,30 +29,10 @@ export function VulnerabilityDetail({ v }: { v: VulnerabilityFragment }) {
         second={v.description}
         secondPartialType="body2"
       />
-      {v.cvss?.v2Vector && (
-        <CVSSSection
-          source={v.cvssSource}
-          score={v.cvss.v2Score}
-          vector={v.cvss.v2Vector}
-          vectorType="V2"
-        />
-      )}
-      {v.cvss?.v3Vector && (
-        <CVSSSection
-          source={v.cvssSource}
-          score={v.cvss.v3Score}
-          vector={v.cvss.v3Vector}
-          vectorType="V3"
-        />
-      )}
-      {v.cvss?.v40Vector && (
-        <CVSSSection
-          source={v.cvssSource}
-          score={v.cvss.v40Score}
-          vector={v.cvss.v40Vector}
-          vectorType="V40"
-        />
-      )}
+      {/* <CVSSSection
+        bundle={v.cvss}
+        source={v.cvssSource}
+      /> */}
     </VulnerabilityDetailSC>
   )
 }
@@ -101,41 +80,24 @@ function CVSSRow({
   )
 }
 
-function parseCVSSVector(vector: string) {
-  console.log('vector', vector)
-  return {
-    attackVector: 'NETWORK',
-    attackComplexity: 'LOW',
-    privilegesRequired: 'NONE',
-    userInteraction: 'REQUIRED',
-    confidentiality: 'HIGH',
-    integrity: 'HIGH',
-    availability: 'HIGH',
-  }
-}
-
 function CVSSSection({
+  bundle,
   source,
-  score,
-  vector,
-  vectorType,
 }: {
+  bundle?: Nullable<CvssBundle>
   source?: Nullable<string>
-  score?: Nullable<number>
-  vector: string
-  vectorType: 'V2' | 'V3' | 'V40'
 }) {
   const theme = useTheme()
-  const parsedVector = parseCVSSVector(vector)
+
   return (
     <Flex
       direction="column"
       gap="large"
     >
-      {source && score && (
+      {source && (
         <StackedText
           css={{ color: theme.colors['text'], marginTop: theme.spacing.medium }}
-          first={`CVSS ${vectorType} Vector (source ${source}, score: ${score})`}
+          first={`CVSS Vector (source ${source})`}
           firstPartialType="body2Bold"
           second="Each metric is ordered from low to high severity."
           secondPartialType="body2"
@@ -254,18 +216,3 @@ const VulnerabilityDetailSC = styled.div(({ theme }) => ({
   gap: theme.spacing.medium,
   padding: `0 ${theme.spacing.medium}px`,
 }))
-
-const mockVulnerability = {
-  title: 'Critical Buffer Overflow in libcurl',
-  description:
-    'A buffer overflow vulnerability exists in libcurl versions prior to 7.88.1 that could allow remote attackers to execute arbitrary code via crafted HTTP responses.',
-  cvssSource: 'NVD',
-  cvss: {
-    v2Score: '8.9',
-    v2Vector: 'AV:N/AC:L/Au:N/C:H/I:H/A:H',
-    v3Score: '9.8',
-    v3Vector: 'AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
-    v40Score: '9.8',
-    v40Vector: 'AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H',
-  },
-}
