@@ -2549,6 +2549,18 @@ enum VulnReportGrade {
   F
 }
 
+enum VulnAttackVector {
+  NETWORK
+  ADJACENT
+  LOCAL
+  PHYSICAL
+}
+
+enum VulnUserInteraction {
+  NONE
+  REQUIRED
+}
+
 enum PolicyAggregate {
   CLUSTER
   ENFORCEMENT
@@ -2798,6 +2810,13 @@ type Vulnerability {
 }
 
 type CvssBundle {
+  attackVector: VulnAttackVector
+  attackComplexity: VulnSeverity
+  privilegesRequired: VulnSeverity
+  userInteraction: VulnUserInteraction
+  confidentiality: VulnSeverity
+  integrity: VulnSeverity
+  availability: VulnSeverity
   nvidia: Cvss
   redhat: Cvss
 }
