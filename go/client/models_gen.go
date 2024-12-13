@@ -1788,8 +1788,15 @@ type CvssAttributes struct {
 }
 
 type CvssBundle struct {
-	Nvidia *Cvss `json:"nvidia,omitempty"`
-	Redhat *Cvss `json:"redhat,omitempty"`
+	AttackVector       *VulnAttackVector    `json:"attackVector,omitempty"`
+	AttackComplexity   *VulnSeverity        `json:"attackComplexity,omitempty"`
+	PrivilegesRequired *VulnSeverity        `json:"privilegesRequired,omitempty"`
+	UserInteraction    *VulnUserInteraction `json:"userInteraction,omitempty"`
+	Confidentiality    *VulnSeverity        `json:"confidentiality,omitempty"`
+	Integrity          *VulnSeverity        `json:"integrity,omitempty"`
+	Availability       *VulnSeverity        `json:"availability,omitempty"`
+	Nvidia             *Cvss                `json:"nvidia,omitempty"`
+	Redhat             *Cvss                `json:"redhat,omitempty"`
 }
 
 type CvssBundleAttributes struct {
@@ -8771,6 +8778,51 @@ func (e ValidationUniqScope) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type VulnAttackVector string
+
+const (
+	VulnAttackVectorNetwork  VulnAttackVector = "NETWORK"
+	VulnAttackVectorAdjacent VulnAttackVector = "ADJACENT"
+	VulnAttackVectorLocal    VulnAttackVector = "LOCAL"
+	VulnAttackVectorPhysical VulnAttackVector = "PHYSICAL"
+)
+
+var AllVulnAttackVector = []VulnAttackVector{
+	VulnAttackVectorNetwork,
+	VulnAttackVectorAdjacent,
+	VulnAttackVectorLocal,
+	VulnAttackVectorPhysical,
+}
+
+func (e VulnAttackVector) IsValid() bool {
+	switch e {
+	case VulnAttackVectorNetwork, VulnAttackVectorAdjacent, VulnAttackVectorLocal, VulnAttackVectorPhysical:
+		return true
+	}
+	return false
+}
+
+func (e VulnAttackVector) String() string {
+	return string(e)
+}
+
+func (e *VulnAttackVector) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VulnAttackVector(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VulnAttackVector", str)
+	}
+	return nil
+}
+
+func (e VulnAttackVector) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type VulnReportGrade string
 
 const (
@@ -8862,6 +8914,47 @@ func (e *VulnSeverity) UnmarshalGQL(v interface{}) error {
 }
 
 func (e VulnSeverity) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type VulnUserInteraction string
+
+const (
+	VulnUserInteractionNone     VulnUserInteraction = "NONE"
+	VulnUserInteractionRequired VulnUserInteraction = "REQUIRED"
+)
+
+var AllVulnUserInteraction = []VulnUserInteraction{
+	VulnUserInteractionNone,
+	VulnUserInteractionRequired,
+}
+
+func (e VulnUserInteraction) IsValid() bool {
+	switch e {
+	case VulnUserInteractionNone, VulnUserInteractionRequired:
+		return true
+	}
+	return false
+}
+
+func (e VulnUserInteraction) String() string {
+	return string(e)
+}
+
+func (e *VulnUserInteraction) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VulnUserInteraction(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VulnUserInteraction", str)
+	}
+	return nil
+}
+
+func (e VulnUserInteraction) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

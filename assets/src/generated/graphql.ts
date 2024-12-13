@@ -2202,8 +2202,15 @@ export type CvssAttributes = {
 
 export type CvssBundle = {
   __typename?: 'CvssBundle';
+  attackComplexity?: Maybe<VulnSeverity>;
+  attackVector?: Maybe<VulnAttackVector>;
+  availability?: Maybe<VulnSeverity>;
+  confidentiality?: Maybe<VulnSeverity>;
+  integrity?: Maybe<VulnSeverity>;
   nvidia?: Maybe<Cvss>;
+  privilegesRequired?: Maybe<VulnSeverity>;
   redhat?: Maybe<Cvss>;
+  userInteraction?: Maybe<VulnUserInteraction>;
 };
 
 export type CvssBundleAttributes = {
@@ -9721,6 +9728,13 @@ export type VulnArtifactAttributes = {
   tag?: InputMaybe<Scalars['String']['input']>;
 };
 
+export enum VulnAttackVector {
+  Adjacent = 'ADJACENT',
+  Local = 'LOCAL',
+  Network = 'NETWORK',
+  Physical = 'PHYSICAL'
+}
+
 export type VulnOs = {
   __typename?: 'VulnOs';
   eosl?: Maybe<Scalars['Boolean']['output']>;
@@ -9768,6 +9782,11 @@ export type VulnSummaryAttributes = {
   noneCount?: InputMaybe<Scalars['Int']['input']>;
   unknownCount?: InputMaybe<Scalars['Int']['input']>;
 };
+
+export enum VulnUserInteraction {
+  None = 'NONE',
+  Required = 'REQUIRED'
+}
 
 export type Vulnerability = {
   __typename?: 'Vulnerability';

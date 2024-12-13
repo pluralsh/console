@@ -5,6 +5,8 @@ defmodule Console.GraphQl.Deployments.Policy do
   ecto_enum :constraint_enforcement, Console.Schema.PolicyConstraint.Enforcement
   ecto_enum :vuln_severity, Console.Schema.Vulnerability.Severity
   ecto_enum :vuln_report_grade, Console.Schema.VulnerabilityReport.Grade
+  ecto_enum :vuln_attack_vector, Console.Schema.Vulnerability.AttackVector
+  ecto_enum :vuln_user_interaction, Console.Schema.Vulnerability.UserInteraction
 
   enum :policy_aggregate do
     value :cluster
@@ -242,6 +244,14 @@ defmodule Console.GraphQl.Deployments.Policy do
   end
 
   object :cvss_bundle do
+    field :attack_vector,       :vuln_attack_vector
+    field :attack_complexity,   :vuln_severity
+    field :privileges_required, :vuln_severity
+    field :user_interaction,    :vuln_user_interaction
+    field :confidentiality,     :vuln_severity
+    field :integrity,           :vuln_severity
+    field :availability,        :vuln_severity
+
     field :nvidia, :cvss
     field :redhat, :cvss
   end
