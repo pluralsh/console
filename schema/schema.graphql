@@ -2539,6 +2539,7 @@ enum VulnSeverity {
   MEDIUM
   HIGH
   CRITICAL
+  NONE
 }
 
 enum VulnReportGrade {

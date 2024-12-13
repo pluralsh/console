@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 /* prettier-ignore */
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
@@ -9761,6 +9761,7 @@ export enum VulnSeverity {
   High = 'HIGH',
   Low = 'LOW',
   Medium = 'MEDIUM',
+  None = 'NONE',
   Unknown = 'UNKNOWN'
 }
 
