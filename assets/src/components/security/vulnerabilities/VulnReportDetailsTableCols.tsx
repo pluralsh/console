@@ -85,6 +85,7 @@ const vulnSeverityToChipSeverity: Record<VulnSeverity, ChipProps['severity']> =
     [VulnSeverity.Medium]: 'warning',
     [VulnSeverity.Low]: 'success',
     [VulnSeverity.Unknown]: 'neutral',
+    [VulnSeverity.None]: 'neutral',
   }
 
 export const ColSeverity = columnHelper.accessor((report) => report?.severity, {
