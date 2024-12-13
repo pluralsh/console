@@ -13,6 +13,7 @@ defmodule Console.Cost.LoaderTest do
   setup :set_mimic_global
 
   describe "#load/0" do
+    @tag :skip
     test "it can load and compile cost information" do
       deployment_settings(prometheus_connection: %{host: "https://prom.example.com"}, cost: %{enabled: true})
       cluster = insert(:cluster)

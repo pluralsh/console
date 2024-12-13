@@ -13,6 +13,10 @@ defmodule Console.Schema.ClusterScalingRecommendation do
     field :memory_request, :float
     field :cpu_request,    :float
 
+    field :cpu_cost,    :float
+    field :memory_cost, :float
+    field :gpu_cost,    :float
+
     field :memory_recommendation, :float
     field :cpu_recommendation,    :float
 
@@ -38,7 +42,19 @@ defmodule Console.Schema.ClusterScalingRecommendation do
     from(csr in query, order_by: ^order)
   end
 
-  @valid ~w(type namespace name container cpu_request memory_request memory_recommendation cpu_recommendation)a
+  @valid ~w(
+    type
+    namespace
+    name
+    container
+    cpu_request
+    memory_request
+    memory_recommendation
+    cpu_recommendation
+    cpu_cost
+    gpu_cost
+    memory_cost
+  )a
 
   def changeset(model, attrs \\ %{}) do
     model

@@ -1376,15 +1376,20 @@ export type ClusterNamespaceUsage = {
   __typename?: 'ClusterNamespaceUsage';
   cluster?: Maybe<Cluster>;
   cpu?: Maybe<Scalars['Float']['output']>;
-  cpuCost?: Maybe<Scalars['Int']['output']>;
+  cpuCost?: Maybe<Scalars['Float']['output']>;
   /** the amount of cpu utilized */
   cpuUtil?: Maybe<Scalars['Float']['output']>;
+  egressCost?: Maybe<Scalars['Float']['output']>;
+  gpu?: Maybe<Scalars['Float']['output']>;
+  gpuCost?: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
+  ingressCost?: Maybe<Scalars['Float']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  loadBalancerCost?: Maybe<Scalars['Float']['output']>;
   /** the amount of memory utilized */
   memUtil?: Maybe<Scalars['Float']['output']>;
   memory?: Maybe<Scalars['Float']['output']>;
-  memoryCost?: Maybe<Scalars['Int']['output']>;
+  memoryCost?: Maybe<Scalars['Float']['output']>;
   namespace?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -1482,6 +1487,20 @@ export type ClusterProviderUpdateAttributes = {
   service?: InputMaybe<ClusterServiceAttributes>;
 };
 
+export type ClusterRecommendationAttributes = {
+  container?: InputMaybe<Scalars['String']['input']>;
+  cpuCost?: InputMaybe<Scalars['Float']['input']>;
+  cpuRequest?: InputMaybe<Scalars['Float']['input']>;
+  gpuCost?: InputMaybe<Scalars['Float']['input']>;
+  memoryCost?: InputMaybe<Scalars['Float']['input']>;
+  memoryRequest?: InputMaybe<Scalars['Float']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  /** the service id known to be attached to this recommendation */
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  type?: InputMaybe<ScalingRecommendationType>;
+};
+
 export type ClusterRestore = {
   __typename?: 'ClusterRestore';
   backup?: Maybe<ClusterBackup>;
@@ -1529,14 +1548,18 @@ export type ClusterScalingRecommendation = {
   __typename?: 'ClusterScalingRecommendation';
   cluster?: Maybe<Cluster>;
   container?: Maybe<Scalars['String']['output']>;
+  cpuCost?: Maybe<Scalars['Float']['output']>;
   cpuRecommendation?: Maybe<Scalars['Float']['output']>;
   cpuRequest?: Maybe<Scalars['Float']['output']>;
+  gpuCost?: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  memoryCost?: Maybe<Scalars['Float']['output']>;
   memoryRecommendation?: Maybe<Scalars['Float']['output']>;
   memoryRequest?: Maybe<Scalars['Float']['output']>;
   name?: Maybe<Scalars['String']['output']>;
   namespace?: Maybe<Scalars['String']['output']>;
+  service?: Maybe<ServiceDeployment>;
   type?: Maybe<ScalingRecommendationType>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
 };
@@ -1628,15 +1651,20 @@ export type ClusterUsage = {
   __typename?: 'ClusterUsage';
   cluster?: Maybe<Cluster>;
   cpu?: Maybe<Scalars['Float']['output']>;
-  cpuCost?: Maybe<Scalars['Int']['output']>;
+  cpuCost?: Maybe<Scalars['Float']['output']>;
   /** the amount of cpu utilized */
   cpuUtil?: Maybe<Scalars['Float']['output']>;
+  egressCost?: Maybe<Scalars['Float']['output']>;
+  gpu?: Maybe<Scalars['Float']['output']>;
+  gpuCost?: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
+  ingressCost?: Maybe<Scalars['Float']['output']>;
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
+  loadBalancerCost?: Maybe<Scalars['Float']['output']>;
   /** the amount of memory utilized */
   memUtil?: Maybe<Scalars['Float']['output']>;
   memory?: Maybe<Scalars['Float']['output']>;
-  memoryCost?: Maybe<Scalars['Int']['output']>;
+  memoryCost?: Maybe<Scalars['Float']['output']>;
   namespaces?: Maybe<ClusterNamespaceUsageConnection>;
   recommendations?: Maybe<ClusterScalingRecommendationConnection>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
@@ -2013,6 +2041,36 @@ export type CostAnalysis = {
   totalCost?: Maybe<Scalars['Float']['output']>;
 };
 
+export type CostAttributes = {
+  cpu?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical cpu cost for this scope */
+  cpuCost?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical cpu utilization for this scope */
+  cpuUtil?: InputMaybe<Scalars['Float']['input']>;
+  egressCost?: InputMaybe<Scalars['Float']['input']>;
+  gpu?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical gpu cost for this scope */
+  gpuCost?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical gpu utilization for this scope */
+  gpuUtil?: InputMaybe<Scalars['Float']['input']>;
+  ingressCost?: InputMaybe<Scalars['Float']['input']>;
+  loadBalancerCost?: InputMaybe<Scalars['Float']['input']>;
+  memory?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical memory cost for this scope */
+  memoryCost?: InputMaybe<Scalars['Float']['input']>;
+  /** the historical memory utilization for this scope */
+  memoryUtil?: InputMaybe<Scalars['Float']['input']>;
+  /** leave null if cluster scoped */
+  namespace?: InputMaybe<Scalars['String']['input']>;
+  storage?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type CostIngestAttributes = {
+  cluster?: InputMaybe<CostAttributes>;
+  namespaces?: InputMaybe<Array<InputMaybe<CostAttributes>>>;
+  recommendations?: InputMaybe<Array<InputMaybe<ClusterRecommendationAttributes>>>;
+};
+
 /** Settings for cost management */
 export type CostSettings = {
   __typename?: 'CostSettings';
@@ -2140,6 +2198,17 @@ export type CvssAttributes = {
   v3Vector?: InputMaybe<Scalars['String']['input']>;
   v40Score?: InputMaybe<Scalars['Float']['input']>;
   v40Vector?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type CvssBundle = {
+  __typename?: 'CvssBundle';
+  nvidia?: Maybe<Cvss>;
+  redhat?: Maybe<Cvss>;
+};
+
+export type CvssBundleAttributes = {
+  nvidia?: InputMaybe<CvssAttributes>;
+  redhat?: InputMaybe<CvssAttributes>;
 };
 
 export type DaemonSet = {
@@ -5555,6 +5624,7 @@ export type RootMutationType = {
   /** forces a pipeline gate to be in open state */
   forceGate?: Maybe<PipelineGate>;
   impersonateServiceAccount?: Maybe<User>;
+  ingestClusterCost?: Maybe<Scalars['Boolean']['output']>;
   installAddOn?: Maybe<ServiceDeployment>;
   installRecipe?: Maybe<Build>;
   installStack?: Maybe<Build>;
@@ -6188,6 +6258,11 @@ export type RootMutationTypeForceGateArgs = {
 
 export type RootMutationTypeImpersonateServiceAccountArgs = {
   email: Scalars['String']['input'];
+};
+
+
+export type RootMutationTypeIngestClusterCostArgs = {
+  costs: CostIngestAttributes;
 };
 
 
@@ -9697,7 +9772,7 @@ export type VulnSummaryAttributes = {
 export type Vulnerability = {
   __typename?: 'Vulnerability';
   class?: Maybe<Scalars['String']['output']>;
-  cvss?: Maybe<Cvss>;
+  cvss?: Maybe<CvssBundle>;
   cvssSource?: Maybe<Scalars['String']['output']>;
   description?: Maybe<Scalars['String']['output']>;
   fixedVersion?: Maybe<Scalars['String']['output']>;
@@ -9716,11 +9791,12 @@ export type Vulnerability = {
   target?: Maybe<Scalars['String']['output']>;
   title?: Maybe<Scalars['String']['output']>;
   updatedAt?: Maybe<Scalars['DateTime']['output']>;
+  vulnId?: Maybe<Scalars['String']['output']>;
 };
 
 export type VulnerabilityAttributes = {
   class?: InputMaybe<Scalars['String']['input']>;
-  cvss?: InputMaybe<CvssAttributes>;
+  cvss?: InputMaybe<CvssBundleAttributes>;
   cvssSource?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
   fixedVersion?: InputMaybe<Scalars['String']['input']>;
@@ -9736,6 +9812,7 @@ export type VulnerabilityAttributes = {
   severity?: InputMaybe<VulnSeverity>;
   target?: InputMaybe<Scalars['String']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
+  vulnId?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type VulnerabilityReport = {
