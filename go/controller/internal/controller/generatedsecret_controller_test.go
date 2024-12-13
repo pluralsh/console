@@ -67,13 +67,23 @@ var _ = Describe("GeneratedSecret Controller", Ordered, func() {
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 			}
+
+			// create new persisted secret
 			_, err := reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
 			Expect(err).NotTo(HaveOccurred())
 			s1 := &corev1.Secret{}
 			Expect(k8sClient.Get(ctx, client.ObjectKey{Name: "secret1", Namespace: namespace}, s1)).To(Succeed())
 			Expect(s1.Data["b64"]).To(Equal([]byte("b25lIHR3byB0aHJlZQ==")))
 			Expect(s1.Data["name"]).To(Equal([]byte("John Doe")))
-			Expect(len(s1.Data["password"])).To(Equal(10))
+			password := s1.Data["password"]
+			Expect(len(password)).To(Equal(10))
+
+			// read from persisted secret
+			_, err = reconciler.Reconcile(ctx, reconcile.Request{NamespacedName: namespacedName})
+			Expect(err).NotTo(HaveOccurred())
+			// should have exactly the same data
+			Expect(k8sClient.Get(ctx, client.ObjectKey{Name: "secret1", Namespace: namespace}, s1)).To(Succeed())
+			Expect(s1.Data["password"]).To(Equal(password))
 		})
 
 	})

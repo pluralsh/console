@@ -1,6 +1,8 @@
 package v1alpha1
 
 import (
+	"fmt"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -18,6 +20,11 @@ type GeneratedSecretDestination struct {
 	Namespace string `json:"namespace,omitempty"`
 }
 
+type GeneratedSecretStatus struct {
+	Status                    `json:",inline"`
+	RenderedTemplateSecretRef *corev1.LocalObjectReference `json:"renderedTemplateSecretRef,omitempty"`
+}
+
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+kubebuilder:resource:scope=Namespaced
@@ -27,8 +34,8 @@ type GeneratedSecret struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   GeneratedSecretSpec `json:"spec,omitempty"`
-	Status Status              `json:"status,omitempty"`
+	Spec   GeneratedSecretSpec   `json:"spec,omitempty"`
+	Status GeneratedSecretStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -42,6 +49,10 @@ type GeneratedSecretList struct {
 
 func (in *GeneratedSecret) SetCondition(condition metav1.Condition) {
 	meta.SetStatusCondition(&in.Status.Conditions, condition)
+}
+
+func (in *GeneratedSecret) GetSecretName() string {
+	return fmt.Sprintf("gs-%s", in.Name)
 }
 
 func init() {
