@@ -15,6 +15,7 @@ Package v1alpha1 contains API Schema definitions for the deployments v1alpha1 AP
 - [ClusterRestoreTrigger](#clusterrestoretrigger)
 - [CustomStackRun](#customstackrun)
 - [DeploymentSettings](#deploymentsettings)
+- [GeneratedSecret](#generatedsecret)
 - [GitRepository](#gitrepository)
 - [GlobalService](#globalservice)
 - [HelmRepository](#helmrepository)
@@ -766,6 +767,60 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `job` _[JobSpec](#jobspec)_ |  |  | Optional: {} <br /> |
+
+
+#### GeneratedSecret
+
+
+
+GeneratedSecret is the Schema for the generatedsecrets API
+
+
+
+
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `apiVersion` _string_ | `deployments.plural.sh/v1alpha1` | | |
+| `kind` _string_ | `GeneratedSecret` | | |
+| `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
+| `spec` _[GeneratedSecretSpec](#generatedsecretspec)_ |  |  |  |
+
+
+#### GeneratedSecretDestination
+
+
+
+
+
+
+
+_Appears in:_
+- [GeneratedSecretSpec](#generatedsecretspec)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `name` _string_ |  |  |  |
+| `namespace` _string_ |  |  |  |
+
+
+#### GeneratedSecretSpec
+
+
+
+GeneratedSecretSpec defines the desired state of GeneratedSecret
+
+
+
+_Appears in:_
+- [GeneratedSecret](#generatedsecret)
+
+| Field | Description | Default | Validation |
+| --- | --- | --- | --- |
+| `template` _object (keys:string, values:string)_ | Template secret data in string form. |  |  |
+| `destinations` _[GeneratedSecretDestination](#generatedsecretdestination) array_ | Destinations describe name/namespace for the secrets. |  |  |
+
+
 
 
 #### GitHealth
@@ -2662,6 +2717,7 @@ _Appears in:_
 
 _Appears in:_
 - [ClusterStatus](#clusterstatus)
+- [GeneratedSecretStatus](#generatedsecretstatus)
 - [GitRepositoryStatus](#gitrepositorystatus)
 - [ServiceStatus](#servicestatus)
 
