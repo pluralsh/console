@@ -1,13 +1,15 @@
 defmodule Console.Prom.Plugin do
   use PromEx.Plugin
 
-  def metric_scope(:git_agent), do: [:console, :git, :agent]
-  def metric_scope(:cluster_count), do: [:console, :cluster, :count]
-  def metric_scope(:unhealthy_cluster_count), do: [:console, :unhealthy, :cluster, :count]
-  def metric_scope(:service_count), do: [:console, :service, :count]
-  def metric_scope(:failed_service_count), do: [:console, :failed, :service, :count]
-  def metric_scope(:file_count), do: [:console, :file, :count]
-  def metric_scope(:file_size), do: [:console, :file, :size]
+  def metric_scope(:git_agent), do: ~w(console git agent)a
+  def metric_scope(:cluster_count), do: ~w(console cluster count)a
+  def metric_scope(:unhealthy_cluster_count), do: ~w(console unhealthy cluster count)a
+  def metric_scope(:service_count), do: ~w(console service count)a
+  def metric_scope(:failed_service_count), do: ~w(console failed service count)a
+  def metric_scope(:stack_count), do: ~w(console stack count)a
+  def metric_scope(:failed_stack_count), do: ~w(console failed stack count)a
+  def metric_scope(:file_count), do: ~w(console file count)a
+  def metric_scope(:file_size), do: ~w(console file size)a
 
   @impl true
   def event_metrics(_opts) do
