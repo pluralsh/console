@@ -1,11 +1,20 @@
-import { Button, Chip, Modal, Table } from '@pluralsh/design-system'
+import {
+  ArrowTopRightIcon,
+  Button,
+  Chip,
+  Flex,
+  Modal,
+  Table,
+} from '@pluralsh/design-system'
 import { createColumnHelper } from '@tanstack/react-table'
 import { CertificateFragment } from 'generated/graphql'
 import { ComponentProps, useState } from 'react'
 import { useTheme } from 'styled-components'
 
-import { InfoSectionH3 } from './common'
+import { useParams } from 'react-router-dom'
+import { getCustomResourceDetailsAbsPath } from 'routes/kubernetesRoutesConsts.tsx'
 import { RawYaml } from '../ComponentRaw.tsx'
+import { InfoSectionH3 } from './common'
 
 const columnHelper = createColumnHelper<CertificateFragment>()
 
@@ -89,17 +98,35 @@ const columns = [
     header: '',
     meta: { gridTemplate: 'max-content' },
     cell: function Cell({ getValue }) {
+      const { clusterId = '' } = useParams()
       const certificate = getValue()
       const [open, setOpen] = useState(false)
 
       return (
         <>
-          <Button
-            secondary
-            onClick={() => setOpen(true)}
-          >
-            View certificate
-          </Button>
+          <Flex gap="small">
+            <Button
+              secondary
+              onClick={() => setOpen(true)}
+            >
+              Raw
+            </Button>
+            <Button
+              secondary
+              endIcon={<ArrowTopRightIcon />}
+              as="a"
+              target="_blank"
+              rel="noopener noreferrer"
+              href={getCustomResourceDetailsAbsPath(
+                clusterId,
+                'certificates.cert-manager.io',
+                certificate.metadata?.name,
+                certificate.metadata?.namespace
+              )}
+            >
+              View Certificate
+            </Button>
+          </Flex>
           <Modal
             header={`${certificate.metadata?.name} - Raw`}
             scrollable={false}
