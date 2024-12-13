@@ -171,6 +171,9 @@ defmodule Console.GraphQl.Resolvers.Deployments.Cluster do
     |> ok()
   end
 
+  def cost_ingest(%{costs: data}, %{context: %{cluster: cluster}}),
+    do: Console.Cost.Ingester.ingest(data, cluster)
+
   def create_cluster(%{attributes: attrs}, %{context: %{current_user: user}}),
     do: Clusters.create_cluster(attrs, user)
 

@@ -238,6 +238,45 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :last_request_at, :datetime
   end
 
+  input_object :cost_ingest_attributes do
+    field :cluster,         :cost_attributes
+    field :namespaces,      list_of(:cost_attributes)
+    field :recommendations, list_of(:cluster_recommendation_attributes)
+  end
+
+  input_object :cost_attributes do
+    field :namespace,           :string, description: "leave null if cluster scoped"
+    field :memory,              :float
+    field :cpu,                 :float
+    field :gpu,                 :float
+    field :storage,             :float
+    field :memory_util,         :float, description: "the historical memory utilization for this scope"
+    field :cpu_util,            :float, description: "the historical cpu utilization for this scope"
+    field :gpu_util,            :float, description: "the historical gpu utilization for this scope"
+    field :cpu_cost,            :float, description: "the historical cpu cost for this scope"
+    field :memory_cost,         :float, description: "the historical memory cost for this scope"
+    field :gpu_cost,            :float, description: "the historical gpu cost for this scope"
+    field :ingress_cost,        :float
+    field :load_balancer_cost,  :float
+    field :egress_cost,         :float
+  end
+
+  input_object :cluster_recommendation_attributes do
+    field :type,           :scaling_recommendation_type
+    field :namespace,      :string
+    field :name,           :string
+    field :container,      :string
+
+    field :memory_request, :float
+    field :cpu_request,    :float
+
+    field :cpu_cost,      :float
+    field :memory_cost,   :float
+    field :gpu_cost,      :float
+
+    field :service_id, :id, description: "the service id known to be attached to this recommendation"
+  end
+
   @desc "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
   object :cluster_provider do
     field :id,                  non_null(:id), description: "the id of this provider"
@@ -703,14 +742,19 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :cluster_usage do
-    field :id,        non_null(:id)
-    field :cpu,       :float
-    field :memory,    :float
-    field :cpu_util,  :float, description: "the amount of cpu utilized"
-    field :mem_util,  :float, description: "the amount of memory utilized"
+    field :id,                 non_null(:id)
+    field :cpu,                :float
+    field :memory,             :float
+    field :gpu,                :float
+    field :cpu_util,           :float, description: "the amount of cpu utilized"
+    field :mem_util,           :float, description: "the amount of memory utilized"
 
-    field :cpu_cost,     :integer, resolve: fn u, _, _ -> {:ok, Console.Cost.Model.resolve(u, :cpu)} end
-    field :memory_cost,  :integer, resolve: fn u, _, _ -> {:ok, Console.Cost.Model.resolve(u, :memory)} end
+    field :cpu_cost,           :float
+    field :memory_cost,        :float
+    field :gpu_cost,           :float
+    field :ingress_cost,       :float
+    field :load_balancer_cost, :float
+    field :egress_cost,        :float
 
     field :cluster, :cluster, resolve: dataloader(Deployments)
 
@@ -730,11 +774,16 @@ defmodule Console.GraphQl.Deployments.Cluster do
     field :namespace, :string
     field :cpu,       :float
     field :memory,    :float
+    field :gpu,       :float
     field :cpu_util,  :float, description: "the amount of cpu utilized"
     field :mem_util,  :float, description: "the amount of memory utilized"
 
-    field :cpu_cost,     :integer, resolve: fn u, _, _ -> {:ok, Console.Cost.Model.resolve(u, :cpu)} end
-    field :memory_cost,  :integer, resolve: fn u, _, _ -> {:ok, Console.Cost.Model.resolve(u, :memory)} end
+    field :cpu_cost,           :float
+    field :memory_cost,        :float
+    field :gpu_cost,           :float
+    field :ingress_cost,       :float
+    field :load_balancer_cost, :float
+    field :egress_cost,        :float
 
     field :cluster, :cluster, resolve: dataloader(Deployments)
 
@@ -742,17 +791,22 @@ defmodule Console.GraphQl.Deployments.Cluster do
   end
 
   object :cluster_scaling_recommendation do
-    field :id,        non_null(:id)
-    field :type,      :scaling_recommendation_type
-    field :namespace, :string
-    field :name,      :string
-    field :container, :string
+    field :id,                    non_null(:id)
+    field :type,                  :scaling_recommendation_type
+    field :namespace,             :string
+    field :name,                  :string
+    field :container,             :string
 
     field :memory_request,        :float
     field :cpu_request,           :float
     field :memory_recommendation, :float
     field :cpu_recommendation,    :float
 
+    field :cpu_cost,              :float
+    field :memory_cost,           :float
+    field :gpu_cost,              :float
+
+    field :service, :service_deployment, resolve: dataloader(Deployments)
     field :cluster, :cluster, resolve: dataloader(Deployments)
 
     timestamps()
@@ -776,6 +830,13 @@ defmodule Console.GraphQl.Deployments.Cluster do
       arg :attributes, non_null(:cluster_ping)
 
       safe_resolve &Deployments.ping/2
+    end
+
+    field :ingest_cluster_cost, :boolean do
+      middleware ClusterAuthenticated
+      arg :costs, non_null(:cost_ingest_attributes)
+
+      resolve &Deployments.cost_ingest/2
     end
 
     @desc "registers a list of runtime services discovered for the current cluster"

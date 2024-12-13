@@ -1080,15 +1080,20 @@ type ClusterNamespaceUsage struct {
 	Namespace *string  `json:"namespace,omitempty"`
 	CPU       *float64 `json:"cpu,omitempty"`
 	Memory    *float64 `json:"memory,omitempty"`
+	Gpu       *float64 `json:"gpu,omitempty"`
 	// the amount of cpu utilized
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
 	// the amount of memory utilized
-	MemUtil    *float64 `json:"memUtil,omitempty"`
-	CPUCost    *int64   `json:"cpuCost,omitempty"`
-	MemoryCost *int64   `json:"memoryCost,omitempty"`
-	Cluster    *Cluster `json:"cluster,omitempty"`
-	InsertedAt *string  `json:"insertedAt,omitempty"`
-	UpdatedAt  *string  `json:"updatedAt,omitempty"`
+	MemUtil          *float64 `json:"memUtil,omitempty"`
+	CPUCost          *float64 `json:"cpuCost,omitempty"`
+	MemoryCost       *float64 `json:"memoryCost,omitempty"`
+	GpuCost          *float64 `json:"gpuCost,omitempty"`
+	IngressCost      *float64 `json:"ingressCost,omitempty"`
+	LoadBalancerCost *float64 `json:"loadBalancerCost,omitempty"`
+	EgressCost       *float64 `json:"egressCost,omitempty"`
+	Cluster          *Cluster `json:"cluster,omitempty"`
+	InsertedAt       *string  `json:"insertedAt,omitempty"`
+	UpdatedAt        *string  `json:"updatedAt,omitempty"`
 }
 
 type ClusterNamespaceUsageConnection struct {
@@ -1172,6 +1177,20 @@ type ClusterProviderUpdateAttributes struct {
 	CloudSettings *CloudProviderSettingsAttributes `json:"cloudSettings,omitempty"`
 }
 
+type ClusterRecommendationAttributes struct {
+	Type          *ScalingRecommendationType `json:"type,omitempty"`
+	Namespace     *string                    `json:"namespace,omitempty"`
+	Name          *string                    `json:"name,omitempty"`
+	Container     *string                    `json:"container,omitempty"`
+	MemoryRequest *float64                   `json:"memoryRequest,omitempty"`
+	CPURequest    *float64                   `json:"cpuRequest,omitempty"`
+	CPUCost       *float64                   `json:"cpuCost,omitempty"`
+	MemoryCost    *float64                   `json:"memoryCost,omitempty"`
+	GpuCost       *float64                   `json:"gpuCost,omitempty"`
+	// the service id known to be attached to this recommendation
+	ServiceID *string `json:"serviceId,omitempty"`
+}
+
 type ClusterRestore struct {
 	ID         string         `json:"id"`
 	Status     RestoreStatus  `json:"status"`
@@ -1219,6 +1238,10 @@ type ClusterScalingRecommendation struct {
 	CPURequest           *float64                   `json:"cpuRequest,omitempty"`
 	MemoryRecommendation *float64                   `json:"memoryRecommendation,omitempty"`
 	CPURecommendation    *float64                   `json:"cpuRecommendation,omitempty"`
+	CPUCost              *float64                   `json:"cpuCost,omitempty"`
+	MemoryCost           *float64                   `json:"memoryCost,omitempty"`
+	GpuCost              *float64                   `json:"gpuCost,omitempty"`
+	Service              *ServiceDeployment         `json:"service,omitempty"`
 	Cluster              *Cluster                   `json:"cluster,omitempty"`
 	InsertedAt           *string                    `json:"insertedAt,omitempty"`
 	UpdatedAt            *string                    `json:"updatedAt,omitempty"`
@@ -1305,17 +1328,22 @@ type ClusterUsage struct {
 	ID     string   `json:"id"`
 	CPU    *float64 `json:"cpu,omitempty"`
 	Memory *float64 `json:"memory,omitempty"`
+	Gpu    *float64 `json:"gpu,omitempty"`
 	// the amount of cpu utilized
 	CPUUtil *float64 `json:"cpuUtil,omitempty"`
 	// the amount of memory utilized
-	MemUtil         *float64                                `json:"memUtil,omitempty"`
-	CPUCost         *int64                                  `json:"cpuCost,omitempty"`
-	MemoryCost      *int64                                  `json:"memoryCost,omitempty"`
-	Cluster         *Cluster                                `json:"cluster,omitempty"`
-	Namespaces      *ClusterNamespaceUsageConnection        `json:"namespaces,omitempty"`
-	Recommendations *ClusterScalingRecommendationConnection `json:"recommendations,omitempty"`
-	InsertedAt      *string                                 `json:"insertedAt,omitempty"`
-	UpdatedAt       *string                                 `json:"updatedAt,omitempty"`
+	MemUtil          *float64                                `json:"memUtil,omitempty"`
+	CPUCost          *float64                                `json:"cpuCost,omitempty"`
+	MemoryCost       *float64                                `json:"memoryCost,omitempty"`
+	GpuCost          *float64                                `json:"gpuCost,omitempty"`
+	IngressCost      *float64                                `json:"ingressCost,omitempty"`
+	LoadBalancerCost *float64                                `json:"loadBalancerCost,omitempty"`
+	EgressCost       *float64                                `json:"egressCost,omitempty"`
+	Cluster          *Cluster                                `json:"cluster,omitempty"`
+	Namespaces       *ClusterNamespaceUsageConnection        `json:"namespaces,omitempty"`
+	Recommendations  *ClusterScalingRecommendationConnection `json:"recommendations,omitempty"`
+	InsertedAt       *string                                 `json:"insertedAt,omitempty"`
+	UpdatedAt        *string                                 `json:"updatedAt,omitempty"`
 }
 
 type ClusterUsageConnection struct {
@@ -1610,6 +1638,36 @@ type CostAnalysis struct {
 	SharedCost    *float64 `json:"sharedCost,omitempty"`
 }
 
+type CostAttributes struct {
+	// leave null if cluster scoped
+	Namespace *string  `json:"namespace,omitempty"`
+	Memory    *float64 `json:"memory,omitempty"`
+	CPU       *float64 `json:"cpu,omitempty"`
+	Gpu       *float64 `json:"gpu,omitempty"`
+	Storage   *float64 `json:"storage,omitempty"`
+	// the historical memory utilization for this scope
+	MemoryUtil *float64 `json:"memoryUtil,omitempty"`
+	// the historical cpu utilization for this scope
+	CPUUtil *float64 `json:"cpuUtil,omitempty"`
+	// the historical gpu utilization for this scope
+	GpuUtil *float64 `json:"gpuUtil,omitempty"`
+	// the historical cpu cost for this scope
+	CPUCost *float64 `json:"cpuCost,omitempty"`
+	// the historical memory cost for this scope
+	MemoryCost *float64 `json:"memoryCost,omitempty"`
+	// the historical gpu cost for this scope
+	GpuCost          *float64 `json:"gpuCost,omitempty"`
+	IngressCost      *float64 `json:"ingressCost,omitempty"`
+	LoadBalancerCost *float64 `json:"loadBalancerCost,omitempty"`
+	EgressCost       *float64 `json:"egressCost,omitempty"`
+}
+
+type CostIngestAttributes struct {
+	Cluster         *CostAttributes                    `json:"cluster,omitempty"`
+	Namespaces      []*CostAttributes                  `json:"namespaces,omitempty"`
+	Recommendations []*ClusterRecommendationAttributes `json:"recommendations,omitempty"`
+}
+
 // Settings for cost management
 type CostSettings struct {
 	Enabled *bool `json:"enabled,omitempty"`
@@ -1727,6 +1785,16 @@ type CvssAttributes struct {
 	V2Score   *float64 `json:"v2Score,omitempty"`
 	V3Score   *float64 `json:"v3Score,omitempty"`
 	V40Score  *float64 `json:"v40Score,omitempty"`
+}
+
+type CvssBundle struct {
+	Nvidia *Cvss `json:"nvidia,omitempty"`
+	Redhat *Cvss `json:"redhat,omitempty"`
+}
+
+type CvssBundleAttributes struct {
+	Nvidia *CvssAttributes `json:"nvidia,omitempty"`
+	Redhat *CvssAttributes `json:"redhat,omitempty"`
 }
 
 type DaemonSet struct {
@@ -6026,31 +6094,33 @@ type Vulnerability struct {
 	Class            *string       `json:"class,omitempty"`
 	PackageType      *string       `json:"packageType,omitempty"`
 	PkgPath          *string       `json:"pkgPath,omitempty"`
+	VulnID           *string       `json:"vulnId,omitempty"`
 	PublishedDate    *string       `json:"publishedDate,omitempty"`
 	LastModifiedDate *string       `json:"lastModifiedDate,omitempty"`
-	Cvss             *Cvss         `json:"cvss,omitempty"`
+	Cvss             *CvssBundle   `json:"cvss,omitempty"`
 	InsertedAt       *string       `json:"insertedAt,omitempty"`
 	UpdatedAt        *string       `json:"updatedAt,omitempty"`
 }
 
 type VulnerabilityAttributes struct {
-	Resource         *string         `json:"resource,omitempty"`
-	FixedVersion     *string         `json:"fixedVersion,omitempty"`
-	InstalledVersion *string         `json:"installedVersion,omitempty"`
-	Severity         *VulnSeverity   `json:"severity,omitempty"`
-	Score            *float64        `json:"score,omitempty"`
-	Title            *string         `json:"title,omitempty"`
-	Description      *string         `json:"description,omitempty"`
-	CvssSource       *string         `json:"cvssSource,omitempty"`
-	PrimaryLink      *string         `json:"primaryLink,omitempty"`
-	Links            []*string       `json:"links,omitempty"`
-	Target           *string         `json:"target,omitempty"`
-	Class            *string         `json:"class,omitempty"`
-	PackageType      *string         `json:"packageType,omitempty"`
-	PkgPath          *string         `json:"pkgPath,omitempty"`
-	PublishedDate    *string         `json:"publishedDate,omitempty"`
-	LastModifiedDate *string         `json:"lastModifiedDate,omitempty"`
-	Cvss             *CvssAttributes `json:"cvss,omitempty"`
+	Resource         *string               `json:"resource,omitempty"`
+	FixedVersion     *string               `json:"fixedVersion,omitempty"`
+	InstalledVersion *string               `json:"installedVersion,omitempty"`
+	Severity         *VulnSeverity         `json:"severity,omitempty"`
+	Score            *float64              `json:"score,omitempty"`
+	Title            *string               `json:"title,omitempty"`
+	Description      *string               `json:"description,omitempty"`
+	CvssSource       *string               `json:"cvssSource,omitempty"`
+	PrimaryLink      *string               `json:"primaryLink,omitempty"`
+	Links            []*string             `json:"links,omitempty"`
+	Target           *string               `json:"target,omitempty"`
+	Class            *string               `json:"class,omitempty"`
+	PackageType      *string               `json:"packageType,omitempty"`
+	PkgPath          *string               `json:"pkgPath,omitempty"`
+	VulnID           *string               `json:"vulnId,omitempty"`
+	PublishedDate    *string               `json:"publishedDate,omitempty"`
+	LastModifiedDate *string               `json:"lastModifiedDate,omitempty"`
+	Cvss             *CvssBundleAttributes `json:"cvss,omitempty"`
 }
 
 type VulnerabilityReport struct {

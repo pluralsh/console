@@ -92,11 +92,17 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :class,            :string
     field :package_type,     :string
     field :pkg_path,         :string
+    field :vuln_id,          :string
 
     field :published_date,     :datetime
     field :last_modified_date, :datetime
 
-    field :cvss, :cvss_attributes
+    field :cvss, :cvss_bundle_attributes
+  end
+
+  input_object :cvss_bundle_attributes do
+    field :nvidia, :cvss_attributes
+    field :redhat, :cvss_attributes
   end
 
   input_object :cvss_attributes do
@@ -225,13 +231,19 @@ defmodule Console.GraphQl.Deployments.Policy do
     field :class,            :string
     field :package_type,     :string
     field :pkg_path,         :string
+    field :vuln_id,          :string
 
     field :published_date,     :datetime
     field :last_modified_date, :datetime
 
-    field :cvss, :cvss
+    field :cvss, :cvss_bundle
 
     timestamps()
+  end
+
+  object :cvss_bundle do
+    field :nvidia, :cvss
+    field :redhat, :cvss
   end
 
   object :cvss do

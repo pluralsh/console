@@ -779,6 +779,8 @@ type RootMutationType {
   "a regular status ping to be sent by the deploy operator"
   pingCluster(attributes: ClusterPing!): Cluster
 
+  ingestClusterCost(costs: CostIngestAttributes!): Boolean
+
   "registers a list of runtime services discovered for the current cluster"
   registerRuntimeServices(services: [RuntimeServiceAttributes], serviceId: ID): Int
 
@@ -2638,9 +2640,15 @@ input VulnerabilityAttributes {
   class: String
   packageType: String
   pkgPath: String
+  vulnId: String
   publishedDate: DateTime
   lastModifiedDate: DateTime
-  cvss: CvssAttributes
+  cvss: CvssBundleAttributes
+}
+
+input CvssBundleAttributes {
+  nvidia: CvssAttributes
+  redhat: CvssAttributes
 }
 
 input CvssAttributes {
@@ -2781,11 +2789,17 @@ type Vulnerability {
   class: String
   packageType: String
   pkgPath: String
+  vulnId: String
   publishedDate: DateTime
   lastModifiedDate: DateTime
-  cvss: Cvss
+  cvss: CvssBundle
   insertedAt: DateTime
   updatedAt: DateTime
+}
+
+type CvssBundle {
+  nvidia: Cvss
+  redhat: Cvss
 }
 
 type Cvss {
@@ -4548,6 +4562,72 @@ input InsightClientInfoAttributes {
   lastRequestAt: DateTime
 }
 
+input CostIngestAttributes {
+  cluster: CostAttributes
+  namespaces: [CostAttributes]
+  recommendations: [ClusterRecommendationAttributes]
+}
+
+input CostAttributes {
+  "leave null if cluster scoped"
+  namespace: String
+
+  memory: Float
+
+  cpu: Float
+
+  gpu: Float
+
+  storage: Float
+
+  "the historical memory utilization for this scope"
+  memoryUtil: Float
+
+  "the historical cpu utilization for this scope"
+  cpuUtil: Float
+
+  "the historical gpu utilization for this scope"
+  gpuUtil: Float
+
+  "the historical cpu cost for this scope"
+  cpuCost: Float
+
+  "the historical memory cost for this scope"
+  memoryCost: Float
+
+  "the historical gpu cost for this scope"
+  gpuCost: Float
+
+  ingressCost: Float
+
+  loadBalancerCost: Float
+
+  egressCost: Float
+}
+
+input ClusterRecommendationAttributes {
+  type: ScalingRecommendationType
+
+  namespace: String
+
+  name: String
+
+  container: String
+
+  memoryRequest: Float
+
+  cpuRequest: Float
+
+  cpuCost: Float
+
+  memoryCost: Float
+
+  gpuCost: Float
+
+  "the service id known to be attached to this recommendation"
+  serviceId: ID
+}
+
 "a CAPI provider for a cluster, cloud is inferred from name if not provided manually"
 type ClusterProvider {
   "the id of this provider"
@@ -5175,15 +5255,25 @@ type ClusterUsage {
 
   memory: Float
 
+  gpu: Float
+
   "the amount of cpu utilized"
   cpuUtil: Float
 
   "the amount of memory utilized"
   memUtil: Float
 
-  cpuCost: Int
+  cpuCost: Float
 
-  memoryCost: Int
+  memoryCost: Float
+
+  gpuCost: Float
+
+  ingressCost: Float
+
+  loadBalancerCost: Float
+
+  egressCost: Float
 
   cluster: Cluster
 
@@ -5205,15 +5295,25 @@ type ClusterNamespaceUsage {
 
   memory: Float
 
+  gpu: Float
+
   "the amount of cpu utilized"
   cpuUtil: Float
 
   "the amount of memory utilized"
   memUtil: Float
 
-  cpuCost: Int
+  cpuCost: Float
 
-  memoryCost: Int
+  memoryCost: Float
+
+  gpuCost: Float
+
+  ingressCost: Float
+
+  loadBalancerCost: Float
+
+  egressCost: Float
 
   cluster: Cluster
 
@@ -5232,6 +5332,10 @@ type ClusterScalingRecommendation {
   cpuRequest: Float
   memoryRecommendation: Float
   cpuRecommendation: Float
+  cpuCost: Float
+  memoryCost: Float
+  gpuCost: Float
+  service: ServiceDeployment
   cluster: Cluster
   insertedAt: DateTime
   updatedAt: DateTime

@@ -483,4 +483,26 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
       %{"upgradeInsights" => [%{"name" => _, "details" => [%{"status" => "PASSING"}]}]} = found
     end
   end
+
+  describe "ingestClusterCost" do
+    test "it can ingest cluster cost information in one transaction" do
+      cluster = insert(:cluster)
+      cost = %{"cpu" => 1.0, "memory" => 100.0, "gpu" => 0.0, "cpuUtil" => 0.5, "memoryUtil" => 20.0, "gpuUtil" => 0.0}
+      ingest = %{
+        "cluster" => cost,
+        "namespaces" => Enum.map([cost], &Map.put(&1, "namespace", "default")),
+        "recommendations" => [%{"type" => "DEPLOYMENT", "namespace" => "default", "name" => "default", "container" => "nginx"}]
+      }
+
+      {:ok, %{data: %{"ingestClusterCost" => true}}} = run_query("""
+        mutation Ingest($costs: CostIngestAttributes!) {
+          ingestClusterCost(costs: $costs)
+        }
+      """, %{"costs" => ingest}, %{cluster: cluster})
+
+      assert Console.Repo.aggregate(Console.Schema.ClusterUsage, :count, :id) == 1
+      assert Console.Repo.aggregate(Console.Schema.ClusterNamespaceUsage, :count, :id) == 1
+      assert Console.Repo.aggregate(Console.Schema.ClusterScalingRecommendation, :count, :id) == 1
+    end
+  end
 end
