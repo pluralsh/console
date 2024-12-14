@@ -23,7 +23,7 @@ defmodule Console.Cost.Utils do
   end
 
   def batch_insert(records, schema, opts \\ []) do
-    {repo, opts} = Keyword.pop(opts, :repo, Console.LocalRepo)
+    {repo, opts} = Keyword.pop(opts, :repo, Console.Repo)
 
     Console.throttle(records, count: 200, pause: 10)
     |> Stream.chunk_every(200)
