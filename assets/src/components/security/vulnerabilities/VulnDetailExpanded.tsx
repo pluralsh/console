@@ -28,6 +28,7 @@ export function VulnDetailExpanded({ v }: { v: VulnerabilityFragment }) {
       <CVSSSection
         bundle={v.cvss}
         source={v.cvssSource}
+        score={v.score}
       />
     </VulnerabilityDetailSC>
   )
@@ -79,9 +80,11 @@ function CVSSRow({
 function CVSSSection({
   bundle,
   source,
+  score,
 }: {
   bundle?: Nullable<CvssBundle>
   source?: Nullable<string>
+  score?: Nullable<number>
 }) {
   const theme = useTheme()
   const hasMetrics =
@@ -95,10 +98,10 @@ function CVSSSection({
       direction="column"
       gap="large"
     >
-      {source && (
+      {source && score && (
         <StackedText
           css={{ color: theme.colors['text'], marginTop: theme.spacing.medium }}
-          first={`CVSS Vector (source ${source})`}
+          first={`CVSS Vector (source ${source}, score: ${score})`}
           firstPartialType="body2Bold"
           second="Each metric is ordered from low to high severity."
           secondPartialType="body2"

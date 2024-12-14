@@ -32,6 +32,7 @@ export const ColImage = columnHelper.accessor(({ node }) => node, {
         }
         target="_blank"
         rel="noopener noreferrer"
+        onClick={(e) => e.stopPropagation()}
         css={{ color: theme.colors['action-link-inline'] }}
       >
         {report?.artifactUrl}

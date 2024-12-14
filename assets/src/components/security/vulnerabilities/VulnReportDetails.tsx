@@ -38,7 +38,7 @@ export function VulnerabilityReportDetails() {
     skip: !vulnerabilityReportId,
     fetchPolicy: 'cache-and-network',
   })
-  console.log(data?.vulnerabilityReport?.vulnerabilities?.[0])
+
   if (error) return <GqlError error={error} />
 
   return (
