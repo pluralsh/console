@@ -1,4 +1,4 @@
-import { EmptyState, Table } from '@pluralsh/design-system'
+import { EmptyState, Table, useSetBreadcrumbs } from '@pluralsh/design-system'
 import LoadingIndicator from 'components/utils/LoadingIndicator'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 import { Violation } from 'generated/graphql'
@@ -6,12 +6,21 @@ import { isEmpty } from 'lodash'
 
 import { Row } from '@tanstack/react-table'
 
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useOutletContext } from 'react-router-dom'
 
-import { ScrollablePage } from '../../../utils/layout/ScrollablePage'
+import { ScrollablePage } from '../../../../utils/layout/ScrollablePage'
 
-import { getKubernetesResourcePath } from '../../../../routes/kubernetesRoutesConsts'
+import { getKubernetesResourcePath } from '../../../../../routes/kubernetesRoutesConsts'
 
+import { useMemo } from 'react'
+import {
+  POLICIES_ABS_PATH,
+  POLICIES_AFFECTED_RESOURCES_PATH,
+  POLICIES_REL_PATH,
+  SECURITY_ABS_PATH,
+  SECURITY_REL_PATH,
+} from 'routes/securityRoutesConsts'
+import { PolicyContextType } from '../Policy'
 import {
   ColErrorMessage,
   ColKind,
@@ -21,18 +30,24 @@ import {
 
 const columns = [ColResourceName, ColNamespace, ColKind, ColErrorMessage]
 
-export default function PolicyAffectedResources({
-  policyName,
-  violations,
-  clusterId,
-  loading,
-}: {
-  policyName?: string
-  violations?: Array<Violation | null> | null
-  clusterId?: Nullable<string>
-  loading: boolean
-}) {
+export default function PolicyAffectedResources() {
   const navigate = useNavigate()
+  const { policy, loading } = useOutletContext<PolicyContextType>()
+  const policyName = policy?.name
+  const clusterId = policy?.cluster?.id
+  const violations = policy?.violations
+
+  useSetBreadcrumbs(
+    useMemo(
+      () => [
+        { label: `${SECURITY_REL_PATH}`, url: `${SECURITY_ABS_PATH}}` },
+        { label: POLICIES_REL_PATH, url: `${POLICIES_ABS_PATH}` },
+        { label: policy?.name || '' },
+        { label: POLICIES_AFFECTED_RESOURCES_PATH },
+      ],
+      [policy?.name]
+    )
+  )
 
   if (loading) return <LoadingIndicator />
 

@@ -29,22 +29,12 @@ export function PoliciesViolationsGauge({
   const {
     clusterPolicyChartData,
     enforcementChartData,
-    installedChartData,
     clusterPolicyStatsError,
     enforcementStatsError,
-    installedStatsError,
   } = usePolicyChartsData(filters)
 
-  if (clusterPolicyStatsError || enforcementStatsError || installedStatsError) {
-    return (
-      <GqlError
-        error={
-          clusterPolicyStatsError ||
-          enforcementStatsError ||
-          installedStatsError
-        }
-      />
-    )
+  if (clusterPolicyStatsError || enforcementStatsError) {
+    return <GqlError error={clusterPolicyStatsError || enforcementStatsError} />
   }
 
   return (
@@ -56,10 +46,6 @@ export function PoliciesViolationsGauge({
       <PolicyChartCard
         title="Constraints by Enforcement"
         data={enforcementChartData}
-      />
-      <PolicyChartCard
-        title="Installed Clusters"
-        data={installedChartData}
       />
     </div>
   )

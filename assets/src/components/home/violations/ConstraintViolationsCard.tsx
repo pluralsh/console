@@ -9,7 +9,7 @@ import { useTheme } from 'styled-components'
 
 import { POLL_INTERVAL } from 'components/cd/ContinuousDeployment'
 
-import { PoliciesTable } from 'components/policies/PoliciesTable'
+import { PoliciesTable } from 'components/security/policies/PoliciesTable'
 
 import { HOME_CARD_MAX_HEIGHT } from '../HomeCard'
 

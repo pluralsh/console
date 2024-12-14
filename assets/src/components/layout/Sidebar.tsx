@@ -1,8 +1,11 @@
 import { GITHUB_LINK } from 'utils/constants'
 
+import { useMutation } from '@apollo/client'
 import {
+  AiSparkleOutlineIcon,
   ArrowTopRightIcon,
   BellIcon,
+  CatalogIcon,
   Sidebar as DSSidebar,
   GearTrainIcon,
   GitHubLogoIcon,
@@ -19,39 +22,36 @@ import {
   SidebarItem,
   SidebarSection,
   StackIcon,
-  WarningShieldIcon,
-  AiSparkleOutlineIcon,
-  CatalogIcon,
   Tooltip,
+  WarningShieldIcon,
 } from '@pluralsh/design-system'
-import { Link, useLocation } from 'react-router-dom'
-import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
-import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
 import { ME_Q } from 'components/graphql/users'
-import { useMutation } from '@apollo/client'
-import { updateCache } from 'utils/graphql'
+import { Avatar, Flex, Menu, MenuItem, useOutsideClick } from 'honorable'
+import { ReactElement, useCallback, useMemo, useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
+import { updateCache } from 'utils/graphql'
 
+import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
+import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
 import { PersonaConfigurationFragment } from 'generated/graphql'
 import { PR_DEFAULT_ABS_PATH } from 'routes/prRoutesConsts'
-import { useCDEnabled } from 'components/cd/utils/useCDEnabled'
-import { useDefaultCDPath } from 'components/cd/ContinuousDeployment'
 
-import { POLICIES_ABS_PATH } from 'routes/policiesRoutesConsts'
+import { SECURITY_ABS_PATH } from 'routes/securityRoutesConsts'
 
 import { SETTINGS_ABS_PATH } from 'routes/settingsRoutesConst'
 import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 
-import { useLogin } from '../contexts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
 import { getStacksAbsPath } from '../../routes/stacksRoutesConsts'
+import { useLogin } from '../contexts'
 
 import HelpLauncher from '../help/HelpLauncher'
 
-import { MARK_READ } from './queries'
-import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
 import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import CommandPaletteShortcuts from '../commandpalette/CommandPaletteShortcuts.tsx'
+import { NotificationsPanelOverlay } from './NotificationsPanelOverlay'
+import { MARK_READ } from './queries'
 
 type MenuItem = {
   text: string
@@ -133,12 +133,12 @@ function getMenuItems({
       hotkeys: ['shift P', '7'],
     },
     {
-      text: 'Policies',
-      expandedLabel: 'Policies',
+      text: 'Security',
+      expandedLabel: 'Security',
       icon: <WarningShieldIcon />,
-      path: POLICIES_ABS_PATH,
+      path: SECURITY_ABS_PATH,
       enabled: !!(personaConfig?.all || personaConfig?.sidebar?.kubernetes),
-      hotkeys: ['shift L', '8'],
+      hotkeys: ['8'],
     },
     {
       text: 'Backups',

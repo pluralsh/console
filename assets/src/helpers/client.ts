@@ -26,7 +26,7 @@ export const authlessClient = new ApolloClient({
 
 function maybeReconnect(socket, absintheSocket) {
   const chan = absintheSocket.channel
-  console.log('socket reconnect attempt', socket)
+  // console.log('socket reconnect attempt', socket)
   if (socket.connectionState() === 'closed') {
     console.warn('found dead websocket, attempting a reconnect')
     if (!socket.conn) {
@@ -43,13 +43,13 @@ function maybeReconnect(socket, absintheSocket) {
 
   const state = chan.state
   if (state === 'closed' || state === 'errored') {
-    console.log('broken absinthe channel, rejoining')
+    // console.log('broken absinthe channel, rejoining')
     chan.rejoin()
     return
   }
 
-  console.log('found healthy channel', chan)
-  console.log('absinthe socket not dead, ignoring')
+  // console.log('found healthy channel', chan)
+  // console.log('absinthe socket not dead, ignoring')
 }
 
 export function buildClient(gqlUrl, wsUrl, fetchToken) {

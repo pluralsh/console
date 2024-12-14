@@ -95,7 +95,7 @@ defmodule Console.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.12.0"},
-      {:ecto_sqlite3, "~> 0.17"},
+      # {:ecto_sqlite3, "~> 0.17"},
       {:yajwt, "~> 1.4"},
       {:joken, "~> 2.6"},
       {:mdex, "~> 0.1"},

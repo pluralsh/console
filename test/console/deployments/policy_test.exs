@@ -30,6 +30,7 @@ defmodule Console.Deployments.PolicyTest do
           installed_version: "1.1.0",
           severity:          :high,
           score:             8.0,
+          cvss: %{redhat: %{v3_vector: "CVSS:3.1/AV:L/AC:L/PR:H/UI:N/S:C/C:H/I:N/A:N", v3_score: 6}},
           title:             "blah",
           description:       "blah",
           cvss_source:       "nvidia",

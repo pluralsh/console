@@ -7,11 +7,11 @@ import { PolicyConstraint, PolicyConstraintsQuery } from 'generated/graphql'
 import { Edge } from 'utils/graphql'
 import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
 
-import { getPolicyDetailsPath } from 'routes/policiesRoutesConsts'
+import { getPolicyPath } from 'routes/securityRoutesConsts'
 
 import { ColActions } from 'components/home/clusteroverview/ClusterOverviewTable'
 
-import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../utils/table/useFetchPaginatedData'
+import { DEFAULT_REACT_VIRTUAL_OPTIONS } from '../../utils/table/useFetchPaginatedData'
 
 import {
   ColCluster,
@@ -55,14 +55,7 @@ export function PoliciesTable({
   }, [refetch, setRefetch])
 
   const reactTableOptions: ComponentProps<typeof Table>['reactTableOptions'] =
-    useMemo(
-      () => ({
-        meta: {
-          refetch,
-        },
-      }),
-      [refetch]
-    )
+    useMemo(() => ({ meta: { refetch } }), [refetch])
 
   return (
     <div
@@ -86,7 +79,7 @@ export function PoliciesTable({
           }}
           onRowClick={(_e, { original }: Row<Edge<PolicyConstraint>>) =>
             navigate(
-              getPolicyDetailsPath({
+              getPolicyPath({
                 policyId: original.node?.id,
               })
             )

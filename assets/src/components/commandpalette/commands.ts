@@ -1,5 +1,7 @@
 import {
+  AiSparkleOutlineIcon,
   ArrowTopRightIcon,
+  CatalogIcon,
   ClusterIcon,
   DocumentIcon,
   EyeIcon,
@@ -7,6 +9,7 @@ import {
   GitPullIcon,
   HistoryIcon,
   HomeIcon,
+  IconProps,
   KubernetesAltIcon,
   PeopleIcon,
   PodContainerIcon,
@@ -18,9 +21,6 @@ import {
   WarningShieldIcon,
   setThemeColorMode,
   useThemeColorMode,
-  IconProps,
-  CatalogIcon,
-  AiSparkleOutlineIcon,
 } from '@pluralsh/design-system'
 import { UseHotkeysOptions } from '@saas-ui/use-hotkeys'
 import { isEmpty } from 'lodash'
@@ -28,7 +28,9 @@ import { ComponentType, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { useClustersTinyQuery } from '../../generated/graphql'
+import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 import { BACKUPS_ABS_PATH } from '../../routes/backupRoutesConsts'
+import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
 import {
   CD_ABS_PATH,
   CLUSTERS_REL_PATH,
@@ -37,11 +39,11 @@ import {
   getClusterDetailsPath,
 } from '../../routes/cdRoutesConsts'
 import { KUBERNETES_ROOT_PATH } from '../../routes/kubernetesRoutesConsts'
-import { POLICIES_ABS_PATH } from '../../routes/policiesRoutesConsts'
 import {
   PR_ABS_PATH,
   PR_AUTOMATIONS_ABS_PATH,
 } from '../../routes/prRoutesConsts'
+import { SECURITY_ABS_PATH } from '../../routes/securityRoutesConsts.tsx'
 import {
   SETTINGS_ABS_PATH,
   USER_MANAGEMENT_ABS_PATH,
@@ -50,8 +52,6 @@ import { STACKS_ROOT_PATH } from '../../routes/stacksRoutesConsts'
 import { mapExistingNodes } from '../../utils/graphql'
 import { useProjectId } from '../contexts/ProjectsContext'
 import { useShareSecretOpen } from '../sharesecret/ShareSecretContext'
-import { CATALOGS_ABS_PATH } from '../../routes/catalogRoutesConsts.tsx'
-import { AI_ABS_PATH } from '../../routes/aiRoutes.tsx'
 
 type CommandGroup = {
   commands: Command[]
@@ -184,11 +184,11 @@ export function useCommands(): CommandGroup[] {
             hotkeys: ['shift P', '7'],
           },
           {
-            label: 'Policies',
+            label: 'Security',
             icon: WarningShieldIcon,
-            callback: () => navigate(POLICIES_ABS_PATH),
+            callback: () => navigate(SECURITY_ABS_PATH),
             deps: [navigate],
-            hotkeys: ['shift L', '8'],
+            hotkeys: ['8'],
           },
           {
             label: 'Backups',
