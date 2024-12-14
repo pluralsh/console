@@ -3,6 +3,10 @@ git_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver
 release_url: https://github.com/kubernetes-sigs/aws-efs-csi-driver/releases/tag/v{vsn}
 helm_repository_url: https://kubernetes-sigs.github.io/aws-efs-csi-driver
 versions:
+- version: 2.1.2
+  kube: []
+  requirements: []
+  incompatibilities: []
 - version: 2.1.1
   kube: []
   requirements: []
