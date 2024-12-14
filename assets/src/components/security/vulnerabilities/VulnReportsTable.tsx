@@ -16,7 +16,6 @@ import {
   ColGrade,
   ColImage,
   ColNamespaces,
-  ColServices,
   ColSummary,
 } from './VulnReportsTableCols'
 
@@ -73,11 +72,4 @@ export function VulneratbilityReportsTable({
   )
 }
 
-const columns = [
-  ColImage,
-  ColNamespaces,
-  ColServices,
-  ColGrade,
-  ColSummary,
-  ColActions,
-]
+const columns = [ColImage, ColNamespaces, ColGrade, ColSummary, ColActions]
