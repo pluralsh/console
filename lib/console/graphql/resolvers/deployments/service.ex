@@ -103,6 +103,11 @@ defmodule Console.GraphQl.Resolvers.Deployments.Service do
     end
   end
 
+  def allow_secrets(svc, result, ctx) do
+    with {:ok, _} <- allow(svc, actor(ctx), :secrets),
+      do: {:ok, result}
+  end
+
   def helm_values(%{parent: service} = helm, _, ctx) do
     case allow(service, actor(ctx), :secrets) do
       {:ok, _} -> {:ok, helm.values}

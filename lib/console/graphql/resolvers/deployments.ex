@@ -68,7 +68,8 @@ defmodule Console.GraphQl.Resolvers.Deployments do
     NamespaceVuln,
     VulnerabilityReport,
     Vulnerability,
-    ClusterInsightComponent
+    ClusterInsightComponent,
+    ServiceConfiguration
   }
 
   def query(Project, _), do: Project
@@ -135,6 +136,7 @@ defmodule Console.GraphQl.Resolvers.Deployments do
   def query(VulnerabilityReport, _), do: VulnerabilityReport
   def query(Vulnerability, _), do: Vulnerability
   def query(ClusterInsightComponent, _), do: ClusterInsightComponent
+  def query(ServiceConfiguration, _), do: ServiceConfiguration
   def query(_, _), do: Cluster
 
   delegates Console.GraphQl.Resolvers.Deployments.Git

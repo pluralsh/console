@@ -124,8 +124,12 @@ defmodule Console.GraphQl.Schema.Base do
 
   def filter_loader(dataloader, func) when is_function(dataloader, 3) and is_function(func, 3) do
     fn parent, args, res ->
-      with {:ok, result} <- dataloader.(parent, args, res),
-        do: {:ok, func.(parent, result, res)}
+      with {:ok, result} <- dataloader.(parent, args, res) do
+        case func.(parent, result, res) do
+          l when is_list(l) -> {:ok, l}
+          res -> res
+        end
+      end
     end
   end
 

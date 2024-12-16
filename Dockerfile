@@ -1,7 +1,8 @@
 ARG ELIXIR_VERSION=1.16.3
 ARG OTP_VERSION=26.2.5.5
-ARG DEBIAN_VERSION=bullseye-20241202
-ARG RUNNER_IMAGE=debian:${DEBIAN_VERSION}-slim
+ARG ALPINE_VERSION=3.20.3
+ARG TOOLS_IMAGE=alpine:${ALPINE_VERSION}
+ARG RUNNER_IMAGE=alpine:${ALPINE_VERSION}
 
 FROM node:16.16-alpine3.15 as node
 
@@ -22,7 +23,7 @@ ENV VITE_PROD_SECRET_KEY=${VITE_PROD_SECRET_KEY}
 
 RUN yarn run build
 
-FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-debian-${DEBIAN_VERSION}-slim AS builder
+FROM hexpm/elixir:${ELIXIR_VERSION}-erlang-${OTP_VERSION}-alpine-${ALPINE_VERSION} AS builder
 
 # The following are build arguments used to change variable parts of the image.
 # The name of your application/release (required)
@@ -40,7 +41,7 @@ ENV SKIP_PHOENIX=${SKIP_PHOENIX} \
 WORKDIR /opt/app
 
 # This step installs all the build tools we'll need
-RUN apt-get update -y && apt-get install -y git build-essential && \
+RUN apk update && apk add git build-base && \
   mix local.rebar --force && \
   mix local.hex --force
 
@@ -57,7 +58,7 @@ COPY --from=node /app/build ./priv/static
 
 RUN mix release
 
-FROM ${RUNNER_IMAGE} as tools
+FROM ${TOOLS_IMAGE} as tools
 
 ARG TARGETARCH=amd64
 
@@ -73,7 +74,7 @@ ENV CLI_VERSION=v0.10.3
 # renovate: datasource=github-tags depName=kubernetes/kubernetes
 # ENV KUBECTL_VERSION=v1.31.3
 
-RUN apt-get update -y && apt-get install -y curl wget unzip
+RUN apk update && apk add curl wget unzip
 RUN curl -L https://github.com/pluralsh/plural-cli/releases/download/${CLI_VERSION}/plural-cli_${CLI_VERSION#v}_Linux_${TARGETARCH}.tar.gz | tar xvz plural && \
   mv plural /usr/local/bin/plural && \
   # curl -L https://get.helm.sh/helm-${HELM_VERSION}-linux-${TARGETARCH}.tar.gz | tar xvz && \
@@ -94,13 +95,11 @@ COPY --from=tools /usr/local/bin/plural /usr/local/bin/plural
 
 WORKDIR /opt/app
 
-RUN  echo "deb http://deb.debian.org/debian bullseye-backports main" >/etc/apt/sources.list.d/bullseye-backports.list && \
-  apt-get update -y && \
-  apt-get install -y libstdc++6 openssl libncurses5 locales ca-certificates git-man/bullseye-backports git/bullseye-backports gnupg bash && \
-  apt-get clean && rm -f /var/lib/apt/lists/*_* && \
-  sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && \
+RUN apk update && apk add openssh-client libgcc libstdc++ ncurses-libs openssl-dev ca-certificates git gnupg bash && \
+  apk add --no-cache --update --virtual=build gcc musl-dev libffi-dev openssl-dev make && \
+  apk del build && \
   addgroup --gid 10001 app && \
-  adduser --home /home/console --uid 10001 --gid 10001 console && \
+  adduser -D -h /home/console -u 10001 -G app console && \
   chown console:app /opt/app && \
   mkdir -p /opt/app/data
 
