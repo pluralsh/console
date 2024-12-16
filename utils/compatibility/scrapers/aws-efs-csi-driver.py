@@ -16,6 +16,7 @@ compatibility_url = "https://github.com/kubernetes-sigs/aws-efs-csi-driver"
 def get_kube_versions(version):
     latest_kube_versions = expand_kube_versions("1.17", current_kube_version())
     compatibility = [
+        ("2.1.x", latest_kube_versions),
         ("2.0.x", latest_kube_versions),
         ("1.7.x", latest_kube_versions),
         ("1.6.x", latest_kube_versions),
