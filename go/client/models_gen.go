@@ -8878,6 +8878,7 @@ const (
 	VulnSeverityMedium   VulnSeverity = "MEDIUM"
 	VulnSeverityHigh     VulnSeverity = "HIGH"
 	VulnSeverityCritical VulnSeverity = "CRITICAL"
+	VulnSeverityNone     VulnSeverity = "NONE"
 )
 
 var AllVulnSeverity = []VulnSeverity{
@@ -8886,11 +8887,12 @@ var AllVulnSeverity = []VulnSeverity{
 	VulnSeverityMedium,
 	VulnSeverityHigh,
 	VulnSeverityCritical,
+	VulnSeverityNone,
 }
 
 func (e VulnSeverity) IsValid() bool {
 	switch e {
-	case VulnSeverityUnknown, VulnSeverityLow, VulnSeverityMedium, VulnSeverityHigh, VulnSeverityCritical:
+	case VulnSeverityUnknown, VulnSeverityLow, VulnSeverityMedium, VulnSeverityHigh, VulnSeverityCritical, VulnSeverityNone:
 		return true
 	}
 	return false
