@@ -103,6 +103,7 @@ type ConsoleClient interface {
 	ListHelmRepositories(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListHelmRepositories, error)
 	GetHelmRepository(ctx context.Context, url string, interceptors ...clientv2.RequestInterceptor) (*GetHelmRepository, error)
 	UpsertHelmRepository(ctx context.Context, url string, attributes *HelmRepositoryAttributes, interceptors ...clientv2.RequestInterceptor) (*UpsertHelmRepository, error)
+	IngestClusterCost(ctx context.Context, costs CostIngestAttributes, interceptors ...clientv2.RequestInterceptor) (*IngestClusterCost, error)
 	ListNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListNamespaces, error)
 	ListClusterNamespaces(ctx context.Context, after *string, first *int64, before *string, last *int64, interceptors ...clientv2.RequestInterceptor) (*ListClusterNamespaces, error)
 	GetNamespace(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNamespace, error)
@@ -13304,6 +13305,17 @@ func (t *UpsertHelmRepository) GetUpsertHelmRepository() *HelmRepositoryFragment
 	return t.UpsertHelmRepository
 }
 
+type IngestClusterCost struct {
+	IngestClusterCost *bool "json:\"ingestClusterCost,omitempty\" graphql:\"ingestClusterCost\""
+}
+
+func (t *IngestClusterCost) GetIngestClusterCost() *bool {
+	if t == nil {
+		t = &IngestClusterCost{}
+	}
+	return t.IngestClusterCost
+}
+
 type ListNamespaces struct {
 	ManagedNamespaces *ListNamespaces_ManagedNamespaces "json:\"managedNamespaces,omitempty\" graphql:\"managedNamespaces\""
 }
@@ -21363,6 +21375,28 @@ func (c *Client) UpsertHelmRepository(ctx context.Context, url string, attribute
 	return &res, nil
 }
 
+const IngestClusterCostDocument = `mutation IngestClusterCost ($costs: CostIngestAttributes!) {
+	ingestClusterCost(costs: $costs)
+}
+`
+
+func (c *Client) IngestClusterCost(ctx context.Context, costs CostIngestAttributes, interceptors ...clientv2.RequestInterceptor) (*IngestClusterCost, error) {
+	vars := map[string]any{
+		"costs": costs,
+	}
+
+	var res IngestClusterCost
+	if err := c.Client.Post(ctx, "IngestClusterCost", IngestClusterCostDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 const ListNamespacesDocument = `query ListNamespaces ($after: String, $first: Int, $before: String, $last: Int) {
 	managedNamespaces(after: $after, first: $first, before: $before, last: $last) {
 		pageInfo {
@@ -27878,6 +27912,7 @@ var DocumentOperationNames = map[string]string{
 	ListHelmRepositoriesDocument:                      "ListHelmRepositories",
 	GetHelmRepositoryDocument:                         "GetHelmRepository",
 	UpsertHelmRepositoryDocument:                      "UpsertHelmRepository",
+	IngestClusterCostDocument:                         "IngestClusterCost",
 	ListNamespacesDocument:                            "ListNamespaces",
 	ListClusterNamespacesDocument:                     "ListClusterNamespaces",
 	GetNamespaceDocument:                              "GetNamespace",

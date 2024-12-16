@@ -1,0 +1,3 @@
+mutation IngestClusterCost($costs: CostIngestAttributes!) {
+    ingestClusterCost(costs: $costs)
+}
