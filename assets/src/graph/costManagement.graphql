@@ -1,0 +1,103 @@
+fragment ClusterUsageTiny on ClusterUsage {
+  id
+  cpu
+  memory
+  gpu
+  cpuUtil
+  memUtil
+  cpuCost
+  memoryCost
+  ingressCost
+  loadBalancerCost
+  egressCost
+  cluster {
+    ...ClusterTiny
+  }
+}
+
+fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
+  id
+  namespace
+  cpuCost
+  cpuUtil
+  cpu
+  memoryCost
+  memUtil
+  memory
+}
+
+fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
+  id
+  namespace
+  name
+  container
+  cpuCost
+  cpuRequest
+  cpuRecommendation
+  memoryCost
+  memoryRequest
+  memoryRecommendation
+  type
+}
+
+query ClusterUsages($after: String, $first: Int, $before: String, $last: Int) {
+  clusterUsages(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterUsageTiny
+      }
+    }
+  }
+}
+
+query ClusterUsageNamespaces(
+  $id: ID!
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+) {
+  clusterUsage(id: $id) {
+    id
+    namespaces(after: $after, first: $first, before: $before, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ClusterNamespaceUsage
+        }
+      }
+    }
+  }
+}
+
+query ClusterUsageScalingRecommendations(
+  $id: ID!
+  $after: String
+  $first: Int
+  $before: String
+  $last: Int
+) {
+  clusterUsage(id: $id) {
+    id
+    recommendations(
+      after: $after
+      first: $first
+      before: $before
+      last: $last
+    ) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ClusterScalingRecommendation
+        }
+      }
+    }
+  }
+}
