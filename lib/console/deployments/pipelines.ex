@@ -221,14 +221,18 @@ defmodule Console.Deployments.Pipelines do
   Whether all promotion gates for this edge are currently open
   """
   @spec open?(PipelineEdge.t, PipelinePromotion.t) :: boolean
-  def open?(%PipelineEdge{gates: [_ | _] = gates}, %PipelinePromotion{revised_at: r}) when not is_nil(r) do
+  def open?(%PipelineEdge{gates: [_ | _] = gates}, %PipelinePromotion{revised_at: r} = promo) when not is_nil(r) do
     Enum.all?(gates, fn
       %PipelineGate{state: :open} = g ->
-        Timex.after?(coalesce(g.updated_at, g.inserted_at), r)
+        ts = coalesce(g.updated_at, g.inserted_at)
+        Timex.after?(ts, r) && after_context?(ts, promo)
       _ -> false
     end)
   end
   def open?(_, _), do: true
+
+  defp after_context?(ts, %PipelinePromotion{context: %PipelineContext{inserted_at: at}}), do: Timex.after?(ts, at)
+  defp after_context?(_, _), do: true
 
   @doc """
   Whether an edge was promoted after the given dt
@@ -396,7 +400,7 @@ defmodule Console.Deployments.Pipelines do
   @spec apply_promotion(PipelinePromotion.t) :: promotion_resp
   def apply_promotion(%PipelinePromotion{} = promo) do
     start_transaction()
-    |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, services: [:service, :revision]])} end)
+    |> add_operation(:promo, fn _ -> {:ok, Repo.preload(promo, [:stage, :context, services: [:service, :revision]])} end)
     |> add_operation(:edges, fn %{promo: %{stage: stage}} -> {:ok, edges(stage)} end)
     |> add_operation(:resolve, fn %{promo: promotion, edges: edges} ->
       Enum.filter(edges, &open?(&1, promotion))

@@ -54,5 +54,7 @@ defmodule Console.TestHelpers do
   def run_query(query, variables, context \\ %{}),
     do: Absinthe.run(query, Console.GraphQl, variables: variables, context: context)
 
+  def log_line(log), do: %Console.Logs.Line{timestamp: Timex.now(), log: log}
+
   def from_connection(%{"edges" => edges}), do: Enum.map(edges, & &1["node"])
 end

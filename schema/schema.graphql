@@ -59,6 +59,8 @@ type RootQueryType {
 
   metric(query: String!, offset: Int, step: String, clusterId: ID): [MetricResponse]
 
+  logAggregation(serviceId: ID, clusterId: ID, query: String, time: LogTimeRange, limit: Int): [LogLine]
+
   logs(query: String!, start: Long, end: Long, limit: Int!, clusterId: ID): [LogStream]
 
   scalingRecommendation(kind: AutoscalingTarget!, namespace: String!, name: String!): VerticalPodAutoscaler
@@ -1072,6 +1074,11 @@ enum AiProvider {
   VERTEX
 }
 
+enum LogDriver {
+  VICTORIA
+  ELASTIC
+}
+
 input ProjectAttributes {
   name: String!
   description: String
@@ -1321,6 +1328,9 @@ type DeploymentSettings {
   "settings for cost management"
   cost: CostSettings
 
+  "settings for connections to log aggregation datastores"
+  logging: LoggingSettings
+
   "The console's expected agent version"
   agentVsn: String!
 
@@ -1481,6 +1491,17 @@ type VertexAiSettings {
 
   "the gcp region the model"
   location: String!
+}
+
+"Settings for configuring log aggregation throughout Plural"
+type LoggingSettings {
+  enabled: Boolean
+
+  "the type of log aggregation solution you wish to use"
+  driver: LogDriver
+
+  "configures a connection to victoria metrics"
+  victoria: HttpConnection
 }
 
 type ProjectConnection {
@@ -3797,6 +3818,8 @@ input ServiceUpdateAttributes {
   writeBindings: [PolicyBindingAttributes]
 
   contextBindings: [ContextBindingAttributes]
+
+  imports: [ServiceImportAttributes]
 }
 
 input ServiceCloneAttributes {
@@ -7009,6 +7032,13 @@ input LabelInput {
   value: String
 }
 
+input LogTimeRange {
+  before: String
+  after: String
+  duration: String
+  reverse: Boolean
+}
+
 type Dashboard {
   id: String!
   spec: DashboardSpec!
@@ -7042,6 +7072,17 @@ type DashboardMetric {
 type MetricResponse {
   metric: Map
   values: [MetricResult]
+}
+
+type LogLine {
+  timestamp: DateTime
+  log: String!
+  facets: [LogFacet]
+}
+
+type LogFacet {
+  key: String!
+  value: String!
 }
 
 type Metadata {

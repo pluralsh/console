@@ -1,15 +1,18 @@
 defmodule Console.Cost.Ingester do
   alias Console.Repo
   import Console.Services.Base
-  import Console.Cost.Utils, only: [batch_insert: 3]
+  import Console.Cost.Utils, only: [batch_insert: 2]
   alias Console.Schema.{Cluster, ClusterUsage, ClusterNamespaceUsage, ClusterScalingRecommendation}
 
   def ingest(attrs, %Cluster{id: id}) do
     start_transaction()
-    |> add_operation(:wipe_cluster, fn _ ->
-      ClusterUsage.for_cluster(id)
-      |> Repo.delete_all()
-      |> ok()
+    |> add_operation(:cluster, fn _ ->
+      case Repo.get_by(ClusterUsage, cluster_id: id) do
+        %ClusterUsage{} = usage -> usage
+        nil -> %ClusterUsage{cluster_id: id}
+      end
+      |> ClusterUsage.changeset(attrs[:cluster])
+      |> Repo.insert_or_update()
     end)
     |> add_operation(:wipe_namespace, fn _ ->
       ClusterNamespaceUsage.for_cluster(id)
@@ -21,22 +24,17 @@ defmodule Console.Cost.Ingester do
       |> Repo.delete_all()
       |> ok()
     end)
-    |> add_operation(:cluster, fn _ ->
-      %ClusterUsage{id: id}
-      |> ClusterUsage.changeset(attrs[:cluster])
-      |> Repo.insert()
-    end)
     |> add_operation(:namespace, fn _ ->
       Map.get(attrs, :namespaces, [])
-      |> Stream.map(&timestamped/1)
+      |> Stream.map(&cluster_timestamped(&1, id))
       |> Stream.map(&Map.drop(&1, ~w(gpu_util)a))
-      |> batch_insert(ClusterNamespaceUsage, repo: Repo)
+      |> batch_insert(ClusterNamespaceUsage)
       |> ok()
     end)
     |> add_operation(:scaling, fn _ ->
       Map.get(attrs, :recommendations, [])
-      |> Stream.map(&timestamped/1)
-      |> batch_insert(ClusterScalingRecommendation, repo: Repo)
+      |> Stream.map(&cluster_timestamped(&1, id))
+      |> batch_insert(ClusterScalingRecommendation)
       |> ok()
     end)
     |> execute()
@@ -44,5 +42,10 @@ defmodule Console.Cost.Ingester do
       {:ok, _} -> {:ok, true}
       err -> err
     end
+  end
+
+  defp cluster_timestamped(map, cluster_id) do
+    timestamped(map)
+    |> Map.put(:cluster_id, cluster_id)
   end
 end

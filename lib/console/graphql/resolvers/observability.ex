@@ -1,5 +1,7 @@
 defmodule Console.GraphQl.Resolvers.Observability do
   alias Console.Services.Observability
+  alias Console.Logs.{Provider, Query}
+
   @default_offset 30 * 60
   @nano 1_000_000_000
 
@@ -14,6 +16,12 @@ defmodule Console.GraphQl.Resolvers.Observability do
     with {:ok, dash} <- Observability.get_dashboard(name, id) do
       {:ok, Observability.hydrate(dash, Map.get(args, :labels, []), start, now)}
     end
+  end
+
+  def list_logs(args, %{context: %{current_user: user}}) do
+    query = Query.new(args)
+    with {:ok, query} <- Provider.accessible(query, user),
+      do: Provider.query(query)
   end
 
   def resolve_logs(%{query: query, limit: limit} = args, _) do

@@ -177,6 +177,33 @@ defmodule Console.GraphQl.ObservabilityQueriesTest do
     end
   end
 
+  describe "logAggregation" do
+    test "it can fetch from a logs db" do
+      user = insert(:user)
+      svc = insert(:service, read_bindings: [%{user_id: user.id}])
+      expect(Console.Logs.Provider, :query, fn _ -> {:ok, [log_line("a log")]} end)
+
+      {:ok, %{data: %{"logAggregation" => [line]}}} = run_query("""
+        query Logs($serviceId: ID!) {
+          logAggregation(serviceId: $serviceId) { timestamp log }
+        }
+      """, %{"serviceId" => svc.id}, %{current_user: user})
+
+      assert line["log"] == "a log"
+    end
+
+    test "it will authz" do
+      user = insert(:user)
+      svc = insert(:service)
+
+      {:ok, %{errors: [_ | _]}} = run_query("""
+        query Logs($serviceId: ID!) {
+          logAggregation(serviceId: $serviceId) { timestamp log }
+        }
+      """, %{"serviceId" => svc.id}, %{current_user: user})
+    end
+  end
+
   describe "scalingRecommendation" do
     test "it can fetch a vpa to provide recommendations" do
       user = insert(:user)

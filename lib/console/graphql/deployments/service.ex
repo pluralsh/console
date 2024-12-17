@@ -80,6 +80,7 @@ defmodule Console.GraphQl.Deployments.Service do
     field :read_bindings,    list_of(:policy_binding_attributes)
     field :write_bindings,   list_of(:policy_binding_attributes)
     field :context_bindings, list_of(:context_binding_attributes)
+    field :imports,          list_of(:service_import_attributes)
   end
 
   input_object :service_clone_attributes do

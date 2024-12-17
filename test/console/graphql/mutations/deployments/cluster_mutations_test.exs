@@ -500,9 +500,20 @@ defmodule Console.GraphQl.Deployments.ClusterMutationsTest do
         }
       """, %{"costs" => ingest}, %{cluster: cluster})
 
-      assert Console.Repo.aggregate(Console.Schema.ClusterUsage, :count, :id) == 1
-      assert Console.Repo.aggregate(Console.Schema.ClusterNamespaceUsage, :count, :id) == 1
-      assert Console.Repo.aggregate(Console.Schema.ClusterScalingRecommendation, :count, :id) == 1
+      {:ok, %{data: %{"ingestClusterCost" => true}}} = run_query("""
+        mutation Ingest($costs: CostIngestAttributes!) {
+          ingestClusterCost(costs: $costs)
+        }
+      """, %{"costs" => ingest}, %{cluster: cluster})
+
+      [usage] = Console.Repo.all(Console.Schema.ClusterUsage)
+      assert usage.cluster_id == cluster.id
+
+      [ns] = Console.Repo.all(Console.Schema.ClusterNamespaceUsage)
+      assert ns.cluster_id == cluster.id
+
+      [sr] = Console.Repo.all(Console.Schema.ClusterScalingRecommendation)
+      assert sr.cluster_id == cluster.id
     end
   end
 end

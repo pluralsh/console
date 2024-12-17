@@ -1915,6 +1915,8 @@ type DeploymentSettings struct {
 	Ai *AiSettings `json:"ai,omitempty"`
 	// settings for cost management
 	Cost *CostSettings `json:"cost,omitempty"`
+	// settings for connections to log aggregation datastores
+	Logging *LoggingSettings `json:"logging,omitempty"`
 	// The console's expected agent version
 	AgentVsn string `json:"agentVsn"`
 	// the latest known k8s version
@@ -2724,6 +2726,11 @@ type LoadBalancerStatus struct {
 	Ingress []*LoadBalancerIngressStatus `json:"ingress,omitempty"`
 }
 
+type LogFacet struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 type LogFilter struct {
 	Metadata Metadata      `json:"metadata"`
 	Spec     LogFilterSpec `json:"spec"`
@@ -2741,9 +2748,31 @@ type LogLabel struct {
 	Value *string `json:"value,omitempty"`
 }
 
+type LogLine struct {
+	Timestamp *string     `json:"timestamp,omitempty"`
+	Log       string      `json:"log"`
+	Facets    []*LogFacet `json:"facets,omitempty"`
+}
+
 type LogStream struct {
 	Stream map[string]interface{} `json:"stream,omitempty"`
 	Values []*MetricResult        `json:"values,omitempty"`
+}
+
+type LogTimeRange struct {
+	Before   *string `json:"before,omitempty"`
+	After    *string `json:"after,omitempty"`
+	Duration *string `json:"duration,omitempty"`
+	Reverse  *bool   `json:"reverse,omitempty"`
+}
+
+// Settings for configuring log aggregation throughout Plural
+type LoggingSettings struct {
+	Enabled *bool `json:"enabled,omitempty"`
+	// the type of log aggregation solution you wish to use
+	Driver *LogDriver `json:"driver,omitempty"`
+	// configures a connection to victoria metrics
+	Victoria *HTTPConnection `json:"victoria,omitempty"`
 }
 
 type LoginInfo struct {
@@ -5232,6 +5261,7 @@ type ServiceUpdateAttributes struct {
 	ReadBindings    []*PolicyBindingAttributes     `json:"readBindings,omitempty"`
 	WriteBindings   []*PolicyBindingAttributes     `json:"writeBindings,omitempty"`
 	ContextBindings []*ContextBindingAttributes    `json:"contextBindings,omitempty"`
+	Imports         []*ServiceImportAttributes     `json:"imports,omitempty"`
 }
 
 type ServiceVuln struct {
@@ -7250,6 +7280,47 @@ func (e *ListMerge) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ListMerge) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type LogDriver string
+
+const (
+	LogDriverVictoria LogDriver = "VICTORIA"
+	LogDriverElastic  LogDriver = "ELASTIC"
+)
+
+var AllLogDriver = []LogDriver{
+	LogDriverVictoria,
+	LogDriverElastic,
+}
+
+func (e LogDriver) IsValid() bool {
+	switch e {
+	case LogDriverVictoria, LogDriverElastic:
+		return true
+	}
+	return false
+}
+
+func (e LogDriver) String() string {
+	return string(e)
+}
+
+func (e *LogDriver) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = LogDriver(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid LogDriver", str)
+	}
+	return nil
+}
+
+func (e LogDriver) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

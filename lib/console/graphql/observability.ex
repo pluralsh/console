@@ -13,6 +13,13 @@ defmodule Console.GraphQl.Observability do
     field :value, :string
   end
 
+  input_object :log_time_range do
+    field :before,   :string
+    field :after,    :string
+    field :duration, :string
+    field :reverse,  :boolean
+  end
+
   object :dashboard do
     field :id,   non_null(:string), resolve: fn %{metadata: %{name: n}}, _, _ -> {:ok, n} end
     field :spec, non_null(:dashboard_spec)
@@ -50,6 +57,17 @@ defmodule Console.GraphQl.Observability do
     end
   end
 
+  object :log_line do
+    field :timestamp, :datetime
+    field :log,       non_null(:string)
+    field :facets,    list_of(:log_facet)
+  end
+
+  object :log_facet do
+    field :key,   non_null(:string)
+    field :value, non_null(:string)
+  end
+
   object :observability_queries do
     field :dashboards, list_of(:dashboard) do
       middleware Authenticated
@@ -81,6 +99,17 @@ defmodule Console.GraphQl.Observability do
 
       middleware ObservabilityClient, :prometheus
       safe_resolve &Observability.resolve_metric/2
+    end
+
+    field :log_aggregation, list_of(:log_line) do
+      middleware Authenticated
+      arg :service_id, :id
+      arg :cluster_id, :id
+      arg :query,      :string
+      arg :time,       :log_time_range
+      arg :limit,      :integer
+
+      resolve &Observability.list_logs/2
     end
 
     field :logs, list_of(:log_stream) do
