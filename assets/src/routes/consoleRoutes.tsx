@@ -8,15 +8,15 @@ import { Security } from 'components/profile/Security'
 import { Navigate, Route, RouteObject, Routes } from 'react-router-dom'
 
 import { aiRoutes } from './aiRoutes.tsx'
-import { backupsRoutes } from './backupRoutes'
+import { catalogRoutes } from './catalogRoutes.tsx'
 import { cdRoutes } from './cdRoutes'
+import { costManagementRoutes } from './costManagementRoutes.tsx'
 import { kubernetesRoutes } from './kubernetesRoute'
-import { securityRoutes } from './securityRoutes'
 import { prRoutes } from './prRoutes'
 import { secretsRoutes } from './secretsRoute'
+import { securityRoutes } from './securityRoutes'
 import { settingsRoutes } from './settingsRoutes'
 import { stacksRoutes } from './stacksRoutes'
-import { catalogRoutes } from './catalogRoutes.tsx'
 
 const profileRoutes = [
   <Route
@@ -60,7 +60,8 @@ export const consoleComponentRoutes = [
   ...stacksRoutes,
   // ...incidentsRoutes,
   ...securityRoutes,
-  ...backupsRoutes,
+  // ...backupsRoutes,
+  ...costManagementRoutes,
   ...profileRoutes,
   ...cdRoutes,
   settingsRoutes,
