@@ -1,14 +1,7 @@
-import styled from 'styled-components'
-import {
-  Card,
-  CardProps,
-  FillLevel,
-  useFillLevel,
-} from '@pluralsh/design-system'
-import { ComponentProps, ReactNode, forwardRef } from 'react'
+import { Card, FillLevel, useFillLevel } from '@pluralsh/design-system'
 import { Ul } from 'honorable'
-
-type Hue = Required<CardProps>['hue']
+import { ComponentProps, ReactNode, forwardRef } from 'react'
+import styled from 'styled-components'
 
 const fillLevelToBorderColor: Record<FillLevel, string> = {
   0: 'border',
@@ -19,7 +12,6 @@ const fillLevelToBorderColor: Record<FillLevel, string> = {
 
 const ListItemSC = styled.li<{
   $last?: boolean
-  $hue?: string
   $fillLevel?: FillLevel
 }>(({ theme, $last = false, $fillLevel }) => ({
   margin: 0,
@@ -53,7 +45,6 @@ const ListItem = forwardRef<ComponentProps<typeof ListItemSC>, ListItemProps>(
 )
 
 type ListProps = any & {
-  hue?: Hue
   children: ReactNode
 }
 
