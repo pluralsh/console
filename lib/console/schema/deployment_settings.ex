@@ -4,6 +4,7 @@ defmodule Console.Schema.DeploymentSettings do
   alias Piazza.Ecto.EncryptedString
 
   defenum AIProvider, openai: 0, anthropic: 1, ollama: 2, azure: 3, bedrock: 4, vertex: 5
+  defenum LogDriver, victoria: 0, elastic: 1
 
   defmodule Connection do
     use Piazza.Ecto.Schema
@@ -52,6 +53,13 @@ defmodule Console.Schema.DeploymentSettings do
       field :user,     :string
       field :password, EncryptedString
       field :ssl,      :boolean
+    end
+
+    embeds_one :logging, Logging, on_replace: :update do
+      field :enabled,  :boolean
+      field :driver,   LogDriver
+
+      embeds_one :victoria, Connection, on_replace: :update
     end
 
     embeds_one :cost, Cost, on_replace: :update do
@@ -159,6 +167,7 @@ defmodule Console.Schema.DeploymentSettings do
     |> cast_embed(:smtp, with: &smtp_changeset/2)
     |> cast_embed(:stacks, with: &stacks_changeset/2)
     |> cast_embed(:cost, with: &cost_changeset/2)
+    |> cast_embed(:logging, with: &logging_changeset/2)
     |> change_markers(agent_helm_values: :helm_changed, agent_version: :version_changed)
     |> put_new_change(:write_policy_id, &Ecto.UUID.generate/0)
     |> put_new_change(:read_policy_id, &Ecto.UUID.generate/0)
@@ -240,5 +249,11 @@ defmodule Console.Schema.DeploymentSettings do
   defp cost_changeset(model, attrs) do
     model
     |> cast(attrs, ~w(enabled recommendation_threshold recommendation_cushion)a)
+  end
+
+  defp logging_changeset(model, attrs) do
+    model
+    |> cast(attrs, [:enabled])
+    |> cast_embed(:victoria)
   end
 end

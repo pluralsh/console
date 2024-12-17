@@ -2,8 +2,10 @@ defmodule Console.GraphQl.Deployments.Settings do
   use Console.GraphQl.Schema.Base
   alias Console.Deployments.Settings
   alias Console.GraphQl.Resolvers.{Deployments}
+  alias Console.Schema.DeploymentSettings
 
-  ecto_enum :ai_provider, Console.Schema.DeploymentSettings.AIProvider
+  ecto_enum :ai_provider, DeploymentSettings.AIProvider
+  ecto_enum :log_driver, DeploymentSettings.LogDriver
 
   input_object :project_attributes do
     field :name,          non_null(:string)
@@ -47,6 +49,12 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :enabled,                  :boolean
     field :recommendation_threshold, :integer, description: "the percentage change needed to generate a recommendation, default 30%"
     field :recommendation_cushion,   :integer, description: "the percentage change needed to generate a recommendation, default 20%"
+  end
+
+  input_object :logging_settings_attributes do
+    field :enabled,  :boolean
+    field :driver,   :log_driver
+    field :victoria, :http_connection_attributes
   end
 
   input_object :ai_settings_attributes do
@@ -154,6 +162,7 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :smtp,                  :smtp_settings, description: "smtp server configuration for email notifications"
     field :ai,                    :ai_settings, description: "settings for LLM provider clients"
     field :cost,                  :cost_settings, description: "settings for cost management"
+    field :logging,               :logging_settings, description: "settings for connections to log aggregation datastores"
 
     field :agent_vsn, non_null(:string), description: "The console's expected agent version",
       resolve: fn _, _, _ -> {:ok, Settings.agent_vsn()} end
@@ -257,6 +266,13 @@ defmodule Console.GraphQl.Deployments.Settings do
     field :tool_model, :string, description: "the model to use for tool calls, which are less frequent and require more complex reasoning"
     field :project,    non_null(:string), description: "the gcp project id to use"
     field :location,   non_null(:string), description: "the gcp region the model"
+  end
+
+  @desc "Settings for configuring log aggregation throughout Plural"
+  object :logging_settings do
+    field :enabled,  :boolean
+    field :driver,   :log_driver, description: "the type of log aggregation solution you wish to use"
+    field :victoria, :http_connection, description: "configures a connection to victoria metrics"
   end
 
   connection node_type: :project

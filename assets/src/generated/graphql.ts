@@ -2351,6 +2351,8 @@ export type DeploymentSettings = {
   insertedAt?: Maybe<Scalars['DateTime']['output']>;
   /** the latest known k8s version */
   latestK8sVsn: Scalars['String']['output'];
+  /** settings for connections to log aggregation datastores */
+  logging?: Maybe<LoggingSettings>;
   /** the way we can connect to your loki instance */
   lokiConnection?: Maybe<HttpConnection>;
   name: Scalars['String']['output'];
@@ -3305,6 +3307,17 @@ export type LoadBalancerStatus = {
   ingress?: Maybe<Array<Maybe<LoadBalancerIngressStatus>>>;
 };
 
+export enum LogDriver {
+  Elastic = 'ELASTIC',
+  Victoria = 'VICTORIA'
+}
+
+export type LogFacet = {
+  __typename?: 'LogFacet';
+  key: Scalars['String']['output'];
+  value: Scalars['String']['output'];
+};
+
 export type LogFilter = {
   __typename?: 'LogFilter';
   metadata: Metadata;
@@ -3325,10 +3338,34 @@ export type LogLabel = {
   value?: Maybe<Scalars['String']['output']>;
 };
 
+export type LogLine = {
+  __typename?: 'LogLine';
+  facets?: Maybe<Array<Maybe<LogFacet>>>;
+  log: Scalars['String']['output'];
+  timestamp?: Maybe<Scalars['DateTime']['output']>;
+};
+
 export type LogStream = {
   __typename?: 'LogStream';
   stream?: Maybe<Scalars['Map']['output']>;
   values?: Maybe<Array<Maybe<MetricResult>>>;
+};
+
+export type LogTimeRange = {
+  after?: InputMaybe<Scalars['String']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  duration?: InputMaybe<Scalars['String']['input']>;
+  reverse?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+/** Settings for configuring log aggregation throughout Plural */
+export type LoggingSettings = {
+  __typename?: 'LoggingSettings';
+  /** the type of log aggregation solution you wish to use */
+  driver?: Maybe<LogDriver>;
+  enabled?: Maybe<Scalars['Boolean']['output']>;
+  /** configures a connection to victoria metrics */
+  victoria?: Maybe<HttpConnection>;
 };
 
 export type LoginInfo = {
@@ -6802,6 +6839,7 @@ export type RootQueryType = {
   installations?: Maybe<InstallationConnection>;
   invite?: Maybe<Invite>;
   job?: Maybe<Job>;
+  logAggregation?: Maybe<Array<Maybe<LogLine>>>;
   logFilters?: Maybe<Array<Maybe<LogFilter>>>;
   loginInfo?: Maybe<LoginInfo>;
   logs?: Maybe<Array<Maybe<LogStream>>>;
@@ -7355,6 +7393,15 @@ export type RootQueryTypeJobArgs = {
   name: Scalars['String']['input'];
   namespace: Scalars['String']['input'];
   serviceId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type RootQueryTypeLogAggregationArgs = {
+  clusterId?: InputMaybe<Scalars['ID']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  query?: InputMaybe<Scalars['String']['input']>;
+  serviceId?: InputMaybe<Scalars['ID']['input']>;
+  time?: InputMaybe<LogTimeRange>;
 };
 
 
