@@ -11405,6 +11405,44 @@ export type ComponentTreeQueryVariables = Exact<{
 
 export type ComponentTreeQuery = { __typename?: 'RootQueryType', componentTree?: { __typename?: 'ComponentTree', root?: { __typename?: 'KubernetesUnstructured', raw?: Record<string, unknown> | null, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null, edges?: Array<{ __typename?: 'ResourceEdge', from: string, to: string } | null> | null, certificates?: Array<{ __typename?: 'Certificate', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, configmaps?: Array<{ __typename?: 'ConfigMap', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, cronjobs?: Array<{ __typename?: 'CronJob', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, daemonsets?: Array<{ __typename?: 'DaemonSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, deployments?: Array<{ __typename?: 'Deployment', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, ingresses?: Array<{ __typename?: 'Ingress', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, secrets?: Array<{ __typename?: 'Secret', metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, services?: Array<{ __typename?: 'Service', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null, statefulsets?: Array<{ __typename?: 'StatefulSet', raw: string, metadata: { __typename?: 'Metadata', uid?: string | null, name: string, namespace?: string | null, creationTimestamp?: string | null, labels?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null, annotations?: Array<{ __typename?: 'LabelPair', name?: string | null, value?: string | null } | null> | null } } | null> | null } | null };
 
+export type ClusterUsageTinyFragment = { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null };
+
+export type ClusterNamespaceUsageFragment = { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null };
+
+export type ClusterScalingRecommendationFragment = { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, type?: ScalingRecommendationType | null };
+
+export type ClusterUsagesQueryVariables = Exact<{
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ClusterUsagesQuery = { __typename?: 'RootQueryType', clusterUsages?: { __typename?: 'ClusterUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterUsageEdge', node?: { __typename?: 'ClusterUsage', id: string, cpu?: number | null, memory?: number | null, gpu?: number | null, cpuUtil?: number | null, memUtil?: number | null, cpuCost?: number | null, memoryCost?: number | null, ingressCost?: number | null, loadBalancerCost?: number | null, egressCost?: number | null, cluster?: { __typename?: 'Cluster', self?: boolean | null, virtual?: boolean | null, id: string, name: string, distro?: ClusterDistro | null, upgradePlan?: { __typename?: 'ClusterUpgradePlan', compatibilities?: boolean | null, deprecations?: boolean | null, incompatibilities?: boolean | null } | null, provider?: { __typename?: 'ClusterProvider', cloud: string } | null } | null } | null } | null> | null } | null };
+
+export type ClusterUsageNamespacesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ClusterUsageNamespacesQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, namespaces?: { __typename?: 'ClusterNamespaceUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterNamespaceUsageEdge', node?: { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null } | null } | null> | null } | null } | null };
+
+export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+  after?: InputMaybe<Scalars['String']['input']>;
+  first?: InputMaybe<Scalars['Int']['input']>;
+  before?: InputMaybe<Scalars['String']['input']>;
+  last?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, type?: ScalingRecommendationType | null } | null } | null> | null } | null } | null };
+
 export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Record<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
 
 export type RestorePostgresMutationVariables = Exact<{
@@ -14149,6 +14187,51 @@ export const ComponentTreeFragmentDoc = gql`
   }
 }
     ${MetadataFragmentDoc}`;
+export const ClusterUsageTinyFragmentDoc = gql`
+    fragment ClusterUsageTiny on ClusterUsage {
+  id
+  cpu
+  memory
+  gpu
+  cpuUtil
+  memUtil
+  cpuCost
+  memoryCost
+  ingressCost
+  loadBalancerCost
+  egressCost
+  cluster {
+    ...ClusterTiny
+  }
+}
+    ${ClusterTinyFragmentDoc}`;
+export const ClusterNamespaceUsageFragmentDoc = gql`
+    fragment ClusterNamespaceUsage on ClusterNamespaceUsage {
+  id
+  namespace
+  cpuCost
+  cpuUtil
+  cpu
+  memoryCost
+  memUtil
+  memory
+}
+    `;
+export const ClusterScalingRecommendationFragmentDoc = gql`
+    fragment ClusterScalingRecommendation on ClusterScalingRecommendation {
+  id
+  namespace
+  name
+  container
+  cpuCost
+  cpuRequest
+  cpuRecommendation
+  memoryCost
+  memoryRequest
+  memoryRecommendation
+  type
+}
+    `;
 export const DatabaseTableRowFragmentDoc = gql`
     fragment DatabaseTableRow on Postgresql {
   instances {
@@ -21509,6 +21592,167 @@ export type ComponentTreeQueryHookResult = ReturnType<typeof useComponentTreeQue
 export type ComponentTreeLazyQueryHookResult = ReturnType<typeof useComponentTreeLazyQuery>;
 export type ComponentTreeSuspenseQueryHookResult = ReturnType<typeof useComponentTreeSuspenseQuery>;
 export type ComponentTreeQueryResult = Apollo.QueryResult<ComponentTreeQuery, ComponentTreeQueryVariables>;
+export const ClusterUsagesDocument = gql`
+    query ClusterUsages($after: String, $first: Int, $before: String, $last: Int) {
+  clusterUsages(after: $after, first: $first, before: $before, last: $last) {
+    pageInfo {
+      ...PageInfo
+    }
+    edges {
+      node {
+        ...ClusterUsageTiny
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClusterUsageTinyFragmentDoc}`;
+
+/**
+ * __useClusterUsagesQuery__
+ *
+ * To run a query within a React component, call `useClusterUsagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterUsagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterUsagesQuery({
+ *   variables: {
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useClusterUsagesQuery(baseOptions?: Apollo.QueryHookOptions<ClusterUsagesQuery, ClusterUsagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterUsagesQuery, ClusterUsagesQueryVariables>(ClusterUsagesDocument, options);
+      }
+export function useClusterUsagesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterUsagesQuery, ClusterUsagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterUsagesQuery, ClusterUsagesQueryVariables>(ClusterUsagesDocument, options);
+        }
+export function useClusterUsagesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterUsagesQuery, ClusterUsagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterUsagesQuery, ClusterUsagesQueryVariables>(ClusterUsagesDocument, options);
+        }
+export type ClusterUsagesQueryHookResult = ReturnType<typeof useClusterUsagesQuery>;
+export type ClusterUsagesLazyQueryHookResult = ReturnType<typeof useClusterUsagesLazyQuery>;
+export type ClusterUsagesSuspenseQueryHookResult = ReturnType<typeof useClusterUsagesSuspenseQuery>;
+export type ClusterUsagesQueryResult = Apollo.QueryResult<ClusterUsagesQuery, ClusterUsagesQueryVariables>;
+export const ClusterUsageNamespacesDocument = gql`
+    query ClusterUsageNamespaces($id: ID!, $after: String, $first: Int, $before: String, $last: Int) {
+  clusterUsage(id: $id) {
+    id
+    namespaces(after: $after, first: $first, before: $before, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ClusterNamespaceUsage
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClusterNamespaceUsageFragmentDoc}`;
+
+/**
+ * __useClusterUsageNamespacesQuery__
+ *
+ * To run a query within a React component, call `useClusterUsageNamespacesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterUsageNamespacesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterUsageNamespacesQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useClusterUsageNamespacesQuery(baseOptions: Apollo.QueryHookOptions<ClusterUsageNamespacesQuery, ClusterUsageNamespacesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterUsageNamespacesQuery, ClusterUsageNamespacesQueryVariables>(ClusterUsageNamespacesDocument, options);
+      }
+export function useClusterUsageNamespacesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterUsageNamespacesQuery, ClusterUsageNamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterUsageNamespacesQuery, ClusterUsageNamespacesQueryVariables>(ClusterUsageNamespacesDocument, options);
+        }
+export function useClusterUsageNamespacesSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterUsageNamespacesQuery, ClusterUsageNamespacesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterUsageNamespacesQuery, ClusterUsageNamespacesQueryVariables>(ClusterUsageNamespacesDocument, options);
+        }
+export type ClusterUsageNamespacesQueryHookResult = ReturnType<typeof useClusterUsageNamespacesQuery>;
+export type ClusterUsageNamespacesLazyQueryHookResult = ReturnType<typeof useClusterUsageNamespacesLazyQuery>;
+export type ClusterUsageNamespacesSuspenseQueryHookResult = ReturnType<typeof useClusterUsageNamespacesSuspenseQuery>;
+export type ClusterUsageNamespacesQueryResult = Apollo.QueryResult<ClusterUsageNamespacesQuery, ClusterUsageNamespacesQueryVariables>;
+export const ClusterUsageScalingRecommendationsDocument = gql`
+    query ClusterUsageScalingRecommendations($id: ID!, $after: String, $first: Int, $before: String, $last: Int) {
+  clusterUsage(id: $id) {
+    id
+    recommendations(after: $after, first: $first, before: $before, last: $last) {
+      pageInfo {
+        ...PageInfo
+      }
+      edges {
+        node {
+          ...ClusterScalingRecommendation
+        }
+      }
+    }
+  }
+}
+    ${PageInfoFragmentDoc}
+${ClusterScalingRecommendationFragmentDoc}`;
+
+/**
+ * __useClusterUsageScalingRecommendationsQuery__
+ *
+ * To run a query within a React component, call `useClusterUsageScalingRecommendationsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useClusterUsageScalingRecommendationsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useClusterUsageScalingRecommendationsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *      after: // value for 'after'
+ *      first: // value for 'first'
+ *      before: // value for 'before'
+ *      last: // value for 'last'
+ *   },
+ * });
+ */
+export function useClusterUsageScalingRecommendationsQuery(baseOptions: Apollo.QueryHookOptions<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>(ClusterUsageScalingRecommendationsDocument, options);
+      }
+export function useClusterUsageScalingRecommendationsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>(ClusterUsageScalingRecommendationsDocument, options);
+        }
+export function useClusterUsageScalingRecommendationsSuspenseQuery(baseOptions?: Apollo.SuspenseQueryHookOptions<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useSuspenseQuery<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>(ClusterUsageScalingRecommendationsDocument, options);
+        }
+export type ClusterUsageScalingRecommendationsQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsQuery>;
+export type ClusterUsageScalingRecommendationsLazyQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsLazyQuery>;
+export type ClusterUsageScalingRecommendationsSuspenseQueryHookResult = ReturnType<typeof useClusterUsageScalingRecommendationsSuspenseQuery>;
+export type ClusterUsageScalingRecommendationsQueryResult = Apollo.QueryResult<ClusterUsageScalingRecommendationsQuery, ClusterUsageScalingRecommendationsQueryVariables>;
 export const RestorePostgresDocument = gql`
     mutation RestorePostgres($clone: CloneAttributes, $name: String!, $namespace: String!, $timestamp: DateTime!) {
   restorePostgres(
@@ -25873,6 +26117,9 @@ export const namedOperations = {
     ServiceStatuses: 'ServiceStatuses',
     ServiceLogs: 'ServiceLogs',
     ComponentTree: 'ComponentTree',
+    ClusterUsages: 'ClusterUsages',
+    ClusterUsageNamespaces: 'ClusterUsageNamespaces',
+    ClusterUsageScalingRecommendations: 'ClusterUsageScalingRecommendations',
     PostgresDatabases: 'PostgresDatabases',
     PostgresDatabase: 'PostgresDatabase',
     Groups: 'Groups',
@@ -26147,6 +26394,9 @@ export const namedOperations = {
     ServiceDeploymentBindings: 'ServiceDeploymentBindings',
     ServiceStatusCount: 'ServiceStatusCount',
     ComponentTree: 'ComponentTree',
+    ClusterUsageTiny: 'ClusterUsageTiny',
+    ClusterNamespaceUsage: 'ClusterNamespaceUsage',
+    ClusterScalingRecommendation: 'ClusterScalingRecommendation',
     DatabaseTableRow: 'DatabaseTableRow',
     GroupMember: 'GroupMember',
     Group: 'Group',
