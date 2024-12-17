@@ -60,7 +60,13 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return r.handleDelete(ctx, generatedSecret)
 	}
 
-	data, err := r.persistData(ctx, generatedSecret, generatedSecret.Spec.Template)
+	tmp, err := r.prepareTemplateData(ctx, generatedSecret)
+	if err != nil {
+		utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	data, err := r.persistData(ctx, generatedSecret, tmp)
 	if err != nil {
 		utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -102,6 +108,27 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	generatedSecret.Status.RenderedTemplateSecretRef = &corev1.LocalObjectReference{Name: generatedSecret.GetSecretName()}
 	utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionTrue, v1alpha1.ReadyConditionReason, "")
 	return ctrl.Result{}, nil
+}
+
+func (r *GeneratedSecretReconciler) prepareTemplateData(ctx context.Context, generatedSecret *v1alpha1.GeneratedSecret) (map[string]string, error) {
+	data := make(map[string]string)
+	if generatedSecret.Spec.Template == nil {
+		generatedSecret.Spec.Template = make(map[string]string)
+	}
+
+	if generatedSecret.Spec.ConfigurationRef != nil {
+		secretRef := &corev1.SecretReference{Name: generatedSecret.Spec.ConfigurationRef.Name, Namespace: generatedSecret.Spec.ConfigurationRef.Namespace}
+		secret, err := utils.GetSecret(ctx, r.Client, secretRef)
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range secret.Data {
+			value := string(v)
+			data[k] = value
+		}
+	}
+	data = lo.Assign(data, generatedSecret.Spec.Template)
+	return data, nil
 }
 
 func (r *GeneratedSecretReconciler) persistData(ctx context.Context, gs *v1alpha1.GeneratedSecret, tmp map[string]string) (map[string][]byte, error) {
