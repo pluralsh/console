@@ -7,5 +7,6 @@
   },
   "files.associations": {
     "**/src/archive/**/*": "plaintext"
-  }
+  },
+  "makefile.configureOnOpen": false
 }
