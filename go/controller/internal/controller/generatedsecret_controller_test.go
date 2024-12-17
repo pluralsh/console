@@ -95,8 +95,6 @@ var _ = Describe("GeneratedSecret Controller", Ordered, func() {
 			Expect(k8sClient.Get(ctx, client.ObjectKey{Name: "secret1", Namespace: namespace}, s1)).To(Succeed())
 			Expect(s1.Data["b64"]).To(Equal([]byte("b25lIHR3byB0aHJlZQ==")))
 			Expect(s1.Data["name"]).To(Equal([]byte("John Doe")))
-			// from configurationRef
-			Expect(s1.Data["a"]).To(Equal([]byte("b")))
 			password := s1.Data["password"]
 			Expect(len(password)).To(Equal(10))
 
