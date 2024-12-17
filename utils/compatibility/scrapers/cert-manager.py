@@ -21,6 +21,7 @@ def find_target_tables(sections):
     for section in sections:
         if section.get_text(strip=True) in [
             "Currently supported releases",
+            "Upcoming releases",
         ]:
             table = section.find_next("table")
             if table:
