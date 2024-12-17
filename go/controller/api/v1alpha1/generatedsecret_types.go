@@ -11,9 +11,14 @@ import (
 // GeneratedSecretSpec defines the desired state of GeneratedSecret
 type GeneratedSecretSpec struct {
 	// Template secret data in string form.
+	// +kubebuilder:validation:Optional
 	Template map[string]string `json:"template,omitempty"`
 	// Destinations describe name/namespace for the secrets.
 	Destinations []GeneratedSecretDestination `json:"destinations,omitempty"`
+
+	// ConfigurationRef is a secret reference which should contain data for secrets.
+	// +kubebuilder:validation:Optional
+	ConfigurationRef *corev1.SecretReference `json:"configurationRef,omitempty"`
 }
 
 type GeneratedSecretDestination struct {

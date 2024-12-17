@@ -817,8 +817,9 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `template` _object (keys:string, values:string)_ | Template secret data in string form. |  |  |
+| `template` _object (keys:string, values:string)_ | Template secret data in string form. |  | Optional: {} <br /> |
 | `destinations` _[GeneratedSecretDestination](#generatedsecretdestination) array_ | Destinations describe name/namespace for the secrets. |  |  |
+| `configurationRef` _[SecretReference](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.29/#secretreference-v1-core)_ | ConfigurationRef is a secret reference which should contain data for secrets. |  | Optional: {} <br /> |
 
 
 

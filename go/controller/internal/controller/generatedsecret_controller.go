@@ -60,7 +60,17 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		return r.handleDelete(ctx, generatedSecret)
 	}
 
-	data, err := r.persistData(ctx, generatedSecret, generatedSecret.Spec.Template)
+	bindings, err := r.prepareBindings(ctx, generatedSecret)
+	if err != nil {
+		utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
+		return ctrl.Result{}, err
+	}
+
+	if generatedSecret.Spec.Template == nil {
+		generatedSecret.Spec.Template = make(map[string]string)
+	}
+
+	data, err := r.persistData(ctx, generatedSecret, generatedSecret.Spec.Template, bindings)
 	if err != nil {
 		utils.MarkCondition(generatedSecret.SetCondition, v1alpha1.ReadyConditionType, v1.ConditionFalse, v1alpha1.SynchronizedConditionReasonError, err.Error())
 		return ctrl.Result{}, err
@@ -104,8 +114,27 @@ func (r *GeneratedSecretReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	return ctrl.Result{}, nil
 }
 
-func (r *GeneratedSecretReconciler) persistData(ctx context.Context, gs *v1alpha1.GeneratedSecret, tmp map[string]string) (map[string][]byte, error) {
-	data, err := templateData(tmp)
+func (r *GeneratedSecretReconciler) prepareBindings(ctx context.Context, generatedSecret *v1alpha1.GeneratedSecret) (map[string]interface{}, error) {
+	bindings := map[string]interface{}{}
+
+	if generatedSecret.Spec.ConfigurationRef != nil {
+		data := make(map[string]string)
+		secretRef := &corev1.SecretReference{Name: generatedSecret.Spec.ConfigurationRef.Name, Namespace: generatedSecret.Spec.ConfigurationRef.Namespace}
+		secret, err := utils.GetSecret(ctx, r.Client, secretRef)
+		if err != nil {
+			return nil, err
+		}
+		for k, v := range secret.Data {
+			value := string(v)
+			data[k] = value
+		}
+		bindings["configuration"] = data
+	}
+	return bindings, nil
+}
+
+func (r *GeneratedSecretReconciler) persistData(ctx context.Context, gs *v1alpha1.GeneratedSecret, tmp map[string]string, bindings map[string]interface{}) (map[string][]byte, error) {
+	data, err := templateData(tmp, bindings)
 	if err != nil {
 		return nil, err
 	}
@@ -175,10 +204,10 @@ func (r *GeneratedSecretReconciler) tryAddSecretControllerRef(ctx context.Contex
 	return utils.TryAddControllerRef(ctx, r.Client, gs, secret, r.Scheme)
 }
 
-func templateData(tmp map[string]string) (map[string][]byte, error) {
+func templateData(tmp map[string]string, bindings map[string]interface{}) (map[string][]byte, error) {
 	data := make(map[string][]byte)
 	for k, v := range tmp {
-		out, err := template.RenderLiquid([]byte(v), map[string]interface{}{})
+		out, err := template.RenderLiquid([]byte(v), bindings)
 		if err != nil {
 			return nil, err
 		}

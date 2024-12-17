@@ -7,6 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/pluralsh/console/go/controller/api/v1alpha1"
 	"github.com/pluralsh/console/go/controller/internal/controller"
+	common "github.com/pluralsh/console/go/controller/internal/test/common"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -18,6 +19,7 @@ import (
 var _ = Describe("GeneratedSecret Controller", Ordered, func() {
 	Context("When reconciling a resource", func() {
 		const (
+			configSecretName    = "config"
 			generatedSecretName = "test"
 			namespace           = "default"
 		)
@@ -29,6 +31,16 @@ var _ = Describe("GeneratedSecret Controller", Ordered, func() {
 		gs := &v1alpha1.GeneratedSecret{}
 
 		BeforeAll(func() {
+			By("Creating configuration secret")
+			Expect(common.MaybeCreate(k8sClient, &corev1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      configSecretName,
+					Namespace: "default",
+				},
+				Data: map[string][]byte{
+					"a": []byte("b"),
+				},
+			}, nil)).To(Succeed())
 			By("Creating GeneratedSecret")
 			err := k8sClient.Get(ctx, namespacedName, gs)
 			if err != nil && errors.IsNotFound(err) {
@@ -38,6 +50,10 @@ var _ = Describe("GeneratedSecret Controller", Ordered, func() {
 						Namespace: namespace,
 					},
 					Spec: v1alpha1.GeneratedSecretSpec{
+						ConfigurationRef: &corev1.SecretReference{
+							Name:      configSecretName,
+							Namespace: namespace,
+						},
 						Template: map[string]string{
 							"b64":      "{{ 'one two three' | b64enc }}",
 							"name":     "John Doe",
@@ -53,6 +69,7 @@ var _ = Describe("GeneratedSecret Controller", Ordered, func() {
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
+
 		})
 
 		AfterAll(func() {
@@ -60,6 +77,9 @@ var _ = Describe("GeneratedSecret Controller", Ordered, func() {
 			gs := &v1alpha1.GeneratedSecret{}
 			Expect(k8sClient.Get(ctx, namespacedName, gs)).NotTo(HaveOccurred())
 			Expect(k8sClient.Delete(ctx, gs)).To(Succeed())
+			configSecret := &corev1.Secret{}
+			Expect(k8sClient.Get(ctx, types.NamespacedName{Name: configSecretName, Namespace: namespace}, configSecret)).NotTo(HaveOccurred())
+			Expect(k8sClient.Delete(ctx, configSecret)).To(Succeed())
 		})
 
 		It("Reconcile test", func() {
