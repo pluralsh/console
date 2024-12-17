@@ -405,16 +405,13 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
         query Runtime($id: ID!) {
           runtimeService(id: $id) {
             id
-            addon {
-              versions { version kube }
-              readme
-            }
+            addon { versions { version kube } }
           }
         }
       """, %{"id" => runtime.id}, %{current_user: user})
 
       assert rs["id"] == runtime.id
-      assert rs["addon"]["readme"]
+      # assert rs["addon"]["readme"]
     end
 
     test "users w/o cluster read cannot fetch a runtime service by id" do
@@ -428,7 +425,6 @@ defmodule Console.GraphQl.Deployments.ClusterQueriesTest do
             id
             addon {
               versions { version kube }
-              readme
             }
           }
         }

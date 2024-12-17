@@ -8804,6 +8804,7 @@ export type ServiceUpdateAttributes = {
   dryRun?: InputMaybe<Scalars['Boolean']['input']>;
   git?: InputMaybe<GitRefAttributes>;
   helm?: InputMaybe<HelmConfigAttributes>;
+  imports?: InputMaybe<Array<InputMaybe<ServiceImportAttributes>>>;
   interval?: InputMaybe<Scalars['String']['input']>;
   kustomize?: InputMaybe<KustomizeAttributes>;
   parentId?: InputMaybe<Scalars['ID']['input']>;

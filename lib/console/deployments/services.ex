@@ -475,7 +475,7 @@ defmodule Console.Deployments.Services do
   def update_service(attrs, %Service{} = svc) do
     start_transaction()
     |> add_operation(:base, fn _ ->
-      svc = Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings])
+      svc = Repo.preload(svc, [:context_bindings, :dependencies, :read_bindings, :write_bindings, :imports])
       attrs = Map.put(attrs, :status, :stale)
       svc
       |> Service.changeset(stabilize_deps(attrs, svc))

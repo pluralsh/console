@@ -3818,6 +3818,8 @@ input ServiceUpdateAttributes {
   writeBindings: [PolicyBindingAttributes]
 
   contextBindings: [ContextBindingAttributes]
+
+  imports: [ServiceImportAttributes]
 }
 
 input ServiceCloneAttributes {

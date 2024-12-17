@@ -182,6 +182,7 @@ func (r *ServiceReconciler) Reconcile(ctx context.Context, req ctrl.Request) (_ 
 		SyncConfig:      attr.SyncConfig,
 		Dependencies:    attr.Dependencies,
 		ParentID:        attr.ParentID,
+		Imports:         attr.Imports,
 	}
 
 	sha, err := utils.HashObject(updater)

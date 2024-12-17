@@ -5261,6 +5261,7 @@ type ServiceUpdateAttributes struct {
 	ReadBindings    []*PolicyBindingAttributes     `json:"readBindings,omitempty"`
 	WriteBindings   []*PolicyBindingAttributes     `json:"writeBindings,omitempty"`
 	ContextBindings []*ContextBindingAttributes    `json:"contextBindings,omitempty"`
+	Imports         []*ServiceImportAttributes     `json:"imports,omitempty"`
 }
 
 type ServiceVuln struct {
