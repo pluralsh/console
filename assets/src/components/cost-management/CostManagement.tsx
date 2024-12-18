@@ -7,33 +7,64 @@ import {
   Table,
   TagMultiSelectProps,
 } from '@pluralsh/design-system'
+import { Row } from '@tanstack/react-table'
 import { TagsFilter } from 'components/cd/services/ClusterTagsFilter'
+import { useProjectId } from 'components/contexts/ProjectsContext'
 import { GqlError } from 'components/utils/Alert'
-import { useFetchPaginatedData } from 'components/utils/table/useFetchPaginatedData'
+import { FullHeightTableWrap } from 'components/utils/layout/FullHeightTableWrap'
+import {
+  DEFAULT_REACT_VIRTUAL_OPTIONS,
+  useFetchPaginatedData,
+} from 'components/utils/table/useFetchPaginatedData'
 import { OverlineH1, Subtitle1H1 } from 'components/utils/typography/Text'
 import {
   ClusterUsageTinyFragment,
   Conjunction,
   useClusterUsagesQuery,
 } from 'generated/graphql'
-import { Key, useState } from 'react'
+import { Key, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import styled, { useTheme } from 'styled-components'
+import { keySetToTagArray } from 'utils/clusterTags'
+import {
+  ColActions,
+  ColCluster,
+  ColCpuCost,
+  ColCpuEfficiency,
+  ColMemoryCost,
+  ColMemoryEfficiency,
+} from './ClusterUsagesTableCols'
 
 export function CostManagement() {
   const theme = useTheme()
+  const navigate = useNavigate()
+  const projectId = useProjectId()
   const [selectedTagKeys, setSelectedTagKeys] = useState<Set<Key>>(new Set())
   const [tagOp, setTagOp] = useState<Conjunction>(Conjunction.Or)
 
-  const { data, loading, error } = useFetchPaginatedData({
-    queryHook: useClusterUsagesQuery,
-    pageSize: 500,
-    keyPath: ['clusterUsages'],
-  })
+  const { data, loading, error, fetchNextPage, setVirtualSlice } =
+    useFetchPaginatedData(
+      {
+        queryHook: useClusterUsagesQuery,
+        pageSize: 500,
+        keyPath: ['clusterUsages'],
+      },
+      {
+        projectId,
+        tagQuery:
+          selectedTagKeys.size > 0
+            ? { op: tagOp, tags: keySetToTagArray(selectedTagKeys) }
+            : undefined,
+      }
+    )
 
-  const usages =
-    data?.clusterUsages?.edges
-      ?.map((edge) => edge?.node)
-      .filter((node): node is ClusterUsageTinyFragment => !!node) || []
+  const usages = useMemo(
+    () =>
+      data?.clusterUsages?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is ClusterUsageTinyFragment => !!node) || [],
+    [data?.clusterUsages?.edges]
+  )
 
   return (
     <WrapperSC>
@@ -80,6 +111,7 @@ export function CostManagement() {
         </Card>
       </Flex>
       <Card
+        css={{ overflow: 'hidden' }}
         header={{
           content: (
             <Flex gap="small">
@@ -89,19 +121,29 @@ export function CostManagement() {
           ),
         }}
       >
-        {error ? (
-          <GqlError error={error} />
-        ) : (
-          <Table
-            fillLevel={1}
-            flush
-            rowBg="base"
-            loading={!data && loading}
-            // TODO
-            columns={[{ key: 'name', label: 'name', id: 'name' }]}
-            data={usages}
-          />
-        )}
+        <FullHeightTableWrap>
+          {error ? (
+            <GqlError error={error} />
+          ) : (
+            <Table
+              fillLevel={1}
+              virtualizeRows
+              flush
+              rowBg="base"
+              loading={!data && loading}
+              columns={cols}
+              data={usages}
+              onRowClick={(_, row: Row<ClusterUsageTinyFragment>) =>
+                navigate(`details/${row.original?.id}`)
+              }
+              hasNextPage={data?.clusterUsages?.pageInfo?.hasNextPage}
+              isFetchingNextPage={loading}
+              fetchNextPage={fetchNextPage}
+              reactVirtualOptions={DEFAULT_REACT_VIRTUAL_OPTIONS}
+              onVirtualSliceChange={setVirtualSlice}
+            />
+          )}
+        </FullHeightTableWrap>
       </Card>
     </WrapperSC>
   )
@@ -114,4 +156,14 @@ const WrapperSC = styled.div(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   gap: theme.spacing.large,
+  overflow: 'hidden',
 }))
+
+const cols = [
+  ColCluster,
+  ColCpuCost,
+  ColCpuEfficiency,
+  ColMemoryCost,
+  ColMemoryEfficiency,
+  ColActions,
+]

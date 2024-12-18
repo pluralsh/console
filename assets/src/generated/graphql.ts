@@ -11416,6 +11416,9 @@ export type ClusterUsagesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  tagQuery?: InputMaybe<TagQuery>;
+  projectId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -11427,10 +11430,11 @@ export type ClusterUsageNamespacesQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type ClusterUsageNamespacesQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, namespaces?: { __typename?: 'ClusterNamespaceUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterNamespaceUsageEdge', node?: { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null } | null } | null> | null } | null } | null };
+export type ClusterUsageNamespacesQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, namespaces?: { __typename?: 'ClusterNamespaceUsageConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterNamespaceUsageEdge', node?: { __typename?: 'ClusterNamespaceUsage', id: string, namespace?: string | null, cpuCost?: number | null, cpuUtil?: number | null, cpu?: number | null, memoryCost?: number | null, memUtil?: number | null, memory?: number | null } | null } | null> | null } | null } | null };
 
 export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11438,10 +11442,12 @@ export type ClusterUsageScalingRecommendationsQueryVariables = Exact<{
   first?: InputMaybe<Scalars['Int']['input']>;
   before?: InputMaybe<Scalars['String']['input']>;
   last?: InputMaybe<Scalars['Int']['input']>;
+  q?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<ScalingRecommendationType>;
 }>;
 
 
-export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, type?: ScalingRecommendationType | null } | null } | null> | null } | null } | null };
+export type ClusterUsageScalingRecommendationsQuery = { __typename?: 'RootQueryType', clusterUsage?: { __typename?: 'ClusterUsage', id: string, cluster?: { __typename?: 'Cluster', id: string, name: string } | null, recommendations?: { __typename?: 'ClusterScalingRecommendationConnection', pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, endCursor?: string | null, hasPreviousPage: boolean, startCursor?: string | null }, edges?: Array<{ __typename?: 'ClusterScalingRecommendationEdge', node?: { __typename?: 'ClusterScalingRecommendation', id: string, namespace?: string | null, name?: string | null, container?: string | null, cpuCost?: number | null, cpuRequest?: number | null, cpuRecommendation?: number | null, memoryCost?: number | null, memoryRequest?: number | null, memoryRecommendation?: number | null, type?: ScalingRecommendationType | null } | null } | null> | null } | null } | null };
 
 export type DatabaseTableRowFragment = { __typename?: 'Postgresql', instances?: Array<{ __typename?: 'PostgresInstance', uid: string } | null> | null, metadata: { __typename?: 'Metadata', name: string, namespace?: string | null, creationTimestamp?: string | null }, spec: { __typename?: 'PostgresqlSpec', numberOfInstances?: number | null, databases?: Record<string, unknown> | null, postgresql?: { __typename?: 'PostgresSettings', version?: string | null } | null, resources?: { __typename?: 'Resources', limits?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null, requests?: { __typename?: 'ResourceSpec', cpu?: string | null, memory?: string | null } | null } | null, volume?: { __typename?: 'DatabaseVolume', size?: string | null } | null }, status?: { __typename?: 'PostgresqlStatus', clusterStatus?: string | null } | null };
 
@@ -21593,8 +21599,16 @@ export type ComponentTreeLazyQueryHookResult = ReturnType<typeof useComponentTre
 export type ComponentTreeSuspenseQueryHookResult = ReturnType<typeof useComponentTreeSuspenseQuery>;
 export type ComponentTreeQueryResult = Apollo.QueryResult<ComponentTreeQuery, ComponentTreeQueryVariables>;
 export const ClusterUsagesDocument = gql`
-    query ClusterUsages($after: String, $first: Int, $before: String, $last: Int) {
-  clusterUsages(after: $after, first: $first, before: $before, last: $last) {
+    query ClusterUsages($after: String, $first: Int, $before: String, $last: Int, $q: String, $tagQuery: TagQuery, $projectId: ID) {
+  clusterUsages(
+    after: $after
+    first: $first
+    before: $before
+    last: $last
+    q: $q
+    tagQuery: $tagQuery
+    projectId: $projectId
+  ) {
     pageInfo {
       ...PageInfo
     }
@@ -21624,6 +21638,9 @@ ${ClusterUsageTinyFragmentDoc}`;
  *      first: // value for 'first'
  *      before: // value for 'before'
  *      last: // value for 'last'
+ *      q: // value for 'q'
+ *      tagQuery: // value for 'tagQuery'
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
@@ -21644,10 +21661,14 @@ export type ClusterUsagesLazyQueryHookResult = ReturnType<typeof useClusterUsage
 export type ClusterUsagesSuspenseQueryHookResult = ReturnType<typeof useClusterUsagesSuspenseQuery>;
 export type ClusterUsagesQueryResult = Apollo.QueryResult<ClusterUsagesQuery, ClusterUsagesQueryVariables>;
 export const ClusterUsageNamespacesDocument = gql`
-    query ClusterUsageNamespaces($id: ID!, $after: String, $first: Int, $before: String, $last: Int) {
+    query ClusterUsageNamespaces($id: ID!, $after: String, $first: Int, $before: String, $last: Int, $q: String) {
   clusterUsage(id: $id) {
     id
-    namespaces(after: $after, first: $first, before: $before, last: $last) {
+    cluster {
+      id
+      name
+    }
+    namespaces(after: $after, first: $first, before: $before, last: $last, q: $q) {
       pageInfo {
         ...PageInfo
       }
@@ -21679,6 +21700,7 @@ ${ClusterNamespaceUsageFragmentDoc}`;
  *      first: // value for 'first'
  *      before: // value for 'before'
  *      last: // value for 'last'
+ *      q: // value for 'q'
  *   },
  * });
  */
@@ -21699,10 +21721,21 @@ export type ClusterUsageNamespacesLazyQueryHookResult = ReturnType<typeof useClu
 export type ClusterUsageNamespacesSuspenseQueryHookResult = ReturnType<typeof useClusterUsageNamespacesSuspenseQuery>;
 export type ClusterUsageNamespacesQueryResult = Apollo.QueryResult<ClusterUsageNamespacesQuery, ClusterUsageNamespacesQueryVariables>;
 export const ClusterUsageScalingRecommendationsDocument = gql`
-    query ClusterUsageScalingRecommendations($id: ID!, $after: String, $first: Int, $before: String, $last: Int) {
+    query ClusterUsageScalingRecommendations($id: ID!, $after: String, $first: Int, $before: String, $last: Int, $q: String, $type: ScalingRecommendationType) {
   clusterUsage(id: $id) {
     id
-    recommendations(after: $after, first: $first, before: $before, last: $last) {
+    cluster {
+      id
+      name
+    }
+    recommendations(
+      after: $after
+      first: $first
+      before: $before
+      last: $last
+      q: $q
+      type: $type
+    ) {
       pageInfo {
         ...PageInfo
       }
@@ -21734,6 +21767,8 @@ ${ClusterScalingRecommendationFragmentDoc}`;
  *      first: // value for 'first'
  *      before: // value for 'before'
  *      last: // value for 'last'
+ *      q: // value for 'q'
+ *      type: // value for 'type'
  *   },
  * });
  */
