@@ -69,6 +69,11 @@ type DeploymentSettingsSpec struct {
 	// +kubebuilder:validation:Optional
 	AgentHelmValues *runtime.RawExtension `json:"agentHelmValues,omitempty"`
 
+	// The root repo for setting up your infrastructure with Plural.  Usually this will be your `plural up repo`
+	//
+	// +kubebuilder:validation:Optional
+	ManagementRepo *string `json:"managementRepo,omitempty"`
+
 	// Stacks global configuration for stack execution
 	//
 	// +kubebuilder:validation:Optional

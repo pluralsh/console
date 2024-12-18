@@ -146,7 +146,10 @@ func (r *DeploymentSettingsReconciler) SetupWithManager(mgr ctrl.Manager) error 
 }
 
 func (r *DeploymentSettingsReconciler) genDeploymentSettingsAttr(ctx context.Context, settings *v1alpha1.DeploymentSettings) (*console.DeploymentSettingsAttributes, error) {
-	attr := &console.DeploymentSettingsAttributes{}
+	attr := &console.DeploymentSettingsAttributes{
+		MgmtRepo: settings.Spec.ManagementRepo,
+	}
+
 	if settings.Spec.AgentHelmValues != nil {
 		var obj runtime.Object
 		if err := runtime.Convert_runtime_RawExtension_To_runtime_Object(settings.Spec.AgentHelmValues, &obj, nil); err != nil {

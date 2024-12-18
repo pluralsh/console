@@ -1103,6 +1103,8 @@ input DeploymentSettingsAttributes {
   "connection details for a loki instance to use"
   lokiConnection: HttpConnectionAttributes
 
+  mgmtRepo: String
+
   "configuration for smtp message delivery"
   smtp: SmtpSettingsAttributes
 
@@ -1330,6 +1332,9 @@ type DeploymentSettings {
 
   "settings for connections to log aggregation datastores"
   logging: LoggingSettings
+
+  "the root repo you used to run `plural up`"
+  mgmtRepo: String
 
   "The console's expected agent version"
   agentVsn: String!
